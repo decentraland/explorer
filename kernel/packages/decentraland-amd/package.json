@@ -1,11 +1,10 @@
 {
   "name": "dcl-amd",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": "dist/amd.js",
   "scripts": {
-    "build": "make build",
-    "prepublish": "make build test"
+    "build": "make build"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +16,6 @@
     "expect": "^23.6.0",
     "mocha": "^5.2.0",
     "typescript": "^3.1.2",
-    "uglify-js": "^3.4.9"
+    "terser": "^5.2.1"
   }
 }

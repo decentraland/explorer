@@ -175,6 +175,7 @@ namespace Builder
             }
 
             SetCurrentScene();
+            HideHUDs();
         }
 
         public void SetBuilderCameraPosition(string position)
@@ -523,6 +524,11 @@ namespace Builder
             cameraController?.gameObject.SetActive(isPreviewMode);
             cursorController?.gameObject.SetActive(isPreviewMode);
 
+            if (!isPreview)
+            {
+                HideHUDs();
+            }
+
             SetCaptureKeyboardInputEnabled(isPreview);
         }
 
@@ -551,6 +557,19 @@ namespace Builder
                 currentScene.OnEntityRemoved += OnEntityIsRemoved;
                 currentScene.metricsController = new DCLBuilderSceneMetricsController(currentScene);
                 OnSceneChanged?.Invoke(currentScene);
+            }
+        }
+
+        private void HideHUDs()
+        {
+            IHUD hud;
+            for (int i = 0; i < (int)HUDController.HUDElementID.COUNT; i++)
+            {
+                hud = HUDController.i.GetHUDElement((HUDController.HUDElementID)i);
+                if (hud != null)
+                {
+                    hud.SetVisibility(false);
+                }
             }
         }
 
@@ -623,7 +642,7 @@ namespace Builder
         {
             DCL.SettingsData.QualitySettings settings = new DCL.SettingsData.QualitySettings()
             {
-                textureQuality = DCL.SettingsData.QualitySettings.TextureQuality.FullRes,
+                baseResolution = DCL.SettingsData.QualitySettings.BaseResolution.BaseRes_1080,
                 antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._2x,
                 renderScale = 1,
                 shadows = true,

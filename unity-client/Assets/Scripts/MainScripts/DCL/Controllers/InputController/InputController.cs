@@ -15,6 +15,8 @@ public enum DCLAction_Trigger
     ToggleWorldChat = 122,
     ToggleUIVisibility = 123,
     ToggleControlsHud = 124,
+    ToggleSettings = 125,
+    ToggleExploreHud = 126,
 
     OpenExpressions = 200,
     Expression_Wave = 201,
@@ -32,6 +34,9 @@ public enum DCLAction_Hold
     Sprint = 1,
     Jump = 2,
     FreeCameraMode = 101,
+    VoiceChatRecording = 102,
+    DefaultConfirmAction = 300,
+    DefaultCancelAction = 301
 }
 
 public enum DCLAction_Measurable
@@ -105,6 +110,10 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.ToggleControlsHud:
                     InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
+                case DCLAction_Trigger.ToggleExploreHud:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.X, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
                 case DCLAction_Trigger.Expression_Wave:
                     InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
@@ -148,7 +157,16 @@ public class InputController : MonoBehaviour
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.FromKey(action, KeyCode.Y, InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Hold.VoiceChatRecording:
+                    InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Hold.DefaultConfirmAction:
+                    InputProcessor.FromKey(action, KeyCode.E, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.DefaultCancelAction:
+                    InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

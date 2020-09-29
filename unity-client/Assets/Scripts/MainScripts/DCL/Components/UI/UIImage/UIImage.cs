@@ -90,7 +90,7 @@ namespace DCL.Components
             referencesContainer.paddingLayoutGroup.padding.left = Mathf.RoundToInt(model.paddingLeft);
             referencesContainer.paddingLayoutGroup.padding.right = Mathf.RoundToInt(model.paddingRight);
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRecTransform);
+            Utils.ForceRebuildLayoutImmediate(parentRecTransform);
             return null;
         }
 
@@ -119,7 +119,6 @@ namespace DCL.Components
         public override void Dispose()
         {
             dclTexture?.DetachFrom(this);
-            dclTexture?.Dispose();
 
             if (referencesContainer != null)
                 Utils.SafeDestroy(referencesContainer.gameObject);

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DCL.Helpers;
 
 public class ControlsHUDController : IHUD
@@ -6,6 +6,9 @@ public class ControlsHUDController : IHUD
     internal ControlsHUDView view;
 
     private bool prevMouseLockState = false;
+
+    public event System.Action OnControlsOpened;
+    public event System.Action OnControlsClosed;
 
     public ControlsHUDController()
     {
@@ -30,6 +33,9 @@ public class ControlsHUDController : IHUD
             }
 
             view.showHideAnimator.Hide();
+            OnControlsClosed?.Invoke();
+
+            AudioScriptableObjects.fadeOut.Play(true);
         }
         else if (!IsVisible() && visible)
         {
@@ -37,6 +43,8 @@ public class ControlsHUDController : IHUD
             Utils.UnlockCursor();
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
+            OnControlsOpened?.Invoke();
+            AudioScriptableObjects.fadeIn.Play(true);
         }
     }
 

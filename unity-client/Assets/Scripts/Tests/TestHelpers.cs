@@ -20,7 +20,7 @@ namespace DCL.Helpers
 {
     public class WaitForAllMessagesProcessed : CustomYieldInstruction
     {
-        public override bool keepWaiting => SceneController.i.hasPendingMessages;
+        public override bool keepWaiting => Environment.i.messagingControllersManager.hasPendingMessages;
     }
 
     // NOTE(Brian): Attribute used to determine if tests are visual. Those tests will be run to generate the baseline images.
@@ -117,8 +117,7 @@ namespace DCL.Helpers
 
             return scene.EntityComponentCreateOrUpdate(
                 entity.entityId,
-                componentInstanceId,
-                componentClassId,
+                (CLASS_ID_COMPONENT) componentClassId,
                 data
                 , out _) as T;
         }
@@ -194,7 +193,7 @@ namespace DCL.Helpers
 
             string uniqueId = GetComponentUniqueId(scene, "material", (int) id, "-shared-" + disposableIdCounter);
 
-            T result = scene.SharedComponentCreate(uniqueId, "material", (int) id) as T;
+            T result = scene.SharedComponentCreate(uniqueId, (int) id) as T;
 
             Assert.IsNotNull(result, "class-id mismatch!");
 
@@ -203,12 +202,16 @@ namespace DCL.Helpers
             return result;
         }
 
+        public static void SharedComponentDispose(BaseDisposable component)
+        {
+            component.scene.SharedComponentDispose(component.id);
+        }
+
         public static void SharedComponentAttach(BaseDisposable component, DecentralandEntity entity)
         {
             entity.scene.SharedComponentAttach(
                 entity.entityId,
-                component.id,
-                component.componentName
+                component.id
             );
         }
 
@@ -227,8 +230,7 @@ namespace DCL.Helpers
             PB_Transform pB_Transform = GetPBTransform(position, rotation, scale);
             scene.EntityComponentCreateOrUpdate(
                 entity.entityId,
-                "",
-                (int) CLASS_ID_COMPONENT.TRANSFORM,
+                CLASS_ID_COMPONENT.TRANSFORM,
                 System.Convert.ToBase64String(pB_Transform.ToByteArray())
                 , out CleanableYieldInstruction routine);
         }
@@ -360,7 +362,13 @@ namespace DCL.Helpers
         public static BasicMaterial CreateEntityWithBasicMaterial(ParcelScene scene, BasicMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithBasicMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static BasicMaterial CreateEntityWithBasicMaterial(ParcelScene scene, BasicMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, position,
                 out entity);
             BasicMaterial material =
                 SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, model);
@@ -371,7 +379,13 @@ namespace DCL.Helpers
         public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithPBRMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, CLASS_ID.BOX_SHAPE, position,
                 out entity);
             PBRMaterial material =
                 SharedComponentCreate<PBRMaterial, PBRMaterial.Model>(scene, CLASS_ID.PBR_MATERIAL, model);
@@ -440,7 +454,6 @@ namespace DCL.Helpers
 
             scene.SharedComponentCreate(
                 materialComponentID,
-                "material",
                 (int) DCL.Models.CLASS_ID.BASIC_MATERIAL
             );
 
@@ -450,8 +463,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentAttach(
                 entityId,
-                materialComponentID,
-                "material"
+                materialComponentID
             );
         }
 
@@ -462,8 +474,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentCreate(
                 materialComponentID,
-                "material",
-                (int) DCL.Models.CLASS_ID.PBR_MATERIAL
+                (int) CLASS_ID.PBR_MATERIAL
             );
 
             scene.SharedComponentUpdate(
@@ -472,8 +483,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentAttach(
                 entityId,
-                materialComponentID,
-                "material"
+                materialComponentID
             );
         }
 
@@ -496,7 +506,6 @@ namespace DCL.Helpers
 
             scene.SharedComponentCreate(
                 componentId,
-                "shape",
                 (int) classId
             );
 
@@ -506,8 +515,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentAttach(
                 entityId,
-                componentId,
-                "shape"
+                componentId
             );
 
             return componentId;

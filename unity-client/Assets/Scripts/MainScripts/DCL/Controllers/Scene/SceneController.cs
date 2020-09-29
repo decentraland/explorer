@@ -8,93 +8,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Components;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace DCL
 {
-    public class SceneController : MonoBehaviour, IMessageHandler
+    public interface ISceneHandler
+    {
+        HashSet<Vector2Int> GetAllLoadedScenesCoords();
+    }
+
+    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler, ISceneHandler
     {
         public static SceneController i { get; private set; }
 
-        public bool startDecentralandAutomatically = true;
-        public static bool VERBOSE = false;
+        //======================================================================
+
+        #region PROJECT_ENTRYPOINT
+
+        //======================================================================
+        private EntryPoint_World worldEntryPoint;
+        private WorldBlockersController worldBlockersController;
+        public PhysicsSyncController physicsSyncController;
 
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
-        public HashSet<string> readyScenes = new HashSet<string>();
-        public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
-
-        [Header("Debug Tools")] public GameObject fpsPanel;
-
-        [Header("Debug Panel")] public GameObject engineDebugPanel;
-        public GameObject sceneDebugPanel;
-
-        public bool debugScenes;
-
-        public Vector2Int debugSceneCoords;
-        public bool ignoreGlobalScenes = false;
-        public bool msgStepByStep = false;
-
-        [NonSerialized] public bool deferredMessagesDecoding = false;
-        Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.005f;
-
-
-        #region BENCHMARK_EVENTS
-
-        //NOTE(Brian): For performance reasons, these events may need to be removed for production.
-        public Action<string> OnMessageWillQueue;
-        public Action<string> OnMessageWillDequeue;
-
-        public Action<string> OnMessageProcessStart;
-        public Action<string> OnMessageProcessEnds;
-
-        public Action<string> OnMessageDecodeStart;
-        public Action<string> OnMessageDecodeEnds;
-
-        #endregion
-
-        public static Action OnDebugModeSet;
-
-#if UNITY_EDITOR
-        public delegate void ProcessDelegate(string sceneId, string method);
-
-        public event ProcessDelegate OnMessageProcessInfoStart;
-        public event ProcessDelegate OnMessageProcessInfoEnds;
-#endif
-        [System.NonSerialized] public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
-        private Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
-
-        [System.NonSerialized] public bool isDebugMode;
-        [System.NonSerialized] public bool isWssDebugMode;
-        [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
-        [System.NonSerialized] public bool useBoundariesChecker = true;
-
-        [System.NonSerialized] public bool prewarmEntitiesPool = true;
-
-        public bool hasPendingMessages => MessagingControllersManager.i.pendingMessagesCount > 0;
-
-        public string globalSceneId { get; private set; }
-        public string currentSceneId { get; private set; }
-
-        public SceneBoundariesChecker boundariesChecker { get; private set; }
-
-        private bool sceneSortDirty = false;
-        private bool positionDirty = true;
-        private int lastSortFrame = 0;
-
-        public event Action OnSortScenes;
-        public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
-        public event Action<ParcelScene> OnNewSceneAdded;
-
-        public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
-
-        public event OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
-
-        private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
-        private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
+        public bool startDecentralandAutomatically = true;
 
         void Awake()
         {
@@ -106,18 +47,14 @@ namespace DCL
 
             i = this;
 
-            PointerEventsController.i.Initialize();
-
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-
             Debug.unityLogger.logEnabled = false;
 #endif
 
             InitializeSceneBoundariesChecker();
 
-            MessagingControllersManager.i.Initialize(this);
-            MemoryManager.i.Initialize();
+            Environment.i.Initialize(this);
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
             if (startDecentralandAutomatically)
@@ -127,10 +64,494 @@ namespace DCL
 
             ParcelScene.parcelScenesCleaner.Start();
 
-            if (deferredMessagesDecoding)
-                StartCoroutine(DeferredDecoding());
+            if (deferredMessagesDecoding)             // We should be able to delete this code
+                StartCoroutine(DeferredDecoding());   //
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
+
+            InitializeWorldBlockersController();
+
+            physicsSyncController = new PhysicsSyncController();
+            //TODO(Brian): Move those suscriptions elsewhere when we have the PoolManager in its own
+            //             assembly. (already done in PR #1149, not merged yet)
+            PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
+            PoolManager.i.OnGet += physicsSyncController.MarkDirty;
+
+#if !UNITY_EDITOR
+            worldEntryPoint = new EntryPoint_World(this); // Es un subsistema independiente => Se pone en el entrypoint pero no en el enviroment.
+#endif
+        }
+
+        void Start()
+        {
+            if (prewarmSceneMessagesPool)
+            {
+                for (int i = 0; i < 100000; i++)
+                {
+                    sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
+                }
+            }
+
+            if (prewarmEntitiesPool)
+            {
+                EnsureEntityPool();
+            }
+
+            componentFactory.PrewarmPools();
+
+            if (!debugScenes)
+            {
+                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
+                OnRenderingStateChange(CommonScriptableObjects.rendererState.Get(), false);
+            }
+        }
+
+        public void Restart()
+        {
+            Environment.i.Restart(this);
+
+            ParcelScene.parcelScenesCleaner.ForceCleanup();
+        }
+
+        void OnDestroy()
+        {
+            PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
+            DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
+            ParcelScene.parcelScenesCleaner.Stop();
+        }
+
+
+        private void Update()
+        {
+            InputController_Legacy.i.Update();
+
+            Environment.i.pointerEventsController.Update();
+
+            if (lastSortFrame != Time.frameCount && sceneSortDirty)
+            {
+                lastSortFrame = Time.frameCount;
+                sceneSortDirty = false;
+                SortScenesByDistance();
+            }
+        }
+
+        private void LateUpdate()
+        {
+            physicsSyncController.Sync();
+        }
+
+        public void EnsureEntityPool() // TODO: Move to PoolManagerFactory
+        {
+            if (PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
+                return;
+
+            GameObject go = new GameObject();
+            Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: 2000, isPersistent: true);
+
+            if (prewarmEntitiesPool)
+                pool.ForcePrewarm();
+        }
+
+        //======================================================================
+
+        #endregion
+
+        //======================================================================
+
+
+        //======================================================================
+
+        #region MESSAGES_HANDLING
+
+        //======================================================================
+
+        //NOTE(Brian): For performance reasons, these events may need to be removed for production.
+        public Action<string> OnMessageWillQueue;
+        public Action<string> OnMessageWillDequeue;
+
+        public Action<string> OnMessageProcessStart;
+        public Action<string> OnMessageProcessEnds;
+
+        public Action<string> OnMessageDecodeStart;
+        public Action<string> OnMessageDecodeEnds;
+
+#if UNITY_EDITOR
+        public delegate void ProcessDelegate(string sceneId, string method);
+
+        public event ProcessDelegate OnMessageProcessInfoStart;
+        public event ProcessDelegate OnMessageProcessInfoEnds;
+#endif
+        [NonSerialized] public bool deferredMessagesDecoding = false;
+        Queue<string> payloadsToDecode = new Queue<string>();
+        const float MAX_TIME_FOR_DECODE = 0.005f;
+        public bool msgStepByStep = false;
+
+        public T SafeFromJson<T>(string data)
+        {
+            OnMessageDecodeStart?.Invoke("Misc");
+            T result = Utils.SafeFromJson<T>(data);
+            OnMessageDecodeEnds?.Invoke("Misc");
+
+            return result;
+        }
+
+        public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
+        {
+            string sceneId = msgObject.sceneId;
+            string method = msgObject.method;
+
+            yieldInstruction = null;
+
+            ParcelScene scene;
+            bool res = false;
+
+            if (loadedScenes.TryGetValue(sceneId, out scene))
+            {
+#if UNITY_EDITOR
+                if (debugScenes && scene is GlobalScene && ignoreGlobalScenes)
+                {
+                    return false;
+                }
+#endif
+                if (!scene.gameObject.activeInHierarchy)
+                {
+                    return true;
+                }
+
+#if UNITY_EDITOR
+                OnMessageProcessInfoStart?.Invoke(sceneId, method);
+#endif
+                OnMessageProcessStart?.Invoke(method);
+
+                switch (method)
+                {
+                    case MessagingTypes.ENTITY_CREATE:
+                        {
+                            if (msgObject.payload is Protocol.CreateEntity payload)
+                                scene.CreateEntity(payload.entityId);
+
+                            break;
+                        }
+                    case MessagingTypes.ENTITY_REPARENT:
+                        {
+                            if (msgObject.payload is Protocol.SetEntityParent payload)
+                                scene.SetEntityParent(payload.entityId, payload.parentId);
+
+                            break;
+                        }
+
+                    case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
+                        {
+                            if (msgObject.payload is Protocol.EntityComponentCreateOrUpdate payload)
+                                scene.EntityComponentCreateOrUpdate(payload.entityId, (CLASS_ID_COMPONENT)payload.classId, payload.json, out yieldInstruction);
+
+                            break;
+                        }
+
+                    case MessagingTypes.ENTITY_COMPONENT_DESTROY:
+                        {
+                            if (msgObject.payload is Protocol.EntityComponentDestroy payload)
+                                scene.EntityComponentRemove(payload.entityId, payload.name);
+
+                            break;
+                        }
+
+                    case MessagingTypes.SHARED_COMPONENT_ATTACH:
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentAttach payload)
+                                scene.SharedComponentAttach(payload.entityId, payload.id);
+
+                            break;
+                        }
+
+                    case MessagingTypes.SHARED_COMPONENT_CREATE:
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentCreate payload)
+                                scene.SharedComponentCreate(payload.id, payload.classId);
+
+                            break;
+                        }
+
+                    case MessagingTypes.SHARED_COMPONENT_DISPOSE:
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentDispose payload)
+                                scene.SharedComponentDispose(payload.id);
+                            break;
+                        }
+
+                    case MessagingTypes.SHARED_COMPONENT_UPDATE:
+                        {
+                            if (msgObject.payload is Protocol.SharedComponentUpdate payload)
+                                scene.SharedComponentUpdate(payload.componentId, payload.json, out yieldInstruction);
+                            break;
+                        }
+
+                    case MessagingTypes.ENTITY_DESTROY:
+                        {
+                            if (msgObject.payload is Protocol.RemoveEntity payload)
+                                scene.RemoveEntity(payload.entityId);
+                            break;
+                        }
+
+                    case MessagingTypes.INIT_DONE:
+                        {
+                            scene.SetInitMessagesDone();
+                            break;
+                        }
+
+                    case MessagingTypes.QUERY:
+                        {
+                            if (msgObject.payload is QueryMessage queryMessage)
+                                ParseQuery(queryMessage.payload, scene.sceneData.id);
+                            break;
+                        }
+
+                    case MessagingTypes.OPEN_EXTERNAL_URL:
+                        {
+                            if (msgObject.payload is Protocol.OpenExternalUrl payload)
+                                OnOpenExternalUrlRequest?.Invoke(scene, payload.url);
+                            break;
+                        }
+
+                    case MessagingTypes.OPEN_NFT_DIALOG:
+                        {
+                            if (msgObject.payload is Protocol.OpenNftDialog payload)
+                                OnOpenNFTDialogRequest?.Invoke(payload.contactAddress, payload.tokenId, payload.comment);
+                            break;
+                        }
+
+                    default:
+                        Debug.LogError($"Unknown method {method}");
+                        return true;
+                }
+
+                OnMessageProcessEnds?.Invoke(method);
+
+#if UNITY_EDITOR
+                OnMessageProcessInfoEnds?.Invoke(sceneId, method);
+#endif
+
+                res = true;
+            }
+
+            else
+            {
+                res = false;
+            }
+
+            sceneMessagesPool.Enqueue(msgObject);
+
+            return res;
+        }
+
+        public void ParseQuery(object payload, string sceneId)
+        {
+            ParcelScene scene = loadedScenes[sceneId];
+
+            if (!(payload is RaycastQuery raycastQuery))
+                return;
+
+            Vector3 worldOrigin = raycastQuery.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
+
+            raycastQuery.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
+            raycastQuery.sceneId = sceneId;
+            PhysicsCast.i.Query(raycastQuery);
+        }
+
+        public string SendSceneMessage(string payload)
+        {
+            return SendSceneMessage(payload, deferredMessagesDecoding);
+        }
+
+        private string SendSceneMessage(string payload, bool enqueue)
+        {
+            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            int count = chunks.Length;
+            string lastBusId = null;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (CommonScriptableObjects.rendererState.Get() && enqueue)
+                {
+                    payloadsToDecode.Enqueue(chunks[i]);
+                }
+                else
+                {
+                    lastBusId = DecodeAndEnqueue(chunks[i]);
+                }
+            }
+
+            return lastBusId;
+        }
+
+        private string DecodeAndEnqueue(string payload)
+        {
+            OnMessageDecodeStart?.Invoke("Misc");
+
+            string sceneId;
+            string message;
+            string messageTag;
+            PB_SendSceneMessage sendSceneMessage;
+
+            if (!MessageDecoder.DecodePayloadChunk(payload, out sceneId, out message, out messageTag, out sendSceneMessage))
+            {
+                return null;
+            }
+
+            MessagingBus.QueuedSceneMessage_Scene queuedMessage;
+
+            if (sceneMessagesPool.Count > 0)
+                queuedMessage = sceneMessagesPool.Dequeue();
+            else
+                queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
+
+            MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
+
+            EnqueueSceneMessage(queuedMessage);
+
+            OnMessageDecodeEnds?.Invoke("Misc");
+
+            return "";
+        }
+
+        private IEnumerator DeferredDecoding()
+        {
+            float start = Time.realtimeSinceStartup;
+            float maxTimeForDecode;
+
+            while (true)
+            {
+                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
+
+                if (payloadsToDecode.Count > 0)
+                {
+                    string payload = payloadsToDecode.Dequeue();
+
+                    DecodeAndEnqueue(payload);
+
+                    if (Time.realtimeSinceStartup - start < maxTimeForDecode)
+                        continue;
+                }
+
+                yield return null;
+                start = Time.unscaledTime;
+            }
+        }
+
+        public void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene message)
+        {
+            TryGetScene(message.sceneId, out ParcelScene scene);
+
+            Environment.i.messagingControllersManager.AddControllerIfNotExists(this, message.sceneId);
+
+            Environment.i.messagingControllersManager.Enqueue(scene, message);
+        }
+
+        //======================================================================
+
+        #endregion
+
+        //======================================================================
+
+
+        //======================================================================
+
+        #region SCENES_MANAGEMENT
+
+        //======================================================================
+        public HashSet<string> readyScenes = new HashSet<string>();
+        public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
+        [System.NonSerialized] public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+
+
+        public ParcelScene CreateTestScene(LoadParcelScenesMessage.UnityParcelScene data = null)
+        {
+            if (data == null)
+            {
+                data = new LoadParcelScenesMessage.UnityParcelScene();
+            }
+
+            if (data.parcels == null)
+            {
+                data.parcels = new Vector2Int[] { data.basePosition };
+            }
+
+            if (string.IsNullOrEmpty(data.id))
+            {
+                data.id = $"(test):{data.basePosition.x},{data.basePosition.y}";
+            }
+
+            if (loadedScenes.ContainsKey(data.id))
+            {
+                Debug.LogWarning($"Scene {data.id} is already loaded.");
+                return loadedScenes[data.id];
+            }
+
+            var go = new GameObject();
+            var newScene = go.AddComponent<ParcelScene>();
+            newScene.ownerController = this;
+            newScene.isTestScene = true;
+            newScene.isPersistent = true;
+            newScene.SetData(data);
+
+            if (DCLCharacterController.i != null)
+                newScene.InitializeDebugPlane();
+
+            scenesSortedByDistance.Add(newScene);
+
+            Environment.i.messagingControllersManager.AddControllerIfNotExists(this, data.id);
+
+            loadedScenes.Add(data.id, newScene);
+            OnNewSceneAdded?.Invoke(newScene);
+
+            return newScene;
+        }
+
+        public void SendSceneReady(string sceneId)
+        {
+            readyScenes.Add(sceneId);
+
+            Environment.i.messagingControllersManager.SetSceneReady(sceneId);
+
+            WebInterface.ReportControlEvent(new WebInterface.SceneReady(sceneId));
+
+            worldBlockersController.SetupWorldBlockers();
+        }
+
+        public string TryToGetSceneCoordsID(string id)
+        {
+            if (loadedScenes.ContainsKey(id))
+                return loadedScenes[id].sceneData.basePosition.ToString();
+
+            return id;
+        }
+
+        public bool TryGetScene(string id, out ParcelScene scene)
+        {
+            scene = null;
+
+            if (!loadedScenes.ContainsKey(id))
+                return false;
+
+            scene = loadedScenes[id];
+            return true;
+        }
+
+        public Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null)
+        {
+            if (scene == null)
+            {
+                string sceneId = currentSceneId;
+
+                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
+                    scene = loadedScenes[currentSceneId];
+                else
+                    return pos;
+            }
+
+            Vector3 worldPosition = DCLCharacterController.i.characterPosition.UnityToWorldPosition(pos);
+            return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
         void InitializeSceneBoundariesChecker()
@@ -149,6 +570,12 @@ namespace DCL
             {
                 boundariesChecker = new SceneBoundariesChecker();
             }
+        }
+
+        void InitializeWorldBlockersController()
+        {
+            if(worldBlockersController == null)
+                worldBlockersController = new WorldBlockersController(this, new BlockerHandler(DCLCharacterController.i.characterPosition), DCLCharacterController.i.characterPosition);
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)
@@ -194,7 +621,7 @@ namespace DCL
                     {
                         currentSceneId = scene.sceneData.id;
 
-                        if (firstSort)
+                        if(firstSort)
                             CommonScriptableObjects.rendererState.AddLock(this);
 
                         break;
@@ -226,183 +653,12 @@ namespace DCL
             return dist1 - dist2;
         }
 
-        public const string EMPTY_GO_POOL_NAME = "Empty";
-
-        public void EnsureEntityPool()
-        {
-            if (PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
-                return;
-
-            GameObject go = new GameObject();
-            Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: 2000, isPersistent: true);
-
-            if (prewarmEntitiesPool)
-                pool.ForcePrewarm();
-        }
-
-        void Start()
-        {
-            if (prewarmSceneMessagesPool)
-            {
-                for (int i = 0; i < 100000; i++)
-                {
-                    sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
-                }
-            }
-
-            if (prewarmEntitiesPool)
-            {
-                EnsureEntityPool();
-            }
-
-            componentFactory.PrewarmPools();
-
-            if (!debugScenes)
-            {
-                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
-                OnRenderingStateChange(CommonScriptableObjects.rendererState.Get(), false);
-            }
-        }
-
-        private void OnRenderingStateChange(bool enabled, bool prevState)
-        {
-            if (!enabled && !string.IsNullOrEmpty(currentSceneId))
-            {
-                CommonScriptableObjects.rendererState.AddLock(this);
-            }
-        }
-
         private void OnSceneReady(ParcelScene scene)
         {
             if (scene.sceneData.id == currentSceneId)
             {
                 CommonScriptableObjects.rendererState.RemoveLock(this);
             }
-        }
-
-        public void Restart()
-        {
-            MessagingControllersManager.i.Cleanup();
-            MessagingControllersManager.i.Initialize(this);
-
-            MemoryManager.i.CleanupPoolsIfNeeded(true);
-            MemoryManager.i.Initialize();
-
-            PointerEventsController.i.Cleanup();
-            PointerEventsController.i.Initialize();
-
-            ParcelScene.parcelScenesCleaner.ForceCleanup();
-        }
-
-        void OnDestroy()
-        {
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
-            DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
-            ParcelScene.parcelScenesCleaner.Stop();
-        }
-
-        private void Update()
-        {
-            InputController_Legacy.i.Update();
-
-            if (lastSortFrame != Time.frameCount && sceneSortDirty)
-            {
-                lastSortFrame = Time.frameCount;
-                sceneSortDirty = false;
-                SortScenesByDistance();
-            }
-        }
-
-        public void CreateUIScene(string json)
-        {
-#if UNITY_EDITOR
-            if (debugScenes && ignoreGlobalScenes)
-                return;
-#endif
-            CreateUISceneMessage uiScene = SafeFromJson<CreateUISceneMessage>(json);
-
-            string uiSceneId = uiScene.id;
-
-            if (loadedScenes.ContainsKey(uiSceneId))
-                return;
-
-            var newGameObject = new GameObject("UI Scene - " + uiSceneId);
-
-            var newScene = newGameObject.AddComponent<GlobalScene>();
-            newScene.ownerController = this;
-            newScene.unloadWithDistance = false;
-            newScene.isPersistent = true;
-
-            LoadParcelScenesMessage.UnityParcelScene data = new LoadParcelScenesMessage.UnityParcelScene
-            {
-                id = uiSceneId,
-                basePosition = new Vector2Int(0, 0),
-                baseUrl = uiScene.baseUrl
-            };
-
-            newScene.SetData(data);
-
-            loadedScenes.Add(uiSceneId, newScene);
-            OnNewSceneAdded?.Invoke(newScene);
-
-            globalSceneId = uiSceneId;
-
-            if (!MessagingControllersManager.i.ContainsController(globalSceneId))
-                MessagingControllersManager.i.AddController(this, globalSceneId, isGlobal: true);
-
-            if (VERBOSE)
-            {
-                Debug.Log($"Creating UI scene {uiSceneId}");
-            }
-        }
-
-        public void SetDebug()
-        {
-            Debug.unityLogger.logEnabled = true;
-
-            isDebugMode = true;
-            fpsPanel.SetActive(true);
-
-            InitializeSceneBoundariesChecker();
-
-            OnDebugModeSet?.Invoke();
-        }
-
-        public void HideFPSPanel()
-        {
-            fpsPanel.SetActive(false);
-        }
-
-        public void ShowFPSPanel()
-        {
-            fpsPanel.SetActive(true);
-        }
-
-        public void SetSceneDebugPanel()
-        {
-            engineDebugPanel.SetActive(false);
-            sceneDebugPanel.SetActive(true);
-        }
-
-        public void SetEngineDebugPanel()
-        {
-            sceneDebugPanel.SetActive(false);
-            engineDebugPanel.SetActive(true);
-        }
-
-        public void SetDisableAssetBundles()
-        {
-            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
-        }
-
-        public bool IsCharacterInsideScene(ParcelScene scene)
-        {
-            bool result = false;
-
-            if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
-                result = true;
-
-            return result;
         }
 
         public void LoadParcelScenesExecute(string decentralandSceneJSON)
@@ -445,8 +701,7 @@ namespace DCL
 
                 scenesSortedByDistance.Add(newScene);
 
-                if (!MessagingControllersManager.i.ContainsController(newScene.sceneData.id))
-                    MessagingControllersManager.i.AddController(this, newScene.sceneData.id);
+                Environment.i.messagingControllersManager.AddControllerIfNotExists(this, newScene.sceneData.id);
 
                 newScene.OnSceneReady += OnSceneReady;
 
@@ -503,10 +758,9 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            Environment.i.messagingControllersManager.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
 
-            if (MessagingControllersManager.i.ContainsController(sceneKey))
-                MessagingControllersManager.i.RemoveController(sceneKey);
+            Environment.i.messagingControllersManager.RemoveController(sceneKey);
         }
 
         public void UnloadParcelSceneExecute(string sceneKey)
@@ -526,8 +780,7 @@ namespace DCL
             scenesSortedByDistance.Remove(scene);
 
             // Remove messaging controller for unloaded scene
-            if (MessagingControllersManager.i.ContainsController(scene.sceneData.id))
-                MessagingControllersManager.i.RemoveController(scene.sceneData.id);
+            Environment.i.messagingControllersManager.RemoveController(scene.sceneData.id);
 
             if (scene)
             {
@@ -561,7 +814,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_LOAD);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            Environment.i.messagingControllersManager.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
 
             sceneSortDirty = true;
 
@@ -576,7 +829,7 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            Environment.i.messagingControllersManager.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
         }
 
         public void UnloadAllScenesQueued()
@@ -585,316 +838,183 @@ namespace DCL
 
             OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
-            MessagingControllersManager.i.ForceEnqueueToGlobal(MessagingBusId.INIT, queuedMessage);
+            Environment.i.messagingControllersManager.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
         }
 
-        public string SendSceneMessage(string payload)
+        public void CreateUIScene(string json)
         {
-            return SendSceneMessage(payload, deferredMessagesDecoding);
-        }
-
-        private string SendSceneMessage(string payload, bool enqueue)
-        {
-            string[] chunks = payload.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            int count = chunks.Length;
-            string lastBusId = null;
-
-            for (int i = 0; i < count; i++)
-            {
-                if (CommonScriptableObjects.rendererState.Get() && enqueue)
-                {
-                    payloadsToDecode.Enqueue(chunks[i]);
-                }
-                else
-                {
-                    lastBusId = DecodeAndEnqueue(chunks[i]);
-                }
-            }
-
-            return lastBusId;
-        }
-
-        private string DecodeAndEnqueue(string payload)
-        {
-            OnMessageDecodeStart?.Invoke("Misc");
-
-            string sceneId;
-            string message;
-            string messageTag;
-            PB_SendSceneMessage sendSceneMessage;
-
-            if (!MessageDecoder.DecodePayloadChunk(payload, out sceneId, out message, out messageTag, out sendSceneMessage))
-            {
-                return null;
-            }
-
-            MessagingBus.QueuedSceneMessage_Scene queuedMessage;
-
-            if (sceneMessagesPool.Count > 0)
-                queuedMessage = sceneMessagesPool.Dequeue();
-            else
-                queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
-
-            MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
-
-            EnqueueMessage(queuedMessage);
-
-            OnMessageDecodeEnds?.Invoke("Misc");
-
-            return "";
-        }
-
-        private IEnumerator DeferredDecoding()
-        {
-            float start = Time.realtimeSinceStartup;
-            float maxTimeForDecode;
-
-            while (true)
-            {
-                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
-
-                if (payloadsToDecode.Count > 0)
-                {
-                    string payload = payloadsToDecode.Dequeue();
-
-                    DecodeAndEnqueue(payload);
-
-                    if (Time.realtimeSinceStartup - start < maxTimeForDecode)
-                        continue;
-                }
-
-                yield return null;
-                start = Time.unscaledTime;
-            }
-        }
-
-        private string EnqueueMessage(MessagingBus.QueuedSceneMessage_Scene queuedMessage)
-        {
-            ParcelScene scene;
-            TryGetScene(queuedMessage.sceneId, out scene);
-
-            // If it doesn't exist, create messaging controller for this scene id
-            if (!MessagingControllersManager.i.ContainsController(queuedMessage.sceneId))
-                MessagingControllersManager.i.AddController(this, queuedMessage.sceneId);
-
-            string busId = MessagingControllersManager.i.Enqueue(scene, queuedMessage);
-            return busId;
-        }
-
-        public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
-        {
-            string sceneId = msgObject.sceneId;
-            string tag = msgObject.tag;
-            string method = msgObject.method;
-            DCL.Interface.PB_SendSceneMessage payload = msgObject.payload;
-
-            yieldInstruction = null;
-
-            ParcelScene scene;
-            bool res = false;
-
-            if (loadedScenes.TryGetValue(sceneId, out scene))
-            {
 #if UNITY_EDITOR
-                if (debugScenes && scene is GlobalScene && ignoreGlobalScenes)
-                {
-                    return false;
-                }
+            if (debugScenes && ignoreGlobalScenes)
+                return;
 #endif
-                if (!scene.gameObject.activeInHierarchy)
-                {
-                    return true;
-                }
+            CreateUISceneMessage uiScene = SafeFromJson<CreateUISceneMessage>(json);
 
-#if UNITY_EDITOR
-                OnMessageProcessInfoStart?.Invoke(sceneId, method);
-#endif
-                OnMessageProcessStart?.Invoke(method);
+            string uiSceneId = uiScene.id;
 
-                switch (method)
-                {
-                    case MessagingTypes.ENTITY_CREATE:
-                        scene.CreateEntity(tag);
-                        break;
-                    case MessagingTypes.ENTITY_REPARENT:
-                        scene.SetEntityParent(payload.SetEntityParent.EntityId, payload.SetEntityParent.ParentId);
-                        break;
+            if (loadedScenes.ContainsKey(uiSceneId))
+                return;
 
-                    //NOTE(Brian): EntityComponent messages
-                    case MessagingTypes.ENTITY_COMPONENT_CREATE_OR_UPDATE:
-                        scene.EntityComponentCreateOrUpdate(payload.UpdateEntityComponent.EntityId, payload.UpdateEntityComponent.Name, payload.UpdateEntityComponent.ClassId, payload.UpdateEntityComponent.Data, out yieldInstruction);
-                        break;
-                    case MessagingTypes.ENTITY_COMPONENT_DESTROY:
-                        scene.EntityComponentRemove(payload.ComponentRemoved.EntityId, payload.ComponentRemoved.Name);
-                        break;
+            var newGameObject = new GameObject("UI Scene - " + uiSceneId);
 
-                    //NOTE(Brian): SharedComponent messages
-                    case MessagingTypes.SHARED_COMPONENT_ATTACH:
-                        scene.SharedComponentAttach(payload.AttachEntityComponent.EntityId, payload.AttachEntityComponent.Id, payload.AttachEntityComponent.Name);
-                        break;
-                    case MessagingTypes.SHARED_COMPONENT_CREATE:
-                        scene.SharedComponentCreate(payload.ComponentCreated.Id, payload.ComponentCreated.Name, payload.ComponentCreated.Classid);
-                        break;
-                    case MessagingTypes.SHARED_COMPONENT_DISPOSE:
-                        scene.SharedComponentDispose(payload.ComponentDisposed.Id);
-                        break;
-                    case MessagingTypes.SHARED_COMPONENT_UPDATE:
-                        scene.SharedComponentUpdate(payload.ComponentUpdated.Id, payload.ComponentUpdated.Json, out yieldInstruction);
-                        break;
-                    case MessagingTypes.ENTITY_DESTROY:
-                        scene.RemoveEntity(tag);
-                        break;
-                    case MessagingTypes.INIT_DONE:
-                        scene.SetInitMessagesDone();
-                        break;
-                    case MessagingTypes.QUERY:
-                        ParseQuery(payload.Query.QueryId, payload.Query.Payload, scene.sceneData.id);
-                        break;
-                    case MessagingTypes.OPEN_EXTERNAL_URL:
-                        OnOpenExternalUrlRequest?.Invoke(scene, payload.OpenExternalUrl.Url);
-                        break;
-                    case MessagingTypes.OPEN_NFT_DIALOG:
-                        OnOpenNFTDialogRequest?.Invoke(payload.OpenNFTDialog.AssetContractAddress, payload.OpenNFTDialog.TokenId, payload.OpenNFTDialog.Comment);
-                        break;
-                    default:
-                        Debug.LogError($"Unknown method {method}");
-                        return true;
-                }
-
-                OnMessageProcessEnds?.Invoke(method);
-
-#if UNITY_EDITOR
-                OnMessageProcessInfoEnds?.Invoke(sceneId, method);
-#endif
-
-                res = true;
-            }
-
-            else
-            {
-                res = false;
-            }
-
-            sceneMessagesPool.Enqueue(msgObject);
-
-            return res;
-        }
-
-        public Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null)
-        {
-            if (scene == null)
-            {
-                string sceneId = currentSceneId;
-
-                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[currentSceneId];
-                else
-                    return pos;
-            }
-
-            Vector3 worldPosition = DCLCharacterController.i.characterPosition.UnityToWorldPosition(pos);
-            return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
-        }
-
-        public void ParseQuery(string queryId, string payload, string sceneId)
-        {
-            QueryMessage query = new QueryMessage();
-
-            MessageDecoder.DecodeQueryMessage(queryId, payload, ref query);
-
-            ParcelScene scene = loadedScenes[sceneId];
-
-            Vector3 worldOrigin = query.payload.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
-            query.payload.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
-
-            switch (query.queryId)
-            {
-                case "raycast":
-                    query.payload.sceneId = sceneId;
-                    PhysicsCast.i.Query(query.payload);
-                    break;
-            }
-        }
-
-        public T SafeFromJson<T>(string data)
-        {
-            OnMessageDecodeStart?.Invoke("Misc");
-            T result = Utils.SafeFromJson<T>(data);
-            OnMessageDecodeEnds?.Invoke("Misc");
-
-            return result;
-        }
-
-        public ParcelScene CreateTestScene(LoadParcelScenesMessage.UnityParcelScene data = null)
-        {
-            if (data == null)
-            {
-                data = new LoadParcelScenesMessage.UnityParcelScene();
-            }
-
-            if (data.parcels == null)
-            {
-                data.parcels = new Vector2Int[] { data.basePosition };
-            }
-
-            if (string.IsNullOrEmpty(data.id))
-            {
-                data.id = $"(test):{data.basePosition.x},{data.basePosition.y}";
-            }
-
-            if (loadedScenes.ContainsKey(data.id))
-            {
-                Debug.LogWarning($"Scene {data.id} is already loaded.");
-                return loadedScenes[data.id];
-            }
-
-            var go = new GameObject();
-            var newScene = go.AddComponent<ParcelScene>();
+            var newScene = newGameObject.AddComponent<GlobalScene>();
             newScene.ownerController = this;
-            newScene.isTestScene = true;
-            newScene.useBlockers = false;
+            newScene.unloadWithDistance = false;
+            newScene.isPersistent = true;
+
+            LoadParcelScenesMessage.UnityParcelScene data = new LoadParcelScenesMessage.UnityParcelScene
+            {
+                id = uiSceneId,
+                basePosition = new Vector2Int(0, 0),
+                baseUrl = uiScene.baseUrl
+            };
+
             newScene.SetData(data);
 
-            if (DCLCharacterController.i != null)
-                newScene.InitializeDebugPlane();
-
-            scenesSortedByDistance.Add(newScene);
-
-            if (!MessagingControllersManager.i.ContainsController(data.id))
-                MessagingControllersManager.i.AddController(this, data.id);
-
-            loadedScenes.Add(data.id, newScene);
+            loadedScenes.Add(uiSceneId, newScene);
             OnNewSceneAdded?.Invoke(newScene);
 
-            return newScene;
+            globalSceneId = uiSceneId;
+
+            Environment.i.messagingControllersManager.AddControllerIfNotExists(this, globalSceneId, isGlobal: true);
+
+            if (VERBOSE)
+            {
+                Debug.Log($"Creating UI scene {uiSceneId}");
+            }
         }
 
-        public void SendSceneReady(string sceneId)
+        public bool IsCharacterInsideScene(ParcelScene scene)
         {
-            readyScenes.Add(sceneId);
-
-            MessagingControllersManager.i.SetSceneReady(sceneId);
-
-            WebInterface.ReportControlEvent(new WebInterface.SceneReady(sceneId));
+            return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
         }
 
-        public string TryToGetSceneCoordsID(string id)
+        private void OnRenderingStateChange(bool enabled, bool prevState)
         {
-            if (loadedScenes.ContainsKey(id))
-                return loadedScenes[id].sceneData.basePosition.ToString();
-
-            return id;
+            if (!enabled && !string.IsNullOrEmpty(currentSceneId))
+            {
+                CommonScriptableObjects.rendererState.AddLock(this);
+            }
         }
 
-        public bool TryGetScene(string id, out ParcelScene scene)
+        public HashSet<Vector2Int> GetAllLoadedScenesCoords()
         {
-            scene = null;
+            HashSet<Vector2Int> allLoadedParcelCoords = new HashSet<Vector2Int>();
 
-            if (!loadedScenes.ContainsKey(id))
-                return false;
+            // Create fast (hashset) collection of loaded parcels coords
+            foreach (var element in loadedScenes)
+            {
+                if (!element.Value.isReady) continue;
 
-            scene = loadedScenes[id];
-            return true;
+                allLoadedParcelCoords.UnionWith(element.Value.parcels);
+            }
+
+            return allLoadedParcelCoords;
+        }
+
+        //======================================================================
+
+        #endregion
+
+        //======================================================================
+
+
+        //======================================================================
+
+        #region DEBUG_MANAGEMENT
+
+        //======================================================================
+        [Header("Debug Tools")] public GameObject fpsPanel;
+        [Header("Debug Panel")] public GameObject engineDebugPanel;
+        public GameObject sceneDebugPanel;
+        public bool debugScenes;
+        public Vector2Int debugSceneCoords;
+        public static Action OnDebugModeSet;
+        [System.NonSerialized] public bool isDebugMode;
+        [System.NonSerialized] public bool isWssDebugMode;
+        public static bool VERBOSE = false;
+        public bool ignoreGlobalScenes = false;
+
+        // Beware this SetDebug() may be called before Awake() somehow...
+        public void SetDebug()
+        {
+            Debug.unityLogger.logEnabled = true;
+
+            isDebugMode = true;
+            fpsPanel.SetActive(true);
+
+            InitializeSceneBoundariesChecker();
+
+            OnDebugModeSet?.Invoke();
+
+            InitializeWorldBlockersController();
+
+            worldBlockersController.SetEnabled(false);
+        }
+
+        public void HideFPSPanel()
+        {
+            fpsPanel.SetActive(false);
+        }
+
+        public void ShowFPSPanel()
+        {
+            fpsPanel.SetActive(true);
+        }
+
+        public void SetSceneDebugPanel()
+        {
+            engineDebugPanel.SetActive(false);
+            sceneDebugPanel.SetActive(true);
+        }
+
+        public void SetEngineDebugPanel()
+        {
+            sceneDebugPanel.SetActive(false);
+            engineDebugPanel.SetActive(true);
+        }
+
+        //======================================================================
+
+        #endregion
+
+        //======================================================================
+
+
+        public Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool { get; } = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
+
+        [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
+        [System.NonSerialized] public bool useBoundariesChecker = true;
+
+        [System.NonSerialized] public bool prewarmEntitiesPool = true;
+
+        public string globalSceneId { get; private set; }
+        public string currentSceneId { get; private set; }
+
+        public SceneBoundariesChecker boundariesChecker { get; private set; }
+
+        private bool sceneSortDirty = false;
+        private bool positionDirty = true;
+        private int lastSortFrame = 0;
+
+        public event Action OnSortScenes;
+        public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
+        public event Action<ParcelScene> OnNewSceneAdded;
+
+        public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
+
+        public event OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
+
+        private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
+        private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
+
+
+
+        public const string EMPTY_GO_POOL_NAME = "Empty";
+
+
+        public void SetDisableAssetBundles()
+        {
+            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
         }
 
         public void BuilderReady()

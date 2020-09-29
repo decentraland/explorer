@@ -22,13 +22,14 @@ test/out
 .idea
 coverage
 
-# ================ #
-# Generated scenes #
-# ================ #
+# ============================= #
+# Generated / Downloaded scenes #
+# ============================= #
 public/test-scenes/*/*.js
 public/hell-map/*/*.js
 public/ecs-scenes/*/*.js
 public/test-scenes/*/bin/*.js
+public/downloaded-scenes
 
 scripts/**/*.js
 scripts/**/*.d.ts
@@ -52,3 +53,7 @@ packages/decentraland-ecs/types/dcl/*
 packages/decentraland-ecs/artifacts
 packages/decentraland-ecs/package-lock.json
 .tsbuildinfo
+
+**/*.js.lib
+public/build-ecs-libraries/**/*.d.ts
+public/build-ecs-libraries/**/*.js

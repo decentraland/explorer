@@ -24,6 +24,8 @@ import { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-r
 import { QueryType, CLASS_ID, Transform, Vector2 } from 'decentraland-ecs/src'
 import { PB_Transform, PB_Vector3, PB_Quaternion } from '../shared/proto/engineinterface_pb'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
+import { sleep } from 'atomicHelpers/sleep'
+import future, { IFuture } from 'fp-future'
 
 // tslint:disable-next-line:whitespace
 type IEngineAPI = import('shared/apis/EngineAPI').IEngineAPI
@@ -58,6 +60,28 @@ function resolveMapping(mapping: string | undefined, mappingName: string, baseUr
   }
 
   return (baseUrl.endsWith('/') ? baseUrl : baseUrl + '/') + url
+}
+
+//NOTE(Brian): The idea is to map all string ids used by this scene to ints
+//             so we avoid sending/processing big ids like "xxxxx-xxxxx-xxxxx-xxxxx"
+//             that are used by i.e. raycasting queries.
+let idToNumberStore: Record<string, number> = {}
+let numberToIdStore: Record<number, string> = {}
+let idToNumberStoreCounter: number = 10 // Starting in 10, to leave room for special cases (such as the root entity)
+
+function addIdToStorage(id: string, idAsNumber: number) {
+  idToNumberStore[id] = idAsNumber
+  numberToIdStore[idAsNumber] = id
+}
+
+function getIdAsNumber(id: string): number {
+  if (idToNumberStore[id] === undefined) {
+    idToNumberStoreCounter++
+    addIdToStorage(id, idToNumberStoreCounter)
+    return idToNumberStoreCounter
+  } else {
+    return idToNumberStore[id]
+  }
 }
 
 const componentNameRE = /^(engine\.)/
@@ -162,7 +186,7 @@ export default class GamekitScene extends Script {
 
     if (bootstrapData && bootstrapData.main) {
       const mappingName = bootstrapData.main
-      const mapping = bootstrapData.mappings.find($ => $.file === mappingName)
+      const mapping = bootstrapData.mappings.find(($) => $.file === mappingName)
       const url = resolveMapping(mapping && mapping.hash, mappingName, bootstrapData.baseUrl)
       const html = await fetch(url)
 
@@ -193,7 +217,7 @@ export default class GamekitScene extends Script {
   calculateSceneCenter(parcels: Array<{ x: number; y: number }>): Vector2 {
     let center: Vector2 = new Vector2()
 
-    parcels.forEach(v2 => {
+    parcels.forEach((v2) => {
       center = Vector2.Add(v2, center)
     })
 
@@ -218,6 +242,8 @@ export default class GamekitScene extends Script {
 
       const fullData = sceneData.data as LoadableParcelScene
       const sceneId = fullData.id
+
+      let loadingModules: Record<string, IFuture<void>> = {}
 
       const dcl: DecentralandInterface = {
         DEBUG: true,
@@ -261,7 +287,6 @@ export default class GamekitScene extends Script {
           }
           that.events.push({
             type: 'CreateEntity',
-            tag: entityId,
             payload: { id: entityId } as CreateEntityPayload
           })
         },
@@ -269,7 +294,6 @@ export default class GamekitScene extends Script {
         removeEntity(entityId: string) {
           that.events.push({
             type: 'RemoveEntity',
-            tag: entityId,
             payload: { id: entityId } as RemoveEntityPayload
           })
         },
@@ -351,6 +375,7 @@ export default class GamekitScene extends Script {
 
         /** queries for a specific system with a certain query configuration */
         query(queryType: QueryType, payload: any) {
+          payload.queryId = getIdAsNumber(payload.queryId).toString()
           that.events.push({
             type: 'Query',
             tag: sceneId + '_' + payload.queryId,
@@ -363,7 +388,13 @@ export default class GamekitScene extends Script {
 
         /** subscribe to specific events, events will be handled by the onEvent function */
         subscribe(eventName: string): void {
-          that.eventSubscriber.on(eventName, event => {
+          that.eventSubscriber.on(eventName, (event) => {
+            if (eventName === 'raycastResponse') {
+              let idAsNumber = parseInt(event.data.queryId)
+              if (numberToIdStore[idAsNumber]) {
+                event.data.queryId = numberToIdStore[idAsNumber].toString()
+              }
+            }
             that.fireEvent({ type: eventName, data: event.data })
           })
         },
@@ -406,28 +437,34 @@ export default class GamekitScene extends Script {
           })
         },
 
-        loadModule: async _moduleName => {
-          const moduleToLoad = _moduleName.replace(/^@decentraland\//, '')
-          let methods: string[] = []
+        loadModule: async (_moduleName) => {
+          loadingModules[_moduleName] = future()
 
-          if (moduleToLoad === WEB3_PROVIDER) {
-            methods.push(PROVIDER_METHOD)
-            this.provider = await this.getEthereumProvider()
-          } else {
-            const proxy = (await this.loadAPIs([moduleToLoad]))[moduleToLoad]
+          try {
+            const moduleToLoad = _moduleName.replace(/^@decentraland\//, '')
+            let methods: string[] = []
 
-            try {
-              methods = await proxy._getExposedMethods()
-            } catch (e) {
-              throw Object.assign(new Error(`Error getting the methods of ${moduleToLoad}: ` + e.message), {
-                original: e
-              })
+            if (moduleToLoad === WEB3_PROVIDER) {
+              methods.push(PROVIDER_METHOD)
+              this.provider = await this.getEthereumProvider()
+            } else {
+              const proxy = (await this.loadAPIs([moduleToLoad]))[moduleToLoad]
+
+              try {
+                methods = await proxy._getExposedMethods()
+              } catch (e) {
+                throw Object.assign(new Error(`Error getting the methods of ${moduleToLoad}: ` + e.message), {
+                  original: e
+                })
+              }
             }
-          }
 
-          return {
-            rpcHandle: moduleToLoad,
-            methods: methods.map(name => ({ name }))
+            return {
+              rpcHandle: moduleToLoad,
+              methods: methods.map((name) => ({ name }))
+            }
+          } finally {
+            loadingModules[_moduleName].resolve()
           }
         },
         callRpc: async (rpcHandle: string, methodName: string, args: any[]) => {
@@ -451,7 +488,7 @@ export default class GamekitScene extends Script {
 
       {
         const monkeyPatchDcl: any = dcl
-        monkeyPatchDcl.updateEntity = function() {
+        monkeyPatchDcl.updateEntity = function () {
           throw new Error('The scene is using an outdated version of decentraland-ecs, please upgrade to >5.0.0')
         }
       }
@@ -461,7 +498,7 @@ export default class GamekitScene extends Script {
           this.startLoop()
         }
 
-        this.onStartFunctions.forEach($ => {
+        this.onStartFunctions.forEach(($) => {
           try {
             $()
           } catch (e) {
@@ -480,6 +517,22 @@ export default class GamekitScene extends Script {
 
       try {
         await customEval((source as any) as string, getES5Context({ dcl }))
+
+        let modulesNotLoaded: string[] = []
+
+        const timeout = sleep(10000).then(() => {
+          modulesNotLoaded = Object.keys(loadingModules).filter((it) => loadingModules[it].isPending)
+        })
+
+        await Promise.race([Promise.all(Object.values(loadingModules)), timeout])
+
+        if (modulesNotLoaded.length > 0) {
+          defaultLogger.warn(
+            `Timed out loading modules!. The scene ${sceneId} may not work correctly. Modules not loaded: ${modulesNotLoaded}`
+          )
+        }
+
+        loadingModules = {}
 
         this.events.push(this.initMessagesFinished())
 
@@ -504,7 +557,7 @@ export default class GamekitScene extends Script {
 
   private setupFpsThrottling(dcl: DecentralandInterface) {
     dcl.subscribe('positionChanged')
-    dcl.onEvent(event => {
+    dcl.onEvent((event) => {
       if (event.type !== 'positionChanged') {
         return
       }
@@ -521,7 +574,7 @@ export default class GamekitScene extends Script {
       const distanceToPlayer = Vector2.Distance(playerPos, scenePos)
 
       let fps: number = 1
-      const insideScene: boolean = this.parcels.some(e => e.x === playerPos.x && e.y === playerPos.y)
+      const insideScene: boolean = this.parcels.some((e) => e.x === playerPos.x && e.y === playerPos.y)
 
       if (insideScene) {
         fps = 30
@@ -595,18 +648,18 @@ export default class GamekitScene extends Script {
     if (classId === CLASS_ID.TRANSFORM) {
       const transform: Transform = JSON.parse(json)
 
-      pbPosition.setX(transform.position.x)
-      pbPosition.setY(transform.position.y)
-      pbPosition.setZ(transform.position.z)
+      pbPosition.setX(Math.fround(transform.position.x))
+      pbPosition.setY(Math.fround(transform.position.y))
+      pbPosition.setZ(Math.fround(transform.position.z))
 
       pbRotation.setX(transform.rotation.x)
       pbRotation.setY(transform.rotation.y)
       pbRotation.setZ(transform.rotation.z)
       pbRotation.setW(transform.rotation.w)
 
-      pbScale.setX(transform.scale.x)
-      pbScale.setY(transform.scale.y)
-      pbScale.setZ(transform.scale.z)
+      pbScale.setX(Math.fround(transform.scale.x))
+      pbScale.setY(Math.fround(transform.scale.y))
+      pbScale.setZ(Math.fround(transform.scale.z))
 
       pbTransform.setPosition(pbPosition)
       pbTransform.setRotation(pbRotation)

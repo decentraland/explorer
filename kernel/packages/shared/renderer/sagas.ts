@@ -71,8 +71,6 @@ function* wrapEngineInstance(_gameInstance: UnityGame) {
 
   _instancedJS
     .then(($) => {
-      // Expose the "kernel" interface as a global object to allow easier inspection
-      global['browserInterface'] = $
       globalThis.globalStore.dispatch(rendererEnabled(_instancedJS))
     })
     .catch((error) => {
@@ -94,13 +92,17 @@ function* handleMessageFromEngine(
       _instancedJS.then(($) => $.onMessage(type, jsonEncodedMessage)).catch((e) => logger.error(e.message))
       return
     }
+
     _instancedJS.then(($) => $.onMessage(type, JSON.parse(jsonEncodedMessage))).catch((e) => logger.error(e.message))
   } else {
     logger.error('Message received without initializing engine', type, jsonEncodedMessage)
   }
 }
 
-namespace DCL {
+export namespace DCL {
+  // This exposes JSEvents emscripten's object
+  export let JSEvents: any
+
   // This function get's called by the engine
   export function EngineStarted() {
     globalThis.globalStore.dispatch(engineStarted())
@@ -114,6 +116,7 @@ namespace DCL {
 // The namespace DCL is exposed to global because the unity template uses it to
 // send the messages
 global['DCL'] = DCL
+;(window as any)['DCL'] = DCL
 
 /** This connects the local game to a native client via WebSocket */
 function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): UnityGame {
@@ -149,6 +152,7 @@ function initializeUnityEditor(webSocketUrl: string, container: HTMLElement): Un
   }
 
   const gameInstance: UnityGame = {
+    Module: null,
     SendMessage(_obj, type, payload) {
       if (ws.readyState === ws.OPEN) {
         const msg = JSON.stringify({ type, payload })

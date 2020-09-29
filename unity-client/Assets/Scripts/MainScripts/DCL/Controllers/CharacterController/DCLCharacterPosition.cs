@@ -1,5 +1,6 @@
 using DCL.Configuration;
 using System;
+using DCL;
 using UnityEngine;
 
 public class DCLCharacterPosition
@@ -14,9 +15,7 @@ public class DCLCharacterPosition
 
     public Vector3 UnityToWorldPosition(Vector3 pos)
     {
-
         return pos + offset;
-
     }
 
     public Vector3 WorldToUnityPosition(Vector3 pos)
@@ -26,31 +25,25 @@ public class DCLCharacterPosition
 
     public Vector3 worldPosition
     {
-        get
-        {
-            return worldPositionValue;
-        }
+        get { return worldPositionValue; }
 
         set
         {
             worldPositionValue = value;
             unityPositionValue = WorldToUnityPosition(worldPositionValue);
-            CheckAndTeleport();
+            CheckAndRepositionWorld();
         }
     }
 
     public Vector3 unityPosition
     {
-        get
-        {
-            return unityPositionValue;
-        }
+        get { return unityPositionValue; }
 
         set
         {
             unityPositionValue = value;
             worldPositionValue = UnityToWorldPosition(unityPositionValue);
-            CheckAndTeleport();
+            CheckAndRepositionWorld();
         }
     }
 
@@ -60,7 +53,7 @@ public class DCLCharacterPosition
         CommonScriptableObjects.playerWorldPosition.Set(Vector3.zero);
     }
 
-    private void CheckAndTeleport()
+    private void CheckAndRepositionWorld()
     {
         bool dirty = false;
         float minDistanceForReposition = PlayerSettings.WORLD_REPOSITION_MINIMUM_DISTANCE;
@@ -91,6 +84,7 @@ public class DCLCharacterPosition
 
             CommonScriptableObjects.playerWorldPosition.Set(worldPositionValue);
             CommonScriptableObjects.playerUnityToWorldOffset.Set(offset);
+            SceneController.i.physicsSyncController.MarkDirty();
         }
     }
 

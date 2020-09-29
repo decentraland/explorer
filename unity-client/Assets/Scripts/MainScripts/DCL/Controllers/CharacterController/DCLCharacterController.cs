@@ -4,13 +4,13 @@ using DCL.Helpers;
 using UnityEngine;
 using System.Collections;
 using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class DCLCharacterController : MonoBehaviour
 {
     public static DCLCharacterController i { get; private set; }
 
-    [Header("Movement")]
-    public float minimumYPosition = 1f;
+    [Header("Movement")] public float minimumYPosition = 1f;
     public float groundCheckExtraDistance = 0.25f;
     public float gravity = -55f;
     public float jumpForce = 12f;
@@ -22,17 +22,13 @@ public class DCLCharacterController : MonoBehaviour
 
     public DCLCharacterPosition characterPosition;
 
-    [Header("Collisions")]
-    public LayerMask groundLayers;
+    [Header("Collisions")] public LayerMask groundLayers;
 
-    [System.NonSerialized]
-    public bool initialPositionAlreadySet = false;
+    [System.NonSerialized] public bool initialPositionAlreadySet = false;
 
-    [System.NonSerialized]
-    public bool characterAlwaysEnabled = true;
+    [System.NonSerialized] public bool characterAlwaysEnabled = true;
 
-    [System.NonSerialized]
-    public CharacterController characterController;
+    [System.NonSerialized] public CharacterController characterController;
 
     new Collider collider;
 
@@ -56,8 +52,7 @@ public class DCLCharacterController : MonoBehaviour
     Quaternion groundLastRotation;
     bool jumpButtonPressed = false;
 
-    [Header("InputActions")]
-    public InputAction_Hold jumpAction;
+    [Header("InputActions")] public InputAction_Hold jumpAction;
     public InputAction_Hold sprintAction;
 
     public Vector3 moveVelocity;
@@ -71,6 +66,13 @@ public class DCLCharacterController : MonoBehaviour
 
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
+
+
+    // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake
+    public DCL.Models.DecentralandEntity avatarReference { get; private set; }
+    public DCL.Models.DecentralandEntity firstPersonCameraReference  { get; private set; }
+    [SerializeField] private GameObject avatarGameObject;
+    [SerializeField] private GameObject firstPersonCameraGameObject;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
@@ -108,6 +110,13 @@ public class DCLCharacterController : MonoBehaviour
 
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
+
+        if (avatarGameObject == null || firstPersonCameraGameObject == null)
+        {
+            throw new System.Exception("Both the avatar and first person camera game objects must be set.");
+        }
+        avatarReference = new DCL.Models.DecentralandEntity { gameObject = avatarGameObject };
+        firstPersonCameraReference = new DCL.Models.DecentralandEntity { gameObject = firstPersonCameraGameObject };
     }
 
     private void SuscribeToInput()
@@ -159,6 +168,7 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = characterPosition.worldPosition;
         characterPosition.worldPosition = newPosition;
         transform.position = characterPosition.unityPosition;
+        SceneController.i.physicsSyncController.MarkDirty();
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
         CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
@@ -294,7 +304,12 @@ public class DCLCharacterController : MonoBehaviour
         }
 
         if (characterController.enabled)
+        {
+            //NOTE(Brian): Transform has to be in sync before the Move call, otherwise this call
+            //             will reset the character controller to its previous position.
+            SceneController.i.physicsSyncController.Sync();
             characterController.Move(velocity * deltaTime);
+        }
 
         SetPosition(characterPosition.UnityToWorldPosition(transform.position));
 
@@ -323,12 +338,16 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResetGround()
     {
+        if(isOnMovingPlatform)
+            CommonScriptableObjects.playerIsOnMovingPlatform.Set(false);
+
         isOnMovingPlatform = false;
         groundTransform = null;
         movingPlatformSpeed = 0;
     }
 
     Vector3 lastLocalGroundPosition;
+
     void CheckGround()
     {
         if (groundTransform == null)
@@ -336,6 +355,7 @@ public class DCLCharacterController : MonoBehaviour
 
         if (isOnMovingPlatform)
         {
+            Physics.SyncTransforms();
             //NOTE(Brian): This should move the character with the moving platform
             Vector3 newGroundWorldPos = groundTransform.TransformPoint(lastLocalGroundPosition);
             movingPlatformSpeed = Vector3.Distance(newGroundWorldPos, transform.position);
@@ -355,6 +375,8 @@ public class DCLCharacterController : MonoBehaviour
                     && groundHasMoved)
                 {
                     isOnMovingPlatform = true;
+                    CommonScriptableObjects.playerIsOnMovingPlatform.Set(true);
+                    Physics.SyncTransforms();
                     lastLocalGroundPosition = groundTransform.InverseTransformPoint(transform.position);
                 }
             }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using Cinemachine;
 
 namespace DCL
 {
@@ -21,6 +20,8 @@ namespace DCL
         public Dictionary<GameObject, PoolableObject> poolables = new Dictionary<GameObject, PoolableObject>();
         public HashSet<PoolableObject> poolableValues = new HashSet<PoolableObject>();
 
+        public event System.Action OnGet;
+
         public bool HasPoolable(PoolableObject poolable)
         {
             //NOTE(Brian): The only poolableValues use is this. Using ContainsValue in a Dictionary is slow as hell.
@@ -29,6 +30,9 @@ namespace DCL
 
         public PoolableObject GetPoolable(GameObject gameObject)
         {
+            if (gameObject == null)
+                return null;
+
             if (poolables.ContainsKey(gameObject))
             {
                 return poolables[gameObject];
@@ -210,6 +214,7 @@ namespace DCL
                 return null;
             }
 
+            OnGet?.Invoke();
             return pool.Get();
         }
 

@@ -5,7 +5,7 @@ import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { SceneJsonData } from 'shared/types'
 import { reportScenesFromTiles } from 'shared/atlas/actions'
-import { getSceneNameFromAtlasState, postProcessSceneName } from 'shared/atlas/selectors'
+import { getSceneNameFromAtlasState, postProcessSceneName, getPoiTiles } from 'shared/atlas/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -54,10 +54,20 @@ export async function fetchHotScenes(): Promise<HotSceneInfoRaw[]> {
 }
 
 export async function reportHotScenes() {
-  const hotScenes = await fetchHotScenes()
+  const hotScenes = (await fetchHotScenes()).filter(
+    (scene) =>
+      globalThis.globalStore.getState().atlas.tileToScene[scene.baseCoord] &&
+      globalThis.globalStore.getState().atlas.tileToScene[scene.baseCoord].type !== 7 // NOTE: filter roads
+  )
 
-  globalThis.globalStore.dispatch(reportScenesFromTiles(hotScenes.map((scene) => scene.baseCoord)))
-  window.unityInterface.UpdateHotScenesList(hotScenes.map((scene) => hotSceneInfoFromRaw(scene)))
+  // NOTE: we report POI as hotscenes for now, approach should change in next iteration
+  const pois = await fetchPOIsAsHotSceneInfoRaw()
+  const report = hotScenes.concat(
+    pois.filter((poi) => hotScenes.filter((scene) => scene.baseCoord === poi.baseCoord).length === 0)
+  )
+
+  globalThis.globalStore.dispatch(reportScenesFromTiles(report.map((scene) => scene.baseCoord)))
+  window.unityInterface.UpdateHotScenesList(report.map((scene) => hotSceneInfoFromRaw(scene)))
 }
 
 function countUsers(a: HotSceneInfoRaw) {
@@ -66,8 +76,10 @@ function countUsers(a: HotSceneInfoRaw) {
 
 async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<string, HotSceneInfoRaw>) {
   const tiles =
-    candidate.layer.usersParcels?.filter((value) => value[0] && value[1]).map((value) => `${value[0]},${value[1]}`) ??
-    []
+    candidate.layer.usersParcels
+      // tslint:disable:strict-type-predicates
+      ?.filter((value) => typeof value[0] !== 'undefined' && typeof value[1] !== 'undefined')
+      .map((value) => `${value[0]},${value[1]}`) ?? []
 
   const scenesId = await fetchSceneIds(tiles)
 
@@ -100,11 +112,8 @@ function createHotSceneInfoRaw(
   baseCoord: string,
   sceneJsonData: SceneJsonData | undefined
 ): HotSceneInfoRaw {
-  const sceneName =
-    getSceneNameFromAtlasState(sceneJsonData) ?? globalThis.globalStore.getState().atlas.tileToScene[baseCoord].name
-
   return {
-    name: postProcessSceneName(sceneName),
+    name: getSceneName(baseCoord, sceneJsonData),
     baseCoord: baseCoord,
     realmsInfo: [createRealmInfo(candidate, 1)]
   }
@@ -119,6 +128,12 @@ function createRealmInfo(candidate: Candidate, usersCount: number): RealmInfo {
   }
 }
 
+function getSceneName(baseCoord: string, sceneJsonData: SceneJsonData | undefined): string {
+  const sceneName =
+    getSceneNameFromAtlasState(sceneJsonData) ?? globalThis.globalStore.getState().atlas.tileToScene[baseCoord]?.name
+  return postProcessSceneName(sceneName)
+}
+
 function hotSceneInfoFromRaw(hotSceneInfoRaw: HotSceneInfoRaw): HotSceneInfo {
   const baseCoord = hotSceneInfoRaw.baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
   return {
@@ -126,4 +141,18 @@ function hotSceneInfoFromRaw(hotSceneInfoRaw: HotSceneInfoRaw): HotSceneInfo {
     usersTotalCount: countUsers(hotSceneInfoRaw),
     realms: hotSceneInfoRaw.realmsInfo
   }
+}
+
+async function fetchPOIsAsHotSceneInfoRaw(): Promise<HotSceneInfoRaw[]> {
+  const tiles = getPoiTiles(globalThis.globalStore.getState())
+  const scenesId = (await fetchSceneIds(tiles)).filter((id) => id !== null) as string[]
+  const scenesLand = (await fetchSceneJson(scenesId)).filter((land) => land.sceneJsonData)
+
+  return scenesLand.map((land) => {
+    return {
+      name: getSceneName(land.sceneJsonData.scene.base, land.sceneJsonData),
+      baseCoord: land.sceneJsonData.scene.base,
+      realmsInfo: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0 }]
+    }
+  })
 }

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 #if !WINDOWS_UWP
 using System.Threading;
 #endif
@@ -149,6 +150,8 @@ namespace UnityGLTF
         protected ILoader _loader;
         protected bool _isRunning = false;
 
+        public string id;
+
         struct NodeId_Like
         {
             public int Id;
@@ -172,13 +175,15 @@ namespace UnityGLTF
         /// <param name="gltfFileName">glTF file relative to data loader path</param>
         /// <param name="externalDataLoader">Loader to load external data references</param>
         /// <param name="asyncCoroutineHelper">Helper to load coroutines on a seperate thread</param>
-        public GLTFSceneImporter(string gltfFileName, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper) : this(externalDataLoader, asyncCoroutineHelper)
+        public GLTFSceneImporter(string id, string gltfFileName, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper) : this(externalDataLoader, asyncCoroutineHelper)
         {
             _gltfFileName = gltfFileName;
+            this.id = string.IsNullOrEmpty(id) ? gltfFileName : id;
         }
 
-        public GLTFSceneImporter(GLTFRoot rootNode, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper, Stream gltfStream = null) : this(externalDataLoader, asyncCoroutineHelper)
+        public GLTFSceneImporter(string id, GLTFRoot rootNode, ILoader externalDataLoader, AsyncCoroutineHelper asyncCoroutineHelper, Stream gltfStream = null) : this(externalDataLoader, asyncCoroutineHelper)
         {
+            this.id = id;
             _gltfRoot = rootNode;
             _loader = externalDataLoader;
             if (gltfStream != null)
@@ -220,8 +225,6 @@ namespace UnityGLTF
         {
             get { return _lastLoadedScene; }
         }
-
-        public Transform enparentTarget;
 
         public static System.Action<float> OnPerformanceFinish;
 
@@ -497,7 +500,7 @@ namespace UnityGLTF
                 }
             }
 
-            if ((image.Uri == null || !PersistentAssetCache.ImageCacheByUri.ContainsKey(image.Uri)) && _assetCache.ImageStreamCache[sourceId] == null)
+            if ((image.Uri == null || !PersistentAssetCache.HasImage(image.Uri, id)) && _assetCache.ImageStreamCache[sourceId] == null)
             {
                 // we only load the streams if not a base64 uri, meaning the data is in the uri
                 if (image.Uri != null && !URIHelper.IsBase64Uri(image.Uri))
@@ -665,14 +668,15 @@ namespace UnityGLTF
                 }
                 else
                 {
-                    if (PersistentAssetCache.StreamCacheByUri.ContainsKey(buffer.Uri))
+                    if (PersistentAssetCache.HasBuffer(buffer.Uri, id))
                     {
-                        bufferDataStream = PersistentAssetCache.StreamCacheByUri[buffer.Uri].stream;
+                        bufferDataStream = PersistentAssetCache.GetBuffer(buffer.Uri, id).stream;
                     }
                     else
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
+                        PersistentAssetCache.AddBuffer(buffer.Uri, id, new RefCountedStreamData(buffer.Uri, bufferDataStream));
                     }
                 }
 
@@ -715,8 +719,8 @@ namespace UnityGLTF
                 {
                     string uri = image.Uri;
 
-                    byte[] bufferData;
-                    URIHelper.TryParseBase64(uri, out bufferData);
+                    URIHelper.TryParseBase64(uri, out byte[] bufferData);
+
                     if (bufferData != null)
                     {
                         stream = new MemoryStream(bufferData, 0, bufferData.Length, false, true);
@@ -1111,24 +1115,83 @@ namespace UnityGLTF
 
             for (var ci = 0; ci < channelCount; ++ci)
             {
-                // copy all key frames data to animation curve and add it to the clip
-                AnimationCurve curve = new AnimationCurve(keyframes[ci]);
+                var name = propertyNames[ci];
 
                 // For cubic spline interpolation, the inTangents and outTangents are already explicitly defined.
                 // For the rest, set them appropriately.
                 if (mode != InterpolationType.CUBICSPLINE)
                 {
                     for (var i = 0; i < keyframes[ci].Length; i++)
-                    {
-                        SetTangentMode(curve, keyframes[ci], i, mode);
-                    }
+                        SetTangentMode(keyframes[ci], i, mode);
                 }
+
+                var optimizedKeyframes = OptimizeKeyFrames(keyframes[ci]);
+
+                // copy all key frames data to animation curve and add it to the clip
+                AnimationCurve curve = new AnimationCurve(optimizedKeyframes);
 
                 clip.SetCurve(relativePath, curveType, propertyNames[ci], curve);
             }
         }
 
-        private static void SetTangentMode(AnimationCurve curve, Keyframe[] keyframes, int keyframeIndex, InterpolationType interpolation)
+        private static float GetDiffAngle(float a1, float a2)
+        {
+            return Mathf.PI - Mathf.Abs(Mathf.Abs(a1 - a2) - Mathf.PI);
+        }
+
+        public static Keyframe[] OptimizeKeyFrames(Keyframe[] rawKeyframes)
+        {
+            if (rawKeyframes.Length <= 2)
+                return rawKeyframes;
+
+            List<Keyframe> result = new List<Keyframe>(2);
+
+            result.Add(rawKeyframes[0]);
+
+            const float TANGENT_THRESHOLD = 0.1f;
+
+            for (int i = 1; i < rawKeyframes.Length - 1; i++)
+            {
+                Keyframe nextKey = rawKeyframes[i + 1];
+                Keyframe prevKey = rawKeyframes[i - 1];
+                Keyframe curKey = rawKeyframes[i];
+
+                float angCurToNext = Mathf.Atan2(nextKey.value - curKey.value, nextKey.time - curKey.time);
+                float angCurToPrev = Mathf.Atan2(curKey.value - prevKey.value, curKey.time - prevKey.time);
+
+                float curOutAngle = Mathf.Atan(curKey.outTangent);
+                float curInAngle = Mathf.Atan(curKey.inTangent);
+
+                //NOTE(Brian): Collinearity tests. Small value = more collinear.
+
+                //NOTE(Brian): curr keyframe out tangent point against path towards the next keyframe.
+                float curOutDiff = GetDiffAngle(curOutAngle, angCurToNext);
+
+                //NOTE(Brian): curr keyframe in tangent point against path towards the prev keyframe.
+                float curInDiff = GetDiffAngle(curInAngle, angCurToPrev);
+
+                //NOTE(Brian): next keyframe in tangent point against path towards the curr keyframe.
+                float nextInDiff = GetDiffAngle(Mathf.Atan(nextKey.inTangent), angCurToNext);
+
+                //NOTE(Brian): prev keyframe out tangent point against path towards the curr keyframe.
+                float prevOutDiff = GetDiffAngle(Mathf.Atan(prevKey.outTangent), angCurToPrev);
+
+                //NOTE(Brian): test if both tangents for the current keyframe are collinear
+                //             (i.e. don't cull broken curves).
+                float sameDiff = GetDiffAngle(curInAngle, curOutAngle);
+
+                float tangentDeviation = Mathf.Abs(curOutDiff + curInDiff + nextInDiff + prevOutDiff + sameDiff);
+
+                if (tangentDeviation > TANGENT_THRESHOLD)
+                    result.Add(curKey);
+            }
+
+            result.Add(rawKeyframes[rawKeyframes.Length - 1]);
+
+            return result.ToArray();
+        }
+
+        private static void SetTangentMode(Keyframe[] keyframes, int keyframeIndex, InterpolationType interpolation)
         {
             var key = keyframes[keyframeIndex];
 
@@ -1147,10 +1210,6 @@ namespace UnityGLTF
                     key.outTangent = float.PositiveInfinity;
                     break;
             }
-
-            // NOTE (Pravs): Khronos GLTFLoader uses curve.MoveKey(keyframeIndex, key) instead but it has problems with same-time keyframes.
-            // Beware that accessing 'curve.keys.Length' in this method generates a memory build crash with complex animations...
-            curve.AddKey(key.time, key.value);
         }
 
         private static float GetCurveKeyframeLeftLinearSlope(Keyframe[] keyframes, int keyframeIndex)
@@ -1229,7 +1288,6 @@ namespace UnityGLTF
                 yield return ConstructMaterialImageBuffers(gltfMaterial);
             }
 
-
             for (int i = 0; i < nodesWithMeshes.Count; i++)
             {
                 NodeId_Like nodeId = nodesWithMeshes[i];
@@ -1241,13 +1299,13 @@ namespace UnityGLTF
                     skin: node.Skin != null ? node.Skin.Value : null);
             }
 
-
             if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
             {
                 // create the AnimationClip that will contain animation data
                 // NOTE (Pravs): Khronos GLTFLoader sets the animationComponent as 'enabled = false' but we don't do that so that we can find the component when needed.
                 Animation animation = sceneObj.AddComponent<Animation>();
                 animation.playAutomatically = true;
+                animation.cullingType = AnimationCullingType.AlwaysAnimate;
 
                 for (int i = 0; i < _gltfRoot.Animations.Count; ++i)
                 {
@@ -1493,10 +1551,15 @@ namespace UnityGLTF
                 bindPoses[i] = gltfBindPoses[i].ToMatrix4x4Convert();
             }
 
-            renderer.rootBone = _assetCache.NodeCache[skeletonId].transform;
             curMesh.bindposes = bindPoses;
             renderer.bones = bones;
+            renderer.rootBone = _assetCache.NodeCache[skeletonId].transform;
+
+            if (!skeletonGameObjects.Contains(renderer.rootBone.gameObject))
+                skeletonGameObjects.Add(renderer.rootBone.gameObject);
         }
+
+        HashSet<GameObject> skeletonGameObjects = new HashSet<GameObject>();
 
         private BoneWeight[] CreateBoneWeightArray(Vector4[] joints, Vector4[] weights, int vertCount)
         {
@@ -2361,9 +2424,9 @@ namespace UnityGLTF
 
                 RefCountedTextureData source = null;
 
-                if (image.Uri != null && PersistentAssetCache.ImageCacheByUri.ContainsKey(image.Uri))
+                if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
                 {
-                    source = PersistentAssetCache.ImageCacheByUri[image.Uri];
+                    source = PersistentAssetCache.GetImage(image.Uri, id);
                     _assetCache.ImageCache[sourceId] = source.Texture;
                 }
                 else
@@ -2373,7 +2436,7 @@ namespace UnityGLTF
 
                     if (image.Uri != null && addImagesToPersistentCaching)
                     {
-                        PersistentAssetCache.ImageCacheByUri[image.Uri] = source;
+                        PersistentAssetCache.AddImage(image.Uri, id, source);
                     }
                 }
 
@@ -2507,7 +2570,7 @@ namespace UnityGLTF
         protected static string AbsoluteFilePath(string gltfPath)
         {
             var fileName = Path.GetFileName(gltfPath);
-            var lastIndex = gltfPath.IndexOf(fileName);
+            var lastIndex = gltfPath.IndexOf(fileName, StringComparison.Ordinal);
             var partialPath = gltfPath.Substring(0, lastIndex);
             return partialPath;
         }

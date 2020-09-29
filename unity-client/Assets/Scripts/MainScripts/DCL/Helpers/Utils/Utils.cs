@@ -5,7 +5,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DCL.Configuration;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
@@ -87,7 +89,6 @@ namespace DCL.Helpers
             t.offsetMax = Vector2.one;
             t.sizeDelta = Vector2.zero;
             t.anchoredPosition = Vector2.zero;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void SetToCentered(this RectTransform t)
@@ -97,7 +98,6 @@ namespace DCL.Helpers
             t.anchorMax = Vector2.one * 0.5f;
             t.offsetMax = Vector2.one * 0.5f;
             t.sizeDelta = Vector2.one * 100;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void SetToBottomLeft(this RectTransform t)
@@ -107,7 +107,6 @@ namespace DCL.Helpers
             t.anchorMax = Vector2.zero;
             t.offsetMax = Vector2.zero;
             t.sizeDelta = Vector2.one * 100;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void ForceUpdateLayout(this RectTransform rt, bool delayed = true)
@@ -120,13 +119,37 @@ namespace DCL.Helpers
             else
             {
                 Utils.InverseTransformChildTraversal<RectTransform>(
-                (x) =>
-                {
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-                },
-                rt);
+                    (x) => { Utils.ForceRebuildLayoutImmediate(x); },
+                    rt);
+            }
+        }
 
-                LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+
+
+        /// <summary>
+        /// Reimplementation of the LayoutRebuilder.ForceRebuildLayoutImmediate() function (Unity UI API) for make it more performant.
+        /// </summary>
+        /// <param name="rectTransformRoot">Root from which to rebuild.</param>
+        public static void ForceRebuildLayoutImmediate(RectTransform rectTransformRoot)
+        {
+            if (rectTransformRoot == null) return;
+
+            // NOTE(Santi): It seems to be very much cheaper to execute the next instructions manually than execute directly the function
+            //              'LayoutRebuilder.ForceRebuildLayoutImmediate()', that theorically already contains these instructions.
+            var layoutElements = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutElement), true).ToList();
+            layoutElements.RemoveAll(e => (e is Behaviour && !((Behaviour)e).isActiveAndEnabled) || e is TextMeshProUGUI);
+            foreach (var layoutElem in layoutElements)
+            {
+                (layoutElem as ILayoutElement).CalculateLayoutInputHorizontal();
+                (layoutElem as ILayoutElement).CalculateLayoutInputVertical();
+            }
+
+            var layoutControllers = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutController), true).ToList();
+            layoutControllers.RemoveAll(e => e is Behaviour && !((Behaviour)e).isActiveAndEnabled);
+            foreach (var layoutCtrl in layoutControllers)
+            {
+                (layoutCtrl as ILayoutController).SetLayoutHorizontal();
+                (layoutCtrl as ILayoutController).SetLayoutVertical();
             }
         }
 
@@ -135,13 +158,8 @@ namespace DCL.Helpers
             yield return null;
 
             Utils.InverseTransformChildTraversal<RectTransform>(
-            (x) =>
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(x);
-            },
-            rt);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+                (x) => { Utils.ForceRebuildLayoutImmediate(x); },
+                rt);
         }
 
 
@@ -274,32 +292,13 @@ namespace DCL.Helpers
         public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
-            System.Action<UnityWebRequest> OnSuccessInternal =
-                (request) =>
-                {
-                    var texture = DownloadHandlerTexture.GetContent(request);
-                    OnSuccess?.Invoke(texture);
-                };
-
-            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal, OnFail);
-        }
-
-        public static IEnumerator FetchWrappedTextureAsset(string url, Action<IWrappedTextureAsset> OnSuccess,
-            WrappedTextureMaxSize maxTextureSize = WrappedTextureMaxSize.DONT_RESIZE)
-        {
-            string contentType = null;
-            byte[] bytes = null;
-
-            yield return Utils.FetchAsset(url, UnityWebRequest.Get(url), (request) =>
+            void SuccessInternal(UnityWebRequest request)
             {
-                contentType = request.GetResponseHeader("Content-Type");
-                bytes = request.downloadHandler.data;
-            });
-
-            if (contentType != null && bytes != null)
-            {
-                yield return WrappedTextureAssetFactory.Create(contentType, bytes, maxTextureSize, OnSuccess);
+                var texture = DownloadHandlerTexture.GetContent(request);
+                OnSuccess?.Invoke(texture);
             }
+
+            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), SuccessInternal, OnFail);
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
@@ -406,10 +405,11 @@ namespace DCL.Helpers
         public static Vector2Int WorldToGridPosition(Vector3 worldPosition)
         {
             return new Vector2Int(
-                (int)Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
-                (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
+                (int) Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
+                (int) Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
             );
         }
+
         public static Vector2 WorldToGridPositionUnclamped(Vector3 worldPosition)
         {
             return new Vector2(
@@ -445,6 +445,7 @@ namespace DCL.Helpers
             {
                 return true;
             }
+
             return false;
         }
 
@@ -609,6 +610,5 @@ namespace DCL.Helpers
 
             return value;
         }
-
     }
 }

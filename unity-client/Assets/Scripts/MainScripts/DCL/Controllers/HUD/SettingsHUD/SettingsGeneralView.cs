@@ -11,7 +11,7 @@ namespace DCL.SettingsHUD
         public const string TEXT_OFF = "OFF";
 
         public SpinBoxPresetted qualityPresetSpinBox = null;
-        public SpinBoxPresetted textureResSpinBox = null;
+        public SpinBoxPresetted baseResSpinBox = null;
         public SpinBoxPresetted shadowResSpinBox = null;
         public Toggle soundToggle = null;
         public Toggle colorGradingToggle = null;
@@ -22,10 +22,12 @@ namespace DCL.SettingsHUD
         public Slider antiAliasingSlider = null;
         public Slider renderingScaleSlider = null;
         public Slider drawDistanceSlider = null;
+        public Slider shadowDistanceSlider = null;
         public TextMeshProUGUI mouseSensitivityValueLabel = null;
         public TextMeshProUGUI antiAliasingValueLabel = null;
         public TextMeshProUGUI renderingScaleValueLabel = null;
         public TextMeshProUGUI drawDistanceValueLabel = null;
+        public TextMeshProUGUI shadowDistanceValueLabel = null;
 
         private DCL.SettingsData.QualitySettings currentQualitySetting;
         private DCL.SettingsData.GeneralSettings currentGeneralSetting;
@@ -46,9 +48,9 @@ namespace DCL.SettingsHUD
                 shouldSetAsCustom = false;
             });
 
-            textureResSpinBox.onValueChanged.AddListener(value =>
+            baseResSpinBox.onValueChanged.AddListener(value =>
             {
-                tempQualitySetting.textureQuality = (DCL.SettingsData.QualitySettings.TextureQuality)value;
+                tempQualitySetting.baseResolution = (DCL.SettingsData.QualitySettings.BaseResolution)value;
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
@@ -137,6 +139,14 @@ namespace DCL.SettingsHUD
                 isDirty = true;
             });
 
+            shadowDistanceSlider.onValueChanged.AddListener(value =>
+            {
+                tempQualitySetting.shadowDistance = value;
+                shadowDistanceValueLabel.text = value.ToString();
+                shouldSetAsCustom = true;
+                isDirty = true;
+            });
+
         }
 
         void OnEnable()
@@ -198,7 +208,7 @@ namespace DCL.SettingsHUD
 
         void UpdateQualitySettings()
         {
-            textureResSpinBox.value = (int)tempQualitySetting.textureQuality;
+            baseResSpinBox.value = (int)tempQualitySetting.baseResolution;
             shadowResSpinBox.value = (int)Mathf.Log((int)tempQualitySetting.shadowResolution, 2) - 8;
             soundToggle.isOn = tempGeneralSetting.sfxVolume > 0 ? true : false;
             colorGradingToggle.isOn = tempQualitySetting.colorGrading;
@@ -209,6 +219,8 @@ namespace DCL.SettingsHUD
             antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
+            shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
+
         }
 
         public void Apply()

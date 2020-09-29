@@ -8,13 +8,11 @@ public class UIVisualTestsBase : VisualTestsBase
 {
     protected string screenSpaceId;
 
-    protected override IEnumerator SetUp()
-    {
-        yield break;
-    }
-
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
+        VisualTestHelpers.snapshotIndex = 0;
+        VisualTestHelpers.currentTestName = testName;
+
         yield return InitScene();
 
         //NOTE(Brian): If we don't wait a frame, RenderingController.Awake sets the rendering state back to false.
@@ -50,8 +48,7 @@ public class UIVisualTestsBase : VisualTestsBase
         // Creation
         var component = scene.SharedComponentCreate(
             componentId,
-            "material",
-            (int) classId
+            (int)classId
         ) as SharedComponentType;
         yield return component.routine;
 

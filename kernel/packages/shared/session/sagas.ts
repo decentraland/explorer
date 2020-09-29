@@ -1,4 +1,4 @@
-import { put, takeLatest, call } from 'redux-saga/effects'
+import { put, takeLatest, call, delay, select } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
@@ -8,10 +8,16 @@ import { Authenticator } from 'dcl-crypto'
 import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
 
 import { createLogger } from 'shared/logger'
+import { referUser, initializeReferral } from 'shared/referral'
 import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { AUTH_ERROR_LOGGED_OUT, NETWORK_MISMATCH } from 'shared/loading/types'
+import {
+  AUTH_ERROR_LOGGED_OUT,
+  NETWORK_MISMATCH,
+  awaitingUserSignature,
+  AWAITING_USER_SIGNATURE
+} from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
@@ -26,9 +32,11 @@ const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
   yield call(initializeTos)
+  yield call(initializeReferral)
 
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
+  yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
 
 function* initializeTos() {
@@ -53,6 +61,15 @@ function* initializeTos() {
   }
 }
 
+function* scheduleAwaitingSignaturePrompt() {
+  yield delay(10000)
+  const isStillWaiting = yield select((state) => !state.session?.initialized)
+
+  if (isStillWaiting) {
+    showAwaitingSignaturePrompt(true)
+  }
+}
+
 function* login() {
   let userId: string
   let identity: ExplorerIdentity
@@ -73,7 +90,9 @@ function* login() {
 
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
+        yield put(awaitingUserSignature())
         identity = yield createAuthIdentity()
+        showAwaitingSignaturePrompt(false)
         userId = identity.address
 
         setLocalProfile(userId, {
@@ -97,6 +116,7 @@ function* login() {
 
     if (identity.hasConnectedWeb3) {
       identifyUser(userId)
+      referUser(identity)
     }
   } else {
     logger.log(`Using test user.`)
@@ -215,10 +235,18 @@ async function createAuthIdentity() {
 }
 
 function showEthSignAdvice(show: boolean) {
-  const element = document.getElementById('eth-sign-advice')
+  showElementById('eth-sign-advice', show)
+}
+
+function showElementById(id: string, show: boolean) {
+  const element = document.getElementById(id)
   if (element) {
     element.style.display = show ? 'block' : 'none'
   }
+}
+
+function showAwaitingSignaturePrompt(show: boolean) {
+  showElementById('check-wallet-prompt', show)
 }
 
 function* logout() {

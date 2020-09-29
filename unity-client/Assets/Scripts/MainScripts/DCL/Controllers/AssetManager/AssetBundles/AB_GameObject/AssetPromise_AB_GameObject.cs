@@ -5,7 +5,6 @@ using DCL.Helpers;
 using DCL.Configuration;
 using UnityEngine;
 using System.Collections.Generic;
-using Cinemachine;
 
 namespace DCL
 {
@@ -127,8 +126,7 @@ namespace DCL
 
                 asset.container = null;
 
-                if (subPromise.asset.ownerAssetBundle != null)
-                    subPromise.asset.ownerAssetBundle.Unload(false);
+                AssetPromiseKeeper_AB.i.Forget(subPromise);
 
                 yield break;
             }
@@ -147,6 +145,13 @@ namespace DCL
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
                 yield return MaterialCachingHelper.Process(list, enableRenderers: false, settings.cachingFlags);
 
+                var animators = assetBundleModelGO.GetComponentsInChildren<Animation>(true);
+
+                for (int animIndex = 0; animIndex < animators.Length; animIndex++)
+                {
+                    animators[animIndex].cullingType = AnimationCullingType.AlwaysAnimate;
+                }
+
 #if UNITY_EDITOR
                 assetBundleModelGO.name = subPromise.asset.assetBundleAssetName;
 #endif
@@ -154,16 +159,13 @@ namespace DCL
                 assetBundleModelGO.transform.ResetLocalTRS();
                 yield return null;
             }
-
-            if (subPromise.asset.ownerAssetBundle != null)
-                subPromise.asset.ownerAssetBundle.Unload(false);
         }
 
         protected override Asset_AB_GameObject GetAsset(object id)
         {
             if (settings.forceNewInstance)
             {
-                return ((AssetLibrary_AB_GameObject)library).GetCopyFromOriginal(id);
+                return ((AssetLibrary_AB_GameObject) library).GetCopyFromOriginal(id);
             }
             else
             {
