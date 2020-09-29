@@ -177,14 +177,15 @@ export class BrowserInterface {
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile: Profile = getUserProfile().profile as Profile
-    profile.tutorialStep = data.tutorialStep
-    globalThis.globalStore.dispatch(saveProfileRequest(profile))
-
-    persistCurrentUser({
-      version: profile.version,
-      profile: profileToRendererFormat(profile, getIdentity())
-    })
+    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
+    if (profile) {
+      const profileUpdate: Profile = { ...profile, tutorialStep: data.tutorialStep }
+      globalThis.globalStore.dispatch(saveProfileRequest(profileUpdate))
+      persistCurrentUser({
+        version: profileUpdate.version,
+        profile: profileToRendererFormat(profileUpdate, getIdentity())
+      })
+    }
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
