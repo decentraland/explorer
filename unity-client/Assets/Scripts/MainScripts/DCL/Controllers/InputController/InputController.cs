@@ -276,8 +276,6 @@ public static class InputProcessor
 
     public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers, KeyCode[] modifierKeys)
     {
-        // This method seems to be redundant with the previous one, but in the previous one we don't care about modifiers. 
-        // In this one, we validate that either no modifier keys were pressed (modifierKeys == null), or the requested modifier keys are pressed.
         if (!PassModifierKeys(modifierKeys)) return;
 
         FromKey(action, key, modifiers);
