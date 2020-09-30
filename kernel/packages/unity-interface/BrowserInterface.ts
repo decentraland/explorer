@@ -380,8 +380,8 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
-    // tslint:disable-next-line
     const isSupported =
+      // tslint:disable-next-line
       typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function'
 
     if (!isSupported) {
