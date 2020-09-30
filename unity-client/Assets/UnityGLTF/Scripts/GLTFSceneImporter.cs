@@ -676,7 +676,7 @@ namespace UnityGLTF
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
-                        PersistentAssetCache.AddBuffer(buffer.Uri, id, new RefCountedStreamData(buffer.Uri, bufferDataStream));
+                        PersistentAssetCache.AddBuffer(buffer.Uri, id, bufferDataStream);
                     }
                 }
 
@@ -2432,12 +2432,14 @@ namespace UnityGLTF
                 else
                 {
                     yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-                    string fullId = PersistentAssetCache.GetCacheId(image.Uri, id);
-                    source = new RefCountedTextureData(fullId, _assetCache.ImageCache[sourceId]);
 
-                    if (fullId != null && addImagesToPersistentCaching)
+                    if (addImagesToPersistentCaching)
                     {
-                        PersistentAssetCache.AddImage(fullId, source);
+                        source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
+                    }
+                    else
+                    {
+                        source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
                     }
                 }
 

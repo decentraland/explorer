@@ -22,21 +22,23 @@ namespace UnityGLTF.Cache
         /// </summary>
         /// <param name="uri">The relative or local uri of the image</param>
         /// <param name="idSuffix">A global identifier to prevent collisions in case the local uri between different loaded images is the same</param>
-        /// <param name="refCountedTexture">The texture container representing the cached image</param>
-        public static void AddImage(string uri, string idSuffix, RefCountedTextureData refCountedTexture)
+        /// <param name="texture">The texture to cached image</param>
+        public static RefCountedTextureData AddImage(string uri, string idSuffix, Texture2D texture)
         {
             var key = GetCacheId(uri, idSuffix);
-            ImageCacheByUri[key] = refCountedTexture;
+            ImageCacheByUri[key] = new RefCountedTextureData(key, texture);
+            return ImageCacheByUri[key];
         }
 
         /// <summary>
         /// Add image to persistent cache providing the exact id in which the image can be looked up.
         /// </summary>
-        /// <param name="fullId">The full id as an string</param>
-        /// <param name="refCountedTexture">The texture container representing the cached image</param>
-        public static void AddImage(string fullId, RefCountedTextureData refCountedTexture)
+        /// <param name="fullId">The relative or local uri of the image</param>
+        /// <param name="texture">The texture to cached image</param>
+        public static RefCountedTextureData AddImage(string fullId, Texture2D texture)
         {
-            ImageCacheByUri[fullId] = refCountedTexture;
+            ImageCacheByUri[fullId] = new RefCountedTextureData(fullId, texture);
+            return ImageCacheByUri[fullId];
         }
 
         /// <summary>
@@ -115,10 +117,11 @@ namespace UnityGLTF.Cache
         /// <param name="uri">The relative or local uri of the buffer</param>
         /// <param name="idSuffix">A global identifier to prevent collisions in case the local uri between different loaded buffers is the same</param>
         /// <param name="refCountedStream"></param>
-        public static void AddBuffer(string uri, string idSuffix, RefCountedStreamData refCountedStream)
+        public static RefCountedStreamData AddBuffer(string uri, string idSuffix, Stream refCountedStream)
         {
             var key = GetCacheId(uri, idSuffix);
-            StreamCacheByUri[key] = refCountedStream;
+            StreamCacheByUri[key] = new RefCountedStreamData(key, refCountedStream);
+            return StreamCacheByUri[key];
         }
 
         /// <summary>
