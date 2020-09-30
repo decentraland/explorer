@@ -7,7 +7,6 @@ import {
   VOICE_CHAT_SAMPLE_RATE,
   OPUS_FRAME_SIZE_MS,
   OUTPUT_NODE_BUFFER_SIZE,
-  OUTPUT_NODE_BUFFER_DURATION,
   OPUS_SAMPLES_PER_FRAME,
   INPUT_NODE_BUFFER_SIZE
 } from './constants'
@@ -205,7 +204,6 @@ export class VoiceCommunicator {
         } else {
           if (wasPlaying) {
             this.changePlayingStatus(src, false)
-            this.outputs[src].decodedBuffer.read() // Emptying buffer
           }
         }
       }
@@ -300,8 +298,7 @@ export class VoiceCommunicator {
 
       const answerSdp = parse(answer.sdp!)
 
-      answerSdp.media[0].fmtp[0].config =
-        answerSdp.media[0].fmtp[0].config + ';stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
+      answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
 
       answer.sdp = write(answerSdp)
 
@@ -348,12 +345,11 @@ export class VoiceCommunicator {
 
     const readEncodedBufferLoop = async () => {
       if (this.outputs[src]) {
-        const framesToRead = Math.ceil((OUTPUT_NODE_BUFFER_DURATION * 1.5) / OPUS_FRAME_SIZE_MS)
+        // Leaving this buffer to fill too much causes a great deal of latency, so we leave this as 1 for now. In the future, we should adjust this based
+        // on packet loss or something like that
+        const framesToRead = 1
 
-        const frames = await this.outputs[src].encodedFramesQueue.dequeueItemsWhenAvailable(
-          framesToRead,
-          OUTPUT_NODE_BUFFER_DURATION * 3
-        )
+        const frames = await this.outputs[src].encodedFramesQueue.dequeueItemsWhenAvailable(framesToRead, 2000)
 
         if (frames.length > 0) {
           let stream = this.voiceChatWorkerMain.decodeStreams[src]
