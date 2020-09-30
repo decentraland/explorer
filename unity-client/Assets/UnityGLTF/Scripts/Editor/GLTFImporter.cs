@@ -356,23 +356,15 @@ namespace UnityGLTF
                                 EditorApplication.delayCall += () =>
                                 {
                                     Texture2D[] cachedTextures = PersistentAssetCache.ImageCacheByUri.Values.Select((x) => { return x.Texture; }).ToArray();
+
                                     delayCallsCount--;
+
                                     for (var i = 0; i < textures.Count; ++i)
                                     {
                                         var tex = textures[i];
                                         var materialMaps = texMaterialMap[tex];
-                                        string texPath;
-
-                                        if (!cachedTextures.Contains(tex))
-                                        {
-                                            var texturesRoot = string.Concat(folderName, "/", "Textures/");
-                                            var ext = _useJpgTextures ? ".jpg" : ".png";
-                                            texPath = string.Concat(texturesRoot, tex.name, ext);
-                                        }
-                                        else
-                                        {
-                                            texPath = AssetDatabase.GetAssetPath(tex);
-                                        }
+                                        string texPath = AssetDatabase.GetAssetPath(tex);
+                                        bool cachedTexture = cachedTextures.Contains(tex);
 
                                         var importedTex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
                                         var importer = (TextureImporter) TextureImporter.GetAtPath(texPath);
@@ -382,17 +374,24 @@ namespace UnityGLTF
                                             importer.isReadable = false;
                                             var isNormalMap = true;
 
-                                            foreach (var materialMap in materialMaps)
+                                            if (cachedTexture)
                                             {
-                                                if (materialMap.Material == mat)
+                                                isNormalMap = false;
+                                            }
+                                            else
+                                            {
+                                                foreach (var materialMap in materialMaps)
                                                 {
-                                                    //NOTE(Brian): Only set as normal map if is exclusively
-                                                    //             used for that.
-                                                    //             We don't want DXTnm in color textures.
-                                                    if (!materialMap.IsNormalMap)
-                                                        isNormalMap = false;
+                                                    if (materialMap.Material == mat)
+                                                    {
+                                                        //NOTE(Brian): Only set as normal map if is exclusively
+                                                        //             used for that.
+                                                        //             We don't want DXTnm in color textures.
+                                                        if (!materialMap.IsNormalMap)
+                                                            isNormalMap = false;
 
-                                                    newMat.SetTexture(materialMap.Property, importedTex);
+                                                        newMat.SetTexture(materialMap.Property, importedTex);
+                                                    }
                                                 }
                                             }
 
@@ -408,6 +407,7 @@ namespace UnityGLTF
                                             }
 
                                             importer.crunchedCompression = true;
+                                            importer.compressionQuality = 100;
                                             importer.textureCompression = TextureImporterCompression.CompressedHQ;
                                             importer.SaveAndReimport();
                                         }
@@ -458,7 +458,6 @@ namespace UnityGLTF
                 throw new Exception(e.Message + "\n" + e.StackTrace, e);
             }
 
-#if UNITY_2017_3_OR_NEWER
             // Set main asset
             ctx.AddObjectToAsset("main asset", gltfScene);
 
@@ -476,16 +475,6 @@ namespace UnityGLTF
             }
 
             ctx.SetMainObject(gltfScene);
-#else
-            // Set main asset
-            ctx.SetMainAsset("main asset", gltfScene);
-
-            // Add meshes
-            foreach (var mesh in meshes)
-            {
-                ctx.AddSubAsset("mesh " + mesh.name, mesh);
-            }
-#endif
         }
 
         public static System.Action<GLTFRoot> OnGLTFRootIsConstructed;
