@@ -62,6 +62,7 @@ export class VoiceCommunicator {
   private context: AudioContext
   private outputGainNode: GainNode
   private outputStreamNode?: MediaStreamAudioDestinationNode
+  private loopbackConnections?: { src: RTCPeerConnection; dst: RTCPeerConnection }
   private input?: VoiceInput
   private voiceChatWorkerMain: VoiceChatCodecWorkerMain
   private outputs: Record<string, VoiceOutput> = {}
@@ -92,7 +93,7 @@ export class VoiceCommunicator {
       // Workaround for echo cancellation. See: https://bugs.chromium.org/p/chromium/issues/detail?id=687574#c71
       this.outputStreamNode = this.context.createMediaStreamDestination()
       this.outputGainNode.connect(this.outputStreamNode)
-      this.createRTCLoopbackConnection()
+      this.loopbackConnections = this.createRTCLoopbackConnection()
     } else {
       this.outputGainNode.connect(this.context.destination)
     }
@@ -104,40 +105,6 @@ export class VoiceCommunicator {
     this.voiceChatWorkerMain = new VoiceChatCodecWorkerMain()
 
     this.startOutputsExpiration()
-  }
-
-  createRTCLoopbackConnection(): { src: RTCPeerConnection; dst: RTCPeerConnection } {
-    const src = new RTCPeerConnection()
-    const dst = new RTCPeerConnection()
-
-    ;(async () => {
-      src.onicecandidate = (e) => e.candidate && dst.addIceCandidate(new RTCIceCandidate(e.candidate))
-      dst.onicecandidate = (e) => e.candidate && src.addIceCandidate(new RTCIceCandidate(e.candidate))
-
-      dst.ontrack = (e) => (this.options.loopbackAudioElement!.srcObject = e.streams[0])
-
-      this.outputStreamNode!.stream.getTracks().forEach((track) => src.addTrack(track, this.outputStreamNode!.stream))
-
-      const offer = await src.createOffer()
-
-      await src.setLocalDescription(offer)
-
-      await dst.setRemoteDescription(offer)
-      const answer = await dst.createAnswer()
-
-      const answerSdp = parse(answer.sdp!)
-
-      answerSdp.media[0].fmtp[0].config =
-        answerSdp.media[0].fmtp[0].config + ';stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
-
-      answer.sdp = write(answerSdp)
-
-      await dst.setLocalDescription(answer)
-
-      await src.setRemoteDescription(answer)
-    })().catch((e) => defaultLogger.error('Error creating loopback connection', e))
-
-    return { src, dst }
   }
 
   public setSelfId(selfId: string) {
@@ -290,6 +257,71 @@ export class VoiceCommunicator {
 
   pause() {
     this.pauseRequested = true
+  }
+
+  private createRTCLoopbackConnection(
+    currentRetryNumber: number = 0
+  ): { src: RTCPeerConnection; dst: RTCPeerConnection } {
+    const src = new RTCPeerConnection()
+    const dst = new RTCPeerConnection()
+
+    let retryNumber = currentRetryNumber
+
+    ;(async () => {
+      // When having an error, we retry in a couple of seconds. Up to 10 retries.
+      src.onconnectionstatechange = (e) => {
+        if (
+          src.connectionState === 'closed' ||
+          src.connectionState === 'disconnected' ||
+          (src.connectionState === 'failed' && currentRetryNumber < 10)
+        ) {
+          // Just in case, we close connections to free resources
+          this.closeLoopbackConnections()
+          this.loopbackConnections = this.createRTCLoopbackConnection(retryNumber)
+        } else if (src.connectionState === 'connected') {
+          // We reset retry number when the connection succeeds
+          retryNumber = 0
+        }
+      }
+
+      src.onicecandidate = (e) => e.candidate && dst.addIceCandidate(new RTCIceCandidate(e.candidate))
+      dst.onicecandidate = (e) => e.candidate && src.addIceCandidate(new RTCIceCandidate(e.candidate))
+
+      dst.ontrack = (e) => (this.options.loopbackAudioElement!.srcObject = e.streams[0])
+
+      this.outputStreamNode!.stream.getTracks().forEach((track) => src.addTrack(track, this.outputStreamNode!.stream))
+
+      const offer = await src.createOffer()
+
+      await src.setLocalDescription(offer)
+
+      await dst.setRemoteDescription(offer)
+      const answer = await dst.createAnswer()
+
+      const answerSdp = parse(answer.sdp!)
+
+      answerSdp.media[0].fmtp[0].config =
+        answerSdp.media[0].fmtp[0].config + ';stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
+
+      answer.sdp = write(answerSdp)
+
+      await dst.setLocalDescription(answer)
+
+      await src.setRemoteDescription(answer)
+    })().catch((e) => {
+      defaultLogger.error('Error creating loopback connection', e)
+    })
+
+    return { src, dst }
+  }
+
+  private closeLoopbackConnections() {
+    if (this.loopbackConnections) {
+      const { src, dst } = this.loopbackConnections
+
+      src.close()
+      dst.close()
+    }
   }
 
   private disconnectInput() {
