@@ -40,13 +40,10 @@ public class CullingController : MonoBehaviour
 
     public TextMeshProUGUI panel;
 
-    public bool paused = false;
-
     void UpdatePanel()
     {
-        string pausedString = paused ? "OFF" : "ON";
         int rendererCount = (rs?.Length ?? 0) + (skrs?.Length ?? 0);
-        panel.text = $"Culling: {pausedString} (H = toggle)\nRenderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
+        panel.text = $"Renderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
         panel.text += $"\nUnique materials: {uniqueMaterials.Count} (cached {cachedMats})";
     }
 
@@ -124,27 +121,6 @@ public class CullingController : MonoBehaviour
 
         while (true)
         {
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                paused = !paused;
-                UpdatePanel();
-            }
-
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                FindObjectsOfType<Canvas>().ToList().ForEach((x) =>
-                {
-                    if (x.sortingOrder > -100)
-                        x.enabled = false;
-                });
-            }
-
-            if (paused)
-            {
-                yield return null;
-                continue;
-            }
-
             bool shouldCheck = false;
 
             if (cullingListDirty)
