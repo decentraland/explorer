@@ -20,7 +20,7 @@ namespace DCL.Helpers
 {
     public class WaitForAllMessagesProcessed : CustomYieldInstruction
     {
-        public override bool keepWaiting => SceneController.i.hasPendingMessages;
+        public override bool keepWaiting => Environment.i.messagingControllersManager.hasPendingMessages;
     }
 
     // NOTE(Brian): Attribute used to determine if tests are visual. Those tests will be run to generate the baseline images.
@@ -202,6 +202,11 @@ namespace DCL.Helpers
             return result;
         }
 
+        public static void SharedComponentDispose(BaseDisposable component)
+        {
+            component.scene.SharedComponentDispose(component.id);
+        }
+
         public static void SharedComponentAttach(BaseDisposable component, DecentralandEntity entity)
         {
             entity.scene.SharedComponentAttach(
@@ -357,7 +362,13 @@ namespace DCL.Helpers
         public static BasicMaterial CreateEntityWithBasicMaterial(ParcelScene scene, BasicMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithBasicMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static BasicMaterial CreateEntityWithBasicMaterial(ParcelScene scene, BasicMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, position,
                 out entity);
             BasicMaterial material =
                 SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, model);
@@ -368,7 +379,13 @@ namespace DCL.Helpers
         public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithPBRMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, CLASS_ID.BOX_SHAPE, position,
                 out entity);
             PBRMaterial material =
                 SharedComponentCreate<PBRMaterial, PBRMaterial.Model>(scene, CLASS_ID.PBR_MATERIAL, model);
@@ -468,6 +485,73 @@ namespace DCL.Helpers
                 entityId,
                 materialComponentID
             );
+        }
+
+        public static IEnumerator CreateAudioSource(ParcelScene scene, string entityId, string audioClipId, bool playing, bool loop = true)
+        {
+            var audioSourceModel = new DCLAudioSource.Model()
+            {
+                audioClipId = audioClipId,
+                playing = playing,
+                volume = 1.0f,
+                loop = loop,
+                pitch = 1.0f
+            };
+
+            DCLAudioSource audioSource =
+                TestHelpers.EntityComponentCreate<DCLAudioSource, DCLAudioSource.Model>(scene, scene.entities[entityId],
+                    audioSourceModel);
+
+            yield return audioSource.routine;
+        }
+
+        public static IEnumerator LoadAudioClip(ParcelScene scene, string audioClipId, string url, bool loop, bool loading,
+            float volume, bool waitForLoading = true)
+        {
+            DCLAudioClip.Model model = new DCLAudioClip.Model
+            {
+                url = url,
+                loop = loop,
+                shouldTryToLoad = loading,
+                volume = volume
+            };
+
+            DCLAudioClip audioClip = scene.SharedComponentCreate(
+                audioClipId,
+                (int) CLASS_ID.AUDIO_CLIP
+            ) as DCLAudioClip;
+
+            scene.SharedComponentUpdate(audioClipId, JsonUtility.ToJson(model));
+
+            yield return audioClip.routine;
+
+            Assert.IsTrue(scene.disposableComponents.ContainsKey(audioClipId), "Shared component was not created correctly!");
+
+            if (waitForLoading)
+            {
+                yield return new WaitUntil(
+                    () =>
+                    {
+                        return audioClip.loadingState != DCLAudioClip.LoadState.LOADING_IN_PROGRESS &&
+                               audioClip.loadingState != DCLAudioClip.LoadState.IDLE;
+                    });
+            }
+        }
+
+        public static IEnumerator CreateAudioSourceWithClipForEntity(DecentralandEntity entity)
+        {
+            yield return LoadAudioClip(entity.scene,
+                audioClipId: "audioClipTest",
+                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
+                loop: true,
+                loading: true,
+                volume: 1f,
+                waitForLoading: true);
+
+            yield return CreateAudioSource(entity.scene,
+                entityId: entity.entityId,
+                audioClipId: "audioClipTest",
+                playing: true);
         }
 
         public static string GetComponentUniqueId(ParcelScene scene, string salt, int classId, string entityId)

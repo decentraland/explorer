@@ -30,7 +30,8 @@ export const contracts = {
     'AdapterFeeCollector': '0x5DC888024cB599CfDdb9E6483ED6bAe1fA9e9D18',
     'AdapterConverter': '0x2782eb28Dcb1eF4E7632273cd4e347e130Ce4646',
     'POIAllowlist': '0x5DC4a5C214f2161F0D5595a6dDd9352409aE3Ab4',
-    'NAMEDenylist': '0x20c6f1e86eba703a14414a0cbc1b55c89dba7a0f'
+    'NAMEDenylist': '0x20c6f1e86eba703a14414a0cbc1b55c89dba7a0f',
+    'CollectionsV2Factory': '0x16d8bac5b67a6b782a9081377bec413bc5bb56a6'
   },
   'mainnet': {
     'MANAToken': '0x0f5d2fb29fb7d3cfee444a200298f468908cc942',
@@ -89,7 +90,8 @@ export const contracts = {
     'BurningStore': '0x0822d44c2e2f96d4cccad80610134861802b2cca',
     'BaseList': '0x21b6EFf834d7cc8c12A5Ec924939aa521F0FE83F',
     'POIAllowListProxy': '0x0ef15a1c7a49429a36cb46d4da8c53119242b54e',
-    'NameDenyListProxy': '0x0c4c90a4f29872a2e9ef4c4be3d419792bca9a36'
+    'NameDenyListProxy': '0x0c4c90a4f29872a2e9ef4c4be3d419792bca9a36',
+    'BinanceUsCollection': '0xa8ee490e4c4da48cc1653502c1a77479d4d818de'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',
@@ -100,7 +102,11 @@ export const contracts = {
   'rinkeby': {
     'MANAToken': '0x28bce5263f5d7f4eb7e8c6d5d78275ca455bac63',
     'LANDProxy': '0x28bef22df3e2040a4be64a9ca0e8b5ae2b91462d',
-    'LANDRegistry': '0xaf29226656fade9c97f51741e40f60c5bd67ee31',
-    'Multisig': '0x0de35b8b47b129877e0efca24e294b61d7e7eee3'
+    'LANDRegistry': '0xbeea8bfb0e582be1c3fb464824e61c218ba0c1b1',
+    'EstateRegistry': '0x3f0b58ad7a8b27d0e5573cd1ca7d456e2f6d4884',
+    'Multisig': '0x0de35b8b47b129877e0efca24e294b61d7e7eee3',
+    'MANAMiniMeToken': '0xfb2712a1246f712b889692c7ce55fec25c06bc33',
+    'LANDMiniMeToken': '0x576c4577aAd561EA79acbd49215a0cC1473BfCCA',
+    'EstateMiniMeToken': '0x2b98C125733035cDE09d311F988845808EE270E6'
   }
 }

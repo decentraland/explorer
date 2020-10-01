@@ -51,6 +51,15 @@ public class TermsOfServiceHUDView : MonoBehaviour
     public void SetVisible(bool visible)
     {
         content.SetActive(visible);
+
+        if (visible)
+        {
+            AudioScriptableObjects.dialogOpen.Play(true);
+        }
+        else
+        {
+            AudioScriptableObjects.dialogClose.Play(true);
+        }
     }
 
     public void SetData(string sceneName, bool hasAdultContent, bool hasGamblingContent, bool hasToS, bool hasPrivacyPolicy, bool hasContactEmail)

@@ -147,34 +147,19 @@ public static class AvatarUtils
                 if (replaceThemWith.HasProperty("_FresnelMatCap"))
                     _FMatCap = replaceThemWith.GetTexture("_FresnelMatCap");
 
-                float? sssIntensity = null;
-                Vector4? sssParams = null;
-
-                if (replaceThemWith.HasProperty("_SSSIntensity"))
-                    sssIntensity = replaceThemWith.GetFloat("_SSSIntensity");
-
-                if (replaceThemWith.HasProperty("_SSSParams"))
-                    sssParams = replaceThemWith.GetVector("_SSSParams");
-
                 //NOTE(Brian): This method has a bug, if the material being copied lacks a property of the source material,
                 //             the source material property will get erased. It can't be added back and even the material inspector crashes.
                 //             Check the comment in Lit.shader.
                 copy.CopyPropertiesFromMaterial(mat);
-
-                if (sssParams.HasValue)
-                    copy.SetVector("_SSSParams", sssParams.Value);
-
-                if (sssIntensity.HasValue)
-                    copy.SetFloat("_SSSIntensity", sssIntensity.Value);
-
-                if (_MatCap != null)
-                    copy.SetTexture("_MatCap", _MatCap);
 
                 if (_GMatCap != null)
                     copy.SetTexture("_GlossMatCap", _GMatCap);
 
                 if (_FMatCap != null)
                     copy.SetTexture("_FresnelMatCap", _FMatCap);
+
+                if (_MatCap != null)
+                    copy.SetTexture("_MatCap", _MatCap);
 
                 if (copy.HasProperty(ShaderUtils._ZWrite))
                 {

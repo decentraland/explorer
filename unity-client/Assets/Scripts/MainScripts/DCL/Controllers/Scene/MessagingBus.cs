@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using DCL.Interface;
+using DCL.Models;
 using UnityEngine.SceneManagement;
 
 namespace DCL
@@ -106,7 +107,6 @@ namespace DCL
         }
 
         private SceneController sceneController;
-        private MessagingControllersManager manager;
 
         public MessagingBus(MessagingBusType type, IMessageProcessHandler handler, MessagingController owner)
         {
@@ -117,7 +117,6 @@ namespace DCL
             this.owner = owner;
             this.pendingMessagesCount = 0;
             sceneController = SceneController.i;
-            manager = MessagingControllersManager.i;
         }
 
         public void Start()
@@ -140,6 +139,28 @@ namespace DCL
         public void Enqueue(QueuedSceneMessage message, QueueMode queueMode = QueueMode.Reliable)
         {
             bool enqueued = true;
+
+            // When removing an entity we have to ensure that the enqueued lossy messages after it are processed and not replaced
+            if (message is QueuedSceneMessage_Scene queuedSceneMessage && queuedSceneMessage.payload is Protocol.RemoveEntity removeEntityPayload)
+            {
+                List<string> unreliableMessagesToRemove = new List<string>();
+                foreach (string key in unreliableMessages.Keys)
+                {
+                    if (key.Contains(removeEntityPayload.entityId)) //Key of unreliableMessages is a mixture of entityId
+                    {
+                        unreliableMessagesToRemove.Add(key);
+                    }
+                }
+
+                for (int index = 0; index < unreliableMessagesToRemove.Count; index++)
+                {
+                    string key = unreliableMessagesToRemove[index];
+                    if (unreliableMessages.ContainsKey(key))
+                    {
+                        unreliableMessages.Remove(key);
+                    }
+                }
+            }
 
             if (queueMode == QueueMode.Reliable)
             {
@@ -183,13 +204,13 @@ namespace DCL
 
                 if (type == MessagingBusType.INIT)
                 {
-                    manager.pendingInitMessagesCount++;
+                    Environment.i.messagingControllersManager.pendingInitMessagesCount++;
                 }
 
                 if (owner != null)
                 {
                     owner.enabled = true;
-                    manager.MarkBusesDirty();
+                    Environment.i.messagingControllersManager.MarkBusesDirty();
                 }
             }
         }
@@ -293,14 +314,14 @@ namespace DCL
 
             if (type == MessagingBusType.INIT)
             {
-                manager.pendingInitMessagesCount--;
-                manager.processedInitMessagesCount++;
+                Environment.i.messagingControllersManager.pendingInitMessagesCount--;
+                Environment.i.messagingControllersManager.processedInitMessagesCount++;
             }
         }
 
         private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
         {
-            manager.pendingMessagesCount++;
+            Environment.i.messagingControllersManager.pendingMessagesCount++;
             pendingMessagesCount++;
             return pendingMessages.AddLast(message);
         }
@@ -311,7 +332,7 @@ namespace DCL
             {
                 pendingMessages.RemoveFirst();
                 pendingMessagesCount--;
-                MessagingControllersManager.i.pendingMessagesCount--;
+                Environment.i.messagingControllersManager.pendingMessagesCount--;
             }
         }
 

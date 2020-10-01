@@ -67,14 +67,24 @@ public class WearableController
         loader.settings.visibleFlags = AssetPromiseSettings_Rendering.VisibleFlags.INVISIBLE;
         loader.settings.parent = parent;
 
-        loader.OnSuccessEvent += (x) =>
-        {
-            assetRenderers = x.GetComponentsInChildren<Renderer>();
-            PrepareWearable(x);
-            onSuccess.Invoke(this);
-        };
+        assetRenderers = null;
 
-        loader.OnFailEvent += () => onFail.Invoke(this);
+        void OnSuccessWrapper(GameObject gameObject)
+        {
+            loader.OnSuccessEvent -= OnSuccessWrapper;
+            assetRenderers = gameObject.GetComponentsInChildren<Renderer>();
+            PrepareWearable(gameObject);
+            onSuccess.Invoke(this);
+        }
+        loader.OnSuccessEvent += OnSuccessWrapper;
+
+        void OnFailEventWrapper()
+        {
+            loader.OnFailEvent -= OnFailEventWrapper;
+            loader = null;
+            onFail.Invoke(this);
+        }
+        loader.OnFailEvent += OnFailEventWrapper;
 
         loader.Load(representation.mainFile);
     }
@@ -116,7 +126,8 @@ public class WearableController
     {
         foreach (var kvp in originalMaterials)
         {
-            kvp.Key.materials = kvp.Value;
+            if (kvp.Key != null)
+                kvp.Key.materials = kvp.Value;
         }
 
         originalMaterials.Clear();
@@ -141,18 +152,21 @@ public class WearableController
     {
         UnloadMaterials();
         RestoreOriginalMaterials();
+        assetRenderers = null;
 
         if (loader != null)
         {
+            loader.ClearEvents();
             loader.Unload();
         }
     }
 
-    public void SetAssetRenderersEnabled(bool active)
+    public virtual void SetAssetRenderersEnabled(bool active)
     {
         for (var i = 0; i < assetRenderers.Length; i++)
         {
-            assetRenderers[i].enabled = active;
+            if (assetRenderers[i] != null)
+                assetRenderers[i].enabled = active;
         }
     }
 
