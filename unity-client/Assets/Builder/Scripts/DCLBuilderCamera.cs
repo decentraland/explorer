@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DCL.Controllers;
 using DCL.Models;
 using Builder.Gizmos;
@@ -15,6 +15,7 @@ namespace Builder
         public Transform yawPivot;
         public Transform rootPivot;
         public Camera builderCamera;
+        public GameObject builderCameraObject;
 
         [Space()]
         [Header("Input Settings")]
@@ -54,7 +55,7 @@ namespace Builder
 
         private void Awake()
         {
-            zoomDefault = zoomCurrent = zoomTarget = Mathf.Clamp(builderCamera.transform.localPosition.z, -zoomMax, -zoomMin);
+            zoomDefault = zoomCurrent = zoomTarget = Mathf.Clamp(builderCameraObject.transform.localPosition.z, -zoomMax, -zoomMin);
             pitchCurrent = pitchTarget = pitchPivot.localEulerAngles.x;
             yawCurrent = yawTarget = yawPivot.localEulerAngles.y;
 
@@ -84,7 +85,7 @@ namespace Builder
 
             float zoomPrev = zoomCurrent;
             zoomCurrent += (zoomTarget - zoomCurrent) * Time.deltaTime * zoomSpeed;
-            builderCamera.transform.localPosition = new Vector3(0, 0, zoomCurrent);
+            builderCameraObject.transform.localPosition = new Vector3(0, 0, zoomCurrent);
 
             Vector3 panOffset = panTarget - panCurrent;
             float sqDist = panOffset.magnitude;
@@ -212,7 +213,7 @@ namespace Builder
             OnDragObjectEnd();
         }
 
-        private void OnSetCameraPosition(Vector3 position)
+        public void OnSetCameraPosition(Vector3 position)
         {
             panCurrent = position;
             rootPivot.transform.localPosition = panCurrent;
@@ -232,7 +233,7 @@ namespace Builder
         private void OnResetCameraZoom()
         {
             zoomCurrent = zoomTarget = zoomDefault;
-            builderCamera.transform.position.Set(0, 0, zoomCurrent);
+            builderCameraObject.transform.position.Set(0, 0, zoomCurrent);
             OnCameraZoomChanged?.Invoke(builderCamera, zoomCurrent);
         }
 

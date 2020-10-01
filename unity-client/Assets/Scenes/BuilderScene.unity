@@ -1704,6 +1704,7 @@ MonoBehaviour:
   yawPivot: {fileID: 1824549429}
   rootPivot: {fileID: 1824549429}
   builderCamera: {fileID: 1992111983}
+  builderCameraObject: {fileID: 1992111980}
   rotationSpeed: 5
   pitchAmount: 10
   pitchAngleMin: 0

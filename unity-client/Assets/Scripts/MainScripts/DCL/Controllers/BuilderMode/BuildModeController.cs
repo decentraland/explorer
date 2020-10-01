@@ -7,6 +7,7 @@ using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -46,8 +47,10 @@ public class BuildModeController : MonoBehaviour
     public SceneObjectCatalogController catalogController;
     public SceneLimitInfoController sceneLimitInfoController;
     public EntityInformationController entityInformationController;
+    public AdvancedBuildModeController advancedBuildModeController;
     public BuildModeEntityListController buildModeEntityListController;
     public OutlinerController outlinerController;
+    public BuilderInputWrapper builderInputWrapper;
 
     [Header("Build References")]
 
@@ -61,8 +64,7 @@ public class BuildModeController : MonoBehaviour
 
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false, isMultiSelectionActive = false;
-
+    bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = false;
     List<DecentrelandEntityToEdit> selectedEntities = new List<DecentrelandEntityToEdit>();
     Dictionary<string, DecentrelandEntityToEdit> convertedEntities = new Dictionary<string, DecentrelandEntityToEdit>();
 
@@ -84,7 +86,7 @@ public class BuildModeController : MonoBehaviour
     {
         editModeChange.OnTriggered += OnEditModeChangeAction;
         catalogController.OnSceneObjectSelected += OnSceneObjectSelected;
-
+        builderInputWrapper.OnMouseClick += MouseClick;
     }
 
     private void OnDestroy()
@@ -111,7 +113,7 @@ public class BuildModeController : MonoBehaviour
             if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
             {
                 CheckInputForShowingWindows();
-                if (Utils.isCursorLocked) CheckEditModeInput();              
+                if (Utils.isCursorLocked || isAdvancedModeActive) CheckEditModeInput();              
             }
 
             if (checkerInsideSceneOptimizationCounter >= 60)
@@ -166,7 +168,38 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+    void MouseClick(int buttonID, Vector3 position)
+    {
+        if (isEditModeActivated)
+        {
+            if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
+            {
+                if (Utils.isCursorLocked || isAdvancedModeActive)
+                {
+                    if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftShift))
+                    {
+                        if (buttonID == 0)
+                        {
+                            SelectObject();
+                            InputDone();
+                            return;
+                        }
+                        CheckEntityOnPointer();
+                    }
 
+                    if (selectedEntities.Count > 0)
+                    {
+                        if (buttonID == 0 && AreAllEntitiesInsideBoundaries())
+                        {
+                            DeselectEntities();
+                            InputDone();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
     void OnSceneObjectSelected(SceneObject sceneObject)
     {
         SceneMetricsController.Model limits = sceneToEdit.metricsController.GetLimits();
@@ -216,7 +249,7 @@ public class BuildModeController : MonoBehaviour
         Select(entity);
         
         catalogController.CloseCatalog();
-   
+        InputDone();
 
     }
 
@@ -254,7 +287,22 @@ public class BuildModeController : MonoBehaviour
             InputDone();
             return;
         }
-        if(Input.GetKey(KeyCode.N))
+        if (Input.GetKey(KeyCode.L))
+        {
+            if (!isAdvancedModeActive)
+            {           
+                advancedBuildModeController.ActivateAdvancedBuildMode(sceneToEdit);
+                isAdvancedModeActive = true;
+            }
+            else
+            {
+                isAdvancedModeActive = false;
+                advancedBuildModeController.DesactivateAdvancedBuildMode();
+            }
+            InputDone();
+            return;
+        }
+            if (Input.GetKey(KeyCode.N))
         {
 
             shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
@@ -277,19 +325,14 @@ public class BuildModeController : MonoBehaviour
             SetSnapActive(!isSnapActivated);
         }
 
-      
-
-
         if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftShift))
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                SelectObject();
-                InputDone();
-                return;
-            }
             CheckEntityOnPointer();
         }
+
+
+
+
         if (selectedEntities.Count > 0)
         {
             if(Input.GetKey(KeyCode.Delete))
@@ -311,12 +354,7 @@ public class BuildModeController : MonoBehaviour
                 InputDone();
                 return;
             }
-            if (Input.GetMouseButtonDown(0) && AreAllEntitiesInsideBoundaries())
-            {
-                DeselectEntities();
-                InputDone();
-                return;
-            }
+
 
             if (Input.GetKey(KeyCode.R))
             {
@@ -595,8 +633,16 @@ public class BuildModeController : MonoBehaviour
     DecentralandEntity GetEntityOnPointer()
     {
         RaycastHit hit;
-        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
-        if (Physics.Raycast(ray, out hit, distanceLimitToSelectObjects, layerToRaycast))
+        UnityEngine.Ray ray;
+        float distanceToSelect = distanceLimitToSelectObjects;
+        if (!isAdvancedModeActive) ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        else
+        {
+            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            distanceToSelect = 9999;
+        }
+
+        if (Physics.Raycast(ray, out hit, distanceToSelect, layerToRaycast))
         {
             string entityID = hit.collider.gameObject.name;
             if(sceneToEdit.entities.ContainsKey(entityID)) return sceneToEdit.entities[entityID];

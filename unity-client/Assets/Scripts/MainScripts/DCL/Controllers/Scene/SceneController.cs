@@ -552,6 +552,23 @@ namespace DCL
             Vector3 worldPosition = DCLCharacterController.i.characterPosition.UnityToWorldPosition(pos);
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
+        public Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)
+        {
+            if (scene == null)
+            {
+                string sceneId = currentSceneId;
+
+                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
+                    scene = loadedScenes[currentSceneId];
+                else
+                    return pos;
+            }
+            Vector3 sceneRealPosition = scene.gameObject.transform.position;
+            Vector3 sceneFictionPosition = new Vector3(scene.sceneData.basePosition.x, 0, scene.sceneData.basePosition.y);
+            Vector3 sceneOffset = sceneRealPosition - sceneFictionPosition;
+            Vector3 solvedPosition= pos+sceneOffset;
+            return solvedPosition;
+        }
 
         void InitializeSceneBoundariesChecker()
         {
@@ -873,6 +890,21 @@ namespace DCL
             }
         }
 
+        public void IsolateScene(ParcelScene sceneToActive)
+        {
+            foreach(ParcelScene scene in scenesSortedByDistance)
+            {
+                if (scene != sceneToActive) scene.gameObject.SetActive(false);
+            }
+        }
+        public void ReIntegrateIsolatedScene()
+        {
+            foreach (ParcelScene scene in scenesSortedByDistance)
+            {
+                scene.gameObject.SetActive(true);
+            }
+        }
+        
         public bool IsCharacterInsideScene(ParcelScene scene)
         {
             return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
