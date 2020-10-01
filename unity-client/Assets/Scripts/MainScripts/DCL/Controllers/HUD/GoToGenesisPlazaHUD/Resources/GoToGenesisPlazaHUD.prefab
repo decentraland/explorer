@@ -539,7 +539,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6934009050601321467}
   - component: {fileID: 3635863837677420424}
-  - component: {fileID: 2638626163547641671}
   m_Layer: 5
   m_Name: RobotModel
   m_TagString: Untagged
@@ -574,35 +573,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4617628843631338304}
   m_CullTransparentMesh: 0
---- !u!114 &2638626163547641671
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4617628843631338304}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
-  m_Maskable: 0
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 42ecadcdf0d674029b255fccf03f5965, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 1
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4909393520845524058
 GameObject:
   m_ObjectHideFlags: 0
@@ -1215,6 +1185,7 @@ GameObject:
   - component: {fileID: 4009808828430240770}
   - component: {fileID: 130523288579308580}
   - component: {fileID: 542301577773551959}
+  - component: {fileID: 7728859459588448112}
   m_Layer: 5
   m_Name: GoToGenesisPlazaHUD
   m_TagString: Untagged
@@ -1366,6 +1337,22 @@ MonoBehaviour:
   closeButton: {fileID: 8988084336317977587}
   cancelButton: {fileID: 8829506031662869903}
   continueButton: {fileID: 31662781482329574}
+--- !u!114 &7728859459588448112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6498655820486328905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c79ce172eb9ef458c304fe338b9d18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unlockCursorAtStart: 1
+  show3DTeacherAtStart: 1
+  teacherPositionRef: {fileID: 6934009050601321467}
+  okButton: {fileID: 0}
 --- !u!1 &7210473132899234908
 GameObject:
   m_ObjectHideFlags: 0
