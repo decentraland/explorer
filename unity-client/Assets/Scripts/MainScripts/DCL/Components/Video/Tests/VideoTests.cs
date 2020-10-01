@@ -121,11 +121,11 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
             Assert.IsTrue(videoTexture.isVisible, "DCLVideoTexture should be visible");
 
             yield return TestHelpers.SharedComponentUpdate<BoxShape, BoxShape.Model>(ent1Shape, new BoxShape.Model() { visible = false });
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
         }
@@ -147,11 +147,11 @@ namespace Tests
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
 
             yield return TestHelpers.SharedComponentUpdate<BasicMaterial, BasicMaterial.Model>(ent1Mat, new BasicMaterial.Model() { texture = videoTexture.id });
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
             Assert.IsTrue(videoTexture.isVisible, "DCLVideoTexture should be visible");
 
             yield return TestHelpers.SharedComponentUpdate<BoxShape, BoxShape.Model>(ent1Shape, new BoxShape.Model() { visible = false });
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
         }
@@ -171,11 +171,11 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
             Assert.IsTrue(videoTexture.isVisible, "DCLVideoTexture should be visible");
 
             scene.RemoveEntity(ent1.entityId, true);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             Assert.IsTrue(!videoTexture.isVisible, "DCLVideoTexture should not be visible ");
         }
@@ -201,7 +201,7 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             // Check the volume
             Assert.AreEqual(0f, videoTexture.texturePlayer.volume);
@@ -228,7 +228,7 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             // Check the volume
             Assert.AreEqual(videoTexture.model.volume, videoTexture.texturePlayer.volume);
@@ -256,7 +256,7 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");
@@ -291,7 +291,7 @@ namespace Tests
             yield return ent1Shape.routine;
 
             TestHelpers.SharedComponentAttach(ent1Shape, ent1);
-            yield return null; //a frame to wait DCLVideoTexture update
+            yield return new WaitForAllMessagesProcessed();
 
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
