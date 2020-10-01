@@ -7,12 +7,14 @@ using DCL;
 using DCL.Configuration;
 using DCL.Helpers;
 using Builder;
+using Builder.Gizmos;
 
 public class AdvancedBuildModeController : MonoBehaviour
 {
     public float distanceEagleCamera = 20f;
     public FreeCameraMovement freeCameraController;
     public GameObject eagleCamera;
+    public DCLBuilderGizmoManager gizmoManager;
 
     //public CameraController cameraController;
     public Transform lookAtT;
@@ -33,6 +35,7 @@ public class AdvancedBuildModeController : MonoBehaviour
         LookAtTransfrom();
 
         eagleCamera.gameObject.SetActive(true);
+        gizmoManager.InitializeGizmos(Camera.main);
         mouseCatcher.enabled = false;
         SceneController.i.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();

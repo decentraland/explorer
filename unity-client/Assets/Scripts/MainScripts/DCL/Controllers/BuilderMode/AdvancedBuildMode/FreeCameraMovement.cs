@@ -1,3 +1,4 @@
+using Builder.Gizmos;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,48 +18,32 @@ public class FreeCameraMovement : MonoBehaviour
     private float yaw = 0f;
     private float pitch = 0f;
 
+    bool isCameraAbleToMove = true;
     private void Awake()
     {
         builderInputWrapper.OnMouseDrag += MouseDrag;
         builderInputWrapper.OnMouseDragRaw += MouseDragRaw;
         builderInputWrapper.OnMouseWheel += MouseWheel;
+
+        DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
+        DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
+
     }
 
+    private void OnGizmoTransformObjectEnd(string gizmoType)
+    {
+        isCameraAbleToMove = true;
+    }
 
-    //private void Update()
-    //{
-
-        //Look around
-        //if (Input.GetMouseButton(1))
-        //{
-        //    yaw += lookSpeedH * Input.GetAxis("Mouse X");
-        //    pitch -= lookSpeedV * Input.GetAxis("Mouse Y");
-
-        //    transform.eulerAngles = new Vector3(pitch, yaw, 0f);
-        //}
-
-        ////drag camera
-        //if (Input.GetMouseButton(0))
-        //{
-        //transform.Translate(-Input.GetAxisRaw("Mouse X") * Time.deltaTime * dragSpeed, -Input.GetAxisRaw("Mouse Y") * Time.deltaTime * dragSpeed, 0);
-        //}
-
-        //if (Input.GetMouseButton(2))
-        //{
-        //    //Zoom in and out 
-        //    transform.Translate(0, 0, Input.GetAxisRaw("Mouse X") * zoomSpeed * .07f, Space.Self);
-        //}
-
-        //Zoom in and out 
-    
-
-    //}
-
+    private void OnGizmoTransformObjectStart(string gizmoType)
+    {
+        isCameraAbleToMove = false;
+    }
 
 
     private void MouseWheel(float axis)
     {
-        transform.Translate(0, 0, axis * zoomSpeed, Space.Self);
+      if(isCameraAbleToMove)  transform.Translate(0, 0, axis * zoomSpeed, Space.Self);
     }
     private void MouseDragRaw(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
@@ -66,21 +51,23 @@ public class FreeCameraMovement : MonoBehaviour
     }
     private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if (buttonId == 0) CameraDrag(axisX, axisY);
+        if (buttonId == 0 ||buttonId == 2) CameraDrag(axisX, axisY);
     }
  
 
     public void CameraDrag(float axisX, float axisY)
     {
-
-        transform.Translate(-axisX * Time.deltaTime * dragSpeed, -axisY * Time.deltaTime * dragSpeed, 0);
+        if (isCameraAbleToMove) transform.Translate(-axisX * Time.deltaTime * dragSpeed, -axisY * Time.deltaTime * dragSpeed, 0);
     }
     public void CameraLook(float axisX, float axisY)
     {
-        yaw += lookSpeedH * axisX;
-        pitch -= lookSpeedV * axisY;
+        if (isCameraAbleToMove)
+        {
+            yaw += lookSpeedH * axisX;
+            pitch -= lookSpeedV * axisY;
 
-        transform.eulerAngles = new Vector3(pitch, yaw, 0f);
+            transform.eulerAngles = new Vector3(pitch, yaw, 0f);
+        }
     }
 
 

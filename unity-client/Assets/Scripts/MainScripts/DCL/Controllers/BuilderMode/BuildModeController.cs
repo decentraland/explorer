@@ -1,3 +1,5 @@
+using Builder;
+using Builder.Gizmos;
 using DCL;
 using DCL.Components;
 using DCL.Configuration;
@@ -51,6 +53,7 @@ public class BuildModeController : MonoBehaviour
     public BuildModeEntityListController buildModeEntityListController;
     public OutlinerController outlinerController;
     public BuilderInputWrapper builderInputWrapper;
+    public DCLBuilderGizmoManager gizmoManager;
 
     [Header("Build References")]
 
@@ -152,9 +155,10 @@ public class BuildModeController : MonoBehaviour
                 else if (Vector3.Distance(snapGO.transform.position, gameObjectToEdit.transform.position) >= snapDistanceToActivateMovement)
                 {
                     CopyGameObjectStatus(gameObjectToEdit, snapGO, false);
-                    gameObjectToEdit.transform.SetParent(Camera.main.transform);
+            
                     
                     snapObjectAlreadyMoved = true;
+                    SetEditObjectParent();
                 }
 
             }
@@ -266,7 +270,11 @@ public class BuildModeController : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.J))
         {
-            if (catalogController.IsCatalogOpen()) catalogController.CloseCatalog();
+            if (catalogController.IsCatalogOpen())
+            {
+                catalogController.CloseCatalog();
+                if(!isAdvancedModeActive) Utils.LockCursor();
+            }
             else catalogController.OpenCatalog();
 
             InputDone();
@@ -289,16 +297,7 @@ public class BuildModeController : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.L))
         {
-            if (!isAdvancedModeActive)
-            {           
-                advancedBuildModeController.ActivateAdvancedBuildMode(sceneToEdit);
-                isAdvancedModeActive = true;
-            }
-            else
-            {
-                isAdvancedModeActive = false;
-                advancedBuildModeController.DesactivateAdvancedBuildMode();
-            }
+            SetAdvanceMode(!isAdvancedModeActive);
             InputDone();
             return;
         }
@@ -371,7 +370,7 @@ public class BuildModeController : MonoBehaviour
             }
 
 
-            if (Input.mouseScrollDelta.y >0.5f)
+            if (Input.mouseScrollDelta.y >0.5f  && !isAdvancedModeActive)
             {
 
                 if (isSnapActivated)
@@ -381,7 +380,7 @@ public class BuildModeController : MonoBehaviour
                 }
                 else ScaleSelection(scaleSpeed);
             }
-            else if (Input.mouseScrollDelta.y < -0.5f)
+            else if (Input.mouseScrollDelta.y < -0.5f && !isAdvancedModeActive)
             {
                 if (isSnapActivated)
                 {
@@ -396,12 +395,59 @@ public class BuildModeController : MonoBehaviour
     }
 
 
+    void SetAdvanceMode(bool advanceModeActive)
+    {
+        if (!isAdvancedModeActive)
+        {
+            advancedBuildModeController.ActivateAdvancedBuildMode(sceneToEdit);
+            SetEditObjectParent();
+        }
+        else
+        {
+            SetEditObjectParent();
+            advancedBuildModeController.DesactivateAdvancedBuildMode();
+        }
+
+        isAdvancedModeActive = advanceModeActive;
+
+      
+        DeselectEntities();
+    }
+
+    void SetEditObjectParent()
+    {
+        Transform parentToAsign = null;
+        bool worldPositionStays = false;
+        if (!isAdvancedModeActive && !isMultiSelectionActive)
+        {
+            if (isSnapActivated)
+            {
+                if (snapObjectAlreadyMoved) parentToAsign = Camera.main.transform;
+            }
+            else
+            {
+                worldPositionStays = true;
+                parentToAsign = freeMovementGO.transform;
+            }
+
+        }
+        else if(!isAdvancedModeActive && isMultiSelectionActive)
+        {
+            if (!isSnapActivated)
+            { 
+                parentToAsign = originalParentGOEdit;
+            }
+            worldPositionStays = true;
+        }
+        
+        gameObjectToEdit.transform.SetParent(parentToAsign, worldPositionStays);
+    }
     void StartMultiSelection()
     {
         isMultiSelectionActive = true;
         originalParentGOEdit = gameObjectToEdit.transform.parent;
 
-        gameObjectToEdit.transform.SetParent(null);
+        SetEditObjectParent();
         snapGO.transform.SetParent(null);
         freeMovementGO.transform.SetParent(null);
     }
@@ -409,9 +455,13 @@ public class BuildModeController : MonoBehaviour
     void EndMultiSelection()
     {
         isMultiSelectionActive = false;
-        gameObjectToEdit.transform.SetParent(originalParentGOEdit,true);
-        snapGO.transform.SetParent(Camera.main.transform);
-        freeMovementGO.transform.SetParent(Camera.main.transform);
+        SetEditObjectParent();
+
+        if (!isAdvancedModeActive)
+        {
+            snapGO.transform.SetParent(Camera.main.transform);
+            freeMovementGO.transform.SetParent(Camera.main.transform);
+        }
 
         SetObjectIfSnapOrNot();
     }
@@ -421,7 +471,7 @@ public class BuildModeController : MonoBehaviour
         bool areAllIn = true;
         foreach(DecentrelandEntityToEdit entity in selectedEntities)
         {
-            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.entity))
+            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 areAllIn = false;
                 break;
@@ -458,7 +508,7 @@ public class BuildModeController : MonoBehaviour
         {
             selectedEntities.Remove(entity);
             convertedEntities.Remove(entity.entityUniqueId);
-            sceneToEdit.RemoveEntity(entity.entity.entityId, true);
+            sceneToEdit.RemoveEntity(entity.rootEntity.entityId, true);
         }
     
 
@@ -483,13 +533,23 @@ public class BuildModeController : MonoBehaviour
     }
     public void SetSnapActive(bool isActive)
     {
+       
         isSnapActivated = isActive;
         snapImgStatusShowGO.SetActive(isSnapActivated);
         if (isSnapActivated)
         {
-            snapObjectAlreadyMoved = false;
-            snapGO.transform.SetParent(Camera.main.transform);
+            if (!isAdvancedModeActive)
+            {
+                snapObjectAlreadyMoved = false;
+                snapGO.transform.SetParent(Camera.main.transform);
+            
+            }
+            else
+            {
+                gizmoManager.SetSnapFactor(snapFactor, snapFactor, snapFactor);
+            }
         }
+    
         SetObjectIfSnapOrNot();
     }
 
@@ -546,14 +606,14 @@ public class BuildModeController : MonoBehaviour
             //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
             foreach (DecentrelandEntityToEdit entity in selectedEntities)
             {
-                entity.entity.gameObject.transform.SetParent(null);
+                entity.rootEntity.gameObject.transform.SetParent(null);
             }
             gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
             gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
             gameObjectToEdit.transform.localScale = Vector3.one;
             foreach (DecentrelandEntityToEdit entity in selectedEntities)
             {
-                entity.entity.gameObject.transform.SetParent(gameObjectToEdit.transform);
+                entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
             }
         
 
@@ -562,7 +622,17 @@ public class BuildModeController : MonoBehaviour
             initialRotation = gameObjectToEdit.transform.rotation;
 
             SetObjectIfSnapOrNot();
+            if (isAdvancedModeActive)
+            {
+                List<EditableEntity> editableEntities = new List<EditableEntity>();
+                foreach (DecentrelandEntityToEdit entity in selectedEntities)
+                {
+                    editableEntities.Add(entity);
+                }
 
+                gizmoManager.SelectedEntities(gameObjectToEdit.transform, editableEntities);
+                gizmoManager.SetGizmoType("MOVE");
+            }
 
 
             entityInformationController.Enable();
@@ -583,9 +653,9 @@ public class BuildModeController : MonoBehaviour
         float totalZ = 0f;
         foreach (DecentrelandEntityToEdit entity in selectedEntities)
         {
-            totalX += entity.entity.gameObject.transform.position.x;
-            totalY += entity.entity.gameObject.transform.position.y;
-            totalZ += entity.entity.gameObject.transform.position.z;
+            totalX += entity.rootEntity.gameObject.transform.position.x;
+            totalY += entity.rootEntity.gameObject.transform.position.y;
+            totalZ += entity.rootEntity.gameObject.transform.position.z;
         }
         float centerX = totalX / selectedEntities.Count;
         float centerY = totalY / selectedEntities.Count;
@@ -596,7 +666,7 @@ public class BuildModeController : MonoBehaviour
 
     void SetObjectIfSnapOrNot()
     {
-        if (!isMultiSelectionActive)
+        if (!isMultiSelectionActive && !isAdvancedModeActive)
         {
             if (!isSnapActivated)
             {
@@ -613,8 +683,6 @@ public class BuildModeController : MonoBehaviour
                 Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
 
                 freeMovementGO.transform.rotation = lookOnLook;
-                gameObjectToEdit.transform.SetParent(freeMovementGO.transform, true);
-
             }
             else
             {
@@ -657,12 +725,10 @@ public class BuildModeController : MonoBehaviour
             bool areAllEntitiesInsideSceneBoundaries = true;
             foreach(DecentrelandEntityToEdit entity in selectedEntities)
             {
-                if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.entity))
+                if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 {              
                     areAllEntitiesInsideSceneBoundaries = false;
-                }
-               
-             
+                }                        
             }
 
             if(!areAllEntitiesInsideSceneBoundaries) UndoEdit();
@@ -670,11 +736,12 @@ public class BuildModeController : MonoBehaviour
 
             foreach (DecentrelandEntityToEdit entity in selectedEntities)
             {
-                SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.entity);
-                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.entity);
+                SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
+                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.rootEntity);
                 entity.Deselect();
             }
 
+            gizmoManager.HideGizmo();
             selectedEntities.Clear();
             entityInformationController.Disable();
         }
@@ -687,7 +754,7 @@ public class BuildModeController : MonoBehaviour
 
         for (int i = 0; i < selectedEntities.Count; i++)
         {         
-            idsToRemove.Add(selectedEntities[i].entity.entityId);          
+            idsToRemove.Add(selectedEntities[i].rootEntity.entityId);          
         }
 
         DeselectEntities();
@@ -702,13 +769,13 @@ public class BuildModeController : MonoBehaviour
     {
         foreach(DecentrelandEntityToEdit entity in selectedEntities)
         {
-            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.entity)) return;
+            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity)) return;
         }
 
         int amount = selectedEntities.Count;
         for (int i = 0; i < amount; i++)
         {
-            DecentralandEntity entity = sceneToEdit.DuplicateEntity(selectedEntities[i].entity);
+            DecentralandEntity entity = sceneToEdit.DuplicateEntity(selectedEntities[i].rootEntity);
             SetupEntityToEdit(entity);
             //Select(entity);
         }
@@ -769,7 +836,7 @@ public class BuildModeController : MonoBehaviour
     }
 
 
-    void EnterEditMode()
+    public void EnterEditMode()
     {
         
         editModeChangeFX.SetActive(true);
@@ -810,10 +877,11 @@ public class BuildModeController : MonoBehaviour
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
         //
         SetupAllEntities();
+        DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
     }
 
 
-    void ExitEditMode()
+    public void ExitEditMode()
     {
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
@@ -830,8 +898,13 @@ public class BuildModeController : MonoBehaviour
         DeselectEntities();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
+        DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
     }
 
+    void ExitAfterCharacterTeleport(DCLCharacterPosition position)
+    {
+        ExitEditMode();
+    }
 
     void FindSceneToEdit()
     {      

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
 namespace Builder.Gizmos
@@ -28,16 +28,22 @@ namespace Builder.Gizmos
 
         public void SetColorHighlight()
         {
-            objectRenderer.GetPropertyBlock(props);
-            props.SetColor(colorPropertyID, highLightColor);
-            objectRenderer.SetPropertyBlock(props);
+            if (props != null)
+            {
+                objectRenderer.GetPropertyBlock(props);
+                props.SetColor(colorPropertyID, highLightColor);
+                objectRenderer.SetPropertyBlock(props);
+            }
         }
 
         public void SetColorDefault()
         {
-            objectRenderer.GetPropertyBlock(props);
-            props.SetColor(colorPropertyID, defaultColor);
-            objectRenderer.SetPropertyBlock(props);
+            if (props != null)
+            {
+                objectRenderer.GetPropertyBlock(props);
+                props.SetColor(colorPropertyID, defaultColor);
+                objectRenderer.SetPropertyBlock(props);
+            }
         }
 
         private void Awake()

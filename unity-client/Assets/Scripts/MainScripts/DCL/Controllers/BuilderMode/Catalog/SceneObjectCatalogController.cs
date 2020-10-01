@@ -163,7 +163,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     public void CloseCatalog()
     {
         catalogUIGO.SetActive(false);
-        Utils.LockCursor();
+ 
     }
 
     [ContextMenu ("Iterate catalog")]

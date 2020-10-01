@@ -8,10 +8,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DecentrelandEntityToEdit 
+public class DecentrelandEntityToEdit : EditableEntity
 {
     public string entityUniqueId;
-    public DecentralandEntity entity;
 
     public bool isLocked = false;
     public bool isSelected = false;
@@ -32,41 +31,41 @@ public class DecentrelandEntityToEdit
 
     public DecentrelandEntityToEdit(DecentralandEntity _entity, Material _editMaterial)
     {
-        entity = _entity;
-        entity.OnShapeUpdated += ShapeUpdate;
+        rootEntity = _entity;
+        rootEntity.OnShapeUpdated += ShapeUpdate;
    
         editMaterial = _editMaterial;
 
-        entityUniqueId = entity.scene.sceneData.id + entity.entityId;
+        entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
 
-        if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+        if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
-            CreateCollidersForEntity(entity);
+            CreateCollidersForEntity(rootEntity);
         }
     }
 
     public void Select()
     {
         isSelected = true;
-        originalParent = entity.gameObject.transform.parent;
+        originalParent = rootEntity.gameObject.transform.parent;
         SetEditMaterials();
-        SceneController.i.boundariesChecker.AddPersistent(entity);
+        SceneController.i.boundariesChecker.AddPersistent(rootEntity);
     }
 
 
     public void Deselect()
     {
         isSelected = false;
-        entity.gameObject.transform.SetParent(originalParent);
-        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+        rootEntity.gameObject.transform.SetParent(originalParent);
+        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
     }
 
     public void CreateColliders()
     {
-        if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
+        if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
-            CreateCollidersForEntity(entity);
+            CreateCollidersForEntity(rootEntity);
         }
     }
     public void DestroyColliders()
@@ -80,11 +79,11 @@ public class DecentrelandEntityToEdit
 
     void SetOriginalMaterials()
     {
-        if (entity.meshesInfo.renderers != null)
+        if (rootEntity.meshesInfo.renderers != null)
         {
             //originalRenderers.material = originalMaterials;
             int cont = 0;
-            foreach (Renderer renderer in entity.meshesInfo.renderers)
+            foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
             {
                 renderer.material = originalMaterials[cont];
                 cont++;
@@ -93,11 +92,11 @@ public class DecentrelandEntityToEdit
     }
     void SetEditMaterials()
     {
-        if (entity.meshesInfo.renderers != null && entity.meshesInfo.renderers.Length >= 1)
+        if (rootEntity.meshesInfo.renderers != null && rootEntity.meshesInfo.renderers.Length >= 1)
         {
-            originalMaterials = new Material[entity.meshesInfo.renderers.Length];
+            originalMaterials = new Material[rootEntity.meshesInfo.renderers.Length];
             int cont = 0;
-            foreach (Renderer renderer in entity.meshesInfo.renderers)
+            foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
             {
                 originalMaterials[cont] = renderer.material;
                 renderer.material = editMaterial;
