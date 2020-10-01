@@ -127,7 +127,7 @@ export type LoadableParcelScene = {
   contents: Array<ContentMapping>
   baseUrl: string
   baseUrlBundles: string
-  land: ILand
+  land?: ILand
 }
 
 export const BillboardModes = {
@@ -383,7 +383,7 @@ export type Notification = {
 export enum HUDElementID {
   NONE = 0,
   MINIMAP = 1,
-  AVATAR = 2,
+  PROFILE_HUD = 2,
   NOTIFICATION = 3,
   AVATAR_EDITOR = 4,
   SETTINGS = 5,
@@ -399,10 +399,10 @@ export enum HUDElementID {
   NFT_INFO_DIALOG = 16,
   TELEPORT_DIALOG = 17,
   CONTROLS_HUD = 18,
-  EMAIL_PROMPT = 19,
-  EXPLORE_HUD = 20,
-  MANA_HUD = 21,
-  HELP_AND_SUPPORT_HUD = 22
+  EXPLORE_HUD = 19,
+  MANA_HUD = 20,
+  HELP_AND_SUPPORT_HUD = 21,
+  GO_TO_GENESIS_PLAZA_HUD = 22
 }
 
 export type HUDConfiguration = {

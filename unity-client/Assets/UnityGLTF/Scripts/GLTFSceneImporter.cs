@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 #if !WINDOWS_UWP
 using System.Threading;
 #endif
@@ -675,7 +676,7 @@ namespace UnityGLTF
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
-                        PersistentAssetCache.AddBuffer(buffer.Uri, id, new RefCountedStreamData(buffer.Uri, bufferDataStream));
+                        PersistentAssetCache.AddBuffer(buffer.Uri, id, bufferDataStream);
                     }
                 }
 
@@ -1114,24 +1115,83 @@ namespace UnityGLTF
 
             for (var ci = 0; ci < channelCount; ++ci)
             {
-                // copy all key frames data to animation curve and add it to the clip
-                AnimationCurve curve = new AnimationCurve(keyframes[ci]);
+                var name = propertyNames[ci];
 
                 // For cubic spline interpolation, the inTangents and outTangents are already explicitly defined.
                 // For the rest, set them appropriately.
                 if (mode != InterpolationType.CUBICSPLINE)
                 {
                     for (var i = 0; i < keyframes[ci].Length; i++)
-                    {
-                        SetTangentMode(curve, keyframes[ci], i, mode);
-                    }
+                        SetTangentMode(keyframes[ci], i, mode);
                 }
+
+                var optimizedKeyframes = OptimizeKeyFrames(keyframes[ci]);
+
+                // copy all key frames data to animation curve and add it to the clip
+                AnimationCurve curve = new AnimationCurve(optimizedKeyframes);
 
                 clip.SetCurve(relativePath, curveType, propertyNames[ci], curve);
             }
         }
 
-        private static void SetTangentMode(AnimationCurve curve, Keyframe[] keyframes, int keyframeIndex, InterpolationType interpolation)
+        private static float GetDiffAngle(float a1, float a2)
+        {
+            return Mathf.PI - Mathf.Abs(Mathf.Abs(a1 - a2) - Mathf.PI);
+        }
+
+        public static Keyframe[] OptimizeKeyFrames(Keyframe[] rawKeyframes)
+        {
+            if (rawKeyframes.Length <= 2)
+                return rawKeyframes;
+
+            List<Keyframe> result = new List<Keyframe>(2);
+
+            result.Add(rawKeyframes[0]);
+
+            const float TANGENT_THRESHOLD = 0.1f;
+
+            for (int i = 1; i < rawKeyframes.Length - 1; i++)
+            {
+                Keyframe nextKey = rawKeyframes[i + 1];
+                Keyframe prevKey = rawKeyframes[i - 1];
+                Keyframe curKey = rawKeyframes[i];
+
+                float angCurToNext = Mathf.Atan2(nextKey.value - curKey.value, nextKey.time - curKey.time);
+                float angCurToPrev = Mathf.Atan2(curKey.value - prevKey.value, curKey.time - prevKey.time);
+
+                float curOutAngle = Mathf.Atan(curKey.outTangent);
+                float curInAngle = Mathf.Atan(curKey.inTangent);
+
+                //NOTE(Brian): Collinearity tests. Small value = more collinear.
+
+                //NOTE(Brian): curr keyframe out tangent point against path towards the next keyframe.
+                float curOutDiff = GetDiffAngle(curOutAngle, angCurToNext);
+
+                //NOTE(Brian): curr keyframe in tangent point against path towards the prev keyframe.
+                float curInDiff = GetDiffAngle(curInAngle, angCurToPrev);
+
+                //NOTE(Brian): next keyframe in tangent point against path towards the curr keyframe.
+                float nextInDiff = GetDiffAngle(Mathf.Atan(nextKey.inTangent), angCurToNext);
+
+                //NOTE(Brian): prev keyframe out tangent point against path towards the curr keyframe.
+                float prevOutDiff = GetDiffAngle(Mathf.Atan(prevKey.outTangent), angCurToPrev);
+
+                //NOTE(Brian): test if both tangents for the current keyframe are collinear
+                //             (i.e. don't cull broken curves).
+                float sameDiff = GetDiffAngle(curInAngle, curOutAngle);
+
+                float tangentDeviation = Mathf.Abs(curOutDiff + curInDiff + nextInDiff + prevOutDiff + sameDiff);
+
+                if (tangentDeviation > TANGENT_THRESHOLD)
+                    result.Add(curKey);
+            }
+
+            result.Add(rawKeyframes[rawKeyframes.Length - 1]);
+
+            return result.ToArray();
+        }
+
+        private static void SetTangentMode(Keyframe[] keyframes, int keyframeIndex, InterpolationType interpolation)
         {
             var key = keyframes[keyframeIndex];
 
@@ -1150,10 +1210,6 @@ namespace UnityGLTF
                     key.outTangent = float.PositiveInfinity;
                     break;
             }
-
-            // NOTE (Pravs): Khronos GLTFLoader uses curve.MoveKey(keyframeIndex, key) instead but it has problems with same-time keyframes.
-            // Beware that accessing 'curve.keys.Length' in this method generates a memory build crash with complex animations...
-            curve.AddKey(key.time, key.value);
         }
 
         private static float GetCurveKeyframeLeftLinearSlope(Keyframe[] keyframes, int keyframeIndex)
@@ -1232,7 +1288,6 @@ namespace UnityGLTF
                 yield return ConstructMaterialImageBuffers(gltfMaterial);
             }
 
-
             for (int i = 0; i < nodesWithMeshes.Count; i++)
             {
                 NodeId_Like nodeId = nodesWithMeshes[i];
@@ -1243,7 +1298,6 @@ namespace UnityGLTF
                     meshId: node.Mesh.Id,
                     skin: node.Skin != null ? node.Skin.Value : null);
             }
-
 
             if (_gltfRoot.Animations != null && _gltfRoot.Animations.Count > 0)
             {
@@ -2378,11 +2432,14 @@ namespace UnityGLTF
                 else
                 {
                     yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-                    source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId]);
 
-                    if (image.Uri != null && addImagesToPersistentCaching)
+                    if (addImagesToPersistentCaching)
                     {
-                        PersistentAssetCache.AddImage(image.Uri, id, source);
+                        source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
+                    }
+                    else
+                    {
+                        source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
                     }
                 }
 
@@ -2442,7 +2499,7 @@ namespace UnityGLTF
                         // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
                         unityTexture.Apply(false, true);
 #endif
-                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
+                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData( PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
                     }
                     else
                     {

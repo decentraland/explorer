@@ -102,9 +102,20 @@ namespace DCL
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
 
             avatarName.SetName(model.name);
+            avatarName.SetTalking(model.talking);
 
             everythingIsLoaded = true;
 
+            onPointerDown.collider.enabled = true;
+        }
+
+        public void DisablePassport()
+        {
+            onPointerDown.collider.enabled = false;
+        }
+
+        public void EnablePassport()
+        {
             onPointerDown.collider.enabled = true;
         }
 

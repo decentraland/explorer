@@ -2,7 +2,7 @@ using UnityEngine;
 using DCL.Interface;
 using DCL.Helpers;
 using System.Collections;
-using DCL.Tutorial;
+using System;
 
 public class EmailPromptHUDController : IHUD
 {
@@ -12,6 +12,10 @@ public class EmailPromptHUDController : IHUD
 
     bool isPopupRoutineRunning = false;
     Coroutine showPopupDelayedRoutine;
+
+    public event Action OnSetEmailFlag;
+
+    public bool waitForEndOfTutorial { get; set; } = false;
 
     public EmailPromptHUDController()
     {
@@ -33,15 +37,13 @@ public class EmailPromptHUDController : IHUD
             view.showHideAnimator.Show();
             WebInterface.ReportAnalyticsEvent("open email popup");
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
+            AudioScriptableObjects.fadeIn.Play(true);
         }
         else
         {
             view.showHideAnimator.Hide();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
+            AudioScriptableObjects.fadeOut.Play(true);
         }
     }
 
@@ -90,6 +92,7 @@ public class EmailPromptHUDController : IHUD
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+        yield return new WaitUntil(() => !waitForEndOfTutorial);
         SetVisibility(true);
         isPopupRoutineRunning = false;
     }
@@ -117,6 +120,6 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        TutorialController.i.SetStepCompleted(TutorialController.TutorialStep.EmailRequested);
+        OnSetEmailFlag?.Invoke();
     }
 }

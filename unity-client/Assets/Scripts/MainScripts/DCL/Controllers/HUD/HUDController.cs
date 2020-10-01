@@ -1,4 +1,5 @@
 using DCL.HelpAndSupportHUD;
+using DCL.GoToGenesisPlazaHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,7 +24,8 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
     }
 
-    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.AVATAR) as Legacy.AvatarHUDController;
+    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.PROFILE_HUD) as Legacy.AvatarHUDController;
+    public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -64,11 +66,11 @@ public class HUDController : MonoBehaviour
 
     public ControlsHUDController controlsHud => GetHUDElement(HUDElementID.CONTROLS_HUD) as ControlsHUDController;
 
-    public EmailPromptHUDController emailPromptHud => GetHUDElement(HUDElementID.EMAIL_PROMPT) as EmailPromptHUDController;
-
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
+
+    public GoToGenesisPlazaHUDController goToGenesisPlazaHud => GetHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD) as GoToGenesisPlazaHUDController;
 
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
 
@@ -114,7 +116,7 @@ public class HUDController : MonoBehaviour
     {
         NONE = 0,
         MINIMAP = 1,
-        AVATAR = 2,
+        PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
         SETTINGS = 5,
@@ -131,10 +133,10 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        EMAIL_PROMPT = 19,
-        EXPLORE_HUD = 20,
-        MANA_HUD = 21,
-        HELP_AND_SUPPORT_HUD = 22,
+        EXPLORE_HUD = 19,
+        MANA_HUD = 20,
+        HELP_AND_SUPPORT_HUD = 21,
+        GO_TO_GENESIS_PLAZA_HUD = 22,
         COUNT = 23
     }
 
@@ -174,8 +176,16 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MINIMAP:
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.AVATAR:
-                CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
+            case HUDElementID.PROFILE_HUD:
+                var avatarHudConfig = JsonUtility.FromJson<Legacy.AvatarHUDConfiguration>(extraPayload);
+                if (avatarHudConfig != null && avatarHudConfig.useNewVersion)
+                {
+                    CreateHudElement<ProfileHUDController>(configuration, hudElementId);
+                }
+                else
+                {
+                    CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
+                }
 
                 if (avatarHud_Legacy != null)
                 {
@@ -309,13 +319,6 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
                 taskbarHud?.AddControlsMoreOption();
                 break;
-            case HUDElementID.EMAIL_PROMPT:
-                if (emailPromptHud == null)
-                {
-                    CreateHudElement<EmailPromptHUDController>(configuration, hudElementId);
-                }
-                emailPromptHud?.SetEnable(configuration.active);
-                break;
             case HUDElementID.EXPLORE_HUD:
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
@@ -330,6 +333,10 @@ public class HUDController : MonoBehaviour
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
+                break;
+            case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
+                CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
+                taskbarHud?.AddGoToGenesisWindow(goToGenesisPlazaHud);
                 break;
         }
 
@@ -417,6 +424,11 @@ public class HUDController : MonoBehaviour
             mail = ownUserProfile.email,
             avatarPic = ownUserProfile.faceSnapshot
         });
+    }
+
+    public void SetPlayerTalking(string talking)
+    {
+        avatarHud_Legacy.SetTalking("true".Equals(talking));
     }
 
     public void RequestTeleport(string teleportDataJson)

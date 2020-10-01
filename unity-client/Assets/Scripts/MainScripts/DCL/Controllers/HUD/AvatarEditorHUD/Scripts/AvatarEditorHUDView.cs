@@ -49,7 +49,6 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button randomizeButton;
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
-    [SerializeField] internal AvatarEditorHUDAudioHandler audioHandler;
 
     [Header("Collectibles")] [SerializeField]
     internal GameObject web3Container;
@@ -61,6 +60,13 @@ public class AvatarEditorHUDView : MonoBehaviour
     internal static CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
+
+    [HideInInspector]
+    public event System.Action<AvatarModel> OnAvatarAppear;
+    [HideInInspector]
+    public event System.Action<bool> OnSetVisibility;
+    [HideInInspector]
+    public event System.Action OnRandomize;
 
     private void Awake()
     {
@@ -229,33 +235,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                 if (doneButton != null)
                     doneButton.interactable = true;
 
-                AudioContainer audioContainer = null;
-                if (audioHandler != null)
-                    audioContainer = audioHandler.GetComponent<AudioContainer>();
-
-                if (audioContainer != null && isOpen)
-                {
-                    audioContainer.GetEvent("AvatarAppear").Play();
-                    audioHandler.PlayRarity();
-
-                    // Play a voice reaction sound from the avatar
-                    if (Random.Range(0f, 1f) > 0.4f)
-                    {
-                        AudioEvent eventReaction = null;
-                        if (avatarModel.bodyShape.Contains("Female"))
-                            eventReaction = audioContainer.GetEvent("ReactionFemale");
-                        else
-                            eventReaction = audioContainer.GetEvent("ReactionMale");
-
-                        if (eventReaction != null)
-                        {
-                            if (!eventReaction.source.isPlaying)
-                                eventReaction.PlayScheduled(0.6f);
-                        }
-                    }
-                }
-
-                
+                OnAvatarAppear?.Invoke(avatarModel);
             });
     }
 
@@ -312,6 +292,7 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     private void OnRandomizeButton()
     {
+        OnRandomize?.Invoke();
         controller.RandomizeWearables();
     }
 
@@ -336,17 +317,20 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void SetVisibility(bool visible)
     {
-        if (HUDAudioPlayer.i != null)
-        {
-            if (visible && !isOpen)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-            else if (isOpen)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
-        }
-
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
+
+        if (visible && !isOpen)
+        {
+            AudioScriptableObjects.dialogOpen.Play(true);
+            OnSetVisibility?.Invoke(visible);
+        }
+        else if (!visible && isOpen)
+        {
+            AudioScriptableObjects.dialogClose.Play(true);
+            OnSetVisibility?.Invoke(visible);
+        }
 
         isOpen = visible;
     }

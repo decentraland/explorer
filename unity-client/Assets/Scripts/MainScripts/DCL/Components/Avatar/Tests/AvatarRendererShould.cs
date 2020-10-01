@@ -54,9 +54,9 @@ namespace AvatarShape_Tests
             avatarRenderer.ApplyModel(avatarModel, () => success = true, null);
             yield return new DCL.WaitUntil(() => success, 4);
 
+            LogAssert.Expect(LogType.Error, "Bodyshape Invalid_id not found in catalog");
             LogAssert.Expect(LogType.Error, "Wearable Scioli_right_arm not found in catalog");
             LogAssert.Expect(LogType.Error, "Wearable Peron_hands not found in catalog");
-            LogAssert.Expect(LogType.Error, "Wearable Invalid_id not found in catalog");
 
             UnityEngine.Assertions.Assert.IsTrue(success);
         }
@@ -174,6 +174,49 @@ namespace AvatarShape_Tests
             avatarRenderer.SetVisibility(false);
 
             Assert.IsTrue(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).myAssetRenderers.All(x => !x.enabled));
+        }
+
+        [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
+        public IEnumerator ProcessHideListProperly_HeadHidden()
+        {
+            //Clean hides/replaces to avoid interferences
+            CleanWearableHidesAndReplaces(SUNGLASSES_ID);
+            CleanWearableHidesAndReplaces(BLUE_BANDANA_ID);
+            catalog.Get(SUNGLASSES_ID).hides = new [] { WearableLiterals.Misc.HEAD};
+
+            avatarModel.wearables = new List<string>() {SUNGLASSES_ID};
+
+            bool ready = false;
+            avatarRenderer.ApplyModel(avatarModel, () => ready = true, null);
+            yield return new DCL.WaitUntil(() => ready);
+
+            Assert.IsFalse(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).headRenderer.enabled);
+            Assert.IsFalse(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).eyebrowsRenderer.enabled);
+            Assert.IsFalse(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).eyesRenderer.enabled);
+            Assert.IsFalse(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).mouthRenderer.enabled);
+        }
+
+        [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
+        public IEnumerator ProcessHideListProperly_HeadShowing()
+        {
+            //Clean hides/replaces to avoid interferences
+            CleanWearableHidesAndReplaces(SUNGLASSES_ID);
+            CleanWearableHidesAndReplaces(BLUE_BANDANA_ID);
+
+            avatarModel.wearables = new List<string>() {SUNGLASSES_ID};
+
+            bool ready = false;
+            avatarRenderer.ApplyModel(avatarModel, () => ready = true, null);
+            yield return new DCL.WaitUntil(() => ready);
+
+            Assert.IsTrue(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).headRenderer.enabled);
+            Assert.IsTrue(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).eyebrowsRenderer.enabled);
+            Assert.IsTrue(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).eyesRenderer.enabled);
+            Assert.IsTrue(AvatarRenderer_Mock.GetBodyShapeController(avatarRenderer).mouthRenderer.enabled);
         }
 
         [UnityTest]
