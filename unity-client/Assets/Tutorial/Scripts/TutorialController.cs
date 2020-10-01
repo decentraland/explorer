@@ -158,6 +158,11 @@ namespace DCL.Tutorial
             ShowTeacher3DModel(false);
             WebInterface.SetDelightedSurveyEnabled(true);
 
+            if (!alreadyOpenedFromDeepLink)
+            {
+                WebInterface.SendSceneExternalActionEvent(SceneController.i.currentSceneId,"tutorial","end");
+            }
+
             NotificationsController.disableWelcomeNotification = false;
 
             if (hudController != null && hudController.emailPromptHud != null)

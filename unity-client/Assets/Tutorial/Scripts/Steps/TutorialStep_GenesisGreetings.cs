@@ -1,4 +1,6 @@
 using System.Collections;
+using DCL.Controllers;
+using DCL.Interface;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,6 +32,14 @@ namespace DCL.Tutorial
             tutorialController.SetTeacherCanvasSortingOrder(TEACHER_CANVAS_SORT_ORDER_START);
 
             tutorialController.hudController?.taskbarHud?.SetVisibility(false);
+
+            if (tutorialController)
+            {
+                if (!tutorialController.alreadyOpenedFromDeepLink)
+                {
+                    WebInterface.SendSceneExternalActionEvent(SceneController.i.currentSceneId,"tutorial","begin");
+                }
+            }
         }
 
         public override IEnumerator OnStepExecute()
