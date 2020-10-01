@@ -676,7 +676,7 @@ namespace UnityGLTF
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
-                        PersistentAssetCache.AddBuffer(buffer.Uri, id, new RefCountedStreamData(buffer.Uri, bufferDataStream));
+                        PersistentAssetCache.AddBuffer(buffer.Uri, id, bufferDataStream);
                     }
                 }
 
@@ -2428,22 +2428,24 @@ namespace UnityGLTF
 
             RefCountedTextureData source = null;
 
-            if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
-            {
-                source = PersistentAssetCache.GetImage(image.Uri, id);
-                _assetCache.ImageCache[sourceId] = source.Texture;
-            }
-            else
-            {
-                yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-
-                source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId] ?? Texture2D.whiteTexture);
-
-                if (image.Uri != null && addImagesToPersistentCaching)
+                if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
                 {
-                    PersistentAssetCache.AddImage(image.Uri, id, source);
+                    source = PersistentAssetCache.GetImage(image.Uri, id);
+                    _assetCache.ImageCache[sourceId] = source.Texture;
                 }
-            }
+                else
+                {
+                    yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
+
+                    if (addImagesToPersistentCaching)
+                    {
+                        source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
+                    }
+                    else
+                    {
+                        source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
+                    }
+                }
 
             var desiredFilterMode = FilterMode.Bilinear;
             var desiredWrapMode = TextureWrapMode.Repeat;
@@ -2498,16 +2500,17 @@ namespace UnityGLTF
                     unityTexture.wrapMode = desiredWrapMode;
 
 #if !UNITY_EDITOR
-                        // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
-                        unityTexture.Apply(false, true);
+                    // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
+                    unityTexture.Apply(false, true);
 #endif
-                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
+                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData( PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
                 }
                 else
                 {
                     Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
                     _assetCache.TextureCache[textureIndex].CachedTexture = source;
                 }
+                
             }
         }
 
