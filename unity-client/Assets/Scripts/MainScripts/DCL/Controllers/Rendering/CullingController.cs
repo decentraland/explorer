@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 using UnityGLTF.Cache;
 using Object = System.Object;
 
@@ -34,17 +35,18 @@ public class CullingController : MonoBehaviour
     private HashSet<Material> uniqueMaterials = new HashSet<Material>();
     private Dictionary<Material, List<Renderer>> matToRends = new Dictionary<Material, List<Renderer>>();
 
-    private int cachedMats = 0;
     public static bool cullingListDirty = true;
     public static Vector3 lastPlayerPos;
 
-    public TextMeshProUGUI panel;
+    public Text panel;
 
     void UpdatePanel()
     {
         int rendererCount = (rs?.Length ?? 0) + (skrs?.Length ?? 0);
-        panel.text = $"Renderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
-        panel.text += $"\nUnique materials: {uniqueMaterials.Count} (cached {cachedMats})";
+
+        string text = $"Renderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
+        text += $"\nUnique materials: {uniqueMaterials.Count}";
+        panel.text = text;
     }
 
     void DrawBounds(Bounds b, Color color, float delay = 0)
@@ -85,7 +87,6 @@ public class CullingController : MonoBehaviour
         skrs = FindObjectsOfType<SkinnedMeshRenderer>();
         yield return null;
         uniqueMaterials.Clear();
-        cachedMats = 0;
 
         foreach (var r in rs)
         {
@@ -99,15 +100,7 @@ public class CullingController : MonoBehaviour
                 matToRends[m].Add(r);
 
                 if (!uniqueMaterials.Contains(m))
-                {
                     uniqueMaterials.Add(m);
-                    string crc = m.ComputeCRC().ToString();
-
-                    if (PersistentAssetCache.MaterialCacheByCRC.ContainsKey(crc))
-                    {
-                        cachedMats++;
-                    }
-                }
             }
         }
     }
@@ -188,10 +181,13 @@ public class CullingController : MonoBehaviour
 
                     bool isOpaque = true;
 
-                    if (r.sharedMaterials[0].HasProperty("_ZWrite") &&
-                        r.sharedMaterials[0].GetFloat("_ZWrite") == 0)
+                    if (r.sharedMaterials[0] != null)
                     {
-                        isOpaque = false;
+                        if (r.sharedMaterials[0].HasProperty("_ZWrite") &&
+                            r.sharedMaterials[0].GetFloat("_ZWrite") == 0)
+                        {
+                            isOpaque = false;
+                        }
                     }
 
                     if (isOpaque)

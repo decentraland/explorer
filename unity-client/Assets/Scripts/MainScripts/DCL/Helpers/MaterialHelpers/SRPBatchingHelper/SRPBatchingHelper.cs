@@ -41,13 +41,13 @@ namespace DCL.Helpers
     {
         static Dictionary<int, int> crcToQueue = new Dictionary<int, int>();
 
-        public static void OptimizeMaterial(Renderer renderer, Material material)
+        public static void OptimizeMaterial(Material material)
         {
             //NOTE(Brian): Just enable these keywords so the SRP batcher batches more stuff.
             material.EnableKeyword("_EMISSION");
             material.EnableKeyword("_NORMALMAP");
 
-            material.enableInstancing = true;
+            material.enableInstancing = false;
 
             int zWrite = (int) material.GetFloat(ShaderUtils._ZWrite);
 

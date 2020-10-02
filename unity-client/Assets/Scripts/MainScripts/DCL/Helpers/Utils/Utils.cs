@@ -46,7 +46,7 @@ namespace DCL.Helpers
         {
             if (r != null)
             {
-                foreach (Material m in r.materials)
+                foreach (Material m in r.sharedMaterials)
                 {
                     if (m != null)
                     {
@@ -125,7 +125,6 @@ namespace DCL.Helpers
         }
 
 
-
         /// <summary>
         /// Reimplementation of the LayoutRebuilder.ForceRebuildLayoutImmediate() function (Unity UI API) for make it more performant.
         /// </summary>
@@ -137,7 +136,7 @@ namespace DCL.Helpers
             // NOTE(Santi): It seems to be very much cheaper to execute the next instructions manually than execute directly the function
             //              'LayoutRebuilder.ForceRebuildLayoutImmediate()', that theorically already contains these instructions.
             var layoutElements = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutElement), true).ToList();
-            layoutElements.RemoveAll(e => (e is Behaviour && !((Behaviour)e).isActiveAndEnabled) || e is TextMeshProUGUI);
+            layoutElements.RemoveAll(e => (e is Behaviour && !((Behaviour) e).isActiveAndEnabled) || e is TextMeshProUGUI);
             foreach (var layoutElem in layoutElements)
             {
                 (layoutElem as ILayoutElement).CalculateLayoutInputHorizontal();
@@ -145,7 +144,7 @@ namespace DCL.Helpers
             }
 
             var layoutControllers = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutController), true).ToList();
-            layoutControllers.RemoveAll(e => e is Behaviour && !((Behaviour)e).isActiveAndEnabled);
+            layoutControllers.RemoveAll(e => e is Behaviour && !((Behaviour) e).isActiveAndEnabled);
             foreach (var layoutCtrl in layoutControllers)
             {
                 (layoutCtrl as ILayoutController).SetLayoutHorizontal();

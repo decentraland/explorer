@@ -1758,7 +1758,7 @@ namespace UnityGLTF
                 usedMaterials.Add(material);
             }
 
-            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(renderer, material);
+            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(material);
 
             if (matController != null)
             {
@@ -2499,7 +2499,7 @@ namespace UnityGLTF
                         // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
                         unityTexture.Apply(false, true);
 #endif
-                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData( PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
+                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
                     }
                     else
                     {
