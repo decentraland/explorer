@@ -1,3 +1,4 @@
+using DCL;
 using UnityEngine;
 using DCL.Interface;
 
@@ -5,13 +6,17 @@ public class ProfileHUDController : IHUD
 {
     private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
 
+    public bool talking { get; private set; }
+
     internal ProfileHUDView view;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
-    public bool talking { get; private set; }
+    private IMouseCatcher mouseCatcher;
 
     public ProfileHUDController()
     {
+        mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
+
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
 
@@ -19,6 +24,7 @@ public class ProfileHUDController : IHUD
         view.buttonClaimName.onClick.AddListener(()=> WebInterface.OpenURL(URL_CLAIM_NAME));
 
         ownUserProfile.OnUpdate += OnProfileUpdated;
+        if (mouseCatcher != null) mouseCatcher.OnMouseLock += OnMouseLocked;
     }
 
     public void SetVisibility(bool visible)
@@ -39,10 +45,16 @@ public class ProfileHUDController : IHUD
             Object.Destroy(view.gameObject);
         }
         ownUserProfile.OnUpdate -= OnProfileUpdated;
+        if (mouseCatcher != null) mouseCatcher.OnMouseLock -= OnMouseLocked;
     }
 
     void OnProfileUpdated(UserProfile profile)
     {
         view?.SetProfile(profile);
+    }
+
+    void OnMouseLocked()
+    {
+        view.HideMenu();
     }
 }

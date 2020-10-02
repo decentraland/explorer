@@ -75,6 +75,14 @@ internal class ProfileHUDView : MonoBehaviour
         }
     }
 
+    public void HideMenu()
+    {
+        if (showHideAnimator.isVisible)
+        {
+            showHideAnimator.Hide();
+        }
+    }
+
     private void HandleProfileSnapshot(UserProfile userProfile)
     {
         if (profile)
