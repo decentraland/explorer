@@ -34,9 +34,6 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
 
-    [Header("Talking Feedback")]
-    [SerializeField] private GameObject playerTalkingIcon;
-
     private Coroutine copyToastRoutine = null;
     private UserProfile profile = null;
 
@@ -172,10 +169,5 @@ internal class ProfileHUDView : MonoBehaviour
         copyToast.Show();
         yield return new WaitForSeconds(COPY_TOAST_VISIBLE_TIME);
         copyToast.Hide();
-    }
-
-    internal void SetTalking(bool talking)
-    {
-        playerTalkingIcon.SetActive(talking);
     }
 }

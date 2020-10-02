@@ -12,7 +12,8 @@ import {
   NO_MOTD,
   DEBUG_PM,
   OPEN_AVATAR_EDITOR,
-  HAS_INITIAL_POSITION_MARK
+  HAS_INITIAL_POSITION_MARK,
+  VOICE_CHAT_ENABLED
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
@@ -54,7 +55,7 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: VOICE_CHAT_ENABLED })
     i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })

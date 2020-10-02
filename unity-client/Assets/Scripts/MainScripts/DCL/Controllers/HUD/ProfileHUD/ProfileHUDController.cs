@@ -6,8 +6,6 @@ public class ProfileHUDController : IHUD
 {
     private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
 
-    public bool talking { get; private set; }
-
     internal ProfileHUDView view;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -30,12 +28,6 @@ public class ProfileHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view?.gameObject.SetActive(visible);
-    }
-
-    public void SetTalking(bool value)
-    {
-        talking = value;
-        view.SetTalking(talking);
     }
 
     public void Dispose()

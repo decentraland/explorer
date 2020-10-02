@@ -264,12 +264,19 @@ public class HUDController : MonoBehaviour
 
                     if (taskbarHud != null)
                     {
+                        var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
+
                         taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i, FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
                         taskbarHud.AddSettingsWindow(settingsHud);
                         taskbarHud.AddBackpackWindow(avatarEditorHud);
+
+                        if (config.enableVoiceChat)
+                        {
+                            taskbarHud.OnAddVoiceChat();
+                        }
                     }
                 }
                 else
@@ -393,7 +400,7 @@ public class HUDController : MonoBehaviour
 
     public void SetPlayerTalking(string talking)
     {
-        profileHud.SetTalking("true".Equals(talking));
+        taskbarHud?.SetVoiceChatRecording("true".Equals(talking));
     }
 
     public void RequestTeleport(string teleportDataJson)

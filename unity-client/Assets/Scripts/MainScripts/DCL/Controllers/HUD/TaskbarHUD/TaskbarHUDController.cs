@@ -1,3 +1,4 @@
+using System;
 using DCL;
 using DCL.GoToGenesisPlazaHUD;
 using DCL.HelpAndSupportHUD;
@@ -10,6 +11,12 @@ using UnityEngine.EventSystems;
 
 public class TaskbarHUDController : IHUD
 {
+    [Serializable]
+    public struct Configuration
+    {
+        public bool enableVoiceChat;
+    }
+
     public TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
@@ -389,6 +396,11 @@ public class TaskbarHUDController : IHUD
         };
     }
 
+    public void OnAddVoiceChat()
+    {
+        view.OnAddVoiceChat();
+    }
+
     public void ShowGoToGenesisPlazaButton()
     {
         view.OnAddGoToGenesisWindow(true);
@@ -497,6 +509,11 @@ public class TaskbarHUDController : IHUD
         view.chatButton.SetToggleState(false, false);
         worldChatWindowHud.view.chatHudView.ResetInputField();
         worldChatWindowHud.view.ActivatePreview();
+    }
+
+    public void SetVoiceChatRecording(bool recording)
+    {
+        view?.voiceChatButton.SetOnRecording(recording);
     }
 
     private void OnFriendsToggleInputPress()

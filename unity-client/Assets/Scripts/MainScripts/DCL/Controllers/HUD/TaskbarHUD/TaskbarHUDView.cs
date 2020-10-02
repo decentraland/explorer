@@ -13,6 +13,8 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal RectTransform leftWindowContainer;
     [SerializeField] internal ShowHideAnimator leftWindowContainerAnimator;
     [SerializeField] internal LayoutGroup leftWindowContainerLayout;
+    [SerializeField] internal GameObject voiceChatButtonContainer;
+    [SerializeField] internal VoiceChatButton voiceChatButton;
     [SerializeField] internal TaskbarButton chatButton;
     [SerializeField] internal TaskbarButton friendsButton;
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
@@ -85,6 +87,7 @@ public class TaskbarHUDView : MonoBehaviour
         backpackButton.transform.parent.gameObject.SetActive(false);
         exploreButton.transform.parent.gameObject.SetActive(false);
         goToGenesisButton.transform.parent.gameObject.SetActive(false);
+        voiceChatButtonContainer.SetActive(false);
 
         moreButton.gameObject.SetActive(true);
         moreMenu.Initialize(this);
@@ -231,6 +234,11 @@ public class TaskbarHUDView : MonoBehaviour
     internal void OnAddControlsMoreOption()
     {
         moreMenu.ActivateControlsButton();
+    }
+
+    internal void OnAddVoiceChat()
+    {
+        voiceChatButtonContainer.SetActive(true);
     }
 
     internal void ShowBar(bool visible, bool instant = false)
