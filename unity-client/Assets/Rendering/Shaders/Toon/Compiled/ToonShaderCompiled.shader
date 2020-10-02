@@ -9,12 +9,12 @@
         [NoScaleOffset]_MatCap("Diffuse MatCap", 2D) = "white" {}
         [NoScaleOffset]_GlossMatCap("Gloss MatCap", 2D) = "white" {}
         [NoScaleOffset]_FresnelMatCap("Fresnel MatCap", 2D) = "white" {}
-        
-		[HideInInspector] _AlphaClip("__clip", Float) = 0.0
-		[HideInInspector] _SrcBlend("__src", Float) = 1.0
-		[HideInInspector] _DstBlend("__dst", Float) = 0.0
-		[HideInInspector] _ZWrite("__zw", Float) = 1.0
-		[HideInInspector] _Cull("__cull", Float) = 2.0
+        _SSSIntensity("SSS Intensity", Float) = 0
+        _SSSParams("SSSParams", Vector) = (0, 0, 0, 0)
+        [HideInInspector] _SrcBlend("__src", Float) = 1.0
+        [HideInInspector] _DstBlend("__dst", Float) = 0.0
+        [HideInInspector] _ZWrite("__zw", Float) = 1.0
+        [HideInInspector] _Cull("__cull", Float) = 2.0
     }
 
     SubShader
@@ -32,11 +32,10 @@
                 // LightMode: <None>
             }
            
+            // Render State
             Blend [_SrcBlend][_DstBlend]
             ZWrite [_ZWrite]
-            Cull [_Cull]            
-            // ColorMask: <None>
-            
+            Cull [_Cull]
         
             HLSLPROGRAM
             #pragma vertex vert
@@ -61,15 +60,24 @@
             #pragma shader_feature _ _SAMPLE_GI
             #pragma shader_feature _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
+            #pragma shader_feature_local _ _RECEIVE_SHADOWS_OFF
             
-            #if defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT)
+            #if defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT) && defined(_RECEIVE_SHADOWS_OFF)
                 #define KEYWORD_PERMUTATION_0
-            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT)
                 #define KEYWORD_PERMUTATION_1
-            #elif defined(_SHADOWS_SOFT)
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_RECEIVE_SHADOWS_OFF)
                 #define KEYWORD_PERMUTATION_2
-            #else
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE)
                 #define KEYWORD_PERMUTATION_3
+            #elif defined(_SHADOWS_SOFT) && defined(_RECEIVE_SHADOWS_OFF)
+                #define KEYWORD_PERMUTATION_4
+            #elif defined(_SHADOWS_SOFT)
+                #define KEYWORD_PERMUTATION_5
+            #elif defined(_RECEIVE_SHADOWS_OFF)
+                #define KEYWORD_PERMUTATION_6
+            #else
+                #define KEYWORD_PERMUTATION_7
             #endif
             
             
@@ -80,15 +88,15 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_NORMAL
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_TANGENT
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_TEXCOORD0
         #endif
         
@@ -96,16 +104,16 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define VARYINGS_NEED_POSITION_WS 
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define VARYINGS_NEED_NORMAL_WS
         #endif
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define VARYINGS_NEED_TEXCOORD0
         #endif
         
@@ -113,7 +121,7 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define VARYINGS_NEED_VIEWDIRECTION_WS
         #endif
         
@@ -137,12 +145,20 @@
             CBUFFER_START(UnityPerMaterial)
             float4 _BaseColor;
             float4 _EmissionColor;
+            float _SSSIntensity;
+            float4 _SSSParams;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); float4 _BaseMap_TexelSize;
             TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap); float4 _EmissionMap_TexelSize;
             TEXTURE2D(_MatCap); SAMPLER(sampler_MatCap); float4 _MatCap_TexelSize;
             TEXTURE2D(_GlossMatCap); SAMPLER(sampler_GlossMatCap); float4 _GlossMatCap_TexelSize;
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
+            float3 _LightDir;
+            SAMPLER(_SampleTexture2D_F1EE66C6_Sampler_3_Linear_Repeat);
+            SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
+            SAMPLER(_SampleTexture2D_ED76F6F0_Sampler_3_Linear_Repeat);
+            SAMPLER(_SampleTexture2D_373639E5_Sampler_3_Linear_Repeat);
+            SAMPLER(_SampleTexture2D_D0991351_Sampler_3_Linear_Repeat);
         
             // Graph Functions
             
@@ -182,17 +198,9 @@
                 Alpha_2 = _Multiply_39CACBA9_Out_2;
             }
             
-            // 30e7511c83704777d308b3476b8fa14a
-            #include "Assets/ToonShader/MainLight.hlsl"
-            
             void Unity_Normalize_float3(float3 In, out float3 Out)
             {
                 Out = normalize(In);
-            }
-            
-            void Unity_Lerp_float3(float3 A, float3 B, float3 T, out float3 Out)
-            {
-                Out = lerp(A, B, T);
             }
             
             void Unity_Add_float3(float3 A, float3 B, out float3 Out)
@@ -241,7 +249,7 @@
                 float3 WorldSpaceViewDirection;
             };
             
-            void SG_ToonShader_4cadc1cb7cae444909bd6637f15fdf84(TEXTURE2D_PARAM(Texture2D_8319D4A3, samplerTexture2D_8319D4A3), float4 Texture2D_8319D4A3_TexelSize, TEXTURE2D_PARAM(Texture2D_E7BDB00A, samplerTexture2D_E7BDB00A), float4 Texture2D_E7BDB00A_TexelSize, TEXTURE2D_PARAM(Texture2D_73021B24, samplerTexture2D_73021B24), float4 Texture2D_73021B24_TexelSize, float Vector1_1431D892, float Vector1_C2B7F43A, float4 Vector4_453A6B1F, float Vector1_55629F98, float4 Vector4_752D3319, float3 Vector3_FEFB7F68, float4 Vector4_D503119C, Bindings_ToonShader_4cadc1cb7cae444909bd6637f15fdf84 IN, out float4 OutVector4_1)
+            void SG_ToonShader_4cadc1cb7cae444909bd6637f15fdf84(TEXTURE2D_PARAM(Texture2D_8319D4A3, samplerTexture2D_8319D4A3), float4 Texture2D_8319D4A3_TexelSize, TEXTURE2D_PARAM(Texture2D_E7BDB00A, samplerTexture2D_E7BDB00A), float4 Texture2D_E7BDB00A_TexelSize, TEXTURE2D_PARAM(Texture2D_73021B24, samplerTexture2D_73021B24), float4 Texture2D_73021B24_TexelSize, float Vector1_1431D892, float Vector1_C2B7F43A, float4 Vector4_453A6B1F, float Vector1_55629F98, float4 Vector4_752D3319, float3 Vector3_FEFB7F68, float4 Vector4_D503119C, float Vector1_11D631DE, float4 Vector4_92D383D7, Bindings_ToonShader_4cadc1cb7cae444909bd6637f15fdf84 IN, out float4 OutVector4_1)
             {
                 float4 _Property_901B8B6D_Out_0 = Vector4_D503119C;
                 float3 _Normalize_8273837E_Out_1;
@@ -259,8 +267,8 @@
                 float _Power_5DFD9006_Out_2;
                 Unity_Power_float(_DotProduct_76A480D2_Out_2, _Property_C53F68C2_Out_0, _Power_5DFD9006_Out_2);
                 float _Clamp_D9CC571E_Out_3;
-                Unity_Clamp_float(_Power_5DFD9006_Out_2, 0.4, 0.99, _Clamp_D9CC571E_Out_3);
-                float2 _Vector2_44A7BA58_Out_0 = float2(_Clamp_D9CC571E_Out_3, 0.6);
+                Unity_Clamp_float(_Power_5DFD9006_Out_2, 0.38, 0.99, _Clamp_D9CC571E_Out_3);
+                float2 _Vector2_44A7BA58_Out_0 = float2(_Clamp_D9CC571E_Out_3, 1.2);
                 float4 _SampleTexture2D_ED76F6F0_RGBA_0 = SAMPLE_TEXTURE2D(Texture2D_E7BDB00A, samplerTexture2D_E7BDB00A, _Vector2_44A7BA58_Out_0);
                 float _SampleTexture2D_ED76F6F0_R_4 = _SampleTexture2D_ED76F6F0_RGBA_0.r;
                 float _SampleTexture2D_ED76F6F0_G_5 = _SampleTexture2D_ED76F6F0_RGBA_0.g;
@@ -310,19 +318,18 @@
                 Unity_DotProduct_float3(IN.WorldSpaceNormal, _Property_8698A325_Out_0, _DotProduct_1FDA7E42_Out_2);
                 float _Remap_8C993BE6_Out_3;
                 Unity_Remap_float(_DotProduct_1FDA7E42_Out_2, float2 (-1, 1), float2 (0.01, 0.99), _Remap_8C993BE6_Out_3);
-                float4 _Property_325E7392_Out_0 = Vector4_D503119C;
-                float _Split_9A7EC216_R_1 = _Property_325E7392_Out_0[0];
-                float _Split_9A7EC216_G_2 = _Property_325E7392_Out_0[1];
-                float _Split_9A7EC216_B_3 = _Property_325E7392_Out_0[2];
-                float _Split_9A7EC216_A_4 = _Property_325E7392_Out_0[3];
-                float2 _Vector2_5DAC94A7_Out_0 = float2(_Remap_8C993BE6_Out_3, _Split_9A7EC216_A_4);
+                float _Vector1_CA43906C_Out_0 = 1;
+                float2 _Vector2_5DAC94A7_Out_0 = float2(_Remap_8C993BE6_Out_3, _Vector1_CA43906C_Out_0);
                 float4 _SampleTexture2D_D0991351_RGBA_0 = SAMPLE_TEXTURE2D(Texture2D_73021B24, samplerTexture2D_73021B24, _Vector2_5DAC94A7_Out_0);
                 float _SampleTexture2D_D0991351_R_4 = _SampleTexture2D_D0991351_RGBA_0.r;
                 float _SampleTexture2D_D0991351_G_5 = _SampleTexture2D_D0991351_RGBA_0.g;
                 float _SampleTexture2D_D0991351_B_6 = _SampleTexture2D_D0991351_RGBA_0.b;
                 float _SampleTexture2D_D0991351_A_7 = _SampleTexture2D_D0991351_RGBA_0.a;
+                float4 Color_348AB651 = IsGammaSpace() ? float4(0.7075472, 0.7075472, 0.7075472, 0) : float4(SRGBToLinear(float3(0.7075472, 0.7075472, 0.7075472)), 0);
+                float4 _Multiply_A21999C2_Out_2;
+                Unity_Multiply_float(_SampleTexture2D_D0991351_RGBA_0, Color_348AB651, _Multiply_A21999C2_Out_2);
                 float4 _Add_2FDF1664_Out_2;
-                Unity_Add_float4(_Multiply_56052616_Out_2, _SampleTexture2D_D0991351_RGBA_0, _Add_2FDF1664_Out_2);
+                Unity_Add_float4(_Multiply_56052616_Out_2, _Multiply_A21999C2_Out_2, _Add_2FDF1664_Out_2);
                 float4 _Add_4BDC99FF_Out_2;
                 Unity_Add_float4(_Multiply_D3D0BB31_Out_2, _Add_2FDF1664_Out_2, _Add_4BDC99FF_Out_2);
                 float4 _Multiply_B754EF2_Out_2;
@@ -330,12 +337,9 @@
                 OutVector4_1 = _Multiply_B754EF2_Out_2;
             }
             
-            void Unity_Blend_SoftLight_float4(float4 Base, float4 Blend, out float4 Out, float Opacity)
+            void Unity_Blend_Multiply_float4(float4 Base, float4 Blend, out float4 Out, float Opacity)
             {
-                float4 result1 = 2.0 * Base * Blend + Base * Base * (1.0 - 2.0 * Blend);
-                float4 result2 = sqrt(Base) * (2.0 * Blend - 1.0) + 2.0 * Base * (1.0 - Blend);
-                float4 zeroOrOne = step(0.5, Blend);
-                Out = result2 * zeroOrOne + (1 - zeroOrOne) * result1;
+                Out = Base * Blend;
                 Out = lerp(Base, Out, Opacity);
             }
             
@@ -374,27 +378,25 @@
             
             struct Bindings_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb
             {
-                float3 WorldSpacePosition;
                 float3 ViewSpacePosition;
             };
             
             void SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(float4 Color_E739F888, float4 Color_D4F585C6, float4 Color_D7818A04, Bindings_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb IN, out float4 FinalColor_1)
             {
-                float3 _CustomFunction_8EE2438A_ShadowAttenuation_1;
-                GetShadowInformation_float(IN.WorldSpacePosition, _CustomFunction_8EE2438A_ShadowAttenuation_1);
                 float4 _Property_4D5FC0A4_Out_0 = Color_E739F888;
                 float4 _Property_463AA739_Out_0 = Color_D4F585C6;
+                float4 Color_95B82AD4 = IsGammaSpace() ? float4(0.6415094, 0.5737489, 0.5416518, 1) : float4(SRGBToLinear(float3(0.6415094, 0.5737489, 0.5416518)), 1);
                 float4 _Property_3D5D922_Out_0 = Color_D7818A04;
+                float4 _Add_B566B9BB_Out_2;
+                Unity_Add_float4(Color_95B82AD4, _Property_3D5D922_Out_0, _Add_B566B9BB_Out_2);
                 float4 _Blend_2E558B58_Out_2;
-                Unity_Blend_SoftLight_float4(_Property_463AA739_Out_0, _Property_3D5D922_Out_0, _Blend_2E558B58_Out_2, 1);
+                Unity_Blend_Multiply_float4(_Property_463AA739_Out_0, _Add_B566B9BB_Out_2, _Blend_2E558B58_Out_2, 1);
                 float4 _Add_380AFE1D_Out_2;
                 Unity_Add_float4(_Property_4D5FC0A4_Out_0, _Blend_2E558B58_Out_2, _Add_380AFE1D_Out_2);
-                float3 _Multiply_1EACE21A_Out_2;
-                Unity_Multiply_float(_CustomFunction_8EE2438A_ShadowAttenuation_1, (_Add_380AFE1D_Out_2.xyz), _Multiply_1EACE21A_Out_2);
                 Bindings_Fog_db57d56e4661e4144b06df0b3edef8a9 _Fog_2A6D8F80;
                 _Fog_2A6D8F80.ViewSpacePosition = IN.ViewSpacePosition;
                 float4 _Fog_2A6D8F80_Color_1;
-                SG_Fog_db57d56e4661e4144b06df0b3edef8a9((float4(_Multiply_1EACE21A_Out_2, 1.0)), _Fog_2A6D8F80, _Fog_2A6D8F80_Color_1);
+                SG_Fog_db57d56e4661e4144b06df0b3edef8a9(_Add_380AFE1D_Out_2, _Fog_2A6D8F80, _Fog_2A6D8F80_Color_1);
                 FinalColor_1 = _Fog_2A6D8F80_Color_1;
             }
         
@@ -404,19 +406,16 @@
             // Graph Pixel
             struct SurfaceDescriptionInputs
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 WorldSpaceNormal;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 WorldSpaceViewDirection;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 ViewSpacePosition;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float3 WorldSpacePosition;
-                #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 uv0;
                 #endif
             };
@@ -431,83 +430,84 @@
             SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
             {
                 SurfaceDescription surface = (SurfaceDescription)0;
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _Property_432780F8_Out_0 = _EmissionColor;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _SampleTexture2D_F1EE66C6_RGBA_0 = SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, IN.uv0.xy);
                 float _SampleTexture2D_F1EE66C6_R_4 = _SampleTexture2D_F1EE66C6_RGBA_0.r;
                 float _SampleTexture2D_F1EE66C6_G_5 = _SampleTexture2D_F1EE66C6_RGBA_0.g;
                 float _SampleTexture2D_F1EE66C6_B_6 = _SampleTexture2D_F1EE66C6_RGBA_0.b;
                 float _SampleTexture2D_F1EE66C6_A_7 = _SampleTexture2D_F1EE66C6_RGBA_0.a;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _Multiply_66E414AD_Out_2;
                 Unity_Multiply_float(_Property_432780F8_Out_0, _SampleTexture2D_F1EE66C6_RGBA_0, _Multiply_66E414AD_Out_2);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _Property_DC445BEF_Out_0 = _BaseColor;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 Bindings_TextureSample_556dc6c40f462774daf8a2ff53e16c59 _TextureSample_7368FD5F;
                 _TextureSample_7368FD5F.uv0 = IN.uv0;
                 float4 _TextureSample_7368FD5F_Color_1;
                 float _TextureSample_7368FD5F_Alpha_2;
                 SG_TextureSample_556dc6c40f462774daf8a2ff53e16c59(_Property_DC445BEF_Out_0, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap), _BaseMap_TexelSize, _TextureSample_7368FD5F, _TextureSample_7368FD5F_Color_1, _TextureSample_7368FD5F_Alpha_2);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 Color_A56BBF16 = IsGammaSpace() ? float4(0.6698113, 0.6698113, 0.6698113, 0) : float4(SRGBToLinear(float3(0.6698113, 0.6698113, 0.6698113)), 0);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 Color_2C5C3282 = IsGammaSpace() ? float4(0.6509434, 0.6509434, 0.6509434, 0) : float4(SRGBToLinear(float3(0.6509434, 0.6509434, 0.6509434)), 0);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float4 Color_6481DB60 = IsGammaSpace() ? float4(1.23864, 1.23864, 1.23864, 1) : float4(SRGBToLinear(float3(1.23864, 1.23864, 1.23864)), 1);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float4 Color_FC39AC41 = IsGammaSpace() ? float4(0.5283019, 0.5283019, 0.5283019, 1) : float4(SRGBToLinear(float3(0.5283019, 0.5283019, 0.5283019)), 1);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float3 _CustomFunction_C0D68817_Direction_0;
-                float3 _CustomFunction_C0D68817_Color_1;
-                float _CustomFunction_C0D68817_DistAttenuation_2;
-                GetLightingInformation_float(_CustomFunction_C0D68817_Direction_0, _CustomFunction_C0D68817_Color_1, _CustomFunction_C0D68817_DistAttenuation_2);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 Color_6481DB60 = IsGammaSpace() ? float4(1.317959, 1.317959, 1.317959, 1) : float4(SRGBToLinear(float3(1.317959, 1.317959, 1.317959)), 1);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float3 _Normalize_6188E847_Out_1;
-                Unity_Normalize_float3(_CustomFunction_C0D68817_Direction_0, _Normalize_6188E847_Out_1);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 Color_FC39AC41 = IsGammaSpace() ? float4(0.6603774, 0.6603774, 0.6603774, 1) : float4(SRGBToLinear(float3(0.6603774, 0.6603774, 0.6603774)), 1);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float _Vector1_86FEC704_Out_0 = 0.3;
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float3 _Property_EE0DEFE3_Out_0 = _LightDir;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float3 _Lerp_C4ADBCE0_Out_3;
-                Unity_Lerp_float3(_CustomFunction_C0D68817_Color_1, SHADERGRAPH_AMBIENT_EQUATOR, (_Vector1_86FEC704_Out_0.xxx), _Lerp_C4ADBCE0_Out_3);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 Color_DB06A4BB = IsGammaSpace() ? float4(0.9249374, 0.9817838, 0.9916598, 1) : float4(SRGBToLinear(float3(0.9249374, 0.9817838, 0.9916598)), 1);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float _Property_F0A41D64_Out_0 = _SSSIntensity;
+                #endif
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 _Property_34EA98AC_Out_0 = _SSSParams;
+                #endif
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 Bindings_ToonShader_4cadc1cb7cae444909bd6637f15fdf84 _ToonShader_FA30CA77;
                 _ToonShader_FA30CA77.WorldSpaceNormal = IN.WorldSpaceNormal;
                 _ToonShader_FA30CA77.WorldSpaceViewDirection = IN.WorldSpaceViewDirection;
                 float4 _ToonShader_FA30CA77_OutVector4_1;
-                SG_ToonShader_4cadc1cb7cae444909bd6637f15fdf84(TEXTURE2D_ARGS(_FresnelMatCap, sampler_FresnelMatCap), _FresnelMatCap_TexelSize, TEXTURE2D_ARGS(_GlossMatCap, sampler_GlossMatCap), _GlossMatCap_TexelSize, TEXTURE2D_ARGS(_MatCap, sampler_MatCap), _MatCap_TexelSize, 1.5, -1, Color_6481DB60, 2, Color_FC39AC41, _Normalize_6188E847_Out_1, (float4(_Lerp_C4ADBCE0_Out_3, 1.0)), _ToonShader_FA30CA77, _ToonShader_FA30CA77_OutVector4_1);
+                SG_ToonShader_4cadc1cb7cae444909bd6637f15fdf84(TEXTURE2D_ARGS(_FresnelMatCap, sampler_FresnelMatCap), _FresnelMatCap_TexelSize, TEXTURE2D_ARGS(_GlossMatCap, sampler_GlossMatCap), _GlossMatCap_TexelSize, TEXTURE2D_ARGS(_MatCap, sampler_MatCap), _MatCap_TexelSize, 1.77, -0.27, Color_6481DB60, 0.17, Color_FC39AC41, _Property_EE0DEFE3_Out_0, Color_DB06A4BB, _Property_F0A41D64_Out_0, _Property_34EA98AC_Out_0, _ToonShader_FA30CA77, _ToonShader_FA30CA77_OutVector4_1);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float4 Color_4CE4E507 = IsGammaSpace() ? float4(1, 1, 1, 1) : float4(SRGBToLinear(float3(1, 1, 1)), 1);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 _Multiply_BD25ADC4_Out_2;
+                Unity_Multiply_float(Color_2C5C3282, _ToonShader_FA30CA77_OutVector4_1, _Multiply_BD25ADC4_Out_2);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-                float4 _Multiply_59C36D5A_Out_2;
-                Unity_Multiply_float(_ToonShader_FA30CA77_OutVector4_1, Color_4CE4E507, _Multiply_59C36D5A_Out_2);
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 _Add_EB51409C_Out_2;
+                Unity_Add_float4(Color_A56BBF16, _Multiply_BD25ADC4_Out_2, _Add_EB51409C_Out_2);
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 Bindings_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb _FinalCombine_D0158F10;
-                _FinalCombine_D0158F10.WorldSpacePosition = IN.WorldSpacePosition;
                 _FinalCombine_D0158F10.ViewSpacePosition = IN.ViewSpacePosition;
                 float4 _FinalCombine_D0158F10_FinalColor_1;
-                SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(_Multiply_66E414AD_Out_2, _TextureSample_7368FD5F_Color_1, _Multiply_59C36D5A_Out_2, _FinalCombine_D0158F10, _FinalCombine_D0158F10_FinalColor_1);
+                SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(_Multiply_66E414AD_Out_2, _TextureSample_7368FD5F_Color_1, _Add_EB51409C_Out_2, _FinalCombine_D0158F10, _FinalCombine_D0158F10_FinalColor_1);
                 #endif
                 surface.Color = (_FinalCombine_D0158F10_FinalColor_1.xyz);
                 surface.Alpha = _TextureSample_7368FD5F_Alpha_2;
@@ -521,20 +521,20 @@
             // Generated Type: Attributes
             struct Attributes
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 positionOS : POSITION;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 normalOS : NORMAL;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 tangentOS : TANGENT;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 uv0 : TEXCOORD0;
                 #endif
                 #if UNITY_ANY_INSTANCING_ENABLED
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint instanceID : INSTANCEID_SEMANTIC;
                 #endif
                 #endif
@@ -543,44 +543,44 @@
             // Generated Type: Varyings
             struct Varyings
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 positionCS : SV_POSITION;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 positionWS;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 normalWS;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 texCoord0;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 viewDirectionWS;
                 #endif
                 #if UNITY_ANY_INSTANCING_ENABLED
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint instanceID : CUSTOM_INSTANCE_ID;
                 #endif
                 #endif
                 #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
                 #endif
                 #endif
                 #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
                 #endif
                 #endif
                 #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
                 #endif
                 #endif
             };
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             // Generated Type: PackedVaryings
             struct PackedVaryings
             {
@@ -660,15 +660,15 @@
                 SurfaceDescriptionInputs output;
                 ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             // must use interpolated tangent, bitangent and normal before they are normalized in the pixel shader.
             #endif
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             float3 unnormalizedNormalWS = input.normalWS;
             #endif
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             const float renormFactor = 1.0 / length(unnormalizedNormalWS);
             #endif
             
@@ -678,7 +678,7 @@
             
             
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             output.WorldSpaceNormal =            renormFactor*input.normalWS.xyz;		// we want a unit length Normal Vector node in shader graph
             #endif
             
@@ -697,7 +697,7 @@
             
             
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             output.WorldSpaceViewDirection =     input.viewDirectionWS; //TODO: by default normalized in HD, but not in universal
             #endif
             
@@ -705,19 +705,16 @@
             
             
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
-            output.WorldSpacePosition =          input.positionWS;
-            #endif
             
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             output.ViewSpacePosition =           TransformWorldToView(input.positionWS);
             #endif
             
             
             
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             output.uv0 =                         input.texCoord0;
             #endif
             
@@ -756,10 +753,12 @@
             }
            
             // Render State
-            Blend [_SrcBlend][_DstBlend]
-            ZWrite [_ZWrite]
-            Cull [_Cull]            
+            Blend One Zero, One Zero
+            Cull Off
+            ZTest LEqual
+            ZWrite On
             // ColorMask: <None>
+            
         
             HLSLPROGRAM
             #pragma vertex vert
@@ -781,15 +780,24 @@
             #pragma shader_feature _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
+            #pragma shader_feature_local _ _RECEIVE_SHADOWS_OFF
             
-            #if defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT)
+            #if defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT) && defined(_RECEIVE_SHADOWS_OFF)
                 #define KEYWORD_PERMUTATION_0
-            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT)
                 #define KEYWORD_PERMUTATION_1
-            #elif defined(_SHADOWS_SOFT)
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_RECEIVE_SHADOWS_OFF)
                 #define KEYWORD_PERMUTATION_2
-            #else
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE)
                 #define KEYWORD_PERMUTATION_3
+            #elif defined(_SHADOWS_SOFT) && defined(_RECEIVE_SHADOWS_OFF)
+                #define KEYWORD_PERMUTATION_4
+            #elif defined(_SHADOWS_SOFT)
+                #define KEYWORD_PERMUTATION_5
+            #elif defined(_RECEIVE_SHADOWS_OFF)
+                #define KEYWORD_PERMUTATION_6
+            #else
+                #define KEYWORD_PERMUTATION_7
             #endif
             
             
@@ -800,15 +808,15 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_NORMAL
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_TANGENT
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_TEXCOORD0
         #endif
         
@@ -819,7 +827,7 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define VARYINGS_NEED_TEXCOORD0
         #endif
         
@@ -848,12 +856,15 @@
             CBUFFER_START(UnityPerMaterial)
             float4 _BaseColor;
             float4 _EmissionColor;
+            float _SSSIntensity;
+            float4 _SSSParams;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); float4 _BaseMap_TexelSize;
             TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap); float4 _EmissionMap_TexelSize;
             TEXTURE2D(_MatCap); SAMPLER(sampler_MatCap); float4 _MatCap_TexelSize;
             TEXTURE2D(_GlossMatCap); SAMPLER(sampler_GlossMatCap); float4 _GlossMatCap_TexelSize;
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
+            float3 _LightDir;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
@@ -900,7 +911,7 @@
             // Graph Pixel
             struct SurfaceDescriptionInputs
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 uv0;
                 #endif
             };
@@ -914,12 +925,12 @@
             SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
             {
                 SurfaceDescription surface = (SurfaceDescription)0;
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _Property_DC445BEF_Out_0 = _BaseColor;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 Bindings_TextureSample_556dc6c40f462774daf8a2ff53e16c59 _TextureSample_7368FD5F;
                 _TextureSample_7368FD5F.uv0 = IN.uv0;
                 float4 _TextureSample_7368FD5F_Color_1;
@@ -937,20 +948,20 @@
             // Generated Type: Attributes
             struct Attributes
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 positionOS : POSITION;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 normalOS : NORMAL;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 tangentOS : TANGENT;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 uv0 : TEXCOORD0;
                 #endif
                 #if UNITY_ANY_INSTANCING_ENABLED
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint instanceID : INSTANCEID_SEMANTIC;
                 #endif
                 #endif
@@ -959,35 +970,35 @@
             // Generated Type: Varyings
             struct Varyings
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 positionCS : SV_POSITION;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 texCoord0;
                 #endif
                 #if UNITY_ANY_INSTANCING_ENABLED
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint instanceID : CUSTOM_INSTANCE_ID;
                 #endif
                 #endif
                 #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
                 #endif
                 #endif
                 #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
                 #endif
                 #endif
                 #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
                 #endif
                 #endif
             };
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             // Generated Type: PackedVaryings
             struct PackedVaryings
             {
@@ -1058,10 +1069,51 @@
                 SurfaceDescriptionInputs output;
                 ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             output.uv0 =                         input.texCoord0;
             #endif
-
+            
+            
+            
+            
+            
+            
             #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
             #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
             #else
@@ -1092,9 +1144,10 @@
             }
            
             // Render State
-            Blend [_SrcBlend][_DstBlend]
-            ZWrite [_ZWrite]
-            Cull [_Cull]            
+            Blend One Zero, One Zero
+            Cull Off
+            ZTest LEqual
+            ZWrite On
             ColorMask 0
             
         
@@ -1118,15 +1171,24 @@
             // PassKeywords: <None>
             #pragma shader_feature _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
+            #pragma shader_feature_local _ _RECEIVE_SHADOWS_OFF
             
-            #if defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT)
+            #if defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT) && defined(_RECEIVE_SHADOWS_OFF)
                 #define KEYWORD_PERMUTATION_0
-            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE)
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_SHADOWS_SOFT)
                 #define KEYWORD_PERMUTATION_1
-            #elif defined(_SHADOWS_SOFT)
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE) && defined(_RECEIVE_SHADOWS_OFF)
                 #define KEYWORD_PERMUTATION_2
-            #else
+            #elif defined(_MAIN_LIGHT_SHADOWS_CASCADE)
                 #define KEYWORD_PERMUTATION_3
+            #elif defined(_SHADOWS_SOFT) && defined(_RECEIVE_SHADOWS_OFF)
+                #define KEYWORD_PERMUTATION_4
+            #elif defined(_SHADOWS_SOFT)
+                #define KEYWORD_PERMUTATION_5
+            #elif defined(_RECEIVE_SHADOWS_OFF)
+                #define KEYWORD_PERMUTATION_6
+            #else
+                #define KEYWORD_PERMUTATION_7
             #endif
             
             
@@ -1137,15 +1199,15 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_NORMAL
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_TANGENT
         #endif
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define ATTRIBUTES_NEED_TEXCOORD0
         #endif
         
@@ -1156,7 +1218,7 @@
         
         
         
-        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+        #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
         #define VARYINGS_NEED_TEXCOORD0
         #endif
         
@@ -1185,12 +1247,15 @@
             CBUFFER_START(UnityPerMaterial)
             float4 _BaseColor;
             float4 _EmissionColor;
+            float _SSSIntensity;
+            float4 _SSSParams;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); float4 _BaseMap_TexelSize;
             TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap); float4 _EmissionMap_TexelSize;
             TEXTURE2D(_MatCap); SAMPLER(sampler_MatCap); float4 _MatCap_TexelSize;
             TEXTURE2D(_GlossMatCap); SAMPLER(sampler_GlossMatCap); float4 _GlossMatCap_TexelSize;
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
+            float3 _LightDir;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
@@ -1237,7 +1302,7 @@
             // Graph Pixel
             struct SurfaceDescriptionInputs
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 uv0;
                 #endif
             };
@@ -1251,12 +1316,12 @@
             SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
             {
                 SurfaceDescription surface = (SurfaceDescription)0;
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _Property_DC445BEF_Out_0 = _BaseColor;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 Bindings_TextureSample_556dc6c40f462774daf8a2ff53e16c59 _TextureSample_7368FD5F;
                 _TextureSample_7368FD5F.uv0 = IN.uv0;
                 float4 _TextureSample_7368FD5F_Color_1;
@@ -1274,20 +1339,20 @@
             // Generated Type: Attributes
             struct Attributes
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 positionOS : POSITION;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float3 normalOS : NORMAL;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 tangentOS : TANGENT;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 uv0 : TEXCOORD0;
                 #endif
                 #if UNITY_ANY_INSTANCING_ENABLED
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint instanceID : INSTANCEID_SEMANTIC;
                 #endif
                 #endif
@@ -1296,35 +1361,35 @@
             // Generated Type: Varyings
             struct Varyings
             {
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 positionCS : SV_POSITION;
                 #endif
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 texCoord0;
                 #endif
                 #if UNITY_ANY_INSTANCING_ENABLED
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint instanceID : CUSTOM_INSTANCE_ID;
                 #endif
                 #endif
                 #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
                 #endif
                 #endif
                 #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
                 #endif
                 #endif
                 #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
                 #endif
                 #endif
             };
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             // Generated Type: PackedVaryings
             struct PackedVaryings
             {
@@ -1431,7 +1496,7 @@
             
             
             
-            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3)
+            #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
             output.uv0 =                         input.texCoord0;
             #endif
             
