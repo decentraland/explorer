@@ -49,6 +49,29 @@ public static class AvatarUtils
     }
 
     /// <summary>
+    /// This will search all the transform hierachy, and change _Color on all materials containing the proper name.
+    /// </summary>
+    /// <param name="transformRoot">Transform where to start</param>
+    /// <param name="materialsContainingThisName">name to filter in materials</param>
+    /// <param name="colorToChange">color to change in the renderers</param>
+    public static void SetColorInHierarchy(Transform transformRoot,
+        string materialsContainingThisName,
+        Color colorToChange,
+        string shaderId = "_BaseColor")
+    {
+        int _Color = Shader.PropertyToID(shaderId);
+
+        MapSharedMaterialsRecursively(
+            transformRoot,
+            (mat) =>
+            {
+                mat.SetColor(_Color, colorToChange);
+                return mat;
+            },
+            materialsContainingThisName);
+    }
+
+    /// <summary>
     /// This will search all the transform hierachy for all renderers,
     /// and replace all of its materials containing the specified name by the new one.
     /// </summary>
