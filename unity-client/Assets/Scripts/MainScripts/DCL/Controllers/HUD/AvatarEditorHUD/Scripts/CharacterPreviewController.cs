@@ -80,24 +80,9 @@ public class CharacterPreviewController : MonoBehaviour
         if (avatarDone && avatarRenderer != null)
         {
             SetLayerRecursively(avatarRenderer.gameObject, CHARACTER_PREVIEW_LAYER);
-            ConfigureRenderers();
         }
 
         onDone?.Invoke();
-    }
-
-    private void ConfigureRenderers()
-    {
-        var renderers = avatarRenderer.gameObject.GetComponentsInChildren<Renderer>();
-
-        foreach (var r in renderers)
-        {
-            foreach (var m in r.materials)
-            {
-                m.EnableKeyword("_RECEIVE_SHADOWS_OFF");
-                m.SetFloat("_SSSIntensity", 0.1f);
-            }
-        }
     }
 
     private void SetLayerRecursively(GameObject gameObject, int layer)
