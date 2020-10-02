@@ -264,8 +264,6 @@ public class HUDController : MonoBehaviour
 
                     if (taskbarHud != null)
                     {
-                        var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
-
                         taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i, FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
@@ -273,9 +271,13 @@ public class HUDController : MonoBehaviour
                         taskbarHud.AddSettingsWindow(settingsHud);
                         taskbarHud.AddBackpackWindow(avatarEditorHud);
 
-                        if (config.enableVoiceChat)
+                        if (!string.IsNullOrEmpty(extraPayload))
                         {
-                            taskbarHud.OnAddVoiceChat();
+                            var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
+                            if (config.enableVoiceChat)
+                            {
+                                taskbarHud.OnAddVoiceChat();
+                            }
                         }
                     }
                 }
