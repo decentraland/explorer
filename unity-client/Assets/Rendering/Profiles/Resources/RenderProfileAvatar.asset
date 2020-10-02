@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: RenderProfileAvatar
   m_EditorClassIdentifier: 
   avatarEditorProfile:
-    lightDirection: {x: 0, y: -1, z: 0}
+    lightDirection: {x: 0.707, y: 0.707, z: 0.707}
   inWorldProfile:
     lightDirection: {x: -0.1, y: 0.8, z: -0.4}

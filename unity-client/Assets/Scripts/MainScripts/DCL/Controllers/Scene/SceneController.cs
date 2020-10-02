@@ -81,7 +81,7 @@ namespace DCL
             worldEntryPoint = new EntryPoint_World(this); // Es un subsistema independiente => Se pone en el entrypoint pero no en el enviroment.
 #endif
 
-            RenderProfiles.renderProfileAvatar.Apply(RenderProfileAvatar.ProfileID.IN_WORLD);
+            RenderProfiles.renderProfileAvatar.inWorldProfile.Apply();
         }
 
         void Start()
