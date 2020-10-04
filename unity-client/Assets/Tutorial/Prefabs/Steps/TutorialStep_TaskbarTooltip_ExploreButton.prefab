@@ -140,8 +140,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 21.21, y: 6.91}
-  m_SizeDelta: {x: -95.97415, y: -28.809624}
+  m_AnchoredPosition: {x: 24.1, y: 6.91}
+  m_SizeDelta: {x: -101.75488, y: -28.809624}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6044884098513507028
 CanvasRenderer:
@@ -300,8 +300,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.86, y: 0}
-  m_SizeDelta: {x: 393.2527, y: 100}
+  m_AnchoredPosition: {x: 9.83, y: 0}
+  m_SizeDelta: {x: 384.84442, y: 100}
   m_Pivot: {x: 1.02, y: 0}
 --- !u!222 &7491104538370866601
 CanvasRenderer:
@@ -552,17 +552,17 @@ PrefabInstance:
     - target: {fileID: 2025551091650611686, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -25.7
+      value: -19
       objectReference: {fileID: 0}
     - target: {fileID: 2025551091650611686, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -28.9
+      value: -25
       objectReference: {fileID: 0}
     - target: {fileID: 2025551091650611686, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 62.974884
+      value: 63
       objectReference: {fileID: 0}
     - target: {fileID: 2025551091650611686, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
         type: 3}
@@ -607,6 +607,11 @@ PrefabInstance:
     - target: {fileID: 6719309770230432466, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
         type: 3}
       propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6719309770230432466, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
+        type: 3}
+      propertyPath: m_PixelsPerUnitMultiplier
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8351141141120936396, guid: 2444f5fcc239b4e46aa76b2cd2bff5ff,
