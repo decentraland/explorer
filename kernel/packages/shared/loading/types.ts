@@ -92,6 +92,9 @@ export const newLogin = () => action(NEW_LOGIN)
 export const NETWORK_MISMATCH = 'Network mismatch'
 export const networkMismatch = () => action(NETWORK_MISMATCH)
 
+export const SET_LOADING_SCREEN = 'setting loading screen'
+export const setLoadingScreen = (show: boolean) => action(SET_LOADING_SCREEN, { show })
+
 export const ExecutionLifecycleNotifications = {
   notStarted,
   loadingStarted,

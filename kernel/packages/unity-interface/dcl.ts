@@ -1,17 +1,25 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, ENABLE_NEW_TASKBAR } from 'config'
+import {
+  DEBUG,
+  EDITOR,
+  ENABLE_NEW_TASKBAR,
+  ENGINE_DEBUG_PANEL,
+  NO_ASSET_BUNDLES,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER
+} from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, teleportTriggered } from 'shared/loading/types'
+import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse } from 'shared/types'
+import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
   enableParcelSceneLoading,
+  getParcelSceneID,
   loadParcelScene,
-  stopParcelSceneWorker,
-  getParcelSceneID
+  stopParcelSceneWorker
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker, hudWorkerUrl } from 'shared/world/SceneWorker'
+import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
 import { worldRunningObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
@@ -49,18 +57,19 @@ export let gameInstance!: GameInstance
 export let isTheFirstLoading = true
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
-  document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
-  document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'flex' : 'none'
-  document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
+  globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
+  // document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
+  // document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'flex' : 'none'
+  // document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
+  // const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
 
-  if (shouldShow) {
-    loadingAudio?.play().catch((e) => {
-      /*Ignored. If this fails is not critical*/
-    })
-  } else {
-    loadingAudio?.pause()
-  }
+  // if (shouldShow) {
+  //   loadingAudio?.play().catch((e) => {
+  //     /*Ignored. If this fails is not critical*/
+  //   })
+  // } else {
+  //   loadingAudio?.pause()
+  // }
 
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
@@ -131,7 +140,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }

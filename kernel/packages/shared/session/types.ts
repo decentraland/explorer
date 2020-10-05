@@ -11,9 +11,19 @@ export type ExplorerIdentity = AuthIdentity & {
   hasConnectedWeb3: boolean
 }
 
+export enum LoginStage {
+  LOADING = 'loading',
+  SING_IN = 'signIn',
+  CONNECT_ADVICE = 'connect',
+  SING_ADVICE = 'sign'
+}
+
 export type SessionState = {
   initialized: boolean
   userId: string | undefined
   identity: ExplorerIdentity | undefined
   network: ETHEREUM_NETWORK | undefined
+  loginStage: LoginStage | undefined
+  tos: boolean
+  showWalletPrompt: boolean
 }

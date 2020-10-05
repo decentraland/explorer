@@ -1,64 +1,61 @@
-import { put, takeLatest, call, delay, select } from 'redux-saga/effects'
+import { call, delay, put, select, takeLatest, takeEvery } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
 import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
+import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
-import { referUser, initializeReferral } from 'shared/referral'
-import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
+import { initializeReferral, referUser } from 'shared/referral'
+import { awaitWeb3Approval, isSessionExpired, loginCompleted, providerFuture } from 'shared/ethereum/provider'
 import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
-  NETWORK_MISMATCH,
+  AWAITING_USER_SIGNATURE,
   awaitingUserSignature,
-  AWAITING_USER_SIGNATURE
+  NETWORK_MISMATCH
 } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
-import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
+import { getAppNetwork, getNetworkFromTLD } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { Session } from '.'
 import { ExplorerIdentity } from './types'
-import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
+import {
+  enableLogin,
+  LOGIN,
+  loginCompleted as loginCompletedAction,
+  LOGOUT,
+  UPDATE_TOS,
+  updateTOS,
+  userAuthentified
+} from './actions'
 
 const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
-  yield call(initializeTos)
+  yield call(initialize)
   yield call(initializeReferral)
 
+  yield takeEvery(UPDATE_TOS, updateTermOfService)
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
 
-function* initializeTos() {
-  const TOS_KEY = 'tos'
+const TOS_KEY = 'tos'
+function* initialize() {
   const tosAgreed: boolean = getFromLocalStorage(TOS_KEY) ?? false
-
-  const agreeCheck = document.getElementById('agree-check') as HTMLInputElement | undefined
-  if (agreeCheck) {
-    agreeCheck.checked = tosAgreed
-    // @ts-ignore
-    agreeCheck.onchange && agreeCheck.onchange()
-
-    const originalOnChange = agreeCheck.onchange
-    agreeCheck.onchange = (e) => {
-      saveToLocalStorage(TOS_KEY, agreeCheck.checked)
-      // @ts-ignore
-      originalOnChange && originalOnChange(e)
-    }
-
-    // enable agree check after initialization
-    enableLogin()
-  }
+  yield put(updateTOS(tosAgreed))
+  yield put(enableLogin())
+}
+function* updateTermOfService(action: any) {
+  saveToLocalStorage(TOS_KEY, action.payload)
 }
 
 function* scheduleAwaitingSignaturePrompt() {
@@ -251,13 +248,4 @@ function showAwaitingSignaturePrompt(show: boolean) {
 
 function* logout() {
   Session.current.then((s) => s.logout()).catch((e) => logger.error('error while logging out', e))
-}
-
-function enableLogin() {
-  const wrapper = document.getElementById('eth-login-confirmation-wrapper')
-  const spinner = document.getElementById('eth-login-confirmation-spinner')
-  if (wrapper && spinner) {
-    spinner.style.cssText = 'display: none;'
-    wrapper.style.cssText = 'display: flex;'
-  }
 }
