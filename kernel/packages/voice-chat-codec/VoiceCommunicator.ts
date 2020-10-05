@@ -3,14 +3,9 @@ import { RingBuffer } from 'atomicHelpers/RingBuffer'
 import { SortedLimitedQueue } from 'atomicHelpers/SortedLimitedQueue'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
-import {
-  VOICE_CHAT_SAMPLE_RATE,
-  OPUS_FRAME_SIZE_MS,
-  OUTPUT_NODE_BUFFER_SIZE,
-  OPUS_SAMPLES_PER_FRAME,
-  INPUT_NODE_BUFFER_SIZE
-} from './constants'
+import { VOICE_CHAT_SAMPLE_RATE, OPUS_FRAME_SIZE_MS, OUTPUT_NODE_BUFFER_SIZE } from './constants'
 import { parse, write } from 'sdp-transform'
+import { WorkletRequestTopic } from './types'
 
 export type AudioCommunicatorChannel = {
   send(data: Uint8Array): any
@@ -35,7 +30,7 @@ type VoiceOutput = {
 }
 
 type VoiceInput = {
-  encodeInputProcessor: ScriptProcessorNode
+  workletNode: AudioWorkletNode
   inputStream: MediaStreamAudioSourceNode
   recordingContext: AudioContext
   encodeStream: EncodeStream
@@ -57,6 +52,8 @@ export type VoiceSpatialParams = {
   orientation: [number, number, number]
 }
 
+const worlketModulesUrl = 'voice-chat-codec/audioWorkletProcessors.js'
+
 export class VoiceCommunicator {
   private context: AudioContext
   private outputGainNode: GainNode
@@ -73,9 +70,6 @@ export class VoiceCommunicator {
   private readonly channelBufferSize: number
   private readonly outputExpireTime = 60 * 1000
 
-  private pauseRequested: boolean = false
-  private inputSamplesCount: number = 0
-
   constructor(
     private selfId: string,
     private channel: AudioCommunicatorChannel,
@@ -84,7 +78,7 @@ export class VoiceCommunicator {
     this.sampleRate = this.options.sampleRate ?? VOICE_CHAT_SAMPLE_RATE
     this.channelBufferSize = this.options.channelBufferSize ?? 2.0
 
-    this.context = new AudioContext({ sampleRate: this.sampleRate })
+    this.context = this.createContext({ sampleRate: this.sampleRate })
 
     this.outputGainNode = this.context.createGain()
 
@@ -106,14 +100,17 @@ export class VoiceCommunicator {
     this.startOutputsExpiration()
   }
 
+  private createContext(contextOptions?: AudioContextOptions) {
+    const aContext = new AudioContext(contextOptions)
+    aContext.audioWorklet.addModule(worlketModulesUrl)
+    return aContext
+  }
+
   public setSelfId(selfId: string) {
     this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
     this.selfId = selfId
     if (this.input) {
-      this.input.encodeStream = this.createInputEncodeStream(
-        this.input.recordingContext,
-        this.input.encodeInputProcessor
-      )
+      this.input.encodeStream = this.createInputEncodeStream(this.input.recordingContext, this.input.workletNode)
     }
   }
 
@@ -243,18 +240,23 @@ export class VoiceCommunicator {
   }
 
   start() {
-    this.pauseRequested = false
     if (this.input) {
-      this.input.encodeInputProcessor.connect(this.input.recordingContext.destination)
-      this.input.inputStream.connect(this.input.encodeInputProcessor)
-      this.notifyRecording(true)
+      this.sendToInputWorklet(WorkletRequestTopic.RESUME)
     } else {
       this.notifyRecording(false)
     }
   }
 
   pause() {
-    this.pauseRequested = true
+    if (this.input) {
+      this.sendToInputWorklet(WorkletRequestTopic.PAUSE)
+    } else {
+      this.notifyRecording(false)
+    }
+  }
+
+  private sendToInputWorklet(topic: WorkletRequestTopic) {
+    this.input?.workletNode.port.postMessage({ topic: topic })
   }
 
   private createRTCLoopbackConnection(
@@ -321,14 +323,6 @@ export class VoiceCommunicator {
     }
   }
 
-  private disconnectInput() {
-    this.input?.inputStream.disconnect()
-
-    this.input?.encodeInputProcessor.disconnect()
-
-    this.notifyRecording(false)
-  }
-
   private createOutput(src: string, relativePosition: VoiceSpatialParams) {
     const nodes = this.createOutputNodes(src)
     this.outputs[src] = {
@@ -375,16 +369,18 @@ export class VoiceCommunicator {
 
   private createInputFor(stream: MediaStream, context: AudioContext) {
     const streamSource = context.createMediaStreamSource(stream)
-    const inputProcessor = context.createScriptProcessor(INPUT_NODE_BUFFER_SIZE, 1, 1)
+    const workletNode = new AudioWorkletNode(context, 'inputProcessor')
+    streamSource.connect(workletNode)
+    workletNode.connect(context.destination)
     return {
       recordingContext: context,
-      encodeStream: this.createInputEncodeStream(context, inputProcessor),
-      encodeInputProcessor: inputProcessor,
+      encodeStream: this.createInputEncodeStream(context, workletNode),
+      workletNode,
       inputStream: streamSource
     }
   }
 
-  private createInputEncodeStream(recordingContext: AudioContext, encodeInputProcessor: ScriptProcessorNode) {
+  private createInputEncodeStream(recordingContext: AudioContext, workletNode: AudioWorkletNode) {
     const encodeStream = this.voiceChatWorkerMain.getOrCreateEncodeStream(
       this.selfId,
       this.sampleRate,
@@ -393,23 +389,18 @@ export class VoiceCommunicator {
 
     encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
 
-    encodeInputProcessor.onaudioprocess = (e) => {
-      const buffer = e.inputBuffer
-      let data = buffer.getChannelData(0)
-
-      if (this.pauseRequested) {
-        // We try to use as many samples as we can that would complete some frames
-        const samplesToUse =
-          Math.floor(data.length / OPUS_SAMPLES_PER_FRAME) * OPUS_SAMPLES_PER_FRAME +
-          OPUS_SAMPLES_PER_FRAME -
-          (this.inputSamplesCount % OPUS_SAMPLES_PER_FRAME)
-        data = data.slice(0, samplesToUse)
-        this.disconnectInput()
-        this.pauseRequested = false
+    workletNode.port.onmessage = (e) => {
+      if (e.data.topic === WorkletRequestTopic.ENCODE) {
+        encodeStream.encode(e.data.samples)
       }
 
-      encodeStream.encode(data)
-      this.inputSamplesCount += data.length
+      if (e.data.topic === WorkletRequestTopic.ON_PAUSED) {
+        this.notifyRecording(false)
+      }
+
+      if (e.data.topic === WorkletRequestTopic.ON_RECORDING) {
+        this.notifyRecording(true)
+      }
     }
 
     return encodeStream
