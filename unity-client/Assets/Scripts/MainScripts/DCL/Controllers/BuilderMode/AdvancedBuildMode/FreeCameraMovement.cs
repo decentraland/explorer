@@ -7,6 +7,12 @@ using UnityEngine;
 public class FreeCameraMovement : MonoBehaviour
 {
     public BuilderInputWrapper builderInputWrapper;
+
+    public float smoothLookAtSpeed = 5f;
+
+    [Header("Manual Camera Movement")]
+
+    public float keyboardMovementSpeed = 5f;
     public float lookSpeedH = 2f;
 
     public float lookSpeedV = 2f;
@@ -19,6 +25,8 @@ public class FreeCameraMovement : MonoBehaviour
     private float pitch = 0f;
 
     bool isCameraAbleToMove = true;
+
+    Coroutine smoothLookAtCor;
     private void Awake()
     {
         builderInputWrapper.OnMouseDrag += MouseDrag;
@@ -29,6 +37,37 @@ public class FreeCameraMovement : MonoBehaviour
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
 
     }
+
+    private void Update()
+    {
+
+        if (Input.GetKey("w"))
+        {
+            transform.position += transform.forward * keyboardMovementSpeed * Time.deltaTime;
+        }
+        if (Input.GetKey("s"))
+        {
+            transform.position += -transform.forward *keyboardMovementSpeed* Time.deltaTime;
+        }
+        if (Input.GetKey("d"))
+        {
+            transform.position += transform.right * keyboardMovementSpeed * Time.deltaTime;
+        }
+        if (Input.GetKey("a"))
+        {
+            transform.position += -transform.right * keyboardMovementSpeed * Time.deltaTime;
+        }
+        if (Input.GetKey(KeyCode.Space))
+        {
+            transform.position += transform.up * keyboardMovementSpeed * Time.deltaTime;
+        }
+        else if (Input.GetKey(KeyCode.X))
+        {
+            transform.position += -transform.up * keyboardMovementSpeed * Time.deltaTime;
+        }
+
+    }
+
 
     private void OnGizmoTransformObjectEnd(string gizmoType)
     {
@@ -81,5 +120,26 @@ public class FreeCameraMovement : MonoBehaviour
         yaw = transform.eulerAngles.y;
         pitch = transform.eulerAngles.x;
 
+    }
+
+    public void SmoothLookAt(Transform transform)
+    {
+        if (smoothLookAtCor != null) StopCoroutine(smoothLookAtCor);
+        smoothLookAtCor = StartCoroutine(SmoothLookAtCorutine(transform));
+    }
+
+
+    IEnumerator SmoothLookAtCorutine(Transform target)
+    {
+        Quaternion targetRotation = Quaternion.LookRotation(target.transform.position - transform.position);
+        float advance = 0;
+        while(advance <= 1)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, advance);
+            advance += smoothLookAtSpeed * Time.deltaTime;
+            yield return null;
+        }
+        yaw = transform.eulerAngles.y;
+        pitch = transform.eulerAngles.x;
     }
 }

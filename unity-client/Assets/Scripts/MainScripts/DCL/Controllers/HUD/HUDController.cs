@@ -444,6 +444,8 @@ public class HUDController : MonoBehaviour
         hudElements.Clear();
     }
 
+
+
     public IHUD GetHUDElement(HUDElementID id)
     {
         if (!hudElements.ContainsKey(id))

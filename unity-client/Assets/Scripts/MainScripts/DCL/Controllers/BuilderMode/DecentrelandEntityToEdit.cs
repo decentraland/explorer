@@ -29,11 +29,11 @@ public class DecentrelandEntityToEdit : EditableEntity
 
     Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
 
-    public DecentrelandEntityToEdit(DecentralandEntity _entity, Material _editMaterial)
+    public void Init(DecentralandEntity _entity, Material _editMaterial)
     {
         rootEntity = _entity;
         rootEntity.OnShapeUpdated += ShapeUpdate;
-   
+
         editMaterial = _editMaterial;
 
         entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
@@ -42,8 +42,8 @@ public class DecentrelandEntityToEdit : EditableEntity
         {
             CreateCollidersForEntity(rootEntity);
         }
-    }
 
+    }
     public void Select()
     {
         isSelected = true;

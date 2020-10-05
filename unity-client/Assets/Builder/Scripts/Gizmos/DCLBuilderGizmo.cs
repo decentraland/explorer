@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Builder.Gizmos
 {
@@ -10,7 +10,7 @@ namespace Builder.Gizmos
         [SerializeField] protected DCLBuilderGizmoAxis axisZ;
 
         public bool initialized { get; private set; }
-
+        public float sizeFactor = 1;
         protected float snapFactor = 0;
 
         protected bool worldOrientedGizmos = true;
@@ -123,7 +123,7 @@ namespace Builder.Gizmos
             if (builderCamera)
             {
                 float dist = GetCameraPlaneDistance(builderCamera, transform.position);
-                transform.localScale = relativeScaleRatio * dist;
+                transform.localScale = relativeScaleRatio * dist* sizeFactor;
             }
         }
 

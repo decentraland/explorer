@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BuilderInputWrapper : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class BuilderInputWrapper : MonoBehaviour
         if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold) return;
         if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000) return;
 
-        OnMouseClick?.Invoke(buttonId, mousePosition);
+        if(!IsPointerOverUIElement())OnMouseClick?.Invoke(buttonId, mousePosition);
     }
 
     private void MouseDown(int buttonId, Vector3 mousePosition)
@@ -40,15 +41,24 @@ public class BuilderInputWrapper : MonoBehaviour
 
     private void MouseWheel(float axisValue)
     {
-        OnMouseWheel?.Invoke(axisValue);
+        if (!IsPointerOverUIElement()) OnMouseWheel?.Invoke(axisValue);
     }
 
     private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        OnMouseDrag?.Invoke(buttonId, mousePosition, axisX, axisY);
+        if (!IsPointerOverUIElement()) OnMouseDrag?.Invoke(buttonId, mousePosition, axisX, axisY);
     }
     private void MouseRawDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        OnMouseDragRaw?.Invoke(buttonId, mousePosition, axisX, axisY);
+        if (!IsPointerOverUIElement()) OnMouseDragRaw?.Invoke(buttonId, mousePosition, axisX, axisY);
+    }
+
+    public bool IsPointerOverUIElement()
+    {
+        var eventData = new PointerEventData(EventSystem.current);
+        eventData.position = Input.mousePosition;
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        return results.Count > 1;
     }
 }

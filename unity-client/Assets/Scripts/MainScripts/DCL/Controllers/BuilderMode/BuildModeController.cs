@@ -9,6 +9,7 @@ using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
@@ -90,6 +91,7 @@ public class BuildModeController : MonoBehaviour
         editModeChange.OnTriggered += OnEditModeChangeAction;
         catalogController.OnSceneObjectSelected += OnSceneObjectSelected;
         builderInputWrapper.OnMouseClick += MouseClick;
+        buildModeEntityListController.OnEntityClick += Select;
     }
 
     private void OnDestroy()
@@ -136,21 +138,24 @@ public class BuildModeController : MonoBehaviour
             {
                 if (snapObjectAlreadyMoved)
                 {
-                    Vector3 objectPosition = snapGO.transform.position;
-                    Vector3 eulerRotation = snapGO.transform.rotation.eulerAngles;
+                    if (!isAdvancedModeActive)
+                    {
+                        Vector3 objectPosition = snapGO.transform.position;
+                        Vector3 eulerRotation = snapGO.transform.rotation.eulerAngles;
 
-                    float currentSnapFactor = snapFactor;
+                        float currentSnapFactor = snapFactor;
 
-                    //float currentSnapFactor = snapFactor * currentScaleAdded;
+                        //float currentSnapFactor = snapFactor * currentScaleAdded;
 
-                    objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
-                    objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
-                    objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
-                    eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
+                        objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
+                        objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
+                        objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
+                        eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
 
-                    Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
-                    gameObjectToEdit.transform.rotation = initialRotation * destinationRotation;
-                    gameObjectToEdit.transform.position = objectPosition;
+                        Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
+                        gameObjectToEdit.transform.rotation = initialRotation * destinationRotation;
+                        gameObjectToEdit.transform.position = objectPosition;
+                    }
                 }
                 else if (Vector3.Distance(snapGO.transform.position, gameObjectToEdit.transform.position) >= snapDistanceToActivateMovement)
                 {
@@ -263,7 +268,7 @@ public class BuildModeController : MonoBehaviour
         if (Input.GetKey(KeyCode.Y))
         {
             if (isSceneEntitiesListActive) buildModeEntityListController.CloseList();
-            else buildModeEntityListController.OpenEntityList(sceneToEdit);
+            else buildModeEntityListController.OpenEntityList(convertedEntities.Values.ToList());
             isSceneEntitiesListActive = !isSceneEntitiesListActive;
             InputDone();
             return;
@@ -401,6 +406,7 @@ public class BuildModeController : MonoBehaviour
         {
             advancedBuildModeController.ActivateAdvancedBuildMode(sceneToEdit);
             SetEditObjectParent();
+            SetObjectIfSnapOrNot();
         }
         else
         {
@@ -549,7 +555,8 @@ public class BuildModeController : MonoBehaviour
                 gizmoManager.SetSnapFactor(snapFactor, snapFactor, snapFactor);
             }
         }
-    
+        else if(isAdvancedModeActive) gizmoManager.SetSnapFactor(0, 0, 0);
+
         SetObjectIfSnapOrNot();
     }
 
@@ -587,62 +594,67 @@ public class BuildModeController : MonoBehaviour
             }
         }
     }
+    void Select(DecentrelandEntityToEdit entityEditable)
+    {
+        if (entityEditable.isLocked || entityEditable.isSelected) return;
+        //if (gameObjectToEdit != null) DeselectObject();
 
+        entityEditable.Select();
+
+        currentYRotationAdded = 0;
+        currentScaleAdded = 1;
+
+        selectedEntities.Add(entityEditable);
+
+        //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
+        foreach (DecentrelandEntityToEdit entity in selectedEntities)
+        {
+            entity.rootEntity.gameObject.transform.SetParent(null);
+        }
+        gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
+        gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
+        gameObjectToEdit.transform.localScale = Vector3.one;
+        foreach (DecentrelandEntityToEdit entity in selectedEntities)
+        {
+            entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
+        }
+
+
+
+
+        initialRotation = gameObjectToEdit.transform.rotation;
+
+        SetObjectIfSnapOrNot();
+        if (isAdvancedModeActive)
+        {
+            List<EditableEntity> editableEntities = new List<EditableEntity>();
+            foreach (DecentrelandEntityToEdit entity in selectedEntities)
+            {
+                editableEntities.Add(entity);
+            }
+
+            gizmoManager.SelectedEntities(gameObjectToEdit.transform, editableEntities);
+
+
+            if (!isMultiSelectionActive) advancedBuildModeController.LookAtEntity(entityEditable.rootEntity);
+        }
+
+
+        entityInformationController.Enable();
+        entityInformationController.SetEntity(entityEditable.rootEntity, sceneToEdit);
+        CopyGameObjectStatus(gameObjectToEdit, undoGO, false, false);
+        CopyGameObjectStatus(gameObjectToEdit, snapGO, false);
+
+
+
+        sceneLimitInfoController.UpdateInfo();
+    }
     void Select(DecentralandEntity decentralandEntity)
     {
-        if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id+decentralandEntity.entityId))
+        if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id + decentralandEntity.entityId))
         {
             DecentrelandEntityToEdit entityEditable = convertedEntities[sceneToEdit.sceneData.id + decentralandEntity.entityId];
-            if (entityEditable.isLocked || entityEditable.isSelected) return;
-            //if (gameObjectToEdit != null) DeselectObject();
-
-            entityEditable.Select();
-
-            currentYRotationAdded = 0;
-            currentScaleAdded = 1;
-
-            selectedEntities.Add(entityEditable);
-
-            //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
-            foreach (DecentrelandEntityToEdit entity in selectedEntities)
-            {
-                entity.rootEntity.gameObject.transform.SetParent(null);
-            }
-            gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
-            gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
-            gameObjectToEdit.transform.localScale = Vector3.one;
-            foreach (DecentrelandEntityToEdit entity in selectedEntities)
-            {
-                entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
-            }
-        
-
-    
-
-            initialRotation = gameObjectToEdit.transform.rotation;
-
-            SetObjectIfSnapOrNot();
-            if (isAdvancedModeActive)
-            {
-                List<EditableEntity> editableEntities = new List<EditableEntity>();
-                foreach (DecentrelandEntityToEdit entity in selectedEntities)
-                {
-                    editableEntities.Add(entity);
-                }
-
-                gizmoManager.SelectedEntities(gameObjectToEdit.transform, editableEntities);
-                gizmoManager.SetGizmoType("MOVE");
-            }
-
-
-            entityInformationController.Enable();
-            entityInformationController.SetEntity(decentralandEntity, sceneToEdit);
-            CopyGameObjectStatus(gameObjectToEdit, undoGO,false,false);
-            CopyGameObjectStatus(gameObjectToEdit, snapGO,false);
-          
-
-
-            sceneLimitInfoController.UpdateInfo();
+            Select(entityEditable);
         }
     }
 
@@ -676,7 +688,8 @@ public class BuildModeController : MonoBehaviour
                 freeMovementGO.transform.rotation = gameObjectToEdit.transform.rotation;
                 freeMovementGO.transform.localScale = gameObjectToEdit.transform.localScale;
 
-                gameObjectToEdit.transform.SetParent(originalParent);
+                //gameObjectToEdit.transform.SetParent(originalParent);
+                SetEditObjectParent();
 
                 Vector3 pointToLookAt = Camera.main.transform.position;
                 pointToLookAt.y = gameObjectToEdit.transform.position.y;
@@ -686,8 +699,13 @@ public class BuildModeController : MonoBehaviour
             }
             else
             {
+                snapGO.transform.SetParent(Camera.main.transform);
                 gameObjectToEdit.transform.SetParent(null);
             }
+        }
+        else if(isAdvancedModeActive)
+        {
+            snapGO.transform.SetParent(null);
         }
     }
 
@@ -941,7 +959,8 @@ public class BuildModeController : MonoBehaviour
         if (!convertedEntities.ContainsKey(entity.scene.sceneData.id + entity.entityId))
         {
            
-            DecentrelandEntityToEdit entityToEdit = new DecentrelandEntityToEdit(entity, editMaterial);
+            DecentrelandEntityToEdit entityToEdit = Utils.GetOrCreateComponent<DecentrelandEntityToEdit>(entity.gameObject);
+            entityToEdit.Init(entity, editMaterial);
             convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);
             entity.OnRemoved += RemoveConvertedEntity;
             entityToEdit.isNew = hasBeenCreated;

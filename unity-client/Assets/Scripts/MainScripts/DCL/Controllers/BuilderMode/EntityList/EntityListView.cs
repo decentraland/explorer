@@ -3,18 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EntityListView : ListView<DecentralandEntity>
+public class EntityListView : ListView<DecentrelandEntityToEdit>
 {
     public EntityListAdapter entityListAdapter;
 
-    public System.Action<BuildModeEntityListController.EntityAction,DecentralandEntity> OnActioninvoked;
+    public System.Action<BuildModeEntityListController.EntityAction, DecentrelandEntityToEdit, EntityListAdapter> OnActioninvoked;
 
 
     public override void AddAdapters()
     {
         base.AddAdapters();
 
-        foreach (DecentralandEntity entity in contentList)
+        foreach (DecentrelandEntityToEdit entity in contentList)
         {
             EntityListAdapter adapter = Instantiate(entityListAdapter, contentPanelTransform).GetComponent<EntityListAdapter>();
             adapter.SetContent(entity);
@@ -22,8 +22,8 @@ public class EntityListView : ListView<DecentralandEntity>
         }
     }
 
-    public void EntityActionInvoked(BuildModeEntityListController.EntityAction action, DecentralandEntity entityToApply)
+    public void EntityActionInvoked(BuildModeEntityListController.EntityAction action, DecentrelandEntityToEdit entityToApply,EntityListAdapter adapter)
     {
-        OnActioninvoked?.Invoke(action, entityToApply);
+        OnActioninvoked?.Invoke(action, entityToApply,adapter);
     }
 }

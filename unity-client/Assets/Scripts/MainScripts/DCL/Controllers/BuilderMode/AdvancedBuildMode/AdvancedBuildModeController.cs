@@ -8,13 +8,18 @@ using DCL.Configuration;
 using DCL.Helpers;
 using Builder;
 using Builder.Gizmos;
+using DCL.Models;
+using UnityEngine.UI;
 
 public class AdvancedBuildModeController : MonoBehaviour
 {
     public float distanceEagleCamera = 20f;
+    [Header("References")]
     public FreeCameraMovement freeCameraController;
-    public GameObject eagleCamera;
+    public GameObject eagleCamera,advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
+
+    public Outline moveOutline, rotateOutline, scaleOutline;
 
     //public CameraController cameraController;
     public Transform lookAtT;
@@ -35,10 +40,24 @@ public class AdvancedBuildModeController : MonoBehaviour
         LookAtTransfrom();
 
         eagleCamera.gameObject.SetActive(true);
+
         gizmoManager.InitializeGizmos(Camera.main);
+        gizmoManager.ShowGizmo();
+        if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE) gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
         SceneController.i.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
+        advancedModeUI.SetActive(true);
+    }
+
+    public void DesactivateAdvancedBuildMode()
+    {
+        mouseCatcher.enabled = true;
+        Utils.LockCursor();
+        eagleCamera.gameObject.SetActive(false);
+        SceneController.i.ReIntegrateIsolatedScene();
+        advancedModeUI.SetActive(false);
+        gizmoManager.HideGizmo();
     }
 
     [ContextMenu("Look at transform")]
@@ -46,14 +65,34 @@ public class AdvancedBuildModeController : MonoBehaviour
     {
         freeCameraController.LookAt(lookAtT);
     }
-    public void DesactivateAdvancedBuildMode()
+
+    public void LookAtEntity(DecentralandEntity entity)
     {
-        mouseCatcher.enabled = true;
-        Utils.LockCursor();
-        eagleCamera.gameObject.SetActive(false);
-        SceneController.i.ReIntegrateIsolatedScene();
+        freeCameraController.SmoothLookAt(entity.gameObject.transform);      
     }
 
+    public void TranslateMode()
+    {
+        moveOutline.enabled = true;
+        rotateOutline.enabled = false;
+        scaleOutline.enabled = false;
+        gizmoManager.SetGizmoType("MOVE");
+    }
+
+    public void RotateMode()
+    {
+        moveOutline.enabled = false;
+        rotateOutline.enabled = true;
+        scaleOutline.enabled = false;
+        gizmoManager.SetGizmoType("ROTATE");
+    }
+    public void ScaleMode()
+    {
+        moveOutline.enabled = false;
+        rotateOutline.enabled = false;
+        scaleOutline.enabled = true;
+        gizmoManager.SetGizmoType("SCALE");
+    }
 
 
     void SetLookAtObject()
