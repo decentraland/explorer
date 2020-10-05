@@ -15,12 +15,21 @@ public class HUDController : MonoBehaviour
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
 
+    private readonly Notification.Model hiddenUINotification = new Notification.Model()
+    {
+        timer = 3,
+        type = NotificationFactory.Type.UI_HIDDEN,
+        groupID = "UIHiddenNotification"
+    };
+
     private void Awake()
     {
         i = this;
 
         toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
+
+        CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenOnOnChange;
     }
 
     public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
@@ -105,6 +114,14 @@ public class HUDController : MonoBehaviour
             return;
 
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
+    }
+
+    private void AllUIHiddenOnOnChange(bool current, bool previous)
+    {
+        if (current)
+        {
+            NotificationsController.i?.ShowNotification(hiddenUINotification);
+        }
     }
 
     public enum HUDElementID
@@ -423,6 +440,7 @@ public class HUDController : MonoBehaviour
     public void Cleanup()
     {
         toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
+        CommonScriptableObjects.allUIHidden.OnChange -= AllUIHiddenOnOnChange;
 
         if (worldChatWindowHud != null)
         {
