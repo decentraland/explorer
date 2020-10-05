@@ -27,6 +27,8 @@ import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { ensureMetaConfigurationInitialized } from 'shared/meta'
+import { store } from 'shared/cache'
 
 const container = document.getElementById('gameContainer')
 
@@ -99,7 +101,15 @@ initializeUnity(container)
     await startUnitySceneWorkers()
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
+    
+    await ensureMetaConfigurationInitialized()
 
+    let worldMetaConfig:any = globalThis.globalStore.getState().meta.config.world
+
+    if (worldMetaConfig.currentWorldEvent) {
+      i.SetRenderProfile((worldMetaConfig.currentWorldEvent as any) as RenderProfile)
+    }
+    
     if (!NO_MOTD) {
       i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true })
     }

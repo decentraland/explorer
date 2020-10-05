@@ -15,8 +15,14 @@ export type MetaConfiguration = {
   }
   world: {
     pois: Vector2Component[]
+    currentWorldEvent: WorldEventState 
   }
   comms: CommsConfig
+}
+
+export enum WorldEventState {
+  DEFAULT = 0,
+  HALLOWEEN = 1,
 }
 
 export type MetaState = {
