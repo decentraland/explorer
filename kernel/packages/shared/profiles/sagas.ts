@@ -202,7 +202,7 @@ function overrideBaseUrl(wearable: Wearable) {
       baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
     }
   } else {
-    return wearable
+    return wearable ?? {}
   }
 }
 
