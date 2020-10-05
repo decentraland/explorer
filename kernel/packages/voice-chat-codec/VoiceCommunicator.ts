@@ -96,12 +96,6 @@ export class VoiceCommunicator {
     this.startOutputsExpiration()
   }
 
-  private createContext(contextOptions?: AudioContextOptions) {
-    const aContext = new AudioContext(contextOptions)
-    aContext.audioWorklet.addModule(worlketModulesUrl)
-    return aContext
-  }
-
   public setSelfId(selfId: string) {
     this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
     this.selfId = selfId
@@ -208,7 +202,7 @@ export class VoiceCommunicator {
     } catch (e) {
       // If this fails, then it most likely it is because the sample rate of the stream is incompatible with the context's, so we create a special context for recording
       if (e.message.includes('sample-rate is currently not supported')) {
-        const recordingContext = new AudioContext()
+        const recordingContext = this.createContext()
         this.input = this.createInputFor(stream, recordingContext)
       } else {
         throw e
@@ -409,6 +403,14 @@ export class VoiceCommunicator {
     }
 
     setTimeout(expireOutputs, 0)
+  }
+
+  private createContext(contextOptions?: AudioContextOptions) {
+    const aContext = new AudioContext(contextOptions)
+    aContext.audioWorklet
+      .addModule(worlketModulesUrl)
+      .catch((e) => defaultLogger.error('Error loading worklet modules: ', e))
+    return aContext
   }
 
   private destroyOutput(outputId: string) {
