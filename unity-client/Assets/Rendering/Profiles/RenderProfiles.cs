@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class RenderProfiles
+namespace DCL
 {
-    private static RenderProfileAvatar renderProfileAvatarValue;
-    public static RenderProfileAvatar renderProfileAvatar => GetOrLoad(ref renderProfileAvatarValue, "RenderProfileAvatar");
-
-    internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
+    public static class RenderProfiles
     {
-        if (variable == null)
-        {
-            variable = Resources.Load<T>(path);
-        }
+        private static RenderProfileAvatar renderProfileAvatarValue;
+        public static RenderProfileAvatar renderProfileAvatar => GetOrLoad(ref renderProfileAvatarValue, "RenderProfileAvatar");
 
-        return variable;
+        internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
+        {
+            if (variable == null)
+            {
+                variable = Resources.Load<T>(path);
+            }
+
+            return variable;
+        }
     }
 }
