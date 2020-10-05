@@ -5,12 +5,17 @@ export enum RequestTopic {
   DESTROY_DECODER = 'DESTROY_ENCODER'
 }
 
-export enum WorkletRequestTopic {
+export enum InputWorkletRequestTopic {
   ENCODE = 'ENCODE',
   PAUSE = 'PAUSE',
   RESUME = 'RESUME',
   ON_PAUSED = 'ON_PAUSED',
   ON_RECORDING = 'ON_RECORDING'
+}
+
+export enum OutputWorkletRequestTopic {
+  STREAM_PLAYING = 'STREAM_PLAYING',
+  WRITE_SAMPLES = 'WRITE_SAMPLES'
 }
 
 export enum ResponseTopic {

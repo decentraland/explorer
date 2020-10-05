@@ -1,11 +1,9 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
-import { RingBuffer } from 'atomicHelpers/RingBuffer'
 import { SortedLimitedQueue } from 'atomicHelpers/SortedLimitedQueue'
-import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
-import { VOICE_CHAT_SAMPLE_RATE, OPUS_FRAME_SIZE_MS, OUTPUT_NODE_BUFFER_SIZE } from './constants'
+import { VOICE_CHAT_SAMPLE_RATE, OPUS_FRAME_SIZE_MS } from './constants'
 import { parse, write } from 'sdp-transform'
-import { WorkletRequestTopic } from './types'
+import { InputWorkletRequestTopic, OutputWorkletRequestTopic } from './types'
 
 export type AudioCommunicatorChannel = {
   send(data: Uint8Array): any
@@ -21,11 +19,9 @@ type EncodedFrame = {
 
 type VoiceOutput = {
   encodedFramesQueue: SortedLimitedQueue<EncodedFrame>
-  decodedBuffer: RingBuffer<Float32Array>
-  scriptProcessor: ScriptProcessorNode
+  workletNode: AudioWorkletNode
   panNode: PannerNode
   spatialParams: VoiceSpatialParams
-  playing: boolean
   lastUpdateTime: number
 }
 
@@ -38,7 +34,7 @@ type VoiceInput = {
 
 export type VoiceCommunicatorOptions = {
   sampleRate?: number
-  channelBufferSize?: number
+  outputBufferLength?: number
   maxDistance?: number
   refDistance?: number
   initialListenerParams?: VoiceSpatialParams
@@ -67,7 +63,7 @@ export class VoiceCommunicator {
   private streamRecordingListeners: StreamRecordingListener[] = []
 
   private readonly sampleRate: number
-  private readonly channelBufferSize: number
+  private readonly outputBufferLength: number
   private readonly outputExpireTime = 60 * 1000
 
   constructor(
@@ -76,7 +72,7 @@ export class VoiceCommunicator {
     private options: VoiceCommunicatorOptions
   ) {
     this.sampleRate = this.options.sampleRate ?? VOICE_CHAT_SAMPLE_RATE
-    this.channelBufferSize = this.options.channelBufferSize ?? 2.0
+    this.outputBufferLength = this.options.outputBufferLength ?? 2.0
 
     this.context = this.createContext({ sampleRate: this.sampleRate })
 
@@ -166,8 +162,8 @@ export class VoiceCommunicator {
     this.outputGainNode.gain.value = value
   }
 
-  createOutputNodes(src: string): { scriptProcessor: ScriptProcessorNode; panNode: PannerNode } {
-    const scriptProcessor = this.createScriptOutputFor(src)
+  createOutputNodes(src: string): { workletNode: AudioWorkletNode; panNode: PannerNode } {
+    const workletNode = this.createWorkletFor(src)
     const panNode = this.context.createPanner()
     panNode.coneInnerAngle = 180
     panNode.coneOuterAngle = 360
@@ -177,45 +173,26 @@ export class VoiceCommunicator {
     panNode.panningModel = this.options.panningModel ?? 'equalpower'
     panNode.distanceModel = this.options.distanceModel ?? 'inverse'
     panNode.rolloffFactor = 1.0
-    scriptProcessor.connect(panNode)
+    workletNode.connect(panNode)
     panNode.connect(this.outputGainNode)
 
-    return { scriptProcessor, panNode }
+    return { workletNode, panNode }
   }
 
-  createScriptOutputFor(src: string) {
-    const bufferSize = OUTPUT_NODE_BUFFER_SIZE
-    const processor = this.context.createScriptProcessor(bufferSize, 0, 1)
-    processor.onaudioprocess = (ev) => {
-      const data = ev.outputBuffer.getChannelData(0)
+  createWorkletFor(src: string) {
+    const workletNode = new AudioWorkletNode(this.context, 'outputProcessor', {
+      numberOfInputs: 0,
+      numberOfOutputs: 1,
+      processorOptions: { sampleRate: this.sampleRate, bufferLength: this.outputBufferLength }
+    })
 
-      data.fill(0)
-      if (this.outputs[src]) {
-        const wasPlaying = this.outputs[src].playing
-        const minReadCount = wasPlaying ? 0 : OUTPUT_NODE_BUFFER_SIZE - 1
-        if (this.outputs[src].decodedBuffer.readAvailableCount() > minReadCount) {
-          data.set(this.outputs[src].decodedBuffer.read(data.length))
-          if (!wasPlaying) {
-            this.changePlayingStatus(src, true)
-          }
-        } else {
-          if (wasPlaying) {
-            this.changePlayingStatus(src, false)
-          }
-        }
+    workletNode.port.onmessage = (e) => {
+      if (e.data.topic === OutputWorkletRequestTopic.STREAM_PLAYING) {
+        this.streamPlayingListeners.forEach((listener) => listener(src, e.data.playing))
       }
     }
 
-    return processor
-  }
-
-  changePlayingStatus(streamId: string, playing: boolean) {
-    this.outputs[streamId].playing = playing
-    this.outputs[streamId].lastUpdateTime = Date.now()
-    // Listeners could be long running, so we defer the execution of them
-    defer(() => {
-      this.streamPlayingListeners.forEach((listener) => listener(streamId, playing))
-    })
+    return workletNode
   }
 
   setInputStream(stream: MediaStream) {
@@ -241,7 +218,7 @@ export class VoiceCommunicator {
 
   start() {
     if (this.input) {
-      this.sendToInputWorklet(WorkletRequestTopic.RESUME)
+      this.sendToInputWorklet(InputWorkletRequestTopic.RESUME)
     } else {
       this.notifyRecording(false)
     }
@@ -249,13 +226,13 @@ export class VoiceCommunicator {
 
   pause() {
     if (this.input) {
-      this.sendToInputWorklet(WorkletRequestTopic.PAUSE)
+      this.sendToInputWorklet(InputWorkletRequestTopic.PAUSE)
     } else {
       this.notifyRecording(false)
     }
   }
 
-  private sendToInputWorklet(topic: WorkletRequestTopic) {
+  private sendToInputWorklet(topic: InputWorkletRequestTopic) {
     this.input?.workletNode.port.postMessage({ topic: topic })
   }
 
@@ -327,11 +304,9 @@ export class VoiceCommunicator {
     const nodes = this.createOutputNodes(src)
     this.outputs[src] = {
       encodedFramesQueue: new SortedLimitedQueue(
-        Math.ceil((this.channelBufferSize * 1000) / OPUS_FRAME_SIZE_MS),
+        Math.ceil((this.outputBufferLength * 1000) / OPUS_FRAME_SIZE_MS),
         (frameA, frameB) => frameA.order - frameB.order
       ),
-      decodedBuffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
-      playing: false,
       spatialParams: relativePosition,
       lastUpdateTime: Date.now(),
       ...nodes
@@ -353,7 +328,10 @@ export class VoiceCommunicator {
 
             stream.addAudioDecodedListener((samples) => {
               this.outputs[src].lastUpdateTime = Date.now()
-              this.outputs[src].decodedBuffer.write(samples)
+              this.outputs[src].workletNode.port.postMessage(
+                { topic: OutputWorkletRequestTopic.WRITE_SAMPLES, samples },
+                [samples.buffer]
+              )
             })
           }
 
@@ -369,7 +347,10 @@ export class VoiceCommunicator {
 
   private createInputFor(stream: MediaStream, context: AudioContext) {
     const streamSource = context.createMediaStreamSource(stream)
-    const workletNode = new AudioWorkletNode(context, 'inputProcessor')
+    const workletNode = new AudioWorkletNode(context, 'inputProcessor', {
+      numberOfInputs: 1,
+      numberOfOutputs: 1
+    })
     streamSource.connect(workletNode)
     workletNode.connect(context.destination)
     return {
@@ -390,15 +371,15 @@ export class VoiceCommunicator {
     encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
 
     workletNode.port.onmessage = (e) => {
-      if (e.data.topic === WorkletRequestTopic.ENCODE) {
+      if (e.data.topic === InputWorkletRequestTopic.ENCODE) {
         encodeStream.encode(e.data.samples)
       }
 
-      if (e.data.topic === WorkletRequestTopic.ON_PAUSED) {
+      if (e.data.topic === InputWorkletRequestTopic.ON_PAUSED) {
         this.notifyRecording(false)
       }
 
-      if (e.data.topic === WorkletRequestTopic.ON_RECORDING) {
+      if (e.data.topic === InputWorkletRequestTopic.ON_RECORDING) {
         this.notifyRecording(true)
       }
     }
@@ -441,6 +422,6 @@ export class VoiceCommunicator {
   private disconnectOutputNodes(outputId: string) {
     const output = this.outputs[outputId]
     output.panNode.disconnect()
-    output.scriptProcessor.disconnect()
+    output.workletNode.disconnect()
   }
 }
