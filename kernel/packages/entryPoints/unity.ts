@@ -14,14 +14,14 @@ import {
   OPEN_AVATAR_EDITOR,
   ENABLE_MANA_HUD,
   ENABLE_NEW_TASKBAR,
-  HAS_INITIAL_POSITION_MARK
+  HAS_INITIAL_POSITION_MARK, HALLOWEEN
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
-import { HUDElementID } from 'shared/types'
+import { HUDElementID, RenderProfile } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
@@ -68,6 +68,8 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+
+    i.SetRenderProfile( HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT )
 
     try {
       await userAuthentified()

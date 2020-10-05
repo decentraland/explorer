@@ -146,6 +146,9 @@ export const ENABLE_NEW_TASKBAR =
   location.search.indexOf('ENABLE_NEW_TASKBAR') !==
   -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
 
+export const HALLOWEEN = location.search.indexOf('HALLOWEEN') !== -1
+
+
 export const PIN_CATALYST = qs.PIN_CATALYST
 
 export namespace commConfigurations {

@@ -12,6 +12,13 @@ public class RenderProfileBridge : MonoBehaviour
         HALLOWEEN,
     }
 
+    public static RenderProfileBridge i { get; private set; }
+
+    public void Awake()
+    {
+        i = this;
+    }
+
     public void SetRenderProfile(ID id)
     {
         switch (id)
