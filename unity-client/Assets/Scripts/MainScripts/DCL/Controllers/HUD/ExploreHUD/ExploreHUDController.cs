@@ -14,6 +14,7 @@ public class ExploreHUDController : IHUD
     FriendTrackerController friendsController;
 
     public event Action OnToggleTriggered;
+    public event Action OnOpen;
     public event Action OnClose;
 
     public ExploreHUDController()
@@ -58,6 +59,7 @@ public class ExploreHUDController : IHUD
         {
             Utils.UnlockCursor();
             view.RefreshData();
+            OnOpen?.Invoke();
         }
         else if (!visible && view.IsActive())
         {

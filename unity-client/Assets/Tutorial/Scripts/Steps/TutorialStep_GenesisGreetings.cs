@@ -35,7 +35,7 @@ namespace DCL.Tutorial
 
             if (tutorialController)
             {
-                if (!tutorialController.alreadyOpenedFromDeepLink)
+                if (!tutorialController.alreadyOpenedFromDeepLink && SceneController.i != null)
                 {
                     WebInterface.SendSceneExternalActionEvent(SceneController.i.currentSceneId,"tutorial","begin");
                 }

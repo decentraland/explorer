@@ -23,6 +23,8 @@ public class TaskbarMoreMenu : MonoBehaviour
 
     private TaskbarHUDView view;
 
+    public event System.Action<bool> OnMoreMenuOpened;
+
     public void Initialize(TaskbarHUDView view)
     {
         this.view = view;
@@ -98,6 +100,8 @@ public class TaskbarMoreMenu : MonoBehaviour
                 moreMenuAnimator.Hide(instant);
             }
         }
+
+        OnMoreMenuOpened?.Invoke(visible);
     }
 
     private void ToggleCollapseBar()

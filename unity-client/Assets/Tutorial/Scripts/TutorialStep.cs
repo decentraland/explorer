@@ -42,7 +42,12 @@ namespace DCL.Tutorial
                 tutorialController.ShowTeacher3DModel(show3DTeacherAtStart);
 
                 if (show3DTeacherAtStart && teacherPositionRef != null)
+                {
                     tutorialController.SetTeacherPosition(teacherPositionRef.position);
+
+                    if (tutorialController.teacher.isHiddenByAnAnimation)
+                        tutorialController.teacher.PlayAnimation(TutorialTeacher.TeacherAnimation.Reset);
+                }
             }
         }
 

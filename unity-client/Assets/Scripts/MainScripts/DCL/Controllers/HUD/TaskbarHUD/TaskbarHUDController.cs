@@ -39,6 +39,7 @@ public class TaskbarHUDController : IHUD
     public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
     public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
     public RectTransform goToGenesisTooltipReference { get => view.goToGenesisTooltipReference; }
+    public TaskbarMoreMenu moreMenu { get => view.moreMenu; }
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController, IFriendsController friendsController)
     {
@@ -199,7 +200,7 @@ public class TaskbarHUDController : IHUD
     private void MouseCatcher_OnMouseLock()
     {
         view.leftWindowContainerAnimator.Hide();
-        view.moreMenu.ShowMoreMenu(false);
+        ShowMoreMenu(false);
 
         foreach (var btn in view.GetButtonList())
         {
@@ -547,5 +548,10 @@ public class TaskbarHUDController : IHUD
     {
         if (!AnyWindowsDifferentThanChatIsOpen())
             worldChatWindowHud.MarkWorldChatMessagesAsRead();
+    }
+
+    public void ShowMoreMenu(bool isActive)
+    {
+        view.moreMenu.ShowMoreMenu(isActive);
     }
 }
