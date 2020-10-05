@@ -1,7 +1,16 @@
 import { VoiceChatCodecWorkerMain, EncodeStream } from './VoiceChatCodecWorkerMain'
 import { RingBuffer } from 'atomicHelpers/RingBuffer'
+import { SortedLimitedQueue } from 'atomicHelpers/SortedLimitedQueue'
 import { defer } from 'atomicHelpers/defer'
 import defaultLogger from 'shared/logger'
+import {
+  VOICE_CHAT_SAMPLE_RATE,
+  OPUS_FRAME_SIZE_MS,
+  OUTPUT_NODE_BUFFER_SIZE,
+  OPUS_SAMPLES_PER_FRAME,
+  INPUT_NODE_BUFFER_SIZE
+} from './constants'
+import { parse, write } from 'sdp-transform'
 
 export type AudioCommunicatorChannel = {
   send(data: Uint8Array): any
@@ -10,8 +19,14 @@ export type AudioCommunicatorChannel = {
 export type StreamPlayingListener = (streamId: string, playing: boolean) => any
 export type StreamRecordingListener = (recording: boolean) => any
 
+type EncodedFrame = {
+  order: number
+  frame: Uint8Array
+}
+
 type VoiceOutput = {
-  buffer: RingBuffer<Float32Array>
+  encodedFramesQueue: SortedLimitedQueue<EncodedFrame>
+  decodedBuffer: RingBuffer<Float32Array>
   scriptProcessor: ScriptProcessorNode
   panNode: PannerNode
   spatialParams: VoiceSpatialParams
@@ -34,6 +49,7 @@ export type VoiceCommunicatorOptions = {
   initialListenerParams?: VoiceSpatialParams
   panningModel?: PanningModelType
   distanceModel?: DistanceModelType
+  loopbackAudioElement?: HTMLAudioElement
 }
 
 export type VoiceSpatialParams = {
@@ -44,6 +60,8 @@ export type VoiceSpatialParams = {
 export class VoiceCommunicator {
   private context: AudioContext
   private outputGainNode: GainNode
+  private outputStreamNode?: MediaStreamAudioDestinationNode
+  private loopbackConnections?: { src: RTCPeerConnection; dst: RTCPeerConnection }
   private input?: VoiceInput
   private voiceChatWorkerMain: VoiceChatCodecWorkerMain
   private outputs: Record<string, VoiceOutput> = {}
@@ -55,17 +73,29 @@ export class VoiceCommunicator {
   private readonly channelBufferSize: number
   private readonly outputExpireTime = 60 * 1000
 
+  private pauseRequested: boolean = false
+  private inputSamplesCount: number = 0
+
   constructor(
     private selfId: string,
     private channel: AudioCommunicatorChannel,
     private options: VoiceCommunicatorOptions
   ) {
-    this.sampleRate = this.options.sampleRate ?? 24000
+    this.sampleRate = this.options.sampleRate ?? VOICE_CHAT_SAMPLE_RATE
     this.channelBufferSize = this.options.channelBufferSize ?? 2.0
 
     this.context = new AudioContext({ sampleRate: this.sampleRate })
+
     this.outputGainNode = this.context.createGain()
-    this.outputGainNode.connect(this.context.destination)
+
+    if (options.loopbackAudioElement) {
+      // Workaround for echo cancellation. See: https://bugs.chromium.org/p/chromium/issues/detail?id=687574#c71
+      this.outputStreamNode = this.context.createMediaStreamDestination()
+      this.outputGainNode.connect(this.outputStreamNode)
+      this.loopbackConnections = this.createRTCLoopbackConnection()
+    } else {
+      this.outputGainNode.connect(this.context.destination)
+    }
 
     if (this.options.initialListenerParams) {
       this.setListenerSpatialParams(this.options.initialListenerParams)
@@ -99,33 +129,15 @@ export class VoiceCommunicator {
     return !!this.input
   }
 
-  async playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array) {
+  playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array, time: number) {
     if (!this.outputs[src]) {
-      const nodes = this.createOutputNodes(src)
-      this.outputs[src] = {
-        buffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
-        playing: false,
-        spatialParams: relativePosition,
-        lastUpdateTime: Date.now(),
-        ...nodes
-      }
+      this.createOutput(src, relativePosition)
     } else {
       this.outputs[src].lastUpdateTime = Date.now()
       this.setVoiceRelativePosition(src, relativePosition)
     }
 
-    let stream = this.voiceChatWorkerMain.decodeStreams[src]
-
-    if (!stream) {
-      stream = this.voiceChatWorkerMain.getOrCreateDecodeStream(src, this.sampleRate)
-
-      stream.addAudioDecodedListener((samples) => {
-        this.outputs[src].lastUpdateTime = Date.now()
-        this.outputs[src].buffer.write(samples)
-      })
-    }
-
-    stream.decode(encoded)
+    this.outputs[src].encodedFramesQueue.queue({ frame: encoded, order: time })
   }
 
   setListenerSpatialParams(spatialParams: VoiceSpatialParams) {
@@ -175,7 +187,7 @@ export class VoiceCommunicator {
   }
 
   createScriptOutputFor(src: string) {
-    const bufferSize = 8192
+    const bufferSize = OUTPUT_NODE_BUFFER_SIZE
     const processor = this.context.createScriptProcessor(bufferSize, 0, 1)
     processor.onaudioprocess = (ev) => {
       const data = ev.outputBuffer.getChannelData(0)
@@ -183,8 +195,9 @@ export class VoiceCommunicator {
       data.fill(0)
       if (this.outputs[src]) {
         const wasPlaying = this.outputs[src].playing
-        if (this.outputs[src].buffer.readAvailableCount() > 0) {
-          data.set(this.outputs[src].buffer.read(data.length))
+        const minReadCount = wasPlaying ? 0 : OUTPUT_NODE_BUFFER_SIZE - 1
+        if (this.outputs[src].decodedBuffer.readAvailableCount() > minReadCount) {
+          data.set(this.outputs[src].decodedBuffer.read(data.length))
           if (!wasPlaying) {
             this.changePlayingStatus(src, true)
           }
@@ -230,6 +243,7 @@ export class VoiceCommunicator {
   }
 
   start() {
+    this.pauseRequested = false
     if (this.input) {
       this.input.encodeInputProcessor.connect(this.input.recordingContext.destination)
       this.input.inputStream.connect(this.input.encodeInputProcessor)
@@ -240,24 +254,128 @@ export class VoiceCommunicator {
   }
 
   pause() {
-    try {
-      this.input?.inputStream.disconnect(this.input.encodeInputProcessor)
-    } catch (e) {
-      // Ignored. This will fail if it was already disconnected
-    }
+    this.pauseRequested = true
+  }
 
-    try {
-      this.input?.encodeInputProcessor.disconnect(this.input.recordingContext.destination)
-    } catch (e) {
-      // Ignored. This will fail if it was already disconnected
+  private createRTCLoopbackConnection(
+    currentRetryNumber: number = 0
+  ): { src: RTCPeerConnection; dst: RTCPeerConnection } {
+    const src = new RTCPeerConnection()
+    const dst = new RTCPeerConnection()
+
+    let retryNumber = currentRetryNumber
+
+    ;(async () => {
+      // When having an error, we retry in a couple of seconds. Up to 10 retries.
+      src.onconnectionstatechange = (e) => {
+        if (
+          src.connectionState === 'closed' ||
+          src.connectionState === 'disconnected' ||
+          (src.connectionState === 'failed' && currentRetryNumber < 10)
+        ) {
+          // Just in case, we close connections to free resources
+          this.closeLoopbackConnections()
+          this.loopbackConnections = this.createRTCLoopbackConnection(retryNumber)
+        } else if (src.connectionState === 'connected') {
+          // We reset retry number when the connection succeeds
+          retryNumber = 0
+        }
+      }
+
+      src.onicecandidate = (e) => e.candidate && dst.addIceCandidate(new RTCIceCandidate(e.candidate))
+      dst.onicecandidate = (e) => e.candidate && src.addIceCandidate(new RTCIceCandidate(e.candidate))
+
+      dst.ontrack = (e) => (this.options.loopbackAudioElement!.srcObject = e.streams[0])
+
+      this.outputStreamNode!.stream.getTracks().forEach((track) => src.addTrack(track, this.outputStreamNode!.stream))
+
+      const offer = await src.createOffer()
+
+      await src.setLocalDescription(offer)
+
+      await dst.setRemoteDescription(offer)
+      const answer = await dst.createAnswer()
+
+      const answerSdp = parse(answer.sdp!)
+
+      answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
+
+      answer.sdp = write(answerSdp)
+
+      await dst.setLocalDescription(answer)
+
+      await src.setRemoteDescription(answer)
+    })().catch((e) => {
+      defaultLogger.error('Error creating loopback connection', e)
+    })
+
+    return { src, dst }
+  }
+
+  private closeLoopbackConnections() {
+    if (this.loopbackConnections) {
+      const { src, dst } = this.loopbackConnections
+
+      src.close()
+      dst.close()
     }
+  }
+
+  private disconnectInput() {
+    this.input?.inputStream.disconnect()
+
+    this.input?.encodeInputProcessor.disconnect()
 
     this.notifyRecording(false)
   }
 
+  private createOutput(src: string, relativePosition: VoiceSpatialParams) {
+    const nodes = this.createOutputNodes(src)
+    this.outputs[src] = {
+      encodedFramesQueue: new SortedLimitedQueue(
+        Math.ceil((this.channelBufferSize * 1000) / OPUS_FRAME_SIZE_MS),
+        (frameA, frameB) => frameA.order - frameB.order
+      ),
+      decodedBuffer: new RingBuffer(Math.floor(this.channelBufferSize * this.sampleRate), Float32Array),
+      playing: false,
+      spatialParams: relativePosition,
+      lastUpdateTime: Date.now(),
+      ...nodes
+    }
+
+    const readEncodedBufferLoop = async () => {
+      if (this.outputs[src]) {
+        // Leaving this buffer to fill too much causes a great deal of latency, so we leave this as 1 for now. In the future, we should adjust this based
+        // on packet loss or something like that
+        const framesToRead = 1
+
+        const frames = await this.outputs[src].encodedFramesQueue.dequeueItemsWhenAvailable(framesToRead, 2000)
+
+        if (frames.length > 0) {
+          let stream = this.voiceChatWorkerMain.decodeStreams[src]
+
+          if (!stream) {
+            stream = this.voiceChatWorkerMain.getOrCreateDecodeStream(src, this.sampleRate)
+
+            stream.addAudioDecodedListener((samples) => {
+              this.outputs[src].lastUpdateTime = Date.now()
+              this.outputs[src].decodedBuffer.write(samples)
+            })
+          }
+
+          frames.forEach((it) => stream.decode(it.frame))
+        }
+
+        await readEncodedBufferLoop()
+      }
+    }
+
+    readEncodedBufferLoop().catch((e) => defaultLogger.log('Error while reading encoded buffer of ' + src, e))
+  }
+
   private createInputFor(stream: MediaStream, context: AudioContext) {
     const streamSource = context.createMediaStreamSource(stream)
-    const inputProcessor = context.createScriptProcessor(4096, 1, 1)
+    const inputProcessor = context.createScriptProcessor(INPUT_NODE_BUFFER_SIZE, 1, 1)
     return {
       recordingContext: context,
       encodeStream: this.createInputEncodeStream(context, inputProcessor),
@@ -275,9 +393,23 @@ export class VoiceCommunicator {
 
     encodeStream.addAudioEncodedListener((data) => this.channel.send(data))
 
-    encodeInputProcessor.onaudioprocess = async (e) => {
+    encodeInputProcessor.onaudioprocess = (e) => {
       const buffer = e.inputBuffer
-      encodeStream.encode(buffer.getChannelData(0))
+      let data = buffer.getChannelData(0)
+
+      if (this.pauseRequested) {
+        // We try to use as many samples as we can that would complete some frames
+        const samplesToUse =
+          Math.floor(data.length / OPUS_SAMPLES_PER_FRAME) * OPUS_SAMPLES_PER_FRAME +
+          OPUS_SAMPLES_PER_FRAME -
+          (this.inputSamplesCount % OPUS_SAMPLES_PER_FRAME)
+        data = data.slice(0, samplesToUse)
+        this.disconnectInput()
+        this.pauseRequested = false
+      }
+
+      encodeStream.encode(data)
+      this.inputSamplesCount += data.length
     }
 
     return encodeStream
@@ -308,14 +440,16 @@ export class VoiceCommunicator {
   }
 
   private destroyOutput(outputId: string) {
-    try {
-      this.outputs[outputId].panNode.disconnect(this.context.destination)
-    } catch (e) {
-      // Ignored. This may fail if the node wasn't connected yet
-    }
+    this.disconnectOutputNodes(outputId)
 
     this.voiceChatWorkerMain.destroyDecodeStream(outputId)
 
     delete this.outputs[outputId]
+  }
+
+  private disconnectOutputNodes(outputId: string) {
+    const output = this.outputs[outputId]
+    output.panNode.disconnect()
+    output.scriptProcessor.disconnect()
   }
 }
