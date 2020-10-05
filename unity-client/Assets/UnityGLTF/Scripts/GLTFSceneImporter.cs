@@ -676,7 +676,7 @@ namespace UnityGLTF
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
-                        PersistentAssetCache.AddBuffer(buffer.Uri, id, new RefCountedStreamData(buffer.Uri, bufferDataStream));
+                        PersistentAssetCache.AddBuffer(buffer.Uri, id, bufferDataStream);
                     }
                 }
 
@@ -762,6 +762,9 @@ namespace UnityGLTF
 
         protected virtual IEnumerator ConstructUnityTexture(Stream stream, bool markGpuOnly, bool linear, GLTFImage image, int imageCacheIndex)
         {
+            if (stream == null)
+                yield break;
+
             if (stream is MemoryStream)
             {
                 using (MemoryStream memoryStream = stream as MemoryStream)
@@ -2417,12 +2420,13 @@ namespace UnityGLTF
         {
             yield return new WaitUntil(() => _assetCache.TextureCache[textureIndex] != null);
 
-            if (_assetCache.TextureCache[textureIndex].CachedTexture == null)
-            {
-                int sourceId = GetTextureSourceId(texture);
-                GLTFImage image = _gltfRoot.Images[sourceId];
+            if (_assetCache.TextureCache[textureIndex].CachedTexture != null)
+                yield break;
 
-                RefCountedTextureData source = null;
+            int sourceId = GetTextureSourceId(texture);
+            GLTFImage image = _gltfRoot.Images[sourceId];
+
+            RefCountedTextureData source = null;
 
                 if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
                 {
@@ -2432,78 +2436,81 @@ namespace UnityGLTF
                 else
                 {
                     yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-                    source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId]);
 
-                    if (image.Uri != null && addImagesToPersistentCaching)
+                    if (addImagesToPersistentCaching)
                     {
-                        PersistentAssetCache.AddImage(image.Uri, id, source);
-                    }
-                }
-
-                var desiredFilterMode = FilterMode.Bilinear;
-                var desiredWrapMode = TextureWrapMode.Repeat;
-
-                if (texture.Sampler != null)
-                {
-                    var sampler = texture.Sampler.Value;
-                    switch (sampler.MinFilter)
-                    {
-                        case MinFilterMode.Nearest:
-                        case MinFilterMode.NearestMipmapNearest:
-                        case MinFilterMode.NearestMipmapLinear:
-                            desiredFilterMode = FilterMode.Point;
-                            break;
-                        case MinFilterMode.Linear:
-                        case MinFilterMode.LinearMipmapNearest:
-                        case MinFilterMode.LinearMipmapLinear:
-                            desiredFilterMode = FilterMode.Bilinear;
-                            break;
-                        default:
-                            Debug.LogWarning("Unsupported Sampler.MinFilter: " + sampler.MinFilter);
-                            break;
-                    }
-
-                    switch (sampler.WrapS)
-                    {
-                        case GLTF.Schema.WrapMode.ClampToEdge:
-                            desiredWrapMode = TextureWrapMode.Clamp;
-                            break;
-                        case GLTF.Schema.WrapMode.Repeat:
-                        default:
-                            desiredWrapMode = TextureWrapMode.Repeat;
-                            break;
-                    }
-                }
-
-                if (markGpuOnly || (source.Texture.filterMode == desiredFilterMode && source.Texture.wrapMode == desiredWrapMode))
-                {
-                    _assetCache.TextureCache[textureIndex].CachedTexture = source;
-
-                    if (markGpuOnly)
-                    {
-                        Debug.LogWarning("Ignoring sampler");
-                    }
-                }
-                else
-                {
-                    if (source.Texture.isReadable)
-                    {
-                        var unityTexture = Object.Instantiate(source.Texture);
-                        unityTexture.filterMode = desiredFilterMode;
-                        unityTexture.wrapMode = desiredWrapMode;
-
-#if !UNITY_EDITOR
-                        // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
-                        unityTexture.Apply(false, true);
-#endif
-                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
+                        source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
                     }
                     else
                     {
-                        Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
-                        _assetCache.TextureCache[textureIndex].CachedTexture = source;
+                        source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
                     }
                 }
+
+            var desiredFilterMode = FilterMode.Bilinear;
+            var desiredWrapMode = TextureWrapMode.Repeat;
+
+            if (texture.Sampler != null)
+            {
+                var sampler = texture.Sampler.Value;
+                switch (sampler.MinFilter)
+                {
+                    case MinFilterMode.Nearest:
+                    case MinFilterMode.NearestMipmapNearest:
+                    case MinFilterMode.NearestMipmapLinear:
+                        desiredFilterMode = FilterMode.Point;
+                        break;
+                    case MinFilterMode.Linear:
+                    case MinFilterMode.LinearMipmapNearest:
+                    case MinFilterMode.LinearMipmapLinear:
+                        desiredFilterMode = FilterMode.Bilinear;
+                        break;
+                    default:
+                        Debug.LogWarning("Unsupported Sampler.MinFilter: " + sampler.MinFilter);
+                        break;
+                }
+
+                switch (sampler.WrapS)
+                {
+                    case GLTF.Schema.WrapMode.ClampToEdge:
+                        desiredWrapMode = TextureWrapMode.Clamp;
+                        break;
+                    case GLTF.Schema.WrapMode.Repeat:
+                    default:
+                        desiredWrapMode = TextureWrapMode.Repeat;
+                        break;
+                }
+            }
+
+            if (markGpuOnly || (source.Texture.filterMode == desiredFilterMode && source.Texture.wrapMode == desiredWrapMode))
+            {
+                _assetCache.TextureCache[textureIndex].CachedTexture = source;
+
+                if (markGpuOnly)
+                {
+                    Debug.LogWarning("Ignoring sampler");
+                }
+            }
+            else
+            {
+                if (source.Texture.isReadable)
+                {
+                    var unityTexture = Object.Instantiate(source.Texture);
+                    unityTexture.filterMode = desiredFilterMode;
+                    unityTexture.wrapMode = desiredWrapMode;
+
+#if !UNITY_EDITOR
+                    // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
+                    unityTexture.Apply(false, true);
+#endif
+                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData( PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
+                }
+                else
+                {
+                    Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
+                    _assetCache.TextureCache[textureIndex].CachedTexture = source;
+                }
+                
             }
         }
 
