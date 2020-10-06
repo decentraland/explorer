@@ -29,15 +29,17 @@ namespace DCL.Tutorial
         {
             base.SetTooltipPosition();
 
-            if (tutorialController != null && tutorialController.hudController != null)
+            if (tutorialController != null &&
+                tutorialController.hudController != null &&
+                tutorialController.hudController.taskbarHud != null)
             {
+                tutorialController.hudController.taskbarHud.SetVisibility(true);
+
                 if (tutorialController.hudController.taskbarHud.tutorialTooltipReference)
                 {
                     tooltipTransform.position =
                         tutorialController.hudController.taskbarHud.tutorialTooltipReference.position;
                 }
-
-                tutorialController.hudController.taskbarHud?.SetVisibility(true);
             }
         }
 
