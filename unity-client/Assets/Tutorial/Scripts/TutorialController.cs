@@ -256,6 +256,18 @@ namespace DCL.Tutorial
             teacherCanvas.sortingOrder = sortOrder;
         }
 
+        /// <summary>
+        /// Finishes the current running step, skips all the next ones and completes the tutorial.
+        /// </summary>
+        public void SkipTutorial()
+        {
+            int skipIndex = stepsOnGenesisPlaza.Count +
+                stepsFromDeepLink.Count +
+                stepsOnGenesisPlazaAfterDeepLink.Count;
+
+            StartCoroutine(StartTutorialFromStep(skipIndex));
+        }
+
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             if (!renderingEnabled)

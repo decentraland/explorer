@@ -37,6 +37,18 @@ namespace DCL.Tutorial_Tests
             Assert.IsNull(tutorialController.runningStep);
         }
 
+        [Test]
+        public void SkipTutorialStepsFromGenesisPlazaCorrectly()
+        {
+            ConfigureTutorialForGenesisPlaza();
+
+            tutorialController.SkipTutorial();
+
+            Assert.IsTrue(tutorialController.markTutorialAsCompleted);
+            Assert.IsFalse(tutorialController.isRunning);
+            Assert.IsNull(tutorialController.runningStep);
+        }
+
         [UnityTest]
         public IEnumerator ExecuteTutorialStepsFromDeepLinkCorrectly()
         {
@@ -50,12 +62,37 @@ namespace DCL.Tutorial_Tests
             Assert.IsNull(tutorialController.runningStep);
         }
 
+        [Test]
+        public void SkipTutorialStepsFromDeepLinkCorrectly()
+        {
+            ConfigureTutorialForDeepLink();
+
+            tutorialController.SkipTutorial();
+
+            Assert.IsFalse(tutorialController.markTutorialAsCompleted);
+            Assert.IsTrue(tutorialController.alreadyOpenedFromDeepLink);
+            Assert.IsFalse(tutorialController.isRunning);
+            Assert.IsNull(tutorialController.runningStep);
+        }
+
         [UnityTest]
         public IEnumerator ExecuteTutorialStepsFromGenesisPlazaAfterDeepLinkCorrectly()
         {
             ConfigureTutorialForGenesisPlazaAfterDeepLink();
 
             yield return tutorialController.StartTutorialFromStep(0);
+
+            Assert.IsTrue(tutorialController.markTutorialAsCompleted);
+            Assert.IsFalse(tutorialController.isRunning);
+            Assert.IsNull(tutorialController.runningStep);
+        }
+
+        [Test]
+        public void SkipTutorialStepsFromGenesisPlazaAfterDeepLinkCorrectly()
+        {
+            ConfigureTutorialForGenesisPlazaAfterDeepLink();
+
+            tutorialController.SkipTutorial();
 
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
