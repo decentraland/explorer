@@ -1,4 +1,4 @@
-﻿Shader "Unlit Master"
+﻿Shader "DCL/Toon Shader Compiled"
 {
     Properties
     {
