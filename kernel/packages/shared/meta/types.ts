@@ -1,5 +1,6 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import future, { IFuture } from 'fp-future'
+import { RenderProfile } from 'shared/types'
 
 export let USE_UNITY_INDEXED_DB_CACHE: IFuture<boolean> = future()
 
@@ -13,16 +14,26 @@ export type MetaConfiguration = {
     denied: string[]
     contentWhitelist: string[]
   }
-  world: {
-    pois: Vector2Component[]
-    currentWorldEvent: WorldEventState 
-  }
+  world: WorldConfig
   comms: CommsConfig
 }
 
-export enum WorldEventState {
-  DEFAULT = 0,
-  HALLOWEEN = 1,
+export type WorldConfig = {
+  pois: Vector2Component[]
+  renderProfile?: RenderProfile
+  motd?: MotdConfig
+}
+
+export type MotdConfig = {
+  headerImageUrl: string
+  bodyImageUrl: string
+  title: string
+  body: string
+  buttons: {
+    caption: string
+    action: string //NOTE(Brian): The button actions will be global chat's actions, 
+                   //             for instance `/goto 0,0`, or 'Close' that will just close the MOTD.
+  }[]
 }
 
 export type MetaState = {
