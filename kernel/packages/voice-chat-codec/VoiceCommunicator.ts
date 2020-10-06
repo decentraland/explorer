@@ -212,6 +212,7 @@ export class VoiceCommunicator {
 
   start() {
     if (this.input) {
+      this.input.workletNode.connect(this.input.recordingContext.destination)
       this.sendToInputWorklet(InputWorkletRequestTopic.RESUME)
     } else {
       this.notifyRecording(false)
@@ -346,7 +347,6 @@ export class VoiceCommunicator {
       numberOfOutputs: 1
     })
     streamSource.connect(workletNode)
-    workletNode.connect(context.destination)
     return {
       recordingContext: context,
       encodeStream: this.createInputEncodeStream(context, workletNode),
@@ -371,6 +371,7 @@ export class VoiceCommunicator {
 
       if (e.data.topic === InputWorkletRequestTopic.ON_PAUSED) {
         this.notifyRecording(false)
+        this.input?.workletNode.disconnect()
       }
 
       if (e.data.topic === InputWorkletRequestTopic.ON_RECORDING) {
