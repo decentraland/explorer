@@ -14,8 +14,9 @@ export type ExplorerIdentity = AuthIdentity & {
 export enum LoginStage {
   LOADING = 'loading',
   SING_IN = 'signIn',
-  CONNECT_ADVICE = 'connect',
-  SING_ADVICE = 'sign'
+  CONNECT_ADVICE = 'connect_advice',
+  SING_ADVICE = 'sign_advice',
+  COMPLETED = 'completed'
 }
 
 export type SessionState = {

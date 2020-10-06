@@ -1,7 +1,7 @@
 import { AnyAction } from 'redux'
 
 import { LoginStage, SessionState } from './types'
-import { ENABLE_LOGIN, UPDATE_TOS, USER_AUTHENTIFIED, UserAuthentified } from './actions'
+import { CHANGE_LOGIN_STAGE, TOGGLE_WALLET_PROMPT, UPDATE_TOS, USER_AUTHENTIFIED, UserAuthentified } from './actions'
 
 const INITIAL_STATE: SessionState = {
   initialized: false,
@@ -27,9 +27,11 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
     case UPDATE_TOS: {
       return { ...state, tos: action.payload }
     }
-    case ENABLE_LOGIN: {
-      return { ...state, loginStage: LoginStage.SING_IN }
+    case CHANGE_LOGIN_STAGE: {
+      return { ...state, loginStage: action.payload.stage }
     }
+    case TOGGLE_WALLET_PROMPT:
+      return { ...state, showWalletPrompt: action.payload.show }
   }
   return state
 }

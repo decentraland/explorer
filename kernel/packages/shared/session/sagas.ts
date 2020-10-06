@@ -1,6 +1,5 @@
-import { call, delay, put, select, takeLatest, takeEvery } from 'redux-saga/effects'
+import { call, delay, put, select, takeEvery, takeLatest } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
-import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
@@ -9,8 +8,15 @@ import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLO
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
-import { awaitWeb3Approval, isSessionExpired, loginCompleted, providerFuture } from 'shared/ethereum/provider'
-import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
+import {
+  createEth,
+  createWeb3Connector,
+  isSessionExpired,
+  loginCompleted,
+  providerFuture,
+  requestWeb3Provider
+} from 'shared/ethereum/provider'
+import { getUserProfile, removeUserProfile, setLocalProfile } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
@@ -25,17 +31,22 @@ import { getNetwork } from 'shared/ethereum/EthereumService'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { Session } from '.'
-import { ExplorerIdentity } from './types'
+import { ExplorerIdentity, LoginStage } from './types'
 import {
-  enableLogin,
+  changeLoginStage,
+  INIT_SESSION,
   LOGIN,
+  LoginAction,
   loginCompleted as loginCompletedAction,
   LOGOUT,
+  toggleWalletPrompt,
   UPDATE_TOS,
   updateTOS,
   userAuthentified
 } from './actions'
+import { ProviderType } from '../ethereum/ProviderType'
 
+const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
@@ -43,17 +54,17 @@ export function* sessionSaga(): any {
   yield call(initializeReferral)
 
   yield takeEvery(UPDATE_TOS, updateTermOfService)
+  yield takeLatest(INIT_SESSION, initSession)
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
 
-const TOS_KEY = 'tos'
 function* initialize() {
-  const tosAgreed: boolean = getFromLocalStorage(TOS_KEY) ?? false
+  const tosAgreed: boolean = !!getFromLocalStorage(TOS_KEY)
   yield put(updateTOS(tosAgreed))
-  yield put(enableLogin())
 }
+
 function* updateTermOfService(action: any) {
   saveToLocalStorage(TOS_KEY, action.payload)
 }
@@ -63,17 +74,24 @@ function* scheduleAwaitingSignaturePrompt() {
   const isStillWaiting = yield select((state) => !state.session?.initialized)
 
   if (isStillWaiting) {
-    showAwaitingSignaturePrompt(true)
+    yield put(toggleWalletPrompt(true))
   }
 }
 
-function* login() {
-  let userId: string
-  let identity: ExplorerIdentity
-
+function* initSession() {
   if (ENABLE_WEB3) {
-    yield awaitWeb3Approval()
+    yield createWeb3Connector()
+    const userData = getUserProfile()
+    if (userData && userData.userId && isSessionExpired(userData)) {
+      removeUserProfile()
+    }
+  }
+  yield put(changeLoginStage(LoginStage.SING_IN))
+}
 
+function* requestProvider(providerType: ProviderType) {
+  const provider = yield requestWeb3Provider(providerType)
+  if (provider) {
     if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
       throw new Error('Network mismatch')
     }
@@ -81,7 +99,20 @@ function* login() {
     if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getNetworkValue())) {
       showNetworkWarning()
     }
+  }
+  return provider
+}
 
+function* login(action: LoginAction) {
+  let userId: string
+  let identity: ExplorerIdentity
+
+  if (ENABLE_WEB3) {
+    if (!(yield requestProvider(action.payload.provider as ProviderType))) {
+      yield put(changeLoginStage(LoginStage.CONNECT_ADVICE))
+      return
+    }
+    yield put(changeLoginStage(LoginStage.COMPLETED))
     try {
       const userData = getUserProfile()
 
@@ -89,7 +120,7 @@ function* login() {
       if (isSessionExpired(userData)) {
         yield put(awaitingUserSignature())
         identity = yield createAuthIdentity()
-        showAwaitingSignaturePrompt(false)
+        yield put(toggleWalletPrompt(false))
         userId = identity.address
 
         setLocalProfile(userId, {
@@ -170,8 +201,7 @@ async function checkTldVsNetwork() {
 
 async function getNetworkValue() {
   const web3Network = await getNetwork()
-  const web3Net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-  return web3Net
+  return web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
 }
 
 function showNetworkWarning() {
@@ -193,7 +223,7 @@ async function createAuthIdentity() {
   if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
-      const eth = Eth.fromCurrentProvider()!
+      const eth = createEth()
       const account = (await eth.getAccounts())[0]
 
       address = account.toJSON()
@@ -204,11 +234,11 @@ async function createAuthIdentity() {
             result = await new Personal(eth.provider).sign(message, account, '')
           } catch (e) {
             if (e.message && e.message.includes('User denied message signature')) {
-              showEthSignAdvice(true)
+              put(changeLoginStage(LoginStage.SING_ADVICE))
             }
           }
         }
-        showEthSignAdvice(false)
+        put(changeLoginStage(LoginStage.COMPLETED))
         return result
       }
       hasConnectedWeb3 = true
@@ -229,21 +259,6 @@ async function createAuthIdentity() {
   const identity: ExplorerIdentity = { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3 }
 
   return identity
-}
-
-function showEthSignAdvice(show: boolean) {
-  showElementById('eth-sign-advice', show)
-}
-
-function showElementById(id: string, show: boolean) {
-  const element = document.getElementById(id)
-  if (element) {
-    element.style.display = show ? 'block' : 'none'
-  }
-}
-
-function showAwaitingSignaturePrompt(show: boolean) {
-  showElementById('check-wallet-prompt', show)
 }
 
 function* logout() {
