@@ -28,7 +28,6 @@ import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
-import { store } from 'shared/cache'
 import { WorldConfig } from 'shared/meta/types'
 
 const container = document.getElementById('gameContainer')

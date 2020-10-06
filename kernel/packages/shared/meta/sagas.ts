@@ -3,7 +3,7 @@ import { getServerConfigurations } from 'config'
 import { metaConfigurationInitialized, META_CONFIGURATION_INITIALIZED } from './actions'
 import defaultLogger from '../logger'
 import { buildNumber } from './env'
-import { MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE, WorldEventState } from './types'
+import { MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE } from './types'
 import { isMetaConfigurationInitiazed } from './selectors'
 
 const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
@@ -17,8 +17,7 @@ const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
     contentWhitelist: []
   },
   world: {
-    pois: [],
-    currentWorldEvent: WorldEventState.DEFAULT
+    pois: []
   },
   comms: {
     targetConnections: 4,
