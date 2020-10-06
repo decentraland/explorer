@@ -19,8 +19,8 @@ type EncodedFrame = {
 
 type VoiceOutput = {
   encodedFramesQueue: SortedLimitedQueue<EncodedFrame>
-  workletNode: AudioWorkletNode
-  panNode: PannerNode
+  workletNode?: AudioWorkletNode
+  panNode?: PannerNode
   spatialParams: VoiceSpatialParams
   lastUpdateTime: number
 }
@@ -28,7 +28,7 @@ type VoiceOutput = {
 type VoiceInput = {
   workletNode: AudioWorkletNode
   inputStream: MediaStreamAudioSourceNode
-  recordingContext: AudioContext
+  recordingContext: AudioContextWithInitPromise
   encodeStream: EncodeStream
 }
 
@@ -50,8 +50,10 @@ export type VoiceSpatialParams = {
 
 const worlketModulesUrl = 'voice-chat-codec/audioWorkletProcessors.js'
 
+type AudioContextWithInitPromise = [AudioContext, Promise<any>]
+
 export class VoiceCommunicator {
-  private context: AudioContext
+  private contextWithInitPromise: AudioContextWithInitPromise
   private outputGainNode: GainNode
   private outputStreamNode?: MediaStreamAudioDestinationNode
   private loopbackConnections?: { src: RTCPeerConnection; dst: RTCPeerConnection }
@@ -66,6 +68,10 @@ export class VoiceCommunicator {
   private readonly outputBufferLength: number
   private readonly outputExpireTime = 60 * 1000
 
+  private get context(): AudioContext {
+    return this.contextWithInitPromise[0]
+  }
+
   constructor(
     private selfId: string,
     private channel: AudioCommunicatorChannel,
@@ -74,7 +80,7 @@ export class VoiceCommunicator {
     this.sampleRate = this.options.sampleRate ?? VOICE_CHAT_SAMPLE_RATE
     this.outputBufferLength = this.options.outputBufferLength ?? 2.0
 
-    this.context = this.createContext({ sampleRate: this.sampleRate })
+    this.contextWithInitPromise = this.createContext({ sampleRate: this.sampleRate })
 
     this.outputGainNode = this.context.createGain()
 
@@ -100,7 +106,7 @@ export class VoiceCommunicator {
     this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
     this.selfId = selfId
     if (this.input) {
-      this.input.encodeStream = this.createInputEncodeStream(this.input.recordingContext, this.input.workletNode)
+      this.input.encodeStream = this.createInputEncodeStream(this.input.recordingContext[0], this.input.workletNode)
     }
   }
 
@@ -118,7 +124,7 @@ export class VoiceCommunicator {
 
   playEncodedAudio(src: string, relativePosition: VoiceSpatialParams, encoded: Uint8Array, time: number) {
     if (!this.outputs[src]) {
-      this.createOutput(src, relativePosition)
+      this.createOutput(src, relativePosition).catch((e) => defaultLogger.error('Error creating output!', e))
     } else {
       this.outputs[src].lastUpdateTime = Date.now()
       this.setVoiceRelativePosition(src, relativePosition)
@@ -144,33 +150,18 @@ export class VoiceCommunicator {
     const panNode = this.outputs[src].panNode
     const spatialParams = this.outputs[src].spatialParams
 
-    panNode.positionX.value = spatialParams.position[0]
-    panNode.positionY.value = spatialParams.position[1]
-    panNode.positionZ.value = spatialParams.position[2]
-    panNode.orientationX.value = spatialParams.orientation[0]
-    panNode.orientationY.value = spatialParams.orientation[1]
-    panNode.orientationZ.value = spatialParams.orientation[2]
+    if (panNode) {
+      panNode.positionX.value = spatialParams.position[0]
+      panNode.positionY.value = spatialParams.position[1]
+      panNode.positionZ.value = spatialParams.position[2]
+      panNode.orientationX.value = spatialParams.orientation[0]
+      panNode.orientationY.value = spatialParams.orientation[1]
+      panNode.orientationZ.value = spatialParams.orientation[2]
+    }
   }
 
   setVolume(value: number) {
     this.outputGainNode.gain.value = value
-  }
-
-  createOutputNodes(src: string): { workletNode: AudioWorkletNode; panNode: PannerNode } {
-    const workletNode = this.createWorkletFor(src)
-    const panNode = this.context.createPanner()
-    panNode.coneInnerAngle = 180
-    panNode.coneOuterAngle = 360
-    panNode.coneOuterGain = 0.9
-    panNode.maxDistance = this.options.maxDistance ?? 10000
-    panNode.refDistance = this.options.refDistance ?? 5
-    panNode.panningModel = this.options.panningModel ?? 'equalpower'
-    panNode.distanceModel = this.options.distanceModel ?? 'inverse'
-    panNode.rolloffFactor = 1.0
-    workletNode.connect(panNode)
-    panNode.connect(this.outputGainNode)
-
-    return { workletNode, panNode }
   }
 
   createWorkletFor(src: string) {
@@ -189,21 +180,21 @@ export class VoiceCommunicator {
     return workletNode
   }
 
-  setInputStream(stream: MediaStream) {
+  async setInputStream(stream: MediaStream) {
     if (this.input) {
       this.voiceChatWorkerMain.destroyEncodeStream(this.selfId)
-      if (this.input.recordingContext !== this.context) {
-        this.input.recordingContext.close().catch((e) => defaultLogger.error('Error closing recording context', e))
+      if (this.input.recordingContext[0] !== this.context) {
+        this.input.recordingContext[0].close().catch((e) => defaultLogger.error('Error closing recording context', e))
       }
     }
 
     try {
-      this.input = this.createInputFor(stream, this.context)
+      this.input = await this.createInputFor(stream, this.contextWithInitPromise)
     } catch (e) {
       // If this fails, then it most likely it is because the sample rate of the stream is incompatible with the context's, so we create a special context for recording
       if (e.message.includes('sample-rate is currently not supported')) {
         const recordingContext = this.createContext()
-        this.input = this.createInputFor(stream, recordingContext)
+        this.input = await this.createInputFor(stream, recordingContext)
       } else {
         throw e
       }
@@ -212,7 +203,7 @@ export class VoiceCommunicator {
 
   start() {
     if (this.input) {
-      this.input.workletNode.connect(this.input.recordingContext.destination)
+      this.input.workletNode.connect(this.input.recordingContext[0].destination)
       this.sendToInputWorklet(InputWorkletRequestTopic.RESUME)
     } else {
       this.notifyRecording(false)
@@ -225,6 +216,24 @@ export class VoiceCommunicator {
     } else {
       this.notifyRecording(false)
     }
+  }
+
+  private async createOutputNodes(src: string): Promise<{ workletNode: AudioWorkletNode; panNode: PannerNode }> {
+    await this.contextWithInitPromise[1]
+    const workletNode = this.createWorkletFor(src)
+    const panNode = this.context.createPanner()
+    panNode.coneInnerAngle = 180
+    panNode.coneOuterAngle = 360
+    panNode.coneOuterGain = 0.9
+    panNode.maxDistance = this.options.maxDistance ?? 10000
+    panNode.refDistance = this.options.refDistance ?? 5
+    panNode.panningModel = this.options.panningModel ?? 'equalpower'
+    panNode.distanceModel = this.options.distanceModel ?? 'inverse'
+    panNode.rolloffFactor = 1.0
+    workletNode.connect(panNode)
+    panNode.connect(this.outputGainNode)
+
+    return { workletNode, panNode }
   }
 
   private sendToInputWorklet(topic: InputWorkletRequestTopic) {
@@ -295,17 +304,20 @@ export class VoiceCommunicator {
     }
   }
 
-  private createOutput(src: string, relativePosition: VoiceSpatialParams) {
-    const nodes = this.createOutputNodes(src)
+  private async createOutput(src: string, relativePosition: VoiceSpatialParams) {
     this.outputs[src] = {
       encodedFramesQueue: new SortedLimitedQueue(
         Math.ceil((this.outputBufferLength * 1000) / OPUS_FRAME_SIZE_MS),
         (frameA, frameB) => frameA.order - frameB.order
       ),
       spatialParams: relativePosition,
-      lastUpdateTime: Date.now(),
-      ...nodes
+      lastUpdateTime: Date.now()
     }
+
+    const { workletNode, panNode } = await this.createOutputNodes(src)
+
+    this.outputs[src].workletNode = workletNode
+    this.outputs[src].panNode = panNode
 
     const readEncodedBufferLoop = async () => {
       if (this.outputs[src]) {
@@ -323,7 +335,7 @@ export class VoiceCommunicator {
 
             stream.addAudioDecodedListener((samples) => {
               this.outputs[src].lastUpdateTime = Date.now()
-              this.outputs[src].workletNode.port.postMessage(
+              this.outputs[src].workletNode?.port.postMessage(
                 { topic: OutputWorkletRequestTopic.WRITE_SAMPLES, samples },
                 [samples.buffer]
               )
@@ -340,16 +352,17 @@ export class VoiceCommunicator {
     readEncodedBufferLoop().catch((e) => defaultLogger.log('Error while reading encoded buffer of ' + src, e))
   }
 
-  private createInputFor(stream: MediaStream, context: AudioContext) {
-    const streamSource = context.createMediaStreamSource(stream)
-    const workletNode = new AudioWorkletNode(context, 'inputProcessor', {
+  private async createInputFor(stream: MediaStream, context: AudioContextWithInitPromise) {
+    await context[1]
+    const streamSource = context[0].createMediaStreamSource(stream)
+    const workletNode = new AudioWorkletNode(context[0], 'inputProcessor', {
       numberOfInputs: 1,
       numberOfOutputs: 1
     })
     streamSource.connect(workletNode)
     return {
       recordingContext: context,
-      encodeStream: this.createInputEncodeStream(context, workletNode),
+      encodeStream: this.createInputEncodeStream(context[0], workletNode),
       workletNode,
       inputStream: streamSource
     }
@@ -406,12 +419,12 @@ export class VoiceCommunicator {
     setTimeout(expireOutputs, 0)
   }
 
-  private createContext(contextOptions?: AudioContextOptions) {
+  private createContext(contextOptions?: AudioContextOptions): AudioContextWithInitPromise {
     const aContext = new AudioContext(contextOptions)
-    aContext.audioWorklet
+    const workletInitializedPromise = aContext.audioWorklet
       .addModule(worlketModulesUrl)
       .catch((e) => defaultLogger.error('Error loading worklet modules: ', e))
-    return aContext
+    return [aContext, workletInitializedPromise]
   }
 
   private destroyOutput(outputId: string) {
@@ -424,7 +437,7 @@ export class VoiceCommunicator {
 
   private disconnectOutputNodes(outputId: string) {
     const output = this.outputs[outputId]
-    output.panNode.disconnect()
-    output.workletNode.disconnect()
+    output.panNode?.disconnect()
+    output.workletNode?.disconnect()
   }
 }
