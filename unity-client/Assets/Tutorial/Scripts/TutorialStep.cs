@@ -26,6 +26,8 @@ namespace DCL.Tutorial
         protected Animator stepAnimator;
         protected MouseCatcher mouseCatcher;
         protected bool hideAnimationFinished = false;
+        protected bool blockSkipActions = false;
+
         internal bool letInstantiation = true;
 
         /// <summary>
@@ -53,6 +55,8 @@ namespace DCL.Tutorial
                         tutorialController.teacher.PlayAnimation(TutorialTeacher.TeacherAnimation.Reset);
                 }
             }
+
+            ConfigureSkipOptions();
         }
 
         /// <summary>
@@ -70,6 +74,7 @@ namespace DCL.Tutorial
         /// <returns></returns>
         public virtual IEnumerator OnStepPlayAnimationForHidding()
         {
+            blockSkipActions = true;
             OnJustAfterStepExecuted?.Invoke();
             yield return PlayAndWaitForHideAnimation();
         }
@@ -79,6 +84,14 @@ namespace DCL.Tutorial
         /// </summary>
         public virtual void OnStepFinished()
         {
+            if (mainSection != null &&
+                skipTutorialSection != null &&
+                yesSkipInputAction != null &&
+                noSkipInputAction)
+            {
+                yesSkipInputAction.OnFinished -= YesSkipInputAction_OnFinished;
+                noSkipInputAction.OnFinished -= NoSkipInputAction_OnFinished;
+            }
         }
 
         private void OnShowAnimationFinish()
@@ -101,6 +114,43 @@ namespace DCL.Tutorial
 
             stepAnimator.SetTrigger(STEP_FINISHED_ANIMATOR_TRIGGER);
             yield return new WaitUntil(() => hideAnimationFinished);
+        }
+
+        private void ConfigureSkipOptions()
+        {
+            if (mainSection != null &&
+                skipTutorialSection != null &&
+                yesSkipInputAction != null &&
+                noSkipInputAction)
+            {
+                yesSkipInputAction.OnFinished += YesSkipInputAction_OnFinished;
+                noSkipInputAction.OnFinished += NoSkipInputAction_OnFinished;
+            }
+        }
+
+        private void YesSkipInputAction_OnFinished(DCLAction_Hold action)
+        {
+            if (blockSkipActions)
+                return;
+
+            if (mainSection.activeSelf)
+            {
+                mainSection.SetActive(false);
+                skipTutorialSection.SetActive(true);
+            }
+            else if (skipTutorialSection.activeSelf)
+            {
+                tutorialController.SkipTutorial();
+            }
+        }
+
+        private void NoSkipInputAction_OnFinished(DCLAction_Hold action)
+        {
+            if (skipTutorialSection.activeSelf)
+            {
+                mainSection.SetActive(true);
+                skipTutorialSection.SetActive(false);
+            }
         }
     }
 }

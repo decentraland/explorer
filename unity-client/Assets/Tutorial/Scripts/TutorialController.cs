@@ -261,6 +261,13 @@ namespace DCL.Tutorial
         /// </summary>
         public void SkipTutorial()
         {
+            if (!debugRunTutorial && sendStats)
+            {
+                SendSkipTutorialSegmentStats(
+                    tutorialVersion,
+                    runningStep.name.Replace("(Clone)", "").Replace("TutorialStep_", ""));
+            }
+
             int skipIndex = stepsOnGenesisPlaza.Count +
                 stepsFromDeepLink.Count +
                 stepsOnGenesisPlazaAfterDeepLink.Count;
@@ -328,7 +335,7 @@ namespace DCL.Tutorial
                 elapsedTime = Time.realtimeSinceStartup - elapsedTime;
                 if (!debugRunTutorial && sendStats)
                 {
-                    SendSegmentStats(
+                    SendStepCompletedSegmentStats(
                         tutorialVersion,
                         tutorialPath,
                         i + 1,
@@ -397,7 +404,7 @@ namespace DCL.Tutorial
             return false;
         }
 
-        private void SendSegmentStats(int version, TutorialPath tutorialPath, int stepNumber, string stepName, float elapsedTime)
+        private void SendStepCompletedSegmentStats(int version, TutorialPath tutorialPath, int stepNumber, string stepName, float elapsedTime)
         {
             WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]
             {
@@ -408,6 +415,17 @@ namespace DCL.Tutorial
                 new WebInterface.AnalyticsPayload.Property("elapsed time", elapsedTime.ToString("0.00"))
             };
             WebInterface.ReportAnalyticsEvent("tutorial step completed", properties);
+        }
+
+        private void SendSkipTutorialSegmentStats(int version, string stepName)
+        {
+            WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]
+            {
+                new WebInterface.AnalyticsPayload.Property("version", version.ToString()),
+                new WebInterface.AnalyticsPayload.Property("step name", stepName),
+                new WebInterface.AnalyticsPayload.Property("elapsed time", Time.realtimeSinceStartup.ToString("0.00"))
+            };
+            WebInterface.ReportAnalyticsEvent("tutorial skipped", properties);
         }
     }
 }
