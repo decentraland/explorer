@@ -182,8 +182,6 @@ namespace DCL.Tutorial
 
             if (runningStep != null)
             {
-                yield return runningStep.OnStepPlayAnimationForHidding();
-
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
                 runningStep = null;
@@ -273,6 +271,8 @@ namespace DCL.Tutorial
                 stepsOnGenesisPlazaAfterDeepLink.Count;
 
             StartCoroutine(StartTutorialFromStep(skipIndex));
+
+            hudController?.taskbarHud?.SetVisibility(true);
         }
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
@@ -387,7 +387,7 @@ namespace DCL.Tutorial
             SetTutorialEnabled(false.ToString());
 
             if (hudController != null)
-                hudController.taskbarHud.HideGoToGenesisPlazaButton();
+                hudController.taskbarHud?.HideGoToGenesisPlazaButton();
         }
 
         private bool IsPlayerInsideGenesisPlaza()
