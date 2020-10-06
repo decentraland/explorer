@@ -21,6 +21,26 @@ namespace UnityGLTF
             set { return; }
         }
 
+        private Vector2 baseColorOffset = new Vector2(0, 0);
+        public virtual Vector2 BaseColorXOffset
+        {
+            get { return baseColorOffset; }
+            set {
+                baseColorOffset = value;
+                Vector2 unitySpaceVec = new Vector2(baseColorOffset.x, 1 - BaseColorXScale.y - baseColorOffset.y);
+                _material.SetTextureOffset(_BaseMap, unitySpaceVec);
+            }
+        }
+
+        public virtual Vector2 BaseColorXScale
+        {
+            get { return _material.GetTextureScale(_BaseMap); }
+            set {
+                _material.SetTextureScale(_BaseMap, value);
+                BaseColorXOffset = baseColorOffset;
+            }
+        }
+
         public virtual Color BaseColorFactor
         {
             get { return _material.GetColor(_BaseColor); }
