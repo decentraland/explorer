@@ -20,6 +20,7 @@ public class ManaHUDController : IHUD
 
         view.buttonManaInfo.onPointerDown += OnManaInfoPressed;
         view.buttonManaPurchase.onPointerDown += OnManaPurchasePressed;
+        CommonScriptableObjects.isProfileHUDOpen.OnChange += IsProfileHUDOpen_OnChange;
     }
 
     public void SetVisibility(bool visible)
@@ -61,6 +62,7 @@ public class ManaHUDController : IHUD
 
         view.buttonManaInfo.onPointerDown -= OnManaInfoPressed;
         view.buttonManaPurchase.onPointerDown -= OnManaPurchasePressed;
+        CommonScriptableObjects.isProfileHUDOpen.OnChange -= IsProfileHUDOpen_OnChange;
     }
 
     void OnManaInfoPressed()
@@ -71,6 +73,11 @@ public class ManaHUDController : IHUD
     void OnManaPurchasePressed()
     {
         WebInterface.OpenURL(URL_MANA_PURCHASE);
+    }
+
+    void IsProfileHUDOpen_OnChange(bool current, bool previous)
+    {
+        view.uiHoverTriggerShowHideAnimator.enabled = !current;
     }
 
     IEnumerator IntervalRoutine()

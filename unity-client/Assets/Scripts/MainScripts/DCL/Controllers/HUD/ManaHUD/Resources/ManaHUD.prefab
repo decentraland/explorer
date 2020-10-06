@@ -1080,6 +1080,7 @@ MonoBehaviour:
   balanceText: {fileID: 948692606874764089}
   buttonManaInfo: {fileID: 5970883973475450914}
   buttonManaPurchase: {fileID: 6620738618661707245}
+  uiHoverTriggerShowHideAnimator: {fileID: 8410139346004304987}
 --- !u!114 &8410139346004304987
 MonoBehaviour:
   m_ObjectHideFlags: 0

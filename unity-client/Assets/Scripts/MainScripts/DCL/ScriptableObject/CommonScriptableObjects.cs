@@ -119,6 +119,9 @@ public static class CommonScriptableObjects
     private static CameraMode cameraModeValue;
     public static CameraMode cameraMode => GetOrLoad(ref cameraModeValue, "ScriptableObjects/CameraMode");
 
+    private static BooleanVariable isProfileHUDOpenValue;
+    public static BooleanVariable isProfileHUDOpen => GetOrLoad(ref isProfileHUDOpenValue, "ScriptableObjects/IsProfileHUDOpen");
+
     internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)

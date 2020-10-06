@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -65,10 +65,12 @@ internal class ProfileHUDView : MonoBehaviour
         if (showHideAnimator.isVisible)
         {
             showHideAnimator.Hide();
+            CommonScriptableObjects.isProfileHUDOpen.Set(false);
         }
         else
         {
             showHideAnimator.Show();
+            CommonScriptableObjects.isProfileHUDOpen.Set(true);
         }
     }
 
@@ -77,6 +79,7 @@ internal class ProfileHUDView : MonoBehaviour
         if (showHideAnimator.isVisible)
         {
             showHideAnimator.Hide();
+            CommonScriptableObjects.isProfileHUDOpen.Set(false);
         }
     }
 
