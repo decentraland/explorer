@@ -91,6 +91,8 @@ export const NEW_LOGIN = 'New login'
 export const newLogin = () => action(NEW_LOGIN)
 export const NETWORK_MISMATCH = 'Network mismatch'
 export const networkMismatch = () => action(NETWORK_MISMATCH)
+export const ERROR_MESSAGE = 'report error'
+export const errorMessage = (type: string) => action(ERROR_MESSAGE, { type })
 
 export const SET_LOADING_SCREEN = 'setting loading screen'
 export const setLoadingScreen = (show: boolean) => action(SET_LOADING_SCREEN, { show })

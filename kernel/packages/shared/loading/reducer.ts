@@ -1,6 +1,7 @@
 import { AnyAction } from 'redux'
 import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions'
 import {
+  ERROR_MESSAGE,
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
   EXPERIENCE_STARTED,
@@ -21,6 +22,7 @@ export type LoadingState = {
   loadPercentage: number
   initialLoad: boolean
   showLoadingScreen: boolean
+  error: string | null
 }
 
 export function loadingReducer(state?: LoadingState, action?: AnyAction) {
@@ -33,7 +35,8 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
       loadPercentage: 0,
       subsystemsLoad: 0,
       initialLoad: true,
-      showLoadingScreen: false
+      showLoadingScreen: false,
+      error: null
     }
   }
   if (!action) {
@@ -59,7 +62,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     return newState
   }
   if (action.type === TELEPORT_TRIGGERED) {
-    return { ...state, helpText: action.payload }
+    return { ...state, helpText: 0, message: action.payload }
   }
   if (action.type === ROTATE_HELP_TEXT) {
     const newValue = state.helpText + 1
@@ -70,6 +73,9 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   }
   if (action.type === SET_LOADING_SCREEN) {
     return { ...state, showLoadingScreen: action.payload.show }
+  }
+  if (action.type === ERROR_MESSAGE) {
+    return { ...state, error: action.payload.type }
   }
   return state
 }

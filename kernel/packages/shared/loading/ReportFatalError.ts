@@ -1,12 +1,13 @@
 import { action } from 'typesafe-actions'
 import {
-  ExecutionLifecycleEvent,
   COMMS_COULD_NOT_BE_ESTABLISHED,
-  NOT_INVITED,
-  NO_WEBGL_COULD_BE_CREATED,
+  errorMessage,
+  ExecutionLifecycleEvent,
   MOBILE_NOT_SUPPORTED,
+  NETWORK_MISMATCH,
   NEW_LOGIN,
-  NETWORK_MISMATCH
+  NO_WEBGL_COULD_BE_CREATED,
+  NOT_INVITED
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 
@@ -21,8 +22,6 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   const body = document.body
   const container = document.getElementById('gameContainer')
   container!.setAttribute('style', 'display: none !important')
-  const progressBar = document.getElementById('progress-bar')
-  progressBar!.setAttribute('style', 'display: none !important')
 
   body.setAttribute('style', 'background-image: none !important;')
 
@@ -40,8 +39,7 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       : event === NETWORK_MISMATCH
       ? 'networkmismatch'
       : 'fatal'
-
-  document.getElementById('error-' + targetError)!.setAttribute('style', 'display: block !important')
+  globalThis.globalStore && globalThis.globalStore.dispatch(errorMessage(targetError))
   aborted = true
 }
 
