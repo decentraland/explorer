@@ -17,6 +17,10 @@ namespace DCL.Tutorial
         [SerializeField] internal bool unlockCursorAtStart = false;
         [SerializeField] internal bool show3DTeacherAtStart = false;
         [SerializeField] internal protected RectTransform teacherPositionRef;
+        [SerializeField] internal GameObject mainSection;
+        [SerializeField] internal GameObject skipTutorialSection;
+        [SerializeField] internal InputAction_Hold yesSkipInputAction;
+        [SerializeField] internal InputAction_Hold noSkipInputAction;
 
         protected TutorialController tutorialController;
         protected Animator stepAnimator;
