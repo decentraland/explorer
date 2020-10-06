@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Halloween World
   m_EditorClassIdentifier: 
   skyboxMaterial: {fileID: 2100000, guid: 7e1a5fec7e194e246a9d32f2f1a1498a, type: 2}
-  skyColor: {r: 1, g: 1, b: 1, a: 1}
-  equatorColor: {r: 1, g: 1, b: 1, a: 1}
+  skyColor: {r: 0.60784316, g: 0.92941177, b: 1, a: 1}
+  equatorColor: {r: 0.98039216, g: 0.8352941, b: 0.74509805, a: 1}
   groundColor: {r: 1, g: 1, b: 1, a: 1}
-  fogColor: {r: 1, g: 1, b: 1, a: 1}
+  fogColor: {r: 0.8443396, g: 0.93445873, b: 1, a: 1}
   avatarProfile: {fileID: 11400000, guid: e16a3dafe28c4044b8616c8abe59b80f, type: 2}
+  fillWithRenderSettings: 0
