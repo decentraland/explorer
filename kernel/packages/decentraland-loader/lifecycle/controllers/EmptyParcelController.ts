@@ -1,6 +1,7 @@
 import { jsonFetch } from 'atomicHelpers/jsonFetch'
 import { ILand, ContentMapping } from 'shared/types'
 import { HALLOWEEN } from 'config'
+import defaultLogger from 'shared/logger'
 
 export class EmptyParcelController {
   emptyScenes!: Record<string, ContentMapping[]>
@@ -16,11 +17,13 @@ export class EmptyParcelController {
       contentServerBundles: string
     }
   ) {
-    if (HALLOWEEN) {
-      this.baseUrl = globalThis.location.origin + '/loader/empty-scenes-halloween/'
-    } else {
-      this.baseUrl = globalThis.location.origin + '/loader/empty-scenes/'
-    }
+    this.baseUrl = globalThis.location.origin + '/loader/empty-scenes-halloween/'
+    // if (HALLOWEEN) {
+    //   defaultLogger.info('USING HALLOWEEN EMPTY SCENES')
+    // } else {
+    //   defaultLogger.info('USING DEFAULT EMPTY SCENES... ' + location.origin)
+    //   this.baseUrl = globalThis.location.origin + '/loader/empty-scenes/'
+    // }
   }
 
   resolveEmptyParcels() {
