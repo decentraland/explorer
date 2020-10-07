@@ -27,7 +27,8 @@ namespace DCL.Tutorial
         {
             FromGenesisPlaza,
             FromDeepLink,
-            FromGenesisPlazaAfterDeepLink
+            FromGenesisPlazaAfterDeepLink,
+            FromResetTutorial
         }
 
         public static TutorialController i { get; private set; }
@@ -47,6 +48,9 @@ namespace DCL.Tutorial
 
         [Header("Tutorial Steps on Genesis Plaza (after Deep Link)")]
         [SerializeField] internal List<TutorialStep> stepsOnGenesisPlazaAfterDeepLink = new List<TutorialStep>();
+
+        [Header("Tutorial Steps from Reset Tutorial")]
+        [SerializeField] internal List<TutorialStep> stepsFromReset = new List<TutorialStep>();
 
         [Header("3D Model Teacher")]
         [SerializeField] internal Camera teacherCamera;
@@ -74,6 +78,7 @@ namespace DCL.Tutorial
         internal bool playerIsInGenesisPlaza = false;
         internal bool markTutorialAsCompleted = false;
         internal TutorialStep runningStep = null;
+        internal bool tutorialReset = false;
 
         private int currentStepIndex;
         private Coroutine executeStepsCoroutine;
@@ -106,6 +111,11 @@ namespace DCL.Tutorial
                     hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
                     hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
                 }
+
+                if (hudController.taskbarHud != null)
+                {
+                    hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
+                }
             }
 
             NotificationsController.disableWelcomeNotification = false;
@@ -133,6 +143,13 @@ namespace DCL.Tutorial
                     hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza += GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
                     hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
                     hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza += GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
+                }
+
+                if (hudController.taskbarHud != null)
+                {
+                    hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
+                    hudController.taskbarHud.moreMenu.OnRestartTutorial += MoreMenu_OnRestartTutorial;
+                    hudController.taskbarHud.ShowTutorialOption(false);
                 }
             }
 
@@ -163,6 +180,7 @@ namespace DCL.Tutorial
                 runningStep = null;
             }
 
+            tutorialReset = false;
             isRunning = false;
             ShowTeacher3DModel(false);
             WebInterface.SetDelightedSurveyEnabled(true);
@@ -174,8 +192,14 @@ namespace DCL.Tutorial
 
             NotificationsController.disableWelcomeNotification = false;
 
-            if (hudController != null && hudController.emailPromptHud != null)
-                hudController.emailPromptHud.waitForEndOfTutorial = false;
+            if (hudController != null)
+            {
+                if (hudController.emailPromptHud != null)
+                    hudController.emailPromptHud.waitForEndOfTutorial = false;
+
+                if (hudController.taskbarHud != null)
+                    hudController.taskbarHud.ShowTutorialOption(true);
+            }
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
@@ -196,11 +220,15 @@ namespace DCL.Tutorial
                 runningStep = null;
             }
 
-            if (playerIsInGenesisPlaza)
+            if (playerIsInGenesisPlaza || tutorialReset)
             {
                 markTutorialAsCompleted = true;
 
-                if (alreadyOpenedFromDeepLink)
+                if (tutorialReset)
+                {
+                    yield return ExecuteSteps(TutorialPath.FromResetTutorial, stepIndex);
+                }
+                else if (alreadyOpenedFromDeepLink)
                     yield return ExecuteSteps(TutorialPath.FromGenesisPlazaAfterDeepLink, stepIndex);
                 else
                     yield return ExecuteSteps(TutorialPath.FromGenesisPlaza, stepIndex);
@@ -277,7 +305,8 @@ namespace DCL.Tutorial
 
             int skipIndex = stepsOnGenesisPlaza.Count +
                 stepsFromDeepLink.Count +
-                stepsOnGenesisPlazaAfterDeepLink.Count;
+                stepsOnGenesisPlazaAfterDeepLink.Count +
+                stepsFromReset.Count;
 
             StartCoroutine(StartTutorialFromStep(skipIndex));
 
@@ -342,6 +371,9 @@ namespace DCL.Tutorial
                 case TutorialPath.FromGenesisPlazaAfterDeepLink:
                     steps = stepsOnGenesisPlazaAfterDeepLink;
                     break;
+                case TutorialPath.FromResetTutorial:
+                    steps = stepsFromReset;
+                    break;
             }
 
             float elapsedTime = 0f;
@@ -388,6 +420,12 @@ namespace DCL.Tutorial
             runningStep = null;
 
             SetTutorialDisabled();
+
+            if (tutorialPath == TutorialPath.FromDeepLink)
+            {
+                hudController?.taskbarHud?.ShowTutorialOption(false);
+            }
+
         }
 
         private void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
@@ -422,6 +460,13 @@ namespace DCL.Tutorial
 
             if (hudController != null)
                 hudController.taskbarHud?.HideGoToGenesisPlazaButton();
+        }
+
+        private void MoreMenu_OnRestartTutorial()
+        {
+            SetTutorialDisabled();
+            tutorialReset = true;
+            SetTutorialEnabled(false.ToString());
         }
 
         private bool IsPlayerInsideGenesisPlaza()

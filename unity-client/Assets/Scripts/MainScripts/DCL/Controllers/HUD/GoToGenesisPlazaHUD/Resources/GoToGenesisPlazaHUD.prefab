@@ -1185,7 +1185,6 @@ GameObject:
   - component: {fileID: 4009808828430240770}
   - component: {fileID: 130523288579308580}
   - component: {fileID: 542301577773551959}
-  - component: {fileID: 7728859459588448112}
   m_Layer: 5
   m_Name: GoToGenesisPlazaHUD
   m_TagString: Untagged
@@ -1337,22 +1336,6 @@ MonoBehaviour:
   closeButton: {fileID: 8988084336317977587}
   cancelButton: {fileID: 8829506031662869903}
   continueButton: {fileID: 31662781482329574}
---- !u!114 &7728859459588448112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6498655820486328905}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9c79ce172eb9ef458c304fe338b9d18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unlockCursorAtStart: 1
-  show3DTeacherAtStart: 1
-  teacherPositionRef: {fileID: 6934009050601321467}
-  okButton: {fileID: 0}
 --- !u!1 &7210473132899234908
 GameObject:
   m_ObjectHideFlags: 0

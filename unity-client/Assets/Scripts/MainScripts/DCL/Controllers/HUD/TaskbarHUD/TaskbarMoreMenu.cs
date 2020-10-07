@@ -20,10 +20,12 @@ public class TaskbarMoreMenu : MonoBehaviour
     [SerializeField] internal InputAction_Trigger controlsToggleAction;
     [SerializeField] internal Button settingsButton;
     [SerializeField] internal Button helpAndSupportButton;
+    [SerializeField] internal Button tutorialButton;
 
     private TaskbarHUDView view;
 
     public event System.Action<bool> OnMoreMenuOpened;
+    public event System.Action OnRestartTutorial;
 
     public void Initialize(TaskbarHUDView view)
     {
@@ -34,6 +36,7 @@ public class TaskbarMoreMenu : MonoBehaviour
         controlsButton.gameObject.SetActive(false);
         settingsButton.gameObject.SetActive(false);
         helpAndSupportButton.gameObject.SetActive(false);
+        tutorialButton.gameObject.SetActive(true);
 
         collapseBarButton.onClick.AddListener(() =>
         {
@@ -43,6 +46,11 @@ public class TaskbarMoreMenu : MonoBehaviour
         hideUIButton.onClick.AddListener(() =>
         {
             ToggleHideUI();
+        });
+
+        tutorialButton.onClick.AddListener(() =>
+        {
+            OnRestartTutorial?.Invoke();
         });
     }
 
@@ -102,6 +110,11 @@ public class TaskbarMoreMenu : MonoBehaviour
         }
 
         OnMoreMenuOpened?.Invoke(visible);
+    }
+
+    internal void ShowTutorialButton(bool visible)
+    {
+        tutorialButton.gameObject.SetActive(visible);
     }
 
     private void ToggleCollapseBar()

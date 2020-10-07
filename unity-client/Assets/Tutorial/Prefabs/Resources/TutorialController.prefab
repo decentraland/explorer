@@ -56,7 +56,7 @@ MonoBehaviour:
     FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
-    FarClipPlane: 100
+    FarClipPlane: 300
     Dutch: 0
     LensShift: {x: 0, y: 0}
   m_Transitions:
@@ -290,6 +290,17 @@ MonoBehaviour:
   - {fileID: 4712031868617782090, guid: 54219e5d1e0415f4ab74ddc2ee0adbfa, type: 3}
   - {fileID: 3037048280107810980, guid: e5f5e18a835a34e45830f29570029838, type: 3}
   - {fileID: 3680644473237013901, guid: 92afb818b93335f4c91c56034d82f56e, type: 3}
+  stepsFromReset:
+  - {fileID: 4146741736848859845, guid: e38c1e2e466c58a4aa90e19bbda22466, type: 3}
+  - {fileID: 7706447210135135071, guid: 1e4462a1d0dc0b242bab8052d1486ff8, type: 3}
+  - {fileID: 758471573230640681, guid: 53f98be530a835e4eae47ac30281cd4c, type: 3}
+  - {fileID: 3513632204808866648, guid: cc71903c441610f40b884c6fe6ddedf5, type: 3}
+  - {fileID: 3952690954592510233, guid: 5fe82923a0c0de34b93a9ebdce7c6cf3, type: 3}
+  - {fileID: 4410924681366832147, guid: 0e9002742ce819f4583733f5a29364ad, type: 3}
+  - {fileID: 5639665319216893634, guid: 259bf436d3fbfe847b44d46cf81f1201, type: 3}
+  - {fileID: 4712031868617782090, guid: 54219e5d1e0415f4ab74ddc2ee0adbfa, type: 3}
+  - {fileID: 3037048280107810980, guid: e5f5e18a835a34e45830f29570029838, type: 3}
+  - {fileID: 3680644473237013901, guid: 92afb818b93335f4c91c56034d82f56e, type: 3}
   teacherCamera: {fileID: 604084521501385079}
   teacherRawImage: {fileID: 6732306866191114328}
   teacher: {fileID: 977289631841785178}
@@ -329,6 +340,10 @@ MonoBehaviour:
     m_RotationOrder: 4
   teacherCanvas: {fileID: 6650911990874416982}
   eagleEyeCamera: {fileID: 770616498577745558}
+  eagleCamInitPosition: {x: 30, y: 30, z: -50}
+  eagleCamInitLookAtPoint: {x: 0, y: 0, z: 0}
+  eagleCamRotationActived: 1
+  eagleCamRotationSpeed: 1
   debugRunTutorial: 0
   debugStartingStepIndex: 0
   debugOpenedFromDeepLink: 0

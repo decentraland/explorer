@@ -554,4 +554,9 @@ public class TaskbarHUDController : IHUD
     {
         view.moreMenu.ShowMoreMenu(isActive);
     }
+
+    public void ShowTutorialOption(bool isActive)
+    {
+        view.moreMenu.ShowTutorialButton(isActive);
+    }
 }
