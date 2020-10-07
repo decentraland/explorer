@@ -81,7 +81,7 @@ function getIdAsNumber(id: string): number {
 
 const componentNameRE = /^(engine\.)/
 
-export abstract class DclShell extends Script {
+export abstract class SceneRuntime extends Script {
   @inject('EngineAPI')
   engine: IEngineAPI | null = null
 

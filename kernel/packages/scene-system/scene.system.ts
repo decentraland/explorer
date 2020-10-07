@@ -1,7 +1,7 @@
 import { WebWorkerTransport } from 'decentraland-rpc'
 import { inject } from 'decentraland-rpc/lib/client/Script'
 import { defaultLogger } from 'shared/logger'
-import { DclShell } from './sdk/DclShell'
+import { SceneRuntime } from './sdk/SceneRuntime'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
 import { customEval, getES5Context } from './sdk/sandbox'
 
@@ -9,7 +9,7 @@ import { customEval, getES5Context } from './sdk/sandbox'
  * This file starts the scene in a WebWorker context.
  */
 
-class WebWorkerScene extends DclShell {
+class WebWorkerScene extends SceneRuntime {
   @inject('DevTools')
   devTools: any
 

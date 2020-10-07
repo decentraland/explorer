@@ -1,6 +1,6 @@
-import { WebWorkerTransport } from "decentraland-rpc"
-import { DclShell } from "./sdk/DclShell"
-import type { IWorker } from "decentraland-rpc/lib/common/transports/WebWorker"
+import { WebWorkerTransport } from 'decentraland-rpc'
+import { SceneRuntime } from './sdk/SceneRuntime'
+import type { IWorker } from 'decentraland-rpc/lib/common/transports/WebWorker'
 
 /**
  * This file starts the scene in a Node.js context.
@@ -18,11 +18,11 @@ export interface VMEnvironment extends IWorker {
 
 const globalObject: VMEnvironment = globalThis as any
 
-if (!("global" in globalObject)) {
-  (globalObject as any).global = globalObject
+if (!('global' in globalObject)) {
+  ;(globalObject as any).global = globalObject
 }
 
-class CliScene extends DclShell {
+class CliScene extends SceneRuntime {
   onError(error: Error): void {
     globalObject.__env__error(error)
   }
