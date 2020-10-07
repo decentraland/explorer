@@ -31,8 +31,7 @@ namespace UnityGLTF
             set
             {
                 diffuseOffset = value;
-                var unitySpaceVec = new Vector2(diffuseOffset.x, 1 - DiffuseXScale.y - diffuseOffset.y);
-                _material.SetTextureOffset(_BaseMap, unitySpaceVec);
+                _material.SetTextureOffset(_BaseMap, GLTFSceneImporter.GLTFOffsetToUnitySpace(diffuseOffset, DiffuseXScale.y));
             }
         }
 

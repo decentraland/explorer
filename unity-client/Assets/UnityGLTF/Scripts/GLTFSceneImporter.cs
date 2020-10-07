@@ -2586,5 +2586,10 @@ namespace UnityGLTF
             var partialPath = gltfPath.Substring(0, lastIndex);
             return partialPath;
         }
+
+        public static Vector2 GLTFOffsetToUnitySpace(Vector2 offset, float textureYScale)
+        {
+            return new Vector2(offset.x, 1 - textureYScale - offset.y);
+        }
     }
 }
