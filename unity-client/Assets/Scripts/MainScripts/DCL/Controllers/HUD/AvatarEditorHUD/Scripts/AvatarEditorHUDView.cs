@@ -61,12 +61,9 @@ public class AvatarEditorHUDView : MonoBehaviour
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
 
-    [HideInInspector]
-    public event System.Action<AvatarModel> OnAvatarAppear;
-    [HideInInspector]
-    public event System.Action<bool> OnSetVisibility;
-    [HideInInspector]
-    public event System.Action OnRandomize;
+    [HideInInspector] public event System.Action<AvatarModel> OnAvatarAppear;
+    [HideInInspector] public event System.Action<bool> OnSetVisibility;
+    [HideInInspector] public event System.Action OnRandomize;
 
     private void Awake()
     {

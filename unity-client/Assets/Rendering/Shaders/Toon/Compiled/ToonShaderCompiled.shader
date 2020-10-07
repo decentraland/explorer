@@ -36,6 +36,8 @@
             Blend [_SrcBlend][_DstBlend]
             ZWrite [_ZWrite]
             Cull [_Cull]
+            // ColorMask: <None>
+            
         
             HLSLPROGRAM
             #pragma vertex vert
@@ -154,6 +156,7 @@
             TEXTURE2D(_GlossMatCap); SAMPLER(sampler_GlossMatCap); float4 _GlossMatCap_TexelSize;
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
+            float4 _LightColor;
             SAMPLER(_SampleTexture2D_F1EE66C6_Sampler_3_Linear_Repeat);
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
             SAMPLER(_SampleTexture2D_ED76F6F0_Sampler_3_Linear_Repeat);
@@ -480,7 +483,7 @@
                 float3 _Property_EE0DEFE3_Out_0 = _LightDir;
                 #endif
                 #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
-                float4 Color_DB06A4BB = IsGammaSpace() ? float4(0.9249374, 0.9817838, 0.9916598, 1) : float4(SRGBToLinear(float3(0.9249374, 0.9817838, 0.9916598)), 1);
+                float4 _Property_DC394E50_Out_0 = _LightColor;
                 #endif
                 #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float _Property_F0A41D64_Out_0 = _SSSIntensity;
@@ -493,7 +496,7 @@
                 _ToonShader_FA30CA77.WorldSpaceNormal = IN.WorldSpaceNormal;
                 _ToonShader_FA30CA77.WorldSpaceViewDirection = IN.WorldSpaceViewDirection;
                 float4 _ToonShader_FA30CA77_OutVector4_1;
-                SG_ToonShader_4cadc1cb7cae444909bd6637f15fdf84(TEXTURE2D_ARGS(_FresnelMatCap, sampler_FresnelMatCap), _FresnelMatCap_TexelSize, TEXTURE2D_ARGS(_GlossMatCap, sampler_GlossMatCap), _GlossMatCap_TexelSize, TEXTURE2D_ARGS(_MatCap, sampler_MatCap), _MatCap_TexelSize, 1.77, -0.27, Color_6481DB60, 0.17, Color_FC39AC41, _Property_EE0DEFE3_Out_0, Color_DB06A4BB, _Property_F0A41D64_Out_0, _Property_34EA98AC_Out_0, _ToonShader_FA30CA77, _ToonShader_FA30CA77_OutVector4_1);
+                SG_ToonShader_4cadc1cb7cae444909bd6637f15fdf84(TEXTURE2D_ARGS(_FresnelMatCap, sampler_FresnelMatCap), _FresnelMatCap_TexelSize, TEXTURE2D_ARGS(_GlossMatCap, sampler_GlossMatCap), _GlossMatCap_TexelSize, TEXTURE2D_ARGS(_MatCap, sampler_MatCap), _MatCap_TexelSize, 1.77, -0.27, Color_6481DB60, 0.17, Color_FC39AC41, _Property_EE0DEFE3_Out_0, _Property_DC394E50_Out_0, _Property_F0A41D64_Out_0, _Property_34EA98AC_Out_0, _ToonShader_FA30CA77, _ToonShader_FA30CA77_OutVector4_1);
                 #endif
                 #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 float4 _Multiply_BD25ADC4_Out_2;
@@ -753,10 +756,9 @@
             }
            
             // Render State
-            Blend One Zero, One Zero
-            Cull Off
-            ZTest LEqual
-            ZWrite On
+            Blend [_SrcBlend][_DstBlend]
+            ZWrite [_ZWrite]
+            Cull [_Cull]
             // ColorMask: <None>
             
         
@@ -865,6 +867,7 @@
             TEXTURE2D(_GlossMatCap); SAMPLER(sampler_GlossMatCap); float4 _GlossMatCap_TexelSize;
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
+            float4 _LightColor;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
@@ -1144,10 +1147,9 @@
             }
            
             // Render State
-            Blend One Zero, One Zero
-            Cull Off
-            ZTest LEqual
-            ZWrite On
+            Blend [_SrcBlend][_DstBlend]
+            ZWrite [_ZWrite]
+            Cull [_Cull]
             ColorMask 0
             
         
@@ -1256,6 +1258,7 @@
             TEXTURE2D(_GlossMatCap); SAMPLER(sampler_GlossMatCap); float4 _GlossMatCap_TexelSize;
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
+            float4 _LightColor;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
