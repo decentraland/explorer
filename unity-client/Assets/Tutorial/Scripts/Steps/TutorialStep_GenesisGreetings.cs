@@ -24,20 +24,20 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
-            tutorialController.SetEagleEyeCameraPosition(new Vector3(30, 30, -50), CommonScriptableObjects.playerUnityPosition.Get());
-            tutorialController.SetEagleEyeCameraActive(true);
-
             titleText.text = titleText.text.Replace("{userName}", UserProfile.GetOwnUserProfile().userName);
 
             okButton.onClick.AddListener(OnOkButtonClick);
 
-            defaultTeacherCanvasSortOrder = tutorialController.teacherCanvas.sortingOrder;
-            tutorialController.SetTeacherCanvasSortingOrder(TEACHER_CANVAS_SORT_ORDER_START);
-
-            tutorialController.hudController?.taskbarHud?.SetVisibility(false);
-
             if (tutorialController)
             {
+                tutorialController.SetEagleEyeCameraPosition(new Vector3(30, 30, -50), CommonScriptableObjects.playerUnityPosition.Get());
+                tutorialController.SetEagleEyeCameraActive(true);
+
+                defaultTeacherCanvasSortOrder = tutorialController.teacherCanvas.sortingOrder;
+                tutorialController.SetTeacherCanvasSortingOrder(TEACHER_CANVAS_SORT_ORDER_START);
+
+                tutorialController.hudController?.taskbarHud?.SetVisibility(false);
+
                 if (!tutorialController.alreadyOpenedFromDeepLink && SceneController.i != null)
                 {
                     WebInterface.SendSceneExternalActionEvent(SceneController.i.currentSceneId,"tutorial","begin");

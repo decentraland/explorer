@@ -286,6 +286,9 @@ namespace DCL.Tutorial
         public void SetEagleEyeCameraActive(bool isActive)
         {
             eagleEyeCamera.gameObject.SetActive(isActive);
+            hudController?.minimapHud?.SetVisibility(!isActive);
+            hudController?.manaHud?.SetVisibility(!isActive);
+            hudController?.profileHud?.SetVisibility(!isActive);
         }
 
         /// <summary>
