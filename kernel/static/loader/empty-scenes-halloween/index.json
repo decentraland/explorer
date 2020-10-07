@@ -25,11 +25,11 @@
       "hash": "QmHalloween01"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -59,11 +59,11 @@
       "hash": "QmHalloween02"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -93,11 +93,11 @@
       "hash": "QmHalloween03"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -127,11 +127,11 @@
       "hash": "QmHalloween04"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -161,11 +161,11 @@
       "hash": "QmHalloween05"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -195,11 +195,11 @@
       "hash": "QmHalloween06"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -229,11 +229,11 @@
       "hash": "QmHalloween07"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -263,11 +263,11 @@
       "hash": "QmHalloween08"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ],
@@ -297,13 +297,14 @@
       "hash": "QmHalloween09"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
+
   ],
   "EP_10": [
     {
@@ -331,13 +332,14 @@
       "hash": "QmHalloween10"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
+
   ],
   "EP_11": [
     {
@@ -365,13 +367,14 @@
       "hash": "QmHalloween11"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
+
   ],
   "EP_12": [
     {
@@ -399,11 +402,11 @@
       "hash": "QmHalloween12"
     },
     {
-      "file": "EmptyParcels-TX.png",
+      "file": "models/emptyparcels-tx.png",
       "hash": "QmHalloweenEmptyParcels"
     },
     {
-      "file": "EmptyParcels-TX-Emissive.png",
+      "file": "models/emptyparcels-tx-emissive.png",
       "hash": "QmHalloweenEmptyParcelsEmissive"
     }
   ]
