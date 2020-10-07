@@ -17,7 +17,7 @@ export class EmptyParcelController {
       worldConfig: WorldConfig
     }
   ) {
-    if ( options.worldConfig.renderProfile === RenderProfile.HALLOWEEN ) {
+    if (options.worldConfig.renderProfile === RenderProfile.HALLOWEEN) {
       this.baseUrl = globalThis.location.origin + '/loader/empty-scenes-halloween/'
     } else {
       this.baseUrl = globalThis.location.origin + '/loader/empty-scenes/'

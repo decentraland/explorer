@@ -29,8 +29,8 @@ const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
 export function* metaSaga(): any {
   const config: Partial<MetaConfiguration> = yield call(fetchMetaConfiguration)
 
-  if ( HALLOWEEN ) {
-    if ( !config.world ) {
+  if (HALLOWEEN) {
+    if (!config.world) {
       config.world = {} as WorldConfig
     }
 
