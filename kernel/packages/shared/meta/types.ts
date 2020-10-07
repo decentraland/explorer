@@ -31,8 +31,8 @@ export type MotdConfig = {
   body: string
   buttons: {
     caption: string
-    action: string //NOTE(Brian): The button actions will be global chat's actions, 
-                   //             for instance `/goto 0,0`, or 'Close' that will just close the MOTD.
+    action: string // NOTE(Brian): The button actions will be global chat's actions,
+                   // for instance `/goto 0,0`, or 'Close' that will just close the MOTD.
   }[]
 }
 
