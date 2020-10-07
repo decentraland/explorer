@@ -10,6 +10,7 @@ namespace DCL.Components
             public Vector3 position = Vector3.zero;
             public Quaternion rotation = Quaternion.identity;
             public Vector3 scale = Vector3.one;
+            public float lerpSpeed = 0f;
         }
 
         public static Model model = new Model();

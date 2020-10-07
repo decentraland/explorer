@@ -103,7 +103,8 @@ export const MORDOR_POSITION: Position = [
   0,
   0,
   0,
-  0
+  0,
+  false
 ]
 
 type CommsContainer = {
@@ -112,6 +113,7 @@ type CommsContainer = {
     create: () => string
     list: () => string[]
     remove: (id: string) => boolean
+    reposition: (id: string, xPos: any, yPos: any, zPos: any) => void
   }
 }
 
@@ -481,6 +483,10 @@ export function processPositionMessage(context: Context, fromAlias: string, mess
   if (msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
     const p = message.data
 
+    if (p[7]) {
+      console.log("pravs - processPositionMessage - Immediate!")
+    }
+
     peerTrackingInfo.position = p
     peerTrackingInfo.lastPositionUpdate = msgTimestamp
     peerTrackingInfo.lastUpdate = Date.now()
@@ -565,7 +571,8 @@ export function onPositionUpdate(context: Context, p: Position) {
     return
   }
 
-  if (elapsed > 100 && !context.positionUpdatesPaused) {
+  const immediateReposition = p[7]
+  if ((immediateReposition || elapsed > 100) && !context.positionUpdatesPaused) {
     lastPositionSent = p
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch((e) => defaultLogger.warn(`error while sending message `, e))
@@ -958,6 +965,9 @@ async function doStartCommunications(context: Context) {
     })
 
     context.positionObserver = positionObservable.add((obj: Readonly<PositionReport>) => {
+      if(obj.immediate) {
+        console.log("pravs - context.positionObserver - immediate!")
+      }
       const p = [
         obj.position.x,
         obj.position.y - obj.playerHeight,
@@ -965,7 +975,8 @@ async function doStartCommunications(context: Context) {
         obj.quaternion.x,
         obj.quaternion.y,
         obj.quaternion.z,
-        obj.quaternion.w
+        obj.quaternion.w,
+        obj.immediate // false
       ] as Position
 
       if (context && isWorldRunning) {
@@ -1133,13 +1144,18 @@ globalThis.bots = {
       }
     })
     const position = { ...lastPlayerPosition }
-    const handle = setInterval(() => {
-      processPositionMessage(context!, id, {
-        type: 'position',
-        time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0]
-      })
-    }, 1000)
+    // const handle = setInterval(() => {
+    //   processPositionMessage(context!, id, {
+    //     type: 'position',
+    //     time: Date.now(),
+    //     data: [position.x, position.y, position.z, 0, 0, 0, 0]
+    //   })
+    // }, 1000)
+    const handle = processPositionMessage(context!, id, {
+      type: 'position',
+      time: Date.now(),
+      data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
+    })
     bots.push({ id, handle })
     return id
   },
@@ -1156,6 +1172,16 @@ globalThis.bots = {
       return true
     }
     return false
+  },
+  reposition: (id: string, xPos: any, yPos: any, zPos: any) => { // to test immediate repositioning
+    let bot = bots.find((bot) => bot.id === id)
+    if(bot) {
+      bot.handle = processPositionMessage(context!, id, {
+        type: 'position',
+        time: Date.now(),
+        data: [xPos, yPos, zPos, 0, 0, 0, 0, true]
+      })
+    }
   },
   list: () => bots.map((bot) => bot.id)
 }

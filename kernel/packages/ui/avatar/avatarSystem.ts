@@ -91,8 +91,13 @@ export class AvatarEntity extends Entity {
   }
 
   setPose(pose: Pose): void {
-    const [x, y, z, Qx, Qy, Qz, Qw] = pose
+    const [x, y, z, Qx, Qy, Qz, Qw, immediately] = pose
 
+    if (immediately) {
+      console.log("pravs - avatarSystem.setPose - immediate!")
+    }
+
+    this.transform.lerpSpeed = immediately ? 0 : 1
     this.transform.position.set(x, y, z)
     this.transform.rotation.set(Qx, Qy, Qz, Qw)
   }

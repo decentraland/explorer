@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.27771077, g: 0.65681255, b: 0.9724352, a: 1}
+  m_IndirectSpecularColor: {r: 0.27765352, g: 0.65676206, b: 0.96994627, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -308,7 +308,17 @@ PrefabInstance:
     - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
         type: 3}
       propertyPath: debugScenes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugSceneCoords.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114754758112584508, guid: b387035aa46399445bdc7951a41d5213,
+        type: 3}
+      propertyPath: debugSceneCoords.y
+      value: 101
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b387035aa46399445bdc7951a41d5213, type: 3}
@@ -716,6 +726,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5391034735890957258, guid: e399265a17d26494da5c9fe6063ea2d2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 47.100098
+      objectReference: {fileID: 0}
     - target: {fileID: 6473396510046919356, guid: e399265a17d26494da5c9fe6063ea2d2,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -915,10 +930,10 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
   baseUrlCustom: http://localhost:8080/?ENABLE_EXPLORE_HUD&
-  environment: 2
-  startInCoords: {x: 0, y: 0}
+  environment: 1
+  startInCoords: {x: 0, y: 101}
   forceLocalComms: 0
-  allWearables: 1
+  allWearables: 0
   testWearables: 0
   enableTutorial: 0
   soloScene: 0

@@ -121,6 +121,7 @@ message PB_Transform {
     PB_Vector3 position = 1;
     PB_Quaternion  rotation = 2;
     PB_Vector3 scale = 3;
+    float lerpSpeed = 4;
 }
 
 message PB_UpdateEntityComponent {

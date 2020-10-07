@@ -79,9 +79,10 @@ namespace DCL
 
         public void OnTransformChanged(DCLTransform.Model model)
         {
+            Debug.Log("pravs - AvatarMovementController.OnTransformChanged - lerpSpeed: " + model.lerpSpeed);
             MoveTo(
                 model.position - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet
-                model.rotation);
+                model.rotation, model.lerpSpeed <= 0f );
         }
 
         public void MoveTo(Vector3 position, Quaternion rotation, bool immediate = false)

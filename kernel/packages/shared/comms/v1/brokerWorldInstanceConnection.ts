@@ -319,7 +319,8 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
                   positionData.getRotationX(),
                   positionData.getRotationY(),
                   positionData.getRotationZ(),
-                  positionData.getRotationW()
+                  positionData.getRotationW(),
+                  false
                 ]
               })
             break
