@@ -1,5 +1,6 @@
 using System.Collections;
 using DCL;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -11,20 +12,15 @@ namespace AvatarShape_Tests
     {
         private const string EYES_ID = "dcl://base-avatars/f_eyes_01";
         private WearableDictionary catalog;
-
-        //TODO: Remove it once we have a mocking library
-        private class Mock_BodyShapeController : IBodyShapeController
-        {
-            public string bodyShapeId => WearableLiterals.BodyShapes.FEMALE;
-            public void SetupEyes(Material material, Texture texture, Texture mask, Color color) { }
-            public void SetupEyebrows(Material material, Texture texture, Color color) { }
-            public void SetupMouth(Material material, Texture texture, Color color) { }
-        }
+        private IBodyShapeController bodyShapeController;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+            bodyShapeController = Substitute.For<IBodyShapeController>();
+            bodyShapeController.bodyShapeId.Returns(WearableLiterals.BodyShapes.FEMALE);
+
             catalog = AvatarTestHelpers.CreateTestCatalogLocal();
         }
 
@@ -35,7 +31,7 @@ namespace AvatarShape_Tests
             FacialFeatureController controller = new FacialFeatureController(catalog.GetOrDefault(EYES_ID), new Material(Shader.Find("DCL/Toon Shader")));
 
             //Act
-            controller.Load(new Mock_BodyShapeController(), Color.red);
+            controller.Load(bodyShapeController, Color.red);
             yield return new WaitUntil(() => controller.isReady);
 
             //Assert
@@ -63,7 +59,7 @@ namespace AvatarShape_Tests
             FacialFeatureController controller = new FacialFeatureController(fakeWearable, new Material(Shader.Find("DCL/Toon Shader")));
 
             //Act
-            controller.Load(new Mock_BodyShapeController(), Color.red);
+            controller.Load(bodyShapeController, Color.red);
             yield return new WaitUntil(() => controller.isReady);
 
             //Assert
@@ -91,7 +87,7 @@ namespace AvatarShape_Tests
             FacialFeatureController controller = new FacialFeatureController(fakeWearable, new Material(Shader.Find("DCL/Toon Shader")));
 
             //Act
-            controller.Load(new Mock_BodyShapeController(), Color.red);
+            controller.Load(bodyShapeController, Color.red);
             yield return new WaitUntil(() => controller.isReady);
 
             //Assert
