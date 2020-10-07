@@ -9,7 +9,12 @@ using DCL;
 public class CatalogItemAdapter : MonoBehaviour
 {
     public RawImage thumbnailImg;
+    public Image favImg;
+
+    public Color offFavoriteColor, onFavoriteColor;
+
     public System.Action<SceneObject> OnSceneObjectClicked;
+    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
 
     SceneObject sceneObject;
 
@@ -21,6 +26,8 @@ public class CatalogItemAdapter : MonoBehaviour
     {
         this.sceneObject = sceneObject;
 
+        if(sceneObject.isFavorite) favImg.color = onFavoriteColor;
+        else favImg.color = offFavoriteColor;
         GetThumbnail();
     }
 
@@ -52,6 +59,19 @@ public class CatalogItemAdapter : MonoBehaviour
     }
 
 
+    public void SetFavorite(bool isOn)
+    {
+        if (isOn) favImg.color = onFavoriteColor;
+        else favImg.color = offFavoriteColor;
+    }
+
+  
+
+    public void FavoriteIconClicked()
+    {
+        
+        OnSceneObjectFavorite?.Invoke(sceneObject, this);
+    }
     public void SceneObjectClicked()
     {
         OnSceneObjectClicked?.Invoke(sceneObject);
@@ -63,6 +83,7 @@ public class CatalogItemAdapter : MonoBehaviour
         {
             thumbnailImg.enabled = true;
             thumbnailImg.texture = texture.texture;
+            favImg.gameObject.SetActive(true);
         }
     }
 }

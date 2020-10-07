@@ -8,6 +8,7 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     public TextMeshProUGUI categoryTxt;
     public GameObject categoryContentGO;
     public System.Action<SceneObject> OnSceneObjectClicked;
+    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
 
     [Header("Prefab References")]
     public GameObject catalogItemAdapterPrefab;
@@ -22,6 +23,7 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
             CatalogItemAdapter adapter = Instantiate(catalogItemAdapterPrefab, categoryContentGO.transform).GetComponent<CatalogItemAdapter>();
             adapter.SetContent(sceneObject);
             adapter.OnSceneObjectClicked += SceneObjectClicked;
+            adapter.OnSceneObjectFavorite += SceneObjectFavorite;
         }
     }
 
@@ -39,5 +41,9 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     void SceneObjectClicked(SceneObject sceneObjectClicked)
     {
         OnSceneObjectClicked?.Invoke(sceneObjectClicked);
+    }
+    void SceneObjectFavorite(SceneObject sceneObjectClicked, CatalogItemAdapter adapter)
+    {
+        OnSceneObjectFavorite?.Invoke(sceneObjectClicked,adapter);
     }
 }

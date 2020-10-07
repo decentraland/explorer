@@ -60,7 +60,7 @@ public class BuildModeController : MonoBehaviour
 
     public Material editMaterial;
  
-    public LayerMask layerToRaycast;
+    public LayerMask layerToRaycast,groundLayer;
 
     [Header("InputActions")]
     [SerializeField] internal InputAction_Trigger editModeChange;
@@ -69,6 +69,7 @@ public class BuildModeController : MonoBehaviour
     ParcelScene sceneToEdit;
 
     bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = false;
+    bool isPlacingNewObject = false;
     List<DecentrelandEntityToEdit> selectedEntities = new List<DecentrelandEntityToEdit>();
     Dictionary<string, DecentrelandEntityToEdit> convertedEntities = new Dictionary<string, DecentrelandEntityToEdit>();
 
@@ -91,7 +92,7 @@ public class BuildModeController : MonoBehaviour
         editModeChange.OnTriggered += OnEditModeChangeAction;
         catalogController.OnSceneObjectSelected += OnSceneObjectSelected;
         builderInputWrapper.OnMouseClick += MouseClick;
-        buildModeEntityListController.OnEntityClick += Select;
+        buildModeEntityListController.OnEntityClick += SelectFromList;
     }
 
     private void OnDestroy()
@@ -127,6 +128,11 @@ public class BuildModeController : MonoBehaviour
                 checkerInsideSceneOptimizationCounter = 0;
             }
             else checkerInsideSceneOptimizationCounter++;
+
+            if(isPlacingNewObject)
+            {
+                SetEditObjectAtMouse();
+            }
         }
     }
 
@@ -177,6 +183,16 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+    void SetEditObjectAtMouse()
+    {
+        RaycastHit hit;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+        {
+            gameObjectToEdit.transform.position = hit.point;
+        }
+    }
     void MouseClick(int buttonID, Vector3 position)
     {
         if (isEditModeActivated)
@@ -254,11 +270,14 @@ public class BuildModeController : MonoBehaviour
         DecentralandEntity entity = CreateEntity();
         sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
 
-
+        DeselectEntities();
         Select(entity);
-        
+
+        isPlacingNewObject = true;
         catalogController.CloseCatalog();
+
         InputDone();
+
 
     }
 
@@ -594,9 +613,27 @@ public class BuildModeController : MonoBehaviour
             }
         }
     }
+    void SelectFromList(DecentrelandEntityToEdit entityToEdit)
+    {
+        if(!isMultiSelectionActive)DeselectEntities();
+        Select(entityToEdit);
+    }
     void Select(DecentrelandEntityToEdit entityEditable)
     {
-        if (entityEditable.isLocked || entityEditable.isSelected) return;
+        if (entityEditable.isLocked) return;
+
+        if(entityEditable.isSelected)
+        {
+            if (selectedEntities.Count > 1)
+            {
+                DeselectEntity(entityEditable);
+                return;
+            }
+            else
+            {
+                DeselectEntities();
+            }
+        }
         //if (gameObjectToEdit != null) DeselectObject();
 
         entityEditable.Select();
@@ -736,6 +773,17 @@ public class BuildModeController : MonoBehaviour
         return null;
     }
 
+    void DeselectEntity(DecentrelandEntityToEdit entity)
+    {
+        if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+        {
+            UndoEdit();
+        }
+
+        SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
+        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.rootEntity);
+        entity.Deselect();
+    }
     void DeselectEntities()
     {
         if (selectedEntities.Count > 0)
@@ -762,6 +810,7 @@ public class BuildModeController : MonoBehaviour
             gizmoManager.HideGizmo();
             selectedEntities.Clear();
             entityInformationController.Disable();
+            isPlacingNewObject = false;
         }
    
     }
@@ -916,6 +965,7 @@ public class BuildModeController : MonoBehaviour
         DeselectEntities();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
+        advancedBuildModeController.DesactivateAdvancedBuildMode();
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
     }
 

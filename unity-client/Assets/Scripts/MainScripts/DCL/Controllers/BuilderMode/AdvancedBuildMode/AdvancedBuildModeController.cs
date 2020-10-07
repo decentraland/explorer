@@ -48,6 +48,7 @@ public class AdvancedBuildModeController : MonoBehaviour
         SceneController.i.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
         advancedModeUI.SetActive(true);
+        CommonScriptableObjects.allUIHidden.Set(true);
     }
 
     public void DesactivateAdvancedBuildMode()
@@ -58,6 +59,7 @@ public class AdvancedBuildModeController : MonoBehaviour
         SceneController.i.ReIntegrateIsolatedScene();
         advancedModeUI.SetActive(false);
         gizmoManager.HideGizmo();
+        CommonScriptableObjects.allUIHidden.Set(false);
     }
 
     [ContextMenu("Look at transform")]

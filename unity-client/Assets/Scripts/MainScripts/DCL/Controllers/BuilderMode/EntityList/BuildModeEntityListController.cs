@@ -52,6 +52,7 @@ public class BuildModeEntityListController : MonoBehaviour
         {
             case EntityAction.SELECT:
                 OnEntityClick?.Invoke(entityToApply);
+                
                 break;
             case EntityAction.LOCK:
                 entityToApply.isLocked = !entityToApply.isLocked;
@@ -68,7 +69,8 @@ public class BuildModeEntityListController : MonoBehaviour
                 CopyFromEntity(entityToApply.rootEntity, newEntity);
                 break;
         }
-        entityListView.SetContent(entitiesList);
+        adapter.SetContent(entityToApply);
+        //entityListView.SetContent(entitiesList);
     }
 
 

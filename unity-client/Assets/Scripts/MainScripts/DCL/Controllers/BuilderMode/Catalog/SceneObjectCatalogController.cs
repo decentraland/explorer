@@ -15,22 +15,25 @@ public class SceneObjectCatalogController : MonoBehaviour
 {
     public System.Action<string> OnResultReceived;
     public System.Action<SceneObject> OnSceneObjectSelected;
+    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
 
     public TextMeshProUGUI catalogTitleTxt;
-    public Button backBtn;
     public GameObject catalogUIGO;
     public CatalogAssetPackListView catalogAssetPackListView;
     public CatalogGroupListView catalogGroupListView;
     public TMP_InputField searchInputField;
+    public RawImage[] shortcutsImgs;
 
     List<Dictionary<string, List<SceneObject>>> filterObjects = new List<Dictionary<string, List<SceneObject>>>();
     string lastFilterName = "";
-    bool catalogInitializaed = false;
+    bool catalogInitializaed = false, isShowingAssetPacks = false;
+    List<SceneObject> favoritesShortcutsSceneObjects = new List<SceneObject>();
     private void Start()
     {
         OnResultReceived += AddFullSceneObjectCatalog;
         catalogAssetPackListView.OnSceneAssetPackClick += OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked += SceneObjectSelected;
+        catalogGroupListView.OnSceneObjectFavorite += AsignFavorite;
         searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
     }
 
@@ -55,47 +58,80 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     void FilterAssets(string nameToFilter)
     {
-        //if(string.IsNullOrEmpty(lastFilterName))
-        //{
-
-        //}
-        //else
-        //{
-          filterObjects.Clear();
-            foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+        filterObjects.Clear();
+        foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+        {
+            foreach (SceneObject sceneObject in assetPack.assets)
             {
-                foreach(SceneObject sceneObject in assetPack.assets)
+                if (sceneObject.category.Contains(nameToFilter) || sceneObject.tags.Contains(nameToFilter) || sceneObject.name.Contains(nameToFilter))
                 {
-                    if(sceneObject.category.Contains(nameToFilter) || sceneObject.tags.Contains(nameToFilter) || sceneObject.name.Contains(nameToFilter))
+                    bool foundCategory = false;
+                    foreach (Dictionary<string, List<SceneObject>> groupedSceneObjects in filterObjects)
                     {
-                        bool foundCategory = false;
-                        foreach(Dictionary<string, List<SceneObject>> groupedSceneObjects in filterObjects)
+                        if (groupedSceneObjects.ContainsKey(sceneObject.category))
                         {
-                            if (groupedSceneObjects.ContainsKey(sceneObject.category))
-                            {
-                                foundCategory = true;
-                                if (!groupedSceneObjects[sceneObject.category].Contains(sceneObject)) groupedSceneObjects[sceneObject.category].Add(sceneObject);
-                            }
+                            foundCategory = true;
+                            if (!groupedSceneObjects[sceneObject.category].Contains(sceneObject)) groupedSceneObjects[sceneObject.category].Add(sceneObject);
                         }
-                        if(!foundCategory)
-                        {
-                            Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
-                            groupedSceneObjects.Add(sceneObject.category, new List<SceneObject>() { sceneObject });
-                            filterObjects.Add(groupedSceneObjects);
-                        }
+                    }
+                    if (!foundCategory)
+                    {
+                        Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
+                        groupedSceneObjects.Add(sceneObject.category, new List<SceneObject>() { sceneObject });
+                        filterObjects.Add(groupedSceneObjects);
                     }
                 }
             }
-
-        //}
+        }
     }
 
+
+    public void AsignFavorite(SceneObject sceneObject, CatalogItemAdapter adapter)
+    {
+        if (favoritesShortcutsSceneObjects.Count < 9)
+        {
+
+            if (!favoritesShortcutsSceneObjects.Contains(sceneObject))
+            {
+                int index = favoritesShortcutsSceneObjects.Count;
+                int cont = 0;
+                foreach (SceneObject sceneObjectIteration in favoritesShortcutsSceneObjects)
+                {
+                    if (sceneObjectIteration == null)
+                    {
+                        index = cont;
+                        break;
+                    }
+                    cont++;
+                }
+                if (index >= favoritesShortcutsSceneObjects.Count) favoritesShortcutsSceneObjects.Add(sceneObject);
+                else favoritesShortcutsSceneObjects[index] = sceneObject;
+                shortcutsImgs[index].texture = adapter.thumbnailImg.texture;
+                shortcutsImgs[index].enabled = true;
+                sceneObject.isFavorite = true;
+            }
+            else
+            {
+                int index = favoritesShortcutsSceneObjects.IndexOf(sceneObject);
+                shortcutsImgs[index].enabled = false;
+                favoritesShortcutsSceneObjects[index] = null;
+                sceneObject.isFavorite = false;
+            }
+
+            adapter.SetFavorite(sceneObject.isFavorite);
+        }
+    }
+
+    public void FavotiteObjectSelected(int index)
+    {
+        if (favoritesShortcutsSceneObjects[index] != null)
+        {
+            OnSceneObjectSelected?.Invoke(favoritesShortcutsSceneObjects[index]);
+        }
+    }
     void SceneObjectSelected(SceneObject sceneObject)
     {
-
         OnSceneObjectSelected?.Invoke(sceneObject);
-
-
     }
 
     void OnScenePackSelected(SceneAssetPack sceneAssetPack)
@@ -124,6 +160,11 @@ public class SceneObjectCatalogController : MonoBehaviour
         catalogGroupListView.SetContent(contentList);
     }
 
+    public void Back()
+    {
+        if (isShowingAssetPacks) CloseCatalog();
+        else ShowAssetsPacks();
+    }
     public bool IsCatalogOpen()
     {
         return catalogUIGO.activeSelf;
@@ -131,15 +172,16 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void ShowAssetsPacks()
     {
+        isShowingAssetPacks = true;
+        catalogTitleTxt.text = "Asset Packs";
         catalogAssetPackListView.gameObject.SetActive(true);
         catalogGroupListView.gameObject.SetActive(false);
-        backBtn.gameObject.SetActive(false);
     }
     public void ShowCatalogContent()
     {
+        isShowingAssetPacks = false;
         catalogAssetPackListView.gameObject.SetActive(false);
         catalogGroupListView.gameObject.SetActive(true);
-        backBtn.gameObject.SetActive(true);
     }
     public void OpenCatalog()
     {

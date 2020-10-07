@@ -34,6 +34,7 @@ public class SceneObject
 
     public ObjectMetrics metrics;
     public string script;
+    public bool isFavorite = false;
 
     string baseUrl = "https://builder-api.decentraland.org/v1/storage/contents/";
     public string ComposeThumbnailUrl()

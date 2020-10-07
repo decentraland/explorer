@@ -7,6 +7,7 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
 
     public CatalogAssetGroupAdapter categoryItemAdapterPrefab;
     public System.Action<SceneObject> OnSceneObjectClicked;
+    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
 
 
 
@@ -21,15 +22,24 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
                 CatalogAssetGroupAdapter adapter = Instantiate(categoryItemAdapterPrefab, contentPanelTransform).GetComponent<CatalogAssetGroupAdapter>();
                 adapter.SetContent(assetPackGroup.Key, assetPackGroup.Value);
                 adapter.OnSceneObjectClicked += SceneObjectSelected;
+                adapter.OnSceneObjectFavorite += SceneObjectFavorite;
             }
         }         
     }
+
 
 
    void SceneObjectSelected(SceneObject sceneObject)
     {
 
         OnSceneObjectClicked?.Invoke(sceneObject);
+
+
+    }
+    void SceneObjectFavorite(SceneObject sceneObject,CatalogItemAdapter adapter)
+    {
+
+        OnSceneObjectFavorite?.Invoke(sceneObject, adapter);
 
 
     }
