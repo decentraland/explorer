@@ -6,20 +6,17 @@ import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJs
 import { SceneJsonData } from 'shared/types'
 import { reportScenesFromTiles } from 'shared/atlas/actions'
 import { getSceneNameFromAtlasState, postProcessSceneName, getPoiTiles } from 'shared/atlas/selectors'
+import { Vector2 } from 'decentraland-ecs/src'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 declare const globalThis: StoreContainer
-
-declare const window: {
-  unityInterface: {
-    UpdateHotScenesList: (info: HotSceneInfo[]) => void
-  }
-}
 
 type RealmInfo = {
   serverName: string
   layer: string
   usersCount: number
   usersMax: number
+  crowdedParcels: Vector2[]
 }
 
 type HotSceneInfoRaw = {
@@ -67,7 +64,7 @@ export async function reportHotScenes() {
   )
 
   globalThis.globalStore.dispatch(reportScenesFromTiles(report.map((scene) => scene.baseCoord)))
-  window.unityInterface.UpdateHotScenesList(report.map((scene) => hotSceneInfoFromRaw(scene)))
+  unityInterface.UpdateHotScenesList(report.map((scene) => hotSceneInfoFromRaw(scene)))
 }
 
 function countUsers(a: HotSceneInfoRaw) {
@@ -94,28 +91,26 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
 
       if (realmInfo[0]) {
         realmInfo[0].usersCount += 1
+        realmInfo[0].crowdedParcels.push(stringToVector2(tiles[i]))
       } else {
-        crowdedScenes[id].realmsInfo.push(createRealmInfo(candidate, 1))
+        const realmInfo = createRealmInfo(candidate, 1)
+        realmInfo.crowdedParcels.push(stringToVector2(tiles[i]))
+        crowdedScenes[id].realmsInfo.push(realmInfo)
       }
     } else {
-      crowdedScenes[id] = createHotSceneInfoRaw(
-        candidate,
-        land?.sceneJsonData?.scene.base ?? tiles[i],
-        land?.sceneJsonData
-      )
+      crowdedScenes[id] = createHotSceneInfoRaw(land?.sceneJsonData?.scene.base ?? tiles[i], land?.sceneJsonData)
+      const realmInfo = createRealmInfo(candidate, 1)
+      realmInfo.crowdedParcels.push(stringToVector2(tiles[i]))
+      crowdedScenes[id].realmsInfo.push(realmInfo)
     }
   }
 }
 
-function createHotSceneInfoRaw(
-  candidate: Candidate,
-  baseCoord: string,
-  sceneJsonData: SceneJsonData | undefined
-): HotSceneInfoRaw {
+function createHotSceneInfoRaw(baseCoord: string, sceneJsonData: SceneJsonData | undefined): HotSceneInfoRaw {
   return {
     name: getSceneName(baseCoord, sceneJsonData),
     baseCoord: baseCoord,
-    realmsInfo: [createRealmInfo(candidate, 1)]
+    realmsInfo: []
   }
 }
 
@@ -124,7 +119,8 @@ function createRealmInfo(candidate: Candidate, usersCount: number): RealmInfo {
     serverName: candidate.catalystName,
     layer: candidate.layer.name,
     usersMax: candidate.layer.maxUsers,
-    usersCount: usersCount
+    usersCount: usersCount,
+    crowdedParcels: []
   }
 }
 
@@ -152,7 +148,12 @@ async function fetchPOIsAsHotSceneInfoRaw(): Promise<HotSceneInfoRaw[]> {
     return {
       name: getSceneName(land.sceneJsonData.scene.base, land.sceneJsonData),
       baseCoord: land.sceneJsonData.scene.base,
-      realmsInfo: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0 }]
+      realmsInfo: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0, crowdedParcels: [] }]
     }
   })
+}
+
+function stringToVector2(coord: string): Vector2 {
+  let split = coord.split(',')
+  return new Vector2(parseInt(split[0], 10), parseInt(split[1], 10))
 }

@@ -26,6 +26,7 @@ public class HotScenesController : MonoBehaviour
             public string layer;
             public int usersCount;
             public int usersMax;
+            public Vector2Int[] crowdedParcels;
         }
         public Vector2Int baseCoords;
         public int usersTotalCount;

@@ -53,6 +53,8 @@ namespace DCL
         private Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
         private Dictionary<string, MinimapMetadata.MinimapUserInfo> usersInfo = new Dictionary<string, MinimapMetadata.MinimapUserInfo>();
         private Dictionary<string, PoolableObject> usersInfoMarkers = new Dictionary<string, PoolableObject>();
+        private MapGlobalUsersPositionMarkerController usersPositionMarkerController;
+
         private Pool usersInfoPool;
 
         private bool parcelHighlightEnabledValue = false;
@@ -105,6 +107,12 @@ namespace DCL
             parcelHighlightImage.rectTransform.localScale = new Vector3(parcelHightlightScale, parcelHightlightScale, 1f);
 
             parcelHoldCountdown = parcelHoldTimeInSeconds;
+
+            usersPositionMarkerController = new MapGlobalUsersPositionMarkerController(userIconPrefab.gameObject,
+                overlayContainer.transform,
+                MapUtils.GetTileToLocalPosition);
+            usersPositionMarkerController.Enable();
+            usersPositionMarkerController.SetInForeground();
         }
 
         private void EnsurePools()
