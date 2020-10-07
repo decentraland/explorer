@@ -3,7 +3,15 @@ using System.Collections.Generic;
 using DCL.Helpers;
 using UnityEngine;
 
-public class BodyShapeController : WearableController
+public interface IBodyShapeController
+{
+    string bodyShapeId { get; }
+    void SetupEyes(Material material, Texture texture, Texture mask, Color color);
+    void SetupEyebrows(Material material, Texture texture, Color color);
+    void SetupMouth(Material material, Texture texture, Color color);
+}
+
+public class BodyShapeController : WearableController, IBodyShapeController
 {
     public string bodyShapeId => wearable.id;
     private Transform animationTarget;
@@ -31,28 +39,8 @@ public class BodyShapeController : WearableController
         base.Load(parent, onSuccess, onFail);
     }
 
-    public void RemoveUnusedParts(HashSet<string> usedCategories)
+    public void SetActiveParts(bool lowerBodyActive, bool upperBodyActive, bool feetActive)
     {
-        bool lowerBodyActive = false;
-        bool upperBodyActive = false;
-        bool feetActive = false;
-
-        foreach (var category in usedCategories)
-        {
-            switch (category)
-            {
-                case WearableLiterals.Categories.LOWER_BODY:
-                    lowerBodyActive = true;
-                    break;
-                case WearableLiterals.Categories.UPPER_BODY:
-                    upperBodyActive = true;
-                    break;
-                case WearableLiterals.Categories.FEET:
-                    feetActive = true;
-                    break;
-            }
-        }
-
         lowerBodyRenderer.gameObject.SetActive(lowerBodyActive);
         lowerBodyRenderer.enabled = lowerBodyActive;
 
@@ -186,7 +174,7 @@ public class BodyShapeController : WearableController
     public SkinnedMeshRenderer upperBodyRenderer { get; private set; }
     public SkinnedMeshRenderer lowerBodyRenderer { get; private set; }
 
-    public override void UpdateVisibility()
+    public override void UpdateVisibility(HashSet<string> hiddenList)
     {
         bool headIsVisible = !hiddenList.Contains(WearableLiterals.Misc.HEAD);
 

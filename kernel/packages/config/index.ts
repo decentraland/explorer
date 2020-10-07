@@ -108,6 +108,8 @@ export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const REALM = qs.realm
 
+export const VOICE_CHAT_ENABLED = location.search.indexOf('VOICE_CHAT_ENABLED') !== -1
+
 export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
 
 export const LOS = qs.LOS
@@ -121,7 +123,7 @@ export const DEBUG_WS_MESSAGES = location.search.indexOf('DEBUG_WS_MESSAGES') !=
 export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
 export const DEBUG_PM = location.search.indexOf('DEBUG_PM') !== -1
-export const DEBUG_SCENE_LOG = location.search.indexOf('DEBUG_SCENE_LOG') !== -1
+export const DEBUG_SCENE_LOG = DEBUG || location.search.indexOf('DEBUG_SCENE_LOG') !== -1
 
 export const INIT_PRE_LOAD = location.search.indexOf('INIT_PRE_LOAD') !== -1
 
@@ -138,11 +140,14 @@ export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== 
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
-export const ENABLE_EXPLORE_HUD = location.search.indexOf('ENABLE_EXPLORE_HUD') !== -1
 export const ENABLE_MANA_HUD = location.search.indexOf('ENABLE_MANA_HUD') !== -1
-export const ENABLE_NEW_TASKBAR = location.search.indexOf('ENABLE_NEW_TASKBAR') !== -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+export const ENABLE_NEW_TASKBAR =
+  location.search.indexOf('ENABLE_NEW_TASKBAR') !==
+  -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
 
 export const PIN_CATALYST = qs.PIN_CATALYST
+
+export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
 
 export namespace commConfigurations {
   export const debug = true
@@ -175,6 +180,8 @@ export namespace commConfigurations {
       username: 'usernamedcl'
     }
   ]
+
+  export const voiceChatUseHRTF = location.search.indexOf('VOICE_CHAT_USE_HRTF') !== -1
 }
 export const loginConfig = {
   org: {
@@ -230,7 +237,16 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (location.search.match(/TEST_WEARABLES/)) {
+  const url = new URL(location.toString())
+  if (url.searchParams.has('TEST_WEARABLES')) {
+    const value = url.searchParams.get('TEST_WEARABLES')
+    if (value) {
+      try {
+        return new URL(value).toString()
+      } catch (e) {
+        return `https://${value}/index.json`
+      }
+    }
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'

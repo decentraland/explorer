@@ -13,13 +13,13 @@
 This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ and the latest version of GNU make, install it using `brew install make`
 If you are using Windows 10 we recommend you to enable the Linux subsystem and install a Linux distro from Windows Store like Ubuntu. Then install all tools and dependecies like nodejs, npm, typescript, make...
 
-## Running the kernel
+## Running the Explorer
 
 Make sure you have the following dependencies:
 - Node v10 or compatible installed via `sudo apt install nodejs`
 - yarn installed globally via `sudo npm install yarn -g`
 
-IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path. 
+IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path.
 
 Build the project:
 
@@ -34,19 +34,31 @@ Optionally, you can build the test scenes which are used in `debug` mode:
 
     make test-scenes
 
-To run the Unity interface:
+Once the kernel is running, to run the Unity interface you will have to:
 
 1. Download and install Unity 2019.4.0f1
 2. Open the Initial Scene
 3. Run the Initial Scene in the Unity editor!
 
-To run the client in `debug` mode append the following query parameter to the URL:
+And that should be it!
+
+Optionally, if you want to run the client in `debug` mode, append the following query parameter to the URL:
 
     http://localhost:8080/?DEBUG_MODE
 
 To spawn in a specific set of coordinates append the following query paramter:
 
-    http://localhost:8080/?DEBUG_MODE&fps&position=10,10
+    http://localhost:8080/?DEBUG_MODE&position=10,10
+    
+### Troubleshooting
+
+If while trying to compile the Unity project you get an error regarding some libraries that can not be added (for instance Newtonsoft
+Json.NET or Google Protobuf), please execute the following command in the root folder:
+
+    git lfs install
+    git lfs pull
+
+Then, on the Unity editor, click on `Assets > Reimport All`
 
 ## Running tests
 
@@ -84,10 +96,10 @@ describe('My example test', function() {
 4. In a new browser tab go to http://localhost:8000/?UNITY_ENABLED=true&DEBUG_MODE&LOCAL_COMMS&position=0%2C-1&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl
 5. Go back to unity and the scene should start loading in there almost immediately
 
-### DCL scene in preview mode using a local explorer version
+### DCL scene in preview mode using a local Kernel version
 
-1. In the explorer repo directory, run a `make watch` or `make dev-watch` once
-2. Kill the server and run `make initialize-ecs-npm-link`
+1. In the explorer repo directory, run a `make watch` once
+2. Kill the server and run `make npm-link`
 3. In the scene directory run `npm link decentraland-ecs`
 4. In the scene directory run `dcl start` and it should already be using the local version of the client
 

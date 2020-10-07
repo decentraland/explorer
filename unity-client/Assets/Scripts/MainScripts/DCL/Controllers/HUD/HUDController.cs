@@ -25,6 +25,7 @@ public class HUDController : MonoBehaviour
     }
 
     public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.PROFILE_HUD) as Legacy.AvatarHUDController;
+    public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -176,7 +177,15 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.PROFILE_HUD:
-                CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
+                var avatarHudConfig = JsonUtility.FromJson<Legacy.AvatarHUDConfiguration>(extraPayload);
+                if (avatarHudConfig != null && avatarHudConfig.useNewVersion)
+                {
+                    CreateHudElement<ProfileHUDController>(configuration, hudElementId);
+                }
+                else
+                {
+                    CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
+                }
 
                 if (avatarHud_Legacy != null)
                 {
@@ -285,7 +294,6 @@ public class HUDController : MonoBehaviour
 
                         taskbarHud.AddSettingsWindow(settingsHud);
                         taskbarHud.AddBackpackWindow(avatarEditorHud);
-                        taskbarHud.AddGoToGenesisWindow(goToGenesisPlazaHud);
                     }
                 }
                 else
@@ -328,6 +336,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
                 CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
+                taskbarHud?.AddGoToGenesisWindow(goToGenesisPlazaHud);
                 break;
         }
 
@@ -415,6 +424,11 @@ public class HUDController : MonoBehaviour
             mail = ownUserProfile.email,
             avatarPic = ownUserProfile.faceSnapshot
         });
+    }
+
+    public void SetPlayerTalking(string talking)
+    {
+        avatarHud_Legacy.SetTalking("true".Equals(talking));
     }
 
     public void RequestTeleport(string teleportDataJson)

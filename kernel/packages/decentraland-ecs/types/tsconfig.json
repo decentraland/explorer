@@ -7,19 +7,13 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
+    "downlevelIteration": true,
     "keyofStringsOnly": true,
     "inlineSourceMap": true,
     "sourceMap": false,
     "removeComments": false,
     "inlineSources": true,
-    "preserveConstEnums": true,
-    "alwaysStrict": true,
     "useDefineForClassFields": false,
-    "strict": true,
-    "strictNullChecks": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
     "noLib": true,
     "allowJs": true,
     "types": [
@@ -29,7 +23,8 @@
       "@decentraland/SocialController",
       "@decentraland/Identity",
       "@decentraland/web3-provider",
-      "@decentraland/EnvironmentAPI"
+      "@decentraland/EnvironmentAPI",
+      "@decentraland/ParcelIdentity"
     ],
     "typeRoots": [
       "."
