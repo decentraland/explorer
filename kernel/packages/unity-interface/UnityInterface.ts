@@ -13,7 +13,8 @@ import {
   HUDElementID,
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
-  UpdateUserStatusMessage, RenderProfile
+  UpdateUserStatusMessage,
+  RenderProfile
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -130,7 +131,7 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
   }
 
-  public SetRenderProfile(id:RenderProfile) {
+  public SetRenderProfile(id: RenderProfile) {
     this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', id)
   }
 
