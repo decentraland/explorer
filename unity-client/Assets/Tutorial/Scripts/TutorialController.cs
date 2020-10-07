@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Cinemachine;
 
 namespace DCL.Tutorial
 {
@@ -54,6 +55,9 @@ namespace DCL.Tutorial
         [SerializeField] internal float teacherMovementSpeed = 4f;
         [SerializeField] internal AnimationCurve teacherMovementCurve;
         [SerializeField] internal Canvas teacherCanvas;
+
+        [Header("Virtual Cameras")]
+        [SerializeField] internal CinemachineVirtualCamera eagleEyeCamera;
 
         [Header("Debugging")]
         [SerializeField] internal bool debugRunTutorial = false;
@@ -273,6 +277,26 @@ namespace DCL.Tutorial
             StartCoroutine(StartTutorialFromStep(skipIndex));
 
             hudController?.taskbarHud?.SetVisibility(true);
+        }
+
+        /// <summary>
+        /// Activate/deactivate the eagle eye camera.
+        /// </summary>
+        /// <param name="isActive">True for activate the eagle eye camera.</param>
+        public void SetEagleEyeCameraActive(bool isActive)
+        {
+            eagleEyeCamera.gameObject.SetActive(isActive);
+        }
+
+        /// <summary>
+        /// Set a position and a direction to the eagle eye camera.
+        /// </summary>
+        /// <param name="position">New position for the ceagle eye camera.</param>
+        /// <param name="lookAtTarget">New direction for the ceagle eye camera.</param>
+        public void SetEagleEyeCameraPosition(Vector3 position, Vector3 lookAtTarget)
+        {
+            eagleEyeCamera.transform.position = position;
+            eagleEyeCamera.transform.LookAt(lookAtTarget);
         }
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
