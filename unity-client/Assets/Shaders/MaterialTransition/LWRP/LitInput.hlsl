@@ -18,6 +18,7 @@ half _OcclusionStrength;
 float _CullYPlane;
 half _FadeThickness;
 half _FadeDirection;
+int _BaseMapUVs;
 
 TEXTURE2D(_OcclusionMap);       SAMPLER(sampler_OcclusionMap);
 TEXTURE2D(_MetallicGlossMap);   SAMPLER(sampler_MetallicGlossMap);

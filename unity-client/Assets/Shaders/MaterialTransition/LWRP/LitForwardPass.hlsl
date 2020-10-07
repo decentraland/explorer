@@ -10,7 +10,8 @@ struct Attributes
     float3 normalOS     : NORMAL;
     float4 tangentOS    : TANGENT;
     float2 texcoord     : TEXCOORD0;
-    float2 lightmapUV   : TEXCOORD1;
+    float2 texcoord1     : TEXCOORD1;
+    float2 lightmapUV   : TEXCOORD4;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 

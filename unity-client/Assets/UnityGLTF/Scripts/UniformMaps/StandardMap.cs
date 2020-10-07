@@ -22,6 +22,7 @@ namespace UnityGLTF
 
         protected static readonly int _BaseMap = Shader.PropertyToID("_BaseMap");
         protected static readonly int _BaseColor = Shader.PropertyToID("_BaseColor");
+        protected static readonly int _BaseMapUVs = Shader.PropertyToID("_BaseMapUVs");
         protected static readonly int _Metallic = Shader.PropertyToID("_Metallic");
         protected static readonly int _Smoothness = Shader.PropertyToID("_Smoothness");
 
