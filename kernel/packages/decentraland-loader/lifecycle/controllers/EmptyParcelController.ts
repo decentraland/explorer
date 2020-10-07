@@ -15,12 +15,13 @@ export class EmptyParcelController {
       metaContentService: string
       contentServerBundles: string
       worldConfig: WorldConfig
+      rootUrl: string
     }
   ) {
     if (options.worldConfig.renderProfile === RenderProfile.HALLOWEEN) {
-      this.baseUrl = `${location.protocol}//${location.host}${location.pathname}loader/empty-scenes-halloween/`
+      this.baseUrl = `${options.rootUrl}loader/empty-scenes-halloween/`
     } else {
-      this.baseUrl = `${location.protocol}//${location.host}${location.pathname}loader/empty-scenes/`
+      this.baseUrl = `${options.rootUrl}loader/empty-scenes/`
     }
   }
 

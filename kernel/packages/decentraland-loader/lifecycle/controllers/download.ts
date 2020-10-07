@@ -35,6 +35,7 @@ export class SceneDataDownloadManager {
       metaContentService: string
       contentServerBundles: string
       worldConfig: WorldConfig
+      rootUrl: string
     }
   ) {
     this.emptyParcelController = new EmptyParcelController(options)

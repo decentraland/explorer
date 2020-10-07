@@ -42,6 +42,7 @@ let downloadManager: SceneDataDownloadManager
       metaContentServer: string
       metaContentService: string
       contentServerBundles: string
+      rootUrl: string
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
@@ -52,7 +53,8 @@ let downloadManager: SceneDataDownloadManager
         metaContentServer: options.metaContentServer,
         metaContentService: options.metaContentService,
         contentServerBundles: options.contentServerBundles,
-        worldConfig: options.worldConfig
+        worldConfig: options.worldConfig,
+        rootUrl: options.rootUrl
       })
       parcelController = new ParcelLifeCycleController({
         lineOfSightRadius: options.lineOfSightRadius,

@@ -101,6 +101,7 @@ export async function initParcelSceneWorker() {
     metaContentServer: DEBUG ? localServer : getFetchMetaContentServer(state),
     metaContentService: DEBUG ? localServer : getFetchMetaContentService(state),
     contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
+    rootUrl: `${location.protocol}//${location.host}${location.pathname}`,
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
     emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
