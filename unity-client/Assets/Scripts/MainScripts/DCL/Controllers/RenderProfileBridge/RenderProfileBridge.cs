@@ -12,6 +12,12 @@ public class RenderProfileBridge : MonoBehaviour
         HALLOWEEN,
     }
 
+    [System.Serializable]
+    public class Model
+    {
+        public ID id;
+    }
+
     public static RenderProfileBridge i { get; private set; }
 
     public void Awake()
@@ -19,8 +25,9 @@ public class RenderProfileBridge : MonoBehaviour
         i = this;
     }
 
-    public void SetRenderProfile(ID id)
+    public void SetRenderProfile(string json)
     {
+        ID id = JsonUtility.FromJson<Model>(json).id;
         switch (id)
         {
             case ID.DEFAULT:
