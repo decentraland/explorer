@@ -143,6 +143,8 @@ export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') 
 
 export const PIN_CATALYST = qs.PIN_CATALYST
 
+export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
+
 export namespace commConfigurations {
   export const debug = true
   export const commRadius = 4
