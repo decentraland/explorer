@@ -1,12 +1,12 @@
 import { Script, inject, EventSubscriber } from 'decentraland-rpc'
 
-import { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-rpc/types'
 import { CLASS_ID, Vector2 } from 'decentraland-ecs/src'
 import { PB_Transform, PB_Vector3, PB_Quaternion } from '../../shared/proto/engineinterface_pb'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { sleep } from 'atomicHelpers/sleep'
 import future, { IFuture } from 'fp-future'
 
+import type { ScriptingTransport, ILogOpts } from 'decentraland-rpc/src/common/json-rpc/types'
 import type { QueryType, Transform } from 'decentraland-ecs'
 import type { DecentralandInterface, IEvents } from 'decentraland-ecs/src/decentraland/Types'
 import type { IEngineAPI } from 'shared/apis/EngineAPI'
