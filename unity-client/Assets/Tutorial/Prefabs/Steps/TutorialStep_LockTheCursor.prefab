@@ -281,6 +281,10 @@ MonoBehaviour:
   unlockCursorAtStart: 1
   show3DTeacherAtStart: 1
   teacherPositionRef: {fileID: 3099849961085206906}
+  mainSection: {fileID: 0}
+  skipTutorialSection: {fileID: 0}
+  yesSkipInputAction: {fileID: 0}
+  noSkipInputAction: {fileID: 0}
 --- !u!1 &1364692181531218564
 GameObject:
   m_ObjectHideFlags: 0
@@ -696,7 +700,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 27.433807, y: -29}
+  m_AnchoredPosition: {x: 11, y: -29}
   m_SizeDelta: {x: 199.21468, y: 36.559948}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &3677279793223156131
