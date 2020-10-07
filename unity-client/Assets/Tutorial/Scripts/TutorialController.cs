@@ -56,8 +56,12 @@ namespace DCL.Tutorial
         [SerializeField] internal AnimationCurve teacherMovementCurve;
         [SerializeField] internal Canvas teacherCanvas;
 
-        [Header("Virtual Cameras")]
+        [Header("Eagle Eye Camera")]
         [SerializeField] internal CinemachineVirtualCamera eagleEyeCamera;
+        [SerializeField] internal Vector3 eagleCamInitPosition = new Vector3(30, 30, -50);
+        [SerializeField] internal Vector3 eagleCamInitLookAtPoint = new Vector3(0, 0, 0);
+        [SerializeField] internal bool eagleCamRotationActived = true;
+        [SerializeField] internal float eagleCamRotationSpeed = 1f;
 
         [Header("Debugging")]
         [SerializeField] internal bool debugRunTutorial = false;
@@ -74,6 +78,7 @@ namespace DCL.Tutorial
         private int currentStepIndex;
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
+        private Coroutine eagleEyeRotationCoroutine;
 
         private void Awake()
         {
@@ -289,17 +294,19 @@ namespace DCL.Tutorial
             hudController?.minimapHud?.SetVisibility(!isActive);
             hudController?.manaHud?.SetVisibility(!isActive);
             hudController?.profileHud?.SetVisibility(!isActive);
-        }
 
-        /// <summary>
-        /// Set a position and a direction to the eagle eye camera.
-        /// </summary>
-        /// <param name="position">New position for the ceagle eye camera.</param>
-        /// <param name="lookAtTarget">New direction for the ceagle eye camera.</param>
-        public void SetEagleEyeCameraPosition(Vector3 position, Vector3 lookAtTarget)
-        {
-            eagleEyeCamera.transform.position = position;
-            eagleEyeCamera.transform.LookAt(lookAtTarget);
+            if (isActive)
+            {
+                eagleEyeCamera.transform.position = eagleCamInitPosition;
+                eagleEyeCamera.transform.LookAt(eagleCamInitLookAtPoint);
+
+                if (eagleCamRotationActived)
+                    eagleEyeRotationCoroutine = StartCoroutine(EagleEyeCameraRotation(eagleCamRotationSpeed));
+            }
+            else if (eagleEyeRotationCoroutine != null)
+            {
+                StopCoroutine(eagleEyeRotationCoroutine);
+            }
         }
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
@@ -453,6 +460,15 @@ namespace DCL.Tutorial
                 new WebInterface.AnalyticsPayload.Property("elapsed time", Time.realtimeSinceStartup.ToString("0.00"))
             };
             WebInterface.ReportAnalyticsEvent("tutorial skipped", properties);
+        }
+
+        private IEnumerator EagleEyeCameraRotation(float rotationSpeed)
+        {
+            while (true)
+            {
+                eagleEyeCamera.transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed, Space.World);
+                yield return null;
+            }
         }
     }
 }

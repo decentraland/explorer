@@ -1,6 +1,5 @@
-using System.Collections;
-using DCL.Controllers;
 using DCL.Interface;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,7 +29,6 @@ namespace DCL.Tutorial
 
             if (tutorialController)
             {
-                tutorialController.SetEagleEyeCameraPosition(new Vector3(30, 30, -50), CommonScriptableObjects.playerUnityPosition.Get());
                 tutorialController.SetEagleEyeCameraActive(true);
 
                 defaultTeacherCanvasSortOrder = tutorialController.teacherCanvas.sortingOrder;
