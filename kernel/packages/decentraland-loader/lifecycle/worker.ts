@@ -4,6 +4,7 @@
 import { WebWorkerTransport } from 'decentraland-rpc'
 
 import defaultLogger from 'shared/logger'
+import { WorldConfig } from 'shared/meta/types'
 import { ILand, InstancedSpawnPoint } from 'shared/types'
 
 import { SceneDataDownloadManager, TileIdPair } from './controllers/download'
@@ -44,12 +45,14 @@ let downloadManager: SceneDataDownloadManager
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
+      worldConfig: WorldConfig
     }) => {
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
         metaContentServer: options.metaContentServer,
         metaContentService: options.metaContentService,
-        contentServerBundles: options.contentServerBundles
+        contentServerBundles: options.contentServerBundles,
+        worldConfig: options.worldConfig
       })
       parcelController = new ParcelLifeCycleController({
         lineOfSightRadius: options.lineOfSightRadius,

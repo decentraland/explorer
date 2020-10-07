@@ -3,6 +3,7 @@ import { ILand } from 'shared/types'
 import { CatalystClient } from 'dcl-catalyst-client'
 import { EntityType } from 'dcl-catalyst-commons'
 import { EmptyParcelController } from './EmptyParcelController'
+import { WorldConfig } from 'shared/meta/types'
 
 export type DeployedScene = {
   parcel_id: string
@@ -33,6 +34,7 @@ export class SceneDataDownloadManager {
       metaContentServer: string
       metaContentService: string
       contentServerBundles: string
+      worldConfig: WorldConfig
     }
   ) {
     this.emptyParcelController = new EmptyParcelController(options)

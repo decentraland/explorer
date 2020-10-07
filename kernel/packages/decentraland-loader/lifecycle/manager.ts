@@ -103,7 +103,8 @@ export async function initParcelSceneWorker() {
     contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
     lineOfSightRadius: LOS ? Number.parseInt(LOS, 10) : parcelLimits.visibleRadius,
     secureRadius: parcelLimits.secureRadius,
-    emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests']
+    emptyScenes: ENABLE_EMPTY_SCENES && !(globalThis as any)['isRunningTests'],
+    worldConfig: globalThis.globalStore.getState().meta.config.world
   })
 
   return server
