@@ -575,7 +575,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 106.1, y: 4.9}
+  m_AnchoredPosition: {x: 101.67997, y: 4.9}
   m_SizeDelta: {x: 147.02722, y: 107.59999}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &3198882407141370640
@@ -780,8 +780,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -78.03999, y: 4.4000015}
-  m_SizeDelta: {x: 198.63168, y: 39.449085}
+  m_AnchoredPosition: {x: -69.1, y: 4.4000015}
+  m_SizeDelta: {x: 171.91684, y: 39.449085}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5110432849654418489
 CanvasRenderer:
@@ -810,7 +810,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Move around pressing
+  m_text: 'Move around using
 
 '
   m_isRightToLeft: 0
@@ -881,7 +881,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: -0.0038012785, w: 0}
   m_textInfo:
     textComponent: {fileID: 2662654081255569629}
-    characterCount: 21
+    characterCount: 18
     spriteCount: 0
     spaceCount: 3
     wordCount: 3

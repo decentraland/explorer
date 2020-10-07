@@ -10952,8 +10952,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'By the way: Nice to meet you, {userName}! My name is Alice and I''m here
-    to teach you the basics. Shall we?'
+  m_text: Nice to meet you, {userName}! My name is Alice and I'm here to teach you
+    some Decentraland basics. Shall we begin?
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
@@ -10981,7 +10981,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 18
+  m_fontSize: 17.15
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -11022,12 +11022,12 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 2662654081255569629}
-    characterCount: 106
+    characterCount: 114
     spriteCount: 0
-    spaceCount: 21
-    wordCount: 22
+    spaceCount: 20
+    wordCount: 21
     linkCount: 0
-    lineCount: 2
+    lineCount: 3
     pageCount: 1
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
