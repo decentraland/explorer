@@ -31,6 +31,7 @@ public class TaskbarHUDView : MonoBehaviour
 
     [Header("Tutorial Config")]
     [SerializeField] internal RectTransform exploreTooltipReference;
+    [SerializeField] internal RectTransform backpackTooltipReference;
     [SerializeField] internal RectTransform moreTooltipReference;
     [SerializeField] internal RectTransform goToGenesisTooltipReference;
 

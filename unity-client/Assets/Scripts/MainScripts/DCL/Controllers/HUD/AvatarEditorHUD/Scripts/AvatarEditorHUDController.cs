@@ -24,6 +24,7 @@ public class AvatarEditorHUDController : IHUD
 
     public AvatarEditorHUDView view;
 
+    public event Action OnOpen;
     public event Action OnClose;
 
     public AvatarEditorHUDController()
@@ -414,6 +415,8 @@ public class AvatarEditorHUDController : IHUD
     {
         if (!visible && view.isOpen)
             OnClose?.Invoke();
+        else if (visible && !view.isOpen)
+            OnOpen?.Invoke();
 
         view.SetVisibility(visible);
     }
