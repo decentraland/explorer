@@ -1162,7 +1162,7 @@ globalThis.bots = {
   },
   reposition: (id: string, xPos: any, yPos: any, zPos: any) => { // to test immediate repositioning
     let bot = bots.find((bot) => bot.id === id)
-    if(bot) {
+    if (bot) {
       bot.handle = processPositionMessage(context!, id, {
         type: 'position',
         time: Date.now(),

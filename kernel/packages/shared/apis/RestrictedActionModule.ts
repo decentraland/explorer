@@ -3,10 +3,10 @@ import { ExposableAPI } from './ExposableAPI'
 import defaultLogger from '../logger'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { ParcelIdentity } from './ParcelIdentity'
-import {Quaternion, Vector3} from 'decentraland-ecs/src'
+import { Quaternion, Vector3 } from 'decentraland-ecs/src'
 import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelpers/parcelScenePositions'
-import {lastPlayerPosition} from '../world/positionThings'
-import {browserInterface} from "../../unity-interface/BrowserInterface"
+import { lastPlayerPosition } from '../world/positionThings'
+import { browserInterface } from "../../unity-interface/BrowserInterface"
 
 export enum Permission {
   ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE'
