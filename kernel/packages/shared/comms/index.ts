@@ -480,7 +480,8 @@ export function processPositionMessage(context: Context, fromAlias: string, mess
   const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
-  if (msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
+  const immediateReposition = message.data[7]
+  if (immediateReposition || msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
     const p = message.data
 
     peerTrackingInfo.position = p
@@ -959,9 +960,6 @@ async function doStartCommunications(context: Context) {
     })
 
     context.positionObserver = positionObservable.add((obj: Readonly<PositionReport>) => {
-      if(obj.immediate) {
-        console.log("pravs - context.positionObserver - immediate!") // THIS IS GETTING CALLED ON THE SENDER
-      }
       const p = [
         obj.position.x,
         obj.position.y - obj.playerHeight,
@@ -1138,18 +1136,13 @@ globalThis.bots = {
       }
     })
     const position = { ...lastPlayerPosition }
-    // const handle = setInterval(() => {
-    //   processPositionMessage(context!, id, {
-    //     type: 'position',
-    //     time: Date.now(),
-    //     data: [position.x, position.y, position.z, 0, 0, 0, 0]
-    //   })
-    // }, 1000)
-    const handle = processPositionMessage(context!, id, {
-      type: 'position',
-      time: Date.now(),
-      data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
-    })
+    const handle = setInterval(() => {
+      processPositionMessage(context!, id, {
+        type: 'position',
+        time: Date.now(),
+        data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
+      })
+    }, 1000)
     bots.push({ id, handle })
     return id
   },

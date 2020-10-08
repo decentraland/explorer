@@ -91,12 +91,9 @@ export class AvatarEntity extends Entity {
   }
 
   setPose(pose: Pose): void {
-    const [x, y, z, Qx, Qy, Qz, Qw, immediately] = pose
+    const [x, y, z, Qx, Qy, Qz, Qw, immediate] = pose
 
-    this.transform.immediate = immediately
-
-    console.log("pravs - avatarSystem.setPose - 1 - immediate: " + this.transform.immediate)
-
+    this.transform.immediate = immediate
     this.transform.position.set(x, y, z)
     this.transform.rotation.set(Qx, Qy, Qz, Qw)
   }
