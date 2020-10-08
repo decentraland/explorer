@@ -142,7 +142,10 @@ namespace DCL.Tutorial
             if (hudController != null)
             {
                 if (hudController.emailPromptHud != null)
+                {
                     hudController.emailPromptHud.waitForEndOfTutorial = true;
+                    hudController.emailPromptHud.ResetPopupDelayed();
+                }
 
                 if (hudController.goToGenesisPlazaHud != null)
                 {

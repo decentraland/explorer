@@ -71,6 +71,15 @@ public class EmailPromptHUDController : IHUD
         }
     }
 
+    public void ResetPopupDelayed()
+    {
+        if (isPopupRoutineRunning)
+        {
+            StopPopupRoutine();
+            StartPopupRoutine();
+        }
+    }
+
     void StartPopupRoutine()
     {
         showPopupDelayedRoutine = CoroutineStarter.Start(ShowPopupDelayed(POPUP_DELAY));
