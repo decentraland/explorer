@@ -407,7 +407,7 @@ namespace DCL
                 queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
 
             MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
-            Debug.Log(queuedMessage.payload);
+
             EnqueueSceneMessage(queuedMessage);
 
             OnMessageDecodeEnds?.Invoke("Misc");
