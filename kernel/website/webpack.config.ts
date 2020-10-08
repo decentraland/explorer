@@ -1,6 +1,7 @@
 import * as path from 'path'
 import { Configuration } from 'webpack'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const webpackConfig = (env): Configuration => ({
   entry: './website/src/index.tsx',
@@ -12,6 +13,12 @@ const webpackConfig = (env): Configuration => ({
     path: path.resolve('./static/dist'),
     filename: 'react.js'
   },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    })
+  ],
   module: {
     rules: [
       {
@@ -24,10 +31,18 @@ const webpackConfig = (env): Configuration => ({
       },
       {
         test: /\.css$/i,
-        use: ['css-loader?url=false']
-        // options: {
-        //   url: true
-        // }
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: '/public/path/to/'
+            }
+          },
+          {
+            loader: 'css-loader',
+            options: { url: false }
+          }
+        ]
       }
     ]
   },
