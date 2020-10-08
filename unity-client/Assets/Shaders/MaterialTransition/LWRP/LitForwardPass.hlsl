@@ -11,14 +11,13 @@ struct Attributes
     float4 tangentOS    : TANGENT;
     float2 texcoord     : TEXCOORD0;
     float2 texcoord1     : TEXCOORD1;
-    float2 lightmapUV   : TEXCOORD4;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct Varyings
 {
-    float2 uv                       : TEXCOORD0;
-    DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 1);
+    float4 uvAlbedoNormal           : TEXCOORD0; //Albedo, Normal UVs
+    float4 uvMetallicEmissive       : TEXCOORD1; //Metallic, Emissive UVs
 
     float3 positionWS               : TEXCOORD2;
 
@@ -72,7 +71,6 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 #endif
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
-    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, inputData.normalWS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,7 +91,11 @@ Varyings LitPassVertex(Attributes input)
     half3 vertexLight = VertexLighting(vertexInput.positionWS, normalInput.normalWS);
     half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
 
-    output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+    float2 uvs[] = { TRANSFORM_TEX(input.texcoord, _BaseMap), TRANSFORM_TEX(input.texcoord1, _BaseMap)};
+    output.uvAlbedoNormal.xy = uvs[clamp(_BaseMapUVs, 0, 1)];
+    output.uvAlbedoNormal.zw = uvs[clamp(_NormalMapUVs, 0, 1)];
+    output.uvMetallicEmissive.xy = uvs[clamp(_MetallicMapUVs, 0, 1)];
+    output.uvMetallicEmissive.zw = uvs[clamp(_EmissiveMapUVs, 0, 1)];
 
 #ifdef _NORMALMAP
     output.normalWS = half4(normalInput.normalWS, viewDirWS.x);
@@ -103,10 +105,6 @@ Varyings LitPassVertex(Attributes input)
     output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
     output.viewDirWS = viewDirWS;
 #endif
-    
-    OUTPUT_LIGHTMAP_UV(input.lightmapUV, unity_LightmapST, output.lightmapUV);
-    OUTPUT_SH(output.normalWS.xyz, output.vertexSH);
-
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 
     output.positionWS = vertexInput.positionWS;
@@ -129,7 +127,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
     SurfaceData surfaceData;
-    InitializeStandardLitSurfaceData(input.uv, surfaceData);
+    InitializeStandardLitSurfaceData(input.uvAlbedoNormal.xy, input.uvAlbedoNormal.zw, input.uvMetallicEmissive.xy, input.uvMetallicEmissive.zw, surfaceData);
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
