@@ -93,7 +93,10 @@ namespace DCL.Tutorial
 
         private void Start()
         {
-            CommonScriptableObjects.isTaskbarHUDInitialized.OnChange += IsTaskbarHUDInitialized_OnChange;
+            if (CommonScriptableObjects.isTaskbarHUDInitialized.Get())
+                IsTaskbarHUDInitialized_OnChange(true, false);
+            else
+                CommonScriptableObjects.isTaskbarHUDInitialized.OnChange += IsTaskbarHUDInitialized_OnChange;
 
             if (debugRunTutorial)
                 SetTutorialEnabled(debugOpenedFromDeepLink.ToString());
@@ -464,8 +467,11 @@ namespace DCL.Tutorial
 
         private void IsTaskbarHUDInitialized_OnChange(bool current, bool previous)
         {
-            if (hudController != null && hudController.taskbarHud != null)
+            if (current && hudController != null && hudController.taskbarHud != null)
+            {
+                hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
                 hudController.taskbarHud.moreMenu.OnRestartTutorial += MoreMenu_OnRestartTutorial;
+            }
         }
 
         private void MoreMenu_OnRestartTutorial()
