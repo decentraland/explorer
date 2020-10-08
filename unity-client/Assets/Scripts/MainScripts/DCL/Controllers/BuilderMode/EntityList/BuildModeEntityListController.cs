@@ -17,10 +17,10 @@ public class BuildModeEntityListController : MonoBehaviour
         DUPLICATE = 4,
     }
 
-    public System.Action<DecentrelandEntityToEdit> OnEntityClick;
+    public System.Action<DecentralandEntityToEdit> OnEntityClick;
     public EntityListView entityListView;
     ParcelScene currentScene;
-    List<DecentrelandEntityToEdit> entitiesList;
+    List<DecentralandEntityToEdit> entitiesList;
 
     private void Awake()
     {
@@ -32,7 +32,7 @@ public class BuildModeEntityListController : MonoBehaviour
         entityListView.OnActioninvoked -= EntityActionInvoked;
     }
 
-    public void OpenEntityList(List<DecentrelandEntityToEdit> sceneEntities)
+    public void OpenEntityList(List<DecentralandEntityToEdit> sceneEntities)
     {
         entitiesList = sceneEntities;
         gameObject.SetActive(true);
@@ -46,7 +46,7 @@ public class BuildModeEntityListController : MonoBehaviour
         entityListView.gameObject.SetActive(false);
     }
 
-    public void EntityActionInvoked(EntityAction action, DecentrelandEntityToEdit entityToApply,EntityListAdapter adapter)
+    public void EntityActionInvoked(EntityAction action, DecentralandEntityToEdit entityToApply,EntityListAdapter adapter)
     {
         switch (action)
         {
@@ -55,7 +55,7 @@ public class BuildModeEntityListController : MonoBehaviour
                 
                 break;
             case EntityAction.LOCK:
-                entityToApply.isLocked = !entityToApply.isLocked;
+                entityToApply.IsLocked = !entityToApply.IsLocked;
                 //entityToApply.isLocked = !entityToApply.isLocked;
                 break;
             case EntityAction.DELETE:
@@ -69,7 +69,7 @@ public class BuildModeEntityListController : MonoBehaviour
                 CopyFromEntity(entityToApply.rootEntity, newEntity);
                 break;
         }
-        adapter.SetContent(entityToApply);
+        //adapter.SetContent(entityToApply);
         //entityListView.SetContent(entitiesList);
     }
 

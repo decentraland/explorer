@@ -10,21 +10,26 @@ public class EntityListAdapter : MonoBehaviour
     public Color selectedColor;
     public TextMeshProUGUI nameTxt;
     public Image selectedImg, lockImg,showImg;
-    public System.Action<BuildModeEntityListController.EntityAction, DecentrelandEntityToEdit, EntityListAdapter> OnActioninvoked;
-    DecentrelandEntityToEdit currentEntity;
+    public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActioninvoked;
+    DecentralandEntityToEdit currentEntity;
 
-    public void SetContent(DecentrelandEntityToEdit _decentrelandEntity)
+    public void SetContent(DecentralandEntityToEdit _decentrelandEntity)
     {
+        if(currentEntity != null)
+        {
+            currentEntity.onStatusUpdate -= SetContent;
+        }
         currentEntity = _decentrelandEntity;
         nameTxt.text = currentEntity.rootEntity.entityId;
         if (currentEntity.rootEntity.gameObject.activeSelf) showImg.color = selectedColor;
         else showImg.color = Color.white;
 
-        if (!currentEntity.isLocked) lockImg.color = Color.white;
+        if (!currentEntity.IsLocked) lockImg.color = Color.white;
         else lockImg.color = selectedColor;
 
 
-        selectedImg.enabled = _decentrelandEntity.isSelected;
+        selectedImg.enabled = _decentrelandEntity.IsSelected;
+        currentEntity.onStatusUpdate += SetContent;
     }
 
     public void SelectOrDeselect()

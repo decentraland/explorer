@@ -10,6 +10,7 @@ using Builder;
 using Builder.Gizmos;
 using DCL.Models;
 using UnityEngine.UI;
+using System;
 
 public class AdvancedBuildModeController : MonoBehaviour
 {
@@ -37,7 +38,7 @@ public class AdvancedBuildModeController : MonoBehaviour
 
 
         freeCameraController.SetPosition(Camera.main.transform.position + Vector3.up * distanceEagleCamera);
-        LookAtTransfrom();
+        freeCameraController.LookAt(lookAtT);
 
         eagleCamera.gameObject.SetActive(true);
 
@@ -49,6 +50,7 @@ public class AdvancedBuildModeController : MonoBehaviour
         Utils.UnlockCursor();
         advancedModeUI.SetActive(true);
         CommonScriptableObjects.allUIHidden.Set(true);
+        RenderSettings.fog = false;
     }
 
     public void DesactivateAdvancedBuildMode()
@@ -60,14 +62,10 @@ public class AdvancedBuildModeController : MonoBehaviour
         advancedModeUI.SetActive(false);
         gizmoManager.HideGizmo();
         CommonScriptableObjects.allUIHidden.Set(false);
+        RenderSettings.fog = true;
     }
 
-    [ContextMenu("Look at transform")]
-    public void LookAtTransfrom()
-    {
-        freeCameraController.LookAt(lookAtT);
-    }
-
+  
     public void LookAtEntity(DecentralandEntity entity)
     {
         freeCameraController.SmoothLookAt(entity.gameObject.transform);      
@@ -135,5 +133,11 @@ public class AdvancedBuildModeController : MonoBehaviour
         position.z += ParcelSettings.PARCEL_SIZE * Mathf.Abs(maxY - minY) / 2;
 
         return position;
+    }
+
+    public void FocusGameObject(List<DecentralandEntityToEdit> entitiesToFocus)
+    {
+        freeCameraController.FocusOnEntities(entitiesToFocus);
+       
     }
 }

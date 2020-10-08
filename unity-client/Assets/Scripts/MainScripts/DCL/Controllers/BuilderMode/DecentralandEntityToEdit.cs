@@ -8,13 +8,51 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DecentrelandEntityToEdit : EditableEntity
+public class DecentralandEntityToEdit : EditableEntity
 {
     public string entityUniqueId;
 
-    public bool isLocked = false;
-    public bool isSelected = false;
-    public bool isNew = false;
+    public System.Action<DecentralandEntityToEdit> onStatusUpdate;
+
+    private bool isLocked = false;
+    public bool IsLocked
+    {
+        get
+        {
+            return isLocked;
+        }
+        set
+        {
+            isLocked = value;
+            onStatusUpdate?.Invoke(this);
+        }
+    }
+    private bool isSelected = false;
+    public bool IsSelected
+    {
+        get
+        {
+            return isSelected;
+        }
+        set
+        {
+            isSelected = value;
+            onStatusUpdate?.Invoke(this);
+        }
+    }
+    private bool isNew = false;
+    public bool IsNew
+    {
+        get
+        {
+            return isNew;
+        }
+        set
+        {
+            isNew = value;
+            onStatusUpdate?.Invoke(this);
+        }
+    }
 
     Transform originalParent;
 
@@ -23,9 +61,6 @@ public class DecentrelandEntityToEdit : EditableEntity
     Material[] originalMaterials;
 
     Material editMaterial;
-
-    float currentScaleAdded, currentYRotationAdded;
-    GameObject entityCollider;
 
     Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
 
@@ -46,7 +81,7 @@ public class DecentrelandEntityToEdit : EditableEntity
     }
     public void Select()
     {
-        isSelected = true;
+        IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
         SetEditMaterials();
         SceneController.i.boundariesChecker.AddPersistent(rootEntity);
@@ -55,7 +90,7 @@ public class DecentrelandEntityToEdit : EditableEntity
 
     public void Deselect()
     {
-        isSelected = false;
+        IsSelected = false;
         rootEntity.gameObject.transform.SetParent(originalParent);
         SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
@@ -107,7 +142,7 @@ public class DecentrelandEntityToEdit : EditableEntity
 
     void ShapeUpdate(DecentralandEntity decentralandEntity)
     {
-        if (isSelected) SetEditMaterials();
+        if (IsSelected) SetEditMaterials();
         CreateCollidersForEntity(decentralandEntity);
     }
 

@@ -70,8 +70,8 @@ public class BuildModeController : MonoBehaviour
 
     bool isEditModeActivated = false, isSnapActivated = true, isSceneInformationActive = false,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = false;
     bool isPlacingNewObject = false;
-    List<DecentrelandEntityToEdit> selectedEntities = new List<DecentrelandEntityToEdit>();
-    Dictionary<string, DecentrelandEntityToEdit> convertedEntities = new Dictionary<string, DecentrelandEntityToEdit>();
+    List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
+    Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
 
     GameObject gameObjectToEdit;
     GameObject undoGO, snapGO, freeMovementGO;
@@ -259,9 +259,6 @@ public class BuildModeController : MonoBehaviour
         }
         SceneController.i.UpdateParcelScenesExecute(data);
 
-
-
-
         GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
         mesh.model.src = sceneObject.model;
@@ -377,7 +374,12 @@ public class BuildModeController : MonoBehaviour
                 InputDone();
                 return;
             }
-
+            if(Input.GetKey(KeyCode.F) && isAdvancedModeActive)
+            {
+                advancedBuildModeController.FocusGameObject(selectedEntities);
+                InputDone();
+                return;
+            }
 
             if (Input.GetKey(KeyCode.R))
             {
@@ -419,7 +421,11 @@ public class BuildModeController : MonoBehaviour
     }
 
 
-    void SetAdvanceMode(bool advanceModeActive)
+    public void ChangeAdvanceMode()
+    {
+        SetAdvanceMode(!isAdvancedModeActive);
+    }
+    public void SetAdvanceMode(bool advanceModeActive)
     {
         if (!isAdvancedModeActive)
         {
@@ -489,12 +495,13 @@ public class BuildModeController : MonoBehaviour
         }
 
         SetObjectIfSnapOrNot();
+        outlinerController.CancelUnselectedOutlines();
     }
 
     bool AreAllEntitiesInsideBoundaries()
     {
         bool areAllIn = true;
-        foreach(DecentrelandEntityToEdit entity in selectedEntities)
+        foreach(DecentralandEntityToEdit entity in selectedEntities)
         {
             if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
@@ -508,12 +515,13 @@ public class BuildModeController : MonoBehaviour
     {
         if (outlinerOptimizationCounter >= 10)
         {
-            DecentralandEntity entity = GetEntityOnPointer();
-            if (entity != null)
+            DecentralandEntityToEdit entity = GetEntityOnPointer();
+            if (!isMultiSelectionActive) outlinerController.CancelAllOutlines();
+            else outlinerController.CancelUnselectedOutlines();
+            if (entity != null && !entity.IsSelected)
             {
-                outlinerController.OutLineOnlyThisEntity(entity);
+                outlinerController.OutLineEntity(entity);
             }
-            else outlinerController.CancelAllOutlines();
             outlinerOptimizationCounter = 0;
         }
         else outlinerOptimizationCounter++;
@@ -521,15 +529,15 @@ public class BuildModeController : MonoBehaviour
 
     public void UndoEdit()
     {
-        List<DecentrelandEntityToEdit> entitiesToRemove = new List<DecentrelandEntityToEdit>();
-        foreach(DecentrelandEntityToEdit entity in selectedEntities)
+        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
+        foreach(DecentralandEntityToEdit entity in selectedEntities)
         {
-            if (entity.isSelected && entity.isNew) entitiesToRemove.Add(entity);
+            if (entity.IsSelected && entity.IsNew) entitiesToRemove.Add(entity);
         }
 
         CopyGameObjectStatus(undoGO, gameObjectToEdit,false,false);
 
-        foreach(DecentrelandEntityToEdit entity in entitiesToRemove)
+        foreach(DecentralandEntityToEdit entity in entitiesToRemove)
         {
             selectedEntities.Remove(entity);
             convertedEntities.Remove(entity.entityUniqueId);
@@ -610,24 +618,39 @@ public class BuildModeController : MonoBehaviour
             else
             {
                 EnterEditMode();
+                SetAdvanceMode(true);
             }
         }
     }
-    void SelectFromList(DecentrelandEntityToEdit entityToEdit)
+    void SelectFromList(DecentralandEntityToEdit entityToEdit)
     {
         if(!isMultiSelectionActive)DeselectEntities();
-        Select(entityToEdit);
+        if (Select(entityToEdit))
+        {
+            if (!isMultiSelectionActive) outlinerController.OutLineEntity(entityToEdit);
+            else outlinerController.OutlineEntities(selectedEntities);
+        }
+       
     }
-    void Select(DecentrelandEntityToEdit entityEditable)
+    void Select(DecentralandEntity decentralandEntity)
     {
-        if (entityEditable.isLocked) return;
+        if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id + decentralandEntity.entityId))
+        {
+            DecentralandEntityToEdit entityEditable = convertedEntities[sceneToEdit.sceneData.id + decentralandEntity.entityId];
+            Select(entityEditable);
+        }
+    }
+    bool Select(DecentralandEntityToEdit entityEditable)
+    {
+        
+        if (entityEditable.IsLocked) return false;
 
-        if(entityEditable.isSelected)
+        if(entityEditable.IsSelected)
         {
             if (selectedEntities.Count > 1)
             {
                 DeselectEntity(entityEditable);
-                return;
+                return false;
             }
             else
             {
@@ -635,7 +658,7 @@ public class BuildModeController : MonoBehaviour
             }
         }
         //if (gameObjectToEdit != null) DeselectObject();
-
+       
         entityEditable.Select();
 
         currentYRotationAdded = 0;
@@ -644,14 +667,14 @@ public class BuildModeController : MonoBehaviour
         selectedEntities.Add(entityEditable);
 
         //GLTFShape shape = (GLTFShape)entityToEdit.GetSharedComponent(typeof(GLTFShape));
-        foreach (DecentrelandEntityToEdit entity in selectedEntities)
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
         {
             entity.rootEntity.gameObject.transform.SetParent(null);
         }
         gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
         gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
         gameObjectToEdit.transform.localScale = Vector3.one;
-        foreach (DecentrelandEntityToEdit entity in selectedEntities)
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
         {
             entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
         }
@@ -665,7 +688,7 @@ public class BuildModeController : MonoBehaviour
         if (isAdvancedModeActive)
         {
             List<EditableEntity> editableEntities = new List<EditableEntity>();
-            foreach (DecentrelandEntityToEdit entity in selectedEntities)
+            foreach (DecentralandEntityToEdit entity in selectedEntities)
             {
                 editableEntities.Add(entity);
             }
@@ -685,22 +708,17 @@ public class BuildModeController : MonoBehaviour
 
 
         sceneLimitInfoController.UpdateInfo();
+        outlinerController.CancelAllOutlines();
+        return true;
     }
-    void Select(DecentralandEntity decentralandEntity)
-    {
-        if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id + decentralandEntity.entityId))
-        {
-            DecentrelandEntityToEdit entityEditable = convertedEntities[sceneToEdit.sceneData.id + decentralandEntity.entityId];
-            Select(entityEditable);
-        }
-    }
+
 
     Vector3 GetCenterPointOfSelectedObjects()
     {
         float totalX = 0f;
         float totalY = 0f;
         float totalZ = 0f;
-        foreach (DecentrelandEntityToEdit entity in selectedEntities)
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
         {
             totalX += entity.rootEntity.gameObject.transform.position.x;
             totalY += entity.rootEntity.gameObject.transform.position.y;
@@ -749,11 +767,11 @@ public class BuildModeController : MonoBehaviour
 
     void SelectObject()
     {
-        DecentralandEntity entityToSelect = GetEntityOnPointer();
+        DecentralandEntityToEdit entityToSelect = GetEntityOnPointer();
         if(entityToSelect != null) Select(entityToSelect); 
     }
 
-    DecentralandEntity GetEntityOnPointer()
+    DecentralandEntityToEdit GetEntityOnPointer()
     {
         RaycastHit hit;
         UnityEngine.Ray ray;
@@ -768,12 +786,20 @@ public class BuildModeController : MonoBehaviour
         if (Physics.Raycast(ray, out hit, distanceToSelect, layerToRaycast))
         {
             string entityID = hit.collider.gameObject.name;
-            if(sceneToEdit.entities.ContainsKey(entityID)) return sceneToEdit.entities[entityID];
+
+            if (sceneToEdit.entities.ContainsKey(entityID))
+            {
+                if(convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])))
+                {
+                    return convertedEntities[GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])];
+                }
+              
+            }
         }
         return null;
     }
 
-    void DeselectEntity(DecentrelandEntityToEdit entity)
+    void DeselectEntity(DecentralandEntityToEdit entity)
     {
         if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
         {
@@ -789,7 +815,7 @@ public class BuildModeController : MonoBehaviour
         if (selectedEntities.Count > 0)
         {
             bool areAllEntitiesInsideSceneBoundaries = true;
-            foreach(DecentrelandEntityToEdit entity in selectedEntities)
+            foreach(DecentralandEntityToEdit entity in selectedEntities)
             {
                 if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 {              
@@ -800,7 +826,7 @@ public class BuildModeController : MonoBehaviour
             if(!areAllEntitiesInsideSceneBoundaries) UndoEdit();
 
 
-            foreach (DecentrelandEntityToEdit entity in selectedEntities)
+            foreach (DecentralandEntityToEdit entity in selectedEntities)
             {
                 SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
                 SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.rootEntity);
@@ -834,7 +860,7 @@ public class BuildModeController : MonoBehaviour
     }
     public void DuplicateEntities()
     {
-        foreach(DecentrelandEntityToEdit entity in selectedEntities)
+        foreach(DecentralandEntityToEdit entity in selectedEntities)
         {
             if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity)) return;
         }
@@ -989,7 +1015,7 @@ public class BuildModeController : MonoBehaviour
 
     void DestroyCollidersForAllEntities()
     {
-        foreach(DecentrelandEntityToEdit entity in convertedEntities.Values)
+        foreach(DecentralandEntityToEdit entity in convertedEntities.Values)
         {
             entity.DestroyColliders();
         }
@@ -1006,21 +1032,26 @@ public class BuildModeController : MonoBehaviour
 
     void SetupEntityToEdit(DecentralandEntity entity,bool hasBeenCreated = false)
     {
-        if (!convertedEntities.ContainsKey(entity.scene.sceneData.id + entity.entityId))
+        if (!convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entity)))
         {
            
-            DecentrelandEntityToEdit entityToEdit = Utils.GetOrCreateComponent<DecentrelandEntityToEdit>(entity.gameObject);
+            DecentralandEntityToEdit entityToEdit = Utils.GetOrCreateComponent<DecentralandEntityToEdit>(entity.gameObject);
             entityToEdit.Init(entity, editMaterial);
             convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);
             entity.OnRemoved += RemoveConvertedEntity;
-            entityToEdit.isNew = hasBeenCreated;
+            entityToEdit.IsNew = hasBeenCreated;
         }
 
     }
 
     void RemoveConvertedEntity(DecentralandEntity entity)
     {
-        convertedEntities.Remove(entity.scene.sceneData.id + entity.entityId);
+        convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
+    }
+
+    string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)
+    {
+        return entity.scene.sceneData.id + entity.entityId;
     }
 
 }

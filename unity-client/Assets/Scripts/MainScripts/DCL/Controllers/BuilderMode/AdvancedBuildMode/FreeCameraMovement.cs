@@ -1,4 +1,5 @@
 using Builder.Gizmos;
+using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ public class FreeCameraMovement : MonoBehaviour
     public BuilderInputWrapper builderInputWrapper;
 
     public float smoothLookAtSpeed = 5f;
+    public float focusDistance = 5f;
+    public float focusSpeed = 5f;
 
     [Header("Manual Camera Movement")]
 
@@ -109,6 +112,13 @@ public class FreeCameraMovement : MonoBehaviour
         }
     }
 
+    public void FocusOnEntities(List<DecentralandEntityToEdit> entitiesToFocus)
+    {
+        Vector3 middlePoint = FindMidPoint(entitiesToFocus);
+        StartCoroutine(SmoothFocusOnTarget(middlePoint));
+        SmoothLookAt(middlePoint);
+    }
+
 
     public void SetPosition(Vector3 position)
     {
@@ -121,17 +131,54 @@ public class FreeCameraMovement : MonoBehaviour
         pitch = transform.eulerAngles.x;
 
     }
-
     public void SmoothLookAt(Transform transform)
     {
+        SmoothLookAt(transform.position);
+    }
+    public void SmoothLookAt(Vector3 position)
+    {
         if (smoothLookAtCor != null) StopCoroutine(smoothLookAtCor);
-        smoothLookAtCor = StartCoroutine(SmoothLookAtCorutine(transform));
+        smoothLookAtCor = StartCoroutine(SmoothLookAtCorutine(position));
+    }
+
+    Vector3 FindMidPoint(List<DecentralandEntityToEdit> entitiesToLook)
+    {
+        Vector3 finalPosition = Vector3.zero;
+        int totalPoints = 0;
+        foreach(DecentralandEntityToEdit entity in entitiesToLook)
+        {
+            if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0) {
+                Vector3 midPointFromEntity = Vector3.zero;
+                foreach (Renderer render in entity.rootEntity.renderers)
+                {
+                    midPointFromEntity += render.bounds.center;
+                }
+                midPointFromEntity /= entity.rootEntity.renderers.Length;
+                finalPosition += midPointFromEntity;
+                totalPoints++;
+            }
+           
+        }
+
+        finalPosition /= totalPoints;
+        return finalPosition;
     }
 
 
-    IEnumerator SmoothLookAtCorutine(Transform target)
+    IEnumerator SmoothFocusOnTarget(Vector3 targetPosition)
     {
-        Quaternion targetRotation = Quaternion.LookRotation(target.transform.position - transform.position);
+        float advance = 0;
+        while (advance <= 1)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPosition, advance);
+            advance += smoothLookAtSpeed * Time.deltaTime;
+            if (Vector3.Distance(transform.position, targetPosition) <= focusDistance) advance = 2;
+            yield return null;
+        }
+    }
+    IEnumerator SmoothLookAtCorutine(Vector3 targetPosition)
+    {
+        Quaternion targetRotation = Quaternion.LookRotation(targetPosition - transform.position);
         float advance = 0;
         while(advance <= 1)
         {

@@ -6,65 +6,68 @@ using UnityEngine;
 
 public class OutlinerController : MonoBehaviour
 {
-    public GameObject outlinerPrefab;
+
+    List<DecentralandEntityToEdit> entitiesOutlined = new List<DecentralandEntityToEdit>();
 
 
-    List<MeshFilter> outliners = new List<MeshFilter>();
-
-    public DecentralandEntity currentSelectedEntity;
-    public void OutLineOnlyThisEntity(DecentralandEntity entity)
+    public void OutlineEntities(List<DecentralandEntityToEdit> entitiesToEdit)
     {
-        if (currentSelectedEntity != null)
+        foreach(DecentralandEntityToEdit entityToEdit in entitiesToEdit)
         {
-            currentSelectedEntity.OnCleanupEvent -= CleanOutLinersFromClean;
-            currentSelectedEntity.OnRemoved -= CleanOutlinersFromEntity;
+            OutLineEntity(entityToEdit);
         }
-        entity.OnCleanupEvent += CleanOutLinersFromClean;
-        entity.OnRemoved += CleanOutlinersFromEntity;
-        currentSelectedEntity = entity;
-        foreach (MeshFilter meshFilter in outliners)
+    }
+
+    public void OutLineEntity(DecentralandEntityToEdit entity)
+    {
+
+        if (entity.rootEntity.meshRootGameObject && entity.rootEntity.renderers.Length > 0)
         {
-            if(meshFilter != null)meshFilter.gameObject.SetActive(false);
-        }
-    
-        if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
-        {
-            for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
+            if (!entitiesOutlined.Contains(entity))
             {
-                if (i >= outliners.Count) outliners.Add(Instantiate(outlinerPrefab).GetComponent<MeshFilter>());
-                else
+                entitiesOutlined.Add(entity);
+                for (int i = 0; i < entity.rootEntity.meshesInfo.renderers.Length; i++)
                 {
-                    if (outliners[i] == null) outliners[i] = Instantiate(outlinerPrefab).GetComponent<MeshFilter>();
-                    outliners[i].gameObject.SetActive(true);
-                    outliners[i].mesh = entity.meshesInfo.renderers[i].GetComponent<MeshFilter>().mesh;
-                    outliners[i].gameObject.transform.SetParent(entity.meshesInfo.renderers[i].gameObject.transform.parent, false);
+                    entity.rootEntity.meshesInfo.renderers[i].gameObject.layer = LayerMask.NameToLayer("Selection");
                 }
             }
         }
+
     }
 
-    void CleanOutLinersFromClean(ICleanableEventDispatcher dispatcher)
+
+    public void CancelUnselectedOutlines()
     {
-        CleanOutLiners();
-    }
-    void CleanOutlinersFromEntity(DecentralandEntity entity)
-    {
-        CleanOutLiners();
-    }
-    void CleanOutLiners()
-    {
-        for(int i = 0; i <outliners.Count;i++)
+        for (int i = 0; i < entitiesOutlined.Count; i++)
         {
-            if(outliners[i] == null) outliners.Remove(outliners[i]);
+            if (!entitiesOutlined[i].IsSelected)
+            {
+                CancelEntityOutline(entitiesOutlined[i]);
+                entitiesOutlined.Remove(entitiesOutlined[i]);
+            }
+        }
+    }
+    public void CancelAllOutlines()
+    {
+        for (int i = 0; i < entitiesOutlined.Count; i++)
+        {
+            CancelEntityOutline(entitiesOutlined[i]);
+            entitiesOutlined.Remove(entitiesOutlined[i]);
+           
         }
     }
 
-
-    public void CancelAllOutlines()
+    public void CancelEntityOutline(DecentralandEntityToEdit entityToQuitOutline)
     {
-        foreach(MeshFilter filter in outliners)
+        if (entitiesOutlined.Contains(entityToQuitOutline))
         {
-            if (filter != null) filter.gameObject.SetActive(false);
+            if (entityToQuitOutline.rootEntity.meshRootGameObject && entityToQuitOutline.rootEntity.meshesInfo.renderers.Length > 0)
+            {
+                for (int x = 0; x < entityToQuitOutline.rootEntity.meshesInfo.renderers.Length; x++)
+                {
+                    entityToQuitOutline.rootEntity.meshesInfo.renderers[x].gameObject.layer = LayerMask.NameToLayer("Default");
+                }
+            }
         }
     }
 }
