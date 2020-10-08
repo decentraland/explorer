@@ -640,7 +640,7 @@ export class TextShape extends ObservableComponent {
   billboard: boolean = false
 
   @ObservableComponent.field
-  visible: boolean = false
+  visible: boolean = true
 
   constructor(value?: string) {
     super()
