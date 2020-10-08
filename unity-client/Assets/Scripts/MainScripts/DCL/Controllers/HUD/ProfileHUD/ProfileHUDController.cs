@@ -27,7 +27,7 @@ public class ProfileHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
-        view?.gameObject.SetActive(visible);
+        view?.SetVisibility(visible);
     }
 
     public void Dispose()

@@ -1442,6 +1442,8 @@ GameObject:
   - component: {fileID: 269540385008896160}
   - component: {fileID: 2940456320096999484}
   - component: {fileID: 5339787396754724817}
+  - component: {fileID: 4545096824855088683}
+  - component: {fileID: 4227713636645781401}
   m_Layer: 5
   m_Name: MinimapHUD
   m_TagString: Untagged
@@ -1552,6 +1554,7 @@ MonoBehaviour:
   mapViewport: {fileID: 7368721439090438775}
   openNavmapButton: {fileID: 5098086527300088398}
   toggleNavMapAction: {fileID: 11400000, guid: fc656e28ef52546e6a82e7ae7f5570b5, type: 2}
+  mainShowHideAnimator: {fileID: 4227713636645781401}
   minimapTooltipReference: {fileID: 659054471540643331}
 --- !u!222 &269540385008896160
 CanvasRenderer:
@@ -1585,6 +1588,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30cedd7c5f8c0064e98640b29b2156a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &4545096824855088683
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525154057530514719}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: d5f6cd638da0f1b4388c7a3679abe0b0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &4227713636645781401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525154057530514719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideOnEnable: 0
+  animSpeedFactor: 1
+  disableAfterFadeOut: 0
+  visibleParam: visible
 --- !u!1 &4665053653492846095
 GameObject:
   m_ObjectHideFlags: 0

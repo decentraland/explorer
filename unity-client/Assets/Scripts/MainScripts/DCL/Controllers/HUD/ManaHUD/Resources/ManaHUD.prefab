@@ -953,6 +953,8 @@ GameObject:
   - component: {fileID: 1188071796749117903}
   - component: {fileID: 9097801749934311101}
   - component: {fileID: 8410139346004304987}
+  - component: {fileID: 8115506097957026313}
+  - component: {fileID: 6265905098040279766}
   m_Layer: 5
   m_Name: ManaHUD
   m_TagString: Untagged
@@ -1077,6 +1079,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 592884f630b884aee8ea07a47452b2ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainShowHideAnimator: {fileID: 6265905098040279766}
   balanceText: {fileID: 948692606874764089}
   buttonManaInfo: {fileID: 5970883973475450914}
   buttonManaPurchase: {fileID: 6620738618661707245}
@@ -1098,6 +1101,41 @@ MonoBehaviour:
   enableAnimatorOnHover: 1
   setVisibleDelay: 0.2
   setHideDelay: 0.4
+--- !u!95 &8115506097957026313
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7458880536947113354}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: d5f6cd638da0f1b4388c7a3679abe0b0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &6265905098040279766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7458880536947113354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideOnEnable: 0
+  animSpeedFactor: 1
+  disableAfterFadeOut: 0
+  visibleParam: visible
 --- !u!1 &8587521600747083272
 GameObject:
   m_ObjectHideFlags: 0

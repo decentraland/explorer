@@ -2403,6 +2403,8 @@ GameObject:
   - component: {fileID: 8278114066472325544}
   - component: {fileID: 5103067147336230822}
   - component: {fileID: 7185147057440504892}
+  - component: {fileID: 6605554144506243223}
+  - component: {fileID: 280088380982461574}
   m_Layer: 5
   m_Name: ProfileHUD
   m_TagString: Untagged
@@ -2444,7 +2446,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c4235571b994c96b0aac42797cc5c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showHideAnimator: {fileID: 8660805047963294343}
+  mainShowHideAnimator: {fileID: 280088380982461574}
+  menuShowHideAnimator: {fileID: 8660805047963294343}
   loadingSpinner: {fileID: 3475705995837572437}
   copyToast: {fileID: 7150535707475580996}
   copyTooltip: {fileID: 8368628428006989261}
@@ -2460,7 +2463,6 @@ MonoBehaviour:
   buttonClaimName: {fileID: 2457515400162479628}
   buttonCopyAddress: {fileID: 7590329705511461525}
   buttonLogOut: {fileID: 2439665739510493948}
-  playerTalkingIcon: {fileID: 0}
 --- !u!223 &7148020178624039399
 Canvas:
   m_ObjectHideFlags: 0
@@ -2545,6 +2547,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30cedd7c5f8c0064e98640b29b2156a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &6605554144506243223
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525154057530514719}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: d5f6cd638da0f1b4388c7a3679abe0b0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &280088380982461574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525154057530514719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideOnEnable: 0
+  animSpeedFactor: 1
+  disableAfterFadeOut: 0
+  visibleParam: visible
 --- !u!1 &4572852650187169043
 GameObject:
   m_ObjectHideFlags: 0

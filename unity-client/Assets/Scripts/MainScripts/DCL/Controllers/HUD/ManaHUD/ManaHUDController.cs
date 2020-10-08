@@ -16,7 +16,7 @@ public class ManaHUDController : IHUD
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ManaHUD")).GetComponent<ManaHUDview>();
         view.name = "_ManaHUD";
-        view.gameObject.SetActive(false);
+        view.SetVisibility(false);
 
         view.buttonManaInfo.onPointerDown += OnManaInfoPressed;
         view.buttonManaPurchase.onPointerDown += OnManaPurchasePressed;
@@ -25,7 +25,7 @@ public class ManaHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
-        view.gameObject.SetActive(visible);
+        view.SetVisibility(visible);
 
         if (visible && fetchIntervalRoutine == null)
         {
