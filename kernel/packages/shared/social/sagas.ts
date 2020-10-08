@@ -12,6 +12,7 @@ import {
   UnmutePlayer,
   UNMUTE_PLAYER
 } from './actions'
+import { Profile } from 'shared/types'
 
 export function* socialSaga(): any {
   yield takeEvery(MUTE_PLAYER, saveMutedPlayer)
@@ -46,7 +47,7 @@ function* saveBlockedPlayer(action: BlockPlayer) {
 function* saveUnmutedPlayer(action: UnmutePlayer) {}
 
 function* saveUnblockedPlayer(action: UnblockPlayer) {
-  const profile = yield getCurrentProfile()
+  const profile = yield* getCurrentProfile()
 
   if (profile) {
     const blocked = profile.blocked ? profile.blocked.filter((id) => id !== action.payload.playerId) : []
@@ -56,6 +57,6 @@ function* saveUnblockedPlayer(action: UnblockPlayer) {
 
 function* getCurrentProfile() {
   const address = yield select(getCurrentUserId)
-  const profile = yield select(getProfile, address)
+  const profile: Profile | null = yield select(getProfile, address)
   return profile
 }
