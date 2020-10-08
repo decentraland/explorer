@@ -98,6 +98,8 @@ initializeUnity(container)
 
     i.SetRenderProfile(HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT)
 
+    i.SetRenderProfile( HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT )
+
     try {
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
@@ -134,6 +136,8 @@ initializeUnity(container)
     await startUnitySceneWorkers()
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
+    
+    await ensureMetaConfigurationInitialized()
 
     let worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world!
 

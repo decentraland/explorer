@@ -31,7 +31,7 @@ public class RenderProfileBridge : MonoBehaviour
     /// <summary>
     /// Called from kernel. Toggles the current WorldRenderProfile used by explorer.
     /// </summary>
-    /// <param name="json"></param>
+    /// <param name="json">Model in json format</param>
     public void SetRenderProfile(string json)
     {
         ID id = JsonUtility.FromJson<Model>(json).id;
