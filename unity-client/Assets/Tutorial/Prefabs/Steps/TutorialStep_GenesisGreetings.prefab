@@ -37,7 +37,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0.000061035156, y: 192}
+  m_AnchoredPosition: {x: 0.000061035156, y: 255}
   m_SizeDelta: {x: 192, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1867055422669045278
@@ -202,6 +202,10 @@ MonoBehaviour:
   unlockCursorAtStart: 1
   show3DTeacherAtStart: 1
   teacherPositionRef: {fileID: 2605350578601284478}
+  mainSection: {fileID: 0}
+  skipTutorialSection: {fileID: 0}
+  yesSkipInputAction: {fileID: 0}
+  noSkipInputAction: {fileID: 0}
   okButton: {fileID: 7474437959616039966}
   titleText: {fileID: 3194584141860739375}
 --- !u!1 &1355243940208002131
@@ -239,8 +243,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -50}
-  m_SizeDelta: {x: 950, y: 250}
+  m_AnchoredPosition: {x: 0, y: -7}
+  m_SizeDelta: {x: 950, y: 115.05905}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6608947268826324607
 CanvasRenderer:
@@ -269,10 +273,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Just like other plazas and public spaces in Decentraland, Genesis Plaza
-    is its own self-contained experience \u2013 filled with interactive play areas
-    and valuable information about the metaverse.\n\nLook for special portals that
-    take you to other highlights in Decentraland!"
+  m_text: The Plaza is at the centre of Genesis City. Explore the Plaza to learn
+    more about the Decentraland world.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 7dfa1f6019e8840a797a48955651317e, type: 2}
@@ -341,14 +343,14 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 3563827233588354408}
-    characterCount: 268
+    characterCount: 105
     spriteCount: 0
-    spaceCount: 40
-    wordCount: 39
+    spaceCount: 18
+    wordCount: 19
     linkCount: 0
-    lineCount: 5
+    lineCount: 2
     pageCount: 1
-    materialCount: 2
+    materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_spriteAnimator: {fileID: 0}
