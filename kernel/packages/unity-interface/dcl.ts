@@ -58,18 +58,6 @@ export let isTheFirstLoading = true
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
   globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
-  // document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
-  // document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'flex' : 'none'
-  // document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  // const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
-
-  // if (shouldShow) {
-  //   loadingAudio?.play().catch((e) => {
-  //     /*Ignored. If this fails is not critical*/
-  //   })
-  // } else {
-  //   loadingAudio?.pause()
-  // }
 
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
