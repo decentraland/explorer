@@ -19,7 +19,6 @@ enum Error {
 }
 
 const mapStateToProps = (state: any) => {
-  console.log('NET_MISMATCH', state)
   return {
     error: state.loading.error || null,
     details: state.loading.tldError || null
