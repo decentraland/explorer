@@ -560,7 +560,7 @@ export enum Fonts {
  * @public
  */
 @Component('engine.text', CLASS_ID.TEXT_SHAPE)
-export class TextShape extends Shape {
+export class TextShape extends ObservableComponent {
   @ObservableComponent.field
   outlineWidth: number = 0
 
@@ -641,6 +641,9 @@ export class TextShape extends Shape {
 
   @ObservableComponent.field
   billboard: boolean = false
+
+  @ObservableComponent.field
+  visible: boolean = true
 
   constructor(value?: string) {
     super()

@@ -227,8 +227,8 @@ function requestMediaDevice() {
         },
         video: false
       })
-      .then((a) => {
-        voiceCommunicator!.setInputStream(a)
+      .then(async (a) => {
+        await voiceCommunicator!.setInputStream(a)
         if (isVoiceChatRecording(store.getState())) {
           voiceCommunicator!.start()
         } else {
