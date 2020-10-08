@@ -22,7 +22,8 @@ import {
   AUTH_ERROR_LOGGED_OUT,
   AWAITING_USER_SIGNATURE,
   awaitingUserSignature,
-  NETWORK_MISMATCH
+  NETWORK_MISMATCH,
+  setTLDError
 } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getAppNetwork, getNetworkFromTLD } from 'shared/web3'
@@ -108,8 +109,12 @@ function* login(action: LoginAction) {
   let identity: ExplorerIdentity
 
   if (ENABLE_WEB3) {
-    if (!(yield requestProvider(action.payload.provider as ProviderType))) {
-      yield put(changeLoginStage(LoginStage.CONNECT_ADVICE))
+    try {
+      if (!(yield requestProvider(action.payload.provider as ProviderType))) {
+        yield put(changeLoginStage(LoginStage.CONNECT_ADVICE))
+        return
+      }
+    } catch (e) {
       return
     }
     yield put(changeLoginStage(LoginStage.COMPLETED))
@@ -176,8 +181,8 @@ function* login(action: LoginAction) {
   yield put(loginCompletedAction())
 }
 
-async function checkTldVsNetwork() {
-  const web3Net = await getNetworkValue()
+function* checkTldVsNetwork() {
+  const web3Net = yield getNetworkValue()
 
   const tld = getTLD()
   const tldNet = getNetworkFromTLD()
@@ -188,9 +193,7 @@ async function checkTldVsNetwork() {
   }
 
   if (tldNet !== web3Net) {
-    document.getElementById('tld')!.textContent = tld
-    document.getElementById('web3Net')!.textContent = web3Net
-    document.getElementById('web3NetGoal')!.textContent = tldNet
+    yield put(setTLDError({ tld, web3Net, tldNet }))
 
     ReportFatalError(NETWORK_MISMATCH)
     return true

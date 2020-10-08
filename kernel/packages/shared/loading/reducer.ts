@@ -8,6 +8,7 @@ import {
   loadingTips,
   NOT_STARTED,
   ROTATE_HELP_TEXT,
+  SET_ERROR_TLD,
   SET_LOADING_SCREEN,
   SUBSYSTEMS_EVENTS,
   TELEPORT_TRIGGERED
@@ -23,6 +24,11 @@ export type LoadingState = {
   initialLoad: boolean
   showLoadingScreen: boolean
   error: string | null
+  tldError: {
+    tld: string
+    web3Net: string
+    tldNet: string
+  } | null
 }
 
 export function loadingReducer(state?: LoadingState, action?: AnyAction) {
@@ -36,7 +42,8 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
       subsystemsLoad: 0,
       initialLoad: true,
       showLoadingScreen: false,
-      error: null
+      error: null,
+      tldError: null
     }
   }
   if (!action) {
@@ -76,6 +83,9 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   }
   if (action.type === ERROR_MESSAGE) {
     return { ...state, error: action.payload.type }
+  }
+  if (action.type === SET_ERROR_TLD) {
+    return { ...state, error: 'networkmismatch', tldError: action.payload }
   }
   return state
 }
