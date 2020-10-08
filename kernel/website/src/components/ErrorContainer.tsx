@@ -18,12 +18,17 @@ enum Error {
   NET_MISMATCH = 'networkmismatch'
 }
 
-const mapStateToProps = (state: any) => ({
-  error: state.loading.error || null
-})
+const mapStateToProps = (state: any) => {
+  console.log('NET_MISMATCH', state)
+  return {
+    error: state.loading.error || null,
+    details: state.loading.tldError || null
+  }
+}
 
 export interface ErrorContainerProps {
   error: string | null
+  tldError: { tld: string; web3Net: string; tldNet: string } | null
 }
 
 const ErrorContainer: React.FC<ErrorContainerProps> = (props) => {
@@ -35,7 +40,7 @@ const ErrorContainer: React.FC<ErrorContainerProps> = (props) => {
       {props.error === Error.NOT_MOBILE && <ErrorNoMobile />}
       {props.error === Error.NOT_INVITED && <ErrorNotInvited />}
       {props.error === Error.NOT_SUPPORTED && <ErrorNotSupported />}
-      {props.error === Error.NET_MISMATCH && <ErrorNetworkMismatch />}
+      {props.error === Error.NET_MISMATCH && <ErrorNetworkMismatch tld={props.tldError} />}
     </React.Fragment>
   )
 }

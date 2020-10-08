@@ -2,7 +2,7 @@ import * as React from 'react'
 import './Errors.css'
 
 export const ErrorNewLogin: React.FC = () => (
-  <div id="error-newlogin" className="error-container hidden-error">
+  <div id="error-newlogin" className="error-container">
     <div className="error-background" />
     <div className="errormessage">
       <div className="errortext col">

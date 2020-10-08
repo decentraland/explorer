@@ -6,7 +6,7 @@ export interface TermOfServiceProps {
   onChange: any
 }
 export const TermOfService: React.FC<TermOfServiceProps> = (props) => (
-  <div>
+  <div class="eth-login-tos">
     <input
       type="checkbox"
       id="agree-check"
