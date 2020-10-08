@@ -5167,7 +5167,8 @@ proto.engineinterface.PB_Transform.toObject = function(includeInstance, msg) {
   var f, obj = {
     position: (f = msg.getPosition()) && proto.engineinterface.PB_Vector3.toObject(includeInstance, f),
     rotation: (f = msg.getRotation()) && proto.engineinterface.PB_Quaternion.toObject(includeInstance, f),
-    scale: (f = msg.getScale()) && proto.engineinterface.PB_Vector3.toObject(includeInstance, f)
+    scale: (f = msg.getScale()) && proto.engineinterface.PB_Vector3.toObject(includeInstance, f),
+    immediate: jspb.Message.getBooleanFieldWithDefault(msg, 4, false)
   };
 
   if (includeInstance) {
@@ -5218,6 +5219,10 @@ proto.engineinterface.PB_Transform.deserializeBinaryFromReader = function(msg, r
       var value = new proto.engineinterface.PB_Vector3;
       reader.readMessage(value,proto.engineinterface.PB_Vector3.deserializeBinaryFromReader);
       msg.setScale(value);
+      break;
+    case 4:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setImmediate(value);
       break;
     default:
       reader.skipField();
@@ -5270,6 +5275,13 @@ proto.engineinterface.PB_Transform.serializeBinaryToWriter = function(message, w
       3,
       f,
       proto.engineinterface.PB_Vector3.serializeBinaryToWriter
+    );
+  }
+  f = message.getImmediate();
+  if (f) {
+    writer.writeBool(
+      4,
+      f
     );
   }
 };
@@ -5383,6 +5395,24 @@ proto.engineinterface.PB_Transform.prototype.clearScale = function() {
  */
 proto.engineinterface.PB_Transform.prototype.hasScale = function() {
   return jspb.Message.getField(this, 3) != null;
+};
+
+
+/**
+ * optional bool immediate = 4;
+ * @return {boolean}
+ */
+proto.engineinterface.PB_Transform.prototype.getImmediate = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 4, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.engineinterface.PB_Transform} returns this
+ */
+proto.engineinterface.PB_Transform.prototype.setImmediate = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 4, value);
 };
 
 

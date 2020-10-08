@@ -543,7 +543,6 @@ namespace DCL.Controllers
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
-                Debug.Log("pravs - TRANSFORM COMP UPDATE, lerpSpeed: " + DCLTransform.model.lerpSpeed);
 
                 if (!entity.components.ContainsKey(classId))
                 {

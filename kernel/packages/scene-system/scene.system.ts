@@ -664,6 +664,7 @@ export default class GamekitScene extends Script {
       pbTransform.setPosition(pbPosition)
       pbTransform.setRotation(pbRotation)
       pbTransform.setScale(pbScale)
+      pbTransform.setImmediate(transform.immediate)
 
       let arrayBuffer: Uint8Array = pbTransform.serializeBinary()
       data = btoa(String.fromCharCode(...arrayBuffer))

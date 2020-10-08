@@ -71,7 +71,7 @@ export class BrowserInterface {
     positionEvent.playerHeight = data.playerHeight || playerConfigurations.height
 
     positionEvent.immediate = false
-    if (data.immediate) {
+    if (data.immediate !== undefined) {
       positionEvent.immediate = data.immediate
     }
 

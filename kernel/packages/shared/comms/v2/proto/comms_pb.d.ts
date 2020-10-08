@@ -85,8 +85,8 @@ export class PositionData extends jspb.Message {
   getRotationW(): number;
   setRotationW(value: number): void;
 
-  getImmediately(): boolean;
-  setImmediately(value: boolean): void;
+  getImmediate(): boolean;
+  setImmediate(value: boolean): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): PositionData.AsObject;
@@ -107,7 +107,7 @@ export namespace PositionData {
     rotationY: number,
     rotationZ: number,
     rotationW: number,
-    immediately: boolean,
+    immediate: boolean,
   }
 }
 

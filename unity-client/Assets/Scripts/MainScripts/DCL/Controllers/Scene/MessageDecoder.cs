@@ -150,6 +150,7 @@ namespace DCL
             model.position = new Vector3(pbTransform.Position.X, pbTransform.Position.Y, pbTransform.Position.Z);
             model.scale = new Vector3(pbTransform.Scale.X, pbTransform.Scale.Y, pbTransform.Scale.Z);
             model.rotation = new Quaternion((float) pbTransform.Rotation.X, (float) pbTransform.Rotation.Y, (float) pbTransform.Rotation.Z, (float) pbTransform.Rotation.W);
+            model.immediate = pbTransform.Immediate;
         }
 
         public static void DecodeQueryMessage(string queryId, string payload, ref QueryMessage query)

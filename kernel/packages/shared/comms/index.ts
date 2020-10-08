@@ -483,10 +483,6 @@ export function processPositionMessage(context: Context, fromAlias: string, mess
   if (msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
     const p = message.data
 
-    if (p[7]) {
-      console.log("pravs - processPositionMessage - Immediate!")
-    }
-
     peerTrackingInfo.position = p
     peerTrackingInfo.lastPositionUpdate = msgTimestamp
     peerTrackingInfo.lastUpdate = Date.now()
@@ -534,7 +530,6 @@ export function onPositionUpdate(context: Context, p: Position) {
         }
       }
     }
-
     currentParcelTopics = rawTopics.join(' ')
     if (context.currentPosition && !context.positionUpdatesPaused) {
       worldConnection
@@ -544,7 +539,6 @@ export function onPositionUpdate(context: Context, p: Position) {
   }
 
   const parcelSceneSubscriptions = getParcelSceneSubscriptions()
-
   const parcelSceneCommsTopics = parcelSceneSubscriptions.join(' ')
 
   const topics =
@@ -565,13 +559,13 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   const now = Date.now()
   const elapsed = now - lastNetworkUpdatePosition
+  const immediateReposition = p[7]
 
   // We only send the same position message as a ping if we have not sent positions in the last 5 seconds
-  if (arrayEquals(p, lastPositionSent) && elapsed < 5000) {
+  if (!immediateReposition && arrayEquals(p, lastPositionSent) && elapsed < 5000) {
     return
   }
 
-  const immediateReposition = p[7]
   if ((immediateReposition || elapsed > 100) && !context.positionUpdatesPaused) {
     lastPositionSent = p
     lastNetworkUpdatePosition = now
@@ -966,7 +960,7 @@ async function doStartCommunications(context: Context) {
 
     context.positionObserver = positionObservable.add((obj: Readonly<PositionReport>) => {
       if(obj.immediate) {
-        console.log("pravs - context.positionObserver - immediate!")
+        console.log("pravs - context.positionObserver - immediate!") // THIS IS GETTING CALLED ON THE SENDER
       }
       const p = [
         obj.position.x,
@@ -976,7 +970,7 @@ async function doStartCommunications(context: Context) {
         obj.quaternion.y,
         obj.quaternion.z,
         obj.quaternion.w,
-        obj.immediate // false
+        obj.immediate
       ] as Position
 
       if (context && isWorldRunning) {
