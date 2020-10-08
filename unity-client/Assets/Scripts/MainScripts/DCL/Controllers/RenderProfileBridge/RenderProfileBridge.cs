@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using DCL;
 using UnityEngine;
 
+/// <summary>
+/// This bridge is used for toggling the current RenderProfile from kernel
+/// </summary>
 public class RenderProfileBridge : MonoBehaviour
 {
     public enum ID
@@ -25,6 +28,10 @@ public class RenderProfileBridge : MonoBehaviour
         i = this;
     }
 
+    /// <summary>
+    /// Called from kernel. Toggles the current WorldRenderProfile used by explorer.
+    /// </summary>
+    /// <param name="json"></param>
     public void SetRenderProfile(string json)
     {
         ID id = JsonUtility.FromJson<Model>(json).id;

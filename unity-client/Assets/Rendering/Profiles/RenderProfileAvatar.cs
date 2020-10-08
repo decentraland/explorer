@@ -7,6 +7,12 @@ using UnityEngine.Serialization;
 
 namespace DCL
 {
+    /// <summary>
+    /// This ScriptableObject is used to control toon shader and avatar rendering values
+    /// assigned to any RenderProfileWorld.
+    ///
+    /// Values can change depending if we are in avatar editor mode or in-game world.
+    /// </summary>
     [CreateAssetMenu(menuName = "DCL/Rendering/Create Avatar Profile", fileName = "RenderProfileAvatar", order = 0)]
     public class RenderProfileAvatar : ScriptableObject
     {
@@ -23,10 +29,8 @@ namespace DCL
             }
         }
 
-        [FormerlySerializedAs("avatarEditorProfile")] [SerializeField]
-        public MaterialProfile avatarEditor;
+        [SerializeField] public MaterialProfile avatarEditor;
 
-        [FormerlySerializedAs("inWorldProfile")] [SerializeField]
-        public MaterialProfile inWorld;
+        [SerializeField] public MaterialProfile inWorld;
     }
 }
