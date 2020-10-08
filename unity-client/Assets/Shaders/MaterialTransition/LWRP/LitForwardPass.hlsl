@@ -71,6 +71,7 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 #endif
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
+    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, half3(0,0,0), inputData.normalWS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
