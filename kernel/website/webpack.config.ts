@@ -35,7 +35,7 @@ const webpackConfig = (env): Configuration => ({
           {
             loader: MiniCssExtractPlugin.loader,
             options: {
-              publicPath: '/public/path/to/'
+              publicPath: '/'
             }
           },
           {

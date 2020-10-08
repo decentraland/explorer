@@ -6,7 +6,6 @@
     "start": "make watch",
     "build": "make build-essentials",
     "test": "make test-ci",
-    "react-dev": "webpack-dev-server --config ./website/webpack.config.ts --mode development --env.development --open --hot --progress",
     "react-build": "webpack --config ./website/webpack.config.ts --mode production --env.production --progress"
   },
   "prettier": {

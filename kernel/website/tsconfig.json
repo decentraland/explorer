@@ -36,7 +36,7 @@
         "name": "tslint-language-service"
       }
     ],
-    "baseUrl": "./"
+    "baseUrl": "./src"
   },
   "include": [
     "src"

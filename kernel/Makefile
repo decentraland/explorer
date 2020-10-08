@@ -129,7 +129,12 @@ DIST_ENTRYPOINTS := static/dist/editor.js static/dist/unity.js static/dist/previ
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/models static/unity static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
-build-deploy: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(SCENE_SYSTEM) $(INTERNAL_SCENES) ## Build all the entrypoints needed for a deployment
+build-react:
+	@echo "\n\nREACT APP BUILDER\n\n"
+	@npm run react-build
+	@echo "\n\n(˘³˘)♥ IT FINISHED BABY (˘³˘)♥\n\n"
+
+build-deploy: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(SCENE_SYSTEM) $(INTERNAL_SCENES) build-react ## Build all the entrypoints needed for a deployment
 	@node ./scripts/replaceVersion.js
 
 build-release: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(DIST_PACKAGE_JSON) ## Build all the entrypoints and run the `scripts/prepareDist` script
@@ -253,9 +258,9 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 
 # Development
 
-watch: $(SOME_MAPPINGS) build-essentials static/dist/unity.js ## Watch the files required for hacking the explorer
+watch: $(SOME_MAPPINGS) build-essentials static/dist/unity.js build-react ## Watch the files required for hacking the explorer
 	@NODE_ENV=development npx concurrently \
-		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,unity,test,react,simulator,server" \
+		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,unity,test,simulator,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
 			"$(COMPILER) targets/engine/scene-system.json --watch" \
 			"$(COMPILER) targets/engine/internal-scenes.json --watch" \
@@ -263,7 +268,6 @@ watch: $(SOME_MAPPINGS) build-essentials static/dist/unity.js ## Watch the files
 			"$(COMPILER) targets/scenes/basic-scenes.json --watch" \
 			"$(COMPILER) targets/entryPoints/unity.json --watch" \
 			"$(COMPILER) targets/test.json --watch" \
-			"npm run react-build" \
 			"node ./scripts/runPathSimulator.js" \
 			"node ./scripts/runTestServer.js --keep-open"
 
