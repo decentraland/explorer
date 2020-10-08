@@ -74,6 +74,8 @@ public class HUDController : MonoBehaviour
 
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
 
+    public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -137,7 +139,8 @@ public class HUDController : MonoBehaviour
         MANA_HUD = 20,
         HELP_AND_SUPPORT_HUD = 21,
         GO_TO_GENESIS_PLAZA_HUD = 22,
-        COUNT = 23
+        USERS_AROUND_LIST_HUD = 23,
+        COUNT = 24
     }
 
     [System.Serializable]
@@ -337,6 +340,10 @@ public class HUDController : MonoBehaviour
             case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
                 CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
                 taskbarHud?.AddGoToGenesisWindow(goToGenesisPlazaHud);
+                break;
+            case HUDElementID.USERS_AROUND_LIST_HUD:
+                CreateHudElement<UsersAroundListHUDController>(configuration, hudElementId);
+                minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
                 break;
         }
 

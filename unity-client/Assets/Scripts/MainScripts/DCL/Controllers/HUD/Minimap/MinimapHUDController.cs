@@ -93,4 +93,10 @@ public class MinimapHUDController : IHUD
     {
         view.SetVisibility(visible);
     }
+
+    public void AddUsersAroundIndicator(UsersAroundListHUDController controller)
+    {
+        view.usersAroundListHudButton.gameObject.SetActive(true);
+        controller.SetButtonView(view.usersAroundListHudButton);
+    }
 }
