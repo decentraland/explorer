@@ -99,6 +99,32 @@ namespace DCL.Tutorial_Tests
             Assert.IsNull(tutorialController.runningStep);
         }
 
+        [UnityTest]
+        public IEnumerator ExecuteTutorialStepsForResetTutorialCorrectly()
+        {
+            ConfigureTutorialForResetTutorial();
+
+            yield return tutorialController.StartTutorialFromStep(0);
+
+            Assert.IsTrue(tutorialController.markTutorialAsCompleted);
+            Assert.IsFalse(tutorialController.isRunning);
+            Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(tutorialController.tutorialReset);
+        }
+
+        [Test]
+        public void SkipTutorialStepsForResetTutorialCorrectly()
+        {
+            ConfigureTutorialForResetTutorial();
+
+            tutorialController.SkipTutorial();
+
+            Assert.IsTrue(tutorialController.markTutorialAsCompleted);
+            Assert.IsFalse(tutorialController.isRunning);
+            Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(tutorialController.tutorialReset);
+        }
+
         [Test]
         public void ShowHideTutorialTeacherCorrectly()
         {
@@ -127,9 +153,11 @@ namespace DCL.Tutorial_Tests
             tutorialController.stepsOnGenesisPlaza.Clear();
             tutorialController.stepsFromDeepLink.Clear();
             tutorialController.stepsOnGenesisPlazaAfterDeepLink.Clear();
+            tutorialController.stepsFromReset.Clear();
             tutorialController.timeBetweenSteps = 0f;
             tutorialController.sendStats = false;
             tutorialController.debugRunTutorial = false;
+            tutorialController.tutorialReset = false;
         }
 
         private void DestroyTutorial()
@@ -188,6 +216,22 @@ namespace DCL.Tutorial_Tests
 
             tutorialController.playerIsInGenesisPlaza = true;
             tutorialController.alreadyOpenedFromDeepLink = true;
+            tutorialController.isRunning = true;
+            tutorialController.markTutorialAsCompleted = false;
+        }
+
+        private void ConfigureTutorialForResetTutorial()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                tutorialController.stepsFromReset.Add(CreateNewFakeStep());
+            }
+
+            currentStepIndex = 0;
+            currentSteps = tutorialController.stepsFromReset;
+
+            tutorialController.tutorialReset = true;
+            tutorialController.playerIsInGenesisPlaza = false;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = false;
         }

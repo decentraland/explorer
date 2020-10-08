@@ -46,6 +46,7 @@ public class TaskbarHUDShould : TestsBase
 
         Assert.IsTrue(view != null, "Taskbar view is null?");
         Assert.IsTrue(view.moreButton.gameObject.activeSelf, "More button is not actived?");
+        Assert.IsTrue(CommonScriptableObjects.isTaskbarHUDInitialized, "Taskbar controller is not initialized?");
     }
 
     protected override IEnumerator TearDown()

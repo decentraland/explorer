@@ -91,6 +91,8 @@ public class TaskbarHUDController : IHUD
         }
 
         view.leftWindowContainerAnimator.Show();
+
+        CommonScriptableObjects.isTaskbarHUDInitialized.Set(true);
     }
 
     private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)

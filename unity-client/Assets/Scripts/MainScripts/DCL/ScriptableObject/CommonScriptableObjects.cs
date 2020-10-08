@@ -122,6 +122,9 @@ public static class CommonScriptableObjects
     private static BooleanVariable isProfileHUDOpenValue;
     public static BooleanVariable isProfileHUDOpen => GetOrLoad(ref isProfileHUDOpenValue, "ScriptableObjects/IsProfileHUDOpen");
 
+    private static BooleanVariable isTaskbarHUDInitializedValue;
+    public static BooleanVariable isTaskbarHUDInitialized => GetOrLoad(ref isTaskbarHUDInitializedValue, "ScriptableObjects/IsTaskbarHUDInitialized");
+
     internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)

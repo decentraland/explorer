@@ -93,6 +93,8 @@ namespace DCL.Tutorial
 
         private void Start()
         {
+            CommonScriptableObjects.isTaskbarHUDInitialized.OnChange += IsTaskbarHUDInitialized_OnChange;
+
             if (debugRunTutorial)
                 SetTutorialEnabled(debugOpenedFromDeepLink.ToString());
         }
@@ -100,6 +102,8 @@ namespace DCL.Tutorial
         private void OnDestroy()
         {
             SetTutorialDisabled();
+
+            CommonScriptableObjects.isTaskbarHUDInitialized.OnChange -= IsTaskbarHUDInitialized_OnChange;
 
             if (hudController != null)
             {
@@ -146,11 +150,7 @@ namespace DCL.Tutorial
                 }
 
                 if (hudController.taskbarHud != null)
-                {
-                    hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
-                    hudController.taskbarHud.moreMenu.OnRestartTutorial += MoreMenu_OnRestartTutorial;
                     hudController.taskbarHud.ShowTutorialOption(false);
-                }
             }
 
             NotificationsController.disableWelcomeNotification = true;
@@ -460,6 +460,12 @@ namespace DCL.Tutorial
 
             if (hudController != null)
                 hudController.taskbarHud?.HideGoToGenesisPlazaButton();
+        }
+
+        private void IsTaskbarHUDInitialized_OnChange(bool current, bool previous)
+        {
+            if (hudController != null && hudController.taskbarHud != null)
+                hudController.taskbarHud.moreMenu.OnRestartTutorial += MoreMenu_OnRestartTutorial;
         }
 
         private void MoreMenu_OnRestartTutorial()
