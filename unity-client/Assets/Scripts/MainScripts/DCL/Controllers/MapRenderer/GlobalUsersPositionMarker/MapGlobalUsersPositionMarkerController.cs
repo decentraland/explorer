@@ -54,6 +54,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
         if (updateCoroutine != null)
         {
             CoroutineStarter.Stop(updateCoroutine);
+            updateCoroutine = null;
         }
     }
 
@@ -78,16 +79,19 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
     {
         while (true)
         {
-            yield return WaitForSecondsCache.Get(updateInterval);
+            float time = Time.realtimeSinceStartup;
+
+            while (Time.realtimeSinceStartup - time < updateInterval)
+            {
+                yield return null;
+            }
 
             if (HotScenesController.i.timeSinceLastUpdate > updateInterval)
             {
-                Debug.Log(($"PATO: FETCH"));
                 WebInterface.FetchHotScenes();
             }
             else
             {
-                Debug.Log(($"PATO: NO FETCH {HotScenesController.i.timeSinceLastUpdate}"));
                 OnHotSceneListFinishUpdating();
             }
         }

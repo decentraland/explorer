@@ -2,7 +2,6 @@
     "name": "GlobalUsersPositionMarker",
     "references": [
         "GUID:cc6bfabbfe87b7949aa248893f89ce37",
-        "GUID:3f4c1b4f55716479ea104c4254afe172",
         "GUID:760a1d365aad58044916992b072cf2a6",
         "GUID:82873c2d9c9cbe94391e6b33e5153865",
         "GUID:b1087c5731ff68448a0a9c625bb7e52d",

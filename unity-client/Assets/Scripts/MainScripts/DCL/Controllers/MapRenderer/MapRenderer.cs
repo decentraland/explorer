@@ -158,6 +158,8 @@ namespace DCL
 
             ParcelHighlightButton.onClick.RemoveListener(ClickMousePositionParcel);
 
+            usersPositionMarkerController?.Dispose();
+
             isInitialized = false;
         }
 
