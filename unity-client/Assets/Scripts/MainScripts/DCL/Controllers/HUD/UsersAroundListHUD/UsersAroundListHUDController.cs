@@ -29,7 +29,7 @@ public class UsersAroundListHUDController : IHUD
         usersListView.Dispose();
         if (usersButtonView != null)
         {
-            usersButtonView.OnClick -= OnUsersButtonPressed;
+            usersButtonView.OnClick -= ToggleVisibility;
         }
     }
 
@@ -42,7 +42,7 @@ public class UsersAroundListHUDController : IHUD
     public void SetButtonView(IUsersAroundListHUDButtonView view)
     {
         usersButtonView = view;
-        usersButtonView.OnClick += OnUsersButtonPressed;
+        usersButtonView.OnClick += ToggleVisibility;
     }
 
     public void SetUserMuted(string userId, bool isMuted)
@@ -84,10 +84,21 @@ public class UsersAroundListHUDController : IHUD
             usersButtonView?.SetUsersCount(trackedUsersHashSet.Count);
         }
         usersListView.RemoveUser(userId);
+
+        if (isVisible && trackedUsersHashSet.Count == 0)
+        {
+            ToggleVisibility();
+        }
     }
 
-    void OnUsersButtonPressed()
+    void ToggleVisibility()
     {
-        SetVisibility(!isVisible);
+        bool setVisible = !isVisible;
+        if (trackedUsersHashSet.Count == 0 && setVisible)
+        {
+            return;
+        }
+
+        SetVisibility(setVisible);
     }
 }

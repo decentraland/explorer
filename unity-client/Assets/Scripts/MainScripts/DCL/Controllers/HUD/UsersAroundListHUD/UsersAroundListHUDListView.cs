@@ -17,6 +17,9 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     {
         availableElements = new Queue<UsersAroundListHUDListElementView>();
         userElementDictionary = new Dictionary<string, UsersAroundListHUDListElementView>();
+
+        listElementView.gameObject.SetActive(false);
+        availableElements.Enqueue(listElementView);
     }
 
     void IUsersAroundListHUDListView.AddOrUpdateUser(MinimapMetadata.MinimapUserInfo userInfo)
@@ -35,6 +38,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         else
         {
             view = Instantiate(listElementView, content);
+            view.gameObject.SetActive(true);
             view.OnMuteUser += (userId, mute) => OnRequestMuteUser?.Invoke(userId, mute);
         }
 
