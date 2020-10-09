@@ -132,7 +132,7 @@ export class UnityInterface {
   }
 
   public SetRenderProfile(id: RenderProfile) {
-    this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', id)
+    this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', JSON.stringify({ id: id }))
   }
 
   public CreateUIScene(data: { id: string; baseUrl: string }) {

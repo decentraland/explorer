@@ -14,7 +14,8 @@ import {
   OPEN_AVATAR_EDITOR,
   ENABLE_MANA_HUD,
   ENABLE_NEW_TASKBAR,
-  HAS_INITIAL_POSITION_MARK, HALLOWEEN
+  HAS_INITIAL_POSITION_MARK,
+  HALLOWEEN
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
@@ -56,27 +57,56 @@ initializeUnity(container)
       { useNewVersion: ENABLE_NEW_TASKBAR }
     )
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
+    i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, {
+      active: true,
+      visible: OPEN_AVATAR_EDITOR
+    })
     i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
+      active: true,
+      visible: true
+    })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, {
+      active: true,
+      visible: true
+    })
     i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, {
+      active: true,
+      visible: true
+    })
+    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, {
+      active: true,
+      visible: false
+    })
+    i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, {
+      active: true,
+      visible: false
+    })
+    i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, {
+      active: true,
+      visible: false
+    })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, {
+      active: true,
+      visible: false
+    })
+
+    i.SetRenderProfile(HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT)
 
     i.SetRenderProfile( HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT )
 
     try {
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
-      i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+      i.ConfigureHUDElement(HUDElementID.FRIENDS, {
+        active: identity.hasConnectedWeb3,
+        visible: false
+      })
       i.ConfigureHUDElement(HUDElementID.MANA_HUD, {
         active: ENABLE_MANA_HUD && identity.hasConnectedWeb3,
         visible: true
@@ -98,20 +128,25 @@ initializeUnity(container)
     onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
+
+    //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
+    //             so ensuring meta configuration is initialized in this stage is a must
+    await ensureMetaConfigurationInitialized()
+
     await startUnitySceneWorkers()
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
     
     await ensureMetaConfigurationInitialized()
 
-    let worldConfig:WorldConfig = globalThis.globalStore.getState().meta.config.world!
+    let worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world!
 
     if (worldConfig.renderProfile) {
       i.SetRenderProfile(worldConfig.renderProfile)
     }
 
     if (!NO_MOTD) {
-      i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true }, worldConfig.motd)
+      i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true }, worldConfig.messageOfTheDay)
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))

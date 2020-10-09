@@ -5,6 +5,12 @@ using DCL;
 using DCL.Helpers;
 using UnityEngine;
 
+/// <summary>
+/// RenderProfileWorld allows us to toggle between several global rendering configuration presets.
+/// This is useful for events, setting day/night cycles, lerping between any of those, etc.
+///
+/// All the presets are stored in the RenderProfileManifest object.
+/// </summary>
 [CreateAssetMenu(menuName = "DCL/Rendering/Create World Profile", fileName = "RenderProfileWorld", order = 0)]
 public class RenderProfileWorld : ScriptableObject
 {
