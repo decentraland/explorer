@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DCL.Interface;
 using UnityEngine;
 
 public class UsersAroundListHUDController : IHUD
@@ -60,7 +61,7 @@ public class UsersAroundListHUDController : IHUD
         usersListView = view;
         usersListView.OnRequestMuteUser += ((userId, mute) =>
         {
-            //send to kernel
+            WebInterface.SetMuteUser(userId, mute);
         });
         MinimapMetadata.GetMetadata().OnUserInfoUpdated += MapRenderer_OnUserInfoUpdated;
         MinimapMetadata.GetMetadata().OnUserInfoRemoved += MapRenderer_OnUserInfoRemoved;

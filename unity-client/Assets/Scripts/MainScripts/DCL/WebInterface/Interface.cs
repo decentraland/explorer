@@ -463,6 +463,13 @@ namespace DCL.Interface
             public Property[] properties;
         }
 
+        [System.Serializable]
+        public class MuteUserPayload
+        {
+            public string userId;
+            public bool mute;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -532,6 +539,7 @@ namespace DCL.Interface
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
         private static BaseResolution baseResEvent = new BaseResolution();
         private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
+        private static MuteUserPayload muteUserEvent = new MuteUserPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -1004,6 +1012,13 @@ namespace DCL.Interface
         public static void FetchBalanceOfMANA()
         {
             SendMessage("FetchBalanceOfMANA");
+        }
+
+        public static void SetMuteUser(string userId, bool mute)
+        {
+            muteUserEvent.userId = userId;
+            muteUserEvent.mute = mute;
+            SendMessage("SetMuteUser", muteUserEvent);
         }
     }
 }

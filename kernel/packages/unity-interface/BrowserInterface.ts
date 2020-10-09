@@ -409,6 +409,10 @@ export class BrowserInterface {
       unityInterface.UpdateBalanceOfMANA(`${balance}`)
     }
   }
+
+  public SetMuteUser(data: { userId: string; mute: boolean }) {
+    // mute or unmute user here
+  }
 }
 
 export let browserInterface: BrowserInterface = new BrowserInterface()
