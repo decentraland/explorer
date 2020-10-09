@@ -13,7 +13,7 @@ public class WearableController
     private const string MATERIAL_FILTER_SKIN = "skin";
 
     public readonly WearableItem wearable;
-    protected RendereableAssetLoadHelper loader;
+    protected IRendereableAssetLoadHelper loader;
     private readonly string bodyShapeId;
 
     public string id => wearable.id;
@@ -23,6 +23,7 @@ public class WearableController
     public bool isReady => loader != null && loader.isFinished;
 
     protected Renderer[] assetRenderers;
+    Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
 
     List<Material> materials = null;
 
@@ -42,6 +43,11 @@ public class WearableController
         assetRenderers = original.assetRenderers;
     }
 
+    protected virtual IRendereableAssetLoadHelper CreateRendereableAssetLoaderHelper()
+    {
+        return new RendereableAssetLoadHelper();
+    }
+
     public virtual void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
     {
         if (isReady)
@@ -49,10 +55,7 @@ public class WearableController
 
         boneRetargetingDirty = true;
 
-        var representation = wearable.GetRepresentation(bodyShapeId);
-        var provider = wearable.GetContentProvider(bodyShapeId);
-
-        loader = new RendereableAssetLoadHelper(provider, wearable.baseUrlBundles);
+        loader = CreateRendereableAssetLoaderHelper();
 
         loader.settings.forceNewInstance = false;
         loader.settings.initialLocalPosition = Vector3.up * 0.75f;
@@ -79,10 +82,9 @@ public class WearableController
         }
         loader.OnFailEvent += OnFailEventWrapper;
 
-        loader.Load(representation.mainFile);
+        var representation = wearable.GetRepresentation(bodyShapeId);
+        loader.Load(wearable.GetContentProvider(bodyShapeId), wearable.baseUrlBundles, representation.mainFile);
     }
-
-    Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
 
     public void SetupDefaultMaterial(Material defaultMaterial, Color skinColor, Color hairColor)
     {
@@ -146,7 +148,6 @@ public class WearableController
 
         if (loader != null)
         {
-            loader.ClearEvents();
             loader.Unload();
             loader = null;
         }

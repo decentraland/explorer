@@ -291,7 +291,7 @@ namespace DCL
             OnFailEvent?.Invoke();
         }
 
-        void OnWearableLoadingFail(WearableController wearableController, int retriesCount = MAX_RETRIES)
+        protected virtual void OnWearableLoadingFail(WearableController wearableController, int retriesCount = MAX_RETRIES)
         {
             if (retriesCount <= 0)
             {

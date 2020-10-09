@@ -156,7 +156,7 @@ namespace AvatarShape_Tests
 
         public Renderer[] myAssetRenderers => assetRenderers;
         public GameObject myAssetContainer => assetContainer;
-        public RendereableAssetLoadHelper myLoader => loader;
+        public IRendereableAssetLoadHelper myLoader => loader;
     }
 
     class BodyShapeController_Mock : BodyShapeController

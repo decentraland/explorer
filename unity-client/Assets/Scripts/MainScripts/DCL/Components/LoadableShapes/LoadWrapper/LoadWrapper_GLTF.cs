@@ -22,7 +22,7 @@ namespace DCL.Components
 
             alreadyLoaded = false;
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
-            loadHelper = new RendereableAssetLoadHelper(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles);
+            loadHelper = new RendereableAssetLoadHelper();
 
             loadHelper.settings.parent = entity.meshRootGameObject.transform;
 
@@ -40,7 +40,7 @@ namespace DCL.Components
 
             loadHelper.OnSuccessEvent += (x) => OnSuccessWrapper(OnSuccess);
             loadHelper.OnFailEvent += () => OnFailWrapper(OnSuccess);
-            loadHelper.Load(targetUrl);
+            loadHelper.Load(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles, targetUrl);
         }
 
         private void OnFailWrapper(Action<LoadWrapper> OnFail)

@@ -4,7 +4,19 @@ using UnityEngine.Assertions;
 
 namespace DCL.Components
 {
-    public class RendereableAssetLoadHelper
+    public interface IRendereableAssetLoadHelper
+    {
+        event Action<GameObject> OnSuccessEvent;
+        event Action OnFailEvent;
+
+        AssetPromiseSettings_Rendering settings { get; set; }
+        GameObject loadedAsset { get; }
+        bool isFinished { get; }
+        void Load(ContentProvider contentProvider, string bundlesContentUrl, string targetUrl);
+        void Unload();
+    }
+
+    public class RendereableAssetLoadHelper : IRendereableAssetLoadHelper
     {
         public enum LoadingType
         {
@@ -13,16 +25,22 @@ namespace DCL.Components
             GLTF_ONLY
         }
 
-        public static bool VERBOSE = false;
+        private static bool VERBOSE = false;
 
+        public event Action<GameObject> OnSuccessEvent;
+        public event Action OnFailEvent;
+
+        //TODO These statics are coupling this script to WSSController and SceneController.
+        //     We can break it with ScriptableObjects.
         public static bool useCustomContentServerUrl = false;
         public static string customContentServerUrl;
-
         public static LoadingType loadingType = LoadingType.ASSET_BUNDLE_WITH_GLTF_FALLBACK;
 
-        public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
+        public AssetPromiseSettings_Rendering settings { get; set; } = new AssetPromiseSettings_Rendering();
 
         public GameObject loadedAsset { get; protected set; }
+        AssetPromise_GLTF gltfPromise;
+        AssetPromise_AB_GameObject abPromise;
 
         public bool isFinished
         {
@@ -38,51 +56,7 @@ namespace DCL.Components
             }
         }
 
-        string bundlesContentUrl;
-        ContentProvider contentProvider;
-
-        AssetPromise_GLTF gltfPromise;
-        AssetPromise_AB_GameObject abPromise;
-
-#if UNITY_EDITOR
-        public override string ToString()
-        {
-            float loadTime = Mathf.Min(loadFinishTime, Time.realtimeSinceStartup) - loadStartTime;
-
-            string result = "not loading";
-
-            if (gltfPromise != null)
-            {
-                result = $"GLTF -> promise state = {gltfPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}";
-
-                if (gltfPromise.state == AssetPromiseState.WAITING)
-                {
-                    result += $"\nmaster promise state... is blocked... {AssetPromiseKeeper_GLTF.i.GetMasterState(gltfPromise)}";
-                }
-            }
-
-            if (abPromise != null)
-            {
-                result = $"ASSET BUNDLE -> promise state = {abPromise.ToString()} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_AB.i.waitingPromisesCount}";
-            }
-
-            return result;
-        }
-
-        float loadStartTime = 0;
-        float loadFinishTime = float.MaxValue;
-#endif
-
-        public RendereableAssetLoadHelper(ContentProvider contentProvider, string bundlesContentUrl)
-        {
-            this.contentProvider = contentProvider;
-            this.bundlesContentUrl = bundlesContentUrl;
-        }
-
-        public event Action<GameObject> OnSuccessEvent;
-        public event Action OnFailEvent;
-
-        public void Load(string targetUrl)
+        public void Load(ContentProvider contentProvider, string bundlesContentUrl, string targetUrl)
         {
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
 #if UNITY_EDITOR
@@ -91,24 +65,25 @@ namespace DCL.Components
             switch (loadingType)
             {
                 case LoadingType.ASSET_BUNDLE_WITH_GLTF_FALLBACK:
-                    LoadAssetBundle(targetUrl, OnSuccessEvent, () => LoadGltf(targetUrl, OnSuccessEvent, OnFailEvent));
+                    LoadAssetBundle(contentProvider, bundlesContentUrl, targetUrl, OnSuccessEvent, () => LoadGltf(contentProvider, targetUrl, OnSuccessEvent, OnFailEvent));
                     break;
                 case LoadingType.ASSET_BUNDLE_ONLY:
-                    LoadAssetBundle(targetUrl, OnSuccessEvent, OnFailEvent);
+                    LoadAssetBundle(contentProvider, bundlesContentUrl, targetUrl, OnSuccessEvent, OnFailEvent);
                     break;
                 case LoadingType.GLTF_ONLY:
-                    LoadGltf(targetUrl, OnSuccessEvent, OnFailEvent);
+                    LoadGltf(contentProvider, targetUrl, OnSuccessEvent, OnFailEvent);
                     break;
             }
         }
 
         public void Unload()
         {
+            ClearEvents();
             AssetPromiseKeeper_GLTF.i.Forget(gltfPromise);
             AssetPromiseKeeper_AB_GameObject.i.Forget(abPromise);
         }
 
-        void LoadAssetBundle(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
+        void LoadAssetBundle(ContentProvider contentProvider, string bundlesContentUrl, string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
         {
             if (abPromise != null)
             {
@@ -141,7 +116,7 @@ namespace DCL.Components
             AssetPromiseKeeper_AB_GameObject.i.Keep(abPromise);
         }
 
-        void LoadGltf(string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
+        void LoadGltf(ContentProvider contentProvider, string targetUrl, Action<GameObject> OnSuccess, Action OnFail)
         {
             if (gltfPromise != null)
             {
@@ -195,10 +170,38 @@ namespace DCL.Components
             ClearEvents();
         }
 
-        public void ClearEvents()
+        private void ClearEvents()
         {
             OnSuccessEvent = null;
             OnFailEvent = null;
         }
+
+#if UNITY_EDITOR
+        float loadStartTime = 0;
+        float loadFinishTime = float.MaxValue;
+        public override string ToString()
+        {
+            float loadTime = Mathf.Min(loadFinishTime, Time.realtimeSinceStartup) - loadStartTime;
+
+            string result = "not loading";
+
+            if (gltfPromise != null)
+            {
+                result = $"GLTF -> promise state = {gltfPromise.state} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_GLTF.i.waitingPromisesCount}";
+
+                if (gltfPromise.state == AssetPromiseState.WAITING)
+                {
+                    result += $"\nmaster promise state... is blocked... {AssetPromiseKeeper_GLTF.i.GetMasterState(gltfPromise)}";
+                }
+            }
+
+            if (abPromise != null)
+            {
+                result = $"ASSET BUNDLE -> promise state = {abPromise.ToString()} ({loadTime} load time)... waiting promises = {AssetPromiseKeeper_AB.i.waitingPromisesCount}";
+            }
+
+            return result;
+        }
+#endif
     }
 }
