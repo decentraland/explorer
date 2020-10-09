@@ -98,6 +98,12 @@ public static class CommonScriptableObjects
     private static Vector3Variable cameraRightValue;
     public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
 
+    private static BooleanVariable cameraIsBlendingValue;
+    public static BooleanVariable cameraIsBlending => GetOrLoad(ref cameraIsBlendingValue, "ScriptableObjects/CameraIsBlending");
+
+    private static BooleanVariable cameraBlockedValue;
+    public static BooleanVariable cameraBlocked => GetOrLoad(ref cameraBlockedValue, "ScriptableObjects/CameraBlocked");
+
     private static BooleanVariable playerInfoCardVisibleStateValue;
     public static BooleanVariable playerInfoCardVisibleState => GetOrLoad(ref playerInfoCardVisibleStateValue, "ScriptableObjects/PlayerInfoCardVisibleState");
 

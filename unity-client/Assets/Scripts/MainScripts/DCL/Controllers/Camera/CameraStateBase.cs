@@ -1,5 +1,6 @@
 using Cinemachine;
 using UnityEngine;
+
 public class CameraStateBase : MonoBehaviour
 {    
 
@@ -32,8 +33,13 @@ public class CameraStateBase : MonoBehaviour
     {
 
     }
+
     public virtual Vector3 OnGetRotation()
     {
         return Vector3.zero;
+    }
+
+    public virtual void OnBlock(bool blocked)
+    {
     }
 }

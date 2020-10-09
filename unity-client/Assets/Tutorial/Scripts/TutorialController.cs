@@ -326,6 +326,8 @@ namespace DCL.Tutorial
         public void SetEagleEyeCameraActive(bool isActive)
         {
             eagleEyeCamera.gameObject.SetActive(isActive);
+            StartCoroutine(BlockPlayerCameraUntilBlendingIsFinished());
+
             hudController?.minimapHud?.SetVisibility(!isActive);
             hudController?.manaHud?.SetVisibility(!isActive);
             hudController?.profileHud?.SetVisibility(!isActive);
@@ -529,6 +531,16 @@ namespace DCL.Tutorial
                 eagleEyeCamera.transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed, Space.World);
                 yield return null;
             }
+        }
+
+        private IEnumerator BlockPlayerCameraUntilBlendingIsFinished()
+        {
+            CommonScriptableObjects.cameraBlocked.Set(true);
+
+            yield return new WaitUntil(() => CommonScriptableObjects.cameraIsBlending);
+            yield return new WaitUntil(() => !CommonScriptableObjects.cameraIsBlending);
+
+            CommonScriptableObjects.cameraBlocked.Set(false);
         }
     }
 }
