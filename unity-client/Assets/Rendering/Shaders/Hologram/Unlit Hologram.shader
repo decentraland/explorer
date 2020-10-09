@@ -20,7 +20,7 @@ Shader "DCL/FX/Hologram"
         {
             Tags { "RenderType"="Transparent" "Queue"="Transparent+500" "RenderPipeline"="UniversalPipeline" }
 
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend SrcAlpha One
             ZWrite Off
 
             CGPROGRAM

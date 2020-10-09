@@ -17,7 +17,7 @@ namespace DCL.Controllers
         static GameObject blockerPrefab;
 
         const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
-        const string PARCEL_BLOCKER_PREFAB = "Prefabs/ParcelBlocker";
+        //const string PARCEL_BLOCKER_PREFAB = "Prefabs/ParcelBlocker";
 
         Vector3 auxPosVec = new Vector3();
         Vector3 auxScaleVec = new Vector3();
@@ -43,7 +43,9 @@ namespace DCL.Controllers
             this.characterPosition = characterPosition;
 
             if (blockerPrefab == null)
-                blockerPrefab = Resources.Load<GameObject>(PARCEL_BLOCKER_PREFAB);
+            {
+                blockerPrefab = RenderProfileManifest.currentProfile.loadingBlockerPrefab;
+            }
 
             // We need to manually create the Pool for empty game objects if it doesn't exist
             if (!PoolManager.i.ContainsPool(PARCEL_BLOCKER_POOL_NAME))

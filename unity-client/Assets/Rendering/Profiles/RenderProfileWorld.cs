@@ -8,6 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "DCL/Rendering/Create World Profile", fileName = "RenderProfileWorld", order = 0)]
 public class RenderProfileWorld : ScriptableObject
 {
+    [SerializeField] public GameObject loadingBlockerPrefab;
     [SerializeField] private Material skyboxMaterial;
     [SerializeField] private Color skyColor;
     [SerializeField] private Color equatorColor;

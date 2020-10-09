@@ -7,19 +7,23 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Blocker
-  m_Shader: {fileID: 4800000, guid: 66051c67177673d4296ceb8a14bf2eba, type: 3}
-  m_ShaderKeywords: _RECEIVE_SHADOWS_OFF
+  m_Name: Blocker_Green
+  m_Shader: {fileID: 4800000, guid: d540ea39c5edb8e44b3119aa7ed2d662, type: 3}
+  m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 4000
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - SHADOWCASTER
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 227a07f88949e4a34bd4ffe9b4bfc3a2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -40,6 +44,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _GlowMap:
+        m_Texture: {fileID: 2800000, guid: 0c4f11e7620674390b99b197e3353591, type: 3}
+        m_Scale: {x: 1, y: -5}
+        m_Offset: {x: 0, y: 0}
+    - _GlowTexture:
+        m_Texture: {fileID: 2800000, guid: 0c4f11e7620674390b99b197e3353591, type: 3}
+        m_Scale: {x: 1, y: 2}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: -1, y: -1}
@@ -49,6 +61,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OpaqueCollisionRamp:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -65,21 +81,27 @@ Material:
     - _Blend: 0
     - _BumpScale: 1
     - _Cull: 2
-    - _CullYPlane: 272.2
+    - _CullYPlane: 5
     - _Cutoff: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
     - _FadeDirection: 1
-    - _FadeThickness: 10
+    - _FadeThickness: 50
     - _GlossMapScale: 1
     - _Glossiness: 1
     - _GlossinessSource: 1
     - _GlossyReflections: 1
+    - _MaxRenderingDistance: 20
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _QueueOffset: 0
     - _ReceiveShadows: 0
+    - _RenderDistanceEnd: 301
+    - _RenderDistanceStart: 26.2
+    - _RenderingDistanceEnd: 30
+    - _RenderingDistanceStart: -100
     - _RimPower: 1.06
     - _SampleGI: 0
     - _Shininess: 0
@@ -88,13 +110,16 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _Surface: 1
-    - _ThrobbScale: 0.2
+    - _ThrobbScale: -3
     - _UVSec: 0
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
-    - _Color: {r: 0, g: 1, b: 0.44142365, a: 0.09803922}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 1, b: 0.18039216, a: 0.5019608}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _GlowColor: {r: 3.8646922, g: 25.688938, b: 0, a: 1}
+    - _GlowVelocity: {r: 0, g: -20, b: 0, a: 0}
     - _LoadingColor: {r: 0, g: 0.28627437, b: 1, a: 0.20392157}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}

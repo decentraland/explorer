@@ -47,6 +47,9 @@ namespace DCL
 
             i = this;
 
+            RenderProfileManifest.currentProfile = RenderProfileManifest.i.defaultProfile;
+            RenderProfileManifest.currentProfile.avatarProfile.inWorld.Apply();
+
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = false;
@@ -80,9 +83,6 @@ namespace DCL
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this); // Es un subsistema independiente => Se pone en el entrypoint pero no en el enviroment.
 #endif
-
-            RenderProfileManifest.currentProfile = RenderProfileManifest.i.defaultProfile;
-            RenderProfileManifest.currentProfile.avatarProfile.inWorld.Apply();
         }
 
         void Start()
