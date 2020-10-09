@@ -1,5 +1,13 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, ENABLE_NEW_TASKBAR } from 'config'
+import {
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER,
+  NO_ASSET_BUNDLES,
+  ENABLE_NEW_TASKBAR
+} from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
@@ -54,8 +62,9 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
   const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
 
-  if (shouldShow) {
-    loadingAudio?.play().catch((e) => {
+  if (shouldShow && loadingAudio) {
+    loadingAudio.volume = 0.05
+    loadingAudio.play().catch((e) => {
       /*Ignored. If this fails is not critical*/
     })
   } else {
@@ -131,7 +140,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }

@@ -1,4 +1,5 @@
 import { isMobile } from 'shared/comms/mobile'
+import { setLoadingScreenVisible } from 'unity-interface/dcl'
 
 import './apis/index'
 import './events'
@@ -27,6 +28,8 @@ export function initShared() {
     ReportFatalError(MOBILE_NOT_SUPPORTED)
     return
   }
+
+  setLoadingScreenVisible(true)
 
   store.dispatch(notStarted())
   store.dispatch(loadingStarted())
