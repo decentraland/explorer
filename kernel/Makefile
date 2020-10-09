@@ -135,9 +135,13 @@ build-deploy: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(SCENE_SYSTEM) $(INTERNA
 build-release: $(DIST_ENTRYPOINTS) $(DIST_STATIC_FILES) $(DIST_PACKAGE_JSON) ## Build all the entrypoints and run the `scripts/prepareDist` script
 	@node ./scripts/prepareDist.js
 
-publish: build-release ## Release a new version, using the `scripts/npmPublish` script
+publish: | build-release update-bundled-dependency ## Release a new version, using the `scripts/npmPublish` script
 	@cd $(PWD)/packages/decentraland-ecs; node $(PWD)/scripts/npmPublish.js
 	@cd $(PWD)/packages/build-ecs; node $(PWD)/scripts/npmPublish.js
+	@cd $(PWD)/static; node $(PWD)/scripts/npmPublish.js
+
+update-bundled-dependency: # updates static/package.json devDependencies to match the bundled decentraland-renderer version
+	@cd $(PWD)/static; npm install --save-dev --save-bundle $(shell npm list --depth 0 | grep -Po --color=never "decentraland-renderer.*")
 
 # Testing
 
