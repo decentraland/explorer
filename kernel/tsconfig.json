@@ -18,6 +18,7 @@
     "emitDecoratorMetadata": true,
     "noUnusedLocals": true,
     "jsx": "react",
+    "jsxFactory": "createElement",
     "plugins": [
       {
         "name": "tslint-language-service"
