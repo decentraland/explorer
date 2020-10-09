@@ -21,6 +21,7 @@ public class AvatarEditorHUDController : IHUD
     private ColorList skinColorList;
     private ColorList eyeColorList;
     private ColorList hairColorList;
+    private bool prevMouseLockState = false;
 
     public AvatarEditorHUDView view;
 
@@ -37,6 +38,9 @@ public class AvatarEditorHUDController : IHUD
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
 
         view = AvatarEditorHUDView.Create(this);
+
+        view.OnToggleActionTriggered += ToggleVisibility;
+        view.OnCloseActionTriggered += Hide;
 
         skinColorList = Resources.Load<ColorList>("SkinTone");
         hairColorList = Resources.Load<ColorList>("HairColor");
@@ -414,15 +418,29 @@ public class AvatarEditorHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         if (!visible && view.isOpen)
+        {
+            if (prevMouseLockState)
+            {
+                Utils.LockCursor();
+            }
+
             OnClose?.Invoke();
+        }
         else if (visible && !view.isOpen)
+        {
+            prevMouseLockState = Utils.isCursorLocked;
+            Utils.UnlockCursor();
             OnOpen?.Invoke();
+        }
 
         view.SetVisibility(visible);
     }
 
     public void Dispose()
     {
+        view.OnToggleActionTriggered -= ToggleVisibility;
+        view.OnCloseActionTriggered -= Hide;
+
         CleanUp();
     }
 
@@ -469,5 +487,15 @@ public class AvatarEditorHUDController : IHUD
     public void SellCollectible(string collectibleId)
     {
         WebInterface.OpenURL("https://market.decentraland.org/account");
+    }
+
+    public void ToggleVisibility()
+    {
+        SetVisibility(!view.isOpen);
+    }
+
+    public void Hide()
+    {
+        SetVisibility(false);
     }
 }
