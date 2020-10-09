@@ -130,6 +130,14 @@ namespace DCL.Tutorial
 
         private void YesSkipInputAction_OnFinished(DCLAction_Hold action)
         {
+            if (skipTutorialSection.activeSelf)
+            {
+                tutorialController.SkipTutorial();
+            }
+        }
+
+        private void NoSkipInputAction_OnFinished(DCLAction_Hold action)
+        {
             if (blockSkipActions)
                 return;
 
@@ -139,14 +147,6 @@ namespace DCL.Tutorial
                 skipTutorialSection.SetActive(true);
             }
             else if (skipTutorialSection.activeSelf)
-            {
-                tutorialController.SkipTutorial();
-            }
-        }
-
-        private void NoSkipInputAction_OnFinished(DCLAction_Hold action)
-        {
-            if (skipTutorialSection.activeSelf)
             {
                 mainSection.SetActive(true);
                 skipTutorialSection.SetActive(false);
