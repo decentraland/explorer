@@ -3,7 +3,7 @@ import { Meta, Story } from "@storybook/react";
 import {
   ErrorNetworkMismatch,
   ErrorNetworkMismatchProps,
-} from "../components/errors/ErrorNetworkMismatch";
+} from "./ErrorNetworkMismatch";
 
 export default {
   title: "Explorer/Errors/ErrorNetworkMismatch",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { ErrorNewLogin } from "../components/errors/ErrorNewLogin";
+import { ErrorNewLogin } from "./ErrorNewLogin";
 
 export default {
   title: "Explorer/Errors/ErrorNewLogin",

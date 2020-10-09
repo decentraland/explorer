@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Meta, Story } from "@storybook/react";
-import { EthSignAdvice } from "../components/EthSignAdvice";
+import { EthSignAdvice } from "./EthSignAdvice";
 
 export default {
   title: "Explorer/login/EthSignAdvice",

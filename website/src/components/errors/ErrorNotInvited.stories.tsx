@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { ErrorNotInvited } from "../components/errors/ErrorNotInvited";
+import { ErrorNotInvited } from "./ErrorNotInvited";
 
 export default {
   title: "Explorer/Errors/ErrorNotInvited",

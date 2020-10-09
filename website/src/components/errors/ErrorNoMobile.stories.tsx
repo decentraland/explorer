@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { ErrorNoMobile } from "../components/errors/ErrorNoMobile";
+import { ErrorNoMobile } from "./ErrorNoMobile";
 
 export default {
   title: "Explorer/Errors/ErrorNoMobile",

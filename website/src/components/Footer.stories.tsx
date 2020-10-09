@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { Footer } from "../components/Footer";
+import { Footer } from "./Footer";
 
 export default {
   title: "Explorer/base/Footer",

@@ -1,10 +1,7 @@
 import React from "react";
 
 import { Meta, Story } from "@storybook/react";
-import {
-  LoadingContainer,
-  LoadingContainerProps,
-} from "../components/LoadingContainer";
+import { LoadingContainer, LoadingContainerProps } from "./LoadingContainer";
 
 export default {
   title: "Explorer/LoadingContainer",

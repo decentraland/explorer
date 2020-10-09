@@ -1,9 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import {
-  LoginContainer,
-  LoginContainerProps,
-} from "../components/LoginContainer";
+import { LoginContainer, LoginContainerProps } from "./LoginContainer";
 
 export default {
   title: "Explorer/LoginContainer",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { ErrorNotSupported } from "../components/errors/ErrorNotSupported";
+import { ErrorNotSupported } from "./ErrorNotSupported";
 
 export default {
   title: "Explorer/Errors/ErrorNotSupported",

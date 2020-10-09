@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Meta, Story } from "@storybook/react";
-import { EthLogin, EthLoginProps } from "../components/EthLogin";
+import { EthLogin, EthLoginProps } from "./EthLogin";
 
 export default {
   title: "Explorer/login/EthLogin",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { Audio, AudioProps } from "../components/Audio";
+import { Audio, AudioProps } from "./Audio";
 
 export default {
   title: "Explorer/base/Audio",

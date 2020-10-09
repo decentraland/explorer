@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Meta, Story } from "@storybook/react";
-import { TermOfService, TermOfServiceProps } from "../components/TermOfService";
+import { TermOfService, TermOfServiceProps } from "./TermOfService";
 
 export default {
   title: "Explorer/login/TermOfService",

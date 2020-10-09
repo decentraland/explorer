@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Meta, Story } from "@storybook/react";
-import { Navbar } from "../components/Navbar";
+import { Navbar } from "./Navbar";
 
 export default {
   title: "Explorer/base/Navbar",

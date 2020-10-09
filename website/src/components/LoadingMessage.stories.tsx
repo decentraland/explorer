@@ -1,9 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import {
-  LoadingMessage,
-  LoadingMessageProps,
-} from "../components/LoadingMessage";
+import { LoadingMessage, LoadingMessageProps } from "./LoadingMessage";
 
 export default {
   title: "Explorer/base/LoadingMessage",

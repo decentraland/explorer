@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import { ErrorFatal } from "../components/errors/ErrorFatal";
+import { ErrorFatal } from "./ErrorFatal";
 
 export default {
   title: "Explorer/Errors/ErrorFatal",

@@ -1,9 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import {
-  EthConnectAdvice,
-  EthConnectAdviceProps,
-} from "../components/EthConnectAdvice";
+import { EthConnectAdvice, EthConnectAdviceProps } from "./EthConnectAdvice";
 
 export default {
   title: "Explorer/login/EthConnectAdvice",
