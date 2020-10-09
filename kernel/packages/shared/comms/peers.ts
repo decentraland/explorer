@@ -1,7 +1,8 @@
 import { Observable } from 'decentraland-ecs/src'
 import { UUID, PeerInformation, AvatarMessage, UserInformation, AvatarMessageType, Pose } from './interface/types'
 import { getFromLocalStorage, saveToLocalStorage, removeFromLocalStorage } from 'atomicHelpers/localStorage'
-import { unityInterface } from 'unity-interface/UnityInterface'
+
+declare const unityInterface: any
 
 export const getUserProfile = () => getFromLocalStorage('dcl-profile') || {}
 export const removeUserProfile = () => removeFromLocalStorage('dcl-profile')
