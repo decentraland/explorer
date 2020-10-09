@@ -9,7 +9,7 @@ namespace DCL
 {
     public class AvatarRenderer : MonoBehaviour
     {
-        private const int MAX_RETRIES = 5;
+        public  const int MAX_RETRIES = 5;
 
         public Material defaultMaterial;
         public Material eyeMaterial;
@@ -344,7 +344,7 @@ namespace DCL
                     break;
 
                 default:
-                    var wearableController = new WearableController(wearable, bodyShapeController.id);
+                    var wearableController = wearableFactory.Create(wearable, bodyShapeController.id);
                     wearableControllers.Add(wearable, wearableController);
                     break;
             }
@@ -400,5 +400,14 @@ namespace DCL
         {
             CleanupAvatar();
         }
+
+        public WearableFactory wearableFactory = new WearableFactory();
+
     }
+
+    public class WearableFactory
+    {
+        public virtual WearableController Create(WearableItem item, string bodyShapeId) => new WearableController(item, bodyShapeId);
+    }
+
 }

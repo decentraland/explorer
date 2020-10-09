@@ -27,8 +27,8 @@ namespace DCL.Components
 
         private static bool VERBOSE = false;
 
-        public event Action<GameObject> OnSuccessEvent;
-        public event Action OnFailEvent;
+        public virtual event Action<GameObject> OnSuccessEvent;
+        public virtual event Action OnFailEvent;
 
         //TODO These statics are coupling this script to WSSController and SceneController.
         //     We can break it with ScriptableObjects.
@@ -56,7 +56,7 @@ namespace DCL.Components
             }
         }
 
-        public void Load(ContentProvider contentProvider, string bundlesContentUrl, string targetUrl)
+        public virtual void Load(ContentProvider contentProvider, string bundlesContentUrl, string targetUrl)
         {
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
 #if UNITY_EDITOR

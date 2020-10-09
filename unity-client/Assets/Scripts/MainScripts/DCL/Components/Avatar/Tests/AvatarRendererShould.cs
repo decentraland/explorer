@@ -4,6 +4,8 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Components;
+using NSubstitute;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -249,6 +251,51 @@ namespace AvatarShape_Tests
                 representation.overrideHides = new string[] { };
                 representation.overrideReplaces = new string[] { };
             }
+        }
+
+        [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
+        public IEnumerator RetryWhenWearableFails()
+        {
+            WearableController wearableControllerToTest = null;
+            WearableController createMock(WearableItem item, string bodyShapeId)
+            {
+                int retries = 0;
+                wearableControllerToTest = Substitute.ForPartsOf<WearableController>(item, bodyShapeId);
+                wearableControllerToTest.CreateRendereableAssetLoaderHelper()
+                    .ReturnsForAnyArgs(info =>
+                    {
+                        var loader = Substitute.ForPartsOf<RendereableAssetLoadHelper>();
+                        loader
+                            .WhenForAnyArgs(mock => mock.Load(Arg.Any<ContentProvider>(), Arg.Any<string>(), Arg.Any<string>()))
+                            .Do((x) =>
+                            {
+                                retries++;
+                                if (retries < AvatarRenderer.MAX_RETRIES - 1)
+                                    loader.OnFailEvent += Raise.Event<Action>();
+                                else
+                                    loader.OnSuccessEvent += Raise.Event<Action<GameObject>>(CreateTestGameObject("wearableHolder"));
+                            });
+
+                        return loader;
+                    });
+                return wearableControllerToTest;
+            }
+            WearableFactory factory = Substitute.For<WearableFactory>();
+            factory.Create(default, default)
+                .ReturnsForAnyArgs(x => createMock(x.ArgAt<WearableItem>(0), x.ArgAt<string>(1)));
+
+            avatarRenderer.wearableFactory = factory;
+            avatarModel.wearables = new List<string>() {SUNGLASSES_ID};
+
+            bool ready = false;
+            avatarRenderer.ApplyModel(avatarModel, () => ready = true, null);
+
+            yield return new DCL.WaitUntil(() => ready);
+
+            Assert.IsNotNull(wearableControllerToTest);
+            wearableControllerToTest.ReceivedWithAnyArgs(AvatarRenderer.MAX_RETRIES - 1).Load(default, default, default);
         }
     }
 

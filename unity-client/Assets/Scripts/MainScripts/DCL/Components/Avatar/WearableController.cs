@@ -43,7 +43,7 @@ public class WearableController
         assetRenderers = original.assetRenderers;
     }
 
-    protected virtual IRendereableAssetLoadHelper CreateRendereableAssetLoaderHelper()
+    public virtual IRendereableAssetLoadHelper CreateRendereableAssetLoaderHelper()
     {
         return new RendereableAssetLoadHelper();
     }
