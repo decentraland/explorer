@@ -18,13 +18,21 @@ namespace DCL
 
         public Dictionary<object, Pool> pools = new Dictionary<object, Pool>();
         public Dictionary<GameObject, PoolableObject> poolables = new Dictionary<GameObject, PoolableObject>();
+        public HashSet<PoolableObject> poolableValues = new HashSet<PoolableObject>();
+
+        public event System.Action OnGet;
+
         public bool HasPoolable(PoolableObject poolable)
         {
-            return poolables.ContainsValue(poolable);
+            //NOTE(Brian): The only poolableValues use is this. Using ContainsValue in a Dictionary is slow as hell.
+            return poolableValues.Contains(poolable);
         }
 
         public PoolableObject GetPoolable(GameObject gameObject)
         {
+            if (gameObject == null)
+                return null;
+
             if (poolables.ContainsKey(gameObject))
             {
                 return poolables[gameObject];
@@ -41,10 +49,7 @@ namespace DCL
                 return containerValue;
             }
 
-            set
-            {
-                containerValue = value;
-            }
+            set { containerValue = value; }
         }
 
         GameObject containerValue = null;
@@ -59,36 +64,35 @@ namespace DCL
         {
             EnsureContainer();
 
-            if (RenderingController.i != null)
-            {
-                initializing = !RenderingController.i.renderingEnabled;
-
-                if (RenderingController.i != null)
-                    RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
-            }
-            else
-            {
-                initializing = false;
-            }
+            initializing = !CommonScriptableObjects.rendererState.Get();
+            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         }
-        void OnRenderingStateChanged(bool renderingEnabled)
+
+        void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             initializing = !renderingEnabled;
         }
 
-        public Pool AddPool(object id, GameObject original, IPooledObjectInstantiator instantiator = null, int maxPrewarmCount = DEFAULT_PREWARM_COUNT)
+        public Pool AddPool(object id, GameObject original, IPooledObjectInstantiator instantiator = null, int maxPrewarmCount = DEFAULT_PREWARM_COUNT, bool isPersistent = false)
         {
+            Pool existingPool = GetPool(id);
+
+            if (existingPool != null && !existingPool.IsValid())
+                RemovePool(id);
+
             if (ContainsPool(id))
             {
                 if (Pool.FindPoolInGameObject(original, out Pool poolAlreadyExists))
                 {
                     Debug.LogWarning("WARNING: Object is already being contained in an existing pool!. Returning it.");
+                    poolAlreadyExists.persistent = isPersistent;
                     return poolAlreadyExists;
                 }
 
                 Pool result = GetPool(id);
 
                 result.AddToPool(original);
+                result.persistent = isPersistent;
 
                 return result;
             }
@@ -100,16 +104,17 @@ namespace DCL
 
             pool.id = id;
             pool.original = original;
+            pool.persistent = isPersistent;
 
             if (USE_POOL_CONTAINERS)
             {
                 pool.container.transform.parent = container.transform;
                 pool.original.name = "Original";
-                pool.original.transform.parent = pool.container.transform;
+                pool.original.transform.SetParent(pool.container.transform, true);
             }
             else
             {
-                pool.original.transform.parent = null;
+                pool.original.transform.SetParent(null, true);
             }
 
             pool.original.SetActive(false);
@@ -173,7 +178,6 @@ namespace DCL
             }
 
 
-
             if (poolables.TryGetValue(gameObject, out PoolableObject poolableObject))
             {
                 poolableObject.Release();
@@ -210,6 +214,7 @@ namespace DCL
                 return null;
             }
 
+            OnGet?.Invoke();
             return pool.Get();
         }
 
@@ -233,8 +238,7 @@ namespace DCL
                 RemovePool(idsToRemove[i]);
             }
 
-            if (RenderingController.i != null)
-                RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         public void ReleaseAllFromPool(object id)
@@ -242,33 +246,6 @@ namespace DCL
             if (pools.ContainsKey(id))
             {
                 pools[id].ReleaseAll();
-            }
-        }
-
-        List<GameObject> toRemoveAuxList = new List<GameObject>();
-        public void CleanPoolableReferences()
-        {
-            toRemoveAuxList.Clear();
-
-            using (var it = poolables.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    var kvp = it.Current;
-
-                    if (kvp.Value.gameObject == null)
-                    {
-                        kvp.Value.node?.List.Remove(kvp.Value);
-                        kvp.Value.node = null;
-                        toRemoveAuxList.Add(kvp.Key);
-                    }
-                }
-            }
-
-            for (int i = 0; i < toRemoveAuxList.Count; i++)
-            {
-                GameObject key = toRemoveAuxList[i];
-                poolables.Remove(key);
             }
         }
     }

@@ -1,18 +1,27 @@
-import { call, put } from 'redux-saga/effects'
-import { getServerConfigurations } from '../../config/index'
-import { metaConfigurationInitialized } from './actions'
+import { call, put, select, take } from 'redux-saga/effects'
+import { getServerConfigurations } from 'config'
+import { metaConfigurationInitialized, META_CONFIGURATION_INITIALIZED } from './actions'
 import defaultLogger from '../logger'
 import { buildNumber } from './env'
-import { MetaConfiguration } from './types'
+import { MetaConfiguration, USE_UNITY_INDEXED_DB_CACHE } from './types'
+import { isMetaConfigurationInitiazed } from './selectors'
 
 const DEFAULT_META_CONFIGURATION: MetaConfiguration = {
   explorer: {
-    minBuildNumber: 0
+    minBuildNumber: 0,
+    useUnityIndexedDbCache: false
   },
   servers: {
     added: [],
     denied: [],
     contentWhitelist: []
+  },
+  world: {
+    pois: []
+  },
+  comms: {
+    targetConnections: 4,
+    maxConnections: 6
   }
 }
 
@@ -21,6 +30,25 @@ export function* metaSaga(): any {
 
   yield put(metaConfigurationInitialized(config))
   yield call(checkExplorerVersion, config)
+  yield call(checkIndexedDB, config)
+}
+
+function checkIndexedDB(config: Partial<MetaConfiguration>) {
+  if (!config || !config.explorer) {
+    return
+  }
+
+  if (!config.explorer.useUnityIndexedDbCache) {
+    defaultLogger.info(`Unity IndexedDB meta config is undefined. Defaulting as false (only for chrome)`)
+    USE_UNITY_INDEXED_DB_CACHE.resolve(false)
+    return
+  }
+
+  defaultLogger.info(
+    `Unity IndexedDB meta config loaded. Configured remotely as: `,
+    config.explorer.useUnityIndexedDbCache
+  )
+  USE_UNITY_INDEXED_DB_CACHE.resolve(config.explorer.useUnityIndexedDbCache)
 }
 
 function checkExplorerVersion(config: Partial<MetaConfiguration>) {
@@ -47,5 +75,11 @@ async function fetchMetaConfiguration() {
       `Error while fetching meta configuration from '${explorerConfigurationEndpoint}' using default config`
     )
     return DEFAULT_META_CONFIGURATION
+  }
+}
+
+export function* waitForMetaConfigurationInitialization() {
+  if (!(yield select(isMetaConfigurationInitiazed))) {
+    yield take(META_CONFIGURATION_INITIALIZED)
   }
 }

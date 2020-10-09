@@ -6,14 +6,15 @@ using System.Linq;
 using UnityEngine;
 using Categories = WearableLiterals.Categories;
 
-public class AvatarEditorHUDController : IDisposable, IHUD
+public class AvatarEditorHUDController : IHUD
 {
-    protected static readonly string[] categoriesThatMustHaveSelection = { Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH };
-    protected static readonly string[] categoriesToRandomize = { Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET };
+    protected static readonly string[] categoriesThatMustHaveSelection = {Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH};
+    protected static readonly string[] categoriesToRandomize = {Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET};
 
     [NonSerialized] public bool bypassUpdateAvatarPreview = false;
     private UserProfile userProfile;
     private WearableDictionary catalog;
+    bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
     protected readonly AvatarEditorHUDModel model = new AvatarEditorHUDModel();
 
@@ -21,11 +22,15 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     private ColorList eyeColorList;
     private ColorList hairColorList;
 
-    protected AvatarEditorHUDView view;
+    public AvatarEditorHUDView view;
 
-    public Action<bool> OnVisibilityChanged;
+    public event Action OnClose;
 
-    public AvatarEditorHUDController(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
+    public AvatarEditorHUDController()
+    {
+    }
+
+    public void Initialize(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
@@ -39,7 +44,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
         SetCatalog(catalog);
 
-        LoadUserProfile(userProfile);
+        LoadUserProfile(userProfile, true);
         this.userProfile.OnUpdate += LoadUserProfile;
     }
 
@@ -60,14 +65,33 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     public void LoadUserProfile(UserProfile userProfile)
     {
-        if (userProfile?.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape)) return;
+        LoadUserProfile(userProfile, false);
+    }
+
+    public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
+    {
+        bool avatarEditorNotVisible = renderingEnabled && !view.isOpen;
+        bool isPlaying = !Application.isBatchMode;
+
+        if (!forceLoading)
+        {
+            if (isPlaying && avatarEditorNotVisible)
+                return;
+        }
+
+        if (userProfile == null)
+            return;
+
+        if (userProfile.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape))
+            return;
 
         var bodyShape = CatalogController.wearableCatalog.Get(userProfile.avatar.bodyShape);
+
         if (bodyShape == null)
         {
             return;
         }
-    
+
         view.SetIsWeb3(userProfile.hasConnectedWeb3);
 
         ProcessCatalog(this.catalog);
@@ -78,7 +102,9 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
         model.wearables.Clear();
         view.UnselectAllWearables();
+
         int wearablesCount = userProfile.avatar.wearables.Count;
+
         for (var i = 0; i < wearablesCount; i++)
         {
             var wearable = CatalogController.wearableCatalog.Get(userProfile.avatar.wearables[i]);
@@ -87,8 +113,10 @@ public class AvatarEditorHUDController : IDisposable, IHUD
                 Debug.LogError($"Couldn't find wearable with ID {userProfile.avatar.wearables[i]}");
                 continue;
             }
+
             EquipWearable(wearable);
         }
+
         EnsureWearablesCategoriesNotEmpty();
 
         UpdateAvatarPreview();
@@ -146,9 +174,11 @@ public class AvatarEditorHUDController : IDisposable, IHUD
                 {
                     UnequipWearable(sameCategoryEquipped);
                 }
+
                 EquipWearable(wearable);
             }
         }
+
         UpdateAvatarPreview();
     }
 
@@ -186,6 +216,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             colorToSet = hairColorList.colors[hairColorList.defaultColor];
         }
+
         model.hairColor = colorToSet;
         view.SelectHairColor(model.hairColor);
     }
@@ -197,6 +228,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             colorToSet = eyeColorList.colors[eyeColorList.defaultColor];
         }
+
         model.eyesColor = colorToSet;
         view.SelectEyeColor(model.eyesColor);
     }
@@ -208,6 +240,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         {
             colorToSet = skinColorList.colors[skinColorList.defaultColor];
         }
+
         model.skinColor = colorToSet;
         view.SelectSkinColor(model.skinColor);
     }
@@ -219,7 +252,9 @@ public class AvatarEditorHUDController : IDisposable, IHUD
             Debug.LogError($"Item ({bodyShape.id} is not a body shape");
             return;
         }
-        if (model.bodyShape == bodyShape) return;
+
+        if (model.bodyShape == bodyShape)
+            return;
 
         model.bodyShape = bodyShape;
         view.UpdateSelectedBody(bodyShape);
@@ -310,6 +345,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
                 }
             }
         }
+
         view.RemoveWearable(wearable);
     }
 
@@ -335,10 +371,12 @@ public class AvatarEditorHUDController : IDisposable, IHUD
                 {
                     Debug.LogError($"Couldn't get any wearable for category {category} and bodyshape {model.bodyShape.id}");
                 }
+
                 var wearable = supportedWearables[UnityEngine.Random.Range(0, supportedWearables.Length - 1)];
                 EquipWearable(wearable);
             }
         }
+
         UpdateAvatarPreview();
     }
 
@@ -374,8 +412,10 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     public void SetVisibility(bool visible)
     {
+        if (!visible && view.isOpen)
+            OnClose?.Invoke();
+
         view.SetVisibility(visible);
-        OnVisibilityChanged?.Invoke(visible);
     }
 
     public void Dispose()
@@ -386,7 +426,10 @@ public class AvatarEditorHUDController : IDisposable, IHUD
     public void CleanUp()
     {
         UnequipAllWearables();
-        view?.CleanUp();
+
+        if (view != null)
+            view.CleanUp();
+
         this.userProfile.OnUpdate -= LoadUserProfile;
         this.catalog.OnAdded -= AddWearable;
         this.catalog.OnRemoved -= RemoveWearable;
@@ -397,11 +440,11 @@ public class AvatarEditorHUDController : IDisposable, IHUD
         SetVisibility(configuration.active);
     }
 
-    public void SaveAvatar(Sprite faceSnapshot, Sprite bodySnapshot)
+    public void SaveAvatar(Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
-        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, bodySnapshot);
-        userProfile.OverrideAvatar(avatarModel, faceSnapshot, bodySnapshot);
+        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot);
+        userProfile.OverrideAvatar(avatarModel, face256Snapshot);
 
         SetVisibility(false);
     }
@@ -414,7 +457,7 @@ public class AvatarEditorHUDController : IDisposable, IHUD
 
     public void GoToMarketplace()
     {
-        if(userProfile.hasConnectedWeb3)
+        if (userProfile.hasConnectedWeb3)
             WebInterface.OpenURL("https://market.decentraland.org/browse?section=wearables");
         else
             WebInterface.OpenURL("https://docs.decentraland.org/get-a-wallet");

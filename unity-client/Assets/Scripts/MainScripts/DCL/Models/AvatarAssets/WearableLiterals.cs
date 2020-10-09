@@ -25,6 +25,18 @@ public static class WearableLiterals
         public const string MOUTH = "mouth";
         public const string FACIAL = "facial";
         public const string HAIR = "hair";
+
+        //TODO: Implement an IReadOnlyCollection for HashSet to make them immutable
+        public static readonly HashSet<string> ALL  = new HashSet<string>
+        {
+            UPPER_BODY,
+            LOWER_BODY,
+            EYEBROWS,
+            FACIAL,
+            MOUTH,
+            FEET,
+            EYES,
+        };
     }
 
     public static class BodyShapes
@@ -35,7 +47,7 @@ public static class WearableLiterals
 
     public static class ItemRarity
     {
-        public const string SWANKY = "swanky";
+        public const string RARE = "rare";
         public const string EPIC = "epic";
         public const string LEGENDARY = "legendary";
         public const string MYTHIC = "mythic";
@@ -44,7 +56,7 @@ public static class WearableLiterals
 
     public static class DefaultWearables
     {
-        private static readonly Dictionary<(string, string), string> defaultWearables = new Dictionary<(string, string), string>()
+        private static readonly Dictionary<(string, string), string> defaultWearables = new Dictionary<(string, string), string>
         {
             { (BodyShapes.MALE, Categories.EYES), "dcl://base-avatars/eyes_00" },
             { (BodyShapes.MALE, Categories.EYEBROWS), "dcl://base-avatars/eyebrows_00" },

@@ -1,6 +1,5 @@
 using DCL.Components;
 using DCL.Controllers;
-using DCL.Helpers;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -25,11 +24,13 @@ namespace DCL
             MIRROR
         }
 
-        Model model;
+        protected Model model;
+        AssetPromise_Texture texturePromise = null;
 
         public TextureWrapMode unityWrap;
         public FilterMode unitySamplingMode;
         public Texture2D texture;
+
         public DCLTexture(DCL.Controllers.ParcelScene scene) : base(scene)
         {
         }
@@ -37,46 +38,35 @@ namespace DCL
         public static IEnumerator FetchFromComponent(ParcelScene scene, string componentId,
             System.Action<Texture2D> OnFinish)
         {
+            yield return FetchTextureComponent(scene, componentId, (dclTexture) => { OnFinish?.Invoke(dclTexture.texture); });
+        }
+
+        public static IEnumerator FetchTextureComponent(ParcelScene scene, string componentId,
+            System.Action<DCLTexture> OnFinish)
+        {
             if (!scene.disposableComponents.ContainsKey(componentId))
             {
                 Debug.Log($"couldn't fetch texture, the DCLTexture component with id {componentId} doesn't exist");
-
                 yield break;
             }
 
             DCLTexture textureComponent = scene.disposableComponents[componentId] as DCLTexture;
+
             if (textureComponent == null)
             {
                 Debug.Log($"couldn't fetch texture, the shared component with id {componentId} is NOT a DCLTexture");
-
                 yield break;
             }
 
-            if (textureComponent.texture == null)
-            {
-                while (textureComponent.texture == null)
-                {
-                    yield return null;
+            yield return new WaitUntil(() => textureComponent.texture != null);
 
-                    if (textureComponent.texture != null)
-                    {
-                        if (OnFinish != null)
-                        {
-                            OnFinish.Invoke(textureComponent.texture);
-                        }
-
-                        yield break;
-                    }
-                }
-            }
-            else if (OnFinish != null)
-            {
-                OnFinish.Invoke(textureComponent.texture);
-            }
+            OnFinish.Invoke(textureComponent);
         }
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
             unitySamplingMode = model.samplingMode;
@@ -112,37 +102,90 @@ namespace DCL
                     {
                         Debug.LogError($"DCLTexture with id {id} couldn't parse its base64 image data.");
                     }
+
+                    if (texture != null)
+                    {
+                        texture.wrapMode = unityWrap;
+                        texture.filterMode = unitySamplingMode;
+                        texture.Compress(false);
+                        texture.Apply(unitySamplingMode != FilterMode.Point, true);
+                    }
                 }
                 else
                 {
                     string contentsUrl = string.Empty;
+                    bool isExternalURL = model.src.Contains("http://") || model.src.Contains("https://");
 
-                    scene.contentProvider.TryGetContentsUrl(model.src, out contentsUrl);
+                    if (isExternalURL)
+                        contentsUrl = model.src;
+                    else
+                        scene.contentProvider.TryGetContentsUrl(model.src, out contentsUrl);
 
                     if (!string.IsNullOrEmpty(contentsUrl))
                     {
-                        yield return Utils.FetchTexture(contentsUrl, (tex) =>
-                        {
-                            texture = (Texture2D)tex;
-                        });
-                    }
-                }
+                        if (texturePromise != null)
+                            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
 
-                if (texture != null)
-                {
-                    texture.wrapMode = unityWrap;
-                    texture.filterMode = unitySamplingMode;
-                    texture.Compress(false);
-                    texture.Apply(unitySamplingMode != FilterMode.Point, true);
+                        texturePromise = new AssetPromise_Texture(contentsUrl, unityWrap, unitySamplingMode, storeDefaultTextureInAdvance: true);
+                        texturePromise.OnSuccessEvent += (x) => texture = x.texture;
+                        texturePromise.OnFailEvent += (x) => { texture = null; };
+
+                        AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+                        yield return texturePromise;
+                    }
                 }
             }
         }
 
+        private int refCount;
+
+        public virtual void AttachTo(PBRMaterial material)
+        {
+            AddRefCount();
+        }
+
+        public virtual void AttachTo(BasicMaterial material)
+        {
+            AddRefCount();
+        }
+
+        public virtual void AttachTo(UIImage image)
+        {
+            AddRefCount();
+        }
+
+        public virtual void DetachFrom(PBRMaterial material)
+        {
+            RemoveRefCount();
+        }
+
+        public virtual void DetachFrom(BasicMaterial material)
+        {
+            RemoveRefCount();
+        }
+
+        public virtual void DetachFrom(UIImage image)
+        {
+            RemoveRefCount();
+        }
+
+        public void AddRefCount()
+        {
+            refCount++;
+        }
+
+        public void RemoveRefCount()
+        {
+            if (refCount == 0)
+                Dispose();
+        }
+
         public override void Dispose()
         {
-            if (texture != null)
+            if (texturePromise != null)
             {
-                UnityEngine.Object.Destroy(texture);
+                AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                texturePromise = null;
             }
 
             base.Dispose();

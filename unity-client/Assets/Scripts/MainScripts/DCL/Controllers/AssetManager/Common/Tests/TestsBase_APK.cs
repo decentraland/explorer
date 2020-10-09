@@ -15,7 +15,7 @@ namespace AssetPromiseKeeper_Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            MemoryManager.i.Initialize();
+            Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
             keeper = new APKType();
             yield break;
         }
@@ -24,7 +24,7 @@ namespace AssetPromiseKeeper_Tests
         protected override IEnumerator TearDown()
         {
             keeper.Cleanup();
-            yield return base.TearDown();
+            yield return TearDown_Memory();
         }
     }
 }

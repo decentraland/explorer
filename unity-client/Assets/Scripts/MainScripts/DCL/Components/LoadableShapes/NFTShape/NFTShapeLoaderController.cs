@@ -1,76 +1,93 @@
 ﻿using DCL.Components;
 using DCL.Configuration;
-using DCL.Helpers;
-using System;
+using DCL.Helpers.NFT;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.Networking;
+using System.Collections.Generic;
+using DCL.Controllers.Gif;
+using DCL;
 
 public class NFTShapeLoaderController : MonoBehaviour
 {
-    [Serializable]
-    public class NFTAssetData
-    {
-        [Serializable]
-        public class File
-        {
-            public string url;
-            public string role;
-        }
-
-        public File[] files;
-    }
-
     public enum NoiseType
     {
         ClassicPerlin,
         PeriodicPerlin,
         Simplex,
         SimplexNumericalGrad,
-        SimplexAnalyticalGrad
+        SimplexAnalyticalGrad,
+        None
     }
 
     public MeshRenderer meshRenderer;
     public new BoxCollider collider;
     public Color backgroundColor;
+    public GameObject spinner;
 
     [HideInInspector] public bool alreadyLoadedAsset = false;
 
     public event System.Action OnLoadingAssetSuccess;
     public event System.Action OnLoadingAssetFail;
 
+    [SerializeField]
+    NFTShapeMaterial[] materials;
+
     [Header("Noise Shader")]
-    [SerializeField] NoiseType noiseType = NoiseType.Simplex;
+    [SerializeField]
+    NoiseType noiseType = NoiseType.Simplex;
+
     [SerializeField] bool noiseIs3D = false;
     [SerializeField] bool noiseIsFractal = false;
 
-    Material frameMaterial;
     System.Action<LoadWrapper> OnSuccess;
     System.Action<LoadWrapper> OnFail;
     string darURLProtocol;
     string darURLRegistry;
     string darURLAsset;
-    MaterialPropertyBlock imageMaterialPropertyBlock;
-    MaterialPropertyBlock backgroundMaterialPropertyBlock;
+
+    public Material frameMaterial { private set; get; } = null;
+    public Material imageMaterial { private set; get; } = null;
+    public Material backgroundMaterial { private set; get; } = null;
 
     int BASEMAP_SHADER_PROPERTY = Shader.PropertyToID("_BaseMap");
     int COLOR_SHADER_PROPERTY = Shader.PropertyToID("_BaseColor");
 
-    Texture nftImageTexture;
+    DCL.ITexture nftAsset;
+    AssetPromise_Texture texturePromise = null;
 
     bool VERBOSE = false;
 
     void Awake()
     {
-        imageMaterialPropertyBlock = new MaterialPropertyBlock();
-        backgroundMaterialPropertyBlock = new MaterialPropertyBlock();
-        frameMaterial = meshRenderer.materials[2];
+        Material[] meshMaterials = new Material[materials.Length];
+        for (int i = 0; i < materials.Length; i++)
+        {
+            switch (materials[i].type)
+            {
+                case NFTShapeMaterial.MaterialType.BACKGROUND:
+                    backgroundMaterial = new Material(materials[i].material);
+                    meshMaterials[i] = backgroundMaterial;
+                    break;
+                case NFTShapeMaterial.MaterialType.FRAME:
+                    frameMaterial = materials[i].material;
+                    meshMaterials[i] = frameMaterial;
+                    break;
+                case NFTShapeMaterial.MaterialType.IMAGE:
+                    imageMaterial = new Material(materials[i].material);
+                    meshMaterials[i] = imageMaterial;
+                    break;
+            }
+        }
+        meshRenderer.materials = meshMaterials;
+
+        // NOTE: we use half scale to keep backward compatibility cause we are using 512px to normalize the scale with a 256px value that comes from the images
+        meshRenderer.transform.localScale = new Vector3(0.5f, 0.5f, 1);
 
         InitializePerlinNoise();
     }
 
-    public void LoadAsset(string url = "", bool loadEvenIfAlreadyLoaded = false)
+    public void LoadAsset(string url, bool loadEvenIfAlreadyLoaded = false)
     {
         if (string.IsNullOrEmpty(url) || (!loadEvenIfAlreadyLoaded && alreadyLoadedAsset)) return;
 
@@ -124,119 +141,126 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     public void UpdateBackgroundColor(Color newColor)
     {
-        meshRenderer.GetPropertyBlock(backgroundMaterialPropertyBlock, 1);
-        backgroundMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, newColor);
-        meshRenderer.SetPropertyBlock(backgroundMaterialPropertyBlock, 1);
+        if (backgroundMaterial == null)
+            return;
+
+        backgroundMaterial.SetColor(COLOR_SHADER_PROPERTY, newColor);
     }
 
+    string lastURLUsed = string.Empty;
     IEnumerator FetchNFTImage()
     {
-        string jsonURL = $"{NFTDataFetchingSettings.DAR_API_URL}/{darURLRegistry}/asset/{darURLAsset}";
-
-        UnityWebRequest www = UnityWebRequest.Get(jsonURL);
-        yield return www.SendWebRequest();
-
-        if (!www.WebRequestSucceded())
-        {
-            OnLoadingAssetFail?.Invoke();
-
-            Debug.LogError($"{www.responseCode} - {www.url}", gameObject);
-
-            yield break;
-        }
-
-        NFTAssetData currentAssetData = JsonUtility.FromJson<NFTAssetData>(www.downloadHandler.text);
-        if (currentAssetData.files == null)
-        {
-            Debug.LogError($"Didn't find any asset image for '{jsonURL}' for the NFTShape.");
-
-            yield break;
-        }
-
-        if (VERBOSE)
-        {
-            Debug.Log("NFT fetched JSON: " + www.downloadHandler.text);
-
-            Debug.Log("NFT Assets Found: ");
-            for (int i = 0; i < currentAssetData.files.Length; i++)
-            {
-                Debug.Log("file url: " + currentAssetData.files[i]?.url);
-            }
-        }
+        if (spinner != null)
+            spinner.SetActive(true);
 
         string thumbnailImageURL = null;
-        string dclImageURL = null;
         string previewImageURL = null;
+        string originalImageURL = null;
 
-        for (int i = 0; i < currentAssetData.files.Length; i++)
-        {
-            if (currentAssetData.files[i].role == "thumbnail")
-                thumbnailImageURL = currentAssetData.files[i].url;
-            else if (currentAssetData.files[i].role == "preview")
-                previewImageURL = currentAssetData.files[i].url;
-            else if (currentAssetData.files[i].role == "dcl-picture-frame-image")
-                dclImageURL = currentAssetData.files[i].url;
-        }
-
-        // We fetch and show the thumbnail image first
-        if (!string.IsNullOrEmpty(thumbnailImageURL))
-        {
-            yield return Utils.FetchTexture(thumbnailImageURL, (downloadedTex) =>
+        yield return NFTHelper.FetchNFTInfo(darURLRegistry, darURLAsset,
+            (nftInfo) =>
             {
-                SetFrameImage(downloadedTex);
+                thumbnailImageURL = nftInfo.thumbnailUrl;
+                previewImageURL = nftInfo.previewImageUrl;
+                originalImageURL = nftInfo.originalImageUrl;
+            },
+            (error) =>
+            {
+                Debug.LogError($"Didn't find any asset image for '{darURLRegistry}/{darURLAsset}' for the NFTShape.\n{error}");
+                OnLoadingAssetFail?.Invoke();
             });
-        }
 
-        // We fetch the final image
+        yield return new DCL.WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < 900f);
+
+        // We download the "preview" 256px image
         bool foundDCLImage = false;
-        if (!string.IsNullOrEmpty(dclImageURL))
+        if (!string.IsNullOrEmpty(previewImageURL))
         {
-            yield return Utils.FetchTexture(dclImageURL, (downloadedTex) =>
+            lastURLUsed = previewImageURL;
+
+            yield return WrappedTextureUtils.Fetch(previewImageURL, (downloadedTex, texturePromise) =>
             {
+
                 foundDCLImage = true;
+                this.texturePromise = texturePromise;
                 SetFrameImage(downloadedTex, resizeFrameMesh: true);
-            });
+            }, Asset_Gif.MaxSize.DONT_RESIZE);
         }
 
-        // We fall back to a common "preview" image if no "dcl image" was found
-        if (!foundDCLImage && !string.IsNullOrEmpty(previewImageURL))
+        //We fall back to the nft original image which can have a really big size
+        if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
-            yield return Utils.FetchTexture(previewImageURL, (downloadedTex) =>
+            lastURLUsed = originalImageURL;
+
+            yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedTex, texturePromise) =>
             {
+
+                foundDCLImage = true;
+                this.texturePromise = texturePromise;
                 SetFrameImage(downloadedTex, resizeFrameMesh: true);
-            });
+            }, Asset_Gif.MaxSize._256);
         }
 
-        OnLoadingAssetSuccess?.Invoke();
+        FinishLoading(foundDCLImage);
     }
 
-    void SetFrameImage(Texture newTexture, bool resizeFrameMesh = false)
+    void FinishLoading(bool loadedSuccessfully)
     {
-        if (newTexture == null) return;
-
-        nftImageTexture = newTexture;
-
-        meshRenderer.GetPropertyBlock(imageMaterialPropertyBlock, 0);
-        imageMaterialPropertyBlock.SetTexture(BASEMAP_SHADER_PROPERTY, newTexture);
-        imageMaterialPropertyBlock.SetColor(COLOR_SHADER_PROPERTY, Color.white);
-        meshRenderer.SetPropertyBlock(imageMaterialPropertyBlock, 0);
-
-        if (resizeFrameMesh)
+        if (loadedSuccessfully)
         {
-            Vector3 newScale = new Vector3(newTexture.width / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.x,
-                                            newTexture.height / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.y, 1f);
+            if (spinner != null)
+                spinner.SetActive(false);
 
-            meshRenderer.transform.localScale = newScale;
+            OnLoadingAssetSuccess?.Invoke();
         }
         else
         {
-            meshRenderer.transform.localScale = Vector3.one;
+            OnLoadingAssetFail?.Invoke();
         }
+    }
+
+    void SetFrameImage(DCL.ITexture newAsset, bool resizeFrameMesh = false)
+    {
+        if (newAsset == null) return;
+
+        nftAsset = newAsset;
+
+        if (nftAsset is Asset_Gif gifAsset)
+        {
+            gifAsset.OnFrameTextureChanged -= UpdateTexture;
+            gifAsset.OnFrameTextureChanged += UpdateTexture;
+            gifAsset.Play(false);
+        }
+
+        UpdateTexture(nftAsset.texture);
+
+        if (resizeFrameMesh)
+        {
+            Vector3 newScale = new Vector3(newAsset.width / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.x,
+                newAsset.height / NFTDataFetchingSettings.NORMALIZED_DIMENSIONS.y, 1f);
+
+            meshRenderer.transform.localScale = newScale;
+        }
+    }
+
+    public void UpdateTexture(Texture2D texture)
+    {
+        if (imageMaterial == null)
+            return;
+
+        imageMaterial.SetTexture(BASEMAP_SHADER_PROPERTY, texture);
+        imageMaterial.SetColor(COLOR_SHADER_PROPERTY, Color.white);
     }
 
     void InitializePerlinNoise()
     {
+        if (frameMaterial == null)
+            return;
+
         frameMaterial.shaderKeywords = null;
+
+        if (noiseType == NoiseType.None)
+            return;
 
         switch (noiseType)
         {
@@ -266,9 +290,23 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void OnDestroy()
     {
-        if (nftImageTexture != null)
+        if (texturePromise != null)
         {
-            UnityEngine.Object.Destroy(nftImageTexture);
+            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+            texturePromise = null;
+        }
+        else
+        {
+            nftAsset?.Dispose();
+        }
+
+        if (backgroundMaterial != null)
+        {
+            Object.Destroy(backgroundMaterial);
+        }
+        if (imageMaterial != null)
+        {
+            Object.Destroy(imageMaterial);
         }
     }
 }

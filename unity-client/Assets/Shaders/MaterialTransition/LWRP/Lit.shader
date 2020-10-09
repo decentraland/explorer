@@ -4,9 +4,10 @@ Shader "DCL/LWRP/Lit"
     {
         // Specular vs Metallic workflow
         [HideInInspector] _WorkflowMode("WorkflowMode", Float) = 1.0
-        
+
         [MainColor] _BaseColor("Color", Color) = (0.5,0.5,0.5,1)
         [MainTexture] _BaseMap("Albedo", 2D) = "white" {}
+        _AlphaTexture("Alpha Texture", 2D) = "white" {}
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
@@ -45,10 +46,10 @@ Shader "DCL/LWRP/Lit"
         [HideInInspector] _ZWrite("__zw", Float) = 1.0
         [HideInInspector] _Cull("__cull", Float) = 2.0
 
-        _ReceiveShadows("Receive Shadows", Float) = 1.0        
+        _ReceiveShadows("Receive Shadows", Float) = 1.0
         // Editmode props
         [HideInInspector] _QueueOffset("Queue offset", Float) = 0.0
-        
+
         // ObsoleteProperties
         [HideInInspector] _MainTex("BaseMap", 2D) = "white" {}
         [HideInInspector] _Color("Base Color", Color) = (0.5, 0.5, 0.5, 1)
@@ -66,7 +67,7 @@ Shader "DCL/LWRP/Lit"
         // Lightweight Pipeline tag is required. If Lightweight render pipeline is not set in the graphics settings
         // this Subshader will fail. One can add a subshader below or fallback to Standard built-in to make this
         // material work with both Lightweight Render Pipeline and Builtin Unity Pipeline
-        Tags{"RenderType" = "Opaque" "RenderPipeline" = "LightweightPipeline" "IgnoreProjector" = "True"}
+        Tags{"RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True"}
         LOD 300
 
         // ------------------------------------------------------------------
@@ -76,7 +77,7 @@ Shader "DCL/LWRP/Lit"
             // Lightmode matches the ShaderPassName set in LightweightRenderPipeline.cs. SRPDefaultUnlit and passes with
             // no LightMode tag are also rendered by Lightweight Render Pipeline
             Name "ForwardLit"
-            Tags{"LightMode" = "LightweightForward"}
+            Tags{"LightMode" = "UniversalForward"}
 
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
@@ -159,7 +160,7 @@ Shader "DCL/LWRP/Lit"
             #pragma fragment ShadowPassFragment
 
             #include "LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/ShadowCasterPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
             ENDHLSL
         }
 
@@ -191,7 +192,7 @@ Shader "DCL/LWRP/Lit"
             #pragma multi_compile_instancing
 
             #include "LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/DepthOnlyPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
             ENDHLSL
         }
 
@@ -220,12 +221,12 @@ Shader "DCL/LWRP/Lit"
             #pragma shader_feature _SPECGLOSSMAP
 
             #include "LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/LitMetaPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitMetaPass.hlsl"
 
             ENDHLSL
         }
 
     }
     FallBack "Hidden/InternalErrorShader"
-    CustomEditor "UnityEditor.Rendering.LWRP.ShaderGUI.LitShader"
+    CustomEditor "UnityEditor.Rendering.Universal.ShaderGUI.LitShader"
 }

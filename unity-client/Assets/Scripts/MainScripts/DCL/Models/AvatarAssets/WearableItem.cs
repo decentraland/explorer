@@ -132,7 +132,7 @@ public class WearableItem : Item
     {
         switch (rarity)
         {
-            case WearableLiterals.ItemRarity.SWANKY:
+            case WearableLiterals.ItemRarity.RARE:
                 return 5000;
             case WearableLiterals.ItemRarity.EPIC:
                 return 1000;
@@ -150,6 +150,27 @@ public class WearableItem : Item
     public string ComposeThumbnailUrl()
     {
         return baseUrl + thumbnail;
+    }
+
+    public static HashSet<string> CompoundHidesList(string bodyShapeId, List<WearableItem> wearables)
+    {
+        HashSet<string> result = new HashSet<string>();
+        //Last wearable added has priority over the rest
+        for (int i = wearables.Count - 1; i >= 0; i--)
+        {
+            var wearableItem = wearables[i];
+
+            if (result.Contains(wearableItem.category)) //Skip hidden elements to avoid two elements hiding each other
+                continue;
+
+            var wearableHidesList = wearableItem.GetHidesList(bodyShapeId);
+            if (wearableHidesList != null)
+            {
+                result.UnionWith(wearableHidesList);
+            }
+        }
+
+        return result;
     }
 
 }

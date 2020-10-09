@@ -2,6 +2,13 @@
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using DCL;
+using DCL.Components;
+//using DCL.Configuration;
+using DCL.Controllers;
+using DCL.Helpers;
+//using DCL.Interface;
+using DCL.Models;
 
 namespace DownloadableClient
 {
@@ -31,7 +38,7 @@ namespace DownloadableClient
             AsyncOperation sceneOperation = SceneManager.LoadSceneAsync("InitialScene", LoadSceneMode.Additive);
             yield return sceneOperation;
 
-            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
 
             DCL.WSSController.i.openBrowserWhenStart = true;
             //DCL.WSSController.i.baseUrlMode = DCL.WSSController.BaseUrl.LOCAL_HOST;
@@ -54,11 +61,11 @@ namespace DownloadableClient
             }
         }
 
-        private void OnRenderingStateChanged(bool isRendering)
+        private void OnRenderingStateChanged(bool newValue, bool oldValue)
         {
-            if (isRendering)
+            if (newValue)
             {
-                RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+                CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
                 Application.logMessageReceived -= OnLogMessageReceived;
                 canvas.gameObject.SetActive(false);
                 sceneCamera.gameObject.SetActive(false);

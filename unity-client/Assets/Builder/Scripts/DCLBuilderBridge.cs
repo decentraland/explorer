@@ -1,16 +1,17 @@
-using UnityEngine;
+using System;
+using Builder.Gizmos;
+using DCL;
+using DCL.Components;
+using DCL.Configuration;
+using DCL.Controllers;
+using DCL.Helpers;
+using DCL.Interface;
+using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
-using DCL;
-using DCL.Models;
-using DCL.Controllers;
-using DCL.Interface;
-using DCL.Components;
-using DCL.Helpers;
-using DCL.Configuration;
-using Builder.Gizmos;
-using UnityEngine.Rendering.LWRP;
+using UnityEngine;
 using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
 
 namespace Builder
 {
@@ -156,6 +157,7 @@ namespace Builder
             {
                 StopCoroutine(screenshotCoroutine);
             }
+
             screenshotCoroutine = StartCoroutine(TakeScreenshotRoutine(id));
         }
 
@@ -171,7 +173,9 @@ namespace Builder
                 currentScene.OnEntityAdded -= OnEntityIsAdded;
                 currentScene.OnEntityRemoved -= OnEntityIsRemoved;
             }
+
             SetCurrentScene();
+            HideHUDs();
         }
 
         public void SetBuilderCameraPosition(string position)
@@ -217,6 +221,7 @@ namespace Builder
                         {
                             DCLCharacterController.i.transform.rotation = Quaternion.Euler(0f, yaw * Mathf.Rad2Deg, 0f);
                         }
+
                         if (cameraController)
                         {
                             var cameraRotation = new CameraController.SetRotationPayload()
@@ -304,6 +309,7 @@ namespace Builder
                     loadedScene = iterator.Current.Value;
                 }
             }
+
             return loadedScene;
         }
 
@@ -316,6 +322,8 @@ namespace Builder
             cameraController = Object.FindObjectOfType<CameraController>();
             cursorController = Object.FindObjectOfType<CursorController>();
             mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
+            var playerAvatarController = Object.FindObjectOfType<PlayerAvatarController>();
+
             if (mouseCatcher != null)
             {
                 mouseCatcher.enabled = false;
@@ -333,9 +341,16 @@ namespace Builder
             {
                 cameraController.gameObject.SetActive(false);
             }
+
             if (cursorController)
             {
                 cursorController.gameObject.SetActive(false);
+            }
+
+            // NOTE: no third person camera in builder yet, so avoid rendering being locked waiting for avatar.
+            if (playerAvatarController)
+            {
+                CommonScriptableObjects.rendererState.RemoveLock(playerAvatarController);
             }
 
             SceneController.i?.fpsPanel.SetActive(false);
@@ -359,20 +374,21 @@ namespace Builder
 
         private void OnEntityIsAdded(DecentralandEntity entity)
         {
-            if (!isPreviewMode)
-            {
-                var builderEntity = AddBuilderEntityComponent(entity);
-                OnEntityAdded?.Invoke(builderEntity);
+            if (isPreviewMode)
+                return;
 
-                entity.OnShapeUpdated += OnEntityShapeUpdated;
+            var builderEntity = AddBuilderEntityComponent(entity);
+            OnEntityAdded?.Invoke(builderEntity);
 
-                builderWebInterface.SendEntityStartLoad(entity);
-            }
+            entity.OnShapeUpdated += OnEntityShapeUpdated;
+
+            builderWebInterface.SendEntityStartLoad(entity);
         }
 
         private void OnEntityIsRemoved(DecentralandEntity entity)
         {
             var builderEntity = entity.gameObject.GetComponent<DCLBuilderEntity>();
+
             if (builderEntity != null)
             {
                 OnEntityRemoved?.Invoke(builderEntity);
@@ -399,8 +415,9 @@ namespace Builder
                 DCLBuilderGizmoManager.OnGizmoTransformObject += OnGizmoTransformObject;
                 DCLBuilderEntity.OnEntityShapeUpdated += ProcessEntityBoundaries;
                 DCLBuilderEntity.OnEntityTransformUpdated += ProcessEntityBoundaries;
-                RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             }
+
             isGameObjectActive = true;
         }
 
@@ -416,7 +433,7 @@ namespace Builder
             DCLBuilderGizmoManager.OnGizmoTransformObject -= OnGizmoTransformObject;
             DCLBuilderEntity.OnEntityShapeUpdated -= ProcessEntityBoundaries;
             DCLBuilderEntity.OnEntityTransformUpdated -= ProcessEntityBoundaries;
-            RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
 
         private void OnObjectDragEnd()
@@ -425,6 +442,7 @@ namespace Builder
             {
                 NotifyGizmosTransformEvent(selectedEntities, DCLGizmos.Gizmo.NONE);
             }
+
             entitiesMoved = false;
         }
 
@@ -440,6 +458,7 @@ namespace Builder
             {
                 NotifyGizmosTransformEvent(selectedEntities, gizmoType);
             }
+
             entitiesMoved = false;
         }
 
@@ -505,10 +524,15 @@ namespace Builder
             cameraController?.gameObject.SetActive(isPreviewMode);
             cursorController?.gameObject.SetActive(isPreviewMode);
 
+            if (!isPreview)
+            {
+                HideHUDs();
+            }
+
             SetCaptureKeyboardInputEnabled(isPreview);
         }
 
-        private void OnRenderingStateChanged(bool renderingEnabled)
+        private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             if (renderingEnabled)
             {
@@ -526,6 +550,7 @@ namespace Builder
         private void SetCurrentScene()
         {
             currentScene = GetLoadedScene();
+
             if (currentScene)
             {
                 currentScene.OnEntityAdded += OnEntityIsAdded;
@@ -534,6 +559,29 @@ namespace Builder
                 OnSceneChanged?.Invoke(currentScene);
             }
         }
+
+        private void HideHUDs()
+        {
+            IHUD hud;
+            for (int i = 0; i < (int)HUDController.HUDElementID.COUNT; i++)
+            {
+                hud = HUDController.i.GetHUDElement((HUDController.HUDElementID)i);
+                if (hud != null)
+                {
+                    hud.SetVisibility(false);
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (currentScene)
+            {
+                currentScene.OnEntityAdded -= OnEntityIsAdded;
+                currentScene.OnEntityRemoved -= OnEntityIsRemoved;
+            }
+        }
+
 
         private DCLBuilderEntity AddBuilderEntityComponent(DecentralandEntity entity)
         {
@@ -559,7 +607,7 @@ namespace Builder
                 outOfBoundariesEntitiesId.RemoveAt(entityIndexInList);
             }
 
-            currentScene.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
+            DCL.SceneController.i.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
         }
 
         private void SendOutOfBoundariesEntities()
@@ -573,14 +621,14 @@ namespace Builder
             {
                 for (int i = 0; i < selectedEntities.Count; i++)
                 {
-                    currentScene.boundariesChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
+                    DCL.SceneController.i.boundariesChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
                 }
             }
         }
 
         private void SetupRendererPipeline()
         {
-            LightweightRenderPipelineAsset lwrpa = ScriptableObject.Instantiate(GraphicsSettings.renderPipelineAsset) as LightweightRenderPipelineAsset;
+            UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lwrpa = ScriptableObject.Instantiate(GraphicsSettings.renderPipelineAsset) as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
 
             if (lwrpa != null)
             {
@@ -592,14 +640,14 @@ namespace Builder
 
         private void SetupQualitySettings()
         {
-            DCL.SettingsHUD.QualitySettings settings = new DCL.SettingsHUD.QualitySettings()
+            DCL.SettingsData.QualitySettings settings = new DCL.SettingsData.QualitySettings()
             {
-                textureQuality = DCL.SettingsHUD.QualitySettings.TextureQuality.FullRes,
-                antiAliasing = UnityEngine.Rendering.LWRP.MsaaQuality._2x,
+                baseResolution = DCL.SettingsData.QualitySettings.BaseResolution.BaseRes_1080,
+                antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._2x,
                 renderScale = 1,
                 shadows = true,
                 softShadows = true,
-                shadowResolution = UnityEngine.Rendering.LWRP.ShadowResolution._256,
+                shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._256,
                 cameraDrawDistance = 100,
                 bloom = true,
                 colorGrading = true

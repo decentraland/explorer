@@ -1,16 +1,16 @@
-import { DEBUG_ANALYTICS } from 'config'
+import { DEBUG_ANALYTICS, getTLD } from 'config'
 
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { Vector2, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src'
 import { defaultLogger } from 'shared/logger'
 
-import { chatObservable, ChatEvent } from './comms/chat'
 import { avatarMessageObservable } from './comms/peers'
 import { AvatarMessageType } from './comms/interface/types'
 import { positionObservable } from './world/positionThings'
 import { uuid } from '../decentraland-ecs/src/ecs/helpers'
+import { AnalyticsContainer } from './types'
 
-declare var window: any
+declare const window: Window & AnalyticsContainer
 
 export type SegmentEvent = {
   name: string
@@ -22,6 +22,32 @@ const sessionId = uuid()
 const trackingQueue: SegmentEvent[] = []
 let tracking = false
 
+enum AnalyticsAccount {
+  PRD = '1plAT9a2wOOgbPCrTaU8rgGUMzgUTJtU',
+  DEV = 'a4h4BC4dL1v7FhIQKKuPHEdZIiNRDVhc'
+}
+
+// TODO fill with segment keys and integrate identity server
+export function initializeAnalytics() {
+  const TLD = getTLD()
+  switch (TLD) {
+    case 'org':
+      if (
+        globalThis.location.host === 'play.decentraland.org' ||
+        globalThis.location.host === 'explorer.decentraland.org'
+      ) {
+        return initialize(AnalyticsAccount.PRD)
+      }
+      return initialize(AnalyticsAccount.DEV)
+    case 'today':
+      return initialize(AnalyticsAccount.DEV)
+    case 'zone':
+      return initialize(AnalyticsAccount.DEV)
+    default:
+      return initialize(AnalyticsAccount.DEV)
+  }
+}
+
 export async function initialize(segmentKey: string): Promise<void> {
   hookObservables()
   if (!window.analytics) {
@@ -32,6 +58,9 @@ export async function initialize(segmentKey: string): Promise<void> {
     // loading client for the first time
     window.analytics.load(segmentKey)
     window.analytics.page()
+    window.analytics.ready(() => {
+      window.analytics.timeout(10000)
+    })
   }
 }
 
@@ -66,7 +95,7 @@ function startTracking() {
 }
 
 function track({ name, data }: SegmentEvent) {
-  window.analytics.track(name, data, {}, () => {
+  window.analytics.track(name, data, { integrations: { Klaviyo: false } }, () => {
     if (trackingQueue.length === 0) {
       tracking = false
       return
@@ -76,17 +105,6 @@ function track({ name, data }: SegmentEvent) {
 }
 
 function hookObservables() {
-  chatObservable.add(event => {
-    if (event.type === ChatEvent.MESSAGE_RECEIVED) {
-      queueTrackingEvent('Chat message received', { length: event.messageEntry.message.length })
-    } else if (event.type === ChatEvent.MESSAGE_SENT) {
-      queueTrackingEvent('Send chat message', {
-        messageId: event.messageEntry.id,
-        length: event.messageEntry.message.length
-      })
-    }
-  })
-
   avatarMessageObservable.add(({ type, ...data }) => {
     if (type === AvatarMessageType.USER_VISIBLE || type === AvatarMessageType.USER_POSE) {
       return

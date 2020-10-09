@@ -1,24 +1,39 @@
+using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace DCL
 {
-    public class MemoryManager : Singleton<MemoryManager>
+    public class MemoryManager
     {
-        private const float TIME_TO_POOL_CLEANUP = 60.0f;
-        private const float MIN_TIME_BETWEEN_UNLOAD_ASSETS = 10.0f;
-        private float lastTimeUnloadUnusedAssets = 0;
+        private const uint MAX_USED_MEMORY = 1300 * 1024 * 1024;
+        private const float TIME_FOR_NEW_MEMORY_CHECK = 1.0f;
+
+        private List<object> idsToCleanup = new List<object>();
 
         public void Initialize()
         {
             CoroutineStarter.Start(AutoCleanup());
         }
 
-        // TODO: here we'll define cleanup criteria
+        public MemoryManager()
+        {
+            CommonScriptableObjects.rendererState.OnChange += (isEnable, prevState) =>
+            {
+                if (isEnable)
+                {
+                    ParcelScene.parcelScenesCleaner.ForceCleanup();
+                    Resources.UnloadUnusedAssets();
+                }
+            };
+        }
+
         bool NeedsMemoryCleanup()
         {
-            return true;
+            long usedMemory = Profiler.GetTotalAllocatedMemoryLong() + Profiler.GetMonoUsedSizeLong() + Profiler.GetAllocatedMemoryForGraphicsDriver();
+            return usedMemory >= MAX_USED_MEMORY;
         }
 
         IEnumerator AutoCleanup()
@@ -30,7 +45,7 @@ namespace DCL
                     yield return CleanupPoolsIfNeeded();
                 }
 
-                yield return new WaitForSecondsRealtime(0.1f);
+                yield return new WaitForSecondsRealtime(TIME_FOR_NEW_MEMORY_CHECK);
             }
         }
 
@@ -39,15 +54,17 @@ namespace DCL
             if (forceCleanup)
                 return true;
 
-            bool timeout = DCLTime.realtimeSinceStartup - pool.lastGetTime >= TIME_TO_POOL_CLEANUP;
-            return timeout && pool.usedObjectsCount == 0;
+            if (pool.persistent)
+                return false;
+
+            return pool.usedObjectsCount == 0;
         }
 
         public IEnumerator CleanupPoolsIfNeeded(bool forceCleanup = false)
         {
             using (var iterator = PoolManager.i.pools.GetEnumerator())
             {
-                List<object> idsToCleanup = new List<object>();
+                idsToCleanup.Clear();
 
                 while (iterator.MoveNext())
                 {
@@ -58,22 +75,15 @@ namespace DCL
                         idsToCleanup.Add(pool.id);
                     }
                 }
+            }
 
-                int count = idsToCleanup.Count;
-
-                if (count > 0)
+            int count = idsToCleanup.Count;
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
                 {
-                    for (int i = 0; i < count; i++)
-                    {
-                        PoolManager.i.RemovePool(idsToCleanup[i]);
-                        yield return null;
-                    }
-
-                    if (DCLTime.realtimeSinceStartup - lastTimeUnloadUnusedAssets >= MIN_TIME_BETWEEN_UNLOAD_ASSETS)
-                    {
-                        lastTimeUnloadUnusedAssets = DCLTime.realtimeSinceStartup;
-                        Resources.UnloadUnusedAssets();
-                    }
+                    PoolManager.i.RemovePool(idsToCleanup[i]);
+                    yield return null;
                 }
             }
         }

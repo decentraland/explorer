@@ -4,10 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [assembly: InternalsVisibleTo("AvatarEditorHUDTests")]
+
 public class AvatarEditorHUDView : MonoBehaviour
 {
     private const string VIEW_PATH = "AvatarEditorHUD";
     private const string VIEW_OBJECT_NAME = "_AvatarEditorHUD";
+
+    public bool isOpen { get; private set; }
 
     [System.Serializable]
     public class AvatarEditorNavigationInfo
@@ -47,20 +50,33 @@ public class AvatarEditorHUDView : MonoBehaviour
     [SerializeField] internal Button doneButton;
     [SerializeField] internal Button exitButton;
 
-    [Header("Collectibles")]
-    [SerializeField] internal GameObject web3Container;
+    [Header("Collectibles")] [SerializeField]
+    internal GameObject web3Container;
+
     [SerializeField] internal Button web3GoToMarketplaceButton;
     [SerializeField] internal GameObject noWeb3Container;
     [SerializeField] internal Button noWeb3GoToMarketplaceButton;
 
-    internal CharacterPreviewController characterPreviewController;
+    internal static CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
 
+    [HideInInspector]
+    public event System.Action<AvatarModel> OnAvatarAppear;
+    [HideInInspector]
+    public event System.Action<bool> OnSetVisibility;
+    [HideInInspector]
+    public event System.Action OnRandomize;
+
     private void Awake()
     {
-        characterPreviewController = GameObject.Instantiate(characterPreviewPrefab).GetComponent<CharacterPreviewController>();
-        characterPreviewController.name = "_CharacterPreviewController";
+        if (characterPreviewController == null)
+        {
+            characterPreviewController = GameObject.Instantiate(characterPreviewPrefab).GetComponent<CharacterPreviewController>();
+            characterPreviewController.name = "_CharacterPreviewController";
+        }
+
+        isOpen = false;
     }
 
     private void Initialize(AvatarEditorHUDController controller)
@@ -95,6 +111,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         {
             InitializeNavigationInfo(navigationInfos[i]);
         }
+
         InitializeNavigationInfo(collectiblesNavigationInfo);
 
         characterPreviewRotation.OnHorizontalRotation += characterPreviewController.Rotate;
@@ -123,6 +140,7 @@ public class AvatarEditorHUDView : MonoBehaviour
             wearableGridPairs[i].selector.OnSellClicked += controller.SellCollectible;
             selectorsByCategory.Add(wearableGridPairs[i].categoryFilter, wearableGridPairs[i].selector);
         }
+
         collectiblesItemSelector.OnItemClicked += controller.WearableClicked;
         collectiblesItemSelector.OnSellClicked += controller.SellCollectible;
 
@@ -152,6 +170,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                 wearableGridPairs[i].selector.SetBodyShape(bodyShape.id);
             }
         }
+
         collectiblesItemSelector.SetBodyShape(bodyShape.id);
     }
 
@@ -198,6 +217,7 @@ public class AvatarEditorHUDView : MonoBehaviour
                 wearableGridPairs[i].selector.UnselectAll();
             }
         }
+
         collectiblesItemSelector.UnselectAll();
     }
 
@@ -206,12 +226,23 @@ public class AvatarEditorHUDView : MonoBehaviour
         if (avatarModel?.wearables == null) return;
 
         SetLoadingPanel(true);
-        characterPreviewController.UpdateModel(avatarModel, () => SetLoadingPanel(false));
+        doneButton.interactable = false;
+        characterPreviewController.UpdateModel(avatarModel,
+            () =>
+            {
+                SetLoadingPanel(false);
+
+                if (doneButton != null)
+                    doneButton.interactable = true;
+
+                OnAvatarAppear?.Invoke(avatarModel);
+            });
     }
 
     private void SetLoadingPanel(bool active)
     {
-        loadingPanel.SetActive(active);
+        if (loadingPanel != null)
+            loadingPanel.SetActive(active);
     }
 
     public void AddWearable(WearableItem wearableItem, int amount)
@@ -255,11 +286,13 @@ public class AvatarEditorHUDView : MonoBehaviour
                 enumerator.Current.Value.RemoveAllItemToggle();
             }
         }
+
         collectiblesItemSelector.RemoveAllItemToggle();
     }
 
     private void OnRandomizeButton()
     {
+        OnRandomize?.Invoke();
         controller.RandomizeWearables();
     }
 
@@ -274,10 +307,12 @@ public class AvatarEditorHUDView : MonoBehaviour
         controller.DiscardAndClose();
     }
 
-    private void OnSnapshotsReady(Sprite face, Sprite body)
+    private void OnSnapshotsReady(Sprite face, Sprite face128, Sprite face256, Sprite body)
     {
         doneButton.interactable = true;
-        controller.SaveAvatar(face, body);
+        controller.SaveAvatar(face, face128, face256, body);
+
+        characterPreviewController.ResetRenderersLayer();
     }
 
     public void SetVisibility(bool visible)
@@ -285,6 +320,19 @@ public class AvatarEditorHUDView : MonoBehaviour
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
+
+        if (visible && !isOpen)
+        {
+            AudioScriptableObjects.dialogOpen.Play(true);
+            OnSetVisibility?.Invoke(visible);
+        }
+        else if (!visible && isOpen)
+        {
+            AudioScriptableObjects.dialogClose.Play(true);
+            OnSetVisibility?.Invoke(visible);
+        }
+
+        isOpen = visible;
     }
 
     public void CleanUp()
@@ -308,11 +356,18 @@ public class AvatarEditorHUDView : MonoBehaviour
             collectiblesItemSelector.OnItemClicked -= controller.WearableClicked;
             collectiblesItemSelector.OnSellClicked -= controller.SellCollectible;
         }
+
         if (skinColorSelector != null) skinColorSelector.OnColorChanged -= controller.SkinColorClicked;
         if (eyeColorSelector != null) eyeColorSelector.OnColorChanged -= controller.EyesColorClicked;
         if (hairColorSelector != null) hairColorSelector.OnColorChanged -= controller.HairColorClicked;
 
         if (this != null)
             Destroy(gameObject);
+
+        if (characterPreviewController != null)
+        {
+            Destroy(characterPreviewController.gameObject);
+            characterPreviewController = null;
+        }
     }
 }

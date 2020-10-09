@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System.Collections;
 using UnityEngine;
 
@@ -33,10 +33,15 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+
             audioSource = gameObject.GetOrCreateComponent<AudioSource>();
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
-            audioSource.volume = model.volume;
+            CommonScriptableObjects.sceneID.OnChange -= OnCurrentSceneChanged;
+            CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneChanged;
+
+            audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) ? model.volume : 0f;
             audioSource.loop = model.loop;
             audioSource.pitch = model.pitch;
             audioSource.spatialBlend = 1;
@@ -77,8 +82,15 @@ namespace DCL.Components
             yield return null;
         }
 
+        private void OnCurrentSceneChanged(string currentSceneId, string previousSceneId)
+        {
+            audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
+        }
+
         private void OnDestroy()
         {
+            CommonScriptableObjects.sceneID.OnChange -= OnCurrentSceneChanged;
+
             //NOTE(Brian): Unsuscribe events.
             InitDCLAudioClip(null);
         }

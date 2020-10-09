@@ -8,21 +8,23 @@ import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
 
 import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
-import { IScene, normalizeContentMappings, ILand } from '../shared/types'
+import { Wearable } from '../shared/profiles/types'
+import { SceneJsonData, ILand, HUDElementID } from '../shared/types'
+import { normalizeContentMappings } from '../shared/selectors'
 import { SceneWorker } from '../shared/world/SceneWorker'
 import { initializeUnity } from '../unity-interface/initializer'
 import {
-  UnityParcelScene,
   loadBuilderScene,
   updateBuilderScene,
-  futures,
-  unloadCurrentBuilderScene,
-  unityInterface
+  unloadCurrentBuilderScene
 } from '../unity-interface/dcl'
 import defaultLogger from '../shared/logger'
 import { uuid } from '../decentraland-ecs/src/ecs/helpers'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
+import { UnityParcelScene } from 'unity-interface/UnityParcelScene'
+import { unityInterface } from 'unity-interface/UnityInterface'
+import { futures } from 'unity-interface/BrowserInterface'
 
 const evtEmitter = new EventEmitter()
 const initializedEngine = future<void>()
@@ -35,9 +37,9 @@ let builderSceneLoaded: IFuture<boolean> = future()
  * Function executed by builder
  * It creates the builder scene, binds the scene events and stubs the content mappings
  */
-async function createBuilderScene(scene: IScene & { baseUrl: string }) {
+async function createBuilderScene(scene: SceneJsonData, baseUrl: string, mappings: any) {
   const isFirstRun = unityScene === undefined
-  const sceneData = await getSceneData(scene)
+  const sceneData = await getSceneData(scene, baseUrl, mappings)
   unityScene = loadBuilderScene(sceneData)
   bindSceneEvents()
 
@@ -60,10 +62,9 @@ async function createBuilderScene(scene: IScene & { baseUrl: string }) {
   evtEmitter.emit('ready', {})
 }
 
-async function renewBuilderScene(scene: IScene & { baseUrl: string }) {
+async function renewBuilderScene(scene: SceneJsonData, mappings: any) {
   if (unityScene) {
-    scene.baseUrl = unityScene.data.baseUrl
-    const sceneData = await getSceneData(scene)
+    const sceneData = await getSceneData(scene, unityScene.data.baseUrl, mappings)
     updateBuilderScene(sceneData)
   }
 }
@@ -72,25 +73,22 @@ async function renewBuilderScene(scene: IScene & { baseUrl: string }) {
  * It fakes the content mappings for being used at the Builder without
  * content server plus loads and creates the scene worker
  */
-async function getSceneData(scene: IScene & { baseUrl: string }): Promise<ILand> {
+async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings: any): Promise<ILand> {
   const id = getBaseCoords(scene)
-  const publisher = '0x0'
-  const contents = normalizeContentMappings(scene._mappings || [])
+  const contents = normalizeContentMappings(mappings || [])
 
-  if (!scene.baseUrl) {
+  if (!baseUrl) {
     throw new Error('baseUrl missing in scene')
   }
 
   return {
-    name: 'Editor scene',
-    baseUrl: scene.baseUrl,
+    baseUrl: baseUrl,
     baseUrlBundles: '',
     sceneId: '0, 0',
-    scene,
+    sceneJsonData: scene,
     mappingsResponse: {
       contents,
       parcel_id: id,
-      publisher,
       root_cid: 'Qmtest'
     }
   }
@@ -99,7 +97,7 @@ async function getSceneData(scene: IScene & { baseUrl: string }): Promise<ILand>
 /**
  * It returns base parcel if exists on `scene.json` or "0,0" if `baseParcel` missing
  */
-function getBaseCoords(scene: IScene): string {
+function getBaseCoords(scene: SceneJsonData): string {
   if (scene && scene.scene && scene.scene.base) {
     const [x, y] = scene.scene.base.split(',').map($ => parseInt($, 10))
     return `${x},${y}`
@@ -172,6 +170,10 @@ namespace editor {
     try {
       await initializeUnity(container, buildConfigPath)
       defaultLogger.log('Engine initialized.')
+      unityInterface.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+      unityInterface.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
+      unityInterface.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+
       initializedEngine.resolve()
     } catch (err) {
       defaultLogger.error('Error loading Unity', err)
@@ -183,7 +185,7 @@ namespace editor {
   export async function handleMessage(message: any) {
     if (message.type === 'update') {
       await initializedEngine
-      await createBuilderScene(message.payload.scene)
+      await createBuilderScene(message.payload.scene, message.payload.scene.baseUrl, message.payload.scene._mappings)
     }
   }
 
@@ -211,8 +213,7 @@ namespace editor {
       const { worker } = unityScene
       if (action.payload.mappings) {
         const scene = { ...action.payload.scene }
-        scene._mappings = action.payload.mappings
-        await renewBuilderScene(scene)
+        await renewBuilderScene(scene, action.payload.mappings)
       }
       worker.engineAPI!.sendSubscriptionEvent('externalAction', action)
     }
@@ -275,6 +276,14 @@ namespace editor {
     } else {
       return loadingEntities
     }
+  }
+
+  export function addWearablesToCatalog(wearables: Wearable[]) {
+    unityInterface.AddWearablesToCatalog(wearables)
+  }
+
+  export function removeWearablesFromCatalog(wearableIds: string[]) {
+    unityInterface.RemoveWearablesFromCatalog(wearableIds)
   }
 
   export function takeScreenshot(mime?: string): IFuture<string> {

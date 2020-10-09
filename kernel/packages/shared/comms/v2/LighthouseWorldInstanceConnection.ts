@@ -1,18 +1,28 @@
 import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
-import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, PackageType } from '../interface/types'
+import {
+  Package,
+  BusMessage,
+  ChatMessage,
+  ProfileVersion,
+  UserInformation,
+  PackageType,
+  VoiceFragment
+} from '../interface/types'
 import { Position, positionHash } from '../interface/utils'
 import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
-import { Peer as PeerType, PacketCallback } from 'decentraland-katalyst-peer/src/Peer'
-import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
+import { Peer as PeerType } from 'decentraland-katalyst-peer/src/Peer'
+import { PacketCallback } from 'decentraland-katalyst-peer/src/types'
+import { ChatData, CommsMessage, ProfileData, SceneData, PositionData, VoiceData } from './proto/comms_pb'
 import { Realm, CommsStatus } from 'shared/dao/types'
+import { compareVersions } from 'atomicHelpers/semverCompare'
 
 import * as Long from 'long'
 declare const window: any
 window.Long = Long
 
-const { Peer } = require('decentraland-katalyst-peer')
+const { Peer, buildCatalystPeerStatsData } = require('decentraland-katalyst-peer')
 
 const NOOP = () => {
   // do nothing
@@ -20,13 +30,21 @@ const NOOP = () => {
 
 const logger = createLogger('Lighthouse: ')
 
-type MessageData = ChatData | ProfileData | SceneData | PositionData
+type MessageData = ChatData | ProfileData | SceneData | PositionData | VoiceData
 
 const commsMessageType: PeerMessageType = {
   name: 'sceneComms',
   ttl: 10,
   expirationTime: 10 * 1000,
   optimistic: true
+}
+
+const VoiceType: PeerMessageType = {
+  name: 'voice',
+  ttl: 5,
+  optimistic: true,
+  discardOlderThan: 2000,
+  expirationTime: 10000
 }
 
 declare var global: any
@@ -38,12 +56,15 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   chatHandler: (alias: string, data: Package<ChatMessage>) => void = NOOP
   profileHandler: (alias: string, identity: string, data: Package<ProfileVersion>) => void = NOOP
   positionHandler: (alias: string, data: Package<Position>) => void = NOOP
+  voiceHandler: (alias: string, data: Package<VoiceFragment>) => void = NOOP
 
   isAuthenticated: boolean = true // TODO - remove this
 
   ping: number = -1
 
   private peer: PeerType
+
+  private rooms: string[] = []
 
   constructor(
     private peerId: string,
@@ -73,9 +94,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   public async changeRealm(realm: Realm, url: string) {
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
-    let rooms: string[] = []
     if (this.peer) {
-      rooms = this.peer.currentRooms.map(it => it.id)
       await this.cleanUpPeer()
     }
 
@@ -84,7 +103,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
     this.initializePeer()
     await this.connectPeer()
-    await this.updateSubscriptions(rooms)
+    await this.syncRoomsWithPeer()
   }
 
   printDebugInformation() {
@@ -93,6 +112,12 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
 
   close() {
     return this.cleanUpPeer()
+  }
+
+  analyticsData() {
+    return {
+      stats: buildCatalystPeerStatsData(this.peer)
+    }
   }
 
   async sendInitialMessage(userInfo: Partial<UserInformation>) {
@@ -129,6 +154,15 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     await this.sendData(topic, sceneData, commsMessageType)
   }
 
+  async sendVoiceMessage(currentPosition: Position, data: Uint8Array): Promise<void> {
+    const topic = positionHash(currentPosition)
+
+    const voiceData = new VoiceData()
+    voiceData.setEncodedSamples(data)
+
+    await this.sendData(topic, voiceData, VoiceType)
+  }
+
   async sendChatMessage(currentPosition: Position, messageId: string, text: string) {
     const topic = positionHash(currentPosition)
 
@@ -140,16 +174,21 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   async updateSubscriptions(rooms: string[]) {
+    this.rooms = rooms
+    await this.syncRoomsWithPeer()
+  }
+
+  private async syncRoomsWithPeer() {
     const currentRooms = this.peer.currentRooms
-    const joining = rooms.map(room => {
-      if (!currentRooms.some(current => current.id === room)) {
+    const joining = this.rooms.map((room) => {
+      if (!currentRooms.some((current) => current.id === room)) {
         return this.peer.joinRoom(room)
       } else {
         return Promise.resolve()
       }
     })
-    const leaving = currentRooms.map(current => {
-      if (!rooms.some(room => current.id === room)) {
+    const leaving = currentRooms.map((current) => {
+      if (!this.rooms.some((room) => current.id === room)) {
         return this.peer.leaveRoom(current.id)
       } else {
         return Promise.resolve()
@@ -159,7 +198,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private async sendData(topic: string, messageData: MessageData, type: PeerMessageType) {
-    if (this.peer.currentRooms.some(it => it.id === topic)) {
+    if (this.peer.currentRooms.some((it) => it.id === topic)) {
       await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
     } else {
       // TODO: We may want to queue some messages
@@ -180,10 +219,6 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   private initializePeer() {
     this.statusHandler({ status: 'connecting', connectedPeers: this.connectedPeersCount() })
     this.peer = this.createPeer()
-    // @ts-ignore
-    this.peer.log = () => {
-      // DO NOTHING
-    }
     global.__DEBUG_PEER = this.peer
     return this.peer
   }
@@ -201,7 +236,11 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
         this.statusHandler({ status, connectedPeers: this.connectedPeersCount() })
       }
     }
-    return new Peer(this.lighthouseUrl, this.peerId, this.peerCallback, this.peerConfig)
+
+    // We require a version greater than 0.1 to not send an ID
+    const idToUse = compareVersions('0.1', this.realm.lighthouseVersion) === -1 ? undefined : this.peerId
+
+    return new Peer(this.lighthouseUrl, idToUse, this.peerCallback, this.peerConfig)
   }
 
   private async cleanUpPeer() {
@@ -216,10 +255,9 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
           this.chatHandler(sender, createPackage(commsMessage, 'chat', mapToPackageChat(commsMessage.getChatData()!)))
           break
         case CommsMessage.DataCase.POSITION_DATA:
-          this.positionHandler(
-            sender,
-            createPackage(commsMessage, 'position', mapToPositionMessage(commsMessage.getPositionData()!))
-          )
+          const positionMessage = mapToPositionMessage(commsMessage.getPositionData()!)
+          this.peer.setPeerPosition(sender, positionMessage.slice(0, 3))
+          this.positionHandler(sender, createPackage(commsMessage, 'position', positionMessage))
           break
         case CommsMessage.DataCase.SCENE_DATA:
           this.sceneMessageHandler(
@@ -232,6 +270,16 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
             sender,
             commsMessage.getProfileData()!.getUserId(),
             createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
+          )
+          break
+        case CommsMessage.DataCase.VOICE_DATA:
+          this.voiceHandler(
+            sender,
+            createPackage(
+              commsMessage,
+              'voice',
+              mapToPackageVoice(commsMessage.getVoiceData()!.getEncodedSamples_asU8())
+            )
           )
           break
         default: {
@@ -283,6 +331,10 @@ function mapToPackageProfile(profileData: ProfileData) {
   return { user: profileData.getUserId(), version: profileData.getProfileVersion() }
 }
 
+function mapToPackageVoice(data: Uint8Array) {
+  return { encoded: data }
+}
+
 function createProfileData(userInfo: UserInformation) {
   const profileData = new ProfileData()
   profileData.setProfileVersion(userInfo.version ? userInfo.version.toString() : '')
@@ -310,6 +362,7 @@ function createCommsMessage(data: MessageData) {
   if (data instanceof SceneData) commsMessage.setSceneData(data)
   if (data instanceof ProfileData) commsMessage.setProfileData(data)
   if (data instanceof PositionData) commsMessage.setPositionData(data)
+  if (data instanceof VoiceData) commsMessage.setVoiceData(data)
 
   return commsMessage
 }

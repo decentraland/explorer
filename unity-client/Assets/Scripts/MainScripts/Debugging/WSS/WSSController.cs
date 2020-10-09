@@ -1,6 +1,7 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Interface;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -39,7 +40,6 @@ namespace DCL
             lock (WSSController.queuedMessages)
             {
                 Message finalMessage;
-
                 finalMessage = JsonUtility.FromJson<Message>(e.Data);
 
                 WSSController.queuedMessages.Enqueue(finalMessage);
@@ -96,38 +96,37 @@ namespace DCL
         static bool VERBOSE = false;
         WebSocketServer ws;
         public SceneController sceneController;
+        public RenderingController renderingController;
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
         public CameraController cameraController;
 
-        [System.NonSerialized]
-        public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
+        [System.NonSerialized] public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
 
-        [System.NonSerialized]
-        public static volatile bool queuedMessagesDirty;
+        [System.NonSerialized] public static volatile bool queuedMessagesDirty;
 
-        public bool isServerReady { get { return ws.IsListening; } }
+        public bool isServerReady
+        {
+            get { return ws.IsListening; }
+        }
 
         public bool openBrowserWhenStart;
 
-        [Header("Kernel General Settings")]
-        public bool useCustomContentServer = false;
+        [Header("Kernel General Settings")] public bool useCustomContentServer = false;
         public string customContentServerUrl = "http://localhost:1338/";
 
-        [Space(10)]
-        public BaseUrl baseUrlMode;
+        [Space(10)] public BaseUrl baseUrlMode;
         public string baseUrlCustom;
 
-        [Space(10)]
-        public Environment environment;
+        [Space(10)] public Environment environment;
 
         public Vector2 startInCoords = new Vector2(-99, 109);
 
-        [Header("Kernel Misc Settings")]
-        public bool forceLocalComms = true;
+        [Header("Kernel Misc Settings")] public bool forceLocalComms = true;
         public bool allWearables = false;
         public bool testWearables = false;
         public bool enableTutorial = false;
+        public bool soloScene = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -138,18 +137,18 @@ namespace DCL
 
         private void Start()
         {
+            if (useCustomContentServer)
+            {
+                RendereableAssetLoadHelper.useCustomContentServerUrl = true;
+                RendereableAssetLoadHelper.customContentServerUrl = customContentServerUrl;
+            }
+
 #if UNITY_EDITOR
             SceneController.i.isWssDebugMode = true;
 #endif
             ws = new WebSocketServer("ws://localhost:5000");
             ws.AddWebSocketService<DCLWebSocketService>("/dcl");
             ws.Start();
-
-            if (useCustomContentServer)
-            {
-                RendereableAssetLoadHelper.useCustomContentServerUrl = true;
-                RendereableAssetLoadHelper.customContentServerUrl = customContentServerUrl;
-            }
 
             if (openBrowserWhenStart)
             {
@@ -197,6 +196,11 @@ namespace DCL
                 if (enableTutorial)
                 {
                     debugString += "RESET_TUTORIAL&";
+                }
+
+                if (soloScene)
+                {
+                    debugString += "LOS=0&";
                 }
 
                 string debugPanelString = "";
@@ -292,13 +296,13 @@ namespace DCL
                                 UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
                                 break;
                             case "DeactivateRendering":
-                                RenderingController.i.DeactivateRendering();
+                                renderingController.DeactivateRendering();
                                 break;
                             case "ActivateRendering":
-                                RenderingController.i.ActivateRendering();
+                                renderingController.ActivateRendering();
                                 break;
-                            case "ShowNotification":
-                                HUDController.i.ShowNotificationFromJson(msg.payload);
+                            case "ShowNotificationFromJson":
+                                NotificationsController.i.ShowNotificationFromJson(msg.payload);
                                 break;
                             case "BuilderReady":
                                 sceneController.BuilderReady();
@@ -369,56 +373,64 @@ namespace DCL
                             case "ShowNewWearablesNotification":
                                 HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
-                            case "ConfigureMinimapHUD":
-                                HUDController.i?.ConfigureMinimapHUD(msg.payload);
+                            case "ConfigureHUDElement":
+                                HUDController.i?.ConfigureHUDElement(msg.payload);
                                 break;
-                            case "ConfigureAvatarHUD":
-                                HUDController.i?.ConfigureAvatarHUD(msg.payload);
+                            case "InitializeFriends":
+                                FriendsController.i?.InitializeFriends(msg.payload);
                                 break;
-                            case "ConfigureNotificationHUD":
-                                HUDController.i?.ConfigureNotificationHUD(msg.payload);
+                            case "UpdateFriendshipStatus":
+                                FriendsController.i?.UpdateFriendshipStatus(msg.payload);
                                 break;
-                            case "ConfigureAvatarEditorHUD":
-                                HUDController.i?.ConfigureAvatarEditorHUD(msg.payload);
+                            case "UpdateUserPresence":
+                                FriendsController.i?.UpdateUserPresence(msg.payload);
                                 break;
-                            case "ConfigurePlayerInfoCardHUD":
-                                HUDController.i.ConfigurePlayerInfoCardHUD(msg.payload);
+                            case "FriendNotFound":
+                                FriendsController.i?.FriendNotFound(msg.payload);
                                 break;
-                            case "ConfigureExpressionsHUD":
-                                HUDController.i.ConfigureExpressionsHUD(msg.payload);
-                                break;
-                            case "ConfigureWelcomeHUD":
-                                HUDController.i.ConfigureWelcomeHUD(msg.payload);
+                            case "AddMessageToChatWindow":
+                                ChatController.i?.AddMessageToChatWindow(msg.payload);
                                 break;
                             case "UpdateMinimapSceneInformation":
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
-                            case "ConfigureSettingsHUD":
-                                HUDController.i.ConfigureSettingsHUD(msg.payload);
-                                break;
                             case "SetTutorialEnabled":
-                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
                                 break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
-                                break;
-                            case "ConfigureAirdroppingHUD":
-                                HUDController.i.ConfigureAirdroppingHUD(msg.payload);
                                 break;
                             case "AirdroppingRequest":
                                 HUDController.i.AirdroppingRequest(msg.payload);
                                 break;
                             case "ShowWelcomeNotification":
-                                HUDController.i.ShowWelcomeNotification();
-                                break;
-                            case "ConfigureTermsOfServiceHUD":
-                                HUDController.i.ConfigureTermsOfServiceHUD(msg.payload);
+                                NotificationsController.i.ShowWelcomeNotification();
                                 break;
                             case "ShowTermsOfServices":
                                 HUDController.i.ShowTermsOfServices(msg.payload);
                                 break;
+                            case "RequestTeleport":
+                                HUDController.i.RequestTeleport(msg.payload);
+                                break;
+                            case "SetDisableAssetBundles":
+                                SceneController.i.SetDisableAssetBundles();
+                                break;
+                            case "UpdateHotScenesList":
+                                HotScenesController.i.UpdateHotScenesList(msg.payload);
+                                break;
+                            case "UpdateBalanceOfMANA":
+                                HUDController.i.UpdateBalanceOfMANA(msg.payload);
+                                break;
+                            case "SetPlayerTalking":
+                                HUDController.i.SetPlayerTalking(msg.payload);
+                                break;
+                            case "EnableNewTaskbar":
+                                HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
+                                break;
                             default:
-                                Debug.Log("<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " + msg.type);
+                                Debug.Log(
+                                    "<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " +
+                                    msg.type);
                                 break;
                         }
                     }
@@ -434,6 +446,7 @@ namespace DCL
             {
                 builderBridge = FindObjectOfType<Builder.DCLBuilderBridge>();
             }
+
             return builderBridge;
         }
     }

@@ -1,16 +1,21 @@
+import { parcelLimits } from 'config'
+
 import { teleportObservable, lastPlayerPosition } from 'shared/world/positionThings'
-import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { POIs } from 'shared/comms/POIs'
-import { parcelLimits, tutorialEnabled } from 'config'
-import { getUserProfile } from 'shared/comms/peers'
-import { Profile } from 'shared/passports/types'
-import { tutorialStepId } from 'decentraland-loader/lifecycle/tutorial/tutorial'
 import { fetchLayerUsersParcels } from 'shared/comms'
 import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
-import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import defaultLogger from 'shared/logger'
+import { ensureUnityInterface } from 'shared/renderer'
 
-const CAMPAIGN_PARCEL_SEQUENCE = [
+import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
+
+import { StoreContainer } from '../store/rootTypes'
+import { WORLD_EXPLORER } from '../../config/index'
+
+declare const globalThis: StoreContainer
+
+export const CAMPAIGN_PARCEL_SEQUENCE = [
   { x: -3, y: -33 },
   { x: 72, y: -9 },
   { x: -55, y: 143 },
@@ -78,11 +83,10 @@ export class TeleportController {
   public static stopTeleportAnimation() {
     document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
     document.body.setAttribute('style', 'background: #151419')
-
-    const profile = getUserProfile().profile as Profile
-
-    if (!tutorialEnabled() || profile.tutorialStep !== tutorialStepId.INITIAL_SCENE) {
-      (window as any)['unityInterface'].ShowWelcomeNotification()
+    if (WORLD_EXPLORER) {
+      ensureUnityInterface()
+        .then((unity) => unity.ShowWelcomeNotification())
+        .catch(defaultLogger.error)
     }
   }
 
@@ -100,13 +104,13 @@ export class TeleportController {
       const currentParcel = worldToGrid(lastPlayerPosition)
 
       usersParcels = usersParcels.filter(
-        it => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+        (it) => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
       )
 
       if (usersParcels.length > 0) {
         // Sorting from most close users
         const [target, closeUsers] = usersParcels
-          .map(it => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
+          .map((it) => [it, countParcelsCloseTo(it, usersParcels)] as [ParcelArray, number])
           .sort(([_, score1], [__, score2]) => score2 - score1)[0]
 
         return TeleportController.goTo(

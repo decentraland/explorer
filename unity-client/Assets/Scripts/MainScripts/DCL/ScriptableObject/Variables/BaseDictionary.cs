@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseDictionary<TKey, TValue> : ScriptableObject
@@ -69,6 +69,14 @@ public class BaseDictionary<TKey, TValue> : ScriptableObject
     public bool TryGetValue(TKey key, out TValue value)
     {
         return dictionary.TryGetValue(key, out value);
+    }
+
+    public TValue GetOrDefault(TKey key)
+    {
+        if (!dictionary.ContainsKey(key))
+            return default;
+
+        return dictionary[key];
     }
 
     public Dictionary<TKey, TValue>.Enumerator GetEnumerator()

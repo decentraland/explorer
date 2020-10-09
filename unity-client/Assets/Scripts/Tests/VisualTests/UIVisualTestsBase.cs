@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -10,9 +10,15 @@ public class UIVisualTestsBase : VisualTestsBase
 
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
+        VisualTestHelpers.snapshotIndex = 0;
+        VisualTestHelpers.currentTestName = testName;
+
         yield return InitScene();
 
-        yield return VisualTestHelpers.InitVisualTestsScene(testName);
+        //NOTE(Brian): If we don't wait a frame, RenderingController.Awake sets the rendering state back to false.
+        yield return null;
+
+        base.SetUp_Renderer();
 
         // Create UIScreenSpace
         UIScreenSpace screenSpace = TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene, CLASS_ID.UI_SCREEN_SPACE_SHAPE);
@@ -27,6 +33,9 @@ public class UIVisualTestsBase : VisualTestsBase
 
         // The camera should only render UI to decrease conflict chance with future ground changes, etc.
         VisualTestController.i.camera.cullingMask = 1 << LayerMask.NameToLayer("UI");
+
+        int id = GameViewUtils.AddOrGetCustomSize(GameViewUtils.GameViewSizeType.FixedResolution, UnityEditor.GameViewSizeGroupType.Standalone, 1280, 720, "Test Resolution");
+        GameViewUtils.SetSize(id);
     }
 
     protected IEnumerator CreateUIComponent<SharedComponentType, SharedComponentModel>(CLASS_ID classId, SharedComponentModel model, string componentId)
@@ -39,7 +48,6 @@ public class UIVisualTestsBase : VisualTestsBase
         // Creation
         var component = scene.SharedComponentCreate(
             componentId,
-            "material",
             (int)classId
         ) as SharedComponentType;
         yield return component.routine;

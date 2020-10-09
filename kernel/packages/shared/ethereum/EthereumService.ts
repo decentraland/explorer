@@ -38,7 +38,8 @@ const whitelist = [
   'web3_sha3',
   'web3_clientVersion',
   'eth_getTransactionCount',
-  'eth_getBlockByNumber'
+  'eth_getBlockByNumber',
+  'eth_signTypedData_v4'
 ]
 
 function isWhitelistedRPC(msg: RPCSendableMessage) {
@@ -157,6 +158,8 @@ export async function requirePayment(toAddress: string, amount: number, currency
       const supportedTokens: Record<string, string> = {} // a TODO: getNetworkConfigurations(network).paymentTokens
 
       if (currency in supportedTokens === false) {
+        // tslint:disable:no-console
+        console.warn(`WARNING! Using a non-supported coin. Skipping operation! Please use one of the next coins 'ETH'`)
         return false
       }
 

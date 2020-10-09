@@ -27,9 +27,11 @@ namespace DCL.Components
         private DecentralandEntity ownerEntity;
         public void Initialize(DecentralandEntity entity)
         {
+            if (entity == null || entity.meshesInfo == null) return;
+
             Renderer[] rendererList = entity.meshesInfo.renderers;
 
-            if (rendererList.Length == 0) return;
+            if (rendererList == null || rendererList.Length == 0) return;
 
             this.ownerEntity = entity;
 

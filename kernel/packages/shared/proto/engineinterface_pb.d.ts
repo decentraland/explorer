@@ -840,6 +840,16 @@ export class PB_SendSceneMessage extends jspb.Message {
   getScenestarted(): google_protobuf_empty_pb.Empty | undefined
   setScenestarted(value?: google_protobuf_empty_pb.Empty): void
 
+  hasOpenexternalurl(): boolean
+  clearOpenexternalurl(): void
+  getOpenexternalurl(): PB_OpenExternalUrl | undefined
+  setOpenexternalurl(value?: PB_OpenExternalUrl): void
+
+  hasOpennftdialog(): boolean
+  clearOpennftdialog(): void
+  getOpennftdialog(): PB_OpenNFTDialog | undefined
+  setOpennftdialog(value?: PB_OpenNFTDialog): void
+
   getPayloadCase(): PB_SendSceneMessage.PayloadCase
   serializeBinary(): Uint8Array
   toObject(includeInstance?: boolean): PB_SendSceneMessage.AsObject
@@ -866,6 +876,8 @@ export namespace PB_SendSceneMessage {
     componentupdated?: PB_ComponentUpdated.AsObject
     query?: PB_Query.AsObject
     scenestarted?: google_protobuf_empty_pb.Empty.AsObject
+    openexternalurl?: PB_OpenExternalUrl.AsObject
+    opennftdialog?: PB_OpenNFTDialog.AsObject
   }
 
   export enum PayloadCase {
@@ -880,7 +892,9 @@ export namespace PB_SendSceneMessage {
     COMPONENTREMOVED = 10,
     COMPONENTUPDATED = 11,
     QUERY = 12,
-    SCENESTARTED = 13
+    SCENESTARTED = 13,
+    OPENEXTERNALURL = 14,
+    OPENNFTDIALOG = 15
   }
 }
 
@@ -3185,6 +3199,54 @@ export namespace PB_UITextShape {
     paddingright: number
     paddingbottom: number
     paddingleft: number
+  }
+}
+
+export class PB_OpenExternalUrl extends jspb.Message {
+  getUrl(): string
+  setUrl(value: string): void
+
+  serializeBinary(): Uint8Array
+  toObject(includeInstance?: boolean): PB_OpenExternalUrl.AsObject
+  static toObject(includeInstance: boolean, msg: PB_OpenExternalUrl): PB_OpenExternalUrl.AsObject
+  static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> }
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> }
+  static serializeBinaryToWriter(message: PB_OpenExternalUrl, writer: jspb.BinaryWriter): void
+  static deserializeBinary(bytes: Uint8Array): PB_OpenExternalUrl
+  static deserializeBinaryFromReader(message: PB_OpenExternalUrl, reader: jspb.BinaryReader): PB_OpenExternalUrl
+}
+
+export namespace PB_OpenExternalUrl {
+  export type AsObject = {
+    url: string
+  }
+}
+
+export class PB_OpenNFTDialog extends jspb.Message {
+  getAssetcontractaddress(): string
+  setAssetcontractaddress(value: string): void
+
+  getTokenid(): string
+  setTokenid(value: string): void
+
+  getComment(): string
+  setComment(value: string): void
+
+  serializeBinary(): Uint8Array
+  toObject(includeInstance?: boolean): PB_OpenNFTDialog.AsObject
+  static toObject(includeInstance: boolean, msg: PB_OpenNFTDialog): PB_OpenNFTDialog.AsObject
+  static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> }
+  static extensionsBinary: { [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message> }
+  static serializeBinaryToWriter(message: PB_OpenNFTDialog, writer: jspb.BinaryWriter): void
+  static deserializeBinary(bytes: Uint8Array): PB_OpenNFTDialog
+  static deserializeBinaryFromReader(message: PB_OpenNFTDialog, reader: jspb.BinaryReader): PB_OpenNFTDialog
+}
+
+export namespace PB_OpenNFTDialog {
+  export type AsObject = {
+    assetcontractaddress: string
+    tokenid: string
+    comment: string
   }
 }
 

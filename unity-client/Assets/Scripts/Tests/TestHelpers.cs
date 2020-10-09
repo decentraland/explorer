@@ -20,7 +20,7 @@ namespace DCL.Helpers
 {
     public class WaitForAllMessagesProcessed : CustomYieldInstruction
     {
-        public override bool keepWaiting => SceneController.i.hasPendingMessages;
+        public override bool keepWaiting => Environment.i.messagingControllersManager.hasPendingMessages;
     }
 
     // NOTE(Brian): Attribute used to determine if tests are visual. Those tests will be run to generate the baseline images.
@@ -70,6 +70,8 @@ namespace DCL.Helpers
 
         public static DecentralandEntity CreateSceneEntity(ParcelScene scene)
         {
+            Assert.IsNotNull(scene, "Can't create entity for null scene!");
+
             entityCounter++;
             string id = $"{entityCounter}";
             return scene.CreateEntity(id);
@@ -96,8 +98,8 @@ namespace DCL.Helpers
             where K : new()
         {
             int componentClassId = classId == CLASS_ID_COMPONENT.NONE
-                ? (int)scene.ownerController.componentFactory.GetIdForType<T>()
-                : (int)classId;
+                ? (int) scene.ownerController.componentFactory.GetIdForType<T>()
+                : (int) classId;
 
             string componentInstanceId = GetComponentUniqueId(scene, typeof(T).Name, componentClassId, entity.entityId);
 
@@ -114,10 +116,9 @@ namespace DCL.Helpers
             }
 
             return scene.EntityComponentCreateOrUpdate(
-                    entity.entityId,
-                    componentInstanceId,
-                    componentClassId,
-                    data
+                entity.entityId,
+                (CLASS_ID_COMPONENT) componentClassId,
+                data
                 , out _) as T;
         }
 
@@ -180,8 +181,8 @@ namespace DCL.Helpers
         }
 
         public static T SharedComponentCreate<T, K>(ParcelScene scene, CLASS_ID id, K model = null)
-    where T : BaseDisposable
-    where K : class, new()
+            where T : BaseDisposable
+            where K : class, new()
         {
             if (model == null)
             {
@@ -190,9 +191,9 @@ namespace DCL.Helpers
 
             disposableIdCounter++;
 
-            string uniqueId = GetComponentUniqueId(scene, "material", (int)id, "-shared-" + disposableIdCounter);
+            string uniqueId = GetComponentUniqueId(scene, "material", (int) id, "-shared-" + disposableIdCounter);
 
-            T result = scene.SharedComponentCreate(uniqueId, "material", (int)id) as T;
+            T result = scene.SharedComponentCreate(uniqueId, (int) id) as T;
 
             Assert.IsNotNull(result, "class-id mismatch!");
 
@@ -201,12 +202,16 @@ namespace DCL.Helpers
             return result;
         }
 
+        public static void SharedComponentDispose(BaseDisposable component)
+        {
+            component.scene.SharedComponentDispose(component.id);
+        }
+
         public static void SharedComponentAttach(BaseDisposable component, DecentralandEntity entity)
         {
             entity.scene.SharedComponentAttach(
                 entity.entityId,
-                component.id,
-                component.componentName
+                component.id
             );
         }
 
@@ -225,8 +230,7 @@ namespace DCL.Helpers
             PB_Transform pB_Transform = GetPBTransform(position, rotation, scale);
             scene.EntityComponentCreateOrUpdate(
                 entity.entityId,
-                "",
-                (int)CLASS_ID_COMPONENT.TRANSFORM,
+                CLASS_ID_COMPONENT.TRANSFORM,
                 System.Convert.ToBase64String(pB_Transform.ToByteArray())
                 , out CleanableYieldInstruction routine);
         }
@@ -235,7 +239,7 @@ namespace DCL.Helpers
         {
             DecentralandEntity entity = CreateSceneEntity(scene);
             string componentId =
-                GetComponentUniqueId(scene, "textShape", (int)CLASS_ID_COMPONENT.TEXT_SHAPE, entity.entityId);
+                GetComponentUniqueId(scene, "textShape", (int) CLASS_ID_COMPONENT.TEXT_SHAPE, entity.entityId);
 
             TextShape textShape = EntityComponentCreate<TextShape, TextShape.Model>(scene, entity, model);
 
@@ -246,7 +250,7 @@ namespace DCL.Helpers
 
         public static GLTFShape AttachGLTFShape(DecentralandEntity entity, ParcelScene scene, Vector3 position, GLTFShape.Model model)
         {
-            string componentId = GetComponentUniqueId(scene, "gltfShape", (int)CLASS_ID.GLTF_SHAPE, entity.entityId);
+            string componentId = GetComponentUniqueId(scene, "gltfShape", (int) CLASS_ID.GLTF_SHAPE, entity.entityId);
             GLTFShape gltfShape = SharedComponentCreate<GLTFShape, GLTFShape.Model>(scene, CLASS_ID.GLTF_SHAPE, model);
 
             SetEntityTransform(scene, entity, position, Quaternion.identity, Vector3.one);
@@ -257,13 +261,13 @@ namespace DCL.Helpers
         public static GLTFShape CreateEntityWithGLTFShape(ParcelScene scene, Vector3 position, string url)
         {
             DecentralandEntity entity = null;
-            return CreateEntityWithGLTFShape(scene, position, new GLTFShape.Model() { src = url }, out entity);
+            return CreateEntityWithGLTFShape(scene, position, new GLTFShape.Model() {src = url}, out entity);
         }
 
         public static GLTFShape CreateEntityWithGLTFShape(ParcelScene scene, Vector3 position, string url,
             out DecentralandEntity entity)
         {
-            return CreateEntityWithGLTFShape(scene, position, new GLTFShape.Model() { src = url }, out entity);
+            return CreateEntityWithGLTFShape(scene, position, new GLTFShape.Model() {src = url}, out entity);
         }
 
         public static GLTFShape CreateEntityWithGLTFShape(ParcelScene scene, Vector3 position, GLTFShape.Model model)
@@ -288,7 +292,7 @@ namespace DCL.Helpers
 
         public static BoxShape CreateEntityWithBoxShape(ParcelScene scene, Vector3 position, bool visible)
         {
-            return CreateEntityWithBoxShape(scene, position, new BoxShape.Model { visible = visible });
+            return CreateEntityWithBoxShape(scene, position, new BoxShape.Model {visible = visible});
         }
 
         public static SphereShape CreateEntityWithSphereShape(ParcelScene scene, Vector3 position,
@@ -300,7 +304,7 @@ namespace DCL.Helpers
 
         public static SphereShape CreateEntityWithSphereShape(ParcelScene scene, Vector3 position, bool visible)
         {
-            return CreateEntityWithSphereShape(scene, position, new SphereShape.Model { visible = visible });
+            return CreateEntityWithSphereShape(scene, position, new SphereShape.Model {visible = visible});
         }
 
         public static PlaneShape CreateEntityWithPlaneShape(ParcelScene scene, Vector3 position,
@@ -312,7 +316,7 @@ namespace DCL.Helpers
 
         public static PlaneShape CreateEntityWithPlaneShape(ParcelScene scene, Vector3 position, bool visible)
         {
-            return CreateEntityWithPlaneShape(scene, position, new PlaneShape.Model { visible = visible });
+            return CreateEntityWithPlaneShape(scene, position, new PlaneShape.Model {visible = visible});
         }
 
         public static CylinderShape CreateEntityWithCylinderShape(ParcelScene scene, Vector3 position,
@@ -324,7 +328,7 @@ namespace DCL.Helpers
 
         public static CylinderShape CreateEntityWithCylinderShape(ParcelScene scene, Vector3 position, bool visible)
         {
-            return CreateEntityWithCylinderShape(scene, position, new CylinderShape.Model { visible = visible });
+            return CreateEntityWithCylinderShape(scene, position, new CylinderShape.Model {visible = visible});
         }
 
         public static ConeShape CreateEntityWithConeShape(ParcelScene scene, Vector3 position,
@@ -335,7 +339,7 @@ namespace DCL.Helpers
 
         public static ConeShape CreateEntityWithConeShape(ParcelScene scene, Vector3 position, bool visible)
         {
-            return CreateEntityWithConeShape(scene, position, new ConeShape.Model { visible = visible });
+            return CreateEntityWithConeShape(scene, position, new ConeShape.Model {visible = visible});
         }
 
         private static T CreateEntityWithPrimitive<T, K>(ParcelScene scene, Vector3 position, CLASS_ID classId,
@@ -358,7 +362,13 @@ namespace DCL.Helpers
         public static BasicMaterial CreateEntityWithBasicMaterial(ParcelScene scene, BasicMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithBasicMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static BasicMaterial CreateEntityWithBasicMaterial(ParcelScene scene, BasicMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, position,
                 out entity);
             BasicMaterial material =
                 SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(scene, CLASS_ID.BASIC_MATERIAL, model);
@@ -369,7 +379,13 @@ namespace DCL.Helpers
         public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model,
             out DecentralandEntity entity)
         {
-            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, DCL.Models.CLASS_ID.BOX_SHAPE, Vector3.zero,
+            return CreateEntityWithPBRMaterial(scene, model, Vector3.zero, out entity);
+        }
+
+        public static PBRMaterial CreateEntityWithPBRMaterial(ParcelScene scene, PBRMaterial.Model model, Vector3 position,
+            out DecentralandEntity entity)
+        {
+            InstantiateEntityWithShape<BoxShape, BoxShape.Model>(scene, CLASS_ID.BOX_SHAPE, position,
                 out entity);
             PBRMaterial material =
                 SharedComponentCreate<PBRMaterial, PBRMaterial.Model>(scene, CLASS_ID.PBR_MATERIAL, model);
@@ -438,8 +454,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentCreate(
                 materialComponentID,
-                "material",
-                (int)DCL.Models.CLASS_ID.BASIC_MATERIAL
+                (int) DCL.Models.CLASS_ID.BASIC_MATERIAL
             );
 
             scene.SharedComponentUpdate(
@@ -448,8 +463,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentAttach(
                 entityId,
-                materialComponentID,
-                "material"
+                materialComponentID
             );
         }
 
@@ -460,8 +474,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentCreate(
                 materialComponentID,
-                "material",
-                (int)DCL.Models.CLASS_ID.PBR_MATERIAL
+                (int) CLASS_ID.PBR_MATERIAL
             );
 
             scene.SharedComponentUpdate(
@@ -470,14 +483,80 @@ namespace DCL.Helpers
 
             scene.SharedComponentAttach(
                 entityId,
-                materialComponentID,
-                "material"
+                materialComponentID
             );
+        }
+
+        public static IEnumerator CreateAudioSource(ParcelScene scene, string entityId, string audioClipId, bool playing, bool loop = true)
+        {
+            var audioSourceModel = new DCLAudioSource.Model()
+            {
+                audioClipId = audioClipId,
+                playing = playing,
+                volume = 1.0f,
+                loop = loop,
+                pitch = 1.0f
+            };
+
+            DCLAudioSource audioSource =
+                TestHelpers.EntityComponentCreate<DCLAudioSource, DCLAudioSource.Model>(scene, scene.entities[entityId],
+                    audioSourceModel);
+
+            yield return audioSource.routine;
+        }
+
+        public static IEnumerator LoadAudioClip(ParcelScene scene, string audioClipId, string url, bool loop, bool loading,
+            float volume, bool waitForLoading = true)
+        {
+            DCLAudioClip.Model model = new DCLAudioClip.Model
+            {
+                url = url,
+                loop = loop,
+                shouldTryToLoad = loading,
+                volume = volume
+            };
+
+            DCLAudioClip audioClip = scene.SharedComponentCreate(
+                audioClipId,
+                (int) CLASS_ID.AUDIO_CLIP
+            ) as DCLAudioClip;
+
+            scene.SharedComponentUpdate(audioClipId, JsonUtility.ToJson(model));
+
+            yield return audioClip.routine;
+
+            Assert.IsTrue(scene.disposableComponents.ContainsKey(audioClipId), "Shared component was not created correctly!");
+
+            if (waitForLoading)
+            {
+                yield return new WaitUntil(
+                    () =>
+                    {
+                        return audioClip.loadingState != DCLAudioClip.LoadState.LOADING_IN_PROGRESS &&
+                               audioClip.loadingState != DCLAudioClip.LoadState.IDLE;
+                    });
+            }
+        }
+
+        public static IEnumerator CreateAudioSourceWithClipForEntity(DecentralandEntity entity)
+        {
+            yield return LoadAudioClip(entity.scene,
+                audioClipId: "audioClipTest",
+                url: DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/Train.wav",
+                loop: true,
+                loading: true,
+                volume: 1f,
+                waitForLoading: true);
+
+            yield return CreateAudioSource(entity.scene,
+                entityId: entity.entityId,
+                audioClipId: "audioClipTest",
+                playing: true);
         }
 
         public static string GetComponentUniqueId(ParcelScene scene, string salt, int classId, string entityId)
         {
-            string baseId = salt + "-" + (int)classId + "-" + entityId;
+            string baseId = salt + "-" + (int) classId + "-" + entityId;
             string finalId = baseId;
 
             while (scene.GetSharedComponent(finalId) != null)
@@ -490,12 +569,11 @@ namespace DCL.Helpers
 
         public static string CreateAndSetShape(ParcelScene scene, string entityId, CLASS_ID classId, string model)
         {
-            string componentId = GetComponentUniqueId(scene, "shape", (int)classId, entityId);
+            string componentId = GetComponentUniqueId(scene, "shape", (int) classId, entityId);
 
             scene.SharedComponentCreate(
                 componentId,
-                "shape",
-                (int)classId
+                (int) classId
             );
 
             scene.SharedComponentUpdate(
@@ -504,8 +582,7 @@ namespace DCL.Helpers
 
             scene.SharedComponentAttach(
                 entityId,
-                componentId,
-                "shape"
+                componentId
             );
 
             return componentId;
@@ -516,7 +593,7 @@ namespace DCL.Helpers
             scene.SharedComponentUpdate(componentId, model);
         }
 
-        static object GetRandomValueForType(Type t)
+        static object GetRandomValueForType(System.Type t)
         {
             if (t == typeof(float))
             {
@@ -589,6 +666,12 @@ namespace DCL.Helpers
                     modelValue = null;
                 }
 
+                //NOTE(Brian): Corner case, arrays are defaulted as null, but json deserialization inits them as an empty array?
+                if (modelValue is Array)
+                {
+                    modelValue = null;
+                }
+
                 Assert.AreEqual(defaultValue, modelValue, $"Checking {fieldName} failed! Is not default value! error!");
             }
         }
@@ -614,9 +697,9 @@ namespace DCL.Helpers
                 yield return component.routine;
             }
 
-            int id = (int)scene.ownerController.componentFactory.GetIdForType<TComponent>();
+            int id = (int) scene.ownerController.componentFactory.GetIdForType<TComponent>();
 
-            scene.EntityComponentUpdate(e, (CLASS_ID_COMPONENT)id, "{}");
+            scene.EntityComponentUpdate(e, (CLASS_ID_COMPONENT) id, "{}");
 
             if (component.routine != null)
             {
@@ -642,7 +725,7 @@ namespace DCL.Helpers
                 yield return component.routine;
             }
 
-            Type componentType = typeof(TComponent);
+            System.Type componentType = typeof(TComponent);
 
             if (component is BaseShape)
             {
@@ -757,6 +840,7 @@ namespace DCL.Helpers
             {
                 Assert.IsTrue(renderers[i].enabled);
             }
+
             yield return TestShapeOnPointerEventCollider(entity);
 
             // update visibility with 'false'
@@ -768,6 +852,7 @@ namespace DCL.Helpers
             {
                 Assert.IsFalse(renderers[i].enabled);
             }
+
             yield return TestShapeOnPointerEventCollider(entity);
 
             // update visibility with 'true'
@@ -779,6 +864,7 @@ namespace DCL.Helpers
             {
                 Assert.IsTrue(renderers[i].enabled);
             }
+
             yield return TestShapeOnPointerEventCollider(entity);
         }
 
@@ -824,7 +910,7 @@ namespace DCL.Helpers
             yield return parentElement.routine;
 
             // make canvas invisible
-            yield return SharedComponentUpdate(parentElement, new UIScreenSpace.Model { visible = false });
+            yield return SharedComponentUpdate(parentElement, new UIScreenSpace.Model {visible = false});
 
             TComponent targetUIElement =
                 SharedComponentCreate<TComponent, TComponentModel>(scene,
@@ -888,10 +974,7 @@ namespace DCL.Helpers
                     ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointerEventData,
                         ExecuteEvents.pointerDownHandler);
                 },
-                () =>
-                {
-                    eventTriggered = true;
-                });
+                () => { eventTriggered = true; });
 
             yield return null;
 
@@ -927,10 +1010,7 @@ namespace DCL.Helpers
                     ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointerEventData,
                         ExecuteEvents.pointerDownHandler);
                 },
-                () =>
-                {
-                    eventTriggered = true;
-                });
+                () => { eventTriggered = true; });
 
             yield return null;
 
@@ -966,10 +1046,7 @@ namespace DCL.Helpers
                     ExecuteEvents.ExecuteHierarchy(raycastResult.gameObject, pointerEventData,
                         ExecuteEvents.pointerDownHandler);
                 },
-                () =>
-                {
-                    eventTriggered = true;
-                });
+                () => { eventTriggered = true; });
 
             yield return null;
 
@@ -989,8 +1066,8 @@ namespace DCL.Helpers
             Vector2 pos = imagePos;
 
             pos *= scale;
-            pos.x *= ((RectTransform)canvas.transform).sizeDelta.x / Screen.width;
-            pos.y *= ((RectTransform)canvas.transform).sizeDelta.y / Screen.height;
+            pos.x *= ((RectTransform) canvas.transform).sizeDelta.x / Screen.width;
+            pos.y *= ((RectTransform) canvas.transform).sizeDelta.y / Screen.height;
 
             pointerEventData.position = pos;
 
@@ -999,7 +1076,9 @@ namespace DCL.Helpers
 
             // Check that there's at least one result
             if (results.Count == 0)
+            {
                 return false;
+            }
 
             // Check that the clicked object is the one on the front
             return results[0].gameObject == rectT.gameObject;
@@ -1007,14 +1086,13 @@ namespace DCL.Helpers
 
         public static IEnumerator UnloadAllUnityScenes()
         {
+            if (SceneManager.sceneCount == 1)
+                yield break;
+
             for (int i = SceneManager.sceneCount - 1; i >= 0; i--)
             {
                 var scene = SceneManager.GetSceneAt(i);
-
-                if (scene.name.Contains(testingSceneName))
-                {
-                    yield return SceneManager.UnloadSceneAsync(scene);
-                }
+                yield return SceneManager.UnloadSceneAsync(scene);
             }
         }
 
@@ -1063,75 +1141,90 @@ namespace DCL.Helpers
             return sceneController;
         }
 
-        static string lastMessageFromEngineType;
-        static string lastMessageFromEnginePayload;
+        // static string lastMessageFromEngineType;
+        // static string lastMessageFromEnginePayload;
 
         public static IEnumerator WaitForMessageFromEngine(string targetMessageType, string targetMessageJSONPayload,
             System.Action OnIterationStart, System.Action OnSuccess)
         {
-            // Hook up to web interface engine message reporting
-            DCL.Interface.WebInterface.OnMessageFromEngine += OnMessageFromEngine;
-
-            lastMessageFromEngineType = "";
-            lastMessageFromEnginePayload = "";
+            string lastMessageFromEngineType = "";
+            string lastMessageFromEnginePayload = "";
 
             bool awaitedConditionMet = false;
-            yield return new DCL.WaitUntil(() =>
+
+            Action<string, string> msgFromEngineCallback = (eventType, eventPayload) =>
             {
-                OnIterationStart?.Invoke();
+                lastMessageFromEngineType = eventType;
+                lastMessageFromEnginePayload = eventPayload;
 
                 if (lastMessageFromEngineType == targetMessageType &&
                     lastMessageFromEnginePayload == targetMessageJSONPayload)
                 {
-                    DCL.Interface.WebInterface.OnMessageFromEngine -= OnMessageFromEngine;
-
                     OnSuccess?.Invoke();
                     awaitedConditionMet = true;
                 }
+            };
 
+            // Hook up to web interface engine message reporting
+            WebInterface.OnMessageFromEngine += msgFromEngineCallback;
+
+            yield return new DCL.WaitUntil(() =>
+            {
+                OnIterationStart?.Invoke();
                 return awaitedConditionMet;
             }, 2f);
+
+            WebInterface.OnMessageFromEngine -= msgFromEngineCallback;
         }
 
         public static IEnumerator WaitForEventFromEngine<T>(string targetMessageType, T evt,
             System.Action OnIterationStart, Func<T, bool> OnSuccess)
         {
-            // Hook up to web interface engine message reporting
-            DCL.Interface.WebInterface.OnMessageFromEngine += OnFirstMessageFromEngine;
+            string lastMessageFromEngineType = "";
+            string lastMessageFromEnginePayload = "";
 
-            lastMessageFromEngineType = "";
-            lastMessageFromEnginePayload = "";
+            bool messageReceived = false;
 
-            yield return new DCL.WaitUntil(() =>
+            Action<string, string> msgFromEngineCallback = (eventType, eventPayload) =>
             {
-                OnIterationStart?.Invoke();
+                lastMessageFromEngineType = eventType;
+                lastMessageFromEnginePayload = eventPayload;
 
                 if (!string.IsNullOrEmpty(lastMessageFromEnginePayload) && lastMessageFromEngineType == targetMessageType)
                 {
                     var messageObject = JsonUtility.FromJson<T>(lastMessageFromEnginePayload);
 
                     if (OnSuccess != null)
-                        return OnSuccess.Invoke(messageObject);
+                        messageReceived = OnSuccess.Invoke(messageObject);
                 }
+            };
 
-                return false;
+            // Hook up to web interface engine message reporting
+            DCL.Interface.WebInterface.OnMessageFromEngine += msgFromEngineCallback;
+
+            yield return new DCL.WaitUntil(() =>
+            {
+                OnIterationStart?.Invoke();
+                return messageReceived;
             }, 2f);
+
+            DCL.Interface.WebInterface.OnMessageFromEngine -= msgFromEngineCallback;
         }
 
         // Used in WaitForPointerDownEventFromEngine() to capture the first triggered event message from engine
-        static void OnFirstMessageFromEngine(string eventType, string eventPayload)
-        {
-            DCL.Interface.WebInterface.OnMessageFromEngine -= OnFirstMessageFromEngine;
-            lastMessageFromEngineType = eventType;
-            lastMessageFromEnginePayload = eventPayload;
-        }
-
-        // Used in WaitForMessageFromEngine() to capture the triggered event messages from engine
-        static void OnMessageFromEngine(string eventType, string eventPayload)
-        {
-            lastMessageFromEngineType = eventType;
-            lastMessageFromEnginePayload = eventPayload;
-        }
+        // static void OnFirstMessageFromEngine(string eventType, string eventPayload)
+        // {
+        //     DCL.Interface.WebInterface.OnMessageFromEngine -= OnFirstMessageFromEngine;
+        //     lastMessageFromEngineType = eventType;
+        //     lastMessageFromEnginePayload = eventPayload;
+        // }
+        //
+        // // Used in WaitForMessageFromEngine() to capture the triggered event messages from engine
+        // static void OnMessageFromEngine(string eventType, string eventPayload)
+        // {
+        //     lastMessageFromEngineType = eventType;
+        //     lastMessageFromEnginePayload = eventPayload;
+        // }
 
         public static void TestRectTransformMaxStretched(RectTransform rt)
         {

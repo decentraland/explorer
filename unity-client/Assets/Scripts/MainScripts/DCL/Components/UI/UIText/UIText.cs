@@ -36,54 +36,52 @@ namespace DCL.Components
                 model.textModel = SceneController.i.SafeFromJson<TextShape.Model>(newJson);
             }
 
-            TextShape.ApplyModelChanges(referencesContainer.text, model.textModel);
+            yield return TextShape.ApplyModelChanges(scene, referencesContainer.text, model.textModel);
 
             RefreshAll();
-            return null;
         }
 
-        public override void RefreshDCLLayout(bool refreshSize = true, bool refreshAlignmentAndPosition = true)
+        protected override void RefreshDCLSize(RectTransform parentTransform = null)
         {
-            if (refreshSize)
+            if (parentTransform == null)
             {
+                parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
+            }
+
+            if (model.textModel.adaptWidth || model.textModel.adaptHeight)
                 referencesContainer.text.ForceMeshUpdate(false);
-                RectTransform parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
-                Bounds b = referencesContainer.text.textBounds;
 
-                float width, height;
+            Bounds b = referencesContainer.text.textBounds;
 
-                if (model.textModel.adaptWidth)
-                {
-                    width = b.size.x;
-                }
-                else
-                {
-                    width = model.width.GetScaledValue(parentTransform.rect.width);
-                }
+            float width, height;
 
-                if (model.textModel.adaptHeight)
-                {
-                    height = b.size.y;
-                }
-                else
-                {
-                    height = model.height.GetScaledValue(parentTransform.rect.height);
-                }
-
-                referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-                referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
-                referencesContainer.layoutElementRT.ForceUpdateRectTransforms();
-            }
-
-            if (refreshAlignmentAndPosition)
+            if (model.textModel.adaptWidth)
             {
-                RefreshDCLAlignmentAndPosition();
+                width = b.size.x;
             }
+            else
+            {
+                width = model.width.GetScaledValue(parentTransform.rect.width);
+            }
+
+            if (model.textModel.adaptHeight)
+            {
+                height = b.size.y;
+            }
+            else
+            {
+                height = model.height.GetScaledValue(parentTransform.rect.height);
+            }
+
+            referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
 
         public override void Dispose()
         {
-            Utils.SafeDestroy(referencesContainer.gameObject);
+            if (referencesContainer != null)
+                Utils.SafeDestroy(referencesContainer.gameObject);
+
             base.Dispose();
         }
     }

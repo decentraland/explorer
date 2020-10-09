@@ -12,15 +12,16 @@ namespace Tests
     public class MaterialTransitionControllerTests : TestsBase
     {
         [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test is too slow")]
         public IEnumerator MaterialTransitionWithGLTF()
         {
-            yield return InitScene();
-            DCL.Configuration.EnvironmentSettings.DEBUG = true;
-            sceneController.SetDebug();
-
             var entity1 = TestHelpers.CreateSceneEntity(scene);
 
             ParcelSettings.VISUAL_LOADING_ENABLED = true;
+
+            var prevLoadingType = RendereableAssetLoadHelper.loadingType;
+            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
 
             Shader hologramShader = Shader.Find("DCL/FX/Hologram");
 
@@ -33,7 +34,7 @@ namespace Tests
                 DCL.Models.CLASS_ID.GLTF_SHAPE,
                 Vector3.zero,
                 out entity,
-                new GLTFShape.Model() { src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb" });
+                new GLTFShape.Model() {src = DCL.Helpers.Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"});
 
             LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(entity);
             yield return new WaitUntil(() => gltfShape.alreadyLoaded);
@@ -76,15 +77,15 @@ namespace Tests
 
             Assert.Less(timeout, 10.1f, "Timeout! MaterialTransitionController never appeared?");
 
+            RendereableAssetLoadHelper.loadingType = prevLoadingType;
+
             yield return null;
         }
 
         [UnityTest]
         public IEnumerator MaterialTransitionWithParametrizableMeshes()
         {
-            yield return InitScene(reloadUnityScene: false);
             DCL.Configuration.EnvironmentSettings.DEBUG = true;
-            sceneController.SetDebug();
 
             var entity1 = TestHelpers.CreateSceneEntity(scene);
 
@@ -101,10 +102,14 @@ namespace Tests
 
             yield return null;
 
-            float timeout = 0;
-            while (timeout < 10)
+            float timeout = 0f;
+            float maxTime = 20f;
+            while (timeout < maxTime)
             {
                 timeout += Time.deltaTime;
+
+                if (timeout > maxTime)
+                    timeout = maxTime;
 
                 if (entity.meshRootGameObject != null)
                 {
@@ -128,7 +133,7 @@ namespace Tests
                 yield return null;
             }
 
-            Assert.Less(timeout, 10.1f, "Timeout! MaterialTransitionController never appeared?");
+            Assert.Less(timeout, maxTime + 0.1f, "Timeout! MaterialTransitionController never appeared?");
 
             yield return null;
         }

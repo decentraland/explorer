@@ -2,14 +2,15 @@
 // This doesn't execute on the main thread, so it's a "server" in terms of decentraland-rpc
 
 import { WebWorkerTransport } from 'decentraland-rpc'
-import { Adapter } from './lib/adapter'
-import { ParcelLifeCycleController } from './controllers/parcel'
-import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
-import { PositionLifecycleController } from './controllers/position'
-import { SceneDataDownloadManager } from './controllers/download'
-import { ILand, InstancedSpawnPoint } from 'shared/types'
+
 import defaultLogger from 'shared/logger'
-import { setTutorialEnabled } from './tutorial/tutorial'
+import { ILand, InstancedSpawnPoint } from 'shared/types'
+
+import { SceneDataDownloadManager, TileIdPair } from './controllers/download'
+import { ParcelLifeCycleController } from './controllers/parcel'
+import { PositionLifecycleController } from './controllers/position'
+import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
+import { Adapter } from './lib/adapter'
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -38,20 +39,17 @@ let downloadManager: SceneDataDownloadManager
     (options: {
       contentServer: string
       metaContentServer: string
+      metaContentService: string
       contentServerBundles: string
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
-      tutorialBaseURL: string
-      tutorialSceneEnabled: boolean
     }) => {
-      setTutorialEnabled(options.tutorialSceneEnabled)
-
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
         metaContentServer: options.metaContentServer,
-        contentServerBundles: options.contentServerBundles,
-        tutorialBaseURL: options.tutorialBaseURL
+        metaContentService: options.metaContentService,
+        contentServerBundles: options.contentServerBundles
       })
       parcelController = new ParcelLifeCycleController({
         lineOfSightRadius: options.lineOfSightRadius,
@@ -72,27 +70,38 @@ let downloadManager: SceneDataDownloadManager
         connector.notify('Event.track', event)
       )
 
-      sceneController.on('Start scene', sceneId => {
+      sceneController.on('Start scene', (sceneId) => {
         connector.notify('Scene.shouldStart', { sceneId })
       })
-      sceneController.on('Preload scene', sceneId => {
+      sceneController.on('Preload scene', (sceneId) => {
         connector.notify('Scene.shouldPrefetch', { sceneId })
       })
-      sceneController.on('Unload scene', sceneId => {
+      sceneController.on('Unload scene', (sceneId) => {
         connector.notify('Scene.shouldUnload', { sceneId })
       })
 
       connector.on('User.setPosition', (opt: { position: { x: number; y: number }; teleported: boolean }) => {
-        positionController.reportCurrentPosition(opt.position, opt.teleported).catch(e => {
+        positionController.reportCurrentPosition(opt.position, opt.teleported).catch((e) => {
           defaultLogger.error(`error while resolving new scenes around`, e)
         })
       })
 
-      connector.on('Scene.dataRequest', async (data: { sceneId: string }) =>
+      connector.on('Scene.dataRequest', async (data: { sceneId: string }) => {
         connector.notify('Scene.dataResponse', {
           data: (await downloadManager.getParcelDataBySceneId(data.sceneId)) as ILand
         })
-      )
+      })
+
+      connector.on('Scene.idRequest', async (data: { sceneIds: string[] }) => {
+        const scenes: TileIdPair[] = await downloadManager.resolveSceneSceneIds(data.sceneIds)
+
+        for (const scene of scenes) {
+          connector.notify('Scene.idResponse', {
+            position: scene[0],
+            data: scene[1]
+          })
+        }
+      })
 
       connector.on('Scene.prefetchDone', (opt: { sceneId: string }) => {
         sceneController.reportDataLoaded(opt.sceneId)

@@ -11,7 +11,7 @@ namespace DCL.SettingsHUD
         public const string TEXT_OFF = "OFF";
 
         public SpinBoxPresetted qualityPresetSpinBox = null;
-        public SpinBoxPresetted textureResSpinBox = null;
+        public SpinBoxPresetted baseResSpinBox = null;
         public SpinBoxPresetted shadowResSpinBox = null;
         public Toggle soundToggle = null;
         public Toggle colorGradingToggle = null;
@@ -22,16 +22,18 @@ namespace DCL.SettingsHUD
         public Slider antiAliasingSlider = null;
         public Slider renderingScaleSlider = null;
         public Slider drawDistanceSlider = null;
+        public Slider shadowDistanceSlider = null;
         public TextMeshProUGUI mouseSensitivityValueLabel = null;
         public TextMeshProUGUI antiAliasingValueLabel = null;
         public TextMeshProUGUI renderingScaleValueLabel = null;
         public TextMeshProUGUI drawDistanceValueLabel = null;
+        public TextMeshProUGUI shadowDistanceValueLabel = null;
 
-        private DCL.SettingsHUD.QualitySettings currentQualitySetting;
-        private DCL.SettingsHUD.GeneralSettings currentGeneralSetting;
+        private DCL.SettingsData.QualitySettings currentQualitySetting;
+        private DCL.SettingsData.GeneralSettings currentGeneralSetting;
 
-        private DCL.SettingsHUD.QualitySettings tempQualitySetting;
-        private DCL.SettingsHUD.GeneralSettings tempGeneralSetting;
+        private DCL.SettingsData.QualitySettings tempQualitySetting;
+        private DCL.SettingsData.GeneralSettings tempGeneralSetting;
 
         private bool shouldSetAsCustom = false;
         private bool isDirty = false;
@@ -40,22 +42,22 @@ namespace DCL.SettingsHUD
         {
             qualityPresetSpinBox.onValueChanged.AddListener(value =>
             {
-                DCL.SettingsHUD.QualitySettings preset = Settings.i.qualitySettingsPresets[value];
+                DCL.SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[value];
                 tempQualitySetting = preset;
                 UpdateQualitySettings();
                 shouldSetAsCustom = false;
             });
 
-            textureResSpinBox.onValueChanged.AddListener(value =>
+            baseResSpinBox.onValueChanged.AddListener(value =>
             {
-                tempQualitySetting.textureQuality = (DCL.SettingsHUD.QualitySettings.TextureQuality)value;
+                tempQualitySetting.baseResolution = (DCL.SettingsData.QualitySettings.BaseResolution)value;
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
 
             shadowResSpinBox.onValueChanged.AddListener(value =>
             {
-                tempQualitySetting.shadowResolution = (UnityEngine.Rendering.LWRP.ShadowResolution)(256 << value);
+                tempQualitySetting.shadowResolution = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << value);
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
@@ -108,7 +110,7 @@ namespace DCL.SettingsHUD
             antiAliasingSlider.onValueChanged.AddListener(value =>
             {
                 int antiAliasingValue = 1 << (int)value;
-                tempQualitySetting.antiAliasing = (UnityEngine.Rendering.LWRP.MsaaQuality)antiAliasingValue;
+                tempQualitySetting.antiAliasing = (UnityEngine.Rendering.Universal.MsaaQuality)antiAliasingValue;
                 if (value == 0)
                 {
                     antiAliasingValueLabel.text = TEXT_OFF;
@@ -133,6 +135,14 @@ namespace DCL.SettingsHUD
             {
                 tempQualitySetting.cameraDrawDistance = value;
                 drawDistanceValueLabel.text = value.ToString();
+                shouldSetAsCustom = true;
+                isDirty = true;
+            });
+
+            shadowDistanceSlider.onValueChanged.AddListener(value =>
+            {
+                tempQualitySetting.shadowDistance = value;
+                shadowDistanceValueLabel.text = value.ToString();
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
@@ -165,13 +175,13 @@ namespace DCL.SettingsHUD
             }
         }
 
-        void SetupQualityPreset(DCL.SettingsHUD.QualitySettings savedSetting)
+        void SetupQualityPreset(DCL.SettingsData.QualitySettings savedSetting)
         {
             List<string> presetNames = new List<string>();
             int presetIndex = 0;
             bool presetIndexFound = false;
 
-            DCL.SettingsHUD.QualitySettings preset;
+            DCL.SettingsData.QualitySettings preset;
             for (int i = 0; i < Settings.i.qualitySettingsPresets.Length; i++)
             {
                 preset = Settings.i.qualitySettingsPresets[i];
@@ -198,7 +208,7 @@ namespace DCL.SettingsHUD
 
         void UpdateQualitySettings()
         {
-            textureResSpinBox.value = (int)tempQualitySetting.textureQuality;
+            baseResSpinBox.value = (int)tempQualitySetting.baseResolution;
             shadowResSpinBox.value = (int)Mathf.Log((int)tempQualitySetting.shadowResolution, 2) - 8;
             soundToggle.isOn = tempGeneralSetting.sfxVolume > 0 ? true : false;
             colorGradingToggle.isOn = tempQualitySetting.colorGrading;
@@ -206,9 +216,11 @@ namespace DCL.SettingsHUD
             shadowToggle.isOn = tempQualitySetting.shadows;
             bloomToggle.isOn = tempQualitySetting.bloom;
             mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
-            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.LWRP.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
+            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
+            shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
+
         }
 
         public void Apply()

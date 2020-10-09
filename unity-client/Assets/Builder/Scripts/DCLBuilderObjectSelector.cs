@@ -7,13 +7,15 @@ namespace Builder
 {
     public class DCLBuilderObjectSelector : MonoBehaviour
     {
-        const float MAX_SECS_FOR_CLICK = 0.25f;
+        const float DRAGGING_THRESHOLD_TIME = 0.25f;
 
         public DCLBuilderRaycast builderRaycast;
         public DCLBuilderGizmoManager gizmosManager;
 
         public delegate void EntitySelectedDelegate(DCLBuilderEntity entity, string gizmoType);
+
         public delegate void EntityDeselectedDelegate(DCLBuilderEntity entity);
+
         public delegate void EntitySelectedListChangedDelegate(Transform selectionParent, List<DCLBuilderEntity> selectedEntities);
 
         public static event EntitySelectedDelegate OnMarkObjectSelected;
@@ -28,7 +30,7 @@ namespace Builder
 
         private Dictionary<string, DCLBuilderEntity> entities = new Dictionary<string, DCLBuilderEntity>();
         private List<DCLBuilderEntity> selectedEntities = new List<DCLBuilderEntity>();
-        private EntityPressedInfo entityEnqueueForDeselectInfo = new EntityPressedInfo();
+        private EntityPressedInfo lastPressedEntityInfo = new EntityPressedInfo();
         private bool isDirty = false;
         private bool isSelectionTransformed = false;
 
@@ -47,6 +49,9 @@ namespace Builder
 
         private void OnDestroy()
         {
+            if (selectedEntitiesParent != null)
+                Destroy(selectedEntitiesParent.gameObject);
+
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
         }
 
@@ -66,6 +71,7 @@ namespace Builder
                 DCLBuilderObjectDragger.OnDraggingObject += OnObjectsDrag;
                 DCLBuilderObjectDragger.OnDraggingObjectEnd += OnObjectsDragEnd;
             }
+
             isGameObjectActive = true;
         }
 
@@ -91,6 +97,7 @@ namespace Builder
             {
                 return;
             }
+
             isDirty = false;
             SelectionParentReset();
             OnSelectedObjectListChanged?.Invoke(selectedEntitiesParent, selectedEntities);
@@ -107,6 +114,8 @@ namespace Builder
                 return;
             }
 
+            bool gizmoOrEntityPressed = false;
+
             RaycastHit hit;
             if (builderRaycast.Raycast(mousePosition, builderRaycast.defaultMask | builderRaycast.gizmoMask, out hit, CompareSelectionHit))
             {
@@ -114,6 +123,7 @@ namespace Builder
                 if (gizmosAxis != null)
                 {
                     OnGizmosAxisPressed?.Invoke(gizmosAxis);
+                    gizmoOrEntityPressed = true;
                 }
                 else
                 {
@@ -127,17 +137,15 @@ namespace Builder
 
                     if (pressedEntity != null && CanSelect(pressedEntity))
                     {
-                        if (SelectionParentHasChild(pressedEntity.transform))
-                        {
-                            EnqueueEntityForDeselect(pressedEntity, hit.point);
-                        }
-                        else
-                        {
-                            ProcessEntityPressed(pressedEntity, hit.point);
-                        }
+                        SetLastPressedEntity(pressedEntity, hit.point);
                         OnEntityPressed?.Invoke(pressedEntity, hit.point);
+                        gizmoOrEntityPressed = true;
                     }
                 }
+            }
+
+            if (gizmoOrEntityPressed)
+            {
                 groundClickTime = 0;
             }
             else
@@ -152,22 +160,27 @@ namespace Builder
             {
                 return;
             }
-            if (entityEnqueueForDeselectInfo.pressedEntity != null)
+
+            if (lastPressedEntityInfo.pressedEntity != null)
             {
-                if ((Time.unscaledTime - entityEnqueueForDeselectInfo.pressedTime) < MAX_SECS_FOR_CLICK)
+                // NOTE: we only process entity as selected if we are not considering that user was holding mouse button to rotate the camera
+                if ((Time.unscaledTime - lastPressedEntityInfo.pressedTime) < DRAGGING_THRESHOLD_TIME)
                 {
-                    ProcessEntityPressed(entityEnqueueForDeselectInfo.pressedEntity, entityEnqueueForDeselectInfo.hitPoint);
+                    ProcessEntityPressed(lastPressedEntityInfo.pressedEntity, lastPressedEntityInfo.hitPoint);
                 }
             }
-            entityEnqueueForDeselectInfo.pressedEntity = null;
 
-            if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < MAX_SECS_FOR_CLICK)
+            lastPressedEntityInfo.pressedEntity = null;
+
+            // NOTE: deselect all entities if the user click on the ground and it wasn't holding the mouse left button
+            if (groundClickTime != 0 && (Time.unscaledTime - groundClickTime) < DRAGGING_THRESHOLD_TIME)
             {
                 if (selectedEntities != null)
                 {
                     OnNoObjectSelected?.Invoke();
                 }
             }
+
             groundClickTime = 0;
         }
 
@@ -193,6 +206,7 @@ namespace Builder
             {
                 Deselect(entity);
             }
+
             if (entities.ContainsKey(entity.rootEntity.entityId))
             {
                 entities.Remove(entity.rootEntity.entityId);
@@ -201,7 +215,7 @@ namespace Builder
 
         private void OnSceneChanged(ParcelScene scene)
         {
-            boundariesChecker = scene.boundariesChecker;
+            boundariesChecker = DCL.SceneController.i.boundariesChecker;
             currentScene = scene;
         }
 
@@ -242,6 +256,7 @@ namespace Builder
             {
                 SelectionParentReset();
             }
+
             isSelectionTransformed = false;
         }
 
@@ -256,6 +271,7 @@ namespace Builder
             {
                 SelectionParentReset();
             }
+
             isSelectionTransformed = false;
         }
 
@@ -270,6 +286,7 @@ namespace Builder
             {
                 return;
             }
+
             OnMarkObjectSelected?.Invoke(entity, gizmosManager.GetSelectedGizmo());
         }
 
@@ -284,6 +301,7 @@ namespace Builder
             {
                 selectedEntities.Add(entity);
             }
+
             SelectionParentAddEntity(entity);
             entity.SetSelectLayer();
 
@@ -299,10 +317,12 @@ namespace Builder
                 OnDeselectedObject?.Invoke(entity);
                 entity.SetDefaultLayer();
             }
+
             if (selectedEntities.Contains(entity))
             {
                 selectedEntities.Remove(entity);
             }
+
             isDirty = true;
         }
 
@@ -312,6 +332,7 @@ namespace Builder
             {
                 Deselect(selectedEntities[i]);
             }
+
             SelectionParentRemoveAllEntities();
         }
 
@@ -321,11 +342,11 @@ namespace Builder
             gameObject.SetActive(!isPreview);
         }
 
-        private void EnqueueEntityForDeselect(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
+        private void SetLastPressedEntity(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
         {
-            entityEnqueueForDeselectInfo.pressedEntity = pressedEntity;
-            entityEnqueueForDeselectInfo.pressedTime = Time.unscaledTime;
-            entityEnqueueForDeselectInfo.hitPoint = hitPoint;
+            lastPressedEntityInfo.pressedEntity = pressedEntity;
+            lastPressedEntityInfo.pressedTime = Time.unscaledTime;
+            lastPressedEntityInfo.hitPoint = hitPoint;
         }
 
         private void ProcessEntityPressed(DCLBuilderEntity pressedEntity, Vector3 hitPoint)
@@ -444,6 +465,7 @@ namespace Builder
                     closestHit = hit;
                 }
             }
+
             return closestHit;
         }
 
@@ -459,6 +481,7 @@ namespace Builder
             {
                 return SelectionParentHasChild(collider.ownerEntity.transform);
             }
+
             return false;
         }
 

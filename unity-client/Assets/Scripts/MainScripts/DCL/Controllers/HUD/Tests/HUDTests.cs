@@ -1,54 +1,64 @@
 using NUnit.Framework;
 using System.Collections;
-using UnityEngine;
+using DCL;
 using UnityEngine.TestTools;
 
 namespace Tests
 {
     public class HUDControllerShould : TestsBase
     {
+        protected override bool justSceneSetUp => true;
+
+        protected override IEnumerator SetUp()
+        {
+            yield return base.SetUp();
+            HUDController.i.Cleanup();
+        }
+
+        protected override IEnumerator TearDown()
+        {
+            HUDController.i.Cleanup();
+            yield return base.TearDown();
+        }
+
         [UnityTest]
         public IEnumerator NotCreateHUDsInitially()
         {
-            yield return InitScene();
             // There must be a hud controller
             HUDController hudController = HUDController.i;
             Assert.IsNotNull(hudController, "There must be a HUDController in the scene");
 
-            // But the HUDs should not have been created
-            Assert.IsNull(hudController.avatarHud);
-            Assert.IsNull(hudController.notificationHud);
-            Assert.IsNull(hudController.avatarEditorHud);
-            Assert.IsNull(hudController.minimapHud);
+            HUDController.i.Cleanup();
+            // HUD controllers are created
+            for (int i = 1; i < (int) HUDController.HUDElementID.COUNT; i++)
+            {
+                Assert.IsNull(hudController.GetHUDElement((HUDController.HUDElementID) i));
+            }
 
-            // And the HUD views should not exist
-            Assert.IsNull(GameObject.FindObjectOfType<AvatarHUDView>());
-            Assert.IsNull(GameObject.FindObjectOfType<NotificationHUDView>());
-            Assert.IsNull(GameObject.FindObjectOfType<AvatarEditorHUDView>());
-            Assert.IsNull(GameObject.FindObjectOfType<MinimapHUDView>());
+            yield break;
         }
 
         [UnityTest]
         public IEnumerator CreateHudIfConfigurationIsActive()
         {
-            yield return InitScene();
             // There must be a hud controller
             HUDController hudController = HUDController.i;
             Assert.IsNotNull(hudController, "There must be a HUDController in the scene");
 
-            string configurationJson = "{\"active\":true,\"visible\":true}";
-            hudController.ConfigureAvatarHUD(configurationJson);
-            hudController.ConfigureNotificationHUD(configurationJson);
+            HUDConfiguration config = new HUDConfiguration() {active = true, visible = true};
+
+            for (int i = 1; i < (int) HUDController.HUDElementID.COUNT; i++)
+            {
+                hudController.ConfigureHUDElement((HUDController.HUDElementID) i, config, null);
+            }
 
             yield return null;
 
             // HUD controllers are created
-            Assert.IsNotNull(hudController.avatarHud);
-            Assert.IsNotNull(hudController.notificationHud);
-
-            // HUD views exist
-            Assert.IsNotNull(GameObject.FindObjectOfType<AvatarHUDView>());
-            Assert.IsNotNull(GameObject.FindObjectOfType<NotificationHUDView>());
+            for (int i = 1; i < (int) HUDController.HUDElementID.COUNT; i++)
+            {
+                Assert.IsNotNull(hudController.GetHUDElement((HUDController.HUDElementID) i), $"Failed to create {(HUDController.HUDElementID) i}");
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using DCL.Configuration;
+using DCL.Configuration;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -22,20 +22,6 @@ namespace DCL.Helpers
             generateBaseline = true;
             yield return test;
             generateBaseline = false;
-        }
-
-        public static IEnumerator InitVisualTestsScene(string testName)
-        {
-            currentTestName = testName;
-            snapshotIndex = 0;
-
-            DCLCharacterController.i.gravity = 0f;
-            DCLCharacterController.i.enabled = false;
-
-            // Position character inside parcel (0,0)
-            TestHelpers.SetCharacterPosition(new Vector3(0, 2f, 0f));
-
-            yield return new WaitForSeconds(2.0f);
         }
 
         /// <summary>
@@ -107,7 +93,7 @@ namespace DCL.Helpers
             }
 
             var previousQualityLevel = QualitySettings.GetQualityLevel();
-            QualitySettings.SetQualityLevel((int)QualityLevel.Good, true);
+            QualitySettings.SetQualityLevel((int) QualityLevel.Good, true);
 
             string finalPath = snapshotPath + snapshotName;
 

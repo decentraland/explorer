@@ -13,6 +13,31 @@ namespace SceneBoundariesCheckerTests
 {
     public static class SBC_Asserts
     {
+        public static IEnumerator EntitiesAreBeingCorrectlyRegistered(ParcelScene scene)
+        {
+            var boxShape1 = TestHelpers.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
+            var boxShape2 = TestHelpers.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
+
+            var entity1 = boxShape1.attachedEntities.First();
+            var entity2 = boxShape2.attachedEntities.First();
+
+            TestHelpers.SetEntityParent(scene, entity1, entity2);
+
+            Assert.AreEqual(2, scene.entities.Count, "scene entities count can't be zero!");
+            Assert.AreEqual(2, SceneController.i.boundariesChecker.entitiesToCheckCount, "entities to check can't be zero!");
+
+            yield return null;
+
+            TestHelpers.RemoveSceneEntity(scene, entity2.entityId);
+
+            ParcelScene.parcelScenesCleaner.ForceCleanup();
+
+            Assert.AreEqual(0, scene.entities.Count, "entity count should be zero");
+            Assert.AreEqual(0, SceneController.i.boundariesChecker.entitiesToCheckCount, "entities to check should be zero!");
+
+            yield break;
+        }
+
         public static IEnumerator PShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
         {
             var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
@@ -20,7 +45,6 @@ namespace SceneBoundariesCheckerTests
 
             Assert.IsTrue(MeshIsInvalid(boxShape.attachedEntities.First().meshesInfo));
         }
-
 
         public static IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
         {
@@ -54,11 +78,14 @@ namespace SceneBoundariesCheckerTests
 
             TestHelpers.SharedComponentAttach(component, entity);
 
-            var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
+            yield return null;
+
+            LoadWrapper shapeLoader = NFTShape.GetLoaderForEntity(entity);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
 
             Assert.IsTrue(MeshIsInvalid(entity.meshesInfo));
         }
+
         public static IEnumerator PShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
         {
             var boxShape = TestHelpers.CreateEntityWithBoxShape(scene, new Vector3(8, 1, 8));
@@ -72,8 +99,12 @@ namespace SceneBoundariesCheckerTests
             var transformModel = new DCLTransform.Model { position = new Vector3(18, 1, 18) };
             TestHelpers.SetEntityTransform(scene, entity, transformModel);
 
+            yield return null;
+            yield return null;
+
             Assert.IsTrue(MeshIsInvalid(entity.meshesInfo));
         }
+
         public static IEnumerator GLTFShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
         {
             var entity = TestHelpers.CreateSceneEntity(scene);
@@ -93,6 +124,9 @@ namespace SceneBoundariesCheckerTests
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(18, 1, 18) });
 
+            yield return null;
+            yield return null;
+
             Assert.IsTrue(MeshIsInvalid(entity.meshesInfo));
         }
 
@@ -111,13 +145,17 @@ namespace SceneBoundariesCheckerTests
 
             TestHelpers.SharedComponentAttach(component, entity);
 
-            var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
+            yield return null;
+
+            LoadWrapper shapeLoader = NFTShape.GetLoaderForEntity(entity);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
 
             Assert.IsFalse(MeshIsInvalid(entity.meshesInfo));
 
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(18, 1, 18) });
+
+            yield return null;
 
             Assert.IsTrue(MeshIsInvalid(entity.meshesInfo));
         }
@@ -133,6 +171,9 @@ namespace SceneBoundariesCheckerTests
             // Move object to surpass the scene height boundaries
             var transformModel = new DCLTransform.Model { position = new Vector3(8, 30, 8) };
             TestHelpers.SetEntityTransform(scene, entity, transformModel);
+
+            yield return null;
+            yield return null;
 
             Assert.IsTrue(MeshIsInvalid(entity.meshesInfo));
         }
@@ -158,8 +199,12 @@ namespace SceneBoundariesCheckerTests
             var transformModel = new DCLTransform.Model { position = new Vector3(18, 1, 18) };
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], transformModel);
 
+            yield return null;
+            yield return null;
+
             Assert.IsTrue(MeshIsInvalid(scene.entities[childEntityId].meshesInfo));
         }
+
         public static IEnumerator ChildShapeIsEvaluatedOnShapelessParent(ParcelScene scene)
         {
             // create shapeless parent entity
@@ -176,11 +221,15 @@ namespace SceneBoundariesCheckerTests
             yield return null;
 
             TestHelpers.SetEntityParent(scene, childEntityId, entityId);
+            yield return null;
 
             Assert.IsTrue(MeshIsInvalid(scene.entities[childEntityId].meshesInfo));
 
             // Move parent object to re-enter the scene boundaries
             TestHelpers.SetEntityTransform(scene, scene.entities[entityId], new Vector3(8, 1, 8), Quaternion.identity, Vector3.one);
+
+            yield return null;
+            yield return null;
 
             Assert.IsFalse(MeshIsInvalid(scene.entities[childEntityId].meshesInfo));
         }
@@ -198,6 +247,8 @@ namespace SceneBoundariesCheckerTests
             // Move object to re-enter the scene boundaries
             var transformModel = new DCLTransform.Model { position = new Vector3(8, 1, 8) };
             TestHelpers.SetEntityTransform(scene, entity, transformModel);
+
+            yield return null;
 
             Assert.IsFalse(MeshIsInvalid(entity.meshesInfo));
         }
@@ -221,8 +272,12 @@ namespace SceneBoundariesCheckerTests
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
+            yield return null;
+            yield return null;
+
             Assert.IsFalse(MeshIsInvalid(entity.meshesInfo));
         }
+
         public static IEnumerator NFTShapeIsResetWhenReenteringBounds(ParcelScene scene)
         {
             var entity = TestHelpers.CreateSceneEntity(scene);
@@ -238,13 +293,17 @@ namespace SceneBoundariesCheckerTests
 
             TestHelpers.SharedComponentAttach(component, entity);
 
-            var shapeLoader = entity.gameObject.GetComponentInChildren<LoadWrapper_NFT>(true);
+            yield return null;
+
+            LoadWrapper shapeLoader = NFTShape.GetLoaderForEntity(entity);
             yield return new WaitUntil(() => shapeLoader.alreadyLoaded);
 
             Assert.IsTrue(MeshIsInvalid(entity.meshesInfo));
 
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
+
+            yield return null;
 
             Assert.IsFalse(MeshIsInvalid(entity.meshesInfo));
         }
@@ -275,6 +334,5 @@ namespace SceneBoundariesCheckerTests
 
             return true;
         }
-
     }
 }

@@ -1,9 +1,11 @@
+﻿using System.Runtime.CompilerServices;
 using DCL;
 using UnityEngine;
 
 public class PlayerAvatarController : MonoBehaviour
 {
     public AvatarRenderer avatarRenderer;
+    public AvatarVisibility avatarVisibility;
     public float cameraDistanceToDeactivate = 1.0f;
 
     private UserProfile userProfile => UserProfile.GetOwnUserProfile();
@@ -19,7 +21,7 @@ public class PlayerAvatarController : MonoBehaviour
         avatarRenderer.OnFailEvent -= OnAvatarRendererReady;
         avatarRenderer.OnSuccessEvent += OnAvatarRendererReady;
         avatarRenderer.OnFailEvent += OnAvatarRendererReady;
-        RenderingController.i.renderingActivatedAckLock.AddLock(this);
+        CommonScriptableObjects.rendererState.AddLock(this);
 
         mainCamera = Camera.main;
     }
@@ -27,7 +29,7 @@ public class PlayerAvatarController : MonoBehaviour
     private void OnAvatarRendererReady()
     {
         enableCameraCheck = true;
-        RenderingController.i.renderingActivatedAckLock.RemoveLock(this);
+        CommonScriptableObjects.rendererState.RemoveLock(this);
         avatarRenderer.OnSuccessEvent -= OnAvatarRendererReady;
         avatarRenderer.OnFailEvent -= OnAvatarRendererReady;
     }
@@ -37,14 +39,27 @@ public class PlayerAvatarController : MonoBehaviour
         if (!enableCameraCheck || repositioningWorld)
             return;
 
-        bool shouldBeVisible = Vector3.Distance(mainCamera.transform.position, transform.position) > cameraDistanceToDeactivate;
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
 
-        if (shouldBeVisible != avatarRenderer.gameObject.activeSelf)
-            avatarRenderer.SetVisibility(shouldBeVisible);
+            if (mainCamera == null)
+                return;
+        }
+
+        bool shouldBeVisible = Vector3.Distance(mainCamera.transform.position, transform.position) > cameraDistanceToDeactivate;
+        avatarVisibility.SetVisibility("PLAYER_AVATAR_CONTROLLER", shouldBeVisible);
     }
+
     private void OnEnable()
     {
         userProfile.OnUpdate += OnUserProfileOnUpdate;
+        userProfile.OnAvatarExpressionSet += OnAvatarExpression;
+    }
+
+    private void OnAvatarExpression(string id, long timestamp)
+    {
+        avatarRenderer.UpdateExpressions(id, timestamp);
     }
 
     private void OnUserProfileOnUpdate(UserProfile profile)
@@ -55,5 +70,6 @@ public class PlayerAvatarController : MonoBehaviour
     private void OnDisable()
     {
         userProfile.OnUpdate -= OnUserProfileOnUpdate;
+        userProfile.OnAvatarExpressionSet -= OnAvatarExpression;
     }
 }

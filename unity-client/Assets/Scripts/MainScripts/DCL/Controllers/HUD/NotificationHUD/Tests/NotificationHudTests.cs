@@ -7,17 +7,24 @@ namespace Tests
 {
     public class NotificationHudTests : TestsBase
     {
+        private NotificationHUDController controller;
+
         protected override IEnumerator SetUp()
         {
+            yield return base.SetUp();
+            controller = new NotificationHUDController();
             sceneInitialized = false;
-            return base.SetUp();
+        }
+
+        protected override IEnumerator TearDown()
+        {
+            controller.Dispose();
+            yield return base.TearDown();
         }
 
         [Test]
         public void NotificationHud_Creation()
         {
-
-            var controller = new NotificationHUDController();
             var views = GameObject.FindObjectsOfType<NotificationHUDView>();
 
             Assert.AreEqual(1, views.Length);
@@ -30,9 +37,6 @@ namespace Tests
         [Test]
         public void NotificationHud_ModelDefaulted()
         {
-
-            var controller = new NotificationHUDController();
-
             Assert.IsNotNull(controller.model);
             Assert.IsNotNull(controller.model.notifications);
             Assert.AreEqual(controller.model.notifications.Count, 0);
@@ -41,12 +45,9 @@ namespace Tests
         [UnityTest]
         public IEnumerator NotificationHud_ShowNotification()
         {
-
-            var controller = new NotificationHUDController();
-
-            NotificationModel model = new NotificationModel()
+            Notification.Model model = new Notification.Model()
             {
-                type = NotificationModel.NotificationType.GENERIC,
+                type = NotificationFactory.Type.GENERIC,
                 message = "text",
                 timer = -1,
                 scene = ""
@@ -60,20 +61,18 @@ namespace Tests
             Assert.AreEqual(notifications.Length, 1);
 
             Notification n = notifications[0];
-            Assert.AreEqual(n.notificationModel.type, model.type);
-            Assert.AreEqual(n.notificationModel.message, model.message);
-            Assert.AreEqual(n.notificationModel.timer, model.timer);
-            Assert.AreEqual(n.notificationModel.scene, model.scene);
+            Assert.AreEqual(n.model.type, model.type);
+            Assert.AreEqual(n.model.message, model.message);
+            Assert.AreEqual(n.model.timer, model.timer);
+            Assert.AreEqual(n.model.scene, model.scene);
         }
 
         [UnityTest]
         public IEnumerator NotificationHud_ShowSeveralNotifications()
         {
-            var controller = new NotificationHUDController();
-
-            NotificationModel model = new NotificationModel()
+            Notification.Model model = new Notification.Model()
             {
-                type = NotificationModel.NotificationType.GENERIC,
+                type = NotificationFactory.Type.GENERIC,
                 message = "text",
                 timer = -1,
                 scene = ""
@@ -81,9 +80,9 @@ namespace Tests
 
             controller.ShowNotification(model);
 
-            NotificationModel model2 = new NotificationModel()
+            Notification.Model model2 = new Notification.Model()
             {
-                type = NotificationModel.NotificationType.SCRIPTING_ERROR,
+                type = NotificationFactory.Type.SCRIPTING_ERROR,
                 message = "text",
                 timer = -1,
                 scene = ""
@@ -100,12 +99,9 @@ namespace Tests
         [UnityTest]
         public IEnumerator NotificationHud_ShowTimedNotification()
         {
-
-            var controller = new NotificationHUDController();
-
-            NotificationModel model = new NotificationModel()
+            Notification.Model model = new Notification.Model()
             {
-                type = NotificationModel.NotificationType.GENERIC,
+                type = NotificationFactory.Type.GENERIC,
                 message = "text",
                 timer = 3,
                 scene = ""
@@ -118,7 +114,7 @@ namespace Tests
             Assert.AreEqual(notifications.Length, 1);
             Assert.AreEqual(controller.model.notifications.Count, 1);
 
-            yield return new WaitForSeconds(4);
+            yield return new DCL.WaitUntil(() => notifications.Length == 0, 4);
 
             notifications = GameObject.FindObjectsOfType<Notification>();
             Assert.AreEqual(notifications.Length, 0);

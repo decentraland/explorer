@@ -1,9 +1,9 @@
 #ifndef LIGHTWEIGHT_LIT_INPUT_INCLUDED
 #define LIGHTWEIGHT_LIT_INPUT_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/SurfaceInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
 float4 _BaseMap_ST;
@@ -22,6 +22,7 @@ half _FadeDirection;
 TEXTURE2D(_OcclusionMap);       SAMPLER(sampler_OcclusionMap);
 TEXTURE2D(_MetallicGlossMap);   SAMPLER(sampler_MetallicGlossMap);
 TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
+TEXTURE2D(_AlphaTexture);       SAMPLER(sampler_AlphaTexture);
 CBUFFER_END
 
 #ifdef _SPECULAR_SETUP
@@ -81,7 +82,8 @@ half SampleOcclusion(float2 uv)
 inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfaceData)
 {
     half4 albedoAlpha = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
-    outSurfaceData.alpha = Alpha(albedoAlpha.a, _BaseColor, _Cutoff);
+    half4 alphaTexture = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_AlphaTexture, sampler_AlphaTexture));
+    outSurfaceData.alpha = Alpha(albedoAlpha.a, _BaseColor, _Cutoff) * alphaTexture.r;
 
     half4 specGloss = SampleMetallicSpecGloss(uv, albedoAlpha.a);
     outSurfaceData.albedo = albedoAlpha.rgb * _BaseColor.rgb;
@@ -96,6 +98,13 @@ inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfa
 
     outSurfaceData.smoothness = specGloss.a;
     outSurfaceData.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
+
+    if (outSurfaceData.normalTS.x > -.004 && outSurfaceData.normalTS.x < .004)
+        outSurfaceData.normalTS.x = 0;
+
+    if (outSurfaceData.normalTS.y > -.004 && outSurfaceData.normalTS.y < .004)
+        outSurfaceData.normalTS.y = 0;
+
     outSurfaceData.occlusion = SampleOcclusion(uv);
     outSurfaceData.emission = SampleEmission(uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
 }

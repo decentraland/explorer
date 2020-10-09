@@ -12,6 +12,7 @@ export enum ServerConnectionStatus {
 
 export type CatalystLayers = {
   name: string
+  version: string
   layers: Layer[]
 }
 
@@ -22,6 +23,7 @@ export type Candidate = {
   score: number
   layer: Layer
   status: ServerConnectionStatus
+  lighthouseVersion: string
 }
 
 export type LayerUserInfo = {
@@ -35,15 +37,18 @@ export type Realm = {
   domain: string
   catalystName: string
   layer: string
+  lighthouseVersion: string
 }
 
 export type DaoState = {
   initialized: boolean
+  candidatesFetched: boolean
   profileServer: string
   fetchContentServer: string
   fetchMetaContentServer: string
   updateContentServer: string
   commsServer: string
+  resizeService: string
   realm: Realm | undefined
   candidates: Candidate[]
   contentWhitelist: Candidate[]

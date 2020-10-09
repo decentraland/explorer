@@ -12,7 +12,7 @@ export type SceneLoad = ReturnType<typeof signalSceneLoad>
 export type SceneStart = ReturnType<typeof signalSceneStart>
 export type SceneFail = ReturnType<typeof signalSceneFail>
 
-declare var global: any
+declare const global: any
 
 export function globalSignalSceneLoad(sceneId: string) {
   global['globalStore'].dispatch(signalSceneLoad(sceneId))
@@ -25,3 +25,8 @@ export function globalSignalSceneStart(sceneId: string) {
 export function globalSignalSceneFail(sceneId: string) {
   global['globalStore'].dispatch(signalSceneFail(sceneId))
 }
+
+export const UPDATE_STATUS_MESSAGE = 'Update status message'
+export const updateStatusMessage = (message: string, loadPercentage: number) =>
+  action(UPDATE_STATUS_MESSAGE, { message, loadPercentage })
+export type UpdateStatusMessage = ReturnType<typeof updateStatusMessage>

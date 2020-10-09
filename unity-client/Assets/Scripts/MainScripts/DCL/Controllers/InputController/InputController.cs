@@ -9,10 +9,24 @@ public enum DCLAction_Trigger
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
     CameraChange = 100,
 
+    ToggleNavMap = 110,
+    ToggleFriends = 120,
+    CloseWindow = 121,
+    ToggleWorldChat = 122,
+    ToggleUIVisibility = 123,
+    ToggleControlsHud = 124,
+    ToggleSettings = 125,
+    ToggleExploreHud = 126,
+    ToggleVoiceChatRecording = 127,
+
     OpenExpressions = 200,
     Expression_Wave = 201,
     Expression_FistPump = 202,
     Expression_Robot = 203,
+    Expression_RaiseHand = 204,
+    Expression_Clap = 205,
+    Expression_ThrowMoney = 206,
+    Expression_SendKiss = 207
 }
 
 public enum DCLAction_Hold
@@ -21,6 +35,9 @@ public enum DCLAction_Hold
     Sprint = 1,
     Jump = 2,
     FreeCameraMode = 101,
+    VoiceChatRecording = 102,
+    DefaultConfirmAction = 300,
+    DefaultCancelAction = 301
 }
 
 public enum DCLAction_Measurable
@@ -39,9 +56,13 @@ public class InputController : MonoBehaviour
     public InputAction_Trigger[] triggerTimeActions;
     public InputAction_Hold[] holdActions;
     public InputAction_Measurable[] measurableActions;
+    bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+    bool allUIHidden => CommonScriptableObjects.allUIHidden.Get();
 
     private void Update()
     {
+        if (!renderingEnabled) return;
+
         Update_Trigger();
         Update_Hold();
         Update_Measurable();
@@ -57,10 +78,42 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.CameraChange:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.FocusNotInInput);
+                        InputProcessor.FromKey(action, KeyCode.V,
+                            modifiers: InputProcessor.Modifier.NeedsPointerLocked |
+                                       InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleNavMap:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Tab, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleFriends:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.L, modifiers: InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Trigger.ToggleWorldChat:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.Return, modifiers: InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Trigger.ToggleUIVisibility:
+                    InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Trigger.CloseWindow:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleControlsHud:
+                    InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleExploreHud:
+                    if (allUIHidden) break;
+                    InputProcessor.FromKey(action, KeyCode.X, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.Expression_Wave:
                     InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -70,6 +123,21 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.Expression_Robot:
                     InputProcessor.FromKey(action, KeyCode.Alpha3, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_RaiseHand:
+                    InputProcessor.FromKey(action, KeyCode.Alpha4, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_Clap:
+                    InputProcessor.FromKey(action, KeyCode.Alpha5, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_ThrowMoney:
+                    InputProcessor.FromKey(action, KeyCode.Alpha6, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.Expression_SendKiss:
+                    InputProcessor.FromKey(action, KeyCode.Alpha7, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleVoiceChatRecording:
+                    InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftAlt });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -93,7 +161,17 @@ public class InputController : MonoBehaviour
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.FromKey(action, KeyCode.Y, InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Hold.VoiceChatRecording:
+                    // Push to talk functionality only triggers if no modifier key is pressed
+                    InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.FocusNotInInput, null);
+                    break;
+                case DCLAction_Hold.DefaultConfirmAction:
+                    InputProcessor.FromKey(action, KeyCode.E, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.DefaultCancelAction:
+                    InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -129,7 +207,7 @@ public class InputController : MonoBehaviour
 
 public static class InputProcessor
 {
-    private static readonly KeyCode[] MODIFIER_KEYS = new [] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
+    private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
 
     [Flags]
     public enum Modifier
@@ -140,11 +218,28 @@ public static class InputProcessor
         FocusNotInInput = 0b0000010,
     }
 
+    public static Boolean PassModifierKeys(KeyCode[] modifierKeys)
+    {
+        for (var i = 0; i < MODIFIER_KEYS.Length; i++)
+        {
+            var keyCode = MODIFIER_KEYS[i];
+            var pressed = Input.GetKey(keyCode);
+            if (modifierKeys == null)
+            {
+                if (pressed) return false;
+            }
+            else
+            {
+                if (modifierKeys.Contains(keyCode) != pressed) return false;
+            }
+        }
+
+        return true;
+    }
+
     public static bool PassModifiers(Modifier modifiers)
     {
-        bool result = true;
-
-        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && Cursor.lockState != CursorLockMode.Locked)
+        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.isCursorLocked)
             return false;
 
         if (IsModifierSet(modifiers, Modifier.FocusNotInInput) && FocusIsInInputField())
@@ -153,28 +248,18 @@ public static class InputProcessor
         return true;
     }
 
-    public static void FromKey(InputAction_Trigger action, KeyCode key, KeyCode[] modifierKeys = null, Modifier modifiers = Modifier.None)
+    public static void FromKey(InputAction_Trigger action, KeyCode key, KeyCode[] modifierKeys = null,
+        Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
 
-        for (var i = 0; i < MODIFIER_KEYS.Length; i++)
-        {
-            var keyCode = MODIFIER_KEYS[i];
-            var pressed = Input.GetKey(keyCode);
-            if (modifierKeys == null)
-            {
-                if (pressed) return;
-            }
-            else
-            {
-                if (modifierKeys.Contains(keyCode) != pressed) return;
-            }
-        }
+        if (!PassModifierKeys(modifierKeys)) return;
 
         if (Input.GetKeyDown(key)) action.RaiseOnTriggered();
     }
 
-    public static void FromMouseButton(InputAction_Trigger action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
+    public static void FromMouseButton(InputAction_Trigger action, int mouseButtonIdx,
+        Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
 
@@ -187,6 +272,13 @@ public static class InputProcessor
 
         if (Input.GetKeyDown(key)) action.RaiseOnStarted();
         if (Input.GetKeyUp(key)) action.RaiseOnFinished();
+    }
+
+    public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers, KeyCode[] modifierKeys)
+    {
+        if (!PassModifierKeys(modifierKeys)) return;
+
+        FromKey(action, key, modifiers);
     }
 
     public static void FromMouse(InputAction_Hold action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
@@ -218,10 +310,13 @@ public static class InputProcessor
 
     public static bool FocusIsInInputField()
     {
-        if (EventSystem.current.currentSelectedGameObject != null && (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null || EventSystem.current.currentSelectedGameObject.GetComponent<UnityEngine.UI.InputField>() != null))
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null ||
+             EventSystem.current.currentSelectedGameObject.GetComponent<UnityEngine.UI.InputField>() != null))
         {
             return true;
         }
+
         return false;
     }
 }

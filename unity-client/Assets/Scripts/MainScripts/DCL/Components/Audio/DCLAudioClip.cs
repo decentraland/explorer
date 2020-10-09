@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using System;
 using System.Collections;
@@ -88,7 +88,6 @@ namespace DCL.Components
             if (audioClip != null && loadingState != LoadState.IDLE)
             {
                 audioClip.UnloadAudioData();
-                Resources.UnloadUnusedAssets();
                 audioClip = null;
                 loadingState = LoadState.IDLE;
             }
@@ -96,6 +95,8 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
             if (!string.IsNullOrEmpty(model.url))
@@ -111,6 +112,12 @@ namespace DCL.Components
             }
 
             yield return null;
+        }
+
+        public override void Dispose()
+        {
+            Utils.SafeDestroy(audioClip);
+            base.Dispose();
         }
     }
 }

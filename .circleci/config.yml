@@ -81,7 +81,7 @@ jobs:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build
+      - image: decentraland/renderer-build:2019.4
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -91,7 +91,7 @@ jobs:
       - run:
           name: Get the hash of source files
           command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
+            find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
@@ -101,33 +101,34 @@ jobs:
           keys:
             - unity-tests-{{ checksum "../.unitysources-checksum" }}
       - run:
-          name: Extract the license key for Unity
-          command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip /tmp/explorer/.circleci/license.zip
-      - run:
           name: Run tests
           command: |
             if [[ -e /tmp/explorer/unity-client/testlog/log.txt ]]; then
                 exit 0
             else
-                bash ./test-ci.sh
+                bash before-ci.sh
+                bash test-ci.sh
                 exit $?
             fi;
+          no_output_timeout: 30m
       - save_cache:
           name: Store test results
           key: unity-tests-{{ checksum "../.unitysources-checksum" }}
           paths:
             - /tmp/explorer/unity-client/testlog/log.txt
+            - /tmp/explorer/unity-client/TestResources/VisualTests/CurrentTestImages/*.png
       - store_artifacts:
-          name: Store test result as artifacts
+          name: Store tests result as artifacts
           path: /tmp/explorer/unity-client/testlog
+      - store_artifacts:
+          name: Store visual tests result as artifacts
+          path: /tmp/explorer/unity-client/TestResources/VisualTests/CurrentTestImages
 
   build-unity:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build
+      - image: decentraland/renderer-build:2019.4
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -137,33 +138,23 @@ jobs:
       - run:
           name: Get the hash of source files
           command: |
-            find Assets -type f \( -exec shasum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
+            find Assets -type f \( -iname \*.unity -o -iname \*.cs -o -iname \*.fbx -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
             - unity-build-{{ checksum "../.unitysources-checksum" }}
       - run:
-          name: Extract the license key for Unity
-          command: |
-            openssl enc -d -aes-256-cbc -md sha256 -in /tmp/explorer/.circleci/license.zip-cipher -out /tmp/explorer/.circleci/license.zip -k ${CIPHER_KEY}
-            cd / && unzip /tmp/explorer/.circleci/license.zip
-      - run:
           name: Build decentraland-renderer
           command: |
             if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-                chmod +x $CIRCLE_WORKING_DIRECTORY/build-ci.sh
                 mkdir -p ${BUILD_PATH}
+                bash before-ci.sh
                 (./build-ci.sh & echo $! > /tmp/explorer/build.pid &)
                 pid=`cat /tmp/explorer/build.pid`
                 while [ -e /proc/$pid -a /proc/$pid/exe ]; do
                     echo "Running Unity Build..."
                     sleep 60
                 done
-                ls -la ${BUILD_PATH}
-                [ -n "$(ls -A ${BUILD_PATH})" ];
-                # Apply hot fix to take out old CachedXMLRequest
-                apt-get install bc
-                cd /tmp/explorer/unity-client/Builds/unity/Build && ../../../../.circleci/hotpatch.sh unity.wasm.framework.unityweb
             fi;
       - save_cache:
           name: Store decentraland-renderer build
@@ -185,9 +176,13 @@ jobs:
     steps:
       - <<: *attach_root
       - run:
+          name: Install Puppeteer dependencies
+          command: |
+            sudo apt-get -y -qq install libxss1
+      - run:
           name: Get the hash of source files
           command: |
-            find packages -type f \( -exec shasum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
+            find packages -type f \( -iname \*.ts -o -iname \*.tsx -o -iname \*.json -o -iname \*.proto -o -iname \*.sh \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.kernelsources-checksum
       - restore_cache:
           name: Restore built files
           keys:
@@ -220,7 +215,7 @@ jobs:
             make build-essentials
             mkdir -p scene-cache
             cd scene-cache && find . -name '*.js' | xargs -I{} cp -f -t ../public/ --parents {}; cd ..
-            find public -name *.ts | xargs shasum packages/decentraland-ecs/dist/index.d.ts static/systems/scene.system.js | sort > .compiled-scene-checksum
+            find public -name *.ts | xargs md5sum packages/decentraland-ecs/dist/index.d.ts static/systems/scene.system.js | sort > .compiled-scene-checksum
       - restore_cache:
           name: Restore cached test scenes, part I
           keys:
@@ -305,7 +300,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           when: on_success
       - run:
-          name: Publish a new version of decentraland-ecs
+          name: Publish a new version of decentraland-renderer
           command: /tmp/explorer/.circleci/publish.sh
 
   publish-ecs:
@@ -417,7 +412,6 @@ workflows:
       - build-unity:
           <<: *all_branches_and_tags
           requires:
-            - run-unity-tests
             - checkout
 
       - build-kernel:
@@ -432,9 +426,11 @@ workflows:
             - build-unity
 
       - publish-renderer:
-          <<: *all_branches_and_tags
           requires:
             - package
+          filters:
+            branches:
+              only: /(.*)/ # run on all branches, but no tags
 
       # ecs publishing
       - hold-ecs:

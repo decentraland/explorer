@@ -1,6 +1,6 @@
 import { takeEvery } from 'redux-saga/effects'
 import { queueTrackingEvent } from '../analytics'
-import { SAVE_AVATAR_SUCCESS, SaveAvatarSuccess } from '../passports/actions'
+import { SAVE_PROFILE_SUCCESS, SaveProfileSuccess } from '../profiles/actions'
 import {
   NETWORK_MISMATCH,
   COMMS_ESTABLISHED,
@@ -26,13 +26,16 @@ import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
   MOBILE_NOT_SUPPORTED,
   NOT_INVITED,
-  NEW_LOGIN
+  NEW_LOGIN,
+  CATALYST_COULD_NOT_LOAD,
+  AWAITING_USER_SIGNATURE
 } from '../loading/types'
 
 const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   // lifecycle events
   [NOT_STARTED]: 'session_start',
   [LOADING_STARTED]: 'loading_1_start',
+  [AWAITING_USER_SIGNATURE]: 'loading_1_1_awaiting_user_signature',
   [AUTH_SUCCESSFUL]: 'loading_2_authOK',
   [ESTABLISHING_COMMS]: 'loading_3_init_comms',
   [COMMS_ESTABLISHED]: 'loading_4_comms_established',
@@ -53,18 +56,19 @@ const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   [FAILED_FETCHING_UNITY]: 'error_fetchengine',
   [COMMS_ERROR_RETRYING]: 'error_comms_',
   [COMMS_COULD_NOT_BE_ESTABLISHED]: 'error_comms_failed',
+  [CATALYST_COULD_NOT_LOAD]: 'error_catalyst_loading',
   [MOBILE_NOT_SUPPORTED]: 'unsupported_mobile',
   [NOT_INVITED]: 'error_not_invited'
 }
 
 export function* metricSaga() {
   for (const event of ExecutionLifecycleEventsList) {
-    yield takeEvery(event, action => {
+    yield takeEvery(event, (action) => {
       const _action: any = action
       queueTrackingEvent('lifecycle event', toTrackingEvent(event, _action.payload))
     })
   }
-  yield takeEvery(SAVE_AVATAR_SUCCESS, (action: SaveAvatarSuccess) =>
+  yield takeEvery(SAVE_PROFILE_SUCCESS, (action: SaveProfileSuccess) =>
     queueTrackingEvent('avatar_edit_success', toAvatarEditSuccess(action.payload))
   )
 }
@@ -77,6 +81,6 @@ function toTrackingEvent(event: ExecutionLifecycleEvent, payload: any) {
   return { stage: result }
 }
 
-function toAvatarEditSuccess({ userId, version, profile }: SaveAvatarSuccess['payload']) {
+function toAvatarEditSuccess({ userId, version, profile }: SaveProfileSuccess['payload']) {
   return { userId, version, wearables: profile.avatar.wearables }
 }

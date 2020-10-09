@@ -2,57 +2,134 @@ using DCL.Helpers;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using DCL;
 
 public class FacialFeatureController
 {
-    public delegate void TexturesFetched(Texture texture, Texture mask);
+    public string id => wearable.id;
+    public string category => wearable.category;
+
+    public bool isReady { get; private set; }
 
     private string bodyShapeType;
-    WearableItem wearable;
+    public WearableItem wearable;
 
     Texture mainTexture = null;
     Texture maskTexture = null;
-    bool texturesRetreived = false;
+    AssetPromise_Texture mainTexturePromise = null;
+    AssetPromise_Texture maskTexturePromise = null;
 
-    public FacialFeatureController(WearableItem wearableItem, string bodyShapeType)
+    private Color color;
+    private BodyShapeController bodyShape;
+    private Material baseMaterial;
+    private Material baseMaterialCopy;
+
+    public FacialFeatureController(WearableItem wearableItem, string bodyShapeType, Material baseMaterial)
     {
+        isReady = false;
+        this.baseMaterial = baseMaterial;
         this.wearable = wearableItem;
         this.bodyShapeType = bodyShapeType;
-        texturesRetreived = false;
     }
 
-    public IEnumerator FetchTextures(TexturesFetched onTextureFetched)
+    public void Load(BodyShapeController loadedBody, Color color)
     {
-        if (texturesRetreived)
+        this.color = color;
+
+        if (isReady)
         {
-            onTextureFetched?.Invoke(mainTexture, maskTexture);
-            yield break;
+            PrepareWearable();
+            return;
         }
+
+        this.bodyShape = loadedBody;
+        CoroutineStarter.Start(FetchTextures(PrepareWearable));
+    }
+
+    void PrepareWearable()
+    {
+        if (baseMaterialCopy == null)
+            baseMaterialCopy = new Material(baseMaterial);
+
+        switch (wearable.category)
+        {
+            case WearableLiterals.Categories.EYES:
+                bodyShape.SetupEyes(baseMaterialCopy, mainTexture, maskTexture, color);
+                break;
+            case WearableLiterals.Categories.EYEBROWS:
+                bodyShape.SetupEyebrows(baseMaterialCopy, mainTexture, color);
+                break;
+            case WearableLiterals.Categories.MOUTH:
+                bodyShape.SetupMouth(baseMaterialCopy, mainTexture, color);
+                break;
+        }
+
+        isReady = true;
+    }
+
+    public IEnumerator FetchTextures(System.Action OnComplete)
+    {
+        if (mainTexturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(mainTexturePromise);
+
+        if (maskTexturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(maskTexturePromise);
+
+        mainTexture = null;
+        maskTexture = null;
 
         var representation = wearable.GetRepresentation(bodyShapeType);
 
-        string mainTextureName = representation.contents.FirstOrDefault(x => !x.file.ToLower().Contains("_mask.png"))?.hash;
-        string maskName = representation.contents.FirstOrDefault(x => x.file.ToLower().Contains("_mask.png"))?.hash;
+        string mainTextureName = representation?.contents?.FirstOrDefault(x => !x.file.ToLower().Contains("_mask.png"))?.hash;
+        string maskName = representation?.contents?.FirstOrDefault(x => x.file.ToLower().Contains("_mask.png"))?.hash;
 
         if (!string.IsNullOrEmpty(mainTextureName))
         {
-            yield return Utils.FetchTexture(wearable.baseUrl + mainTextureName, (tex) =>
-            {
-                tex.Compress(false);
-                mainTexture = tex;
-            });
+            mainTexturePromise = new AssetPromise_Texture(wearable.baseUrl + mainTextureName);
+            mainTexturePromise.OnSuccessEvent += (x) => mainTexture = x.texture;
+            mainTexturePromise.OnFailEvent += (x) => mainTexture = null;
+
+            AssetPromiseKeeper_Texture.i.Keep(mainTexturePromise);
         }
 
         if (!string.IsNullOrEmpty(maskName))
         {
-            yield return Utils.FetchTexture(wearable.baseUrl + maskName, (tex) =>
-            {
-                tex.Compress(false);
-                maskTexture = tex;
-            });
+            maskTexturePromise = new AssetPromise_Texture(wearable.baseUrl + maskName);
+            maskTexturePromise.OnSuccessEvent += (x) => maskTexture = x.texture;
+            maskTexturePromise.OnFailEvent += (x) => maskTexture = null;
+
+            AssetPromiseKeeper_Texture.i.Keep(maskTexturePromise);
         }
 
-        texturesRetreived = true;
-        onTextureFetched?.Invoke(mainTexture, maskTexture);
+        yield return mainTexturePromise;
+        yield return maskTexturePromise;
+
+        OnComplete?.Invoke();
+    }
+
+    public void CleanUp()
+    {
+        if (mainTexturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(mainTexturePromise);
+
+        if (maskTexturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(maskTexturePromise);
+
+        Object.Destroy(baseMaterialCopy);
+
+        isReady = false;
+    }
+
+    public static FacialFeatureController CreateDefaultFacialFeature(string bodyShape, string category, Material material)
+    {
+        string defaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, category);
+        WearableItem wearable = CatalogController.wearableCatalog.GetOrDefault(defaultId);
+        if (wearable == null)
+        {
+            Debug.LogError($"Couldn't resolve wearable {defaultId}");
+            return null;
+        }
+
+        return new FacialFeatureController(wearable, bodyShape, material);
     }
 }

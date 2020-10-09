@@ -8,19 +8,21 @@ namespace CameraController_Test
 {
     public class CameraControllerShould : TestsBase
     {
+        protected override bool enableSceneIntegrityChecker => false;
+
         [Test]
         public void ReactToCameraChangeAction()
         {
-            var currentCamera = cameraController.currentMode;
+            var currentCamera = CommonScriptableObjects.cameraMode.Get();
             cameraController.cameraChangeAction.RaiseOnTriggered();
 
-            Assert.AreNotEqual(currentCamera, cameraController.currentMode);
+            Assert.AreNotEqual(currentCamera, CommonScriptableObjects.cameraMode.Get());
         }
 
         [Test]
-        [TestCase(CameraStateBase.ModeId.FirstPerson)]
-        [TestCase(CameraStateBase.ModeId.ThirdPerson)]
-        public void LiveCameraIsOn(CameraStateBase.ModeId cameraMode)
+        [TestCase(CameraMode.ModeId.FirstPerson)]
+        [TestCase(CameraMode.ModeId.ThirdPerson)]
+        public void LiveCameraIsOn(CameraMode.ModeId cameraMode)
         {
             cameraController.SetCameraMode(cameraMode);
             Assert.IsTrue(cameraController.currentCameraState.defaultVirtualCamera.gameObject.activeInHierarchy);
@@ -57,13 +59,14 @@ namespace CameraController_Test
         [UnityTest]
         public IEnumerator ActivateAndDeactivateWithKernelRenderingToggleEvents()
         {
-            RenderingController.i.DeactivateRendering();
+            RenderingController renderingController = GameObject.FindObjectOfType<RenderingController>();
+            renderingController.DeactivateRendering();
             Assert.IsFalse(cameraController.cameraTransform.gameObject.activeSelf);
 
             yield return null;
 
-            RenderingController.i.renderingActivatedAckLock.RemoveAllLocks();
-            RenderingController.i.ActivateRendering();
+            renderingController.renderingActivatedAckLock.RemoveAllLocks();
+            renderingController.ActivateRendering();
             Assert.IsTrue(cameraController.cameraTransform.gameObject.activeSelf);
             yield break;
         }

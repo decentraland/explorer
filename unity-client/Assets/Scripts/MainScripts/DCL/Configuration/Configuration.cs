@@ -9,6 +9,7 @@ namespace DCL.Configuration
 
     public static class EnvironmentSettings
     {
+        public static bool RUNNING_TESTS = false;
         public static bool DEBUG = true;
         public static readonly Vector3 MORDOR = new Vector3(10000, 10000, 10000);
         public static readonly int MORDOR_SCALAR = 10000;
@@ -63,7 +64,10 @@ namespace DCL.Configuration
 
     public static class NFTDataFetchingSettings
     {
-        public static UnityEngine.Vector2 NORMALIZED_DIMENSIONS = new UnityEngine.Vector2(512f, 512f); // The image dimensions that correspond to Vector3.One scale
+        public static UnityEngine.Vector2
+            NORMALIZED_DIMENSIONS =
+                new UnityEngine.Vector2(512f, 512f); // The image dimensions that correspond to Vector3.One scale
+
         public static string DAR_API_URL = "https://schema.decentraland.org/dar";
     }
 
@@ -74,8 +78,12 @@ namespace DCL.Configuration
         public static int characterLayer = LayerMask.NameToLayer("CharacterController");
         public static int characterOnlyLayer = LayerMask.NameToLayer("CharacterOnly");
         public static LayerMask physicsCastLayerMask = 1 << onPointerEventLayer;
+
         public static LayerMask physicsCastLayerMaskWithoutCharacter = (physicsCastLayerMask | (1 << defaultLayer))
-                                                                        & ~(1 << characterLayer)
-                                                                        & ~(1 << characterOnlyLayer);
+                                                                       & ~(1 << characterLayer)
+                                                                       & ~(1 << characterOnlyLayer);
+
+        public static int friendsHUDPlayerMenu = LayerMask.NameToLayer("FriendsHUDPlayerMenu");
+        public static int playerInfoCardMenu = LayerMask.NameToLayer("PlayerInfoCardMenu");
     }
 }

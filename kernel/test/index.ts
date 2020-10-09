@@ -9,14 +9,18 @@ global['isRunningTests'] = true
 import './atomicHelpers/parcelScenePositions.test'
 import './atomicHelpers/landHelpers.test'
 import './atomicHelpers/vectorHelpers.test'
+import './atomicHelpers/OrderedRingBuffer.test'
+import './atomicHelpers/SortedLimitedQueue.test'
 
 /* UNIT */
 import './unit/ethereum.test'
 import './unit/objectComparison.test'
 import './unit/comms.test'
-import './unit/passport.saga.test'
+import './unit/jsonFetch.test'
+import './unit/profiles.saga.test'
+import './unit/BrowserInterface.test'
 import './unit/positionThings.test'
-import './unit/chunkGenerator.test'
+import './unit/RestrictedActionModule.test'
 import './unityIntegration/ecs/math/quaternion.test'
 import './unityIntegration/ecs/math/vector3.test'
 

@@ -14,20 +14,22 @@ public class CameraController : MonoBehaviour
     [Header("InputActions")]
     [SerializeField] internal InputAction_Trigger cameraChangeAction;
 
-    internal Dictionary<CameraStateBase.ModeId, CameraStateBase> cachedModeToVirtualCamera;
+    internal Dictionary<CameraMode.ModeId, CameraStateBase> cachedModeToVirtualCamera;
 
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
     private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
     private Vector3Variable cameraPosition => CommonScriptableObjects.cameraPosition;
     private Vector3Variable playerUnityToWorldOffset => CommonScriptableObjects.playerUnityToWorldOffset;
 
-    internal CameraStateBase.ModeId currentMode = CameraStateBase.ModeId.FirstPerson;
-    public CameraStateBase currentCameraState => cachedModeToVirtualCamera[currentMode];
+    public CameraStateBase currentCameraState => cachedModeToVirtualCamera[CommonScriptableObjects.cameraMode];
+
+    [HideInInspector]
+    public System.Action<CameraMode.ModeId> onSetCameraMode;
 
     private void Start()
     {
-        if (RenderingController.i != null)
-            RenderingController.i.OnRenderingStateChanged += OnRenderingStateChanged;
+        CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
+        OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
 
         cachedModeToVirtualCamera = cameraModes.ToDictionary(x => x.cameraModeId, x => x);
 
@@ -42,31 +44,33 @@ public class CameraController : MonoBehaviour
         cameraChangeAction.OnTriggered += OnCameraChangeAction;
         playerUnityToWorldOffset.OnChange += PrecisionChanged;
 
-        SetCameraMode(currentMode);
+        SetCameraMode(CommonScriptableObjects.cameraMode);
     }
 
-    private void OnRenderingStateChanged(bool enabled)
+    private void OnRenderingStateChanged(bool enabled, bool prevState)
     {
         cameraTransform.gameObject.SetActive(enabled);
     }
 
     private void OnCameraChangeAction(DCLAction_Trigger action)
     {
-        if (currentMode == CameraStateBase.ModeId.FirstPerson)
+        if (CommonScriptableObjects.cameraMode == CameraMode.ModeId.FirstPerson)
         {
-            SetCameraMode(CameraStateBase.ModeId.ThirdPerson);
+            SetCameraMode(CameraMode.ModeId.ThirdPerson);
         }
         else
         {
-            SetCameraMode(CameraStateBase.ModeId.FirstPerson);
+            SetCameraMode(CameraMode.ModeId.FirstPerson);
         }
     }
 
-    public void SetCameraMode(CameraStateBase.ModeId newMode)
+    public void SetCameraMode(CameraMode.ModeId newMode)
     {
         currentCameraState.OnUnselect();
-        currentMode = newMode;
+        CommonScriptableObjects.cameraMode.Set(newMode);
         currentCameraState.OnSelect();
+
+        onSetCameraMode.Invoke(newMode);
     }
 
     private void PrecisionChanged(Vector3 newValue, Vector3 oldValue)
@@ -89,6 +93,11 @@ public class CameraController : MonoBehaviour
         currentCameraState?.OnSetRotation(payload);
     }
 
+    public void SetRotation(float x, float y, float z, Vector3? cameraTarget = null)
+    {
+        currentCameraState?.OnSetRotation(new SetRotationPayload() { x = x, y = y, z = z, cameraTarget = cameraTarget });
+    }
+
     public Vector3 GetRotation()
     {
         if (currentCameraState != null)
@@ -107,9 +116,10 @@ public class CameraController : MonoBehaviour
     {
         CommonScriptableObjects.playerUnityToWorldOffset.OnChange -= PrecisionChanged;
         cameraChangeAction.OnTriggered -= OnCameraChangeAction;
-        RenderingController.i.OnRenderingStateChanged -= OnRenderingStateChanged;
+        CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
     }
 
+    [System.Serializable]
     public class SetRotationPayload
     {
         public float x;

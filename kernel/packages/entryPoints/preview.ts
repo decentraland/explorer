@@ -1,19 +1,20 @@
-// tslint:disable:no-console
-declare var global: any
-declare var window: any
+declare const global: any & StoreContainer
+declare const window: any
 
-global['preview'] = window['preview'] = true
-global['enableWeb3'] = window['enableWeb3']
+// IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
+global.preview = window.preview = true
+global.enableWeb3 = window.enableWeb3
 
-import { initializeUnity } from '../unity-interface/initializer'
-import { loadPreviewScene, unityInterface } from '../unity-interface/dcl'
-import { DEBUG_WS_MESSAGES } from '../config'
+import { initializeUnity } from 'unity-interface/initializer'
+import { loadPreviewScene } from 'unity-interface/dcl'
+import { DEBUG_WS_MESSAGES } from 'config'
 import defaultLogger from 'shared/logger'
-import { future, IFuture } from 'fp-future'
-import { ILand } from 'shared/types'
+import { ILand, HUDElementID } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
-import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 import { signalRendererInitialized } from 'shared/renderer/actions'
+import { StoreContainer } from 'shared/store/rootTypes'
+import { future, IFuture } from 'fp-future'
+import { sceneLifeCycleObservable } from 'decentraland-loader/lifecycle/controllers/scene'
 
 // Remove the 'dcl-loading' class, used until JS loads.
 document.body.classList.remove('dcl-loading')
@@ -30,28 +31,28 @@ function startPreviewWatcher() {
 
   const loadScene = () => {
     loadPreviewScene()
-      .then(scene => {
+      .then((scene) => {
         isSceneLoading = false
         defaultScene.resolve(scene)
       })
-      .catch(err => {
+      .catch((err) => {
         isSceneLoading = false
-        console.error('Error loading scene')
-        console.error(err)
+        defaultLogger.error('Error loading scene', err)
+        defaultScene.reject(err)
       })
   }
 
   loadScene()
 
-  global['handleServerMessage'] = function(message: any) {
+  global.handleServerMessage = function (message: any) {
     if (message.type === 'update') {
       if (DEBUG_WS_MESSAGES) {
-        console.log('Message received: ', message)
+        defaultLogger.info('Message received: ', message)
       }
       // if a scene is currently loading we do not trigger another load
       if (isSceneLoading) {
         if (DEBUG_WS_MESSAGES) {
-          console.log('Ignoring message, scene still loading...')
+          defaultLogger.trace('Ignoring message, scene still loading...')
         }
         return
       }
@@ -65,7 +66,7 @@ function startPreviewWatcher() {
 function sceneRenderable() {
   const sceneRenderable = future<void>()
 
-  const observer = sceneLifeCycleObservable.add(async sceneStatus => {
+  const observer = sceneLifeCycleObservable.add(async (sceneStatus) => {
     if (sceneStatus.sceneId === (await defaultScene).sceneId) {
       sceneLifeCycleObservable.remove(observer)
       sceneRenderable.resolve()
@@ -76,14 +77,17 @@ function sceneRenderable() {
 }
 
 initializeUnity(container)
-  .then(async ret => {
-    const i = unityInterface
-    i.ConfigureMinimapHUD({ active: true, visible: true })
-    i.ConfigureNotificationHUD({ active: true, visible: true })
-    i.ConfigureSettingsHUD({ active: true, visible: false })
-    i.ConfigureAirdroppingHUD({ active: true, visible: true })
+  .then(async (ret) => {
+    const i = (await ret.instancedJS).unityInterface
+    i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
 
-    global['globalStore'].dispatch(signalRendererInitialized())
+    global.globalStore.dispatch(signalRendererInitialized())
 
     const renderable = sceneRenderable()
 
@@ -91,13 +95,9 @@ initializeUnity(container)
 
     await renderable
 
-    ret.instancedJS
-      .then(async ({ unityInterface }) => {
-        unityInterface.Teleport(pickWorldSpawnpoint(await defaultScene))
-        unityInterface.ActivateRendering()
-      })
-      .catch(defaultLogger.error)
+    i.Teleport(pickWorldSpawnpoint(await defaultScene))
+    i.ActivateRendering()
   })
-  .catch(err => {
+  .catch((err) => {
     defaultLogger.error('There was an error', err)
   })

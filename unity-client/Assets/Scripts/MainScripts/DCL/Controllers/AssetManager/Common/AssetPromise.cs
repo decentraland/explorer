@@ -25,6 +25,7 @@ namespace DCL
     public abstract class AssetPromise<AssetType> : CustomYieldInstruction
         where AssetType : Asset, new()
     {
+        internal bool isDirty = false;
         internal AssetLibrary<AssetType> library;
         public AssetType asset { get; protected set; }
 
@@ -34,7 +35,10 @@ namespace DCL
         public event Action<AssetType> OnSuccessEvent;
         public event Action<AssetType> OnFailEvent;
 
-        public override bool keepWaiting { get { return state == AssetPromiseState.LOADING || state == AssetPromiseState.WAITING; } }
+        public override bool keepWaiting
+        {
+            get { return state == AssetPromiseState.LOADING || state == AssetPromiseState.WAITING; }
+        }
 
         public void ClearEvents()
         {
@@ -46,6 +50,7 @@ namespace DCL
         {
             OnPreFinishEvent = null;
             CallAndClearEvents(false);
+            state = AssetPromiseState.IDLE_AND_EMPTY;
         }
 
         internal void SetWaitingState()
@@ -79,12 +84,13 @@ namespace DCL
             if (state == AssetPromiseState.LOADING || state == AssetPromiseState.FINISHED)
                 return;
 
-            object id = GetId();
             state = AssetPromiseState.LOADING;
+
             // NOTE(Brian): Get existent library element
-            if (library.Contains(id))
+            object libraryAssetCheckId = GetLibraryAssetCheckId();
+            if (library.Contains(libraryAssetCheckId))
             {
-                asset = GetAsset(id);
+                asset = GetAsset(libraryAssetCheckId);
 
                 if (asset != null)
                 {
@@ -102,9 +108,14 @@ namespace DCL
             // NOTE(Brian): Get new library element
             asset = new AssetType();
             OnBeforeLoadOrReuse();
-            asset.id = id;
+            asset.id = GetId();
 
             OnLoad(OnLoadSuccess, OnLoadFailure);
+        }
+
+        protected virtual object GetLibraryAssetCheckId()
+        {
+            return GetId();
         }
 
         protected virtual AssetType GetAsset(object id)
@@ -117,15 +128,14 @@ namespace DCL
             OnFinish?.Invoke();
         }
 
-        private void OnReuseFinished()
+        protected void OnReuseFinished()
         {
             OnAfterLoadOrReuse();
             state = AssetPromiseState.FINISHED;
             CallAndClearEvents(isSuccess: true);
         }
 
-
-        private void OnLoadSuccess()
+        protected void OnLoadSuccess()
         {
             if (AddToLibrary())
             {
@@ -139,7 +149,7 @@ namespace DCL
             }
         }
 
-        private void OnLoadFailure()
+        protected void OnLoadFailure()
         {
             CallAndClearEvents(isSuccess: false);
             Cleanup();
@@ -183,6 +193,6 @@ namespace DCL
         protected abstract void OnLoad(Action OnSuccess, Action OnFail);
         protected abstract void OnBeforeLoadOrReuse();
         protected abstract void OnAfterLoadOrReuse();
-        internal abstract object GetId();
+        public abstract object GetId();
     }
 }

@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -26,6 +26,8 @@ namespace DCL.Components
 
         public override string referencesContainerPrefabName => "UIImage";
 
+        DCLTexture dclTexture = null;
+
         public UIImage(ParcelScene scene) : base(scene)
         {
         }
@@ -43,52 +45,44 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            RectTransform parentRecTransform = referencesContainer.GetComponentInParent<RectTransform>();
+
             // Fetch texture
             if (!string.IsNullOrEmpty(model.source))
             {
-                if (fetchRoutine != null)
+                if (dclTexture == null || (dclTexture != null && dclTexture.id != model.source))
                 {
-                    scene.StopCoroutine(fetchRoutine);
-                    fetchRoutine = null;
+                    if (fetchRoutine != null)
+                    {
+                        scene.StopCoroutine(fetchRoutine);
+                        fetchRoutine = null;
+                    }
+
+                    IEnumerator fetchIEnum = DCLTexture.FetchTextureComponent(scene, model.source, (downloadedTexture) =>
+                    {
+                        referencesContainer.image.texture = downloadedTexture.texture;
+                        fetchRoutine = null;
+                        dclTexture?.DetachFrom(this);
+                        dclTexture = downloadedTexture;
+                        dclTexture.AttachTo(this);
+
+                        ConfigureUVRect(parentRecTransform);
+                    });
+
+                    fetchRoutine = scene.StartCoroutine(fetchIEnum);
                 }
-
-                IEnumerator fetchIEnum = DCLTexture.FetchFromComponent(scene, model.source, (downloadedTexture) =>
-                {
-                    referencesContainer.image.texture = downloadedTexture;
-                    fetchRoutine = null;
-                });
-
-                fetchRoutine = scene.StartCoroutine(fetchIEnum);
             }
             else
             {
                 referencesContainer.image.texture = null;
+                dclTexture?.DetachFrom(this);
+                dclTexture = null;
             }
 
             referencesContainer.image.enabled = model.visible;
             referencesContainer.image.color = Color.white;
 
-            RectTransform parentRecTransform = referencesContainer.GetComponentInParent<RectTransform>();
-
-            if (referencesContainer.image.texture != null)
-            {
-                // Configure uv rect
-                Vector2 normalizedSourceCoordinates = new Vector2(
-                    model.sourceLeft / referencesContainer.image.texture.width,
-                    -model.sourceTop / referencesContainer.image.texture.height);
-
-
-                Vector2 normalizedSourceSize = new Vector2(
-                    model.sourceWidth * (model.sizeInPixels ? 1f : parentRecTransform.rect.width) /
-                    referencesContainer.image.texture.width,
-                    model.sourceHeight * (model.sizeInPixels ? 1f : parentRecTransform.rect.height) /
-                    referencesContainer.image.texture.height);
-
-                referencesContainer.image.uvRect = new Rect(normalizedSourceCoordinates.x,
-                    normalizedSourceCoordinates.y + (1 - normalizedSourceSize.y),
-                    normalizedSourceSize.x,
-                    normalizedSourceSize.y);
-            }
+            ConfigureUVRect(parentRecTransform);
 
             // Apply padding
             referencesContainer.paddingLayoutGroup.padding.bottom = Mathf.RoundToInt(model.paddingBottom);
@@ -96,13 +90,38 @@ namespace DCL.Components
             referencesContainer.paddingLayoutGroup.padding.left = Mathf.RoundToInt(model.paddingLeft);
             referencesContainer.paddingLayoutGroup.padding.right = Mathf.RoundToInt(model.paddingRight);
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRecTransform);
+            Utils.ForceRebuildLayoutImmediate(parentRecTransform);
             return null;
+        }
+
+        private void ConfigureUVRect(RectTransform parentRecTransform)
+        {
+            if (referencesContainer.image.texture == null)
+                return;
+
+            // Configure uv rect
+            Vector2 normalizedSourceCoordinates = new Vector2(
+                model.sourceLeft / referencesContainer.image.texture.width,
+                -model.sourceTop / referencesContainer.image.texture.height);
+
+            Vector2 normalizedSourceSize = new Vector2(
+                model.sourceWidth * (model.sizeInPixels ? 1f : parentRecTransform.rect.width) /
+                referencesContainer.image.texture.width,
+                model.sourceHeight * (model.sizeInPixels ? 1f : parentRecTransform.rect.height) /
+                referencesContainer.image.texture.height);
+
+            referencesContainer.image.uvRect = new Rect(normalizedSourceCoordinates.x,
+                normalizedSourceCoordinates.y + (1 - normalizedSourceSize.y),
+                normalizedSourceSize.x,
+                normalizedSourceSize.y);
         }
 
         public override void Dispose()
         {
-            Utils.SafeDestroy(referencesContainer.gameObject);
+            dclTexture?.DetachFrom(this);
+
+            if (referencesContainer != null)
+                Utils.SafeDestroy(referencesContainer.gameObject);
 
             base.Dispose();
         }

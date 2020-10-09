@@ -1,4 +1,9 @@
+using System;
+using DCL.Helpers;
+using DCL.Models;
 using UnityEngine;
+using System;
+using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -61,13 +66,17 @@ namespace DCL.Interface
                 public string sceneId;
             }
 
-            public SceneReady(string sceneId) : base("SceneReady", new Payload() { sceneId = sceneId }) { }
+            public SceneReady(string sceneId) : base("SceneReady", new Payload() { sceneId = sceneId })
+            {
+            }
         }
 
         [System.Serializable]
         public class ActivateRenderingACK : ControlEvent<object>
         {
-            public ActivateRenderingACK() : base("ActivateRenderingACK", null) { }
+            public ActivateRenderingACK() : base("ActivateRenderingACK", null)
+            {
+            }
         }
 
         [System.Serializable]
@@ -148,6 +157,13 @@ namespace DCL.Interface
         [System.Serializable]
         public class OnClickEventPayload
         {
+            public ACTION_BUTTON buttonId = ACTION_BUTTON.POINTER;
+        }
+
+        [System.Serializable]
+        public class SendChatMessageEvent
+        {
+            public ChatMessage message;
         }
 
 
@@ -246,6 +262,20 @@ namespace DCL.Interface
             public string encodedTexture;
         };
 
+        [System.Serializable]
+        public class GotoEvent
+        {
+            public int x;
+            public int y;
+        };
+
+        [System.Serializable]
+        public class BaseResolution
+        {
+            public int baseResolution;
+        };
+
+
         //-----------------------------------------------------
         // Raycast
         [System.Serializable]
@@ -337,6 +367,14 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class PerformanceHiccupPayload
+        {
+            public int hiccupsInThousandFrames;
+            public float hiccupsTime;
+            public float totalTime;
+        }
+
+        [System.Serializable]
         public class TermsOfServiceResponsePayload
         {
             public string sceneId;
@@ -356,6 +394,75 @@ namespace DCL.Interface
             public string userEmail;
         }
 
+        [System.Serializable]
+        public class GIFSetupPayload
+        {
+            public string imageSource;
+            public string id;
+            public bool isWebGL1;
+        }
+
+        [System.Serializable]
+        public class RequestScenesInfoAroundParcelPayload
+        {
+            public Vector2 parcel;
+            public int scenesAround;
+        }
+
+        [System.Serializable]
+        public class AudioStreamingPayload
+        {
+            public string url;
+            public bool play;
+            public float volume;
+        }
+
+        [System.Serializable]
+        public class SetVoiceChatRecordingPayload
+        {
+            public bool recording;
+        }
+
+        [System.Serializable]
+        public class ApplySettingsPayload
+        {
+            public float sfxVolume;
+        }
+
+        [System.Serializable]
+        public class JumpInPayload
+        {
+            public FriendsController.UserStatus.Realm realm = new FriendsController.UserStatus.Realm();
+            public Vector2 gridPosition;
+        }
+
+        [System.Serializable]
+        public class LoadingFeedbackMessage
+        {
+            public string message;
+            public int loadPercentage;
+        }
+
+        [System.Serializable]
+        public class AnalyticsPayload
+        {
+            [System.Serializable]
+            public class Property
+            {
+                public string key;
+                public string value;
+
+                public Property(string key, string value)
+                {
+                    this.key = key;
+                    this.value = value;
+                }
+            }
+
+            public string name;
+            public Property[] properties;
+        }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -364,8 +471,9 @@ namespace DCL.Interface
     [DllImport("__Internal")] public static extern void StartDecentraland();
     [DllImport("__Internal")] public static extern void MessageFromEngine(string type, string message);
 #else
-        public static void StartDecentraland() =>
-            Debug.Log("StartDecentraland called");
+        public static void StartDecentraland()
+        {
+        }
 
         public static void MessageFromEngine(string type, string message)
         {
@@ -414,6 +522,16 @@ namespace DCL.Interface
         private static OnPointerEventPayload onPointerEventPayload = new OnPointerEventPayload();
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
+        private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
+        private static SetVoiceChatRecordingPayload setVoiceChatRecordingPayload = new SetVoiceChatRecordingPayload();
+
+        private static ApplySettingsPayload applySettingsPayload = new ApplySettingsPayload();
+        private static GIFSetupPayload gifSetupPayload = new GIFSetupPayload();
+        private static JumpInPayload jumpInPayload = new JumpInPayload();
+        private static GotoEvent gotoEvent = new GotoEvent();
+        private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
+        private static BaseResolution baseResEvent = new BaseResolution();
+        private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -461,14 +579,14 @@ namespace DCL.Interface
             SendSceneEvent<T>(sceneId, "raycastResponse", response);
         }
 
-        public static void ReportRaycastHitFirstResult(string sceneId, string queryId, string queryType, RaycastHitEntity payload)
+        public static void ReportRaycastHitFirstResult(string sceneId, string queryId, RaycastType raycastType, RaycastHitEntity payload)
         {
-            ReportRaycastResult<RaycastHitFirstResponse, RaycastHitEntity>(sceneId, queryId, queryType, payload);
+            ReportRaycastResult<RaycastHitFirstResponse, RaycastHitEntity>(sceneId, queryId, Protocol.RaycastTypeToLiteral(raycastType), payload);
         }
 
-        public static void ReportRaycastHitAllResult(string sceneId, string queryId, string queryType, RaycastHitEntities payload)
+        public static void ReportRaycastHitAllResult(string sceneId, string queryId, RaycastType raycastType, RaycastHitEntities payload)
         {
-            ReportRaycastResult<RaycastHitAllResponse, RaycastHitEntities>(sceneId, queryId, queryType, payload);
+            ReportRaycastResult<RaycastHitAllResponse, RaycastHitEntities>(sceneId, queryId, Protocol.RaycastTypeToLiteral(raycastType), payload);
         }
 
         private static OnPointerEventPayload.Hit CreateHitObject(string entityId, string meshName, Vector3 point, Vector3 normal, float distance)
@@ -665,16 +783,20 @@ namespace DCL.Interface
         public class SaveAvatarPayload
         {
             public string face;
+            public string face128;
+            public string face256;
             public string body;
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite bodySnapshot)
+        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
         {
             var payload = new SaveAvatarPayload()
             {
                 avatar = avatar,
                 face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
+                face128 = System.Convert.ToBase64String(face128Snapshot.texture.EncodeToPNG()),
+                face256 = System.Convert.ToBase64String(face256Snapshot.texture.EncodeToPNG()),
                 body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
             };
             SendMessage("SaveUserAvatar", payload);
@@ -693,6 +815,16 @@ namespace DCL.Interface
         public static void SendPerformanceReport(string encodedFrameTimesInMS)
         {
             MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+        }
+
+        public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
+        {
+            SendMessage("PerformanceHiccupReport", new PerformanceHiccupPayload()
+            {
+                hiccupsInThousandFrames = hiccupsInThousandFrames,
+                hiccupsTime = hiccupsTime,
+                totalTime = totalTime
+            });
         }
 
         public static void SendTermsOfServiceResponse(string sceneId, bool accepted, bool dontShowAgain)
@@ -743,7 +875,7 @@ namespace DCL.Interface
             });
         }
 
-        public static void SendUnlockPlayer(string userId)
+        public static void SendUnblockPlayer(string userId)
         {
             SendMessage("UnblockPlayer", new SendUnblockPlayerPayload()
             {
@@ -757,6 +889,121 @@ namespace DCL.Interface
             {
                 userEmail = email
             });
+        }
+
+        public static void RequestScenesInfoAroundParcel(Vector2 parcel, int maxScenesArea)
+        {
+            SendMessage("RequestScenesInfoInArea", new RequestScenesInfoAroundParcelPayload()
+            {
+                parcel = parcel,
+                scenesAround = maxScenesArea
+            });
+        }
+
+        public static void SendAudioStreamEvent(string url, bool play, float volume)
+        {
+            onAudioStreamingEvent.url = url;
+            onAudioStreamingEvent.play = play;
+            onAudioStreamingEvent.volume = volume;
+            SendMessage("SetAudioStream", onAudioStreamingEvent);
+        }
+
+        public static void SendSetVoiceChatRecording(bool recording)
+        {
+            setVoiceChatRecordingPayload.recording = recording;
+            SendMessage("SetVoiceChatRecording", setVoiceChatRecordingPayload);
+        }
+
+        public static void ToggleVoiceChatRecording()
+        {
+            SendMessage("ToggleVoiceChatRecording");
+        }
+
+        public static void ApplySettings(float sfxVolume)
+        {
+            applySettingsPayload.sfxVolume = sfxVolume;
+            SendMessage("ApplySettings", applySettingsPayload);
+        }
+
+        public static void RequestGIFProcessor(string gifURL, string gifId, bool isWebGL1)
+        {
+            gifSetupPayload.imageSource = gifURL;
+            gifSetupPayload.id = gifId;
+            gifSetupPayload.isWebGL1 = isWebGL1;
+
+            SendMessage("RequestGIFProcessor", gifSetupPayload);
+        }
+
+        public static void GoTo(int x, int y)
+        {
+            gotoEvent.x = x;
+            gotoEvent.y = y;
+            SendMessage("GoTo", gotoEvent);
+        }
+
+        public static void GoToCrowd()
+        {
+            SendMessage("GoToCrowd");
+        }
+
+        public static void GoToMagic()
+        {
+            SendMessage("GoToMagic");
+        }
+
+        public static void JumpIn(int x, int y, string serverName, string layerName)
+        {
+            jumpInPayload.realm.serverName = serverName;
+            jumpInPayload.realm.layer = layerName;
+
+            jumpInPayload.gridPosition.x = x;
+            jumpInPayload.gridPosition.y = y;
+
+            SendMessage("JumpIn", jumpInPayload);
+        }
+
+        public static void SendChatMessage(ChatMessage message)
+        {
+            sendChatMessageEvent.message = message;
+            SendMessage("SendChatMessage", sendChatMessageEvent);
+        }
+
+        public static void UpdateFriendshipStatus(FriendsController.FriendshipUpdateStatusMessage message)
+        {
+            SendMessage("UpdateFriendshipStatus", message);
+        }
+
+        public static void ScenesLoadingFeedback(LoadingFeedbackMessage message)
+        {
+            SendMessage("ScenesLoadingFeedback", message);
+        }
+
+        public static void FetchHotScenes()
+        {
+            SendMessage("FetchHotScenes");
+        }
+
+        public static void SetBaseResolution(int resolution)
+        {
+            baseResEvent.baseResolution = resolution;
+            SendMessage("SetBaseResolution", baseResEvent);
+        }
+
+        public static void ReportAnalyticsEvent(string eventName)
+        {
+            ReportAnalyticsEvent(eventName, null);
+        }
+
+        public static void ReportAnalyticsEvent(string eventName, AnalyticsPayload.Property[] eventProperties)
+        {
+            analyticsEvent.name = eventName;
+            analyticsEvent.properties = eventProperties;
+            SendMessage("Track", analyticsEvent);
+        }
+
+        public static void FetchBalanceOfMANA()
+        {
+            SendMessage("FetchBalanceOfMANA");
         }
     }
 }

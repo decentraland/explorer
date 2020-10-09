@@ -1,11 +1,18 @@
+#if UNITY_WEBGL && !UNITY_EDITOR
+#define WEB_PLATFORM
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DCL.Configuration;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 namespace DCL.Helpers
 {
@@ -82,7 +89,6 @@ namespace DCL.Helpers
             t.offsetMax = Vector2.one;
             t.sizeDelta = Vector2.zero;
             t.anchoredPosition = Vector2.zero;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void SetToCentered(this RectTransform t)
@@ -92,7 +98,6 @@ namespace DCL.Helpers
             t.anchorMax = Vector2.one * 0.5f;
             t.offsetMax = Vector2.one * 0.5f;
             t.sizeDelta = Vector2.one * 100;
-            t.ForceUpdateRectTransforms();
         }
 
         public static void SetToBottomLeft(this RectTransform t)
@@ -102,13 +107,66 @@ namespace DCL.Helpers
             t.anchorMax = Vector2.zero;
             t.offsetMax = Vector2.zero;
             t.sizeDelta = Vector2.one * 100;
-            t.ForceUpdateRectTransforms();
         }
+
+        public static void ForceUpdateLayout(this RectTransform rt, bool delayed = true)
+        {
+            if (!rt.gameObject.activeInHierarchy)
+                return;
+
+            if (delayed)
+                CoroutineStarter.Start(ForceUpdateLayoutRoutine(rt));
+            else
+            {
+                Utils.InverseTransformChildTraversal<RectTransform>(
+                    (x) => { Utils.ForceRebuildLayoutImmediate(x); },
+                    rt);
+            }
+        }
+
+
+
+        /// <summary>
+        /// Reimplementation of the LayoutRebuilder.ForceRebuildLayoutImmediate() function (Unity UI API) for make it more performant.
+        /// </summary>
+        /// <param name="rectTransformRoot">Root from which to rebuild.</param>
+        public static void ForceRebuildLayoutImmediate(RectTransform rectTransformRoot)
+        {
+            if (rectTransformRoot == null) return;
+
+            // NOTE(Santi): It seems to be very much cheaper to execute the next instructions manually than execute directly the function
+            //              'LayoutRebuilder.ForceRebuildLayoutImmediate()', that theorically already contains these instructions.
+            var layoutElements = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutElement), true).ToList();
+            layoutElements.RemoveAll(e => (e is Behaviour && !((Behaviour)e).isActiveAndEnabled) || e is TextMeshProUGUI);
+            foreach (var layoutElem in layoutElements)
+            {
+                (layoutElem as ILayoutElement).CalculateLayoutInputHorizontal();
+                (layoutElem as ILayoutElement).CalculateLayoutInputVertical();
+            }
+
+            var layoutControllers = rectTransformRoot.GetComponentsInChildren(typeof(ILayoutController), true).ToList();
+            layoutControllers.RemoveAll(e => e is Behaviour && !((Behaviour)e).isActiveAndEnabled);
+            foreach (var layoutCtrl in layoutControllers)
+            {
+                (layoutCtrl as ILayoutController).SetLayoutHorizontal();
+                (layoutCtrl as ILayoutController).SetLayoutVertical();
+            }
+        }
+
+        private static IEnumerator ForceUpdateLayoutRoutine(RectTransform rt)
+        {
+            yield return null;
+
+            Utils.InverseTransformChildTraversal<RectTransform>(
+                (x) => { Utils.ForceRebuildLayoutImmediate(x); },
+                rt);
+        }
+
 
         public static void InverseTransformChildTraversal<TComponent>(Action<TComponent> action, Transform startTransform)
             where TComponent : Component
         {
-            Assert.IsTrue(startTransform != null, "startTransform must not be null");
+            if (startTransform == null) return;
 
             foreach (Transform t in startTransform)
             {
@@ -160,7 +218,7 @@ namespace DCL.Helpers
             return request != null && !request.isNetworkError && !request.isHttpError;
         }
 
-        static IEnumerator FetchAsset(string url, UnityWebRequest request,
+        public static IEnumerator FetchAsset(string url, UnityWebRequest request,
             System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
         {
             if (!string.IsNullOrEmpty(url))
@@ -171,7 +229,7 @@ namespace DCL.Helpers
 
                     if (!WebRequestSucceded(request))
                     {
-                        Debug.LogError(
+                        Debug.Log(
                             string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
 
                         if (OnFail != null)
@@ -190,7 +248,7 @@ namespace DCL.Helpers
             }
             else
             {
-                Debug.LogError(string.Format("Can't fetch asset as the url is empty!"));
+                Debug.Log(string.Format("Can't fetch asset as the url is empty!"));
             }
         }
 
@@ -231,17 +289,16 @@ namespace DCL.Helpers
                 OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess)
+        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
-            System.Action<UnityWebRequest> OnSuccessInternal =
-                (request) =>
-                {
-                    var texture = DownloadHandlerTexture.GetContent(request);
-                    OnSuccess?.Invoke(texture);
-                };
+            void SuccessInternal(UnityWebRequest request)
+            {
+                var texture = DownloadHandlerTexture.GetContent(request);
+                OnSuccess?.Invoke(texture);
+            }
 
-            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), OnSuccessInternal);
+            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), SuccessInternal, OnFail);
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
@@ -348,8 +405,16 @@ namespace DCL.Helpers
         public static Vector2Int WorldToGridPosition(Vector3 worldPosition)
         {
             return new Vector2Int(
-                (int)Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
-                (int)Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
+                (int) Mathf.Floor(worldPosition.x / ParcelSettings.PARCEL_SIZE),
+                (int) Mathf.Floor(worldPosition.z / ParcelSettings.PARCEL_SIZE)
+            );
+        }
+
+        public static Vector2 WorldToGridPositionUnclamped(Vector3 worldPosition)
+        {
+            return new Vector2(
+                worldPosition.x / ParcelSettings.PARCEL_SIZE,
+                worldPosition.z / ParcelSettings.PARCEL_SIZE
             );
         }
 
@@ -380,6 +445,7 @@ namespace DCL.Helpers
             {
                 return true;
             }
+
             return false;
         }
 
@@ -403,6 +469,8 @@ namespace DCL.Helpers
 
             for (int i = 0; i < renderers.Length; i++)
             {
+                if (renderers[i] == null) continue;
+
                 if (i == 0)
                     bounds = renderers[i].bounds;
                 else
@@ -416,24 +484,70 @@ namespace DCL.Helpers
         public static bool LockedThisFrame() => lockedInFrame == Time.frameCount;
 
         //NOTE(Brian): Made as an independent flag because the CI doesn't work well with the Cursor.lockState check.
-        public static bool isCursorLocked = false;
+        public static bool isCursorLocked { get; private set; } = false;
+
+#if WEB_PLATFORM
+        private static bool requestedUnlock = false;
+        private static bool requestedLock = false;
+#endif
 
         public static void LockCursor()
         {
+#if WEB_PLATFORM
+            if (isCursorLocked)
+            {
+                return;
+            }
+            if (requestedUnlock || requestedLock)
+            {
+                return;
+            }
+            requestedLock = true;
+#else
             isCursorLocked = true;
-            lockedInFrame = Time.frameCount;
             Cursor.visible = false;
+#endif
             Cursor.lockState = CursorLockMode.Locked;
+            lockedInFrame = Time.frameCount;
 
             EventSystem.current.SetSelectedGameObject(null);
         }
 
         public static void UnlockCursor()
         {
+#if WEB_PLATFORM
+            if (!isCursorLocked)
+            {
+                return;
+            }
+            if (requestedUnlock || requestedLock)
+            {
+                return;
+            }
+            requestedUnlock = true;
+#else
             isCursorLocked = false;
             Cursor.visible = true;
+#endif
             Cursor.lockState = CursorLockMode.None;
+
+            EventSystem.current.SetSelectedGameObject(null);
         }
+
+#if WEB_PLATFORM
+        // NOTE: This should come from browser's pointerlockchange callback
+        public static void BrowserSetCursorState(bool locked)
+        {
+            if (!locked && !requestedUnlock)
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
+            isCursorLocked = locked;
+            Cursor.visible = !locked;
+            requestedUnlock = false;
+            requestedLock = false;
+        }
+#endif
 
         public static void DestroyAllChild(this Transform transform)
         {
@@ -441,6 +555,60 @@ namespace DCL.Helpers
             {
                 UnityEngine.Object.Destroy(child.gameObject);
             }
+        }
+
+        public static List<Vector2Int> GetBottomLeftZoneArray(Vector2Int bottomLeftAnchor, Vector2Int size)
+        {
+            List<Vector2Int> coords = new List<Vector2Int>();
+
+            for (int x = bottomLeftAnchor.x; x < bottomLeftAnchor.x + size.x; x++)
+            {
+                for (int y = bottomLeftAnchor.y; y < bottomLeftAnchor.y + size.y; y++)
+                {
+                    coords.Add(new Vector2Int(x, y));
+                }
+            }
+
+            return coords;
+        }
+
+        public static List<Vector2Int> GetCenteredZoneArray(Vector2Int center, Vector2Int size)
+        {
+            List<Vector2Int> coords = new List<Vector2Int>();
+
+            for (int x = center.x - size.x; x < center.x + size.x; x++)
+            {
+                for (int y = center.y - size.y; y < center.y + size.y; y++)
+                {
+                    coords.Add(new Vector2Int(x, y));
+                }
+            }
+
+            return coords;
+        }
+
+        public static void DrawRectGizmo(Rect rect, Color color, float duration)
+        {
+            Vector3 tl2 = new Vector3(rect.xMin, rect.yMax, 0);
+            Vector3 bl2 = new Vector3(rect.xMin, rect.yMin, 0);
+            Vector3 tr2 = new Vector3(rect.xMax, rect.yMax, 0);
+            Vector3 br2 = new Vector3(rect.xMax, rect.yMin, 0);
+
+            Debug.DrawLine(tl2, bl2, color, duration);
+            Debug.DrawLine(tl2, tr2, color, duration);
+            Debug.DrawLine(bl2, br2, color, duration);
+            Debug.DrawLine(tr2, br2, color, duration);
+        }
+
+        public static string ToUpperFirst(this string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                var capital = char.ToUpper(value[0]);
+                value = capital + value.Substring(1);
+            }
+
+            return value;
         }
     }
 }

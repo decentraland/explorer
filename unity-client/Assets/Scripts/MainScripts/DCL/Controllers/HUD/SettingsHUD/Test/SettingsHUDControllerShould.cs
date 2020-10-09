@@ -2,9 +2,8 @@
 using NUnit.Framework;
 using UnityEngine.TestTools;
 using DCL.SettingsHUD;
-using UnityEngine.Rendering.LWRP;
-
-using QualitySettings = DCL.SettingsHUD.QualitySettings;
+using QualitySettings = DCL.SettingsData.QualitySettings;
+using GeneralSettings = DCL.SettingsData.GeneralSettings;
 
 namespace Tests
 {
@@ -21,12 +20,12 @@ namespace Tests
 
             testQualitySettings = new QualitySettings()
             {
-                textureQuality = QualitySettings.TextureQuality.HalfRes,
-                antiAliasing = MsaaQuality._4x,
+                baseResolution = QualitySettings.BaseResolution.BaseRes_1080,
+                antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._4x,
                 renderScale = 0.1f,
                 shadows = false,
                 softShadows = false,
-                shadowResolution = UnityEngine.Rendering.LWRP.ShadowResolution._512,
+                shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
                 cameraDrawDistance = 51f,
                 bloom = true,
                 colorGrading = true
@@ -43,6 +42,19 @@ namespace Tests
             controller = new SettingsHUDController();
         }
 
+        protected override IEnumerator TearDown()
+        {
+            // Reset volume setting
+            testGeneralSettings = new GeneralSettings()
+            {
+                sfxVolume = 1
+            };
+            DCL.Settings.i.ApplyGeneralSettings(testGeneralSettings);
+
+            controller.Dispose();
+            yield return base.TearDown();
+        }
+
         [UnityTest]
         public IEnumerator CreateView()
         {
@@ -56,7 +68,7 @@ namespace Tests
         {
             SettingsGeneralView generalContent = controller.view.GetComponentInChildren<SettingsGeneralView>();
             Assert.IsTrue(generalContent.qualityPresetSpinBox.label == SettingsGeneralView.TEXT_QUALITY_CUSTOM, "qualityPresetSpinBox missmatch");
-            Assert.IsTrue(generalContent.textureResSpinBox.value == 1, "textureResSpinBox missmatch");
+            Assert.IsTrue(generalContent.baseResSpinBox.value == 1, "textureResSpinBox missmatch");
             Assert.IsTrue(generalContent.shadowResSpinBox.label == "512", "shadowResSpinBox missmatch");
             Assert.IsTrue(generalContent.soundToggle.isOn == false, "soundToggle missmatch");
             Assert.IsTrue(generalContent.colorGradingToggle.isOn == true, "colorGradingToggle missmatch");

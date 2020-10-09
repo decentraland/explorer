@@ -1,4 +1,4 @@
-﻿using DCL.Models;
+using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -43,14 +43,14 @@ namespace DCL.Components
         }
 
 
-        public virtual void AttachTo(DecentralandEntity entity, Type overridenAttachedType = null)
+        public virtual void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)
         {
             if (attachedEntities.Contains(entity))
             {
                 return;
             }
 
-            Type thisType = overridenAttachedType != null ? overridenAttachedType : GetType();
+            System.Type thisType = overridenAttachedType != null ? overridenAttachedType : GetType();
             entity.AddSharedComponent(thisType, this);
 
             attachedEntities.Add(entity);
@@ -65,13 +65,13 @@ namespace DCL.Components
             DetachFrom(entity);
         }
 
-        public virtual void DetachFrom(DecentralandEntity entity, Type overridenAttachedType = null)
+        public virtual void DetachFrom(DecentralandEntity entity, System.Type overridenAttachedType = null)
         {
             if (!attachedEntities.Contains(entity)) return;
 
             entity.OnRemoved -= OnEntityRemoved;
 
-            Type thisType = overridenAttachedType != null ? overridenAttachedType : GetType();
+            System.Type thisType = overridenAttachedType != null ? overridenAttachedType : GetType();
             entity.RemoveSharedComponent(thisType, false);
 
             attachedEntities.Remove(entity);
@@ -94,7 +94,6 @@ namespace DCL.Components
         public virtual void Dispose()
         {
             DetachFromEveryEntity();
-            Resources.UnloadUnusedAssets(); //NOTE(Brian): This will ensure assets are freed correctly.
         }
 
         public abstract IEnumerator ApplyChanges(string newJson);
@@ -113,7 +112,7 @@ namespace DCL.Components
         {
             if (isRoutineRunning)
             {
-                GetCoroutineOwner().StopCoroutine(routine);
+                CoroutineStarter.Stop(routine);
             }
         }
 

@@ -13,7 +13,6 @@ namespace DCL
         public AssetPromiseSettings_Rendering settings = new AssetPromiseSettings_Rendering();
         AssetPromise_AB subPromise;
         Coroutine loadingCoroutine;
-        List<Renderer> renderers = new List<Renderer>();
 
         public AssetPromise_AB_GameObject(string contentUrl, string hash) : base(contentUrl, hash)
         {
@@ -53,7 +52,7 @@ namespace DCL
 
         protected override void OnAfterLoadOrReuse()
         {
-            settings.ApplyAfterLoad(renderers);
+            settings.ApplyAfterLoad(asset.container.transform);
         }
 
         protected override void OnBeforeLoadOrReuse()
@@ -73,14 +72,23 @@ namespace DCL
             }
 
             if (asset != null)
-                GameObject.Destroy(asset.container);
+                UnityEngine.Object.Destroy(asset.container);
 
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
 
+
+        public override string ToString()
+        {
+            if (subPromise != null)
+                return $"{subPromise.ToString()} ... AB_GameObject state = {state}";
+            else
+                return $"subPromise == null? state = {state}";
+        }
+
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action OnFail)
         {
-            subPromise = new AssetPromise_AB(contentUrl, hash);
+            subPromise = new AssetPromise_AB(contentUrl, hash, asset.container.transform);
             bool success = false;
             subPromise.OnSuccessEvent += (x) => success = true;
             asset.ownerPromise = subPromise;
@@ -110,7 +118,18 @@ namespace DCL
         public IEnumerator InstantiateABGameObjects()
         {
             var goList = subPromise.asset.GetAssetsByExtensions<GameObject>("glb", "ltf");
-            renderers.Clear();
+
+            if (goList.Count == 0)
+            {
+                if (asset.container != null)
+                    UnityEngine.Object.Destroy(asset.container);
+
+                asset.container = null;
+
+                AssetPromiseKeeper_AB.i.Forget(subPromise);
+
+                yield break;
+            }
 
             for (int i = 0; i < goList.Count; i++)
             {
@@ -120,29 +139,33 @@ namespace DCL
                 if (asset.container == null)
                     break;
 
-                GameObject assetBundleModelGO = UnityEngine.Object.Instantiate(goList[i]);
-                renderers.AddRange(assetBundleModelGO.GetComponentsInChildren<Renderer>(true));
+                GameObject assetBundleModelGO = UnityEngine.Object.Instantiate(goList[i], asset.container.transform);
+                var list = new List<Renderer>(assetBundleModelGO.GetComponentsInChildren<Renderer>(true));
 
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
-                yield return MaterialCachingHelper.Process(renderers, enableRenderers: false, settings.cachingFlags);
+                yield return MaterialCachingHelper.Process(list, enableRenderers: false, settings.cachingFlags);
 
+                var animators = assetBundleModelGO.GetComponentsInChildren<Animation>(true);
+
+                for (int animIndex = 0; animIndex < animators.Length; animIndex++)
+                {
+                    animators[animIndex].cullingType = AnimationCullingType.AlwaysAnimate;
+                }
+
+#if UNITY_EDITOR
                 assetBundleModelGO.name = subPromise.asset.assetBundleAssetName;
-                assetBundleModelGO.transform.parent = asset.container.transform;
+#endif
+                //assetBundleModelGO.transform.SetParent(asset.container.transform, false);
                 assetBundleModelGO.transform.ResetLocalTRS();
                 yield return null;
             }
-
-            if (subPromise.asset.ownerAssetBundle != null)
-                subPromise.asset.ownerAssetBundle.Unload(false);
-
-            yield break;
         }
 
         protected override Asset_AB_GameObject GetAsset(object id)
         {
             if (settings.forceNewInstance)
             {
-                return ((AssetLibrary_AB_GameObject)library).GetCopyFromOriginal(id);
+                return ((AssetLibrary_AB_GameObject) library).GetCopyFromOriginal(id);
             }
             else
             {

@@ -47,7 +47,7 @@ namespace DCL.Controllers
         Dictionary<GameObject, InvalidMeshInfo> invalidMeshesInfo = new Dictionary<GameObject, InvalidMeshInfo>();
         HashSet<Renderer> invalidSubmeshes = new HashSet<Renderer>();
 
-        public SceneBoundariesDebugModeChecker(ParcelScene ownerScene) : base(ownerScene)
+        public SceneBoundariesDebugModeChecker() : base()
         {
             invalidMeshesInfo = new Dictionary<GameObject, InvalidMeshInfo>();
             invalidMeshMaterial = Resources.Load(INVALID_MESH_MATERIAL_NAME) as Material;
@@ -60,7 +60,7 @@ namespace DCL.Controllers
 
             for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
             {
-                if (!scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
+                if (!entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
                 {
                     isInsideBoundaries = false;
 
@@ -81,16 +81,22 @@ namespace DCL.Controllers
 
         void RemoveInvalidMeshEffect(DecentralandEntity entity)
         {
-            if (WasEntityInAValidPosition(entity)) return;
+            if (entity == null || WasEntityInAValidPosition(entity)) return;
 
             PoolableObject shapePoolableObjectBehaviour = PoolManager.i.GetPoolable(entity.meshesInfo.meshRootGameObject);
+
             if (shapePoolableObjectBehaviour != null)
                 shapePoolableObjectBehaviour.OnRelease -= invalidMeshesInfo[entity.gameObject].ResetMaterials;
 
-            for (int i = 0; i < entity.renderers.Length; i++)
+            var renderers = entity.meshesInfo.renderers;
+
+            if (renderers != null)
             {
-                if (invalidSubmeshes.Contains(entity.renderers[i]))
-                    invalidSubmeshes.Remove(entity.renderers[i]);
+                for (int i = 0; i < renderers.Length; i++)
+                {
+                    if (invalidSubmeshes.Contains(renderers[i]))
+                        invalidSubmeshes.Remove(renderers[i]);
+                }
             }
 
             invalidMeshesInfo[entity.gameObject].ResetMaterials();
@@ -151,7 +157,18 @@ namespace DCL.Controllers
             {
                 return invalidMeshesInfo[entity.gameObject].originalMaterials;
             }
+
             return null;
+        }
+
+        protected override void OnRemoveEntity(DecentralandEntity entity)
+        {
+            base.OnRemoveEntity(entity);
+
+            if (entity.gameObject != null)
+            {
+                RemoveInvalidMeshEffect(entity);
+            }
         }
     }
 }
