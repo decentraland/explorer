@@ -424,6 +424,172 @@ exports[`Storyshots Explorer/Errors/ErrorNotSupported Template 1`] = `
 </div>
 `;
 
+exports[`Storyshots Explorer/LoadingContainer Template 1`] = `
+Array [
+  <div
+    id="load-messages-wrapper"
+  >
+    <div
+      className="load-images-wrapper"
+    >
+      <img
+        alt=""
+        id="load-images"
+        src="images/decentraland-connect/loadingtips/Mana.png"
+      />
+    </div>
+    <div
+      id="load-messages"
+    >
+      MANA is Decentraland’s virtual currency. Use it to buy LAND and other premium items, vote on key policies and pay platform fees.
+    </div>
+    <div
+      id="subtext-messages-container"
+    >
+      <div
+        id="subtext-messages"
+      >
+        Loading scenes...
+      </div>
+    </div>
+  </div>,
+  <div
+    className="progress"
+  >
+    <div
+      className="full"
+      style={
+        Object {
+          "width": "15%",
+        }
+      }
+    >
+       
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots Explorer/LoginContainer Template 1`] = `
+<div
+  className="login"
+>
+  <nav
+    className="nav-bar"
+  >
+    <div
+      className="nav-bar-content"
+    >
+      <div
+        className="nav-text nav-need-support"
+      >
+        <span>
+          Need support?
+        </span>
+      </div>
+      <a
+        className="nav-discord"
+        href="https://dcl.gg/discord"
+        target="about:blank"
+      >
+        <img
+          alt="Discord"
+          className="nav-discord-img"
+          src="images/decentraland-connect/Discord.png"
+        />
+        <span
+          className="nav-text nav-discord-text"
+        >
+          JOIN OUR DISCORD
+        </span>
+      </a>
+    </div>
+  </nav>
+  <div
+    className="eth-login-popup"
+  >
+    <img
+      alt="Decentraland"
+      className="eth-login-logo"
+      src="images/decentraland-connect/Isologotipo.png"
+    />
+    <div
+      className="eth-login-description"
+    >
+      Enter the first virtual world fully owned by its users.
+    </div>
+    <div
+      className="loader"
+      id="eth-login-confirmation-spinner"
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    >
+       
+    </div>
+  </div>
+  <footer
+    className="footer-bar"
+  >
+    <div
+      className="footer-bar-content"
+    >
+      <a
+        className="footer-link"
+        href="https://dcl.gg/discord"
+        target="about:blank"
+      >
+        <img
+          alt=""
+          className="footer-icon"
+          src="images/decentraland-connect/footer/Discord.png"
+        />
+      </a>
+      <a
+        className="footer-link"
+        href="https://www.reddit.com/r/decentraland/"
+        target="about:blank"
+      >
+        <img
+          alt=""
+          className="footer-icon"
+          src="images/decentraland-connect/footer/Reddit.png"
+        />
+      </a>
+      <a
+        className="footer-link"
+        href="http://github.com/decentraland"
+        target="about:blank"
+      >
+        <img
+          alt=""
+          className="footer-icon"
+          src="images/decentraland-connect/footer/Git.png"
+        />
+      </a>
+      <a
+        className="footer-link"
+        href="https://twitter.com/decentraland"
+        target="about:blank"
+      >
+        <img
+          alt=""
+          className="footer-icon"
+          src="images/decentraland-connect/footer/Twitter.png"
+        />
+      </a>
+      <span
+        className="footer-text"
+      >
+        © 2020 Decentraland
+      </span>
+    </div>
+  </footer>
+</div>
+`;
+
 exports[`Storyshots Explorer/base/Audio Template 1`] = `
 <audio
   autoPlay={true}
@@ -566,6 +732,12 @@ exports[`Storyshots Explorer/base/Navbar Template 1`] = `
     </a>
   </div>
 </nav>
+`;
+
+exports[`Storyshots Explorer/base/Overlay Template 1`] = `
+<div
+  id="overlay"
+/>
 `;
 
 exports[`Storyshots Explorer/base/ProgressBar Template 1`] = `

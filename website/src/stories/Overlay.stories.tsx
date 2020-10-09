@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import Overlay, { OverlayProps } from "../components/Overlay";
+import { Overlay, OverlayProps } from "../components/Overlay";
 
 export default {
   title: "Explorer/base/Overlay",

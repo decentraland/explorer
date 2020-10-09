@@ -12,7 +12,7 @@ export interface OverlayProps {
   show: boolean;
 }
 
-const Overlay: React.FC<OverlayProps> = (props) => (
+export const Overlay: React.FC<OverlayProps> = (props) => (
   <React.Fragment>{props.show && <div id="overlay" />}</React.Fragment>
 );
 

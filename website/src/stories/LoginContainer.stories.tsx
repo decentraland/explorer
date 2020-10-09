@@ -1,7 +1,7 @@
 import React from "react";
-
 import { Meta, Story } from "@storybook/react";
-import LoginContainer, {
+import {
+  LoginContainer,
   LoginContainerProps,
 } from "../components/LoginContainer";
 
@@ -10,8 +10,12 @@ export default {
   args: {
     terms: true,
     stage: "loading",
+    onLogin: () => {},
+    onTermsChange: () => {},
   } as LoginContainerProps,
   component: LoginContainer,
 } as Meta;
 
-export const Template: Story = (args: any) => <LoginContainer {...args} />;
+export const Template: Story<LoginContainerProps> = (args) => (
+  <LoginContainer {...args} />
+);

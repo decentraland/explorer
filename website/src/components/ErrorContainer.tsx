@@ -30,7 +30,7 @@ export interface ErrorContainerProps {
   details: { tld: string; web3Net: string; tldNet: string } | null;
 }
 
-const ErrorContainer: React.FC<ErrorContainerProps> = (props) => {
+export const ErrorContainer: React.FC<ErrorContainerProps> = (props) => {
   return (
     <React.Fragment>
       {props.error === Error.FATAL && <ErrorFatal />}

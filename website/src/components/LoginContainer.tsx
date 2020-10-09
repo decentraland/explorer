@@ -34,7 +34,7 @@ export interface LoginContainerProps {
   onTermsChange: any;
 }
 
-const LoginContainer: React.FC<LoginContainerProps> = (props) => (
+export const LoginContainer: React.FC<LoginContainerProps> = (props) => (
   <React.Fragment>
     {props.stage !== LoginStage.COMPLETED && (
       <div className="login">

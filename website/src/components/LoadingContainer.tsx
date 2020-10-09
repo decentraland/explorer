@@ -65,7 +65,7 @@ const changeTip = (current: number) => {
   return current + 1 < loadingTips.length ? current + 1 : 0;
 };
 
-const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
+export const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
   const { state, showWalletPrompt } = props;
   const [step, setStep]: [number, any] = useState(0);
   // setting animation of loading

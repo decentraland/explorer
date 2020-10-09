@@ -1,9 +1,9 @@
 import React from "react";
 
 import { Meta, Story } from "@storybook/react";
-import LoadingContainer, {
+import {
+  LoadingContainer,
   LoadingContainerProps,
-  LoadingState,
 } from "../components/LoadingContainer";
 
 export default {
@@ -24,6 +24,6 @@ export default {
   component: LoadingContainer,
 } as Meta;
 
-export const Template: Story<LoadingState> = (args: LoadingState) => (
+export const Template: Story<LoadingContainerProps> = (args) => (
   <LoadingContainer {...args} />
 );
