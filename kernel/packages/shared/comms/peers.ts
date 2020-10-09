@@ -2,8 +2,6 @@ import { Observable } from 'decentraland-ecs/src'
 import { UUID, PeerInformation, AvatarMessage, UserInformation, AvatarMessageType, Pose } from './interface/types'
 import { getFromLocalStorage, saveToLocalStorage, removeFromLocalStorage } from 'atomicHelpers/localStorage'
 
-declare const unityInterface: any
-
 export const getUserProfile = () => getFromLocalStorage('dcl-profile') || {}
 export const removeUserProfile = () => removeFromLocalStorage('dcl-profile')
 export const getBlockedUsers: () => Set<string> = () => new Set(getFromLocalStorage('dcl-blocked-users') || [])
@@ -145,15 +143,12 @@ export function receiveUserData(uuid: string, data: Partial<UserInformation>) {
   }
 }
 
-export function receiveUserTalking(uuid: string, userId: string | undefined, talking: boolean) {
+export function receiveUserTalking(uuid: string, talking: boolean) {
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.USER_TALKING,
     uuid,
     talking
   })
-  if (userId) {
-    unityInterface.SetUserTalking(userId, talking)
-  }
 }
 
 export function receiveUserPose(uuid: string, pose: Pose) {

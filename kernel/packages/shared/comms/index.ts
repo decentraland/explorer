@@ -87,6 +87,7 @@ import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCom
 import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
 import { isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -268,6 +269,7 @@ export function updatePeerVoicePlaying(userId: string, playing: boolean) {
       }
     }
   }
+  unityInterface.SetUserTalking(userId, playing)
 }
 
 export function updateVoiceCommunicatorVolume(volume: number) {
@@ -630,7 +632,7 @@ function collectInfo(context: Context) {
       receiveUserVisible(alias, true)
       receiveUserPose(alias, peerInfo.position as Pose)
       receiveUserData(alias, peerInfo.userInfo)
-      receiveUserTalking(alias, peerInfo.userInfo?.userId, peerInfo.talking)
+      receiveUserTalking(alias, peerInfo.talking)
     }
   } else {
     const sortedBySqDistanceVisiblePeers = visiblePeers.sort((p1, p2) => p1.squareDistance - p2.squareDistance)
@@ -642,7 +644,7 @@ function collectInfo(context: Context) {
         receiveUserVisible(alias, true)
         receiveUserPose(alias, peer.position as Pose)
         receiveUserData(alias, peer.userInfo)
-        receiveUserTalking(alias, peer.userInfo?.userId, peer.talking)
+        receiveUserTalking(alias, peer.talking)
       } else {
         receiveUserVisible(alias, false)
       }
