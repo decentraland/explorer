@@ -343,7 +343,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   teacherCanvas: {fileID: 6650911990874416982}
   eagleEyeCamera: {fileID: 770616498577745558}
-  eagleCamInitPosition: {x: 30, y: 30, z: -50}
+  eagleCamInitPosition: {x: 30, y: 20, z: -60}
   eagleCamInitLookAtPoint: {x: 0, y: 0, z: 0}
   eagleCamRotationActived: 1
   eagleCamRotationSpeed: 1
