@@ -146,7 +146,7 @@ initializeUnity(container)
     }
 
     if (!NO_MOTD) {
-      i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true }, worldConfig.motd)
+      i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true }, worldConfig.messageOfTheDay)
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
