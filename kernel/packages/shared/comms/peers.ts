@@ -145,13 +145,15 @@ export function receiveUserData(uuid: string, data: Partial<UserInformation>) {
   }
 }
 
-export function receiveUserTalking(uuid: string, talking: boolean) {
+export function receiveUserTalking(uuid: string, userId: string | undefined, talking: boolean) {
   avatarMessageObservable.notifyObservers({
     type: AvatarMessageType.USER_TALKING,
     uuid,
     talking
   })
-  unityInterface.SetUserTalking(uuid, talking)
+  if (userId) {
+    unityInterface.SetUserTalking(userId, talking)
+  }
 }
 
 export function receiveUserPose(uuid: string, pose: Pose) {

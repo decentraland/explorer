@@ -630,7 +630,7 @@ function collectInfo(context: Context) {
       receiveUserVisible(alias, true)
       receiveUserPose(alias, peerInfo.position as Pose)
       receiveUserData(alias, peerInfo.userInfo)
-      receiveUserTalking(alias, peerInfo.talking)
+      receiveUserTalking(alias, peerInfo.userInfo?.userId, peerInfo.talking)
     }
   } else {
     const sortedBySqDistanceVisiblePeers = visiblePeers.sort((p1, p2) => p1.squareDistance - p2.squareDistance)
@@ -642,7 +642,7 @@ function collectInfo(context: Context) {
         receiveUserVisible(alias, true)
         receiveUserPose(alias, peer.position as Pose)
         receiveUserData(alias, peer.userInfo)
-        receiveUserTalking(alias, peer.talking)
+        receiveUserTalking(alias, peer.userInfo?.userId, peer.talking)
       } else {
         receiveUserVisible(alias, false)
       }
