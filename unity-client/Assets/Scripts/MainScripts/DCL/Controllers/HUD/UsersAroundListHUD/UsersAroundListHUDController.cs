@@ -7,7 +7,7 @@ public class UsersAroundListHUDController : IHUD
     internal IUsersAroundListHUDListView usersListView;
 
     private bool isVisible = false;
-    private HashSet<string> trackedUsersHashSet = new HashSet<string>();
+    private readonly HashSet<string> trackedUsersHashSet = new HashSet<string>();
 
     public UsersAroundListHUDController()
     {

@@ -360,6 +360,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
   }
 
+  public SetUserTalking(userId: string, talking: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetUserTalking', JSON.stringify({ userId: userId, talking: talking }))
+  }
+
   // *********************************************************************************
   // ************** Builder messages **************
   // *********************************************************************************

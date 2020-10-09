@@ -438,6 +438,12 @@ public class HUDController : MonoBehaviour
         avatarHud_Legacy.SetTalking("true".Equals(talking));
     }
 
+    public void SetUserTalking(string payload)
+    {
+        var model = JsonUtility.FromJson<UserTalkingModel>(payload);
+        usersAroundListHud.SetUserRecording(model.userId, model.talking);
+    }
+
     public void RequestTeleport(string teleportDataJson)
     {
         teleportHud?.RequestTeleport(teleportDataJson);

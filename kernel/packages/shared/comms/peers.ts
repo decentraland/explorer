@@ -1,6 +1,7 @@
 import { Observable } from 'decentraland-ecs/src'
 import { UUID, PeerInformation, AvatarMessage, UserInformation, AvatarMessageType, Pose } from './interface/types'
 import { getFromLocalStorage, saveToLocalStorage, removeFromLocalStorage } from 'atomicHelpers/localStorage'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 export const getUserProfile = () => getFromLocalStorage('dcl-profile') || {}
 export const removeUserProfile = () => removeFromLocalStorage('dcl-profile')
@@ -149,6 +150,7 @@ export function receiveUserTalking(uuid: string, talking: boolean) {
     uuid,
     talking
   })
+  unityInterface.SetUserTalking(uuid, talking)
 }
 
 export function receiveUserPose(uuid: string, pose: Pose) {
