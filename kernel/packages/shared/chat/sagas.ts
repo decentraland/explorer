@@ -15,14 +15,7 @@ import { ChatMessageType, ChatMessage } from 'shared/types'
 import { EXPERIENCE_STARTED } from 'shared/loading/types'
 import { queueTrackingEvent } from 'shared/analytics'
 import { sendPublicChatMessage } from 'shared/comms'
-import {
-  getCurrentUser,
-  peerMap,
-  findPeerByName,
-  removeFromMutedUsers,
-  avatarMessageObservable,
-  addToMutedUsers
-} from 'shared/comms/peers'
+import { getCurrentUser, peerMap, findPeerByName, avatarMessageObservable } from 'shared/comms/peers'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { TeleportController } from 'shared/world/TeleportController'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
@@ -36,6 +29,7 @@ import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { findProfileByName } from 'shared/profiles/selectors'
 import { isFriend } from 'shared/friends/selectors'
 import { fetchHotScenes } from 'shared/social/hotScenes'
+import { mutePlayer, unmutePlayer } from 'shared/social/actions'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -320,44 +314,6 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('mute', 'Mute [username]', (message) => {
-    const username = message
-    const currentUser = getCurrentUser()
-    if (!currentUser) throw new Error('cannotGetCurrentUser')
-
-    const user = findPeerByName(username)
-    if (user && user.userId) {
-      // Cannot mute yourself
-      if (username === currentUser.userId) {
-        return {
-          messageId: uuid(),
-          messageType: ChatMessageType.SYSTEM,
-          sender: 'Decentraland',
-          timestamp: Date.now(),
-          body: `You cannot mute yourself.`
-        }
-      }
-
-      addToMutedUsers(user.userId)
-
-      return {
-        messageId: uuid(),
-        messageType: ChatMessageType.SYSTEM,
-        sender: 'Decentraland',
-        timestamp: Date.now(),
-        body: `You muted user ${username}.`
-      }
-    } else {
-      return {
-        messageId: uuid(),
-        messageType: ChatMessageType.SYSTEM,
-        sender: 'Decentraland',
-        timestamp: Date.now(),
-        body: `User not found ${JSON.stringify(username)}.`
-      }
-    }
-  })
-
   addChatCommand(
     'emote',
     'Trigger avatar animation named [expression] ("robot", "wave", or "fistpump")',
@@ -445,15 +401,17 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('unmute', 'Unmute [username]', (message) => {
-    const username = message
+  function muteOrUnmute(
+    username: string,
+    actionBuilder: (userId: string) => { type: string; payload: { playerId: string } },
+    ifSuccessfulMessage: string
+  ) {
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
 
     const user = findPeerByName(username)
-
     if (user && user.userId) {
-      // Cannot unmute or mute yourself
+      // Cannot mute yourself
       if (username === currentUser.userId) {
         return {
           messageId: uuid(),
@@ -464,14 +422,14 @@ function initChatCommands() {
         }
       }
 
-      removeFromMutedUsers(user.userId)
+      globalThis.globalStore.dispatch(actionBuilder(user.userId))
 
       return {
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: `You unmuted user ${username}.`
+        body: ifSuccessfulMessage
       }
     } else {
       return {
@@ -482,6 +440,14 @@ function initChatCommands() {
         body: `User not found ${JSON.stringify(username)}.`
       }
     }
+  }
+
+  addChatCommand('mute', 'Mute [username]', (message) => {
+    return muteOrUnmute(message, mutePlayer, `You muted user ${message}.`)
+  })
+
+  addChatCommand('unmute', 'Unmute [username]', (message) => {
+    return muteOrUnmute(message, unmutePlayer, `You unmuted user ${message}.`)
   })
 
   addChatCommand('help', 'Show a list of commands', (message) => {
