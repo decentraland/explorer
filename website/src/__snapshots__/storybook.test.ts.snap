@@ -1,0 +1,750 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Explorer/Errors/ErrorComms Template 1`] = `
+<div
+  className="error-container"
+  id="error-comms"
+>
+  <div
+    className="error-background"
+  />
+  <div
+    className="errormessage"
+  >
+    <div
+      className="errortext col"
+    >
+      <div
+        className="error"
+      >
+        Error
+      </div>
+      <div
+        className="communicationslink"
+      >
+        A communication link could not be
+        <br />
+        established with other peers
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        This might be because you are behind a restrictive network firewall, or a temporary problem with our coordinator server. 
+        <br />
+        <br />
+        Please try again later, or reach out to us at
+         
+        <a
+          href="mailto:developers@decentraland.org"
+        >
+          developers@decentraland.org
+        </a>
+        .
+        <br />
+        <br />
+        Thank you for helping us improve!
+      </div>
+      <div
+        className="cta"
+      >
+        <button
+          className="retry"
+          onClick={[Function]}
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+    <div
+      className="errorimage col"
+    >
+      <div
+        className="imagewrapper"
+      >
+        <img
+          alt=""
+          className="error-image"
+          src="images/robots/error-robotdead.png"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/Errors/ErrorFatal Template 1`] = `
+<div
+  className="error-container"
+  id="error-fatal"
+>
+  <div
+    className="error-background"
+  />
+  <div
+    className="errormessage"
+  >
+    <div
+      className="errortext col"
+    >
+      <div
+        className="error"
+      >
+        Error
+      </div>
+      <div
+        className="communicationslink"
+      >
+        An unexpected error ocurred when loading the world
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        This might be just temporary. 
+        <br />
+        <br />
+         Please try reloading, and if the problem persists,
+        <br />
+        feel free to reach out to us at 
+        <br />
+         
+        <a
+          href="mailto:developers@decentraland.org"
+        >
+          developers@decentraland.org
+        </a>
+        <br />
+        <br />
+        Thank you for helping us improve!
+      </div>
+      <div
+        className="cta"
+      >
+        <button
+          className="retry"
+          onClick={[Function]}
+        >
+          Reload
+        </button>
+      </div>
+    </div>
+    <div
+      className="errorimage col"
+    >
+      <div
+        className="imagewrapper"
+      >
+        <img
+          alt=""
+          className="error-image"
+          src="images/robots/error-robotdown.png"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/Errors/ErrorNetworkMismatch Template 1`] = `
+<div
+  className="error-container"
+  id="error-networkmismatch"
+>
+  <div
+    className="error-background"
+  />
+  <div
+    className="errormessage"
+  >
+    <div
+      className="errortext col"
+    >
+      <div
+        className="communicationslink"
+      >
+        A network mismatch was detected
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        We detected that you are entering the
+         
+        <strong
+          id="tld"
+        >
+          zone
+        </strong>
+         domain with your Ethereum wallet set to 
+        <strong
+          id="web3Net"
+        >
+          mainnet
+        </strong>
+        .
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        To continue, please change the Ethereum network in your wallet to
+         
+        <strong
+          id="web3NetGoal"
+        >
+          ropsten
+        </strong>
+         and click "Reload".
+      </div>
+      <div
+        className="cta"
+      >
+        <button
+          className="retry"
+          onClick={[Function]}
+        >
+          Reload
+        </button>
+      </div>
+    </div>
+    <div
+      className="errorimage col"
+    >
+      <div
+        className="imagewrapper"
+      >
+        <img
+          alt=""
+          className="error-image"
+          src="/images/robots/robotsmiling.png"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/Errors/ErrorNewLogin Template 1`] = `
+<div
+  className="error-container"
+  id="error-newlogin"
+>
+  <div
+    className="error-background"
+  />
+  <div
+    className="errormessage"
+  >
+    <div
+      className="errortext col"
+    >
+      <div
+        className="error communicationslink"
+      >
+        Another session was detected
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        It seems that the explorer was opened with your account from another device, browser, or tab.
+        <br />
+        Please, close the prior session and click "Reload" to explore the world in this window.
+      </div>
+      <div
+        className="cta"
+      >
+        <button
+          className="retry"
+          onClick={[Function]}
+        >
+          Reload
+        </button>
+      </div>
+    </div>
+    <div
+      className="errorimage col"
+    >
+      <div
+        className="imagewrapper"
+      >
+        <img
+          alt=""
+          className="error-image"
+          src="images/robots/robotsmiling.png"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/Errors/ErrorNoMobile Template 1`] = `
+<div
+  className="hidden-error"
+  id="error-nomobile"
+>
+  <div
+    className="error-background"
+    style={
+      Object {
+        "backgroundColor": "#0d0c0f",
+        "height": "100%",
+        "width": "100%",
+        "zIndex": 10,
+      }
+    }
+  />
+  <div
+    className="iphone8916"
+    style={
+      Object {
+        "zIndex": 11,
+      }
+    }
+  >
+    <div
+      className="div1"
+      style={
+        Object {
+          "height": "100%",
+          "margin": "auto",
+          "position": "relative",
+          "width": "375px",
+        }
+      }
+    >
+      <div
+        className="theclientisonlya"
+      >
+        The client is only available on desktop right now.
+      </div>
+      <img
+        alt=""
+        className="robotmobilebrowsererror"
+        src="images/robots/error-robotmobile.png"
+      />
+      <div
+        className="cta"
+      >
+        <div
+          className="signup"
+          onClick={[Function]}
+        >
+          Learn more about decentraland
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/Errors/ErrorNotInvited Template 1`] = `
+<div
+  className="error-container"
+  id="error-notinvited"
+>
+  <div
+    className="error-background"
+  />
+  <div
+    className="errormessage"
+  >
+    <div
+      className="errortext col"
+    >
+      <div
+        className="error"
+      >
+        Oops...
+      </div>
+      <div
+        className="communicationslink"
+      >
+        The Explorer is in Private Beta
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        Your account is not in the beta testing group. Only users with a claimed name have access right now. 
+        <br />
+        <br />
+        Stay tuned! Genesis City opens its doors on February 20th.
+      </div>
+    </div>
+    <div
+      className="errorimage col"
+    >
+      <img
+        alt=""
+        className="error-image"
+        src="images/robots/error-robotmobile.png"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/Errors/ErrorNotSupported Template 1`] = `
+<div
+  className="error-container"
+  id="error-notsupported"
+>
+  <div
+    className="error-background"
+  />
+  <div
+    className="errormessage"
+  >
+    <div
+      className="errortext col"
+    >
+      <div
+        className="error"
+      >
+        Error
+      </div>
+      <div
+        className="communicationslink"
+      >
+        Your browser or device is not supported
+      </div>
+      <div
+        className="givesomedetailof"
+      >
+        The Explorer only works on Chrome or Firefox for Windows, Linux and macOS.
+      </div>
+    </div>
+    <div
+      className="errorimage col"
+    >
+      <img
+        alt=""
+        className="error-image"
+        src="images/robots/error-robotmobile.png"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/base/Audio Template 1`] = `
+<audio
+  autoPlay={true}
+  loop={true}
+>
+  <source
+    src="https://play.decentraland.org/tone4.mp3"
+    type="audio/mpeg"
+  />
+</audio>
+`;
+
+exports[`Storyshots Explorer/base/Footer Template 1`] = `
+<footer
+  className="footer-bar"
+>
+  <div
+    className="footer-bar-content"
+  >
+    <a
+      className="footer-link"
+      href="https://dcl.gg/discord"
+      target="about:blank"
+    >
+      <img
+        alt=""
+        className="footer-icon"
+        src="images/decentraland-connect/footer/Discord.png"
+      />
+    </a>
+    <a
+      className="footer-link"
+      href="https://www.reddit.com/r/decentraland/"
+      target="about:blank"
+    >
+      <img
+        alt=""
+        className="footer-icon"
+        src="images/decentraland-connect/footer/Reddit.png"
+      />
+    </a>
+    <a
+      className="footer-link"
+      href="http://github.com/decentraland"
+      target="about:blank"
+    >
+      <img
+        alt=""
+        className="footer-icon"
+        src="images/decentraland-connect/footer/Git.png"
+      />
+    </a>
+    <a
+      className="footer-link"
+      href="https://twitter.com/decentraland"
+      target="about:blank"
+    >
+      <img
+        alt=""
+        className="footer-icon"
+        src="images/decentraland-connect/footer/Twitter.png"
+      />
+    </a>
+    <span
+      className="footer-text"
+    >
+      © 2020 Decentraland
+    </span>
+  </div>
+</footer>
+`;
+
+exports[`Storyshots Explorer/base/LoadingMessage Template 1`] = `
+<div
+  id="load-messages-wrapper"
+>
+  <div
+    className="load-images-wrapper"
+  >
+    <img
+      alt=""
+      id="load-images"
+      src="images/decentraland-connect/loadingtips/Mana.png"
+    />
+  </div>
+  <div
+    id="load-messages"
+  >
+    MANA is Decentraland’s virtual currency. Use it to buy LAND and other premium items, vote on key policies and pay platform fees.
+  </div>
+  <div
+    id="subtext-messages-container"
+  >
+    <div
+      id="subtext-messages"
+    >
+      Loading scenes...
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/base/Logo Template 1`] = `
+<img
+  alt="Decentraland"
+  className="eth-login-logo"
+  src="images/decentraland-connect/Isologotipo.png"
+/>
+`;
+
+exports[`Storyshots Explorer/base/Navbar Template 1`] = `
+<nav
+  className="nav-bar"
+>
+  <div
+    className="nav-bar-content"
+  >
+    <div
+      className="nav-text nav-need-support"
+    >
+      <span>
+        Need support?
+      </span>
+    </div>
+    <a
+      className="nav-discord"
+      href="https://dcl.gg/discord"
+      target="about:blank"
+    >
+      <img
+        alt="Discord"
+        className="nav-discord-img"
+        src="images/decentraland-connect/Discord.png"
+      />
+      <span
+        className="nav-text nav-discord-text"
+      >
+        JOIN OUR DISCORD
+      </span>
+    </a>
+  </div>
+</nav>
+`;
+
+exports[`Storyshots Explorer/base/ProgressBar Template 1`] = `
+<div
+  className="progress"
+>
+  <div
+    className="full"
+    style={
+      Object {
+        "width": "10%",
+      }
+    }
+  >
+     
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/base/Spinner Template 1`] = `
+<div
+  className="loader"
+  id="eth-login-confirmation-spinner"
+  style={
+    Object {
+      "display": "block",
+    }
+  }
+>
+   
+</div>
+`;
+
+exports[`Storyshots Explorer/login/EthConnectAdvice Template 1`] = `
+Array [
+  <div
+    className="eth-login-description"
+  >
+    Please, follow the instructions provided by your Ethereum wallet provider to complete login.
+    <br />
+    To proceed, 
+    <strong>
+      login
+    </strong>
+     into your wallet and confirm with
+     
+    <strong>
+      connecting
+    </strong>
+     to your Ethereum wallet extension.
+  </div>,
+  <button
+    className="eth-login-confirm-button1"
+    onClick={[Function]}
+  >
+    <img
+      alt=""
+      className="eth-login-wallet-icon"
+      src="images/decentraland-connect/walletIcon.png"
+    />
+    Connect wallet
+  </button>,
+]
+`;
+
+exports[`Storyshots Explorer/login/EthLogin Template 1`] = `
+Array [
+  <div
+    className="eth-login-description"
+  >
+    Enter the first virtual world fully owned by its users.
+  </div>,
+  <div
+    id="eth-login-confirmation-wrapper"
+  >
+    <div
+      className="eth-login-tos"
+    >
+      <input
+        checked={true}
+        className="eth-login-tos-agree"
+        id="agree-check"
+        onChange={[Function]}
+        type="checkbox"
+      />
+      <label
+        className="eth-login-tos-label"
+        htmlFor="agree-check"
+      >
+        I am of legal age and I have read and agree to the
+         
+        <a
+          href="https://decentraland.org/terms"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Terms of Service
+        </a>
+         
+        and
+         
+        <a
+          href="https://decentraland.org/privacy"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Privacy Policy
+        </a>
+      </label>
+    </div>
+    <button
+      className="eth-login-confirm-button1"
+      disabled={false}
+      id="eth-login-confirm-button"
+      onClick={[Function]}
+    >
+      Start Exploring
+    </button>
+  </div>,
+]
+`;
+
+exports[`Storyshots Explorer/login/EthSignAdvice Template 1`] = `
+Array [
+  <div
+    className="eth-login-description"
+  >
+    Please, follow the instructions provided by your Ethereum wallet provider to complete login.
+  </div>,
+  <div
+    className="eth-login-description"
+    style={
+      Object {
+        "marginTop": "10px",
+      }
+    }
+  >
+    To proceed, confirm 
+    <strong>
+      signing
+    </strong>
+     the following message in your wallet extension.
+  </div>,
+]
+`;
+
+exports[`Storyshots Explorer/login/TermOfService Template 1`] = `
+<div
+  className="eth-login-tos"
+>
+  <input
+    checked={false}
+    className="eth-login-tos-agree"
+    id="agree-check"
+    type="checkbox"
+  />
+  <label
+    className="eth-login-tos-label"
+    htmlFor="agree-check"
+  >
+    I am of legal age and I have read and agree to the
+     
+    <a
+      href="https://decentraland.org/terms"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Terms of Service
+    </a>
+     
+    and
+     
+    <a
+      href="https://decentraland.org/privacy"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Privacy Policy
+    </a>
+  </label>
+</div>
+`;
