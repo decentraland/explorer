@@ -1,5 +1,4 @@
 import React from "react";
-import "./Errors.css";
 
 export const ErrorComms: React.FC = () => (
   <div id="error-comms" className="error-container">

@@ -1,5 +1,4 @@
 import React from "react";
-import "./Errors.css";
 
 export const ErrorNotSupported: React.FC = () => (
   <div id="error-notsupported" className="error-container">

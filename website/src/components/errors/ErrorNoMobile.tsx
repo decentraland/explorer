@@ -1,5 +1,4 @@
 import React from "react";
-import "./Errors.css";
 
 export const ErrorNoMobile: React.FC = () => (
   <div id="error-nomobile" className="hidden-error">

@@ -12,7 +12,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ percentage }) => {
   };
   return (
     <div className="progress">
-      <div className="full" style={progress}>
+      <div id="progress-bar-inner" className="full" style={progress}>
         {" "}
       </div>
     </div>

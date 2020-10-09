@@ -1,5 +1,4 @@
 import React from "react";
-import "./Errors.css";
 
 export const ErrorNotInvited: React.FC = () => (
   <div id="error-notinvited" className="error-container">
