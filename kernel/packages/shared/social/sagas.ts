@@ -12,7 +12,9 @@ import {
   UnmutePlayer,
   UNMUTE_PLAYER
 } from './actions'
-import { Profile } from 'shared/types'
+import { Profile } from 'shared/profiles/types'
+
+type ProfileSetKey = 'muted' | 'blocked'
 
 export function* socialSaga(): any {
   yield takeEvery(MUTE_PLAYER, saveMutedPlayer)
@@ -21,37 +23,45 @@ export function* socialSaga(): any {
   yield takeEvery(UNBLOCK_PLAYER, saveUnblockedPlayer)
 }
 
-function* saveMutedPlayer(action: MutePlayer) {}
+function* saveMutedPlayer(action: MutePlayer) {
+  yield* addPlayerToProfileSet(action.payload.playerId, 'muted')
+}
 
 function* saveBlockedPlayer(action: BlockPlayer) {
+  yield* addPlayerToProfileSet(action.payload.playerId, 'blocked')
+}
+
+function* saveUnmutedPlayer(action: UnmutePlayer) {
+  yield* removePlayerFromProfileSet(action.payload.playerId, 'muted')
+}
+
+function* saveUnblockedPlayer(action: UnblockPlayer) {
+  yield* removePlayerFromProfileSet(action.payload.playerId, 'blocked')
+}
+
+function* addPlayerToProfileSet(playerId: string, setKey: ProfileSetKey) {
   const profile = yield getCurrentProfile()
 
   if (profile) {
-    let blocked: string[] = [action.payload.playerId]
-
-    if (profile.blocked) {
-      for (let blockedUser of profile.blocked) {
-        if (blockedUser === action.payload.playerId) {
-          return
-        }
+    let set: string[] = [playerId]
+    if (profile[setKey]) {
+      if (profile[setKey].indexOf(playerId) >= 0) {
+        return
       }
 
-      // Merge the existing array and any previously blocked users
-      blocked = [...profile.blocked, ...blocked]
+      set = [...profile[setKey], playerId]
     }
 
-    yield put(saveProfileRequest({ ...profile, blocked }))
+    yield put(saveProfileRequest({ [setKey]: set }))
   }
 }
 
-function* saveUnmutedPlayer(action: UnmutePlayer) {}
-
-function* saveUnblockedPlayer(action: UnblockPlayer) {
+function* removePlayerFromProfileSet(playerId: string, setKey: ProfileSetKey) {
   const profile = yield* getCurrentProfile()
 
   if (profile) {
-    const blocked = profile.blocked ? profile.blocked.filter((id) => id !== action.payload.playerId) : []
-    yield put(saveProfileRequest({ ...profile, blocked }))
+    const set = profile[setKey] ? profile[setKey]!.filter((id) => id !== playerId) : []
+    yield put(saveProfileRequest({ ...profile, [setKey]: set }))
   }
 }
 

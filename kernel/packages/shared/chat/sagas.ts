@@ -29,7 +29,7 @@ import { sampleDropData } from 'shared/airdrops/sampleDrop'
 import { findProfileByName } from 'shared/profiles/selectors'
 import { isFriend } from 'shared/friends/selectors'
 import { fetchHotScenes } from 'shared/social/hotScenes'
-import { mutePlayer, unmutePlayer } from 'shared/social/actions'
+import { blockPlayer, mutePlayer, unblockPlayer, unmutePlayer } from 'shared/social/actions'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -401,11 +401,14 @@ function initChatCommands() {
     }
   })
 
-  function muteOrUnmute(
+  function performSocialActionOnPlayer(
     username: string,
     actionBuilder: (userId: string) => { type: string; payload: { playerId: string } },
-    ifSuccessfulMessage: string
+    actionName: 'mute' | 'block',
+    undo: boolean = false
   ) {
+    let pastTense = actionName === 'mute' ? 'muted' : 'blocked'
+    let presentTense = undo ? 'un' + actionName : actionName
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
 
@@ -418,7 +421,7 @@ function initChatCommands() {
           messageType: ChatMessageType.SYSTEM,
           sender: 'Decentraland',
           timestamp: Date.now(),
-          body: `You cannot mute or unmute yourself.`
+          body: `You cannot ${presentTense} yourself.`
         }
       }
 
@@ -429,7 +432,7 @@ function initChatCommands() {
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: ifSuccessfulMessage
+        body: `You ${pastTense} user ${username}.`
       }
     } else {
       return {
@@ -443,11 +446,19 @@ function initChatCommands() {
   }
 
   addChatCommand('mute', 'Mute [username]', (message) => {
-    return muteOrUnmute(message, mutePlayer, `You muted user ${message}.`)
+    return performSocialActionOnPlayer(message, mutePlayer, 'mute')
   })
 
   addChatCommand('unmute', 'Unmute [username]', (message) => {
-    return muteOrUnmute(message, unmutePlayer, `You unmuted user ${message}.`)
+    return performSocialActionOnPlayer(message, unmutePlayer, 'mute')
+  })
+
+  addChatCommand('block', 'Block [username]', (message) => {
+    return performSocialActionOnPlayer(message, blockPlayer, 'block')
+  })
+
+  addChatCommand('unblock', 'Unblock [username]', (message) => {
+    return performSocialActionOnPlayer(message, unblockPlayer, 'block')
   })
 
   addChatCommand('help', 'Show a list of commands', (message) => {

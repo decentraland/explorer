@@ -27,7 +27,7 @@ import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/d
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
-import { blockPlayer, unblockPlayer } from 'shared/social/actions'
+import { blockPlayer, mutePlayer, unblockPlayer, unmutePlayer } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 import { logout } from 'shared/session/actions'
@@ -238,6 +238,14 @@ export class BrowserInterface {
 
   public UnblockPlayer(data: { userId: string }) {
     globalThis.globalStore.dispatch(unblockPlayer(data.userId))
+  }
+
+  public MutePlayer(data: { userId: string }) {
+    globalThis.globalStore.dispatch(mutePlayer(data.userId))
+  }
+
+  public UnmutePlayer(data: { userId: string }) {
+    globalThis.globalStore.dispatch(unmutePlayer(data.userId))
   }
 
   public ReportUserEmail(data: { userEmail: string }) {

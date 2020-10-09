@@ -97,7 +97,6 @@ export class AvatarEntity extends Entity {
   }
 
   private updateVisibility() {
-    debugger
     if (!this.visible && this.isAddedToEngine()) {
       this.remove()
     } else if (this.visible && !this.isAddedToEngine()) {
