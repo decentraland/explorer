@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5b3e476476d1b49339a7115d8e55a56d
+guid: 8581723a4628341c98ccd6e6dfb66ed9
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -85,7 +85,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
     buildTarget: WebGL
-    maxTextureSize: 64
+    maxTextureSize: 32
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -101,7 +101,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: c3a1c50da63ab4408ab10b669319dec1
+    spriteID: ae6c2ff01a90147dab146b124732f5ad
     internalID: 0
     vertices: []
     indices: 
