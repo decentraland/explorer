@@ -93,10 +93,10 @@ Varyings LitPassVertex(Attributes input)
     half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
 
     float2 uvs[] = { TRANSFORM_TEX(input.texcoord, _BaseMap), TRANSFORM_TEX(input.texcoord1, _BaseMap)};
-    output.uvAlbedoNormal.xy = uvs[clamp(_BaseMapUVs, 0, 1)];
-    output.uvAlbedoNormal.zw = uvs[clamp(_NormalMapUVs, 0, 1)];
-    output.uvMetallicEmissive.xy = uvs[clamp(_MetallicMapUVs, 0, 1)];
-    output.uvMetallicEmissive.zw = uvs[clamp(_EmissiveMapUVs, 0, 1)];
+    output.uvAlbedoNormal.xy = uvs[saturate(_BaseMapUVs)];
+    output.uvAlbedoNormal.zw = uvs[saturate(_NormalMapUVs)];
+    output.uvMetallicEmissive.xy = uvs[saturate(_MetallicMapUVs)];
+    output.uvMetallicEmissive.zw = uvs[saturate(_EmissiveMapUVs)];
 
 #ifdef _NORMALMAP
     output.normalWS = half4(normalInput.normalWS, viewDirWS.x);
