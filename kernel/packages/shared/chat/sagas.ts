@@ -404,11 +404,9 @@ function initChatCommands() {
   function performSocialActionOnPlayer(
     username: string,
     actionBuilder: (userId: string) => { type: string; payload: { playerId: string } },
-    actionName: 'mute' | 'block',
-    undo: boolean = false
+    actionName: 'mute' | 'block' | 'unmute' | 'unblock'
   ) {
-    let pastTense = actionName === 'mute' ? 'muted' : 'blocked'
-    let presentTense = undo ? 'un' + actionName : actionName
+    let pastTense: string = actionName === 'mute' || actionName === 'unmute' ? actionName + 'd' : actionName + 'ed'
     const currentUser = getCurrentUser()
     if (!currentUser) throw new Error('cannotGetCurrentUser')
 
@@ -421,7 +419,7 @@ function initChatCommands() {
           messageType: ChatMessageType.SYSTEM,
           sender: 'Decentraland',
           timestamp: Date.now(),
-          body: `You cannot ${presentTense} yourself.`
+          body: `You cannot ${actionName} yourself.`
         }
       }
 
@@ -450,7 +448,7 @@ function initChatCommands() {
   })
 
   addChatCommand('unmute', 'Unmute [username]', (message) => {
-    return performSocialActionOnPlayer(message, unmutePlayer, 'mute')
+    return performSocialActionOnPlayer(message, unmutePlayer, 'unmute')
   })
 
   addChatCommand('block', 'Block [username]', (message) => {
@@ -458,7 +456,7 @@ function initChatCommands() {
   })
 
   addChatCommand('unblock', 'Unblock [username]', (message) => {
-    return performSocialActionOnPlayer(message, unblockPlayer, 'block')
+    return performSocialActionOnPlayer(message, unblockPlayer, 'unblock')
   })
 
   addChatCommand('help', 'Show a list of commands', (message) => {
