@@ -20,10 +20,6 @@ export function initShared() {
   startSagas()
 
   if (isMobile()) {
-    const element = document.getElementById('eth-login')
-    if (element) {
-      element.style.display = 'none'
-    }
     ReportFatalError(MOBILE_NOT_SUPPORTED)
     return
   }
