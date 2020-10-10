@@ -3,7 +3,7 @@ import { Meta, Story } from "@storybook/react";
 import { ProgressBar, ProgressBarProps } from "./ProgressBar";
 
 export default {
-  title: "Explorer/base/ProgressBar",
+  title: "Explorer/loading/ProgressBar",
   args: {
     percentage: 10,
   },

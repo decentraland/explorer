@@ -1,10 +1,11 @@
 import React from "react";
+import "./TermsOfService.css";
 
-import "./EthLogin.css";
 export interface TermOfServiceProps {
   checked: boolean;
   onChange: any;
 }
+
 export const TermOfService: React.FC<TermOfServiceProps> = (props) => (
   <div className="eth-login-tos">
     <input

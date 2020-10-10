@@ -3,11 +3,10 @@ import { Meta, Story } from "@storybook/react";
 import { EthConnectAdvice, EthConnectAdviceProps } from "./EthConnectAdvice";
 
 export default {
-  title: "Explorer/login/EthConnectAdvice",
-  args: {
-    onLogin: () => {},
-  } as EthConnectAdviceProps,
+  title: "Explorer/auth/EthConnectAdvice",
+  args: {},
   component: EthConnectAdvice,
+  argTypes: { onLogin: { action: "login clicked" } },
 } as Meta;
 
 export const Template: Story<EthConnectAdviceProps> = (args) => (

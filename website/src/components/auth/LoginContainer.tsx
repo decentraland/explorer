@@ -1,10 +1,10 @@
 import React from "react";
-import { Navbar } from "./Navbar";
-import { Footer } from "./Footer";
+import { Navbar } from "../common/Navbar";
+import { Footer } from "../common/Footer";
 import { EthLogin } from "./EthLogin";
 import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
-import { Logo } from "./Logo";
+import { Logo } from "../common/Logo";
 import { connect } from "react-redux";
 
 export enum LoginStage {

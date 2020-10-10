@@ -1,6 +1,6 @@
 import React from "react";
 import "./EthLogin.css";
-import { Spinner } from "./Spinner";
+import { Spinner } from "../common/Spinner";
 import { TermOfService } from "./TermOfService";
 
 export interface EthLoginProps {

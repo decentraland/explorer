@@ -4,7 +4,7 @@ import { Meta, Story } from "@storybook/react";
 import { EthLogin, EthLoginProps } from "./EthLogin";
 
 export default {
-  title: "Explorer/login/EthLogin",
+  title: "Explorer/auth/EthLogin",
   args: {
     terms: true,
     loading: false,

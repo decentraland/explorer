@@ -1,5 +1,7 @@
 import React from "react";
 
+import "./errors.css";
+
 export const ErrorNewLogin: React.FC = () => (
   <div id="error-newlogin" className="error-container">
     <div className="error-background" />

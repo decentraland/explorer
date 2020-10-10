@@ -4,7 +4,7 @@ import { Meta, Story } from "@storybook/react";
 import { EthSignAdvice } from "./EthSignAdvice";
 
 export default {
-  title: "Explorer/login/EthSignAdvice",
+  title: "Explorer/auth/EthSignAdvice",
   component: EthSignAdvice,
 } as Meta;
 

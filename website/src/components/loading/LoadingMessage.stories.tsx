@@ -3,7 +3,7 @@ import { Meta, Story } from "@storybook/react";
 import { LoadingMessage, LoadingMessageProps } from "./LoadingMessage";
 
 export default {
-  title: "Explorer/base/LoadingMessage",
+  title: "Explorer/loading/LoadingMessage",
   args: {
     image: "images/decentraland-connect/loadingtips/Mana.png",
     message: `MANA is Decentraland’s virtual currency. Use it to buy LAND and other premium items, vote on key policies and pay platform fees.`,

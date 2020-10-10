@@ -1,5 +1,7 @@
 import React from "react";
 
+import "./errors.css";
+
 export interface ErrorNetworkMismatchProps {
   details: { tld: string; web3Net: string; tldNet: string } | null;
 }

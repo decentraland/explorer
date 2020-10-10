@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
-import Overlay from "./Overlay";
-import ErrorContainer from "./ErrorContainer";
-import LoginContainer from "./LoginContainer";
-import LoadingContainer from "./LoadingContainer";
-import { Audio } from "./Audio";
-import WarningContainer from "./WarningContainer";
+import Overlay from "./common/Overlay";
+import ErrorContainer from "./errors/ErrorContainer";
+import LoginContainer from "./auth/LoginContainer";
+import LoadingContainer from "./loading/LoadingContainer";
+import { Audio } from "./common/Audio";
+import WarningContainer from "./warning/WarningContainer";
 
 const mapStateToProps = (state: any) => {
   return {

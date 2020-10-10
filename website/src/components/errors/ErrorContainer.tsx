@@ -1,14 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
-import { ErrorComms } from "./errors/ErrorComms";
-import { ErrorFatal } from "./errors/ErrorFatal";
-import { ErrorNoMobile } from "./errors/ErrorNoMobile";
-import { ErrorNewLogin } from "./errors/ErrorNewLogin";
-import { ErrorNetworkMismatch } from "./errors/ErrorNetworkMismatch";
-import { ErrorNotInvited } from "./errors/ErrorNotInvited";
-import { ErrorNotSupported } from "./errors/ErrorNotSupported";
+import { ErrorComms } from "./ErrorComms";
+import { ErrorFatal } from "./ErrorFatal";
+import { ErrorNoMobile } from "./ErrorNoMobile";
+import { ErrorNewLogin } from "./ErrorNewLogin";
+import { ErrorNetworkMismatch } from "./ErrorNetworkMismatch";
+import { ErrorNotInvited } from "./ErrorNotInvited";
+import { ErrorNotSupported } from "./ErrorNotSupported";
 
-enum Error {
+import "./errors.css";
+
+export enum Error {
   FATAL = "fatal",
   COMMS = "comms",
   NEW_LOGIN = "newlogin",

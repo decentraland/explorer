@@ -4,7 +4,7 @@ import { Meta, Story } from "@storybook/react";
 import { TermOfService, TermOfServiceProps } from "./TermOfService";
 
 export default {
-  title: "Explorer/login/TermOfService",
+  title: "Explorer/auth/TermOfService",
   args: {
     checked: false,
   },
