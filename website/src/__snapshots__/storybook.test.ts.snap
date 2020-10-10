@@ -458,6 +458,7 @@ Array [
   >
     <div
       className="full"
+      id="progress-bar-inner"
       style={
         Object {
           "width": "15%",
@@ -746,6 +747,7 @@ exports[`Storyshots Explorer/base/ProgressBar Template 1`] = `
 >
   <div
     className="full"
+    id="progress-bar-inner"
     style={
       Object {
         "width": "10%",
