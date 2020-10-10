@@ -1,3 +1,4 @@
+using System.Collections;
 using DCL.Configuration;
 using DCL.Helpers;
 using System.Collections.Generic;
@@ -38,6 +39,7 @@ namespace DCL.Controllers
             new Vector2Int(-1, 1)
         };
 
+
         public BlockerHandler(DCLCharacterPosition characterPosition)
         {
             this.characterPosition = characterPosition;
@@ -61,23 +63,74 @@ namespace DCL.Controllers
         {
             float centerOffset = ParcelSettings.PARCEL_SIZE / 2;
             PoolableObject blockerPoolable = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
-            Transform blockerTransform = blockerPoolable.gameObject.transform;
+            GameObject blockerGo = blockerPoolable.gameObject;
+            BoxCollider blockerCollider = blockerGo.GetComponent<BoxCollider>();
 
+            Vector3 blockerPos = this.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+
+            auxPosVec.x = blockerPos.x + centerOffset;
+            auxPosVec.z = blockerPos.z + centerOffset;
+            auxPosVec.y = 8;
+
+            Transform blockerTransform = blockerGo.transform;
             blockerTransform.SetParent(parent, false);
-            blockerTransform.position = this.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
-
-            auxPosVec.x = blockerTransform.position.x + centerOffset;
-            auxPosVec.z = blockerTransform.position.z + centerOffset;
-
             blockerTransform.position = auxPosVec;
-            blockerTransform.localScale = auxScaleVec;
+            blockerTransform.localScale = Vector3.one * 16;
+
+            blockerCollider.size = Vector3.one + (Vector3.up * auxScaleVec.y);
+            blockerCollider.center = Vector3.up * ((auxScaleVec.y / 2) - 0.5f);
 
 #if UNITY_EDITOR
-            blockerPoolable.gameObject.name = "BLOCKER " + pos;
+            blockerGo.name = "BLOCKER " + pos;
 #endif
 
             blockers.Add(pos, blockerPoolable);
+            CoroutineStarter.Start(FadeIn(blockerGo));
         }
+
+        protected void DestroyBlocker(Vector2Int coords)
+        {
+            CoroutineStarter.Start(FadeOut(coords));
+        }
+
+        IEnumerator FadeIn(GameObject go)
+        {
+            Renderer rend = go.GetComponent<Renderer>();
+
+            Color color = rend.material.GetColor(ShaderUtils._BaseColor);
+
+            while (color.a < 0.5f)
+            {
+                color.a += Time.deltaTime;
+                rend.material.SetColor(ShaderUtils._BaseColor, color);
+                yield return null;
+            }
+        }
+
+        IEnumerator FadeOut(Vector2Int coords)
+        {
+            GameObject go = blockers[coords].gameObject;
+            Renderer rend = go.GetComponent<Renderer>();
+
+            Color color = rend.material.GetColor(ShaderUtils._BaseColor);
+
+            while (color.a > 0)
+            {
+                if (rend == null)
+                    break;
+
+                color.a -= Time.deltaTime;
+                rend.material.SetColor(ShaderUtils._BaseColor, color);
+                yield return null;
+            }
+
+            if (blockers.ContainsKey(coords))
+            {
+                blockers[coords].Release();
+                blockers.Remove(coords);
+            }
+        }
+
 
         public void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent)
         {
@@ -142,8 +195,7 @@ namespace DCL.Controllers
             // Remove extra blockers
             foreach (var coords in blockersToRemove)
             {
-                blockers[coords].Release();
-                blockers.Remove(coords);
+                DestroyBlocker(coords);
             }
 
             // Add missing blockers

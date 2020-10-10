@@ -2,10 +2,11 @@ Shader "DCL/FX/Blocker Hologram"
 {
     Properties
     {
-        [HDR]_Color( "Color", Color ) = ( 1.0, 1.0, 1.0, 1.0 )
+        [HDR]_BaseColor( "Color", Color ) = ( 1.0, 1.0, 1.0, 1.0 )
         [HDR]_GlowColor ( "Glow Color", Color ) = ( 1.0, 1.0, 1.0, 1.0 )
         _BaseMap( "Base Map", 2D ) = "white"
 
+        _RimPower ("Rim Power", Float) = 0.5
         _CullYPlane ("Cull Y Plane", Float) = 0.5
         _FadeThickness ("Fade Thickness", Float) = 5
         _RenderingDistanceStart ("Rendering Distance Start", Float) = 20.0
@@ -13,6 +14,7 @@ Shader "DCL/FX/Blocker Hologram"
         
         _GlowMap ("Glow Map", 2D) = "white"
         _GlowVelocity ("Glow Velocity", Vector) = (0,0,0,0)
+        _BaseMapVelocity ("Base Map Velocity", Vector) = (0,0,0,0)
     }
 
     SubShader
@@ -32,7 +34,7 @@ Shader "DCL/FX/Blocker Hologram"
             #pragma fragment frag
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _Color;
+                float4 _BaseColor;
                 float4 _GlowColor;
 
                 float _FadeThickness;
@@ -40,9 +42,11 @@ Shader "DCL/FX/Blocker Hologram"
                 float _RenderingDistanceStart;
                 float _RenderingDistanceEnd;
                 float4 _GlowVelocity;
+                float4 _BaseMapVelocity;
 
                 float4 _BaseMap_ST;
                 float4 _GlowMap_ST;
+                float _RimPower;
             CBUFFER_END
             
             sampler2D _GlowMap;
@@ -61,6 +65,7 @@ Shader "DCL/FX/Blocker Hologram"
                 float2 uv : TEXCOORD0;
                 float2 uv2 : TEXCOORD1;
                 float4 posWorld : TEXCOORD3;
+                float3 normalDir : TEXCOORD4;
             };
 
             vertexOutput vert(vertexInput v)
@@ -68,13 +73,27 @@ Shader "DCL/FX/Blocker Hologram"
                 vertexOutput o;
 
                 o.posWorld = mul(unity_ObjectToWorld, v.vertex);
+                o.normalDir = normalize( mul( float4( v.normal, 0.0 ), unity_WorldToObject ).xyz );;
+
                 o.uv = TRANSFORM_TEX( v.uv, _BaseMap );
                 o.uv2 = TRANSFORM_TEX( v.uv, _GlowMap );
 
                 o.pos = UnityObjectToClipPos(v.vertex);
                 return o;
             }
+            
+            float GetLambertAttenuation(vertexOutput i)
+            {
+                float3 lightDirection = normalize( _WorldSpaceLightPos0.xyz );
+                return saturate( dot( i.normalDir, lightDirection ) );
+            }
 
+            float GetRimLighting(vertexOutput i)
+            {
+                float3 viewDirection = normalize( _WorldSpaceCameraPos.xyz - i.posWorld.xyz );
+                return pow( 1.0 - saturate( dot( viewDirection, i.normalDir ) ), _RimPower );
+            }
+            
             float4 frag(vertexOutput i) : COLOR
             {
                 float renderingDistance = length(_WorldSpaceCameraPos.xyz - i.posWorld.xyz);
@@ -88,12 +107,18 @@ Shader "DCL/FX/Blocker Hologram"
                 float fadeStart = _RenderingDistanceStart;
                 float fadeEnd = _RenderingDistanceEnd;
                 float fadeWidth = fadeEnd - fadeStart;
+                
+                float lambertAtten = GetLambertAttenuation(i);
+                float rim = GetRimLighting(i);
+
 
                 distanceAlphaMultiplier = clamp(fadeEnd - renderingDistance, 0, fadeWidth) / fadeWidth;
 
-                float4 mapColor = tex2D( _BaseMap, i.uv );
+                float4 mapColor2 = tex2D( _BaseMap, i.uv + (_Time[0] * _BaseMapVelocity.zw) );
+                float4 mapColor = tex2D( _BaseMap, i.uv + (_Time[0] * _BaseMapVelocity.xy) ) * mapColor2;
                 float4 glowColor = tex2D( _GlowMap, i.uv2 + (_Time[0] * _GlowVelocity.xy) ) * _GlowColor;
-                float4 finalColor = float4((mapColor.rgb * _Color.rgb) + glowColor.rgb, mapColor.a * _Color.a * _GlowColor.a);
+                float4 finalColor = float4((mapColor.rgb * _BaseColor.rgb) + glowColor.rgb, (mapColor.a * _BaseColor.a * glowColor.a));
+                finalColor *= rim;
                 finalColor.a = saturate(finalColor.a * distanceAlphaMultiplier);
 
                 // NOTE(Brian): fading code
