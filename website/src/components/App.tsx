@@ -5,6 +5,7 @@ import ErrorContainer from "./ErrorContainer";
 import LoginContainer from "./LoginContainer";
 import LoadingContainer from "./LoadingContainer";
 import { Audio } from "./Audio";
+import WarningContainer from "./WarningContainer";
 
 const mapStateToProps = (state: any) => {
   return {
@@ -20,6 +21,7 @@ const App: React.FC<AppProps> = (props) => (
   <div>
     <Audio track="/tone4.mp3" play={true} />
     <Overlay />
+    <WarningContainer />
     {!props.error && <LoadingContainer />}
     {!props.error && <LoginContainer />}
     {props.error && <ErrorContainer />}

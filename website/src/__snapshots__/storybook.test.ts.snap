@@ -591,6 +591,66 @@ exports[`Storyshots Explorer/LoginContainer Template 1`] = `
 </div>
 `;
 
+exports[`Storyshots Explorer/Warnings/Container Template 1`] = `
+<div
+  className="network-warning-bar"
+  id="network-warning"
+>
+  <div
+    className="network-warning-title"
+  >
+    <strong>
+      Warning:
+    </strong>
+     you’re running on the Ethereum Mainnet.
+  </div>
+  <div
+    className="network-warning-description"
+  >
+    Blockchain transactions in this network have a cost and real consequences. We recommend you use the 
+    <strong>
+      Ropsten
+    </strong>
+     test network instead.
+  </div>
+  <button
+    className="network-warning-button"
+  >
+    ⨯
+  </button>
+</div>
+`;
+
+exports[`Storyshots Explorer/Warnings/NetworkWarning Template 1`] = `
+<div
+  className="network-warning-bar"
+  id="network-warning"
+>
+  <div
+    className="network-warning-title"
+  >
+    <strong>
+      Warning:
+    </strong>
+     you’re running on the Ethereum Mainnet.
+  </div>
+  <div
+    className="network-warning-description"
+  >
+    Blockchain transactions in this network have a cost and real consequences. We recommend you use the 
+    <strong>
+      Ropsten
+    </strong>
+     test network instead.
+  </div>
+  <button
+    className="network-warning-button"
+  >
+    ⨯
+  </button>
+</div>
+`;
+
 exports[`Storyshots Explorer/base/Audio Template 1`] = `
 <audio
   autoPlay={true}
