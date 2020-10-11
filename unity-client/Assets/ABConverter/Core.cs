@@ -118,6 +118,9 @@ namespace DCL
                             assetsAlreadyDumped = true;
                             timer = Time.realtimeSinceStartup;
 
+                            if (settings.dumpOnly)
+                                shouldGenerateAssetBundles = false;
+
                             //NOTE(Brian): return in order to wait for GLTFImporter.finishedImporting flag, as it will set asynchronously.
                             return;
                         }
@@ -179,7 +182,7 @@ namespace DCL
 
                 List<AssetPath> assetsToMark = new List<AssetPath>();
 
-                if (!PrepareDump(ref gltfPaths))
+                if (!FilterDumpList(ref gltfPaths))
                     return false;
 
                 //NOTE(Brian): Prepare textures and buffers. We should prepare all the dependencies in this phase.
@@ -208,9 +211,9 @@ namespace DCL
             /// </summary>
             /// <param name="gltfPaths">paths to be checked for existence</param>
             /// <returns>false if all paths are already converted to asset bundles, true if the conversion makes sense</returns>
-            internal bool PrepareDump(ref List<AssetPath> gltfPaths)
+            internal bool FilterDumpList(ref List<AssetPath> gltfPaths)
             {
-                bool shouldAbortBecauseAllBundlesExist = true;
+                bool shouldBuildAssetBundles;
 
                 totalAssets += gltfPaths.Count;
 
@@ -224,14 +227,14 @@ namespace DCL
 
                     int skippedCount = gltfCount - gltfPaths.Count;
                     skippedAssets += skippedCount;
-                    shouldAbortBecauseAllBundlesExist = gltfPaths.Count == 0;
+                    shouldBuildAssetBundles = gltfPaths.Count == 0;
                 }
                 else
                 {
-                    shouldAbortBecauseAllBundlesExist = false;
+                    shouldBuildAssetBundles = false;
                 }
 
-                if (shouldAbortBecauseAllBundlesExist)
+                if (shouldBuildAssetBundles)
                 {
                     log.Info("All assets in this scene were already generated!. Skipping.");
                     return false;
@@ -355,6 +358,14 @@ namespace DCL
                         continue;
                     }
 
+                    var importer = env.assetDatabase.GetImporterAtPath(assetPath.finalPath);
+
+                    if (importer is TextureImporter texImporter)
+                    {
+                        texImporter.crunchedCompression = true;
+                        texImporter.textureCompression = TextureImporterCompression.CompressedHQ;
+                    }
+
                     env.assetDatabase.ImportAsset(assetPath.finalPath, ImportAssetOptions.ForceUpdate);
                     env.assetDatabase.SaveAssets();
 
@@ -438,7 +449,7 @@ namespace DCL
 
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
-                PersistentAssetCache.AddImage(relativePath, gltfPath.finalPath, new RefCountedTextureData(relativePath, t2d));
+                PersistentAssetCache.AddImage(relativePath, gltfPath.finalPath, t2d);
             }
 
             /// <summary>
@@ -459,7 +470,7 @@ namespace DCL
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
                 //              consume the asset bundle dependencies instead of trying to create new streams.
-                PersistentAssetCache.AddBuffer(relativePath, gltfPath.finalPath, new RefCountedStreamData(relativePath, stream));
+                PersistentAssetCache.AddBuffer(relativePath, gltfPath.finalPath, stream);
             }
 
             /// <summary>
@@ -616,7 +627,9 @@ namespace DCL
 
             internal virtual void InitializeDirectoryPaths(bool deleteIfExists)
             {
+                log.Info("Initializing directory -- " + finalDownloadedPath);
                 env.directory.InitializeDirectory(finalDownloadedPath, deleteIfExists);
+                log.Info("Initializing directory -- " + settings.finalAssetBundlePath);
                 env.directory.InitializeDirectory(settings.finalAssetBundlePath, deleteIfExists);
             }
 

@@ -225,8 +225,8 @@ function requestMediaDevice() {
         },
         video: false
       })
-      .then((a) => {
-        voiceCommunicator!.setInputStream(a)
+      .then(async (a) => {
+        await voiceCommunicator!.setInputStream(a)
         if (isVoiceChatRecording(store.getState())) {
           voiceCommunicator!.start()
         } else {
@@ -997,7 +997,8 @@ async function doStartCommunications(context: Context) {
 
         {
           initialListenerParams: context.currentPosition ? getSpatialParamsFor(context.currentPosition) : undefined,
-          panningModel: commConfigurations.voiceChatUseHRTF ? 'HRTF' : 'equalpower'
+          panningModel: commConfigurations.voiceChatUseHRTF ? 'HRTF' : 'equalpower',
+          loopbackAudioElement: document.getElementById('voice-chat-audio') as HTMLAudioElement | undefined
         }
       )
 

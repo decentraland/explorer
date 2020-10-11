@@ -148,6 +148,8 @@ export const ENABLE_NEW_TASKBAR =
 
 export const PIN_CATALYST = qs.PIN_CATALYST
 
+export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
+
 export namespace commConfigurations {
   export const debug = true
   export const commRadius = 4
@@ -238,7 +240,16 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (window.location.search.match(/TEST_WEARABLES/)) {
+  const url = new URL(window.location)
+  if (url.searchParams.has('TEST_WEARABLES')) {
+    const value = url.searchParams.get('TEST_WEARABLES')
+    if (value) {
+      try {
+        return new URL(value).toString()
+      } catch (e) {
+        return `https://${value}/index.json`
+      }
+    }
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'
