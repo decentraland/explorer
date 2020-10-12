@@ -13,8 +13,6 @@ namespace DCL.Tutorial
                 tutorialController.hudController != null &&
                 tutorialController.hudController.taskbarHud != null)
                 tutorialController.hudController.taskbarHud.moreMenu.OnMoreMenuOpened += MoreMenu_OnMoreMenuOpened;
-
-            tutorialController.SetEagleEyeCameraActive(false);
         }
 
         public override void OnStepFinished()

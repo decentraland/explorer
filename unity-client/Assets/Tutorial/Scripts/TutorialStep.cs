@@ -69,7 +69,7 @@ namespace DCL.Tutorial
         }
 
         /// <summary>
-        /// Executes the final animation and waits for its finalization.
+        /// Executes the final animation and waits for its finalization and for any camera blending.
         /// </summary>
         /// <returns></returns>
         public virtual IEnumerator OnStepPlayAnimationForHidding()
@@ -77,6 +77,9 @@ namespace DCL.Tutorial
             blockSkipActions = true;
             OnJustAfterStepExecuted?.Invoke();
             yield return PlayAndWaitForHideAnimation();
+
+            yield return null;
+            yield return new WaitUntil(() => !CommonScriptableObjects.cameraIsBlending.Get());
         }
 
         /// <summary>

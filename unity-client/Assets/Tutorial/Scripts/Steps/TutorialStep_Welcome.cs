@@ -17,7 +17,6 @@ namespace DCL.Tutorial
             base.OnStepStart();
 
             descriptionText.text = descriptionText.text.Replace("{userName}", UserProfile.GetOwnUserProfile().userName);
-            tutorialController.SetEagleEyeCameraActive(false);
         }
 
         public override IEnumerator OnStepExecute()

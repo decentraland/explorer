@@ -326,16 +326,12 @@ namespace DCL.Tutorial
         public void SetEagleEyeCameraActive(bool isActive)
         {
             eagleEyeCamera.gameObject.SetActive(isActive);
-            StartCoroutine(BlockPlayerCameraUntilBlendingIsFinished());
-
-            hudController?.minimapHud?.SetVisibility(!isActive);
-            hudController?.manaHud?.SetVisibility(!isActive);
-            hudController?.profileHud?.SetVisibility(!isActive);
+            StartCoroutine(BlockPlayerCameraUntilBlendingIsFinished(isActive));
 
             if (isActive)
             {
                 eagleEyeCamera.transform.position = eagleCamInitPosition;
-                eagleEyeCamera.transform.LookAt(eagleCamInitLookAtPoint);
+                eagleEyeCamera.transform.LookAt(CommonScriptableObjects.playerUnityPosition.Get());
 
                 if (eagleCamRotationActived)
                     eagleEyeRotationCoroutine = StartCoroutine(EagleEyeCameraRotation(eagleCamRotationSpeed));
@@ -533,14 +529,28 @@ namespace DCL.Tutorial
             }
         }
 
-        private IEnumerator BlockPlayerCameraUntilBlendingIsFinished()
+        private IEnumerator BlockPlayerCameraUntilBlendingIsFinished(bool hideUIs)
         {
+            if (hideUIs)
+            {
+                hudController?.minimapHud?.SetVisibility(false);
+                hudController?.manaHud?.SetVisibility(false);
+                hudController?.profileHud?.SetVisibility(false);
+            }
+
             CommonScriptableObjects.cameraBlocked.Set(true);
 
-            yield return new WaitUntil(() => CommonScriptableObjects.cameraIsBlending);
-            yield return new WaitUntil(() => !CommonScriptableObjects.cameraIsBlending);
+            yield return null;
+            yield return new WaitUntil(() => !CommonScriptableObjects.cameraIsBlending.Get());
 
             CommonScriptableObjects.cameraBlocked.Set(false);
+
+            if (!hideUIs)
+            {
+                hudController?.minimapHud?.SetVisibility(true);
+                hudController?.manaHud?.SetVisibility(true);
+                hudController?.profileHud?.SetVisibility(true);
+            }
         }
     }
 }
