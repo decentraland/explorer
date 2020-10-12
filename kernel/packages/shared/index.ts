@@ -14,6 +14,9 @@ import { initSession } from './session/actions'
 declare const globalThis: StoreContainer
 
 export function initShared() {
+  if (globalThis.globalStore) {
+    return
+  }
   const { store, startSagas } = buildStore()
   globalThis.globalStore = store
 
