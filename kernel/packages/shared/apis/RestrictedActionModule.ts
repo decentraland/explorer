@@ -53,7 +53,9 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
       defaultLogger.error(`Permission "${Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE}" is required`)
       return
     }
+
     const position = this.calculatePosition(newPosition)
+
     // validate new position is inside of some scene
     if (!this.isPositionValid(position)) {
       defaultLogger.error('Error: Position is out of scene', position)
@@ -66,9 +68,8 @@ export class RestrictedActionModule extends ExposableAPI implements IRestrictedA
 
     unityInterface.Teleport({ position, cameraTarget }, false)
 
-    // TODO: Get ahead of the position report that will be done automatically later and report
+    // Get ahead of the position report that will be done automatically later and report
     // position right now, also marked as an immediate update (last bool in Position structure)
-    // positionObservable.notifyObservers() ???
     browserInterface.ReportPosition({
       position: newPosition,
       rotation: Quaternion.Identity,
