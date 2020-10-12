@@ -126,20 +126,21 @@ namespace DCL.Controllers
                 }
             }
 
-            if (entity.meshRootGameObject == null || entity.meshesInfo.renderers == null || entity.meshesInfo.renderers.Length == 0) return;
+            if (entity.meshRootGameObject == null || entity.meshesInfo.renderers == null || entity.meshesInfo.renderers.Length == 0)
+            {
+                UpdateAudioSourceValidState(entity, entity.scene.IsInsideSceneBoundaries(entity.gameObject.transform.position + CommonScriptableObjects.playerUnityToWorldOffset));
+                return;
+            }
 
             // If the mesh is being loaded we should skip the evaluation (it will be triggered again later when the loading finishes)
             if (entity.meshRootGameObject.GetComponent<MaterialTransitionController>()) // the object's MaterialTransitionController is destroyed when it finishes loading
             {
                 return;
             }
-            else
-            {
-                var loadWrapper = LoadableShape.GetLoaderForEntity(entity);
 
-                if (loadWrapper != null && !loadWrapper.alreadyLoaded)
-                    return;
-            }
+            var loadWrapper = LoadableShape.GetLoaderForEntity(entity);
+            if (loadWrapper != null && !loadWrapper.alreadyLoaded)
+                return;
 
             EvaluateMeshBounds(entity);
         }
@@ -160,6 +161,8 @@ namespace DCL.Controllers
             UpdateEntityMeshesValidState(entity, isInsideBoundaries, meshBounds);
 
             UpdateEntityCollidersValidState(entity, isInsideBoundaries);
+
+            UpdateAudioSourceValidState(entity, isInsideBoundaries);
         }
 
         protected virtual bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
@@ -199,6 +202,15 @@ namespace DCL.Controllers
                     if (entity.meshesInfo.colliders[i] != null)
                         entity.meshesInfo.colliders[i].enabled = isInsideBoundaries;
                 }
+            }
+        }
+
+        protected virtual void UpdateAudioSourceValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        {
+            DCLAudioSource[] audioSources = entity.gameObject.GetComponentsInChildren<DCLAudioSource>();
+            for (int i = 0; i < audioSources.Length; i++)
+            {
+                audioSources[i].SetAudioSourceEnabled(isInsideBoundaries);
             }
         }
 

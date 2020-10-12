@@ -566,6 +566,11 @@ namespace DCL.Controllers
                 return null;
             }
 
+            if (classId == CLASS_ID_COMPONENT.AUDIO_SOURCE)
+            {
+                SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+            }
+
             BaseComponent newComponent = null;
             DCLComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
