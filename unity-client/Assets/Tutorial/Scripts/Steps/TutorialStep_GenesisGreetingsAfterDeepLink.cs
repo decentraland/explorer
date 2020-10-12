@@ -13,10 +13,16 @@ namespace DCL.Tutorial
     {
         public override IEnumerator OnStepPlayAnimationForHidding()
         {
-            if (tutorialController != null)
-                tutorialController.SetEagleEyeCameraActive(false);
+            tutorialController?.SetEagleEyeCameraActive(false);
 
             yield return base.OnStepPlayAnimationForHidding();
+        }
+
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+
+            tutorialController?.hudController?.taskbarHud?.SetVisibility(true);
         }
     }
 }

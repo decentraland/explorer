@@ -42,6 +42,8 @@ namespace DCL.Tutorial
         {
             if (!controlsHasBeenOpened && mainSection.activeSelf)
                 controlsHasBeenOpened = true;
+
+            tutorialController?.hudController?.taskbarHud?.SetVisibility(true);
         }
 
         private void ControlsHud_OnControlsClosed()

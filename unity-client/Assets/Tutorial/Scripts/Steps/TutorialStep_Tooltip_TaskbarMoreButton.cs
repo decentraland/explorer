@@ -33,8 +33,6 @@ namespace DCL.Tutorial
                 tutorialController.hudController != null &&
                 tutorialController.hudController.taskbarHud != null)
             {
-                tutorialController.hudController.taskbarHud.SetVisibility(true);
-
                 if (tutorialController.hudController.taskbarHud.tutorialTooltipReference)
                 {
                     tooltipTransform.position =
