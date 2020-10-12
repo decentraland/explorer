@@ -6405,6 +6405,11 @@ decentraland-kernel@^1.0.0-20201009223709.commit-48606a5:
   resolved "https://registry.yarnpkg.com/decentraland-kernel/-/decentraland-kernel-1.0.0-20201009223709.commit-48606a5.tgz#77ee735fd8f368312fc7cec19291ca11a52e2d97"
   integrity sha512-LP+zttxEpxag5WFxJlrUgaTcZWawWixnkbjqGYWGpZ+9TvvxG4F6MMu6VUjs+AHRhdL1QhmPFAJ03iGxdPjUmg==
 
+decentraland-renderer@^1.8.40705:
+  version "1.8.41179"
+  resolved "https://registry.yarnpkg.com/decentraland-renderer/-/decentraland-renderer-1.8.41179.tgz#4d3ec99642ba1afefe6aa55f14568643b86c0fa0"
+  integrity sha512-k2pSYeeXzaf57O5Ao81o/RjM2ZP69/n5OqsQd/qHe2nrlxYzCHIzTLCTbqLjmPgXxs14YXj4aqttA7fHooUjJA==
+
 decode-uri-component@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/decode-uri-component/-/decode-uri-component-0.2.0.tgz#eb3913333458775cb84cd1a1fae062106bb87545"
