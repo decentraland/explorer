@@ -25,7 +25,7 @@ import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldSt
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 
 const container = document.getElementById('gameContainer')
 
@@ -70,7 +70,7 @@ initializeUnity(container)
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
       i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3, visible: true })
 
-      ProfileAsPromise(identity.address)
+      EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
