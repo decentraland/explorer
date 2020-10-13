@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace DCL
@@ -27,6 +28,13 @@ namespace DCL
             }
 
             return variable;
+        }
+
+        public void Initialize()
+        {
+            currentProfile = defaultProfile;
+            currentProfile.avatarProfile.inWorld.Apply();
+            currentProfile.Apply();
         }
     }
 }

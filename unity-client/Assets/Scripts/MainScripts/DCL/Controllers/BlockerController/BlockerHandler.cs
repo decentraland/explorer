@@ -1,48 +1,41 @@
-using System.Collections;
+using System;
 using DCL.Configuration;
 using DCL.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace DCL.Controllers
 {
-    public interface IBlockerHandler
+    public interface IBlockerInstanceHandler
     {
-        void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent);
-        void CleanBlockers();
+        void DestroyAllBlockers();
         Dictionary<Vector2Int, PoolableObject> GetBlockers();
+        void HideBlocker(Vector2Int coords, bool instant = false);
+        void ShowBlocker(Vector2Int pos, bool instant = false);
+        void SetParent(Transform parent);
     }
 
-    public class BlockerHandler : IBlockerHandler
+    public class BlockerInstanceHandler : IBlockerInstanceHandler
     {
         static GameObject blockerPrefab;
 
         const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
-        //const string PARCEL_BLOCKER_PREFAB = "Prefabs/ParcelBlocker";
 
         Vector3 auxPosVec = new Vector3();
         Vector3 auxScaleVec = new Vector3();
+
         Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
-        HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
-        HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
-        DCLCharacterPosition characterPosition;
 
-        static Vector2Int[] aroundOffsets =
-        {
-            new Vector2Int(1, 0),
-            new Vector2Int(-1, 0),
-            new Vector2Int(0, 1),
-            new Vector2Int(0, -1),
-            new Vector2Int(1, 1),
-            new Vector2Int(-1, -1),
-            new Vector2Int(1, -1),
-            new Vector2Int(-1, 1)
-        };
+        private DCLCharacterPosition characterPosition;
+        private IBlockerAnimationHandler animationHandler;
+        private Transform parent;
 
-
-        public BlockerHandler(DCLCharacterPosition characterPosition)
+        public BlockerInstanceHandler(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
         {
             this.characterPosition = characterPosition;
+            this.animationHandler = animationHandler;
 
             if (blockerPrefab == null)
             {
@@ -59,7 +52,7 @@ namespace DCL.Controllers
             }
         }
 
-        protected void InstantiateBlocker(Vector2Int pos, Transform parent)
+        public void ShowBlocker(Vector2Int pos, bool instant = false)
         {
             float centerOffset = ParcelSettings.PARCEL_SIZE / 2;
             PoolableObject blockerPoolable = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
@@ -85,136 +78,52 @@ namespace DCL.Controllers
 #endif
 
             blockers.Add(pos, blockerPoolable);
-            CoroutineStarter.Start(FadeIn(blockerGo));
+
+            if (!instant)
+                animationHandler.FadeIn(blockerGo);
         }
 
-        protected void DestroyBlocker(Vector2Int coords)
+        public void SetParent(Transform parent)
         {
-            CoroutineStarter.Start(FadeOut(coords));
+            this.parent = parent;
         }
 
-        IEnumerator FadeIn(GameObject go)
+        public void HideBlocker(Vector2Int coords, bool instant = false)
         {
-            Renderer rend = go.GetComponent<Renderer>();
-
-            Color color = rend.material.GetColor(ShaderUtils._BaseColor);
-
-            while (color.a < 0.5f)
+            if (instant)
             {
-                color.a += Time.deltaTime;
-                rend.material.SetColor(ShaderUtils._BaseColor, color);
-                yield return null;
+                ReleaseBlocker(coords);
+                return;
             }
+
+            animationHandler.FadeOut(
+                blockers[coords].gameObject,
+                () => ReleaseBlocker(coords)
+            );
         }
 
-        IEnumerator FadeOut(Vector2Int coords)
+        private void ReleaseBlocker(Vector2Int coords)
         {
-            GameObject go = blockers[coords].gameObject;
-            Renderer rend = go.GetComponent<Renderer>();
+            if (!blockers.ContainsKey(coords))
+                return;
 
-            Color color = rend.material.GetColor(ShaderUtils._BaseColor);
-
-            while (color.a > 0)
-            {
-                if (rend == null)
-                    break;
-
-                color.a -= Time.deltaTime;
-                rend.material.SetColor(ShaderUtils._BaseColor, color);
-                yield return null;
-            }
-
-            if (blockers.ContainsKey(coords))
-            {
-                blockers[coords].Release();
-                blockers.Remove(coords);
-            }
+            blockers[coords].Release();
+            blockers.Remove(coords);
         }
 
-
-        public void SetupGlobalBlockers(HashSet<Vector2Int> allLoadedParcelCoords, float height, Transform parent)
-        {
-            if (allLoadedParcelCoords.Count == 0) return;
-
-            blockersToRemove.Clear();
-            blockersToAdd.Clear();
-
-            auxScaleVec.x = ParcelSettings.PARCEL_SIZE;
-            auxScaleVec.y = height;
-            auxScaleVec.z = ParcelSettings.PARCEL_SIZE;
-
-            auxPosVec.y = (height - 1) / 2;
-
-            // Detect blockers to be removed
-            foreach (var item in blockers)
-            {
-                if (allLoadedParcelCoords.Contains(item.Key))
-                {
-                    blockersToRemove.Add(item.Key);
-                }
-                else
-                {
-                    bool foundAroundLoadedScenes = false;
-                    for (int i = 0; i < aroundOffsets.Length; i++)
-                    {
-                        Vector2Int offset = aroundOffsets[i];
-                        Vector2Int checkedPosition = new Vector2Int(item.Key.x + offset.x, item.Key.y + offset.y);
-
-                        if (allLoadedParcelCoords.Contains(checkedPosition))
-                        {
-                            foundAroundLoadedScenes = true;
-                            break;
-                        }
-                    }
-
-                    if (!foundAroundLoadedScenes)
-                        blockersToRemove.Add(item.Key);
-                }
-            }
-
-            // Detect missing blockers to be added
-            using (var it = allLoadedParcelCoords.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    Vector2Int pos = it.Current;
-
-                    for (int i = 0; i < aroundOffsets.Length; i++)
-                    {
-                        Vector2Int offset = aroundOffsets[i];
-                        Vector2Int checkedPosition = new Vector2Int(pos.x + offset.x, pos.y + offset.y);
-
-                        if (!allLoadedParcelCoords.Contains(checkedPosition) && !blockers.ContainsKey(checkedPosition))
-                        {
-                            blockersToAdd.Add(checkedPosition);
-                        }
-                    }
-                }
-            }
-
-            // Remove extra blockers
-            foreach (var coords in blockersToRemove)
-            {
-                DestroyBlocker(coords);
-            }
-
-            // Add missing blockers
-            foreach (var coords in blockersToAdd)
-            {
-                InstantiateBlocker(coords, parent);
-            }
-        }
 
         public Dictionary<Vector2Int, PoolableObject> GetBlockers()
         {
             return new Dictionary<Vector2Int, PoolableObject>(blockers);
         }
 
-        public void CleanBlockers()
+        public void DestroyAllBlockers()
         {
-            foreach (var blocker in blockers)
+            var keys = blockers.Keys.ToArray();
+
+            for (var i = 0; i < keys.Length; i++)
             {
-                blocker.Value.Release();
+                ReleaseBlocker(keys[i]);
             }
 
             blockers.Clear();
