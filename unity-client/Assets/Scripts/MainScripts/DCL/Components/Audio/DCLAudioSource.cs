@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public class DCLAudioSource : BaseComponent, IOutOfSceneBoundaries
+    public class DCLAudioSource : BaseComponent, IOutOfSceneBoundariesHandler
     {
         [System.Serializable]
         public class Model

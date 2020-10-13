@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace DCL.Controllers
 {
-    public interface IOutOfSceneBoundaries
+    public interface IOutOfSceneBoundariesHandler
     {
         void UpdateOutOfBoundariesState(bool enable);
     }
@@ -212,7 +212,7 @@ namespace DCL.Controllers
 
         protected virtual void UpdateComponents(DecentralandEntity entity, bool isInsideBoundaries)
         {
-            IOutOfSceneBoundaries[] audioSources = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundaries>();
+            IOutOfSceneBoundariesHandler[] audioSources = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundariesHandler>();
             for (int i = 0; i < audioSources.Length; i++)
             {
                 audioSources[i].UpdateOutOfBoundariesState(isInsideBoundaries);

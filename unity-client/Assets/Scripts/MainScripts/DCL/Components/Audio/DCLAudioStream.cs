@@ -3,7 +3,7 @@ using DCL.Controllers;
 
 namespace DCL.Components
 {
-    public class DCLAudioStream : BaseComponent, IOutOfSceneBoundaries
+    public class DCLAudioStream : BaseComponent, IOutOfSceneBoundariesHandler
     {
         [System.Serializable]
         public class Model
