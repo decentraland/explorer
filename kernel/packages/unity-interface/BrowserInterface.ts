@@ -240,14 +240,6 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(unblockPlayer(data.userId))
   }
 
-  public MutePlayer(data: { userId: string }) {
-    globalThis.globalStore.dispatch(mutePlayer(data.userId))
-  }
-
-  public UnmutePlayer(data: { userId: string }) {
-    globalThis.globalStore.dispatch(unmutePlayer(data.userId))
-  }
-
   public ReportUserEmail(data: { userEmail: string }) {
     const profile = getUserProfile().profile
     if (profile) {
@@ -398,7 +390,11 @@ export class BrowserInterface {
   }
 
   public SetMuteUser(data: { userId: string; mute: boolean }) {
-    // mute or unmute user here
+    if (data.mute) {
+      globalThis.globalStore.dispatch(mutePlayer(data.userId))
+    } else {
+      globalThis.globalStore.dispatch(unmutePlayer(data.userId))
+    }
   }
 }
 

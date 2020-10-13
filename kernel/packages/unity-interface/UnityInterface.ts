@@ -364,6 +364,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'SetUserTalking', JSON.stringify({ userId: userId, talking: talking }))
   }
 
+  public SetUserMuted(userId: string, muted: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetUserMuted', JSON.stringify({ userId: userId, muted: muted }))
+  }
+
   // *********************************************************************************
   // ************** Builder messages **************
   // *********************************************************************************

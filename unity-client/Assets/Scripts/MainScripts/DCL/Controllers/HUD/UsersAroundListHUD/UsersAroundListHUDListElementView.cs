@@ -22,7 +22,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     private UserProfile profile;
     private bool isMuted = false;
 
-    private void Awake()
+    private void Start()
     {
         soundButton.onClick.AddListener(OnSoundButtonPressed);
     }
@@ -44,6 +44,11 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     public void SetMuted(bool isMuted)
     {
+        if (this.isMuted == isMuted)
+        {
+            return;
+        }
+
         this.isMuted = isMuted;
         soundAnimator.SetTrigger(isMuted? soundAnimationMute : soundAnimationUnmute);
     }

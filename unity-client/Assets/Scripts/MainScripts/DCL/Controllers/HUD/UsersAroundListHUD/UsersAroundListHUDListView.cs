@@ -18,6 +18,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         availableElements = new Queue<UsersAroundListHUDListElementView>();
         userElementDictionary = new Dictionary<string, UsersAroundListHUDListElementView>();
 
+        listElementView.OnMuteUser += OnMuteUser;
         listElementView.gameObject.SetActive(false);
         availableElements.Enqueue(listElementView);
     }
@@ -39,7 +40,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         {
             view = Instantiate(listElementView, content);
             view.gameObject.SetActive(true);
-            view.OnMuteUser += (userId, mute) => OnRequestMuteUser?.Invoke(userId, mute);
+            view.OnMuteUser += OnMuteUser;
         }
 
         view.SetUserProfile(userInfo.userId);
@@ -98,5 +99,10 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         userElementDictionary.Clear();
         availableElements.Clear();
         Destroy(gameObject);
+    }
+
+    void OnMuteUser(string userId, bool mute)
+    {
+        OnRequestMuteUser?.Invoke(userId, mute);
     }
 }

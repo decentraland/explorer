@@ -9,6 +9,7 @@ public class UsersAroundListHUDController : IHUD
 
     private bool isVisible = false;
     private readonly HashSet<string> trackedUsersHashSet = new HashSet<string>();
+    private UserProfile profile => UserProfile.GetOwnUserProfile();
 
     public UsersAroundListHUDController()
     {
@@ -69,11 +70,15 @@ public class UsersAroundListHUDController : IHUD
 
     void MapRenderer_OnUserInfoUpdated(MinimapMetadata.MinimapUserInfo userInfo)
     {
+        usersListView.AddOrUpdateUser(userInfo);
+
         if (!trackedUsersHashSet.Contains(userInfo.userId))
         {
             trackedUsersHashSet.Add(userInfo.userId);
+            bool isMuted = profile.muted.Contains(userInfo.userId);
+            usersListView.SetUserMuted(userInfo.userId, isMuted);
         }
-        usersListView.AddOrUpdateUser(userInfo);
+
         usersButtonView?.SetUsersCount(trackedUsersHashSet.Count);
     }
 

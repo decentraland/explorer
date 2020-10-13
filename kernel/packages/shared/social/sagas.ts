@@ -13,6 +13,7 @@ import {
   UNMUTE_PLAYER
 } from './actions'
 import { Profile } from 'shared/profiles/types'
+import { unityInterface } from 'unity-interface/UnityInterface'
 
 type ProfileSetKey = 'muted' | 'blocked'
 
@@ -25,6 +26,7 @@ export function* socialSaga(): any {
 
 function* saveMutedPlayer(action: MutePlayer) {
   yield* addPlayerToProfileSet(action.payload.playerId, 'muted')
+  unityInterface.SetUserMuted(action.payload.playerId, true)
 }
 
 function* saveBlockedPlayer(action: BlockPlayer) {
@@ -33,6 +35,7 @@ function* saveBlockedPlayer(action: BlockPlayer) {
 
 function* saveUnmutedPlayer(action: UnmutePlayer) {
   yield* removePlayerFromProfileSet(action.payload.playerId, 'muted')
+  unityInterface.SetUserMuted(action.payload.playerId, false)
 }
 
 function* saveUnblockedPlayer(action: UnblockPlayer) {
