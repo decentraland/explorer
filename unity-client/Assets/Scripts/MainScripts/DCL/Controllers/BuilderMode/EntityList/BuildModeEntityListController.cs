@@ -17,7 +17,7 @@ public class BuildModeEntityListController : MonoBehaviour
         DUPLICATE = 4,
     }
 
-    public System.Action<DecentralandEntityToEdit> OnEntityClick;
+    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDuplicate;
     public EntityListView entityListView;
     ParcelScene currentScene;
     List<DecentralandEntityToEdit> entitiesList;
@@ -65,8 +65,9 @@ public class BuildModeEntityListController : MonoBehaviour
                 entityToApply.rootEntity.gameObject.SetActive(!entityToApply.gameObject.activeSelf);
                 break;
             case EntityAction.DUPLICATE:
-                DecentralandEntity newEntity = currentScene.CreateEntity(Guid.NewGuid().ToString());
-                CopyFromEntity(entityToApply.rootEntity, newEntity);
+                OnEntityDuplicate?.Invoke(entityToApply);
+                //DecentralandEntity newEntity = currentScene.CreateEntity(Guid.NewGuid().ToString());
+                //CopyFromEntity(entityToApply.rootEntity, newEntity);
                 break;
         }
         //adapter.SetContent(entityToApply);
@@ -74,8 +75,8 @@ public class BuildModeEntityListController : MonoBehaviour
     }
 
 
-    void CopyFromEntity(DecentralandEntity originalEntity,DecentralandEntity destinationEntity)
-    {
-        Instantiate(originalEntity.gameObject, destinationEntity.gameObject.transform);
-    }
+    //void CopyFromEntity(DecentralandEntity originalEntity,DecentralandEntity destinationEntity)
+    //{
+    //    Instantiate(originalEntity.gameObject, destinationEntity.gameObject.transform);
+    //}
 }
