@@ -11,6 +11,8 @@ static/systems
 static/loader
 static/default-profile/contents
 static/lifecycle
+static/voice-chat-codec/audioWorkletProcessors.js
+static/voice-chat-codec/worker.js
 packages/config/contracts.ts
 .decentraland
 **/.decentraland
@@ -57,3 +59,4 @@ packages/decentraland-ecs/package-lock.json
 **/*.js.lib
 public/build-ecs-libraries/**/*.d.ts
 public/build-ecs-libraries/**/*.js
+static/package-lock.json

@@ -72,13 +72,16 @@ namespace DCL
             InitializeWorldBlockersController();
 
             physicsSyncController = new PhysicsSyncController();
+
+            CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneIdChange;
+
             //TODO(Brian): Move those suscriptions elsewhere when we have the PoolManager in its own
             //             assembly. (already done in PR #1149, not merged yet)
             PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
             PoolManager.i.OnGet += physicsSyncController.MarkDirty;
 
 #if !UNITY_EDITOR
-            worldEntryPoint = new EntryPoint_World(this); // Es un subsistema independiente => Se pone en el entrypoint pero no en el enviroment.
+            worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
 #endif
 
             RenderProfileManifest.currentProfile = RenderProfileManifest.i.defaultProfile;
@@ -102,12 +105,6 @@ namespace DCL
             }
 
             componentFactory.PrewarmPools();
-
-            if (!debugScenes)
-            {
-                CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChange;
-                OnRenderingStateChange(CommonScriptableObjects.rendererState.Get(), false);
-            }
         }
 
         public void Restart()
@@ -120,7 +117,6 @@ namespace DCL
         void OnDestroy()
         {
             PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChange;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
         }
@@ -132,7 +128,7 @@ namespace DCL
 
             Environment.i.pointerEventsController.Update();
 
-            if (lastSortFrame != Time.frameCount || sceneSortDirty)
+            if (lastSortFrame != Time.frameCount && sceneSortDirty)
             {
                 lastSortFrame = Time.frameCount;
                 sceneSortDirty = false;
@@ -594,13 +590,20 @@ namespace DCL
                 sceneSortDirty = true;
                 currentGridSceneCoordinate.x = currentX;
                 currentGridSceneCoordinate.y = currentY;
+
+                // Since the first position for the character is not sent from Kernel until just-before calling
+                // the rendering activation from Kernel, we need to sort the scenes to get the current scene id
+                // to lock the rendering accordingly...
+                if (!CommonScriptableObjects.rendererState.Get())
+                {
+                    SortScenesByDistance();
+                }
             }
         }
 
         private void SortScenesByDistance()
         {
-            if (DCLCharacterController.i == null)
-                return;
+            if (DCLCharacterController.i == null) return;
 
             currentSceneId = null;
             scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
@@ -614,8 +617,7 @@ namespace DCL
                 {
                     scene = iterator.Current;
 
-                    if (scene == null)
-                        continue;
+                    if (scene == null) continue;
 
                     characterIsInsideScene = scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
 
@@ -628,14 +630,7 @@ namespace DCL
             }
 
             if (!string.IsNullOrEmpty(currentSceneId))
-            {
-                if (TryGetScene(currentSceneId, out ParcelScene scene) && scene.isReady)
-                {
-                    CommonScriptableObjects.rendererState.RemoveLock(this);
-                }
-            }
-
-            CommonScriptableObjects.sceneID.Set(currentSceneId);
+                CommonScriptableObjects.sceneID.Set(currentSceneId);
 
             OnSortScenes?.Invoke();
         }
@@ -651,11 +646,16 @@ namespace DCL
             return dist1 - dist2;
         }
 
-        private void OnSceneReady(ParcelScene scene)
+        private void OnCurrentSceneIdChange(string newSceneId, string prevSceneId)
         {
-            if (scene.sceneData.id == currentSceneId)
+            if (TryGetScene(newSceneId, out ParcelScene newCurrentScene) && !newCurrentScene.isReady)
             {
-                CommonScriptableObjects.rendererState.RemoveLock(this);
+                CommonScriptableObjects.rendererState.AddLock(newCurrentScene);
+
+                newCurrentScene.OnSceneReady += (readyScene) =>
+                {
+                    CommonScriptableObjects.rendererState.RemoveLock(readyScene);
+                };
             }
         }
 
@@ -695,13 +695,13 @@ namespace DCL
 
                 newScene.ownerController = this;
                 loadedScenes.Add(sceneToLoad.id, newScene);
-                OnNewSceneAdded?.Invoke(newScene);
-
                 scenesSortedByDistance.Add(newScene);
 
-                Environment.i.messagingControllersManager.AddControllerIfNotExists(this, newScene.sceneData.id);
+                sceneSortDirty = true;
 
-                newScene.OnSceneReady += OnSceneReady;
+                OnNewSceneAdded?.Invoke(newScene);
+
+                Environment.i.messagingControllersManager.AddControllerIfNotExists(this, newScene.sceneData.id);
 
                 if (VERBOSE)
                     Debug.Log($"{Time.frameCount} : Load parcel scene {newScene.sceneData.basePosition}");
@@ -726,25 +726,9 @@ namespace DCL
             OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_UPDATE);
 
             if (loadedScenes.ContainsKey(sceneToLoad.id))
-            {
                 loadedScenes[sceneToLoad.id].SetUpdateData(sceneToLoad);
-            }
             else
-            {
-                var newGameObject = new GameObject("New Scene");
-
-                var newScene = newGameObject.AddComponent<ParcelScene>();
-                newScene.SetData(sceneToLoad);
-
-                if (isDebugMode)
-                {
-                    newScene.InitializeDebugPlane();
-                }
-
-                newScene.ownerController = this;
-                loadedScenes.Add(sceneToLoad.id, newScene);
-                OnNewSceneAdded?.Invoke(newScene);
-            }
+                LoadParcelScenesExecute(decentralandSceneJSON);
 
             OnMessageProcessEnds?.Invoke(MessagingTypes.SCENE_UPDATE);
         }
@@ -814,8 +798,6 @@ namespace DCL
 
             Environment.i.messagingControllersManager.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
 
-            sceneSortDirty = true;
-
             if (VERBOSE)
                 Debug.Log($"{Time.frameCount} : Load parcel scene queue {decentralandSceneJSON}");
         }
@@ -884,14 +866,6 @@ namespace DCL
         public bool IsCharacterInsideScene(ParcelScene scene)
         {
             return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
-        }
-
-        private void OnRenderingStateChange(bool enabled, bool prevState)
-        {
-            if (!enabled && !string.IsNullOrEmpty(currentSceneId))
-            {
-                CommonScriptableObjects.rendererState.AddLock(this);
-            }
         }
 
         public HashSet<Vector2Int> GetAllLoadedScenesCoords()
