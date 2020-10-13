@@ -82,6 +82,7 @@ namespace DCL
 #endif
 
             RenderProfileManifest.currentProfile = RenderProfileManifest.i.defaultProfile;
+            RenderProfileManifest.currentProfile.Apply();
             RenderProfileManifest.currentProfile.avatarProfile.inWorld.Apply();
         }
 

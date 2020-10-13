@@ -35,6 +35,9 @@ public class RenderProfileWorld : ScriptableObject
         }
 
         fillWithRenderSettings = false;
+
+        if (RenderProfileManifest.currentProfile == this)
+            Apply();
     }
 
     public void FillWithRenderSettings()
@@ -54,5 +57,6 @@ public class RenderProfileWorld : ScriptableObject
         RenderSettings.ambientSkyColor = skyColor;
         RenderSettings.ambientGroundColor = groundColor;
         RenderSettings.fogColor = fogColor;
+        Debug.Log("Applying profile... " + name);
     }
 }
