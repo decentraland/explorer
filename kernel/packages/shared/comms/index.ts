@@ -113,7 +113,7 @@ type CommsContainer = {
     create: () => string
     list: () => string[]
     remove: (id: string) => boolean
-    reposition: (id: string, xPos: any, yPos: any, zPos: any) => void
+    reposition: (id: string) => void
   }
 }
 

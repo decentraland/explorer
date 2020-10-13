@@ -58,7 +58,7 @@ const positionEvent = {
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
   mousePosition: Vector3.Zero(),
-  immediate: false
+  immediate: false // By default the renderer lerps avatars position
 }
 
 export class BrowserInterface {
