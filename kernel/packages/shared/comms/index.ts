@@ -410,6 +410,7 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       profile &&
       peerTrackingInfo.identity &&
       !isBlocked(profile, peerTrackingInfo.identity) &&
+      !isMuted(profile, peerTrackingInfo.identity) &&
       peerTrackingInfo.position
     ) {
       voiceCommunicator?.playEncodedAudio(
@@ -423,7 +424,11 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
 }
 
 function isBlocked(profile: Profile, userId: string): boolean {
-  return profile.blocked && profile.blocked.includes(userId)
+  return !!profile.blocked && profile.blocked.includes(userId)
+}
+
+function isMuted(profile: Profile, userId: string): boolean {
+  return !!profile.muted && profile.muted.includes(userId)
 }
 
 export function processProfileMessage(
