@@ -72,6 +72,7 @@ export class BrowserInterface {
 
     // By default the renderer lerps avatars position
     positionEvent.immediate = false
+
     if (data.immediate !== undefined) {
       positionEvent.immediate = data.immediate
     }
