@@ -12,7 +12,8 @@ import {
   ethereumConfigurations,
   RESET_TUTORIAL,
   WSS_ENABLED,
-  TEST_WEARABLES_OVERRIDE
+  TEST_WEARABLES_OVERRIDE,
+  HAS_INITIAL_POSITION_MARK
 } from 'config'
 
 import defaultLogger from 'shared/logger'
@@ -161,6 +162,9 @@ function* initialProfileLoad() {
       profile = { ...profile, tutorialStep: 0 }
       profileDirty = true
     }
+
+    globalThis.unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
+    globalThis.unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
 
     if (profileDirty) {
       scheduleProfileUpdate(profile)
