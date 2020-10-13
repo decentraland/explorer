@@ -21,10 +21,10 @@ export type MetaConfiguration = {
 export type WorldConfig = {
   pois: Vector2Component[]
   renderProfile?: RenderProfile
-  motd?: MotdConfig
+  messageOfTheDay?: MessageOfTheDayConfig
 }
 
-export type MotdConfig = {
+export type MessageOfTheDayConfig = {
   headerImageUrl: string
   bodyImageUrl: string
   title: string

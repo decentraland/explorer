@@ -434,7 +434,7 @@ namespace DCL
                                 HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
                                 break;
                             case "SetRenderProfile":
-                                RenderProfileBridge.i.SetRenderProfile((RenderProfileBridge.ID) int.Parse(msg.payload));
+                                RenderProfileBridge.i.SetRenderProfile(msg.payload);
                                 break;
                             default:
                                 Debug.Log(

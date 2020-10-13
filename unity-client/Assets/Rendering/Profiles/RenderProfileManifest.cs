@@ -4,6 +4,11 @@ using UnityEngine;
 
 namespace DCL
 {
+    /// <summary>
+    /// RenderProfileManifest is used to store and set the current used RenderProfileWorld.
+    ///
+    /// When a new RenderProfileWorld object is added to the project it must be added here as well.
+    /// </summary>
     [CreateAssetMenu(menuName = "DCL/Rendering/Render Profile Manifest", fileName = "RenderProfileManifest", order = 0)]
     public class RenderProfileManifest : ScriptableObject
     {
