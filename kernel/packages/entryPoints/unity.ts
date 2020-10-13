@@ -12,6 +12,7 @@ import {
   NO_MOTD,
   DEBUG_PM,
   OPEN_AVATAR_EDITOR,
+  HAS_INITIAL_POSITION_MARK,
   VOICE_CHAT_ENABLED
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
@@ -24,6 +25,7 @@ import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldSt
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 
 const container = document.getElementById('gameContainer')
 
@@ -67,6 +69,13 @@ initializeUnity(container)
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
       i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3, visible: true })
+
+      ProfileAsPromise(identity.address)
+          .then((profile) => {
+            i.ConfigureEmailPrompt(profile.tutorialStep)
+            i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+          })
+          .catch((e) => logger.error(`error getting profile ${e}`))
     } catch (e) {
       logger.error('error on configuring friends hud / tutorial')
     }
