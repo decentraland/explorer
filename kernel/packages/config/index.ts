@@ -150,6 +150,8 @@ export const HALLOWEEN = location.search.indexOf('HALLOWEEN') !== -1
 
 export const PIN_CATALYST = qs.PIN_CATALYST
 
+export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
+
 export namespace commConfigurations {
   export const debug = true
   export const commRadius = 4
