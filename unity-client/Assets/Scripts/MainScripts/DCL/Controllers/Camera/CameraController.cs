@@ -3,16 +3,18 @@ using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] internal Transform cameraTransform;
+    [FormerlySerializedAs("cameraTransform")] [SerializeField]
+    internal new Camera camera;
 
-    [Header("Virtual Cameras")]
-    [SerializeField] internal CameraStateBase[] cameraModes;
+    [Header("Virtual Cameras")] [SerializeField]
+    internal CameraStateBase[] cameraModes;
 
-    [Header("InputActions")]
-    [SerializeField] internal InputAction_Trigger cameraChangeAction;
+    [Header("InputActions")] [SerializeField]
+    internal InputAction_Trigger cameraChangeAction;
 
     internal Dictionary<CameraMode.ModeId, CameraStateBase> cachedModeToVirtualCamera;
 
@@ -23,8 +25,7 @@ public class CameraController : MonoBehaviour
 
     public CameraStateBase currentCameraState => cachedModeToVirtualCamera[CommonScriptableObjects.cameraMode];
 
-    [HideInInspector]
-    public System.Action<CameraMode.ModeId> onSetCameraMode;
+    [HideInInspector] public System.Action<CameraMode.ModeId> onSetCameraMode;
 
     private void Start()
     {
@@ -37,7 +38,7 @@ public class CameraController : MonoBehaviour
         {
             while (iterator.MoveNext())
             {
-                iterator.Current.Value.Init(cameraTransform);
+                iterator.Current.Value.Init(camera);
             }
         }
 
@@ -49,7 +50,7 @@ public class CameraController : MonoBehaviour
 
     private void OnRenderingStateChanged(bool enabled, bool prevState)
     {
-        cameraTransform.gameObject.SetActive(enabled);
+        camera.enabled = enabled;
     }
 
     private void OnCameraChangeAction(DCLAction_Trigger action)
@@ -80,6 +81,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        Transform cameraTransform = this.camera.transform;
         cameraForward.Set(cameraTransform.forward);
         cameraRight.Set(cameraTransform.right);
         cameraPosition.Set(cameraTransform.position);
@@ -95,7 +97,7 @@ public class CameraController : MonoBehaviour
 
     public void SetRotation(float x, float y, float z, Vector3? cameraTarget = null)
     {
-        currentCameraState?.OnSetRotation(new SetRotationPayload() { x = x, y = y, z = z, cameraTarget = cameraTarget });
+        currentCameraState?.OnSetRotation(new SetRotationPayload() {x = x, y = y, z = z, cameraTarget = cameraTarget});
     }
 
     public Vector3 GetRotation()
