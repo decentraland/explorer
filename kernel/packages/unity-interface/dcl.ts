@@ -63,7 +63,7 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
 
   if (shouldShow && loadingAudio) {
-    loadingAudio.volume = 0.05
+    loadingAudio.volume = 0.4
     loadingAudio.play().catch((e) => {
       /*Ignored. If this fails is not critical*/
     })
