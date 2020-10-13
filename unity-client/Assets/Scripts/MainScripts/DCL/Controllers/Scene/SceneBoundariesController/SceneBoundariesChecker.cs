@@ -6,6 +6,11 @@ using System.Collections;
 
 namespace DCL.Controllers
 {
+    public interface IOutOfSceneBoundaries
+    {
+        void UpdateOutOfBoundariesState(bool enable);
+    }
+
     public class SceneBoundariesChecker
     {
         [System.NonSerialized] public float timeBetweenChecks = 1f;
@@ -128,7 +133,7 @@ namespace DCL.Controllers
 
             if (entity.meshRootGameObject == null || entity.meshesInfo.renderers == null || entity.meshesInfo.renderers.Length == 0)
             {
-                UpdateAudioSourceValidState(entity, entity.scene.IsInsideSceneBoundaries(entity.gameObject.transform.position + CommonScriptableObjects.playerUnityToWorldOffset));
+                UpdateComponents(entity, entity.scene.IsInsideSceneBoundaries(entity.gameObject.transform.position + CommonScriptableObjects.playerUnityToWorldOffset));
                 return;
             }
 
@@ -162,7 +167,7 @@ namespace DCL.Controllers
 
             UpdateEntityCollidersValidState(entity, isInsideBoundaries);
 
-            UpdateAudioSourceValidState(entity, isInsideBoundaries);
+            UpdateComponents(entity, isInsideBoundaries);
         }
 
         protected virtual bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
@@ -205,12 +210,12 @@ namespace DCL.Controllers
             }
         }
 
-        protected virtual void UpdateAudioSourceValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        protected virtual void UpdateComponents(DecentralandEntity entity, bool isInsideBoundaries)
         {
-            DCLAudioSource[] audioSources = entity.gameObject.GetComponentsInChildren<DCLAudioSource>();
+            IOutOfSceneBoundaries[] audioSources = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundaries>();
             for (int i = 0; i < audioSources.Length; i++)
             {
-                audioSources[i].SetAudioSourceEnabled(isInsideBoundaries);
+                audioSources[i].UpdateOutOfBoundariesState(isInsideBoundaries);
             }
         }
 

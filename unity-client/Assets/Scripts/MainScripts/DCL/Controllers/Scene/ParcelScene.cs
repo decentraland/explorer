@@ -566,7 +566,7 @@ namespace DCL.Controllers
                 return null;
             }
 
-            if (classId == CLASS_ID_COMPONENT.AUDIO_SOURCE)
+            if (classId == CLASS_ID_COMPONENT.AUDIO_SOURCE || classId == CLASS_ID_COMPONENT.AUDIO_STREAM)
             {
                 SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
             }

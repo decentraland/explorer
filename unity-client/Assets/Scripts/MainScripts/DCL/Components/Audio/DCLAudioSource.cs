@@ -1,10 +1,11 @@
 using DCL.Helpers;
 using System.Collections;
+using DCL.Controllers;
 using UnityEngine;
 
 namespace DCL.Components
 {
-    public class DCLAudioSource : BaseComponent
+    public class DCLAudioSource : BaseComponent, IOutOfSceneBoundaries
     {
         [System.Serializable]
         public class Model
@@ -106,7 +107,7 @@ namespace DCL.Components
             InitDCLAudioClip(null);
         }
 
-        public void SetAudioSourceEnabled(bool isEnabled)
+        public void UpdateOutOfBoundariesState(bool isEnabled)
         {
             bool isDirty = audioSource.enabled != isEnabled;
             audioSource.enabled = isEnabled;
