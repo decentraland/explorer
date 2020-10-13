@@ -1,4 +1,3 @@
-
 import { action } from 'typesafe-actions'
 
 // Block / Mute updates
