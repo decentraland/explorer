@@ -178,8 +178,8 @@ export class BrowserInterface {
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
     const profile: Profile = getUserProfile().profile as Profile
-    profile.tutorialStep = data.tutorialStep
-    globalThis.globalStore.dispatch(saveProfileRequest(profile))
+    const updated = { ...profile, tutorialStep: data.tutorialStep }
+    globalThis.globalStore.dispatch(saveProfileRequest(updated))
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
