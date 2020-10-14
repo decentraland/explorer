@@ -299,6 +299,18 @@ namespace Builder
         {
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: SetBuilderConfiguration {payloadJson}");
             DCLBuilderConfig.SetConfig(payloadJson);
+
+            if (currentScene)
+            {
+                if (DCLBuilderConfig.config.environment.disableFloor)
+                {
+                    currentScene.RemoveDebugPlane();
+                }
+                else
+                {
+                    currentScene.InitializeDebugPlane();
+                }
+            }
         }
 
         #endregion
@@ -562,6 +574,16 @@ namespace Builder
                 currentScene.OnEntityAdded += OnEntityIsAdded;
                 currentScene.OnEntityRemoved += OnEntityIsRemoved;
                 currentScene.metricsController = new DCLBuilderSceneMetricsController(currentScene);
+
+                if (DCLBuilderConfig.config.environment.disableFloor)
+                {
+                    currentScene.RemoveDebugPlane();
+                }
+                else
+                {
+                    currentScene.InitializeDebugPlane();
+                }
+
                 OnSceneChanged?.Invoke(currentScene);
             }
         }

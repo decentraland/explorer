@@ -186,6 +186,12 @@ namespace DCL.Controllers
             if (isReleased)
                 return;
 
+            if (sceneDebugPlane != null)
+            {
+                sceneDebugPlane.Dispose();
+                sceneDebugPlane = null;
+            }
+
             DisposeAllSceneComponents();
 
             if (DCLCharacterController.i)
