@@ -32,8 +32,11 @@ public class BlockersControllerShould
         animationHandler.FadeOut(Arg.Any<GameObject>(), Arg.Invoke());
 
         blockerInstanceHandler = new BlockerInstanceHandler(new DCLCharacterPosition(), animationHandler);
-        blockerController = new WorldBlockersController(sceneHandler, blockerInstanceHandler, new DCLCharacterPosition());
+
         blockersParent = new GameObject();
+        blockerInstanceHandler.SetParent(blockersParent.transform);
+
+        blockerController = new WorldBlockersController(sceneHandler, blockerInstanceHandler, new DCLCharacterPosition());
     }
 
     [TearDown]
@@ -45,19 +48,31 @@ public class BlockersControllerShould
     [Test]
     public void SetupBlockersOnlyWhenEnabled()
     {
+        // Arrange
         blockerInstanceHandler = Substitute.For<IBlockerInstanceHandler>();
+        blockerInstanceHandler.GetBlockers().Returns(new Dictionary<Vector2Int, PoolableObject>());
         blockerController = new WorldBlockersController(sceneHandler, blockerInstanceHandler, new DCLCharacterPosition());
 
+        // Act-assert #1: first blockers added should be shown  
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.ReceivedWithAnyArgs().ShowBlocker(default);
 
+        blockerInstanceHandler.ClearReceivedCalls();
+
+        // Act-assert #2: if disabled, blockers should be removed  
         blockerController.SetEnabled(false);
         blockerInstanceHandler.Received(1).DestroyAllBlockers();
 
+        blockerInstanceHandler.ClearReceivedCalls();
+
+        // Act-assert #3: if disabled, no blockers should be added nor removed  
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.DidNotReceiveWithAnyArgs().ShowBlocker(default);
         blockerInstanceHandler.DidNotReceiveWithAnyArgs().HideBlocker(default, default);
 
+        blockerInstanceHandler.ClearReceivedCalls();
+
+        // Act-assert #4: If enabled again, blockers should be added or removed as needed  
         blockerController.SetEnabled(true);
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.ReceivedWithAnyArgs().ShowBlocker(default);
@@ -69,7 +84,7 @@ public class BlockersControllerShould
         blockerController.SetupWorldBlockers();
         var blockers = blockerInstanceHandler.GetBlockers();
 
-        Assert.AreEqual(blockers.Count, 12);
+        Assert.AreEqual(12, blockers.Count);
         Assert.IsFalse(blockers.ContainsKey(new Vector2Int(0, 0)));
         Assert.IsFalse(blockers.ContainsKey(new Vector2Int(-1, 0)));
         Assert.IsFalse(blockers.ContainsKey(new Vector2Int(-1, 1)));

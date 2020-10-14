@@ -83,6 +83,7 @@ namespace DCL.Controllers
         public void Dispose()
         {
             characterPosition.OnPrecisionAdjust -= OnWorldReposition;
+            blockerInstanceHandler.DestroyAllBlockers();
             Object.Destroy(blockersParent.gameObject);
         }
 
@@ -95,8 +96,6 @@ namespace DCL.Controllers
 
             var blockers = blockerInstanceHandler.GetBlockers();
 
-            if (blockers == null || blockers.Count == 0)
-                return;
             // Detect blockers to be removed
             foreach (var item in blockers)
             {
