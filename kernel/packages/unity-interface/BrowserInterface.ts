@@ -1,8 +1,8 @@
 import { uuid } from 'decentraland-ecs/src'
-import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
+import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
+import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
@@ -19,7 +19,6 @@ import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosi
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
 import { worldRunningObservable } from 'shared/world/worldState'
-import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
@@ -27,6 +26,7 @@ import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/d
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
+import { blockPlayer, mutePlayer, unblockPlayer, unmutePlayer } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 import { logout } from 'shared/session/actions'
@@ -179,11 +179,6 @@ export class BrowserInterface {
     const profile: Profile = getUserProfile().profile as Profile
     profile.tutorialStep = data.tutorialStep
     globalThis.globalStore.dispatch(saveProfileRequest(profile))
-
-    persistCurrentUser({
-      version: profile.version,
-      profile: profileToRendererFormat(profile, getIdentity())
-    })
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -232,33 +227,19 @@ export class BrowserInterface {
   }
 
   public BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
-
-    if (profile) {
-      let blocked: string[] = [data.userId]
-
-      if (profile.blocked) {
-        for (let blockedUser of profile.blocked) {
-          if (blockedUser === data.userId) {
-            return
-          }
-        }
-
-        // Merge the existing array and any previously blocked users
-        blocked = [...profile.blocked, ...blocked]
-      }
-
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
-    }
+    globalThis.globalStore.dispatch(blockPlayer(data.userId))
   }
 
   public UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
+    globalThis.globalStore.dispatch(unblockPlayer(data.userId))
+  }
 
-    if (profile) {
-      const blocked = profile.blocked ? profile.blocked.filter((id) => id !== data.userId) : []
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
-    }
+  public MutePlayer(data: { userId: string }) {
+    globalThis.globalStore.dispatch(mutePlayer(data.userId))
+  }
+
+  public UnmutePlayer(data: { userId: string }) {
+    globalThis.globalStore.dispatch(unmutePlayer(data.userId))
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
