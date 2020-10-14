@@ -81,7 +81,7 @@ namespace DCL
         {
             MoveTo(
                 model.position - Vector3.up * DCLCharacterController.i.characterController.height / 2, // To fix the "always flying" avatars bug, We report the chara's centered position but the body hast its pivot at its feet
-                model.rotation, false);
+                model.rotation);
         }
 
         public void MoveTo(Vector3 position, Quaternion rotation, bool immediate = false)
