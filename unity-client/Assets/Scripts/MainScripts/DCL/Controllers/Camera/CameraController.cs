@@ -10,6 +10,8 @@ public class CameraController : MonoBehaviour
     [FormerlySerializedAs("cameraTransform")] [SerializeField]
     internal new Camera camera;
 
+    private Transform cameraTransform;
+
     [Header("Virtual Cameras")] [SerializeField]
     internal CameraStateBase[] cameraModes;
 
@@ -29,6 +31,8 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
+        cameraTransform = this.camera.transform;
+
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
 
@@ -81,7 +85,6 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        Transform cameraTransform = this.camera.transform;
         cameraForward.Set(cameraTransform.forward);
         cameraRight.Set(cameraTransform.right);
         cameraPosition.Set(cameraTransform.position);
