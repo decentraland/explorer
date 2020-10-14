@@ -1,19 +1,21 @@
-import { initShared, initWeb, loadUnity } from "decentraland-kernel";
+import { Kernel } from "../components/types";
 
+const kernel = (window as Kernel).webApp;
 export const getKernelStore = () => {
   const start = Date.now();
   // create kernel store
-  initShared();
+  const store = kernel.createStore();
   const container = document.getElementById("gameContainer") as HTMLElement;
-  //async initialize
-  initWeb(container)
-    .then((initResult: any) => {
+  // initialize Unity
+  kernel
+    .initWeb(container)
+    .then((response) => {
       console.log("website-initWeb completed at: ", Date.now() - start);
-      return loadUnity(initResult).then(() => {
+      return kernel.loadUnity(response).then(() => {
         console.log("website-loadUnity completed at: ", Date.now() - start);
       });
     })
     .then(() => console.log("website-initUnity completed"));
 
-  return (window as any).globalThis.globalStore;
+  return store;
 };
