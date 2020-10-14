@@ -84,7 +84,9 @@ namespace DCL.Controllers
         {
             characterPosition.OnPrecisionAdjust -= OnWorldReposition;
             blockerInstanceHandler.DestroyAllBlockers();
-            Object.Destroy(blockersParent.gameObject);
+
+            if (blockersParent != null)
+                Object.Destroy(blockersParent.gameObject);
         }
 
         internal void SetupWorldBlockers(HashSet<Vector2Int> allLoadedParcelCoords)
