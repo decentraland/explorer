@@ -48,18 +48,19 @@ namespace Tests
         [UnityTest]
         [Category("Explicit")]
         [Explicit("Test too slow")]
-        public IEnumerator LerpPositionByDefault()
+        public IEnumerator InterpolatePosition()
         {
             AvatarTestHelpers.CreateTestCatalog();
             AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Abortitus", "TestAvatar.json");
 
+            // We must wait for the AvatarShape to finish or the OnTransformChanged event is not used
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
 
             Assert.AreEqual(0f, avatar.entity.gameObject.transform.position.x);
             Assert.AreEqual(0f, avatar.entity.gameObject.transform.position.z);
 
             // Update position to the other end of the parcel
-            var transformModel = new DCLTransform.Model { position = new Vector3(15, 2, 15), immediate = false };
+            var transformModel = new DCLTransform.Model { position = new Vector3(15, 2, 15) };
 
             TestHelpers.SetEntityTransform(scene, avatar.entity, transformModel);
 
@@ -67,30 +68,6 @@ namespace Tests
 
             Assert.AreNotEqual(15f, avatar.entity.gameObject.transform.position.x);
             Assert.AreNotEqual(15f, avatar.entity.gameObject.transform.position.z);
-        }
-
-        [UnityTest]
-        [Category("Explicit")]
-        [Explicit("Test too slow")]
-        public IEnumerator RespawnImmediately()
-        {
-            AvatarTestHelpers.CreateTestCatalog();
-            AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Abortitus", "TestAvatar.json");
-
-            yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
-
-            Assert.AreEqual(0f, avatar.entity.gameObject.transform.position.x);
-            Assert.AreEqual(0f, avatar.entity.gameObject.transform.position.z);
-
-            // Update position to the other end of the parcel with immediate = true
-            var transformModel = new DCLTransform.Model { position = new Vector3(15, 2, 15), immediate = true };
-
-            TestHelpers.SetEntityTransform(scene, avatar.entity, transformModel);
-
-            yield return null;
-
-            Assert.AreEqual(15f, avatar.entity.gameObject.transform.position.x);
-            Assert.AreEqual(15f, avatar.entity.gameObject.transform.position.z);
         }
 
         [UnityTest]

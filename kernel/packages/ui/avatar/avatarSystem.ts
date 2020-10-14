@@ -22,7 +22,7 @@ const avatarMap = new Map<string, AvatarEntity>()
 export class AvatarEntity extends Entity {
   visible = true
 
-  readonly transform: Transform
+  transform: Transform
   avatarShape!: AvatarShape
 
   constructor(uuid?: string, avatarShape = new AvatarShape()) {
@@ -85,7 +85,11 @@ export class AvatarEntity extends Entity {
   setPose(pose: Pose): void {
     const [x, y, z, Qx, Qy, Qz, Qw, immediate] = pose
 
-    this.transform.immediate = immediate
+    if (immediate) {
+      // Replace previous transform to immediately reposition the avatar (and avoid having a property only for that inside the Transform)
+      this.transform = this.addComponentOrReplace(new Transform())
+    }
+
     this.transform.position.set(x, y, z)
     this.transform.rotation.set(Qx, Qy, Qz, Qw)
   }

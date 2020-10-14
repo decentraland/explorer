@@ -536,9 +536,6 @@ export class PB_Transform extends jspb.Message {
   getScale(): PB_Vector3 | undefined;
   setScale(value?: PB_Vector3): void;
 
-  getImmediate(): boolean;
-  setImmediate(value: boolean): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): PB_Transform.AsObject;
   static toObject(includeInstance: boolean, msg: PB_Transform): PB_Transform.AsObject;
@@ -554,7 +551,6 @@ export namespace PB_Transform {
     position?: PB_Vector3.AsObject,
     rotation?: PB_Quaternion.AsObject,
     scale?: PB_Vector3.AsObject,
-    immediate: boolean,
   }
 }
 

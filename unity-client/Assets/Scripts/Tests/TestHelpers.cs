@@ -42,7 +42,7 @@ namespace DCL.Helpers
         static int entityCounter = 123;
         static int disposableIdCounter = 123;
 
-        public static PB_Transform GetPBTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool immediate = true)
+        public static PB_Transform GetPBTransform(Vector3 position, Quaternion rotation, Vector3 scale)
         {
             PB_Transform pbTranf = new PB_Transform();
             pbTranf.Position = new PB_Vector3();
@@ -58,7 +58,6 @@ namespace DCL.Helpers
             pbTranf.Scale.X = scale.x;
             pbTranf.Scale.Y = scale.y;
             pbTranf.Scale.Z = scale.z;
-            pbTranf.Immediate = immediate;
             return pbTranf;
         }
 
@@ -218,17 +217,17 @@ namespace DCL.Helpers
 
         public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, DCLTransform.Model model)
         {
-            SetEntityTransform(scene, entity, model.position, model.rotation, model.scale, model.immediate);
+            SetEntityTransform(scene, entity, model.position, model.rotation, model.scale);
         }
 
-        public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, bool immediate = true)
+        public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity)
         {
-            SetEntityTransform(scene, entity, Vector3.zero, Quaternion.identity, Vector3.one, immediate);
+            SetEntityTransform(scene, entity, Vector3.zero, Quaternion.identity, Vector3.one);
         }
 
-        public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, Vector3 position, Quaternion rotation, Vector3 scale, bool immediate = true)
+        public static void SetEntityTransform(ParcelScene scene, DecentralandEntity entity, Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            PB_Transform pB_Transform = GetPBTransform(position, rotation, scale, immediate);
+            PB_Transform pB_Transform = GetPBTransform(position, rotation, scale);
             scene.EntityComponentCreateOrUpdate(
                 entity.entityId,
                 CLASS_ID_COMPONENT.TRANSFORM,

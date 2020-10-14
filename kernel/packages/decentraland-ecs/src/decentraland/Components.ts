@@ -107,14 +107,11 @@ export class Transform extends ObservableComponent {
   @ObservableComponent.field
   scale!: Vector3
 
-  immediate!: boolean
-
   constructor(args: TranformConstructorArgs = {}) {
     super()
     this.position = args.position || Vector3.Zero()
     this.rotation = args.rotation || Quaternion.Identity
     this.scale = args.scale || new Vector3(1, 1, 1)
-    this.immediate = true
   }
 
   /**
