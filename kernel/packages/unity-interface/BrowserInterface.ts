@@ -1,8 +1,8 @@
 import { uuid } from 'decentraland-ecs/src'
-import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
+import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
+import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
@@ -19,7 +19,6 @@ import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosi
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
 import { worldRunningObservable } from 'shared/world/worldState'
-import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
@@ -178,15 +177,9 @@ export class BrowserInterface {
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
-    if (profile) {
-      const profileUpdate: Profile = { ...profile, tutorialStep: data.tutorialStep }
-      globalThis.globalStore.dispatch(saveProfileRequest(profileUpdate))
-      persistCurrentUser({
-        version: profileUpdate.version,
-        profile: profileToRendererFormat(profileUpdate, getIdentity())
-      })
-    }
+    const profile: Profile = getUserProfile().profile as Profile
+    profile.tutorialStep = data.tutorialStep
+    globalThis.globalStore.dispatch(saveProfileRequest(profile))
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
