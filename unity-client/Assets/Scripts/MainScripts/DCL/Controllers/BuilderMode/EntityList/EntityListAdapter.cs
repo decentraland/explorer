@@ -13,24 +13,29 @@ public class EntityListAdapter : MonoBehaviour
     public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActioninvoked;
     DecentralandEntityToEdit currentEntity;
 
+
+    private void OnDestroy()
+    {
+        if (currentEntity != null)
+        {
+            currentEntity.onStatusUpdate -= SetInfo;
+            currentEntity.OnDelete -= DeleteAdapter;
+        }
+    }
     public void SetContent(DecentralandEntityToEdit _decentrelandEntity)
     {
         if(currentEntity != null)
         {
-            currentEntity.onStatusUpdate -= SetContent;
+            currentEntity.onStatusUpdate -= SetInfo;
+            currentEntity.OnDelete -= DeleteAdapter;
         }
         currentEntity = _decentrelandEntity;
-        nameTxt.text = currentEntity.rootEntity.entityId;
-        if (currentEntity.rootEntity.gameObject.activeSelf) showImg.color = selectedColor;
-        else showImg.color = Color.white;
+        currentEntity.onStatusUpdate += SetInfo;
+        currentEntity.OnDelete += DeleteAdapter;
 
-        if (!currentEntity.IsLocked) lockImg.color = Color.white;
-        else lockImg.color = selectedColor;
-
-
-        selectedImg.enabled = _decentrelandEntity.IsSelected;
-        currentEntity.onStatusUpdate += SetContent;
+        SetInfo(_decentrelandEntity);
     }
+
 
     public void SelectOrDeselect()
     {
@@ -59,5 +64,23 @@ public class EntityListAdapter : MonoBehaviour
     public void GroupEntity()
     {
 
+    }
+
+    void SetInfo(DecentralandEntityToEdit entityToEdit)
+    {
+
+        nameTxt.text = entityToEdit.rootEntity.entityId;
+        if (entityToEdit.rootEntity.gameObject.activeSelf) showImg.color = selectedColor;
+        else showImg.color = Color.white;
+
+        if (!entityToEdit.IsLocked) lockImg.color = Color.white;
+        else lockImg.color = selectedColor;
+
+
+        selectedImg.enabled = entityToEdit.IsSelected;
+    }
+    void DeleteAdapter(DecentralandEntityToEdit entityToEdit)
+    {
+        if(entityToEdit.entityUniqueId == currentEntity.entityUniqueId) Destroy(gameObject);
     }
 }

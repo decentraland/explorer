@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class OutlinerController : MonoBehaviour
 {
+    public Material outlineMaterial;
+    [ColorUsageAttribute(true, true)]
+    public Color outlineColor, lockedOutlineColor;
 
     List<DecentralandEntityToEdit> entitiesOutlined = new List<DecentralandEntityToEdit>();
 
@@ -26,6 +29,8 @@ public class OutlinerController : MonoBehaviour
             if (!entitiesOutlined.Contains(entity))
             {
                 entitiesOutlined.Add(entity);
+                if (entity.IsLocked) ChangeMaterialColor(lockedOutlineColor);
+                else ChangeMaterialColor(outlineColor);
                 for (int i = 0; i < entity.rootEntity.meshesInfo.renderers.Length; i++)
                 {
                     entity.rootEntity.meshesInfo.renderers[i].gameObject.layer = LayerMask.NameToLayer("Selection");
@@ -69,5 +74,12 @@ public class OutlinerController : MonoBehaviour
                 }
             }
         }
+    }
+
+
+    void ChangeMaterialColor(Color color)
+    {
+        string colorname = "_OutlineColour";
+        outlineMaterial.SetColor(colorname, color);
     }
 }

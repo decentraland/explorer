@@ -31,10 +31,7 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
 
    void SceneObjectSelected(SceneObject sceneObject)
     {
-
         OnSceneObjectClicked?.Invoke(sceneObject);
-
-
     }
     void SceneObjectFavorite(SceneObject sceneObject,CatalogItemAdapter adapter)
     {

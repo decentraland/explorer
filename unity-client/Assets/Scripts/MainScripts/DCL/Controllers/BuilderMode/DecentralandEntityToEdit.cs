@@ -12,7 +12,7 @@ public class DecentralandEntityToEdit : EditableEntity
 {
     public string entityUniqueId;
 
-    public System.Action<DecentralandEntityToEdit> onStatusUpdate;
+    public System.Action<DecentralandEntityToEdit> onStatusUpdate,OnDelete;
 
     private bool isLocked = false;
     public bool IsLocked
@@ -90,10 +90,19 @@ public class DecentralandEntityToEdit : EditableEntity
 
     public void Deselect()
     {
-        IsSelected = false;
-        rootEntity.gameObject.transform.SetParent(originalParent);
-        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
-        SetOriginalMaterials();
+        if (IsSelected)
+        {
+            IsSelected = false;
+            rootEntity.gameObject.transform.SetParent(originalParent);
+            SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
+            SetOriginalMaterials();
+        }
+    }
+
+    public void Delete()
+    {
+        Deselect();
+        OnDelete?.Invoke(this);
     }
 
     public void CreateColliders()

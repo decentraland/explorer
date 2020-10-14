@@ -50,7 +50,6 @@ public class BuildModeController : MonoBehaviour
     public SceneObjectCatalogController catalogController;
     public SceneLimitInfoController sceneLimitInfoController;
     public EntityInformationController entityInformationController;
-    public AdvancedBuildModeController advancedBuildModeController;
     public BuildModeEntityListController buildModeEntityListController;
     public OutlinerController outlinerController;
     public BuilderInputWrapper builderInputWrapper;
@@ -119,6 +118,7 @@ public class BuildModeController : MonoBehaviour
         builderInputWrapper.OnMouseClick += MouseClick;
         buildModeEntityListController.OnEntityClick += SelectFromList;
         buildModeEntityListController.OnEntityDuplicate += DuplicateEntity;
+        buildModeEntityListController.OnEntityDelete += DeleteEntity;
 
 
         InitEditModes();
@@ -353,12 +353,7 @@ public class BuildModeController : MonoBehaviour
                 InputDone();
                 return;
             }
-            if(Input.GetKey(KeyCode.F) && isAdvancedModeActive)
-            {
-                advancedBuildModeController.FocusGameObject(selectedEntities);
-                InputDone();
-                return;
-            }          
+                 
         }
     }
 
@@ -443,8 +438,9 @@ public class BuildModeController : MonoBehaviour
             else outlinerController.CancelUnselectedOutlines();
             if (entity != null && !entity.IsSelected)
             {
-                outlinerController.OutLineEntity(entity);
+                if (!BuildModeUtils.IsPointerOverUIElement()) outlinerController.OutLineEntity(entity);
             }
+
             outlinerOptimizationCounter = 0;
         }
         else outlinerOptimizationCounter++;
@@ -634,21 +630,29 @@ public class BuildModeController : MonoBehaviour
 
     public void DeletedSelectedEntities()
     {
-        List<string> idsToRemove = new List<string>();
+        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
 
         for (int i = 0; i < selectedEntities.Count; i++)
         {         
-            idsToRemove.Add(selectedEntities[i].rootEntity.entityId);          
+            entitiesToRemove.Add(selectedEntities[i]);          
         }
 
         DeselectEntities();
 
-        foreach(string id in idsToRemove)
+        foreach(DecentralandEntityToEdit entity in entitiesToRemove)
         {
-            sceneToEdit.RemoveEntity(id, true);
+            DeleteEntity(entity);
         }
    
     }
+
+    public void DeleteEntity(DecentralandEntityToEdit entityToDelete)
+    {
+        RemoveConvertedEntity(entityToDelete.rootEntity);
+        entityToDelete.Delete();
+        sceneToEdit.RemoveEntity(entityToDelete.rootEntity.entityId, true);
+    }
+
 
     public void DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
     {
@@ -751,7 +755,7 @@ public class BuildModeController : MonoBehaviour
         DeselectEntities();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
-        advancedBuildModeController.DesactivateAdvancedBuildMode();
+        SetBuildMode(EditModeState.Inactive);
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
     }
 

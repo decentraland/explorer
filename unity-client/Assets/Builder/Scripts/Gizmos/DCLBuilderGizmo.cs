@@ -18,7 +18,7 @@ namespace Builder.Gizmos
 
         protected Camera builderCamera;
 
-        private Vector3 relativeScaleRatio;
+        private Vector3 relativeScaleRatio, initialScale;
         protected bool startDragging = false;
         protected float prevAxisValue;
 
@@ -27,10 +27,12 @@ namespace Builder.Gizmos
         public abstract void SetSnapFactor(DCLBuilderGizmoManager.SnapInfo snapInfo);
         public abstract void TransformEntity(Transform targetTransform, DCLBuilderGizmoAxis axis, float axisValue);
 
+
         public virtual void Initialize(Camera camera)
         {
+            if (!initialized) initialScale = transform.localScale;
             initialized = true;
-            relativeScaleRatio = transform.localScale / GetCameraPlaneDistance(camera, transform.position);
+            relativeScaleRatio = initialScale / GetCameraPlaneDistance(camera, transform.position);
             builderCamera = camera;
             axisX.SetGizmo(this);
             axisY.SetGizmo(this);

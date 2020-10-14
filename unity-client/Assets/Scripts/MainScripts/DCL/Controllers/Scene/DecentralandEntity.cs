@@ -41,6 +41,7 @@ namespace DCL.Models
             {
                 get
                 {
+                    
                     if (meshRootGameObject.transform.position != lastBoundsCalculationPosition)
                     {
                         mergedBoundsValue.center += meshRootGameObject.transform.position - lastBoundsCalculationPosition;

@@ -17,7 +17,7 @@ public class BuildModeEntityListController : MonoBehaviour
         DUPLICATE = 4,
     }
 
-    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDuplicate;
+    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDuplicate,OnEntityDelete;
     public EntityListView entityListView;
     ParcelScene currentScene;
     List<DecentralandEntityToEdit> entitiesList;
@@ -56,10 +56,10 @@ public class BuildModeEntityListController : MonoBehaviour
                 break;
             case EntityAction.LOCK:
                 entityToApply.IsLocked = !entityToApply.IsLocked;
-                //entityToApply.isLocked = !entityToApply.isLocked;
                 break;
             case EntityAction.DELETE:
-                currentScene.RemoveEntity(entityToApply.rootEntity.entityId);
+              
+                OnEntityDelete?.Invoke(entityToApply);
                 break;
             case EntityAction.SHOW:
                 entityToApply.rootEntity.gameObject.SetActive(!entityToApply.gameObject.activeSelf);

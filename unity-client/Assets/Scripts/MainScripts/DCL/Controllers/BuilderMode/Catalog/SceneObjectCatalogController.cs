@@ -26,7 +26,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     List<Dictionary<string, List<SceneObject>>> filterObjects = new List<Dictionary<string, List<SceneObject>>>();
     string lastFilterName = "";
-    bool catalogInitializaed = false, isShowingAssetPacks = false;
+    bool catalogInitializaed = false, isShowingAssetPacks = false, isFavoriteFilterActive = false;
     List<SceneObject> favoritesShortcutsSceneObjects = new List<SceneObject>();
     private void Start()
     {
@@ -86,40 +86,90 @@ public class SceneObjectCatalogController : MonoBehaviour
     }
 
 
+    #region Favorites
+
+    public void ShowFavorites()
+    {
+        isFavoriteFilterActive = !isFavoriteFilterActive;
+
+        if (isFavoriteFilterActive)
+        {
+            string favoriteName = "Favorites";
+            List<Dictionary<string, List<SceneObject>>> favorites = new List<Dictionary<string, List<SceneObject>>>();
+            foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+            {
+                foreach (SceneObject sceneObject in assetPack.assets)
+                {
+                    foreach(SceneObject favObject in favoritesShortcutsSceneObjects)
+                    {
+                        if (favObject != null)
+                        {
+                            if (sceneObject.id == favObject.id && sceneObject.asset_pack_id == favObject.asset_pack_id)
+                            {
+                                bool foundCategory = false;
+                                foreach (Dictionary<string, List<SceneObject>> groupedSceneObjects in favorites)
+                                {
+                                    if (groupedSceneObjects.ContainsKey(favoriteName))
+                                    {
+                                        foundCategory = true;
+                                        if (!groupedSceneObjects[favoriteName].Contains(sceneObject)) groupedSceneObjects[favoriteName].Add(sceneObject);
+                                    }
+                                }
+                                if (!foundCategory)
+                                {
+                                    Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
+                                    groupedSceneObjects.Add(favoriteName, new List<SceneObject>() { sceneObject });
+                                    favorites.Add(groupedSceneObjects);
+                                }
+                                break;
+
+                            }
+                        }
+                    }
+                }
+            }
+            catalogTitleTxt.text = favoriteName;
+            ShowCatalogContent();
+            catalogGroupListView.SetContent(favorites);
+        }
+        else ShowAssetsPacks();
+       
+    }
     public void AsignFavorite(SceneObject sceneObject, CatalogItemAdapter adapter)
     {
-        if (favoritesShortcutsSceneObjects.Count < 9)
-        {
 
-            if (!favoritesShortcutsSceneObjects.Contains(sceneObject))
+        if (!favoritesShortcutsSceneObjects.Contains(sceneObject))
+        {
+            int index = favoritesShortcutsSceneObjects.Count;
+            int cont = 0;
+            foreach (SceneObject sceneObjectIteration in favoritesShortcutsSceneObjects)
             {
-                int index = favoritesShortcutsSceneObjects.Count;
-                int cont = 0;
-                foreach (SceneObject sceneObjectIteration in favoritesShortcutsSceneObjects)
+                if (sceneObjectIteration == null)
                 {
-                    if (sceneObjectIteration == null)
-                    {
-                        index = cont;
-                        break;
-                    }
-                    cont++;
+                    index = cont;
+                    break;
                 }
-                if (index >= favoritesShortcutsSceneObjects.Count) favoritesShortcutsSceneObjects.Add(sceneObject);
-                else favoritesShortcutsSceneObjects[index] = sceneObject;
+                cont++;
+            }
+            if (index >= favoritesShortcutsSceneObjects.Count) favoritesShortcutsSceneObjects.Add(sceneObject);
+            else favoritesShortcutsSceneObjects[index] = sceneObject;
+            if (index < shortcutsImgs.Length)
+            {
                 shortcutsImgs[index].texture = adapter.thumbnailImg.texture;
                 shortcutsImgs[index].enabled = true;
-                sceneObject.isFavorite = true;
             }
-            else
-            {
-                int index = favoritesShortcutsSceneObjects.IndexOf(sceneObject);
-                shortcutsImgs[index].enabled = false;
-                favoritesShortcutsSceneObjects[index] = null;
-                sceneObject.isFavorite = false;
-            }
-
-            adapter.SetFavorite(sceneObject.isFavorite);
+            sceneObject.isFavorite = true;
         }
+        else
+        {
+            int index = favoritesShortcutsSceneObjects.IndexOf(sceneObject);
+            if (index < shortcutsImgs.Length) shortcutsImgs[index].enabled = false;
+            favoritesShortcutsSceneObjects[index] = null;
+            sceneObject.isFavorite = false;
+        }
+
+        adapter.SetFavorite(sceneObject.isFavorite);
+
     }
 
     public void FavotiteObjectSelected(int index)
@@ -129,6 +179,9 @@ public class SceneObjectCatalogController : MonoBehaviour
             OnSceneObjectSelected?.Invoke(favoritesShortcutsSceneObjects[index]);
         }
     }
+
+
+    #endregion
     void SceneObjectSelected(SceneObject sceneObject)
     {
         OnSceneObjectSelected?.Invoke(sceneObject);
@@ -164,6 +217,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         if (isShowingAssetPacks) CloseCatalog();
         else ShowAssetsPacks();
+        isFavoriteFilterActive = false;
     }
     public bool IsCatalogOpen()
     {

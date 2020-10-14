@@ -156,7 +156,7 @@ namespace DCL.Controllers
 
         public bool IsEntityInsideSceneBoundaries(DecentralandEntity entity)
         {
-            if (entity.meshesInfo == null || entity.meshesInfo.mergedBounds == null) return false;
+            if (entity.meshesInfo == null || entity.meshesInfo.meshRootGameObject == null || entity.meshesInfo.mergedBounds == null) return false;
             Bounds meshBounds = entity.meshesInfo.mergedBounds;
 
             // 1st check (full mesh AABB)
