@@ -21,3 +21,11 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# kernel files
+/public/unity/
+/public/loader/
+/public/systems/
+/public/website.js
+/public/default-profile/
+/public/voice-chat-codec/
