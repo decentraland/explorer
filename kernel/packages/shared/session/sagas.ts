@@ -46,6 +46,7 @@ import {
   userAuthentified
 } from './actions'
 import { ProviderType } from '../ethereum/ProviderType'
+import Html from '../Html'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -64,10 +65,11 @@ export function* sessionSaga(): any {
 function* initialize() {
   const tosAgreed: boolean = !!getFromLocalStorage(TOS_KEY)
   yield put(updateTOS(tosAgreed))
+  Html.initializeTos(tosAgreed)
 }
 
 function* updateTermOfService(action: any) {
-  saveToLocalStorage(TOS_KEY, action.payload)
+  return saveToLocalStorage(TOS_KEY, action.payload)
 }
 
 function* scheduleAwaitingSignaturePrompt() {
@@ -76,11 +78,13 @@ function* scheduleAwaitingSignaturePrompt() {
 
   if (isStillWaiting) {
     yield put(toggleWalletPrompt(true))
+    Html.showAwaitingSignaturePrompt(true)
   }
 }
 
 function* initSession() {
   if (ENABLE_WEB3) {
+    Html.showEthLogin()
     yield createWeb3Connector()
     const userData = getUserProfile()
     if (userData && userData.userId && isSessionExpired(userData)) {
@@ -88,6 +92,7 @@ function* initSession() {
     }
   }
   yield put(changeLoginStage(LoginStage.SING_IN))
+  Html.bindLoginEvent()
 }
 
 function* requestProvider(providerType: ProviderType) {
@@ -98,7 +103,7 @@ function* requestProvider(providerType: ProviderType) {
     }
 
     if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getNetworkValue())) {
-      showNetworkWarning()
+      Html.showNetworkWarning()
     }
   }
   return provider
@@ -118,6 +123,7 @@ function* login(action: LoginAction) {
       return
     }
     yield put(changeLoginStage(LoginStage.COMPLETED))
+    Html.hideEthLogin()
     try {
       const userData = getUserProfile()
 
@@ -126,6 +132,7 @@ function* login(action: LoginAction) {
         yield put(awaitingUserSignature())
         identity = yield createAuthIdentity()
         yield put(toggleWalletPrompt(false))
+        Html.showAwaitingSignaturePrompt(false)
         userId = identity.address
 
         setLocalProfile(userId, {
@@ -177,7 +184,7 @@ function* login(action: LoginAction) {
 
   yield put(userAuthentified(userId, identity, net))
 
-  yield loginCompleted
+  loginCompleted.resolve()
   yield put(loginCompletedAction())
 }
 
@@ -194,7 +201,7 @@ function* checkTldVsNetwork() {
 
   if (tldNet !== web3Net) {
     yield put(setTLDError({ tld, web3Net, tldNet }))
-
+    Html.updateTLDInfo(tld, web3Net, tldNet as string)
     ReportFatalError(NETWORK_MISMATCH)
     return true
   }
@@ -205,13 +212,6 @@ function* checkTldVsNetwork() {
 async function getNetworkValue() {
   const web3Network = await getNetwork()
   return web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-}
-
-function showNetworkWarning() {
-  const element = document.getElementById('network-warning')
-  if (element) {
-    element.style.display = 'block'
-  }
 }
 
 async function createAuthIdentity() {
@@ -238,10 +238,12 @@ async function createAuthIdentity() {
           } catch (e) {
             if (e.message && e.message.includes('User denied message signature')) {
               put(changeLoginStage(LoginStage.SING_ADVICE))
+              Html.showEthSignAdvice(true)
             }
           }
         }
         put(changeLoginStage(LoginStage.COMPLETED))
+        Html.showEthSignAdvice(false)
         return result
       }
       hasConnectedWeb3 = true

@@ -9,7 +9,9 @@ import { loadingStarted, notStarted, MOBILE_NOT_SUPPORTED } from './loading/type
 import { buildStore } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { StoreContainer } from './store/rootTypes'
-import { initSession } from './session/actions'
+import { initSession, login } from './session/actions'
+import { ENABLE_WEB3, PREVIEW } from '../config'
+import { ProviderType } from './ethereum/ProviderType'
 
 declare const globalThis: StoreContainer
 
@@ -31,6 +33,9 @@ export function initShared() {
   store.dispatch(loadingStarted())
 
   store.dispatch(initSession())
+  if (PREVIEW && !ENABLE_WEB3) {
+    store.dispatch(login(ProviderType.METAMASK))
+  }
 
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()

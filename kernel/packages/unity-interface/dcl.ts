@@ -30,6 +30,7 @@ import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import Html from '../shared/Html'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -58,6 +59,7 @@ export let isTheFirstLoading = true
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
   globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
+  Html.setLoadingScreen(shouldShow)
 
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false

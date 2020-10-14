@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux'
-import { call, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import { LOGIN_COMPLETED, USER_AUTHENTIFIED } from 'shared/session/actions'
@@ -8,8 +8,16 @@ import { queueTrackingEvent } from '../analytics'
 import { getCurrentUser } from '../comms/peers'
 import { lastPlayerPosition } from '../world/positionThings'
 
-import { SCENE_FAIL, SCENE_LOAD, SCENE_START, SceneLoad } from './actions'
-import { authSuccessful, EXPERIENCE_STARTED, setLoadingScreen, TELEPORT_TRIGGERED, unityClientLoaded } from './types'
+import { SceneLoad, SCENE_FAIL, SCENE_LOAD, SCENE_START } from './actions'
+import {
+  setLoadingScreen,
+  EXPERIENCE_STARTED,
+  rotateHelpText,
+  TELEPORT_TRIGGERED,
+  unityClientLoaded,
+  authSuccessful
+} from './types'
+import Html from '../Html'
 
 const SECONDS = 1000
 
@@ -60,6 +68,21 @@ export function* trackLoadTime(action: SceneLoad): any {
   })
 }
 
+function* refreshTeleport() {
+  while (true) {
+    yield delay(DELAY_BETWEEN_MESSAGES)
+    yield put(rotateHelpText())
+  }
+}
+
+function* refreshTextInScreen() {
+  while (true) {
+    const status = yield select((state) => state.loading)
+    yield call(() => Html.updateTextInScreen(status))
+    yield delay(200)
+  }
+}
+
 export function* waitForSceneLoads() {
   while (true) {
     yield race({
@@ -73,12 +96,26 @@ export function* waitForSceneLoads() {
 }
 
 export function* initialSceneLoading() {
-  yield call(function* () {
-    yield take(EXPERIENCE_STARTED)
-    yield put(setLoadingScreen(false))
+  yield race({
+    refresh: call(refreshTeleport),
+    textInScreen: call(refreshTextInScreen),
+    finish: call(function* () {
+      yield take(EXPERIENCE_STARTED)
+      yield put(setLoadingScreen(false))
+      yield call(Html.hideLoadingTips)
+      yield call(Html.cleanSubTextInScreen)
+    })
   })
 }
 
 export function* teleportSceneLoading() {
-  yield call(waitForSceneLoads)
+  Html.cleanSubTextInScreen()
+  yield race({
+    refresh: call(refreshTeleport),
+    textInScreen: call(function* () {
+      yield delay(2000)
+      yield call(refreshTextInScreen)
+    }),
+    finish: call(waitForSceneLoads)
+  })
 }

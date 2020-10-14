@@ -10,6 +10,7 @@ import {
   NOT_INVITED
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
+import Html from '../Html'
 
 declare const globalThis: StoreContainer
 
@@ -22,6 +23,8 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   const body = document.body
   const container = document.getElementById('gameContainer')
   container!.setAttribute('style', 'display: none !important')
+
+  Html.hideProgressBar()
 
   body.setAttribute('style', 'background-image: none !important;')
 
@@ -40,6 +43,7 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       ? 'networkmismatch'
       : 'fatal'
   globalThis.globalStore && globalThis.globalStore.dispatch(errorMessage(targetError))
+  Html.showErrorModal(targetError)
   aborted = true
 }
 

@@ -1,5 +1,6 @@
 declare const globalThis: { UnityLoader: any } & StoreContainer
 declare const global: any
+;(window as any).reactVersion = true
 
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
