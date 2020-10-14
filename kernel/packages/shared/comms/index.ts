@@ -401,7 +401,8 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 }
 
 function processVoiceFragment(context: Context, fromAlias: string, message: Package<VoiceFragment>) {
-  const profile = getProfile(store.getState(), getIdentity().address)
+  const myAddress = getIdentity().address
+  const profile = getProfile(store.getState(), myAddress)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
@@ -411,6 +412,7 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       peerTrackingInfo.identity &&
       !isBlocked(profile, peerTrackingInfo.identity) &&
       !isMuted(profile, peerTrackingInfo.identity) &&
+      !hasBlockedMe(myAddress, peerTrackingInfo.identity) &&
       peerTrackingInfo.position
     ) {
       voiceCommunicator?.playEncodedAudio(
@@ -429,6 +431,12 @@ function isBlocked(profile: Profile, userId: string): boolean {
 
 function isMuted(profile: Profile, userId: string): boolean {
   return !!profile.muted && profile.muted.includes(userId)
+}
+
+function hasBlockedMe(myAddress: string, theirAddress: string): boolean {
+  const profile = getProfile(store.getState(), theirAddress)
+
+  return !!profile && isBlocked(profile, myAddress)
 }
 
 export function processProfileMessage(
