@@ -18,8 +18,8 @@ namespace Builder
         {
             try
             {
-                var newConfig = JsonUtility.FromJson<BuilderConfig>(configJson);
-                SetConfig(newConfig);
+                JsonUtility.FromJsonOverwrite(configJson, config);
+                SetConfig(config.Clone());
             }
             catch (Exception e)
             {
@@ -29,17 +29,17 @@ namespace Builder
     }
 
     [Serializable]
-    public struct BuilderConfig
+    public class BuilderConfig
     {
         [Serializable]
-        public struct Camera
+        public class Camera
         {
             public float zoomMin;
             public float zoomMax;
         }
 
         [Serializable]
-        public struct Environment
+        public class Environment
         {
             public bool disableFloor;
         }
@@ -50,11 +50,13 @@ namespace Builder
             {
                 return new BuilderConfig()
                 {
-                    camera = new Camera() {zoomMin = 1f, zoomMax = 100f},
-                    environment = new Environment() {disableFloor = false}
+                    camera = new Camera() { zoomMin = 1f, zoomMax = 100f },
+                    environment = new Environment() { disableFloor = false }
                 };
             }
         }
+
+        public BuilderConfig Clone() => (BuilderConfig)MemberwiseClone();
 
         public Camera camera;
         public Environment environment;
