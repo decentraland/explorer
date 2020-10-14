@@ -300,16 +300,16 @@ namespace Builder
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: SetBuilderConfiguration {payloadJson}");
             DCLBuilderConfig.SetConfig(payloadJson);
 
-            if (currentScene)
+            if (!currentScene)
+                return;
+
+            if (DCLBuilderConfig.config.environment.disableFloor)
             {
-                if (DCLBuilderConfig.config.environment.disableFloor)
-                {
-                    currentScene.RemoveDebugPlane();
-                }
-                else
-                {
-                    currentScene.InitializeDebugPlane();
-                }
+                currentScene.RemoveDebugPlane();
+            }
+            else
+            {
+                currentScene.InitializeDebugPlane();
             }
         }
 
