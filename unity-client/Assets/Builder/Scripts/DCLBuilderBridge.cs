@@ -295,6 +295,12 @@ namespace Builder
             }
         }
 
+        public void SetBuilderConfiguration(string payloadJson)
+        {
+            if (LOG_MESSAGES) Debug.Log($"RECEIVE: SetBuilderConfiguration {payloadJson}");
+            DCLBuilderConfig.SetConfig(payloadJson);
+        }
+
         #endregion
 
         private static ParcelScene GetLoadedScene()
