@@ -4,47 +4,62 @@ declare const global: any
 // IMPORTANT! This should be execd before loading 'config' module to ensure that init values are successfully loaded
 global.enableWeb3 = true
 
+import { initShared } from 'shared'
 import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
-import { experienceStarted, NOT_INVITED, AUTH_ERROR_LOGGED_OUT, FAILED_FETCHING_UNITY } from 'shared/loading/types'
+import { AUTH_ERROR_LOGGED_OUT, experienceStarted, FAILED_FETCHING_UNITY, NOT_INVITED } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import {
-  NO_MOTD,
   DEBUG_PM,
-  OPEN_AVATAR_EDITOR,
   ENABLE_MANA_HUD,
   ENABLE_NEW_TASKBAR,
-  HAS_INITIAL_POSITION_MARK
-} from '../config/index'
-import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
+  HAS_INITIAL_POSITION_MARK,
+  NO_MOTD,
+  OPEN_AVATAR_EDITOR
+} from '../config'
+import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { RootStore, StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
-import { initializeUnity } from '../unity-interface/initializer'
+import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
 import { HUDElementID } from 'shared/types'
-import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
+import { onNextWorldRunning, worldRunningObservable } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 
-const container = document.getElementById('gameContainer')
+const logger = createLogger('website.ts: ')
 
-if (!container) throw new Error('cannot find element #gameContainer')
-
-const logger = createLogger('unity.ts: ')
-
-const start = Date.now()
-
-const observer = worldRunningObservable.add((isRunning) => {
-  if (isRunning) {
-    worldRunningObservable.remove(observer)
-    DEBUG_PM && logger.info(`initial load: `, Date.now() - start)
+namespace webApp {
+  export function createStore(): RootStore {
+    initShared()
+    return globalThis.globalStore
   }
-})
 
-initializeUnity(container)
-  .then(async ({ instancedJS }) => {
+  export async function initWeb(container: HTMLElement) {
+    if (!container) throw new Error('cannot find element #gameContainer')
+    const start = Date.now()
+    const observer = worldRunningObservable.add((isRunning) => {
+      if (isRunning) {
+        worldRunningObservable.remove(observer)
+        DEBUG_PM && logger.info(`initial load: `, Date.now() - start)
+      }
+    })
+
+    return initializeUnity(container).catch((err) => {
+      document.body.classList.remove('dcl-loading')
+      if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
+        ReportFatalError(NOT_INVITED)
+      } else {
+        console['error']('Error loading Unity', err)
+        ReportFatalError(FAILED_FETCHING_UNITY)
+      }
+      throw err
+    })
+  }
+
+  export async function loadUnity({ instancedJS }: InitializeUnityResult) {
     const i = (await instancedJS).unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
@@ -109,13 +124,8 @@ initializeUnity(container)
       console['error'](error)
       ReportFatalError(error.message)
     }
-  })
-  .catch((err) => {
-    document.body.classList.remove('dcl-loading')
-    if (err.message === AUTH_ERROR_LOGGED_OUT || err.message === NOT_INVITED) {
-      ReportFatalError(NOT_INVITED)
-    } else {
-      console['error']('Error loading Unity', err)
-      ReportFatalError(FAILED_FETCHING_UNITY)
-    }
-  })
+    return true
+  }
+}
+
+global.webApp = webApp

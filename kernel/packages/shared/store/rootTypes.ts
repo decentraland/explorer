@@ -20,4 +20,6 @@ export type RootState = RootAtlasState &
   RootFriendsState &
   RootRendererState
 
-export type StoreContainer = { globalStore: Store<RootState> }
+export type RootStore = Store<RootState>
+
+export type StoreContainer = { globalStore: RootStore }

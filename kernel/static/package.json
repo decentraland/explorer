@@ -7,6 +7,5 @@
   ],
   "devDependencies": {
     "decentraland-renderer": "1.0.0"
-  },
-  "main": "./dist/unity.js"
+  }
 }

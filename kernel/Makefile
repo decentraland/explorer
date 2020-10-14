@@ -125,7 +125,7 @@ static/dist/%.js: build-essentials packages/entryPoints/%.ts
 
 # Release
 
-DIST_ENTRYPOINTS := static/dist/editor.js static/dist/unity.js static/dist/preview.js
+DIST_ENTRYPOINTS := static/dist/editor.js static/dist/unity.js static/dist/preview.js static/dist/website.js
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/unity static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
@@ -257,7 +257,7 @@ lint-fix: ## Fix bad formatting on all .ts and .tsx files
 
 # Development
 
-watch: $(SOME_MAPPINGS) build-essentials static/dist/unity.js ## Watch the files required for hacking the explorer
+watch: $(SOME_MAPPINGS) build-essentials static/dist/unity.js static/dist/website.js ## Watch the files required for hacking the explorer
 	@NODE_ENV=development npx concurrently \
 		-n "ecs,scene-system,internal-scenes,loader,basic-scenes,unity,test,simulator,server" \
 			"$(COMPILER) targets/engine/ecs.json --watch" \
