@@ -7,6 +7,7 @@ using System;
 public class EmailPromptHUDController : IHUD
 {
     const float POPUP_DELAY = 60;
+    const int EMAIL_PROMPT_PROFILE_FLAG = 128;
 
     EmailPromptHUDView view;
 
@@ -129,7 +130,6 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        // NOTE(Santi): Email prompt set tutorialStep to 128 when finished (this is temporal until we have the new Onboarding flow)
-        WebInterface.SaveUserTutorialStep(UserProfile.GetOwnUserProfile().tutorialStep | 128);
+        WebInterface.SaveUserTutorialStep(UserProfile.GetOwnUserProfile().tutorialStep | EMAIL_PROMPT_PROFILE_FLAG);
     }
 }
