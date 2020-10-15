@@ -13,7 +13,8 @@ import {
   HUDElementID,
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
-  UpdateUserStatusMessage
+  UpdateUserStatusMessage,
+  BuilderConfiguration
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -434,6 +435,10 @@ export class UnityInterface {
 
   public OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
+  }
+
+  public SetBuilderConfiguration(config: BuilderConfiguration) {
+    this.SendBuilderMessage('SetBuilderConfiguration', JSON.stringify(config))
   }
 
   private resizeCanvasDelayed(ev: UIEvent | null) {
