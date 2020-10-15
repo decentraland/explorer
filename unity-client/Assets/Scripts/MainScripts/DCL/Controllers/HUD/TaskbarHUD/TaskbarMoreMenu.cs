@@ -31,6 +31,8 @@ public class TaskbarMoreMenu : MonoBehaviour
     {
         this.view = view;
 
+        CommonScriptableObjects.tutorialActive.OnChange += TutorialActive_OnChange;
+
         collapseBarButton.gameObject.SetActive(true);
         hideUIButton.gameObject.SetActive(true);
         controlsButton.gameObject.SetActive(false);
@@ -52,6 +54,17 @@ public class TaskbarMoreMenu : MonoBehaviour
         {
             OnRestartTutorial?.Invoke();
         });
+    }
+
+    private void OnDestroy()
+    {
+        CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
+    }
+
+    private void TutorialActive_OnChange(bool current, bool previous)
+    {
+        collapseBarButton.gameObject.SetActive(!current);
+        hideUIButton.gameObject.SetActive(!current);
     }
 
     internal void ActivateControlsButton()
@@ -119,6 +132,9 @@ public class TaskbarMoreMenu : MonoBehaviour
 
     private void ToggleCollapseBar()
     {
+        if (CommonScriptableObjects.tutorialActive)
+            return;
+
         view.ShowBar(!view.isBarVisible);
         ShowMoreMenu(false);
 
@@ -132,6 +148,9 @@ public class TaskbarMoreMenu : MonoBehaviour
 
     private void ToggleHideUI()
     {
+        if (CommonScriptableObjects.tutorialActive)
+            return;
+
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
         view.moreButton.SetToggleState(false);
     }

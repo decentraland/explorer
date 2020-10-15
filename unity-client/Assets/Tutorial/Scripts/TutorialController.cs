@@ -105,6 +105,7 @@ namespace DCL.Tutorial
         private void OnDestroy()
         {
             SetTutorialDisabled();
+            CommonScriptableObjects.tutorialActive.Set(false);
 
             CommonScriptableObjects.isTaskbarHUDInitialized.OnChange -= IsTaskbarHUDInitialized_OnChange;
 
@@ -137,6 +138,8 @@ namespace DCL.Tutorial
                 return;
 
             isRunning = true;
+            CommonScriptableObjects.allUIHidden.Set(false);
+            CommonScriptableObjects.tutorialActive.Set(true);
             openedFromDeepLink = Convert.ToBoolean(fromDeepLink);
 
             if (hudController != null)
@@ -206,6 +209,8 @@ namespace DCL.Tutorial
                 if (hudController.taskbarHud != null)
                     hudController.taskbarHud.ShowTutorialOption(true);
             }
+
+            CommonScriptableObjects.tutorialActive.Set(false);
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }

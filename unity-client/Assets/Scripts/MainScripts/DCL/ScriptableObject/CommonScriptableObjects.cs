@@ -131,6 +131,9 @@ public static class CommonScriptableObjects
     private static BooleanVariable isTaskbarHUDInitializedValue;
     public static BooleanVariable isTaskbarHUDInitialized => GetOrLoad(ref isTaskbarHUDInitializedValue, "ScriptableObjects/IsTaskbarHUDInitialized");
 
+    private static BooleanVariable tutorialActiveValue;
+    public static BooleanVariable tutorialActive => GetOrLoad(ref tutorialActiveValue, "ScriptableObjects/TutorialActive");
+
     internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)
