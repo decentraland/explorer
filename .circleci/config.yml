@@ -287,6 +287,12 @@ jobs:
           name: "installing"
           command: npm ci
       - run:
+          name: "creating .env (ignore master)"
+          command: echo "PUBLIC_URL:\"https://play.decentraland.zone/branch-website/${CIRCLE_BRANCH}\"" > .env
+          filters:
+            branches:
+              ignore: master
+      - run:
           name: "testing"
           command: npm test -- --watchAll=false
       - run:
