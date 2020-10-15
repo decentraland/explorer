@@ -54,6 +54,7 @@ public class DecentralandEntityToEdit : EditableEntity
         }
     }
 
+    bool isFloor = false;
     Transform originalParent;
 
 
@@ -77,7 +78,7 @@ public class DecentralandEntityToEdit : EditableEntity
         {
             CreateCollidersForEntity(rootEntity);
         }
-
+        CheckIfEntityIsFloor();
     }
     public void Select()
     {
@@ -98,6 +99,19 @@ public class DecentralandEntityToEdit : EditableEntity
             SetOriginalMaterials();
         }
     }
+
+    public void ChangeShowStatus()
+    {
+        rootEntity.gameObject.SetActive(!gameObject.activeSelf);
+        onStatusUpdate?.Invoke(this);
+    }
+
+    public void ChangeLockStatus()
+    {
+        SetLockStatus(!isLocked);
+    }
+
+ 
 
     public void Delete()
     {
@@ -153,6 +167,7 @@ public class DecentralandEntityToEdit : EditableEntity
     {
         if (IsSelected) SetEditMaterials();
         CreateCollidersForEntity(decentralandEntity);
+
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
@@ -207,5 +222,21 @@ public class DecentralandEntityToEdit : EditableEntity
 
             collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
         }
+    }
+
+    void SetLockStatus(bool _isLocked)
+    {
+        isLocked = _isLocked;
+        onStatusUpdate?.Invoke(this);
+    }
+    void CheckIfEntityIsFloor()
+    {
+        if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.currentShape == null) return;
+        if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length <= 0) return;
+        if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.2f) return;
+        if (rootEntity.gameObject.transform.position.y >= 0.1f) return;
+
+        isFloor = true;
+        SetLockStatus(true);
     }
 }

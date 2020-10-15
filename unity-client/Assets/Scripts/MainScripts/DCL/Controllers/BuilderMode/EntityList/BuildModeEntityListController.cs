@@ -55,14 +55,15 @@ public class BuildModeEntityListController : MonoBehaviour
                 
                 break;
             case EntityAction.LOCK:
-                entityToApply.IsLocked = !entityToApply.IsLocked;
+                entityToApply.ChangeLockStatus();
+                
                 break;
             case EntityAction.DELETE:
               
                 OnEntityDelete?.Invoke(entityToApply);
                 break;
             case EntityAction.SHOW:
-                entityToApply.rootEntity.gameObject.SetActive(!entityToApply.gameObject.activeSelf);
+                entityToApply.ChangeShowStatus();
                 break;
             case EntityAction.DUPLICATE:
                 OnEntityDuplicate?.Invoke(entityToApply);

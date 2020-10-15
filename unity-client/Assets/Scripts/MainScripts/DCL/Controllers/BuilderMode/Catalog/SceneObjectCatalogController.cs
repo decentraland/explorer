@@ -174,9 +174,12 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void FavotiteObjectSelected(int index)
     {
-        if (favoritesShortcutsSceneObjects[index] != null)
+        if (favoritesShortcutsSceneObjects.Count > index)
         {
-            OnSceneObjectSelected?.Invoke(favoritesShortcutsSceneObjects[index]);
+            if (favoritesShortcutsSceneObjects[index] != null)
+            {
+                OnSceneObjectSelected?.Invoke(favoritesShortcutsSceneObjects[index]);
+            }
         }
     }
 

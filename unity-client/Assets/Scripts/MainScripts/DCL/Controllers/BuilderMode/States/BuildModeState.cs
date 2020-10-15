@@ -85,6 +85,10 @@ public class BuildModeState : MonoBehaviour
     {
 
     }
+    public virtual void CheckInputSelectedEntities()
+    {
+
+    }
 
     public virtual void InputDone()
     {
@@ -103,6 +107,11 @@ public class BuildModeState : MonoBehaviour
         freeMovementGO.transform.rotation = zeroAnglesQuaternion;
         gameObjectToEdit.transform.rotation = zeroAnglesQuaternion;
 
+    }
+
+    public virtual Vector3 GetCreatedEntityPoint()
+    {
+        return Vector3.zero;
     }
 
     protected Vector3 GetCenterPointOfSelectedObjects()

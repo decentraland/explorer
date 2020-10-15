@@ -10,7 +10,7 @@ public class BuildFirstPersonMode : BuildModeState
     [Header("Design variables")]
     public float scaleSpeed = 0.25f;
     public float rotationSpeed = 0.5f;
-
+    public float distanceFromCameraForNewEntitties = 5;
 
     Quaternion initialRotation;
 
@@ -134,9 +134,9 @@ public class BuildFirstPersonMode : BuildModeState
         SetObjectIfSnapOrNot();
     }
 
-    public override void CheckInput()
+    public override void CheckInputSelectedEntities()
     {
-        base.CheckInput();
+        base.CheckInputSelectedEntities();
         if (selectedEntities.Count > 0)
         {
             if (Input.GetKey(KeyCode.R))
@@ -187,6 +187,11 @@ public class BuildFirstPersonMode : BuildModeState
             }
         }
     }
+    public override Vector3 GetCreatedEntityPoint()
+    {
+        return Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties;
+    }
+
 
     void SetObjectIfSnapOrNot()
     {

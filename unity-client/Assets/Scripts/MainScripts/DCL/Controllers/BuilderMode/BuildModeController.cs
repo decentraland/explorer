@@ -30,7 +30,6 @@ public class BuildModeController : MonoBehaviour
     public float scaleSpeed = 0.25f;
     public float rotationSpeed = 0.5f;
     public float msBetweenInputInteraction = 200;
-    public float distanceFromCameraForNewEntitties = 4;
 
     public float distanceLimitToSelectObjects = 50;
 
@@ -62,6 +61,7 @@ public class BuildModeController : MonoBehaviour
 
     [Header("Build References")]
 
+    public Texture2D duplicateCursorTexture;
     public Material editMaterial;
  
     public LayerMask layerToRaycast;
@@ -148,7 +148,8 @@ public class BuildModeController : MonoBehaviour
             if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
             {
                 CheckInputForShowingWindows();
-                if (Utils.isCursorLocked || isAdvancedModeActive) CheckEditModeInput();              
+                if (Utils.isCursorLocked || isAdvancedModeActive) CheckEditModeInput();
+                if (currentActiveMode != null) currentActiveMode.CheckInput();
             }
 
             if (checkerInsideSceneOptimizationCounter >= 60)
@@ -332,7 +333,7 @@ public class BuildModeController : MonoBehaviour
 
         if (selectedEntities.Count > 0)
         {
-            currentActiveMode.CheckInput();
+            currentActiveMode.CheckInputSelectedEntities();
 
             if (Input.GetKey(KeyCode.Delete))
             {
@@ -624,8 +625,27 @@ public class BuildModeController : MonoBehaviour
             currentActiveMode.DeselectedEntities();
             selectedEntities.Clear();
             entityInformationController.Disable();
+
+            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
         }
    
+    }
+
+    public void ChangeLockStateSelectedEntities()
+    {
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        {
+            entity.ChangeLockStatus();
+        }
+        DeselectEntities();
+    }
+
+    public void ChangeShowStateSelectedEntities()
+    {
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        {
+            entity.ChangeShowStatus();
+        }
     }
 
     public void DeletedSelectedEntities()
@@ -643,7 +663,7 @@ public class BuildModeController : MonoBehaviour
         {
             DeleteEntity(entity);
         }
-   
+
     }
 
     public void DeleteEntity(DecentralandEntityToEdit entityToDelete)
@@ -671,6 +691,8 @@ public class BuildModeController : MonoBehaviour
         {
             DuplicateEntity(selectedEntities[i]); 
         }
+        Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
+        Debug.Log("Cursor changed");
     }
 
     DecentralandEntity CreateEntity()
@@ -678,7 +700,7 @@ public class BuildModeController : MonoBehaviour
 
         DecentralandEntity newEntity = sceneToEdit.CreateEntity(Guid.NewGuid().ToString());
 
-        DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties, sceneToEdit);
+        DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(currentActiveMode.GetCreatedEntityPoint(), sceneToEdit);
 
         Vector3 pointToLookAt = Camera.main.transform.position;
         pointToLookAt.y = gameObjectToEdit.transform.position.y;
@@ -816,6 +838,7 @@ public class BuildModeController : MonoBehaviour
     {
         return entity.scene.sceneData.id + entity.entityId;
     }
+
 
     
 }

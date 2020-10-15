@@ -18,6 +18,7 @@ public class BuildEditorMode : BuildModeState
     public FreeCameraMovement freeCameraController;
     public GameObject eagleCamera, advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
+    public SceneObjectCatalogController sceneObjectCatalogController;
 
     public Outline moveOutline, rotateOutline, scaleOutline;
 
@@ -86,15 +87,16 @@ public class BuildEditorMode : BuildModeState
         freeMovementGO.transform.SetParent(null);
     }
 
-    public override void EndMultiSelection()
-    {
-        base.EndMultiSelection();
-    }
 
     public override void CreatedEntity(DecentralandEntityToEdit createdEntity)
     {
         base.CreatedEntity(createdEntity);
         isPlacingNewObject = true;
+       
+    }
+    public override Vector3 GetCreatedEntityPoint()
+    {
+        return GetFloorPointAtMouse();
     }
 
     public override void SelectedEntity(DecentralandEntityToEdit selectedEntity)
@@ -110,7 +112,7 @@ public class BuildEditorMode : BuildModeState
         gizmoManager.SelectedEntities(gameObjectToEdit.transform, editableEntities);
 
 
-        if (!isMultiSelectionActive) LookAtEntity(selectedEntity.rootEntity);
+        if (!isMultiSelectionActive && !selectedEntity.IsNew) LookAtEntity(selectedEntity.rootEntity);
 
         snapGO.transform.SetParent(null);
     }
@@ -132,16 +134,65 @@ public class BuildEditorMode : BuildModeState
         }
         else gizmoManager.SetSnapFactor(0, 0, 0);
     }
-
     public override void CheckInput()
     {
         base.CheckInput();
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(0);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha2))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(1);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha3))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(2);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha4))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(3);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha5))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(4);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha6))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(5);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha7))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(6);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha8))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(7);
+            InputDone();
+        }
+        if (Input.GetKey(KeyCode.Alpha9))
+        {
+            sceneObjectCatalogController.FavotiteObjectSelected(8);
+            InputDone();
+        }
+    }
+    public override void CheckInputSelectedEntities()
+    {
+        base.CheckInputSelectedEntities();
         if (Input.GetKey(KeyCode.F))
         {
             FocusGameObject(selectedEntities);
             InputDone();
             return;
         }
+  
     }
 
     public void LookAtEntity(DecentralandEntity entity)
@@ -162,7 +213,7 @@ public class BuildEditorMode : BuildModeState
 
     public void TranslateMode()
     {
-        gizmoManager.ShowGizmo();
+        if (selectedEntities.Count > 0) gizmoManager.ShowGizmo();
         moveOutline.enabled = true;
         rotateOutline.enabled = false;
         scaleOutline.enabled = false;
@@ -171,7 +222,7 @@ public class BuildEditorMode : BuildModeState
 
     public void RotateMode()
     {
-        gizmoManager.ShowGizmo();
+        if(selectedEntities.Count > 0) gizmoManager.ShowGizmo();
         moveOutline.enabled = false;
         rotateOutline.enabled = true;
         scaleOutline.enabled = false;
@@ -179,7 +230,7 @@ public class BuildEditorMode : BuildModeState
     }
     public void ScaleMode()
     {
-        gizmoManager.ShowGizmo();
+        if (selectedEntities.Count > 0) gizmoManager.ShowGizmo();
         moveOutline.enabled = false;
         rotateOutline.enabled = false;
         scaleOutline.enabled = true;
@@ -243,5 +294,17 @@ public class BuildEditorMode : BuildModeState
         }
     }
 
+    Vector3 GetFloorPointAtMouse()
+    {
+        RaycastHit hit;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+        {
+            return hit.point;
+        }
+
+        return Vector3.zero;
+    }
 
 }
