@@ -285,8 +285,11 @@ jobs:
           name: "installing"
           command: npm ci
       - run:
-          name: "install decentraland-kernel as SUDO"
-          command: cd node_modules && ln -s ../../kernel/static/ decentraland-kernel && ls -la decentraland-kernel/*
+          name: "remove decentraland-kernel"
+          command: rm -rf node_modules/decentraland-kernel || true
+      - run:
+          name: "copy fresh decentraland-kernel"
+          command: cp -r /tmp/explorer/kernel/static node_modules/decentraland-kernel
       - run:
           name: "post install script"
           command: sh scripts/post-install.sh
@@ -479,8 +482,7 @@ workflows:
       - build-website:
           <<: *all_branches_and_tags
           requires:
-            - build-kernel
-            - build-unity
+            - package
 
       - publish-renderer:
           requires:
