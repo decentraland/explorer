@@ -566,11 +566,6 @@ namespace DCL.Controllers
                 return null;
             }
 
-            if (classId == CLASS_ID_COMPONENT.AUDIO_SOURCE || classId == CLASS_ID_COMPONENT.AUDIO_STREAM)
-            {
-                SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
-            }
-
             BaseComponent newComponent = null;
             DCLComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
@@ -652,8 +647,14 @@ namespace DCL.Controllers
                 }
             }
 
-            if (newComponent != null && newComponent.isRoutineRunning)
-                yieldInstruction = newComponent.yieldInstruction;
+            if (newComponent != null)
+            {
+                if (newComponent is IOutOfSceneBoundariesHandler)
+                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+
+                if (newComponent.isRoutineRunning)
+                    yieldInstruction = newComponent.yieldInstruction;
+            }
 
             SceneController.i.physicsSyncController.MarkDirty();
             return newComponent;

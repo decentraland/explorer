@@ -130,6 +130,7 @@ namespace DCL.Components
             }
             else
             {
+                //Set volume to 0 (temporary solution until the refactor in #1421)
                 Interface.WebInterface.SendAudioStreamEvent(model.url, true, 0);
             }
         }

@@ -212,10 +212,10 @@ namespace DCL.Controllers
 
         protected virtual void UpdateComponents(DecentralandEntity entity, bool isInsideBoundaries)
         {
-            IOutOfSceneBoundariesHandler[] audioSources = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundariesHandler>();
-            for (int i = 0; i < audioSources.Length; i++)
+            IOutOfSceneBoundariesHandler[] components = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundariesHandler>();
+            for (int i = 0; i < components.Length; i++)
             {
-                audioSources[i].UpdateOutOfBoundariesState(isInsideBoundaries);
+                components[i].UpdateOutOfBoundariesState(isInsideBoundaries);
             }
         }
 
