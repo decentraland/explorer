@@ -10,9 +10,7 @@ const loadingImagesCache: Record<string, IFuture<string>> = {}
 
 export default class Html {
   static showEthLogin() {
-    console.log('SHOW-ETH_LOGIN TRUE')
     if (isReact) return
-    console.log('SHOW-ETH_LOGIN TRUE')
     const element = document.getElementById('eth-login')
     if (element) {
       element.style.display = 'block'
