@@ -8,7 +8,7 @@ public class CameraStateFPS : CameraStateBase
 
     private CinemachinePOV pov;
 
-    public override void Init(Transform cameraTransform)
+    public override void Init(Camera cameraTransform)
     {
         base.Init(cameraTransform);
 
