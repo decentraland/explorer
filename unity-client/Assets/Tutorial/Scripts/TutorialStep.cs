@@ -72,7 +72,7 @@ namespace DCL.Tutorial
         /// Executes the final animation and waits for its finalization and for any camera blending.
         /// </summary>
         /// <returns></returns>
-        public virtual IEnumerator OnStepPlayAnimationForHidding()
+        public virtual IEnumerator OnStepPlayHideAnimation()
         {
             blockSkipActions = true;
             OnJustAfterStepExecuted?.Invoke();

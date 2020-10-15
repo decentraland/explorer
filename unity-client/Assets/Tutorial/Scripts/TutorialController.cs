@@ -400,7 +400,7 @@ namespace DCL.Tutorial
                 else
                     PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
 
-                yield return runningStep.OnStepPlayAnimationForHidding();
+                yield return runningStep.OnStepPlayHideAnimation();
                 runningStep.OnStepFinished();
                 elapsedTime = Time.realtimeSinceStartup - elapsedTime;
                 if (!debugRunTutorial && sendStats)

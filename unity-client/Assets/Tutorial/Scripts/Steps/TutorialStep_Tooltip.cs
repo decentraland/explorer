@@ -51,9 +51,9 @@ namespace DCL.Tutorial
             yield return new WaitUntil(() => stepIsFinished);
         }
 
-        public override IEnumerator OnStepPlayAnimationForHidding()
+        public override IEnumerator OnStepPlayHideAnimation()
         {
-            yield return base.OnStepPlayAnimationForHidding();
+            yield return base.OnStepPlayHideAnimation();
             yield return new WaitUntil(() => !isRelatedFeatureActived);
         }
 

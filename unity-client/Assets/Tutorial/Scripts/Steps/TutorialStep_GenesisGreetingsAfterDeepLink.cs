@@ -11,11 +11,11 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_GenesisGreetingsAfterDeepLink : TutorialStep_GenesisGreetings
     {
-        public override IEnumerator OnStepPlayAnimationForHidding()
+        public override IEnumerator OnStepPlayHideAnimation()
         {
             tutorialController?.SetEagleEyeCameraActive(false);
 
-            yield return base.OnStepPlayAnimationForHidding();
+            yield return base.OnStepPlayHideAnimation();
         }
 
         public override void OnStepFinished()
