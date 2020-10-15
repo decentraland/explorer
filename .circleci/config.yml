@@ -450,7 +450,7 @@ workflows:
       - build-website:
           <<: *all_branches_and_tags
           requires:
-            - checkout
+            - build-kernel
 
       - package:
           <<: *all_branches_and_tags
