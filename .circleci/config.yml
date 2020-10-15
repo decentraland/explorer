@@ -81,6 +81,7 @@ jobs:
             - .git
             - .circleci
             - kernel
+            - website
             - unity-client
 
   run-unity-tests:
