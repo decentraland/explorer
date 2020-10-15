@@ -285,8 +285,8 @@ jobs:
           name: "installing"
           command: npm ci
       - run:
-          name: "install decentraland-kernel"
-          command: npm install ../kernel/static
+          name: "install decentraland-kernel as SUDO"
+          command: sudo npm install ../kernel/static
       - run:
           name: "post install script"
           command: sh scripts/post-install.sh
