@@ -19,13 +19,5 @@ namespace DCL.Tutorial
         {
             yield return new WaitUntil(() => mouseCatcher.isLocked);
         }
-
-        public override IEnumerator OnStepPlayHideAnimation()
-        {
-            if (tutorialController != null)
-                tutorialController.SetEagleEyeCameraActive(false);
-
-            yield return base.OnStepPlayHideAnimation();
-        }
     }
 }

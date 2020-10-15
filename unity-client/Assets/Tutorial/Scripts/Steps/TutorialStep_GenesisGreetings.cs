@@ -48,6 +48,12 @@ namespace DCL.Tutorial
             yield return new WaitUntil(() => stepIsFinished);
         }
 
+        public override IEnumerator OnStepPlayHideAnimation()
+        {
+            tutorialController?.SetEagleEyeCameraActive(false);
+            yield return base.OnStepPlayHideAnimation();
+        }
+
         public override void OnStepFinished()
         {
             base.OnStepFinished();
