@@ -1,4 +1,5 @@
-﻿using DCL.Controllers;
+﻿using DCL.Configuration;
+using DCL.Controllers;
 
 namespace DCL
 {
@@ -27,6 +28,12 @@ namespace DCL
         {
             if (initialized)
                 return;
+
+            //TODO(Brian): We should remove this when we get a proper initialization layer
+            if (!EnvironmentSettings.RUNNING_TESTS)
+            {
+                RenderProfileManifest.i.Initialize();
+            }
 
             messagingControllersManager.Initialize(messageHandler);
             pointerEventsController.Initialize();

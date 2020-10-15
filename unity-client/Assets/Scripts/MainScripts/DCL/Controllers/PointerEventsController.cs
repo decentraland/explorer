@@ -186,6 +186,7 @@ namespace DCL
 
         void OnButtonEvent(WebInterface.ACTION_BUTTON buttonId, InputController_Legacy.EVENT evt, bool useRaycast)
         {
+            //TODO(Brian): We should remove this when we get a proper initialization layer
             if (!EnvironmentSettings.RUNNING_TESTS)
             {
                 if (Utils.LockedThisFrame())

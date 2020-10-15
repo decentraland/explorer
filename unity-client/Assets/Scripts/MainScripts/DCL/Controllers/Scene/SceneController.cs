@@ -41,10 +41,6 @@ namespace DCL
 
             i = this;
 
-            RenderProfileManifest.currentProfile = RenderProfileManifest.i.defaultProfile;
-            RenderProfileManifest.currentProfile.avatarProfile.inWorld.Apply();
-            RenderProfileManifest.currentProfile.Apply();
-
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = false;
