@@ -285,17 +285,30 @@ jobs:
           name: "installing"
           command: npm ci
       - run:
+          name: "create npm link decentraland-kernel"
+          command: cd ../kernel/static && npm link
+      - run:
+          name: "npm link decentraland-kernel"
+          command: npm link decentraland-kernel
+      - run:
+          name: "post install script"
+          command: sh scripts/post-install.sh
+      - run:
           name: "creating .env (ignore master)"
           command: echo "PUBLIC_URL=\"https://play.decentraland.zone/branch-website/${CIRCLE_BRANCH}\"" > .env
           filters:
             branches:
               ignore: master
+            tags:
+              ignore: /.*/
       - run:
           name: "show .env (ignore master)"
           command: cat .env
           filters:
             branches:
               ignore: master
+            tags:
+              ignore: /.*/
       - run:
           name: "testing"
           command: npm test -- --watchAll=false
@@ -460,16 +473,16 @@ workflows:
           requires:
             - checkout
 
-      - build-website:
-          <<: *all_branches_and_tags
-          requires:
-            - build-kernel
-
       - package:
           <<: *all_branches_and_tags
           requires:
             - build-kernel
             - build-unity
+
+      - build-website:
+          <<: *all_branches_and_tags
+          requires:
+            - package
 
       - publish-renderer:
           requires:
