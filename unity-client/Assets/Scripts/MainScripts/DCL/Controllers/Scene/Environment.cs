@@ -29,12 +29,7 @@ namespace DCL
             if (initialized)
                 return;
 
-            //TODO(Brian): We should remove this when we get a proper initialization layer
-            if (!EnvironmentSettings.RUNNING_TESTS)
-            {
-                RenderProfileManifest.i.Initialize();
-            }
-
+            RenderProfileManifest.i.Initialize();
             messagingControllersManager.Initialize(messageHandler);
             pointerEventsController.Initialize();
             memoryManager.Initialize();
