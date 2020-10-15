@@ -285,11 +285,8 @@ jobs:
           name: "installing"
           command: npm ci
       - run:
-          name: "create npm link decentraland-kernel"
-          command: cd ../kernel/static && npm link
-      - run:
-          name: "npm link decentraland-kernel"
-          command: npm link decentraland-kernel
+          name: "install decentraland-kernel"
+          command: npm install ../kernel/static
       - run:
           name: "post install script"
           command: sh scripts/post-install.sh
