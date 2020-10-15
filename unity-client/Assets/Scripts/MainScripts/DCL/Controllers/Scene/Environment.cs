@@ -23,13 +23,13 @@ namespace DCL
             clipboard = Clipboard.Create();
         }
 
-        public void Initialize(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler, bool isTesting = false)
+        public void Initialize(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)
         {
             if (initialized)
                 return;
 
             messagingControllersManager.Initialize(messageHandler);
-            pointerEventsController.Initialize(isTesting);
+            pointerEventsController.Initialize();
             memoryManager.Initialize();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(sceneHandler, DCLCharacterController.i.characterPosition);
 
@@ -54,10 +54,10 @@ namespace DCL
             worldBlockersController.Dispose();
         }
 
-        public void Restart(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler, bool isTesting = false)
+        public void Restart(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)
         {
             Cleanup();
-            Initialize(messageHandler, sceneHandler, isTesting);
+            Initialize(messageHandler, sceneHandler);
         }
     }
 }

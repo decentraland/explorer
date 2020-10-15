@@ -557,8 +557,6 @@ namespace Tests
                 },
                 (eventObj) =>
                 {
-                    Debug.Log("Received event: " + JsonConvert.SerializeObject(eventObj));
-
                     if (eventObj.eventType != sceneEvent.eventType)
                         return false;
 
