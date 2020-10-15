@@ -189,20 +189,24 @@ namespace Builder.Gizmos
 
         public void InitializeGizmos(Camera camera)
         {
+            InitializeGizmos(camera, camera.transform);
+        }
+        public void InitializeGizmos(Camera camera,Transform cameraTransform)
+        {
             if (!isGizmosInitialized)
             {
                 for (int i = 0; i < gizmos.Length; i++)
                 {
                     if (!gizmos[i].initialized)
                     {
-                        gizmos[i].Initialize(camera);
+                        gizmos[i].Initialize(camera, cameraTransform);
                     }
                 }
                 isGizmosInitialized = true;
             }
         }
 
-        private void OnCameraZoomChanged(Camera camera, float zoom)
+            private void OnCameraZoomChanged(Camera camera, float zoom)
         {
             InitializeGizmos(camera);
         }
@@ -218,7 +222,6 @@ namespace Builder.Gizmos
             selectedEntitiesParent = selectionParent;
             GizmoStatusUpdate();
         }
-
         private void OnGizmosAxisPressed(DCLBuilderGizmoAxis pressedAxis)
         {
             OnBeginDrag(pressedAxis);

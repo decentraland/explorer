@@ -54,7 +54,7 @@ public class BuildEditorMode : BuildModeState
         freeCameraController.LookAt(lookAtT);
 
         eagleCamera.gameObject.SetActive(true);
-        gizmoManager.InitializeGizmos(Camera.main);
+        gizmoManager.InitializeGizmos(Camera.main,freeCameraController.transform);
 
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE) gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
@@ -110,7 +110,6 @@ public class BuildEditorMode : BuildModeState
         }
 
         gizmoManager.SelectedEntities(gameObjectToEdit.transform, editableEntities);
-
 
         if (!isMultiSelectionActive && !selectedEntity.IsNew) LookAtEntity(selectedEntity.rootEntity);
 
@@ -213,7 +212,7 @@ public class BuildEditorMode : BuildModeState
 
     public void TranslateMode()
     {
-        if (selectedEntities.Count > 0) gizmoManager.ShowGizmo();
+        if (selectedEntities.Count > 0) ShowGizmos();
         moveOutline.enabled = true;
         rotateOutline.enabled = false;
         scaleOutline.enabled = false;
@@ -222,7 +221,7 @@ public class BuildEditorMode : BuildModeState
 
     public void RotateMode()
     {
-        if(selectedEntities.Count > 0) gizmoManager.ShowGizmo();
+        if(selectedEntities.Count > 0) ShowGizmos();
         moveOutline.enabled = false;
         rotateOutline.enabled = true;
         scaleOutline.enabled = false;
@@ -230,7 +229,7 @@ public class BuildEditorMode : BuildModeState
     }
     public void ScaleMode()
     {
-        if (selectedEntities.Count > 0) gizmoManager.ShowGizmo();
+        if (selectedEntities.Count > 0) ShowGizmos();
         moveOutline.enabled = false;
         rotateOutline.enabled = false;
         scaleOutline.enabled = true;
@@ -242,6 +241,10 @@ public class BuildEditorMode : BuildModeState
 
     }
 
+    void ShowGizmos()
+    {
+        gizmoManager.ShowGizmo();
+    }
     void SetLookAtObject()
     {
         Vector3 middlePoint = CalculateMiddlePoint(sceneToEdit.sceneData.parcels);

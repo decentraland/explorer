@@ -28,11 +28,11 @@ namespace Builder.Gizmos
         public abstract void TransformEntity(Transform targetTransform, DCLBuilderGizmoAxis axis, float axisValue);
 
 
-        public virtual void Initialize(Camera camera)
+        public virtual void Initialize(Camera camera,Transform cameraTransform)
         {
             if (!initialized) initialScale = transform.localScale;
             initialized = true;
-            relativeScaleRatio = initialScale / GetCameraPlaneDistance(camera, transform.position);
+            relativeScaleRatio = initialScale / GetCameraPlaneDistance(cameraTransform, transform.position);
             builderCamera = camera;
             axisX.SetGizmo(this);
             axisY.SetGizmo(this);
@@ -124,14 +124,14 @@ namespace Builder.Gizmos
             SetPositionToTarget();
             if (builderCamera)
             {
-                float dist = GetCameraPlaneDistance(builderCamera, transform.position);
+                float dist = GetCameraPlaneDistance(builderCamera.transform, transform.position);
                 transform.localScale = relativeScaleRatio * dist* sizeFactor;
             }
         }
 
-        private static float GetCameraPlaneDistance(Camera camera, Vector3 objectPosition)
+        private static float GetCameraPlaneDistance(Transform cameraTransform, Vector3 objectPosition)
         {
-            Plane plane = new Plane(camera.transform.forward, camera.transform.position);
+            Plane plane = new Plane(cameraTransform.forward, cameraTransform.position);
             return plane.GetDistanceToPoint(objectPosition);
         }
     }

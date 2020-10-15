@@ -209,12 +209,36 @@ public class BuildModeController : MonoBehaviour
         SceneMetricsController.Model limits = sceneToEdit.metricsController.GetLimits();
         SceneMetricsController.Model usage = sceneToEdit.metricsController.GetModel();
 
-        if (limits.bodies < usage.bodies + sceneObject.metrics.bodies) return;
-        if (limits.entities < usage.entities + sceneObject.metrics.entities) return;
-        if (limits.materials < usage.materials + sceneObject.metrics.materials) return;
-        if (limits.meshes < usage.meshes + sceneObject.metrics.meshes) return;
-        if (limits.textures < usage.textures + sceneObject.metrics.textures) return;
-        if (limits.triangles < usage.triangles + sceneObject.metrics.triangles) return;
+        if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
+        {
+            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            return;
+        }
+        if (limits.entities < usage.entities + sceneObject.metrics.entities)
+        {
+            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            return;
+        }
+        if (limits.materials < usage.materials + sceneObject.metrics.materials)
+        {
+            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            return;
+        }
+        if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
+        {
+            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            return;
+        }
+        if (limits.textures < usage.textures + sceneObject.metrics.textures)
+        {
+            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            return;
+        }
+        if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
+        {
+            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            return;
+        }
 
         LoadParcelScenesMessage.UnityParcelScene data =  sceneToEdit.sceneData;
         data.baseUrl = "https://builder-api.decentraland.org/v1/storage/contents/";
@@ -281,16 +305,7 @@ public class BuildModeController : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.G))
         {
-            if (isSceneInformationActive)
-            {
-                sceneLimitInfoController.Disable();
-            }
-            else
-            {
-                sceneLimitInfoController.Enable();
-
-            }
-            isSceneInformationActive = !isSceneInformationActive;
+            ChangeVisibilityOfSceneInfo();
             InputDone();
             return;
         }
@@ -358,6 +373,19 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+    public void ChangeVisibilityOfSceneInfo()
+    {
+        if (isSceneInformationActive)
+        {
+            sceneLimitInfoController.Disable();
+        }
+        else
+        {
+            sceneLimitInfoController.Enable();
+
+        }
+        isSceneInformationActive = !isSceneInformationActive;
+    }
 
     public void ChangeAdvanceMode()
     {

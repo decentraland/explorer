@@ -61,7 +61,9 @@ public class SceneLimitInfoController : MonoBehaviour
 
     string AppendUsageAndLimit(string name, int usage, int limit)
     {
-        return name + ":   " + usage + " / <color=#959696>" + limit + "</color>";
+        string currentString = name + ":   " + usage + " / <color=#959696>" + limit + "</color>";
+        if (usage >= limit) currentString = "<color=red>" + currentString + "</color>";
+        return currentString;
     }
 
     bool IsParcelSceneSquare(ParcelScene scene)
