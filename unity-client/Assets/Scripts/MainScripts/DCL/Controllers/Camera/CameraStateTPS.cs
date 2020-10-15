@@ -25,7 +25,7 @@ public class CameraStateTPS : CameraStateBase
 
     public float rotationLerpSpeed = 10;
 
-    public override void Init(Transform cameraTransform)
+    public override void Init(Camera camera)
     {
         freeLookTopRig = defaultVirtualCameraAsFreeLook.GetRig(0).GetCinemachineComponent<CinemachineTransposer>();
         freeLookTopRigOriginalBodyDamping = new Vector3(freeLookTopRig.m_XDamping, freeLookTopRig.m_YDamping, freeLookTopRig.m_ZDamping);
@@ -37,7 +37,7 @@ public class CameraStateTPS : CameraStateBase
         originalXAxisMaxSpeed = defaultVirtualCameraAsFreeLook.m_XAxis.m_MaxSpeed;
         originalYAxisMaxSpeed = defaultVirtualCameraAsFreeLook.m_YAxis.m_MaxSpeed;
 
-        base.Init(cameraTransform);
+        base.Init(camera);
     }
 
     private void OnEnable()

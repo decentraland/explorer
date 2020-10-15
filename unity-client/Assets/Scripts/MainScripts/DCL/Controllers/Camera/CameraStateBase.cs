@@ -2,16 +2,17 @@ using Cinemachine;
 using UnityEngine;
 
 public class CameraStateBase : MonoBehaviour
-{    
-
+{
     public CinemachineVirtualCameraBase defaultVirtualCamera;
 
+    protected new Camera camera;
     protected Transform cameraTransform;
     public CameraMode.ModeId cameraModeId;
 
-    public virtual void Init(Transform cameraTransform)
+    public virtual void Init(Camera camera)
     {
-        this.cameraTransform = cameraTransform;
+        this.camera = camera;
+        this.cameraTransform = this.camera.transform;
         gameObject.SetActive(false);
     }
 
@@ -31,7 +32,6 @@ public class CameraStateBase : MonoBehaviour
 
     public virtual void OnSetRotation(CameraController.SetRotationPayload payload)
     {
-
     }
 
     public virtual Vector3 OnGetRotation()
