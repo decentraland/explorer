@@ -105,15 +105,11 @@ namespace DCL.Tutorial
         private void OnDestroy()
         {
             SetTutorialDisabled();
-            CommonScriptableObjects.tutorialActive.Set(false);
 
             CommonScriptableObjects.isTaskbarHUDInitialized.OnChange -= IsTaskbarHUDInitialized_OnChange;
 
             if (hudController != null)
             {
-                if (hudController.emailPromptHud != null)
-                    hudController.emailPromptHud.waitForEndOfTutorial = false;
-
                 if (hudController.goToGenesisPlazaHud != null)
                 {
                     hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
@@ -144,12 +140,6 @@ namespace DCL.Tutorial
 
             if (hudController != null)
             {
-                if (hudController.emailPromptHud != null)
-                {
-                    hudController.emailPromptHud.waitForEndOfTutorial = true;
-                    hudController.emailPromptHud.ResetPopupDelayed();
-                }
-
                 if (hudController.goToGenesisPlazaHud != null)
                 {
                     hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
@@ -203,9 +193,6 @@ namespace DCL.Tutorial
 
             if (hudController != null)
             {
-                if (hudController.emailPromptHud != null)
-                    hudController.emailPromptHud.waitForEndOfTutorial = false;
-
                 if (hudController.taskbarHud != null)
                     hudController.taskbarHud.ShowTutorialOption(true);
             }

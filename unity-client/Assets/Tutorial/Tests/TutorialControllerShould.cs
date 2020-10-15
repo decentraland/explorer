@@ -35,6 +35,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [Test]
@@ -47,6 +48,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [UnityTest]
@@ -60,6 +62,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.alreadyOpenedFromDeepLink);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [Test]
@@ -73,6 +76,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.alreadyOpenedFromDeepLink);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [UnityTest]
@@ -85,6 +89,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [Test]
@@ -97,6 +102,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [UnityTest]
@@ -110,6 +116,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
             Assert.IsFalse(tutorialController.tutorialReset);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [Test]
@@ -123,6 +130,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
             Assert.IsFalse(tutorialController.tutorialReset);
+            Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
         }
 
         [Test]
@@ -186,6 +194,7 @@ namespace DCL.Tutorial_Tests
             tutorialController.alreadyOpenedFromDeepLink = false;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = false;
+            CommonScriptableObjects.tutorialActive.Set(true);
         }
 
         private void ConfigureTutorialForDeepLink()
@@ -202,6 +211,7 @@ namespace DCL.Tutorial_Tests
             tutorialController.openedFromDeepLink = true;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = true;
+            CommonScriptableObjects.tutorialActive.Set(true);
         }
 
         private void ConfigureTutorialForGenesisPlazaAfterDeepLink()
@@ -218,6 +228,7 @@ namespace DCL.Tutorial_Tests
             tutorialController.alreadyOpenedFromDeepLink = true;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = false;
+            CommonScriptableObjects.tutorialActive.Set(true);
         }
 
         private void ConfigureTutorialForResetTutorial()
@@ -234,6 +245,7 @@ namespace DCL.Tutorial_Tests
             tutorialController.playerIsInGenesisPlaza = false;
             tutorialController.isRunning = true;
             tutorialController.markTutorialAsCompleted = false;
+            CommonScriptableObjects.tutorialActive.Set(true);
         }
 
         private TutorialStep_Mock CreateNewFakeStep()
@@ -276,6 +288,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.isRunning);
             Assert.IsNotNull(tutorialController.runningStep);
             Assert.IsTrue(currentSteps[currentStepIndex] == tutorialController.runningStep);
+            Assert.IsTrue(CommonScriptableObjects.tutorialActive.Get());
         }
     }
 }

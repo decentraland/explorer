@@ -15,8 +15,6 @@ public class EmailPromptHUDController : IHUD
     bool isPopupRoutineRunning = false;
     Coroutine showPopupDelayedRoutine;
 
-    public bool waitForEndOfTutorial { get; set; } = false;
-
     public EmailPromptHUDController()
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("EmailPromptHUD")).GetComponent<EmailPromptHUDView>();
@@ -24,6 +22,7 @@ public class EmailPromptHUDController : IHUD
 
         view.OnDismiss += OnDismiss;
         view.OnSendEmail += OnSendEmail;
+        CommonScriptableObjects.tutorialActive.OnChange += TutorialActive_OnChange;
 
         view.gameObject.SetActive(false);
     }
@@ -52,12 +51,17 @@ public class EmailPromptHUDController : IHUD
     {
         if (view != null)
         {
+            view.OnDismiss -= OnDismiss;
+            view.OnSendEmail -= OnSendEmail;
+
             GameObject.Destroy(view.gameObject);
         }
         if (showPopupDelayedRoutine != null)
         {
             StopPopupRoutine();
         }
+
+        CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
     }
 
     public void SetEnable(bool enable)
@@ -72,7 +76,7 @@ public class EmailPromptHUDController : IHUD
         }
     }
 
-    public void ResetPopupDelayed()
+    void ResetPopupDelayed()
     {
         if (isPopupRoutineRunning)
         {
@@ -100,7 +104,7 @@ public class EmailPromptHUDController : IHUD
     {
         isPopupRoutineRunning = true;
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
-        yield return new WaitUntil(() => !waitForEndOfTutorial);
+        yield return new WaitUntil(() => !CommonScriptableObjects.tutorialActive.Get());
         yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         SetVisibility(true);
@@ -131,5 +135,11 @@ public class EmailPromptHUDController : IHUD
     void SetEmailFlag()
     {
         WebInterface.SaveUserTutorialStep(UserProfile.GetOwnUserProfile().tutorialStep | EMAIL_PROMPT_PROFILE_FLAG);
+    }
+
+    private void TutorialActive_OnChange(bool current, bool previous)
+    {
+        if (current)
+            ResetPopupDelayed();
     }
 }
