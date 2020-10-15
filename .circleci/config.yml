@@ -479,7 +479,8 @@ workflows:
       - build-website:
           <<: *all_branches_and_tags
           requires:
-            - package
+            - build-kernel
+            - build-unity
 
       - publish-renderer:
           requires:
