@@ -3,6 +3,14 @@ using UnityEngine;
 
 namespace DCL.Controllers
 {
+    /// <summary>
+    /// This class is the domain-specific glue for BlockerInstanceHandler.
+    /// <br/><br/>
+    /// Responsibilities:<br/>
+    /// - Spawning blockers depending on scene state<br/>
+    /// - Moving blockers when the world is repositioned<br/>
+    /// - Handling lifecycle of BlockerInstanceHandler<br/>
+    /// </summary>
     public class WorldBlockersController
     {
         public bool enabled = true;

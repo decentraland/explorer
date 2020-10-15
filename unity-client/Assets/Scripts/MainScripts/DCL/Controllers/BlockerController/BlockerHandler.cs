@@ -17,6 +17,13 @@ namespace DCL.Controllers
         void SetParent(Transform parent);
     }
 
+    /// <summary>
+    /// This class is the loading blockers composite and instancing handler.
+    /// <br/>
+    /// Responsibilities include:<br/>
+    /// - Handling hide/show of blockers through its IBlockerAnimationHandler<br/>
+    /// - Keeping track of all blockers<br/>
+    /// </summary>
     public class BlockerInstanceHandler : IBlockerInstanceHandler
     {
         static GameObject blockerPrefab;

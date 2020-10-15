@@ -10,6 +10,10 @@ namespace DCL.Controllers
         void FadeOut(GameObject go, System.Action OnFinish);
     }
 
+    /// <summary>
+    /// This class is in charge of handling the FadeIn/FadeOut animation
+    /// of blockers.
+    /// </summary>
     public class BlockerAnimationHandler : IBlockerAnimationHandler
     {
         public void FadeIn(GameObject go)
