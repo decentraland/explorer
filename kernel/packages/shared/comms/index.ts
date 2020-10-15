@@ -104,7 +104,7 @@ export const MORDOR_POSITION: Position = [
   0,
   0,
   0,
-  false
+  true
 ]
 
 type CommsContainer = {

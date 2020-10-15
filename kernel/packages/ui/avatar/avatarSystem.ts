@@ -85,13 +85,19 @@ export class AvatarEntity extends Entity {
   setPose(pose: Pose): void {
     const [x, y, z, Qx, Qy, Qz, Qw, immediate] = pose
 
-    if (immediate) {
-      // Replace previous transform to immediately reposition the avatar (and avoid having a property only for that inside the Transform)
-      this.transform = this.addComponentOrReplace(new Transform())
+    // We re-add the entity to the engine when reposition is immediate to avoid lerping its position in the renderer (and avoid adding a property to the transform for that)
+    const shouldReAddEntity = immediate && this.visible
+
+    if (shouldReAddEntity) {
+      this.remove()
     }
 
     this.transform.position.set(x, y, z)
     this.transform.rotation.set(Qx, Qy, Qz, Qw)
+
+    if (shouldReAddEntity) {
+      engine.addEntity(this)
+    }
   }
 
   public remove() {
