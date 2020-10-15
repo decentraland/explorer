@@ -50,7 +50,7 @@ public class TestsBase
         {
             yield return SetUp_SceneIntegrityChecker();
             SetUp_Renderer();
-            Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>(), isTesting: true);
+            Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>());
             yield break;
         }
 
@@ -63,7 +63,7 @@ public class TestsBase
 
         SetUp_Renderer();
         runtimeGameObjectsRoot = new GameObject("_RuntimeGameObjectsRoot");
-        Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>(), isTesting: true);
+        Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>());
     }
 
 

@@ -17,7 +17,7 @@ namespace AssetPromiseKeeper_Tests
         protected override IEnumerator SetUp()
         {
             Environment.i.Initialize(Substitute.For<IMessageProcessHandler>(),
-                Substitute.For<ISceneHandler>(), isTesting: true);
+                Substitute.For<ISceneHandler>());
             keeper = new APKType();
             yield break;
         }
