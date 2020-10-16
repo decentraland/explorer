@@ -152,7 +152,7 @@ namespace DCL.Components
                 float canvasSubtraction = canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100;
                 childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);
 
-                // We scale the panel upwards to subtract the viewport's bottom 10% for Decentraland's taskbar
+                // We scale the panel upwards to subtract the viewport's bottom 5% for Decentraland's taskbar
                 canvasHeight = childHookRectTransform.sizeDelta.y;
                 childHookRectTransform.pivot = new Vector2(0.5f, 1f);
                 childHookRectTransform.anchoredPosition = new Vector3(0, canvasHeight, 0f);
