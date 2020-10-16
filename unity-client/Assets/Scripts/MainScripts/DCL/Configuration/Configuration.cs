@@ -57,6 +57,11 @@ namespace DCL.Configuration
         public static float LOAD_PARCEL_SCENES_THROTTLING_TIME = SIXTY_FPS_TIME / 4.0f;
     }
 
+    public static class UISettings
+    {
+        public static float RESERVED_CANVAS_TOP_PERCENTAGE = 10f;
+    }
+
     public static class NFTDataFetchingSettings
     {
         public static UnityEngine.Vector2
