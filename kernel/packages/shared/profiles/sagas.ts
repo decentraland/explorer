@@ -11,7 +11,8 @@ import {
   PREVIEW,
   ethereumConfigurations,
   RESET_TUTORIAL,
-  WSS_ENABLED
+  WSS_ENABLED,
+  TEST_WEARABLES_OVERRIDE
 } from 'config'
 
 import defaultLogger from 'shared/logger'
@@ -47,12 +48,7 @@ import {
   saveProfileRequest
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import {
-  baseCatalogsLoaded,
-  getProfile,
-  getProfileDownloadServer,
-  getExclusiveCatalog
-} from './selectors'
+import { baseCatalogsLoaded, getProfile, getProfileDownloadServer, getExclusiveCatalog } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
@@ -120,7 +116,6 @@ export function* profileSaga(): any {
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
 
   yield takeLatestByUserId(INVENTORY_REQUEST, handleFetchInventory)
-
 }
 
 function* initialProfileLoad() {
@@ -200,10 +195,14 @@ function scheduleProfileUpdate(profile: Profile) {
 }
 
 function overrideBaseUrl(wearable: Wearable) {
-  return {
-    ...wearable,
-    baseUrl: getWearablesSafeURL() + '/contents/',
-    baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
+  if (!TEST_WEARABLES_OVERRIDE) {
+    return {
+      ...wearable,
+      baseUrl: getWearablesSafeURL() + '/contents/',
+      baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
+    }
+  } else {
+    return wearable ?? {}
   }
 }
 
@@ -342,6 +341,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   const passport = yield call(processServerProfile, userId, profile)
+
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
 }
 
@@ -522,15 +522,15 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
 
   try {
     const savedProfile = yield select(getProfile, userId)
-    const currentVersion = savedProfile.version || 0
+    const currentVersion: number = savedProfile.version || 0
     const url: string = yield select(getUpdateProfileServer)
-    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } }
 
     const identity = yield select(getCurrentIdentity)
 
     // only update profile if wallet is connected
     if (identity.hasConnectedWeb3) {
-      const result = yield call(modifyAvatar, {
+      yield call(modifyAvatar, {
         url,
         userId,
         currentVersion,
@@ -538,10 +538,13 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
         profile
       })
 
-      const { creationTimestamp: version } = result
-
-      yield put(saveProfileSuccess(userId, version, profile))
+      yield put(saveProfileSuccess(userId, profile.version, profile))
       yield put(profileRequest(userId))
+
+      persistCurrentUser({
+        version: profile.version,
+        profile: profileToRendererFormat(profile, userId)
+      })
     }
   } catch (error) {
     yield put(saveProfileFailure(userId, 'unknown reason'))

@@ -1,6 +1,5 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
-declare var window: any
 
 export const performanceConfigurations = [
   { antialiasing: true, downsampling: 0, shadows: true },
@@ -141,12 +140,9 @@ export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== 
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
-export const ENABLE_MANA_HUD = location.search.indexOf('ENABLE_MANA_HUD') !== -1
-export const ENABLE_NEW_TASKBAR =
-  location.search.indexOf('ENABLE_NEW_TASKBAR') !==
-  -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
-
 export const PIN_CATALYST = qs.PIN_CATALYST
+
+export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
 
 export namespace commConfigurations {
   export const debug = true
@@ -210,11 +206,9 @@ let network: ETHEREUM_NETWORK | null = null
 
 export function getTLD() {
   if (ENV_OVERRIDE) {
-    return window.location.search.match(/ENV=(\w+)/)[1]
+    return location.search.match(/ENV=(\w+)/)![1]
   }
-  if (window) {
-    return window.location.hostname.match(/(\w+)$/)[0]
-  }
+  return location.hostname.match(/(\w+)$/)![0]
 }
 
 export const knownTLDs = ['zone', 'org', 'today']
@@ -238,7 +232,7 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  const url = new URL(window.location)
+  const url = new URL(location.toString())
   if (url.searchParams.has('TEST_WEARABLES')) {
     const value = url.searchParams.get('TEST_WEARABLES')
     if (value) {
