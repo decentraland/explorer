@@ -97,7 +97,8 @@ public class BuildEditorMode : BuildModeState
     {
         base.CreatedEntity(createdEntity);
         isPlacingNewObject = true;
-       
+        //createdEntity.gameObject.transform.eulerAngles = Vector3.zero;
+        gizmoManager.HideGizmo();
     }
     public override Vector3 GetCreatedEntityPoint()
     {
@@ -217,28 +218,34 @@ public class BuildEditorMode : BuildModeState
 
     public void TranslateMode()
     {
+        gizmoManager.SetGizmoType("MOVE");
         if (selectedEntities.Count > 0) ShowGizmos();
+        else gizmoManager.HideGizmo();
         moveOutline.enabled = true;
         rotateOutline.enabled = false;
         scaleOutline.enabled = false;
-        gizmoManager.SetGizmoType("MOVE");
+
     }
 
     public void RotateMode()
     {
-        if(selectedEntities.Count > 0) ShowGizmos();
+        gizmoManager.SetGizmoType("ROTATE");
+        if (selectedEntities.Count > 0) ShowGizmos();
+        else gizmoManager.HideGizmo();
         moveOutline.enabled = false;
         rotateOutline.enabled = true;
         scaleOutline.enabled = false;
-        gizmoManager.SetGizmoType("ROTATE");
+        
     }
     public void ScaleMode()
     {
+        gizmoManager.SetGizmoType("SCALE");
         if (selectedEntities.Count > 0) ShowGizmos();
+        else gizmoManager.HideGizmo();
         moveOutline.enabled = false;
         rotateOutline.enabled = false;
         scaleOutline.enabled = true;
-        gizmoManager.SetGizmoType("SCALE");
+ 
     }
     public void FocusGameObject(List<DecentralandEntityToEdit> entitiesToFocus)
     {

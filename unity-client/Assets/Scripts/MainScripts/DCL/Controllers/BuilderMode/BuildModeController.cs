@@ -86,6 +86,7 @@ public class BuildModeController : MonoBehaviour
 
     int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
 
+    SceneObject lastSceneObjectCreated;
     void Start()
     {
         if (snapGO == null)
@@ -114,7 +115,7 @@ public class BuildModeController : MonoBehaviour
 
 
         editModeChange.OnTriggered += OnEditModeChangeAction;
-        catalogController.OnSceneObjectSelected += OnSceneObjectSelected;
+        catalogController.OnSceneObjectSelected += CreateSceneObjectSelected;
         builderInputWrapper.OnMouseClick += MouseClick;
         buildModeEntityListController.OnEntityClick += SelectFromList;
         buildModeEntityListController.OnEntityDuplicate += DuplicateEntity;
@@ -204,7 +205,7 @@ public class BuildModeController : MonoBehaviour
             }
         }
     }
-    void OnSceneObjectSelected(SceneObject sceneObject)
+    void CreateSceneObjectSelected(SceneObject sceneObject)
     {
         SceneMetricsController.Model limits = sceneToEdit.metricsController.GetLimits();
         SceneMetricsController.Model usage = sceneToEdit.metricsController.GetModel();
@@ -273,9 +274,11 @@ public class BuildModeController : MonoBehaviour
         DeselectEntities();
         Select(entity);
 
+        entity.gameObject.transform.eulerAngles = Vector3.zero;
+
         currentActiveMode.CreatedEntity(convertedEntities[GetConvertedUniqueKeyForEntity(entity)]);
         catalogController.CloseCatalog();
-
+        lastSceneObjectCreated = sceneObject;
         InputDone();
 
     }
@@ -329,8 +332,14 @@ public class BuildModeController : MonoBehaviour
     {        
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            if (selectedEntities.Count > 0) DeselectEntities();
-            CreateBoxEntity();
+   
+            if(lastSceneObjectCreated != null)
+            {
+                if (selectedEntities.Count > 0) DeselectEntities();
+                CreateSceneObjectSelected(lastSceneObjectCreated);
+                InputDone();
+            }
+            //CreateBoxEntity();
         }
 
         if(Input.GetKeyUp(KeyCode.T))
@@ -401,6 +410,7 @@ public class BuildModeController : MonoBehaviour
     public void SetBuildMode(EditModeState state)
     {
         if(currentActiveMode != null)currentActiveMode.Desactivate();
+        isAdvancedModeActive = false;
         currentActiveMode = null;
         switch (state)
         {
@@ -413,6 +423,7 @@ public class BuildModeController : MonoBehaviour
             case EditModeState.Editor:
                 Debug.Log("Editor activated");
                 currentActiveMode = editorMode;
+                isAdvancedModeActive = true;
                 break;
         }
         if (currentActiveMode != null)
@@ -433,13 +444,14 @@ public class BuildModeController : MonoBehaviour
             SetBuildMode(EditModeState.Editor);
         }
 
-        isAdvancedModeActive = advanceModeActive;
+   
 
     }
 
     void StartMultiSelection()
     {
         isMultiSelectionActive = true;
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
         currentActiveMode.StartMultiSelection();
 
     }
@@ -711,6 +723,8 @@ public class BuildModeController : MonoBehaviour
     public void DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
     {
         DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToDuplicate.rootEntity);
+
+        BuildModeUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
     }
     public void DuplicateEntities()
@@ -726,7 +740,6 @@ public class BuildModeController : MonoBehaviour
             DuplicateEntity(selectedEntities[i]); 
         }
         Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
-        Debug.Log("Cursor changed");
     }
 
     DecentralandEntity CreateEntity()
@@ -856,8 +869,7 @@ public class BuildModeController : MonoBehaviour
     void SetupEntityToEdit(DecentralandEntity entity,bool hasBeenCreated = false)
     {
         if (!convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entity)))
-        {
-           
+        {           
             DecentralandEntityToEdit entityToEdit = Utils.GetOrCreateComponent<DecentralandEntityToEdit>(entity.gameObject);
             entityToEdit.Init(entity, editMaterial);
             convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);

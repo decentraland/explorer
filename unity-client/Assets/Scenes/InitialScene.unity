@@ -9045,7 +9045,6 @@ MonoBehaviour:
   axisX: {fileID: 355856631}
   axisY: {fileID: 831672716}
   axisZ: {fileID: 243326022}
-  sizeFactor: 2
 --- !u!1 &772541189
 GameObject:
   m_ObjectHideFlags: 0
@@ -16741,7 +16740,7 @@ MonoBehaviour:
   baseUrlMode: 0
   baseUrlCustom: 
   environment: 4
-  startInCoords: {x: 14, y: 4}
+  startInCoords: {x: 14, y: 3}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
@@ -17800,7 +17799,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1564401391
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17963,7 +17962,6 @@ MonoBehaviour:
   axisX: {fileID: 136434708}
   axisY: {fileID: 1311187790}
   axisZ: {fileID: 1522691647}
-  sizeFactor: 3.5
   axisProportionalScale: {fileID: 153805263}
 --- !u!1 &1589230373
 GameObject:
@@ -19193,7 +19191,6 @@ MonoBehaviour:
   axisX: {fileID: 592302014}
   axisY: {fileID: 2083766815}
   axisZ: {fileID: 283291336}
-  sizeFactor: 1.5
 --- !u!1 &1706716951
 GameObject:
   m_ObjectHideFlags: 0

@@ -107,6 +107,11 @@ public class BuildModeState : MonoBehaviour
         freeMovementGO.transform.rotation = zeroAnglesQuaternion;
         gameObjectToEdit.transform.rotation = zeroAnglesQuaternion;
 
+        foreach(DecentralandEntityToEdit decentralandEntityToEdit in selectedEntities)
+        {
+            decentralandEntityToEdit.rootEntity.gameObject.transform.eulerAngles = Vector3.zero;
+        }
+
     }
 
     public virtual Vector3 GetCreatedEntityPoint()

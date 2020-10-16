@@ -79,6 +79,7 @@ public class BuildFirstPersonMode : BuildModeState
     {
         base.Activate(scene);
         SetEditObjectParent();
+        freeMovementGO.transform.SetParent(Camera.main.transform);
     }
     public override void Desactivate()
     {

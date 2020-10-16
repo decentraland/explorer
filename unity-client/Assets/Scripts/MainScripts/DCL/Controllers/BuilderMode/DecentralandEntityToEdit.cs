@@ -84,7 +84,7 @@ public class DecentralandEntityToEdit : EditableEntity
     {
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
-        SetEditMaterials();
+        SaveOriginalMaterialAndSetEditMaterials();
         SceneController.i.boundariesChecker.AddPersistent(rootEntity);
     }
 
@@ -148,7 +148,7 @@ public class DecentralandEntityToEdit : EditableEntity
             }
         }
     }
-    void SetEditMaterials()
+    void SaveOriginalMaterialAndSetEditMaterials()
     {
         if (rootEntity.meshesInfo.renderers != null && rootEntity.meshesInfo.renderers.Length >= 1)
         {
@@ -156,7 +156,7 @@ public class DecentralandEntityToEdit : EditableEntity
             int cont = 0;
             foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
             {
-                originalMaterials[cont] = renderer.material;
+                if(renderer.material != editMaterial)originalMaterials[cont] = renderer.material;
                 renderer.material = editMaterial;
                 cont++;
             }
@@ -165,7 +165,7 @@ public class DecentralandEntityToEdit : EditableEntity
 
     void ShapeUpdate(DecentralandEntity decentralandEntity)
     {
-        if (IsSelected) SetEditMaterials();
+        if (IsSelected) SaveOriginalMaterialAndSetEditMaterials();
         CreateCollidersForEntity(decentralandEntity);
 
     }
