@@ -1,5 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED, EDITOR } from 'config'
+import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
@@ -13,11 +13,13 @@ import {
   HUDElementID,
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
-  UpdateUserStatusMessage
+  UpdateUserStatusMessage,
+  BuilderConfiguration
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
+import { setDelightedSurveyEnabled } from './delightedSurvey'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -142,7 +144,10 @@ export class UnityInterface {
 
   /** Sends the camera position & target to the engine */
 
-  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint, rotateIfTargetIsNotSet: boolean = true) {
+  public Teleport(
+    { position: { x, y, z }, cameraTarget }: InstancedSpawnPoint,
+    rotateIfTargetIsNotSet: boolean = true
+  ) {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
@@ -183,11 +188,6 @@ export class UnityInterface {
 
   public ShowFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
-  }
-
-  /* NOTE(Santi): This is temporal, until we remove the old taskbar */
-  public EnableNewTaskbar() {
-    this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
   }
 
   public HideFPSPanel() {
@@ -240,19 +240,23 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'ClearWearableCatalog')
   }
 
-  public ShowNewWearablesNotification(wearableNumber: number) {
-    // disabled
-  }
-
   public ShowNotification(notification: Notification) {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
-  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration, extraPayload: any | null = null) {
+  public ConfigureHUDElement(
+    hudElementId: HUDElementID,
+    configuration: HUDConfiguration,
+    extraPayload: any | null = null
+  ) {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration, extraPayload: extraPayload ? JSON.stringify(extraPayload) : null })
+      JSON.stringify({
+        hudElementId: hudElementId,
+        configuration: configuration,
+        extraPayload: extraPayload ? JSON.stringify(extraPayload) : null
+      })
     )
   }
 
@@ -271,8 +275,8 @@ export class UnityInterface {
     }
   }
 
-  public SetTutorialEnabled() {
-    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  public SetTutorialEnabled(fromDeepLink: boolean) {
+    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -336,8 +340,29 @@ export class UnityInterface {
     })
   }
 
+  public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
+    const tutorialCompletedFlag = 256
+
+    this.ConfigureHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD, {
+      active: true,
+      visible: false
+    })
+
+    if (WORLD_EXPLORER) {
+      if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
+        this.SetTutorialEnabled(fromDeepLink)
+      } else {
+        setDelightedSurveyEnabled(true)
+      }
+    }
+  }
+
   public UpdateBalanceOfMANA(balance: string) {
     this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
+  }
+
+  public SetPlayerTalking(talking: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
   }
 
   // *********************************************************************************
@@ -410,6 +435,10 @@ export class UnityInterface {
 
   public OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
+  }
+
+  public SetBuilderConfiguration(config: BuilderConfiguration) {
+    this.SendBuilderMessage('SetBuilderConfiguration', JSON.stringify(config))
   }
 
   private resizeCanvasDelayed(ev: UIEvent | null) {

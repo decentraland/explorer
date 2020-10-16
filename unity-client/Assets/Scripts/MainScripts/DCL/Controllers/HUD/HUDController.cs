@@ -1,4 +1,5 @@
 using DCL.HelpAndSupportHUD;
+using DCL.GoToGenesisPlazaHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,13 @@ public class HUDController : MonoBehaviour
     public static HUDController i { get; private set; }
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
-    private bool newTaskbarIsEnabled = false; // NOTE(Santi): This is temporal, until we remove the old taskbar
+
+    private readonly Notification.Model hiddenUINotification = new Notification.Model()
+    {
+        timer = 3,
+        type = NotificationFactory.Type.UI_HIDDEN,
+        groupID = "UIHiddenNotification"
+    };
 
     private void Awake()
     {
@@ -21,9 +28,11 @@ public class HUDController : MonoBehaviour
 
         toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
+
+        CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenOnOnChange;
     }
 
-    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.PROFILE_HUD) as Legacy.AvatarHUDController;
+    public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -70,6 +79,8 @@ public class HUDController : MonoBehaviour
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
 
+    public GoToGenesisPlazaHUDController goToGenesisPlazaHud => GetHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD) as GoToGenesisPlazaHUDController;
+
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
@@ -99,15 +110,18 @@ public class HUDController : MonoBehaviour
                                        EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
                                        (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
 
-        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen)
+        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen || CommonScriptableObjects.tutorialActive)
             return;
 
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 
-    private void OwnUserProfileUpdated(UserProfile profile)
+    private void AllUIHiddenOnOnChange(bool current, bool previous)
     {
-        UpdateAvatarHUD();
+        if (current)
+        {
+            NotificationsController.i?.ShowNotification(hiddenUINotification);
+        }
     }
 
     public enum HUDElementID
@@ -131,11 +145,12 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        EMAIL_PROMPT = 19,
-        EXPLORE_HUD = 20,
-        MANA_HUD = 21,
-        HELP_AND_SUPPORT_HUD = 22,
-        COUNT = 23
+        EXPLORE_HUD = 19,
+        MANA_HUD = 20,
+        HELP_AND_SUPPORT_HUD = 21,
+        GO_TO_GENESIS_PLAZA_HUD = 22,
+        EMAIL_PROMPT = 23,
+        COUNT = 24
     }
 
     [System.Serializable]
@@ -175,18 +190,7 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.PROFILE_HUD:
-                CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
-
-                if (avatarHud_Legacy != null)
-                {
-                    avatarHud_Legacy.Initialize();
-                    avatarHud_Legacy.OnEditAvatarPressed += ShowAvatarEditor;
-                    avatarHud_Legacy.OnSettingsPressed += ShowSettings;
-                    avatarHud_Legacy.OnControlsPressed += ShowControls;
-                    ownUserProfile.OnUpdate += OwnUserProfileUpdated;
-                    OwnUserProfileUpdated(ownUserProfile);
-                }
-
+                CreateHudElement<ProfileHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -277,13 +281,21 @@ public class HUDController : MonoBehaviour
 
                     if (taskbarHud != null)
                     {
-                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
-                            FriendsController.i, newTaskbarIsEnabled);
+                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i, FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
                         taskbarHud.AddSettingsWindow(settingsHud);
                         taskbarHud.AddBackpackWindow(avatarEditorHud);
+
+                        if (!string.IsNullOrEmpty(extraPayload))
+                        {
+                            var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
+                            if (config.enableVoiceChat)
+                            {
+                                taskbarHud.OnAddVoiceChat();
+                            }
+                        }
                     }
                 }
                 else
@@ -320,7 +332,7 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
                 {
-                    exploreHud.Initialize(FriendsController.i, newTaskbarIsEnabled);
+                    exploreHud.Initialize(FriendsController.i);
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
@@ -330,6 +342,10 @@ public class HUDController : MonoBehaviour
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
+                break;
+            case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
+                CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
+                taskbarHud?.AddGoToGenesisWindow(goToGenesisPlazaHud);
                 break;
         }
 
@@ -384,14 +400,6 @@ public class HUDController : MonoBehaviour
         hudElements[id].SetVisibility(config.visible);
     }
 
-    public void ShowNewWearablesNotification(string wearableCountString)
-    {
-        if (int.TryParse(wearableCountString, out int wearableCount))
-        {
-            avatarHud_Legacy.SetNewWearablesNotification(wearableCount);
-        }
-    }
-
     public void TriggerSelfUserExpression(string id)
     {
         expressionsHud?.ExpressionCalled(id);
@@ -409,14 +417,9 @@ public class HUDController : MonoBehaviour
         termsOfServiceHud?.ShowTermsOfService(model);
     }
 
-    private void UpdateAvatarHUD()
+    public void SetPlayerTalking(string talking)
     {
-        avatarHud_Legacy?.UpdateData(new Legacy.AvatarHUDModel()
-        {
-            name = ownUserProfile.userName,
-            mail = ownUserProfile.email,
-            avatarPic = ownUserProfile.faceSnapshot
-        });
+        taskbarHud?.SetVoiceChatRecording("true".Equals(talking));
     }
 
     public void RequestTeleport(string teleportDataJson)
@@ -437,16 +440,7 @@ public class HUDController : MonoBehaviour
     public void Cleanup()
     {
         toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
-
-        if (ownUserProfile != null)
-            ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
-
-        if (avatarHud_Legacy != null)
-        {
-            avatarHud_Legacy.OnEditAvatarPressed -= ShowAvatarEditor;
-            avatarHud_Legacy.OnSettingsPressed -= ShowSettings;
-            avatarHud_Legacy.OnControlsPressed -= ShowControls;
-        }
+        CommonScriptableObjects.allUIHidden.OnChange -= AllUIHiddenOnOnChange;
 
         if (worldChatWindowHud != null)
         {
@@ -499,10 +493,4 @@ public class HUDController : MonoBehaviour
         Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
-
-    // NOTE(Santi): This is temporal, until we remove the old taskbar
-    public void EnableNewTaskbar()
-    {
-        newTaskbarIsEnabled = true;
-    }
 }

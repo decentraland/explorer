@@ -1,5 +1,5 @@
-import { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
-import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
+import type { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
+import type { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
 export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
 
@@ -127,7 +127,7 @@ export type LoadableParcelScene = {
   contents: Array<ContentMapping>
   baseUrl: string
   baseUrlBundles: string
-  land: ILand
+  land?: ILand
 }
 
 export const BillboardModes = {
@@ -399,10 +399,11 @@ export enum HUDElementID {
   NFT_INFO_DIALOG = 16,
   TELEPORT_DIALOG = 17,
   CONTROLS_HUD = 18,
-  EMAIL_PROMPT = 19,
-  EXPLORE_HUD = 20,
-  MANA_HUD = 21,
-  HELP_AND_SUPPORT_HUD = 22
+  EXPLORE_HUD = 19,
+  MANA_HUD = 20,
+  HELP_AND_SUPPORT_HUD = 21,
+  GO_TO_GENESIS_PLAZA_HUD = 22,
+  EMAIL_PROMPT = 23
 }
 
 export type HUDConfiguration = {
@@ -495,4 +496,14 @@ export type UpdateUserStatusMessage = {
   realm: Realm | undefined
   position: Vector2Component | undefined
   presence: PresenceStatus
+}
+
+export type BuilderConfiguration = {
+  camera: {
+    zoomMin: number
+    zoomMax: number
+  }
+  environment: {
+    disableFloor: boolean
+  }
 }

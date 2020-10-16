@@ -17,8 +17,32 @@ namespace UnityGLTF
         // not implemented by the Standard shader
         public virtual int DiffuseTexCoord
         {
-            get { return 0; }
-            set { return; }
+            get { return _material.GetInt(_BaseMapUVs); }
+            set { _material.SetInt(_BaseMapUVs, value); }
+        }
+
+        Vector2 diffuseOffset = Vector2.zero;
+        public virtual Vector2 DiffuseXOffset
+        {
+            get
+            {
+                return diffuseOffset;
+            }
+            set
+            {
+                diffuseOffset = value;
+                _material.SetTextureOffset(_BaseMap, GLTFSceneImporter.GLTFOffsetToUnitySpace(diffuseOffset, DiffuseXScale.y));
+            }
+        }
+
+        public virtual Vector2 DiffuseXScale
+        {
+            get { return _material.GetTextureScale(_BaseMap); }
+            set
+            {
+                _material.SetTextureScale(_BaseMap, value);
+                DiffuseXOffset = diffuseOffset;
+            }
         }
 
         public virtual Color DiffuseFactor

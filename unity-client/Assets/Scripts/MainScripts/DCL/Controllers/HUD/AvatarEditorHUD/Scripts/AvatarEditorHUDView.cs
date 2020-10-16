@@ -34,6 +34,8 @@ public class AvatarEditorHUDView : MonoBehaviour
         public ItemSelector selector;
     }
 
+    [SerializeField] internal InputAction_Trigger toggleAction;
+    [SerializeField] internal InputAction_Trigger closeAction;
     [SerializeField] internal Canvas avatarEditorCanvas;
     [SerializeField] internal CanvasGroup avatarEditorCanvasGroup;
     [SerializeField] internal AvatarEditorNavigationInfo[] navigationInfos;
@@ -61,11 +63,17 @@ public class AvatarEditorHUDView : MonoBehaviour
     private AvatarEditorHUDController controller;
     internal readonly Dictionary<string, ItemSelector> selectorsByCategory = new Dictionary<string, ItemSelector>();
 
-    [HideInInspector]
     public event System.Action<AvatarModel> OnAvatarAppear;
+    public event System.Action<bool> OnSetVisibility;
+    public event System.Action OnRandomize;
+    public event System.Action OnToggleActionTriggered;
+    public event System.Action OnCloseActionTriggered;
 
     private void Awake()
     {
+        toggleAction.OnTriggered += ToggleAction_OnTriggered;
+        closeAction.OnTriggered += CloseAction_OnTriggered;
+
         if (characterPreviewController == null)
         {
             characterPreviewController = GameObject.Instantiate(characterPreviewPrefab).GetComponent<CharacterPreviewController>();
@@ -73,6 +81,22 @@ public class AvatarEditorHUDView : MonoBehaviour
         }
 
         isOpen = false;
+    }
+
+    private void OnDestroy()
+    {
+        toggleAction.OnTriggered -= ToggleAction_OnTriggered;
+        closeAction.OnTriggered -= CloseAction_OnTriggered;
+    }
+
+    private void ToggleAction_OnTriggered(DCLAction_Trigger action)
+    {
+        OnToggleActionTriggered?.Invoke();
+    }
+
+    private void CloseAction_OnTriggered(DCLAction_Trigger action)
+    {
+        OnCloseActionTriggered?.Invoke();
     }
 
     private void Initialize(AvatarEditorHUDController controller)
@@ -288,6 +312,7 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     private void OnRandomizeButton()
     {
+        OnRandomize?.Invoke();
         controller.RandomizeWearables();
     }
 
@@ -312,14 +337,20 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void SetVisibility(bool visible)
     {
-        if (visible && !isOpen)
-            AudioScriptableObjects.dialogOpen.Play(true);
-        else if (isOpen)
-            AudioScriptableObjects.dialogClose.Play(true);
-
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
+
+        if (visible && !isOpen)
+        {
+            AudioScriptableObjects.dialogOpen.Play(true);
+            OnSetVisibility?.Invoke(visible);
+        }
+        else if (!visible && isOpen)
+        {
+            AudioScriptableObjects.dialogClose.Play(true);
+            OnSetVisibility?.Invoke(visible);
+        }
 
         isOpen = visible;
     }

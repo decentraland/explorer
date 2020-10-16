@@ -1,4 +1,6 @@
+using System;
 using DCL;
+using DCL.GoToGenesisPlazaHUD;
 using DCL.HelpAndSupportHUD;
 using DCL.Helpers;
 using DCL.Interface;
@@ -9,6 +11,12 @@ using UnityEngine.EventSystems;
 
 public class TaskbarHUDController : IHUD
 {
+    [Serializable]
+    public struct Configuration
+    {
+        public bool enableVoiceChat;
+    }
+
     public TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
@@ -17,6 +25,7 @@ public class TaskbarHUDController : IHUD
     public AvatarEditorHUDController avatarEditorHud;
     public ExploreHUDController exploreHud;
     public HelpAndSupportHUDController helpAndSupportHud;
+    public GoToGenesisPlazaHUDController goToGenesisHud;
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
@@ -27,13 +36,18 @@ public class TaskbarHUDController : IHUD
 
     public event System.Action OnAnyTaskbarButtonClicked;
 
-    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController,
-        IFriendsController friendsController, bool newTaskbarIsEnabled)
+    public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
+    public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
+    public RectTransform backpackTooltipReference { get => view.backpackTooltipReference; }
+    public RectTransform goToGenesisTooltipReference { get => view.goToGenesisTooltipReference; }
+    public TaskbarMoreMenu moreMenu { get => view.moreMenu; }
+
+    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController, IFriendsController friendsController)
     {
         this.mouseCatcher = mouseCatcher;
         this.chatController = chatController;
 
-        view = TaskbarHUDView.Create(this, chatController, friendsController, newTaskbarIsEnabled);
+        view = TaskbarHUDView.Create(this, chatController, friendsController);
 
         if (mouseCatcher != null)
         {
@@ -56,6 +70,8 @@ public class TaskbarHUDController : IHUD
         view.OnBackpackToggleOn += View_OnBackpackToggleOn;
         view.OnExploreToggleOff += View_OnExploreToggleOff;
         view.OnExploreToggleOn += View_OnExploreToggleOn;
+        view.OnGoToGenesisToggleOff += View_OnGoToGenesisToggleOff;
+        view.OnGoToGenesisToggleOn += View_OnGoToGenesisToggleOn;
 
         toggleFriendsTrigger = Resources.Load<InputAction_Trigger>("ToggleFriends");
         toggleFriendsTrigger.OnTriggered -= ToggleFriendsTrigger_OnTriggered;
@@ -76,6 +92,8 @@ public class TaskbarHUDController : IHUD
         }
 
         view.leftWindowContainerAnimator.Show();
+
+        CommonScriptableObjects.isTaskbarHUDInitialized.Set(true);
     }
 
     private void ChatHeadsGroup_OnHeadClose(TaskbarButton obj)
@@ -165,6 +183,18 @@ public class TaskbarHUDController : IHUD
         exploreHud.SetVisibility(false);
     }
 
+    private void View_OnGoToGenesisToggleOn()
+    {
+        goToGenesisHud.SetVisibility(true);
+
+        OnAnyTaskbarButtonClicked?.Invoke();
+    }
+
+    private void View_OnGoToGenesisToggleOff()
+    {
+        goToGenesisHud.SetVisibility(false);
+    }
+
     private void MouseCatcher_OnMouseUnlock()
     {
         view.leftWindowContainerAnimator.Show();
@@ -173,7 +203,7 @@ public class TaskbarHUDController : IHUD
     private void MouseCatcher_OnMouseLock()
     {
         view.leftWindowContainerAnimator.Hide();
-        view.moreMenu.ShowMoreMenu(false);
+        ShowMoreMenu(false);
 
         foreach (var btn in view.GetButtonList())
         {
@@ -183,8 +213,7 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.SetVisibility(true);
         worldChatWindowHud.view.ActivatePreview();
 
-        if (!AnyWindowsDifferentThanChatIsOpen())
-            worldChatWindowHud.MarkWorldChatMessagesAsRead();
+        MarkWorldChatAsReadIfOtherWindowIsOpen();
     }
 
     public void AddWorldChatWindow(WorldChatWindowHUDController controller)
@@ -245,8 +274,7 @@ public class TaskbarHUDController : IHUD
             if (btn != null)
                 btn.SetToggleState(false, false);
 
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
 
         privateChatWindowHud.view.OnClose += () =>
@@ -262,8 +290,7 @@ public class TaskbarHUDController : IHUD
                 view.chatHeadsGroup.RemoveChatHead(btn);
             }
 
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -285,9 +312,7 @@ public class TaskbarHUDController : IHUD
         friendsHud.view.OnClose += () =>
         {
             view.friendsButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
 
         friendsHud.view.friendsList.OnDeleteConfirmation += (userIdToRemove) => { view.chatHeadsGroup.RemoveChatHead(userIdToRemove); };
@@ -305,8 +330,7 @@ public class TaskbarHUDController : IHUD
         view.OnAddSettingsWindow();
         settingsHud.OnClose += () =>
         {
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -323,9 +347,7 @@ public class TaskbarHUDController : IHUD
         avatarEditorHud.OnClose += () =>
         {
             view.backpackButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -342,9 +364,7 @@ public class TaskbarHUDController : IHUD
         exploreHud.OnClose += () =>
         {
             view.exploreButton.SetToggleState(false, false);
-
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
     }
 
@@ -360,9 +380,44 @@ public class TaskbarHUDController : IHUD
         view.OnAddHelpAndSupportWindow();
         helpAndSupportHud.view.OnClose += () =>
         {
-            if (!AnyWindowsDifferentThanChatIsOpen())
-                worldChatWindowHud.MarkWorldChatMessagesAsRead();
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
+    }
+
+    public void AddGoToGenesisWindow(GoToGenesisPlazaHUDController controller)
+    {
+        if (controller == null || controller.view == null)
+        {
+            Debug.LogWarning("AddGoToGenesisWindow >>> Go to Genesis window doesn't exist yet!");
+            return;
+        }
+
+        goToGenesisHud = controller;
+        goToGenesisHud.view.OnClose += () =>
+        {
+            view.goToGenesisButton.SetToggleState(false, false);
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
+        };
+    }
+
+    public void OnAddVoiceChat()
+    {
+        view.OnAddVoiceChat();
+    }
+
+    public void ShowGoToGenesisPlazaButton()
+    {
+        view.OnAddGoToGenesisWindow(true);
+
+        view.rightButtonsHorizontalLayout.CalculateLayoutInputHorizontal();
+        view.rightButtonsHorizontalLayout.CalculateLayoutInputVertical();
+        view.rightButtonsHorizontalLayout.SetLayoutHorizontal();
+        view.rightButtonsHorizontalLayout.SetLayoutVertical();
+    }
+
+    public void HideGoToGenesisPlazaButton()
+    {
+        view.OnAddGoToGenesisWindow(false);
     }
 
     public void AddControlsMoreOption()
@@ -399,6 +454,8 @@ public class TaskbarHUDController : IHUD
             view.OnBackpackToggleOn -= View_OnBackpackToggleOn;
             view.OnExploreToggleOff -= View_OnExploreToggleOff;
             view.OnExploreToggleOn -= View_OnExploreToggleOn;
+            view.OnGoToGenesisToggleOff -= View_OnGoToGenesisToggleOff;
+            view.OnGoToGenesisToggleOn -= View_OnGoToGenesisToggleOn;
 
             UnityEngine.Object.Destroy(view.gameObject);
         }
@@ -458,6 +515,11 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud.view.ActivatePreview();
     }
 
+    public void SetVoiceChatRecording(bool recording)
+    {
+        view?.voiceChatButton.SetOnRecording(recording);
+    }
+
     private void OnFriendsToggleInputPress()
     {
         bool anyInputFieldIsSelected = EventSystem.current != null &&
@@ -483,5 +545,21 @@ public class TaskbarHUDController : IHUD
     {
         return (friendsHud != null && friendsHud.view.gameObject.activeSelf) ||
                (privateChatWindowHud != null && privateChatWindowHud.view.gameObject.activeSelf);
+    }
+
+    private void MarkWorldChatAsReadIfOtherWindowIsOpen()
+    {
+        if (!AnyWindowsDifferentThanChatIsOpen())
+            worldChatWindowHud.MarkWorldChatMessagesAsRead();
+    }
+
+    public void ShowMoreMenu(bool isActive)
+    {
+        view.moreMenu.ShowMoreMenu(isActive);
+    }
+
+    public void ShowTutorialOption(bool isActive)
+    {
+        view.moreMenu.ShowTutorialButton(isActive);
     }
 }

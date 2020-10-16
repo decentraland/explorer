@@ -41,8 +41,8 @@ public static class AudioScriptableObjects
     private static AudioEvent fadeOutEvent;
     public static AudioEvent fadeOut => CommonScriptableObjects.GetOrLoad(ref fadeOutEvent, "ScriptableObjects/AudioEvents/HUDCommon/FadeOut");
 
-    private static AudioEvent listItemAppearEvent;
-    public static AudioEvent listItemAppear => CommonScriptableObjects.GetOrLoad(ref listItemAppearEvent, "ScriptableObjects/AudioEvents/HUDCommon/ListItemAppear");
+    private static AudioEvent_WithPitchIncrement listItemAppearEvent;
+    public static AudioEvent_WithPitchIncrement listItemAppear => CommonScriptableObjects.GetOrLoad(ref listItemAppearEvent, "ScriptableObjects/AudioEvents/HUDCommon/ListItemAppear");
 
     private static AudioEvent chatReceiveGlobalEvent;
     public static AudioEvent chatReceiveGlobal => CommonScriptableObjects.GetOrLoad(ref chatReceiveGlobalEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceiveGlobal");
@@ -77,6 +77,9 @@ public static class CommonScriptableObjects
     private static Vector2IntVariable playerCoordsValue;
     public static Vector2IntVariable playerCoords => GetOrLoad(ref playerCoordsValue, "ScriptableObjects/PlayerCoords");
 
+    private static BooleanVariable playerIsOnMovingPlatformValue;
+    public static BooleanVariable playerIsOnMovingPlatform => GetOrLoad(ref playerIsOnMovingPlatformValue, "ScriptableObjects/playerIsOnMovingPlatform");
+
     private static StringVariable sceneIDValue;
     public static StringVariable sceneID => GetOrLoad(ref sceneIDValue, "ScriptableObjects/SceneID");
 
@@ -94,6 +97,12 @@ public static class CommonScriptableObjects
 
     private static Vector3Variable cameraRightValue;
     public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
+
+    private static BooleanVariable cameraIsBlendingValue;
+    public static BooleanVariable cameraIsBlending => GetOrLoad(ref cameraIsBlendingValue, "ScriptableObjects/CameraIsBlending");
+
+    private static BooleanVariable cameraBlockedValue;
+    public static BooleanVariable cameraBlocked => GetOrLoad(ref cameraBlockedValue, "ScriptableObjects/CameraBlocked");
 
     private static BooleanVariable playerInfoCardVisibleStateValue;
     public static BooleanVariable playerInfoCardVisibleState => GetOrLoad(ref playerInfoCardVisibleStateValue, "ScriptableObjects/PlayerInfoCardVisibleState");
@@ -115,6 +124,15 @@ public static class CommonScriptableObjects
 
     private static CameraMode cameraModeValue;
     public static CameraMode cameraMode => GetOrLoad(ref cameraModeValue, "ScriptableObjects/CameraMode");
+
+    private static BooleanVariable isProfileHUDOpenValue;
+    public static BooleanVariable isProfileHUDOpen => GetOrLoad(ref isProfileHUDOpenValue, "ScriptableObjects/IsProfileHUDOpen");
+
+    private static BooleanVariable isTaskbarHUDInitializedValue;
+    public static BooleanVariable isTaskbarHUDInitialized => GetOrLoad(ref isTaskbarHUDInitializedValue, "ScriptableObjects/IsTaskbarHUDInitialized");
+
+    private static BooleanVariable tutorialActiveValue;
+    public static BooleanVariable tutorialActive => GetOrLoad(ref tutorialActiveValue, "ScriptableObjects/TutorialActive");
 
     internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {

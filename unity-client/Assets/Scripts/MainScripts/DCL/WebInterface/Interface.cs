@@ -418,6 +418,18 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class SetVoiceChatRecordingPayload
+        {
+            public bool recording;
+        }
+
+        [System.Serializable]
+        public class ApplySettingsPayload
+        {
+            public float sfxVolume;
+        }
+
+        [System.Serializable]
         public class JumpInPayload
         {
             public FriendsController.UserStatus.Realm realm = new FriendsController.UserStatus.Realm();
@@ -449,6 +461,19 @@ namespace DCL.Interface
 
             public string name;
             public Property[] properties;
+        }
+
+        [System.Serializable]
+        public class DelightedSurveyEnabledPayload
+        {
+            public bool enabled;
+        }
+
+        [System.Serializable]
+        public class ExternalActionSceneEventPayload
+        {
+            public string type;
+            public string payload;
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -511,12 +536,17 @@ namespace DCL.Interface
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
         private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
+        private static SetVoiceChatRecordingPayload setVoiceChatRecordingPayload = new SetVoiceChatRecordingPayload();
+
+        private static ApplySettingsPayload applySettingsPayload = new ApplySettingsPayload();
         private static GIFSetupPayload gifSetupPayload = new GIFSetupPayload();
         private static JumpInPayload jumpInPayload = new JumpInPayload();
         private static GotoEvent gotoEvent = new GotoEvent();
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
         private static BaseResolution baseResEvent = new BaseResolution();
         private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
+        private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
+        private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -759,9 +789,10 @@ namespace DCL.Interface
             SendMessage("SendScreenshot", onSendScreenshot);
         }
 
-        public static void ReportEditAvatarClicked()
+        public static void SetDelightedSurveyEnabled(bool enabled)
         {
-            SendMessage("EditAvatarClicked");
+            delightedSurveyEnabled.enabled = enabled;
+            SendMessage("SetDelightedSurveyEnabled", delightedSurveyEnabled);
         }
 
         [System.Serializable]
@@ -893,6 +924,23 @@ namespace DCL.Interface
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
 
+        public static void SendSetVoiceChatRecording(bool recording)
+        {
+            setVoiceChatRecordingPayload.recording = recording;
+            SendMessage("SetVoiceChatRecording", setVoiceChatRecordingPayload);
+        }
+
+        public static void ToggleVoiceChatRecording()
+        {
+            SendMessage("ToggleVoiceChatRecording");
+        }
+
+        public static void ApplySettings(float sfxVolume)
+        {
+            applySettingsPayload.sfxVolume = sfxVolume;
+            SendMessage("ApplySettings", applySettingsPayload);
+        }
+
         public static void RequestGIFProcessor(string gifURL, string gifId, bool isWebGL1)
         {
             gifSetupPayload.imageSource = gifURL;
@@ -972,6 +1020,13 @@ namespace DCL.Interface
         public static void FetchBalanceOfMANA()
         {
             SendMessage("FetchBalanceOfMANA");
+        }
+
+        public static void SendSceneExternalActionEvent(string sceneId, string type, string payload)
+        {
+            sceneExternalActionEvent.type = type;
+            sceneExternalActionEvent.payload = payload;
+            SendSceneEvent(sceneId, "externalAction", sceneExternalActionEvent);
         }
     }
 }
