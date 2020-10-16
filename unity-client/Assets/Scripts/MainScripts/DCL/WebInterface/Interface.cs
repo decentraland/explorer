@@ -2,7 +2,6 @@ using System;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
-using System;
 using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -463,6 +462,18 @@ namespace DCL.Interface
             public Property[] properties;
         }
 
+        public class DelightedSurveyEnabledPayload
+        {
+            public bool enabled;
+        }
+
+        [System.Serializable]
+        public class ExternalActionSceneEventPayload
+        {
+            public string type;
+            public string payload;
+        }
+
         [System.Serializable]
         public class MuteUserPayload
         {
@@ -539,6 +550,8 @@ namespace DCL.Interface
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
         private static BaseResolution baseResEvent = new BaseResolution();
         private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
+        private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
+        private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
@@ -782,9 +795,10 @@ namespace DCL.Interface
             SendMessage("SendScreenshot", onSendScreenshot);
         }
 
-        public static void ReportEditAvatarClicked()
+        public static void SetDelightedSurveyEnabled(bool enabled)
         {
-            SendMessage("EditAvatarClicked");
+            delightedSurveyEnabled.enabled = enabled;
+            SendMessage("SetDelightedSurveyEnabled", delightedSurveyEnabled);
         }
 
         [System.Serializable]
@@ -1012,6 +1026,13 @@ namespace DCL.Interface
         public static void FetchBalanceOfMANA()
         {
             SendMessage("FetchBalanceOfMANA");
+        }
+
+        public static void SendSceneExternalActionEvent(string sceneId, string type, string payload)
+        {
+            sceneExternalActionEvent.type = type;
+            sceneExternalActionEvent.payload = payload;
+            SendSceneEvent(sceneId, "externalAction", sceneExternalActionEvent);
         }
 
         public static void SetMuteUser(string userId, bool mute)

@@ -104,7 +104,8 @@ export const MORDOR_POSITION: Position = [
   0,
   0,
   0,
-  0
+  0,
+  true
 ]
 
 type CommsContainer = {
@@ -113,6 +114,7 @@ type CommsContainer = {
     create: () => string
     list: () => string[]
     remove: (id: string) => boolean
+    reposition: (id: string) => void
   }
 }
 
@@ -401,7 +403,8 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 }
 
 function processVoiceFragment(context: Context, fromAlias: string, message: Package<VoiceFragment>) {
-  const profile = getProfile(store.getState(), getIdentity().address)
+  const myAddress = getIdentity().address
+  const profile = getProfile(store.getState(), myAddress)
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
@@ -411,6 +414,7 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       peerTrackingInfo.identity &&
       !isBlocked(profile, peerTrackingInfo.identity) &&
       !isMuted(profile, peerTrackingInfo.identity) &&
+      !hasBlockedMe(myAddress, peerTrackingInfo.identity) &&
       peerTrackingInfo.position
     ) {
       voiceCommunicator?.playEncodedAudio(
@@ -429,6 +433,12 @@ function isBlocked(profile: Profile, userId: string): boolean {
 
 function isMuted(profile: Profile, userId: string): boolean {
   return !!profile.muted && profile.muted.includes(userId)
+}
+
+function hasBlockedMe(myAddress: string, theirAddress: string): boolean {
+  const profile = getProfile(store.getState(), theirAddress)
+
+  return !!profile && isBlocked(profile, myAddress)
 }
 
 export function processProfileMessage(
@@ -485,7 +495,9 @@ export function processPositionMessage(context: Context, fromAlias: string, mess
   const msgTimestamp = message.time
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
-  if (msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
+
+  const immediateReposition = message.data[7]
+  if (immediateReposition || msgTimestamp > peerTrackingInfo.lastPositionUpdate) {
     const p = message.data
 
     peerTrackingInfo.position = p
@@ -517,6 +529,7 @@ export function onPositionUpdate(context: Context, p: Position) {
 
   const oldParcel = context.currentPosition ? position2parcel(context.currentPosition) : null
   const newParcel = position2parcel(p)
+  const immediateReposition = p[7]
 
   if (!sameParcel(oldParcel, newParcel)) {
     const commArea = new CommunicationArea(newParcel, context.commRadius)
@@ -535,7 +548,6 @@ export function onPositionUpdate(context: Context, p: Position) {
         }
       }
     }
-
     currentParcelTopics = rawTopics.join(' ')
     if (context.currentPosition && !context.positionUpdatesPaused) {
       worldConnection
@@ -544,20 +556,21 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
   }
 
-  const parcelSceneSubscriptions = getParcelSceneSubscriptions()
+  if (!immediateReposition) { // Otherwise the topics get lost on an immediate reposition...
+    const parcelSceneSubscriptions = getParcelSceneSubscriptions()
+    const parcelSceneCommsTopics = parcelSceneSubscriptions.join(' ')
 
-  const parcelSceneCommsTopics = parcelSceneSubscriptions.join(' ')
+    const topics =
+      (context.userInfo.userId ? context.userInfo.userId + ' ' : '') +
+      currentParcelTopics +
+      (parcelSceneCommsTopics.length ? ' ' + parcelSceneCommsTopics : '')
 
-  const topics =
-    (context.userInfo.userId ? context.userInfo.userId + ' ' : '') +
-    currentParcelTopics +
-    (parcelSceneCommsTopics.length ? ' ' + parcelSceneCommsTopics : '')
-
-  if (topics !== previousTopics) {
-    worldConnection
-      .updateSubscriptions(topics.split(' '))
-      .catch((e) => defaultLogger.warn(`error while updating subscriptions`, e))
-    previousTopics = topics
+    if (topics !== previousTopics) {
+      worldConnection
+        .updateSubscriptions(topics.split(' '))
+        .catch((e) => defaultLogger.warn(`error while updating subscriptions`, e))
+      previousTopics = topics
+    }
   }
 
   context.currentPosition = p
@@ -568,11 +581,11 @@ export function onPositionUpdate(context: Context, p: Position) {
   const elapsed = now - lastNetworkUpdatePosition
 
   // We only send the same position message as a ping if we have not sent positions in the last 5 seconds
-  if (arrayEquals(p, lastPositionSent) && elapsed < 5000) {
+  if (!immediateReposition && arrayEquals(p, lastPositionSent) && elapsed < 5000) {
     return
   }
 
-  if (elapsed > 100 && !context.positionUpdatesPaused) {
+  if ((immediateReposition || elapsed > 100) && !context.positionUpdatesPaused) {
     lastPositionSent = p
     lastNetworkUpdatePosition = now
     worldConnection.sendPositionMessage(p).catch((e) => defaultLogger.warn(`error while sending message `, e))
@@ -972,7 +985,8 @@ async function doStartCommunications(context: Context) {
         obj.quaternion.x,
         obj.quaternion.y,
         obj.quaternion.z,
-        obj.quaternion.w
+        obj.quaternion.w,
+        obj.immediate
       ] as Position
 
       if (context && isWorldRunning) {
@@ -1144,7 +1158,7 @@ globalThis.bots = {
       processPositionMessage(context!, id, {
         type: 'position',
         time: Date.now(),
-        data: [position.x, position.y, position.z, 0, 0, 0, 0]
+        data: [position.x, position.y, position.z, 0, 0, 0, 0, false]
       })
     }, 1000)
     bots.push({ id, handle })
@@ -1163,6 +1177,18 @@ globalThis.bots = {
       return true
     }
     return false
+  },
+  reposition: (id: string) => { // to test immediate repositioning
+    let bot = bots.find((bot) => bot.id === id)
+    if (bot) {
+      const position = { ...lastPlayerPosition }
+
+      bot.handle = processPositionMessage(context!, id, {
+        type: 'position',
+        time: Date.now(),
+        data: [position.x, position.y, position.z, 0, 0, 0, 0, true]
+      })
+    }
   },
   list: () => bots.map((bot) => bot.id)
 }
