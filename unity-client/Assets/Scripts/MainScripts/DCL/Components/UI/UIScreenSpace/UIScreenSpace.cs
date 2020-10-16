@@ -136,27 +136,23 @@ namespace DCL.Components
             {
                 canvas.sortingOrder = -1;
 
-                // "Constrained" panel mask (to avoid rendering parcels UI on the viewport's top 10%)
-                GameObject constrainedPanel = new GameObject("ConstrainedPanel");
-                constrainedPanel.AddComponent<RectMask2D>();
-                childHookRectTransform = constrainedPanel.GetComponent<RectTransform>();
+                GameObject resizedPanel = new GameObject("ResizeUIArea");
+
+                resizedPanel.AddComponent<RectMask2D>().enabled = false; // TODO: find a way of avoiding this RectMask (right now if we remove it that gameobject gets destroyed somehow...)
+
+                resizedPanel.AddComponent<CanvasRenderer>();
+                childHookRectTransform = resizedPanel.GetComponent<RectTransform>();
                 childHookRectTransform.SetParent(canvas.transform);
                 childHookRectTransform.ResetLocalTRS();
 
                 childHookRectTransform.anchorMin = Vector2.zero;
                 childHookRectTransform.anchorMax = new Vector2(1, 0);
 
-                // We scale the panel downwards to subtract the viewport's top 10%
                 float canvasHeight = canvasScaler.referenceResolution.y;
-                childHookRectTransform.pivot = new Vector2(0.5f, 0f);
-                float canvasSubtraction = canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100;
-                childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);
-
-                // We scale the panel upwards to subtract the viewport's bottom 5% for Decentraland's taskbar
-                canvasHeight = childHookRectTransform.sizeDelta.y;
                 childHookRectTransform.pivot = new Vector2(0.5f, 1f);
                 childHookRectTransform.anchoredPosition = new Vector3(0, canvasHeight, 0f);
-                childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction / 2);
+                float canvasSubtraction = canvasHeight * 0.05f;
+                childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);
             }
 
             // Canvas group
