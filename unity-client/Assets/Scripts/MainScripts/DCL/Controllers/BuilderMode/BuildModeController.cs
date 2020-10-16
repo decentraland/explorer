@@ -281,13 +281,13 @@ public class BuildModeController : MonoBehaviour
     }
 
 
+ 
+
     void CheckInputForShowingWindows()
     {
         if (Input.GetKey(KeyCode.Y))
         {
-            if (isSceneEntitiesListActive) buildModeEntityListController.CloseList();
-            else buildModeEntityListController.OpenEntityList(convertedEntities.Values.ToList());
-            isSceneEntitiesListActive = !isSceneEntitiesListActive;
+            ChangeEntityListVisibility();
             InputDone();
             return;
         }
@@ -373,6 +373,12 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+    public void ChangeEntityListVisibility()
+    {
+        if (isSceneEntitiesListActive) buildModeEntityListController.CloseList();
+        else buildModeEntityListController.OpenEntityList(GetEntitiesInCurrentScene());
+        isSceneEntitiesListActive = !isSceneEntitiesListActive;
+    }
     public void ChangeVisibilityOfSceneInfo()
     {
         if (isSceneInformationActive)
@@ -806,6 +812,10 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
         SetBuildMode(EditModeState.Inactive);
+
+        if (isSceneEntitiesListActive) ChangeEntityListVisibility();
+    
+           
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
     }
 
@@ -855,6 +865,16 @@ public class BuildModeController : MonoBehaviour
             entityToEdit.IsNew = hasBeenCreated;
         }
 
+    }
+
+    List<DecentralandEntityToEdit> GetEntitiesInCurrentScene()
+    {
+        List<DecentralandEntityToEdit> currentEntitiesInScene = new List<DecentralandEntityToEdit>();
+        foreach(DecentralandEntityToEdit entity in convertedEntities.Values)
+        {
+            if (entity.rootEntity.scene == sceneToEdit) currentEntitiesInScene.Add(entity);
+        }
+        return currentEntitiesInScene;
     }
 
     void RemoveConvertedEntity(DecentralandEntity entity)

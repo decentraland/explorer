@@ -50,12 +50,17 @@ public class BuildEditorMode : BuildModeState
         SetLookAtObject();
 
 
-        freeCameraController.SetPosition(Camera.main.transform.position + Vector3.up * distanceEagleCamera);
+        // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player position and the camera 
+        Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;
+     
+        freeCameraController.SetPosition(cameraPosition + Vector3.up * distanceEagleCamera);
+
+        //
         freeCameraController.LookAt(lookAtT);
 
         eagleCamera.gameObject.SetActive(true);
         gizmoManager.InitializeGizmos(Camera.main,freeCameraController.transform);
-
+        gizmoManager.SetAllGizmosInPosition(cameraPosition);
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE) gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
         SceneController.i.IsolateScene(sceneToEdit);
@@ -238,7 +243,6 @@ public class BuildEditorMode : BuildModeState
     public void FocusGameObject(List<DecentralandEntityToEdit> entitiesToFocus)
     {
         freeCameraController.FocusOnEntities(entitiesToFocus);
-
     }
 
     void ShowGizmos()
@@ -254,6 +258,7 @@ public class BuildEditorMode : BuildModeState
     Vector3 CalculateMiddlePoint(Vector2Int[] positions)
     {
         Vector3 position;
+
         float totalX = 0f;
         float totalY = 0f;
         float totalZ = 0f;
@@ -279,11 +284,15 @@ public class BuildEditorMode : BuildModeState
         position.y = totalY;
         position.z = centerZ;
 
-        position.x += ParcelSettings.PARCEL_SIZE * Mathf.Abs(maxX - minX) / 2;
-        position.z += ParcelSettings.PARCEL_SIZE * Mathf.Abs(maxY - minY) / 2;
+        int amountParcelsX = Mathf.Abs(maxX - minX)+1;
+        int amountParcelsZ = Mathf.Abs(maxY - minY)+1;
+
+        position.x += ParcelSettings.PARCEL_SIZE/2 * amountParcelsX;
+        position.z += ParcelSettings.PARCEL_SIZE/2 * amountParcelsZ;
 
         return position;
     }
+
 
 
     void SetEditObjectAtMouse()

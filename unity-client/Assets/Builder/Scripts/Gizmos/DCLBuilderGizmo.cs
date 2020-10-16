@@ -10,14 +10,14 @@ namespace Builder.Gizmos
         [SerializeField] protected DCLBuilderGizmoAxis axisZ;
 
         public bool initialized { get; private set; }
-        public float sizeFactor = 1;
         protected float snapFactor = 0;
 
         protected bool worldOrientedGizmos = true;
         private Transform targetTransform = null;
 
         protected Camera builderCamera;
-
+        protected Transform cameraTransform;
+        
         private Vector3 relativeScaleRatio, initialScale;
         protected bool startDragging = false;
         protected float prevAxisValue;
@@ -28,17 +28,23 @@ namespace Builder.Gizmos
         public abstract void TransformEntity(Transform targetTransform, DCLBuilderGizmoAxis axis, float axisValue);
 
 
-        public virtual void Initialize(Camera camera,Transform cameraTransform)
+        public virtual void Initialize(Camera camera,Transform _cameraTransform)
         {
             if (!initialized) initialScale = transform.localScale;
             initialized = true;
-            relativeScaleRatio = initialScale / GetCameraPlaneDistance(cameraTransform, transform.position);
+            relativeScaleRatio = transform.localScale / GetCameraPlaneDistance(_cameraTransform, transform.position); 
             builderCamera = camera;
+            cameraTransform = _cameraTransform;
             axisX.SetGizmo(this);
             axisY.SetGizmo(this);
             axisZ.SetGizmo(this);
         }
 
+        [ContextMenu("Force relative scale")]
+        public void ForceRelativeScaleRatio()
+        {
+            relativeScaleRatio = new Vector3(0.06f,0.06f,0.06f);
+        }
         public string GetGizmoType()
         {
             return gizmoType;
@@ -124,8 +130,8 @@ namespace Builder.Gizmos
             SetPositionToTarget();
             if (builderCamera)
             {
-                float dist = GetCameraPlaneDistance(builderCamera.transform, transform.position);
-                transform.localScale = relativeScaleRatio * dist* sizeFactor;
+                float dist = GetCameraPlaneDistance(cameraTransform, transform.position);
+                transform.localScale = relativeScaleRatio * dist;
             }
         }
 
@@ -134,5 +140,8 @@ namespace Builder.Gizmos
             Plane plane = new Plane(cameraTransform.forward, cameraTransform.position);
             return plane.GetDistanceToPoint(objectPosition);
         }
+
+
+      
     }
 }

@@ -86,6 +86,14 @@ namespace Builder.Gizmos
             hoveredAxis = axis;
         }
 
+        public void SetAllGizmosInPosition(Vector3 position)
+        {
+            for (int i = 0; i < gizmos.Length; i++)
+            {
+                //gizmos[i].transform.position = position;
+                gizmos[i].ForceRelativeScaleRatio();
+            }
+        }
         public void ShowGizmo()
         {
             if (activeGizmo != null)

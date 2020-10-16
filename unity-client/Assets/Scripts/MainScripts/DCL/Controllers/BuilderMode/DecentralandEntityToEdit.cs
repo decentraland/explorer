@@ -233,8 +233,8 @@ public class DecentralandEntityToEdit : EditableEntity
     {
         if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.currentShape == null) return;
         if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length <= 0) return;
-        if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.2f) return;
-        if (rootEntity.gameObject.transform.position.y >= 0.1f) return;
+        if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.05f) return;
+        if (rootEntity.gameObject.transform.position.y >= 0.05f) return;
 
         isFloor = true;
         SetLockStatus(true);
