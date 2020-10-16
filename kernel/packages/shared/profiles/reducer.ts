@@ -15,7 +15,7 @@ import {
 
 const INITIAL_PROFILES: ProfileState = {
   userInfo: {},
-  userInventory: {},
+  userInventory: {}
 }
 
 export function profileReducer(state?: ProfileState, action?: AnyAction): ProfileState {
