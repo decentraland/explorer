@@ -334,6 +334,11 @@ namespace DCL.Tutorial
             }
         }
 
+        public int GetCurrentStepIndex()
+        {
+            return currentStepIndex;
+        }
+
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)
         {
             if (!renderingEnabled)

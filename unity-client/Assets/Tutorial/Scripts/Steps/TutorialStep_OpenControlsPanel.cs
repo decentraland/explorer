@@ -8,6 +8,8 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_OpenControlsPanel : TutorialStep
     {
+        [SerializeField] AudioEvent audioEventSuccess;
+
         private bool controlsHasBeenOpened = false;
         private bool controlsHasBeenClosed = false;
 
@@ -25,6 +27,7 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => controlsHasBeenOpened && controlsHasBeenClosed);
+            audioEventSuccess.Play(true);
         }
 
         public override void OnStepFinished()
