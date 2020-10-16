@@ -1,5 +1,7 @@
 using System;
+using DCL;
 using DCL.Components;
+using DCL.Configuration;
 using UnityEngine;
 
 public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
@@ -62,10 +64,17 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
     Vector3 lastPosition;
     AvatarAnimationsVariable currentAnimations;
     bool isOwnPlayer = false;
+    float floorHeight = ParcelSettings.DEBUG_FLOOR_HEIGHT;
 
     public void Start()
     {
         OnPoolGet();
+
+        if (InitialSceneReferences.i && InitialSceneReferences.i.groundVisual)
+        {
+            BoxCollider floorCollider = InitialSceneReferences.i.groundVisual.GetComponent<BoxCollider>();
+            floorHeight = floorCollider.transform.position.y + floorCollider.center.y - (floorCollider.size.y * 0.5f);
+        }
     }
 
     public void OnPoolGet()
@@ -105,18 +114,30 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
         else
             blackboard.movementSpeed = flattenedVelocity.magnitude;
 
-        Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
-        //NOTE(Brian): isGrounded?
-        blackboard.isGrounded = Physics.Raycast(target.transform.position + rayOffset,
-            Vector3.down,
-            RAY_OFFSET_LENGTH - ELEVATION_OFFSET,
-            DCLCharacterController.i.groundLayers);
-
-#if UNITY_EDITOR
-        Debug.DrawRay(target.transform.position + rayOffset, Vector3.down * (RAY_OFFSET_LENGTH - ELEVATION_OFFSET), blackboard.isGrounded ? Color.green : Color.red);
-#endif
+        blackboard.isGrounded = IsAvatarGrounded();
 
         lastPosition = velocityTargetPosition;
+    }
+
+    bool IsAvatarGrounded()
+    {
+        Vector3 rayOrigin = target.transform.position + (Vector3.up * RAY_OFFSET_LENGTH);
+        float rayMaxDistance = RAY_OFFSET_LENGTH - ELEVATION_OFFSET;
+
+        // Test against floor Y position
+        bool isGrounded = rayOrigin.y + rayMaxDistance <= floorHeight;
+
+        // If not grounded by distance we test raycasting
+        if (!isGrounded)
+        {
+            isGrounded = Physics.Raycast(rayOrigin, Vector3.down, rayMaxDistance, DCLCharacterController.i.groundLayers);
+        }
+
+#if UNITY_EDITOR
+        Debug.DrawRay(rayOrigin, Vector3.down * rayMaxDistance, isGrounded ? Color.green : Color.red);
+#endif
+
+        return isGrounded;
     }
 
     void State_Init(BlackBoard bb)
