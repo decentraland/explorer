@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Halloween World
   m_EditorClassIdentifier: 
   skyboxMaterial: {fileID: 2100000, guid: 74c9f69407f3b99469d19a5bc2b502a2, type: 2}
+  loadingBlockerPrefab: {fileID: 6457685576576672848, guid: 3239d07ea97818f4db09926a91b880ce,
+    type: 3}
   skyColor: {r: 0.60784316, g: 0.92941177, b: 1, a: 1}
   equatorColor: {r: 0.98039216, g: 0.8352941, b: 0.74509805, a: 1}
   groundColor: {r: 1, g: 1, b: 1, a: 1}
