@@ -14,11 +14,6 @@ using UnityEngine.Serialization;
 
 namespace DCL
 {
-    public interface ISceneHandler
-    {
-        HashSet<Vector2Int> GetAllLoadedScenesCoords();
-    }
-
     public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler, ISceneHandler
     {
         public static SceneController i { get; private set; }
@@ -29,7 +24,6 @@ namespace DCL
 
         //======================================================================
         private EntryPoint_World worldEntryPoint;
-        private WorldBlockersController worldBlockersController;
         public PhysicsSyncController physicsSyncController;
 
         [FormerlySerializedAs("factoryManifest")]
@@ -54,7 +48,7 @@ namespace DCL
 
             InitializeSceneBoundariesChecker();
 
-            Environment.i.Initialize(this);
+            Environment.i.Initialize(this, this);
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
             if (startDecentralandAutomatically)
@@ -69,8 +63,6 @@ namespace DCL
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
-            InitializeWorldBlockersController();
-
             physicsSyncController = new PhysicsSyncController();
 
             CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneIdChange;
@@ -83,10 +75,6 @@ namespace DCL
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
 #endif
-
-            RenderProfileManifest.currentProfile = RenderProfileManifest.i.defaultProfile;
-            RenderProfileManifest.currentProfile.Apply();
-            RenderProfileManifest.currentProfile.avatarProfile.inWorld.Apply();
         }
 
         void Start()
@@ -109,7 +97,7 @@ namespace DCL
 
         public void Restart()
         {
-            Environment.i.Restart(this);
+            Environment.i.Restart(this, this);
 
             ParcelScene.parcelScenesCleaner.ForceCleanup();
         }
@@ -516,7 +504,7 @@ namespace DCL
 
             WebInterface.ReportControlEvent(new WebInterface.SceneReady(sceneId));
 
-            worldBlockersController.SetupWorldBlockers();
+            Environment.i.worldBlockersController.SetupWorldBlockers();
         }
 
         public string TryToGetSceneCoordsID(string id)
@@ -570,12 +558,6 @@ namespace DCL
             {
                 boundariesChecker = new SceneBoundariesChecker();
             }
-        }
-
-        void InitializeWorldBlockersController()
-        {
-            if (worldBlockersController == null)
-                worldBlockersController = new WorldBlockersController(this, new BlockerHandler(DCLCharacterController.i.characterPosition), DCLCharacterController.i.characterPosition);
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)
@@ -652,10 +634,7 @@ namespace DCL
             {
                 CommonScriptableObjects.rendererState.AddLock(newCurrentScene);
 
-                newCurrentScene.OnSceneReady += (readyScene) =>
-                {
-                    CommonScriptableObjects.rendererState.RemoveLock(readyScene);
-                };
+                newCurrentScene.OnSceneReady += (readyScene) => { CommonScriptableObjects.rendererState.RemoveLock(readyScene); };
             }
         }
 
@@ -918,9 +897,10 @@ namespace DCL
 
             OnDebugModeSet?.Invoke();
 
-            InitializeWorldBlockersController();
-
-            worldBlockersController.SetEnabled(false);
+            //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
+            //             case. Calling Initialize multiple times in a row is safe.
+            Environment.i.Initialize(this, this);
+            Environment.i.worldBlockersController.SetEnabled(false);
         }
 
         public void HideFPSPanel()
