@@ -1,5 +1,6 @@
-import { Profile, RootProfileState, Wearable } from './types'
+import { Profile, RootProfileState } from './types'
 import { RootDaoState } from '../dao/types'
+import { Wearable } from 'shared/catalogs/types'
 
 export const getProfileDownloadServer = (store: RootDaoState) => store.dao.profileServer
 
@@ -47,25 +48,3 @@ export const getInventory = (store: RootProfileState, userId: string): Wearable[
   store.profiles.userInventory[userId].status === 'ok'
     ? ((store.profiles.userInventory[userId] as any).data as Wearable[])
     : null
-
-export const getPlatformCatalog = (store: RootProfileState): Wearable[] | null =>
-  store.profiles &&
-  store.profiles.catalogs &&
-  store.profiles.catalogs['base-avatars'] &&
-  store.profiles.catalogs['base-avatars'].status === 'ok'
-    ? (store.profiles.catalogs['base-avatars'].data as Wearable[])
-    : null
-
-export const getExclusiveCatalog = (store: RootProfileState): Wearable[] | null =>
-  store.profiles.catalogs &&
-  store.profiles.catalogs['base-exclusive'] &&
-  store.profiles.catalogs['base-exclusive'].status === 'ok'
-    ? (store.profiles.catalogs['base-exclusive'].data as Wearable[])
-    : null
-
-export const baseCatalogsLoaded = (store: RootProfileState) =>
-  store.profiles.catalogs &&
-  store.profiles.catalogs['base-avatars'] &&
-  store.profiles.catalogs['base-avatars'].status === 'ok' &&
-  store.profiles.catalogs['base-exclusive'] &&
-  store.profiles.catalogs['base-exclusive'].status === 'ok'

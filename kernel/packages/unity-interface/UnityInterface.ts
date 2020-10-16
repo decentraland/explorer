@@ -3,7 +3,7 @@ import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
-import { Wearable } from 'shared/profiles/types'
+import { Wearable } from 'shared/types'
 import {
   HUDConfiguration,
   InstancedSpawnPoint,

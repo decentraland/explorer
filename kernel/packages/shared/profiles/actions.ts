@@ -1,6 +1,7 @@
 import { action } from 'typesafe-actions'
-import { Profile, Wearable, Catalog, WearableId } from './types'
+import { Profile } from './types'
 import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
+import { WearableId } from 'shared/catalogs/types'
 
 // Profile fetching
 
@@ -35,21 +36,6 @@ export const saveProfileFailure = (userId: string, error: any) => action(SAVE_PR
 export type SaveProfileRequest = ReturnType<typeof saveProfileRequest>
 export type SaveProfileSuccess = ReturnType<typeof saveProfileSuccess>
 export type SaveProfileFailure = ReturnType<typeof saveProfileFailure>
-
-// Wearables catalog
-
-export const SET_BASE_WEARABLES_CATALOG = 'Set base wearables catalog'
-export const setBaseWearablesCatalog = (wearables: Wearable[]) => action(SET_BASE_WEARABLES_CATALOG, wearables)
-
-export const SET_BASE_EXCLUSIVES_CATALOG = 'Set base exclusives catalog'
-export const setBaseExclusivesCatalog = (wearables: Wearable[]) => action(SET_BASE_EXCLUSIVES_CATALOG, wearables)
-
-export const ADD_CATALOG = 'Add Catalog'
-export const addCatalog = (name: string, catalog: Catalog) => action(ADD_CATALOG, { name, catalog })
-export type AddCatalogAction = ReturnType<typeof addCatalog>
-export const CATALOG_LOADED = 'Catalog Loaded'
-export const catalogLoaded = (name: string) => action(CATALOG_LOADED, { name })
-export type CatalogLoadedAction = ReturnType<typeof catalogLoaded>
 
 // Inventory
 

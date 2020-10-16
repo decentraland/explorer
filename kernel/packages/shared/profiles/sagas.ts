@@ -1,29 +1,12 @@
 import { Store } from 'redux'
 import { EntityType } from 'dcl-catalyst-commons'
 import { ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
-import { call, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { call, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
-import {
-  getServerConfigurations,
-  ALL_WEARABLES,
-  getWearablesSafeURL,
-  PIN_CATALYST,
-  PREVIEW,
-  ethereumConfigurations,
-  RESET_TUTORIAL,
-  WSS_ENABLED,
-  TEST_WEARABLES_OVERRIDE
-} from 'config'
+import { getServerConfigurations, ALL_WEARABLES, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
 
 import defaultLogger from 'shared/logger'
-import { isInitialized } from 'shared/renderer/selectors'
-import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
-  addCatalog,
-  AddCatalogAction,
-  ADD_CATALOG,
-  catalogLoaded,
-  CATALOG_LOADED,
   inventoryFailure,
   InventoryRequest,
   inventoryRequest,
@@ -48,11 +31,11 @@ import {
   saveProfileRequest
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import { baseCatalogsLoaded, getProfile, getProfileDownloadServer, getExclusiveCatalog } from './selectors'
+import { getProfile, getProfileDownloadServer } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Catalog, Profile, Wearable, Collection, ContentFile, Avatar } from './types'
+import { Profile, ContentFile, Avatar } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
 import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
@@ -62,9 +45,7 @@ import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getResourcesURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
-import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
-import { retrieve, store } from 'shared/cache'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
@@ -72,6 +53,11 @@ import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
 import { persistCurrentUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { ensureRenderer } from 'shared/renderer/sagas'
+import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
+import { getExclusiveCatalog } from 'shared/catalogs/selectors'
+import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
+import { Wearable } from 'shared/catalogs/types'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -104,10 +90,6 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
  */
 export function* profileSaga(): any {
   yield takeEvery(USER_AUTHENTIFIED, initialProfileLoad)
-
-  yield takeEvery(RENDERER_INITIALIZED, initialLoad)
-
-  yield takeLatest(ADD_CATALOG, handleAddCatalog)
 
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
   yield takeLatestByUserId(PROFILE_SUCCESS, submitProfileToRenderer)
@@ -194,93 +176,6 @@ function scheduleProfileUpdate(profile: Profile) {
   }).catch((e) => defaultLogger.error(`error while updating profile`, e))
 }
 
-function overrideBaseUrl(wearable: Wearable) {
-  if (!TEST_WEARABLES_OVERRIDE) {
-    return {
-      ...wearable,
-      baseUrl: getWearablesSafeURL() + '/contents/',
-      baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
-    }
-  } else {
-    return wearable ?? {}
-  }
-}
-
-function overrideSwankyRarity(wearable: Wearable) {
-  if ((wearable.rarity as any) === 'swanky') {
-    return {
-      ...wearable,
-      rarity: 'rare' as RarityEnum
-    }
-  }
-  return wearable
-}
-
-export function* initialLoad() {
-  yield call(ensureRealmInitialized)
-
-  if (WORLD_EXPLORER) {
-    try {
-      const catalogUrl = getServerConfigurations().avatar.catalog
-
-      let collections: Collection[] | undefined
-      if (globalThis.location.search.match(/TEST_WEARABLES/)) {
-        collections = [{ id: 'all', wearables: (yield call(fetchCatalog, catalogUrl))[0] }]
-      } else {
-        const cached = yield retrieve('catalog')
-
-        if (cached) {
-          const version = yield headCatalog(catalogUrl)
-          if (cached.version === version) {
-            collections = cached.data
-          }
-        }
-
-        if (!collections) {
-          const response = yield call(fetchCatalog, catalogUrl)
-          collections = response[0]
-
-          const version = response[1]
-          if (version) {
-            yield store('catalog', { version, data: response[0] })
-          }
-        }
-      }
-      const catalog = collections!
-        .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
-        .map(overrideBaseUrl)
-        // TODO - remove once all swankies are removed from service! - moliva - 22/05/2020
-        .map(overrideSwankyRarity)
-      const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
-      const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
-      if (!(yield select(isInitialized))) {
-        yield take(RENDERER_INITIALIZED)
-      }
-      yield put(addCatalog('base-avatars', baseAvatars))
-      yield put(addCatalog('base-exclusive', baseExclusive))
-    } catch (error) {
-      defaultLogger.error('[FATAL]: Could not load catalog!', error)
-    }
-  } else {
-    let baseCatalog = []
-    try {
-      const catalogPath = '/default-profile/basecatalog.json'
-      const response = yield fetch(getResourcesURL() + catalogPath)
-      baseCatalog = yield response.json()
-
-      if (WSS_ENABLED) {
-        for (let item of baseCatalog) {
-          item.baseUrl = `http://localhost:8000${item.baseUrl}`
-        }
-      }
-    } catch (e) {
-      defaultLogger.warn(`Could not load base catalog`)
-    }
-    yield put(addCatalog('base-avatars', baseCatalog))
-    yield put(addCatalog('base-exclusive', []))
-  }
-}
-
 export function* handleFetchProfile(action: ProfileRequestAction): any {
   const userId = action.payload.userId
   const email = ''
@@ -345,6 +240,10 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
 }
 
+function dropIndexFromExclusives(exclusive: string) {
+  return exclusive.split('/').slice(0, 4).join('/')
+}
+
 function lastSegment(url: string) {
   const segments = url.split('/')
   const segment = segments[segments.length - 1]
@@ -403,51 +302,6 @@ export function* handleRandomAsSuccess(action: ProfileRandomAction): any {
   yield put(profileSuccess(action.payload.userId, action.payload.profile))
 }
 
-export function* handleAddCatalog(action: AddCatalogAction): any {
-  // TODO (eordano, 16/Sep/2019): Validate correct schema
-  if (!action.payload.catalog) {
-    return
-  }
-  if (!(yield select(isInitialized))) {
-    yield take(RENDERER_INITIALIZED)
-  }
-  yield call(sendWearablesCatalog, action.payload.catalog)
-  yield put(catalogLoaded(action.payload.name))
-}
-
-async function headCatalog(url: string) {
-  const request = await fetch(url, { method: 'HEAD' })
-  if (!request.ok) {
-    throw new Error('Catalog not found')
-  }
-  return request.headers.get('etag')
-}
-
-export async function fetchCatalog(url: string) {
-  const request = await fetch(url)
-  if (!request.ok) {
-    throw new Error('Catalog not found')
-  }
-  const etag = request.headers.get('etag')
-  return [await request.json(), etag]
-}
-
-export function sendWearablesCatalog(catalog: Catalog) {
-  globalThis.unityInterface.AddWearablesToCatalog(catalog)
-}
-
-export function* ensureRenderer() {
-  while (!(yield select(isInitialized))) {
-    yield take(RENDERER_INITIALIZED)
-  }
-}
-
-export function* ensureBaseCatalogs() {
-  while (!(yield select(baseCatalogsLoaded))) {
-    yield take(CATALOG_LOADED)
-  }
-}
-
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
   if (profile.avatar) {
@@ -482,9 +336,8 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
 }
 
 function* sendLoadProfile(profile: Profile) {
-  while (!(yield select(baseCatalogsLoaded))) {
-    yield take(CATALOG_LOADED)
-  }
+  yield call(ensureBaseCatalogs)
+
   const identity = yield select(getCurrentIdentity)
   const rendererFormat = profileToRendererFormat(profile, identity)
   globalThis.unityInterface.LoadProfile(rendererFormat)
@@ -498,10 +351,6 @@ export function* handleFetchInventory(action: InventoryRequest) {
   } catch (error) {
     yield put(inventoryFailure(userId, error))
   }
-}
-
-function dropIndexFromExclusives(exclusive: string) {
-  return exclusive.split('/').slice(0, 4).join('/')
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
@@ -551,7 +400,7 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   }
 }
 
-export async function calculateBufferHash(buffer: Buffer): Promise<string> {
+async function calculateBufferHash(buffer: Buffer): Promise<string> {
   const hash = await multihashing(buffer, 'sha2-256')
   return new CID(0, 'dag-pb', hash).toBaseEncodedString()
 }
@@ -646,31 +495,4 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
       reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
     }
   })
-}
-
-export function base64ToBlob(base64: string): Blob {
-  const sliceSize = 1024
-  const byteChars = globalThis.atob(base64)
-  const byteArrays = []
-  let len = byteChars.length
-
-  for (let offset = 0; offset < len; offset += sliceSize) {
-    const slice = byteChars.slice(offset, offset + sliceSize)
-
-    const byteNumbers = new Array(slice.length)
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i)
-    }
-
-    const byteArray = new Uint8Array(byteNumbers)
-
-    byteArrays.push(byteArray)
-    len = byteChars.length
-  }
-
-  return new Blob(byteArrays, { type: 'image/jpeg' })
-}
-
-export function delay(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time))
 }

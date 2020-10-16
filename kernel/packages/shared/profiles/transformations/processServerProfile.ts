@@ -1,4 +1,5 @@
-import { Profile, WearableId } from '../types'
+import { Profile } from '../types'
+import { WearableId } from 'shared/catalogs/types'
 import { colorString } from './colorString'
 import { ALL_WEARABLES } from 'config'
 
