@@ -38,6 +38,7 @@ public class BlockerHandlerCan
         blockerInstanceHandler = new BlockerInstanceHandler(new DCLCharacterPosition(), blockerAnimationHandler);
 
         blockersParent = new GameObject();
+
         blockerInstanceHandler.SetParent(blockersParent.transform);
     }
 
@@ -84,7 +85,7 @@ public class BlockerHandlerCan
     [Test]
     public void SetParent()
     {
-        // Prepare
+        // Arrange
         GameObject testParent = new GameObject();
         blockerInstanceHandler.SetParent(testParent.transform);
         blockerInstanceHandler.ShowBlocker(new Vector2Int(0, 0), true);
@@ -102,7 +103,7 @@ public class BlockerHandlerCan
     [Test]
     public void DestroyAllBlockers()
     {
-        // Prepare
+        // Arrange
         blockerInstanceHandler.ShowBlocker(new Vector2Int(0, 0), true);
         blockerInstanceHandler.ShowBlocker(new Vector2Int(0, 1), true);
         blockerInstanceHandler.ShowBlocker(new Vector2Int(0, 2), true);
