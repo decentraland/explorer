@@ -1,20 +1,39 @@
+using System;
 using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
 
+[Serializable]
+public class MessageOfTheDayConfig
+{
+    [Serializable]
+    public class Button
+    {
+        public string caption;
+        public string action; //global chat action to perform
+        public Color tint;
+    }
+
+    public string imageUrl;
+    public int endUnixTimestamp;
+    public string title;
+    public string body;
+    public Button[] buttons;
+}
+
+
 public class WelcomeHUDController : IHUD
 {
-    internal WelcomeHUDView view;
+    internal IWelcomeHUDView view;
+    private MessageOfTheDayConfig config = null;
 
-    public System.Action OnConfirmed;
-    public System.Action OnDismissed;
+    internal virtual IWelcomeHUDView CreateView() => WelcomeHUDView.CreateView();
 
-    bool hasWallet;
-    public void Initialize(bool hasWallet)
+    public void Initialize(MessageOfTheDayConfig config)
     {
-        this.hasWallet = hasWallet;
-        view = WelcomeHUDView.CreateView(hasWallet);
-        view.Initialize(OnConfirmPressed, OnClosePressed);
+        this.config = config;
+        view = CreateView();
+        view.Initialize(OnConfirmPressed, OnClosePressed, config);
 
         Utils.UnlockCursor();
     }
@@ -25,36 +44,29 @@ public class WelcomeHUDController : IHUD
         Utils.LockCursor();
     }
 
-    void OnConfirmPressed()
+    internal virtual void OnConfirmPressed(int buttonIndex)
     {
         Close();
 
-        if (hasWallet)
+        if (config?.buttons != null && buttonIndex >= 0 && buttonIndex < config?.buttons.Length)
         {
-            OnConfirmed?.Invoke();
-            WebInterface.ReportMotdClicked();
-        }
-        else
-        {
-            OnDismissed?.Invoke();
+            SendAction(config.buttons[buttonIndex].action);
         }
     }
 
     void OnClosePressed()
     {
         Close();
-        OnDismissed?.Invoke();
     }
 
     public void Dispose()
     {
-        if (view != null)
-            Object.Destroy(view.gameObject);
+        view?.DisposeSelf();
     }
 
     public void SetVisibility(bool visible)
     {
-        view.gameObject.SetActive(visible);
+        view.SetVisible(visible);
         if (visible)
         {
             Utils.UnlockCursor();
@@ -65,5 +77,17 @@ public class WelcomeHUDController : IHUD
             Utils.LockCursor();
             AudioScriptableObjects.dialogClose.Play(true);
         }
+    }
+
+    internal virtual void SendAction(string action)
+    {
+        //TODO confirm this is the way to go
+         WebInterface.SendChatMessage(new ChatMessage{
+             messageType = ChatMessage.Type.SYSTEM,
+             body = action,
+             recipient = "???",
+             sender = "???",
+             timestamp = 0 //???
+         });
     }
 }

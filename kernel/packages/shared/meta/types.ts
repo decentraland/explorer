@@ -1,6 +1,7 @@
 import { Vector2Component } from 'atomicHelpers/landHelpers'
 import future, { IFuture } from 'fp-future'
 import { RenderProfile } from 'shared/types'
+import { Color4 } from 'decentraland-ecs/src'
 
 export let USE_UNITY_INDEXED_DB_CACHE: IFuture<boolean> = future()
 
@@ -25,8 +26,8 @@ export type WorldConfig = {
 }
 
 export type MessageOfTheDayConfig = {
-  headerImageUrl: string
-  bodyImageUrl: string
+  imageUrl: string
+  endUnixTimestamp: number
   title: string
   body: string
   buttons: {
@@ -34,6 +35,7 @@ export type MessageOfTheDayConfig = {
     action: string
     // NOTE(Brian): The button actions will be global chat's actions,
     // for instance `/goto 0,0`, or 'Close' that will just close the MOTD.
+    tint: Color4
   }[]
 }
 
