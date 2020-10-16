@@ -430,9 +430,6 @@ namespace DCL
                             case "SetPlayerTalking":
                                 HUDController.i.SetPlayerTalking(msg.payload);
                                 break;
-                            case "EnableNewTaskbar":
-                                HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
-                                break;
                             case "SetUserTalking":
                                 HUDController.i.SetUserTalking(msg.payload);
                                 break;

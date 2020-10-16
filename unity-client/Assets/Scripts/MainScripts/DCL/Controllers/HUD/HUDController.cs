@@ -352,7 +352,10 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.USERS_AROUND_LIST_HUD:
                 CreateHudElement<UsersAroundListHUDController>(configuration, hudElementId);
-                minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
+                if (usersAroundListHud != null)
+                {
+                    minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
+                }
                 break;
         }
 
