@@ -794,11 +794,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.3
+      value: -0.6
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.24
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 447954, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_LocalRotation.x
@@ -6393,10 +6393,10 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
   baseUrlCustom: http://localhost:8080/?ENABLE_EXPLORE_HUD&
-  environment: 2
+  environment: 4
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
-  allWearables: 1
+  allWearables: 0
   testWearables: 0
   enableTutorial: 0
   soloScene: 0
@@ -7039,7 +7039,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1694365710
 Transform:
   m_ObjectHideFlags: 0
