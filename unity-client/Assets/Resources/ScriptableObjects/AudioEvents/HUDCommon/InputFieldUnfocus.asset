@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: InputFieldUnfocus
   m_EditorClassIdentifier: 
   loop: 0
-  volume: 1
+  initialVolume: 0.25
   initialPitch: 0.7
   randomPitch: 0
   cooldownSeconds: 0.1

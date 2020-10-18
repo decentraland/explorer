@@ -4,37 +4,69 @@ using UnityEngine;
 
 public class TutorialMusicHandler : MonoBehaviour
 {
-    [SerializeField] AudioEvent audioEventMusic, avatarEditorMusic;
+    [SerializeField] DCL.Tutorial.TutorialController tutorialController;
+    [SerializeField] AudioEvent tutorialMusic, avatarEditorMusic;
+
+    bool rendererIsReady = false, tutorialHasBeenEnabled = false;
+
+    Coroutine fadeOut;
 
     private void Start()
     {
-        CommonScriptableObjects.rendererState.OnChange += OnRenderStateChange;
-        avatarEditorMusic.OnPlay += OnOtherMusicPlay;
-        avatarEditorMusic.OnStop += OnOtherMusicStop;
+        tutorialController.OnTutorialEnabled += OnTutorialEnabled;
+        tutorialController.OnTutorialDisabled += OnTutorialDisabled;
+        CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
+        avatarEditorMusic.OnPlay += OnAvatarEditorMusicPlay;
+        avatarEditorMusic.OnStop += OnAvatarEditorMusicStop;
     }
 
     private void OnDestroy()
     {
-        CommonScriptableObjects.rendererState.OnChange -= OnRenderStateChange;
-        avatarEditorMusic.OnPlay -= OnOtherMusicPlay;
-        avatarEditorMusic.OnStop -= OnOtherMusicStop;
+        tutorialController.OnTutorialEnabled -= OnTutorialEnabled;
+        tutorialController.OnTutorialDisabled -= OnTutorialDisabled;
+        CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
+        avatarEditorMusic.OnPlay -= OnAvatarEditorMusicPlay;
+        avatarEditorMusic.OnStop -= OnAvatarEditorMusicStop;
     }
 
-    void OnRenderStateChange(bool current, bool previous)
+    void OnRendererStateChange(bool current, bool previous)
     {
-        if (current)
-            audioEventMusic.PlayScheduled(1.5f);
-        else
-            StartCoroutine(audioEventMusic.FadeOut(2.5f));
+        rendererIsReady = current;
+        TryPlayingMusic();
     }
 
-    void OnOtherMusicPlay()
+    void OnTutorialEnabled()
     {
-        StartCoroutine(audioEventMusic.FadeOut(1.5f, false));
+        tutorialHasBeenEnabled = true;
+        TryPlayingMusic();
     }
 
-    void OnOtherMusicStop()
+    void TryPlayingMusic()
     {
-        StartCoroutine(audioEventMusic.FadeIn(2.5f));
+        if (rendererIsReady && tutorialHasBeenEnabled && !tutorialMusic.source.isPlaying)
+        {
+            if (fadeOut != null)
+                StopCoroutine(fadeOut);
+            tutorialMusic.PlayScheduled(1.5f);
+        }
+    }
+
+    void OnTutorialDisabled()
+    {
+        if (tutorialMusic.source.isPlaying)
+            fadeOut = StartCoroutine(tutorialMusic.FadeOut(3f));
+        tutorialHasBeenEnabled = false;
+    }
+
+    void OnAvatarEditorMusicPlay()
+    {
+        if (tutorialMusic.source.isPlaying)
+            fadeOut = StartCoroutine(tutorialMusic.FadeOut(1.5f, false));
+    }
+
+    void OnAvatarEditorMusicStop()
+    {
+        if (tutorialMusic.source.isPlaying)
+            StartCoroutine(tutorialMusic.FadeIn(2.5f));
     }
 }

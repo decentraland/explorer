@@ -85,6 +85,8 @@ namespace DCL.Tutorial
         private Coroutine teacherMovementCoroutine;
         private Coroutine eagleEyeRotationCoroutine;
 
+        [HideInInspector] public Action OnTutorialEnabled, OnTutorialDisabled;
+
         private void Awake()
         {
             i = this;
@@ -160,6 +162,8 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
                 OnRenderingStateChanged(true, false);
+
+            OnTutorialEnabled?.Invoke();
         }
 
         /// <summary>
@@ -200,6 +204,8 @@ namespace DCL.Tutorial
             CommonScriptableObjects.tutorialActive.Set(false);
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+
+            OnTutorialDisabled?.Invoke();
         }
 
         /// <summary>

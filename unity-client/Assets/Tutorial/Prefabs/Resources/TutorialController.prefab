@@ -396,7 +396,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e147addd5dc6db409db75dabbcce092, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioEventMusic: {fileID: 11400000, guid: ce462ccff43947244b1be436199fd3f9, type: 2}
+  tutorialController: {fileID: 4465973064103375006}
+  tutorialMusic: {fileID: 11400000, guid: ce462ccff43947244b1be436199fd3f9, type: 2}
   avatarEditorMusic: {fileID: 11400000, guid: 04d736dfcca0ffb40b80e13b0d0b3ac9, type: 2}
 --- !u!114 &2785051562308466544
 MonoBehaviour:
