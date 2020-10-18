@@ -25,9 +25,10 @@ public class AudioEvent : ScriptableObject
 
     private int clipIndex, lastPlayedIndex;
     protected float pitch;
-    private float lastPlayedTime, nextPlayTime; // Used for cooldown
+    private float lastPlayedTime, nextAvailablePlayTime; // Used for cooldown
 
-    protected event System.Action OnPlay;
+    [HideInInspector]
+    public event System.Action OnPlay, OnStop;
 
     public virtual void Initialize(AudioContainer audioContainer)
     {
@@ -35,7 +36,7 @@ public class AudioEvent : ScriptableObject
 
         pitch = initialPitch;
         lastPlayedTime = 0f;
-        nextPlayTime = 0f;
+        nextAvailablePlayTime = 0f;
         lastPlayedIndex = -1;
         RandomizeIndex();
 
@@ -81,7 +82,7 @@ public class AudioEvent : ScriptableObject
         if (source == null) { Debug.Log("AudioEvent: Tried to play " + name + " with source equal to null."); return; }
 
         // Check if AudioSource is active and check cooldown time
-        if (!source.gameObject.activeSelf || Time.time < nextPlayTime) return;
+        if (!source.gameObject.activeSelf || Time.time < nextAvailablePlayTime) return;
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
@@ -96,7 +97,7 @@ public class AudioEvent : ScriptableObject
         RandomizeIndex();
 
         lastPlayedTime = Time.time;
-        nextPlayTime = lastPlayedTime + cooldownSeconds;
+        nextAvailablePlayTime = lastPlayedTime + cooldownSeconds;
 
         OnPlay?.Invoke();
     }
@@ -106,7 +107,7 @@ public class AudioEvent : ScriptableObject
         if (source == null) return;
 
         // Check if AudioSource is active and check cooldown time (taking delay into account)
-        if (!source.gameObject.activeSelf || Time.time + delaySeconds < nextPlayTime) return;
+        if (!source.gameObject.activeSelf || Time.time + delaySeconds < nextAvailablePlayTime) return;
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
@@ -116,17 +117,20 @@ public class AudioEvent : ScriptableObject
         RandomizeIndex();
 
         lastPlayedTime = Time.time + delaySeconds;
-        nextPlayTime = lastPlayedTime + cooldownSeconds;
+        nextAvailablePlayTime = lastPlayedTime + cooldownSeconds;
+
+        OnPlay?.Invoke();
     }
 
     public void Stop()
     {
         source.Stop();
+        OnStop?.Invoke();
     }
 
     public void SetIndex(int index)
     {
-        this.clipIndex = index;
+        clipIndex = index;
     }
 
     public void SetPitch(float pitch)
@@ -134,30 +138,36 @@ public class AudioEvent : ScriptableObject
         this.pitch = pitch;
     }
 
-    public IEnumerator FadeIn(float fadeSeconds)
+    /// <summary>Use StartCoroutine() on this one.</summary>
+    public IEnumerator FadeIn(float fadeSeconds, bool oneShot = false)
     {
-        float startVolume = source.volume;
+        if (!source.isPlaying)
+            Play(oneShot);
 
+        float startVolume = source.volume;
         while (source.volume < initialVolume)
         {
-            source.volume += (initialVolume - startVolume) * (Time.deltaTime / fadeSeconds);
+            source.volume += (initialVolume - startVolume) * (Time.unscaledDeltaTime / fadeSeconds);
             yield return null;
         }
 
         source.volume = initialVolume;
     }
 
-    public IEnumerator FadeOut(float fadeSeconds)
+    /// <summary>Use StartCoroutine() on this one.</summary>
+    public IEnumerator FadeOut(float fadeSeconds, bool stopWhenDone = true)
     {
         float startVolume = source.volume;
-
         while (source.volume > 0)
         {
-            source.volume -= startVolume * (Time.deltaTime / fadeSeconds);
+            source.volume -= startVolume * (Time.unscaledDeltaTime / fadeSeconds);
             yield return null;
         }
 
-        source.Stop();
-        source.volume = initialVolume;
+        if (stopWhenDone)
+        {
+            Stop();
+            source.volume = initialVolume;
+        }
     }
 }
