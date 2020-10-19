@@ -1,6 +1,7 @@
 ﻿Shader "DCL/Unlit Cutout Tinted" {
 Properties {
     _BaseMap ("Base (RGB) Trans (A)", 2D) = "white" {}
+    _TintMask ("Mask for tint (Monochannel) (1 == tint, 0 == no tint)", 2D) = "white" {}
     _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
     _BaseColor ("Color", Color) = (0,0,0,0)
 }
@@ -34,6 +35,7 @@ SubShader {
  
             sampler2D _BaseMap;
             float4 _BaseMap_ST;
+            sampler2D _TintMask;
             fixed _Cutoff;
             fixed4 _BaseColor;
  
@@ -50,7 +52,11 @@ SubShader {
  
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_BaseMap, i.texcoord) * _BaseColor;
+                fixed4 col = tex2D(_BaseMap, i.texcoord);
+                fixed4 tintMask = tex2D(_TintMask, i.texcoord);
+
+                col *= lerp(float4(1,1,1,1), _BaseColor, tintMask.r);
+
                 clip(col.a - _Cutoff);
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
