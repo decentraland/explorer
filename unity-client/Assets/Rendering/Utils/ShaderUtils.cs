@@ -6,6 +6,7 @@ namespace DCL.Helpers
     {
         public static readonly int _LightDir = Shader.PropertyToID("_LightDir");
         public static readonly int _LightColor = Shader.PropertyToID("_LightColor");
+        public static readonly int _TintColor = Shader.PropertyToID("_TintColor");
 
         public static readonly int _SpecGlossMap = Shader.PropertyToID("_SpecGlossMap");
         public static readonly int _SmoothnessTextureChannel = Shader.PropertyToID("_SmoothnessTextureChannel");

@@ -27,6 +27,7 @@ namespace DCL
             {
                 Shader.SetGlobalVector(ShaderUtils._LightDir, lightDirection);
                 Shader.SetGlobalColor(ShaderUtils._LightColor, lightColor);
+                Shader.SetGlobalColor(ShaderUtils._TintColor, tintColor);
             }
         }
 
