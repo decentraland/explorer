@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using DCL.Components;
 using TMPro;
 using UnityEngine;
@@ -6,6 +7,8 @@ using UnityEngine.UI;
 
 internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler
 {
+    const float USER_NOT_RECORDING_THROTTLING = 1;
+
     public event Action<string, bool> OnMuteUser;
 
     [SerializeField] internal TextMeshProUGUI userName;
@@ -21,6 +24,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     private UserProfile profile;
     private bool isMuted = false;
+    private Coroutine setUserRecordingRoutine = null;
 
     private void Start()
     {
@@ -50,12 +54,16 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         }
 
         this.isMuted = isMuted;
-        soundAnimator.SetTrigger(isMuted? soundAnimationMute : soundAnimationUnmute);
+        soundAnimator.SetTrigger(isMuted ? soundAnimationMute : soundAnimationUnmute);
     }
 
     public void SetRecording(bool isRecording)
     {
-        micAnimator.SetTrigger(isRecording? micAnimationRecording : micAnimationIdle);
+        if (setUserRecordingRoutine != null)
+        {
+            StopCoroutine(setUserRecordingRoutine);
+        }
+        setUserRecordingRoutine = StartCoroutine(SetRecordingRoutine(isRecording));
     }
 
     public void OnPoolRelease()
@@ -68,6 +76,11 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         {
             profile.OnFaceSnapshotReadyEvent -= SetAvatarPreviewImage;
             profile = null;
+        }
+        if (setUserRecordingRoutine != null)
+        {
+            StopCoroutine(setUserRecordingRoutine);
+            setUserRecordingRoutine = null;
         }
         gameObject.SetActive(false);
     }
@@ -93,5 +106,16 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             return;
         }
         OnMuteUser?.Invoke(profile.userId, !isMuted);
+    }
+
+    IEnumerator SetRecordingRoutine(bool isRecording)
+    {
+        if (isRecording)
+        {
+            micAnimator.SetTrigger(micAnimationRecording);
+            yield break;
+        }
+        yield return WaitForSecondsCache.Get(USER_NOT_RECORDING_THROTTLING);
+        micAnimator.SetTrigger(micAnimationIdle);
     }
 }
