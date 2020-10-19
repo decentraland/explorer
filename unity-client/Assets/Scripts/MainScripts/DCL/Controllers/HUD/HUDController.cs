@@ -336,10 +336,9 @@ public class HUDController : MonoBehaviour
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
-            // NOTE (Santi): We have temporarily turned off the MANA HUD until Product team designs a new place for it (probably inside the Profile HUD).
-            //case HUDElementID.MANA_HUD:
-            //    CreateHudElement<ManaHUDController>(configuration, hudElementId);
-            //    break;
+            case HUDElementID.MANA_HUD:
+                CreateHudElement<ManaHUDController>(configuration, hudElementId);
+                break;
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
