@@ -48,6 +48,7 @@ namespace DCL
 
             InitializeSceneBoundariesChecker();
 
+            RenderProfileManifest.i.Initialize();
             Environment.i.Initialize(this, this);
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.

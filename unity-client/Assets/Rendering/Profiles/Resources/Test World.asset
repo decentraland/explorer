@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11747b2e083ecda479377a27f449d27f, type: 3}
-  m_Name: Halloween World
+  m_Name: Test World
   m_EditorClassIdentifier: 
-  skyboxMaterial: {fileID: 2100000, guid: 74c9f69407f3b99469d19a5bc2b502a2, type: 2}
-  loadingBlockerPrefab: {fileID: 6457685576576672848, guid: 3239d07ea97818f4db09926a91b880ce,
+  loadingBlockerPrefab: {fileID: 6457685576576672848, guid: 99d9fadbc076e884fa108a3480fb60ac,
     type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: 8cf2550febdfe4b3ebb958bc5e605a78, type: 2}
   skyColor: {r: 0.60784316, g: 0.92941177, b: 1, a: 1}
   equatorColor: {r: 0.98039216, g: 0.8352941, b: 0.74509805, a: 1}
   groundColor: {r: 1, g: 1, b: 1, a: 1}
   fogColor: {r: 0.8443396, g: 0.93445873, b: 1, a: 1}
-  avatarProfile: {fileID: 11400000, guid: e16a3dafe28c4044b8616c8abe59b80f, type: 2}
+  avatarProfile: {fileID: 11400000, guid: e73e040e0549cff4880fd7ec1cf00b75, type: 2}
   fillWithRenderSettings: 0
