@@ -18,6 +18,7 @@ namespace DCL
 
         public RenderProfileWorld defaultProfile;
         public RenderProfileWorld halloweenProfile;
+        public RenderProfileWorld testProfile;
         public static RenderProfileWorld currentProfile;
 
         internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
@@ -30,9 +31,16 @@ namespace DCL
             return variable;
         }
 
-        public void Initialize()
+        public void Initialize(RenderProfileWorld initProfile = null)
         {
-            currentProfile = defaultProfile;
+            currentProfile = initProfile != null ? defaultProfile : initProfile;
+
+            if (currentProfile == null)
+            {
+                Debug.Log("Default profile should never be null!");
+                return;
+            }
+
             currentProfile.avatarProfile.inWorld.Apply();
             currentProfile.Apply();
         }

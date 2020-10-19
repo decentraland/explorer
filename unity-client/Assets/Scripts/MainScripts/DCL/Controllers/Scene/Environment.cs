@@ -29,7 +29,6 @@ namespace DCL
             if (initialized)
                 return;
 
-            RenderProfileManifest.i.Initialize();
             messagingControllersManager.Initialize(messageHandler);
             pointerEventsController.Initialize();
             memoryManager.Initialize();
