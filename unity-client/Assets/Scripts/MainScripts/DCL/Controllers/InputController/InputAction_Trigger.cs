@@ -9,6 +9,9 @@ public class InputAction_Trigger : ScriptableObject
     [SerializeField] internal DCLAction_Trigger dclAction;
     public DCLAction_Trigger GetDCLAction() => dclAction;
 
+    [SerializeField] internal BooleanVariable blockTrigger;
+    public bool isTriggerBlocked => blockTrigger.Get();
+
     private int triggeredInFrame = -1;
 
     public bool WasTriggeredThisFrame()

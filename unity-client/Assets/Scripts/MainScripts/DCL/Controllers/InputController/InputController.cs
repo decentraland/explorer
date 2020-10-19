@@ -74,6 +74,10 @@ public class InputController : MonoBehaviour
         for (var i = 0; i < triggerTimeActions.Length; i++)
         {
             var action = triggerTimeActions[i];
+
+            if (action.blockTrigger != null && action.blockTrigger)
+                continue;
+
             switch (action.GetDCLAction())
             {
                 case DCLAction_Trigger.CameraChange:
@@ -84,21 +88,20 @@ public class InputController : MonoBehaviour
                                        InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleNavMap:
-                    if (allUIHidden || CommonScriptableObjects.featureKeyTriggersBlocked) break;
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     InputProcessor.FromKey(action, KeyCode.Tab, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleFriends:
-                    if (allUIHidden || CommonScriptableObjects.featureKeyTriggersBlocked) break;
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.L, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.ToggleWorldChat:
-                    if (allUIHidden || CommonScriptableObjects.featureKeyTriggersBlocked) break;
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.Return, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.ToggleUIVisibility:
-                    if (CommonScriptableObjects.featureKeyTriggersBlocked) break;
                     InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.CloseWindow:
@@ -106,16 +109,14 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
-                    if (allUIHidden || CommonScriptableObjects.featureKeyTriggersBlocked) break;
+                    if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleControlsHud:
-                    if (CommonScriptableObjects.featureKeyTriggersBlocked) break;
                     InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleExploreHud:
-                    if (CommonScriptableObjects.featureKeyTriggersBlocked) break;
                     if (allUIHidden) break;
                     InputProcessor.FromKey(action, KeyCode.X, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
@@ -144,7 +145,6 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftAlt });
                     break;
                 case DCLAction_Trigger.ToggleAvatarEditorHud:
-                    if (CommonScriptableObjects.featureKeyTriggersBlocked) break;
                     InputProcessor.FromKey(action, KeyCode.I, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
