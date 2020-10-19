@@ -3,9 +3,15 @@ using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
 
+/// <summary>
+/// Model with the configuration for a Message of the Day
+/// </summary>
 [Serializable]
 public class MessageOfTheDayConfig
 {
+    /// <summary>
+    /// Model with the configuration for each button in the Message of the Day
+    /// </summary>
     [Serializable]
     public class Button
     {
@@ -81,10 +87,11 @@ public class WelcomeHUDController : IHUD
 
     internal virtual void SendAction(string action)
     {
-         WebInterface.SendChatMessage(new ChatMessage{
-             messageType = ChatMessage.Type.NONE,
-             recipient = string.Empty,
-             body = action,
-         });
+        WebInterface.SendChatMessage(new ChatMessage
+        {
+            messageType = ChatMessage.Type.NONE,
+            recipient = string.Empty,
+            body = action,
+        });
     }
 }
