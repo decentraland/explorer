@@ -102,7 +102,7 @@ public class BodyShapeController : WearableController, IBodyShapeController
     {
         if (assetContainer?.transform == null)
         {
-            Debug.LogWarning("Tried to setup eyes when the asset not ready");
+            Debug.LogWarning("Tried to setup mouth when the asset not ready");
             return;
         }
 
