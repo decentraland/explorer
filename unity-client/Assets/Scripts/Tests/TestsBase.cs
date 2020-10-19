@@ -51,7 +51,6 @@ public class TestsBase
             yield return SetUp_SceneIntegrityChecker();
             SetUp_Renderer();
             Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>());
-            RenderProfileManifest.i.Initialize(RenderProfileManifest.i.testProfile);
             yield break;
         }
 
@@ -65,7 +64,6 @@ public class TestsBase
         SetUp_Renderer();
         runtimeGameObjectsRoot = new GameObject("_RuntimeGameObjectsRoot");
         Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>());
-        RenderProfileManifest.i.Initialize(RenderProfileManifest.i.testProfile);
     }
 
 

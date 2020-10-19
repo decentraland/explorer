@@ -33,7 +33,7 @@ namespace DCL
 
         public void Initialize(RenderProfileWorld initProfile = null)
         {
-            currentProfile = initProfile != null ? defaultProfile : initProfile;
+            currentProfile = initProfile != null ? initProfile : defaultProfile;
 
             if (currentProfile == null)
             {
