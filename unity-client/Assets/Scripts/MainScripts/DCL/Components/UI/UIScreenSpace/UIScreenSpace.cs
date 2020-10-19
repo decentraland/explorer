@@ -138,10 +138,8 @@ namespace DCL.Components
 
                 GameObject resizedPanel = new GameObject("ResizeUIArea");
 
-                resizedPanel.AddComponent<RectMask2D>().enabled = false; // TODO: find a way of avoiding this RectMask (right now if we remove it that gameobject gets destroyed somehow...)
-
                 resizedPanel.AddComponent<CanvasRenderer>();
-                childHookRectTransform = resizedPanel.GetComponent<RectTransform>();
+                childHookRectTransform = resizedPanel.AddComponent<RectTransform>();
                 childHookRectTransform.SetParent(canvas.transform);
                 childHookRectTransform.ResetLocalTRS();
 
