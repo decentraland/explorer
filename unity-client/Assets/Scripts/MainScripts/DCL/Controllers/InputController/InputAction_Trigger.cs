@@ -10,7 +10,7 @@ public class InputAction_Trigger : ScriptableObject
     public DCLAction_Trigger GetDCLAction() => dclAction;
 
     [SerializeField] internal BooleanVariable blockTrigger;
-    public bool isTriggerBlocked => blockTrigger.Get();
+    public BooleanVariable isTriggerBlocked { get => blockTrigger; set => blockTrigger = value; }
 
     private int triggeredInFrame = -1;
 

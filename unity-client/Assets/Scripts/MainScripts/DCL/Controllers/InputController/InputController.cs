@@ -75,7 +75,7 @@ public class InputController : MonoBehaviour
         {
             var action = triggerTimeActions[i];
 
-            if (action.blockTrigger != null && action.blockTrigger)
+            if (action.isTriggerBlocked != null && action.isTriggerBlocked.Get())
                 continue;
 
             switch (action.GetDCLAction())

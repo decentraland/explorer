@@ -61,7 +61,7 @@ namespace InputController_Tests
             action.blockTrigger = new BooleanVariable();
             action.blockTrigger.Set(true);
 
-            Assert.AreEqual(true, action.isTriggerBlocked);
+            Assert.AreEqual(true, action.isTriggerBlocked.Get());
         }
     }
 

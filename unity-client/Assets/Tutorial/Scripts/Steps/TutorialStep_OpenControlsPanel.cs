@@ -8,14 +8,19 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_OpenControlsPanel : TutorialStep
     {
+        [SerializeField] private InputAction_Trigger toggleControlsHud;
+
         private bool controlsHasBeenOpened = false;
         private bool controlsHasBeenClosed = false;
+        private BooleanVariable originalControlsTriggerIsBlocked;
 
         public override void OnStepStart()
         {
             base.OnStepStart();
 
-            CommonScriptableObjects.featureKeyTriggersBlocked.Set(false);
+            originalControlsTriggerIsBlocked = toggleControlsHud.isTriggerBlocked;
+            if (toggleControlsHud != null)
+                toggleControlsHud.isTriggerBlocked = null;
 
             if (tutorialController != null && tutorialController.hudController != null)
             {
@@ -38,6 +43,9 @@ namespace DCL.Tutorial
                 tutorialController.hudController.controlsHud.OnControlsOpened -= ControlsHud_OnControlsOpened;
                 tutorialController.hudController.controlsHud.OnControlsClosed -= ControlsHud_OnControlsClosed;
             }
+
+            if (toggleControlsHud != null)
+                toggleControlsHud.isTriggerBlocked = originalControlsTriggerIsBlocked;
         }
 
         private void ControlsHud_OnControlsOpened()
@@ -46,6 +54,7 @@ namespace DCL.Tutorial
                 controlsHasBeenOpened = true;
 
             tutorialController?.hudController?.taskbarHud?.SetVisibility(true);
+            CommonScriptableObjects.featureKeyTriggersBlocked.Set(false);
         }
 
         private void ControlsHud_OnControlsClosed()
