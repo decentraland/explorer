@@ -160,10 +160,10 @@
       // End Rollbar Snippet
     </script>
     <script>
-      console.log("Explorer version: EXPLORER_VERSION");
+      console.log("Explorer version: %REACT_APP_EXPLORER_VERSION%");
     </script>
-    <script src="%PUBLIC_URL%/unity/Build/hls.min.js"></script>
-    <script src="%PUBLIC_URL%/unity/Build/DCLUnityLoader.js?EXPLORER_VERSION"></script>
-    <script src="%PUBLIC_URL%/website.js?KERNEL_VERSION"></script>
+    <script src="%PUBLIC_URL%/unity/Build/hls.min.js?%REACT_APP_EXPLORER_VERSION%"></script>
+    <script src="%PUBLIC_URL%/unity/Build/DCLUnityLoader.js?%REACT_APP_EXPLORER_VERSION%"></script>
+    <script src="%PUBLIC_URL%/website.js?%REACT_APP_EXPLORER_VERSION%"></script>
   </body>
 </html>

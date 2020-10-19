@@ -8,4 +8,10 @@ cp -r ./node_modules/decentraland-kernel/loader ./public;
 cp -r ./node_modules/decentraland-kernel/systems ./public;
 cp -r ./node_modules/decentraland-kernel/unity ./public;
 cp -r ./node_modules/decentraland-kernel/voice-chat-codec ./public;
-echo "\nPost install script done! 😘😘😘\n"
+
+echo "Setting kernel version"
+hash=$(git rev-parse HEAD);
+echo "REACT_APP_EXPLORER_VERSION=${hash}" >> .env
+echo ""
+echo "Post install script done! 😘😘😘"
+echo ""
