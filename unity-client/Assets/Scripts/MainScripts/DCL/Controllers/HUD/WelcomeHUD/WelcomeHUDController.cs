@@ -81,13 +81,10 @@ public class WelcomeHUDController : IHUD
 
     internal virtual void SendAction(string action)
     {
-        //TODO confirm this is the way to go
          WebInterface.SendChatMessage(new ChatMessage{
-             messageType = ChatMessage.Type.SYSTEM,
+             messageType = ChatMessage.Type.NONE,
+             recipient = string.Empty,
              body = action,
-             recipient = "???",
-             sender = "???",
-             timestamp = 0 //???
          });
     }
 }
