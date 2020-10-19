@@ -14,14 +14,23 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "DCL/Rendering/Create World Profile", fileName = "RenderProfileWorld", order = 0)]
 public class RenderProfileWorld : ScriptableObject
 {
-    public GameObject loadingBlockerPrefab;
-    [SerializeField] private Material skyboxMaterial;
+    [Header("Loading Blocker")] public GameObject loadingBlockerPrefab;
+
+    [Header("Ambient And Reflection")] [SerializeField]
+    private Material skyboxMaterial;
+
+    [SerializeField] private Cubemap reflectionCubemap;
     [SerializeField] private Color skyColor;
     [SerializeField] private Color equatorColor;
     [SerializeField] private Color groundColor;
     [SerializeField] private Color fogColor;
 
-    public RenderProfileAvatar avatarProfile;
+    [Header("Directional Light")] [SerializeField]
+    private Color directionalColorLight;
+
+    [SerializeField] private Vector3 directionalColorAngle;
+
+    [Header("Misc")] public RenderProfileAvatar avatarProfile;
 
 #if UNITY_EDITOR
     public bool fillWithRenderSettings;
@@ -48,6 +57,9 @@ public class RenderProfileWorld : ScriptableObject
         skyColor = RenderSettings.ambientSkyColor;
         groundColor = RenderSettings.ambientGroundColor;
         fogColor = RenderSettings.fogColor;
+        directionalColorLight = RenderSettings.sun.color;
+        directionalColorAngle = RenderSettings.sun.transform.rotation.eulerAngles;
+        reflectionCubemap = RenderSettings.customReflection;
     }
 #endif
 
@@ -58,6 +70,9 @@ public class RenderProfileWorld : ScriptableObject
         RenderSettings.ambientSkyColor = skyColor;
         RenderSettings.ambientGroundColor = groundColor;
         RenderSettings.fogColor = fogColor;
+        RenderSettings.sun.color = directionalColorLight;
+        RenderSettings.sun.transform.rotation = Quaternion.Euler(directionalColorAngle);
+        RenderSettings.customReflection = reflectionCubemap;
 
         if (verbose)
             Debug.Log("Applying profile... " + name);

@@ -19,6 +19,7 @@ namespace DCL
         [System.Serializable]
         public class MaterialProfile
         {
+            [SerializeField] private Color tintColor;
             [SerializeField] private Color lightColor;
             [SerializeField] private Vector3 lightDirection;
 
