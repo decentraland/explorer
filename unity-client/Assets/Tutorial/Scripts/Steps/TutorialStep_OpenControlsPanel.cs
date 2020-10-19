@@ -15,6 +15,8 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
+            CommonScriptableObjects.featureKeyTriggersBlocked.Set(false);
+
             if (tutorialController != null && tutorialController.hudController != null)
             {
                 tutorialController.hudController.controlsHud.OnControlsOpened += ControlsHud_OnControlsOpened;
