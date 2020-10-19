@@ -8,10 +8,10 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
     [SerializeField] private UsersAroundListHUDListElementView listElementView;
     [SerializeField] private ShowHideAnimator showHideAnimator;
-    [SerializeField] private Transform content;
+    [SerializeField] internal Transform content;
 
-    private Queue<UsersAroundListHUDListElementView> availableElements;
-    private Dictionary<string, UsersAroundListHUDListElementView> userElementDictionary;
+    internal Queue<UsersAroundListHUDListElementView> availableElements;
+    internal Dictionary<string, UsersAroundListHUDListElementView> userElementDictionary;
 
     private void Awake()
     {
@@ -43,8 +43,15 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
             view.OnMuteUser += OnMuteUser;
         }
 
-        view.SetUserProfile(userInfo.userId);
-        userElementDictionary.Add(userInfo.userId, view);
+        bool profileSuccess = view.SetUserProfile(userInfo.userId);
+        if (profileSuccess)
+        {
+            userElementDictionary.Add(userInfo.userId, view);
+        }
+        else
+        {
+            PoolElementView(view);
+        }
     }
 
     void IUsersAroundListHUDListView.RemoveUser(string userId)
@@ -54,8 +61,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
             return;
         }
 
-        elementView.OnPoolRelease();
-        availableElements.Enqueue(elementView);
+        PoolElementView(elementView);
         userElementDictionary.Remove(userId);
     }
 
@@ -104,5 +110,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     void OnMuteUser(string userId, bool mute)
     {
         OnRequestMuteUser?.Invoke(userId, mute);
+    }
+
+    void PoolElementView(UsersAroundListHUDListElementView element)
+    {
+        element.OnPoolRelease();
+        availableElements.Enqueue(element);
     }
 }

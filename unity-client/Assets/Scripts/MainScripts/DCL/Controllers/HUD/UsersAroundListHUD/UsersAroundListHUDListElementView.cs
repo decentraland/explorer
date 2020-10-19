@@ -31,9 +31,15 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         soundButton.onClick.AddListener(OnSoundButtonPressed);
     }
 
-    public void SetUserProfile(string userId)
+    public bool SetUserProfile(string userId)
     {
         profile = UserProfileController.userProfilesCatalog.Get(userId);
+
+        if (profile == null)
+        {
+            return false;
+        }
+
         userName.text = profile.userName;
 
         if (profile.faceSnapshot)
@@ -44,6 +50,8 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         {
             profile.OnFaceSnapshotReadyEvent += SetAvatarPreviewImage;
         }
+
+        return true;
     }
 
     public void SetMuted(bool isMuted)
