@@ -218,7 +218,7 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
             }
 
             if (!eventMusic.source.isPlaying)
-                eventMusic.PlayScheduled(1f);
+                eventMusic.Play();
 
             view.eyeColorSelector.OnColorChanged += OnEyeColorChanged;
             view.skinColorSelector.OnColorChanged += OnSkinColorChanged;

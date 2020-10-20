@@ -35,6 +35,10 @@ public class TutorialMusicHandler : MonoBehaviour
         {
             Debug.Log("Mordi -> tutorialMusic.source.loop = " + tutorialMusic.source.loop);
         }
+        if (tutorialHasBeenEnabled && !tutorialMusic.source.isPlaying)
+        {
+
+        }
     }
 
     void OnRendererStateChange(bool current, bool previous)
@@ -62,7 +66,7 @@ public class TutorialMusicHandler : MonoBehaviour
                 StopCoroutine(fadeOut);
             }
             Debug.Log("Mordi -> " + name + ":: tutorialMusic.PlayScheduled(1.5f)");
-            tutorialMusic.PlayScheduled(1.5f);
+            tutorialMusic.Play();
         }
     }
 
