@@ -14,16 +14,10 @@ hash=$(git rev-parse --short HEAD)
 envFile=.env
 if [ ! -f "$envFile" ]; then
   echo "file $envFile does not exist. creating..."
-  echo "REACT_APP_EXPLORER_VERSION=${hash}" >.env
-else
-  echo "file $envFile exists. replacing..."
-  count=$(cat .env | grep -c "REACT_APP_EXPLORER_VERSION")
-  if [ "$count" -eq 0 ]; then
-    echo "REACT_APP_EXPLORER_VERSION=${hash}" >>.env
-  else
-    sed -i '' -e "s/REACT_APP_EXPLORER_VERSION.*/REACT_APP_EXPLORER_VERSION=${hash}/" .env
-  fi
+  touch .env
 fi
+
+echo "REACT_APP_EXPLORER_VERSION=${hash}" >>.env
 
 echo ""
 echo "Post install script done! 😘😘😘"
