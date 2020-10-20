@@ -40,7 +40,7 @@ public class AvatarEditorHUDController : IHUD
         view = AvatarEditorHUDView.Create(this);
 
         view.OnToggleActionTriggered += ToggleVisibility;
-        view.OnCloseActionTriggered += Hide;
+        view. OnCloseActionTriggered += Hide;
 
         skinColorList = Resources.Load<ColorList>("SkinTone");
         hairColorList = Resources.Load<ColorList>("HairColor");
