@@ -89,7 +89,7 @@ namespace DCL
 
             Vector3 lookAtVector = GetLookAtVector();
             if(lookAtVector != Vector3.zero)
-                entityTransform.forward = GetLookAtVector();
+                entityTransform.forward = lookAtVector;
         }
 
         private void CameraPositionChanged(Vector3 current, Vector3 previous)
