@@ -295,20 +295,15 @@ jobs:
           command: sh scripts/post-install.sh
       - run:
           name: "creating .env (ignore master)"
-          command: echo "PUBLIC_URL=\"https://play.decentraland.zone/branch-website/${CIRCLE_BRANCH}\"" > .env
+          command: echo "PUBLIC_URL=\"https://play.decentraland.zone/branch-website/${CIRCLE_BRANCH}\"" >> .env
           filters:
             branches:
               ignore: master
             tags:
               ignore: /.*/
       - run:
-          name: "show .env (ignore master)"
+          name: "show .env"
           command: cat .env
-          filters:
-            branches:
-              ignore: master
-            tags:
-              ignore: /.*/
       - run:
           name: "testing"
           command: npm test -- --watchAll=false
