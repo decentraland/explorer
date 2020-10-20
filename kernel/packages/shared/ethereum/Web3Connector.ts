@@ -22,13 +22,13 @@ export class Web3Connector {
   }
 
   async connect(type: ProviderType) {
-    this.connector = this.factory.create(type, this.network)
+    this.type = type
+    this.connector = this.factory.create(this.type, this.network)
     if (!this.connector.isAvailable()) {
       // guest
-      type = ProviderType.GUEST
-      this.connector = this.factory.create(type, this.network)
+      this.type = ProviderType.GUEST
+      this.connector = this.factory.create(this.type, this.network)
     }
-    this.type = type
     await this.connector.login()
     return this.connector.getProvider()
   }
