@@ -28,6 +28,7 @@ import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 
 const container = document.getElementById('gameContainer')
+const qs: any = require('query-string')
 
 if (!container) throw new Error('cannot find element #gameContainer')
 
@@ -46,34 +47,33 @@ initializeUnity(container)
   .then(async ({ instancedJS }) => {
     const i = (await instancedJS).unityInterface
 
-    i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, { active: true, visible: OPEN_AVATAR_EDITOR })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: VOICE_CHAT_ENABLED })
-    i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+    const q = qs.parse(location.search)
 
+    const enableUI = q.enable_ui
+    const enableTutorialUI = q.enable_tutorial_ui
+    const enableWeb3UI = q.enable_web3_ui
+    
+    logger.info( `enableUI = ${enableUI}`)
+
+    if ( enableUI ) {
+      i.ConfigureHUDElement(enableUI, { active: true, visible: true })
+    } 
+    
     try {
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
-      i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-      i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3, visible: true })
 
+      if (enableWeb3UI) {
+        i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+        i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3, visible: true })
+      }
+      
       EnsureProfile(identity.address)
           .then((profile) => {
-            i.ConfigureEmailPrompt(profile.tutorialStep)
-            i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            if ( enableTutorialUI ) {
+              i.ConfigureEmailPrompt(profile.tutorialStep)
+              i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            }
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
     } catch (e) {
@@ -89,7 +89,7 @@ initializeUnity(container)
 
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
 
-    if (!NO_MOTD) {
+    if (!NO_MOTD && !enableUI) {
       i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: false, visible: true })
     }
 

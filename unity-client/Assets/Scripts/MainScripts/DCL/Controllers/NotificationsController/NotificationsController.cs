@@ -68,6 +68,7 @@ public class NotificationsController : MonoBehaviour
             timer = NOTIFICATION_DURATION
         };
 
-        controller.ShowNotification(model);
+        if (controller != null)
+            controller.ShowNotification(model);
     }
 }

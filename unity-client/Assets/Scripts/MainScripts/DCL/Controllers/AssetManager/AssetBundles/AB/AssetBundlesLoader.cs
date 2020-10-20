@@ -132,12 +132,15 @@ namespace DCL
                 yield break;
             }
 
+            Debug.Log("AssetBundleLoader >>> LOADING START ... " + assetBundleInfo.asset.id);
             AssetBundleRequest abRequest = assetBundleInfo.assetBundle.LoadAllAssetsAsync();
 
             while (!abRequest.isDone)
             {
                 yield return null;
             }
+
+            Debug.Log("AssetBundleLoader >>> LOADING END ... " + assetBundleInfo.asset.id);
 
             loadedAssetsByName = abRequest.allAssets.ToList();
 

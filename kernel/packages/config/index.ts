@@ -96,6 +96,7 @@ export const GIF_WORKERS = location.search.indexOf('GIF_WORKERS') !== -1
 
 const qs = queryString.parse(location.search)
 
+export const ENABLE_UI = qs.enable_ui
 // Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
