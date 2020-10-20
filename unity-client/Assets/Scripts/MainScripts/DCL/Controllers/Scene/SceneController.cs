@@ -49,7 +49,7 @@ namespace DCL
 
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = true;
+            Debug.unityLogger.logEnabled = false;
 #endif
 
             InitializeSceneBoundariesChecker();
