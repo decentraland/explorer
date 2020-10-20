@@ -21,6 +21,8 @@ namespace DCL.Tutorial
         {
             base.OnStepStart();
 
+            CommonScriptableObjects.featureKeyTriggersBlocked.Set(true);
+
             okButton.onClick.AddListener(OnOkButtonClick);
 
             defaultTeacherCanvasSortOrder = tutorialController.teacherCanvas.sortingOrder;
@@ -40,6 +42,7 @@ namespace DCL.Tutorial
             base.OnStepFinished();
             tutorialController.SetTeacherCanvasSortingOrder(defaultTeacherCanvasSortOrder);
             tutorialController.hudController?.taskbarHud?.SetVisibility(true);
+            CommonScriptableObjects.featureKeyTriggersBlocked.Set(false);
         }
 
         private void OnOkButtonClick()
