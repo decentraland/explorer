@@ -2,8 +2,8 @@ import React from "react";
 import "./LoadingMessage.css";
 
 export interface LoadingMessageProps {
-  image: string;
-  message: string;
+  image?: string;
+  message?: string;
   subMessage: string;
   showWalletPrompt: boolean;
 }

@@ -89,8 +89,8 @@ export const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
     <React.Fragment>
       {state.showLoadingScreen && (
         <LoadingMessage
-          image={tip.image}
-          message={tip.text}
+          image={state.initialLoad ? tip.image : undefined}
+          message={state.initialLoad ? tip.text : undefined}
           subMessage={subMessage}
           showWalletPrompt={showWalletPrompt}
         />
