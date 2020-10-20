@@ -147,7 +147,7 @@ public class AudioEvent : ScriptableObject
     /// <summary>Use StartCoroutine() on this one.</summary>
     public IEnumerator FadeIn(float fadeSeconds)
     {
-        Debug.Log(name + " - Starting fade in");
+        Debug.Log("Mordi -> " + name + " - Starting fade in");
         float startVolume = source.volume;
         while (source.volume < initialVolume)
         {
@@ -162,7 +162,7 @@ public class AudioEvent : ScriptableObject
     /// <summary>Use StartCoroutine() on this one.</summary>
     public IEnumerator FadeOut(float fadeSeconds, bool stopWhenDone = true)
     {
-        Debug.Log(name + " - Starting fade out");
+        Debug.Log("Mordi -> " + name + " - Starting fade out");
         float startVolume = source.volume;
         while (source.volume > 0)
         {

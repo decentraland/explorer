@@ -33,42 +33,42 @@ public class TutorialMusicHandler : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("tutorialMusic.source.loop = " + tutorialMusic.source.loop);
+            Debug.Log("Mordi -> tutorialMusic.source.loop = " + tutorialMusic.source.loop);
         }
     }
 
     void OnRendererStateChange(bool current, bool previous)
     {
-        Debug.Log(name + " - OnRendererStateChange()");
+        Debug.Log("Mordi -> " + name + " - OnRendererStateChange()");
         rendererIsReady = current;
         TryPlayingMusic();
     }
 
     void OnTutorialEnabled()
     {
-        Debug.Log(name + " - OnTutorialEnabled()");
+        Debug.Log("Mordi -> " + name + " - OnTutorialEnabled()");
         tutorialHasBeenEnabled = true;
         TryPlayingMusic();
     }
 
     void TryPlayingMusic()
     {
-        Debug.Log(name + " - TryPlayingMusic()");
+        Debug.Log("Mordi -> " + name + " - TryPlayingMusic()");
         if (rendererIsReady && tutorialHasBeenEnabled && !tutorialMusic.source.isPlaying)
         {
             if (fadeOut != null)
             {
-                Debug.Log(":: StopCoroutine(fadeOut)");
+                Debug.Log("Mordi -> :: StopCoroutine(fadeOut)");
                 StopCoroutine(fadeOut);
             }
-            Debug.Log(name + ":: tutorialMusic.PlayScheduled(1.5f)");
+            Debug.Log("Mordi -> " + name + ":: tutorialMusic.PlayScheduled(1.5f)");
             tutorialMusic.PlayScheduled(1.5f);
         }
     }
 
     void OnTutorialDisabled()
     {
-        Debug.Log(name + " - OnTutorialDisabled()");
+        Debug.Log("Mordi -> " + name + " - OnTutorialDisabled()");
         if (tutorialMusic.source.isPlaying)
             fadeOut = StartCoroutine(tutorialMusic.FadeOut(3f));
         tutorialHasBeenEnabled = false;
@@ -76,14 +76,14 @@ public class TutorialMusicHandler : MonoBehaviour
 
     void OnAvatarEditorMusicPlay()
     {
-        Debug.Log(name + " - OnAvatarEditorMusicPlay()");
+        Debug.Log("Mordi -> " + name + " - OnAvatarEditorMusicPlay()");
         if (tutorialMusic.source.isPlaying)
             fadeOut = StartCoroutine(tutorialMusic.FadeOut(1.5f, false));
     }
 
     void OnAvatarEditorMusicStop()
     {
-        Debug.Log(name + " - OnAvatarEditorMusicStop()");
+        Debug.Log("Mordi -> " + name + " - OnAvatarEditorMusicStop()");
         if (tutorialMusic.source.isPlaying)
             StartCoroutine(tutorialMusic.FadeIn(2.5f));
     }
