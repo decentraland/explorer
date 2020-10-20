@@ -446,7 +446,7 @@ export class UnityInterface {
     this.SendBuilderMessage('SetBuilderConfiguration', JSON.stringify(config))
   }
 
-  private resizeCanvasDelayed(ev: Event | null) {
+  private resizeCanvasDelayed(ev: UIEvent | null) {
     window.setTimeout(() => {
       resizeCanvas(_gameInstance.Module)
     }, 100)
