@@ -126,6 +126,12 @@ namespace DCL
 
         private IEnumerator LoadAssetBundle(AssetBundleInfo assetBundleInfo)
         {
+            if ((string) assetBundleInfo.asset.id == "QmXrJp5ZKB1GeWjJvg4tArAcvwyqyBmydLbN7L6VT5gnf7")
+            {
+                assetBundleInfo.onFail?.Invoke();
+                yield break;
+            }
+
             if (assetBundleInfo.assetBundle == null)
             {
                 assetBundleInfo.onFail?.Invoke();
