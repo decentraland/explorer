@@ -34,8 +34,9 @@ export async function requestWeb3Provider(type: ProviderType) {
     const provider = await web3Connector.connect(type)
     requestManager.setProvider(provider)
     providerFuture.resolve({
-      successful: true,
-      provider: provider
+      successful: !isGuest(),
+      provider: provider,
+      localIdentity: isGuest() ? Account.create() : undefined
     })
     return provider
   } catch (e) {
@@ -43,6 +44,10 @@ export async function requestWeb3Provider(type: ProviderType) {
     requestManager.setProvider(null)
   }
   return null
+}
+
+export function isGuest(): boolean {
+  return web3Connector.isType(ProviderType.GUEST)
 }
 
 export async function awaitWeb3Approval(): Promise<void> {

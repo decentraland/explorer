@@ -79,7 +79,7 @@ export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
     const net = await getAppNetwork()
     const provider = new WebsocketProvider(ethereumConfigurations[net].wss)
 
-    eth = new Eth(provider)
+    eth = createEth(provider)
   }
 
   const contract = new Catalyst(eth, contractAddress)

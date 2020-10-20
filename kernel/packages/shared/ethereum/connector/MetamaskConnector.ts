@@ -6,10 +6,8 @@ declare var window: Window & {
 }
 
 export class MetamaskConnector implements ConnectorInterface {
-  constructor() {
-    if (!window.ethereum.isMetaMask) {
-      throw new Error('Provider does not exist')
-    }
+  isAvailable() {
+    return window['ethereum'] && window.ethereum.isMetaMask
   }
 
   getProvider() {

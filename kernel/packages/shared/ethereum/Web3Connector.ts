@@ -6,9 +6,10 @@ import { ProviderType } from './ProviderType'
 import { ConnectorInterface } from './connector/ConnectorInterface'
 
 export class Web3Connector {
+  private type: ProviderType | undefined
   private factory: ConnectorFactory
   private connector: ConnectorInterface | undefined
-  private readonly network: 'mainnet' | 'ropsten'
+  private readonly network: ETHEREUM_NETWORK
 
   constructor() {
     this.network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
@@ -21,23 +22,29 @@ export class Web3Connector {
   }
 
   async connect(type: ProviderType) {
-    try {
+    this.connector = this.factory.create(type, this.network)
+    if (!this.connector.isAvailable()) {
+      // guest
+      type = ProviderType.GUEST
       this.connector = this.factory.create(type, this.network)
-      await this.connector.login()
-      return this.connector.getProvider()
-    } catch (e) {
-      throw e
     }
+    this.type = type
+    await this.connector.login()
+    return this.connector.getProvider()
+  }
+
+  isType(type: ProviderType) {
+    return this.type === type
   }
 
   createEth(provider: any = false): Eth | undefined {
     if (provider) {
       return new Eth(provider)
     }
-    if (!this.connector) {
+    if (!this.connector || this.isType(ProviderType.GUEST)) {
       return undefined
     }
-    if (this.connector.getProvider().isMetaMask) {
+    if (this.isType(ProviderType.METAMASK)) {
       return Eth.fromCurrentProvider()
     }
     return new Eth(this.connector.getProvider())

@@ -4,4 +4,6 @@ export interface ConnectorInterface {
   login(): Promise<any>
 
   logout(): Promise<boolean>
+
+  isAvailable(): boolean
 }
