@@ -11,9 +11,7 @@ import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import {
   NO_MOTD,
   DEBUG_PM,
-  OPEN_AVATAR_EDITOR,
   HAS_INITIAL_POSITION_MARK,
-  VOICE_CHAT_ENABLED
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
