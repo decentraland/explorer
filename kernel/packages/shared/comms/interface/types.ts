@@ -17,8 +17,7 @@ export enum AvatarMessageType {
   USER_BLOCKED = 'USER_BLOCKED',
   USER_UNBLOCKED = 'USER_UNBLOCKED',
 
-  ADD_FRIEND = 'ADD_FRIEND',
-  SHOW_WINDOW = 'SHOW_WINDOW'
+  ADD_FRIEND = 'ADD_FRIEND'
 }
 
 export type ReceiveUserExpressionMessage = {
@@ -64,7 +63,6 @@ export type UserMessage = {
     | AvatarMessageType.USER_UNBLOCKED
     | AvatarMessageType.USER_MUTED
     | AvatarMessageType.USER_UNMUTED
-    | AvatarMessageType.SHOW_WINDOW
     | AvatarMessageType.USER_TALKING
   uuid: string
 }
@@ -111,8 +109,8 @@ export type AvatarExpression = {
   expressionTimestamp?: number
 }
 
-// The order is [X,Y,Z,Qx,Qy,Qz,Qw]
-export type Pose = [number, number, number, number, number, number, number]
+// The order is [X,Y,Z,Qx,Qy,Qz,Qw,immediate]
+export type Pose = [number, number, number, number, number, number, number, boolean]
 
 export type PoseInformation = {
   v: Pose
