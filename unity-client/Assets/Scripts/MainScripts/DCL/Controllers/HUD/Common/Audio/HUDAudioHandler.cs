@@ -53,6 +53,6 @@ public class HUDAudioHandler : MonoBehaviour
         if (current)
             AudioScriptableObjects.UIHide.Play(true);
         else
-            AudioScriptableObjects.UIUnhide.Play(true);
+            AudioScriptableObjects.UIShow.Play(true);
     }
 }

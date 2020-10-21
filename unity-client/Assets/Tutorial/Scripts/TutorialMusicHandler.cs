@@ -43,7 +43,7 @@ public class TutorialMusicHandler : MonoBehaviour
         else
         {
             if (tutorialMusic.source.isPlaying)
-                fadeOut = StartCoroutine(tutorialMusic.FadeOut(3f));
+                fadeOut = CoroutineStarter.Start(tutorialMusic.FadeOut(3f));
             tutorialHasBeenEnabled = false;
         }
     }
@@ -54,7 +54,7 @@ public class TutorialMusicHandler : MonoBehaviour
         {
             if (fadeOut != null)
             {
-                StopCoroutine(fadeOut);
+                CoroutineStarter.Stop(fadeOut);
             }
             tutorialMusic.Play();
         }
@@ -63,12 +63,12 @@ public class TutorialMusicHandler : MonoBehaviour
     void OnAvatarEditorMusicPlay()
     {
         if (tutorialMusic.source.isPlaying)
-            fadeOut = StartCoroutine(tutorialMusic.FadeOut(1.5f, false));
+            fadeOut = CoroutineStarter.Start(tutorialMusic.FadeOut(1.5f, false));
     }
 
     void OnAvatarEditorMusicStop()
     {
         if (tutorialMusic.source.isPlaying)
-            StartCoroutine(tutorialMusic.FadeIn(2.5f));
+            CoroutineStarter.Start(tutorialMusic.FadeIn(2.5f));
     }
 }
