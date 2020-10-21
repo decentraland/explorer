@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace DCL.Tutorial
 {
     /// <summary>
@@ -7,6 +5,22 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_MinimapTooltip : TutorialStep_Tooltip
     {
+        public override void OnStepStart()
+        {
+            base.OnStepStart();
+
+            NavmapView.OnToggle += NavmapView_OnToggle;
+        }
+
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+
+            NavmapView.OnToggle -= NavmapView_OnToggle;
+
+            tutorialController?.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
+        }
+
         protected override void SetTooltipPosition()
         {
             base.SetTooltipPosition();
@@ -16,6 +30,20 @@ namespace DCL.Tutorial
                 tutorialController.hudController.minimapHud.minimapTooltipReference)
             {
                 tooltipTransform.position = tutorialController.hudController.minimapHud.minimapTooltipReference.position;
+            }
+        }
+
+        private void NavmapView_OnToggle(bool isVisible)
+        {
+            if (isVisible)
+            {
+                isRelatedFeatureActived = true;
+                stepIsFinished = true;
+                tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
+            }
+            else if (isRelatedFeatureActived)
+            {
+                isRelatedFeatureActived = false;
             }
         }
     }

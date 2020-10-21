@@ -1,5 +1,5 @@
-import { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
-import { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
+import type { Vector3Component, Vector2Component } from '../atomicHelpers/landHelpers'
+import type { QueryType } from 'decentraland-ecs/src/decentraland/PhysicsCast'
 
 export { Avatar, Profile, ColorString, WearableId, Wearable } from './profiles/types'
 
@@ -407,7 +407,8 @@ export enum HUDElementID {
   EXPLORE_HUD = 19,
   MANA_HUD = 20,
   HELP_AND_SUPPORT_HUD = 21,
-  GO_TO_GENESIS_PLAZA_HUD = 22
+  GO_TO_GENESIS_PLAZA_HUD = 22,
+  EMAIL_PROMPT = 23
 }
 
 export type HUDConfiguration = {
@@ -500,4 +501,15 @@ export type UpdateUserStatusMessage = {
   realm: Realm | undefined
   position: Vector2Component | undefined
   presence: PresenceStatus
+}
+
+export type BuilderConfiguration = {
+  camera: {
+    zoomMin: number
+    zoomMax: number
+    zoomDefault: number
+  }
+  environment: {
+    disableFloor: boolean
+  }
 }
