@@ -15,10 +15,5 @@ namespace DCL.Tutorial
             audioEventSuccess.Play(true);
             yield break;
         }
-
-        public override IEnumerator OnStepPlayHideAnimation()
-        {
-            yield break;
-        }
     }
 }
