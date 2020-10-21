@@ -35,6 +35,8 @@ namespace DCL.Tutorial
 
         public HUDController hudController { get => HUDController.i; }
 
+        public int currentStepIndex { get; private set; }
+
         [Header("General Configuration")]
         [SerializeField] internal int tutorialVersion = 1;
         [SerializeField] internal float timeBetweenSteps = 0.5f;
@@ -80,12 +82,9 @@ namespace DCL.Tutorial
         internal TutorialStep runningStep = null;
         internal bool tutorialReset = false;
 
-        private int currentStepIndex;
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
         private Coroutine eagleEyeRotationCoroutine;
-
-        [HideInInspector] public Action OnTutorialEnabled, OnTutorialDisabled;
 
         private void Awake()
         {
@@ -162,8 +161,6 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
                 OnRenderingStateChanged(true, false);
-
-            OnTutorialEnabled?.Invoke();
         }
 
         /// <summary>
@@ -206,8 +203,6 @@ namespace DCL.Tutorial
             CommonScriptableObjects.tutorialActive.Set(false);
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
-
-            OnTutorialDisabled?.Invoke();
         }
 
         /// <summary>
@@ -340,11 +335,6 @@ namespace DCL.Tutorial
             {
                 StopCoroutine(eagleEyeRotationCoroutine);
             }
-        }
-
-        public int GetCurrentStepIndex()
-        {
-            return currentStepIndex;
         }
 
         private void OnRenderingStateChanged(bool renderingEnabled, bool prevState)

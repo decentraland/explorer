@@ -49,7 +49,7 @@ namespace DCL.Tutorial
 
                 if (tutorialController.teacher != null)
                 {
-                    if (tutorialController.GetCurrentStepIndex() > 0)
+                    if (tutorialController.currentStepIndex > 0)
                         tutorialController.teacher.PlaySpeakSound();
                     else
                         tutorialController.teacher.PlayHappySound(1f);
@@ -85,7 +85,6 @@ namespace DCL.Tutorial
             blockSkipActions = true;
             OnJustAfterStepExecuted?.Invoke();
             yield return PlayAndWaitForHideAnimation();
-            
             yield return null;
             yield return new WaitUntil(() => !CommonScriptableObjects.cameraIsBlending.Get());
         }

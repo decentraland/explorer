@@ -22,7 +22,7 @@ namespace DCL.GoToGenesisPlazaHUD
         {
             if (visible && !view.isOpen)
                 AudioScriptableObjects.dialogOpen.Play(true);
-            if (!visible && view.isOpen)
+            else if (!visible && view.isOpen)
                 AudioScriptableObjects.dialogClose.Play(true);
 
             OnOpen?.Invoke(visible);

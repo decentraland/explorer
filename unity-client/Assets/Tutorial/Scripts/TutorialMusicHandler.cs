@@ -13,8 +13,7 @@ public class TutorialMusicHandler : MonoBehaviour
 
     private void Awake()
     {
-        tutorialController.OnTutorialEnabled += OnTutorialEnabled;
-        tutorialController.OnTutorialDisabled += OnTutorialDisabled;
+        CommonScriptableObjects.tutorialActive.OnChange += TutorialActive_OnChange;
         CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
         avatarEditorMusic.OnPlay += OnAvatarEditorMusicPlay;
         avatarEditorMusic.OnStop += OnAvatarEditorMusicStop;
@@ -22,8 +21,7 @@ public class TutorialMusicHandler : MonoBehaviour
 
     private void OnDestroy()
     {
-        tutorialController.OnTutorialEnabled -= OnTutorialEnabled;
-        tutorialController.OnTutorialDisabled -= OnTutorialDisabled;
+        CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
         CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
         avatarEditorMusic.OnPlay -= OnAvatarEditorMusicPlay;
         avatarEditorMusic.OnStop -= OnAvatarEditorMusicStop;
@@ -35,10 +33,19 @@ public class TutorialMusicHandler : MonoBehaviour
         TryPlayingMusic();
     }
 
-    void OnTutorialEnabled()
+    private void TutorialActive_OnChange(bool current, bool previous)
     {
-        tutorialHasBeenEnabled = true;
-        TryPlayingMusic();
+        if (current)
+        {
+            tutorialHasBeenEnabled = true;
+            TryPlayingMusic();
+        }
+        else
+        {
+            if (tutorialMusic.source.isPlaying)
+                fadeOut = StartCoroutine(tutorialMusic.FadeOut(3f));
+            tutorialHasBeenEnabled = false;
+        }
     }
 
     void TryPlayingMusic()
@@ -51,13 +58,6 @@ public class TutorialMusicHandler : MonoBehaviour
             }
             tutorialMusic.Play();
         }
-    }
-
-    void OnTutorialDisabled()
-    {
-        if (tutorialMusic.source.isPlaying)
-            fadeOut = StartCoroutine(tutorialMusic.FadeOut(3f));
-        tutorialHasBeenEnabled = false;
     }
 
     void OnAvatarEditorMusicPlay()

@@ -28,6 +28,12 @@ public class HUDAudioHandler : MonoBehaviour
         CommonScriptableObjects.allUIHidden.OnChange += OnAllUIHiddenChange;
     }
 
+    private void OnDestroy()
+    {
+        CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
+        CommonScriptableObjects.allUIHidden.OnChange -= OnAllUIHiddenChange;
+    }
+
     public void RefreshChatLastCheckedTimestamp()
     {
         // Get UTC datetime (used to determine whether chat messages are old or new)
