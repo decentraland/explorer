@@ -557,7 +557,7 @@ export enum Fonts {
  * @public
  */
 @Component('engine.text', CLASS_ID.TEXT_SHAPE)
-export class TextShape extends Shape {
+export class TextShape extends ObservableComponent {
   @ObservableComponent.field
   outlineWidth: number = 0
 
@@ -638,6 +638,9 @@ export class TextShape extends Shape {
 
   @ObservableComponent.field
   billboard: boolean = false
+
+  @ObservableComponent.field
+  visible: boolean = true
 
   constructor(value?: string) {
     super()
@@ -792,11 +795,10 @@ export class Material extends ObservableComponent {
   refractionTexture?: Texture
 
   /**
-   * If sets to true, disables all the lights affecting the material.
-   * Defaults to false.
+   * Allow the material to cast shadows over other objects
    */
   @ObservableComponent.field
-  disableLighting?: boolean
+  castShadows?: boolean = true
 
   /**
    * Sets the transparency mode of the material.
@@ -831,6 +833,12 @@ export class BasicMaterial extends ObservableComponent {
    */
   @ObservableComponent.field
   alphaTest: number = 0.5
+
+  /**
+   * Allow the material to cast shadows over other objects
+   */
+  @ObservableComponent.field
+  castShadows?: boolean = true
 }
 
 /**

@@ -12,7 +12,7 @@ public class AudioEvent : ScriptableObject
 
     public bool loop = false;
     [Range(0f, 1f)]
-    public float volume = 1.0f;
+    public float initialVolume = 1.0f;
     public float initialPitch = 1f;
     [Range(0f, 1f)]
     public float randomPitch = 0.0f;
@@ -23,19 +23,22 @@ public class AudioEvent : ScriptableObject
     [HideInInspector]
     public AudioSource source;
 
-    private int clipIndex;
+    private int clipIndex, lastPlayedIndex;
     protected float pitch;
-    private float lastPlayed, nextPlayTime; // Used for cooldown
+    private float lastPlayedTime, nextAvailablePlayTime; // Used for cooldown
+    private Coroutine fadeInCoroutine, fadeOutCoroutine;
 
-    protected event System.Action OnPlay;
+    [HideInInspector]
+    public event System.Action OnPlay, OnStop, OnFadedIn, OnFadedOut;
 
     public virtual void Initialize(AudioContainer audioContainer)
     {
         if (audioContainer == null) return;
 
         pitch = initialPitch;
-        lastPlayed = 0f;
-        nextPlayTime = 0f;
+        lastPlayedTime = 0f;
+        nextAvailablePlayTime = 0f;
+        lastPlayedIndex = -1;
         RandomizeIndex();
 
         // Add AudioSource component for event
@@ -50,7 +53,7 @@ public class AudioEvent : ScriptableObject
             source.clip = clips[0];
         }
         
-        source.volume = volume;
+        source.volume = initialVolume;
         source.loop = loop;
         source.playOnAwake = false;
 
@@ -61,10 +64,17 @@ public class AudioEvent : ScriptableObject
         source.maxDistance = audioContainer.maxDistance;
     }
 
+    
     public void RandomizeIndex()
     {
+        RandomizeIndex(0, clips.Length);
+    }
+
+    // Randomize the index from (inclusive) to y (exclusive)
+    public void RandomizeIndex(int from, int to)
+    {
         int newIndex;
-        do { newIndex = Random.Range(0, clips.Length); } while (clips.Length > 1 && newIndex == clipIndex);
+        do { newIndex = Random.Range(from, to); } while (clips.Length > 1 && newIndex == lastPlayedIndex);
         clipIndex = newIndex;
     }
 
@@ -73,7 +83,7 @@ public class AudioEvent : ScriptableObject
         if (source == null) { Debug.Log("AudioEvent: Tried to play " + name + " with source equal to null."); return; }
 
         // Check if AudioSource is active and check cooldown time
-        if (!source.gameObject.activeSelf || Time.time < nextPlayTime) return;
+        if (!source.gameObject.activeSelf || Time.time < nextAvailablePlayTime) return;
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
@@ -84,10 +94,11 @@ public class AudioEvent : ScriptableObject
         else
             source.Play();
 
+        lastPlayedIndex = clipIndex;
         RandomizeIndex();
 
-        lastPlayed = Time.time;
-        nextPlayTime = lastPlayed + cooldownSeconds;
+        lastPlayedTime = Time.time;
+        nextAvailablePlayTime = lastPlayedTime + cooldownSeconds;
 
         OnPlay?.Invoke();
     }
@@ -97,26 +108,35 @@ public class AudioEvent : ScriptableObject
         if (source == null) return;
 
         // Check if AudioSource is active and check cooldown time (taking delay into account)
-        if (!source.gameObject.activeSelf || Time.time + delaySeconds < nextPlayTime) return;
+        if (!source.gameObject.activeSelf || Time.time + delaySeconds < nextAvailablePlayTime) return;
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
         source.PlayScheduled(AudioSettings.dspTime + delaySeconds);
 
+        lastPlayedIndex = clipIndex;
         RandomizeIndex();
 
-        lastPlayed = Time.time;
-        nextPlayTime = lastPlayed + cooldownSeconds;
+        lastPlayedTime = Time.time + delaySeconds;
+        nextAvailablePlayTime = lastPlayedTime + cooldownSeconds;
+
+        OnPlay?.Invoke();
     }
 
     public void Stop()
     {
         source.Stop();
+        OnStop?.Invoke();
+    }
+
+    public void ResetVolume()
+    {
+        source.volume = initialVolume;
     }
 
     public void SetIndex(int index)
     {
-        this.clipIndex = index;
+        clipIndex = index;
     }
 
     public void SetPitch(float pitch)
@@ -124,17 +144,36 @@ public class AudioEvent : ScriptableObject
         this.pitch = pitch;
     }
 
-    public IEnumerator FadeOut(float fadeSeconds)
+    /// <summary>Use StartCoroutine() on this one.</summary>
+    public IEnumerator FadeIn(float fadeSeconds)
     {
         float startVolume = source.volume;
-
-        while (source.volume > 0)
+        while (source.volume < initialVolume)
         {
-            source.volume -= startVolume * (Time.deltaTime / fadeSeconds);
+            source.volume += (initialVolume - startVolume) * (Time.unscaledDeltaTime / fadeSeconds);
             yield return null;
         }
 
-        source.Stop();
-        source.volume = volume;
+        source.volume = initialVolume;
+        OnFadedIn?.Invoke();
+    }
+
+    /// <summary>Use StartCoroutine() on this one.</summary>
+    public IEnumerator FadeOut(float fadeSeconds, bool stopWhenDone = true)
+    {
+        float startVolume = source.volume;
+        while (source.volume > 0)
+        {
+            source.volume -= startVolume * (Time.unscaledDeltaTime / fadeSeconds);
+            yield return null;
+        }
+
+        if (stopWhenDone)
+        {
+            Stop();
+            source.volume = initialVolume;
+        }
+
+        OnFadedOut?.Invoke();
     }
 }

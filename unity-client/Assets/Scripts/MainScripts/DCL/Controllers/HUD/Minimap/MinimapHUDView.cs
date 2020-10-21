@@ -21,7 +21,13 @@ public class MinimapHUDView : MonoBehaviour
     [Header("Map Renderer")] public RectTransform mapRenderContainer;
     public RectTransform mapViewport;
     [SerializeField] private Button openNavmapButton;
+
+    public static System.Action<MinimapHUDModel> OnUpdateData;
+    public static System.Action OnOpenNavmapClicked;
     public InputAction_Trigger toggleNavMapAction;
+    [SerializeField] internal ShowHideAnimator mainShowHideAnimator;
+
+    [Header("Tutorial Configuration")] [SerializeField] internal RectTransform minimapTooltipReference;
 
     private void Initialize(MinimapHUDController controller)
     {
@@ -63,6 +69,9 @@ public class MinimapHUDView : MonoBehaviour
 
     public void SetVisibility(bool visible)
     {
-        gameObject.SetActive(visible);
+        if (visible && !mainShowHideAnimator.isVisible)
+            mainShowHideAnimator.Show();
+        else if (!visible && mainShowHideAnimator.isVisible)
+            mainShowHideAnimator.Hide();
     }
 }

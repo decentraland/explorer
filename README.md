@@ -13,13 +13,13 @@
 This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ and the latest version of GNU make, install it using `brew install make`
 If you are using Windows 10 we recommend you to enable the Linux subsystem and install a Linux distro from Windows Store like Ubuntu. Then install all tools and dependecies like nodejs, npm, typescript, make...
 
-## Running the kernel
+## Running the Explorer
 
 Make sure you have the following dependencies:
 - Node v10 or compatible installed via `sudo apt install nodejs`
 - yarn installed globally via `sudo npm install yarn -g`
 
-IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path. 
+IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path.
 
 Build the project:
 
@@ -34,19 +34,31 @@ Optionally, you can build the test scenes which are used in `debug` mode:
 
     make test-scenes
 
-To run the Unity interface:
+Once the kernel is running, to run the Unity interface you will have to:
 
 1. Download and install Unity 2019.4.0f1
 2. Open the Initial Scene
 3. Run the Initial Scene in the Unity editor!
 
-To run the client in `debug` mode append the following query parameter to the URL:
+And that should be it!
+
+Optionally, if you want to run the client in `debug` mode, append the following query parameter to the URL:
 
     http://localhost:8080/?DEBUG_MODE
 
 To spawn in a specific set of coordinates append the following query paramter:
 
-    http://localhost:8080/?DEBUG_MODE&fps&position=10,10
+    http://localhost:8080/?DEBUG_MODE&position=10,10
+
+### Troubleshooting
+
+If while trying to compile the Unity project you get an error regarding some libraries that can not be added (for instance Newtonsoft
+Json.NET or Google Protobuf), please execute the following command in the root folder:
+
+    git lfs install
+    git lfs pull
+
+Then, on the Unity editor, click on `Assets > Reimport All`
 
 ## Running tests
 
@@ -84,10 +96,10 @@ describe('My example test', function() {
 4. In a new browser tab go to http://localhost:8000/?UNITY_ENABLED=true&DEBUG_MODE&LOCAL_COMMS&position=0%2C-1&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl
 5. Go back to unity and the scene should start loading in there almost immediately
 
-### DCL scene in preview mode using a local explorer version
+### DCL scene in preview mode using a local Kernel version
 
-1. In the explorer repo directory, run a `make watch` or `make dev-watch` once
-2. Kill the server and run `make initialize-ecs-npm-link`
+1. In the explorer repo directory, run a `make watch` once
+2. Kill the server and run `make npm-link`
 3. In the scene directory run `npm link decentraland-ecs`
 4. In the scene directory run `dcl start` and it should already be using the local version of the client
 
@@ -119,6 +131,24 @@ Every component declaration should be under the **/packages/decentraland-ecs/src
 - Make sure the corresponding CLASS_ID value exists in MainScripts/DCL/Models/Protocol.cs, otherwise add it.
 - Create the component script in MainScripts/DCL/Components/[Corresponding Folder]/
 - Edit the SharedComponentCreate() method in MainScripts/DCL/Controllers/Scene/ParcelScene.cs to make sure it instantiates the new shared component.
+
+### Adding/Updating protobuf-compiled components (instructions with macOS Homebrew package manager)
+
+0. Install protobuf 3.12 (if a different version is already installed you have to uninstall it first, running `brew uninstall protobuf`):
+    - edit the desired version config file (use code from https://github.com/Homebrew/homebrew-core/blob/53fb074d235fe0335fa8ee293a3f639f3cdffa45/Formula/protobuf.rb) replacing everything in the following file `code $(brew --repo homebrew/core)/Formula/protobuf.rb`
+    - run `HOMEBREW_NO_AUTO_UPDATE=1 brew install protobuf`
+
+1. Edit/add desired component structure at `kernel/packages/shared/proto/engineinterface.proto`
+
+2. In that same directory (`kernel/packages/shared/proto/engineinterface.proto`) run the following command:
+`protoc --plugin=../../../node_modules/ts-protoc-gen/bin/protoc-gen-ts --js_out="import_style=commonjs,binary:." --ts_out="." engineinterface.proto`
+
+3. In that same directory run the following command:
+`protoc --csharp_out=../../../../unity-client/Assets/Scripts/MainScripts/DCL/Models/Protocol/ --csharp_opt=base_namespace=DCL.Interface engineinterface.proto`
+
+4. Make sure to also update the custom "save/read" code we have at:
+    - `kernel/packages/scene-system/scene.system.ts` in `generatePBObject()`
+    - `unity-client/Assets/Scripts/MainScripts/DCL/Controllers/Scene/MessageDecoder.cs`
 
 ### Shaders Scene-Forced PreWarm
 
