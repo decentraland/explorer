@@ -77,15 +77,15 @@ public class UsersAroundListHUDShould : TestsBase
             worldPosition = Vector3.zero
         });
 
-        Assert.IsTrue(GetVisibleChildren(listView.content) == 2, "listView.content.childCount != 2");
+        Assert.IsTrue(GetVisibleChildren(listView.contentPlayers) == 2, "listView.content.childCount != 2");
         Assert.IsTrue(listView.availableElements.Count == 0, "listView.availableElements.Count != 0");
 
         MinimapMetadata.GetMetadata().RemoveUserInfo(users[1]);
-        Assert.IsTrue(GetVisibleChildren(listView.content) == 1, "listView.content.childCount != 1");
+        Assert.IsTrue(GetVisibleChildren(listView.contentPlayers) == 1, "listView.content.childCount != 1");
         Assert.IsTrue(listView.availableElements.Count == 1, "listView.availableElements.Count != 1");
 
         MinimapMetadata.GetMetadata().RemoveUserInfo(users[0]);
-        Assert.IsTrue(GetVisibleChildren(listView.content) == 0, "listView.content.childCount != 0");
+        Assert.IsTrue(GetVisibleChildren(listView.contentPlayers) == 0, "listView.content.childCount != 0");
         Assert.IsTrue(listView.availableElements.Count == 2, "listView.availableElements.Count != 2");
 
 
@@ -94,7 +94,7 @@ public class UsersAroundListHUDShould : TestsBase
             userId = users[2],
             worldPosition = Vector3.zero
         });
-        Assert.IsTrue(GetVisibleChildren(listView.content) == 1, "listView.content.childCount != 1");
+        Assert.IsTrue(GetVisibleChildren(listView.contentPlayers) == 1, "listView.content.childCount != 1");
         Assert.IsTrue(listView.availableElements.Count == 1, "listView.availableElements.Count != 1");
 
         yield break;

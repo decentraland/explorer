@@ -14,13 +14,11 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     [SerializeField] internal TextMeshProUGUI userName;
     [SerializeField] internal Image avatarPreview;
     [SerializeField] internal Animator micAnimator;
-    [SerializeField] internal Animator soundAnimator;
     [SerializeField] internal Button soundButton;
 
     private static readonly int micAnimationIdle = Animator.StringToHash("Idle");
     private static readonly int micAnimationRecording = Animator.StringToHash("Recording");
-    private static readonly int soundAnimationMute = Animator.StringToHash("Mute");
-    private static readonly int soundAnimationUnmute = Animator.StringToHash("Unmute");
+    private static readonly int micAnimationMute = Animator.StringToHash("Mute");
 
     private UserProfile profile;
     private bool isMuted = false;
@@ -31,14 +29,9 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         soundButton.onClick.AddListener(OnSoundButtonPressed);
     }
 
-    public bool SetUserProfile(string userId)
+    public void SetUserProfile(UserProfile profile)
     {
-        profile = UserProfileController.userProfilesCatalog.Get(userId);
-
-        if (profile == null)
-        {
-            return false;
-        }
+        this.profile = profile;
 
         userName.text = profile.userName;
 
@@ -50,8 +43,6 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         {
             profile.OnFaceSnapshotReadyEvent += SetAvatarPreviewImage;
         }
-
-        return true;
     }
 
     public void SetMuted(bool isMuted)
@@ -62,7 +53,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         }
 
         this.isMuted = isMuted;
-        soundAnimator.SetTrigger(isMuted ? soundAnimationMute : soundAnimationUnmute);
+        micAnimator.SetTrigger(isMuted ? micAnimationMute : micAnimationIdle);
     }
 
     public void SetRecording(bool isRecording)
@@ -96,7 +87,6 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     public void OnPoolGet()
     {
         micAnimator.SetTrigger(micAnimationIdle);
-        soundAnimator.SetTrigger(soundAnimationUnmute);
         avatarPreview.sprite = null;
         userName.text = string.Empty;
         gameObject.SetActive(true);
