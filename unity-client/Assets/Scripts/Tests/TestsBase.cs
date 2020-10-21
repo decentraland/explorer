@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
+using DCL.Tutorial;
 
 public class TestsBase
 {
@@ -23,6 +24,12 @@ public class TestsBase
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
+
+    /// <summary>
+    /// Use this as a parent for your dynamically created gameobjects in tests
+    /// so they are cleaned up automatically in the teardown
+    /// </summary>
+    private GameObject runtimeGameObjectsRoot;
 
     protected virtual bool justSceneSetUp => false;
     protected virtual bool enableSceneIntegrityChecker => true;
@@ -54,6 +61,8 @@ public class TestsBase
 
         SetUp_Renderer();
 
+        runtimeGameObjectsRoot = new GameObject("_RuntimeGameObjectsRoot");
+
         Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
@@ -62,6 +71,9 @@ public class TestsBase
     protected virtual IEnumerator TearDown()
     {
         yield return null;
+
+        if(runtimeGameObjectsRoot != null)
+            Object.Destroy(runtimeGameObjectsRoot.gameObject);
 
         TestHelpers.ForceUnloadAllScenes(SceneController.i);
 
@@ -185,7 +197,6 @@ public class TestsBase
         CommonScriptableObjects.rendererState.Set(true);
     }
 
-
     protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
     {
         yield return InitUnityScene("MainTest");
@@ -206,7 +217,7 @@ public class TestsBase
             SetUp_UIScene();
         }
 
-        
+
         Environment.i.Initialize(new DummyMessageHandler(), isTesting: true);
     }
 
@@ -296,5 +307,12 @@ public class TestsBase
                 yield return null;
             }
         }
+    }
+
+    protected GameObject CreateTestGameObject(string name)
+    {
+        GameObject gameObject = new GameObject(name);
+        gameObject.transform.SetParent(runtimeGameObjectsRoot.transform);
+        return gameObject;
     }
 }

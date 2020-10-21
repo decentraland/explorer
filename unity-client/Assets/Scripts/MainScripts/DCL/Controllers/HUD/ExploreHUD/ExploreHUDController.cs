@@ -14,6 +14,7 @@ public class ExploreHUDController : IHUD
     FriendTrackerController friendsController;
 
     public event Action OnToggleTriggered;
+    public event Action OnOpen;
     public event Action OnClose;
 
     public ExploreHUDController()
@@ -25,7 +26,7 @@ public class ExploreHUDController : IHUD
         toggleExploreTrigger = Resources.Load<InputAction_Trigger>("ToggleExploreHud");
         toggleExploreTrigger.OnTriggered += OnToggleActionTriggered;
 
-        view.closeButton.onPointerDown += () =>
+        view.OnCloseButtonPressed += () =>
         {
             if (view.IsVisible())
             {
@@ -38,15 +39,13 @@ public class ExploreHUDController : IHUD
         HotSceneCellView.OnJumpIn += OnJumpIn;
     }
 
-    public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
+    public void Initialize(IFriendsController friendsController)
     {
         this.friendsController = new FriendTrackerController(friendsController, view.friendColors);
         miniMapDataController = new ExploreMiniMapDataController();
 
         view.Initialize(miniMapDataController, this.friendsController);
-
-        if (newTaskbarIsEnabled)
-            view.togglePopupButton.gameObject.SetActive(false);
+        view.togglePopupButton.gameObject.SetActive(false);
     }
 
     public void SetVisibility(bool visible)
@@ -60,6 +59,7 @@ public class ExploreHUDController : IHUD
         {
             Utils.UnlockCursor();
             view.RefreshData();
+            OnOpen?.Invoke();
         }
         else if (!visible && view.IsActive())
         {
@@ -71,7 +71,7 @@ public class ExploreHUDController : IHUD
         if (visible)
         {
             AudioScriptableObjects.dialogOpen.Play(true);
-            AudioScriptableObjects.listItemAppear.SetPitch(1f);
+            AudioScriptableObjects.listItemAppear.ResetPitch();
         }
         else
             AudioScriptableObjects.dialogClose.Play(true);

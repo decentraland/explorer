@@ -38,6 +38,7 @@ public class DCLCharacterController : MonoBehaviour
     float lastJumpButtonPressedTime = 0f;
     float lastMovementReportTime;
     float originalGravity;
+    Vector3 lastLocalGroundPosition;
     Vector3 velocity = Vector3.zero;
 
     bool isSprinting = false;
@@ -68,7 +69,7 @@ public class DCLCharacterController : MonoBehaviour
     public static System.Action<DCLCharacterPosition> OnPositionSet;
 
 
-    // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake 
+    // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake
     public DCL.Models.DecentralandEntity avatarReference { get; private set; }
     public DCL.Models.DecentralandEntity firstPersonCameraReference  { get; private set; }
     [SerializeField] private GameObject avatarGameObject;
@@ -338,12 +339,13 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResetGround()
     {
+        if(isOnMovingPlatform)
+            CommonScriptableObjects.playerIsOnMovingPlatform.Set(false);
+
         isOnMovingPlatform = false;
         groundTransform = null;
         movingPlatformSpeed = 0;
     }
-
-    Vector3 lastLocalGroundPosition;
 
     void CheckGround()
     {
@@ -372,6 +374,7 @@ public class DCLCharacterController : MonoBehaviour
                     && groundHasMoved)
                 {
                     isOnMovingPlatform = true;
+                    CommonScriptableObjects.playerIsOnMovingPlatform.Set(true);
                     Physics.SyncTransforms();
                     lastLocalGroundPosition = groundTransform.InverseTransformPoint(transform.position);
                 }

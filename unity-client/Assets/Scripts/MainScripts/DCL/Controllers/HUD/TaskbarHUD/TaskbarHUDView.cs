@@ -13,17 +13,27 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal RectTransform leftWindowContainer;
     [SerializeField] internal ShowHideAnimator leftWindowContainerAnimator;
     [SerializeField] internal LayoutGroup leftWindowContainerLayout;
+    [SerializeField] internal GameObject voiceChatButtonContainer;
+    [SerializeField] internal VoiceChatButton voiceChatButton;
     [SerializeField] internal TaskbarButton chatButton;
     [SerializeField] internal TaskbarButton friendsButton;
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
     [Header("Right Side Config")]
+    [SerializeField] internal HorizontalLayoutGroup rightButtonsHorizontalLayout;
     [SerializeField] internal TaskbarButton backpackButton;
     [SerializeField] internal TaskbarButton exploreButton;
+    [SerializeField] internal TaskbarButton goToGenesisButton;
 
     [Header("More Button Config")]
     [SerializeField] internal TaskbarButton moreButton;
     [SerializeField] internal TaskbarMoreMenu moreMenu;
+
+    [Header("Tutorial Config")]
+    [SerializeField] internal RectTransform exploreTooltipReference;
+    [SerializeField] internal RectTransform backpackTooltipReference;
+    [SerializeField] internal RectTransform moreTooltipReference;
+    [SerializeField] internal RectTransform goToGenesisTooltipReference;
 
     [Header("Old TaskbarCompatibility (temporal)")]
     [SerializeField] internal RectTransform taskbarPanelTransf;
@@ -41,6 +51,8 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnBackpackToggleOff;
     public event System.Action OnExploreToggleOn;
     public event System.Action OnExploreToggleOff;
+    public event System.Action OnGoToGenesisToggleOn;
+    public event System.Action OnGoToGenesisToggleOff;
     public event System.Action OnMoreToggleOn;
     public event System.Action OnMoreToggleOff;
 
@@ -52,20 +64,21 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
         taskbarButtonList.Add(backpackButton);
         taskbarButtonList.Add(exploreButton);
+        taskbarButtonList.Add(goToGenesisButton);
         taskbarButtonList.Add(moreButton);
         return taskbarButtonList;
     }
 
     internal static TaskbarHUDView Create(TaskbarHUDController controller, IChatController chatController,
-        IFriendsController friendsController, bool newTaskbarIsEnabled)
+        IFriendsController friendsController)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
-        view.Initialize(controller, chatController, friendsController, newTaskbarIsEnabled);
+        view.Initialize(controller, chatController, friendsController);
         return view;
     }
 
     public void Initialize(TaskbarHUDController controller, IChatController chatController,
-        IFriendsController friendsController, bool newTaskbarIsEnabled)
+        IFriendsController friendsController)
     {
         this.controller = controller;
 
@@ -74,6 +87,8 @@ public class TaskbarHUDView : MonoBehaviour
         friendsButton.transform.parent.gameObject.SetActive(false);
         backpackButton.transform.parent.gameObject.SetActive(false);
         exploreButton.transform.parent.gameObject.SetActive(false);
+        goToGenesisButton.transform.parent.gameObject.SetActive(false);
+        voiceChatButtonContainer.SetActive(false);
 
         moreButton.gameObject.SetActive(true);
         moreMenu.Initialize(this);
@@ -84,6 +99,7 @@ public class TaskbarHUDView : MonoBehaviour
         friendsButton.Initialize();
         backpackButton.Initialize();
         exploreButton.Initialize();
+        goToGenesisButton.Initialize();
         moreButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
@@ -101,11 +117,11 @@ public class TaskbarHUDView : MonoBehaviour
         exploreButton.OnToggleOn += OnWindowToggleOn;
         exploreButton.OnToggleOff += OnWindowToggleOff;
 
+        goToGenesisButton.OnToggleOn += OnWindowToggleOn;
+        goToGenesisButton.OnToggleOff += OnWindowToggleOff;
+
         moreButton.OnToggleOn += OnWindowToggleOn;
         moreButton.OnToggleOff += OnWindowToggleOff;
-
-        if (!newTaskbarIsEnabled)
-            ActivateOldTaskbar();
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -118,6 +134,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnBackpackToggleOff?.Invoke();
         else if (obj == exploreButton)
             OnExploreToggleOff?.Invoke();
+        else if (obj == goToGenesisButton)
+            OnGoToGenesisToggleOff?.Invoke();
         else if (obj == moreButton)
             moreMenu.ShowMoreMenu(false);
 
@@ -153,6 +171,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnBackpackToggleOn?.Invoke();
         else if (obj == exploreButton)
             OnExploreToggleOn?.Invoke();
+        else if (obj == goToGenesisButton)
+            OnGoToGenesisToggleOn?.Invoke();
         else if (obj == moreButton)
             moreMenu.ShowMoreMenu(true);
 
@@ -207,9 +227,19 @@ public class TaskbarHUDView : MonoBehaviour
         moreMenu.ActivateHelpAndSupportButton();
     }
 
+    internal void OnAddGoToGenesisWindow(bool visible)
+    {
+        goToGenesisButton.transform.parent.gameObject.SetActive(visible);
+    }
+
     internal void OnAddControlsMoreOption()
     {
         moreMenu.ActivateControlsButton();
+    }
+
+    internal void OnAddVoiceChat()
+    {
+        voiceChatButtonContainer.SetActive(true);
     }
 
     internal void ShowBar(bool visible, bool instant = false)
@@ -272,19 +302,16 @@ public class TaskbarHUDView : MonoBehaviour
             exploreButton.OnToggleOff -= OnWindowToggleOff;
         }
 
+        if (goToGenesisButton != null)
+        {
+            goToGenesisButton.OnToggleOn -= OnWindowToggleOn;
+            goToGenesisButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
         if (moreButton != null)
         {
             moreButton.OnToggleOn -= OnWindowToggleOn;
             moreButton.OnToggleOff -= OnWindowToggleOff;
         }
-    }
-
-    // NOTE(Santi): This is temporal, until we remove the old taskbar
-    private void ActivateOldTaskbar()
-    {
-        taskbarPanelTransf.offsetMax = new Vector2(-200, taskbarPanelTransf.offsetMax.y);
-        taskbarPanelImage.color = new Color(taskbarPanelImage.color.r, taskbarPanelImage.color.g, taskbarPanelImage.color.b, 0f);
-        moreButton.gameObject.SetActive(false);
-        rightButtonsContainer.SetActive(false);
     }
 }

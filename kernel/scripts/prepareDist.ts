@@ -99,11 +99,30 @@ async function injectDependencies(folder: string, dependencies: string[], devDep
 }
 
 async function prepareDecentralandECS(folder: string) {
-  await validatePackage(folder)
   copyFile(path.resolve(root, `packages/decentraland-amd/dist/amd.js`), path.resolve(root, `${folder}/artifacts/amd.js`))
+  copyFile(path.resolve(root, `packages/decentraland-amd/dist/amd.min.js`), path.resolve(root, `${folder}/artifacts/amd.min.js`))
+  copyFile(path.resolve(root, `packages/decentraland-amd/dist/amd.min.js.map`), path.resolve(root, `${folder}/artifacts/amd.min.js.map`))
   copyFile(path.resolve(root, `packages/build-ecs/index.js`), path.resolve(root, `${folder}/artifacts/build-ecs.js`))
+
+  copyFile(path.resolve(root, `static/dist/editor.js`), path.resolve(root, `packages/decentraland-ecs/artifacts/editor.js`))
+
+  copyFile(path.resolve(root, `static/dist/preview.js`), path.resolve(root, `${folder}/artifacts/preview.js`))
+  copyFile(path.resolve(root, `static/preview.html`), path.resolve(root, `${folder}/artifacts/preview.html`))
+
+  copyFile(path.resolve(root, `static/export.html`), path.resolve(root, `${folder}/artifacts/export.html`))
+
+  // static resources
+  copyFile(path.resolve(root, `static/fonts`), path.resolve(root, `${folder}/artifacts/fonts`))
+  copyFile(path.resolve(root, `static/images`), path.resolve(root, `${folder}/artifacts/images`))
+
+  // unity
+  copyFile(path.resolve(root, `static/unity`), path.resolve(root, `${folder}/artifacts/unity`))
+
   await fs.copy(path.resolve(root, `static/default-profile`), path.resolve(root, `${folder}/artifacts/default-profile`))
-  await injectDependencies(folder, ['typescript', 'uglify-js'], false)
+  await validatePackage(folder)
+
+  // build-ecs is embeded inside decentraland-ecs, therefore, it needs the same dependencies
+  await injectDependencies(folder, ['typescript', 'terser'], false)
 }
 
 async function validatePackage(folder: string) {
@@ -117,19 +136,6 @@ async function validatePackage(folder: string) {
     console.log(`  commit: ${commitHash}`)
     writeFileSync(file, JSON.stringify(packageJson, null, 2))
   }
-
-  copyFile(path.resolve(root, `static/dist/preview.js`), path.resolve(root, `${folder}/artifacts/preview.js`))
-  copyFile(path.resolve(root, `static/preview.html`), path.resolve(root, `${folder}/artifacts/preview.html`))
-
-  copyFile(path.resolve(root, `static/export.html`), path.resolve(root, `${folder}/artifacts/export.html`))
-
-  // static resources
-  copyFile(path.resolve(root, `static/fonts`), path.resolve(root, `${folder}/artifacts/fonts`))
-  copyFile(path.resolve(root, `static/images`), path.resolve(root, `${folder}/artifacts/images`))
-  copyFile(path.resolve(root, `static/models`), path.resolve(root, `${folder}/artifacts/models`))
-
-  // unity
-  copyFile(path.resolve(root, `static/unity`), path.resolve(root, `${folder}/artifacts/unity`))
 
   console.log(`> ensure ${folder}/lib exists`)
   {
@@ -145,6 +151,13 @@ async function validatePackage(folder: string) {
     }
   }
 
+  console.log(`> ensure ${folder}/artifacts/amd.js exists`)
+  {
+    if (!fs.existsSync(path.resolve(root, `${folder}/artifacts/amd.js`))) {
+      throw new Error(`${folder}/artifacts/amd.js does not exist`)
+    }
+  }
+
   console.log(`> ensure ${folder}/artifacts/preview.html exists`)
   {
     if (!fs.existsSync(path.resolve(root, `${folder}/artifacts/preview.html`))) {
@@ -157,11 +170,7 @@ async function validatePackage(folder: string) {
 ;(async function() {
   await copyIndex('unity')
   await prepareDecentralandECS('packages/decentraland-ecs')
-  copyFile(
-    path.resolve(root, `static/dist/editor.js`),
-    path.resolve(root, `packages/decentraland-ecs/artifacts/editor.js`)
-  )
-  await injectDependencies('packages/build-ecs', ['typescript', 'uglify-js'], false)
+  await injectDependencies('packages/build-ecs', ['typescript', 'terser'], false)
 })().catch(e => {
   // tslint:disable-next-line:no-console
   console.error(e)
