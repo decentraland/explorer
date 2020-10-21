@@ -11,7 +11,7 @@ public class TutorialMusicHandler : MonoBehaviour
 
     Coroutine fadeOut;
 
-    private void Start()
+    private void Awake()
     {
         tutorialController.OnTutorialEnabled += OnTutorialEnabled;
         tutorialController.OnTutorialDisabled += OnTutorialDisabled;
