@@ -414,11 +414,11 @@ public class AvatarEditorHUDController : IHUD
     {
         if (visible)
         {
-            DCL.RenderProfileManifest.currentProfile.avatarProfile.avatarEditor.Apply();
+            DCL.RenderProfileManifest.i.currentProfile.avatarProfile.avatarEditor.Apply();
         }
         else
         {
-            DCL.RenderProfileManifest.currentProfile.avatarProfile.inWorld.Apply();
+            DCL.RenderProfileManifest.i.currentProfile.avatarProfile.inWorld.Apply();
 
             if (view.isOpen)
                 OnClose?.Invoke();

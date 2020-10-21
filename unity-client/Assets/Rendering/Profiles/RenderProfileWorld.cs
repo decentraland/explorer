@@ -46,8 +46,8 @@ public class RenderProfileWorld : ScriptableObject
 
         fillWithRenderSettings = false;
 
-        if (RenderProfileManifest.currentProfile == this)
-            Apply(false);
+        if (RenderProfileManifest.i.currentProfile == this)
+            Apply();
     }
 
     public void FillWithRenderSettings()
@@ -63,7 +63,7 @@ public class RenderProfileWorld : ScriptableObject
     }
 #endif
 
-    public void Apply(bool verbose = true)
+    public void Apply(bool verbose = false)
     {
         RenderSettings.skybox = skyboxMaterial;
         RenderSettings.ambientEquatorColor = equatorColor;

@@ -27,6 +27,7 @@ namespace DCL.Controllers
     public class BlockerInstanceHandler : IBlockerInstanceHandler
     {
         static GameObject blockerPrefab;
+        private bool blockerPrefabDirty;
 
         const string PARCEL_BLOCKER_POOL_NAME = "ParcelBlocker";
 
@@ -39,28 +40,30 @@ namespace DCL.Controllers
         private IBlockerAnimationHandler animationHandler;
         private Transform parent;
 
+
         public BlockerInstanceHandler(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
         {
             this.characterPosition = characterPosition;
             this.animationHandler = animationHandler;
 
-            if (blockerPrefab == null)
-            {
-                blockerPrefab = RenderProfileManifest.currentProfile.loadingBlockerPrefab;
-            }
+            RenderProfileManifest.i.OnChangeProfile += OnChangeProfile;
+            OnChangeProfile(RenderProfileManifest.i.currentProfile);
+        }
 
-            // We need to manually create the Pool for empty game objects if it doesn't exist
-            if (!PoolManager.i.ContainsPool(PARCEL_BLOCKER_POOL_NAME))
-            {
-                GameObject go = Object.Instantiate(blockerPrefab);
-                Pool pool = PoolManager.i.AddPool(PARCEL_BLOCKER_POOL_NAME, go);
-                pool.persistent = true;
-                pool.ForcePrewarm();
-            }
+        private void OnChangeProfile(RenderProfileWorld profile)
+        {
+            blockerPrefabDirty = true;
+            blockerPrefab = profile.loadingBlockerPrefab;
         }
 
         public void ShowBlocker(Vector2Int pos, bool instant = false)
         {
+            if (blockerPrefabDirty)
+            {
+                blockerPrefabDirty = false;
+                EnsureBlockerPool();
+            }
+
             float centerOffset = ParcelSettings.PARCEL_SIZE / 2;
             PoolableObject blockerPoolable = PoolManager.i.Get(PARCEL_BLOCKER_POOL_NAME);
             GameObject blockerGo = blockerPoolable.gameObject;
@@ -88,6 +91,20 @@ namespace DCL.Controllers
 
             if (!instant)
                 animationHandler.FadeIn(blockerGo);
+        }
+
+        private void EnsureBlockerPool()
+        {
+            // We need to manually create the Pool for empty game objects if it doesn't exist
+            if (PoolManager.i.ContainsPool(PARCEL_BLOCKER_POOL_NAME))
+            {
+                PoolManager.i.RemovePool(PARCEL_BLOCKER_POOL_NAME);
+            }
+
+            GameObject go = Object.Instantiate(blockerPrefab);
+            Pool pool = PoolManager.i.AddPool(PARCEL_BLOCKER_POOL_NAME, go);
+            pool.persistent = true;
+            pool.ForcePrewarm();
         }
 
         public void SetParent(Transform parent)
