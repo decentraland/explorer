@@ -32,19 +32,15 @@ Shader "DCL/LWRP/Lit"
         _MetallicMapUVs ("Metallic UV Channel", Int) = 0
         _EmissiveMapUVs ("Emissive UV Channel", Int) = 0
 
-        //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
-        //             the _MatCap property if isn't present in the source material. There's no way to add it back afterwards.
+        //NOTE(Brian): This is a hack. CopyPropertiesFromMaterial has a bug and removes
+        //             the missing properties if they aren't present in the source material. 
+        //
+        //             The issue is that there's no way to add them back afterwards.
         [HideInInspector] _MatCap("ToonShader MatCap Map", 2D) = "bump" {}
-        
-        //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
-        //             the _GlossMatCap property if isn't present in the source material. There's no way to add it back afterwards.
         [HideInInspector] _GlossMatCap("ToonShader MatCap Map 2", 2D) = "bump" {}
-        
-        //NOTE(Brian): Had to hack this because CopyPropertiesFromMaterial has a bug and removes
-        //             the _FresnelMatCap property if isn't present in the source material. There's no way to add it back afterwards.
         [HideInInspector] _FresnelMatCap("ToonShader MatCap Map 3", 2D) = "bump" {}
-        [HideInInspector] _SSSIntensity("Used by toon shader", Float) = 0
-        [HideInInspector] _SSSParams("Used by toon shader", Vector) = (1,1,1,1)
+        [HideInInspector] _TintColor("Used by toon shader", Color) = (1,1,1,1)
+        //NOTE(Brian): Hack end
 
         _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
         _OcclusionMap("Occlusion", 2D) = "white" {}

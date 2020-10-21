@@ -13,7 +13,7 @@ namespace DCL.Helpers
             material.EnableKeyword("_EMISSION");
             material.EnableKeyword("_NORMALMAP");
 
-            material.enableInstancing = true;
+            material.enableInstancing = false;
 
             int zWrite = (int) material.GetFloat(ShaderUtils._ZWrite);
 

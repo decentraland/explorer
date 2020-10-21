@@ -1,4 +1,4 @@
-﻿Shader "Unlit Master"
+﻿Shader "DCL/Toon Shader"
 {
     Properties
     {
@@ -9,8 +9,6 @@
         [NoScaleOffset]_MatCap("Diffuse MatCap", 2D) = "white" {}
         [NoScaleOffset]_GlossMatCap("Gloss MatCap", 2D) = "white" {}
         [NoScaleOffset]_FresnelMatCap("Fresnel MatCap", 2D) = "white" {}
-        _SSSIntensity("SSS Intensity", Float) = 0
-        _SSSParams("SSSParams", Vector) = (0, 0, 0, 0)
         _TintColor("TintColor", Color) = (0.6415094, 0.5737489, 0.5416518, 1)
         [HideInInspector] _SrcBlend("__src", Float) = 1.0
         [HideInInspector] _DstBlend("__dst", Float) = 0.0
@@ -759,9 +757,11 @@
                 "LightMode" = "ShadowCaster"
             }
            
+            // Render State
             Blend [_SrcBlend][_DstBlend]
             ZWrite [_ZWrite]
             Cull [_Cull]
+            // ColorMask: <None>
             
         
             HLSLPROGRAM
