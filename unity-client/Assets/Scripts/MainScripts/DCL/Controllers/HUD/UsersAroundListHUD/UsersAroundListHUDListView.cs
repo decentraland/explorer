@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDListView
 {
     public event Action<string, bool> OnRequestMuteUser;
+    public event Action<bool> OnRequestMuteGlobal;
 
     [SerializeField] private UsersAroundListHUDListElementView listElementView;
     [SerializeField] private ShowHideAnimator showHideAnimator;
@@ -12,6 +14,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     [SerializeField] internal TMPro.TextMeshProUGUI textPlayersTitle;
     [SerializeField] internal Transform contentFriends;
     [SerializeField] internal Transform contentPlayers;
+    [SerializeField] internal Toggle muteAllToggle;
 
     internal Queue<UsersAroundListHUDListElementView> availableElements;
     internal Dictionary<string, UsersAroundListHUDListElementView> userElementDictionary;
@@ -30,6 +33,8 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         playersTextPattern = textPlayersTitle.text;
         textFriendsTitle.text = string.Format(friendsTextPattern, friendsCount);
         textPlayersTitle.text = string.Format(playersTextPattern, playersCount);
+
+        muteAllToggle.onValueChanged.AddListener(OnMuteGlobal);
 
         listElementView.OnMuteUser += OnMuteUser;
         listElementView.OnPoolRelease();
@@ -132,6 +137,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     void OnMuteUser(string userId, bool mute)
     {
         OnRequestMuteUser?.Invoke(userId, mute);
+    }
+
+    void OnMuteGlobal(bool mute)
+    {
+        OnRequestMuteGlobal?.Invoke(mute);
     }
 
     void PoolElementView(UsersAroundListHUDListElementView element)

@@ -481,6 +481,7 @@ namespace DCL.Interface
             public bool mute;
         }
 
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
      * This method is called after the first render. It marks the loading of the
@@ -1040,6 +1041,12 @@ namespace DCL.Interface
             muteUserEvent.userId = userId;
             muteUserEvent.mute = mute;
             SendMessage("SetMuteUser", muteUserEvent);
+        }
+
+        public static void SetGlobalVoiceChatMute(bool mute)
+        {
+            muteUserEvent.mute = mute;
+            SendMessage("SetGlobalVoiceChatMute", muteUserEvent);
         }
     }
 }

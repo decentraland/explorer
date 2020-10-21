@@ -280,6 +280,12 @@ export function updateVoiceCommunicatorVolume(volume: number) {
   }
 }
 
+export function updateVoiceCommunicatorMute(mute: boolean) {
+  if (voiceCommunicator) {
+    voiceCommunicator.setMute(mute)
+  }
+}
+
 export function sendPublicChatMessage(messageId: string, text: string) {
   if (context && context.currentPosition && context.worldInstanceConnection) {
     context.worldInstanceConnection
@@ -556,7 +562,8 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
   }
 
-  if (!immediateReposition) { // Otherwise the topics get lost on an immediate reposition...
+  if (!immediateReposition) {
+    // Otherwise the topics get lost on an immediate reposition...
     const parcelSceneSubscriptions = getParcelSceneSubscriptions()
     const parcelSceneCommsTopics = parcelSceneSubscriptions.join(' ')
 
@@ -1178,7 +1185,8 @@ globalThis.bots = {
     }
     return false
   },
-  reposition: (id: string) => { // to test immediate repositioning
+  reposition: (id: string) => {
+    // to test immediate repositioning
     let bot = bots.find((bot) => bot.id === id)
     if (bot) {
       const position = { ...lastPlayerPosition }

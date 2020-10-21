@@ -38,7 +38,7 @@ import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
-import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
+import { setVoiceChatRecording, setVoiceMute, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 
 declare const DCL: any
@@ -399,6 +399,10 @@ export class BrowserInterface {
     } else {
       globalThis.globalStore.dispatch(unmutePlayer(data.userId))
     }
+  }
+
+  public SetGlobalVoiceChatMute(data: { mute: boolean }) {
+    globalThis.globalStore.dispatch(setVoiceMute(data.mute))
   }
 }
 

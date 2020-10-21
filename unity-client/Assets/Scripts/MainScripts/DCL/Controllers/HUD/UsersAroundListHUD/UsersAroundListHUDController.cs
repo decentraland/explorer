@@ -64,6 +64,10 @@ public class UsersAroundListHUDController : IHUD
         {
             WebInterface.SetMuteUser(userId, mute);
         });
+        usersListView.OnRequestMuteGlobal += ((mute) =>
+        {
+            WebInterface.SetGlobalVoiceChatMute(mute);
+        });
         MinimapMetadata.GetMetadata().OnUserInfoUpdated += MapRenderer_OnUserInfoUpdated;
         MinimapMetadata.GetMetadata().OnUserInfoRemoved += MapRenderer_OnUserInfoRemoved;
     }

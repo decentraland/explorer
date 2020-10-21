@@ -43,6 +43,8 @@ export type VoiceCommunicatorOptions = {
   panningModel?: PanningModelType
   distanceModel?: DistanceModelType
   loopbackAudioElement?: HTMLAudioElement
+  volume?: number
+  mute?: boolean
 }
 
 export type VoiceSpatialParams = {
@@ -170,7 +172,15 @@ export class VoiceCommunicator {
   }
 
   setVolume(value: number) {
-    this.outputGainNode.gain.value = value
+    this.options.volume = value
+    if (this.options.mute === undefined || !this.options.mute) {
+      this.outputGainNode.gain.value = value
+    }
+  }
+
+  setMute(mute: boolean) {
+    this.options.mute = mute
+    this.outputGainNode.gain.value = mute ? 0 : this.options.volume ?? 0
   }
 
   createWorkletFor(src: string) {
