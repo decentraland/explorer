@@ -412,18 +412,21 @@ public class AvatarEditorHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
+        var currentRenderProfile = DCL.RenderProfileManifest.i.currentProfile;
+
         if (visible)
         {
-            DCL.RenderProfileManifest.i.currentProfile.avatarProfile.avatarEditor.Apply();
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
         }
         else
         {
-            DCL.RenderProfileManifest.i.currentProfile.avatarProfile.inWorld.Apply();
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
 
             if (view.isOpen)
                 OnClose?.Invoke();
         }
 
+        currentRenderProfile.avatarProfile.Apply();
         view.SetVisibility(visible);
     }
 

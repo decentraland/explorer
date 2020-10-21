@@ -74,6 +74,8 @@ public class RenderProfileWorld : ScriptableObject
         RenderSettings.sun.transform.rotation = Quaternion.Euler(directionalColorAngle);
         RenderSettings.customReflection = reflectionCubemap;
 
+        avatarProfile.Apply();
+
         if (verbose)
             Debug.Log("Applying profile... " + name);
     }

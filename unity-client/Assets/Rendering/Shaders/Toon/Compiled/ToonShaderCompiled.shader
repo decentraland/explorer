@@ -1,4 +1,4 @@
-﻿Shader "Unlit Master"
+﻿Shader "DCL/Toon Shader"
 {
     Properties
     {
@@ -9,9 +9,6 @@
         [NoScaleOffset]_MatCap("Diffuse MatCap", 2D) = "white" {}
         [NoScaleOffset]_GlossMatCap("Gloss MatCap", 2D) = "white" {}
         [NoScaleOffset]_FresnelMatCap("Fresnel MatCap", 2D) = "white" {}
-        _SSSIntensity("SSS Intensity", Float) = 0
-        _SSSParams("SSSParams", Vector) = (0, 0, 0, 0)
-        _TintColor("TintColor", Color) = (0.6415094, 0.5737489, 0.5416518, 1)
         [HideInInspector] _SrcBlend("__src", Float) = 1.0
         [HideInInspector] _DstBlend("__dst", Float) = 0.0
         [HideInInspector] _ZWrite("__zw", Float) = 1.0
@@ -149,7 +146,6 @@
             float4 _EmissionColor;
             float _SSSIntensity;
             float4 _SSSParams;
-            float4 _TintColor;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); float4 _BaseMap_TexelSize;
             TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap); float4 _EmissionMap_TexelSize;
@@ -158,6 +154,7 @@
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
             float4 _LightColor;
+            float4 _TintColor;
             SAMPLER(_SampleTexture2D_F1EE66C6_Sampler_3_Linear_Repeat);
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
             SAMPLER(_SampleTexture2D_ED76F6F0_Sampler_3_Linear_Repeat);
@@ -759,9 +756,11 @@
                 "LightMode" = "ShadowCaster"
             }
            
+            // Render State
             Blend [_SrcBlend][_DstBlend]
             ZWrite [_ZWrite]
             Cull [_Cull]
+            // ColorMask: <None>
             
         
             HLSLPROGRAM
@@ -862,7 +861,6 @@
             float4 _EmissionColor;
             float _SSSIntensity;
             float4 _SSSParams;
-            float4 _TintColor;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); float4 _BaseMap_TexelSize;
             TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap); float4 _EmissionMap_TexelSize;
@@ -871,6 +869,7 @@
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
             float4 _LightColor;
+            float4 _TintColor;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
@@ -1254,7 +1253,6 @@
             float4 _EmissionColor;
             float _SSSIntensity;
             float4 _SSSParams;
-            float4 _TintColor;
             CBUFFER_END
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); float4 _BaseMap_TexelSize;
             TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap); float4 _EmissionMap_TexelSize;
@@ -1263,6 +1261,7 @@
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
             float4 _LightColor;
+            float4 _TintColor;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions

@@ -23,6 +23,7 @@ namespace DCL
         public RenderProfileWorld testProfile;
 
         private RenderProfileWorld currentProfileValue;
+
         public RenderProfileWorld currentProfile
         {
             get { return currentProfileValue; }
@@ -58,7 +59,7 @@ namespace DCL
                 return;
             }
 
-            currentProfile.avatarProfile.inWorld.Apply();
+            currentProfile.avatarProfile.currentProfile = currentProfile.avatarProfile.inWorld;
             currentProfile.Apply();
         }
     }
