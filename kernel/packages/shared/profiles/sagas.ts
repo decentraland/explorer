@@ -395,6 +395,10 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   } else if (value.includes('://')) {
     // value is already a URL => use existing hash
     hash = value.split('/').pop()!
+
+    // We need the content file for the deployment
+    const blob = await fetch(value).then((r) => r.blob())
+    contentFile = await makeContentFile(name, blob)
   } else {
     // value is coming in base 64 => convert to blob & upload content
     const blob = base64ToBlob(value)

@@ -12,6 +12,8 @@ import { StoredSession } from './types'
 
 declare const globalThis: StoreContainer
 
+// Please note that dcl-profile in local storage does NOT contain profile information anymore. It just contains identity information
+// Eventually we could migrate this variable to a new one, if we find this too confusing.
 export const getStoredSession: () => StoredSession = () => getFromLocalStorage('dcl-profile') || {}
 
 export const setStoredSession: (session: StoredSession) => void = (session) =>
