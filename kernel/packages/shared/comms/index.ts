@@ -1,4 +1,3 @@
-import { saveToLocalStorage } from 'atomicHelpers/localStorage'
 import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, VOICE_CHAT_ENABLED } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
@@ -11,7 +10,6 @@ import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
 import {
   getCurrentPeer,
-  getCurrentUser,
   getPeer,
   getUser,
   localProfileUUID,
@@ -52,7 +50,7 @@ import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 
-import { Authenticator } from 'dcl-crypto'
+import { Authenticator, AuthIdentity } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
 import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
@@ -65,7 +63,7 @@ import {
   markCatalystRealmConnectionError
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
-import { getProfile } from 'shared/profiles/selectors'
+import { getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
 import { Profile } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
@@ -81,7 +79,7 @@ import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
   commsErrorRetrying
 } from 'shared/loading/types'
-import { getIdentity } from 'shared/session'
+import { getIdentity, getStoredSession } from 'shared/session'
 import { createLogger } from '../logger'
 import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
 import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
@@ -150,7 +148,6 @@ export class PeerTrackingInfo {
             const forRenderer = profileToRendererFormat(profile)
             this.lastProfileUpdate = new Date().getTime()
             const userInfo = this.userInfo || {}
-            userInfo.profile = forRenderer
             userInfo.version = profile.version
             this.userInfo = userInfo
             return forRenderer
@@ -331,15 +328,13 @@ export function processParcelSceneCommsMessage(context: Context, fromAlias: stri
   }
 }
 
-export function persistCurrentUser(changes: Partial<UserInformation>): Readonly<UserInformation> {
+export function updateCommsUser(changes: Partial<UserInformation>) {
   const peer = getCurrentPeer()
 
   if (!peer || !localProfileUUID) throw new Error('cannotGetCurrentPeer')
   if (!peer.user) throw new Error('cannotGetCurrentPeer.user')
 
   Object.assign(peer.user, changes)
-
-  saveToLocalStorage('dcl-profile', peer.user)
 
   receiveUserData(localProfileUUID, peer.user)
 
@@ -349,8 +344,6 @@ export function persistCurrentUser(changes: Partial<UserInformation>): Readonly<
       context.userInfo = user
     }
   }
-
-  return peer.user
 }
 
 function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingInfo {
@@ -365,7 +358,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
-  const profile = getProfile(store.getState(), getIdentity().address)
+  const profile = getCurrentUserProfile(store.getState())
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -374,8 +367,6 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 
     const user = getUser(fromAlias)
     if (user) {
-      const displayName = user.profile && user.profile.userId
-
       if (text.startsWith('␐')) {
         const [id, timestamp] = text.split(' ')
         avatarMessageObservable.notifyObservers({
@@ -389,7 +380,7 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
           const messageEntry: InternalChatMessage = {
             messageType: ChatMessageType.PUBLIC,
             messageId: msgId,
-            sender: displayName || 'unknown',
+            sender: user.userId || 'unknown',
             body: text,
             timestamp: message.time
           }
@@ -401,8 +392,8 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 }
 
 function processVoiceFragment(context: Context, fromAlias: string, message: Package<VoiceFragment>) {
-  const myAddress = getIdentity().address
-  const profile = getProfile(store.getState(), myAddress)
+  const myAddress = getIdentity()?.address
+  const profile = getCurrentUserProfile(store.getState())
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
@@ -433,10 +424,10 @@ function isMuted(profile: Profile, userId: string): boolean {
   return !!profile.muted && profile.muted.includes(userId)
 }
 
-function hasBlockedMe(myAddress: string, theirAddress: string): boolean {
+function hasBlockedMe(myAddress: string | undefined, theirAddress: string): boolean {
   const profile = getProfile(store.getState(), theirAddress)
 
-  return !!profile && isBlocked(profile, myAddress)
+  return !!profile && !!myAddress && isBlocked(profile, myAddress)
 }
 
 export function processProfileMessage(
@@ -554,7 +545,8 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
   }
 
-  if (!immediateReposition) { // Otherwise the topics get lost on an immediate reposition...
+  if (!immediateReposition) {
+    // Otherwise the topics get lost on an immediate reposition...
     const parcelSceneSubscriptions = getParcelSceneSubscriptions()
     const parcelSceneCommsTopics = parcelSceneSubscriptions.join(' ')
 
@@ -618,7 +610,7 @@ function collectInfo(context: Context) {
       continue
     }
 
-    if (trackingInfo.identity === getIdentity().address) {
+    if (trackingInfo.identity === getIdentity()?.address) {
       // If we are tracking a peer that is ourselves, we remove it
       removePeer(context, peerAlias)
       continue
@@ -727,7 +719,7 @@ function subscribeToRealmChange(store: Store<RootState>) {
 
 export async function connect(userId: string) {
   try {
-    const user = getCurrentUser()
+    const user = getStoredSession()
     if (!user) {
       return undefined
     }
@@ -785,7 +777,7 @@ export async function connect(userId: string) {
           },
           authHandler: async (msg: string) => {
             try {
-              return Authenticator.signPayload(getIdentity(), msg)
+              return Authenticator.signPayload(getIdentity() as AuthIdentity, msg)
             } catch (e) {
               defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
             }
@@ -817,7 +809,7 @@ export async function connect(userId: string) {
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
         connection = new LighthouseWorldInstanceConnection(
-          getIdentity().address,
+          getIdentity()?.address as string,
           realm!,
           lighthouseUrl,
           peerConfig,
@@ -1176,7 +1168,8 @@ globalThis.bots = {
     }
     return false
   },
-  reposition: (id: string) => { // to test immediate repositioning
+  reposition: (id: string) => {
+    // to test immediate repositioning
     let bot = bots.find((bot) => bot.id === id)
     if (bot) {
       const position = { ...lastPlayerPosition }

@@ -39,7 +39,6 @@ import { Profile, ContentFile, Avatar } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
 import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
-import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getResourcesURL } from '../location'
@@ -51,7 +50,7 @@ import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
-import { persistCurrentUser } from 'shared/comms'
+import { updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
 import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
@@ -131,14 +130,6 @@ function* initialProfileLoad() {
       profileDirty = true
     }
 
-    const localTutorialStep = getUserProfile().profile ? getUserProfile().profile.tutorialStep : 0
-
-    if (localTutorialStep !== profile.tutorialStep) {
-      let finalTutorialStep = Math.max(localTutorialStep, profile.tutorialStep)
-      profile = { ...profile, tutorialStep: finalTutorialStep }
-      profileDirty = true
-    }
-
     if (RESET_TUTORIAL) {
       profile = { ...profile, tutorialStep: 0 }
       profileDirty = true
@@ -149,12 +140,7 @@ function* initialProfileLoad() {
     }
   }
 
-  const identity = yield select(getCurrentIdentity)
-
-  persistCurrentUser({
-    version: profile.version,
-    profile: profileToRendererFormat(profile, identity)
-  })
+  updateCommsUser({ version: profile.version })
 }
 
 /**
@@ -194,16 +180,6 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
       }
     } catch (error) {
       defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
-    }
-
-    const userInfo = getUserProfile()
-    if (!profile && userInfo && userInfo.userId && userId === userInfo.userId && userInfo.profile) {
-      defaultLogger.info(`Recover profile from local storage`)
-      profile = yield call(
-        ensureServerFormat,
-        { ...userInfo.profile, avatar: { ...userInfo.profile.avatar, snapshots: userInfo.profile.snapshots } },
-        userInfo.version || 0
-      )
     }
 
     if (!profile) {
@@ -370,10 +346,10 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
 
   try {
-    const savedProfile = yield select(getProfile, userId)
-    const currentVersion: number = savedProfile.version || 0
+    const savedProfile: Profile | null = yield select(getProfile, userId)
+    const currentVersion: number = savedProfile?.version || 0
     const url: string = yield select(getUpdateProfileServer)
-    const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } }
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } } as Profile
 
     const identity = yield select(getCurrentIdentity)
 
@@ -390,9 +366,8 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
       yield put(saveProfileSuccess(userId, profile.version, profile))
       yield put(profileRequest(userId))
 
-      persistCurrentUser({
-        version: profile.version,
-        profile: profileToRendererFormat(profile, userId)
+      updateCommsUser({
+        version: profile.version
       })
     }
   } catch (error) {

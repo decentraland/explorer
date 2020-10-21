@@ -1,5 +1,5 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { AuthIdentity } from 'dcl-crypto'
+import { ExplorerIdentity } from 'shared/session/types'
 
 export enum AvatarMessageType {
   // Networking related messages
@@ -31,6 +31,7 @@ export type ReceiveUserDataMessage = {
   type: AvatarMessageType.USER_DATA
   uuid: string
   data: Partial<UserInformation>
+  profile: ProfileForRenderer
 }
 
 export type ReceiveUserVisibleMessage = {
@@ -87,26 +88,20 @@ export type PeerInformation = {
    */
   uuid: UUID
 
-  flags: {
-    muted?: boolean
-  }
-
   user?: UserInformation
 }
 
 export type UserInformation = {
   userId?: string
   version?: number
-  status?: string
   pose?: Pose
   expression?: AvatarExpression
-  profile?: ProfileForRenderer
-  identity?: AuthIdentity
+  identity?: ExplorerIdentity
 }
 
 export type AvatarExpression = {
-  expressionType?: string
-  expressionTimestamp?: number
+  expressionType: string
+  expressionTimestamp: number
 }
 
 // The order is [X,Y,Z,Qx,Qy,Qz,Qw,immediate]

@@ -1,7 +1,7 @@
 import { uuid } from 'decentraland-ecs/src'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
-import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
+import { avatarMessageObservable } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
@@ -13,7 +13,7 @@ import { queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar, Profile } from 'shared/profiles/types'
+import { Avatar } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
@@ -30,7 +30,7 @@ import { blockPlayer, mutePlayer, unblockPlayer, unmutePlayer } from 'shared/soc
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 import { logout } from 'shared/session/actions'
-import { getIdentity, hasWallet } from 'shared/session'
+import { getIdentity, getStoredSession, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
@@ -65,7 +65,12 @@ export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
   /** Triggered when the camera moves */
-  public ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number; immediate?: boolean }) {
+  public ReportPosition(data: {
+    position: ReadOnlyVector3
+    rotation: ReadOnlyQuaternion
+    playerHeight?: number
+    immediate?: boolean
+  }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
     positionEvent.quaternion.set(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w)
     positionEvent.rotation.copyFrom(positionEvent.quaternion.eulerAngles)
@@ -174,21 +179,19 @@ export class BrowserInterface {
       return
     }
     const unique = new Set<string>(interests)
-    const profile: Profile = getUserProfile().profile as Profile
-    globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
+
+    globalThis.globalStore.dispatch(saveProfileRequest({ interests: Array.from(unique) }))
   }
 
   public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
     const { face, face128, face256, body, avatar } = changes
-    const profile: Profile = getUserProfile().profile as Profile
-    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    const update = { avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
+    globalThis.globalStore.dispatch(saveProfileRequest(update))
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile: Profile = getUserProfile().profile as Profile
-    const updated = { ...profile, tutorialStep: data.tutorialStep }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    const update = { tutorialStep: data.tutorialStep }
+    globalThis.globalStore.dispatch(saveProfileRequest(update))
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -253,10 +256,10 @@ export class BrowserInterface {
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
-    const profile = getUserProfile().profile
-    if (profile) {
+    const session = getStoredSession()
+    if (session) {
       if (hasWallet()) {
-        window.analytics.identify(profile.userId, { email: data.userEmail })
+        window.analytics.identify(session.userId, { email: data.userEmail })
       } else {
         window.analytics.identify({ email: data.userEmail })
       }
@@ -390,7 +393,7 @@ export class BrowserInterface {
   public async FetchBalanceOfMANA() {
     const identity = getIdentity()
 
-    if (!identity.hasConnectedWeb3) {
+    if (!identity?.hasConnectedWeb3) {
       return
     }
 

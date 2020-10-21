@@ -10,7 +10,7 @@ import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetw
 import { createLogger } from 'shared/logger'
 import { referUser, initializeReferral } from 'shared/referral'
 import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
-import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
+import { setLocalInformationForComms } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
@@ -24,9 +24,9 @@ import { getNetwork } from 'shared/ethereum/EthereumService'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
-import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
+import { getStoredSession, Session, setStoredSession } from './index'
 
 const logger = createLogger('session: ')
 
@@ -86,7 +86,7 @@ function* login() {
     }
 
     try {
-      const userData = getUserProfile()
+      const userData = getStoredSession()
 
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
@@ -95,18 +95,12 @@ function* login() {
         showAwaitingSignaturePrompt(false)
         userId = identity.address
 
-        setLocalProfile(userId, {
-          userId,
-          identity
-        })
+        saveSession(userId, identity)
       } else {
         identity = userData.identity
         userId = userData.identity.address
 
-        setLocalProfile(userId, {
-          userId,
-          identity
-        })
+        saveSession(userId, identity)
       }
     } catch (e) {
       logger.error(e)
@@ -123,10 +117,7 @@ function* login() {
     identity = yield createAuthIdentity()
     userId = identity.address
 
-    setLocalProfile(userId, {
-      userId,
-      identity
-    })
+    saveSession(userId, identity)
 
     loginCompleted.resolve()
   }
@@ -146,6 +137,18 @@ function* login() {
 
   yield loginCompleted
   yield put(loginCompletedAction())
+}
+
+function saveSession(userId: string, identity: ExplorerIdentity) {
+  setStoredSession({
+    userId,
+    identity
+  })
+
+  setLocalInformationForComms(userId, {
+    userId,
+    identity
+  })
 }
 
 async function checkTldVsNetwork() {

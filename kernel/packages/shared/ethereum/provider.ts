@@ -4,10 +4,9 @@ import { future, IFuture } from 'fp-future'
 import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
-import { getUserProfile } from 'shared/comms/peers'
 import { getTLD } from '../../config/index'
-import { removeUserProfile } from '../comms/peers'
 import { Eth } from 'web3x/eth'
+import { getStoredSession, removeStoredSession } from 'shared/session'
 
 declare var window: Window & {
   ethereum: any
@@ -34,7 +33,7 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
     }
 
     // TODO - look for user id matching account - moliva - 18/02/2020
-    let userData = getUserProfile()
+    let userData = getStoredSession()
 
     // Modern dapp browsers...
     if (window['ethereum'] && isSessionExpired(userData)) {
@@ -72,7 +71,7 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
 function processLoginBackground() {
   const response = future()
 
-  const userData = getUserProfile()
+  const userData = getStoredSession()
   if (window['ethereum']) {
     if (!isSessionExpired(userData)) {
       response.resolve({ successful: true, provider: window.ethereum })
@@ -170,10 +169,10 @@ async function removeSessionIfNotValid() {
   const account = await getUserAccount()
 
   // TODO - look for user id matching account - moliva - 18/02/2020
-  let userData = getUserProfile()
+  let userData = getStoredSession()
 
   if ((userData && userData.userId !== account) || isSessionExpired(userData)) {
-    removeUserProfile()
+    removeStoredSession()
   }
 }
 
