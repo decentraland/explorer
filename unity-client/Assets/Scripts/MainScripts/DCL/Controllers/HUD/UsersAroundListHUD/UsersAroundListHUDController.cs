@@ -28,7 +28,7 @@ public class UsersAroundListHUDController : IHUD
     {
         MinimapMetadata.GetMetadata().OnUserInfoUpdated -= MapRenderer_OnUserInfoUpdated;
         MinimapMetadata.GetMetadata().OnUserInfoRemoved -= MapRenderer_OnUserInfoRemoved;
-        usersListView.Dispose();
+        usersListView?.Dispose();
         if (usersButtonView != null)
         {
             usersButtonView.OnClick -= ToggleVisibility;

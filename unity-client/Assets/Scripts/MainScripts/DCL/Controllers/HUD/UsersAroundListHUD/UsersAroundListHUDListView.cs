@@ -32,7 +32,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         textPlayersTitle.text = string.Format(playersTextPattern, playersCount);
 
         listElementView.OnMuteUser += OnMuteUser;
-        listElementView.gameObject.SetActive(false);
+        listElementView.OnPoolRelease();
         availableElements.Enqueue(listElementView);
     }
 
@@ -55,15 +55,14 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         {
             view = availableElements.Dequeue();
             view.transform.SetParent(isFriend ? contentFriends : contentPlayers);
-            view.OnPoolGet();
         }
         else
         {
             view = Instantiate(listElementView, isFriend ? contentFriends : contentPlayers);
-            view.gameObject.SetActive(true);
             view.OnMuteUser += OnMuteUser;
         }
 
+        view.OnPoolGet();
         view.SetUserProfile(profile);
         userElementDictionary.Add(userInfo.userId, view);
         ModifyListCount(isFriend, 1);
@@ -75,6 +74,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         {
             return;
         }
+        if (!elementView)
+        {
+            return;
+        }
+
         ModifyListCount(elementView.transform.parent == contentFriends, -1);
         PoolElementView(elementView);
         userElementDictionary.Remove(userId);
@@ -119,7 +123,10 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     {
         userElementDictionary.Clear();
         availableElements.Clear();
-        Destroy(gameObject);
+        if (gameObject)
+        {
+            Destroy(gameObject);
+        }
     }
 
     void OnMuteUser(string userId, bool mute)

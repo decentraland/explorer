@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler
 {
-    const float USER_NOT_RECORDING_THROTTLING = 1;
+    const float USER_NOT_RECORDING_THROTTLING = 2;
 
     public event Action<string, bool> OnMuteUser;
 
@@ -114,6 +114,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             yield break;
         }
         yield return WaitForSecondsCache.Get(USER_NOT_RECORDING_THROTTLING);
+        micAnimator.ResetTrigger(micAnimationRecording);
         micAnimator.SetTrigger(micAnimationIdle);
     }
 }
