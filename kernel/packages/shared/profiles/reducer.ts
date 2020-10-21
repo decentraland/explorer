@@ -64,7 +64,10 @@ export function profileReducer(state?: ProfileState, action?: AnyAction): Profil
     case PROFILE_REQUEST:
       return {
         ...state,
-        userInfo: { ...state.userInfo, [action.payload.userId]: { status: 'loading' } }
+        userInfo: {
+          ...state.userInfo,
+          [action.payload.userId]: { ...state.userInfo[action.payload.userId], status: 'loading' }
+        }
       }
     case PROFILE_SUCCESS:
       return {

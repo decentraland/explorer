@@ -67,11 +67,15 @@ export type FileAndHash = {
 
 export type ColorString = string
 
+export type ProfileStatus = 'ok' | 'error' | 'loading'
+
+export type ProfileUserInfo =
+  | { status: 'loading' | 'error'; data: any; hasConnectedWeb3: boolean; addedToCatalog?: boolean }
+  | { status: 'ok'; data: Profile; hasConnectedWeb3: boolean; addedToCatalog?: boolean }
+
 export type ProfileState = {
   userInfo: {
-    [key: string]:
-      | { status: 'loading' | 'error'; data: any; hasConnectedWeb3: boolean; addedToCatalog?: boolean }
-      | { status: 'ok'; data: Profile; hasConnectedWeb3: boolean; addedToCatalog?: boolean }
+    [key: string]: ProfileUserInfo
   }
   userInventory: {
     [key: string]: { status: 'loading' } | { status: 'error'; data: any } | { status: 'ok'; data: WearableId[] }

@@ -1,4 +1,4 @@
-import { Profile, RootProfileState } from './types'
+import { Profile, ProfileStatus, ProfileUserInfo, RootProfileState } from './types'
 import { RootDaoState } from '../dao/types'
 import { Wearable } from 'shared/catalogs/types'
 import { getCurrentUserId } from 'shared/session/selectors'
@@ -6,13 +6,18 @@ import { RootSessionState } from 'shared/session/types'
 
 export const getProfileDownloadServer = (store: RootDaoState) => store.dao.profileServer
 
+export const getProfileStatusAndData = (store: RootProfileState, userId: string): [ProfileStatus | undefined, any] => [
+  store?.profiles?.userInfo[userId]?.status,
+  store?.profiles?.userInfo[userId]?.data
+]
+
 export const getProfile = (store: RootProfileState, userId: string): Profile | null =>
-  store.profiles &&
-  store.profiles.userInfo &&
-  store.profiles.userInfo[userId] &&
-  store.profiles.userInfo[userId].status === 'ok'
-    ? (store.profiles.userInfo[userId].data as Profile)
-    : null
+  getProfileValueIfOkOrLoading(
+    store,
+    userId,
+    (info) => info.data as Profile,
+    () => null
+  )
 
 export const getCurrentUserProfile = (store: RootProfileState & RootSessionState): Profile | null => {
   const currentUserId = getCurrentUserId(store)
@@ -20,12 +25,12 @@ export const getCurrentUserProfile = (store: RootProfileState & RootSessionState
 }
 
 export const hasConnectedWeb3 = (store: RootProfileState, userId: string): boolean =>
-  store.profiles &&
-  store.profiles.userInfo &&
-  store.profiles.userInfo[userId] &&
-  store.profiles.userInfo[userId].status === 'ok'
-    ? !!store.profiles.userInfo[userId].hasConnectedWeb3
-    : false
+  getProfileValueIfOkOrLoading(
+    store,
+    userId,
+    (info) => !!info.hasConnectedWeb3,
+    () => false
+  )
 
 export const findProfileByName = (store: RootProfileState, userName: string): Profile | null =>
   store.profiles && store.profiles.userInfo
@@ -35,20 +40,20 @@ export const findProfileByName = (store: RootProfileState, userName: string): Pr
     : null
 
 export const isAddedToCatalog = (store: RootProfileState, userId: string): boolean =>
-  store.profiles &&
-  store.profiles.userInfo &&
-  store.profiles.userInfo[userId] &&
-  store.profiles.userInfo[userId].status === 'ok'
-    ? !!store.profiles.userInfo[userId].addedToCatalog
-    : false
+  getProfileValueIfOkOrLoading(
+    store,
+    userId,
+    (info) => !!info.addedToCatalog,
+    () => false
+  )
 
 export const getEthereumAddress = (store: RootProfileState, userId: string): string | undefined =>
-  store.profiles &&
-  store.profiles.userInfo &&
-  store.profiles.userInfo[userId] &&
-  store.profiles.userInfo[userId].status === 'ok'
-    ? (store.profiles.userInfo[userId].data as Profile).ethAddress
-    : undefined
+  getProfileValueIfOkOrLoading(
+    store,
+    userId,
+    (info) => (info.data as Profile).ethAddress,
+    () => undefined
+  )
 
 export const getInventory = (store: RootProfileState, userId: string): Wearable[] | null =>
   store.profiles &&
@@ -57,3 +62,17 @@ export const getInventory = (store: RootProfileState, userId: string): Wearable[
   store.profiles.userInventory[userId].status === 'ok'
     ? ((store.profiles.userInventory[userId] as any).data as Wearable[])
     : null
+
+function getProfileValueIfOkOrLoading<T>(
+  store: RootProfileState,
+  userId: string,
+  getter: (p: ProfileUserInfo) => T,
+  ifNotFound: () => T
+): T {
+  return store.profiles &&
+    store.profiles.userInfo &&
+    store.profiles.userInfo[userId] &&
+    (store.profiles.userInfo[userId].status === 'ok' || store.profiles.userInfo[userId].status === 'loading')
+    ? getter(store.profiles.userInfo[userId])
+    : ifNotFound()
+}

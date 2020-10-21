@@ -1,6 +1,6 @@
 import { RootState, StoreContainer } from '../store/rootTypes'
 import { Store } from 'redux'
-import { getProfile } from './selectors'
+import { getProfile, getProfileStatusAndData } from './selectors'
 import { profileRequest } from './actions'
 import { Profile } from './types'
 
@@ -14,14 +14,20 @@ export function ProfileAsPromise(userId: string, version?: number): Promise<Prof
   if (existingProfile && existingProfileWithCorrectVersion) {
     return Promise.resolve(existingProfile)
   }
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const unsubscribe = store.subscribe(() => {
+      const [status, data] = getProfileStatusAndData(store.getState(), userId)
+
+      if (status === 'error') {
+        unsubscribe()
+        return reject(data)
+      }
+
       const profile = getProfile(store.getState(), userId)
       if (profile) {
         unsubscribe()
         return resolve(profile)
       }
-      // TODO (eordano, 16/Sep/2019): Timeout or catch errors
     })
     store.dispatch(profileRequest(userId))
   })
