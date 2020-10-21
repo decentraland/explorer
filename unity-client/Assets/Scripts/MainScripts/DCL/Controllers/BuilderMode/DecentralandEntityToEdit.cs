@@ -53,8 +53,21 @@ public class DecentralandEntityToEdit : EditableEntity
             onStatusUpdate?.Invoke(this);
         }
     }
+    private bool isVisible = true;
+    public bool IsVisible
+    {
+        get
+        {
+            return isVisible;
+        }
+        set
+        {
+            isVisible = value;
+            onStatusUpdate?.Invoke(this);
+        }
+    }
 
-    bool isFloor = false;
+
     Transform originalParent;
 
 
@@ -73,7 +86,7 @@ public class DecentralandEntityToEdit : EditableEntity
         editMaterial = _editMaterial;
 
         entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
-
+        IsVisible = rootEntity.gameObject.activeSelf;
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
             CreateCollidersForEntity(rootEntity);
@@ -103,6 +116,7 @@ public class DecentralandEntityToEdit : EditableEntity
     public void ChangeShowStatus()
     {
         rootEntity.gameObject.SetActive(!gameObject.activeSelf);
+        IsVisible = gameObject.activeSelf;
         onStatusUpdate?.Invoke(this);
     }
 
@@ -236,7 +250,6 @@ public class DecentralandEntityToEdit : EditableEntity
         if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.05f) return;
         if (rootEntity.gameObject.transform.position.y >= 0.05f) return;
 
-        isFloor = true;
         SetLockStatus(true);
     }
 }

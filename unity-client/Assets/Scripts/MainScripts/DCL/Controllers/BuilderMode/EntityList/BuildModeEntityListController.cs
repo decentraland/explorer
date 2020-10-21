@@ -16,7 +16,7 @@ public class BuildModeEntityListController : MonoBehaviour
         SHOW = 3
     }
 
-    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDelete,OnEntityLock;
+    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDelete,OnEntityLock,OnEntityChangeVisibility;
     public EntityListView entityListView;
     ParcelScene currentScene;
     List<DecentralandEntityToEdit> entitiesList;
@@ -76,7 +76,8 @@ public class BuildModeEntityListController : MonoBehaviour
                 OnEntityDelete?.Invoke(entityToApply);
                 break;
             case EntityAction.SHOW:
-                entityToApply.ChangeShowStatus();
+                OnEntityChangeVisibility?.Invoke(entityToApply);
+      
                 break;
         }
 

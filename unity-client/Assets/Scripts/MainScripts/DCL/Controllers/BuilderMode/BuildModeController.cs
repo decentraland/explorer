@@ -82,7 +82,6 @@ public class BuildModeController : MonoBehaviour
     GameObject gameObjectToEdit;
     GameObject undoGO, snapGO, freeMovementGO;
 
-
     float nexTimeToReceiveInput;
 
     int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
@@ -121,11 +120,18 @@ public class BuildModeController : MonoBehaviour
         buildModeEntityListController.OnEntityClick += ChangeEntitySelectionFromList;
         buildModeEntityListController.OnEntityDelete += DeleteEntity;
         buildModeEntityListController.OnEntityLock += ChangeEntityLockStatus;
+        buildModeEntityListController.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
 
         InitEditModes();
 
+    }
+
+    private void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
+    {
+        entityToApply.ChangeShowStatus();
+        if (!entityToApply.IsVisible && selectedEntities.Contains(entityToApply)) DeselectEntity(entityToApply);
     }
 
     private void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
@@ -272,6 +278,7 @@ public class BuildModeController : MonoBehaviour
 
         DeselectEntities();
         Select(entity);
+
 
         entity.gameObject.transform.eulerAngles = Vector3.zero;
 
@@ -812,9 +819,11 @@ public class BuildModeController : MonoBehaviour
 
     public void DeleteEntity(DecentralandEntityToEdit entityToDelete)
     {
+        if (entityToDelete.IsSelected) DeselectEntity(entityToDelete);
         RemoveConvertedEntity(entityToDelete.rootEntity);
         entityToDelete.Delete();
         sceneToEdit.RemoveEntity(entityToDelete.rootEntity.entityId, true);
+        sceneLimitInfoController.UpdateInfo();
         EntityListChanged();
     }
 
@@ -825,6 +834,7 @@ public class BuildModeController : MonoBehaviour
 
         BuildModeUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
+        sceneLimitInfoController.UpdateInfo();
     }
     public void DuplicateEntities()
     {
@@ -928,6 +938,7 @@ public class BuildModeController : MonoBehaviour
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
         DCLCharacterController.i.SetFreeMovementActive(false);
         outlinerController.CancelAllOutlines();
+        
         DeselectEntities();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);

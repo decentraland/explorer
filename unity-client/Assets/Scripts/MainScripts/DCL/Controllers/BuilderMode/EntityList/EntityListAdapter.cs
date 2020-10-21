@@ -59,20 +59,23 @@ public class EntityListAdapter : MonoBehaviour
 
     void SetInfo(DecentralandEntityToEdit entityToEdit)
     {
+        if (this != null)
+        {
+            nameTxt.text = entityToEdit.rootEntity.entityId;
+            if (entityToEdit.IsVisible) showImg.color = iconsSelectedColor;
+            else showImg.color = iconsUnselectedColor;
 
-        nameTxt.text = entityToEdit.rootEntity.entityId;
-        if (entityToEdit.rootEntity.gameObject.activeSelf) showImg.color = iconsSelectedColor;
-        else showImg.color = iconsUnselectedColor;
-
-        if (entityToEdit.IsLocked) lockImg.color = iconsSelectedColor; 
-        else lockImg.color = iconsUnselectedColor;
+            if (entityToEdit.IsLocked) lockImg.color = iconsSelectedColor;
+            else lockImg.color = iconsUnselectedColor;
 
 
-        if (entityToEdit.IsSelected)  selectedImg.color = entitySelectedColor;
-        else selectedImg.color = entityUnselectedColor;
+            if (entityToEdit.IsSelected) selectedImg.color = entitySelectedColor;
+            else selectedImg.color = entityUnselectedColor;
+        }
     }
     void DeleteAdapter(DecentralandEntityToEdit entityToEdit)
     {
-        if(entityToEdit.entityUniqueId == currentEntity.entityUniqueId) Destroy(gameObject);
+        if (this != null)
+            if (entityToEdit.entityUniqueId == currentEntity.entityUniqueId) Destroy(gameObject);
     }
 }
