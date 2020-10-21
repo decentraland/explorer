@@ -11,6 +11,7 @@ namespace DCL.Tutorial
     {
         private const int TEACHER_CANVAS_SORT_ORDER_START = 4;
 
+        [SerializeField] AudioEvent audioEventSuccess;
         [SerializeField] Button okButton;
 
         private bool stepIsFinished = false;
@@ -19,6 +20,8 @@ namespace DCL.Tutorial
         public override void OnStepStart()
         {
             base.OnStepStart();
+
+            CommonScriptableObjects.featureKeyTriggersBlocked.Set(true);
 
             okButton.onClick.AddListener(OnOkButtonClick);
 
@@ -31,6 +34,7 @@ namespace DCL.Tutorial
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => stepIsFinished);
+            audioEventSuccess.Play(true);
         }
 
         public override void OnStepFinished()
@@ -38,6 +42,7 @@ namespace DCL.Tutorial
             base.OnStepFinished();
             tutorialController.SetTeacherCanvasSortingOrder(defaultTeacherCanvasSortOrder);
             tutorialController.hudController?.taskbarHud?.SetVisibility(true);
+            CommonScriptableObjects.featureKeyTriggersBlocked.Set(false);
         }
 
         private void OnOkButtonClick()
