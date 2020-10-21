@@ -14,6 +14,16 @@ public static partial class BuildModeUtils
         gameObjectToReceive.transform.localScale = gameObjectToCopy.transform.lossyScale;
     }
 
+    public static bool IsPointerOverMaskElement(LayerMask mask)
+    {
+        RaycastHit hitInfo;
+        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if(Physics.Raycast(mouseRay, out hitInfo, 5555, mask))
+        {
+            return true;
+        }
+        return false;
+    }
     public static bool IsPointerOverUIElement()
     {
         var eventData = new PointerEventData(EventSystem.current);

@@ -13,11 +13,10 @@ public class BuildModeEntityListController : MonoBehaviour
         SELECT = 0,
         LOCK = 1,
         DELETE = 2,
-        SHOW = 3,
-        DUPLICATE = 4,
+        SHOW = 3
     }
 
-    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDuplicate,OnEntityDelete;
+    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDelete,OnEntityLock;
     public EntityListView entityListView;
     ParcelScene currentScene;
     List<DecentralandEntityToEdit> entitiesList;
@@ -32,11 +31,25 @@ public class BuildModeEntityListController : MonoBehaviour
         entityListView.OnActioninvoked -= EntityActionInvoked;
     }
 
-    public void OpenEntityList(List<DecentralandEntityToEdit> sceneEntities)
+    public void OpenEntityList(List<DecentralandEntityToEdit> sceneEntities,ParcelScene parcelScene)
     {
-        entitiesList = sceneEntities;
+        if (currentScene == null)
+        {
+            currentScene = parcelScene;
+            SetEntityList(sceneEntities);
+        }
+        else
+        {
+            if (currentScene != parcelScene) SetEntityList(sceneEntities);
+        }
         gameObject.SetActive(true);
         entityListView.gameObject.SetActive(true);
+
+    }
+
+    public void SetEntityList(List<DecentralandEntityToEdit> sceneEntities)
+    {
+        entitiesList = sceneEntities;
         entityListView.SetContent(sceneEntities);
     }
 
@@ -55,8 +68,8 @@ public class BuildModeEntityListController : MonoBehaviour
                 
                 break;
             case EntityAction.LOCK:
-                entityToApply.ChangeLockStatus();
-                
+              
+                OnEntityLock?.Invoke(entityToApply);
                 break;
             case EntityAction.DELETE:
               
@@ -65,19 +78,8 @@ public class BuildModeEntityListController : MonoBehaviour
             case EntityAction.SHOW:
                 entityToApply.ChangeShowStatus();
                 break;
-            case EntityAction.DUPLICATE:
-                OnEntityDuplicate?.Invoke(entityToApply);
-                //DecentralandEntity newEntity = currentScene.CreateEntity(Guid.NewGuid().ToString());
-                //CopyFromEntity(entityToApply.rootEntity, newEntity);
-                break;
         }
-        //adapter.SetContent(entityToApply);
-        //entityListView.SetContent(entitiesList);
+
     }
 
-
-    //void CopyFromEntity(DecentralandEntity originalEntity,DecentralandEntity destinationEntity)
-    //{
-    //    Instantiate(originalEntity.gameObject, destinationEntity.gameObject.transform);
-    //}
 }

@@ -4,6 +4,7 @@ using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,9 +19,7 @@ public class BuildEditorMode : BuildModeState
     public FreeCameraMovement freeCameraController;
     public GameObject eagleCamera, advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
-    public SceneObjectCatalogController sceneObjectCatalogController;
 
-    public Outline moveOutline, rotateOutline, scaleOutline;
 
     //public CameraController cameraController;
     public Transform lookAtT;
@@ -32,6 +31,12 @@ public class BuildEditorMode : BuildModeState
     public LayerMask groundLayer;
 
     bool isPlacingNewObject = false;
+
+    private void Start()
+    {
+        DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
+        DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
+    }
 
 
     private void Update()
@@ -66,7 +71,7 @@ public class BuildEditorMode : BuildModeState
         SceneController.i.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
         advancedModeUI.SetActive(true);
-        CommonScriptableObjects.allUIHidden.Set(true);
+       
         RenderSettings.fog = false;
         gizmoManager.HideGizmo();
         gameObjectToEdit.transform.SetParent(null);
@@ -80,7 +85,7 @@ public class BuildEditorMode : BuildModeState
         SceneController.i.ReIntegrateIsolatedScene();
         advancedModeUI.SetActive(false);
         gizmoManager.HideGizmo();
-        CommonScriptableObjects.allUIHidden.Set(false);
+
         RenderSettings.fog = true;
     }
 
@@ -122,10 +127,10 @@ public class BuildEditorMode : BuildModeState
         snapGO.transform.SetParent(null);
     }
 
-    public override void DeselectedEntities()
+    public override void EntityDeselected(DecentralandEntityToEdit entityDeselected)
     {
-        base.DeselectedEntities();
-        gizmoManager.HideGizmo();
+        base.EntityDeselected(entityDeselected);
+        if(selectedEntities.Count <= 0) gizmoManager.HideGizmo();
         isPlacingNewObject = false;
     }
 
@@ -142,51 +147,7 @@ public class BuildEditorMode : BuildModeState
     public override void CheckInput()
     {
         base.CheckInput();
-        if (Input.GetKey(KeyCode.Alpha1))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(0);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha2))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(1);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha3))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(2);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha4))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(3);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha5))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(4);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha6))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(5);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha7))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(6);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha8))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(7);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha9))
-        {
-            sceneObjectCatalogController.FavotiteObjectSelected(8);
-            InputDone();
-        }
+   
     }
     public override void CheckInputSelectedEntities()
     {
@@ -221,9 +182,6 @@ public class BuildEditorMode : BuildModeState
         gizmoManager.SetGizmoType("MOVE");
         if (selectedEntities.Count > 0) ShowGizmos();
         else gizmoManager.HideGizmo();
-        moveOutline.enabled = true;
-        rotateOutline.enabled = false;
-        scaleOutline.enabled = false;
 
     }
 
@@ -232,9 +190,6 @@ public class BuildEditorMode : BuildModeState
         gizmoManager.SetGizmoType("ROTATE");
         if (selectedEntities.Count > 0) ShowGizmos();
         else gizmoManager.HideGizmo();
-        moveOutline.enabled = false;
-        rotateOutline.enabled = true;
-        scaleOutline.enabled = false;
         
     }
     public void ScaleMode()
@@ -242,15 +197,43 @@ public class BuildEditorMode : BuildModeState
         gizmoManager.SetGizmoType("SCALE");
         if (selectedEntities.Count > 0) ShowGizmos();
         else gizmoManager.HideGizmo();
-        moveOutline.enabled = false;
-        rotateOutline.enabled = false;
-        scaleOutline.enabled = true;
  
     }
     public void FocusGameObject(List<DecentralandEntityToEdit> entitiesToFocus)
     {
         freeCameraController.FocusOnEntities(entitiesToFocus);
     }
+
+    void OnGizmosTransformStart(string gizmoType)
+    {
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        {
+            TransformActionStarted(entity.rootEntity,gizmoType);
+        }
+    }
+    void OnGizmosTransformEnd(string gizmoType)
+    {
+        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        {
+            TransformActionEnd(entity.rootEntity, gizmoType);
+        }
+
+        switch(gizmoType)
+        {           
+            case "MOVE":
+
+                ActionFinish(BuildModeAction.ActionType.MOVE);
+                break;
+            case "ROTATE":
+
+                ActionFinish(BuildModeAction.ActionType.ROTATE);
+                break;
+            case "SCALE":
+                ActionFinish(BuildModeAction.ActionType.SCALE);
+                break;
+        }
+    }   
+
 
     void ShowGizmos()
     {
@@ -262,6 +245,7 @@ public class BuildEditorMode : BuildModeState
 
         lookAtT.position = SceneController.i.ConvertSceneToUnityPosition(middlePoint);
     }
+   
     Vector3 CalculateMiddlePoint(Vector2Int[] positions)
     {
         Vector3 position;

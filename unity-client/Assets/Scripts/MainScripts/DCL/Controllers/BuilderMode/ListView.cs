@@ -14,7 +14,7 @@ public class ListView<T> : MonoBehaviour
         RefreshDisplay();
     }
 
-    public void RefreshDisplay()
+    public virtual void RefreshDisplay()
     {
         RemoveAdapters();
         AddAdapters();
@@ -25,7 +25,7 @@ public class ListView<T> : MonoBehaviour
 
     }
 
-    public void RemoveAdapters()
+    public virtual void RemoveAdapters()
     {
 
         for (int i = 0; i < contentPanelTransform.transform.childCount; i++)

@@ -43,6 +43,7 @@ public class OutlinerController : MonoBehaviour
 
     public void CancelUnselectedOutlines()
     {
+        ChangeMaterialColor(outlineColor);
         for (int i = 0; i < entitiesOutlined.Count; i++)
         {
             if (!entitiesOutlined[i].IsSelected)

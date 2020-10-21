@@ -7,7 +7,8 @@ using UnityEngine.UI;
 
 public class EntityListAdapter : MonoBehaviour
 {
-    public Color selectedColor;
+    public Color entitySelectedColor,entityUnselectedColor;
+    public Color iconsSelectedColor,iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
     public Image selectedImg, lockImg,showImg;
     public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActioninvoked;
@@ -56,28 +57,19 @@ public class EntityListAdapter : MonoBehaviour
         OnActioninvoked?.Invoke(BuildModeEntityListController.EntityAction.DELETE, currentEntity, this);
     }
 
-    public void DuplicateEntity()
-    {
-        OnActioninvoked?.Invoke(BuildModeEntityListController.EntityAction.DUPLICATE, currentEntity, this);
-    }
-
-    public void GroupEntity()
-    {
-
-    }
-
     void SetInfo(DecentralandEntityToEdit entityToEdit)
     {
 
         nameTxt.text = entityToEdit.rootEntity.entityId;
-        if (entityToEdit.rootEntity.gameObject.activeSelf) showImg.color = selectedColor;
-        else showImg.color = Color.white;
+        if (entityToEdit.rootEntity.gameObject.activeSelf) showImg.color = iconsSelectedColor;
+        else showImg.color = iconsUnselectedColor;
 
-        if (!entityToEdit.IsLocked) lockImg.color = Color.white;
-        else lockImg.color = selectedColor;
+        if (entityToEdit.IsLocked) lockImg.color = iconsSelectedColor; 
+        else lockImg.color = iconsUnselectedColor;
 
 
-        selectedImg.enabled = entityToEdit.IsSelected;
+        if (entityToEdit.IsSelected)  selectedImg.color = entitySelectedColor;
+        else selectedImg.color = entityUnselectedColor;
     }
     void DeleteAdapter(DecentralandEntityToEdit entityToEdit)
     {

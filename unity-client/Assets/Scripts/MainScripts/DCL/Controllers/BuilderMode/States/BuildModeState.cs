@@ -1,4 +1,5 @@
 using DCL.Controllers;
+using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,7 @@ public class BuildModeState : MonoBehaviour
     public float snapDistanceToActivateMovement = 10f;
 
     public System.Action OnInputDone;
+    public System.Action<BuildModeAction> OnActionGenerated;
 
     protected GameObject gameObjectToEdit, undoGO, snapGO, freeMovementGO;
 
@@ -58,24 +60,35 @@ public class BuildModeState : MonoBehaviour
 
     public virtual void SelectedEntity(DecentralandEntityToEdit selectedEntity)
     {
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
-        {
-            entity.rootEntity.gameObject.transform.SetParent(null);
-        }
-        gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
-        gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
-        gameObjectToEdit.transform.localScale = Vector3.one;
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
-        {
-            entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
-        }
+        CenterGameObjectToEdit();
 
         BuildModeUtils.CopyGameObjectStatus(gameObjectToEdit, undoGO, false, false);
     }
 
+    public virtual void CenterGameObjectToEdit()
+    {
+        if (selectedEntities.Count > 0)
+        {
+            foreach (DecentralandEntityToEdit entity in selectedEntities)
+            {
+                entity.rootEntity.gameObject.transform.SetParent(null);
+            }
+            gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
+            gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
+            gameObjectToEdit.transform.localScale = Vector3.one;
+            foreach (DecentralandEntityToEdit entity in selectedEntities)
+            {
+                entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
+            }
+        }
+    }
     public virtual void CreatedEntity(DecentralandEntityToEdit createdEntity)
     {
 
+    }
+    public virtual void EntityDeselected(DecentralandEntityToEdit entityDeselected)
+    {
+        CenterGameObjectToEdit();
     }
     public virtual void DeselectedEntities()
     {
@@ -83,7 +96,7 @@ public class BuildModeState : MonoBehaviour
     }
     public virtual void CheckInput()
     {
-
+       
     }
     public virtual void CheckInputSelectedEntities()
     {
@@ -134,5 +147,78 @@ public class BuildModeState : MonoBehaviour
         float centerY = totalY / selectedEntities.Count;
         float centerZ = totalZ / selectedEntities.Count;
         return new Vector3(centerX, centerY, centerZ);
+    }
+
+    protected List<BuildModeEntityAction> actionList = new List<BuildModeEntityAction>();
+    protected void TransformActionStarted(DecentralandEntity entity, string type)
+    {
+        
+        BuildModeEntityAction buildModeEntityAction = new BuildModeEntityAction();
+        buildModeEntityAction.entity = entity;
+        switch (type)
+        {
+            case "MOVE":
+                buildModeEntityAction.oldValue = entity.gameObject.transform.position;
+                break;
+            case "ROTATE":
+                buildModeEntityAction.oldValue = entity.gameObject.transform.rotation.eulerAngles;
+                break;
+            case "SCALE":
+                buildModeEntityAction.oldValue = entity.gameObject.transform.lossyScale;
+                break;
+        }
+        actionList.Add(buildModeEntityAction);
+
+
+    }
+    protected void TransformActionEnd(DecentralandEntity entity,string type)
+    {
+
+        List<BuildModeEntityAction> removeList = new List<BuildModeEntityAction>();
+        foreach (BuildModeEntityAction entityAction in actionList)
+        {
+            if (entityAction.entity == entity)
+            {
+         
+                switch (type)
+                {
+                    case "MOVE":
+                      
+                        entityAction.newValue = entity.gameObject.transform.position;
+                        if (Vector3.Distance((Vector3)entityAction.oldValue ,(Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
+                        break;
+                    case "ROTATE":
+                    
+                        entityAction.newValue = entity.gameObject.transform.rotation.eulerAngles;
+                        if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
+                        break;
+                    case "SCALE":
+                        entityAction.newValue = entity.gameObject.transform.lossyScale;
+                        if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
+                        break;
+                }
+
+             
+            }
+        }
+        foreach (BuildModeEntityAction entityAction in removeList)
+        {
+            actionList.Remove(entityAction);
+        }
+        //buildModeAction.CreateActionTypeMove(entity, entity.gameObject.transform);
+    }
+    protected void ActionFinish(BuildModeAction.ActionType type)
+    {
+        if (actionList.Count > 0 && selectedEntities.Count > 0)
+        {
+            BuildModeAction buildModeAction = new BuildModeAction();
+
+            buildModeAction.actionType = type;
+            buildModeAction.CreateActionType(actionList, type);
+            OnActionGenerated?.Invoke(buildModeAction);
+
+            actionList = new List<BuildModeEntityAction>();
+        }
+
     }
 }

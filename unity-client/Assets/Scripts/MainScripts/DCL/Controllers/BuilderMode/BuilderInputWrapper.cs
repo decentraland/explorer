@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 
 public class BuilderInputWrapper : MonoBehaviour
 {
+    public LayerMask layerToStopClick;
     public float msClickThreshold = 200;
     public float movementClickThreshold = 50;
     public Action<int,Vector3> OnMouseClick;
@@ -30,7 +31,7 @@ public class BuilderInputWrapper : MonoBehaviour
         if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold) return;
         if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000) return;
 
-        if(!BuildModeUtils.IsPointerOverUIElement())OnMouseClick?.Invoke(buttonId, mousePosition);
+        if(!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick))OnMouseClick?.Invoke(buttonId, mousePosition);     
     }
 
     private void MouseDown(int buttonId, Vector3 mousePosition)
