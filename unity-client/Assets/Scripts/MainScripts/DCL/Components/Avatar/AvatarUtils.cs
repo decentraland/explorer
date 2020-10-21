@@ -94,6 +94,7 @@ public static class AvatarUtils
                 Texture _MatCap = null;
                 Texture _GMatCap = null;
                 Texture _FMatCap = null;
+                Color? _TintColor = null;
 
                 if (replaceThemWith.HasProperty(ShaderUtils._MatCap))
                     _MatCap = replaceThemWith.GetTexture(ShaderUtils._MatCap);
@@ -103,9 +104,6 @@ public static class AvatarUtils
 
                 if (replaceThemWith.HasProperty(ShaderUtils._FresnelMatCap))
                     _FMatCap = replaceThemWith.GetTexture(ShaderUtils._FresnelMatCap);
-
-                // if (replaceThemWith.HasProperty(ShaderUtils._TintColor))
-                //     _TintColor = replaceThemWith.GetColor(ShaderUtils._TintColor);
 
                 //NOTE(Brian): This method has a bug, if the material being copied lacks a property of the source material,
                 //             the source material property will get erased. It can't be added back and even the material inspector crashes.
@@ -120,8 +118,6 @@ public static class AvatarUtils
 
                 if (_MatCap != null)
                     copy.SetTexture(ShaderUtils._MatCap, _MatCap);
-
-                //RenderProfileManifest.i.currentProfile.avatarProfile.Apply(copy);
 
                 if (copy.HasProperty(ShaderUtils._ZWrite))
                 {
