@@ -102,14 +102,6 @@ public class UsersAroundListHUDShould : TestsBase
 
     int GetVisibleChildren(Transform parent)
     {
-        int ret = 0;
-        foreach (Transform child in parent)
-        {
-            if (child.gameObject.activeSelf)
-            {
-                ret++;
-            }
-        }
-        return ret;
+        return parent.GetComponentsInChildren<UsersAroundListHUDListElementView>(false).Length;
     }
 }
