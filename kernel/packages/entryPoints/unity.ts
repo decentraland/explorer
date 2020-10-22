@@ -13,15 +13,14 @@ import {
   DEBUG_PM,
   OPEN_AVATAR_EDITOR,
   HAS_INITIAL_POSITION_MARK,
-  VOICE_CHAT_ENABLED, 
-  HALLOWEEN
+  VOICE_CHAT_ENABLED
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
-import { HUDElementID, RenderProfile } from 'shared/types'
+import { HUDElementID } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
