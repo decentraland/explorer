@@ -34,6 +34,8 @@ public class AudioEvent : ScriptableObject
 
     public virtual void Initialize(AudioContainer audioContainer)
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         if (audioContainer == null) return;
 
         pitch = initialPitch;
@@ -74,6 +76,8 @@ public class AudioEvent : ScriptableObject
     // Randomize the index from (inclusive) to y (exclusive)
     public void RandomizeIndex(int from, int to)
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         int newIndex;
         do { newIndex = Random.Range(from, to); } while (clips.Length > 1 && newIndex == lastPlayedIndex);
         clipIndex = newIndex;
@@ -130,22 +134,30 @@ public class AudioEvent : ScriptableObject
 
     public void Stop()
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         source.Stop();
         OnStop?.Invoke();
     }
 
     public void ResetVolume()
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         source.volume = initialVolume;
     }
 
     public void SetIndex(int index)
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         clipIndex = index;
     }
 
     public void SetPitch(float pitch)
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         this.pitch = pitch;
     }
 
