@@ -76,8 +76,6 @@ initializeUnity(container)
       visible: false
     })
 
-    i.SetRenderProfile(HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT)
-
     try {
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
