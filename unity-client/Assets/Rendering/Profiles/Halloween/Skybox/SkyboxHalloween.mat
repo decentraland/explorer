@@ -83,7 +83,7 @@ Material:
     - _OcclusionStrength: 1
     - _Overlay1RotationSpeed: 0.1
     - _Overlay2RotationSpeed: 0
-    - _Overlay3RotationSpeed: 0.3
+    - _Overlay3RotationSpeed: 0.4
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
