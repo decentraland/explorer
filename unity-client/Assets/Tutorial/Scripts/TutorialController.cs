@@ -417,6 +417,7 @@ namespace DCL.Tutorial
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
+            runningStep = null;
 
             SetTutorialDisabled();
 
