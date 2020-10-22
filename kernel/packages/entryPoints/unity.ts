@@ -20,7 +20,7 @@ import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThi
 import { StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
-import { HUDElementID } from 'shared/types'
+import { HUDElementID, RenderProfile } from 'shared/types'
 import { worldRunningObservable, onNextWorldRunning } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
@@ -112,6 +112,8 @@ initializeUnity(container)
 
     if (worldConfig.renderProfile) {
       i.SetRenderProfile(worldConfig.renderProfile)
+    } else {
+      i.SetRenderProfile(RenderProfile.DEFAULT)
     }
 
     if (!NO_MOTD) {
