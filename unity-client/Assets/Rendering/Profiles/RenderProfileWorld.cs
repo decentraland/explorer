@@ -34,6 +34,7 @@ public class RenderProfileWorld : ScriptableObject
 
 #if UNITY_EDITOR
     public bool fillWithRenderSettings;
+    public bool copyToRenderSettings;
 
     //NOTE(Brian): Workaround to make an editor-time action.
     //             ContextMenu doesn't seem to work with ScriptableObjects.
@@ -44,10 +45,18 @@ public class RenderProfileWorld : ScriptableObject
             FillWithRenderSettings();
         }
 
+        if (copyToRenderSettings)
+        {
+            Apply();
+        }
+
         fillWithRenderSettings = false;
+        copyToRenderSettings = false;
 
         if (RenderProfileManifest.i.currentProfile == this)
+        {
             Apply();
+        }
     }
 
     public void FillWithRenderSettings()
