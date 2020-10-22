@@ -1,5 +1,5 @@
 import { Eth } from 'web3x/eth'
-import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD } from '../../config'
+import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD, WALLET_API_KEYS } from '../../config'
 import { WebSocketProvider } from 'eth-connect'
 import { ConnectorFactory } from './connector/ConnectorFactory'
 import { ProviderType } from './ProviderType'
@@ -13,7 +13,7 @@ export class Web3Connector {
 
   constructor() {
     this.network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
-    this.factory = new ConnectorFactory()
+    this.factory = new ConnectorFactory(WALLET_API_KEYS.get(this.network)!)
   }
 
   static createWebSocketProvider() {

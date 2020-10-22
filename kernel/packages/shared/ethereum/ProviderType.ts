@@ -1,4 +1,5 @@
 export enum ProviderType {
-  GUEST = 'GUEST',
-  METAMASK = 'Metamask'
+  GUEST = 'Guest',
+  METAMASK = 'Metamask',
+  FORTMATIC = 'Fortmatic'
 }
