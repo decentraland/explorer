@@ -57,6 +57,10 @@ public class BuildModeState : MonoBehaviour
         isMultiSelectionActive = false;
 
     }
+    public virtual void SetDuplicationOffset(DecentralandEntityToEdit entityToDuplicate,float offset)
+    {
+
+    }
 
     public virtual void SelectedEntity(DecentralandEntityToEdit selectedEntity)
     {

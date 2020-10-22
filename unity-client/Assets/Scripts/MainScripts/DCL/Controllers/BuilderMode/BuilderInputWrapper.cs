@@ -17,6 +17,7 @@ public class BuilderInputWrapper : MonoBehaviour
 
     float lastTimeMouseDown = 0;
     Vector3 lastMousePosition;
+    bool canInputBeMade = true;
     private void Awake()
     {
         DCLBuilderInput.OnMouseDrag += MouseDrag;
@@ -26,8 +27,20 @@ public class BuilderInputWrapper : MonoBehaviour
         DCLBuilderInput.OnMouseUp += MouseUp;
     }
 
+    public void StopInput()
+    {
+        canInputBeMade = false;
+    }
+    public void ResumeInput()
+    {
+        canInputBeMade = true;
+    }
+
+
+
     private void MouseUp(int buttonId, Vector3 mousePosition)
     {
+        if (!canInputBeMade) return;
         if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold) return;
         if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000) return;
 
@@ -42,15 +55,18 @@ public class BuilderInputWrapper : MonoBehaviour
 
     private void MouseWheel(float axisValue)
     {
+        if (!canInputBeMade) return;
         if (!BuildModeUtils.IsPointerOverUIElement()) OnMouseWheel?.Invoke(axisValue);
     }
 
     private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
+        if (!canInputBeMade) return;
         if (!BuildModeUtils.IsPointerOverUIElement()) OnMouseDrag?.Invoke(buttonId, mousePosition, axisX, axisY);
     }
     private void MouseRawDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
+        if (!canInputBeMade) return;
         if (!BuildModeUtils.IsPointerOverUIElement()) OnMouseDragRaw?.Invoke(buttonId, mousePosition, axisX, axisY);
     }
 }

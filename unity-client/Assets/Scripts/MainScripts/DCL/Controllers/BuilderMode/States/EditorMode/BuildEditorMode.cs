@@ -15,10 +15,11 @@ public class BuildEditorMode : BuildModeState
     [Header("Editor Design")]
     public float distanceEagleCamera = 20f;
 
-    [Header("References")]
+    [Header("Scenes References")]
     public FreeCameraMovement freeCameraController;
     public GameObject eagleCamera, advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
+    public ToolTipController toolTipController;
 
 
     //public CameraController cameraController;
@@ -85,7 +86,7 @@ public class BuildEditorMode : BuildModeState
         SceneController.i.ReIntegrateIsolatedScene();
         advancedModeUI.SetActive(false);
         gizmoManager.HideGizmo();
-
+        toolTipController.Desactivate();
         RenderSettings.fog = true;
     }
 
@@ -97,6 +98,12 @@ public class BuildEditorMode : BuildModeState
         freeMovementGO.transform.SetParent(null);
     }
 
+
+    public override void SetDuplicationOffset(DecentralandEntityToEdit entityToDuplicate,float offset)
+    {
+        base.SetDuplicationOffset(entityToDuplicate,offset);
+        gameObjectToEdit.transform.position += Vector3.right * offset;
+    }
 
     public override void CreatedEntity(DecentralandEntityToEdit createdEntity)
     {
@@ -160,6 +167,8 @@ public class BuildEditorMode : BuildModeState
         }
   
     }
+
+ 
 
     public void LookAtEntity(DecentralandEntity entity)
     {

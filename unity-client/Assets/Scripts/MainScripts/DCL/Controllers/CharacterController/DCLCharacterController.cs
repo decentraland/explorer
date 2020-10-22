@@ -152,7 +152,7 @@ public class DCLCharacterController : MonoBehaviour
 
     public void SetFreeMovementActive(bool isActive)
     {
-        freeMovementController.SetActive(isActive);
+        //freeMovementController.SetActive(isActive);
     }
     void OnPrecisionAdjust(DCLCharacterPosition charPos)
     {

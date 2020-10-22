@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
@@ -17,6 +18,9 @@ public class SceneObjectCatalogController : MonoBehaviour
     public System.Action<SceneObject> OnSceneObjectSelected;
     public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
 
+
+    public BuilderInputWrapper builderInputWrapper;
+    public Canvas generalCanvas;
     public TextMeshProUGUI catalogTitleTxt;
     public GameObject catalogUIGO;
     public CatalogAssetPackListView catalogAssetPackListView;
@@ -27,13 +31,17 @@ public class SceneObjectCatalogController : MonoBehaviour
     List<Dictionary<string, List<SceneObject>>> filterObjects = new List<Dictionary<string, List<SceneObject>>>();
     string lastFilterName = "";
     bool catalogInitializaed = false, isShowingAssetPacks = false, isFavoriteFilterActive = false;
-    List<SceneObject> favoritesShortcutsSceneObjects = new List<SceneObject>();
+    List<SceneObject> favoritesSceneObjects = new List<SceneObject>();
+    List<SceneObject> quickBarShortcutsSceneObjects = new List<SceneObject>() { null, null, null,null,null,null,null,null,null };
     private void Start()
     {
         OnResultReceived += AddFullSceneObjectCatalog;
         catalogAssetPackListView.OnSceneAssetPackClick += OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked += SceneObjectSelected;
         catalogGroupListView.OnSceneObjectFavorite += AsignFavorite;
+        catalogGroupListView.OnAdapterStartDragging += SceneObjectStartDragged;
+        catalogGroupListView.OnAdapterDrag += OnDrag;
+        catalogGroupListView.OnAdapterEndDrag += OnEndDrag;
         searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
     }
 
@@ -43,6 +51,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         catalogGroupListView.OnSceneObjectClicked -= SceneObjectSelected;
     }
 
+    #region Filter
     void OnSearchInputChanged(string currentSearchInput)
     {
         if (string.IsNullOrEmpty(currentSearchInput)) ShowAssetsPacks();
@@ -84,7 +93,63 @@ public class SceneObjectCatalogController : MonoBehaviour
             }
         }
     }
+    #endregion
 
+    #region DragAndDrop
+    int lastIndexDroped = -1;
+    GameObject draggedObject;
+    public void SetIndexToDrop(int index)
+    {
+        lastIndexDroped = index;
+    }
+    void OnDrag(PointerEventData data)
+    {
+        draggedObject.transform.position = data.position;
+    }
+    void SceneObjectStartDragged(SceneObject sceneObjectClicked, CatalogItemAdapter adapter, BaseEventData data)
+    {
+        PointerEventData eventData = data as PointerEventData;
+        if(draggedObject== null) draggedObject = Instantiate(adapter.gameObject, generalCanvas.transform);
+        RectTransform adapterRT = adapter.GetComponent<RectTransform>();
+        RectTransform newAdapterRT = draggedObject.GetComponent<RectTransform>();
+        CatalogItemAdapter newAdapter = draggedObject.GetComponent<CatalogItemAdapter>();
+        newAdapter.canvasGroup.blocksRaycasts = false;
+        newAdapter.canvasGroup.alpha = 0.6f;
+        newAdapter.SetContent(adapter.GetContent());
+        newAdapterRT.sizeDelta = adapterRT.sizeDelta*0.75f;
+        builderInputWrapper.StopInput();
+    }
+
+    void OnEndDrag(PointerEventData data)
+    {     
+        Destroy(draggedObject,0.1f);
+        builderInputWrapper.ResumeInput();
+    }
+    public void SceneObjectDropped(BaseEventData data)
+    {
+     
+        CatalogItemAdapter adapter = draggedObject.GetComponent<CatalogItemAdapter>();
+        SceneObject sceneObject = adapter.GetContent();
+        Texture texture = null;
+        if (adapter.thumbnailImg.enabled)
+        {
+            texture = adapter.thumbnailImg.texture;
+            SetQuickBarShortcut(sceneObject, lastIndexDroped, texture);
+        }
+        Destroy(draggedObject);
+    }
+    #endregion
+
+    void SetQuickBarShortcut(SceneObject sceneObject, int index,Texture texture)
+    {
+     
+        quickBarShortcutsSceneObjects[index] = sceneObject;
+        if (index < shortcutsImgs.Length)
+        {
+            shortcutsImgs[index].texture = texture;
+            shortcutsImgs[index].enabled = true;
+        }
+    }
 
     #region Favorites
 
@@ -100,7 +165,7 @@ public class SceneObjectCatalogController : MonoBehaviour
             {
                 foreach (SceneObject sceneObject in assetPack.assets)
                 {
-                    foreach(SceneObject favObject in favoritesShortcutsSceneObjects)
+                    foreach(SceneObject favObject in favoritesSceneObjects)
                     {
                         if (favObject != null)
                         {
@@ -138,11 +203,13 @@ public class SceneObjectCatalogController : MonoBehaviour
     public void AsignFavorite(SceneObject sceneObject, CatalogItemAdapter adapter)
     {
 
-        if (!favoritesShortcutsSceneObjects.Contains(sceneObject))
+        if (!favoritesSceneObjects.Contains(sceneObject))
         {
-            int index = favoritesShortcutsSceneObjects.Count;
+            favoritesSceneObjects.Add(sceneObject);
+
+            int index = quickBarShortcutsSceneObjects.Count;
             int cont = 0;
-            foreach (SceneObject sceneObjectIteration in favoritesShortcutsSceneObjects)
+            foreach (SceneObject sceneObjectIteration in quickBarShortcutsSceneObjects)
             {
                 if (sceneObjectIteration == null)
                 {
@@ -151,20 +218,25 @@ public class SceneObjectCatalogController : MonoBehaviour
                 }
                 cont++;
             }
-            if (index >= favoritesShortcutsSceneObjects.Count) favoritesShortcutsSceneObjects.Add(sceneObject);
-            else favoritesShortcutsSceneObjects[index] = sceneObject;
-            if (index < shortcutsImgs.Length)
-            {
-                shortcutsImgs[index].texture = adapter.thumbnailImg.texture;
-                shortcutsImgs[index].enabled = true;
-            }
+            SetQuickBarShortcut(sceneObject,index,adapter.thumbnailImg.texture);
+
             sceneObject.isFavorite = true;
+          
         }
         else
         {
-            int index = favoritesShortcutsSceneObjects.IndexOf(sceneObject);
-            if (index < shortcutsImgs.Length) shortcutsImgs[index].enabled = false;
-            favoritesShortcutsSceneObjects[index] = null;
+            favoritesSceneObjects.Remove(sceneObject);
+
+            if (quickBarShortcutsSceneObjects.Contains(sceneObject))
+            {
+                int index = quickBarShortcutsSceneObjects.IndexOf(sceneObject);
+                if (index < shortcutsImgs.Length && index != -1)
+                {
+                    shortcutsImgs[index].enabled = false;
+                    quickBarShortcutsSceneObjects[index] = null;
+                }
+            }
+         
             sceneObject.isFavorite = false;
         }
 
@@ -172,13 +244,13 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     }
 
-    public void FavotiteObjectSelected(int index)
+    public void QuickBarObjectSelected(int index)
     {
-        if (favoritesShortcutsSceneObjects.Count > index)
+        if (quickBarShortcutsSceneObjects.Count > index)
         {
-            if (favoritesShortcutsSceneObjects[index] != null)
+            if (quickBarShortcutsSceneObjects[index] != null)
             {
-                OnSceneObjectSelected?.Invoke(favoritesShortcutsSceneObjects[index]);
+                OnSceneObjectSelected?.Invoke(quickBarShortcutsSceneObjects[index]);
             }
         }
     }
@@ -309,6 +381,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     }
 
 
+ 
     //IEnumerator GetCatalog()
     //{
     //    UnityWebRequest www = UnityWebRequest.Get("https://builder-api.decentraland.org/v1/assetPacks");

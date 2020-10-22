@@ -32,6 +32,7 @@ public class BuildModeController : MonoBehaviour
     public float msBetweenInputInteraction = 200;
 
     public float distanceLimitToSelectObjects = 50;
+    public float duplicateOffset = 2f;
 
  
 
@@ -44,8 +45,8 @@ public class BuildModeController : MonoBehaviour
 
 
     [Header ("Scene references")]
-    public GameObject editModeChangeFX;
-    public GameObject snapImgStatusShowGO, shortCutsGO;
+    public GameObject buildModeCanvasGO;
+    public GameObject shortCutsGO,extraBtnsGO;
     public SceneObjectCatalogController catalogController;
     public SceneLimitInfoController sceneLimitInfoController;
     public EntityInformationController entityInformationController;
@@ -75,7 +76,7 @@ public class BuildModeController : MonoBehaviour
 
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActive = true, isSceneInformationActive = false,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = true;
+    bool isEditModeActivated = false, isSnapActive = true,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = true;
     List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
     Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
 
@@ -217,32 +218,32 @@ public class BuildModeController : MonoBehaviour
 
         if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
         {
-            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
             return;
         }
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
-            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
             return;
         }
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
-            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
             return;
         }
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
-            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
             return;
         }
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
-            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
             return;
         }
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
-            if (!isSceneInformationActive) ChangeVisibilityOfSceneInfo();
+            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
             return;
         }
 
@@ -294,6 +295,12 @@ public class BuildModeController : MonoBehaviour
 
     void CheckInputForShowingUI()
     {
+        if (Input.GetKey(KeyCode.O))
+        {
+            ChangeVisibilityOfUI();
+            InputDone();
+            return;
+        }
         if (Input.GetKey(KeyCode.Y))
         {
             ChangeEntityListVisibility();
@@ -322,7 +329,7 @@ public class BuildModeController : MonoBehaviour
             if (Input.GetKey(KeyCode.N))
         {
 
-            shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
+            ChangeVisibilityOfControls();
             InputDone();
             return;
         }
@@ -371,47 +378,47 @@ public class BuildModeController : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.Alpha1))
         {
-            catalogController.FavotiteObjectSelected(0);
+            catalogController.QuickBarObjectSelected(0);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha2))
         {
-            catalogController.FavotiteObjectSelected(1);
+            catalogController.QuickBarObjectSelected(1);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha3))
         {
-            catalogController.FavotiteObjectSelected(2);
+            catalogController.QuickBarObjectSelected(2);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha4))
         {
-            catalogController.FavotiteObjectSelected(3);
+            catalogController.QuickBarObjectSelected(3);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha5))
         {
-            catalogController.FavotiteObjectSelected(4);
+            catalogController.QuickBarObjectSelected(4);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha6))
         {
-            catalogController.FavotiteObjectSelected(5);
+            catalogController.QuickBarObjectSelected(5);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha7))
         {
-            catalogController.FavotiteObjectSelected(6);
+            catalogController.QuickBarObjectSelected(6);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha8))
         {
-            catalogController.FavotiteObjectSelected(7);
+            catalogController.QuickBarObjectSelected(7);
             InputDone();
         }
         if (Input.GetKey(KeyCode.Alpha9))
         {
-            catalogController.FavotiteObjectSelected(8);
+            catalogController.QuickBarObjectSelected(8);
             InputDone();
         }
 
@@ -443,6 +450,18 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+    public void ChangeVisibilityOfControls()
+    {
+        shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
+    }
+    public void ChangeVisibilityOfExtraBtns()
+    {
+        extraBtnsGO.SetActive(!extraBtnsGO.activeSelf);
+    }
+    public void ChangeVisibilityOfUI()
+    {
+        buildModeCanvasGO.SetActive(!buildModeCanvasGO.activeSelf);
+    }
     public void ChangeEntityListVisibility()
     {
         if (isSceneEntitiesListActive) buildModeEntityListController.CloseList();
@@ -463,7 +482,7 @@ public class BuildModeController : MonoBehaviour
 
     public void ChangeVisibilityOfSceneInfo()
     {
-        if (isSceneInformationActive)
+        if (sceneLimitInfoController.IsActive())
         {
             sceneLimitInfoController.Disable();
         }
@@ -472,7 +491,6 @@ public class BuildModeController : MonoBehaviour
             sceneLimitInfoController.Enable();
 
         }
-        isSceneInformationActive = !isSceneInformationActive;
         InputDone();
     }
 
@@ -603,7 +621,6 @@ public class BuildModeController : MonoBehaviour
     public void SetSnapActive(bool isActive)
     {      
         isSnapActive = isActive;
-        snapImgStatusShowGO.SetActive(isSnapActive);
         currentActiveMode.SetSnapActive(isActive);
     }
 
@@ -835,6 +852,8 @@ public class BuildModeController : MonoBehaviour
         BuildModeUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
         sceneLimitInfoController.UpdateInfo();
+
+        currentActiveMode.SetDuplicationOffset(entityToDuplicate,duplicateOffset);
     }
     public void DuplicateEntities()
     {
@@ -900,7 +919,7 @@ public class BuildModeController : MonoBehaviour
     public void EnterEditMode()
     {
         
-        editModeChangeFX.SetActive(true);
+        buildModeCanvasGO.SetActive(true);
         DCLCharacterController.i.SetFreeMovementActive(true);
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
@@ -931,7 +950,7 @@ public class BuildModeController : MonoBehaviour
         //
 
         CommonScriptableObjects.allUIHidden.Set(false);
-        editModeChangeFX.SetActive(false);
+        buildModeCanvasGO.SetActive(false);
 
         snapGO.transform.SetParent(transform);
 

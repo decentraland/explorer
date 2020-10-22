@@ -5,16 +5,19 @@ using UnityEngine.UI;
 using DCL.Helpers;
 using System;
 using DCL;
+using UnityEngine.EventSystems;
 
-public class CatalogItemAdapter : MonoBehaviour
+public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandler,IDragHandler
 {
     public RawImage thumbnailImg;
     public Image favImg;
-
+    public CanvasGroup canvasGroup;
     public Color offFavoriteColor, onFavoriteColor;
 
     public System.Action<SceneObject> OnSceneObjectClicked;
     public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
+    public System.Action<SceneObject, CatalogItemAdapter,BaseEventData> OnAdapterStartDrag;
+    public System.Action<PointerEventData> OnAdapterDrag, OnAdapterEndDrag;
 
     SceneObject sceneObject;
 
@@ -22,6 +25,10 @@ public class CatalogItemAdapter : MonoBehaviour
     AssetPromise_Texture loadedThumbnailPromise;
 
 
+    public SceneObject GetContent()
+    {
+        return sceneObject;
+    }
     public void SetContent(SceneObject sceneObject)
     {
         this.sceneObject = sceneObject;
@@ -66,7 +73,10 @@ public class CatalogItemAdapter : MonoBehaviour
     }
 
   
-
+    public void AdapterStartDragging(BaseEventData baseEventData)
+    {
+        OnAdapterStartDrag?.Invoke(sceneObject,this, baseEventData);
+    }
     public void FavoriteIconClicked()
     {
         
@@ -86,4 +96,22 @@ public class CatalogItemAdapter : MonoBehaviour
             favImg.gameObject.SetActive(true);
         }
     }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        AdapterStartDragging(eventData);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        OnAdapterDrag?.Invoke(eventData);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        
+        OnAdapterEndDrag?.Invoke(eventData);
+    }
+
+
 }

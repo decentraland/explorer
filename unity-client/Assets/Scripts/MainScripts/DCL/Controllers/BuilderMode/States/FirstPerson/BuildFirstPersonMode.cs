@@ -70,6 +70,11 @@ public class BuildFirstPersonMode : BuildModeState
         }
     }
 
+    public override void SetDuplicationOffset(DecentralandEntityToEdit entityToDuplicate, float offset)
+    {
+        base.SetDuplicationOffset(entityToDuplicate, offset);
+        if(isSnapActive) gameObjectToEdit.transform.position += Vector3.right * offset;
+    }
     public override void ResetScaleAndRotation()
     {
         base.ResetScaleAndRotation();
