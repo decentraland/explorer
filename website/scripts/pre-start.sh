@@ -25,4 +25,10 @@ ln -sv "${kernel}/static/unity" ./public
 ln -sv "${kernel}/static/voice-chat-codec" ./public
 echo ""
 echo ""
+echo "clear cache"
+sed -i.bak '/REACT_APP_EXPLORER_VERSION/d' .env
+rm -fv .env.bak
+echo "REACT_APP_EXPLORER_VERSION=$(date +"%s")" >>.env
+echo ""
+echo ""
 echo "READY TO DEV 💪💪💪"

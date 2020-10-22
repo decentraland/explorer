@@ -11,12 +11,13 @@ cp -r ./node_modules/decentraland-kernel/voice-chat-codec ./public;
 
 echo "Setting kernel version"
 hash=$(git rev-parse --short HEAD)
-envFile=.env
-if [ ! -f "$envFile" ]; then
-  echo "file $envFile does not exist. creating..."
+if [ ! -f ".env" ]; then
+  echo "file .env does not exist. creating..."
   touch .env
 fi
 
+sed -i.bak '/REACT_APP_EXPLORER_VERSION/d' .env
+rm -fv .env.bak
 echo "REACT_APP_EXPLORER_VERSION=${hash}" >>.env
 
 echo ""
