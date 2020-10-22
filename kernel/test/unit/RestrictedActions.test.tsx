@@ -7,6 +7,8 @@ import { lastPlayerPosition } from '../../packages/shared/world/positionThings'
 
 describe('RestrictedActions tests', () => {
 
+  afterEach(() => sinon.restore())
+
   const options = {
     apiName: '',
     system: null,
@@ -23,7 +25,7 @@ describe('RestrictedActions tests', () => {
         .mock(unityInterface)
         .expects('TriggerSelfUserExpression')
         .once()
-        .withExactArgs('fistpump', false)
+        .withExactArgs('fistpump')
 
       const module = new RestrictedActions(options)
       await module.triggerEmote({ predefined: 'FIST_PUMP' })
@@ -47,7 +49,6 @@ describe('RestrictedActions tests', () => {
   })
 
   describe('MovePlayerTo tests', () => {
-    afterEach(() => sinon.restore())
 
     const mockLastPlayerPosition = (inside: boolean = true) => {
       const position = inside
