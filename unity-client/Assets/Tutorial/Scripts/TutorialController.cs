@@ -179,7 +179,7 @@ namespace DCL.Tutorial
             if (runningStep != null)
             {
                 Destroy(runningStep.gameObject);
-                //runningStep = null;
+                runningStep = null;
             }
 
             tutorialReset = false;
@@ -218,7 +218,7 @@ namespace DCL.Tutorial
             {
                 runningStep.OnStepFinished();
                 Destroy(runningStep.gameObject);
-                //runningStep = null;
+                runningStep = null;
             }
 
             if (playerIsInGenesisPlaza || tutorialReset)
@@ -416,7 +416,7 @@ namespace DCL.Tutorial
             if (!debugRunTutorial && markTutorialAsCompleted)
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
-            //runningStep = null;
+            runningStep = null;
 
             SetTutorialDisabled();
 
