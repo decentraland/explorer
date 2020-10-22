@@ -16,7 +16,7 @@ namespace DCL.Tutorial_Tests
         [SetUp]
         public void SetUp()
         {
-            CreateAndConfigureNewTutorial();
+            CreateAndConfigureTutorial();
         }
 
         [TearDown]
@@ -155,7 +155,7 @@ namespace DCL.Tutorial_Tests
             Assert.IsTrue(tutorialController.teacherRawImage.rectTransform.position != oldPosition);
         }
 
-        private void CreateAndConfigureNewTutorial()
+        private void CreateAndConfigureTutorial()
         {
             tutorialController = GameObject.Instantiate(Resources.Load<GameObject>("TutorialController")).GetComponent<TutorialController>();
             tutorialController.stepsOnGenesisPlaza.Clear();
