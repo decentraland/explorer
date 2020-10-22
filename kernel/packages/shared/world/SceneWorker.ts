@@ -1,5 +1,5 @@
 import { future } from 'fp-future'
-import { ScriptingHost } from 'decentraland-rpc/lib/host'
+import { APIOptions, ScriptingHost } from 'decentraland-rpc/lib/host'
 import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { WebWorkerTransport } from 'decentraland-rpc'
 
@@ -9,10 +9,12 @@ import { defaultLogger } from 'shared/logger'
 import { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
 import { Vector3, Quaternion, Vector2 } from 'decentraland-ecs/src/decentraland/math'
 import { PositionReport, positionObservable } from './positionThings'
-import { Observer, Observable } from 'decentraland-ecs/src'
+import { IEventNames, IEvents, Observer } from 'decentraland-ecs/src'
 import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
 import { worldRunningObservable, isWorldRunning } from './worldState'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
+import { getParcelSceneID } from './parcelSceneManager'
+import { UnityParcelScene } from 'unity-interface/UnityParcelScene'
 
 // tslint:disable-next-line:whitespace
 type EngineAPI = import('../apis/EngineAPI').EngineAPI
@@ -35,19 +37,26 @@ function unmountSystem(system: ScriptingHost) {
   }
 }
 
-export class SceneWorker {
-  public readonly system = future<ScriptingHost>()
+export interface SceneWorker {
+  getSceneId(): string
+  getParcelScene(): ParcelSceneAPI
+  dispose(): void
+  setPosition(position: Vector3): void
+  sendSubscriptionEvent<K extends IEventNames>(event: K, data: IEvents[K]): void
+  emit<T extends IEventNames>(event: T, data: IEvents[T]): void
+  isPersistent(): boolean
+  hasSceneStarted(): boolean
+  getAPIInstance<X>(api: { new(options: APIOptions): X }): Promise<X>
+}
 
-  public engineAPI: EngineAPI | null = null
-  public enabled = true
+export class SceneSystemWorker implements SceneWorker {
+  private readonly system = future<ScriptingHost>()
 
-  /** false if this worker part of a dynamically loaded scene */
-  public persistent = false
-  public readonly onDisposeObservable = new Observable<SceneWorker>()
+  private engineAPI: EngineAPI | null = null
+  private enabled = true
+  private sceneStarted: boolean = false
 
-  public sceneStarted: boolean = false
-
-  public readonly position: Vector3 = new Vector3()
+  private position: Vector3 = new Vector3()
   private readonly lastSentPosition = new Vector3(0, 0, 0)
   private readonly lastSentRotation = new Quaternion(0, 0, 0, 1)
   private positionObserver: Observer<any> | null = null
@@ -56,7 +65,10 @@ export class SceneWorker {
 
   private sceneReady: boolean = false
 
-  constructor(public parcelScene: ParcelSceneAPI, transport?: ScriptingTransport) {
+  constructor(
+    private readonly parcelScene: ParcelSceneAPI,
+    transport?: ScriptingTransport,
+    private readonly persistent: boolean = false) {
     parcelScene.registerWorker(this)
 
     this.subscribeToSceneLifeCycleEvents()
@@ -65,6 +77,12 @@ export class SceneWorker {
     this.loadSystem(transport)
       .then($ => this.system.resolve($))
       .catch($ => this.system.reject($))
+
+    console.log(parcelScene.data.sceneId)
+  }
+
+  getParcelScene(): ParcelSceneAPI {
+    return this.parcelScene
   }
 
   dispose() {
@@ -90,12 +108,40 @@ export class SceneWorker {
       }
 
       this.parcelScene.dispose()
-
-      this.onDisposeObservable.notifyObservers(this)
     }
   }
 
-  sendUserViewMatrix(positionReport: Readonly<PositionReport>) {
+  setPosition(position: Vector3) {
+    this.position = position
+  }
+
+  sendSubscriptionEvent<K extends IEventNames>(event: K, data: IEvents[K]) {
+    this.engineAPI?.sendSubscriptionEvent(event, data)
+  }
+
+  emit<T extends IEventNames>(event: T, data: IEvents[T]): void {
+    if (this.parcelScene instanceof UnityParcelScene) {
+      this.parcelScene.emit(event, data)
+    }
+  }
+
+  isPersistent(): boolean {
+    return this.persistent
+  }
+
+  hasSceneStarted(): boolean {
+    return this.sceneStarted
+  }
+
+  getSceneId(): string {
+    return getParcelSceneID(this.parcelScene)
+  }
+
+  getAPIInstance<X>(api: { new(options: APIOptions): X }): Promise<X> {
+    return this.system.then(system => system.getAPIInstance(api))
+  }
+
+  private sendUserViewMatrix(positionReport: Readonly<PositionReport>) {
     if (this.engineAPI && 'positionChanged' in this.engineAPI.subscribedEvents) {
       if (!this.lastSentPosition.equals(positionReport.position)) {
         this.engineAPI.sendSubscriptionEvent('positionChanged', {
@@ -140,7 +186,7 @@ export class SceneWorker {
 
   private subscribeToSceneLifeCycleEvents() {
     this.sceneLifeCycleObserver = sceneLifeCycleObservable.add(obj => {
-      if (this.parcelScene.data.sceneId === obj.sceneId && obj.status === 'ready') {
+      if (this.getSceneId() === obj.sceneId && obj.status === 'ready') {
         this.sceneReady = true
         sceneLifeCycleObservable.remove(this.sceneLifeCycleObserver)
         this.sendSceneReadyIfNecessary()
@@ -176,7 +222,7 @@ export class SceneWorker {
       return this.startSystem(transport)
     } else {
       const worker = new (Worker as any)(gamekitWorkerUrl, {
-        name: `ParcelSceneWorker(${this.parcelScene.data.sceneId})`
+        name: `ParcelSceneWorker(${getParcelSceneID(this.parcelScene)})`
       })
       return this.startSystem(WebWorkerTransport(worker))
     }
