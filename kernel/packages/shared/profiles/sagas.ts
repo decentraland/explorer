@@ -57,7 +57,7 @@ import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
 import { getExclusiveCatalog } from 'shared/catalogs/selectors'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { Wearable } from 'shared/catalogs/types'
-import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { LocalProfilesRepository } from './LocalProfilesRepository'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -73,6 +73,9 @@ const concatenatedActionTypeUserId = (action: { type: string; payload: { userId:
 
 const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
   takeLatestById(patternOrChannel, concatenatedActionTypeUserId, saga, ...args)
+
+// This repository is for local profiles owned by this browser (without wallet)
+const localProfilesRepo = new LocalProfilesRepository()
 
 /**
  * This saga handles both passports and assets required for the renderer to show the
@@ -369,7 +372,7 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
       })
     }
 
-    persistProfileLocally(identity.address, profile)
+    localProfilesRepo.persist(identity.address, profile)
 
     updateCommsUser({
       version: profile.version
@@ -382,16 +385,9 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   }
 }
 
-const LOCAL_PROFILE_KEY = 'dcl-own-profile'
-
-function persistProfileLocally(address: string, profile: Profile) {
-  // For now, we use local storage. BUT DON'T USE THIS KEY OUTSIDE BECAUSE THIS MIGHT CHANGE EVENTUALLY
-  saveToLocalStorage(LOCAL_PROFILE_KEY, profile)
-}
-
 function fetchProfileLocally(address: string) {
   // For now we only support one local profile.
-  const profile: Profile | null = getFromLocalStorage(LOCAL_PROFILE_KEY)
+  const profile: Profile | null = localProfilesRepo.get(address)
   if (profile?.userId === address) {
     return ensureServerFormat(profile, profile.version)
   } else {
