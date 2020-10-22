@@ -57,8 +57,13 @@ public class RenderProfileWorld : ScriptableObject
         skyColor = RenderSettings.ambientSkyColor;
         groundColor = RenderSettings.ambientGroundColor;
         fogColor = RenderSettings.fogColor;
-        directionalColorLight = RenderSettings.sun.color;
-        directionalColorAngle = RenderSettings.sun.transform.rotation.eulerAngles;
+
+        if (RenderSettings.sun != null)
+        {
+            directionalColorLight = RenderSettings.sun.color;
+            directionalColorAngle = RenderSettings.sun.transform.rotation.eulerAngles;
+        }
+
         reflectionCubemap = RenderSettings.customReflection;
     }
 #endif
@@ -70,8 +75,13 @@ public class RenderProfileWorld : ScriptableObject
         RenderSettings.ambientSkyColor = skyColor;
         RenderSettings.ambientGroundColor = groundColor;
         RenderSettings.fogColor = fogColor;
-        RenderSettings.sun.color = directionalColorLight;
-        RenderSettings.sun.transform.rotation = Quaternion.Euler(directionalColorAngle);
+
+        if (RenderSettings.sun != null)
+        {
+            RenderSettings.sun.color = directionalColorLight;
+            RenderSettings.sun.transform.rotation = Quaternion.Euler(directionalColorAngle);
+        }
+
         RenderSettings.customReflection = reflectionCubemap;
 
         avatarProfile.Apply();
