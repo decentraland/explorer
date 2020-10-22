@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4408158711867673458}
   - component: {fileID: 7474437959616039966}
   - component: {fileID: 644997575118216917}
+  - component: {fileID: 2225248182438074801}
   m_Layer: 5
   m_Name: OkButton
   m_TagString: Untagged
@@ -135,6 +136,22 @@ MonoBehaviour:
   targetRectTransform: {fileID: 5851330219069476100}
   hoverScale: 1.01
   normalScale: 1
+--- !u!114 &2225248182438074801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659330949292716811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playHover: 1
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 11400000, guid: 1ddcfb8a893601e4097bd3c4b7cd6af6, type: 2}
 --- !u!1 &1036035276998138845
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,8 +290,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: The Plaza is at the centre of Genesis City. Explore the Plaza to learn
-    more about the Decentraland world.
+  m_text: The Plaza is at the heart of Genesis City. Take a look around and familiarize
+    yourself with the world.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 7dfa1f6019e8840a797a48955651317e, type: 2}
@@ -343,7 +360,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 3563827233588354408}
-    characterCount: 105
+    characterCount: 102
     spriteCount: 0
     spaceCount: 18
     wordCount: 19
