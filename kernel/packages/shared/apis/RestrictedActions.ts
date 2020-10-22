@@ -8,6 +8,11 @@ import { gridToWorld, isInParcel, parseParcelPosition } from '../../atomicHelper
 import { lastPlayerPosition } from '../world/positionThings'
 import { browserInterface } from "../../unity-interface/BrowserInterface"
 
+export enum Permission {
+  ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE',
+  ALLOW_TO_TRIGGER_AVATAR_EMOTE = 'ALLOW_TO_TRIGGER_AVATAR_EMOTE'
+}
+
 @registerAPI('RestrictedActions')
 export class RestrictedActions extends ExposableAPI {
   parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
@@ -56,13 +61,13 @@ export class RestrictedActions extends ExposableAPI {
 
   private translatePredefinedEmoteToId(emoteName: string): string {
     switch (emoteName) {
-      case 'WAVE': return 'wave';
-      case 'FIST_PUMP': return 'fistpump';
-      case 'ROBOT': return 'robot';
-      case 'RAISE_HAND': return 'raiseHand';
-      case 'CLAP': return 'clap';
-      case 'MONEY': return 'money';
-      case 'KISS': return 'kiss';
+      case 'WAVE': return 'wave'
+      case 'FIST_PUMP': return 'fistpump'
+      case 'ROBOT': return 'robot'
+      case 'RAISE_HAND': return 'raiseHand'
+      case 'CLAP': return 'clap'
+      case 'MONEY': return 'money'
+      case 'KISS': return 'kiss'
     }
     throw new Error(`Unrecognized emote name ${emoteName}`)
   }
@@ -99,8 +104,3 @@ type Emote = {
 }
 
 type PredefinedEmote = string
-
-export enum Permission {
-  ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE = 'ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE',
-  ALLOW_TO_TRIGGER_AVATAR_EMOTE = 'ALLOW_TO_TRIGGER_AVATAR_EMOTE'
-}
