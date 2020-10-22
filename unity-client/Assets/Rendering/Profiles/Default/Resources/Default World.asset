@@ -24,3 +24,4 @@ MonoBehaviour:
   directionalColorAngle: {x: 45.000008, y: 45, z: 45}
   avatarProfile: {fileID: 11400000, guid: e16a3dafe28c4044b8616c8abe59b80f, type: 2}
   fillWithRenderSettings: 0
+  copyToRenderSettings: 0

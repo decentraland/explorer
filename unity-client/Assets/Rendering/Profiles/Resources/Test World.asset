@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loadingBlockerPrefab: {fileID: 6457685576576672848, guid: 99d9fadbc076e884fa108a3480fb60ac,
     type: 3}
-  skyboxMaterial: {fileID: 2100000, guid: 8cf2550febdfe4b3ebb958bc5e605a78, type: 2}
-  skyColor: {r: 0.60784316, g: 0.92941177, b: 1, a: 1}
-  equatorColor: {r: 0.98039216, g: 0.8352941, b: 0.74509805, a: 1}
-  groundColor: {r: 1, g: 1, b: 1, a: 1}
-  fogColor: {r: 0.8443396, g: 0.93445873, b: 1, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: 74c9f69407f3b99469d19a5bc2b502a2, type: 2}
+  reflectionCubemap: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
+  skyColor: {r: 0.6392157, g: 0.48235294, b: 0.9254902, a: 1}
+  equatorColor: {r: 0.26666668, g: 0.13333334, b: 0.32156864, a: 1}
+  groundColor: {r: 0.87058824, g: 0.76862746, b: 1, a: 1}
+  fogColor: {r: 0.16078432, g: 0.12156863, b: 0.29411766, a: 1}
+  directionalColorLight: {r: 0.5176471, g: 0.5176471, b: 0.7058824, a: 1}
+  directionalColorAngle: {x: 45.000008, y: 45, z: 45}
   avatarProfile: {fileID: 11400000, guid: e73e040e0549cff4880fd7ec1cf00b75, type: 2}
   fillWithRenderSettings: 0
+  copyToRenderSettings: 0
