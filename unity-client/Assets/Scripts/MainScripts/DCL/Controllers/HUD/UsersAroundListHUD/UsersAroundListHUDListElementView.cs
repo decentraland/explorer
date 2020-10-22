@@ -58,6 +58,9 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     public void SetRecording(bool isRecording)
     {
+        if (isMuted)
+            return;
+
         if (setUserRecordingRoutine != null)
         {
             StopCoroutine(setUserRecordingRoutine);
