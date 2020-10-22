@@ -173,14 +173,15 @@ export class VoiceCommunicator {
 
   setVolume(value: number) {
     this.options.volume = value
-    if (this.options.mute === undefined || !this.options.mute) {
+    const muted = this.options.mute ?? false
+    if (!muted) {
       this.outputGainNode.gain.value = value
     }
   }
 
   setMute(mute: boolean) {
     this.options.mute = mute
-    this.outputGainNode.gain.value = mute ? 0 : this.options.volume ?? 0
+    this.outputGainNode.gain.value = mute ? 0 : this.options.volume ?? 1
   }
 
   createWorkletFor(src: string) {
