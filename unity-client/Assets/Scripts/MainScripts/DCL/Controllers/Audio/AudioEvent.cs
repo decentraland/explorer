@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using ReorderableList;
+using DCL.Configuration;
 
 [System.Serializable, CreateAssetMenu(fileName = "AudioEvent", menuName = "AudioEvents/AudioEvent")]
 public class AudioEvent : ScriptableObject
@@ -80,6 +81,8 @@ public class AudioEvent : ScriptableObject
 
     public virtual void Play(bool oneShot = false)
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         if (source == null) { Debug.Log("AudioEvent: Tried to play " + name + " with source equal to null."); return; }
 
         // Check if AudioSource is active and check cooldown time
@@ -105,6 +108,8 @@ public class AudioEvent : ScriptableObject
 
     public void PlayScheduled(float delaySeconds)
     {
+        if (EnvironmentSettings.RUNNING_TESTS) return;
+
         if (source == null) return;
 
         // Check if AudioSource is active and check cooldown time (taking delay into account)
@@ -147,6 +152,9 @@ public class AudioEvent : ScriptableObject
     /// <summary>Use StartCoroutine() on this one.</summary>
     public IEnumerator FadeIn(float fadeSeconds)
     {
+        if (EnvironmentSettings.RUNNING_TESTS)
+            yield break;
+
         float startVolume = source.volume;
         while (source.volume < initialVolume)
         {
@@ -161,6 +169,9 @@ public class AudioEvent : ScriptableObject
     /// <summary>Use StartCoroutine() on this one.</summary>
     public IEnumerator FadeOut(float fadeSeconds, bool stopWhenDone = true)
     {
+        if (EnvironmentSettings.RUNNING_TESTS)
+            yield break;
+
         float startVolume = source.volume;
         while (source.volume > 0)
         {
