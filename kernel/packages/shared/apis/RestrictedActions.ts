@@ -13,20 +13,6 @@ export enum Permission {
   ALLOW_TO_TRIGGER_AVATAR_EMOTE = 'ALLOW_TO_TRIGGER_AVATAR_EMOTE'
 }
 
-/**
- * We are leaving this RestrictedActionModule version here for backwards compatibility purposes.
- * RestrictedActions was previously called RestrictedActionModule, so we need to continue exposing this API for already deployed scenes.
- */
-@registerAPI('RestrictedActionModule')
-export class RestrictedActionModule extends ExposableAPI {
-
-  @exposeMethod
-  async movePlayerTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
-    this.options.getAPIInstance(RestrictedActions).movePlayerTo(newPosition, cameraTarget)
-  }
-
-}
-
 @registerAPI('RestrictedActions')
 export class RestrictedActions extends ExposableAPI {
   parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
@@ -118,3 +104,15 @@ type Emote = {
 }
 
 type PredefinedEmote = string
+
+/**
+ * We are leaving this RestrictedActionModule version here for backwards compatibility purposes.
+ * RestrictedActions was previously called RestrictedActionModule, so we need to continue exposing this API for already deployed scenes.
+ */
+@registerAPI('RestrictedActionModule')
+export class RestrictedActionModule extends ExposableAPI {
+  @exposeMethod
+  movePlayerTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
+    return this.options.getAPIInstance(RestrictedActions).movePlayerTo(newPosition, cameraTarget)
+  }
+}
