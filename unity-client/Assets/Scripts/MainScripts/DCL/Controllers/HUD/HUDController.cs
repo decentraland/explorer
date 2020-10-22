@@ -438,10 +438,10 @@ public class HUDController : MonoBehaviour
         usersAroundListHud?.SetUserRecording(model.userId, model.talking);
     }
 
-    public void SetUserMuted(string payload)
+    public void SetUsersMuted(string payload)
     {
         var model = JsonUtility.FromJson<UserMutedModel>(payload);
-        usersAroundListHud?.SetUserMuted(model.userId, model.muted);
+        usersAroundListHud?.SetUsersMuted(model.usersId, model.muted);
     }
 
     public void RequestTeleport(string teleportDataJson)

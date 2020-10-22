@@ -433,8 +433,8 @@ namespace DCL
                             case "SetUserTalking":
                                 HUDController.i.SetUserTalking(msg.payload);
                                 break;
-                            case "SetUserMuted":
-                                HUDController.i.SetUserMuted(msg.payload);
+                            case "SetUsersMuted":
+                                HUDController.i.SetUsersMuted(msg.payload);
                                 break;
                             default:
                                 Debug.Log(

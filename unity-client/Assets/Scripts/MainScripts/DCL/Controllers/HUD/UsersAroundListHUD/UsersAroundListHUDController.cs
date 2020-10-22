@@ -47,9 +47,12 @@ public class UsersAroundListHUDController : IHUD
         usersButtonView.OnClick += ToggleVisibility;
     }
 
-    public void SetUserMuted(string userId, bool isMuted)
+    public void SetUsersMuted(string[] usersId, bool isMuted)
     {
-        usersListView.SetUserMuted(userId, isMuted);
+        for (int i = 0; i < usersId.Length; i++)
+        {
+            usersListView.SetUserMuted(usersId[i], isMuted);
+        }
     }
 
     public void SetUserRecording(string userId, bool isRecording)
@@ -60,10 +63,7 @@ public class UsersAroundListHUDController : IHUD
     void Initialize(IUsersAroundListHUDListView view)
     {
         usersListView = view;
-        usersListView.OnRequestMuteUser += ((userId, mute) =>
-        {
-            WebInterface.SetMuteUser(userId, mute);
-        });
+        usersListView.OnRequestMuteUser += MuteUser;
         usersListView.OnRequestMuteGlobal += ((mute) =>
         {
             WebInterface.SetGlobalVoiceChatMute(mute);
@@ -110,5 +110,10 @@ public class UsersAroundListHUDController : IHUD
         }
 
         SetVisibility(setVisible);
+    }
+
+    void MuteUser(string userId, bool mute)
+    {
+        WebInterface.SetMuteUsers(new string[] { userId }, mute);
     }
 }

@@ -1,5 +1,5 @@
 public struct UserMutedModel
 {
-    public string userId;
+    public string[] usersId;
     public bool muted;
 }

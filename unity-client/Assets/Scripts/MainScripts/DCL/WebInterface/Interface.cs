@@ -477,7 +477,7 @@ namespace DCL.Interface
         [System.Serializable]
         public class MuteUserPayload
         {
-            public string userId;
+            public string[] usersId;
             public bool mute;
         }
 
@@ -1036,11 +1036,11 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "externalAction", sceneExternalActionEvent);
         }
 
-        public static void SetMuteUser(string userId, bool mute)
+        public static void SetMuteUsers(string[] usersId, bool mute)
         {
-            muteUserEvent.userId = userId;
+            muteUserEvent.usersId = usersId;
             muteUserEvent.mute = mute;
-            SendMessage("SetMuteUser", muteUserEvent);
+            SendMessage("SetMuteUsers", muteUserEvent);
         }
 
         public static void SetGlobalVoiceChatMute(bool mute)
