@@ -32,7 +32,7 @@ namespace DCL.Tutorial_Tests
 
             yield return tutorialController.StartTutorialFromStep(0);
 
-            Assert.IsTrue(tutorialController.markTutorialAsCompleted);
+            Assert.IsFalse(tutorialController.markTutorialAsCompleted);
             Assert.IsFalse(tutorialController.isRunning);
             Assert.IsNull(tutorialController.runningStep);
             Assert.IsFalse(CommonScriptableObjects.tutorialActive.Get());
