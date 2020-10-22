@@ -5,18 +5,49 @@ import defaultLogger from '../../packages/shared/logger'
 import { Permission, RestrictedActions } from '../../packages/shared/apis/RestrictedActions'
 import { lastPlayerPosition } from '../../packages/shared/world/positionThings'
 
-describe('RestrictedActionModule tests', () => {
+describe('RestrictedActions tests', () => {
+
+  const options = {
+    apiName: '',
+    system: null,
+    expose: sinon.stub(),
+    notify: sinon.stub(),
+    on: sinon.stub(),
+    getAPIInstance(name): any { }
+  }
+
+  describe('TriggerEmote tests', () => {
+    it('should trigger emote', async () => {
+      mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
+      sinon
+        .mock(unityInterface)
+        .expects('TriggerSelfUserExpression')
+        .once()
+        .withExactArgs('fistpump', false)
+
+      const module = new RestrictedActions(options)
+      await module.triggerEmote({ predefined: 'FIST_PUMP' })
+      sinon.verify()
+    })
+
+
+    it('should fail when scene does not have permissions', async () => {
+      mockPermissionsWith()
+      sinon.mock(unityInterface).expects('TriggerSelfUserExpression').never()
+      sinon
+        .mock(defaultLogger)
+        .expects('error')
+        .once()
+        .withExactArgs('Permission "ALLOW_TO_TRIGGER_AVATAR_EMOTE" is required')
+
+      const module = new RestrictedActions(options)
+      await module.triggerEmote({ predefined: 'FIST_PUMP' })
+      sinon.verify()
+    })
+  })
+
   describe('MovePlayerTo tests', () => {
     afterEach(() => sinon.restore())
-
-    const options = {
-      apiName: '',
-      system: null,
-      expose: sinon.stub(),
-      notify: sinon.stub(),
-      on: sinon.stub(),
-      getAPIInstance(name): any { }
-    }
 
     const mockLastPlayerPosition = (inside: boolean = true) => {
       const position = inside
@@ -27,36 +58,9 @@ describe('RestrictedActionModule tests', () => {
       sinon.stub(lastPlayerPosition, 'z').value(position.z)
     }
 
-    const buildParcelIdentity = (permissions: Permission[] = []) => {
-      return {
-        land: {
-          sceneJsonData: {
-            display: { title: 'interactive-text', favicon: 'favicon_asset' },
-            contact: { name: 'Ezequiel', email: 'ezequiel@decentraland.org' },
-            owner: 'decentraland',
-            scene: { parcels: ['0,101'], base: '0,101' },
-            communications: { type: 'webrtc', signalling: 'https://signalling-01.decentraland.org' },
-            policy: { contentRating: 'E', fly: true, voiceEnabled: true, blacklist: [] },
-            main: 'game.js',
-            tags: [],
-            requiredPermissions: permissions,
-            spawnPoints: [
-              { name: 'spawn1', default: true, position: { x: 0, y: 0, z: 0 }, cameraTarget: { x: 8, y: 1, z: 8 } }
-            ]
-          }
-        }
-      }
-    }
-
     it('should move the player', async () => {
       mockLastPlayerPosition()
-      sinon
-        .mock(options)
-        .expects('getAPIInstance')
-        .withArgs()
-        .once()
-        .returns(buildParcelIdentity([Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE]))
-
+      mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
       sinon
         .mock(unityInterface)
         .expects('Teleport')
@@ -71,12 +75,7 @@ describe('RestrictedActionModule tests', () => {
 
     it('should fail when position is outside scene', async () => {
       mockLastPlayerPosition()
-      sinon
-        .mock(options)
-        .expects('getAPIInstance')
-        .withArgs()
-        .once()
-        .returns(buildParcelIdentity([Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE]))
+      mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
       sinon
         .mock(defaultLogger)
         .expects('error')
@@ -93,7 +92,7 @@ describe('RestrictedActionModule tests', () => {
 
     it('should fail when scene does not have permissions', async () => {
       mockLastPlayerPosition()
-      sinon.mock(options).expects('getAPIInstance').withArgs().once().returns(buildParcelIdentity([]))
+      mockPermissionsWith()
       sinon.mock(unityInterface).expects('Teleport').never()
       sinon
         .mock(defaultLogger)
@@ -109,12 +108,7 @@ describe('RestrictedActionModule tests', () => {
 
     it('should fail when player is out of scene and try to move', async () => {
       mockLastPlayerPosition(false)
-      sinon
-        .mock(options)
-        .expects('getAPIInstance')
-        .withArgs()
-        .once()
-        .returns(buildParcelIdentity([Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE]))
+      mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
 
       sinon.mock(unityInterface).expects('Teleport').never()
 
@@ -130,4 +124,35 @@ describe('RestrictedActionModule tests', () => {
       sinon.verify()
     })
   })
+
+  function mockPermissionsWith(...permissions: Permission[]) {
+    sinon
+      .mock(options)
+      .expects('getAPIInstance')
+      .withArgs()
+      .once()
+      .returns(buildParcelIdentity(permissions))
+  }
+
+  function buildParcelIdentity(permissions: Permission[] = []) {
+    return {
+      land: {
+        sceneJsonData: {
+          display: { title: 'interactive-text', favicon: 'favicon_asset' },
+          contact: { name: 'Ezequiel', email: 'ezequiel@decentraland.org' },
+          owner: 'decentraland',
+          scene: { parcels: ['0,101'], base: '0,101' },
+          communications: { type: 'webrtc', signalling: 'https://signalling-01.decentraland.org' },
+          policy: { contentRating: 'E', fly: true, voiceEnabled: true, blacklist: [] },
+          main: 'game.js',
+          tags: [],
+          requiredPermissions: permissions,
+          spawnPoints: [
+            { name: 'spawn1', default: true, position: { x: 0, y: 0, z: 0 }, cameraTarget: { x: 8, y: 1, z: 8 } }
+          ]
+        }
+      }
+    }
+  }
+
 })

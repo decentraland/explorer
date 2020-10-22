@@ -12,12 +12,6 @@ import { browserInterface } from "../../unity-interface/BrowserInterface"
 export class RestrictedActions extends ExposableAPI {
   parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
 
-  /**
-   * move player to a position inside the scene
-   *
-   * @param position PositionType
-   * @param cameraTarget PositionType
-   */
   @exposeMethod
   async movePlayerTo(newPosition: Vector3, cameraTarget?: Vector3): Promise<void> {
     // checks permissions
@@ -49,11 +43,6 @@ export class RestrictedActions extends ExposableAPI {
     })
   }
 
-  /**
-   * trigger an emote on the current player
-   *
-   * @param emote the emote to perform
-   */
   @exposeMethod
   async triggerEmote(emote: Emote): Promise<void> {
     // checks permissions
