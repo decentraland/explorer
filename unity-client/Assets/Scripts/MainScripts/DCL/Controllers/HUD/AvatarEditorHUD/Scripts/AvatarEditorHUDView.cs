@@ -343,12 +343,12 @@ public class AvatarEditorHUDView : MonoBehaviour
 
         if (visible && !isOpen)
         {
-            AudioScriptableObjects.dialogOpen.Play(true);
+            //AudioScriptableObjects.dialogOpen.Play(true);
             OnSetVisibility?.Invoke(visible);
         }
         else if (!visible && isOpen)
         {
-            AudioScriptableObjects.dialogClose.Play(true);
+            //AudioScriptableObjects.dialogClose.Play(true);
             OnSetVisibility?.Invoke(visible);
         }
 
