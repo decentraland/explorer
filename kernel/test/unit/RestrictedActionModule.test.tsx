@@ -2,7 +2,7 @@ import * as sinon from 'sinon'
 import { Vector3 } from 'decentraland-ecs/src'
 import { unityInterface } from '../../packages/unity-interface/UnityInterface'
 import defaultLogger from '../../packages/shared/logger'
-import { Permission, RestrictedActionModule } from '../../packages/shared/apis/RestrictedActionModule'
+import { Permission, RestrictedActions } from '../../packages/shared/apis/RestrictedActions'
 import { lastPlayerPosition } from '../../packages/shared/world/positionThings'
 
 describe('RestrictedActionModule tests', () => {
@@ -63,7 +63,7 @@ describe('RestrictedActionModule tests', () => {
         .once()
         .withExactArgs({ position: { x: 8, y: 0, z: 1624 }, cameraTarget: undefined }, false)
 
-      const module = new RestrictedActionModule(options)
+      const module = new RestrictedActions(options)
 
       await module.movePlayerTo(new Vector3(8, 0, 8))
       sinon.verify()
@@ -85,7 +85,7 @@ describe('RestrictedActionModule tests', () => {
 
       sinon.mock(unityInterface).expects('Teleport').never()
 
-      const module = new RestrictedActionModule(options)
+      const module = new RestrictedActions(options)
 
       await module.movePlayerTo(new Vector3(21, 0, 32))
       sinon.verify()
@@ -101,7 +101,7 @@ describe('RestrictedActionModule tests', () => {
         .once()
         .withExactArgs('Permission "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE" is required')
 
-      const module = new RestrictedActionModule(options)
+      const module = new RestrictedActions(options)
 
       await module.movePlayerTo(new Vector3(8, 0, 8))
       sinon.verify()
@@ -124,7 +124,7 @@ describe('RestrictedActionModule tests', () => {
         .once()
         .withExactArgs('Error: Player is not inside of scene', lastPlayerPosition)
 
-      const module = new RestrictedActionModule(options)
+      const module = new RestrictedActions(options)
 
       await module.movePlayerTo(new Vector3(8, 0, 8))
       sinon.verify()
