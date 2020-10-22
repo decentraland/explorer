@@ -421,7 +421,8 @@ public class AvatarEditorHUDController : IHUD
 
         if (!visible && view.isOpen)
         {
-            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
+            currentRenderProfile.avatarProfile.Apply();
             if (prevMouseLockState)
             {
                 Utils.LockCursor();
@@ -431,7 +432,9 @@ public class AvatarEditorHUDController : IHUD
         }
         else if (visible && !view.isOpen)
         {
-            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
+            currentRenderProfile.avatarProfile.Apply();
+
             prevMouseLockState = Utils.isCursorLocked;
             Utils.UnlockCursor();
             OnOpen?.Invoke();
