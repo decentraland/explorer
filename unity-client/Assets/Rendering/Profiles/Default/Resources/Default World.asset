@@ -20,7 +20,7 @@ MonoBehaviour:
   equatorColor: {r: 0.98039216, g: 0.8352941, b: 0.74509805, a: 1}
   groundColor: {r: 1, g: 1, b: 1, a: 1}
   fogColor: {r: 0.8443396, g: 0.93445873, b: 1, a: 1}
-  directionalColorLight: {r: 1, g: 1, b: 1, a: 1}
+  directionalColorLight: {r: 0.85882354, g: 0.90795577, b: 0.9137255, a: 1}
   directionalColorAngle: {x: 45.000008, y: 45, z: 45}
   avatarProfile: {fileID: 11400000, guid: e16a3dafe28c4044b8616c8abe59b80f, type: 2}
   fillWithRenderSettings: 0

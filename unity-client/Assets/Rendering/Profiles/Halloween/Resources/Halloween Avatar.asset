@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Halloween Avatar
   m_EditorClassIdentifier: 
   avatarEditor:
-    tintColor: {r: 0.6415094, g: 0.5737489, b: 0.54165184, a: 1}
+    tintColor: {r: 0.6784314, g: 0.5372549, b: 0.47058824, a: 1}
     lightColor: {r: 1, g: 1, b: 1, a: 1}
-    lightDirection: {x: 0.707, y: 0.707, z: 0.707}
+    lightDirection: {x: -0.45, y: 0, z: -0.4}
   inWorld:
-    tintColor: {r: 0.15399753, g: 0.07289071, b: 0.16981131, a: 1}
-    lightColor: {r: 1, g: 1, b: 1, a: 1}
+    tintColor: {r: 0.2894802, g: 0.1718138, b: 0.3679245, a: 1}
+    lightColor: {r: 0.5764706, g: 0.50980395, b: 0.6313726, a: 1}
     lightDirection: {x: -0.1, y: 0.8, z: -0.4}
