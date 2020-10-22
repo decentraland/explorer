@@ -111,20 +111,8 @@ namespace DCL
         }
 
 
-        private bool test;
-
         private void Update()
         {
-            if (Input.GetKeyUp(KeyCode.O))
-            {
-                if (test)
-                    RenderProfileBridge.i.SetRenderProfile(RenderProfileBridge.ID.DEFAULT);
-                else
-                    RenderProfileBridge.i.SetRenderProfile(RenderProfileBridge.ID.HALLOWEEN);
-
-                test = !test;
-            }
-
             InputController_Legacy.i.Update();
 
             Environment.i.pointerEventsController.Update();
