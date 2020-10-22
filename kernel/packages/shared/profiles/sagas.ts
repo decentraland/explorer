@@ -34,7 +34,7 @@ import { generateRandomUserProfile } from './generateRandomUserProfile'
 import { getProfile, getProfileDownloadServer } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
-import { ensureServerFormat } from './transformations/profileToServerFormat'
+import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
 import { Profile, ContentFile, Avatar } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
@@ -57,6 +57,7 @@ import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
 import { getExclusiveCatalog } from 'shared/catalogs/selectors'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { Wearable } from 'shared/catalogs/types'
+import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -180,6 +181,10 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
       }
     } catch (error) {
       defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
+    }
+
+    if (!profile && currentId === userId) {
+      profile = fetchProfileLocally(userId)
     }
 
     if (!profile) {
@@ -351,9 +356,9 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
     const url: string = yield select(getUpdateProfileServer)
     const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } } as Profile
 
-    const identity = yield select(getCurrentIdentity)
+    const identity: ExplorerIdentity = yield select(getCurrentIdentity)
 
-    // only update profile if wallet is connected
+    // only update profile on server if wallet is connected
     if (identity.hasConnectedWeb3) {
       yield call(modifyAvatar, {
         url,
@@ -362,16 +367,35 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
         identity,
         profile
       })
-
-      yield put(saveProfileSuccess(userId, profile.version, profile))
-      yield put(profileRequest(userId))
-
-      updateCommsUser({
-        version: profile.version
-      })
     }
+
+    persistProfileLocally(identity.address, profile)
+
+    updateCommsUser({
+      version: profile.version
+    })
+
+    yield put(saveProfileSuccess(userId, profile.version, profile))
+    yield put(profileRequest(userId))
   } catch (error) {
     yield put(saveProfileFailure(userId, 'unknown reason'))
+  }
+}
+
+const LOCAL_PROFILE_KEY = 'dcl-own-profile'
+
+function persistProfileLocally(address: string, profile: Profile) {
+  // For now, we use local storage. BUT DON'T USE THIS KEY OUTSIDE BECAUSE THIS MIGHT CHANGE EVENTUALLY
+  saveToLocalStorage(LOCAL_PROFILE_KEY, profile)
+}
+
+function fetchProfileLocally(address: string) {
+  // For now we only support one local profile.
+  const profile: Profile | null = getFromLocalStorage(LOCAL_PROFILE_KEY)
+  if (profile?.userId === address) {
+    return ensureServerFormat(profile, profile.version)
+  } else {
+    return null
   }
 }
 
@@ -437,9 +461,10 @@ export async function modifyAvatar(params: {
     }
     newAvatar.snapshots = newSnapshots as Avatar['snapshots']
   }
-  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
 
-  return deploy(url, identity, { avatars: [newProfile] }, files)
+  const metadata = buildServerMetadata({ ...profile, avatar: newAvatar }, currentVersion + 1)
+
+  return deploy(url, identity, metadata, files)
 }
 
 async function deploy(url: string, identity: ExplorerIdentity, metadata: any, contentFiles: Map<string, Buffer>) {

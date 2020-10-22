@@ -190,7 +190,7 @@ function showNetworkWarning() {
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
 
-  const ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
+  let ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
 
   let address
   let signer
@@ -223,6 +223,10 @@ async function createAuthIdentity() {
 
       address = account.address.toJSON()
       signer = async (message: string) => account.sign(message).signature
+
+      // If we are using a local profile, we don't want the identity to expire.
+      // Eventually, if a wallet gets created, we can migrate the profile to the wallet.
+      ephemeralLifespanMinutes = 365 * 24 * 60 * 99
     }
   } else {
     const account = Account.create()
