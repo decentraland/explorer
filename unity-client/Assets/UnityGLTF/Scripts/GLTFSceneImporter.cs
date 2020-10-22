@@ -750,7 +750,7 @@ namespace UnityGLTF
 
 #if !UNITY_EDITOR
             //NOTE(Brian): This breaks importing in editor mode
-            texture.Compress(false);
+            texture.Compress(true);
 #endif
             _assetCache.ImageCache[imageCacheIndex] = texture;
 
