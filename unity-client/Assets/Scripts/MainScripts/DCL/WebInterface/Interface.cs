@@ -462,6 +462,7 @@ namespace DCL.Interface
             public Property[] properties;
         }
 
+        [System.Serializable]
         public class DelightedSurveyEnabledPayload
         {
             public bool enabled;
