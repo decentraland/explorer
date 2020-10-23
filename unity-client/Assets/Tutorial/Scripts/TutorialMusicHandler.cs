@@ -13,6 +13,9 @@ public class TutorialMusicHandler : MonoBehaviour
 
     private void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         CommonScriptableObjects.tutorialActive.OnChange += TutorialActive_OnChange;
         CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
         avatarEditorMusic.OnPlay += OnAvatarEditorMusicPlay;

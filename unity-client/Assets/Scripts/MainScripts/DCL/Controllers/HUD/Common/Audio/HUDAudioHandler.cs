@@ -15,6 +15,9 @@ public class HUDAudioHandler : MonoBehaviour
 
     private void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         if (i != null)
         {
             Destroy(this);
