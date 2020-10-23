@@ -9,8 +9,7 @@ public class AudioEvent_WithBlockingEvent : AudioEvent
 
     public override void Play(bool oneShot = false)
     {
-        return;
-
+        if (EnvironmentSettings.RUNNING_TESTS) return;
         if (blockingEvent == null) return;
         if (blockingEvent.source == null) return;
 
