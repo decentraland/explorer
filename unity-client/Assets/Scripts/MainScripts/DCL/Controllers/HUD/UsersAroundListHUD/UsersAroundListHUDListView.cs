@@ -39,6 +39,9 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         listElementView.OnMuteUser += OnMuteUser;
         listElementView.OnPoolRelease();
         availableElements.Enqueue(listElementView);
+
+        if (FriendsController.i)
+            FriendsController.i.OnUpdateFriendship += OnUpdateFriendship;
     }
 
     void IUsersAroundListHUDListView.AddOrUpdateUser(MinimapMetadata.MinimapUserInfo userInfo)
@@ -126,6 +129,9 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
     void IUsersAroundListHUDListView.Dispose()
     {
+        if (FriendsController.i)
+            FriendsController.i.OnUpdateFriendship -= OnUpdateFriendship;
+
         userElementDictionary.Clear();
         availableElements.Clear();
         Destroy(gameObject);
@@ -147,9 +153,9 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         availableElements.Enqueue(element);
     }
 
-    void ModifyListCount(bool isFriend, int delta)
+    void ModifyListCount(bool friendList, int delta)
     {
-        if (isFriend)
+        if (friendList)
         {
             friendsCount += delta;
             textFriendsTitle.text = string.Format(friendsTextPattern, friendsCount);
@@ -158,6 +164,33 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         {
             playersCount += delta;
             textPlayersTitle.text = string.Format(playersTextPattern, playersCount);
+        }
+    }
+
+    bool IsInFriendsList(UsersAroundListHUDListElementView element)
+    {
+        return element.transform.parent == contentFriends;
+    }
+
+    void OnUpdateFriendship(string userId, FriendshipAction status)
+    {
+        if (!userElementDictionary.TryGetValue(userId, out UsersAroundListHUDListElementView elementView))
+        {
+            return;
+        }
+
+        bool isInFriendsList = IsInFriendsList(elementView);
+        if (status == FriendshipAction.APPROVED && !isInFriendsList)
+        {
+            ModifyListCount(friendList: false, -1);
+            ModifyListCount(friendList: true, 1);
+            elementView.transform.SetParent(contentFriends);
+        }
+        else if (status == FriendshipAction.DELETED && isInFriendsList)
+        {
+            ModifyListCount(friendList: true, -1);
+            ModifyListCount(friendList: false, 1);
+            elementView.transform.SetParent(contentPlayers);
         }
     }
 }
