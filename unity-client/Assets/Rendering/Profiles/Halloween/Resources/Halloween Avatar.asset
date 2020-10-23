@@ -17,6 +17,6 @@ MonoBehaviour:
     lightColor: {r: 1, g: 1, b: 1, a: 1}
     lightDirection: {x: -0.45, y: 0, z: -0.4}
   inWorld:
-    tintColor: {r: 0.2894802, g: 0.1718138, b: 0.3679245, a: 1}
-    lightColor: {r: 0.5764706, g: 0.50980395, b: 0.6313726, a: 1}
-    lightDirection: {x: -0.1, y: 0.8, z: -0.4}
+    tintColor: {r: 0.300025, g: 0.22556959, b: 0.3490566, a: 1}
+    lightColor: {r: 0.9083993, g: 0.7971698, b: 1, a: 1}
+    lightDirection: {x: -0.2, y: 1, z: -0.4}

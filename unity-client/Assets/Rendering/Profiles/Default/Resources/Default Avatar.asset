@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Default Avatar
   m_EditorClassIdentifier: 
   avatarEditor:
-    tintColor: {r: 0.6431373, g: 0.57254905, b: 0.5411765, a: 1}
+    tintColor: {r: 0.6698113, g: 0.6698113, b: 0.6698113, a: 1}
     lightColor: {r: 0.8396226, g: 0.8396226, b: 0.8396226, a: 1}
-    lightDirection: {x: -0.45, y: 0, z: -0.4}
+    lightDirection: {x: 0.45, y: 0.45, z: 0.4}
   inWorld:
     tintColor: {r: 0.5188679, g: 0.44939685, b: 0.4185208, a: 1}
     lightColor: {r: 0.8207547, g: 0.8207547, b: 0.8207547, a: 1}
-    lightDirection: {x: -0.1, y: 0.8, z: -0.4}
+    lightDirection: {x: -0.1, y: 0.45, z: -0.4}

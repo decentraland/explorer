@@ -21,6 +21,7 @@ MonoBehaviour:
   groundColor: {r: 0.764685, g: 0.6536134, b: 0.9056604, a: 1}
   fogColor: {r: 0.20091766, g: 0.12156862, b: 0.29411766, a: 1}
   directionalColorLight: {r: 0.77580774, g: 0.7549395, b: 0.8207547, a: 1}
-  directionalColorAngle: {x: 45.000008, y: 75, z: 45}
+  directionalColorAngle: {x: 45.000008, y: 75, z: 45.000004}
   avatarProfile: {fileID: 11400000, guid: 2d91cc7a3512376409415365f8fbca65, type: 2}
   fillWithRenderSettings: 0
+  copyToRenderSettings: 0
