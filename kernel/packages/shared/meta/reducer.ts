@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux'
 import { META_CONFIGURATION_INITIALIZED, META_UPDATE_MESSAGE_OF_THE_DAY } from './actions'
-import { MessageOfTheDayConfig, MetaState, WorldConfig } from './types'
+import { MetaState, WorldConfig } from './types'
 
 const initialState = {
   initialized: false,
@@ -28,9 +28,7 @@ export function metaReducer(state?: MetaState, action?: AnyAction): MetaState {
           ...state.config,
           world: {
             ...(state.config.world || {}),
-            messageOfTheDay: {
-              ...(action.payload as MessageOfTheDayConfig)
-            },
+            messageOfTheDay: action.payload,
             messageOfTheDayInit: true
           } as WorldConfig
         }

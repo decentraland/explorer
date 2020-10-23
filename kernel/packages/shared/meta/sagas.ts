@@ -46,25 +46,12 @@ export function* metaSaga(): any {
 
 function* fetchMessageOfTheDay() {
   const userId = yield select((state) => state.session.userId)
-  console.log('result-day-user:', userId)
-  const url = 'https://dclcms.club/api/notifications?address='
+  const url = `https://dclcms.club/api/notifications?address=${userId}`
   const result = yield call(() =>
-    fetch(url + userId)
+    fetch(url)
       .then((response) => response.json())
-      .then((data) => {
-        // console.log('result-day-data: ', data)
-        // return data.length ? data[0] : undefined
-        return {
-          background_banner: 'http://dclcms.club/media/background-images/MOTDHeader.png',
-          body:
-            'Welcome to Halloween!\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam pretium congue orci, sit amet aliquet purus fermentum nec. Nunc finibus turpis quis facilisis laoreet. Sed nec hendrerit augue, in finibus ipsum. Curabitur semper urna lectus. Sed fermentum ex commodo nisl maximus bibendum. Integer ut neque quis dolor porta pharetra eu vitae massa. Nam feugiat et risus a pellentesque. Maecenas fermentum arcu id quam scelerisque, ac sodales lacus consequat. Nullam posuere eleifend ipsum quis vehicula. Fusce ipsum nisl, accumsan ac lectus et, hendrerit consequat felis.',
-          title: 'Halloween Day 1',
-          buttons: [{ caption: 'Continue', tint: { r: 0, g: 0, b: 1, a: 1 } }]
-        }
-      })
+      .then((data) => (data.length ? data[0] : null))
   )
-  // console.log('result-day-result-2: ', result)
-  console.log('result-day-result: ', result)
   yield put(metaUpdateMessageOfTheDay(result))
 }
 

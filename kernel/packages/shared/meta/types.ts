@@ -22,7 +22,7 @@ export type MetaConfiguration = {
 export type WorldConfig = {
   pois: Vector2Component[]
   renderProfile?: RenderProfile
-  messageOfTheDay?: MessageOfTheDayConfig
+  messageOfTheDay?: MessageOfTheDayConfig | null
   messageOfTheDayInit?: boolean
 }
 
