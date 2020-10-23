@@ -7,6 +7,12 @@ public class ScrollbarHandleAudioHandler : MonoBehaviour, IPointerEnterHandler, 
     [SerializeField]
     Selectable selectable;
 
+    private void Awake()
+    {
+        DestroyImmediate(this);
+        return;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (selectable != null && !Input.GetMouseButton(0))

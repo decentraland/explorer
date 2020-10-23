@@ -12,6 +12,9 @@ public class CameraControllerAudioHandler : MonoBehaviour
 
     private void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         cameraController.onSetCameraMode += OnSetCameraMode;
     }
 

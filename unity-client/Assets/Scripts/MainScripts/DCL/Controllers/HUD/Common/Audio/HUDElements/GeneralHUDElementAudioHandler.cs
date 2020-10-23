@@ -6,6 +6,12 @@ public class GeneralHUDElementAudioHandler : MonoBehaviour, IPointerEnterHandler
     [SerializeField]
     protected bool playHover = true, playClick = true, playRelease = true;
 
+    private void Awake()
+    {
+        DestroyImmediate(this);
+        return;
+    }
+
     public virtual void OnPointerEnter(PointerEventData eventData)
     {
         if (!playHover)

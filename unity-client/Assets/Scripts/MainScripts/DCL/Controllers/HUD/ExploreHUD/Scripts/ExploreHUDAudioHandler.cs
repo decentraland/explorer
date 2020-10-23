@@ -12,6 +12,12 @@ public class ExploreHUDAudioHandler : MonoBehaviour
 
     float magicPointerEnterLastPlayed = 0f;
 
+    private void Awake()
+    {
+        DestroyImmediate(this);
+        return;
+    }
+
     private void Start()
     {
         magicButton.OnGotoMagicPointerEnter += OnMagicButtonEnter;

@@ -8,6 +8,9 @@ public class SliderAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         slider = GetComponent<Slider>();
         slider.onValueChanged.AddListener(OnValueChanged);
     }

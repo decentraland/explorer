@@ -7,6 +7,12 @@ public class SliderHandleAudioHandler : MonoBehaviour, IPointerEnterHandler
     [SerializeField]
     Slider slider;
 
+    private void Awake()
+    {
+        DestroyImmediate(this);
+        return;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (slider != null && !Input.GetMouseButton(0))

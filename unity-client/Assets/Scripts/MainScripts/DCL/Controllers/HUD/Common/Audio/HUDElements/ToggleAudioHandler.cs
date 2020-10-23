@@ -8,6 +8,9 @@ public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler
 
     void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         toggle = GetComponent<Toggle>();
         toggle.onValueChanged.AddListener(OnValueChanged);
     }

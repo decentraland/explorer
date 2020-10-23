@@ -12,6 +12,9 @@ public class MapRendererAudioHandler : MonoBehaviour
 
     private void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         mapRenderer.OnMovedParcelCursor += OnMovedParcelCursor;
     }
 

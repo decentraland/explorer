@@ -10,6 +10,9 @@ public class ButtonAudioHandler : GeneralHUDElementAudioHandler
 
     void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         selectable = GetComponent<Selectable>();
     }
 

@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class NavMapAudioHandler : MonoBehaviour
 {
+    private void Awake()
+    {
+        DestroyImmediate(this);
+        return;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))

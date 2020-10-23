@@ -22,6 +22,12 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
     IEnumerator musicFadeOut;
 
+    private void Awake()
+    {
+        DestroyImmediate(this);
+        return;
+    }
+
     private void Start()
     {
         int nPairs = view.wearableGridPairs.Length;
