@@ -13,8 +13,7 @@ import {
   DEBUG_PM,
   OPEN_AVATAR_EDITOR,
   HAS_INITIAL_POSITION_MARK,
-  VOICE_CHAT_ENABLED, 
-  HALLOWEEN
+  VOICE_CHAT_ENABLED
 } from '../config/index'
 import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
@@ -76,8 +75,6 @@ initializeUnity(container)
       visible: false
     })
 
-    i.SetRenderProfile(HALLOWEEN ? RenderProfile.HALLOWEEN : RenderProfile.DEFAULT)
-
     try {
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
@@ -115,6 +112,8 @@ initializeUnity(container)
 
     if (worldConfig.renderProfile) {
       i.SetRenderProfile(worldConfig.renderProfile)
+    } else {
+      i.SetRenderProfile(RenderProfile.DEFAULT)
     }
 
     if (!NO_MOTD) {

@@ -19,18 +19,37 @@ namespace DCL
         [System.Serializable]
         public class MaterialProfile
         {
-            [SerializeField] private Color lightColor;
-            [SerializeField] private Vector3 lightDirection;
-
-            public void Apply()
-            {
-                Shader.SetGlobalVector(ShaderUtils._LightDir, lightDirection);
-                Shader.SetGlobalColor(ShaderUtils._LightColor, lightColor);
-            }
+            [SerializeField] internal Color tintColor;
+            [SerializeField] internal Color lightColor;
+            [SerializeField] internal Vector3 lightDirection;
         }
 
-        [SerializeField] public MaterialProfile avatarEditor;
+        [NonSerialized] public MaterialProfile currentProfile;
 
-        [SerializeField] public MaterialProfile inWorld;
+        public MaterialProfile avatarEditor;
+
+        public MaterialProfile inWorld;
+
+        /// <summary>
+        /// Applies the material profile.
+        /// </summary>
+        /// <param name="targetMaterial">If target material is null, the properties will be applied globally.</param>
+        public void Apply(Material targetMaterial = null)
+        {
+            if (currentProfile == null)
+                currentProfile = inWorld;
+
+            if (targetMaterial != null)
+            {
+                targetMaterial.SetVector(ShaderUtils._LightDir, currentProfile.lightDirection);
+                targetMaterial.SetColor(ShaderUtils._LightColor, currentProfile.lightColor);
+                targetMaterial.SetColor(ShaderUtils._TintColor, currentProfile.tintColor);
+                return;
+            }
+
+            Shader.SetGlobalVector(ShaderUtils._LightDir, currentProfile.lightDirection);
+            Shader.SetGlobalColor(ShaderUtils._LightColor, currentProfile.lightColor);
+            Shader.SetGlobalColor(ShaderUtils._TintColor, currentProfile.tintColor);
+        }
     }
 }
