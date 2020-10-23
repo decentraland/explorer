@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DCL;
 using DCL.Helpers;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// RenderProfileWorld allows us to toggle between several global rendering configuration presets.
@@ -79,10 +80,13 @@ public class RenderProfileWorld : ScriptableObject
 
     public void Apply(bool verbose = false)
     {
+        RenderSettings.ambientMode = AmbientMode.Trilight;
+
         RenderSettings.skybox = skyboxMaterial;
         RenderSettings.ambientEquatorColor = equatorColor;
         RenderSettings.ambientSkyColor = skyColor;
         RenderSettings.ambientGroundColor = groundColor;
+
         RenderSettings.fogColor = fogColor;
 
         if (RenderSettings.sun != null)

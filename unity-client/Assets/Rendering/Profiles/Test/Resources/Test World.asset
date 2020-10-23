@@ -22,5 +22,6 @@ MonoBehaviour:
   fogColor: {r: 0.8443396, g: 0.93445873, b: 1, a: 1}
   directionalColorLight: {r: 1, g: 1, b: 1, a: 1}
   directionalColorAngle: {x: 45.000008, y: 45, z: 45}
-  avatarProfile: {fileID: 11400000, guid: e73e040e0549cff4880fd7ec1cf00b75, type: 2}
+  avatarProfile: {fileID: 11400000, guid: ec1399b1cf608ae4fa8ffb32a243aa5e, type: 2}
   fillWithRenderSettings: 0
+  copyToRenderSettings: 0
