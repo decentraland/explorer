@@ -84,6 +84,7 @@ public class TaskbarMoreMenu : MonoBehaviour
     private void OnDestroy()
     {
         CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
+        RenderProfileManifest.i.OnChangeProfile -= OnChangeProfile;
     }
 
     private void TutorialActive_OnChange(bool current, bool previous)
