@@ -22,6 +22,9 @@ public class AudioContainer : MonoBehaviour
 
     void Awake()
     {
+        DestroyImmediate(this);
+        return;
+
         if (!overrideDefaults)
         {
             dopplerLevel = 0.0f;
