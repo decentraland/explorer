@@ -26,16 +26,16 @@ export type WorldConfig = {
 }
 
 export type MessageOfTheDayConfig = {
-  imageUrl: string
-  endUnixTimestamp: number
+  background_banner: string
+  endUnixTimestamp?: number
   title: string
   body: string
   buttons: {
     caption: string
-    action: string
+    action?: string
     // NOTE(Brian): The button actions will be global chat's actions,
     // for instance `/goto 0,0`, or 'Close' that will just close the MOTD.
-    tint: Color4
+    tint?: Color4
   }[]
 }
 
