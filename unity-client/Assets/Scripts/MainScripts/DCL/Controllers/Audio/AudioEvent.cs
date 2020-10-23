@@ -34,7 +34,7 @@ public class AudioEvent : ScriptableObject
 
     public virtual void Initialize(AudioContainer audioContainer)
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         if (audioContainer == null) return;
 
@@ -70,13 +70,15 @@ public class AudioEvent : ScriptableObject
     
     public void RandomizeIndex()
     {
+        return;
+
         RandomizeIndex(0, clips.Length);
     }
 
     // Randomize the index from (inclusive) to y (exclusive)
     public void RandomizeIndex(int from, int to)
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         int newIndex;
         do { newIndex = Random.Range(from, to); } while (clips.Length > 1 && newIndex == lastPlayedIndex);
@@ -85,7 +87,7 @@ public class AudioEvent : ScriptableObject
 
     public virtual void Play(bool oneShot = false)
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         if (source == null) { Debug.Log("AudioEvent: Tried to play " + name + " with source equal to null."); return; }
 
@@ -112,7 +114,7 @@ public class AudioEvent : ScriptableObject
 
     public void PlayScheduled(float delaySeconds)
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         if (source == null) return;
 
@@ -134,7 +136,7 @@ public class AudioEvent : ScriptableObject
 
     public void Stop()
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         source.Stop();
         OnStop?.Invoke();
@@ -142,20 +144,22 @@ public class AudioEvent : ScriptableObject
 
     public void ResetVolume()
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         source.volume = initialVolume;
     }
 
     public void SetIndex(int index)
     {
-        if (EnvironmentSettings.RUNNING_TESTS) return;
+        return;
 
         clipIndex = index;
     }
 
     public void SetPitch(float pitch)
     {
+        return;
+
         if (EnvironmentSettings.RUNNING_TESTS) return;
 
         this.pitch = pitch;
@@ -164,8 +168,7 @@ public class AudioEvent : ScriptableObject
     /// <summary>Use StartCoroutine() on this one.</summary>
     public IEnumerator FadeIn(float fadeSeconds)
     {
-        if (EnvironmentSettings.RUNNING_TESTS)
-            yield break;
+        yield break;
 
         float startVolume = source.volume;
         while (source.volume < initialVolume)
@@ -181,8 +184,7 @@ public class AudioEvent : ScriptableObject
     /// <summary>Use StartCoroutine() on this one.</summary>
     public IEnumerator FadeOut(float fadeSeconds, bool stopWhenDone = true)
     {
-        if (EnvironmentSettings.RUNNING_TESTS)
-            yield break;
+        yield break;
 
         float startVolume = source.volume;
         while (source.volume > 0)
