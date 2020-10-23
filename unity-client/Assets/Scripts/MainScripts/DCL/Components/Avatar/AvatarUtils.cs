@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DCL;
 using DCL.Helpers;
 using UnityEngine;
 
@@ -94,15 +95,16 @@ public static class AvatarUtils
                 Texture _MatCap = null;
                 Texture _GMatCap = null;
                 Texture _FMatCap = null;
+                Color? _TintColor = null;
 
-                if (replaceThemWith.HasProperty("_MatCap"))
-                    _MatCap = replaceThemWith.GetTexture("_MatCap");
+                if (replaceThemWith.HasProperty(ShaderUtils._MatCap))
+                    _MatCap = replaceThemWith.GetTexture(ShaderUtils._MatCap);
 
-                if (replaceThemWith.HasProperty("_GlossMatCap"))
-                    _GMatCap = replaceThemWith.GetTexture("_GlossMatCap");
+                if (replaceThemWith.HasProperty(ShaderUtils._GlossMatCap))
+                    _GMatCap = replaceThemWith.GetTexture(ShaderUtils._GlossMatCap);
 
-                if (replaceThemWith.HasProperty("_FresnelMatCap"))
-                    _FMatCap = replaceThemWith.GetTexture("_FresnelMatCap");
+                if (replaceThemWith.HasProperty(ShaderUtils._FresnelMatCap))
+                    _FMatCap = replaceThemWith.GetTexture(ShaderUtils._FresnelMatCap);
 
                 //NOTE(Brian): This method has a bug, if the material being copied lacks a property of the source material,
                 //             the source material property will get erased. It can't be added back and even the material inspector crashes.
@@ -110,13 +112,13 @@ public static class AvatarUtils
                 copy.CopyPropertiesFromMaterial(mat);
 
                 if (_GMatCap != null)
-                    copy.SetTexture("_GlossMatCap", _GMatCap);
+                    copy.SetTexture(ShaderUtils._GlossMatCap, _GMatCap);
 
                 if (_FMatCap != null)
-                    copy.SetTexture("_FresnelMatCap", _FMatCap);
+                    copy.SetTexture(ShaderUtils._FresnelMatCap, _FMatCap);
 
                 if (_MatCap != null)
-                    copy.SetTexture("_MatCap", _MatCap);
+                    copy.SetTexture(ShaderUtils._MatCap, _MatCap);
 
                 if (copy.HasProperty(ShaderUtils._ZWrite))
                 {
@@ -125,6 +127,8 @@ public static class AvatarUtils
                     if (zWrite == 0)
                         copy.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                 }
+
+                copy.enableInstancing = false;
 
                 result.Add(copy);
                 return copy;

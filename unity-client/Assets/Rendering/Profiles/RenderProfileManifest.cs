@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace DCL
 {
@@ -19,7 +21,23 @@ namespace DCL
         public RenderProfileWorld defaultProfile;
         public RenderProfileWorld halloweenProfile;
         public RenderProfileWorld testProfile;
-        public static RenderProfileWorld currentProfile;
+
+        private RenderProfileWorld currentProfileValue;
+
+        public RenderProfileWorld currentProfile
+        {
+            get { return currentProfileValue; }
+            set
+            {
+                if (value == null || value == currentProfileValue)
+                    return;
+
+                currentProfileValue = value;
+                OnChangeProfile?.Invoke(value);
+            }
+        }
+
+        public event Action<RenderProfileWorld> OnChangeProfile;
 
         internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
         {
@@ -41,7 +59,7 @@ namespace DCL
                 return;
             }
 
-            currentProfile.avatarProfile.inWorld.Apply();
+            currentProfile.avatarProfile.currentProfile = currentProfile.avatarProfile.inWorld;
             currentProfile.Apply();
         }
     }

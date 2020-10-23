@@ -4,9 +4,16 @@ namespace DCL.Helpers
 {
     public static class ShaderUtils
     {
+        //Toon shader properties
         public static readonly int _LightDir = Shader.PropertyToID("_LightDir");
         public static readonly int _LightColor = Shader.PropertyToID("_LightColor");
+        public static readonly int _TintColor = Shader.PropertyToID("_TintColor");
 
+        public static readonly int _GlossMatCap = Shader.PropertyToID("_GlossMatCap");
+        public static readonly int _FresnelMatCap = Shader.PropertyToID("_FresnelMatCap");
+        public static readonly int _MatCap = Shader.PropertyToID("_MatCap");
+
+        //Lit properties
         public static readonly int _SpecGlossMap = Shader.PropertyToID("_SpecGlossMap");
         public static readonly int _SmoothnessTextureChannel = Shader.PropertyToID("_SmoothnessTextureChannel");
         public static readonly int _SpecColor = Shader.PropertyToID("_SpecColor");

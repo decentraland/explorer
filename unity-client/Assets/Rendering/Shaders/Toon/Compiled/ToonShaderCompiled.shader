@@ -1,4 +1,4 @@
-﻿Shader "DCL/Toon Shader Compiled"
+﻿Shader "DCL/Toon Shader"
 {
     Properties
     {
@@ -9,14 +9,11 @@
         [NoScaleOffset]_MatCap("Diffuse MatCap", 2D) = "white" {}
         [NoScaleOffset]_GlossMatCap("Gloss MatCap", 2D) = "white" {}
         [NoScaleOffset]_FresnelMatCap("Fresnel MatCap", 2D) = "white" {}
-        _SSSIntensity("SSS Intensity", Float) = 0
-        _SSSParams("SSSParams", Vector) = (0, 0, 0, 0)
         [HideInInspector] _SrcBlend("__src", Float) = 1.0
         [HideInInspector] _DstBlend("__dst", Float) = 0.0
         [HideInInspector] _ZWrite("__zw", Float) = 1.0
         [HideInInspector] _Cull("__cull", Float) = 2.0
     }
-
     SubShader
     {
         Tags
@@ -157,6 +154,7 @@
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
             float4 _LightColor;
+            float4 _TintColor;
             SAMPLER(_SampleTexture2D_F1EE66C6_Sampler_3_Linear_Repeat);
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
             SAMPLER(_SampleTexture2D_ED76F6F0_Sampler_3_Linear_Repeat);
@@ -384,14 +382,14 @@
                 float3 ViewSpacePosition;
             };
             
-            void SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(float4 Color_E739F888, float4 Color_D4F585C6, float4 Color_D7818A04, Bindings_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb IN, out float4 FinalColor_1)
+            void SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(float4 Color_E739F888, float4 Color_D4F585C6, float4 Color_D7818A04, float4 Color_546468F9, Bindings_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb IN, out float4 FinalColor_1)
             {
                 float4 _Property_4D5FC0A4_Out_0 = Color_E739F888;
                 float4 _Property_463AA739_Out_0 = Color_D4F585C6;
-                float4 Color_95B82AD4 = IsGammaSpace() ? float4(0.6415094, 0.5737489, 0.5416518, 1) : float4(SRGBToLinear(float3(0.6415094, 0.5737489, 0.5416518)), 1);
+                float4 _Property_F9FDD8A9_Out_0 = Color_546468F9;
                 float4 _Property_3D5D922_Out_0 = Color_D7818A04;
                 float4 _Add_B566B9BB_Out_2;
-                Unity_Add_float4(Color_95B82AD4, _Property_3D5D922_Out_0, _Add_B566B9BB_Out_2);
+                Unity_Add_float4(_Property_F9FDD8A9_Out_0, _Property_3D5D922_Out_0, _Add_B566B9BB_Out_2);
                 float4 _Blend_2E558B58_Out_2;
                 Unity_Blend_Multiply_float4(_Property_463AA739_Out_0, _Add_B566B9BB_Out_2, _Blend_2E558B58_Out_2, 1);
                 float4 _Add_380AFE1D_Out_2;
@@ -507,10 +505,13 @@
                 Unity_Add_float4(Color_A56BBF16, _Multiply_BD25ADC4_Out_2, _Add_EB51409C_Out_2);
                 #endif
                 #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
+                float4 _Property_8AD7C09E_Out_0 = _TintColor;
+                #endif
+                #if defined(KEYWORD_PERMUTATION_0) || defined(KEYWORD_PERMUTATION_1) || defined(KEYWORD_PERMUTATION_2) || defined(KEYWORD_PERMUTATION_3) || defined(KEYWORD_PERMUTATION_4) || defined(KEYWORD_PERMUTATION_5) || defined(KEYWORD_PERMUTATION_6) || defined(KEYWORD_PERMUTATION_7)
                 Bindings_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb _FinalCombine_D0158F10;
                 _FinalCombine_D0158F10.ViewSpacePosition = IN.ViewSpacePosition;
                 float4 _FinalCombine_D0158F10_FinalColor_1;
-                SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(_Multiply_66E414AD_Out_2, _TextureSample_7368FD5F_Color_1, _Add_EB51409C_Out_2, _FinalCombine_D0158F10, _FinalCombine_D0158F10_FinalColor_1);
+                SG_FinalCombine_71273f7177aa0cc4f9ddbeefd14a5fbb(_Multiply_66E414AD_Out_2, _TextureSample_7368FD5F_Color_1, _Add_EB51409C_Out_2, _Property_8AD7C09E_Out_0, _FinalCombine_D0158F10, _FinalCombine_D0158F10_FinalColor_1);
                 #endif
                 surface.Color = (_FinalCombine_D0158F10_FinalColor_1.xyz);
                 surface.Alpha = _TextureSample_7368FD5F_Alpha_2;
@@ -868,6 +869,7 @@
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
             float4 _LightColor;
+            float4 _TintColor;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
@@ -1259,6 +1261,7 @@
             TEXTURE2D(_FresnelMatCap); SAMPLER(sampler_FresnelMatCap); float4 _FresnelMatCap_TexelSize;
             float3 _LightDir;
             float4 _LightColor;
+            float4 _TintColor;
             SAMPLER(_SampleTexture2D_592A5A2C_Sampler_3_Linear_Repeat);
         
             // Graph Functions
