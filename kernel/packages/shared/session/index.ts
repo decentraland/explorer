@@ -19,13 +19,9 @@ function sessionKey(userId: string) {
   return `${SESSION_KEY_PREFIX}-${userId}`
 }
 
-export const getLastSession: () => StoredSession | null = () => {
-  const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
-  if (lastSessionId) {
-    return getStoredSession(lastSessionId)
-  } else {
-    return getFromLocalStorage('dcl-profile')
-  }
+export const setStoredSession: (session: StoredSession) => void = (session) => {
+  saveToLocalStorage(LAST_SESSION_KEY, session.userId)
+  saveToLocalStorage(sessionKey(session.userId), session)
 }
 
 export const getStoredSession: (userId: string) => StoredSession | null = (userId) => {
@@ -45,12 +41,16 @@ export const getStoredSession: (userId: string) => StoredSession | null = (userI
   return null
 }
 
-export const setStoredSession: (session: StoredSession) => void = (session) => {
-  saveToLocalStorage(LAST_SESSION_KEY, session.userId)
-  saveToLocalStorage(sessionKey(session.userId), session)
-}
-
 export const removeStoredSession = () => removeFromLocalStorage('dcl-profile')
+
+export const getLastSession: () => StoredSession | null = () => {
+  const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
+  if (lastSessionId) {
+    return getStoredSession(lastSessionId)
+  } else {
+    return getFromLocalStorage('dcl-profile')
+  }
+}
 export class Session {
   private static _instance: Session = new Session()
 

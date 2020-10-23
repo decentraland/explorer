@@ -45,6 +45,7 @@ function prepareSnapshots({
   function prepare(value: string) {
     if (value === '') return value
     try {
+      // tslint:disable-next-line
       new URL(value)
       return value
     } catch (e) {

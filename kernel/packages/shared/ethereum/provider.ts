@@ -206,6 +206,6 @@ export async function getUserAccount(): Promise<string | undefined> {
 
 export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
   if (Eth.fromCurrentProvider()) {
-    return await getUserAccount()
+    return getUserAccount()
   }
 }
