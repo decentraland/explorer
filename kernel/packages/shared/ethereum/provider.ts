@@ -6,7 +6,7 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getTLD } from '../../config/index'
 import { Eth } from 'web3x/eth'
-import { getStoredSession, removeStoredSession } from 'shared/session'
+import { getLastSession, getStoredSession } from 'shared/session'
 
 declare var window: Window & {
   ethereum: any
@@ -32,8 +32,10 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
       return
     }
 
+    const address = await getUserEthAccountIfAvailable()
+
     // TODO - look for user id matching account - moliva - 18/02/2020
-    let userData = getStoredSession()
+    let userData = address ? getStoredSession(address) : getLastSession()
 
     // Modern dapp browsers...
     if (window['ethereum'] && isSessionExpired(userData)) {
@@ -68,21 +70,18 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
   }
 }
 
-function processLoginBackground() {
+function processLoginBackground(address: string | undefined) {
   const response = future()
 
-  const userData = getStoredSession()
+  const userData = address ? getStoredSession(address) : getLastSession()
   if (window['ethereum']) {
     if (!isSessionExpired(userData)) {
       response.resolve({ successful: true, provider: window.ethereum })
     }
   } else if (window.web3 && window.web3.currentProvider) {
-    removeSessionIfNotValid()
-      .then(() => {
-        // legacy providers (don't need for confirmation)
-        response.resolve({ successful: true, provider: window.web3.currentProvider })
-      })
-      .catch((e) => response.reject(e))
+    if (!isSessionExpired(userData)) {
+      response.resolve({ successful: true, provider: window.web3.currentProvider })
+    }
   } else {
     // otherwise, create a local identity
     response.resolve({
@@ -104,12 +103,13 @@ export function awaitWeb3Approval(): Promise<void> {
       if (element) {
         element.style.display = 'block'
 
+        const address = await getUserEthAccountIfAvailable()
+
         if (window['ethereum']) {
-          await removeSessionIfNotValid()
           window['ethereum'].autoRefreshOnNetworkChange = false
         }
 
-        const background = processLoginBackground()
+        const background = processLoginBackground(address)
         background.then((result) => providerFuture.resolve(result)).catch((e) => providerFuture.reject(e))
 
         const button = document.getElementById('eth-login-confirm-button')
@@ -163,20 +163,6 @@ export function awaitWeb3Approval(): Promise<void> {
 }
 
 /**
- * Remove local session if persisted account does not match with one or ephemeral key is expired
- */
-async function removeSessionIfNotValid() {
-  const account = await getUserAccount()
-
-  // TODO - look for user id matching account - moliva - 18/02/2020
-  let userData = getStoredSession()
-
-  if ((userData && userData.userId !== account) || isSessionExpired(userData)) {
-    removeStoredSession()
-  }
-}
-
-/**
  * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
  */
 function registerProviderChanges() {
@@ -215,5 +201,11 @@ export async function getUserAccount(): Promise<string | undefined> {
     return accounts[0].toJSON().toLocaleLowerCase()
   } catch (error) {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
+  }
+}
+
+export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
+  if (Eth.fromCurrentProvider()) {
+    return await getUserAccount()
   }
 }

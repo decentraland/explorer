@@ -30,7 +30,7 @@ import { blockPlayer, mutePlayer, unblockPlayer, unmutePlayer } from 'shared/soc
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 import { logout } from 'shared/session/actions'
-import { getIdentity, getStoredSession, hasWallet } from 'shared/session'
+import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
@@ -40,6 +40,7 @@ import { reportHotScenes } from 'shared/social/hotScenes'
 import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
+import { getCurrentUserId } from 'shared/session/selectors'
 
 declare const DCL: any
 
@@ -256,10 +257,10 @@ export class BrowserInterface {
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
-    const session = getStoredSession()
-    if (session) {
+    const userId = getCurrentUserId(globalThis.globalStore.getState())
+    if (userId) {
       if (hasWallet()) {
-        window.analytics.identify(session.userId, { email: data.userEmail })
+        window.analytics.identify(userId, { email: data.userEmail })
       } else {
         window.analytics.identify({ email: data.userEmail })
       }

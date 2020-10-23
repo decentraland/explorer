@@ -12,12 +12,43 @@ import { StoredSession } from './types'
 
 declare const globalThis: StoreContainer
 
-// Please note that dcl-profile in local storage does NOT contain profile information anymore. It just contains identity information
-// Eventually we could migrate this variable to a new one, if we find this too confusing.
-export const getStoredSession: () => StoredSession = () => getFromLocalStorage('dcl-profile') || {}
+const SESSION_KEY_PREFIX = 'dcl-session'
+const LAST_SESSION_KEY = 'dcl-last-session-id'
 
-export const setStoredSession: (session: StoredSession) => void = (session) =>
-  saveToLocalStorage('dcl-profile', session)
+function sessionKey(userId: string) {
+  return `${SESSION_KEY_PREFIX}-${userId}`
+}
+
+export const getLastSession: () => StoredSession | null = () => {
+  const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
+  if (lastSessionId) {
+    return getStoredSession(lastSessionId)
+  } else {
+    return getFromLocalStorage('dcl-profile')
+  }
+}
+
+export const getStoredSession: (userId: string) => StoredSession | null = (userId) => {
+  const existingSession: StoredSession | null = getFromLocalStorage(sessionKey(userId))
+
+  if (existingSession) {
+    return existingSession
+  } else {
+    // If not existing session was found, we check the old session storage
+    const oldSession: StoredSession | null = getFromLocalStorage('dcl-profile') || {}
+    if (oldSession && oldSession.userId === userId) {
+      setStoredSession(oldSession)
+      return oldSession
+    }
+  }
+
+  return null
+}
+
+export const setStoredSession: (session: StoredSession) => void = (session) => {
+  saveToLocalStorage(LAST_SESSION_KEY, session.userId)
+  saveToLocalStorage(sessionKey(session.userId), session)
+}
 
 export const removeStoredSession = () => removeFromLocalStorage('dcl-profile')
 export class Session {

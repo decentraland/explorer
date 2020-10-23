@@ -9,7 +9,13 @@ import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetw
 
 import { createLogger } from 'shared/logger'
 import { referUser, initializeReferral } from 'shared/referral'
-import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
+import {
+  awaitWeb3Approval,
+  isSessionExpired,
+  providerFuture,
+  loginCompleted,
+  getUserEthAccountIfAvailable
+} from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -26,7 +32,7 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
-import { getStoredSession, Session, setStoredSession } from './index'
+import { getLastSession, getStoredSession, Session, setStoredSession } from './index'
 
 const logger = createLogger('session: ')
 
@@ -86,7 +92,8 @@ function* login() {
     }
 
     try {
-      const userData = getStoredSession()
+      const address = yield getUserEthAccountIfAvailable()
+      const userData = address ? getStoredSession(address) : getLastSession()
 
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
@@ -97,8 +104,8 @@ function* login() {
 
         saveSession(userId, identity)
       } else {
-        identity = userData.identity
-        userId = userData.identity.address
+        identity = userData!.identity
+        userId = userData!.identity.address
 
         saveSession(userId, identity)
       }

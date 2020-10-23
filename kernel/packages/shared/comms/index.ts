@@ -719,7 +719,7 @@ function subscribeToRealmChange(store: Store<RootState>) {
 
 export async function connect(userId: string) {
   try {
-    const user = getStoredSession()
+    const user = getStoredSession(userId)
     if (!user) {
       return undefined
     }

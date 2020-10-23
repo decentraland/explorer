@@ -1,10 +1,8 @@
 import * as sinon from 'sinon'
-import * as peers from '../../packages/shared/comms/peers'
 import { browserInterface } from '../../packages/unity-interface/BrowserInterface'
 import { StoreContainer } from '../../packages/shared/store/rootTypes'
 import * as actions from '../../packages/shared/profiles/actions'
 import { buildStore } from '../../packages/shared/store/store'
-import { Profile } from '../../packages/shared/types'
 
 declare const globalThis: StoreContainer
 
