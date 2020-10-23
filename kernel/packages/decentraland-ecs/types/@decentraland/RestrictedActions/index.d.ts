@@ -20,5 +20,13 @@ declare module '@decentraland/RestrictedActions' {
     predefined: PredefinedEmote
   }
 
-  export type PredefinedEmote = 'WAVE' | 'FIST_PUMP' | 'ROBOT' | 'RAISE_HAND' | 'CLAP' | 'MONEY' | 'KISS'
+  export const enum PredefinedEmote {
+    WAVE = 'wave',
+    FIST_PUMP = 'fistpump',
+    ROBOT = 'robot',
+    RAISE_HAND = 'raiseHand',
+    CLAP = 'clap',
+    MONEY = 'money',
+    KISS = 'kiss',
+  }
 }

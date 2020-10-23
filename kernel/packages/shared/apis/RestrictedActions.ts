@@ -56,20 +56,7 @@ export class RestrictedActions extends ExposableAPI {
       return
     }
 
-    unityInterface.TriggerSelfUserExpression(this.translatePredefinedEmoteToId(emote.predefined))
-  }
-
-  private translatePredefinedEmoteToId(emoteName: string): string {
-    switch (emoteName) {
-      case 'WAVE': return 'wave'
-      case 'FIST_PUMP': return 'fistpump'
-      case 'ROBOT': return 'robot'
-      case 'RAISE_HAND': return 'raiseHand'
-      case 'CLAP': return 'clap'
-      case 'MONEY': return 'money'
-      case 'KISS': return 'kiss'
-    }
-    throw new Error(`Unrecognized emote name ${emoteName}`)
+    unityInterface.TriggerSelfUserExpression(emote.predefined)
   }
 
   private getSceneData() {
