@@ -87,7 +87,7 @@ public class CameraController : MonoBehaviour
         CommonScriptableObjects.cameraMode.Set(newMode);
         currentCameraState.OnSelect();
 
-        onSetCameraMode.Invoke(newMode);
+        onSetCameraMode?.Invoke(newMode);
     }
 
     private void PrecisionChanged(Vector3 newValue, Vector3 oldValue)
