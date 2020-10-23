@@ -51,7 +51,7 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         thumbnail.sprite = null;
         warningPanel.SetActive(false);
 
-        //view = GetComponentInParent<AvatarEditorHUDView>();
+        view = GetComponentInParent<AvatarEditorHUDView>();
     }
 
     protected override void OnClick()

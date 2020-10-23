@@ -47,13 +47,13 @@ namespace DCL.Tutorial
             {
                 tutorialController.ShowTeacher3DModel(show3DTeacherAtStart);
 
-                //if (tutorialController.teacher != null)
-                //{
-                //    if (tutorialController.currentStepIndex > 0)
-                //        tutorialController.teacher.PlaySpeakSound();
-                //    else
-                //        tutorialController.teacher.PlayHappySound(1f);
-                //}
+                if (tutorialController.teacher != null)
+                {
+                    if (tutorialController.currentStepIndex > 0)
+                        tutorialController.teacher.PlaySpeakSound();
+                    else
+                        tutorialController.teacher.PlayHappySound(1f);
+                }
 
                 if (show3DTeacherAtStart && teacherPositionRef != null)
                 {
