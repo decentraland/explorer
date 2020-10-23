@@ -19,6 +19,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     private UserProfile profile;
     private bool isMuted = false;
+    private bool isRecording = false;
     private Coroutine setUserRecordingRoutine = null;
 
     private void Start()
@@ -50,9 +51,10 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     public void SetRecording(bool isRecording)
     {
-        if (isMuted)
+        if (this.isRecording == isRecording)
             return;
 
+        this.isRecording = isRecording;
         if (setUserRecordingRoutine != null)
         {
             StopCoroutine(setUserRecordingRoutine);
