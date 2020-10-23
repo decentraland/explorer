@@ -30,7 +30,8 @@ export function metaReducer(state?: MetaState, action?: AnyAction): MetaState {
             ...(state.config.world || {}),
             messageOfTheDay: {
               ...(action.payload as MessageOfTheDayConfig)
-            }
+            },
+            messageOfTheDayInit: true
           } as WorldConfig
         }
       }

@@ -53,7 +53,7 @@ function* fetchMessageOfTheDay() {
       .then((response) => response.json())
       .then((data) => {
         // console.log('result-day-data: ', data)
-        // return data[0]
+        // return data.length ? data[0] : undefined
         return {
           background_banner: 'http://dclcms.club/media/background-images/MOTDHeader.png',
           body:

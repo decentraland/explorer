@@ -26,7 +26,7 @@ import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
-import { ensureMetaConfigurationInitialized } from 'shared/meta'
+import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { WorldConfig } from 'shared/meta/types'
 
 const container = document.getElementById('gameContainer')
@@ -121,14 +121,12 @@ initializeUnity(container)
     }
 
     if (!NO_MOTD) {
-      const unsubscribe = globalThis.globalStore.subscribe(() => {
-        const world = globalThis.globalStore.getState().meta.config.world
-        if (world && world.messageOfTheDay) {
-          unsubscribe()
-          console.log('result-NOT_MOTD', world.messageOfTheDay)
-          i.ConfigureHUDElement(HUDElementID.MESSAGE_OF_THE_DAY, { active: true, visible: true }, world.messageOfTheDay)
-        }
-      })
+      const messageOfTheDay = await waitForMessageOfTheDay()
+      i.ConfigureHUDElement(
+        HUDElementID.MESSAGE_OF_THE_DAY,
+        { active: !!messageOfTheDay, visible: true },
+        messageOfTheDay
+      )
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))

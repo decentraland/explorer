@@ -23,6 +23,7 @@ export type WorldConfig = {
   pois: Vector2Component[]
   renderProfile?: RenderProfile
   messageOfTheDay?: MessageOfTheDayConfig
+  messageOfTheDayInit?: boolean
 }
 
 export type MessageOfTheDayConfig = {
