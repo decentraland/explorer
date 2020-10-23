@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7371158987296751489}
   - component: {fileID: 6565824077440176744}
   - component: {fileID: 3136244312086885203}
-  - component: {fileID: 7928267792802248356}
   - component: {fileID: 8522172340332194820}
   m_Layer: 5
   m_Name: Mic
@@ -78,25 +77,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!95 &7928267792802248356
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 884244400445963465}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: c2759699cbf0f4199bb4d58d31bbbfb3, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &8522172340332194820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,8 +177,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   userName: {fileID: 5153465745378546742}
   avatarPreview: {fileID: 8957530936927201954}
-  micAnimator: {fileID: 7928267792802248356}
   soundButton: {fileID: 8522172340332194820}
+  muteGO: {fileID: 5882466693401708938}
+  recordingGO: {fileID: 4132515277196897225}
 --- !u!222 &6809395994633376136
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -440,6 +421,7 @@ GameObject:
   - component: {fileID: 6829384385532288453}
   - component: {fileID: 5388692119954353181}
   - component: {fileID: 6177516770726261698}
+  - component: {fileID: 3953242770604871920}
   m_Layer: 5
   m_Name: ImageTalking
   m_TagString: Untagged
@@ -503,6 +485,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!95 &3953242770604871920
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4132515277196897225}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c2759699cbf0f4199bb4d58d31bbbfb3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &5882466693401708938
 GameObject:
   m_ObjectHideFlags: 0

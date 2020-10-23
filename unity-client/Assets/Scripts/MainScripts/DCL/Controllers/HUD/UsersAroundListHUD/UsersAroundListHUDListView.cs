@@ -128,10 +128,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     {
         userElementDictionary.Clear();
         availableElements.Clear();
-        if (gameObject)
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
 
     void OnMuteUser(string userId, bool mute)

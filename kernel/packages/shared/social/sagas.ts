@@ -26,7 +26,6 @@ export function* socialSaga(): any {
 
 function* saveMutedPlayer(action: MutePlayers) {
   yield* addPlayerToProfileSet(action.payload.playersId, 'muted')
-  unityInterface.SetUsersMuted(action.payload.playersId, true)
 }
 
 function* saveBlockedPlayer(action: BlockPlayers) {
@@ -35,7 +34,6 @@ function* saveBlockedPlayer(action: BlockPlayers) {
 
 function* saveUnmutedPlayer(action: UnmutePlayers) {
   yield* removePlayerFromProfileSet(action.payload.playersId, 'muted')
-  unityInterface.SetUsersMuted(action.payload.playersId, false)
 }
 
 function* saveUnblockedPlayer(action: UnblockPlayers) {
@@ -46,12 +44,17 @@ function* addPlayerToProfileSet(playersId: string[], setKey: ProfileSetKey) {
   const profile = yield getCurrentProfile()
 
   if (profile) {
+    let idsToAdd = playersId
     let set: string[] = playersId
     if (profile[setKey]) {
-      set = [...profile[setKey], playersId.filter((id) => !(profile[setKey].indexOf(id) >= 0))]
+      idsToAdd = playersId.filter((id) => !(profile[setKey].indexOf(id) >= 0))
+      set = [...profile[setKey], idsToAdd]
     }
 
     yield put(saveProfileRequest({ [setKey]: set }))
+    if (setKey === 'muted') {
+      unityInterface.SetUsersMuted(idsToAdd, true)
+    }
   }
 }
 
@@ -61,6 +64,9 @@ function* removePlayerFromProfileSet(playersId: string[], setKey: ProfileSetKey)
   if (profile) {
     const set = profile[setKey] ? profile[setKey]!.filter((id) => !playersId.includes(id)) : []
     yield put(saveProfileRequest({ ...profile, [setKey]: set }))
+    if (setKey === 'muted') {
+      unityInterface.SetUsersMuted(playersId, false)
+    }
   }
 }
 

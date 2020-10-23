@@ -371,7 +371,11 @@ export class UnityInterface {
   }
 
   public SetUserTalking(userId: string, talking: boolean) {
-    this.gameInstance.SendMessage('HUDController', 'SetUserTalking', JSON.stringify({ userId: userId, talking: talking }))
+    this.gameInstance.SendMessage(
+      'HUDController',
+      'SetUserTalking',
+      JSON.stringify({ userId: userId, talking: talking })
+    )
   }
 
   public SetUsersMuted(usersId: string[], muted: boolean) {

@@ -1,15 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using DCL.Interface;
 using UnityEngine;
 
 public class UsersAroundListHUDController : IHUD
 {
+    const float MUTE_STATUS_UPDATE_INTERVAL = 1;
+
     internal IUsersAroundListHUDButtonView usersButtonView;
     internal IUsersAroundListHUDListView usersListView;
 
     private bool isVisible = false;
     private readonly HashSet<string> trackedUsersHashSet = new HashSet<string>();
     private UserProfile profile => UserProfile.GetOwnUserProfile();
+
+    private readonly List<string> usersToMute = new List<string>();
+    private readonly List<string> usersToUnmute = new List<string>();
+    private bool isMuteAll = false;
+    private Coroutine updateMuteStatusRoutine = null;
 
     public UsersAroundListHUDController()
     {
@@ -26,9 +34,18 @@ public class UsersAroundListHUDController : IHUD
 
     public void Dispose()
     {
+        ReportMuteStatuses();
+
+        if (updateMuteStatusRoutine != null)
+        {
+            CoroutineStarter.Stop(updateMuteStatusRoutine);
+        }
+
         MinimapMetadata.GetMetadata().OnUserInfoUpdated -= MapRenderer_OnUserInfoUpdated;
         MinimapMetadata.GetMetadata().OnUserInfoRemoved -= MapRenderer_OnUserInfoRemoved;
+
         usersListView?.Dispose();
+
         if (usersButtonView != null)
         {
             usersButtonView.OnClick -= ToggleVisibility;
@@ -63,11 +80,10 @@ public class UsersAroundListHUDController : IHUD
     void Initialize(IUsersAroundListHUDListView view)
     {
         usersListView = view;
-        usersListView.OnRequestMuteUser += MuteUser;
-        usersListView.OnRequestMuteGlobal += ((mute) =>
-        {
-            WebInterface.SetGlobalVoiceChatMute(mute);
-        });
+
+        usersListView.OnRequestMuteUser += OnMuteUser;
+        usersListView.OnRequestMuteGlobal += OnMuteAll;
+
         MinimapMetadata.GetMetadata().OnUserInfoUpdated += MapRenderer_OnUserInfoUpdated;
         MinimapMetadata.GetMetadata().OnUserInfoRemoved += MapRenderer_OnUserInfoRemoved;
     }
@@ -81,6 +97,11 @@ public class UsersAroundListHUDController : IHUD
             trackedUsersHashSet.Add(userInfo.userId);
             bool isMuted = profile.muted.Contains(userInfo.userId);
             usersListView.SetUserMuted(userInfo.userId, isMuted);
+
+            if (isMuteAll && !isMuted)
+            {
+                OnMuteUser(userInfo.userId, true);
+            }
         }
 
         usersButtonView?.SetUsersCount(trackedUsersHashSet.Count);
@@ -112,8 +133,61 @@ public class UsersAroundListHUDController : IHUD
         SetVisibility(setVisible);
     }
 
-    void MuteUser(string userId, bool mute)
+    void OnMuteUser(string userId, bool mute)
     {
-        WebInterface.SetMuteUsers(new string[] { userId }, mute);
+        var list = mute ? usersToMute : usersToUnmute;
+        list.Add(userId);
+
+        if (updateMuteStatusRoutine == null)
+        {
+            updateMuteStatusRoutine = CoroutineStarter.Start(MuteStateUpdateRoutine());
+        }
+    }
+
+    void OnMuteUsers(IEnumerable<string> usersId, bool mute)
+    {
+        using (var iterator = usersId.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                OnMuteUser(iterator.Current, mute);
+            }
+        }
+    }
+
+    void OnMuteAll(bool mute)
+    {
+        isMuteAll = mute;
+
+        if (mute)
+        {
+            usersToUnmute.Clear();
+        }
+        else
+        {
+            usersToMute.Clear();
+        }
+        OnMuteUsers(trackedUsersHashSet, mute);
+    }
+
+    void ReportMuteStatuses()
+    {
+        if (usersToUnmute.Count > 0)
+        {
+            WebInterface.SetMuteUsers(usersToUnmute.ToArray(), false);
+        }
+        if (usersToMute.Count > 0)
+        {
+            WebInterface.SetMuteUsers(usersToMute.ToArray(), true);
+        }
+        usersToUnmute.Clear();
+        usersToMute.Clear();
+    }
+
+    IEnumerator MuteStateUpdateRoutine()
+    {
+        yield return WaitForSecondsCache.Get(MUTE_STATUS_UPDATE_INTERVAL);
+        ReportMuteStatuses();
+        updateMuteStatusRoutine = null;
     }
 }

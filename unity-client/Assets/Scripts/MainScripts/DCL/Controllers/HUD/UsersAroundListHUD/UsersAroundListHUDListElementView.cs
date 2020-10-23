@@ -13,12 +13,9 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     [SerializeField] internal TextMeshProUGUI userName;
     [SerializeField] internal Image avatarPreview;
-    [SerializeField] internal Animator micAnimator;
     [SerializeField] internal Button soundButton;
-
-    private static readonly int micAnimationIdle = Animator.StringToHash("Idle");
-    private static readonly int micAnimationRecording = Animator.StringToHash("Recording");
-    private static readonly int micAnimationMute = Animator.StringToHash("Mute");
+    [SerializeField] internal GameObject muteGO;
+    [SerializeField] internal GameObject recordingGO;
 
     private UserProfile profile;
     private bool isMuted = false;
@@ -47,13 +44,8 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     public void SetMuted(bool isMuted)
     {
-        if (this.isMuted == isMuted)
-        {
-            return;
-        }
-
         this.isMuted = isMuted;
-        micAnimator.SetTrigger(isMuted ? micAnimationMute : micAnimationIdle);
+        muteGO.SetActive(isMuted);
     }
 
     public void SetRecording(bool isRecording)
@@ -89,7 +81,8 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     public void OnPoolGet()
     {
-        micAnimator.SetTrigger(micAnimationIdle);
+        muteGO.SetActive(false);
+        recordingGO.SetActive(false);
         avatarPreview.sprite = null;
         userName.text = string.Empty;
         gameObject.SetActive(true);
@@ -113,11 +106,10 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     {
         if (isRecording)
         {
-            micAnimator.SetTrigger(micAnimationRecording);
+            recordingGO.SetActive(true);
             yield break;
         }
         yield return WaitForSecondsCache.Get(USER_NOT_RECORDING_THROTTLING);
-        micAnimator.ResetTrigger(micAnimationRecording);
-        micAnimator.SetTrigger(micAnimationIdle);
+        recordingGO.SetActive(false);
     }
 }

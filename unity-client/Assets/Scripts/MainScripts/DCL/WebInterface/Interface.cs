@@ -1042,11 +1042,5 @@ namespace DCL.Interface
             muteUserEvent.mute = mute;
             SendMessage("SetMuteUsers", muteUserEvent);
         }
-
-        public static void SetGlobalVoiceChatMute(bool mute)
-        {
-            muteUserEvent.mute = mute;
-            SendMessage("SetGlobalVoiceChatMute", muteUserEvent);
-        }
     }
 }
