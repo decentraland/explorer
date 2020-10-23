@@ -20,15 +20,17 @@ describe('RestrictedActions tests', () => {
 
   describe('TriggerEmote tests', () => {
     it('should trigger emote', async () => {
+      const emote = 'emote'
+
       mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
       sinon
         .mock(unityInterface)
         .expects('TriggerSelfUserExpression')
         .once()
-        .withExactArgs('fistpump')
+        .withExactArgs(emote)
 
       const module = new RestrictedActions(options)
-      await module.triggerEmote({ predefined: 'FIST_PUMP' })
+      await module.triggerEmote({ predefined: emote })
       sinon.verify()
     })
 
@@ -43,7 +45,7 @@ describe('RestrictedActions tests', () => {
         .withExactArgs('Permission "ALLOW_TO_TRIGGER_AVATAR_EMOTE" is required')
 
       const module = new RestrictedActions(options)
-      await module.triggerEmote({ predefined: 'FIST_PUMP' })
+      await module.triggerEmote({ predefined: 'emote' })
       sinon.verify()
     })
   })
