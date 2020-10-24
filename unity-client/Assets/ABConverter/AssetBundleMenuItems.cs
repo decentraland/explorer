@@ -70,17 +70,17 @@ namespace DCL
             mappings.AddRange(es.EP_11);
             mappings.AddRange(es.EP_12);
 
-            var core = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
-
             string emptyScenesResourcesPath = Application.dataPath;
             emptyScenesResourcesPath += $"/../../kernel/static/loader/{folderName}";
 
-            customBaseUrl = "file://" + emptyScenesResourcesPath;
+            string customBaseUrl = "file://" + emptyScenesResourcesPath;
 
-            var settings = new ABConverter.Client.Settings(ApiTLD.ZONE);
+            var settings = new ABConverter.Client.Settings(ApiTLD.NONE);
             settings.skipAlreadyBuiltBundles = true;
             settings.deleteDownloadPathAfterFinished = false;
+            settings.baseUrl = customBaseUrl + "/contents/";
 
+            var core = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             core.Convert(mappings.ToArray());
         }
 
