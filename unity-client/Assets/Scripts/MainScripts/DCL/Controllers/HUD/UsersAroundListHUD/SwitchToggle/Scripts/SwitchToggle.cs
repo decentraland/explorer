@@ -14,6 +14,12 @@ public class SwitchToggle : Toggle
         this.onValueChanged.AddListener(OnValueChanged);
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        OnValueChanged(this.isOn);
+    }
+
     private void OnValueChanged(bool value)
     {
         switchAnimator.SetBool(animatorOnBoolean, value);
