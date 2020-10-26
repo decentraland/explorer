@@ -17,6 +17,18 @@ namespace DCL.Tutorial
             }
         }
 
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+
+            if (tutorialController != null &&
+                tutorialController.hudController != null &&
+                tutorialController.hudController.goToGenesisPlazaHud != null)
+            {
+                tutorialController.hudController.goToGenesisPlazaHud.OnOpen -= GoToGenesisPlazaHud_OnOpen;
+            }
+        }
+
         protected override void SetTooltipPosition()
         {
             base.SetTooltipPosition();
