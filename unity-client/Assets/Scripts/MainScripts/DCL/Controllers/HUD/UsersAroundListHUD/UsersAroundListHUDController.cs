@@ -32,6 +32,9 @@ public class UsersAroundListHUDController : IHUD
         Initialize(usersListView);
     }
 
+    /// <summary>
+    /// Dispose HUD controller
+    /// </summary>
     public void Dispose()
     {
         ReportMuteStatuses();
@@ -52,18 +55,31 @@ public class UsersAroundListHUDController : IHUD
         }
     }
 
+    /// <summary>
+    /// Set HUD's visibility
+    /// </summary>
+    /// <param name="visible"></param>
     public void SetVisibility(bool visible)
     {
         isVisible = visible;
         usersListView.SetVisibility(visible);
     }
 
+    /// <summary>
+    /// Set button to toggle HUD visibility and display users count
+    /// </summary>
+    /// <param name="view">Button view</param>
     public void SetButtonView(IUsersAroundListHUDButtonView view)
     {
         usersButtonView = view;
         usersButtonView.OnClick += ToggleVisibility;
     }
 
+    /// <summary>
+    /// Set mute status for users' id
+    /// </summary>
+    /// <param name="usersId">Array of user ids</param>
+    /// <param name="isMuted">Set if users should be mute or unmute</param>
     public void SetUsersMuted(string[] usersId, bool isMuted)
     {
         for (int i = 0; i < usersId.Length; i++)
@@ -72,6 +88,11 @@ public class UsersAroundListHUDController : IHUD
         }
     }
 
+    /// <summary>
+    /// Set user status as "talking"
+    /// </summary>
+    /// <param name="userId">User's id</param>
+    /// <param name="isRecording">Set user status as "talking" or "not talking"</param>
     public void SetUserRecording(string userId, bool isRecording)
     {
         usersListView.SetUserRecording(userId, isRecording);
