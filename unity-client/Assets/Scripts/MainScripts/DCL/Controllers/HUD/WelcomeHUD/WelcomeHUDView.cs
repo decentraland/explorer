@@ -52,7 +52,7 @@ public class WelcomeHUDView : MonoBehaviour, IWelcomeHUDView
 
         SetupButtons(config.buttons, OnConfirm);
         closeButton.onPointerDown -= OnCloseButtonPressed;
-        OnCloseButtonPressed = OnClose;
+        OnCloseButtonPressed = () => OnClose?.Invoke();
         closeButton.onPointerDown += OnCloseButtonPressed;
 
         CleanUpPromise();
