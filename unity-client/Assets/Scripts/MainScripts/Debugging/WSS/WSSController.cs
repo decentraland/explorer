@@ -430,6 +430,9 @@ namespace DCL
                             case "SetPlayerTalking":
                                 HUDController.i.SetPlayerTalking(msg.payload);
                                 break;
+                            case "SetRenderProfile":
+                                RenderProfileBridge.i.SetRenderProfile(msg.payload);
+                                break;
                             case "SetUserTalking":
                                 HUDController.i.SetUserTalking(msg.payload);
                                 break;
