@@ -31,7 +31,10 @@ import {
   ConnectionEstablishmentError,
   IdTakenError,
   UnknownCommsModeError,
-  VoiceFragment
+  VoiceFragment,
+  ProfileType,
+  ProfileRequest,
+  ProfileResponse
 } from './interface/types'
 import {
   CommunicationArea,
@@ -85,6 +88,7 @@ import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCom
 import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
 import { isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
+import future, { IFuture } from 'fp-future'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -134,6 +138,8 @@ export class PeerTrackingInfo {
     version: null
   }
 
+  profileType?: ProfileType
+
   public loadProfileIfNecessary(profileVersion: number) {
     if (this.identity && profileVersion !== this.profilePromise.version) {
       if (!this.userInfo || !this.userInfo.userId) {
@@ -143,7 +149,7 @@ export class PeerTrackingInfo {
         }
       }
       this.profilePromise = {
-        promise: ProfileAsPromise(this.identity, profileVersion)
+        promise: ProfileAsPromise(this.identity, profileVersion, this.profileType)
           .then((profile) => {
             const forRenderer = profileToRendererFormat(profile)
             this.lastProfileUpdate = new Date().getTime()
@@ -299,6 +305,37 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
   scenesSubscribedToCommsEvents.delete(controller)
 }
 
+const pendingProfileRequests: Record<string, IFuture<Profile>[]> = {}
+
+export async function requestLocalProfileToPeers(userId: string, version?: number): Promise<Profile | null> {
+  if (context && context.worldInstanceConnection && context.currentPosition) {
+    if (!pendingProfileRequests[userId]) {
+      pendingProfileRequests[userId] = []
+    }
+
+    const thisFuture = future<Profile>()
+
+    pendingProfileRequests[userId].push(thisFuture)
+
+    await context.worldInstanceConnection.sendProfileRequest(context.currentPosition, userId, version)
+
+    setTimeout(function () {
+      if (thisFuture.isPending) {
+        thisFuture.reject(new Error('Profile request timed out for comms'))
+        const pendingRequests = pendingProfileRequests[userId]
+        if (pendingRequests && pendingRequests.includes(thisFuture)) {
+          pendingRequests.splice(pendingRequests.indexOf(thisFuture), 1)
+        }
+      }
+    }, 10000)
+
+    return thisFuture
+  } else {
+    return Promise.resolve(null)
+    // TODO: Maybe accumulate request to send after context is initialized?
+  }
+}
+
 async function changeConnectionRealm(realm: Realm, url: string) {
   defaultLogger.log('Changing connection realm to ', JSON.stringify(realm), { url })
   if (context && context.worldInstanceConnection) {
@@ -416,6 +453,27 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
   }
 }
 
+function processProfileRequest(context: Context, fromAlias: string, message: Package<ProfileRequest>) {
+  const myAddress = getIdentity()?.address
+
+  if (message.data.userId !== myAddress) return
+
+  const profile = getCurrentUserProfile(store.getState())
+
+  if (context.currentPosition && profile) {
+    context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, profile)
+  }
+}
+
+function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
+  const profile = message.data.profile
+
+  if (pendingProfileRequests[profile.userId]) {
+    pendingProfileRequests[profile.userId].forEach((it) => it.resolve(profile))
+    delete pendingProfileRequests[profile.userId]
+  }
+}
+
 function isBlocked(profile: Profile, userId: string): boolean {
   return !!profile.blocked && profile.blocked.includes(userId)
 }
@@ -444,6 +502,7 @@ export function processProfileMessage(
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
     peerTrackingInfo.identity = peerIdentity
     peerTrackingInfo.lastUpdate = Date.now()
+    peerTrackingInfo.profileType = message.data.type
 
     if (ensureTrackingUniqueAndLatest(context, fromAlias, peerIdentity, msgTimestamp)) {
       const profileVersion = message.data.version
@@ -935,6 +994,12 @@ async function doStartCommunications(context: Context) {
     connection.voiceHandler = (alias: string, data: Package<VoiceFragment>) => {
       processVoiceFragment(context, alias, data)
     }
+    connection.profileRequestHandler = (alias: string, data: Package<ProfileRequest>) => {
+      processProfileRequest(context, alias, data)
+    }
+    connection.profileResponseHandler = (alias: string, data: Package<ProfileResponse>) => {
+      processProfileResponse(context, alias, data)
+    }
 
     if (commConfigurations.debug) {
       connection.stats = context.stats
@@ -1140,7 +1205,8 @@ globalThis.bots = {
       time: Date.now(),
       data: {
         version: '1',
-        user: id
+        user: id,
+        type: ProfileType.DEPLOYED
       }
     })
     const position = { ...lastPlayerPosition }

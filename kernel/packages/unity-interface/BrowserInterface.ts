@@ -21,7 +21,6 @@ import { positionObservable } from 'shared/world/positionThings'
 import { worldRunningObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
@@ -41,6 +40,7 @@ import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { getCurrentUserId } from 'shared/session/selectors'
+import { ensureFriendProfile } from 'shared/friends/sagas'
 
 declare const DCL: any
 
@@ -297,7 +297,7 @@ export class BrowserInterface {
     // TODO - fix this hack: search should come from another message and method should only exec correct updates (userId, action) - moliva - 01/05/2020
     let found = false
     if (action === FriendshipAction.REQUESTED_TO) {
-      await ProfileAsPromise(userId) // ensure profile
+      await ensureFriendProfile(userId)
       found = hasConnectedWeb3(globalThis.globalStore.getState(), userId)
     }
 

@@ -50,7 +50,7 @@ import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
-import { updateCommsUser } from 'shared/comms'
+import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
 import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
@@ -58,6 +58,7 @@ import { getExclusiveCatalog } from 'shared/catalogs/selectors'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { Wearable } from 'shared/catalogs/types'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
+import { ProfileType } from 'shared/comms/interface/types'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -107,8 +108,9 @@ function* initialProfileLoad() {
   yield call(ensureRealmInitialized)
 
   // initialize profile
-  const userId = yield select(getCurrentUserId)
-  let profile = yield ProfileAsPromise(userId)
+  const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+  const userId = identity.address
+  let profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
 
   if (!PREVIEW) {
     let profileDirty: boolean = false
@@ -175,12 +177,19 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
-      const serverUrl = yield select(getProfileDownloadServer)
-      const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+      if (action.payload.profileType === ProfileType.LOCAL) {
+        const peerProfile: Profile = yield requestLocalProfileToPeers(action.payload.userId)
+        if (peerProfile) {
+          profile = ensureServerFormat(peerProfile, peerProfile.version)
+        }
+      } else {
+        const serverUrl = yield select(getProfileDownloadServer)
+        const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
 
-      if (profiles.avatars.length !== 0) {
-        profile = profiles.avatars[0]
-        hasConnectedWeb3 = true
+        if (profiles.avatars.length !== 0) {
+          profile = profiles.avatars[0]
+          hasConnectedWeb3 = true
+        }
       }
     } catch (error) {
       defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
@@ -415,10 +424,6 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   } else if (value.includes('://')) {
     // value is already a URL => use existing hash
     hash = value.split('/').pop()!
-
-    // We need the content file for the deployment
-    const blob = await fetch(value).then((r) => r.blob())
-    contentFile = await makeContentFile(name, blob)
   } else {
     // value is coming in base 64 => convert to blob & upload content
     const blob = base64ToBlob(value)
@@ -460,17 +465,20 @@ export async function modifyAvatar(params: {
 
   const metadata = buildServerMetadata({ ...profile, avatar: newAvatar }, currentVersion + 1)
 
-  return deploy(url, identity, metadata, files)
+  return deploy(url, identity, metadata, files, content)
 }
 
-async function deploy(url: string, identity: ExplorerIdentity, metadata: any, contentFiles: Map<string, Buffer>) {
+async function deploy(
+  url: string,
+  identity: ExplorerIdentity,
+  metadata: any,
+  contentFiles: Map<string, Buffer>,
+  contentHashes: Map<string, string>
+) {
   // Build entity and group all files
-  const preparationData = await DeploymentBuilder.buildEntity(
-    EntityType.PROFILE,
-    [identity.address],
-    contentFiles,
-    metadata
-  )
+  const preparationData = await (contentFiles.size
+    ? DeploymentBuilder.buildEntity(EntityType.PROFILE, [identity.address], contentFiles, metadata)
+    : DeploymentBuilder.buildEntityWithoutNewFiles(EntityType.PROFILE, [identity.address], contentHashes, metadata))
   // sign the entity id fetchMetaContentServer
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the client
@@ -495,4 +503,8 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
       reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
     }
   })
+}
+
+export function getProfileType(identity?: ExplorerIdentity): ProfileType {
+  return identity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
 }

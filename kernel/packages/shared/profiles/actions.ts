@@ -2,6 +2,7 @@ import { action } from 'typesafe-actions'
 import { Profile } from './types'
 import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
 import { WearableId } from 'shared/catalogs/types'
+import { ProfileType } from 'shared/comms/interface/types'
 
 // Profile fetching
 
@@ -10,7 +11,8 @@ export const PROFILE_SUCCESS = '[Success] Profile fetch'
 export const PROFILE_FAILURE = '[Failure] Profile fetch'
 export const PROFILE_RANDOM = '[?] Profile randomized'
 
-export const profileRequest = (userId: string) => action(PROFILE_REQUEST, { userId })
+export const profileRequest = (userId: string, profileType?: ProfileType) =>
+  action(PROFILE_REQUEST, { userId, profileType })
 export const profileSuccess = (userId: string, profile: Profile, hasConnectedWeb3: boolean = false) =>
   action(PROFILE_SUCCESS, { userId, profile, hasConnectedWeb3 })
 export const profileFailure = (userId: string, error: any) => action(PROFILE_FAILURE, { userId, error })

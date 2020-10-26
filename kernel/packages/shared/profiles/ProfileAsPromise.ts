@@ -3,10 +3,11 @@ import { Store } from 'redux'
 import { getProfile, getProfileStatusAndData } from './selectors'
 import { profileRequest } from './actions'
 import { Profile } from './types'
+import { ProfileType } from 'shared/comms/interface/types'
 
 declare const globalThis: StoreContainer
 
-export function ProfileAsPromise(userId: string, version?: number): Promise<Profile> {
+export function ProfileAsPromise(userId: string, version?: number, profileType?: ProfileType): Promise<Profile> {
   const store: Store<RootState> = globalThis.globalStore
 
   const existingProfile = getProfile(store.getState(), userId)
@@ -29,7 +30,7 @@ export function ProfileAsPromise(userId: string, version?: number): Promise<Prof
         return resolve(profile)
       }
     })
-    store.dispatch(profileRequest(userId))
+    store.dispatch(profileRequest(userId, profileType))
   })
 }
 

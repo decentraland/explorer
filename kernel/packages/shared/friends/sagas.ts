@@ -54,6 +54,7 @@ import {
 import { ensureWorldRunning } from 'shared/world/worldState'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { ProfileType } from 'shared/comms/interface/types'
 
 declare const globalThis: StoreContainer
 
@@ -219,7 +220,7 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
     globalThis.globalStore.dispatch(updateUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
-    await ProfileAsPromise(userId)
+    await ensureFriendProfile(userId)
 
     // add to friendRequests & update renderer
     globalThis.globalStore.dispatch(updateFriendship(action, userId, true))
@@ -247,6 +248,10 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
 
   initializeReceivedMessagesCleanUp()
   yield initializeStatusUpdateInterval(client)
+}
+
+export function ensureFriendProfile(userId: string) {
+  return ProfileAsPromise(userId, undefined, ProfileType.DEPLOYED) // Friends are always deployed ATM
 }
 
 function* initializeFriends(client: SocialAPI) {
@@ -308,7 +313,7 @@ function* initializeFriends(client: SocialAPI) {
 
   const profileIds = Object.values(socialInfo).map((socialData) => socialData.userId)
 
-  const profiles = yield Promise.all(profileIds.map((userId) => ProfileAsPromise(userId)))
+  const profiles = yield Promise.all(profileIds.map((userId) => ensureFriendProfile(userId)))
   DEBUG && logger.info(`profiles`, profiles)
 
   for (const userId of profileIds) {
@@ -627,7 +632,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     }
   } catch (e) {
     if (e instanceof UnknownUsersError) {
-      const profile = yield ProfileAsPromise(userId)
+      const profile = yield ensureFriendProfile(userId)
       const id = profile?.name ? profile.name : `with address '${userId}'`
       showErrorNotification(`User ${id} must log in at least once before befriending them`)
     }

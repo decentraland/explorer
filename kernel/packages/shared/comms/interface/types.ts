@@ -1,4 +1,5 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
+import { Profile } from 'shared/profiles/types'
 import { ExplorerIdentity } from 'shared/session/types'
 
 export enum AvatarMessageType {
@@ -111,7 +112,7 @@ export type PoseInformation = {
   v: Pose
 }
 
-export type PackageType = 'profile' | 'chat' | 'position' | 'voice'
+export type PackageType = 'profile' | 'chat' | 'position' | 'voice' | 'profileRequest' | 'profileResponse'
 
 export type Package<T> = {
   type: PackageType
@@ -119,9 +120,15 @@ export type Package<T> = {
   data: T
 }
 
+export enum ProfileType {
+  LOCAL,
+  DEPLOYED
+}
+
 export type ProfileVersion = {
   version: string
   user: string // TODO - to remove with new login flow - moliva - 22/12/2019
+  type: ProfileType
 }
 
 export type ChatMessage = {
@@ -131,6 +138,15 @@ export type ChatMessage = {
 
 export type VoiceFragment = {
   encoded: Uint8Array
+}
+
+export type ProfileRequest = {
+  userId: string
+  version?: string
+}
+
+export type ProfileResponse = {
+  profile: Profile
 }
 
 export type BusMessage = ChatMessage

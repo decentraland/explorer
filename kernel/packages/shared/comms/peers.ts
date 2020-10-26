@@ -3,6 +3,7 @@ import { UUID, PeerInformation, AvatarMessage, UserInformation, AvatarMessageTyp
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import defaultLogger from 'shared/logger'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { getProfileType } from 'shared/profiles/sagas'
 
 export const peerMap = new Map<UUID, PeerInformation>()
 export const avatarMessageObservable = new Observable<AvatarMessage>()
@@ -109,7 +110,7 @@ export function receiveUserData(uuid: string, data: Partial<UserInformation>) {
     if (profileChanged) {
       Object.assign(userData, data)
       ;(async () => {
-        const profile = await ProfileAsPromise(data.userId!, data.version)
+        const profile = await ProfileAsPromise(data.userId!, data.version, getProfileType(data.identity))
 
         if (profile) {
           avatarMessageObservable.notifyObservers({

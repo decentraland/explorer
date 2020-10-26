@@ -2,7 +2,7 @@ import { analizeColorPart, stripAlpha } from './analizeColorPart'
 import { isValidBodyShape } from './isValidBodyShape'
 import { Profile } from '../types'
 
-export function ensureServerFormat(profile: Profile, version: number): any {
+export function ensureServerFormat(profile: Profile, version: number) {
   const { avatar } = profile
   const eyes = stripAlpha(analizeColorPart(avatar, 'eyeColor', 'eyes'))
   const hair = stripAlpha(analizeColorPart(avatar, 'hairColor', 'hair'))
