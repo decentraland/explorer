@@ -13,6 +13,7 @@ import {
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
+  RenderProfile,
   BuilderConfiguration,
   Wearable
 } from 'shared/types'
@@ -135,6 +136,10 @@ export class UnityInterface {
 
   public LoadProfile(profile: ProfileForRenderer) {
     this.gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
+  }
+
+  public SetRenderProfile(id: RenderProfile) {
+    this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', JSON.stringify({ id: id }))
   }
 
   public CreateUIScene(data: { id: string; baseUrl: string }) {
