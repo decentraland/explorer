@@ -60,7 +60,6 @@ public class WelcomeHUDView : MonoBehaviour, IWelcomeHUDView
         {
             texturePromise = new AssetPromise_Texture(config.background_banner);
             texturePromise.OnSuccessEvent += OnTextureRetrieved;
-            texturePromise.OnFailEvent += OnTextureFailed;
         }
 
         AssetPromiseKeeper_Texture.i.Keep(texturePromise);
@@ -85,11 +84,6 @@ public class WelcomeHUDView : MonoBehaviour, IWelcomeHUDView
 
         if(useImageNativeSize)
             backgroundImage.SetNativeSize();
-    }
-
-    private void OnTextureFailed(Asset_Texture assetTexture)
-    {
-        OnCloseButtonPressed();
     }
 
     private IEnumerator UpdateTimer(DateTime localEndDate)
