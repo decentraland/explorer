@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UsersAroundListHUDController : IHUD
 {
-    const float MUTE_STATUS_UPDATE_INTERVAL = 1;
+    const float MUTE_STATUS_UPDATE_INTERVAL = 0.3f;
 
     internal IUsersAroundListHUDButtonView usersButtonView;
     internal IUsersAroundListHUDListView usersListView;
