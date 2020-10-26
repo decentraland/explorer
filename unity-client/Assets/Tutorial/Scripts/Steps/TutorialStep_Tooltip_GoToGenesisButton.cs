@@ -32,16 +32,9 @@ namespace DCL.Tutorial
 
         private void GoToGenesisPlazaHud_OnOpen(bool isVisible)
         {
-            if (isVisible)
-            {
-                isRelatedFeatureActived = true;
-                stepIsFinished = true;
-                tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
-            }
-            else if (isRelatedFeatureActived)
-            {
-                isRelatedFeatureActived = false;
-            }
+            stepIsFinished = true;
+            isRelatedFeatureActived = false;
+            tutorialController.PlayTeacherAnimation(TutorialTeacher.TeacherAnimation.QuickGoodbye);
         }
     }
 }
