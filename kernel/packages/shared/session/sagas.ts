@@ -273,7 +273,6 @@ function* login(action: LoginAction) {
     yield setNetwork(net)
     queueTrackingEvent('Use network', { net })
   }
-
   yield put(userAuthentified(userId, identity, net))
 
   loginCompleted.resolve()
