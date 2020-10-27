@@ -23,24 +23,26 @@ namespace Tests
         }
 
         // TODO(Santi): Check with Brian how to adapt this test to the new async flow of the WelcomeHUD
-        //[Test]
-        //[TestCase(0)]
-        //[TestCase(1)]
-        //public void ReactToViewOnButtonConfirm(int buttonIndexToPress)
-        //{
-        //    // Arrange
-        //    IWelcomeHUDView mockView = Substitute.For<IWelcomeHUDView>();
-        //    mockView.When(x => x.Initialize(Arg.Any<UnityAction<int>>(), Arg.Any<UnityAction>(), Arg.Any<MessageOfTheDayConfig>()))
-        //        .Do(x => x.ArgAt<UnityAction<int>>(0).Invoke(buttonIndexToPress));
-        //    WelcomeHUDController controller = Substitute.ForPartsOf<WelcomeHUDController>();
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        [Explicit]
+        [Category("Explicit")]
+        public void ReactToViewOnButtonConfirm(int buttonIndexToPress)
+        {
+            // Arrange
+            IWelcomeHUDView mockView = Substitute.For<IWelcomeHUDView>();
+            mockView.When(x => x.Initialize(Arg.Any<UnityAction<int>>(), Arg.Any<UnityAction>(), Arg.Any<MessageOfTheDayConfig>()))
+                .Do(x => x.ArgAt<UnityAction<int>>(0).Invoke(buttonIndexToPress));
+            WelcomeHUDController controller = Substitute.ForPartsOf<WelcomeHUDController>();
 
-        //    // Act
-        //    controller.Initialize(null);
+            // Act
+            controller.Initialize(null);
 
-        //    // Assert
-        //    controller.Received().OnConfirmPressed(buttonIndexToPress);
-        //    mockView.Received().SetVisible(false);
-        //}
+            // Assert
+            controller.Received().OnConfirmPressed(buttonIndexToPress);
+            mockView.Received().SetVisible(false);
+        }
 
         [Test]
         public void CallButtonAction()
