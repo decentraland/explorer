@@ -176,18 +176,12 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
         contextMenuPanel.OnBlock += OnPressBlockButton;
         contextMenuPanel.OnDelete += OnPressDeleteButton;
-        contextMenuPanel.OnReport += OnPressReportButton;
     }
 
     public virtual void OnDestroy()
     {
         contextMenuPanel.OnBlock -= OnPressBlockButton;
         contextMenuPanel.OnDelete -= OnPressDeleteButton;
-        contextMenuPanel.OnReport -= OnPressReportButton;
-    }
-
-    protected virtual void OnPressReportButton(string userId)
-    {
     }
 
     protected virtual void OnPressDeleteButton(string userId)

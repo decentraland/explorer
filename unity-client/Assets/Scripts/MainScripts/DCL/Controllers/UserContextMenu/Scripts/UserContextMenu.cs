@@ -1,3 +1,4 @@
+using DCL.Interface;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -136,6 +137,7 @@ public class UserContextMenu : MonoBehaviour
     private void OnReportUserButtonPressed()
     {
         OnReport?.Invoke(userId);
+        WebInterface.SendReportPlayer(userId);
         Hide();
     }
 

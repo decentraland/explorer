@@ -29,9 +29,6 @@ public class ChatHUDController : IDisposable
 
             this.view.contextMenu.OnBlock -= ContextMenu_OnBlock;
             this.view.contextMenu.OnBlock += ContextMenu_OnBlock;
-
-            this.view.contextMenu.OnReport -= ContextMenu_OnReport;
-            this.view.contextMenu.OnReport += ContextMenu_OnReport;
         }
 
         closeWindowTrigger = Resources.Load<InputAction_Trigger>("CloseWindow");
@@ -55,11 +52,6 @@ public class ChatHUDController : IDisposable
             WebInterface.SendBlockPlayer(userId);
         else
             WebInterface.SendUnblockPlayer(userId);
-    }
-
-    private void ContextMenu_OnReport(string userId)
-    {
-        WebInterface.SendReportPlayer(userId);
     }
 
     private void OnCloseButtonPressed(DCLAction_Trigger action)
@@ -88,7 +80,6 @@ public class ChatHUDController : IDisposable
         {
             view.contextMenu.OnShowMenu -= ContextMenu_OnShowMenu;
             view.contextMenu.OnBlock -= ContextMenu_OnBlock;
-            view.contextMenu.OnReport -= ContextMenu_OnReport;
         }
         closeWindowTrigger.OnTriggered -= OnCloseButtonPressed;
         UnityEngine.Object.Destroy(view.gameObject);

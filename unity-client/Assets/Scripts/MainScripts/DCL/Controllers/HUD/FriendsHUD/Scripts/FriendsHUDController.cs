@@ -39,7 +39,6 @@ public class FriendsHUDController : IHUD
 
         view.friendsList.OnWhisper += Entry_OnWhisper;
         view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
-        view.friendsList.contextMenuPanel.OnReport += Entry_OnReport;
 
         view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
 
@@ -227,11 +226,6 @@ public class FriendsHUDController : IHUD
     private void Entry_OnWhisper(FriendEntry entry)
     {
         OnPressWhisper?.Invoke(entry.userId);
-    }
-
-    private void Entry_OnReport(string userId)
-    {
-        WebInterface.SendReportPlayer(userId);
     }
 
     private void Entry_OnBlock(string userId, bool blockUser)
