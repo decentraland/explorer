@@ -149,7 +149,16 @@ public class UserContextMenu : MonoBehaviour
 
     private void OnBlockUserButtonPressed()
     {
-        OnBlock?.Invoke(userId, !isBlocked);
+        bool blockUser = !isBlocked;
+        OnBlock?.Invoke(userId, blockUser);
+        if (blockUser)
+        {
+            WebInterface.SendBlockPlayer(userId);
+        }
+        else
+        {
+            WebInterface.SendUnblockPlayer(userId);
+        }
         Hide();
     }
 

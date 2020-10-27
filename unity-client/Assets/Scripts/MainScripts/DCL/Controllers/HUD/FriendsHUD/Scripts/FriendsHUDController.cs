@@ -35,10 +35,8 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.OnCancelConfirmation += Entry_OnRequestCancelled;
         view.friendRequestsList.OnRejectConfirmation += Entry_OnRequestRejected;
         view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
-        view.friendRequestsList.contextMenuPanel.OnBlock += Entry_OnBlock;
 
         view.friendsList.OnWhisper += Entry_OnWhisper;
-        view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
 
         view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
 
@@ -226,14 +224,6 @@ public class FriendsHUDController : IHUD
     private void Entry_OnWhisper(FriendEntry entry)
     {
         OnPressWhisper?.Invoke(entry.userId);
-    }
-
-    private void Entry_OnBlock(string userId, bool blockUser)
-    {
-        if (blockUser)
-            WebInterface.SendBlockPlayer(userId);
-        else
-            WebInterface.SendUnblockPlayer(userId);
     }
 
     private void Entry_OnDelete(string userId)
