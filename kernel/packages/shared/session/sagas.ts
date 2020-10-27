@@ -6,7 +6,7 @@ import { Authenticator } from 'dcl-crypto'
 
 import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
-import { createLogger } from 'shared/logger'
+import defaultLogger, { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
 import {
   createEth,
@@ -34,12 +34,16 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 import { Session } from '.'
 import { ExplorerIdentity, LoginStage } from './types'
 import {
+  AUTHENTICATE,
+  AuthenticateAction,
   changeLoginStage,
+  changeSignUpStage,
   INIT_SESSION,
   LOGIN,
   LoginAction,
   loginCompleted as loginCompletedAction,
   LOGOUT,
+  SIGNUP,
   toggleWalletPrompt,
   UPDATE_TOS,
   updateTOS,
@@ -47,6 +51,7 @@ import {
 } from './actions'
 import { ProviderType } from '../ethereum/ProviderType'
 import Html from '../Html'
+import { getProfileByUserId } from '../profiles/sagas'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -59,6 +64,8 @@ export function* sessionSaga(): any {
   yield takeLatest(INIT_SESSION, initSession)
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
+  yield takeLatest(SIGNUP, singUp)
+  yield takeLatest(AUTHENTICATE, authenticate)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
 }
 
@@ -95,6 +102,27 @@ function* initSession() {
   Html.bindLoginEvent()
 }
 
+function* authenticate(action: AuthenticateAction) {
+  defaultLogger.log('KERNEL: authenticate')
+  const provider = yield requestProvider(action.payload.provider as ProviderType)
+  if (!provider) {
+    return
+  }
+  const { userId, identity } = yield authorize()
+  let profile = yield getProfileByUserId(userId)
+  if (!profile) {
+    return yield signIn(userId, identity)
+  }
+  defaultLogger.log('SING_UP_START')
+  // prepare avatar editor
+  // while (!(yield select(baseCatalogsLoaded))) {
+  //   yield take(CATALOG_LOADED)
+  // }
+  yield put(changeLoginStage(LoginStage.SING_UP))
+  yield put(changeSignUpStage('passport'))
+  return
+}
+
 function* requestProvider(providerType: ProviderType) {
   const provider = yield requestWeb3Provider(providerType)
   if (provider) {
@@ -107,6 +135,70 @@ function* requestProvider(providerType: ProviderType) {
     }
   }
   return provider
+}
+
+function* authorize() {
+  if (ENABLE_WEB3) {
+    let profile: { userId: string; identity: ExplorerIdentity }
+    try {
+      const userData = getUserProfile()
+      // check that user data is stored & key is not expired
+      if (isSessionExpired(userData)) {
+        const identity = yield createAuthIdentity()
+        profile = {
+          userId: identity.address,
+          identity
+        }
+        setLocalProfile(profile.userId, profile)
+      } else {
+        profile = {
+          userId: userData.identity.address,
+          identity: userData.identity
+        }
+        setLocalProfile(profile.userId, profile)
+      }
+
+      if (profile.identity.hasConnectedWeb3) {
+        identifyUser(profile.userId)
+        referUser(profile.identity)
+      }
+      return profile
+    } catch (e) {
+      logger.error(e)
+      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
+      throw e
+    }
+  } else {
+    logger.log(`Using test user.`)
+    const identity = yield createAuthIdentity()
+    const profile = { userId: identity.address, identity }
+    setLocalProfile(profile.userId, profile)
+    return profile
+  }
+}
+
+function* signIn(userId: string, identity: ExplorerIdentity) {
+  logger.log(`User ${userId} logged in`)
+  yield put(changeLoginStage(LoginStage.COMPLETED))
+
+  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
+  if (WORLD_EXPLORER) {
+    net = yield getAppNetwork()
+
+    // Load contracts from https://contracts.decentraland.org
+    yield setNetwork(net)
+    queueTrackingEvent('Use network', { net })
+  }
+
+  yield put(userAuthentified(userId, identity, net))
+
+  loginCompleted.resolve()
+  yield put(loginCompletedAction())
+}
+function* singUp() {
+  defaultLogger.log('action: SIGNUP')
+  const userData = getUserProfile()
+  yield signIn(userData.userId, userData.identity)
 }
 
 function* login(action: LoginAction) {

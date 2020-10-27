@@ -1,7 +1,18 @@
 import { AnyAction } from 'redux'
 
 import { LoginStage, SessionState } from './types'
-import { CHANGE_LOGIN_STAGE, TOGGLE_WALLET_PROMPT, UPDATE_TOS, USER_AUTHENTIFIED, UserAuthentified } from './actions'
+import {
+  CHANGE_LOGIN_STAGE,
+  ChangeSignUpStageAction,
+  SIGNUP_FORM,
+  SIGNUP_STAGE,
+  SignUpFormAction,
+  TOGGLE_WALLET_PROMPT,
+  UPDATE_TOS,
+  USER_AUTHENTIFIED,
+  UserAuthentified
+} from './actions'
+import defaultLogger from '../logger'
 
 const INITIAL_STATE: SessionState = {
   initialized: false,
@@ -10,7 +21,13 @@ const INITIAL_STATE: SessionState = {
   network: undefined,
   loginStage: LoginStage.LOADING,
   tos: false,
-  showWalletPrompt: false
+  showWalletPrompt: false,
+  signup: {
+    active: false,
+    stage: '',
+    tos: false,
+    profile: {}
+  }
 }
 
 export function sessionReducer(state?: SessionState, action?: AnyAction) {
@@ -32,6 +49,26 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
     }
     case TOGGLE_WALLET_PROMPT:
       return { ...state, showWalletPrompt: action.payload.show }
+    case SIGNUP_STAGE:
+      defaultLogger.log('SIGNUP_STAGE: ', action.payload)
+      return {
+        ...state,
+        signup: {
+          ...state.signup,
+          ...(action as ChangeSignUpStageAction).payload
+        }
+      }
+    case SIGNUP_FORM:
+      return {
+        ...state,
+        signup: {
+          ...state.signup,
+          profile: {
+            ...state.signup.profile,
+            ...(action as SignUpFormAction).payload
+          }
+        }
+      }
   }
   return state
 }

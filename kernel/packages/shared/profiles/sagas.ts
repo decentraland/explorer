@@ -4,58 +4,58 @@ import { ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-c
 import { call, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 
 import {
-  getServerConfigurations,
   ALL_WEARABLES,
+  ethereumConfigurations,
+  getServerConfigurations,
   getWearablesSafeURL,
   PIN_CATALYST,
   PREVIEW,
-  ethereumConfigurations,
   RESET_TUTORIAL,
-  WSS_ENABLED,
-  TEST_WEARABLES_OVERRIDE
+  TEST_WEARABLES_OVERRIDE,
+  WSS_ENABLED
 } from 'config'
 
 import defaultLogger from 'shared/logger'
 import { isInitialized } from 'shared/renderer/selectors'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
+  ADD_CATALOG,
   addCatalog,
   AddCatalogAction,
-  ADD_CATALOG,
-  catalogLoaded,
+  addedProfileToCatalog,
   CATALOG_LOADED,
+  catalogLoaded,
+  INVENTORY_FAILURE,
+  INVENTORY_REQUEST,
+  INVENTORY_SUCCESS,
   inventoryFailure,
   InventoryRequest,
   inventoryRequest,
   inventorySuccess,
-  INVENTORY_FAILURE,
-  INVENTORY_REQUEST,
-  INVENTORY_SUCCESS,
   InventorySuccess,
+  PROFILE_RANDOM,
   PROFILE_REQUEST,
   PROFILE_SUCCESS,
-  PROFILE_RANDOM,
-  SAVE_PROFILE_REQUEST,
+  ProfileRandomAction,
+  profileRequest,
   ProfileRequestAction,
   profileSuccess,
-  ProfileRandomAction,
   ProfileSuccessAction,
-  SaveProfileRequest,
-  saveProfileSuccess,
-  profileRequest,
+  SAVE_PROFILE_REQUEST,
   saveProfileFailure,
-  addedProfileToCatalog,
-  saveProfileRequest
+  SaveProfileRequest,
+  saveProfileRequest,
+  saveProfileSuccess
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import { baseCatalogsLoaded, getProfile, getProfileDownloadServer, getExclusiveCatalog } from './selectors'
+import { baseCatalogsLoaded, getExclusiveCatalog, getProfile, getProfileDownloadServer } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { ensureServerFormat } from './transformations/profileToServerFormat'
-import { Catalog, Profile, Wearable, Collection, ContentFile, Avatar } from './types'
+import { Avatar, Catalog, Collection, ContentFile, Profile, Wearable } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
-import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
+import { getResizeService, getUpdateProfileServer, isResizeServiceUrl } from '../dao/selectors'
 import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
@@ -65,7 +65,7 @@ import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
-import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
+import { getCurrentIdentity, getCurrentNetwork, getCurrentUserId } from 'shared/session/selectors'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
@@ -281,6 +281,22 @@ export function* initialLoad() {
   }
 }
 
+export function* getProfileByUserId(userId: string): any {
+  try {
+    const server = yield select(getProfileDownloadServer)
+    const profiles: { avatars: object[] } = yield profileServerRequest(server, userId)
+
+    if (profiles.avatars.length !== 0) {
+      return profiles.avatars[0]
+    }
+  } catch (error) {
+    if (error.message !== 'Profile not found') {
+      defaultLogger.log(`Error requesting profile for auth check ${userId}, `, error)
+    }
+  }
+  return null
+}
+
 export function* handleFetchProfile(action: ProfileRequestAction): any {
   const userId = action.payload.userId
   const email = ''
@@ -387,15 +403,11 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
 }
 
 export async function profileServerRequest(serverUrl: string, userId: string) {
-  try {
-    const request = await fetch(`${serverUrl}/${userId}`)
-    if (!request.ok) {
-      throw new Error('Profile not found')
-    }
-    return await request.json()
-  } catch (up) {
-    throw up
+  const request = await fetch(`${serverUrl}/${userId}`)
+  if (!request.ok) {
+    throw new Error('Profile not found')
   }
+  return await request.json()
 }
 
 export function* handleRandomAsSuccess(action: ProfileRandomAction): any {
