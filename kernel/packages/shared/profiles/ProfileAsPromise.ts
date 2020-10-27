@@ -8,11 +8,15 @@ import { ProfileType } from 'shared/comms/interface/types'
 declare const globalThis: StoreContainer
 
 export function ProfileAsPromise(userId: string, version?: number, profileType?: ProfileType): Promise<Profile> {
+  function isExpectedVersion(aProfile: Profile) {
+    return !version || aProfile.version >= version
+  }
+
   const store: Store<RootState> = globalThis.globalStore
 
-  const existingProfile = getProfile(store.getState(), userId)
-  const existingProfileWithCorrectVersion = existingProfile && (!version || existingProfile.version >= version)
-  if (existingProfile && existingProfileWithCorrectVersion) {
+  const [status, existingProfile] = getProfileStatusAndData(store.getState(), userId)
+  const existingProfileWithCorrectVersion = existingProfile && isExpectedVersion(existingProfile)
+  if (existingProfile && existingProfileWithCorrectVersion && status === 'ok') {
     return Promise.resolve(existingProfile)
   }
   return new Promise((resolve, reject) => {
@@ -25,7 +29,7 @@ export function ProfileAsPromise(userId: string, version?: number, profileType?:
       }
 
       const profile = getProfile(store.getState(), userId)
-      if (profile) {
+      if (profile && isExpectedVersion(profile) && status === 'ok') {
         unsubscribe()
         return resolve(profile)
       }

@@ -6,7 +6,10 @@ import { RootSessionState } from 'shared/session/types'
 
 export const getProfileDownloadServer = (store: RootDaoState) => store.dao.profileServer
 
-export const getProfileStatusAndData = (store: RootProfileState, userId: string): [ProfileStatus | undefined, any] => [
+export const getProfileStatusAndData = (
+  store: RootProfileState,
+  userId: string
+): [ProfileStatus | undefined, Profile | undefined] => [
   store?.profiles?.userInfo[userId]?.status,
   store?.profiles?.userInfo[userId]?.data
 ]
@@ -22,6 +25,13 @@ export const getProfile = (store: RootProfileState, userId: string): Profile | n
 export const getCurrentUserProfile = (store: RootProfileState & RootSessionState): Profile | null => {
   const currentUserId = getCurrentUserId(store)
   return currentUserId ? getProfile(store, currentUserId) : null
+}
+
+export const getCurrentUserProfileStatusAndData = (
+  store: RootProfileState & RootSessionState
+): [ProfileStatus | undefined, Profile | undefined] => {
+  const currentUserId = getCurrentUserId(store)
+  return currentUserId ? getProfileStatusAndData(store, currentUserId) : [undefined, undefined]
 }
 
 export const hasConnectedWeb3 = (store: RootProfileState, userId: string): boolean =>

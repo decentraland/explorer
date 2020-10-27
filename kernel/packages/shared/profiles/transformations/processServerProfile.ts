@@ -47,7 +47,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     hasClaimedName: !!receivedProfile.name,
     description: receivedProfile.description || '',
     ethAddress: userId || 'noeth',
-    version: receivedProfile.avatar.version || 1,
+    version: receivedProfile.version ?? receivedProfile.avatar.version ?? 1,
     avatar: {
       eyeColor: colorString(eyeColor),
       hairColor: colorString(hairColor),

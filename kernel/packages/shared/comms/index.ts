@@ -133,15 +133,20 @@ export class PeerTrackingInfo {
   public receivedPublicChatMessages = new Set<string>()
   public talking = false
 
-  profilePromise: { promise: Promise<ProfileForRenderer | void>; version: number | null } = {
+  profilePromise: {
+    promise: Promise<ProfileForRenderer | void>
+    version: number | null
+    status: 'ok' | 'loading' | 'error'
+  } = {
     promise: Promise.resolve(),
-    version: null
+    version: null,
+    status: 'loading'
   }
 
   profileType?: ProfileType
 
   public loadProfileIfNecessary(profileVersion: number) {
-    if (this.identity && profileVersion !== this.profilePromise.version) {
+    if (this.identity && (profileVersion !== this.profilePromise.version || this.profilePromise.status === 'error')) {
       if (!this.userInfo || !this.userInfo.userId) {
         this.userInfo = {
           ...(this.userInfo || {}),
@@ -156,12 +161,15 @@ export class PeerTrackingInfo {
             const userInfo = this.userInfo || {}
             userInfo.version = profile.version
             this.userInfo = userInfo
+            this.profilePromise.status = 'ok'
             return forRenderer
           })
           .catch((error) => {
+            this.profilePromise.status = 'error'
             defaultLogger.error('Error fetching profile!', error)
           }),
-        version: profileVersion
+        version: profileVersion,
+        status: 'loading'
       }
     }
   }
@@ -454,15 +462,22 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
 }
 
 function processProfileRequest(context: Context, fromAlias: string, message: Package<ProfileRequest>) {
-  const myAddress = getIdentity()?.address
+  const myIdentity = getIdentity()
+  const myAddress = myIdentity?.address
 
   if (message.data.userId !== myAddress) return
 
-  const profile = getCurrentUserProfile(store.getState())
-
-  if (context.currentPosition && profile) {
-    context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, profile)
-  }
+  ProfileAsPromise(
+    myAddress,
+    message.data.version ? parseInt(message.data.version) : undefined,
+    myIdentity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
+  )
+    .then((profile) => {
+      if (context.currentPosition) {
+        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, profile)
+      }
+    })
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {

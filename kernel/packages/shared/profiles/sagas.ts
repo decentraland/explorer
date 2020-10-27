@@ -97,6 +97,7 @@ export function* profileSaga(): any {
 
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
   yield takeLatestByUserId(PROFILE_SUCCESS, submitProfileToRenderer)
+  yield takeLatestByUserId(PROFILE_SUCCESS, submitOwnProfileToComms)
   yield takeLatestByUserId(PROFILE_RANDOM, handleRandomAsSuccess)
 
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
@@ -120,7 +121,7 @@ function* initialProfileLoad() {
       const names = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
       // patch profile to readd missing name
-      profile = { ...profile, name: names[0], hasClaimedName: true, version: (profile.version || 0) + 1 }
+      profile = { ...profile, name: names[0], hasClaimedName: true }
 
       if (names && names.length > 0) {
         defaultLogger.info(`Found missing claimed name '${names[0]}' for profile ${userId}, consolidating profile... `)
@@ -177,10 +178,10 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
-      if (action.payload.profileType === ProfileType.LOCAL) {
+      if (action.payload.profileType === ProfileType.LOCAL && currentId !== userId) {
         const peerProfile: Profile = yield requestLocalProfileToPeers(action.payload.userId)
         if (peerProfile) {
-          profile = ensureServerFormat(peerProfile, peerProfile.version)
+          profile = ensureServerFormat(peerProfile)
         }
       } else {
         const serverUrl = yield select(getProfileDownloadServer)
@@ -295,6 +296,14 @@ export function* handleRandomAsSuccess(action: ProfileRandomAction): any {
   yield put(profileSuccess(action.payload.userId, action.payload.profile))
 }
 
+export function* submitOwnProfileToComms(action: ProfileSuccessAction) {
+  const currentId = yield select(getCurrentUserId)
+  const { userId, profile } = action.payload
+  if (userId === currentId) {
+    updateCommsUser({ version: profile.version })
+  }
+}
+
 export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
   if (profile.avatar) {
@@ -370,22 +379,17 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
 
     const identity: ExplorerIdentity = yield select(getCurrentIdentity)
 
+    localProfilesRepo.persist(identity.address, profile)
+
     // only update profile on server if wallet is connected
     if (identity.hasConnectedWeb3) {
       yield call(modifyAvatar, {
         url,
         userId,
-        currentVersion,
         identity,
         profile
       })
     }
-
-    localProfilesRepo.persist(identity.address, profile)
-
-    updateCommsUser({
-      version: profile.version
-    })
 
     yield put(saveProfileSuccess(userId, profile.version, profile))
     yield put(profileRequest(userId))
@@ -394,11 +398,10 @@ export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   }
 }
 
-function fetchProfileLocally(address: string) {
-  // For now we only support one local profile.
+export function fetchProfileLocally(address: string) {
   const profile: Profile | null = localProfilesRepo.get(address)
   if (profile?.userId === address) {
-    return ensureServerFormat(profile, profile.version)
+    return ensureServerFormat(profile)
   } else {
     return null
   }
@@ -437,12 +440,11 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
 
 export async function modifyAvatar(params: {
   url: string
-  currentVersion: number
   userId: string
   identity: ExplorerIdentity
   profile: Profile
 }) {
-  const { url, currentVersion, profile, identity } = params
+  const { url, profile, identity } = params
   const { avatar } = profile
 
   const newAvatar = { ...avatar }
@@ -463,7 +465,7 @@ export async function modifyAvatar(params: {
     newAvatar.snapshots = newSnapshots as Avatar['snapshots']
   }
 
-  const metadata = buildServerMetadata({ ...profile, avatar: newAvatar }, currentVersion + 1)
+  const metadata = buildServerMetadata({ ...profile, avatar: newAvatar })
 
   return deploy(url, identity, metadata, files, content)
 }

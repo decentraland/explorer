@@ -2,7 +2,7 @@ import { analizeColorPart, stripAlpha } from './analizeColorPart'
 import { isValidBodyShape } from './isValidBodyShape'
 import { Profile } from '../types'
 
-export function ensureServerFormat(profile: Profile, version: number) {
+export function ensureServerFormat(profile: Profile) {
   const { avatar } = profile
   const eyes = stripAlpha(analizeColorPart(avatar, 'eyeColor', 'eyes'))
   const hair = stripAlpha(analizeColorPart(avatar, 'hairColor', 'hair'))
@@ -31,14 +31,13 @@ export function ensureServerFormat(profile: Profile, version: number) {
       eyes: { color: eyes },
       hair: { color: hair },
       skin: { color: skin },
-      wearables: avatar.wearables,
-      version
+      wearables: avatar.wearables
     }
   }
 }
 
-export function buildServerMetadata(profile: Profile, currentVersion?: number) {
-  const newProfile = ensureServerFormat(profile, currentVersion ?? profile.version)
+export function buildServerMetadata(profile: Profile) {
+  const newProfile = ensureServerFormat(profile)
   const metadata = { avatars: [newProfile] }
   return metadata
 }
