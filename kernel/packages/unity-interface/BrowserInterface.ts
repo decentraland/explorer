@@ -41,6 +41,7 @@ import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { SceneSystemWorker } from 'shared/world/SceneWorker'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
+import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 
 declare const DCL: any
 
@@ -203,6 +204,18 @@ export class BrowserInterface {
           worldRunningObservable.notifyObservers(true)
         }
         break
+      }
+      case 'StartStateMode': {
+        const { sceneId } = payload
+        const parcelScene = this.resetScene(sceneId)
+        setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
+        break;
+      }
+      case 'StopStateMode': {
+        const { sceneId } = payload
+        const parcelScene = this.resetScene(sceneId)
+        setNewParcelScene(sceneId, new SceneSystemWorker(parcelScene))
+        break;
       }
       default: {
         defaultLogger.warn(`Unknown event type ${eventType}, ignoring`)
@@ -401,25 +414,15 @@ export class BrowserInterface {
     }
   }
 
-  // TODO: Move these calls to ControlEvent?
-  public StartStateMode(sceneId: string) {
+  /** Kill the current worker, reset the scene in Unity and return the ParcelSceneAPI that was being used */
+  private resetScene(sceneId: string): ParcelSceneAPI {
     const worker = getSceneWorkerBySceneID(sceneId)!!
     unityInterface.UnloadScene(sceneId) // Maybe unity should do it by itself?
     const parcelScene = worker.getParcelScene()
     stopParcelSceneWorker(worker)
     const data = parcelScene.data.data as LoadableParcelScene
-    unityInterface.LoadParcelScenes([data])
-    setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
-  }
-
-  public StopStateMode(sceneId: string) {
-    const worker = getSceneWorkerBySceneID(sceneId)!!
-    unityInterface.UnloadScene(sceneId) // Maybe unity should do it by itself?
-    const parcelScene = worker.getParcelScene()
-    stopParcelSceneWorker(worker)
-    const data = parcelScene.data.data as LoadableParcelScene
-    unityInterface.LoadParcelScenes([data])
-    setNewParcelScene(sceneId, new SceneSystemWorker(parcelScene))
+    unityInterface.LoadParcelScenes([data])  // Maybe unity should do it by itself?
+    return parcelScene
   }
 }
 

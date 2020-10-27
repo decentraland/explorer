@@ -1,11 +1,13 @@
-import { WebWorkerTransport } from 'decentraland-rpc'
+import { EventSubscriber, WebWorkerTransport } from 'decentraland-rpc'
 import { inject, Script } from 'decentraland-rpc/lib/client/Script'
 import { ILogOpts, ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { IEngineAPI } from 'shared/apis/EngineAPI'
 import { ParcelIdentity } from 'shared/apis/ParcelIdentity'
+import { SceneStateStorageController } from 'shared/apis/SceneStateStorageController'
 import { defaultLogger } from 'shared/logger'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
-import { UnityActor } from './stateful-scene/UnityActor'
+import { RendererActor } from './stateful-scene/RendererActor'
+import { SceneStateDefinition } from './stateful-scene/SceneStateDefinition'
 
 class StatefulWebWorkerScene extends Script {
   @inject('DevTools')
@@ -17,9 +19,13 @@ class StatefulWebWorkerScene extends Script {
   @inject('ParcelIdentity')
   parcelIdentity!: ParcelIdentity
 
+  @inject('SceneStateStorageController')
+  sceneStateStorage!: SceneStateStorageController
+
   private devToolsAdapter!: DevToolsAdapter
-  private unity!: UnityActor
-  private sceneState: any
+  private renderer!: RendererActor
+  private sceneState!: SceneStateDefinition
+  private eventSubscriber!: EventSubscriber
 
   constructor(transport: ScriptingTransport, opt?: ILogOpts) {
     super(transport, opt)
@@ -27,40 +33,27 @@ class StatefulWebWorkerScene extends Script {
 
   async systemDidEnable(): Promise<void> {
     this.devToolsAdapter = new DevToolsAdapter(this.devTools)
-    const sceneId = this.parcelIdentity.cid
-    this.unity = new UnityActor(this.engine, sceneId)
+    const { cid: sceneId } = await this.parcelIdentity.getParcel()
+    this.renderer = new RendererActor(this.engine, sceneId)
+    this.eventSubscriber = new EventSubscriber(this.engine)
 
-    // Fetch json
-    this.sceneState = {
-      entities: [
-        {
-          Transform: {
-            position: {
-              x: 8,
-              y: 0,
-              z: 8
-            }
-          },
-          GLTFShape: {
-            src: 'models/BlockDog.glb'
-          }
-        }
-      ]
-    }
+    // Fetch stored scene
+    this.sceneState = await this.sceneStateStorage.getStoredState(sceneId)
 
-    // Load the initial state
-    this.sendInitialState()
+    // Listen to the renderer and update the local scene state
+    this.renderer.forwardChangesTo(this.sceneState)
 
-    this.log('Sent the initial state')
-  }
+    // Send the initial state ot the renderer
+    this.sceneState.sendStateTo(this.renderer)
+    this.renderer.sendInitFinished()
+    this.log('Sent initial load')
 
-  private sendInitialState() {
-    let ids = 10;
-    this.sceneState.entities.forEach((entity: any) => {
-      const components = Object.entries(entity).map(([type, data]) => ({ type, data }))
-      this.unity.addEntity(`${ids++}`, components)
+    // Listen to storage requests
+    this.eventSubscriber.on('stateEvent', ({ type }) => {
+      if (type === 'StoreSceneState') {
+        this.sceneStateStorage.storeState(sceneId, this.sceneState.toStorableData())
+      }
     })
-    this.unity.sendInitFinished()
   }
 
   // private error(error: Error) {

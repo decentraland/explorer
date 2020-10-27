@@ -2,20 +2,25 @@ import { CLASS_ID, Transform } from "decentraland-ecs/src";
 import { IEngineAPI } from "shared/apis/EngineAPI";
 import { PB_Quaternion, PB_Transform, PB_Vector3 } from "../../shared/proto/engineinterface_pb";
 import { AttachEntityComponentPayload, ComponentCreatedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, RemoveEntityPayload, UpdateEntityComponentPayload } from "shared/types";
-import { Component, ComponentData, ComponentType, EntityId, StateActor } from "./StateActor"
+import { Component, ComponentData, ComponentId, EntityId, StatefulActor } from "./types"
+import { EventSubscriber } from "decentraland-rpc";
 
 const pbTransform: PB_Transform = new PB_Transform()
 const pbPosition: PB_Vector3 = new PB_Vector3()
 const pbRotation: PB_Quaternion = new PB_Quaternion()
 const pbScale: PB_Vector3 = new PB_Vector3()
 
-export class UnityActor implements StateActor {
+export class RendererActor extends StatefulActor {
 
+  private readonly eventSubscriber: EventSubscriber
   private components: number = 0;
 
   constructor(
     private readonly engine: IEngineAPI,
-    private readonly sceneId: string) { }
+    private readonly sceneId: string) {
+    super()
+    this.eventSubscriber = new EventSubscriber(this.engine)
+  }
 
   addEntity(entityId: EntityId, components?: Component[]): void {
     const batch: EntityAction[] = [{
@@ -23,7 +28,7 @@ export class UnityActor implements StateActor {
       payload: { id: entityId } as CreateEntityPayload
     }]
     if (components) {
-      components.map(({ type, data }) => this.mapComponent(entityId, type, data))
+      components.map(({ id, data }) => this.mapComponent(entityId, id, data))
         .forEach(actions => batch.push(...actions))
     }
     this.engine.sendBatch(batch)
@@ -36,13 +41,13 @@ export class UnityActor implements StateActor {
     }])
   }
 
-  setComponent(entityId: EntityId, componentType: ComponentType, data: ComponentData): void {
-    const updates = this.mapComponent(entityId, componentType, data)
+  setComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): void {
+    const updates = this.mapComponent(entityId, componentId, data)
     this.engine.sendBatch(updates)
   }
 
-  removeComponent(entityId: EntityId, componentType: ComponentType): void {
-    const { name } = this.componentTypeToLegacyData(componentType)
+  removeComponent(entityId: EntityId, componentId: ComponentId): void {
+    const { name } = this.componentTypeToLegacyData(componentId)
     this.engine.sendBatch([{
       type: 'ComponentRemoved',
       tag: entityId,
@@ -61,25 +66,50 @@ export class UnityActor implements StateActor {
     }])
   }
 
-  // TODO
-  onAddEntity(listener: (entityId: EntityId, components?: Component[]) => void): void { }
-  onRemoveEntity(listener: (entityId: EntityId) => void): void { }
-  onSetComponent(listener: (entityId: EntityId, componentType: ComponentType, data: ComponentData) => void): void { }
-  onRemoveComponent(listener: (entityId: EntityId, componentType: ComponentType) => void): void { }
+  onAddEntity(listener: (entityId: EntityId, components?: Component[]) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+      if (type === 'AddEntity') {
+        listener(payload.entityId, payload.components)
+      }
+    })
+  }
 
+  onRemoveEntity(listener: (entityId: EntityId) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+      if (type === 'RemoveEntity') {
+        listener(payload.entityId)
+      }
+    })
+  }
 
-  private mapComponent(entityId: EntityId, type: ComponentType, data: ComponentData): EntityAction[] {
-    const { classId, disposability } = this.componentTypeToLegacyData(type)
+  onSetComponent(listener: (entityId: EntityId, componentId: ComponentId, data: ComponentData) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+      if (type === 'SetComponent') {
+        listener(payload.entityId, payload.componentId, payload.componentData)
+      }
+    })
+  }
+
+  onRemoveComponent(listener: (entityId: EntityId, componentId: ComponentId) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+      if (type === 'RemoveComponent') {
+        listener(payload.entityId, payload.componentId)
+      }
+    })
+  }
+
+  private mapComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): EntityAction[] {
+    const { disposability } = this.componentTypeToLegacyData(componentId)
     if (disposability === ComponentDisposability.DISPOSABLE) {
-      return this.buildDisposableComponentActions(entityId, classId, data)
+      return this.buildDisposableComponentActions(entityId, componentId, data)
     } else {
       return [{
         type: 'UpdateEntityComponent',
-        tag: this.sceneId + '_' + entityId + '_' + classId,
+        tag: this.sceneId + '_' + entityId + '_' + componentId,
         payload: {
           entityId,
-          classId,
-          json: this.generatePBObject(classId, data)
+          classId: componentId,
+          json: this.generatePBObject(componentId, data)
         } as UpdateEntityComponentPayload
       }]
     }
@@ -142,12 +172,12 @@ export class UnityActor implements StateActor {
     return JSON.stringify(data)
   }
 
-  private componentTypeToLegacyData(type: ComponentType): { name: string, classId: number, disposability: ComponentDisposability } {
-    switch (type) {
-      case 'Transform':
-        return { name: 'transform', classId: CLASS_ID.TRANSFORM, disposability: ComponentDisposability.NON_DISPOSABLE }
-      case 'GLTFShape':
-        return { name: 'shape', classId: CLASS_ID.GLTF_SHAPE, disposability: ComponentDisposability.DISPOSABLE }
+  private componentTypeToLegacyData(componentId: ComponentId): { name: string, disposability: ComponentDisposability } {
+    switch (componentId) {
+      case CLASS_ID.TRANSFORM:
+        return { name: 'transform', disposability: ComponentDisposability.NON_DISPOSABLE }
+      case CLASS_ID.GLTF_SHAPE:
+        return { name: 'shape', disposability: ComponentDisposability.DISPOSABLE }
     }
     throw new Error('Not implemented yet')
   }
