@@ -28,10 +28,12 @@ import {
   profileRequest,
   saveProfileFailure,
   addedProfileToCatalog,
-  saveProfileRequest
+  saveProfileRequest,
+  LOCAL_PROFILE_RECEIVED,
+  LocalProfileReceived
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import { getProfile, getProfileDownloadServer } from './selectors'
+import { getProfile, getProfileDownloadServer, hasConnectedWeb3 } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
@@ -103,6 +105,8 @@ export function* profileSaga(): any {
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
 
   yield takeLatestByUserId(INVENTORY_REQUEST, handleFetchInventory)
+
+  yield takeLatestByUserId(LOCAL_PROFILE_RECEIVED, handleLocalProfile)
 }
 
 function* initialProfileLoad() {
@@ -301,6 +305,17 @@ export function* submitOwnProfileToComms(action: ProfileSuccessAction) {
   const { userId, profile } = action.payload
   if (userId === currentId) {
     updateCommsUser({ version: profile.version })
+  }
+}
+
+export function* handleLocalProfile(action: LocalProfileReceived) {
+  const { userId, profile } = action.payload
+
+  const existingProfile = yield select(getProfile, userId)
+  const connectedWeb3 = yield select(hasConnectedWeb3, userId)
+
+  if (!existingProfile || existingProfile.version < profile.version) {
+    yield put(profileSuccess(userId, profile, connectedWeb3))
   }
 }
 
@@ -509,4 +524,8 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
 
 export function getProfileType(identity?: ExplorerIdentity): ProfileType {
   return identity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
+}
+
+export function stripSnapshots(profile: Profile) {
+  return profile.snapshots ? { face256: profile.snapshots.face256, face128: '', face: '', body: '' } : undefined
 }

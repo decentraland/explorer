@@ -59,3 +59,9 @@ export const ADDED_PROFILE_TO_CATALOG = '[Success] Added profile to catalog'
 export const addedProfileToCatalog = (userId: string, profile: ProfileForRenderer) =>
   action(ADDED_PROFILE_TO_CATALOG, { userId, profile })
 export type AddedProfileToCatalog = ReturnType<typeof addedProfileToCatalog>
+
+// Profiles over comms
+export const LOCAL_PROFILE_RECEIVED = 'Local Profile Received'
+export const localProfileReceived = (userId: string, profile: Profile) =>
+  action(LOCAL_PROFILE_RECEIVED, { userId, profile })
+export type LocalProfileReceived = ReturnType<typeof localProfileReceived>

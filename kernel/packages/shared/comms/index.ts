@@ -89,6 +89,9 @@ import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
 import { isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
 import future, { IFuture } from 'fp-future'
+import { getProfileType, stripSnapshots } from 'shared/profiles/sagas'
+import { sleep } from 'atomicHelpers/sleep'
+import { localProfileReceived } from 'shared/profiles/actions'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -193,6 +196,8 @@ export class Context {
   analyticsInterval?: NodeJS.Timer
 
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
+
+  lastProfileResponseTime: number = 0
 
   positionUpdatesPaused: boolean = false
 
@@ -461,31 +466,59 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
   }
 }
 
+const TIME_BETWEEN_PROFILE_RESPONSES = 10000
+
+let sendingProfileResponse = false
+
 function processProfileRequest(context: Context, fromAlias: string, message: Package<ProfileRequest>) {
   const myIdentity = getIdentity()
   const myAddress = myIdentity?.address
 
+  // We only send profile responses for our own address
   if (message.data.userId !== myAddress) return
 
-  ProfileAsPromise(
-    myAddress,
-    message.data.version ? parseInt(message.data.version) : undefined,
-    myIdentity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
-  )
-    .then((profile) => {
-      if (context.currentPosition) {
-        context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, profile)
-      }
-    })
+  // If we are already sending a profile response, we don't want to schedule another
+  if (sendingProfileResponse) return
+
+  sendingProfileResponse = true
+  ;(async () => {
+    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+
+    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+    }
+
+    const profile = await ProfileAsPromise(
+      myAddress,
+      message.data.version ? parseInt(message.data.version) : undefined,
+      getProfileType(myIdentity)
+    )
+
+    if (context.currentPosition) {
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, {
+        ...profile,
+        snapshots: stripSnapshots(profile)
+      })
+    }
+  })()
     .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+    .finally(() => (sendingProfileResponse = false))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
+  const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
+
   const profile = message.data.profile
 
-  if (pendingProfileRequests[profile.userId]) {
+  if (peerTrackingInfo.identity !== profile.userId) return
+
+  if (pendingProfileRequests[profile.userId] && pendingProfileRequests[profile.userId].length > 0) {
     pendingProfileRequests[profile.userId].forEach((it) => it.resolve(profile))
     delete pendingProfileRequests[profile.userId]
+  } else {
+    // If we received an unexpected profile, maybe the profile saga can use this preemptively
+    store.dispatch(localProfileReceived(profile.userId, profile))
   }
 }
 
