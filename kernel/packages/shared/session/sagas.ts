@@ -52,6 +52,8 @@ import {
 import { ProviderType } from '../ethereum/ProviderType'
 import Html from '../Html'
 import { getProfileByUserId } from '../profiles/sagas'
+import { setLoadingScreenVisible } from '../../unity-interface/dcl'
+import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -114,13 +116,25 @@ function* authenticate(action: AuthenticateAction) {
     return yield signIn(userId, identity)
   }
   defaultLogger.log('SING_UP_START')
+
   // prepare avatar editor
-  // while (!(yield select(baseCatalogsLoaded))) {
-  //   yield take(CATALOG_LOADED)
-  // }
+  yield prepareSignUp(userId)
+
+  return
+}
+
+function* prepareSignUp(userId: string) {
+  const profile = yield generateRandomUserProfile(userId)
+  setLoadingScreenVisible(true)
   yield put(changeLoginStage(LoginStage.SING_UP))
   yield put(changeSignUpStage('passport'))
-  return
+  defaultLogger.log('RANDOM PROFILE: ', profile)
+  /*
+   setLoadingScreenVisible(false)
+   unityInterface.LoadProfile(profileToRendererFormat(profile))
+   unityInterface.ShowAvatarEditorInSignInFlow()
+   unityInterface.ActivateRendering(true)
+   */
 }
 
 function* requestProvider(providerType: ProviderType) {
@@ -195,6 +209,7 @@ function* signIn(userId: string, identity: ExplorerIdentity) {
   loginCompleted.resolve()
   yield put(loginCompletedAction())
 }
+
 function* singUp() {
   defaultLogger.log('action: SIGNUP')
   const userData = getUserProfile()
