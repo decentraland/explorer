@@ -10,13 +10,44 @@ public class UserContextMenu : MonoBehaviour
 {
     const string BLOCK_BTN_BLOCK_TEXT = "Block";
     const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
+    const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
-    public TextMeshProUGUI userName;
-    public Button passportButton;
-    public Button blockButton;
-    public Button reportButton;
-    public Button deleteButton;
-    public TextMeshProUGUI blockText;
+    [System.Flags]
+    public enum MenuConfigFlags
+    {
+        Name = 1,
+        Friendship = 2,
+        Message = 4,
+        Passport = 8,
+        Block = 16,
+        Report = 32
+    }
+
+    const MenuConfigFlags headerFlags = MenuConfigFlags.Name | MenuConfigFlags.Friendship;
+
+    [Header("Enable Actions")]
+    [SerializeField] internal MenuConfigFlags menuConfigFlags = MenuConfigFlags.Passport | MenuConfigFlags.Block | MenuConfigFlags.Report;
+
+    [Header("Containers")]
+    [SerializeField] internal GameObject headerContainer;
+    [SerializeField] internal GameObject bodyContainer;
+    [SerializeField] internal GameObject friendshipContainer;
+    [SerializeField] internal GameObject friendAddContainer;
+    [SerializeField] internal GameObject friendRemoveContainer;
+    [SerializeField] internal GameObject friendRequestedContainer;
+
+    [Header("Texts")]
+    [SerializeField] internal TextMeshProUGUI userName;
+    [SerializeField] internal TextMeshProUGUI blockText;
+
+    [Header("Buttons")]
+    [SerializeField] internal Button passportButton;
+    [SerializeField] internal Button blockButton;
+    [SerializeField] internal Button reportButton;
+    [SerializeField] internal Button addFriendButton;
+    [SerializeField] internal Button cancelFriendButton;
+    [SerializeField] internal Button deleteFriendButton;
+    [SerializeField] internal Button messageButton;
 
     public bool isVisible => gameObject.activeSelf;
 
@@ -25,6 +56,8 @@ public class UserContextMenu : MonoBehaviour
     public event System.Action<string> OnReport;
     public event System.Action<string, bool> OnBlock;
     public event System.Action<string> OnDelete;
+
+    private static readonly StringVariable currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
 
     private RectTransform rectTransform;
     private string userId;
@@ -37,8 +70,8 @@ public class UserContextMenu : MonoBehaviour
         passportButton.onClick.AddListener(OnPassportButtonPressed);
         blockButton.onClick.AddListener(OnBlockUserButtonPressed);
         reportButton.onClick.AddListener(OnReportUserButtonPressed);
-        if (deleteButton != null)
-            deleteButton.onClick.AddListener(OnDeleteUserButtonPressed);
+        if (deleteFriendButton != null)
+            deleteFriendButton.onClick.AddListener(OnDeleteUserButtonPressed);
     }
 
     private void Update()
@@ -51,8 +84,8 @@ public class UserContextMenu : MonoBehaviour
         passportButton.onClick.RemoveListener(OnPassportButtonPressed);
         blockButton.onClick.RemoveListener(OnBlockUserButtonPressed);
         reportButton.onClick.RemoveListener(OnReportUserButtonPressed);
-        if (deleteButton != null)
-            deleteButton.onClick.RemoveListener(OnDeleteUserButtonPressed);
+        if (deleteFriendButton != null)
+            deleteFriendButton.onClick.RemoveListener(OnDeleteUserButtonPressed);
     }
 
     /// <summary>
@@ -90,6 +123,7 @@ public class UserContextMenu : MonoBehaviour
     private void OnPassportButtonPressed()
     {
         OnPassport?.Invoke(userId);
+        currentPlayerId.Set(userId);
         Hide();
 
         AudioScriptableObjects.dialogOpen.Play(true);
@@ -120,10 +154,34 @@ public class UserContextMenu : MonoBehaviour
 
     private void HideIfClickedOutside()
     {
-        if (Input.GetMouseButtonDown(0) && 
+        if (Input.GetMouseButtonDown(0) &&
             !RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition))
         {
             Hide();
         }
     }
+
+    private void ProcessActiveElements(MenuConfigFlags flags)
+    {
+        bool hasHeader = (flags & headerFlags) != 0;
+        headerContainer.SetActive(hasHeader);
+        if (hasHeader)
+        {
+            userName.gameObject.SetActive((flags & MenuConfigFlags.Name) != 0);
+            friendshipContainer.SetActive((flags & MenuConfigFlags.Friendship) != 0);
+        }
+        passportButton.gameObject.SetActive((flags & MenuConfigFlags.Passport) != 0);
+        blockButton.gameObject.SetActive((flags & MenuConfigFlags.Block) != 0);
+        reportButton.gameObject.SetActive((flags & MenuConfigFlags.Report) != 0);
+        messageButton.gameObject.SetActive((flags & MenuConfigFlags.Message) != 0);
+    }
+
+#if UNITY_EDITOR
+    //This is just to process buttons and container visibility on editor
+    private void OnValidate()
+    {
+        if (headerContainer == null) return;
+        ProcessActiveElements(menuConfigFlags);
+    }
+#endif
 }
