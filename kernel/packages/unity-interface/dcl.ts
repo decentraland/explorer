@@ -1,13 +1,5 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import {
-  DEBUG,
-  EDITOR,
-  ENABLE_NEW_TASKBAR,
-  ENGINE_DEBUG_PANEL,
-  NO_ASSET_BUNDLES,
-  SCENE_DEBUG_PANEL,
-  SHOW_FPS_COUNTER
-} from 'config'
+import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, NO_ASSET_BUNDLES, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
@@ -113,10 +105,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (SHOW_FPS_COUNTER) {
     unityInterface.ShowFPSPanel()
-  }
-
-  if (ENABLE_NEW_TASKBAR) {
-    unityInterface.EnableNewTaskbar() /* NOTE(Santi): This is temporal, until we remove the old taskbar */
   }
 
   if (ENGINE_DEBUG_PANEL) {

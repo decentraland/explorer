@@ -64,19 +64,28 @@ public class WearableController
 
         void OnSuccessWrapper(GameObject gameObject)
         {
-            loader.OnSuccessEvent -= OnSuccessWrapper;
+            if (loader != null)
+            {
+                loader.OnSuccessEvent -= OnSuccessWrapper;
+            }
             assetRenderers = gameObject.GetComponentsInChildren<Renderer>();
             PrepareWearable(gameObject);
             onSuccess?.Invoke(this);
         }
+
         loader.OnSuccessEvent += OnSuccessWrapper;
 
         void OnFailEventWrapper()
         {
-            loader.OnFailEvent -= OnFailEventWrapper;
-            loader = null;
+            if (loader != null)
+            {
+                loader.OnFailEvent -= OnFailEventWrapper;
+                loader.ClearEvents();
+                loader = null;
+            }
             onFail?.Invoke(this);
         }
+
         loader.OnFailEvent += OnFailEventWrapper;
 
         loader.Load(representation.mainFile);

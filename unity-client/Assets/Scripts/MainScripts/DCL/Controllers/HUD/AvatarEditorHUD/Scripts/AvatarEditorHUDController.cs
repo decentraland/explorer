@@ -21,9 +21,11 @@ public class AvatarEditorHUDController : IHUD
     private ColorList skinColorList;
     private ColorList eyeColorList;
     private ColorList hairColorList;
+    private bool prevMouseLockState = false;
 
     public AvatarEditorHUDView view;
 
+    public event Action OnOpen;
     public event Action OnClose;
 
     public AvatarEditorHUDController()
@@ -36,6 +38,9 @@ public class AvatarEditorHUDController : IHUD
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
 
         view = AvatarEditorHUDView.Create(this);
+
+        view.OnToggleActionTriggered += ToggleVisibility;
+        view.OnCloseActionTriggered += Hide;
 
         skinColorList = Resources.Load<ColorList>("SkinTone");
         hairColorList = Resources.Load<ColorList>("HairColor");
@@ -412,14 +417,38 @@ public class AvatarEditorHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
-        if (!visible && view.isOpen)
-            OnClose?.Invoke();
+        var currentRenderProfile = DCL.RenderProfileManifest.i.currentProfile;
 
+        if (!visible && view.isOpen)
+        {
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
+            currentRenderProfile.avatarProfile.Apply();
+            if (prevMouseLockState)
+            {
+                Utils.LockCursor();
+            }
+
+            OnClose?.Invoke();
+        }
+        else if (visible && !view.isOpen)
+        {
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
+            currentRenderProfile.avatarProfile.Apply();
+
+            prevMouseLockState = Utils.isCursorLocked;
+            Utils.UnlockCursor();
+            OnOpen?.Invoke();
+        }
+
+        currentRenderProfile.avatarProfile.Apply();
         view.SetVisibility(visible);
     }
 
     public void Dispose()
     {
+        view.OnToggleActionTriggered -= ToggleVisibility;
+        view.OnCloseActionTriggered -= Hide;
+
         CleanUp();
     }
 
@@ -466,5 +495,15 @@ public class AvatarEditorHUDController : IHUD
     public void SellCollectible(string collectibleId)
     {
         WebInterface.OpenURL("https://market.decentraland.org/account");
+    }
+
+    public void ToggleVisibility()
+    {
+        SetVisibility(!view.isOpen);
+    }
+
+    public void Hide()
+    {
+        SetVisibility(false);
     }
 }

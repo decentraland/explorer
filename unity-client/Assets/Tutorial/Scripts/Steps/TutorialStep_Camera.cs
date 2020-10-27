@@ -8,6 +8,8 @@ namespace DCL.Tutorial
     /// </summary>
     public class TutorialStep_Camera : TutorialStep
     {
+        [SerializeField] AudioEvent audioEventSuccess;
+
         private bool stepIsFinished = false;
 
         public override void OnStepStart()
@@ -17,15 +19,23 @@ namespace DCL.Tutorial
             CommonScriptableObjects.cameraMode.OnChange += CameraMode_OnChange;
         }
 
+        public override void OnStepFinished()
+        {
+            base.OnStepFinished();
+
+            CommonScriptableObjects.cameraMode.OnChange -= CameraMode_OnChange;
+        }
+
         public override IEnumerator OnStepExecute()
         {
             yield return new WaitUntil(() => stepIsFinished);
             yield return new WaitForSeconds(0.5f);
+            audioEventSuccess.Play(true);
         }
 
         private void CameraMode_OnChange(CameraMode.ModeId current, CameraMode.ModeId previous)
         {
-            if (current != previous)
+            if (current != previous && mainSection.activeSelf)
                 stepIsFinished = true;
         }
     }

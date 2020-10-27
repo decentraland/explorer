@@ -267,5 +267,5 @@ async function createAuthIdentity() {
 }
 
 function* logout() {
-  Session.current.then((s) => s.logout()).catch((e) => logger.error('error while logging out', e))
+  Session.current.logout().catch((e) => logger.error('error while logging out', e))
 }
