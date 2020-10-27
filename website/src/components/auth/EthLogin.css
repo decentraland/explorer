@@ -83,7 +83,7 @@
   cursor: pointer;
 
   background-color: #ff5273;
-  box-shadow: 0px 3.66316px 0px #e12f4f;
+  box-shadow: 0 3.66316px 0 #e12f4f;
 
   line-height: 40px;
   width: 214px;
@@ -99,7 +99,7 @@
 .eth-login-confirm-button1:disabled {
   color: #b6c6d7;
   background-color: #a08db8;
-  box-shadow: 0px 3.66316px 0px #907ca8;
+  box-shadow: 0 3.66316px 0 #907ca8;
 }
 
 .eth-login-logo {

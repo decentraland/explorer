@@ -1,36 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
 import "./EthLogin.css";
 import { Spinner } from "../common/Spinner";
-import { TermOfService } from "./TermOfService";
+import { WalletSelector } from "./WalletSelector";
+import { TermOfServices } from "./TermsOfServices";
+import { Passport } from "./Passport";
 
 export interface EthLoginProps {
   terms: boolean;
   loading: boolean;
-  onLogin: any;
+  onLogin: (provider: string) => void;
+  onGuest: () => void;
   onTermChange: any;
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
+  const [wallet, setWallet] = useState(false);
   return (
     <React.Fragment>
       <div className="eth-login-description">
-        Enter the first virtual world fully owned by its users.
+        Increase yourself into the first virtual world fully owned by its users.
       </div>
       {props.loading ? (
         <Spinner />
       ) : (
         <div id="eth-login-confirmation-wrapper">
-          <TermOfService checked={props.terms} onChange={props.onTermChange} />
           <button
             id="eth-login-confirm-button"
             className="eth-login-confirm-button1"
             disabled={!props.terms}
-            onClick={props.onLogin}
+            onClick={() => setWallet(true)}
           >
-            Start Exploring
+            Sign In - Up
+          </button>
+          <br />
+          <button
+            className="eth-login-confirm-button1"
+            disabled={!props.terms}
+            onClick={props.onGuest}
+          >
+            Play as Guest
           </button>
         </div>
       )}
+      <WalletSelector
+        show={wallet}
+        onClick={props.onLogin}
+        onCancel={() => setWallet(false)}
+      />
+      <TermOfServices show={false} />
+      <Passport show={false} />
     </React.Fragment>
   );
 };

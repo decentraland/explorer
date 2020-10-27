@@ -1,12 +1,12 @@
 import React from "react";
-import "./TermsOfService.css";
+import "./TermCheckbox.css";
 
-export interface TermOfServiceProps {
+export interface TermCheckboxProps {
   checked: boolean;
   onChange: any;
 }
 
-export const TermOfService: React.FC<TermOfServiceProps> = (props) => (
+export const TermCheckbox: React.FC<TermCheckboxProps> = (props) => (
   <div className="eth-login-tos">
     <input
       type="checkbox"

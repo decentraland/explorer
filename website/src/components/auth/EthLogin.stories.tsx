@@ -8,10 +8,13 @@ export default {
   args: {
     terms: true,
     loading: false,
-    onLogin: () => {},
-    onTermChange: () => {},
   } as EthLoginProps,
   component: EthLogin,
+  argTypes: {
+    onLogin: { action: "singing in/up..." },
+    onGuest: { action: "guest click..." },
+    onTermsChange: { action: "terms changed..." },
+  },
 } as Meta;
 
 export const Template: Story<EthLoginProps> = (args: EthLoginProps) => (

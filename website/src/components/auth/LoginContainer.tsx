@@ -21,8 +21,13 @@ const mapStateToProps = (state: any) => ({
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  onLogin: () =>
-    dispatch({ type: "[Request] Login", payload: { provider: "Metamask" } }),
+  onLogin: (provider: string) => {
+    console.log("[Authenticate]");
+    return dispatch({ type: "[Authenticate]", payload: { provider } });
+    // return dispatch({ type: "[Request] Login", payload: { provider } });
+  },
+  onGuest: () =>
+    dispatch({ type: "[Request] Login", payload: { provider: "Guest" } }),
   onTermsChange: (e: React.ChangeEvent<HTMLInputElement>) =>
     dispatch({ type: "UPDATE_TOS", payload: e.target.checked }),
 });
@@ -30,8 +35,9 @@ const mapDispatchToProps = (dispatch: any) => ({
 export interface LoginContainerProps {
   terms: boolean;
   stage: LoginStage;
-  onLogin: any;
-  onTermsChange: any;
+  onLogin: (provider: string) => void;
+  onGuest: () => void;
+  onTermsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => (
@@ -47,6 +53,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => (
               terms={props.terms}
               loading={props.stage === LoginStage.LOADING}
               onLogin={props.onLogin}
+              onGuest={props.onGuest}
               onTermChange={props.onTermsChange}
             />
           )}
