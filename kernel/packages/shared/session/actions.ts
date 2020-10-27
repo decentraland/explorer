@@ -3,6 +3,7 @@ import { action } from 'typesafe-actions'
 import { ETHEREUM_NETWORK } from 'config'
 
 import { ExplorerIdentity } from './types'
+import { Profile } from '../profiles/types'
 
 export const INIT_SESSION = '[Session] initializing'
 export const initSession = () => action(INIT_SESSION)
@@ -48,3 +49,7 @@ export const changeLoginStage = (stage: string) => action(CHANGE_LOGIN_STAGE, { 
 
 export const TOGGLE_WALLET_PROMPT = '[WALLET_PROMPT] show wallet prompt'
 export const toggleWalletPrompt = (show: boolean) => action(TOGGLE_WALLET_PROMPT, { show })
+
+export const SIGNUP_SET_PROFILE = '[SIGN-UP] signup set profile'
+export const signUpSetProfile = (profile: Partial<Profile>) => action(SIGNUP_SET_PROFILE, profile)
+export type SignUpSetProfileAction = ReturnType<typeof signUpSetProfile>

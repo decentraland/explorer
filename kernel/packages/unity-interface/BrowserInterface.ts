@@ -5,8 +5,8 @@ import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
-import { ReadOnlyQuaternion, ReadOnlyVector3, Vector3, Quaternion } from '../decentraland-ecs/src/decentraland/math'
+import { decentralandConfigurations, ethereumConfigurations, playerConfigurations } from 'config'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
 import { queueTrackingEvent } from 'shared/analytics'
@@ -15,21 +15,21 @@ import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar, Profile } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
+import { ChatMessage, FriendshipAction, FriendshipUpdateStatusMessage, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
 import { worldRunningObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
-import { updateUserData, updateFriendship } from 'shared/friends/actions'
+import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
+import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { getAppNetwork, fetchOwner } from 'shared/web3'
+import { fetchOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayer, mutePlayer, unblockPlayer, unmutePlayer } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
-import { logout } from 'shared/session/actions'
+import { changeSignUpStage, logout, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -65,7 +65,12 @@ export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
   /** Triggered when the camera moves */
-  public ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number; immediate?: boolean }) {
+  public ReportPosition(data: {
+    position: ReadOnlyVector3
+    rotation: ReadOnlyQuaternion
+    playerHeight?: number
+    immediate?: boolean
+  }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
     positionEvent.quaternion.set(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w)
     positionEvent.rotation.copyFrom(positionEvent.quaternion.eulerAngles)
@@ -178,11 +183,25 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
   }
 
-  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar; isSignUpFlow: boolean }) {
+  public SaveUserAvatar(changes: {
+    face: string
+    face128: string
+    face256: string
+    body: string
+    avatar: Avatar
+    isSignUpFlow?: boolean
+  }) {
     const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    if (!changes.isSignUpFlow) {
+      globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    } else {
+      globalThis.globalStore.dispatch(signUpSetProfile(updated))
+      globalThis.globalStore.dispatch(changeSignUpStage('passport'))
+      unityInterface.DeactivateRendering()
+      document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
+    }
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {

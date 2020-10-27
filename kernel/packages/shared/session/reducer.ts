@@ -5,8 +5,10 @@ import {
   CHANGE_LOGIN_STAGE,
   ChangeSignUpStageAction,
   SIGNUP_FORM,
+  SIGNUP_SET_PROFILE,
   SIGNUP_STAGE,
   SignUpFormAction,
+  SignUpSetProfileAction,
   TOGGLE_WALLET_PROMPT,
   UPDATE_TOS,
   USER_AUTHENTIFIED,
@@ -69,6 +71,19 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
           }
         }
       }
+    case SIGNUP_SET_PROFILE: {
+      const { name, email, ...values } = (action as SignUpSetProfileAction).payload
+      return {
+        ...state,
+        signup: {
+          ...state.signup,
+          profile: {
+            ...state.signup.profile,
+            ...values
+          }
+        }
+      }
+    }
   }
   return state
 }
