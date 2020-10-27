@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import "./EthLogin.css";
 import { Spinner } from "../common/Spinner";
 import { WalletSelector } from "./WalletSelector";
-import { TermOfServices } from "./TermsOfServices";
-import { Passport } from "./Passport";
 
 export interface EthLoginProps {
   terms: boolean;
@@ -47,8 +45,6 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
         onClick={props.onLogin}
         onCancel={() => setWallet(false)}
       />
-      <TermOfServices show={false} />
-      <Passport show={false} />
     </React.Fragment>
   );
 };

@@ -6,10 +6,12 @@ import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
 import { Logo } from "../common/Logo";
 import { connect } from "react-redux";
+import SignUpContainer from "./SignUpContainer";
 
 export enum LoginStage {
   LOADING = "loading",
   SING_IN = "signIn",
+  SING_UP = "signUp",
   CONNECT_ADVICE = "connect_advice",
   SING_ADVICE = "sign_advice",
   COMPLETED = "completed",
@@ -61,6 +63,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => (
             <EthConnectAdvice onLogin={props.onLogin} />
           )}
           {props.stage === LoginStage.SING_ADVICE && <EthSignAdvice />}
+          {props.stage === LoginStage.SING_UP && <SignUpContainer />}
         </div>
         <Footer />
       </div>
