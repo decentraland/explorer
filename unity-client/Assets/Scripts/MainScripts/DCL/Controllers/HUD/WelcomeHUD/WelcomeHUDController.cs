@@ -65,7 +65,6 @@ public class WelcomeHUDController : IHUD
     internal void Close()
     {
         SetVisibility(false);
-        Utils.LockCursor();
     }
 
     internal virtual void OnConfirmPressed(int buttonIndex)
@@ -102,7 +101,6 @@ public class WelcomeHUDController : IHUD
         }
         else
         {
-            Utils.LockCursor();
             AudioScriptableObjects.dialogClose.Play(true);
         }
 
