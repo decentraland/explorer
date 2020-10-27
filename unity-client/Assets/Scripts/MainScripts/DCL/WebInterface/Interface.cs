@@ -802,10 +802,11 @@ namespace DCL.Interface
             public string face128;
             public string face256;
             public string body;
+            public bool isSignUpFlow;
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
+        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot, bool isSignUpFlow = false)
         {
             var payload = new SaveAvatarPayload()
             {
@@ -813,7 +814,8 @@ namespace DCL.Interface
                 face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
                 face128 = System.Convert.ToBase64String(face128Snapshot.texture.EncodeToPNG()),
                 face256 = System.Convert.ToBase64String(face256Snapshot.texture.EncodeToPNG()),
-                body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
+                body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG()),
+                isSignUpFlow = isSignUpFlow
             };
             SendMessage("SaveUserAvatar", payload);
         }

@@ -432,6 +432,15 @@ public class HUDController : MonoBehaviour
         manaHud?.SetBalance(balance);
     }
 
+    public void ShowAvatarEditorInSignUp()
+    {
+        if (avatarEditorHud != null)
+        {
+            avatarEditorHud.IsSignUpFlowValue = true;
+            ShowAvatarEditor();
+        }
+    }
+
     private void OnDestroy()
     {
         Cleanup();

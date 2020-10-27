@@ -178,7 +178,7 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
   }
 
-  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
+  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar; isSignUpFlow: boolean }) {
     const { face, face128, face256, body, avatar } = changes
     const profile: Profile = getUserProfile().profile as Profile
     const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }

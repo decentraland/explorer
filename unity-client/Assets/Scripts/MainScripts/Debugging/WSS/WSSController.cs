@@ -307,6 +307,9 @@ namespace DCL
                             case "ActivateRendering":
                                 renderingController.ActivateRendering();
                                 break;
+                            case "ForceActivateRendering":
+                                renderingController.ForceActivateRendering();
+                                break;
                             case "ShowNotificationFromJson":
                                 NotificationsController.i.ShowNotificationFromJson(msg.payload);
                                 break;
@@ -432,6 +435,9 @@ namespace DCL
                                 break;
                             case "SetRenderProfile":
                                 RenderProfileBridge.i.SetRenderProfile(msg.payload);
+                                break;
+                            case "ShowAvatarEditorInSignUp":
+                                HUDController.i.ShowAvatarEditorInSignUp();
                                 break;
                             default:
                                 Debug.Log(

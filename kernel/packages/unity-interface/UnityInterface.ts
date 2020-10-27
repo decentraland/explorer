@@ -375,6 +375,11 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
   }
 
+  public ShowAvatarEditorInSignIn() {
+    this.gameInstance.SendMessage('HUDController', 'ShowAvatarEditorInSignUp')
+    this.gameInstance.SendMessage('SceneController', 'ForceActivateRendering')
+  }
+
   // *********************************************************************************
   // ************** Builder messages **************
   // *********************************************************************************
