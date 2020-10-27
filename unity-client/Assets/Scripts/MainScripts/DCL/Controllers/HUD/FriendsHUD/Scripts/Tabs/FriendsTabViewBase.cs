@@ -176,7 +176,6 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
         contextMenuPanel.OnBlock += OnPressBlockButton;
         contextMenuPanel.OnDelete += OnPressDeleteButton;
-        contextMenuPanel.OnPassport += OnPressPassportButton;
         contextMenuPanel.OnReport += OnPressReportButton;
     }
 
@@ -184,15 +183,10 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         contextMenuPanel.OnBlock -= OnPressBlockButton;
         contextMenuPanel.OnDelete -= OnPressDeleteButton;
-        contextMenuPanel.OnPassport -= OnPressPassportButton;
         contextMenuPanel.OnReport -= OnPressReportButton;
     }
 
     protected virtual void OnPressReportButton(string userId)
-    {
-    }
-
-    protected virtual void OnPressPassportButton(string userId)
     {
     }
 

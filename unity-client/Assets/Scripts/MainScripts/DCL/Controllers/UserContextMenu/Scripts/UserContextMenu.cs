@@ -57,14 +57,18 @@ public class UserContextMenu : MonoBehaviour
     public event System.Action<string, bool> OnBlock;
     public event System.Action<string> OnDelete;
 
-    private static readonly StringVariable currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-
+    private static StringVariable currentPlayerId = null;
     private RectTransform rectTransform;
     private string userId;
     private bool isBlocked;
 
     private void Awake()
     {
+        if (!currentPlayerId)
+        {
+            currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
+        }
+
         rectTransform = GetComponent<RectTransform>();
 
         passportButton.onClick.AddListener(OnPassportButtonPressed);

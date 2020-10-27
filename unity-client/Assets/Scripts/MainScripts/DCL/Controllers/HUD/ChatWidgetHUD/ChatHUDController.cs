@@ -6,7 +6,6 @@ using UnityEngine.Events;
 public class ChatHUDController : IDisposable
 {
     public const int MAX_CHAT_ENTRIES = 100;
-    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
     public ChatHUDView view;
 
@@ -28,9 +27,6 @@ public class ChatHUDController : IDisposable
             this.view.contextMenu.OnShowMenu -= ContextMenu_OnShowMenu;
             this.view.contextMenu.OnShowMenu += ContextMenu_OnShowMenu;
 
-            this.view.contextMenu.OnPassport -= ContextMenu_OnPassport;
-            this.view.contextMenu.OnPassport += ContextMenu_OnPassport;
-
             this.view.contextMenu.OnBlock -= ContextMenu_OnBlock;
             this.view.contextMenu.OnBlock += ContextMenu_OnBlock;
 
@@ -51,12 +47,6 @@ public class ChatHUDController : IDisposable
     private void ContextMenu_OnShowMenu()
     {
         view.OnMessageCancelHover();
-    }
-
-    private void ContextMenu_OnPassport(string userId)
-    {
-        var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-        currentPlayerId.Set(userId);
     }
 
     private void ContextMenu_OnBlock(string userId, bool blockUser)
@@ -97,7 +87,6 @@ public class ChatHUDController : IDisposable
         if (view.contextMenu != null)
         {
             view.contextMenu.OnShowMenu -= ContextMenu_OnShowMenu;
-            view.contextMenu.OnPassport -= ContextMenu_OnPassport;
             view.contextMenu.OnBlock -= ContextMenu_OnBlock;
             view.contextMenu.OnReport -= ContextMenu_OnReport;
         }
