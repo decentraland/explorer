@@ -132,6 +132,7 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
     userId: identity.address.toString(),
     ethAddress: identity.address.toString(),
     hasClaimedName: false,
+    inventory: [],
     version: 0,
     ...profile
   }
@@ -225,9 +226,16 @@ function* singUp() {
   const profile = yield select(getSignUpProfile)
   profile.userId = userData.userId.toString()
   profile.ethAddress = userData.userId.toString()
+  profile.version = 0
+  profile.inventory = []
+  profile.tutorialStep = 0
+  profile.hasClaimedName = false
+
+  defaultLogger.log('PROFILE: ', profile)
 
   yield createSignUpProfile(profile, userData.identity)
   yield signIn(userData.userId, userData.identity)
+  unityInterface.ActivateRendering()
 }
 
 function* login(action: LoginAction) {
