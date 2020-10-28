@@ -426,7 +426,7 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
     >
       <button
         className="eth-login-confirm-button1"
-        disabled={true}
+        disabled={false}
         id="eth-login-confirm-button"
         onClick={[Function]}
       >
@@ -435,7 +435,7 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
       <br />
       <button
         className="eth-login-confirm-button1"
-        disabled={true}
+        disabled={false}
       >
         Play as Guest
       </button>
