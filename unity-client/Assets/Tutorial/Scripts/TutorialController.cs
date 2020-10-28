@@ -78,9 +78,11 @@ namespace DCL.Tutorial
         internal bool openedFromDeepLink = false;
         internal bool alreadyOpenedFromDeepLink = false;
         internal bool playerIsInGenesisPlaza = false;
-        internal bool markTutorialAsCompleted = false;
         internal TutorialStep runningStep = null;
         internal bool tutorialReset = false;
+        internal float elapsedTimeInCurrentStep = 0f;
+        internal TutorialPath currentPath;
+        internal int currentStepNumber;
 
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
@@ -223,8 +225,6 @@ namespace DCL.Tutorial
 
             if (playerIsInGenesisPlaza || tutorialReset)
             {
-                markTutorialAsCompleted = true;
-
                 if (tutorialReset)
                 {
                     yield return ExecuteSteps(TutorialPath.FromResetTutorial, stepIndex);
@@ -237,7 +237,6 @@ namespace DCL.Tutorial
             }
             else if (openedFromDeepLink)
             {
-                markTutorialAsCompleted = false;
                 alreadyOpenedFromDeepLink = true;
                 yield return ExecuteSteps(TutorialPath.FromDeepLink, stepIndex);
             }
@@ -375,7 +374,9 @@ namespace DCL.Tutorial
                     break;
             }
 
-            float elapsedTime = 0f;
+            currentPath = tutorialPath;
+
+            elapsedTimeInCurrentStep = 0f;
             for (int i = startingStepIndex; i < steps.Count; i++)
             {
                 var stepPrefab = steps[i];
@@ -387,7 +388,18 @@ namespace DCL.Tutorial
 
                 currentStepIndex = i;
 
-                elapsedTime = Time.realtimeSinceStartup;
+                elapsedTimeInCurrentStep = Time.realtimeSinceStartup;
+                currentStepNumber = i + 1;
+
+                if (!debugRunTutorial && sendStats)
+                {
+                    SendStepStartedSegmentStats(
+                        tutorialVersion,
+                        tutorialPath,
+                        i + 1,
+                        runningStep.name.Replace("(Clone)", "").Replace("TutorialStep_", ""));
+                }
+
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
                 if (i < steps.Count - 1)
@@ -397,7 +409,8 @@ namespace DCL.Tutorial
 
                 yield return runningStep.OnStepPlayHideAnimation();
                 runningStep.OnStepFinished();
-                elapsedTime = Time.realtimeSinceStartup - elapsedTime;
+                elapsedTimeInCurrentStep = Time.realtimeSinceStartup - elapsedTimeInCurrentStep;
+
                 if (!debugRunTutorial && sendStats)
                 {
                     SendStepCompletedSegmentStats(
@@ -405,26 +418,21 @@ namespace DCL.Tutorial
                         tutorialPath,
                         i + 1,
                         runningStep.name.Replace("(Clone)", "").Replace("TutorialStep_", ""),
-                        elapsedTime);
+                        elapsedTimeInCurrentStep);
                 }
+
                 Destroy(runningStep.gameObject);
 
                 if (i < steps.Count - 1 && timeBetweenSteps > 0)
                     yield return new WaitForSeconds(timeBetweenSteps);
             }
 
-            if (!debugRunTutorial && markTutorialAsCompleted)
+            if (!debugRunTutorial)
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
 
             SetTutorialDisabled();
-
-            if (tutorialPath == TutorialPath.FromDeepLink)
-            {
-                hudController?.taskbarHud?.ShowTutorialOption(false);
-            }
-
         }
 
         private void SetUserTutorialStepAsCompleted(TutorialFinishStep finishStepType)
@@ -491,6 +499,18 @@ namespace DCL.Tutorial
             return false;
         }
 
+        private void SendStepStartedSegmentStats(int version, TutorialPath tutorialPath, int stepNumber, string stepName)
+        {
+            WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]
+            {
+                new WebInterface.AnalyticsPayload.Property("version", version.ToString()),
+                new WebInterface.AnalyticsPayload.Property("path", tutorialPath.ToString()),
+                new WebInterface.AnalyticsPayload.Property("step number", stepNumber.ToString()),
+                new WebInterface.AnalyticsPayload.Property("step name", stepName)
+            };
+            WebInterface.ReportAnalyticsEvent("tutorial step started", properties);
+        }
+
         private void SendStepCompletedSegmentStats(int version, TutorialPath tutorialPath, int stepNumber, string stepName, float elapsedTime)
         {
             WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]
@@ -509,8 +529,10 @@ namespace DCL.Tutorial
             WebInterface.AnalyticsPayload.Property[] properties = new WebInterface.AnalyticsPayload.Property[]
             {
                 new WebInterface.AnalyticsPayload.Property("version", version.ToString()),
+                new WebInterface.AnalyticsPayload.Property("path", currentPath.ToString()),
+                new WebInterface.AnalyticsPayload.Property("step number", currentStepNumber.ToString()),
                 new WebInterface.AnalyticsPayload.Property("step name", stepName),
-                new WebInterface.AnalyticsPayload.Property("elapsed time", Time.realtimeSinceStartup.ToString("0.00"))
+                new WebInterface.AnalyticsPayload.Property("elapsed time", (Time.realtimeSinceStartup - elapsedTimeInCurrentStep).ToString("0.00"))
             };
             WebInterface.ReportAnalyticsEvent("tutorial skipped", properties);
         }
