@@ -12,6 +12,7 @@ public class UserContextMenu : MonoBehaviour
     const string BLOCK_BTN_BLOCK_TEXT = "Block";
     const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
     const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
+    const string DELETE_MSG_PATTERN = "Are you sure you want to delete {0} as a friend?";
 
     [System.Flags]
     public enum MenuConfigFlags
@@ -66,6 +67,8 @@ public class UserContextMenu : MonoBehaviour
     private string userId;
     private bool isBlocked;
     private MenuConfigFlags currentConfigFlags;
+    private IConfirmationDialog confirmationDialog;
+
 
     /// <summary>
     /// Show context menu
@@ -88,6 +91,15 @@ public class UserContextMenu : MonoBehaviour
         Setup(userId, configFlags);
         gameObject.SetActive(true);
         OnShowMenu?.Invoke();
+    }
+
+    /// <summary>
+    /// Set confirmation popup to reference use
+    /// </summary>
+    /// <param name="confirmationPopup">confirmation popup reference</param>
+    public void SetConfirmationPopup(IConfirmationDialog confirmationPopup)
+    {
+        this.confirmationDialog = confirmationPopup;
     }
 
     /// <summary>
@@ -148,6 +160,25 @@ public class UserContextMenu : MonoBehaviour
     private void OnDeleteUserButtonPressed()
     {
         OnUnfriend?.Invoke(userId);
+        if (confirmationDialog != null)
+        {
+            confirmationDialog.SetText(string.Format(DELETE_MSG_PATTERN, UserProfileController.userProfilesCatalog.Get(userId)?.userName));
+            confirmationDialog.Show(() =>
+            {
+                FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+                {
+                    userId = userId,
+                    action = FriendshipAction.DELETED
+                });
+
+                WebInterface.UpdateFriendshipStatus(
+                    new FriendsController.FriendshipUpdateStatusMessage()
+                    {
+                        action = FriendshipAction.DELETED,
+                        userId = userId
+                    });
+            });
+        }
         Hide();
     }
 
@@ -160,6 +191,7 @@ public class UserContextMenu : MonoBehaviour
             return;
         }
 
+        // NOTE: if we don't add this, the friend request has strange behaviors
         UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
         {
             userId = userId,
