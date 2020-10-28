@@ -23,6 +23,7 @@ import {
   AWAITING_USER_SIGNATURE,
   awaitingUserSignature,
   NETWORK_MISMATCH,
+  setLoadingScreen,
   setTLDError
 } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
@@ -32,7 +33,7 @@ import { getNetwork } from 'shared/ethereum/EthereumService'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { Session } from '.'
-import { ExplorerIdentity, LoginStage } from './types'
+import { ExplorerIdentity, LoginStage, SignUpStage } from './types'
 import {
   AUTHENTICATE,
   AuthenticateAction,
@@ -51,9 +52,11 @@ import {
 } from './actions'
 import { ProviderType } from '../ethereum/ProviderType'
 import Html from '../Html'
-import { getProfileByUserId } from '../profiles/sagas'
-import { setLoadingScreenVisible } from '../../unity-interface/dcl'
+import { createSignUpProfile, getProfileByUserId } from '../profiles/sagas'
 import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
+import { unityInterface } from '../../unity-interface/UnityInterface'
+import { waitForMetaConfigurationInitialization } from '../meta/sagas'
+import { getSignUpProfile } from './selectors'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -92,6 +95,7 @@ function* scheduleAwaitingSignaturePrompt() {
 }
 
 function* initSession() {
+  yield waitForMetaConfigurationInitialization()
   if (ENABLE_WEB3) {
     Html.showEthLogin()
     yield createWeb3Connector()
@@ -105,36 +109,29 @@ function* initSession() {
 }
 
 function* authenticate(action: AuthenticateAction) {
-  defaultLogger.log('KERNEL: authenticate')
   const provider = yield requestProvider(action.payload.provider as ProviderType)
   if (!provider) {
     return
   }
-  const { userId, identity } = yield authorize()
-  let profile = yield getProfileByUserId(userId)
-  if (!profile) {
-    return yield signIn(userId, identity)
+  const userData = yield authorize()
+  let profile = yield getProfileByUserId(userData.userId)
+  defaultLogger.log('PROFILE_EXIST: ', profile)
+  if (profile) {
+    return yield signIn(userData.userId, userData.identity)
   }
-  defaultLogger.log('SING_UP_START')
-
-  // prepare avatar editor
-  yield prepareSignUp(userId)
-
-  return
+  return yield startSignUp(userData.userId, userData.identity)
 }
 
-function* prepareSignUp(userId: string) {
+function* startSignUp(userId: string, identity: ExplorerIdentity) {
+  yield put(setLoadingScreen(true))
+  saveToLocalStorage('signup_profile', { userId, identity })
   const profile = yield generateRandomUserProfile(userId)
-  setLoadingScreenVisible(true)
   yield put(changeLoginStage(LoginStage.SING_UP))
-  yield put(changeSignUpStage('passport'))
-  defaultLogger.log('RANDOM PROFILE: ', profile)
-  /*
-   setLoadingScreenVisible(false)
-   unityInterface.LoadProfile(profileToRendererFormat(profile))
-   unityInterface.ShowAvatarEditorInSignInFlow()
-   unityInterface.ActivateRendering(true)
-   */
+  yield put(changeSignUpStage(SignUpStage.AVATAR))
+
+  unityInterface.LoadProfile(profile)
+  unityInterface.ShowAvatarEditorInSignIn()
+  yield put(setLoadingScreen(false))
 }
 
 function* requestProvider(providerType: ProviderType) {
@@ -153,30 +150,23 @@ function* requestProvider(providerType: ProviderType) {
 
 function* authorize() {
   if (ENABLE_WEB3) {
-    let profile: { userId: string; identity: ExplorerIdentity }
     try {
+      const eth = createEth()
+      const account = (yield eth.getAccounts())[0]
+      const address = account.toJSON()
       const userData = getUserProfile()
       // check that user data is stored & key is not expired
-      if (isSessionExpired(userData)) {
+      if (isSessionExpired(userData) || userData.userId !== address) {
         const identity = yield createAuthIdentity()
-        profile = {
+        return {
           userId: identity.address,
           identity
         }
-        setLocalProfile(profile.userId, profile)
-      } else {
-        profile = {
-          userId: userData.identity.address,
-          identity: userData.identity
-        }
-        setLocalProfile(profile.userId, profile)
       }
-
-      if (profile.identity.hasConnectedWeb3) {
-        identifyUser(profile.userId)
-        referUser(profile.identity)
+      return {
+        userId: userData.identity.address,
+        identity: userData.identity
       }
-      return profile
     } catch (e) {
       logger.error(e)
       ReportFatalError(AUTH_ERROR_LOGGED_OUT)
@@ -195,6 +185,18 @@ function* signIn(userId: string, identity: ExplorerIdentity) {
   logger.log(`User ${userId} logged in`)
   yield put(changeLoginStage(LoginStage.COMPLETED))
 
+  setLocalProfile(userId, { userId, identity })
+  if (identity.hasConnectedWeb3) {
+    identifyUser(userId)
+    referUser(identity)
+  }
+  yield setUserAuthentified(userId, identity)
+
+  loginCompleted.resolve()
+  yield put(loginCompletedAction())
+}
+
+function* setUserAuthentified(userId: string, identity: ExplorerIdentity) {
   let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
   if (WORLD_EXPLORER) {
     net = yield getAppNetwork()
@@ -205,15 +207,22 @@ function* signIn(userId: string, identity: ExplorerIdentity) {
   }
 
   yield put(userAuthentified(userId, identity, net))
-
-  loginCompleted.resolve()
-  yield put(loginCompletedAction())
 }
 
 function* singUp() {
-  defaultLogger.log('action: SIGNUP')
-  const userData = getUserProfile()
-  yield signIn(userData.userId, userData.identity)
+  setLoadingScreen(true)
+  const userData = getFromLocalStorage('signup_profile')
+
+  logger.log(`User ${userData.userId} signed up`)
+
+  const profile = yield select(getSignUpProfile)
+  profile.userId = userData.userId.toString()
+  profile.ethAddress = userData.userId.toString()
+
+  logger.log(`User profile ${profile}`)
+
+  yield createSignUpProfile(profile, userData.identity)
+  yield signIn(userData.user, userData.identity)
 }
 
 function* login(action: LoginAction) {

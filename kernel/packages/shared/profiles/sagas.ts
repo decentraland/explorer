@@ -407,7 +407,22 @@ export async function profileServerRequest(serverUrl: string, userId: string) {
   if (!request.ok) {
     throw new Error('Profile not found')
   }
-  return await request.json()
+  return request.json()
+}
+
+export function* createSignUpProfile(profile: Profile, identity: ExplorerIdentity) {
+  const url: string = yield select(getUpdateProfileServer)
+  const userId = profile.userId
+  const currentVersion = profile.version || 0
+  // to prevent save a email on profile
+  profile.email = ''
+  return yield modifyAvatar({
+    url,
+    userId,
+    currentVersion,
+    identity,
+    profile
+  })
 }
 
 export function* handleRandomAsSuccess(action: ProfileRandomAction): any {
