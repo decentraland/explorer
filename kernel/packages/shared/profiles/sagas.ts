@@ -1,7 +1,7 @@
 import { Store } from 'redux'
 import { EntityType } from 'dcl-catalyst-commons'
 import { ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
-import { call, put, race, select, take, takeEvery } from 'redux-saga/effects'
+import { call, throttle, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
 import { getServerConfigurations, ALL_WEARABLES, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
 
@@ -30,7 +30,13 @@ import {
   addedProfileToCatalog,
   saveProfileRequest,
   LOCAL_PROFILE_RECEIVED,
-  LocalProfileReceived
+  LocalProfileReceived,
+  deployProfile,
+  DEPLOY_PROFILE_REQUEST,
+  deployProfileSuccess,
+  deployProfileFailure,
+  profileSavedNotDeployed,
+  DeployProfile
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
 import { getProfile, getProfileDownloadServer, hasConnectedWeb3 } from './selectors'
@@ -99,7 +105,6 @@ export function* profileSaga(): any {
 
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
   yield takeLatestByUserId(PROFILE_SUCCESS, submitProfileToRenderer)
-  yield takeLatestByUserId(PROFILE_SUCCESS, submitOwnProfileToComms)
   yield takeLatestByUserId(PROFILE_RANDOM, handleRandomAsSuccess)
 
   yield takeLatestByUserId(SAVE_PROFILE_REQUEST, handleSaveAvatar)
@@ -107,6 +112,8 @@ export function* profileSaga(): any {
   yield takeLatestByUserId(INVENTORY_REQUEST, handleFetchInventory)
 
   yield takeLatestByUserId(LOCAL_PROFILE_RECEIVED, handleLocalProfile)
+
+  yield throttle(3000, DEPLOY_PROFILE_REQUEST, handleDeployProfile)
 }
 
 function* initialProfileLoad() {
@@ -200,8 +207,11 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
       defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
     }
 
-    if (!profile && currentId === userId) {
-      profile = fetchProfileLocally(userId)
+    if (currentId === userId) {
+      const localProfile = fetchProfileLocally(userId)
+      if (!profile || (localProfile && profile.version < localProfile.version)) {
+        profile = localProfile
+      }
     }
 
     if (!profile) {
@@ -295,20 +305,12 @@ export async function profileServerRequest(serverUrl: string, userId: string) {
   }
 }
 
-export function* handleRandomAsSuccess(action: ProfileRandomAction): any {
+function* handleRandomAsSuccess(action: ProfileRandomAction): any {
   // TODO (eordano, 16/Sep/2019): See if there's another way around people expecting PASSPORT_SUCCESS
   yield put(profileSuccess(action.payload.userId, action.payload.profile))
 }
 
-export function* submitOwnProfileToComms(action: ProfileSuccessAction) {
-  const currentId = yield select(getCurrentUserId)
-  const { userId, profile } = action.payload
-  if (userId === currentId) {
-    updateCommsUser({ version: profile.version })
-  }
-}
-
-export function* handleLocalProfile(action: LocalProfileReceived) {
+function* handleLocalProfile(action: LocalProfileReceived) {
   const { userId, profile } = action.payload
 
   const existingProfile = yield select(getProfile, userId)
@@ -319,7 +321,7 @@ export function* handleLocalProfile(action: LocalProfileReceived) {
   }
 }
 
-export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
+function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
   if (profile.avatar) {
     const { snapshots } = profile.avatar
@@ -360,7 +362,7 @@ function* sendLoadProfile(profile: Profile) {
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
 
-export function* handleFetchInventory(action: InventoryRequest) {
+function* handleFetchInventory(action: InventoryRequest) {
   const { userId, ethAddress } = action.payload
   try {
     const inventoryItems = yield call(fetchInventoryItemsByAddress, ethAddress)
@@ -383,37 +385,53 @@ export async function fetchInventoryItemsByAddress(address: string) {
   return inventory.map((wearable) => wearable.id)
 }
 
-export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
+function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
 
   try {
     const savedProfile: Profile | null = yield select(getProfile, userId)
     const currentVersion: number = savedProfile?.version || 0
-    const url: string = yield select(getUpdateProfileServer)
     const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } } as Profile
 
     const identity: ExplorerIdentity = yield select(getCurrentIdentity)
 
     localProfilesRepo.persist(identity.address, profile)
 
+    yield put(saveProfileSuccess(userId, profile.version, profile))
+
     // only update profile on server if wallet is connected
     if (identity.hasConnectedWeb3) {
-      yield call(modifyAvatar, {
-        url,
-        userId,
-        identity,
-        profile
-      })
+      yield put(deployProfile(profile))
+    } else {
+      yield put(profileSavedNotDeployed(userId, profile.version, profile))
     }
 
-    yield put(saveProfileSuccess(userId, profile.version, profile))
     yield put(profileRequest(userId))
   } catch (error) {
     yield put(saveProfileFailure(userId, 'unknown reason'))
   }
 }
 
-export function fetchProfileLocally(address: string) {
+function* handleDeployProfile(deployProfileAction: DeployProfile) {
+  const url: string = yield select(getUpdateProfileServer)
+  const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+  const userId: string = yield select(getCurrentUserId)
+  const profile: Profile = deployProfileAction.payload.profile
+  try {
+    yield modifyAvatar({
+      url,
+      userId,
+      identity,
+      profile
+    })
+    yield put(deployProfileSuccess(userId, profile.version, profile))
+  } catch (e) {
+    defaultLogger.error('Error deploying profile!', e)
+    yield put(deployProfileFailure(userId, profile, e))
+  }
+}
+
+function fetchProfileLocally(address: string) {
   const profile: Profile | null = localProfilesRepo.get(address)
   if (profile?.userId === address) {
     return ensureServerFormat(profile)
@@ -453,12 +471,7 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   return [name, hash, contentFile]
 }
 
-export async function modifyAvatar(params: {
-  url: string
-  userId: string
-  identity: ExplorerIdentity
-  profile: Profile
-}) {
+async function modifyAvatar(params: { url: string; userId: string; identity: ExplorerIdentity; profile: Profile }) {
   const { url, profile, identity } = params
   const { avatar } = profile
 
@@ -524,8 +537,4 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
 
 export function getProfileType(identity?: ExplorerIdentity): ProfileType {
   return identity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
-}
-
-export function stripSnapshots(profile: Profile) {
-  return profile.snapshots ? { face256: profile.snapshots.face256, face128: '', face: '', body: '' } : undefined
 }

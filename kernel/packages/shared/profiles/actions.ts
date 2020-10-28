@@ -39,6 +39,23 @@ export type SaveProfileRequest = ReturnType<typeof saveProfileRequest>
 export type SaveProfileSuccess = ReturnType<typeof saveProfileSuccess>
 export type SaveProfileFailure = ReturnType<typeof saveProfileFailure>
 
+export const DEPLOY_PROFILE_SUCCESS = '[Success] Deploy Profile'
+export const DEPLOY_PROFILE_REQUEST = '[Request] Deploy Profile'
+export const DEPLOY_PROFILE_FAILURE = '[Failure] Deploy Profile'
+export const deployProfile = (profile: Profile) => action(DEPLOY_PROFILE_REQUEST, { profile })
+export const deployProfileSuccess = (userId: string, version: number, profile: Profile) =>
+  action(DEPLOY_PROFILE_SUCCESS, { userId, version, profile })
+export const deployProfileFailure = (userId: string, profile: Profile, error: any) =>
+  action(DEPLOY_PROFILE_FAILURE, { userId, profile, error })
+
+export type DeployProfileSuccess = ReturnType<typeof deployProfileSuccess>
+export type DeployProfile = ReturnType<typeof deployProfile>
+
+export const PROFILE_SAVED_NOT_DEPLOYED = 'Profile not deployed'
+export const profileSavedNotDeployed = (userId: string, version: number, profile: Profile) =>
+  action(PROFILE_SAVED_NOT_DEPLOYED, { userId, version, profile })
+export type ProfileSavedNotDeployed = ReturnType<typeof profileSavedNotDeployed>
+
 // Inventory
 
 export const INVENTORY_REQUEST = '[Request] Inventory fetch'

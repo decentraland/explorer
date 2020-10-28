@@ -89,7 +89,7 @@ import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
 import { isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
 import future, { IFuture } from 'fp-future'
-import { getProfileType, stripSnapshots } from 'shared/profiles/sagas'
+import { getProfileType } from 'shared/profiles/sagas'
 import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
 
@@ -198,6 +198,7 @@ export class Context {
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
 
   lastProfileResponseTime: number = 0
+  sendingProfileResponse: boolean = false
 
   positionUpdatesPaused: boolean = false
 
@@ -468,8 +469,6 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
 
 const TIME_BETWEEN_PROFILE_RESPONSES = 10000
 
-let sendingProfileResponse = false
-
 function processProfileRequest(context: Context, fromAlias: string, message: Package<ProfileRequest>) {
   const myIdentity = getIdentity()
   const myAddress = myIdentity?.address
@@ -478,9 +477,9 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
   if (message.data.userId !== myAddress) return
 
   // If we are already sending a profile response, we don't want to schedule another
-  if (sendingProfileResponse) return
+  if (context.sendingProfileResponse) return
 
-  sendingProfileResponse = true
+  context.sendingProfileResponse = true
   ;(async () => {
     const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
 
@@ -496,14 +495,13 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
     )
 
     if (context.currentPosition) {
-      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, {
-        ...profile,
-        snapshots: stripSnapshots(profile)
-      })
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, profile)
     }
+
+    context.lastProfileResponseTime = Date.now()
   })()
     .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
-    .finally(() => (sendingProfileResponse = false))
+    .finally(() => (context.sendingProfileResponse = false))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {

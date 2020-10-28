@@ -12,12 +12,7 @@ export interface Profile {
   inventory: WearableId[]
   blocked?: string[]
   muted?: string[]
-  snapshots?: {
-    face: string
-    face256: string
-    face128: string
-    body: string
-  }
+  snapshots?: Snapshots
   version: number
   tutorialStep: number
   interests?: string[]
@@ -29,12 +24,14 @@ export interface Avatar {
   hairColor: ColorString
   eyeColor: ColorString
   wearables: WearableId[]
-  snapshots: {
-    face: string
-    face256: string
-    face128: string
-    body: string
-  }
+  snapshots: Snapshots
+}
+
+export type Snapshots = {
+  face: string
+  face256: string
+  face128: string
+  body: string
 }
 
 export interface ProfileForRenderer {
