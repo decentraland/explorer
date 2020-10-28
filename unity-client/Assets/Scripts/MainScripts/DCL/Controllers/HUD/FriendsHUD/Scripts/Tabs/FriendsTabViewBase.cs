@@ -175,13 +175,13 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         rectTransform = transform as RectTransform;
 
         contextMenuPanel.OnBlock += OnPressBlockButton;
-        contextMenuPanel.OnDelete += OnPressDeleteButton;
+        contextMenuPanel.OnUnfriend += OnPressDeleteButton;
     }
 
     public virtual void OnDestroy()
     {
         contextMenuPanel.OnBlock -= OnPressBlockButton;
-        contextMenuPanel.OnDelete -= OnPressDeleteButton;
+        contextMenuPanel.OnUnfriend -= OnPressDeleteButton;
     }
 
     protected virtual void OnPressDeleteButton(string userId)
@@ -215,11 +215,8 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
         entry.OnMenuToggle += (x) =>
         {
-            var ownUserProfiler = UserProfile.GetOwnUserProfile();
-            bool isBlocked = ownUserProfiler.blocked != null ? ownUserProfiler.blocked.Contains(userId) : false;
-            contextMenuPanel.Initialize(userId, string.Empty, isBlocked);
             contextMenuPanel.transform.position = entry.menuPositionReference.position;
-            contextMenuPanel.Show();
+            contextMenuPanel.Show(userId);
         };
 
         UpdateEmptyListObjects();
