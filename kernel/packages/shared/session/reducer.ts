@@ -22,12 +22,12 @@ const INITIAL_STATE: SessionState = {
   userId: undefined,
   network: undefined,
   loginStage: LoginStage.LOADING,
-  tos: false,
+  tos: true,
   showWalletPrompt: false,
   signup: {
     active: false,
     stage: '',
-    tos: false,
+    tos: true,
     profile: {}
   }
 }

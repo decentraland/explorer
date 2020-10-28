@@ -57,7 +57,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
             {(props.stage === LoginStage.SIGN_IN ||
               props.stage === LoginStage.LOADING) && (
               <EthLogin
-                terms={props.terms}
+                terms={true}
                 loading={props.stage === LoginStage.LOADING}
                 onLogin={props.onLogin}
                 onGuest={props.onGuest}
