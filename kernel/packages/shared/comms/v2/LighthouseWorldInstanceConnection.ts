@@ -68,12 +68,14 @@ const VoiceType: PeerMessageType = {
   expirationTime: 10000
 }
 
-const ProfileRequestResponseType: PeerMessageType = {
-  name: 'profile-request-response',
-  ttl: 10,
-  optimistic: true,
-  discardOlderThan: 0,
-  expirationTime: 10000
+function ProfileRequestResponseType(action: 'request' | 'response'): PeerMessageType {
+  return {
+    name: 'profile_' + action,
+    ttl: 10,
+    optimistic: true,
+    discardOlderThan: 0,
+    expirationTime: 10000
+  }
 }
 
 declare var global: any
@@ -170,7 +172,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     profileRequestData.setUserId(userId)
     profileRequestData.setProfileVersion(version?.toString() ?? '')
 
-    await this.sendData(topic, profileRequestData, ProfileRequestResponseType)
+    await this.sendData(topic, profileRequestData, ProfileRequestResponseType('request'))
   }
 
   async sendProfileResponse(currentPosition: Position, profile: Profile): Promise<void> {
@@ -179,7 +181,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     const profileResponseData = new ProfileResponseData()
     profileResponseData.setSerializedProfile(JSON.stringify(profile))
 
-    await this.sendData(topic, profileResponseData, ProfileRequestResponseType)
+    await this.sendData(topic, profileResponseData, ProfileRequestResponseType('response'))
   }
 
   async sendPositionMessage(p: Position) {
