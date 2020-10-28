@@ -202,8 +202,16 @@ public class UserContextMenu : MonoBehaviour
     private void Setup(string userId, MenuConfigFlags configFlags)
     {
         this.userId = userId;
-        this.currentConfigFlags = configFlags;
 
+        UserProfile profile = UserProfileController.userProfilesCatalog.Get(userId);
+        bool hasWallet = profile?.hasConnectedWeb3 ?? false;
+
+        if (!hasWallet || !UserProfile.GetOwnUserProfile().hasConnectedWeb3)
+        {
+            configFlags &= ~MenuConfigFlags.Friendship;
+        }
+
+        this.currentConfigFlags = configFlags;
         ProcessActiveElements(configFlags);
 
         if ((configFlags & MenuConfigFlags.Block) != 0)
@@ -213,7 +221,7 @@ public class UserContextMenu : MonoBehaviour
         }
         if ((configFlags & MenuConfigFlags.Name) != 0)
         {
-            string name = UserProfileController.userProfilesCatalog.Get(userId)?.name;
+            string name = profile?.name;
             userName.text = name;
         }
         if ((configFlags & MenuConfigFlags.Friendship) != 0 && FriendsController.i)
@@ -224,14 +232,14 @@ public class UserContextMenu : MonoBehaviour
             }
             else
             {
-                SetupFriendship(userId, FriendshipStatus.NONE);
+                SetupFriendship(FriendshipStatus.NONE);
             }
             FriendsController.i.OnUpdateUserStatus -= OnFriendStatusUpdate;
             FriendsController.i.OnUpdateUserStatus += OnFriendStatusUpdate;
         }
     }
 
-    private void SetupFriendship(string userId, FriendshipStatus friendshipStatus)
+    private void SetupFriendship(FriendshipStatus friendshipStatus)
     {
         if (friendshipStatus == FriendshipStatus.FRIEND)
         {
@@ -239,6 +247,7 @@ public class UserContextMenu : MonoBehaviour
             friendRemoveContainer.SetActive(true);
             friendRequestedContainer.SetActive(false);
             deleteFriendButton.gameObject.SetActive(true);
+            messageButton.gameObject.SetActive(true);
         }
         else if (friendshipStatus == FriendshipStatus.REQUESTED_TO)
         {
@@ -246,6 +255,7 @@ public class UserContextMenu : MonoBehaviour
             friendRemoveContainer.SetActive(false);
             friendRequestedContainer.SetActive(true);
             deleteFriendButton.gameObject.SetActive(false);
+            messageButton.gameObject.SetActive(false);
         }
         else if (friendshipStatus == FriendshipStatus.NONE)
         {
@@ -253,6 +263,7 @@ public class UserContextMenu : MonoBehaviour
             friendRemoveContainer.SetActive(false);
             friendRequestedContainer.SetActive(false);
             deleteFriendButton.gameObject.SetActive(false);
+            messageButton.gameObject.SetActive(false);
         }
         else if (friendshipStatus == FriendshipStatus.REQUESTED_FROM)
         {
@@ -260,12 +271,16 @@ public class UserContextMenu : MonoBehaviour
             friendRemoveContainer.SetActive(false);
             friendRequestedContainer.SetActive(false);
             deleteFriendButton.gameObject.SetActive(false);
+            messageButton.gameObject.SetActive(false);
         }
     }
 
     private void OnFriendStatusUpdate(string userId, FriendsController.UserStatus status)
     {
-        SetupFriendship(userId, status.friendshipStatus);
+        if (this.userId == userId)
+        {
+            SetupFriendship(status.friendshipStatus);
+        }
     }
 
 #if UNITY_EDITOR
