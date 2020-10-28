@@ -31,7 +31,7 @@ export abstract class StatefulActor implements StateContainer {
   abstract onRemoveComponent(listener: (entityId: EntityId, componentId: ComponentId) => void): void
 
   /**
-   * Take a @param container and update it when an update happens
+   * Take a @param container and update it when an change to the state occurs
    */
   forwardChangesTo(container: StateContainer) {
     this.onAddEntity((entityId, components) => container.addEntity(entityId, components))
