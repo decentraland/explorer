@@ -11,6 +11,7 @@ export default {
   args: {
     terms: false,
     stage: LoginStage.LOADING,
+    subStage: "",
   } as LoginContainerProps,
   component: LoginContainer,
   argTypes: {
@@ -31,14 +32,14 @@ LoadingState.args = {
 export const signInDisabled = Template.bind({});
 signInDisabled.args = {
   ...Template.args,
-  stage: LoginStage.SING_IN,
+  stage: LoginStage.SIGN_IN,
 };
 
 export const signInEnable = Template.bind({});
 signInEnable.args = {
   ...Template.args,
   terms: true,
-  stage: LoginStage.SING_IN,
+  stage: LoginStage.SIGN_IN,
 };
 
 export const ConnectAdvice = Template.bind({});
@@ -50,5 +51,5 @@ ConnectAdvice.args = {
 export const SignAdvice = Template.bind({});
 SignAdvice.args = {
   ...Template.args,
-  stage: LoginStage.SING_ADVICE,
+  stage: LoginStage.SIGN_ADVICE,
 };

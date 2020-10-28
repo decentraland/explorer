@@ -1,12 +1,12 @@
 import React from "react";
 import { Modal } from "../common/Modal";
 
-export interface TermOfServicesProps {
+export interface TermsOfServicesProps {
   handleCancel: any;
   handleAgree: any;
 }
 
-export const TermOfServices: React.FC<TermOfServicesProps> = (props) => (
+export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => (
   <Modal>
     <div className="row" style={{ height: "100px" }}>
       <h2>Terms of Service and Privacy Policy</h2>

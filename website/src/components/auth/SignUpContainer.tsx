@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Passport } from "./Passport";
-import { TermOfServices } from "./TermsOfServices";
+import { TermsOfServices } from "./TermsOfServices";
 
 export interface SignUpContainerProps {
   name: string;
@@ -24,7 +24,7 @@ export const SignUpContainer: React.FC<SignUpContainerProps> = (props) => (
       />
     )}
     {props.stage === "terms" && (
-      <TermOfServices
+      <TermsOfServices
         handleCancel={props.handleCancel}
         handleAgree={props.handleAgree}
       />
