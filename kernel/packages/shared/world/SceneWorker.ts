@@ -167,10 +167,10 @@ export class SceneWorker {
     // TODO: track this errors using rollbar because this kind of event are usually triggered due to setInterval() or unreliable code in scenes, that is not sandboxed
     system.on('error', (e) => {
       // @ts-ignore
-      console.log('Unloading scene because of unhandled exception in the scene worker: ')
+      console['log']('Unloading scene because of unhandled exception in the scene worker: ')
 
       // @ts-ignore
-      console.error(e)
+      console['error'](e)
 
       // These errors should be handled in development time
       if (PREVIEW) {
