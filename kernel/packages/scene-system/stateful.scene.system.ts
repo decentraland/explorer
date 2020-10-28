@@ -49,8 +49,8 @@ class StatefulWebWorkerScene extends Script {
     this.log('Sent initial load')
 
     // Listen to storage requests
-    this.eventSubscriber.on('stateEvent', ({ type }) => {
-      if (type === 'StoreSceneState') {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      if (data.type === 'StoreSceneState') {
         this.sceneStateStorage.storeState(sceneId, this.sceneState.toStorableFormat())
       }
     })

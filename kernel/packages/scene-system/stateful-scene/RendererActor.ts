@@ -62,7 +62,8 @@ export class RendererActor extends StatefulActor {
   }
 
   onAddEntity(listener: (entityId: EntityId, components?: Component[]) => void): void {
-    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
       if (type === 'AddEntity') {
         listener(payload.entityId, payload.components)
       }
@@ -70,7 +71,8 @@ export class RendererActor extends StatefulActor {
   }
 
   onRemoveEntity(listener: (entityId: EntityId) => void): void {
-    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
       if (type === 'RemoveEntity') {
         listener(payload.entityId)
       }
@@ -78,7 +80,8 @@ export class RendererActor extends StatefulActor {
   }
 
   onSetComponent(listener: (entityId: EntityId, componentId: ComponentId, data: ComponentData) => void): void {
-    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
       if (type === 'SetComponent') {
         listener(payload.entityId, payload.componentId, payload.componentData)
       }
@@ -86,7 +89,8 @@ export class RendererActor extends StatefulActor {
   }
 
   onRemoveComponent(listener: (entityId: EntityId, componentId: ComponentId) => void): void {
-    this.eventSubscriber.on('stateEvent', ({ type, payload }) => {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
       if (type === 'RemoveComponent') {
         listener(payload.entityId, payload.componentId)
       }

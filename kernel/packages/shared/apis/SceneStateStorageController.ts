@@ -22,7 +22,11 @@ export class SceneStateStorageController extends ExposableAPI {
   async getStoredState(sceneId: string): Promise<SceneState> {
     if (DEBUG) {
       const sceneState = getFromLocalStorage(`scene-state-${sceneId}`)
-      return sceneState ?? TEST_SCENE
+      if (!sceneState) {
+        defaultLogger.warn(`Couldn't find a stored scene state for scene ${sceneId}`)
+        return TEST_SCENE
+      }
+      return sceneState
     } else {
       defaultLogger.error('Content server storage not yet supported')
     }
