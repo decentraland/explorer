@@ -9,9 +9,10 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class UserContextMenu : MonoBehaviour
 {
+    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
+
     const string BLOCK_BTN_BLOCK_TEXT = "Block";
     const string BLOCK_BTN_UNBLOCK_TEXT = "Unblock";
-    const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
     const string DELETE_MSG_PATTERN = "Are you sure you want to delete {0} as a friend?";
 
     [System.Flags]
