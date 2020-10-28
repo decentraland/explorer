@@ -72,6 +72,11 @@ public class FreeCameraMovement : MonoBehaviour
     }
 
 
+    public void SetCameraCanMove(bool canMove)
+    {
+        isCameraAbleToMove = canMove;
+    }
+
     private void OnGizmoTransformObjectEnd(string gizmoType)
     {
         isCameraAbleToMove = true;

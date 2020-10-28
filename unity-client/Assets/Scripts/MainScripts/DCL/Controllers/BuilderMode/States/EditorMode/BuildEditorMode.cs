@@ -20,6 +20,7 @@ public class BuildEditorMode : BuildModeState
     public GameObject eagleCamera, advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
     public ToolTipController toolTipController;
+    public VoxelController voxelController;
 
 
     //public CameraController cameraController;
@@ -37,6 +38,7 @@ public class BuildEditorMode : BuildModeState
     {
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
+     
     }
 
 
@@ -44,9 +46,30 @@ public class BuildEditorMode : BuildModeState
     {
         if (isPlacingNewObject)
         {
-            SetEditObjectAtMouse();
+            if (!voxelController.IsActive()) SetEditObjectAtMouse();
+            else voxelController.SetEditObjectLikeVoxel();
         }
     }
+
+    public override void Init(GameObject _goToEdit, GameObject _undoGo, GameObject _snapGO, GameObject _freeMovementGO, List<DecentralandEntityToEdit> _selectedEntities)
+    {
+        base.Init(_goToEdit, _undoGo, _snapGO, _freeMovementGO, _selectedEntities);
+        voxelController.SetEditionGO(_goToEdit);
+    }
+    #region Voxel
+
+    public void ActivateVoxelMode()
+    {
+        voxelController.SetActiveMode(true);
+    }
+
+    public void DesactivateVoxelMode()
+    {
+        voxelController.SetActiveMode(false);
+    }
+
+    #endregion
+
     public override void Activate(ParcelScene scene)
     {
         base.Activate(scene);
@@ -75,7 +98,7 @@ public class BuildEditorMode : BuildModeState
        
         RenderSettings.fog = false;
         gizmoManager.HideGizmo();
-        gameObjectToEdit.transform.SetParent(null);
+        editionGO.transform.SetParent(null);
     }
     public override void Desactivate()
     {
@@ -102,7 +125,7 @@ public class BuildEditorMode : BuildModeState
     public override void SetDuplicationOffset(DecentralandEntityToEdit entityToDuplicate,float offset)
     {
         base.SetDuplicationOffset(entityToDuplicate,offset);
-        gameObjectToEdit.transform.position += Vector3.right * offset;
+        editionGO.transform.position += Vector3.right * offset;
     }
 
     public override void CreatedEntity(DecentralandEntityToEdit createdEntity)
@@ -111,6 +134,14 @@ public class BuildEditorMode : BuildModeState
         isPlacingNewObject = true;
         //createdEntity.gameObject.transform.eulerAngles = Vector3.zero;
         gizmoManager.HideGizmo();
+        if (createdEntity.IsVoxel)
+        {
+            createdEntity.rootEntity.gameObject.tag = "Voxel";
+            voxelController.SetVoxelSelected(createdEntity);
+            ActivateVoxelMode();
+        }
+
+
     }
     public override Vector3 GetCreatedEntityPoint()
     {
@@ -127,11 +158,17 @@ public class BuildEditorMode : BuildModeState
             editableEntities.Add(entity);
         }
 
-        gizmoManager.SelectedEntities(gameObjectToEdit.transform, editableEntities);
+        gizmoManager.SelectedEntities(editionGO.transform, editableEntities);
 
         if (!isMultiSelectionActive && !selectedEntity.IsNew) LookAtEntity(selectedEntity.rootEntity);
 
         snapGO.transform.SetParent(null);
+        if (selectedEntity.IsVoxel && selectedEntities.Count == 0)
+        {
+            editionGO.transform.position = voxelController.ConverPositionToVoxelPosition(editionGO.transform.position);
+            //voxelController.SetVoxelSelected(selectedEntity);
+            //ActivateVoxelMode();
+        }
     }
 
     public override void EntityDeselected(DecentralandEntityToEdit entityDeselected)
@@ -139,6 +176,7 @@ public class BuildEditorMode : BuildModeState
         base.EntityDeselected(entityDeselected);
         if(selectedEntities.Count <= 0) gizmoManager.HideGizmo();
         isPlacingNewObject = false;
+        DesactivateVoxelMode();
     }
 
     public override void SetSnapActive(bool isActive)
@@ -302,9 +340,10 @@ public class BuildEditorMode : BuildModeState
 
         if (Physics.Raycast(ray, out hit, 9999, groundLayer))
         {
-            gameObjectToEdit.transform.position = hit.point;
+            editionGO.transform.position = hit.point;
         }
     }
+
 
     Vector3 GetFloorPointAtMouse()
     {

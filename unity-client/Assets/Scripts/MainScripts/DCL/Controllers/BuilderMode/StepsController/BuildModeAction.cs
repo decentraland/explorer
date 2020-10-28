@@ -13,11 +13,9 @@ public class BuildModeAction
         CREATED = 3
     }
     public ActionType actionType;
- 
-    List<BuildModeEntityAction> entitiyApplied = new List<BuildModeEntityAction>();
-
-    //object fromValue,toValue;
     public bool isDone = true;
+    public System.Action<DecentralandEntity, object,ActionType> OnApplyValue;
+    List<BuildModeEntityAction> entitiyApplied = new List<BuildModeEntityAction>();
     
     public void ReDo()
     {
@@ -41,29 +39,37 @@ public class BuildModeAction
 
     void ApplyValue(DecentralandEntity entityToApply, object value)
     {
-        switch (actionType)
-        {
-            case ActionType.MOVE:
-                Vector3 convertedPosition = (Vector3)value;
-                entityToApply.gameObject.transform.position = convertedPosition;
-                break;
-            case ActionType.ROTATE:
-                Vector3 convertedAngles = (Vector3)value;
-                entityToApply.gameObject.transform.eulerAngles = convertedAngles;
-                break;
-            case ActionType.SCALE:
-                Vector3 convertedScale = (Vector3)value;
-                Transform parent = entityToApply.gameObject.transform.parent;
+        OnApplyValue?.Invoke(entityToApply, value, actionType);
+        //switch (actionType)
+        //{
+        //    case ActionType.MOVE:
+        //        Vector3 convertedPosition = (Vector3)value;
+        //        entityToApply.gameObject.transform.position = convertedPosition;
+        //        break;
+        //    case ActionType.ROTATE:
+        //        Vector3 convertedAngles = (Vector3)value;
+        //        entityToApply.gameObject.transform.eulerAngles = convertedAngles;
+        //        break;
+        //    case ActionType.SCALE:
+        //        Vector3 convertedScale = (Vector3)value;
+        //        Transform parent = entityToApply.gameObject.transform.parent;
 
-                entityToApply.gameObject.transform.localScale = new Vector3( convertedScale.x / parent.localScale.x ,  convertedScale.y / parent.localScale.y ,convertedScale.z  / parent.localScale.z );
-                //entityToApply.gameObject.transform.localScale = convertedScale;
-                break;
-            case ActionType.CREATED:
-                break;
+        //        entityToApply.gameObject.transform.localScale = new Vector3( convertedScale.x / parent.localScale.x ,  convertedScale.y / parent.localScale.y ,convertedScale.z  / parent.localScale.z );
+        //        //entityToApply.gameObject.transform.localScale = convertedScale;
+        //        break;
+        //    case ActionType.CREATED:
+        //        if(value == null) 
+        //        break;
 
-        }
+        //}
     }
 
+    public void CreateActionType(BuildModeEntityAction action, ActionType type)
+    {
+        List<BuildModeEntityAction> list = new List<BuildModeEntityAction>();
+        list.Add(action);
+        CreateAction(list, type);
+    }
     public void CreateActionType(List<BuildModeEntityAction> entitiesActions, ActionType type)
     {
         CreateAction(entitiesActions, type);

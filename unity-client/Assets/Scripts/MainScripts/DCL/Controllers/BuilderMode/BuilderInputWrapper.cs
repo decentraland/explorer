@@ -10,7 +10,7 @@ public class BuilderInputWrapper : MonoBehaviour
     public LayerMask layerToStopClick;
     public float msClickThreshold = 200;
     public float movementClickThreshold = 50;
-    public Action<int,Vector3> OnMouseClick;
+    public Action<int,Vector3> OnMouseClick,OnMouseDown,OnMouseUp;
     public Action<int,Vector3,float,float> OnMouseDrag;
     public Action<int,Vector3,float,float> OnMouseDragRaw;
     public Action<float> OnMouseWheel;
@@ -41,16 +41,25 @@ public class BuilderInputWrapper : MonoBehaviour
     private void MouseUp(int buttonId, Vector3 mousePosition)
     {
         if (!canInputBeMade) return;
-        if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold) return;
-        if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000) return;
+     
+     
 
-        if(!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick))OnMouseClick?.Invoke(buttonId, mousePosition);     
+        if (!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick))
+        {
+            OnMouseUp?.Invoke(buttonId, mousePosition);
+            if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold) return;
+            if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000) return;
+            OnMouseClick?.Invoke(buttonId, mousePosition);          
+        }
     }
 
     private void MouseDown(int buttonId, Vector3 mousePosition)
     {
         lastTimeMouseDown = Time.unscaledTime;
         lastMousePosition = mousePosition;
+
+        if (!canInputBeMade) return;
+        if (!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick)) OnMouseDown?.Invoke(buttonId, mousePosition);
     }
 
     private void MouseWheel(float axisValue)

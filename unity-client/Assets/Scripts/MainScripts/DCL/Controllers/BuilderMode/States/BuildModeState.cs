@@ -17,13 +17,13 @@ public class BuildModeState : MonoBehaviour
     public System.Action OnInputDone;
     public System.Action<BuildModeAction> OnActionGenerated;
 
-    protected GameObject gameObjectToEdit, undoGO, snapGO, freeMovementGO;
+    protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 
     protected bool isSnapActive = false, isMultiSelectionActive = false;
     protected List<DecentralandEntityToEdit> selectedEntities;
     public virtual void Init(GameObject _goToEdit,GameObject _undoGo,GameObject _snapGO,GameObject _freeMovementGO,List<DecentralandEntityToEdit> _selectedEntities)
     {
-        gameObjectToEdit = _goToEdit;
+        editionGO = _goToEdit;
         undoGO = _undoGo;
         snapGO = _snapGO;
         freeMovementGO = _freeMovementGO;
@@ -66,7 +66,7 @@ public class BuildModeState : MonoBehaviour
     {
         CenterGameObjectToEdit();
 
-        BuildModeUtils.CopyGameObjectStatus(gameObjectToEdit, undoGO, false, false);
+        BuildModeUtils.CopyGameObjectStatus(editionGO, undoGO, false, false);
     }
 
     public virtual void CenterGameObjectToEdit()
@@ -77,12 +77,12 @@ public class BuildModeState : MonoBehaviour
             {
                 entity.rootEntity.gameObject.transform.SetParent(null);
             }
-            gameObjectToEdit.transform.position = GetCenterPointOfSelectedObjects();
-            gameObjectToEdit.transform.rotation = Quaternion.Euler(0, 0, 0);
-            gameObjectToEdit.transform.localScale = Vector3.one;
+            editionGO.transform.position = GetCenterPointOfSelectedObjects();
+            editionGO.transform.rotation = Quaternion.Euler(0, 0, 0);
+            editionGO.transform.localScale = Vector3.one;
             foreach (DecentralandEntityToEdit entity in selectedEntities)
             {
-                entity.rootEntity.gameObject.transform.SetParent(gameObjectToEdit.transform);
+                entity.rootEntity.gameObject.transform.SetParent(editionGO.transform);
             }
         }
     }
@@ -114,7 +114,7 @@ public class BuildModeState : MonoBehaviour
 
     public virtual void ResetScaleAndRotation()
     {
-        gameObjectToEdit.transform.localScale = Vector3.one;
+        editionGO.transform.localScale = Vector3.one;
         snapGO.transform.localScale = Vector3.one;
         freeMovementGO.transform.localScale = Vector3.one;
 
@@ -122,7 +122,7 @@ public class BuildModeState : MonoBehaviour
 
         snapGO.transform.rotation = zeroAnglesQuaternion;
         freeMovementGO.transform.rotation = zeroAnglesQuaternion;
-        gameObjectToEdit.transform.rotation = zeroAnglesQuaternion;
+        editionGO.transform.rotation = zeroAnglesQuaternion;
 
         foreach(DecentralandEntityToEdit decentralandEntityToEdit in selectedEntities)
         {
@@ -157,8 +157,7 @@ public class BuildModeState : MonoBehaviour
     protected void TransformActionStarted(DecentralandEntity entity, string type)
     {
         
-        BuildModeEntityAction buildModeEntityAction = new BuildModeEntityAction();
-        buildModeEntityAction.entity = entity;
+        BuildModeEntityAction buildModeEntityAction = new BuildModeEntityAction(entity);
         switch (type)
         {
             case "MOVE":

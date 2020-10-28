@@ -68,6 +68,19 @@ public class DecentralandEntityToEdit : EditableEntity
     }
 
 
+    private bool isVoxel = false;
+    public bool IsVoxel
+    {
+        get
+        {
+            return isVoxel;
+        }
+        set
+        {
+            isVoxel = value;
+        }
+    }
+
     Transform originalParent;
 
 
@@ -81,17 +94,21 @@ public class DecentralandEntityToEdit : EditableEntity
     public void Init(DecentralandEntity _entity, Material _editMaterial)
     {
         rootEntity = _entity;
-        rootEntity.OnShapeUpdated += ShapeUpdate;
+        rootEntity.OnShapeUpdated += OnShapeUpdate;
 
         editMaterial = _editMaterial;
+        isVoxel = false;
+
 
         entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
         IsVisible = rootEntity.gameObject.activeSelf;
+
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
             CreateCollidersForEntity(rootEntity);
+            CheckIfEntityIsFloor();
+            CheckIfEntityIsVoxel();
         }
-        CheckIfEntityIsFloor();
     }
     public void Select()
     {
@@ -107,7 +124,7 @@ public class DecentralandEntityToEdit : EditableEntity
         if (IsSelected)
         {
             IsSelected = false;
-            rootEntity.gameObject.transform.SetParent(originalParent);
+            if(rootEntity.gameObject != null)rootEntity.gameObject.transform.SetParent(originalParent);
             SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
             SetOriginalMaterials();
         }
@@ -130,6 +147,7 @@ public class DecentralandEntityToEdit : EditableEntity
     public void Delete()
     {
         Deselect();
+        DestroyColliders();
         OnDelete?.Invoke(this);
     }
 
@@ -177,11 +195,13 @@ public class DecentralandEntityToEdit : EditableEntity
         }
     }
 
-    void ShapeUpdate(DecentralandEntity decentralandEntity)
+    void OnShapeUpdate(DecentralandEntity decentralandEntity)
     {
+
         if (IsSelected) SaveOriginalMaterialAndSetEditMaterials();
         CreateCollidersForEntity(decentralandEntity);
-
+        CheckIfEntityIsFloor();
+        CheckIfEntityIsVoxel();
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
@@ -251,5 +271,16 @@ public class DecentralandEntityToEdit : EditableEntity
         if (rootEntity.gameObject.transform.position.y >= 0.05f) return;
 
         SetLockStatus(true);
+    }
+
+    void CheckIfEntityIsVoxel()
+    {
+        if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.currentShape == null) return;
+        if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length <= 0) return;
+        if (rootEntity.meshesInfo.mergedBounds.size != Vector3.one) return;
+
+        IsVoxel = true;
+        gameObject.tag = "Voxel";
+
     }
 }

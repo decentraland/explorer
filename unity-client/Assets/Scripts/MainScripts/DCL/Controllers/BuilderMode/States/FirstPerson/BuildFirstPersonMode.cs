@@ -46,13 +46,13 @@ public class BuildFirstPersonMode : BuildModeState
                         eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
 
                         Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
-                        gameObjectToEdit.transform.rotation = initialRotation * destinationRotation;
-                        gameObjectToEdit.transform.position = objectPosition;
+                        editionGO.transform.rotation = initialRotation * destinationRotation;
+                        editionGO.transform.position = objectPosition;
                    
                 }
-                else if (Vector3.Distance(snapGO.transform.position, gameObjectToEdit.transform.position) >= snapDistanceToActivateMovement)
+                else if (Vector3.Distance(snapGO.transform.position, editionGO.transform.position) >= snapDistanceToActivateMovement)
                 {
-                    BuildModeUtils.CopyGameObjectStatus(gameObjectToEdit, snapGO, false);
+                    BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
 
 
                     snapObjectAlreadyMoved = true;
@@ -63,8 +63,8 @@ public class BuildFirstPersonMode : BuildModeState
             else
             {
                 Vector3 pointToLookAt = Camera.main.transform.position;
-                pointToLookAt.y = gameObjectToEdit.transform.position.y;
-                Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
+                pointToLookAt.y = editionGO.transform.position.y;
+                Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
                 freeMovementGO.transform.rotation = lookOnLook;
             }
         }
@@ -73,7 +73,7 @@ public class BuildFirstPersonMode : BuildModeState
     public override void SetDuplicationOffset(DecentralandEntityToEdit entityToDuplicate, float offset)
     {
         base.SetDuplicationOffset(entityToDuplicate, offset);
-        if(isSnapActive) gameObjectToEdit.transform.position += Vector3.right * offset;
+        if(isSnapActive) editionGO.transform.position += Vector3.right * offset;
     }
     public override void ResetScaleAndRotation()
     {
@@ -103,7 +103,7 @@ public class BuildFirstPersonMode : BuildModeState
     public override void StartMultiSelection()
     {
         base.StartMultiSelection();
-        originalParentGOEdit = gameObjectToEdit.transform.parent;
+        originalParentGOEdit = editionGO.transform.parent;
 
         SetEditObjectParent();
         snapGO.transform.SetParent(null);
@@ -126,12 +126,12 @@ public class BuildFirstPersonMode : BuildModeState
     {
         base.SelectedEntity(selectedEntity);
 
-        initialRotation = gameObjectToEdit.transform.rotation;
+        initialRotation = editionGO.transform.rotation;
 
         SetObjectIfSnapOrNot();
 
         currentYRotationAdded = 0;
-        BuildModeUtils.CopyGameObjectStatus(gameObjectToEdit, snapGO, false);
+        BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
     }
     public override void CreatedEntity(DecentralandEntityToEdit createdEntity)
     {
@@ -214,25 +214,25 @@ public class BuildFirstPersonMode : BuildModeState
         {
             if (!isSnapActive)
             {
-                gameObjectToEdit.transform.SetParent(null);
-                freeMovementGO.transform.position = gameObjectToEdit.transform.position;
-                freeMovementGO.transform.rotation = gameObjectToEdit.transform.rotation;
-                freeMovementGO.transform.localScale = gameObjectToEdit.transform.localScale;
+                editionGO.transform.SetParent(null);
+                freeMovementGO.transform.position = editionGO.transform.position;
+                freeMovementGO.transform.rotation = editionGO.transform.rotation;
+                freeMovementGO.transform.localScale = editionGO.transform.localScale;
 
                 //SetEditObjectParent();
-                gameObjectToEdit.transform.SetParent(null);
+                editionGO.transform.SetParent(null);
 
                 Vector3 pointToLookAt = Camera.main.transform.position;
-                pointToLookAt.y = gameObjectToEdit.transform.position.y;
-                Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
+                pointToLookAt.y = editionGO.transform.position.y;
+                Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
 
                 freeMovementGO.transform.rotation = lookOnLook;
-                gameObjectToEdit.transform.SetParent(freeMovementGO.transform, true);
+                editionGO.transform.SetParent(freeMovementGO.transform, true);
             }
             else
             {
                 //snapGO.transform.SetParent(Camera.main.transform);
-                gameObjectToEdit.transform.SetParent(null);
+                editionGO.transform.SetParent(null);
             }
         }
 
@@ -265,21 +265,21 @@ public class BuildFirstPersonMode : BuildModeState
             worldPositionStays = true;
         }
 
-        gameObjectToEdit.transform.SetParent(parentToAsign, worldPositionStays);
+        editionGO.transform.SetParent(parentToAsign, worldPositionStays);
     }
 
 
     void RotateSelection(float angleToRotate)
     {
         currentYRotationAdded += angleToRotate;
-        gameObjectToEdit.transform.Rotate(Vector3.up, angleToRotate);
+        editionGO.transform.Rotate(Vector3.up, angleToRotate);
         snapGO.transform.Rotate(Vector3.up, angleToRotate);
     }
 
     void ScaleSelection(float scaleFactor)
     {
         currentScaleAdded += scaleFactor;
-        gameObjectToEdit.transform.localScale += Vector3.one * scaleFactor;
+        editionGO.transform.localScale += Vector3.one * scaleFactor;
         snapGO.transform.localScale += Vector3.one * scaleFactor;
     }
 }

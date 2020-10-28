@@ -6,6 +6,7 @@ using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -80,7 +81,7 @@ public class BuildModeController : MonoBehaviour
     List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
     Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
 
-    GameObject gameObjectToEdit;
+    GameObject editionGO;
     GameObject undoGO, snapGO, freeMovementGO;
 
     float nexTimeToReceiveInput;
@@ -102,12 +103,12 @@ public class BuildModeController : MonoBehaviour
 
         }
         freeMovementGO.transform.SetParent(Camera.main.transform);
-        if (gameObjectToEdit == null)
+        if (editionGO == null)
         {
-            gameObjectToEdit = new GameObject("EditionGO");
+            editionGO = new GameObject("EditionGO");
 
         }
-        gameObjectToEdit.transform.SetParent(Camera.main.transform);
+        editionGO.transform.SetParent(Camera.main.transform);
         if (undoGO == null)
         {
             undoGO = new GameObject("UndoGameObject");
@@ -180,8 +181,8 @@ public class BuildModeController : MonoBehaviour
 
     void InitEditModes()
     {
-        firstPersonMode.Init(gameObjectToEdit, undoGO, snapGO, freeMovementGO, selectedEntities);
-        editorMode.Init(gameObjectToEdit, undoGO,  snapGO, freeMovementGO, selectedEntities);
+        firstPersonMode.Init(editionGO, undoGO, snapGO, freeMovementGO, selectedEntities);
+        editorMode.Init(editionGO, undoGO,  snapGO, freeMovementGO, selectedEntities);
 
         firstPersonMode.OnInputDone += InputDone;
         editorMode.OnInputDone += InputDone;
@@ -277,6 +278,7 @@ public class BuildModeController : MonoBehaviour
         DecentralandEntity entity = CreateEntity();
         sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
 
+        if (sceneObject.asset_pack_id == "b51e5e7c-c56b-4ad9-b9d2-1dc1c6546169") convertedEntities[GetConvertedUniqueKeyForEntity(entity)].IsVoxel = true;
         DeselectEntities();
         Select(entity);
 
@@ -286,6 +288,11 @@ public class BuildModeController : MonoBehaviour
         currentActiveMode.CreatedEntity(convertedEntities[GetConvertedUniqueKeyForEntity(entity)]);
         catalogController.CloseCatalog();
         lastSceneObjectCreated = sceneObject;
+        //BuildModeEntityAction newEntity = new BuildModeEntityAction(entity,null, JsonConvert.SerializeObject(entity));
+        //BuildModeAction buildModeAction = new BuildModeAction();
+        //buildModeAction.CreateActionType(newEntity,BuildModeAction.ActionType.CREATED);
+        //actionController.AddAction(buildModeAction);
+
         InputDone();
 
     }
@@ -441,7 +448,7 @@ public class BuildModeController : MonoBehaviour
             }
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
             {
-                CancelCurrentAction();
+                DestroyCreatedObjects();
                 DeselectEntities();
                 InputDone();
                 return;
@@ -588,7 +595,7 @@ public class BuildModeController : MonoBehaviour
         else outlinerOptimizationCounter++;
     }
 
-    public void CancelCurrentAction()
+    public void DestroyCreatedObjects()
     {
         List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
         foreach(DecentralandEntityToEdit entity in selectedEntities)
@@ -596,13 +603,14 @@ public class BuildModeController : MonoBehaviour
             if (entity.IsSelected && entity.IsNew) entitiesToRemove.Add(entity);
         }
 
-        BuildModeUtils.CopyGameObjectStatus(undoGO, gameObjectToEdit,false,false);
+        BuildModeUtils.CopyGameObjectStatus(undoGO, editionGO,false,false);
 
         foreach(DecentralandEntityToEdit entity in entitiesToRemove)
         {
-            selectedEntities.Remove(entity);
-            convertedEntities.Remove(entity.entityUniqueId);
-            sceneToEdit.RemoveEntity(entity.rootEntity.entityId, true);
+            //selectedEntities.Remove(entity);
+            //convertedEntities.Remove(entity.entityUniqueId);
+            //sceneToEdit.RemoveEntity(entity.rootEntity.entityId, true);
+            DeleteEntity(entity,false);
         }
     
 
@@ -720,7 +728,7 @@ public class BuildModeController : MonoBehaviour
         else if (!isMultiSelectionActive) DeselectEntities();
     }
 
-    DecentralandEntityToEdit GetEntityOnPointer()
+    public DecentralandEntityToEdit GetEntityOnPointer()
     {
         RaycastHit hit;
         UnityEngine.Ray ray;
@@ -749,6 +757,52 @@ public class BuildModeController : MonoBehaviour
     }
 
 
+    public VoxelEntityHit GetCloserUnselectedVoxelEntityOnPointer()
+    {
+        RaycastHit[] hits;
+        UnityEngine.Ray ray  = Camera.main.ScreenPointToRay(Input.mousePosition); ;
+
+        float currentDistance = 9999;
+        VoxelEntityHit voxelEntityHit = null;
+        DecentralandEntityToEdit unselectedEntity = null;
+
+        hits = Physics.RaycastAll(ray, 9999, layerToRaycast);
+        foreach (RaycastHit hit in hits)
+        {
+            string entityID = hit.collider.gameObject.name;
+
+            if (sceneToEdit.entities.ContainsKey(entityID))
+            {
+                if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])))
+                {
+                    DecentralandEntityToEdit entityToCheck  = convertedEntities[GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])];
+                    if(!entityToCheck.IsSelected && entityToCheck.tag == "Voxel")
+                    {
+                        if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
+                        {
+                            unselectedEntity = entityToCheck;
+                            voxelEntityHit = new VoxelEntityHit(unselectedEntity,hit);
+                            currentDistance = Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+        return voxelEntityHit;
+    }
+    public List<DecentralandEntityToEdit> GetAllVoxelsEntities()
+    {
+        List<DecentralandEntityToEdit> voxelEntities = new List<DecentralandEntityToEdit>();
+        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        {
+            if (entity.rootEntity.scene == sceneToEdit && entity.IsVoxel) voxelEntities.Add(entity);
+        }
+
+        return voxelEntities;
+    }
     void ReSelectEntities()
     {
         List<DecentralandEntityToEdit> entitiesToReselect = new List<DecentralandEntityToEdit>();
@@ -763,13 +817,13 @@ public class BuildModeController : MonoBehaviour
             SelectEntity(entity);
         }
     }
-    void DeselectEntity(DecentralandEntityToEdit entity)
+    public void DeselectEntity(DecentralandEntityToEdit entity)
     {
         if (!selectedEntities.Contains(entity)) return;
 
         if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
         {
-            CancelCurrentAction();
+            DestroyCreatedObjects();
         }
  
         SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
@@ -780,11 +834,11 @@ public class BuildModeController : MonoBehaviour
         currentActiveMode.EntityDeselected(entity);
         if (selectedEntities.Count <= 0) entityInformationController.Disable();
     }
-    void DeselectEntities()
+    public void DeselectEntities()
     {
         if (selectedEntities.Count > 0)
         {
-            if (!AreAllSelectedEntitiesInsideBoundaries()) CancelCurrentAction();
+            if (!AreAllSelectedEntitiesInsideBoundaries()) DestroyCreatedObjects();
 
             int amountToDeselect = selectedEntities.Count;
             for(int i = 0; i < amountToDeselect; i++)
@@ -834,18 +888,29 @@ public class BuildModeController : MonoBehaviour
 
     }
 
+    public void DeleteEntity(string entityId)
+    {
+        DecentralandEntityToEdit entity = convertedEntities[GetConvertedUniqueKeyForEntity(entityId)];
+        DeleteEntity(entity, true);
+    }
     public void DeleteEntity(DecentralandEntityToEdit entityToDelete)
     {
-        if (entityToDelete.IsSelected) DeselectEntity(entityToDelete);
+        DeleteEntity(entityToDelete, true);
+    }
+    public void DeleteEntity(DecentralandEntityToEdit entityToDelete, bool checkSelection = true)
+    {
+        if (entityToDelete.IsSelected && checkSelection) DeselectEntity(entityToDelete);
         RemoveConvertedEntity(entityToDelete.rootEntity);
         entityToDelete.Delete();
-        sceneToEdit.RemoveEntity(entityToDelete.rootEntity.entityId, true);
+        string idToRemove = entityToDelete.rootEntity.entityId;
+        Destroy(entityToDelete);
+        sceneToEdit.RemoveEntity(idToRemove, true);
         sceneLimitInfoController.UpdateInfo();
         EntityListChanged();
     }
 
 
-    public void DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
+    public DecentralandEntity DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
     {
         DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToDuplicate.rootEntity);
 
@@ -854,6 +919,8 @@ public class BuildModeController : MonoBehaviour
         sceneLimitInfoController.UpdateInfo();
 
         currentActiveMode.SetDuplicationOffset(entityToDuplicate,duplicateOffset);
+
+        return entity;
     }
     public void DuplicateEntities()
     {
@@ -872,6 +939,16 @@ public class BuildModeController : MonoBehaviour
 
     }
 
+    public DecentralandEntity CreateEntityFromJSON(string entityJson)
+    {
+        DecentralandEntity newEntity = JsonConvert.DeserializeObject<DecentralandEntity>(entityJson);
+        sceneToEdit.CreateEntity(newEntity.entityId);
+
+        SetupEntityToEdit(newEntity, true);
+        sceneLimitInfoController.UpdateInfo();
+        EntityListChanged();
+        return newEntity;
+    }
     DecentralandEntity CreateEntity()
     {
 
@@ -880,8 +957,8 @@ public class BuildModeController : MonoBehaviour
         DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(currentActiveMode.GetCreatedEntityPoint(), sceneToEdit);
 
         Vector3 pointToLookAt = Camera.main.transform.position;
-        pointToLookAt.y = gameObjectToEdit.transform.position.y;
-        Quaternion lookOnLook = Quaternion.LookRotation(gameObjectToEdit.transform.position - pointToLookAt);
+        pointToLookAt.y = editionGO.transform.position.y;
+        Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
 
         DCLTransform.model.rotation = lookOnLook;
         DCLTransform.model.scale = newEntity.gameObject.transform.lossyScale;
@@ -895,25 +972,25 @@ public class BuildModeController : MonoBehaviour
         EntityListChanged();
         return newEntity;
     }
-    void CreateBoxEntity()
-    {
+    //void CreateBoxEntity()
+    //{
 
-        DecentralandEntity newEntity = CreateEntity();
+    //    DecentralandEntity newEntity = CreateEntity();
 
-        BaseDisposable mesh = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.BOX_SHAPE));
-        sceneToEdit.SharedComponentAttach(newEntity.entityId, mesh.id);
+    //    BaseDisposable mesh = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.BOX_SHAPE));
+    //    sceneToEdit.SharedComponentAttach(newEntity.entityId, mesh.id);
 
-        BaseDisposable material = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.PBR_MATERIAL));
+    //    BaseDisposable material = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.PBR_MATERIAL));
 
-        ((PBRMaterial)material).model.albedoColor = editMaterial.color;
-        sceneToEdit.SharedComponentAttach(newEntity.entityId, material.id);
+    //    ((PBRMaterial)material).model.albedoColor = editMaterial.color;
+    //    sceneToEdit.SharedComponentAttach(newEntity.entityId, material.id);
 
-        if(isSnapActive) newEntity.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
+    //    if(isSnapActive) newEntity.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
 
-        Select(newEntity);
+    //    Select(newEntity);
 
-        sceneLimitInfoController.UpdateInfo();
-    }
+    //    sceneLimitInfoController.UpdateInfo();
+    //}
 
 
     public void EnterEditMode()
@@ -1033,6 +1110,10 @@ public class BuildModeController : MonoBehaviour
         convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
     }
 
+    string GetConvertedUniqueKeyForEntity(string entityID)
+    {
+        return sceneToEdit + entityID;
+    }
     string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)
     {
         return entity.scene.sceneData.id + entity.entityId;

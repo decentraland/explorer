@@ -141,8 +141,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     #endregion
 
     void SetQuickBarShortcut(SceneObject sceneObject, int index,Texture texture)
-    {
-     
+    {     
         quickBarShortcutsSceneObjects[index] = sceneObject;
         if (index < shortcutsImgs.Length)
         {
@@ -333,8 +332,8 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void CloseCatalog()
     {
-        catalogUIGO.SetActive(false);
- 
+        //catalogUIGO.SetActive(false);
+        StartCoroutine(CloseCatalogAfterOneFrame());
     }
 
     [ContextMenu ("Iterate catalog")]
@@ -380,7 +379,11 @@ public class SceneObjectCatalogController : MonoBehaviour
         return sceneObjectsList;
     }
 
-
+    IEnumerator CloseCatalogAfterOneFrame()
+    {
+        yield return null;
+        catalogUIGO.SetActive(false);
+    }
  
     //IEnumerator GetCatalog()
     //{
