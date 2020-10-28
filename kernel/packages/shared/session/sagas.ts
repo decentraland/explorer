@@ -52,11 +52,11 @@ import {
 } from './actions'
 import { ProviderType } from '../ethereum/ProviderType'
 import Html from '../Html'
-import { createSignUpProfile, getProfileByUserId } from '../profiles/sagas'
+import { createSignUpProfile, ensureBaseCatalogs, getProfileByUserId } from '../profiles/sagas'
 import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
 import { unityInterface } from '../../unity-interface/UnityInterface'
-import { waitForMetaConfigurationInitialization } from '../meta/sagas'
 import { getSignUpProfile } from './selectors'
+import { ensureRealmInitialized } from '../dao/sagas'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -95,7 +95,7 @@ function* scheduleAwaitingSignaturePrompt() {
 }
 
 function* initSession() {
-  yield waitForMetaConfigurationInitialization()
+  yield ensureRealmInitialized()
   if (ENABLE_WEB3) {
     Html.showEthLogin()
     yield createWeb3Connector()
@@ -124,11 +124,18 @@ function* authenticate(action: AuthenticateAction) {
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
   yield put(setLoadingScreen(true))
-  saveToLocalStorage('signup_profile', { userId, identity })
-  const profile = yield generateRandomUserProfile(userId)
   yield put(changeLoginStage(LoginStage.SING_UP))
   yield put(changeSignUpStage(SignUpStage.AVATAR))
-
+  saveToLocalStorage('signup_profile', { userId, identity })
+  let profile = yield generateRandomUserProfile(userId)
+  profile = {
+    userId: identity.address.toString(),
+    ethAddress: identity.address.toString(),
+    hasClaimedName: false,
+    version: 0,
+    ...profile
+  }
+  yield ensureBaseCatalogs()
   unityInterface.LoadProfile(profile)
   unityInterface.ShowAvatarEditorInSignIn()
   yield put(setLoadingScreen(false))
@@ -219,10 +226,8 @@ function* singUp() {
   profile.userId = userData.userId.toString()
   profile.ethAddress = userData.userId.toString()
 
-  logger.log(`User profile ${profile}`)
-
   yield createSignUpProfile(profile, userData.identity)
-  yield signIn(userData.user, userData.identity)
+  yield signIn(userData.userId, userData.identity)
 }
 
 function* login(action: LoginAction) {

@@ -10,7 +10,7 @@ import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { AUTH_ERROR_LOGGED_OUT, experienceStarted, FAILED_FETCHING_UNITY, NOT_INVITED } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { NO_MOTD, DEBUG_PM, OPEN_AVATAR_EDITOR, HAS_INITIAL_POSITION_MARK, VOICE_CHAT_ENABLED } from '../config'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, VOICE_CHAT_ENABLED } from '../config'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
@@ -89,22 +89,23 @@ namespace webApp {
       visible: false
     })
 
-    try {
-      await userAuthentified()
-      const identity = getCurrentIdentity(globalThis.globalStore.getState())!
-      i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-      // NOTE (Santi): We have temporarily deactivated the MANA HUD until Product team designs a new place for it (probably inside the Profile HUD).
-      i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3 && false, visible: true })
+    userAuthentified()
+      .then(() => {
+        const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+        i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+        // NOTE (Santi): We have temporarily deactivated the MANA HUD until Product team designs a new place for it (probably inside the Profile HUD).
+        i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3 && false, visible: true })
 
-      EnsureProfile(identity.address)
-        .then((profile) => {
-          i.ConfigureEmailPrompt(profile.tutorialStep)
-          i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-        })
-        .catch((e) => logger.error(`error getting profile ${e}`))
-    } catch (e) {
-      logger.error('error on configuring friends hud / tutorial')
-    }
+        EnsureProfile(identity.address)
+          .then((profile) => {
+            i.ConfigureEmailPrompt(profile.tutorialStep)
+            i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+          })
+          .catch((e) => logger.error(`error getting profile ${e}`))
+      })
+      .catch((e) => {
+        logger.error('error on configuring friends hud / tutorial')
+      })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
@@ -131,12 +132,13 @@ namespace webApp {
     }
 
     if (!NO_MOTD) {
-      const messageOfTheDay = await waitForMessageOfTheDay()
-      i.ConfigureHUDElement(
-        HUDElementID.MESSAGE_OF_THE_DAY,
-        { active: !!messageOfTheDay, visible: true },
-        messageOfTheDay
-      )
+      waitForMessageOfTheDay().then((messageOfTheDay) => {
+        i.ConfigureHUDElement(
+          HUDElementID.MESSAGE_OF_THE_DAY,
+          { active: !!messageOfTheDay, visible: false },
+          messageOfTheDay
+        )
+      })
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
