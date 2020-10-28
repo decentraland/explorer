@@ -1,8 +1,7 @@
 import { action } from 'typesafe-actions'
-import { Profile } from './types'
+import { Profile, ProfileType } from './types'
 import { ProfileForRenderer } from '../../decentraland-ecs/src/decentraland/Types'
 import { WearableId } from 'shared/catalogs/types'
-import { ProfileType } from 'shared/comms/interface/types'
 
 // Profile fetching
 

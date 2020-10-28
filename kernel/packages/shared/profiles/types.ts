@@ -87,3 +87,8 @@ export type ContentFile = {
   name: string
   content: Buffer
 }
+
+export enum ProfileType {
+  LOCAL,
+  DEPLOYED
+}

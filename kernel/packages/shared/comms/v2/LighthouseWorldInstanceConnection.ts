@@ -8,7 +8,6 @@ import {
   UserInformation,
   PackageType,
   VoiceFragment,
-  ProfileType,
   ProfileResponse,
   ProfileRequest
 } from '../interface/types'
@@ -33,6 +32,7 @@ import { compareVersions } from 'atomicHelpers/semverCompare'
 import * as Long from 'long'
 import { getProfileType } from 'shared/profiles/sagas'
 import { Profile } from 'shared/types'
+import { ProfileType } from 'shared/profiles/types'
 declare const window: any
 window.Long = Long
 

@@ -43,7 +43,7 @@ import { getProfile, getProfileDownloadServer, hasConnectedWeb3 } from './select
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
-import { Profile, ContentFile, Avatar } from './types'
+import { Profile, ContentFile, Avatar, ProfileType } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
 import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
@@ -66,7 +66,6 @@ import { getExclusiveCatalog } from 'shared/catalogs/selectors'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { Wearable } from 'shared/catalogs/types'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
-import { ProfileType } from 'shared/comms/interface/types'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')

@@ -1,5 +1,5 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { Profile } from 'shared/profiles/types'
+import { Profile, ProfileType } from 'shared/profiles/types'
 import { ExplorerIdentity } from 'shared/session/types'
 
 export enum AvatarMessageType {
@@ -118,11 +118,6 @@ export type Package<T> = {
   type: PackageType
   time: number
   data: T
-}
-
-export enum ProfileType {
-  LOCAL,
-  DEPLOYED
 }
 
 export type ProfileVersion = {

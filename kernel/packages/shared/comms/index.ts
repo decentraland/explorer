@@ -32,7 +32,6 @@ import {
   IdTakenError,
   UnknownCommsModeError,
   VoiceFragment,
-  ProfileType,
   ProfileRequest,
   ProfileResponse
 } from './interface/types'
@@ -67,7 +66,7 @@ import {
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
-import { Profile } from 'shared/profiles/types'
+import { Profile, ProfileType } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
@@ -490,7 +489,7 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
 
     const profile = await ProfileAsPromise(
       myAddress,
-      message.data.version ? parseInt(message.data.version) : undefined,
+      message.data.version ? parseInt(message.data.version, 10) : undefined,
       getProfileType(myIdentity)
     )
 
@@ -500,8 +499,8 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
 
     context.lastProfileResponseTime = Date.now()
   })()
-    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
     .finally(() => (context.sendingProfileResponse = false))
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
 }
 
 function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {

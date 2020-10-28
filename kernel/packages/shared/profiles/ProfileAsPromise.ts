@@ -2,8 +2,7 @@ import { RootState, StoreContainer } from '../store/rootTypes'
 import { Store } from 'redux'
 import { getProfile, getProfileStatusAndData } from './selectors'
 import { profileRequest } from './actions'
-import { Profile } from './types'
-import { ProfileType } from 'shared/comms/interface/types'
+import { Profile, ProfileType } from './types'
 
 declare const globalThis: StoreContainer
 

@@ -21,7 +21,6 @@ import {
   ProfileVersion,
   BusMessage,
   VoiceFragment,
-  ProfileType,
   ProfileResponse,
   ProfileRequest
 } from '../../comms/interface/types'
@@ -33,6 +32,7 @@ import { WorldInstanceConnection } from '../../comms/interface/index'
 import { Realm } from 'shared/dao/types'
 import { getProfileType } from 'shared/profiles/sagas'
 import { Profile } from 'shared/types'
+import { ProfileType } from 'shared/profiles/types'
 
 class SendResult {
   constructor(public bytesSize: number) {}

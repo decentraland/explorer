@@ -20,7 +20,6 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { deepEqual } from 'atomicHelpers/deepEqual'
 
 import { createLogger } from 'shared/logger'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import {
   ChatMessage,
   NotificationType,
@@ -54,7 +53,7 @@ import {
 import { ensureWorldRunning } from 'shared/world/worldState'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { unityInterface } from 'unity-interface/UnityInterface'
-import { ProfileType } from 'shared/comms/interface/types'
+import { ensureFriendProfile } from './ensureFriendProfile'
 
 declare const globalThis: StoreContainer
 
@@ -248,10 +247,6 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
 
   initializeReceivedMessagesCleanUp()
   yield initializeStatusUpdateInterval(client)
-}
-
-export function ensureFriendProfile(userId: string) {
-  return ProfileAsPromise(userId, undefined, ProfileType.DEPLOYED) // Friends are always deployed ATM
 }
 
 function* initializeFriends(client: SocialAPI) {
