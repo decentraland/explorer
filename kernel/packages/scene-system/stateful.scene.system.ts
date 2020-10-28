@@ -38,7 +38,7 @@ class StatefulWebWorkerScene extends Script {
     this.eventSubscriber = new EventSubscriber(this.engine)
 
     // Fetch stored scene
-    this.sceneState = await this.sceneStateStorage.getStoredState(sceneId)
+    this.sceneState = SceneStateDefinition.fromStoredData(await this.sceneStateStorage.getStoredState(sceneId))
 
     // Listen to the renderer and update the local scene state
     this.renderer.forwardChangesTo(this.sceneState)

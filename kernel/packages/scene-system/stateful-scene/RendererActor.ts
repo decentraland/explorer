@@ -1,14 +1,9 @@
-import { CLASS_ID, Transform } from "decentraland-ecs/src";
+import { CLASS_ID } from "decentraland-ecs/src";
 import { IEngineAPI } from "shared/apis/EngineAPI";
-import { PB_Quaternion, PB_Transform, PB_Vector3 } from "../../shared/proto/engineinterface_pb";
 import { AttachEntityComponentPayload, ComponentCreatedPayload, ComponentRemovedPayload, ComponentUpdatedPayload, CreateEntityPayload, EntityAction, RemoveEntityPayload, UpdateEntityComponentPayload } from "shared/types";
 import { Component, ComponentData, ComponentId, EntityId, StatefulActor } from "./types"
 import { EventSubscriber } from "decentraland-rpc";
-
-const pbTransform: PB_Transform = new PB_Transform()
-const pbPosition: PB_Vector3 = new PB_Vector3()
-const pbRotation: PB_Quaternion = new PB_Quaternion()
-const pbScale: PB_Vector3 = new PB_Vector3()
+import { generatePBObjectJSON } from "scene-system/sdk/Utils";
 
 export class RendererActor extends StatefulActor {
 
@@ -99,9 +94,10 @@ export class RendererActor extends StatefulActor {
   }
 
   private mapComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): EntityAction[] {
-    const { disposability } = this.componentTypeToLegacyData(componentId)
+    const { disposability, defaultValue } = this.componentTypeToLegacyData(componentId)
+    const finalData = Object.assign(defaultValue ?? {}, data)
     if (disposability === ComponentDisposability.DISPOSABLE) {
-      return this.buildDisposableComponentActions(entityId, componentId, data)
+      return this.buildDisposableComponentActions(entityId, componentId, finalData)
     } else {
       return [{
         type: 'UpdateEntityComponent',
@@ -109,7 +105,7 @@ export class RendererActor extends StatefulActor {
         payload: {
           entityId,
           classId: componentId,
-          json: this.generatePBObject(componentId, data)
+          json: generatePBObjectJSON(componentId, finalData)
         } as UpdateEntityComponentPayload
       }]
     }
@@ -145,37 +141,15 @@ export class RendererActor extends StatefulActor {
     ]
   }
 
-  private generatePBObject(classId: CLASS_ID, data: ComponentData): string {
-    if (classId === CLASS_ID.TRANSFORM) {
-      const transform: Transform = data
-
-      pbPosition.setX(Math.fround(transform.position?.x ?? 0))
-      pbPosition.setY(Math.fround(transform.position?.y ?? 0))
-      pbPosition.setZ(Math.fround(transform.position?.z ?? 0))
-
-      pbRotation.setX(transform.rotation?.x ?? 0)
-      pbRotation.setY(transform.rotation?.y ?? 0)
-      pbRotation.setZ(transform.rotation?.z ?? 0)
-      pbRotation.setW(transform.rotation?.w ?? 1)
-
-      pbScale.setX(Math.fround(transform.scale?.x ?? 1))
-      pbScale.setY(Math.fround(transform.scale?.y ?? 1))
-      pbScale.setZ(Math.fround(transform.scale?.z ?? 1))
-
-      pbTransform.setPosition(pbPosition)
-      pbTransform.setRotation(pbRotation)
-      pbTransform.setScale(pbScale)
-
-      let arrayBuffer: Uint8Array = pbTransform.serializeBinary()
-      return btoa(String.fromCharCode(...arrayBuffer))
-    }
-    return JSON.stringify(data)
-  }
-
-  private componentTypeToLegacyData(componentId: ComponentId): { name: string, disposability: ComponentDisposability } {
+  // TODO: We need to figure out a better way to handle defaults, so we can try to re-use the logic that already exists
+  private componentTypeToLegacyData(componentId: ComponentId): { name: string, disposability: ComponentDisposability, defaultValue?: ComponentData } {
     switch (componentId) {
       case CLASS_ID.TRANSFORM:
-        return { name: 'transform', disposability: ComponentDisposability.NON_DISPOSABLE }
+        return {
+          name: 'transform',
+          disposability: ComponentDisposability.NON_DISPOSABLE,
+          defaultValue: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0.0, y: 0.0, z: 0.0, w: 1.0 }, scale: { x: 1, y: 1, z: 1 } }
+        }
       case CLASS_ID.GLTF_SHAPE:
         return { name: 'shape', disposability: ComponentDisposability.DISPOSABLE }
     }

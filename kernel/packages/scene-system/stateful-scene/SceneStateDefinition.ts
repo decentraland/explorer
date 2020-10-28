@@ -57,6 +57,12 @@ export class SceneStateDefinition implements StateContainer {
   }
 }
 
+
+/**
+ * We are converting from numeric ids to a more human readable format. It might make sense to change this in the future,
+ * but until this feature is stable enough, it's better to store it in a way that it is easy to debug.
+ */
+
 const HUMAN_READABLE_TO_ID: Map<string, ComponentId> = new Map([['Transform', CLASS_ID.TRANSFORM], ['GLTFShape', CLASS_ID.GLTF_SHAPE]])
 
 function idToHumanReadableType(id: ComponentId): string {

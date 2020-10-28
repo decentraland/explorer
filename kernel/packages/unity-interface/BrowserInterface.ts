@@ -39,7 +39,7 @@ import { reportHotScenes } from 'shared/social/hotScenes'
 import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
-import { SceneSystemWorker } from 'shared/world/SceneWorker'
+import { SceneSystemWorker } from 'shared/world/SceneSystemWorker'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 
@@ -209,13 +209,13 @@ export class BrowserInterface {
         const { sceneId } = payload
         const parcelScene = this.resetScene(sceneId)
         setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
-        break;
+        break
       }
       case 'StopStateMode': {
         const { sceneId } = payload
         const parcelScene = this.resetScene(sceneId)
         setNewParcelScene(sceneId, new SceneSystemWorker(parcelScene))
-        break;
+        break
       }
       default: {
         defaultLogger.warn(`Unknown event type ${eventType}, ignoring`)
@@ -416,7 +416,7 @@ export class BrowserInterface {
 
   /** Kill the current worker, reset the scene in Unity and return the ParcelSceneAPI that was being used */
   private resetScene(sceneId: string): ParcelSceneAPI {
-    const worker = getSceneWorkerBySceneID(sceneId)!!
+    const worker = getSceneWorkerBySceneID(sceneId)!
     unityInterface.UnloadScene(sceneId) // Maybe unity should do it by itself?
     const parcelScene = worker.getParcelScene()
     stopParcelSceneWorker(worker)
