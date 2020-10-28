@@ -34,7 +34,6 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
 
     const address = await getUserEthAccountIfAvailable()
 
-    // TODO - look for user id matching account - moliva - 18/02/2020
     let userData = address ? getStoredSession(address) : getLastSession()
 
     // Modern dapp browsers...
