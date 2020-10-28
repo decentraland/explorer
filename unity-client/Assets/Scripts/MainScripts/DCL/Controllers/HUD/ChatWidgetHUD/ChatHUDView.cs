@@ -23,6 +23,7 @@ public class ChatHUDView : MonoBehaviour
     public GameObject messageHoverPanel;
     public TextMeshProUGUI messageHoverText;
     public UserContextMenu contextMenu;
+    public UserContextConfirmationDialog confirmationDialog;
 
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
     [NonSerialized] public List<DateSeparatorEntry> dateSeparators = new List<DateSeparatorEntry>();

@@ -118,7 +118,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     protected FriendsHUDView owner;
 
     public UserContextMenu contextMenuPanel;
-    public FriendsHUD_DialogBox confirmationDialog;
+    public UserContextConfirmationDialog confirmationDialog;
 
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
     protected Dictionary<string, PoolableObject> instantiatedFriendEntries = new Dictionary<string, PoolableObject>();

@@ -27,6 +27,9 @@ public class UserContextMenu : MonoBehaviour
 
     const MenuConfigFlags headerFlags = MenuConfigFlags.Name | MenuConfigFlags.Friendship;
 
+    [Header("Optional: Set Confirmation Dialog")]
+    [SerializeField] internal UserContextConfirmationDialog confirmationDialog;
+
     [Header("Enable Actions")]
     [SerializeField] internal MenuConfigFlags menuConfigFlags = MenuConfigFlags.Passport | MenuConfigFlags.Block | MenuConfigFlags.Report;
 
@@ -67,7 +70,7 @@ public class UserContextMenu : MonoBehaviour
     private string userId;
     private bool isBlocked;
     private MenuConfigFlags currentConfigFlags;
-    private IConfirmationDialog confirmationDialog;
+    private IConfirmationDialog currentConfirmationDialog;
 
 
     /// <summary>
@@ -89,6 +92,10 @@ public class UserContextMenu : MonoBehaviour
         this.userId = userId;
         ProcessActiveElements(configFlags);
         Setup(userId, configFlags);
+        if (currentConfirmationDialog == null && confirmationDialog != null)
+        {
+            SetConfirmationDialog(confirmationDialog);
+        }
         gameObject.SetActive(true);
         OnShowMenu?.Invoke();
     }
@@ -97,9 +104,9 @@ public class UserContextMenu : MonoBehaviour
     /// Set confirmation popup to reference use
     /// </summary>
     /// <param name="confirmationPopup">confirmation popup reference</param>
-    public void SetConfirmationPopup(IConfirmationDialog confirmationPopup)
+    public void SetConfirmationDialog(IConfirmationDialog confirmationPopup)
     {
-        this.confirmationDialog = confirmationPopup;
+        this.currentConfirmationDialog = confirmationPopup;
     }
 
     /// <summary>
@@ -160,10 +167,10 @@ public class UserContextMenu : MonoBehaviour
     private void OnDeleteUserButtonPressed()
     {
         OnUnfriend?.Invoke(userId);
-        if (confirmationDialog != null)
+        if (currentConfirmationDialog != null)
         {
-            confirmationDialog.SetText(string.Format(DELETE_MSG_PATTERN, UserProfileController.userProfilesCatalog.Get(userId)?.userName));
-            confirmationDialog.Show(() =>
+            currentConfirmationDialog.SetText(string.Format(DELETE_MSG_PATTERN, UserProfileController.userProfilesCatalog.Get(userId)?.userName));
+            currentConfirmationDialog.Show(() =>
             {
                 FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
                 {

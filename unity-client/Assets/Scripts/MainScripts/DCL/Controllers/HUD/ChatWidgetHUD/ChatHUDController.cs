@@ -48,6 +48,7 @@ public class ChatHUDController : IDisposable
         if (view.contextMenu != null)
         {
             view.contextMenu.Hide();
+            view.confirmationDialog.Hide();
         }
     }
 

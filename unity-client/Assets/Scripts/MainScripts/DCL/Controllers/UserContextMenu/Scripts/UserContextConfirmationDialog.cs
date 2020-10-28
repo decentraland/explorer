@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FriendsHUD_DialogBox : MonoBehaviour, IConfirmationDialog
+public class UserContextConfirmationDialog : MonoBehaviour, IConfirmationDialog
 {
     public TextMeshProUGUI dialogText;
     public Button cancelButton;
