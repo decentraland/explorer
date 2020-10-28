@@ -483,7 +483,7 @@ public class AvatarEditorHUDController : IHUD
     public void SaveAvatar(Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
-        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot);
+        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot, IsSignUpFlowValue);
         userProfile.OverrideAvatar(avatarModel, face256Snapshot);
 
         SetVisibility(false);
