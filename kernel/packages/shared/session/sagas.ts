@@ -139,7 +139,6 @@ function* login() {
     yield setNetwork(net)
     queueTrackingEvent('Use network', { net })
   }
-
   yield put(userAuthentified(userId, identity, net))
 
   yield loginCompleted
