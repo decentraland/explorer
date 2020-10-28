@@ -184,6 +184,7 @@ public class UserContextMenu : MonoBehaviour
         {
             userName.gameObject.SetActive((flags & MenuConfigFlags.Name) != 0);
             friendshipContainer.SetActive((flags & MenuConfigFlags.Friendship) != 0);
+            deleteFriendButton.gameObject.SetActive((flags & MenuConfigFlags.Friendship) != 0);
         }
         passportButton.gameObject.SetActive((flags & MenuConfigFlags.Passport) != 0);
         blockButton.gameObject.SetActive((flags & MenuConfigFlags.Block) != 0);
