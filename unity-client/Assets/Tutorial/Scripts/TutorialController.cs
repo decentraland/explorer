@@ -113,12 +113,6 @@ namespace DCL.Tutorial
 
             if (hudController != null)
             {
-                if (hudController.goToGenesisPlazaHud != null)
-                {
-                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
-                }
-
                 if (hudController.taskbarHud != null)
                 {
                     hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
@@ -143,14 +137,6 @@ namespace DCL.Tutorial
 
             if (hudController != null)
             {
-                if (hudController.goToGenesisPlazaHud != null)
-                {
-                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza -= GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnBeforeGoToGenesisPlaza += GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza -= GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
-                    hudController.goToGenesisPlazaHud.OnAfterGoToGenesisPlaza += GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza;
-                }
-
                 if (hudController.taskbarHud != null)
                     hudController.taskbarHud.ShowTutorialOption(false);
             }
@@ -454,19 +440,6 @@ namespace DCL.Tutorial
 
                 yield return null;
             }
-        }
-
-        private void GoToGenesisPlazaHud_OnBeforeGoToGenesisPlaza()
-        {
-            SetTutorialDisabled();
-        }
-
-        private void GoToGenesisPlazaHud_OnAfterGoToGenesisPlaza()
-        {
-            SetTutorialEnabled(false.ToString());
-
-            if (hudController != null)
-                hudController.taskbarHud?.HideGoToGenesisPlazaButton();
         }
 
         private void IsTaskbarHUDInitialized_OnChange(bool current, bool previous)
