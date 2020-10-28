@@ -67,6 +67,20 @@ public class UserContextMenu : MonoBehaviour
     private bool isBlocked;
     private MenuConfigFlags currentConfigFlags;
 
+    /// <summary>
+    /// Show context menu
+    /// </summary>
+    /// <param name="userId"> user id</param>
+    public void Show(string userId)
+    {
+        Show(userId, menuConfigFlags);
+    }
+
+    /// <summary>
+    /// Show context menu
+    /// </summary>
+    /// <param name="userId"> user id</param>
+    /// <param name="configFlags">set buttons to enable in menu</param>
     public void Show(string userId, MenuConfigFlags configFlags)
     {
         this.userId = userId;
@@ -74,11 +88,6 @@ public class UserContextMenu : MonoBehaviour
         Setup(userId, configFlags);
         gameObject.SetActive(true);
         OnShowMenu?.Invoke();
-    }
-
-    public void Show(string userId)
-    {
-        Show(userId, menuConfigFlags);
     }
 
     /// <summary>
@@ -115,7 +124,9 @@ public class UserContextMenu : MonoBehaviour
     private void OnDisable()
     {
         if (FriendsController.i)
-            FriendsController.i.OnUpdateUserStatus -= OnFriendStatusUpdate;
+        {
+            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+        }
     }
 
     private void OnPassportButtonPressed()
@@ -143,13 +154,49 @@ public class UserContextMenu : MonoBehaviour
     private void OnAddFriendButtonPressed()
     {
         OnAddFriend?.Invoke(userId);
-        Hide();
+
+        if (!FriendsController.i)
+        {
+            return;
+        }
+
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+        {
+            userId = userId,
+            name = UserProfileController.userProfilesCatalog.Get(userId)?.userName
+        });
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = userId,
+            action = FriendshipAction.REQUESTED_TO
+        });
+
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = userId, action = FriendshipAction.REQUESTED_TO
+        });
     }
 
     private void OnCancelFriendRequestButtonPressed()
     {
         OnCancelFriend?.Invoke(userId);
-        Hide();
+
+        if (!FriendsController.i)
+        {
+            return;
+        }
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = userId,
+            action = FriendshipAction.CANCELLED
+        });
+
+        WebInterface.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = userId, action = FriendshipAction.CANCELLED
+        });
     }
 
     private void OnMessageButtonPressed()
@@ -221,21 +268,21 @@ public class UserContextMenu : MonoBehaviour
         }
         if ((configFlags & MenuConfigFlags.Name) != 0)
         {
-            string name = profile?.name;
+            string name = profile?.userName;
             userName.text = name;
         }
         if ((configFlags & MenuConfigFlags.Friendship) != 0 && FriendsController.i)
         {
             if (FriendsController.i.friends.TryGetValue(userId, out FriendsController.UserStatus status))
             {
-                OnFriendStatusUpdate(userId, status);
+                SetupFriendship(status.friendshipStatus);
             }
             else
             {
                 SetupFriendship(FriendshipStatus.NONE);
             }
-            FriendsController.i.OnUpdateUserStatus -= OnFriendStatusUpdate;
-            FriendsController.i.OnUpdateUserStatus += OnFriendStatusUpdate;
+            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+            FriendsController.i.OnUpdateFriendship += OnFriendActionUpdate;
         }
     }
 
@@ -275,11 +322,24 @@ public class UserContextMenu : MonoBehaviour
         }
     }
 
-    private void OnFriendStatusUpdate(string userId, FriendsController.UserStatus status)
+    private void OnFriendActionUpdate(string userId, FriendshipAction action)
     {
-        if (this.userId == userId)
+        if (this.userId != userId)
         {
-            SetupFriendship(status.friendshipStatus);
+            return;
+        }
+
+        if (action == FriendshipAction.APPROVED)
+        {
+            SetupFriendship(FriendshipStatus.FRIEND);
+        }
+        else if (action == FriendshipAction.REQUESTED_TO)
+        {
+            SetupFriendship(FriendshipStatus.REQUESTED_TO);
+        }
+        else if (action == FriendshipAction.DELETED || action == FriendshipAction.CANCELLED || action == FriendshipAction.REJECTED)
+        {
+            SetupFriendship(FriendshipStatus.NONE);
         }
     }
 
