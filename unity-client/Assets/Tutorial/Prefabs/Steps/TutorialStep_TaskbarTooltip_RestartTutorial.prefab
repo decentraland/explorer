@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 4282299692103527186}
   - component: {fileID: 7355157609001770265}
   m_Layer: 0
-  m_Name: TutorialStep_TaskbarTooltip_GoToGenesisButton
+  m_Name: TutorialStep_TaskbarTooltip_RestartTutorial
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

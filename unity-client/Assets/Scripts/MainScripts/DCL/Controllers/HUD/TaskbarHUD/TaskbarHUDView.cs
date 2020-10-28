@@ -33,7 +33,6 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal RectTransform exploreTooltipReference;
     [SerializeField] internal RectTransform backpackTooltipReference;
     [SerializeField] internal RectTransform moreTooltipReference;
-    [SerializeField] internal RectTransform goToGenesisTooltipReference;
 
     [Header("Old TaskbarCompatibility (temporal)")]
     [SerializeField] internal RectTransform taskbarPanelTransf;

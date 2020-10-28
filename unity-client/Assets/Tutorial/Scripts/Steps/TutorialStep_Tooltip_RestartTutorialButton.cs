@@ -1,9 +1,9 @@
 namespace DCL.Tutorial
 {
     /// <summary>
-    /// Class that represents the onboarding tutorial step related to how to Jump In the Genesis Plaza and become a DCL Citizen.
+    /// Class that represents the onboarding tutorial step related to how to restart the tutorial from the taskbar more menu.
     /// </summary>
-    public class TutorialStep_Tooltip_GoToGenesisButton : TutorialStep_Tooltip
+    public class TutorialStep_Tooltip_RestartTutorialButton : TutorialStep_Tooltip
     {
         public override void OnStepStart()
         {

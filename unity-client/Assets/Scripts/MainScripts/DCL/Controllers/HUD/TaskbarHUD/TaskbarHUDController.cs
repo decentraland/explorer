@@ -39,7 +39,6 @@ public class TaskbarHUDController : IHUD
     public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
     public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
     public RectTransform backpackTooltipReference { get => view.backpackTooltipReference; }
-    public RectTransform goToGenesisTooltipReference { get => view.goToGenesisTooltipReference; }
     public TaskbarMoreMenu moreMenu { get => view.moreMenu; }
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController, IFriendsController friendsController)
