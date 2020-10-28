@@ -8,7 +8,7 @@ import { generatePBObjectJSON } from "scene-system/sdk/Utils";
 export class RendererActor extends StatefulActor {
 
   private readonly eventSubscriber: EventSubscriber
-  private components: number = 0;
+  private disposableComponents: number = 0;
 
   constructor(
     private readonly engine: IEngineAPI,
@@ -23,7 +23,7 @@ export class RendererActor extends StatefulActor {
       payload: { id: entityId } as CreateEntityPayload
     }]
     if (components) {
-      components.map(({ id, data }) => this.mapComponent(entityId, id, data))
+      components.map(({ id, data }) => this.mapComponentToActions(entityId, id, data))
         .forEach(actions => batch.push(...actions))
     }
     this.engine.sendBatch(batch)
@@ -37,12 +37,12 @@ export class RendererActor extends StatefulActor {
   }
 
   setComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): void {
-    const updates = this.mapComponent(entityId, componentId, data)
+    const updates = this.mapComponentToActions(entityId, componentId, data)
     this.engine.sendBatch(updates)
   }
 
   removeComponent(entityId: EntityId, componentId: ComponentId): void {
-    const { name } = this.componentTypeToLegacyData(componentId)
+    const { name } = this.getDataAboutComponent(componentId)
     this.engine.sendBatch([{
       type: 'ComponentRemoved',
       tag: entityId,
@@ -93,8 +93,8 @@ export class RendererActor extends StatefulActor {
     })
   }
 
-  private mapComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): EntityAction[] {
-    const { disposability, defaultValue } = this.componentTypeToLegacyData(componentId)
+  private mapComponentToActions(entityId: EntityId, componentId: ComponentId, data: ComponentData): EntityAction[] {
+    const { disposability, defaultValue } = this.getDataAboutComponent(componentId)
     const finalData = Object.assign(defaultValue ?? {}, data)
     if (disposability === ComponentDisposability.DISPOSABLE) {
       return this.buildDisposableComponentActions(entityId, componentId, finalData)
@@ -112,7 +112,7 @@ export class RendererActor extends StatefulActor {
   }
 
   private buildDisposableComponentActions(entityId: EntityId, classId: number, data: ComponentData): EntityAction[] {
-    const id = `C${this.components++}`
+    const id = `C${this.disposableComponents++}`
     return [
       {
         type: 'ComponentCreated',
@@ -142,7 +142,7 @@ export class RendererActor extends StatefulActor {
   }
 
   // TODO: We need to figure out a better way to handle defaults, so we can try to re-use the logic that already exists
-  private componentTypeToLegacyData(componentId: ComponentId): { name: string, disposability: ComponentDisposability, defaultValue?: ComponentData } {
+  private getDataAboutComponent(componentId: ComponentId): { name: string, disposability: ComponentDisposability, defaultValue?: ComponentData } {
     switch (componentId) {
       case CLASS_ID.TRANSFORM:
         return {
@@ -153,7 +153,7 @@ export class RendererActor extends StatefulActor {
       case CLASS_ID.GLTF_SHAPE:
         return { name: 'shape', disposability: ComponentDisposability.DISPOSABLE }
     }
-    throw new Error('Not implemented yet')
+    throw new Error('Component not implemented yet')
   }
 
 }

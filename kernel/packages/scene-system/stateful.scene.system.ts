@@ -38,7 +38,7 @@ class StatefulWebWorkerScene extends Script {
     this.eventSubscriber = new EventSubscriber(this.engine)
 
     // Fetch stored scene
-    this.sceneState = SceneStateDefinition.fromStoredData(await this.sceneStateStorage.getStoredState(sceneId))
+    this.sceneState = SceneStateDefinition.fromStorableFormat(await this.sceneStateStorage.getStoredState(sceneId))
 
     // Listen to the renderer and update the local scene state
     this.renderer.forwardChangesTo(this.sceneState)
@@ -51,7 +51,7 @@ class StatefulWebWorkerScene extends Script {
     // Listen to storage requests
     this.eventSubscriber.on('stateEvent', ({ type }) => {
       if (type === 'StoreSceneState') {
-        this.sceneStateStorage.storeState(sceneId, this.sceneState.toStorableData())
+        this.sceneStateStorage.storeState(sceneId, this.sceneState.toStorableFormat())
       }
     })
   }

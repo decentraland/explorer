@@ -30,7 +30,7 @@ export class SceneStateDefinition implements StateContainer {
     }
   }
 
-  toStorableData(): any {
+  toStorableFormat(): any {
     const entities = []
     for (const [entityId, entityComponents] of this.entities.entries()) {
       const components = []
@@ -42,8 +42,8 @@ export class SceneStateDefinition implements StateContainer {
     return { entities }
   }
 
-  static fromStoredData(data: any): SceneStateDefinition {
-    const container = new SceneStateDefinition()
+  static fromStorableFormat(data: any): SceneStateDefinition {
+    const sceneState = new SceneStateDefinition()
     for (const entity of data.entities) {
       const id: EntityId = entity.id
       const components: Component[] | undefined = entity.components
@@ -51,9 +51,9 @@ export class SceneStateDefinition implements StateContainer {
           id: humanReadableTypeToId(component.type),
           data: component.value,
         }))
-      container.addEntity(id, components)
+      sceneState.addEntity(id, components)
     }
-    return container
+    return sceneState
   }
 }
 
