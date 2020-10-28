@@ -11,9 +11,9 @@ namespace DCL.Tutorial
 
             if (tutorialController != null &&
                 tutorialController.hudController != null &&
-                tutorialController.hudController.goToGenesisPlazaHud != null)
+                tutorialController.hudController.taskbarHud != null)
             {
-                tutorialController.hudController.goToGenesisPlazaHud.OnOpen += GoToGenesisPlazaHud_OnOpen;
+                tutorialController.hudController.taskbarHud.moreMenu.OnMoreMenuOpened += MoreMenu_OnMoreMenuOpened;
             }
         }
 
@@ -23,9 +23,9 @@ namespace DCL.Tutorial
 
             if (tutorialController != null &&
                 tutorialController.hudController != null &&
-                tutorialController.hudController.goToGenesisPlazaHud != null)
+                tutorialController.hudController.taskbarHud != null)
             {
-                tutorialController.hudController.goToGenesisPlazaHud.OnOpen -= GoToGenesisPlazaHud_OnOpen;
+                tutorialController.hudController.taskbarHud.moreMenu.OnMoreMenuOpened -= MoreMenu_OnMoreMenuOpened;
             }
         }
 
@@ -35,14 +35,13 @@ namespace DCL.Tutorial
 
             if (tutorialController != null &&
                 tutorialController.hudController != null &&
-                tutorialController.hudController.taskbarHud.goToGenesisTooltipReference)
+                tutorialController.hudController.taskbarHud.tutorialTooltipReference)
             {
-                tutorialController.hudController.taskbarHud.ShowGoToGenesisPlazaButton();
-                tooltipTransform.position = tutorialController.hudController.taskbarHud.goToGenesisTooltipReference.position;
+                tooltipTransform.position = tutorialController.hudController.taskbarHud.tutorialTooltipReference.position;
             }
         }
 
-        private void GoToGenesisPlazaHud_OnOpen(bool isVisible)
+        private void MoreMenu_OnMoreMenuOpened(bool isVisible)
         {
             stepIsFinished = true;
             isRelatedFeatureActived = false;
