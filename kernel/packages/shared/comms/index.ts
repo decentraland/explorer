@@ -318,7 +318,7 @@ export function unsubscribeParcelSceneToCommsMessages(controller: Communications
   scenesSubscribedToCommsEvents.delete(controller)
 }
 
-const pendingProfileRequests: Record<string, IFuture<Profile>[]> = {}
+const pendingProfileRequests: Record<string, IFuture<Profile | null>[]> = {}
 
 export async function requestLocalProfileToPeers(userId: string, version?: number): Promise<Profile | null> {
   if (context && context.worldInstanceConnection && context.currentPosition) {
@@ -326,7 +326,7 @@ export async function requestLocalProfileToPeers(userId: string, version?: numbe
       pendingProfileRequests[userId] = []
     }
 
-    const thisFuture = future<Profile>()
+    const thisFuture = future<Profile | null>()
 
     pendingProfileRequests[userId].push(thisFuture)
 
@@ -334,7 +334,8 @@ export async function requestLocalProfileToPeers(userId: string, version?: numbe
 
     setTimeout(function () {
       if (thisFuture.isPending) {
-        thisFuture.reject(new Error('Profile request timed out for comms'))
+        // We resolve with a null profile. This will fallback to a random profile
+        thisFuture.resolve(null)
         const pendingRequests = pendingProfileRequests[userId]
         if (pendingRequests && pendingRequests.includes(thisFuture)) {
           pendingRequests.splice(pendingRequests.indexOf(thisFuture), 1)
@@ -344,8 +345,8 @@ export async function requestLocalProfileToPeers(userId: string, version?: numbe
 
     return thisFuture
   } else {
+    // We resolve with a null profile. This will fallback to a random profile
     return Promise.resolve(null)
-    // TODO: Maybe accumulate request to send after context is initialized?
   }
 }
 
