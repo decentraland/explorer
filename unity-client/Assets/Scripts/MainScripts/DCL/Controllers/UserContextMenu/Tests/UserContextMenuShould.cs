@@ -99,7 +99,7 @@ public class UserContextMenuShould : TestsBase
     }
 
     [Test]
-    public void FriendSetupWorkCorrectly()
+    public void FriendSetupsCorrectly()
     {
         contextMenu.Show(TEST_USER_ID, UserContextMenu.MenuConfigFlags.Friendship);
 
@@ -142,5 +142,37 @@ public class UserContextMenuShould : TestsBase
         Assert.IsFalse(contextMenu.friendRemoveContainer.activeSelf, "friendRemoveContainer should not be active");
         Assert.IsFalse(contextMenu.friendRequestedContainer.activeSelf, "friendRequestedContainer should not be active");
         Assert.IsFalse(contextMenu.deleteFriendButton.gameObject.activeSelf, "deleteFriendButton should not be active");
+    }
+
+    [Test]
+    public void MessageButtonSetupsCorrectly()
+    {
+        contextMenu.Show(TEST_USER_ID, UserContextMenu.MenuConfigFlags.Message);
+
+        Assert.IsFalse(contextMenu.messageButton.gameObject.activeSelf, "messageButton should not be active");
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = TEST_USER_ID,
+            action = FriendshipAction.REQUESTED_TO
+        });
+
+        Assert.IsFalse(contextMenu.messageButton.gameObject.activeSelf, "messageButton should not be active");
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = TEST_USER_ID,
+            action = FriendshipAction.APPROVED
+        });
+
+        Assert.IsTrue(contextMenu.messageButton.gameObject.activeSelf, "messageButton should be active");
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = TEST_USER_ID,
+            action = FriendshipAction.DELETED
+        });
+
+        Assert.IsFalse(contextMenu.messageButton.gameObject.activeSelf, "messageButton should not be active");
     }
 }
