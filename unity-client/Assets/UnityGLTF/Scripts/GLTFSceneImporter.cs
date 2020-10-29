@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using UnityEditor;
 #if !WINDOWS_UWP
 using System.Threading;
 #endif
