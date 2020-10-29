@@ -49,7 +49,7 @@ function prepareSnapshots({
       new URL(value)
       return value
     } catch (e) {
-      return 'data:text/plain;base64,' + value
+      return value.startsWith('/images') ? value : 'data:text/plain;base64,' + value
     }
   }
   return { face: prepare(face), face128: prepare(face128), face256: prepare(face256), body: prepare(body) }

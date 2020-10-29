@@ -1,4 +1,11 @@
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, VOICE_CHAT_ENABLED } from 'config'
+import {
+  commConfigurations,
+  parcelLimits,
+  COMMS,
+  AUTO_CHANGE_REALM,
+  VOICE_CHAT_ENABLED,
+  genericAvatarSnapshots
+} from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
@@ -503,7 +510,7 @@ function processProfileRequest(context: Context, fromAlias: string, message: Pac
     )
 
     if (context.currentPosition) {
-      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, profile)
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
     }
 
     context.lastProfileResponseTime = Date.now()
@@ -1302,4 +1309,11 @@ globalThis.bots = {
     }
   },
   list: () => bots.map((bot) => bot.id)
+}
+
+function stripSnapshots(profile: Profile): Profile {
+  return {
+    ...profile,
+    avatar: { ...profile.avatar, snapshots: genericAvatarSnapshots }
+  }
 }
