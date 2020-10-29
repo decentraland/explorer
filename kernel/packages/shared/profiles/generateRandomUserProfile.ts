@@ -79,7 +79,7 @@ export function backupProfile(contentServerUrl: string, userId: string) {
         'dcl://base-avatars/f_eyebrows_00',
         'dcl://base-avatars/f_mouth_00'
       ],
-      version: 0,
+      version: -1,
       snapshots: {
         face: `${contentServerUrl}/contents/QmZbyGxDnZ4PaMVX7kpA2NuGTrmnpwTJ8heKKTSCk4GRJL`,
         body: `${contentServerUrl}/contents/QmaQvcBWg57Eqf5E9R3Ts1ttPKKLhKueqdyhshaLS1tu2g`
