@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Spinner } from "../common/Spinner";
-import { WalletSelector } from "./WalletSelector";
-import pngLogo from "../../images/logo-dcl.png";
+import { WalletSelector } from "./wallet/WalletSelector";
+import { Logo } from "../common/Logo";
 import "./EthLogin.css";
 
 export interface EthLoginProps {
@@ -17,7 +17,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
   return (
     <div className="">
       <div className="eth-login-description">
-        <img alt="Decentraland" className="eth-login-logo" src={pngLogo} />
+        <Logo />
         <p>
           Increase yourself into the first virtual world fully owned by its
           users.

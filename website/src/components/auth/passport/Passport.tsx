@@ -1,6 +1,6 @@
 import React from "react";
 import { PassportForm } from "./PassportForm";
-import { Modal } from "../common/Modal";
+import { Modal } from "../../common/Modal";
 import { PassportAvatar } from "./PassportAvatar";
 
 import "./Passport.css";

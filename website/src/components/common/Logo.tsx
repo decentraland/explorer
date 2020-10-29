@@ -1,7 +1,12 @@
 import React from "react";
+import dclIcon from "../../images/logo.png";
+import dclLogo from "../../images/logo-dcl.png";
 import "./Logo.css";
-import pngLogo from "../../images/logo-dcl.png";
 
-export const Logo: React.FC = () => (
-  <img alt="Decentraland" className="eth-login-logo" src={pngLogo} />
+export interface LogoProps {
+  icon?: boolean;
+}
+
+export const Logo: React.FC<LogoProps> = ({ icon = false }) => (
+  <img alt="Decentraland" className="dcl-logo" src={icon ? dclIcon : dclLogo} />
 );

@@ -1,9 +1,9 @@
 import React from "react";
-import { Modal } from "../common/Modal";
+import { Modal } from "../../common/Modal";
 import { WalletButton } from "./WalletButton";
 
-import MetamaskLogo from "../../images/metamask.svg";
-import FortmaticLogo from "../../images/fortmatic.svg";
+import MetamaskLogo from "../../../images/metamask.svg";
+import FortmaticLogo from "../../../images/fortmatic.svg";
 import "./WalletSelector.css";
 
 export interface WalletSelectorProps {

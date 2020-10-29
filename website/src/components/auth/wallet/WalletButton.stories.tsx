@@ -1,8 +1,8 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
 import { WalletButton, WalletButtonProps } from "./WalletButton";
-import MetamaskLogo from "../../images/metamask.svg";
-import FortmaticLogo from "../../images/fortmatic.svg";
+import MetamaskLogo from "../../../images/metamask.svg";
+import FortmaticLogo from "../../../images/fortmatic.svg";
 
 export default {
   title: "Explorer/auth/WalletButton",

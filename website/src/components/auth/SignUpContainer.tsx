@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Passport } from "./Passport";
-import { TermsOfServices } from "./TermsOfServices";
+import { Passport } from "./passport/Passport";
+import { TermsOfServices } from "./terms/TermsOfServices";
 
 export interface SignUpContainerProps {
   name: string;
