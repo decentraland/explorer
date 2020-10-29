@@ -73,7 +73,7 @@ import {
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
 import { getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
-import { Profile, ProfileType } from 'shared/profiles/types'
+import { Profile, ProfileType, Snapshots } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
@@ -99,6 +99,7 @@ import { getProfileType } from 'shared/profiles/sagas'
 import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { isURL } from 'atomicHelpers/parseUrl'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -1312,8 +1313,18 @@ globalThis.bots = {
 }
 
 function stripSnapshots(profile: Profile): Profile {
+  const newSnapshots: Record<string, string> = {}
+  const currentSnapshots: Record<string, string> = profile.avatar.snapshots
+  Object.keys(currentSnapshots).forEach((snapshotKey) => {
+    const snapshot = currentSnapshots[snapshotKey]
+
+    newSnapshots[snapshotKey] =
+      snapshot.startsWith('/') || snapshot.startsWith('./') || isURL(snapshot)
+        ? snapshot
+        : genericAvatarSnapshots[snapshotKey]
+  })
   return {
     ...profile,
-    avatar: { ...profile.avatar, snapshots: genericAvatarSnapshots }
+    avatar: { ...profile.avatar, snapshots: newSnapshots as Snapshots }
   }
 }

@@ -337,7 +337,7 @@ export namespace ethereumConfigurations {
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
 
-export const genericAvatarSnapshots = {
+export const genericAvatarSnapshots: Record<string, string> = {
   face: '/images/avatar_snapshot_default.png',
   body: '/images/image_not_found.png',
   face256: '/images/avatar_snapshot_default256.png',
