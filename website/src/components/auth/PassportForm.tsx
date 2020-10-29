@@ -21,7 +21,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
     props.onSubmit(name, email);
   };
 
-  const onChangeName = ({ target }) => {
+  const onChangeName = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
     if (target.value.length <= 15) {
       setHasError(false);
       setName(target.value);
