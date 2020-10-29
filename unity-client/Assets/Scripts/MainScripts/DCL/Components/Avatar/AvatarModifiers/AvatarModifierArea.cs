@@ -83,13 +83,13 @@ public class AvatarModifierArea : BaseComponent
             newAvatarsInArea = new HashSet<GameObject>();
 
         // Call event for avatars that just entered the area
-        foreach (GameObject avatarThatEntered in newAvatarsInArea.Except(avatarsInArea).ToArray())
+        foreach (GameObject avatarThatEntered in newAvatarsInArea.Except(avatarsInArea))
         {
             OnAvatarEnter?.Invoke(avatarThatEntered);
         }
 
         // Call events for avatars that just exited the area
-        foreach (GameObject avatarThatExited in avatarsInArea.Except(newAvatarsInArea).ToArray())
+        foreach (GameObject avatarThatExited in avatarsInArea.Except(newAvatarsInArea))
         {
             OnAvatarExit?.Invoke(avatarThatExited);
         }
