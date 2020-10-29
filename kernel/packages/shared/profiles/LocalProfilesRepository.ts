@@ -1,5 +1,6 @@
 import { Profile } from './types'
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { getDefaultTLD } from 'config'
 
 const LOCAL_PROFILES_KEY = 'dcl-local-profile'
 
@@ -30,6 +31,6 @@ export class LocalProfilesRepository {
   }
 
   private profileKey(address: string): string {
-    return `${LOCAL_PROFILES_KEY}-${address}`
+    return `${LOCAL_PROFILES_KEY}-${getDefaultTLD()}-${address}`
   }
 }

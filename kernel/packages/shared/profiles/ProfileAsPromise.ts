@@ -8,7 +8,7 @@ declare const globalThis: StoreContainer
 
 export function ProfileAsPromise(userId: string, version?: number, profileType?: ProfileType): Promise<Profile> {
   function isExpectedVersion(aProfile: Profile) {
-    return !version || aProfile.version >= version
+    return !version || aProfile.version >= version || aProfile.version === -1 // We signal random profiles with -1
   }
 
   const store: Store<RootState> = globalThis.globalStore

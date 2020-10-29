@@ -32,6 +32,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
 
   profile.name = 'Guest-' + userId.substr(2, 6)
   profile.tutorialStep = 0
+  profile.version = -1 // We signal random user profiles with -1
 
   return profile
 }
