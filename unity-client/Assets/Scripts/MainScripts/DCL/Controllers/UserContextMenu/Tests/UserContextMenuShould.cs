@@ -3,31 +3,41 @@ using System.Collections;
 using UnityEngine;
 using UnityEditor;
 using System;
+using UnityEngine.TestTools;
 
-public class UserContextMenuShould : TestsBase
+public class UserContextMenuShould
 {
     const string PREFAB_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/UserContextMenu/Prefabs/UserContextMenuPanel.prefab";
     const string TEST_USER_ID = "TEST_USER_ID";
 
     private UserContextMenu contextMenu;
     private FriendsController friendsController;
+    private UserProfileController profileController;
 
-    protected override IEnumerator SetUp()
+    [UnitySetUp]
+    public IEnumerator SetUp()
     {
-        yield return base.SetUp();
         var prefab = AssetDatabase.LoadAssetAtPath(PREFAB_PATH, (typeof(GameObject))) as GameObject;
         contextMenu = UnityEngine.Object.Instantiate(prefab).GetComponent<UserContextMenu>();
-        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+
+        friendsController = (new GameObject()).AddComponent<FriendsController>();
+        profileController = (new GameObject()).AddComponent<UserProfileController>();
+        profileController.AddUserProfileToCatalog(new UserProfileModel()
         {
             name = TEST_USER_ID,
             userId = TEST_USER_ID
         });
-        friendsController = FriendsController.i;
+
+        yield break;
     }
 
-    protected override IEnumerator TearDown()
+    [UnityTearDown]
+    public IEnumerator TearDown()
     {
         UnityEngine.Object.Destroy(contextMenu.gameObject);
+        UnityEngine.Object.Destroy(friendsController.gameObject);
+        UnityEngine.Object.Destroy(profileController.gameObject);
+
         yield break;
     }
 
