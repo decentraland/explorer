@@ -1,3 +1,9 @@
+.termsOfServices {
+  max-width: 600px;
+  display: flex;
+  flex-flow: column;
+}
+
 .termsOfServices h2 {
   text-align: center;
 }

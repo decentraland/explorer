@@ -50,7 +50,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   return (
     <React.Fragment>
       {shouldShow && (
-        <div className="login">
+        <div className="LoginContainer">
           <Navbar />
           <div className="eth-login-popup">
             {(props.stage === LoginStage.SIGN_IN ||

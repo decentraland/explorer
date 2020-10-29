@@ -15,7 +15,7 @@ export interface EthLoginProps {
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const [wallet, setWallet] = useState(false);
   return (
-    <div className="loginContainer">
+    <div className="">
       <div className="eth-login-description">
         <img alt="Decentraland" className="eth-login-logo" src={pngLogo} />
         <p>
