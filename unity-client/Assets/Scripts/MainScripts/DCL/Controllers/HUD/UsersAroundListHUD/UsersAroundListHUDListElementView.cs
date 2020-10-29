@@ -18,9 +18,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     [SerializeField] internal Button soundButton;
     [SerializeField] internal GameObject muteGO;
     [SerializeField] internal GameObject recordingGO;
-    [SerializeField] internal Image background;
-    [SerializeField] internal Sprite defaultBackground;
-    [SerializeField] internal Sprite hoverBackground;
+    [SerializeField] internal GameObject backgroundHover;
     [SerializeField] internal Button menuButton;
     [SerializeField] internal Transform contexMenuRefPosition;
 
@@ -28,11 +26,6 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     private bool isMuted = false;
     private bool isRecording = false;
     private Coroutine setUserRecordingRoutine = null;
-
-    private void Awake()
-    {
-        defaultBackground = background.sprite;
-    }
 
     private void Start()
     {
@@ -106,7 +99,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         recordingGO.SetActive(false);
         avatarPreview.texture = null;
         userName.text = string.Empty;
-        background.sprite = defaultBackground;
+        backgroundHover.SetActive(false);
         menuButton.gameObject.SetActive(false);
         gameObject.SetActive(true);
     }
@@ -138,13 +131,13 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
-        background.sprite = hoverBackground;
+        backgroundHover.SetActive(true);
         menuButton.gameObject.SetActive(true);
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
-        background.sprite = defaultBackground;
+        backgroundHover.SetActive(false);
         menuButton.gameObject.SetActive(false);
     }
 }
