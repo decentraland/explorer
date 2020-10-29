@@ -29,12 +29,3 @@ export function resolveUrl(baseUrl: string, url: string | URL) {
     return url
   }
 }
-
-export function isURL(maybeUrl: string): boolean {
-  try {
-    new URL(maybeUrl)
-    return true
-  } catch (e) {
-    return false
-  }
-}

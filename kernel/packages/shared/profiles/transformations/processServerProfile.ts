@@ -44,7 +44,8 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     userId,
     email: receivedProfile.email || '',
     name: receivedProfile.name || name,
-    hasClaimedName: !!receivedProfile.name,
+    hasClaimedName:
+      typeof receivedProfile.hasClaimedName === 'undefined' ? !!receivedProfile.name : receivedProfile.hasClaimedName,
     description: receivedProfile.description || '',
     ethAddress: userId || 'noeth',
     version: receivedProfile.version ?? receivedProfile.avatar.version ?? 1,

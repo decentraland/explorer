@@ -389,7 +389,7 @@ function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
 
   try {
     const savedProfile: Profile | null = yield select(getProfile, userId)
-    const currentVersion: number = savedProfile?.version || 0
+    const currentVersion: number = savedProfile?.version && savedProfile?.version > 0 ? savedProfile?.version : 0
     const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } } as Profile
 
     const identity: ExplorerIdentity = yield select(getCurrentIdentity)

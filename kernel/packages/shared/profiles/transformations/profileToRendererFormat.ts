@@ -3,6 +3,7 @@ import { ProfileForRenderer } from 'decentraland-ecs/src'
 import { convertToRGBObject } from './convertToRGBObject'
 import { dropDeprecatedWearables } from './processServerProfile'
 import { ExplorerIdentity } from 'shared/session/types'
+import { isURL } from 'atomicHelpers/isURL'
 
 const profileDefaults = {
   tutorialStep: 0
@@ -43,14 +44,8 @@ function prepareSnapshots({
   body: string
 } {
   function prepare(value: string) {
-    if (value === '') return value
-    try {
-      // tslint:disable-next-line
-      new URL(value)
-      return value
-    } catch (e) {
-      return value.startsWith('/images') ? value : 'data:text/plain;base64,' + value
-    }
+    if (value === '' || isURL(value) || value.startsWith('/images')) return value
+    else return 'data:text/plain;base64,' + value
   }
   return { face: prepare(face), face128: prepare(face128), face256: prepare(face256), body: prepare(body) }
 }

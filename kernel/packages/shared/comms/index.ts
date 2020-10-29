@@ -99,7 +99,7 @@ import { getProfileType } from 'shared/profiles/sagas'
 import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
 import { unityInterface } from 'unity-interface/UnityInterface'
-import { isURL } from 'atomicHelpers/parseUrl'
+import { isURL } from 'atomicHelpers/isURL'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
