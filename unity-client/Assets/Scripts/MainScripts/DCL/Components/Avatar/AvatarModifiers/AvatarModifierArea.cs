@@ -73,24 +73,39 @@ public class AvatarModifierArea : BaseComponent
 
         // Find avatars currently on the area
         HashSet<GameObject> newAvatarsInArea = DetectAllAvatarsInArea();
-        if (newAvatarsInArea == null || newAvatarsInArea.SetEquals(avatarsInArea))
-        {
+        if (AreSetEquals(avatarsInArea, newAvatarsInArea))
             return;
-        }
+
+        if(avatarsInArea == null)
+            avatarsInArea = new HashSet<GameObject>();
+
+        if(newAvatarsInArea == null)
+            newAvatarsInArea = new HashSet<GameObject>();
 
         // Call event for avatars that just entered the area
-        foreach (GameObject avatarThatEntered in newAvatarsInArea.Except(avatarsInArea))
+        foreach (GameObject avatarThatEntered in newAvatarsInArea.Except(avatarsInArea).ToArray())
         {
             OnAvatarEnter?.Invoke(avatarThatEntered);
         }
 
         // Call events for avatars that just exited the area
-        foreach (GameObject avatarThatExited in avatarsInArea.Except(newAvatarsInArea))
+        foreach (GameObject avatarThatExited in avatarsInArea.Except(newAvatarsInArea).ToArray())
         {
             OnAvatarExit?.Invoke(avatarThatExited);
         }
 
         avatarsInArea = newAvatarsInArea;
+    }
+
+    private bool AreSetEquals(HashSet<GameObject> set1, HashSet<GameObject> set2)
+    {
+        if (set1 == null && set2 == null)
+            return true;
+
+        if (set1 == null || set2 == null)
+            return false;
+
+        return set1.SetEquals(set2);
     }
 
     private HashSet<GameObject> DetectAllAvatarsInArea()
