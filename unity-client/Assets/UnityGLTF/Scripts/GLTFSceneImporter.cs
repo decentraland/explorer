@@ -2455,24 +2455,24 @@ namespace UnityGLTF
 
             RefCountedTextureData source = null;
 
-            if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
-            {
-                source = PersistentAssetCache.GetImage(image.Uri, id);
-                _assetCache.ImageCache[sourceId] = source.Texture;
-            }
-            else
-            {
-                yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-
-                if (addImagesToPersistentCaching)
+                if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
                 {
-                    source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
+                    source = PersistentAssetCache.GetImage(image.Uri, id);
+                    _assetCache.ImageCache[sourceId] = source.Texture;
                 }
                 else
                 {
-                    source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
+                    yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
+
+                    if (addImagesToPersistentCaching)
+                    {
+                        source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
+                    }
+                    else
+                    {
+                        source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
+                    }
                 }
-            }
 
             var desiredFilterMode = FilterMode.Bilinear;
             var desiredWrapMode = TextureWrapMode.Repeat;
@@ -2530,13 +2530,14 @@ namespace UnityGLTF
                     // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
                     unityTexture.Apply(false, true);
 #endif
-                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
+                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData( PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
                 }
                 else
                 {
                     Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
                     _assetCache.TextureCache[textureIndex].CachedTexture = source;
                 }
+                
             }
         }
 
@@ -2573,9 +2574,8 @@ namespace UnityGLTF
                 def.Extensions != null &&
                 def.Extensions.TryGetValue(ExtTextureTransformExtensionFactory.EXTENSION_NAME, out extension))
             {
-                return (ExtTextureTransformExtension) extension;
+                return (ExtTextureTransformExtension)extension;
             }
-
             return null;
         }
 
