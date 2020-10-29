@@ -12,7 +12,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     public event Action<string, bool> OnMuteUser;
 
     [SerializeField] internal TextMeshProUGUI userName;
-    [SerializeField] internal Image avatarPreview;
+    [SerializeField] internal RawImage avatarPreview;
     [SerializeField] internal Button soundButton;
     [SerializeField] internal GameObject muteGO;
     [SerializeField] internal GameObject recordingGO;
@@ -64,7 +64,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     public void OnPoolRelease()
     {
-        avatarPreview.sprite = null;
+        avatarPreview.texture = null;
         userName.text = string.Empty;
         isMuted = false;
 
@@ -85,14 +85,14 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     {
         muteGO.SetActive(false);
         recordingGO.SetActive(false);
-        avatarPreview.sprite = null;
+        avatarPreview.texture = null;
         userName.text = string.Empty;
         gameObject.SetActive(true);
     }
 
-    void SetAvatarPreviewImage(Sprite sprite)
+    void SetAvatarPreviewImage(Texture texture)
     {
-        avatarPreview.sprite = sprite;
+        avatarPreview.texture = texture;
     }
 
     void OnSoundButtonPressed()
