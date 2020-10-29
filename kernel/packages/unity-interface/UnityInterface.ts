@@ -353,11 +353,6 @@ export class UnityInterface {
   public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
     const tutorialCompletedFlag = 256
 
-    this.ConfigureHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD, {
-      active: true,
-      visible: false
-    })
-
     if (WORLD_EXPLORER) {
       if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
         this.SetTutorialEnabled(fromDeepLink)
@@ -373,6 +368,18 @@ export class UnityInterface {
 
   public SetPlayerTalking(talking: boolean) {
     this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
+  }
+
+  public SetUserTalking(userId: string, talking: boolean) {
+    this.gameInstance.SendMessage(
+      'HUDController',
+      'SetUserTalking',
+      JSON.stringify({ userId: userId, talking: talking })
+    )
+  }
+
+  public SetUsersMuted(usersId: string[], muted: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
   }
 
   // *********************************************************************************
