@@ -2,14 +2,14 @@
 
 exports[`Storyshots Explorer/Login Connect Advice 1`] = `
 <div
-  className="login"
+  className="LoginContainer"
 >
   <nav
     className="nav-bar"
   >
     <img
-      alt=""
-      className="nav-logo"
+      alt="Decentraland"
+      className="dcl-logo"
       src="logo.png"
     />
     <div
@@ -132,14 +132,14 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
 
 exports[`Storyshots Explorer/Login Loading State 1`] = `
 <div
-  className="login"
+  className="LoginContainer"
 >
   <nav
     className="nav-bar"
   >
     <img
-      alt=""
-      className="nav-logo"
+      alt="Decentraland"
+      className="dcl-logo"
       src="logo.png"
     />
     <div
@@ -174,14 +174,14 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
     className="eth-login-popup"
   >
     <div
-      className="loginContainer"
+      className=""
     >
       <div
         className="eth-login-description"
       >
         <img
           alt="Decentraland"
-          className="eth-login-logo"
+          className="dcl-logo"
           src="logo-dcl.png"
         />
         <p>
@@ -263,14 +263,14 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
 
 exports[`Storyshots Explorer/Login Sign Advice 1`] = `
 <div
-  className="login"
+  className="LoginContainer"
 >
   <nav
     className="nav-bar"
   >
     <img
-      alt=""
-      className="nav-logo"
+      alt="Decentraland"
+      className="dcl-logo"
       src="logo.png"
     />
     <div
@@ -386,14 +386,14 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
 
 exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
 <div
-  className="login"
+  className="LoginContainer"
 >
   <nav
     className="nav-bar"
   >
     <img
-      alt=""
-      className="nav-logo"
+      alt="Decentraland"
+      className="dcl-logo"
       src="logo.png"
     />
     <div
@@ -428,14 +428,14 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
     className="eth-login-popup"
   >
     <div
-      className="loginContainer"
+      className=""
     >
       <div
         className="eth-login-description"
       >
         <img
           alt="Decentraland"
-          className="eth-login-logo"
+          className="dcl-logo"
           src="logo-dcl.png"
         />
         <p>
@@ -524,14 +524,14 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
 
 exports[`Storyshots Explorer/Login Sign In Enable 1`] = `
 <div
-  className="login"
+  className="LoginContainer"
 >
   <nav
     className="nav-bar"
   >
     <img
-      alt=""
-      className="nav-logo"
+      alt="Decentraland"
+      className="dcl-logo"
       src="logo.png"
     />
     <div
@@ -566,14 +566,14 @@ exports[`Storyshots Explorer/Login Sign In Enable 1`] = `
     className="eth-login-popup"
   >
     <div
-      className="loginContainer"
+      className=""
     >
       <div
         className="eth-login-description"
       >
         <img
           alt="Decentraland"
-          className="eth-login-logo"
+          className="dcl-logo"
           src="logo-dcl.png"
         />
         <p>
@@ -693,14 +693,14 @@ Array [
 
 exports[`Storyshots Explorer/auth/EthLogin Template 1`] = `
 <div
-  className="loginContainer"
+  className=""
 >
   <div
     className="eth-login-description"
   >
     <img
       alt="Decentraland"
-      className="eth-login-logo"
+      className="dcl-logo"
       src="logo-dcl.png"
     />
     <p>
@@ -801,6 +801,7 @@ exports[`Storyshots Explorer/auth/Passport Template 1`] = `
                 Name your avatar
               </label>
               <input
+                className=""
                 name="name"
                 onChange={[Function]}
                 placeholder="your avatar name"
@@ -875,12 +876,19 @@ exports[`Storyshots Explorer/auth/PassportForm Template 1`] = `
         Name your avatar
       </label>
       <input
+        className=""
         name="name"
         onChange={[Function]}
         placeholder="your avatar name"
         type="text"
         value="ezequiel"
       />
+      <em
+        className="warningLength"
+      >
+        8
+        /15
+      </em>
     </div>
     <div
       className="inputGroup"
@@ -1297,10 +1305,18 @@ exports[`Storyshots Explorer/base/Footer Template 1`] = `
 </footer>
 `;
 
-exports[`Storyshots Explorer/base/Logo Template 1`] = `
+exports[`Storyshots Explorer/base/Logo Icon 1`] = `
 <img
   alt="Decentraland"
-  className="eth-login-logo"
+  className="dcl-logo"
+  src="logo.png"
+/>
+`;
+
+exports[`Storyshots Explorer/base/Logo Large 1`] = `
+<img
+  alt="Decentraland"
+  className="dcl-logo"
   src="logo-dcl.png"
 />
 `;
@@ -1310,8 +1326,8 @@ exports[`Storyshots Explorer/base/Navbar Template 1`] = `
   className="nav-bar"
 >
   <img
-    alt=""
-    className="nav-logo"
+    alt="Decentraland"
+    className="dcl-logo"
     src="logo.png"
   />
   <div
