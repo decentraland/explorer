@@ -15,7 +15,7 @@ export const EthConnectAdvice: React.FC<EthConnectAdviceProps> = (props) => (
       To proceed, <strong>login</strong> into your wallet and confirm with{" "}
       <strong>connecting</strong> to your Ethereum wallet extension.
     </div>
-    <button className="eth-login-confirm-button1" onClick={props.onLogin}>
+    <button className="eth-login-confirm-button" onClick={props.onLogin}>
       <img
         alt=""
         src="images/decentraland-connect/walletIcon.png"

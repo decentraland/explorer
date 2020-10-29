@@ -1,29 +1,18 @@
 .nav-bar {
-  background-color: rgba(0, 0, 0, 0.1);
-  height: 40px;
   display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 3;
+  height: 40px;
+  justify-content: space-between;
+}
+
+img.nav-logo {
+  width: 46px;
+  padding-left: 5px;
 }
 
 .nav-bar-content {
-  position: absolute;
-  right: 50px;
-  height: 100%;
   display: flex;
-  width: fit-content;
-
   align-items: center;
-  vertical-align: middle;
-}
-
-@media screen and (min-width: 1200px) {
-  .nav-bar-content {
-    right: 285px;
-  }
+  padding-right: 5px;
 }
 
 .nav-text {
@@ -33,13 +22,10 @@
 
 .nav-discord {
   width: fit-content;
-
   vertical-align: middle;
   margin: 6px 0 8px 10px;
-
   border: 1px solid rgba(255, 255, 255, 0.6);
-  padding: 4px 12.15px;
-
+  padding: 4px 12px;
   box-sizing: border-box;
   border-radius: 6px;
   text-decoration: none;

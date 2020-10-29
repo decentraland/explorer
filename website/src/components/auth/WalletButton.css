@@ -1,0 +1,31 @@
+.walletButton {
+  width: 150px;
+  display: flex;
+  flex-flow: column wrap;
+  background: white;
+  box-shadow: 0 2px #CACFE2;
+  border-radius: 8px;
+  padding: 1em;
+  cursor: pointer;
+}
+
+.walletButton p {
+  margin: 0;
+  font-size: 1em;
+  text-align: center;
+}
+
+.walletImage {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+}
+.walletImage img {
+  width: 50px;
+}
+
+.walletImage span {
+  font-size: 1.5em;
+  font-weight: bold;
+  line-height: 2em;
+}

@@ -1,29 +1,3 @@
-#eth-connect-advice {
-  /*display: none;*/
-}
-
-#eth-sign-advice {
-  /*display: none;*/
-}
-
-.login {
-  background: #74a4d5;
-  background-image: url("/images/decentraland-connect/background.png");
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: left 50% bottom 33px;
-  position: absolute;
-  z-index: 9;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-#eth-login {
-  display: block;
-}
-
 .eth-login-popup {
   width: 70%;
   max-width: 650px;
@@ -78,28 +52,34 @@
   font-family: "Courier New", Courier, monospace;
 }
 
-.eth-login-confirm-button1 {
+.eth-login-guest-button {
+  border: 0;
+  width: 214px;
   color: white;
   cursor: pointer;
+  line-height: 40px;
+  border-radius: 8px;
+  font-size: 13px;
+  background-color: rgba(153, 153, 153, 0.5);
+}
 
+.eth-login-confirm-button {
+  color: white;
+  cursor: pointer;
   background-color: #ff5273;
-  box-shadow: 0 3.66316px 0 #e12f4f;
-
+  box-shadow: 0 3px 0 #e12f4f;
   line-height: 40px;
   width: 214px;
-
   border: 0;
   border-radius: 8px;
-
-  text-transform: uppercase;
   font-size: 13px;
   font-family: sfsemibold, "Helvetica Neue", Arial, sans-serif;
 }
 
-.eth-login-confirm-button1:disabled {
+.eth-login-confirm-button:disabled {
   color: #b6c6d7;
   background-color: #a08db8;
-  box-shadow: 0 3.66316px 0 #907ca8;
+  box-shadow: 0 3px 0 #907ca8;
 }
 
 .eth-login-logo {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal } from "../common/Modal";
+import "./TermsOfServices.css";
 
 export interface TermsOfServicesProps {
   handleCancel: any;
@@ -8,11 +9,9 @@ export interface TermsOfServicesProps {
 
 export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => (
   <Modal>
-    <div className="row" style={{ height: "100px" }}>
+    <div className="termsOfServices">
       <h2>Terms of Service and Privacy Policy</h2>
-    </div>
-    <div className="row" style={{ padding: "0 60px", height: "365px" }}>
-      <div className="text-box">
+      <div className="content">
         <p>1. Introduction</p>
         <p>
           1.1 This Privacy Policy details important information regarding the
@@ -244,30 +243,11 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => (
         </p>
         <p>10.2 Contact Information: privacy@decentraland.org.</p>
       </div>
-    </div>
-    <div
-      className="row"
-      style={{
-        flex: "0 0 100%",
-        height: "100px",
-        justifyContent: "center",
-      }}
-    >
-      <div className="row" style={{ alignItems: "center" }}>
-        <button
-          id="btnSignupBack"
-          className="button primary"
-          style={{ margin: "0 37px" }}
-          onClick={props.handleCancel}
-        >
+      <div className="actions">
+        <button className="btnBack" onClick={props.handleCancel}>
           BACK
         </button>
-        <button
-          id="btnSignupAgree"
-          className="button primary"
-          style={{ margin: "0 37px" }}
-          onClick={props.handleAgree}
-        >
+        <button className="btnAgree" onClick={props.handleAgree}>
           I AGREE
         </button>
       </div>

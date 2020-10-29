@@ -1,8 +1,10 @@
 import React from "react";
 import "./Navbar.css";
+import logo from "../../images/logo.png";
 
 export const Navbar: React.FC = () => (
   <nav className="nav-bar">
+    <img src={logo} alt="" className="nav-logo" />
     <div className="nav-bar-content">
       <div className="nav-text nav-need-support">
         <span>Need support?</span>

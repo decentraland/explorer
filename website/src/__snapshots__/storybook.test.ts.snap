@@ -7,6 +7,11 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
   <nav
     className="nav-bar"
   >
+    <img
+      alt=""
+      className="nav-logo"
+      src="logo.png"
+    />
     <div
       className="nav-bar-content"
     >
@@ -38,11 +43,6 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
   <div
     className="eth-login-popup"
   >
-    <img
-      alt="Decentraland"
-      className="eth-login-logo"
-      src="images/decentraland-connect/Isologotipo.png"
-    />
     <div
       className="eth-login-description"
     >
@@ -60,7 +60,7 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
        to your Ethereum wallet extension.
     </div>
     <button
-      className="eth-login-confirm-button1"
+      className="eth-login-confirm-button"
     >
       <img
         alt=""
@@ -137,6 +137,11 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
   <nav
     className="nav-bar"
   >
+    <img
+      alt=""
+      className="nav-logo"
+      src="logo.png"
+    />
     <div
       className="nav-bar-content"
     >
@@ -168,26 +173,32 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
   <div
     className="eth-login-popup"
   >
-    <img
-      alt="Decentraland"
-      className="eth-login-logo"
-      src="images/decentraland-connect/Isologotipo.png"
-    />
     <div
-      className="eth-login-description"
+      className="loginContainer"
     >
-      Increase yourself into the first virtual world fully owned by its users.
-    </div>
-    <div
-      className="loader"
-      id="eth-login-confirmation-spinner"
-      style={
-        Object {
-          "display": "block",
+      <div
+        className="eth-login-description"
+      >
+        <img
+          alt="Decentraland"
+          className="eth-login-logo"
+          src="logo-dcl.png"
+        />
+        <p>
+          Increase yourself into the first virtual world fully owned by its users.
+        </p>
+      </div>
+      <div
+        className="loader"
+        id="eth-login-confirmation-spinner"
+        style={
+          Object {
+            "display": "block",
+          }
         }
-      }
-    >
-       
+      >
+         
+      </div>
     </div>
   </div>
   <footer
@@ -257,6 +268,11 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
   <nav
     className="nav-bar"
   >
+    <img
+      alt=""
+      className="nav-logo"
+      src="logo.png"
+    />
     <div
       className="nav-bar-content"
     >
@@ -288,11 +304,6 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
   <div
     className="eth-login-popup"
   >
-    <img
-      alt="Decentraland"
-      className="eth-login-logo"
-      src="images/decentraland-connect/Isologotipo.png"
-    />
     <div
       className="eth-login-description"
     >
@@ -380,6 +391,11 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
   <nav
     className="nav-bar"
   >
+    <img
+      alt=""
+      className="nav-logo"
+      src="logo.png"
+    />
     <div
       className="nav-bar-content"
     >
@@ -411,34 +427,39 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
   <div
     className="eth-login-popup"
   >
-    <img
-      alt="Decentraland"
-      className="eth-login-logo"
-      src="images/decentraland-connect/Isologotipo.png"
-    />
     <div
-      className="eth-login-description"
+      className="loginContainer"
     >
-      Increase yourself into the first virtual world fully owned by its users.
-    </div>
-    <div
-      id="eth-login-confirmation-wrapper"
-    >
-      <button
-        className="eth-login-confirm-button1"
-        disabled={false}
-        id="eth-login-confirm-button"
-        onClick={[Function]}
+      <div
+        className="eth-login-description"
       >
-        Sign In - Up
-      </button>
-      <br />
-      <button
-        className="eth-login-confirm-button1"
-        disabled={false}
+        <img
+          alt="Decentraland"
+          className="eth-login-logo"
+          src="logo-dcl.png"
+        />
+        <p>
+          Increase yourself into the first virtual world fully owned by its users.
+        </p>
+      </div>
+      <div
+        id="eth-login-confirmation-wrapper"
       >
-        Play as Guest
-      </button>
+        <button
+          className="eth-login-confirm-button"
+          disabled={false}
+          onClick={[Function]}
+        >
+          Sign In - Up
+        </button>
+        <br />
+        <button
+          className="eth-login-guest-button"
+          disabled={false}
+        >
+          Play as Guest
+        </button>
+      </div>
     </div>
   </div>
   <footer
@@ -508,6 +529,11 @@ exports[`Storyshots Explorer/Login Sign In Enable 1`] = `
   <nav
     className="nav-bar"
   >
+    <img
+      alt=""
+      className="nav-logo"
+      src="logo.png"
+    />
     <div
       className="nav-bar-content"
     >
@@ -539,34 +565,39 @@ exports[`Storyshots Explorer/Login Sign In Enable 1`] = `
   <div
     className="eth-login-popup"
   >
-    <img
-      alt="Decentraland"
-      className="eth-login-logo"
-      src="images/decentraland-connect/Isologotipo.png"
-    />
     <div
-      className="eth-login-description"
+      className="loginContainer"
     >
-      Increase yourself into the first virtual world fully owned by its users.
-    </div>
-    <div
-      id="eth-login-confirmation-wrapper"
-    >
-      <button
-        className="eth-login-confirm-button1"
-        disabled={false}
-        id="eth-login-confirm-button"
-        onClick={[Function]}
+      <div
+        className="eth-login-description"
       >
-        Sign In - Up
-      </button>
-      <br />
-      <button
-        className="eth-login-confirm-button1"
-        disabled={false}
+        <img
+          alt="Decentraland"
+          className="eth-login-logo"
+          src="logo-dcl.png"
+        />
+        <p>
+          Increase yourself into the first virtual world fully owned by its users.
+        </p>
+      </div>
+      <div
+        id="eth-login-confirmation-wrapper"
       >
-        Play as Guest
-      </button>
+        <button
+          className="eth-login-confirm-button"
+          disabled={false}
+          onClick={[Function]}
+        >
+          Sign In - Up
+        </button>
+        <br />
+        <button
+          className="eth-login-guest-button"
+          disabled={false}
+        >
+          Play as Guest
+        </button>
+      </div>
     </div>
   </div>
   <footer
@@ -648,7 +679,7 @@ Array [
      to your Ethereum wallet extension.
   </div>,
   <button
-    className="eth-login-confirm-button1"
+    className="eth-login-confirm-button"
   >
     <img
       alt=""
@@ -661,32 +692,40 @@ Array [
 `;
 
 exports[`Storyshots Explorer/auth/EthLogin Template 1`] = `
-Array [
+<div
+  className="loginContainer"
+>
   <div
     className="eth-login-description"
   >
-    Increase yourself into the first virtual world fully owned by its users.
-  </div>,
+    <img
+      alt="Decentraland"
+      className="eth-login-logo"
+      src="logo-dcl.png"
+    />
+    <p>
+      Increase yourself into the first virtual world fully owned by its users.
+    </p>
+  </div>
   <div
     id="eth-login-confirmation-wrapper"
   >
     <button
-      className="eth-login-confirm-button1"
+      className="eth-login-confirm-button"
       disabled={false}
-      id="eth-login-confirm-button"
       onClick={[Function]}
     >
       Sign In - Up
     </button>
     <br />
     <button
-      className="eth-login-confirm-button1"
+      className="eth-login-guest-button"
       disabled={false}
     >
       Play as Guest
     </button>
-  </div>,
-]
+  </div>
+</div>
 `;
 
 exports[`Storyshots Explorer/auth/EthSignAdvice Template 1`] = `
@@ -711,6 +750,164 @@ Array [
      the following message in your wallet extension.
   </div>,
 ]
+`;
+
+exports[`Storyshots Explorer/auth/Passport Template 1`] = `
+<div
+  className="popup-container"
+>
+  <div
+    className="popup"
+  >
+    <div
+      className="passport"
+    >
+      <h2
+        className="passportTitle"
+      >
+        Passport
+      </h2>
+      <div
+        className="passportContainer"
+      >
+        <div
+          className="PassportAvatar"
+        >
+          <img
+            alt=""
+            className="avatar"
+            height="180"
+            src="https://peer.decentraland.org/content/contents/QmWUT7gPSJXvsscfkERKKKdVpMU4hu2EGuK9RJ72K9tUsU"
+            width="180"
+          />
+          <em>
+            Active since Aug 2020
+          </em>
+          <button>
+            Edit Avatar
+          </button>
+        </div>
+        <div
+          className="passportForm"
+        >
+          <form
+            method="POST"
+            onSubmit={[Function]}
+          >
+            <div
+              className="inputGroup"
+            >
+              <label>
+                Name your avatar
+              </label>
+              <input
+                name="name"
+                onChange={[Function]}
+                placeholder="your avatar name"
+                type="text"
+                value=""
+              />
+            </div>
+            <div
+              className="inputGroup"
+            >
+              <label>
+                Let's stay in touch
+              </label>
+              <input
+                name="email"
+                onChange={[Function]}
+                placeholder="enter your email"
+                type="text"
+                value=""
+              />
+            </div>
+            <div
+              className="actions"
+            >
+              <button
+                className="btnSubmit"
+                type="submit"
+              >
+                NEXT
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/auth/PassportAvatar Template 1`] = `
+<div
+  className="PassportAvatar"
+>
+  <img
+    alt=""
+    className="avatar"
+    height="180"
+    src="https://peer.decentraland.org/content/contents/QmWUT7gPSJXvsscfkERKKKdVpMU4hu2EGuK9RJ72K9tUsU"
+    width="180"
+  />
+  <em>
+    Active since Aug 2020
+  </em>
+  <button>
+    Edit Avatar
+  </button>
+</div>
+`;
+
+exports[`Storyshots Explorer/auth/PassportForm Template 1`] = `
+<div
+  className="passportForm"
+>
+  <form
+    method="POST"
+    onSubmit={[Function]}
+  >
+    <div
+      className="inputGroup"
+    >
+      <label>
+        Name your avatar
+      </label>
+      <input
+        name="name"
+        onChange={[Function]}
+        placeholder="your avatar name"
+        type="text"
+        value="ezequiel"
+      />
+    </div>
+    <div
+      className="inputGroup"
+    >
+      <label>
+        Let's stay in touch
+      </label>
+      <input
+        name="email"
+        onChange={[Function]}
+        placeholder="enter your email"
+        type="text"
+        value=""
+      />
+    </div>
+    <div
+      className="actions"
+    >
+      <button
+        className="btnSubmit"
+        type="submit"
+      >
+        NEXT
+      </button>
+    </div>
+  </form>
+</div>
 `;
 
 exports[`Storyshots Explorer/auth/TermCheckbox Template 1`] = `
@@ -755,31 +952,16 @@ exports[`Storyshots Explorer/auth/TermsOfServices Template 1`] = `
   className="popup-container"
 >
   <div
-    className="popup big"
+    className="popup"
   >
     <div
-      className="row"
-      style={
-        Object {
-          "height": "100px",
-        }
-      }
+      className="termsOfServices"
     >
       <h2>
         Terms of Service and Privacy Policy
       </h2>
-    </div>
-    <div
-      className="row"
-      style={
-        Object {
-          "height": "365px",
-          "padding": "0 60px",
-        }
-      }
-    >
       <div
-        className="text-box"
+        className="content"
       >
         <p>
           1. Introduction
@@ -920,47 +1102,123 @@ exports[`Storyshots Explorer/auth/TermsOfServices Template 1`] = `
           10.2 Contact Information: privacy@decentraland.org.
         </p>
       </div>
-    </div>
-    <div
-      className="row"
-      style={
-        Object {
-          "flex": "0 0 100%",
-          "height": "100px",
-          "justifyContent": "center",
-        }
-      }
-    >
       <div
-        className="row"
-        style={
-          Object {
-            "alignItems": "center",
-          }
-        }
+        className="actions"
       >
         <button
-          className="button primary"
-          id="btnSignupBack"
-          style={
-            Object {
-              "margin": "0 37px",
-            }
-          }
+          className="btnBack"
         >
           BACK
         </button>
         <button
-          className="button primary"
-          id="btnSignupAgree"
-          style={
-            Object {
-              "margin": "0 37px",
-            }
-          }
+          className="btnAgree"
         >
           I AGREE
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Explorer/auth/WalletButton Fortmatic Button 1`] = `
+<div
+  className="walletButton"
+>
+  <div
+    className="walletImage"
+  >
+    <img
+      alt="Metamask"
+      src="fortmatic.svg"
+    />
+    <span>
+      Metamask
+    </span>
+  </div>
+  <p>
+    Using your Email account
+  </p>
+</div>
+`;
+
+exports[`Storyshots Explorer/auth/WalletButton Metamask Button 1`] = `
+<div
+  className="walletButton"
+>
+  <div
+    className="walletImage"
+  >
+    <img
+      alt="Metamask"
+      src="metamask.svg"
+    />
+    <span>
+      Metamask
+    </span>
+  </div>
+  <p>
+    Using a browser extension
+  </p>
+</div>
+`;
+
+exports[`Storyshots Explorer/auth/WalletSelector Template 1`] = `
+<div
+  className="popup-container"
+>
+  <div
+    className="popup"
+  >
+    <div
+      className="walletSelector"
+    >
+      <h2
+        className="walletSelectorTitle"
+      >
+        Sign In - Up
+      </h2>
+      <div
+        className="walletButtonContainer"
+      >
+        <div
+          className="walletButton"
+          onClick={[Function]}
+        >
+          <div
+            className="walletImage"
+          >
+            <img
+              alt="Metamask"
+              src="metamask.svg"
+            />
+            <span>
+              Metamask
+            </span>
+          </div>
+          <p>
+            Using a browser extension
+          </p>
+        </div>
+        <div
+          className="walletButton"
+          onClick={[Function]}
+        >
+          <div
+            className="walletImage"
+          >
+            <img
+              alt="Fortmatic"
+              src="fortmatic.svg"
+            />
+            <span>
+              Fortmatic
+            </span>
+          </div>
+          <p>
+            Using your email account
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -1043,7 +1301,7 @@ exports[`Storyshots Explorer/base/Logo Template 1`] = `
 <img
   alt="Decentraland"
   className="eth-login-logo"
-  src="images/decentraland-connect/Isologotipo.png"
+  src="logo-dcl.png"
 />
 `;
 
@@ -1051,6 +1309,11 @@ exports[`Storyshots Explorer/base/Navbar Template 1`] = `
 <nav
   className="nav-bar"
 >
+  <img
+    alt=""
+    className="nav-logo"
+    src="logo.png"
+  />
   <div
     className="nav-bar-content"
   >

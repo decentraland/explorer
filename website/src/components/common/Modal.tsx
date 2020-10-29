@@ -8,7 +8,7 @@ export interface ModalProps {
 export const Modal: React.FC<ModalProps> = ({ handleClose, children }) => {
   return (
     <div className="popup-container">
-      <div className="popup big">
+      <div className="popup">
         {handleClose && <div className="close" onClick={handleClose} />}
         {children}
       </div>

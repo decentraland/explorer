@@ -1,0 +1,42 @@
+.termsOfServices h2 {
+  text-align: center;
+}
+
+.termsOfServices .content p {
+  line-height: 1.4em;
+}
+
+.termsOfServices .content {
+  margin: 1em 4em 2em;
+  height: 350px;
+  overflow: scroll;
+}
+
+.termsOfServices .actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.termsOfServices .actions button {
+  cursor: pointer;
+  border: 0;
+  min-width: 210px;
+  padding: 10px;
+  color: white;
+  font-size: 1.5em;
+}
+
+.termsOfServices .actions button.btnBack {
+  background: #404752;
+  box-shadow: 0 4px 0 #363C45;
+  border-radius: 12px;
+}
+
+.termsOfServices .actions button.btnAgree {
+  background: #ff5273;
+  box-shadow: 0 4px 0 #e12f4f;
+  border-radius: 12px;
+}
+
+

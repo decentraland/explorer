@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import "./EthLogin.css";
 import { Spinner } from "../common/Spinner";
 import { WalletSelector } from "./WalletSelector";
+import pngLogo from "../../images/logo-dcl.png";
+import "./EthLogin.css";
 
 export interface EthLoginProps {
   terms: boolean;
@@ -14,17 +15,20 @@ export interface EthLoginProps {
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const [wallet, setWallet] = useState(false);
   return (
-    <React.Fragment>
+    <div className="loginContainer">
       <div className="eth-login-description">
-        Increase yourself into the first virtual world fully owned by its users.
+        <img alt="Decentraland" className="eth-login-logo" src={pngLogo} />
+        <p>
+          Increase yourself into the first virtual world fully owned by its
+          users.
+        </p>
       </div>
       {props.loading ? (
         <Spinner />
       ) : (
         <div id="eth-login-confirmation-wrapper">
           <button
-            id="eth-login-confirm-button"
-            className="eth-login-confirm-button1"
+            className="eth-login-confirm-button"
             disabled={!props.terms}
             onClick={() => setWallet(true)}
           >
@@ -32,7 +36,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
           </button>
           <br />
           <button
-            className="eth-login-confirm-button1"
+            className="eth-login-guest-button"
             disabled={!props.terms}
             onClick={props.onGuest}
           >
@@ -45,6 +49,6 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
         onClick={props.onLogin}
         onCancel={() => setWallet(false)}
       />
-    </React.Fragment>
+    </div>
   );
 };

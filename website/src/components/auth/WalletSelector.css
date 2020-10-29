@@ -1,0 +1,20 @@
+.walletSelector {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+}
+
+h2.walletSelectorTitle {
+  font-size: 25px;
+  line-height: 30px;
+  margin-bottom: 20px;
+}
+
+.walletButtonContainer {
+  display: flex;
+  flex-flow: row;
+}
+
+.walletButtonContainer .walletButton:first-child {
+  margin-right: 2em;
+}

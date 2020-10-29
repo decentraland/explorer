@@ -4,9 +4,9 @@ import { Footer } from "../common/Footer";
 import { EthLogin } from "./EthLogin";
 import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
-import { Logo } from "../common/Logo";
 import { connect } from "react-redux";
 import SignUpContainer from "./SignUpContainer";
+import "./LoginContainer.css";
 
 export enum LoginStage {
   LOADING = "loading",
@@ -46,14 +46,13 @@ export interface LoginContainerProps {
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const shouldShow =
-    LoginStage.COMPLETED !== props.stage || props.subStage === "avatar";
+    LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar";
   return (
     <React.Fragment>
       {shouldShow && (
         <div className="login">
           <Navbar />
           <div className="eth-login-popup">
-            <Logo />
             {(props.stage === LoginStage.SIGN_IN ||
               props.stage === LoginStage.LOADING) && (
               <EthLogin

@@ -1,0 +1,10 @@
+.passport h2.passportTitle {
+  text-align: center;
+}
+
+.passportContainer {
+  display: flex;
+  flex-flow: row nowrap;
+  min-width: 750px;
+  justify-content: space-around;
+}

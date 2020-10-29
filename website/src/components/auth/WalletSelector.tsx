@@ -1,5 +1,10 @@
 import React from "react";
 import { Modal } from "../common/Modal";
+import { WalletButton } from "./WalletButton";
+
+import MetamaskLogo from "../../images/metamask.svg";
+import FortmaticLogo from "../../images/fortmatic.svg";
+import "./WalletSelector.css";
 
 export interface WalletSelectorProps {
   show: boolean;
@@ -14,27 +19,22 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
 }) => {
   return show ? (
     <Modal handleClose={onCancel}>
-      <div className="column">
-        <h2>Sign In - Up</h2>
-      </div>
-      <div
-        className="column"
-        style={{ flex: "0 0 100%", padding: "0 100px 30px" }}
-      >
-        <button
-          className="button full primary"
-          onClick={() => onClick("Metamask")}
-        >
-          <img alt="" src="/images/metamask.svg" width="26" height="25" />
-          <span style={{ textTransform: "none" }}>Metamask</span>
-        </button>
-        <button
-          className="button full primary"
-          onClick={() => onClick("Fortmatic")}
-        >
-          <img alt="" src="/images/fortmatic.svg" width="26" height="25" />
-          <span style={{ textTransform: "none" }}>Fortmatic</span>
-        </button>
+      <div className="walletSelector">
+        <h2 className="walletSelectorTitle">Sign In - Up</h2>
+        <div className="walletButtonContainer">
+          <WalletButton
+            title="Metamask"
+            logo={MetamaskLogo}
+            description="Using a browser extension"
+            onClick={() => onClick("Metamask")}
+          />
+          <WalletButton
+            title="Fortmatic"
+            logo={FortmaticLogo}
+            description="Using your email account"
+            onClick={() => onClick("Fortmatic")}
+          />
+        </div>
       </div>
     </Modal>
   ) : null;
