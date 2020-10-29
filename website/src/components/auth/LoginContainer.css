@@ -1,6 +1,10 @@
 .LoginContainer {
-  background-size: 100%;
-  background: #74a4d5 url("../../images/background.png") no-repeat left 50% bottom 33px;
+  background-size: cover;
+  background-color: #74a4d5;
+  background-image: url("../../images/background.png");
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-position: 0 0;
   position: absolute;
   z-index: 9;
   top: 0;

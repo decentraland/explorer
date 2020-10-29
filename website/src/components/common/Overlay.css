@@ -8,11 +8,8 @@
   bottom: 0;
   z-index: 2;
 
-  background: #74a4d5;
-  background-image: url("/images/decentraland-connect/background.png");
   background-size: 115%;
-  background-repeat: no-repeat;
-  background-position: right -90px bottom 25px;
+  background: #74a4d5 url("../../images/background.png") no-repeat right -90px bottom 25px;
 
   opacity: 0.15;
 }

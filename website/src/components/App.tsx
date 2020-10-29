@@ -6,7 +6,7 @@ import LoginContainer from "./auth/LoginContainer";
 import LoadingContainer from "./loading/LoadingContainer";
 import { Audio } from "./common/Audio";
 import WarningContainer from "./warning/WarningContainer";
-
+import "./App.css";
 const mapStateToProps = (state: any) => {
   return {
     error: !!state.loading.error,

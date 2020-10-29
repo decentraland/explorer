@@ -6,16 +6,6 @@
   align-items: center;
 }
 
-@font-face {
-  font-family: sfregular;
-  src: url("/images/decentraland-connect/SF-UI-Text-Regular.otf");
-}
-
-@font-face {
-  font-family: sfsemibold;
-  src: url("/images/decentraland-connect/SF-UI-Text-Semibold.otf");
-}
-
 .eth-login-description {
   color: white;
   margin-top: 50px;
