@@ -295,11 +295,11 @@ public class UserContextMenu : MonoBehaviour
         this.userId = userId;
 
         UserProfile profile = UserProfileController.userProfilesCatalog.Get(userId);
-        bool hasWallet = profile?.hasConnectedWeb3 ?? false;
+        bool userHasWallet = profile?.hasConnectedWeb3 ?? false;
 
-        if (!hasWallet || !UserProfile.GetOwnUserProfile().hasConnectedWeb3)
+        if (!userHasWallet || !UserProfile.GetOwnUserProfile().hasConnectedWeb3)
         {
-            configFlags &= ~MenuConfigFlags.Friendship;
+            configFlags &= ~usesFriendsApiFlags;
         }
 
         this.currentConfigFlags = configFlags;
