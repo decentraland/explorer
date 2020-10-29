@@ -1,5 +1,4 @@
 using DCL.HelpAndSupportHUD;
-using DCL.GoToGenesisPlazaHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -79,8 +78,6 @@ public class HUDController : MonoBehaviour
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
 
-    public GoToGenesisPlazaHUDController goToGenesisPlazaHud => GetHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD) as GoToGenesisPlazaHUDController;
-
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
 
     public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
@@ -150,10 +147,9 @@ public class HUDController : MonoBehaviour
         EXPLORE_HUD = 19,
         MANA_HUD = 20,
         HELP_AND_SUPPORT_HUD = 21,
-        GO_TO_GENESIS_PLAZA_HUD = 22,
-        EMAIL_PROMPT = 23,
-        USERS_AROUND_LIST_HUD = 24,
-        COUNT = 25
+        EMAIL_PROMPT = 22,
+        USERS_AROUND_LIST_HUD = 23,
+        COUNT = 24
     }
 
     [System.Serializable]
@@ -345,10 +341,6 @@ public class HUDController : MonoBehaviour
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
-                break;
-            case HUDElementID.GO_TO_GENESIS_PLAZA_HUD:
-                CreateHudElement<GoToGenesisPlazaHUDController>(configuration, hudElementId);
-                taskbarHud?.AddGoToGenesisWindow(goToGenesisPlazaHud);
                 break;
             case HUDElementID.USERS_AROUND_LIST_HUD:
                 CreateHudElement<UsersAroundListHUDController>(configuration, hudElementId);
