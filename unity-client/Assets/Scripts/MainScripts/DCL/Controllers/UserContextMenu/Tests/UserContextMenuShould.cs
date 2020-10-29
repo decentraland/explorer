@@ -1,120 +1,146 @@
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
+using UnityEditor;
+using System;
 
 public class UserContextMenuShould : TestsBase
 {
-    // private const string CONTEXT_MENU_PREFAB_NAME = "ChatEntryContextMenu";
-    // private const string TEST_USER_ID = "test userId";
-    // private const string TEST_USER_NAME = "Test User";
+    const string PREFAB_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/UserContextMenu/Prefabs/UserContextMenuPanel.prefab";
+    const string TEST_USER_ID = "TEST_USER_ID";
 
-    // private UserContextMenu contextMenu;
-    // private Canvas canvas;
-    // private bool showEventInvoked;
-    // private bool passportEventInvoked;
-    // private bool reportEventInvoked;
-    // private bool blockEventInvoked;
+    private UserContextMenu contextMenu;
+    private FriendsController friendsController;
 
-    // protected override IEnumerator SetUp()
-    // {
-    //     var canvasgo = new GameObject("canvas");
-    //     canvas = canvasgo.AddComponent<Canvas>();
-    //     var go = Object.Instantiate(Resources.Load(CONTEXT_MENU_PREFAB_NAME), canvas.transform, false) as GameObject;
+    protected override IEnumerator SetUp()
+    {
+        yield return base.SetUp();
+        var prefab = AssetDatabase.LoadAssetAtPath(PREFAB_PATH, (typeof(GameObject))) as GameObject;
+        contextMenu = UnityEngine.Object.Instantiate(prefab).GetComponent<UserContextMenu>();
+        UserProfileController.i.AddUserProfileToCatalog(new UserProfileModel()
+        {
+            name = TEST_USER_ID,
+            userId = TEST_USER_ID
+        });
+        friendsController = FriendsController.i;
+    }
 
-    //     contextMenu = go.GetComponent<UserContextMenu>();
-    //     contextMenu.Initialize(TEST_USER_ID, TEST_USER_NAME, false);
+    protected override IEnumerator TearDown()
+    {
+        UnityEngine.Object.Destroy(contextMenu.gameObject);
+        yield break;
+    }
 
-    //     Assert.AreEqual(TEST_USER_NAME, contextMenu.userName.text, "The context menu title should coincide with the configured user.");
+    [Test]
+    public void ShowContextMenuProperly()
+    {
+        bool showEventCalled = false;
+        Action onShow = () => showEventCalled = true;
+        contextMenu.OnShowMenu += onShow;
 
-    //     contextMenu.OnShowMenu += ContextMenu_OnShowMenu;
-    //     contextMenu.OnPassport += ContextMenu_OnPassport;
-    //     contextMenu.OnReport += ContextMenu_OnReport;
-    //     contextMenu.OnBlock += ContextMenu_OnBlock;
+        contextMenu.Show(TEST_USER_ID);
 
-    //     yield break;
-    // }
+        contextMenu.OnShowMenu -= onShow;
+        Assert.IsTrue(contextMenu.gameObject.activeSelf, "The context menu should be visible.");
+        Assert.IsTrue(showEventCalled);
+    }
 
-    // protected override IEnumerator TearDown()
-    // {
-    //     contextMenu.OnShowMenu -= ContextMenu_OnShowMenu;
-    //     contextMenu.OnPassport -= ContextMenu_OnPassport;
-    //     contextMenu.OnReport -= ContextMenu_OnReport;
-    //     contextMenu.OnBlock -= ContextMenu_OnBlock;
+    [Test]
+    public void HideContextMenuProperly()
+    {
+        contextMenu.Hide();
 
-    //     Object.Destroy(contextMenu.gameObject);
-    //     Object.Destroy(canvas.gameObject);
+        Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
+    }
 
-    //     yield break;
-    // }
+    [Test]
+    public void ClickOnPassportButton()
+    {
+        bool passportEventInvoked = false;
+        Action<string> onPassport = (id) => passportEventInvoked = true;
+        contextMenu.OnPassport += onPassport;
 
-    // [Test]
-    // public void ShowContextMenuProperly()
-    // {
-    //     showEventInvoked = false;
-    //     contextMenu.Show();
+        contextMenu.Show(TEST_USER_ID);
+        contextMenu.passportButton.onClick.Invoke();
 
-    //     Assert.IsTrue(contextMenu.gameObject.activeSelf, "The context menu should be visible.");
-    //     Assert.IsTrue(showEventInvoked);
-    // }
+        contextMenu.OnPassport -= onPassport;
+        Assert.IsTrue(passportEventInvoked);
+        Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
+    }
 
-    // [Test]
-    // public void HideContextMenuProperly()
-    // {
-    //     contextMenu.Hide();
+    [Test]
+    public void ClickOnReportButton()
+    {
+        bool reportEventInvoked = false;
+        Action<string> onReport = (id) => reportEventInvoked = true;
+        contextMenu.OnReport += onReport;
 
-    //     Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
-    // }
+        contextMenu.Show(TEST_USER_ID);
+        contextMenu.reportButton.onClick.Invoke();
 
-    // [Test]
-    // public void ClickOnPassportButton()
-    // {
-    //     passportEventInvoked = false;
-    //     contextMenu.Show();
-    //     contextMenu.passportButton.onClick.Invoke();
+        contextMenu.OnReport -= onReport;
+        Assert.IsTrue(reportEventInvoked);
+        Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
+    }
 
-    //     Assert.IsTrue(passportEventInvoked);
-    //     Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
-    // }
+    [Test]
+    public void ClickOnBlockButton()
+    {
+        bool blockEventInvoked = false;
+        Action<string, bool> onBlock = (id, block) => blockEventInvoked = true;
+        contextMenu.OnBlock += onBlock;
 
-    // [Test]
-    // public void ClickOnReportButton()
-    // {
-    //     reportEventInvoked = false;
-    //     contextMenu.Show();
-    //     contextMenu.reportButton.onClick.Invoke();
+        contextMenu.Show(TEST_USER_ID);
+        contextMenu.blockButton.onClick.Invoke();
 
-    //     Assert.IsTrue(reportEventInvoked);
-    //     Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
-    // }
+        contextMenu.OnBlock -= onBlock;
+        Assert.IsTrue(blockEventInvoked);
+        Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
+    }
 
-    // [Test]
-    // public void ClickOnBlockButton()
-    // {
-    //     blockEventInvoked = false;
-    //     contextMenu.Show();
-    //     contextMenu.blockButton.onClick.Invoke();
+    [Test]
+    public void FriendSetupWorkCorrectly()
+    {
+        contextMenu.Show(TEST_USER_ID, UserContextMenu.MenuConfigFlags.Friendship);
 
-    //     Assert.IsTrue(blockEventInvoked);
-    //     Assert.IsFalse(contextMenu.gameObject.activeSelf, "The context menu should not be visible.");
-    // }
+        Assert.IsTrue(contextMenu.friendshipContainer.activeSelf, "friendshipContainer should be active");
 
-    // private void ContextMenu_OnShowMenu()
-    // {
-    //     showEventInvoked = true;
-    // }
+        Assert.IsTrue(contextMenu.friendAddContainer.activeSelf, "friendAddContainer should be active");
+        Assert.IsFalse(contextMenu.friendRemoveContainer.activeSelf, "friendRemoveContainer should not be active");
+        Assert.IsFalse(contextMenu.friendRequestedContainer.activeSelf, "friendRequestedContainer should not be active");
+        Assert.IsFalse(contextMenu.deleteFriendButton.gameObject.activeSelf, "deleteFriendButton should not be active");
 
-    // private void ContextMenu_OnPassport(string obj)
-    // {
-    //     passportEventInvoked = true;
-    // }
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = TEST_USER_ID,
+            action = FriendshipAction.REQUESTED_TO
+        });
 
-    // private void ContextMenu_OnReport(string obj)
-    // {
-    //     reportEventInvoked = true;
-    // }
+        Assert.IsFalse(contextMenu.friendAddContainer.activeSelf, "friendAddContainer should not be active");
+        Assert.IsFalse(contextMenu.friendRemoveContainer.activeSelf, "friendRemoveContainer should not be active");
+        Assert.IsTrue(contextMenu.friendRequestedContainer.activeSelf, "friendRequestedContainer should be active");
+        Assert.IsFalse(contextMenu.deleteFriendButton.gameObject.activeSelf, "deleteFriendButton should not be active");
 
-    // private void ContextMenu_OnBlock(string arg1, bool arg2)
-    // {
-    //     blockEventInvoked = true;
-    // }
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = TEST_USER_ID,
+            action = FriendshipAction.APPROVED
+        });
+
+        Assert.IsFalse(contextMenu.friendAddContainer.activeSelf, "friendAddContainer should not be active");
+        Assert.IsTrue(contextMenu.friendRemoveContainer.activeSelf, "friendRemoveContainer should be active");
+        Assert.IsFalse(contextMenu.friendRequestedContainer.activeSelf, "friendRequestedContainer should not be active");
+        Assert.IsTrue(contextMenu.deleteFriendButton.gameObject.activeSelf, "deleteFriendButton should be active");
+
+        FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = TEST_USER_ID,
+            action = FriendshipAction.DELETED
+        });
+
+        Assert.IsTrue(contextMenu.friendAddContainer.activeSelf, "friendAddContainer should be active");
+        Assert.IsFalse(contextMenu.friendRemoveContainer.activeSelf, "friendRemoveContainer should not be active");
+        Assert.IsFalse(contextMenu.friendRequestedContainer.activeSelf, "friendRequestedContainer should not be active");
+        Assert.IsFalse(contextMenu.deleteFriendButton.gameObject.activeSelf, "deleteFriendButton should not be active");
+    }
 }
