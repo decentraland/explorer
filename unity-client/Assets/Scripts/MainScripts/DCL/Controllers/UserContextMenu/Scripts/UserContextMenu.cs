@@ -55,6 +55,8 @@ public class UserContextMenu : MonoBehaviour
     [SerializeField] internal Button deleteFriendButton;
     [SerializeField] internal Button messageButton;
 
+    public static event System.Action<string> OnOpenPrivateChatRequest;
+
     public bool isVisible => gameObject.activeSelf;
 
     public event System.Action OnShowMenu;
@@ -242,6 +244,7 @@ public class UserContextMenu : MonoBehaviour
     private void OnMessageButtonPressed()
     {
         OnMessage?.Invoke(userId);
+        OnOpenPrivateChatRequest?.Invoke(userId);
         Hide();
     }
 

@@ -30,6 +30,7 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
 
         CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenOnOnChange;
+        UserContextMenu.OnOpenPrivateChatRequest += OpenPrivateChatWindow;
     }
 
     public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
@@ -456,6 +457,8 @@ public class HUDController : MonoBehaviour
 
         if (taskbarHud != null)
             taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
+
+        UserContextMenu.OnOpenPrivateChatRequest -= OpenPrivateChatWindow;
 
         foreach (var kvp in hudElements)
         {
