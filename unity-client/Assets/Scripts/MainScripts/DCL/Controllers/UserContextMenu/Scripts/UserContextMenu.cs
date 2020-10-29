@@ -27,6 +27,7 @@ public class UserContextMenu : MonoBehaviour
     }
 
     const MenuConfigFlags headerFlags = MenuConfigFlags.Name | MenuConfigFlags.Friendship;
+    const MenuConfigFlags usesFriendsApiFlags = MenuConfigFlags.Friendship | MenuConfigFlags.Message;
 
     [Header("Optional: Set Confirmation Dialog")]
     [SerializeField] internal UserContextConfirmationDialog confirmationDialog;
@@ -314,7 +315,7 @@ public class UserContextMenu : MonoBehaviour
             string name = profile?.userName;
             userName.text = name;
         }
-        if ((configFlags & MenuConfigFlags.Friendship) != 0 && FriendsController.i)
+        if ((configFlags & usesFriendsApiFlags) != 0 && FriendsController.i)
         {
             if (FriendsController.i.friends.TryGetValue(userId, out FriendsController.UserStatus status))
             {
@@ -331,37 +332,64 @@ public class UserContextMenu : MonoBehaviour
 
     private void SetupFriendship(FriendshipStatus friendshipStatus)
     {
+        bool friendshipEnabled = (currentConfigFlags & MenuConfigFlags.Friendship) != 0;
+        bool messageEnabled = (currentConfigFlags & MenuConfigFlags.Message) != 0;
+
         if (friendshipStatus == FriendshipStatus.FRIEND)
         {
-            friendAddContainer.SetActive(false);
-            friendRemoveContainer.SetActive(true);
-            friendRequestedContainer.SetActive(false);
-            deleteFriendButton.gameObject.SetActive(true);
-            messageButton.gameObject.SetActive(true);
+            if (friendshipEnabled)
+            {
+                friendAddContainer.SetActive(false);
+                friendRemoveContainer.SetActive(true);
+                friendRequestedContainer.SetActive(false);
+                deleteFriendButton.gameObject.SetActive(true);
+            }
+            if (messageEnabled)
+            {
+                messageButton.gameObject.SetActive(true);
+            }
         }
         else if (friendshipStatus == FriendshipStatus.REQUESTED_TO)
         {
-            friendAddContainer.SetActive(false);
-            friendRemoveContainer.SetActive(false);
-            friendRequestedContainer.SetActive(true);
-            deleteFriendButton.gameObject.SetActive(false);
-            messageButton.gameObject.SetActive(false);
+            if (friendshipEnabled)
+            {
+                friendAddContainer.SetActive(false);
+                friendRemoveContainer.SetActive(false);
+                friendRequestedContainer.SetActive(true);
+                deleteFriendButton.gameObject.SetActive(false);
+            }
+            if (messageEnabled)
+            {
+                messageButton.gameObject.SetActive(false);
+            }
         }
         else if (friendshipStatus == FriendshipStatus.NONE)
         {
-            friendAddContainer.SetActive(true);
-            friendRemoveContainer.SetActive(false);
-            friendRequestedContainer.SetActive(false);
-            deleteFriendButton.gameObject.SetActive(false);
-            messageButton.gameObject.SetActive(false);
+            if (friendshipEnabled)
+            {
+                friendAddContainer.SetActive(true);
+                friendRemoveContainer.SetActive(false);
+                friendRequestedContainer.SetActive(false);
+                deleteFriendButton.gameObject.SetActive(false);
+            }
+            if (messageEnabled)
+            {
+                messageButton.gameObject.SetActive(false);
+            }
         }
         else if (friendshipStatus == FriendshipStatus.REQUESTED_FROM)
         {
-            friendAddContainer.SetActive(true);
-            friendRemoveContainer.SetActive(false);
-            friendRequestedContainer.SetActive(false);
-            deleteFriendButton.gameObject.SetActive(false);
-            messageButton.gameObject.SetActive(false);
+            if (friendshipEnabled)
+            {
+                friendAddContainer.SetActive(true);
+                friendRemoveContainer.SetActive(false);
+                friendRequestedContainer.SetActive(false);
+                deleteFriendButton.gameObject.SetActive(false);
+            }
+            if (messageEnabled)
+            {
+                messageButton.gameObject.SetActive(false);
+            }
         }
     }
 
