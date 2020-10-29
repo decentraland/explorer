@@ -141,6 +141,20 @@ public class FriendsHUDViewShould : TestsBase
     }
 
     [Test]
+    public void DeleteFriendProperly()
+    {
+        string id1 = "userId-1";
+        var entry = CreateFriendEntry(id1, "Ted Bundy");
+
+        entry.menuButton.onClick.Invoke();
+
+        view.friendsList.contextMenuPanel.deleteFriendButton.onClick.Invoke();
+        view.friendsList.confirmationDialog.confirmButton.onClick.Invoke();
+
+        Assert.IsNull(view.friendsList.GetEntry(id1));
+    }
+
+    [Test]
     public void RejectIncomingFriendRequestsProperly()
     {
         //NOTE(Brian): Confirm cancellation
