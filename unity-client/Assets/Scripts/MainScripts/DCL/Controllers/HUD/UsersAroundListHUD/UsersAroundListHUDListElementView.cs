@@ -4,27 +4,46 @@ using DCL.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler
+internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler, IPointerEnterHandler, IPointerExitHandler
 {
     const float USER_NOT_RECORDING_THROTTLING = 2;
 
     public event Action<string, bool> OnMuteUser;
+    public event Action<Vector3, string> OnShowUserContexMenu;
 
     [SerializeField] internal TextMeshProUGUI userName;
     [SerializeField] internal RawImage avatarPreview;
     [SerializeField] internal Button soundButton;
     [SerializeField] internal GameObject muteGO;
     [SerializeField] internal GameObject recordingGO;
+    [SerializeField] internal Image background;
+    [SerializeField] internal Sprite defaultBackground;
+    [SerializeField] internal Sprite hoverBackground;
+    [SerializeField] internal Button menuButton;
+    [SerializeField] internal Transform contexMenuRefPosition;
 
     private UserProfile profile;
     private bool isMuted = false;
     private bool isRecording = false;
     private Coroutine setUserRecordingRoutine = null;
 
+    private void Awake()
+    {
+        defaultBackground = background.sprite;
+    }
+
     private void Start()
     {
         soundButton.onClick.AddListener(OnSoundButtonPressed);
+        menuButton.onClick.AddListener(() =>
+        {
+            if (profile)
+            {
+                OnShowUserContexMenu?.Invoke(contexMenuRefPosition.position, profile.userId);
+            }
+        });
     }
 
     public void SetUserProfile(UserProfile profile)
@@ -87,6 +106,8 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         recordingGO.SetActive(false);
         avatarPreview.texture = null;
         userName.text = string.Empty;
+        background.sprite = defaultBackground;
+        menuButton.gameObject.SetActive(false);
         gameObject.SetActive(true);
     }
 
@@ -113,5 +134,17 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         }
         yield return WaitForSecondsCache.Get(USER_NOT_RECORDING_THROTTLING);
         recordingGO.SetActive(false);
+    }
+
+    void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
+    {
+        background.sprite = hoverBackground;
+        menuButton.gameObject.SetActive(true);
+    }
+
+    void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
+    {
+        background.sprite = defaultBackground;
+        menuButton.gameObject.SetActive(false);
     }
 }
