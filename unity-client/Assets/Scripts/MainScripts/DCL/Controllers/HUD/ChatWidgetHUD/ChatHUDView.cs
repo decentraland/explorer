@@ -129,6 +129,11 @@ public class ChatHUDView : MonoBehaviour
                 entry.SetFadeout(false);
             }
         }
+
+        if (enabled)
+        {
+            confirmationDialog.Hide();
+        }
     }
 
     public virtual void AddEntry(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
