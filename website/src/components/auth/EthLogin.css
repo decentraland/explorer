@@ -34,14 +34,14 @@
   line-height: 40px;
   border-radius: 8px;
   font-size: 13px;
-  background-color: rgba(153, 153, 153, 0.5);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .eth-login-confirm-button {
   color: white;
   cursor: pointer;
-  background-color: #ff5273;
-  box-shadow: 0 3px 0 #e12f4f;
+  background-color: #ff2d55;
+  box-shadow: 0 3px 0 #cb2242;
   line-height: 40px;
   width: 214px;
   border: 0;

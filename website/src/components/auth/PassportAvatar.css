@@ -21,6 +21,7 @@
   width: 150px;
   color: #333333;
   font-size: 1em;
+  line-height: 25px;
   text-transform: uppercase;
   padding: 0.5em;
   border: 1px solid rgba(0, 0, 0, 0.05);

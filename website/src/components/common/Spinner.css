@@ -3,7 +3,7 @@
   --diameter: 35px;
 
   border: var(--thickness) solid #f3f3f3;
-  border-top: var(--thickness) solid #ff5273;
+  border-top: var(--thickness) solid #ff2d55;
   border-radius: 50%;
   width: var(--diameter);
   height: var(--diameter);

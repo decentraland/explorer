@@ -8,26 +8,44 @@ export interface PassportFormProps {
 }
 
 export const PassportForm: React.FC<PassportFormProps> = (props) => {
+  const [chars, setChars] = useState(props.name ? props.name.length : 0);
   const [name, setName] = useState(props.name || "");
   const [email, setEmail] = useState(props.email || "");
+  const [hasError, setHasError] = useState(false);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!name || name.trim().length > 15) {
+      setHasError(true);
+      return;
+    }
     props.onSubmit(name, email);
+  };
+
+  const onChangeName = ({ target }) => {
+    if (target.value.length <= 15) {
+      setHasError(false);
+      setName(target.value);
+      setChars(target.value.length);
+    }
   };
 
   return (
     <div className="passportForm">
       <form method="POST" onSubmit={handleSubmit}>
-        {/*<em>*required field (you can edit it later)</em>*/}
         <div className="inputGroup">
           <label>Name your avatar</label>
           <input
             type="text"
             name="name"
+            className={hasError ? "hasError" : ""}
             placeholder="your avatar name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={onChangeName}
           />
+          {chars > 0 && <em className="warningLength">{chars}/15</em>}
+          {hasError && (
+            <em className="error">*required field (you can edit it later)</em>
+          )}
         </div>
         <div className="inputGroup">
           <label>Let's stay in touch</label>
