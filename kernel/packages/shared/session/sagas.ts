@@ -100,7 +100,7 @@ function* initSession() {
     Html.showEthLogin()
     yield createWeb3Connector()
     const userData = getUserProfile()
-    if (userData && userData.userId && isSessionExpired(userData)) {
+    if (isSessionExpired(userData)) {
       removeUserProfile()
     }
   }
@@ -218,7 +218,8 @@ function* setUserAuthentified(userId: string, identity: ExplorerIdentity) {
 }
 
 function* singUp() {
-  setLoadingScreen(true)
+  yield put(setLoadingScreen(true))
+  yield put(changeLoginStage(LoginStage.COMPLETED))
   const userData = getFromLocalStorage('signup_profile')
 
   logger.log(`User ${userData.userId} signed up`)
