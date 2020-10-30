@@ -483,7 +483,7 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
   }
 }
 
-const TIME_BETWEEN_PROFILE_RESPONSES = 10000
+const TIME_BETWEEN_PROFILE_RESPONSES = 1000
 
 function processProfileRequest(context: Context, fromAlias: string, message: Package<ProfileRequest>) {
   const myIdentity = getIdentity()
