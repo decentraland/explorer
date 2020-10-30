@@ -430,7 +430,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
                     profileData.getProfileType() === ProfileData.ProfileType.LOCAL
                       ? ProfileType.LOCAL
                       : ProfileType.DEPLOYED
-                } // We use deployed as default b
+                } // We use deployed as default because that way we can emulate the old behaviour
               })
             break
           }
