@@ -25,24 +25,32 @@
 }
 
 .termsOfServices .actions button {
-  cursor: pointer;
-  border: 0;
-  min-width: 210px;
-  padding: 10px;
   color: white;
-  font-size: 1.5em;
+  cursor: pointer;
+  width: 196px;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 20px;
 }
 
 .termsOfServices .actions button.btnBack {
   background: #404752;
   box-shadow: 0 4px 0 #363C45;
-  border-radius: 12px;
+}
+
+.termsOfServices .actions button.btnAgree:disabled {
+  background: #b9818b;
+  box-shadow: 0 4px 0 #b37882;
 }
 
 .termsOfServices .actions button.btnAgree {
   background: #ff2d55;
   box-shadow: 0 4px 0 #cb2242;
-  border-radius: 12px;
 }
 
 

@@ -11,8 +11,11 @@
   margin-top: 50px;
   margin-bottom: 50px;
   text-align: center;
-  font-size: 16px;
   font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 27px;
+  text-shadow: 0 1px 0 #000000;
 }
 
 .eth-login-welcome {
@@ -24,26 +27,37 @@
 
 .eth-login-guest-button {
   border: 0;
-  width: 214px;
+  width: 280px;
+  height: 66px;
   color: white;
   cursor: pointer;
-  line-height: 40px;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 16px;
   background-color: rgba(255, 255, 255, 0.2);
+  font-style: normal;
+  font-weight: normal;
+  font-size: 25px;
+  line-height: 30px;
+  text-align: center;
+  mix-blend-mode: normal;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 .eth-login-confirm-button {
-  color: white;
+  color: #FFFFFF;
+  width: 280px;
+  height: 65px;
   cursor: pointer;
-  background-color: #ff2d55;
-  box-shadow: 0 3px 0 #cb2242;
-  line-height: 40px;
-  width: 214px;
   border: 0;
-  border-radius: 8px;
-  font-size: 13px;
-  font-family: sfsemibold, "Helvetica Neue", Arial, sans-serif;
+  border-radius: 16px;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 30px;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 0 #cb2242;
+  background-color: #ff2d55;
+  mix-blend-mode: normal;
 }
 
 .eth-login-confirm-button:disabled {

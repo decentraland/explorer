@@ -66,15 +66,17 @@
 }
 
 .passportForm form button.btnSubmit {
-  background: #ff2d55;
-  box-shadow: 0 3px 0 #cb2242;
-  border-radius: 12px;
-  display: block;
-  border: 0;
-  width: 192px;
-  color: white;
-  font-weight: bold;
-  height: 46px;
   cursor: pointer;
+  color: white;
+  background: #ff2d55;
+  width: 196px;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 #cb2242;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 20px;
 }
 
