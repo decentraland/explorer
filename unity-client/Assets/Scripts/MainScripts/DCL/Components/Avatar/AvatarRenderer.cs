@@ -204,19 +204,6 @@ namespace DCL
                     bodyShapeController.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
             }
 
-            if (bodyIsDirty)
-            {
-                var invalidWearables = wearableControllers
-                    .Where(x => !x.Value.IsLoadedForBodyShape(bodyShapeController.bodyShapeId))
-                    .Select(x => x.Key).ToArray();
-
-                foreach (WearableItem invalidWearable in invalidWearables)
-                {
-                    wearableControllers[invalidWearable].CleanUp();
-                    wearableControllers.Remove(invalidWearable);
-                }
-            }
-
             HashSet<string> unusedCategories = new HashSet<string>(Categories.ALL);
             int wearableCount = resolvedWearables.Count;
             for (int index = 0; index < wearableCount; index++)
@@ -228,7 +215,10 @@ namespace DCL
                 unusedCategories.Remove(wearable.category);
                 if (wearableControllers.ContainsKey(wearable))
                 {
-                    UpdateWearableController(wearable);
+                    if (wearableControllers[wearable].IsLoadedForBodyShape(bodyShapeController.bodyShapeId))
+                        UpdateWearableController(wearable);
+                    else
+                        wearableControllers[wearable].CleanUp();
                 }
                 else
                 {
