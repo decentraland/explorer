@@ -266,7 +266,7 @@ export function getServerConfigurations() {
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json`,
+    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json?t=${new Date().getTime()}`,
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
@@ -336,3 +336,10 @@ export namespace ethereumConfigurations {
 }
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
+
+export const genericAvatarSnapshots: Record<string, string> = {
+  face: '/images/avatar_snapshot_default.png',
+  body: '/images/image_not_found.png',
+  face256: '/images/avatar_snapshot_default256.png',
+  face128: '/images/avatar_snapshot_default128.png'
+}
