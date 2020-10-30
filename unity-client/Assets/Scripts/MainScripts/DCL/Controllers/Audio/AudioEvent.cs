@@ -10,6 +10,7 @@ public class AudioEvent : ScriptableObject
     {
     }
 
+    public string eventName;
     public bool loop = false;
     [Range(0f, 1f)]
     public float initialVolume = 1.0f;

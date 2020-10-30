@@ -9,6 +9,7 @@ public class AudioContainer : MonoBehaviour
     {
     }
 
+    public bool instantiateEvents = false;
     public AudioMixerGroup audioMixerGroup;
     [Range(0f, 1f)]
     public float spatialBlend = 1f;
@@ -29,9 +30,32 @@ public class AudioContainer : MonoBehaviour
             maxDistance = 400f;
         }
 
+        if (instantiateEvents)
+        {
+            for(int i = 0; i < audioEvents.Count; i++)
+            {
+                AudioEvent instance = Instantiate(audioEvents[i]);
+                audioEvents[i] = instance;
+            }
+        }
+
         foreach (AudioEvent e in audioEvents)
         {
             e.Initialize(this);
         }
+    }
+
+    public AudioEvent GetEvent(string eventName)
+    {
+        Debug.Log(":: -> Looking for " + eventName + "  <- ::");
+
+        for (int i = 0; i < audioEvents.Count; i++)
+        {
+            Debug.Log(audioEvents[i].eventName);
+            if (audioEvents[i].eventName == eventName)
+                return audioEvents[i];
+        }
+
+        return null;
     }
 }
