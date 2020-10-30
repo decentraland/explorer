@@ -410,7 +410,7 @@ function initChatCommands() {
     const currentUserId = getCurrentUserId(getGlobalState())
     if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(globalThis.globalStore.getState(), username)
+    const user = findProfileByName(getGlobalState(), username)
     if (user && user.userId) {
       // Cannot mute yourself
       if (username === currentUserId) {
