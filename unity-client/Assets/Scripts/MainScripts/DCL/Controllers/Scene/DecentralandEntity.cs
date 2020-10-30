@@ -65,7 +65,7 @@ namespace DCL.Models
                     meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
 
                     RecalculateBounds();
-
+                    CullingController.cullingListDirty = true;
                     OnUpdated?.Invoke();
                 }
             }
