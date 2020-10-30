@@ -158,6 +158,9 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
   })
 
   positionObservable.add(obj => {
+    // immediate reposition should only be broadcasted to others, otherwise our scene reloads
+    if (obj.immediate) return
+
     worldToGrid(obj.position, position)
     ret.notify('User.setPosition', { position, teleported: false })
   })

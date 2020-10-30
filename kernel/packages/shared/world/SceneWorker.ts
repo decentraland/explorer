@@ -1,13 +1,13 @@
 import { future } from 'fp-future'
 import { APIOptions, ScriptingHost } from 'decentraland-rpc/lib/host'
 import { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-
 import { defaultLogger } from 'shared/logger'
 import { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { Vector3 } from 'decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents } from 'decentraland-ecs/src'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
+import { PREVIEW } from 'config'
 
 export abstract class SceneWorker {
   protected engineAPI: EngineAPI | null = null
@@ -75,6 +75,22 @@ export abstract class SceneWorker {
     this.engineAPI.parcelSceneAPI = this.parcelScene
 
     system.getAPIInstance(EnvironmentAPI).data = this.parcelScene.data
+
+    // TODO: track this errors using rollbar because this kind of event are usually triggered due to setInterval() or unreliable code in scenes, that is not sandboxed
+    system.on('error', (e) => {
+      // @ts-ignore
+      console['log']('Unloading scene because of unhandled exception in the scene worker: ')
+
+      // @ts-ignore
+      console['error'](e)
+
+      // These errors should be handled in development time
+      if (PREVIEW) {
+        debugger
+      }
+
+      transport.close()
+    })
 
     system.enable()
 
