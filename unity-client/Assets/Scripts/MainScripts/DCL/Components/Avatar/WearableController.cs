@@ -27,7 +27,7 @@ public class WearableController
 
     public bool boneRetargetingDirty = false;
 
-    private string lastMainFileLoaded = null;
+    internal string lastMainFileLoaded = null;
 
     public WearableController(WearableItem wearableItem)
     {

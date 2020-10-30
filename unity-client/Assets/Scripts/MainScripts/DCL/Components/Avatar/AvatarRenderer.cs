@@ -212,6 +212,7 @@ namespace DCL
 
                 foreach (WearableItem invalidWearable in invalidWearables)
                 {
+                    wearableControllers[invalidWearable].CleanUp();
                     wearableControllers.Remove(invalidWearable);
                 }
             }
