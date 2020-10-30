@@ -28,6 +28,7 @@ public class CullingController : MonoBehaviour
 
     private Renderer[] rs;
     private SkinnedMeshRenderer[] skrs;
+    private Animation[] anims;
 
     private HashSet<Renderer> hiddenRenderers = new HashSet<Renderer>();
     private HashSet<Renderer> shadowlessRenderers = new HashSet<Renderer>();
@@ -85,21 +86,42 @@ public class CullingController : MonoBehaviour
         yield return null;
         skrs = FindObjectsOfType<SkinnedMeshRenderer>();
         yield return null;
-        uniqueMaterials.Clear();
+        anims = FindObjectsOfType<Animation>();
+    }
 
-        foreach (var r in rs)
+    const int MAX_CHECKS_PER_FRAME = 250;
+
+    IEnumerator SetAnimationsCulling()
+    {
+        Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
+        int counter = 0;
+
+        for (var i = 0; i < anims.Length; i++)
         {
-            var mats = r.sharedMaterials;
+            counter++;
 
-            foreach (var m in mats)
+            if (counter == MAX_CHECKS_PER_FRAME)
             {
-                if (!matToRends.ContainsKey(m))
-                    matToRends.Add(m, new List<Renderer>());
+                counter = 0;
+                yield return null;
+            }
 
-                matToRends[m].Add(r);
+            Animation anim = anims[i];
 
-                if (!uniqueMaterials.Contains(m))
-                    uniqueMaterials.Add(m);
+            if (anim == null)
+                continue;
+
+            Transform t = anim.transform;
+
+            float distance = Vector3.Distance(playerPosition, t.position);
+
+            if (distance > 15)
+            {
+                anim.cullingType = AnimationCullingType.BasedOnRenderers;
+            }
+            else
+            {
+                anim.cullingType = AnimationCullingType.AlwaysAnimate;
             }
         }
     }
@@ -139,6 +161,8 @@ public class CullingController : MonoBehaviour
             hiddenRenderers.Clear();
             shadowlessRenderers.Clear();
 
+            yield return SetAnimationsCulling();
+
             foreach (Profile p in profiles)
             {
                 Renderer[] rsList = null;
@@ -154,7 +178,7 @@ public class CullingController : MonoBehaviour
                 {
                     counter++;
 
-                    if (counter == 500)
+                    if (counter == MAX_CHECKS_PER_FRAME)
                     {
                         counter = 0;
                         yield return null;
@@ -199,6 +223,14 @@ public class CullingController : MonoBehaviour
 
                         if (hasEmission)
                             shouldBeVisible |= size > p.smallSize / 4;
+                    }
+
+                    if (r is SkinnedMeshRenderer)
+                    {
+                        if (distance > 15)
+                            (r as SkinnedMeshRenderer).updateWhenOffscreen = false;
+                        else
+                            (r as SkinnedMeshRenderer).updateWhenOffscreen = true;
                     }
 
                     if (isOpaque)
