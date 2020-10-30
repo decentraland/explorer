@@ -1,6 +1,7 @@
 import React from "react";
 
 import "./errors.css";
+import errorImage from "../../images/errors/error-robotmobile.png";
 
 export const ErrorNotSupported: React.FC = () => (
   <div id="error-notsupported" className="error-container">
@@ -17,11 +18,7 @@ export const ErrorNotSupported: React.FC = () => (
         </div>
       </div>
       <div className="errorimage col">
-        <img
-          alt=""
-          className="error-image"
-          src="images/robots/error-robotmobile.png"
-        />
+        <img alt="" className="error-image" src={errorImage} />
       </div>
     </div>
   </div>

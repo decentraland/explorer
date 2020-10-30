@@ -7,6 +7,7 @@ import { EthSignAdvice } from "./EthSignAdvice";
 import { connect } from "react-redux";
 import SignUpContainer from "./SignUpContainer";
 import "./LoginContainer.css";
+import { Spinner } from "../common/Spinner";
 
 export enum LoginStage {
   LOADING = "loading",
@@ -18,30 +19,22 @@ export enum LoginStage {
 }
 
 const mapStateToProps = (state: any) => ({
-  terms: !!state.session.tos,
   stage: state.session.loginStage,
   subStage: state.session.signup.stage,
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  onLogin: (provider: string) => {
-    console.log("[Authenticate]");
-    return dispatch({ type: "[Authenticate]", payload: { provider } });
-    // return dispatch({ type: "[Request] Login", payload: { provider } });
-  },
+  onLogin: (provider: string) =>
+    dispatch({ type: "[Authenticate]", payload: { provider } }),
   onGuest: () =>
     dispatch({ type: "[Request] Login", payload: { provider: "Guest" } }),
-  onTermsChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-    dispatch({ type: "UPDATE_TOS", payload: e.target.checked }),
 });
 
 export interface LoginContainerProps {
-  terms: boolean;
   stage: LoginStage;
   subStage: string;
   onLogin: (provider: string) => void;
   onGuest: () => void;
-  onTermsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
@@ -53,15 +46,9 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
         <div className="LoginContainer">
           <Navbar />
           <div className="eth-login-popup">
-            {(props.stage === LoginStage.SIGN_IN ||
-              props.stage === LoginStage.LOADING) && (
-              <EthLogin
-                terms={true}
-                loading={props.stage === LoginStage.LOADING}
-                onLogin={props.onLogin}
-                onGuest={props.onGuest}
-                onTermChange={props.onTermsChange}
-              />
+            {props.stage === LoginStage.LOADING && <Spinner />}
+            {props.stage === LoginStage.SIGN_IN && (
+              <EthLogin onLogin={props.onLogin} onGuest={props.onGuest} />
             )}
             {props.stage === LoginStage.CONNECT_ADVICE && (
               <EthConnectAdvice onLogin={props.onLogin} />

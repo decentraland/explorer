@@ -3,6 +3,14 @@ import { connect } from "react-redux";
 import { LoadingMessage } from "./LoadingMessage";
 import { ProgressBar } from "./ProgressBar";
 
+import imgMana from "../../images/loadingtips/Mana.png";
+import imgMarketplace from "../../images/loadingtips/Marketplace.png";
+import imgLand from "../../images/loadingtips/Land.png";
+import imgLandImg from "../../images/loadingtips/LandImg.png";
+import imgWearables from "../../images/loadingtips/WearablesImg.png";
+import imgDAO from "../../images/loadingtips/DAOImg.png";
+import imgGenesisPlazaImg from "../../images/loadingtips/GenesisPlazaImg.png";
+
 export type LoadingTip = {
   text: string;
   image: string;
@@ -11,31 +19,31 @@ export type LoadingTip = {
 export const loadingTips: Array<LoadingTip> = [
   {
     text: `MANA is Decentraland’s virtual currency. Use it to buy LAND and other premium items, vote on key policies and pay platform fees.`,
-    image: "images/decentraland-connect/loadingtips/Mana.png",
+    image: imgMana,
   },
   {
     text: `Buy and sell LAND, Estates, Avatar wearables and names in the Decentraland Marketplace: stocking the very best digital goods and paraphernalia backed by the ethereum blockchain.`,
-    image: "images/decentraland-connect/loadingtips/Marketplace.png",
+    image: imgMarketplace,
   },
   {
     text: `Create scenes, artworks, challenges and more, using the simple Builder: an easy drag and drop tool. For more experienced creators, the SDK provides the tools to fill the world with social games and applications.`,
-    image: "images/decentraland-connect/loadingtips/Land.png",
+    image: imgLand,
   },
   {
     text: `Decentraland is made up of over 90,000 LANDs: virtual spaces backed by cryptographic tokens. Only LANDowners can determine the content that sits on their LAND.`,
-    image: "images/decentraland-connect/loadingtips/LandImg.png",
+    image: imgLandImg,
   },
   {
     text: `Except for the default set of wearables you get when you start out, each wearable model has a limited supply. The rarest ones can get to be super valuable. You can buy and sell them in the Marketplace.`,
-    image: "images/decentraland-connect/loadingtips/WearablesImg.png",
+    image: imgWearables,
   },
   {
     text: `Decentraland is the first fully decentralized virtual world. By voting through the DAO  ('Decentralized Autonomous Organization'), you are in control of the policies created to determine how the world behaves.`,
-    image: "images/decentraland-connect/loadingtips/DAOImg.png",
+    image: imgDAO,
   },
   {
     text: `Genesis Plaza is built and maintained by the Decentraland Foundation but is still in many ways a community project. Around here you'll find several teleports that can take you directly to special scenes marked as points of interest.`,
-    image: "images/decentraland-connect/loadingtips/GenesisPlazaImg.png",
+    image: imgGenesisPlazaImg,
   },
 ];
 
@@ -70,7 +78,7 @@ export const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
   const [step, setStep]: [number, any] = useState(0);
   // setting animation of loading
   useEffect(() => {
-    const interval = setInterval(() => setStep(changeTip), 10000);
+    const interval = setInterval(() => setStep(changeTip), 5000);
     return () => clearInterval(interval);
   }, []);
 

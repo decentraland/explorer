@@ -1,6 +1,7 @@
 import React from "react";
 import { Logo } from "./Logo";
 import "./Navbar.css";
+import imgDiscord from "../../images/discord.png";
 
 export const Navbar: React.FC = () => (
   <nav className="nav-bar">
@@ -14,11 +15,7 @@ export const Navbar: React.FC = () => (
         href="https://dcl.gg/discord"
         target="about:blank"
       >
-        <img
-          alt="Discord"
-          className="nav-discord-img"
-          src="images/decentraland-connect/Discord.png"
-        />
+        <img alt="Discord" className="nav-discord-img" src={imgDiscord} />
         <span className="nav-text nav-discord-text">JOIN OUR DISCORD</span>
       </a>
     </div>

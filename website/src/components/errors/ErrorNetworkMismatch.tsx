@@ -1,6 +1,7 @@
 import React from "react";
 
 import "./errors.css";
+import errorImage from "../../images/errors/robotsmiling.png";
 
 export interface ErrorNetworkMismatchProps {
   details: { tld: string; web3Net: string; tldNet: string } | null;
@@ -42,11 +43,7 @@ export const ErrorNetworkMismatch: React.FC<ErrorNetworkMismatchProps> = (
         </div>
         <div className="errorimage col">
           <div className="imagewrapper">
-            <img
-              alt=""
-              className="error-image"
-              src="/images/robots/robotsmiling.png"
-            />
+            <img alt="" className="error-image" src={errorImage} />
           </div>
         </div>
       </div>

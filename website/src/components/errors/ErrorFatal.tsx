@@ -1,6 +1,7 @@
 import React from "react";
 
 import "./errors.css";
+import errorImage from "../../images/errors/error-robotdown.png";
 
 export const ErrorFatal: React.FC = () => (
   <div id="error-fatal" className="error-container">
@@ -36,11 +37,7 @@ export const ErrorFatal: React.FC = () => (
       </div>
       <div className="errorimage col">
         <div className="imagewrapper">
-          <img
-            alt=""
-            className="error-image"
-            src="images/robots/error-robotdown.png"
-          />
+          <img alt="" className="error-image" src={errorImage} />
         </div>
       </div>
     </div>

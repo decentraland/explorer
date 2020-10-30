@@ -1,52 +1,24 @@
 import React from "react";
 import "./Footer.css";
+import discord from "../../images/footer/Discord.png";
+import reddit from "../../images/footer/Reddit.png";
+import github from "../../images/footer/Git.png";
+import twitter from "../../images/footer/Twitter.png";
 
 export const Footer: React.FC = () => (
   <footer className="footer-bar">
     <div className="footer-bar-content">
-      <a
-        className="footer-link"
-        href="https://dcl.gg/discord"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Discord.png"
-        />
+      <a href="https://dcl.gg/discord" target="about:blank">
+        <img alt="" src={discord} />
       </a>
-      <a
-        className="footer-link"
-        href="https://www.reddit.com/r/decentraland/"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Reddit.png"
-        />
+      <a href="https://www.reddit.com/r/decentraland/" target="about:blank">
+        <img alt="" src={reddit} />
       </a>
-      <a
-        className="footer-link"
-        href="http://github.com/decentraland"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Git.png"
-        />
+      <a href="http://github.com/decentraland" target="about:blank">
+        <img alt="" src={github} />
       </a>
-      <a
-        className="footer-link"
-        href="https://twitter.com/decentraland"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Twitter.png"
-        />
+      <a href="https://twitter.com/decentraland" target="about:blank">
+        <img alt="" src={twitter} />
       </a>
       <span className="footer-text">© 2020 Decentraland</span>
     </div>

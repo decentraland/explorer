@@ -1,15 +1,11 @@
 import React, { useState } from "react";
-import { Spinner } from "../common/Spinner";
 import { WalletSelector } from "./wallet/WalletSelector";
 import { Logo } from "../common/Logo";
 import "./EthLogin.css";
 
 export interface EthLoginProps {
-  terms: boolean;
-  loading: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
-  onTermChange: any;
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
@@ -23,27 +19,18 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
           users.
         </p>
       </div>
-      {props.loading ? (
-        <Spinner />
-      ) : (
-        <div id="eth-login-confirmation-wrapper">
-          <button
-            className="eth-login-confirm-button"
-            disabled={!props.terms}
-            onClick={() => setWallet(true)}
-          >
-            Sign In - Up
-          </button>
-          <br />
-          <button
-            className="eth-login-guest-button"
-            disabled={!props.terms}
-            onClick={props.onGuest}
-          >
-            Play as Guest
-          </button>
-        </div>
-      )}
+      <div id="eth-login-confirmation-wrapper">
+        <button
+          className="eth-login-confirm-button"
+          onClick={() => setWallet(true)}
+        >
+          Sign In - Up
+        </button>
+        <br />
+        <button className="eth-login-guest-button" onClick={props.onGuest}>
+          Play as Guest
+        </button>
+      </div>
       <WalletSelector
         show={wallet}
         onClick={props.onLogin}

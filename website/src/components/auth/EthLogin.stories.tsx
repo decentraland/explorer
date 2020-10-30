@@ -5,10 +5,7 @@ import { EthLogin, EthLoginProps } from "./EthLogin";
 
 export default {
   title: "Explorer/auth/EthLogin",
-  args: {
-    terms: true,
-    loading: false,
-  } as EthLoginProps,
+  args: {},
   component: EthLogin,
   argTypes: {
     onLogin: { action: "singing in/up..." },

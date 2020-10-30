@@ -9,7 +9,6 @@ import {
 export default {
   title: "Explorer/Login",
   args: {
-    terms: false,
     stage: LoginStage.LOADING,
     subStage: "",
   } as LoginContainerProps,
@@ -29,16 +28,9 @@ LoadingState.args = {
   ...Template.args,
 };
 
-export const signInDisabled = Template.bind({});
-signInDisabled.args = {
+export const signInUp = Template.bind({});
+signInUp.args = {
   ...Template.args,
-  stage: LoginStage.SIGN_IN,
-};
-
-export const signInEnable = Template.bind({});
-signInEnable.args = {
-  ...Template.args,
-  terms: true,
   stage: LoginStage.SIGN_IN,
 };
 

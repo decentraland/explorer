@@ -1,6 +1,7 @@
 import React from "react";
 
 import "./errors.css";
+import errorImage from "../../images/errors/error-robotmobile.png";
 
 export const ErrorNoMobile: React.FC = () => (
   <div id="error-nomobile" className="hidden-error">
@@ -26,11 +27,7 @@ export const ErrorNoMobile: React.FC = () => (
         <div className="theclientisonlya">
           The client is only available on desktop right now.
         </div>
-        <img
-          alt=""
-          className="robotmobilebrowsererror"
-          src="images/robots/error-robotmobile.png"
-        />
+        <img alt="" className="robotmobilebrowsererror" src={errorImage} />
         <div className="cta">
           <div
             className="signup"
