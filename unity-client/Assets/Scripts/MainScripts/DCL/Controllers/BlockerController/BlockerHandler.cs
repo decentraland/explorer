@@ -91,6 +91,8 @@ namespace DCL.Controllers
 
             if (!instant)
                 animationHandler.FadeIn(blockerGo);
+
+            CullingController.cullingListDirty = true;
         }
 
         private void EnsureBlockerPool()
