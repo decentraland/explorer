@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { WalletSelector } from "./wallet/WalletSelector";
-import { Logo } from "../common/Logo";
+import { LoginHeader } from "./LoginHeader";
 import "./EthLogin.css";
 
 export interface EthLoginProps {
@@ -12,13 +12,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const [wallet, setWallet] = useState(false);
   return (
     <div className="">
-      <div className="eth-login-description">
-        <Logo />
-        <p>
-          Increase yourself into the first virtual world fully owned by its
-          users.
-        </p>
-      </div>
+      <LoginHeader />
       <div id="eth-login-confirmation-wrapper">
         <button
           className="eth-login-confirm-button"

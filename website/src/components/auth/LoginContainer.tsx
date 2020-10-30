@@ -4,10 +4,10 @@ import { Footer } from "../common/Footer";
 import { EthLogin } from "./EthLogin";
 import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
+import { InitialLoading } from "./InitialLoading";
 import { connect } from "react-redux";
 import SignUpContainer from "./SignUpContainer";
 import "./LoginContainer.css";
-import { Spinner } from "../common/Spinner";
 
 export enum LoginStage {
   LOADING = "loading",
@@ -46,7 +46,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
         <div className="LoginContainer">
           <Navbar />
           <div className="eth-login-popup">
-            {props.stage === LoginStage.LOADING && <Spinner />}
+            {props.stage === LoginStage.LOADING && <InitialLoading />}
             {props.stage === LoginStage.SIGN_IN && (
               <EthLogin onLogin={props.onLogin} onGuest={props.onGuest} />
             )}
