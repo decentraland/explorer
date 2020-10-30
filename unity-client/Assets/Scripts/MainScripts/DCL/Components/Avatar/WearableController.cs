@@ -14,7 +14,6 @@ public class WearableController
 
     public readonly WearableItem wearable;
     protected RendereableAssetLoadHelper loader;
-    private readonly string bodyShapeId;
 
     public string id => wearable.id;
     public string category => wearable.category;
@@ -30,21 +29,19 @@ public class WearableController
 
     private string lastMainFileLoaded = null;
 
-    public WearableController(WearableItem wearableItem, string bodyShapeId)
+    public WearableController(WearableItem wearableItem)
     {
         this.wearable = wearableItem;
-        this.bodyShapeId = bodyShapeId;
     }
 
     protected WearableController(WearableController original)
     {
         wearable = original.wearable;
         loader = original.loader;
-        bodyShapeId = original.bodyShapeId;
         assetRenderers = original.assetRenderers;
     }
 
-    public virtual void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
+    public virtual void Load(string bodyShapeId, Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
     {
         if (isReady)
             return;
