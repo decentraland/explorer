@@ -179,17 +179,31 @@ public class CullingController : MonoBehaviour
 
                     bool isOpaque = true;
 
-                    if (r.sharedMaterials[0] != null)
+                    Material firstMat = r.sharedMaterials[0];
+
+                    if (firstMat != null)
                     {
-                        if (r.sharedMaterials[0].HasProperty("_ZWrite") &&
-                            r.sharedMaterials[0].GetFloat("_ZWrite") == 0)
+                        if (firstMat.HasProperty("_ZWrite") &&
+                            firstMat.GetFloat("_ZWrite") == 0)
                         {
                             isOpaque = false;
                         }
+
+                        bool hasEmission = false;
+
+                        if (firstMat.HasProperty("_EmissionMap") && firstMat.GetTexture("_EmissionMap") != null)
+                            hasEmission = true;
+
+                        if (firstMat.HasProperty("_EmissionColor") && firstMat.GetColor("_EmissionColor") != Color.clear)
+                            hasEmission = true;
+
+                        if (hasEmission)
+                            shouldBeVisible |= size > p.smallSize / 4;
                     }
 
                     if (isOpaque)
                         shouldBeVisible |= size > p.smallSize;
+
 #if UNITY_EDITOR
                     if (!shouldBeVisible)
                     {
@@ -200,7 +214,7 @@ public class CullingController : MonoBehaviour
                     bool shouldHaveShadow = distance < shadowThreshold;
                     shouldHaveShadow |= size > p.mediumSize;
 
-                    if (r.forceRenderingOff != shouldBeVisible)
+                    if (r.forceRenderingOff != !shouldBeVisible)
                     {
                         r.forceRenderingOff = !shouldBeVisible;
                     }
