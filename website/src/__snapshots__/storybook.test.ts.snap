@@ -30,7 +30,7 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
         <img
           alt="Discord"
           className="nav-discord-img"
-          src="images/decentraland-connect/Discord.png"
+          src="discord.png"
         />
         <span
           className="nav-text nav-discord-text"
@@ -77,47 +77,39 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
       className="footer-bar-content"
     >
       <a
-        className="footer-link"
         href="https://dcl.gg/discord"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Discord.png"
+          src="Discord.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://www.reddit.com/r/decentraland/"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Reddit.png"
+          src="Reddit.png"
         />
       </a>
       <a
-        className="footer-link"
         href="http://github.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Git.png"
+          src="Git.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://twitter.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Twitter.png"
+          src="Twitter.png"
         />
       </a>
       <span
@@ -160,7 +152,7 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
         <img
           alt="Discord"
           className="nav-discord-img"
-          src="images/decentraland-connect/Discord.png"
+          src="discord.png"
         />
         <span
           className="nav-text nav-discord-text"
@@ -174,31 +166,15 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
     className="eth-login-popup"
   >
     <div
-      className=""
-    >
-      <div
-        className="eth-login-description"
-      >
-        <img
-          alt="Decentraland"
-          className="dcl-logo"
-          src="logo-dcl.png"
-        />
-        <p>
-          Increase yourself into the first virtual world fully owned by its users.
-        </p>
-      </div>
-      <div
-        className="loader"
-        id="eth-login-confirmation-spinner"
-        style={
-          Object {
-            "display": "block",
-          }
+      className="loader"
+      id="eth-login-confirmation-spinner"
+      style={
+        Object {
+          "display": "block",
         }
-      >
-         
-      </div>
+      }
+    >
+       
     </div>
   </div>
   <footer
@@ -208,47 +184,39 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
       className="footer-bar-content"
     >
       <a
-        className="footer-link"
         href="https://dcl.gg/discord"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Discord.png"
+          src="Discord.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://www.reddit.com/r/decentraland/"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Reddit.png"
+          src="Reddit.png"
         />
       </a>
       <a
-        className="footer-link"
         href="http://github.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Git.png"
+          src="Git.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://twitter.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Twitter.png"
+          src="Twitter.png"
         />
       </a>
       <span
@@ -291,7 +259,7 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
         <img
           alt="Discord"
           className="nav-discord-img"
-          src="images/decentraland-connect/Discord.png"
+          src="discord.png"
         />
         <span
           className="nav-text nav-discord-text"
@@ -331,47 +299,39 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
       className="footer-bar-content"
     >
       <a
-        className="footer-link"
         href="https://dcl.gg/discord"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Discord.png"
+          src="Discord.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://www.reddit.com/r/decentraland/"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Reddit.png"
+          src="Reddit.png"
         />
       </a>
       <a
-        className="footer-link"
         href="http://github.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Git.png"
+          src="Git.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://twitter.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Twitter.png"
+          src="Twitter.png"
         />
       </a>
       <span
@@ -384,7 +344,7 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
 </div>
 `;
 
-exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
+exports[`Storyshots Explorer/Login Sign In Up 1`] = `
 <div
   className="LoginContainer"
 >
@@ -414,7 +374,7 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
         <img
           alt="Discord"
           className="nav-discord-img"
-          src="images/decentraland-connect/Discord.png"
+          src="discord.png"
         />
         <span
           className="nav-text nav-discord-text"
@@ -447,7 +407,6 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
       >
         <button
           className="eth-login-confirm-button"
-          disabled={false}
           onClick={[Function]}
         >
           Sign In - Up
@@ -455,7 +414,6 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
         <br />
         <button
           className="eth-login-guest-button"
-          disabled={false}
         >
           Play as Guest
         </button>
@@ -469,185 +427,39 @@ exports[`Storyshots Explorer/Login Sign In Disabled 1`] = `
       className="footer-bar-content"
     >
       <a
-        className="footer-link"
         href="https://dcl.gg/discord"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Discord.png"
+          src="Discord.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://www.reddit.com/r/decentraland/"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Reddit.png"
+          src="Reddit.png"
         />
       </a>
       <a
-        className="footer-link"
         href="http://github.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Git.png"
+          src="Git.png"
         />
       </a>
       <a
-        className="footer-link"
         href="https://twitter.com/decentraland"
         target="about:blank"
       >
         <img
           alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Twitter.png"
-        />
-      </a>
-      <span
-        className="footer-text"
-      >
-        © 2020 Decentraland
-      </span>
-    </div>
-  </footer>
-</div>
-`;
-
-exports[`Storyshots Explorer/Login Sign In Enable 1`] = `
-<div
-  className="LoginContainer"
->
-  <nav
-    className="nav-bar"
-  >
-    <img
-      alt="Decentraland"
-      className="dcl-logo"
-      src="logo.png"
-    />
-    <div
-      className="nav-bar-content"
-    >
-      <div
-        className="nav-text nav-need-support"
-      >
-        <span>
-          Need support?
-        </span>
-      </div>
-      <a
-        className="nav-discord"
-        href="https://dcl.gg/discord"
-        target="about:blank"
-      >
-        <img
-          alt="Discord"
-          className="nav-discord-img"
-          src="images/decentraland-connect/Discord.png"
-        />
-        <span
-          className="nav-text nav-discord-text"
-        >
-          JOIN OUR DISCORD
-        </span>
-      </a>
-    </div>
-  </nav>
-  <div
-    className="eth-login-popup"
-  >
-    <div
-      className=""
-    >
-      <div
-        className="eth-login-description"
-      >
-        <img
-          alt="Decentraland"
-          className="dcl-logo"
-          src="logo-dcl.png"
-        />
-        <p>
-          Increase yourself into the first virtual world fully owned by its users.
-        </p>
-      </div>
-      <div
-        id="eth-login-confirmation-wrapper"
-      >
-        <button
-          className="eth-login-confirm-button"
-          disabled={false}
-          onClick={[Function]}
-        >
-          Sign In - Up
-        </button>
-        <br />
-        <button
-          className="eth-login-guest-button"
-          disabled={false}
-        >
-          Play as Guest
-        </button>
-      </div>
-    </div>
-  </div>
-  <footer
-    className="footer-bar"
-  >
-    <div
-      className="footer-bar-content"
-    >
-      <a
-        className="footer-link"
-        href="https://dcl.gg/discord"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Discord.png"
-        />
-      </a>
-      <a
-        className="footer-link"
-        href="https://www.reddit.com/r/decentraland/"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Reddit.png"
-        />
-      </a>
-      <a
-        className="footer-link"
-        href="http://github.com/decentraland"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Git.png"
-        />
-      </a>
-      <a
-        className="footer-link"
-        href="https://twitter.com/decentraland"
-        target="about:blank"
-      >
-        <img
-          alt=""
-          className="footer-icon"
-          src="images/decentraland-connect/footer/Twitter.png"
+          src="Twitter.png"
         />
       </a>
       <span
@@ -712,7 +524,6 @@ exports[`Storyshots Explorer/auth/EthLogin Template 1`] = `
   >
     <button
       className="eth-login-confirm-button"
-      disabled={false}
       onClick={[Function]}
     >
       Sign In - Up
@@ -720,7 +531,6 @@ exports[`Storyshots Explorer/auth/EthLogin Template 1`] = `
     <br />
     <button
       className="eth-login-guest-button"
-      disabled={false}
     >
       Play as Guest
     </button>
@@ -1253,47 +1063,39 @@ exports[`Storyshots Explorer/base/Footer Template 1`] = `
     className="footer-bar-content"
   >
     <a
-      className="footer-link"
       href="https://dcl.gg/discord"
       target="about:blank"
     >
       <img
         alt=""
-        className="footer-icon"
-        src="images/decentraland-connect/footer/Discord.png"
+        src="Discord.png"
       />
     </a>
     <a
-      className="footer-link"
       href="https://www.reddit.com/r/decentraland/"
       target="about:blank"
     >
       <img
         alt=""
-        className="footer-icon"
-        src="images/decentraland-connect/footer/Reddit.png"
+        src="Reddit.png"
       />
     </a>
     <a
-      className="footer-link"
       href="http://github.com/decentraland"
       target="about:blank"
     >
       <img
         alt=""
-        className="footer-icon"
-        src="images/decentraland-connect/footer/Git.png"
+        src="Git.png"
       />
     </a>
     <a
-      className="footer-link"
       href="https://twitter.com/decentraland"
       target="about:blank"
     >
       <img
         alt=""
-        className="footer-icon"
-        src="images/decentraland-connect/footer/Twitter.png"
+        src="Twitter.png"
       />
     </a>
     <span
@@ -1348,7 +1150,7 @@ exports[`Storyshots Explorer/base/Navbar Template 1`] = `
       <img
         alt="Discord"
         className="nav-discord-img"
-        src="images/decentraland-connect/Discord.png"
+        src="discord.png"
       />
       <span
         className="nav-text nav-discord-text"
