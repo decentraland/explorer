@@ -28,6 +28,8 @@ public class WearableController
 
     public bool boneRetargetingDirty = false;
 
+    private string lastMainFileLoaded = null;
+
     public WearableController(WearableItem wearableItem, string bodyShapeId)
     {
         this.wearable = wearableItem;
@@ -81,6 +83,7 @@ public class WearableController
             {
                 loader.OnFailEvent -= OnFailEventWrapper;
                 loader.ClearEvents();
+                lastMainFileLoaded = null;
                 loader = null;
             }
             onFail?.Invoke(this);
@@ -88,6 +91,7 @@ public class WearableController
 
         loader.OnFailEvent += OnFailEventWrapper;
 
+        lastMainFileLoaded = representation.mainFile;
         loader.Load(representation.mainFile);
     }
 
@@ -158,6 +162,7 @@ public class WearableController
             loader.ClearEvents();
             loader.Unload();
             loader = null;
+            lastMainFileLoaded = null;
         }
     }
 
@@ -188,5 +193,13 @@ public class WearableController
     public virtual void UpdateVisibility(HashSet<string> hiddenList)
     {
         SetAssetRenderersEnabled(!hiddenList.Contains(wearable.category));
+    }
+
+    public bool IsLoadedForBodyShape(string bodyShapeId)
+    {
+        if (loader == null || !isReady || lastMainFileLoaded == null)
+            return false;
+
+        return wearable.representations.FirstOrDefault(x => x.bodyShapes.Contains(bodyShapeId))?.mainFile == lastMainFileLoaded;
     }
 }
