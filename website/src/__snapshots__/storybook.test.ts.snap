@@ -780,6 +780,7 @@ exports[`Storyshots Explorer/auth/TermsOfServices Template 1`] = `
       </h2>
       <div
         className="content"
+        onScroll={[Function]}
       >
         <p>
           1. Introduction
@@ -930,6 +931,7 @@ exports[`Storyshots Explorer/auth/TermsOfServices Template 1`] = `
         </button>
         <button
           className="btnAgree"
+          disabled={true}
         >
           I AGREE
         </button>
