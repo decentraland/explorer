@@ -10,7 +10,7 @@ exports[`Storyshots Explorer/Login Connect Advice 1`] = `
     <img
       alt="Decentraland"
       className="dcl-logo"
-      src="logo.png"
+      src="logo.svg"
     />
     <div
       className="nav-bar-content"
@@ -132,7 +132,7 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
     <img
       alt="Decentraland"
       className="dcl-logo"
-      src="logo.png"
+      src="logo.svg"
     />
     <div
       className="nav-bar-content"
@@ -166,15 +166,31 @@ exports[`Storyshots Explorer/Login Loading State 1`] = `
     className="eth-login-popup"
   >
     <div
-      className="loader"
-      id="eth-login-confirmation-spinner"
-      style={
-        Object {
-          "display": "block",
-        }
-      }
+      className="initialLoading"
     >
-       
+      <div
+        className="eth-login-description"
+      >
+        <img
+          alt="Decentraland"
+          className="dcl-logo"
+          src="logo-dcl.png"
+        />
+        <p>
+          Increase yourself into the first virtual world fully owned by its users.
+        </p>
+      </div>
+      <div
+        className="loader"
+        id="eth-login-confirmation-spinner"
+        style={
+          Object {
+            "display": "block",
+          }
+        }
+      >
+         
+      </div>
     </div>
   </div>
   <footer
@@ -239,7 +255,7 @@ exports[`Storyshots Explorer/Login Sign Advice 1`] = `
     <img
       alt="Decentraland"
       className="dcl-logo"
-      src="logo.png"
+      src="logo.svg"
     />
     <div
       className="nav-bar-content"
@@ -354,7 +370,7 @@ exports[`Storyshots Explorer/Login Sign In Up 1`] = `
     <img
       alt="Decentraland"
       className="dcl-logo"
-      src="logo.png"
+      src="logo.svg"
     />
     <div
       className="nav-bar-content"
@@ -562,6 +578,36 @@ Array [
 ]
 `;
 
+exports[`Storyshots Explorer/auth/InitialLoading Template 1`] = `
+<div
+  className="initialLoading"
+>
+  <div
+    className="eth-login-description"
+  >
+    <img
+      alt="Decentraland"
+      className="dcl-logo"
+      src="logo-dcl.png"
+    />
+    <p>
+      Increase yourself into the first virtual world fully owned by its users.
+    </p>
+  </div>
+  <div
+    className="loader"
+    id="eth-login-confirmation-spinner"
+    style={
+      Object {
+        "display": "block",
+      }
+    }
+  >
+     
+  </div>
+</div>
+`;
+
 exports[`Storyshots Explorer/auth/Passport Template 1`] = `
 <div
   className="popup-container"
@@ -587,7 +633,7 @@ exports[`Storyshots Explorer/auth/Passport Template 1`] = `
             alt=""
             className="avatar"
             height="180"
-            src="https://peer.decentraland.org/content/contents/QmWUT7gPSJXvsscfkERKKKdVpMU4hu2EGuK9RJ72K9tUsU"
+            src="defaultAvatar.png"
             width="180"
           />
           <em>
@@ -659,7 +705,7 @@ exports[`Storyshots Explorer/auth/PassportAvatar Template 1`] = `
     alt=""
     className="avatar"
     height="180"
-    src="https://peer.decentraland.org/content/contents/QmWUT7gPSJXvsscfkERKKKdVpMU4hu2EGuK9RJ72K9tUsU"
+    src="defaultAvatar.png"
     width="180"
   />
   <em>
@@ -1113,7 +1159,7 @@ exports[`Storyshots Explorer/base/Logo Icon 1`] = `
 <img
   alt="Decentraland"
   className="dcl-logo"
-  src="logo.png"
+  src="logo.svg"
 />
 `;
 
@@ -1132,7 +1178,7 @@ exports[`Storyshots Explorer/base/Navbar Template 1`] = `
   <img
     alt="Decentraland"
     className="dcl-logo"
-    src="logo.png"
+    src="logo.svg"
   />
   <div
     className="nav-bar-content"

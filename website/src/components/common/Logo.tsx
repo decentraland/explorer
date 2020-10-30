@@ -1,5 +1,5 @@
 import React from "react";
-import dclIcon from "../../images/logo.png";
+import dclIcon from "../../images/logo.svg";
 import dclLogo from "../../images/logo-dcl.png";
 import "./Logo.css";
 
