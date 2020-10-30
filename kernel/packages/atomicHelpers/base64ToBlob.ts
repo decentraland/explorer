@@ -1,4 +1,4 @@
-export function base64ToBlob(base64: string): Blob {
+export function base64ToBlob(base64: string, type: string = 'image/jpeg'): Blob {
   const sliceSize = 1024
   const byteChars = globalThis.atob(base64)
   const byteArrays = []
@@ -18,5 +18,5 @@ export function base64ToBlob(base64: string): Blob {
     len = byteChars.length
   }
 
-  return new Blob(byteArrays, { type: 'image/jpeg' })
+  return new Blob(byteArrays, { type })
 }
