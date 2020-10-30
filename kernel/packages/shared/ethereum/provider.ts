@@ -6,7 +6,7 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getTLD } from '../../config/index'
 import { Eth } from 'web3x/eth'
-import { getLastSession, getStoredSession } from 'shared/session'
+import { getLastSessionWithoutWallet, getStoredSession } from 'shared/session'
 
 declare var window: Window & {
   ethereum: any
@@ -34,7 +34,7 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
 
     const address = await getUserEthAccountIfAvailable()
 
-    let userData = address ? getStoredSession(address) : getLastSession()
+    let userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
 
     // Modern dapp browsers...
     if (window['ethereum'] && isSessionExpired(userData)) {
@@ -72,7 +72,7 @@ function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFut
 function processLoginBackground(address: string | undefined) {
   const response = future()
 
-  const userData = address ? getStoredSession(address) : getLastSession()
+  const userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
   if (window['ethereum']) {
     if (!isSessionExpired(userData)) {
       response.resolve({ successful: true, provider: window.ethereum })

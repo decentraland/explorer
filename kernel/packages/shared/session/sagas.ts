@@ -32,7 +32,7 @@ import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStor
 
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
-import { getLastSession, getStoredSession, Session, setStoredSession } from './index'
+import { getLastSessionWithoutWallet, getStoredSession, Session, setStoredSession } from './index'
 
 const logger = createLogger('session: ')
 
@@ -93,7 +93,7 @@ function* login() {
 
     try {
       const address = yield getUserEthAccountIfAvailable()
-      const userData = address ? getStoredSession(address) : getLastSession()
+      const userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
 
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {

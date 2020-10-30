@@ -41,12 +41,14 @@ export const getStoredSession: (userId: string) => StoredSession | null = (userI
   return null
 }
 
-export const removeStoredSession = () => removeFromLocalStorage('dcl-profile')
-
-export const getLastSession: () => StoredSession | null = () => {
+export const removeStoredSession = (userId?: string) => {
+  if (userId) removeFromLocalStorage(sessionKey(userId))
+}
+export const getLastSessionWithoutWallet: () => StoredSession | null = () => {
   const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
   if (lastSessionId) {
-    return getStoredSession(lastSessionId)
+    const lastSession = getStoredSession(lastSessionId)
+    return lastSession && !lastSession.identity.hasConnectedWeb3 ? lastSession : null
   } else {
     return getFromLocalStorage('dcl-profile')
   }
@@ -62,7 +64,7 @@ export class Session {
     setLoadingScreenVisible(true)
     sendToMordor()
     disconnect()
-    removeStoredSession()
+    removeStoredSession(getIdentity()?.address)
     window.location.reload()
   }
 
