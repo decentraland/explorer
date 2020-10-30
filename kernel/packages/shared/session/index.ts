@@ -44,15 +44,6 @@ export const getStoredSession: (userId: string) => StoredSession | null = (userI
 export const removeStoredSession = (userId?: string) => {
   if (userId) removeFromLocalStorage(sessionKey(userId))
 }
-export const getLastSessionWithoutWallet: () => StoredSession | null = () => {
-  const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
-  if (lastSessionId) {
-    const lastSession = getStoredSession(lastSessionId)
-    return lastSession && !lastSession.identity.hasConnectedWeb3 ? lastSession : null
-  } else {
-    return getFromLocalStorage('dcl-profile')
-  }
-}
 export class Session {
   private static _instance: Session = new Session()
 
@@ -78,6 +69,16 @@ export class Session {
 export const getIdentity = () => getCurrentIdentity(globalThis.globalStore.getState())
 
 export const hasWallet = () => hasWalletSelector(globalThis.globalStore.getState())
+
+export const getLastSessionWithoutWallet: () => StoredSession | null = () => {
+  const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
+  if (lastSessionId) {
+    const lastSession = getStoredSession(lastSessionId)
+    return lastSession && !lastSession.identity.hasConnectedWeb3 ? lastSession : null
+  } else {
+    return getFromLocalStorage('dcl-profile')
+  }
+}
 
 export async function userAuthentified(): Promise<void> {
   const store: Store<RootState> = globalThis.globalStore
