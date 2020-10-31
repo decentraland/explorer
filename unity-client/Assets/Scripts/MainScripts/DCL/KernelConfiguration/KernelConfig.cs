@@ -14,6 +14,10 @@ public class KernelConfig : ScriptableObject
     List<Promise<KernelConfigModel>> initializationPromises = new List<Promise<KernelConfigModel>>();
     internal bool initialized = false;
 
+    /// <summary>
+    /// Set a new Kernel Configuration
+    /// </summary>
+    /// <param name="newValue">New Configuration</param>
     public void Set(KernelConfigModel newValue)
     {
         if (newValue == null)
@@ -34,11 +38,21 @@ public class KernelConfig : ScriptableObject
         OnChange?.Invoke(value, previous);
     }
 
+    /// <summary>
+    /// Get Kernel Configuration
+    /// </summary>
+    /// <returns>Kernel Configuration</returns>
     public KernelConfigModel Get()
     {
         return value;
     }
 
+    /// <summary>
+    /// Get a promise that is resolved when KernelConfig is initialized.
+    /// Usefeul when you need to fetch the configuration once and make sure it values were set and are not it defaults.
+    /// i.e: EnsureConfigInitialized.Then(config => //do stuff)
+    /// </summary>
+    /// <returns>Promise with latest values</returns>
     public Promise<KernelConfigModel> EnsureConfigInitialized()
     {
         var newPromise = new Promise<KernelConfigModel>();

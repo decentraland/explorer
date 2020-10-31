@@ -5,6 +5,10 @@ public static class KernelConfigController
 {
     static KernelConfig config = null;
 
+    /// <summary>
+    /// Get or load KernelConfig Scriptable Object
+    /// </summary>
+    /// <returns>KernelConfig Scriptable Object</returns>
     static public KernelConfig GetConfig()
     {
         if (!config)
