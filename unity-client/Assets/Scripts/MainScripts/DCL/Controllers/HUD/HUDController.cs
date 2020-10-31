@@ -29,6 +29,7 @@ public class HUDController : MonoBehaviour
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
 
         CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenOnOnChange;
+        UserContextMenu.OnOpenPrivateChatRequest += OpenPrivateChatWindow;
     }
 
     public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
@@ -79,6 +80,8 @@ public class HUDController : MonoBehaviour
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
 
     public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
+
+    public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
@@ -146,7 +149,8 @@ public class HUDController : MonoBehaviour
         MANA_HUD = 20,
         HELP_AND_SUPPORT_HUD = 21,
         EMAIL_PROMPT = 22,
-        COUNT = 23
+        USERS_AROUND_LIST_HUD = 23,
+        COUNT = 24
     }
 
     [System.Serializable]
@@ -339,6 +343,13 @@ public class HUDController : MonoBehaviour
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
                 break;
+            case HUDElementID.USERS_AROUND_LIST_HUD:
+                CreateHudElement<UsersAroundListHUDController>(configuration, hudElementId);
+                if (usersAroundListHud != null)
+                {
+                    minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
+                }
+                break;
         }
 
         var hudElement = GetHUDElement(hudElementId);
@@ -414,6 +425,18 @@ public class HUDController : MonoBehaviour
         taskbarHud?.SetVoiceChatRecording("true".Equals(talking));
     }
 
+    public void SetUserTalking(string payload)
+    {
+        var model = JsonUtility.FromJson<UserTalkingModel>(payload);
+        usersAroundListHud?.SetUserRecording(model.userId, model.talking);
+    }
+
+    public void SetUsersMuted(string payload)
+    {
+        var model = JsonUtility.FromJson<UserMutedModel>(payload);
+        usersAroundListHud?.SetUsersMuted(model.usersId, model.muted);
+    }
+
     public void RequestTeleport(string teleportDataJson)
     {
         teleportHud?.RequestTeleport(teleportDataJson);
@@ -457,6 +480,8 @@ public class HUDController : MonoBehaviour
 
         if (taskbarHud != null)
             taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
+
+        UserContextMenu.OnOpenPrivateChatRequest -= OpenPrivateChatWindow;
 
         foreach (var kvp in hudElements)
         {

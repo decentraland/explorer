@@ -70,10 +70,8 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, {
-      active: true,
-      visible: false
-    })
+    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: VOICE_CHAT_ENABLED, visible: false })
 
     try {
       await userAuthentified()
@@ -130,6 +128,12 @@ initializeUnity(container)
 
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {
+      if (error.isSceneError) {
+        // @see packages/shared/world/SceneWorker.ts#loadSystem
+        debugger
+        return
+      }
+
       console['error'](error)
       ReportFatalError(error.message)
     }

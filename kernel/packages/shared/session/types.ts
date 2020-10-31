@@ -44,3 +44,8 @@ export type SessionState = {
   showWalletPrompt: boolean
   signup: SignUpData
 }
+
+export type StoredSession = {
+  userId: string
+  identity: ExplorerIdentity
+}

@@ -84,3 +84,9 @@ export async function getUserAccount(): Promise<string | undefined> {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
   }
 }
+
+export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
+  if (Eth.fromCurrentProvider()) {
+    return getUserAccount()
+  }
+}
