@@ -86,7 +86,7 @@ public class KernelConfigurationShould
         onChange2Pass = false;
 
         KernelConfigModel modelUpdateWithSameValues = model.Clone();
-        KernelConfigController.SetConfig(modelUpdateWithSameValues); // this should trigger onChange cause it has the same values
+        KernelConfigController.SetConfig(modelUpdateWithSameValues); // this shouldn't trigger onChange cause it has the same values
         Assert.IsFalse(onChange1Called, "OnChange was called even if the new value is equal to the new one");
         Assert.IsFalse(onChange2Called, "OnChange was called even if the new value is equal to the new one");
 
