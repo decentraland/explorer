@@ -13,10 +13,10 @@ public class KernelConfigurationShould
         var promiseFromLoaded = loadedConfigSO.EnsureConfigInitialized();
         Assert.IsTrue(promiseFromLoaded.keepWaiting, "Promise shouldn't be resolved until first value is set");
 
-        var promiseFromController = KernelConfigController.GetConfig().EnsureConfigInitialized();
+        var promiseFromController = KernelConfig.i.EnsureConfigInitialized();
         Assert.IsTrue(promiseFromController.keepWaiting, "Promise shouldn't be resolved until first value is set");
 
-        KernelConfigController.SetConfig(new KernelConfigModel() { comms = new Comms() { commRadius = testValue } });
+        KernelConfig.i.Set(new KernelConfigModel() { comms = new Comms() { commRadius = testValue } });
 
         Assert.IsFalse(promiseFromController.keepWaiting, "Promise should be resolved");
         Assert.IsFalse(promiseFromLoaded.keepWaiting, "Promise should be resolved");
@@ -45,7 +45,7 @@ public class KernelConfigurationShould
 
         Resources.UnloadAsset(loadedConfigSO);
         Resources.UnloadAsset(secondLoadedConfigSO);
-        Resources.UnloadAsset(KernelConfigController.GetConfig());
+        Resources.UnloadAsset(KernelConfig.i);
     }
 
     [Test]
@@ -74,9 +74,9 @@ public class KernelConfigurationShould
 
         var loadedConfigSO = Resources.Load<KernelConfig>("KernelConfiguration");
         loadedConfigSO.OnChange += onConfigChage1;
-        KernelConfigController.GetConfig().OnChange += onConfigChage2;
+        KernelConfig.i.OnChange += onConfigChage2;
 
-        KernelConfigController.SetConfig(model);
+        KernelConfig.i.Set(model);
         Assert.IsTrue(onChange1Pass);
         Assert.IsTrue(onChange2Pass);
 
@@ -86,12 +86,12 @@ public class KernelConfigurationShould
         onChange2Pass = false;
 
         KernelConfigModel modelUpdateWithSameValues = model.Clone();
-        KernelConfigController.SetConfig(modelUpdateWithSameValues); // this shouldn't trigger onChange cause it has the same values
+        KernelConfig.i.Set(modelUpdateWithSameValues); // this shouldn't trigger onChange cause it has the same values
         Assert.IsFalse(onChange1Called, "OnChange was called even if the new value is equal to the new one");
         Assert.IsFalse(onChange2Called, "OnChange was called even if the new value is equal to the new one");
 
         loadedConfigSO.OnChange -= onConfigChage1;
-        KernelConfigController.GetConfig().OnChange -= onConfigChage2;
+        KernelConfig.i.OnChange -= onConfigChage2;
 
         onConfigChage1 = (current, prev) =>
         {
@@ -105,17 +105,17 @@ public class KernelConfigurationShould
         };
 
         loadedConfigSO.OnChange += onConfigChage1;
-        KernelConfigController.GetConfig().OnChange += onConfigChage2;
+        KernelConfig.i.OnChange += onConfigChage2;
 
-        KernelConfigController.SetConfig(new KernelConfigModel() { comms = new Comms() { commRadius = testValue2 } });
+        KernelConfig.i.Set(new KernelConfigModel() { comms = new Comms() { commRadius = testValue2 } });
         Assert.IsTrue(onChange1Pass);
         Assert.IsTrue(onChange2Pass);
 
         loadedConfigSO.OnChange -= onConfigChage1;
-        KernelConfigController.GetConfig().OnChange -= onConfigChage2;
+        KernelConfig.i.OnChange -= onConfigChage2;
 
         Resources.UnloadAsset(loadedConfigSO);
-        Resources.UnloadAsset(KernelConfigController.GetConfig());
+        Resources.UnloadAsset(KernelConfig.i);
     }
 
     [Test]
@@ -123,10 +123,10 @@ public class KernelConfigurationShould
     {
         KernelConfigModel model = new KernelConfigModel();
         string json = JsonUtility.ToJson(model);
-        KernelConfigController.SetConfig(json);
+        KernelConfig.i.Set(json);
 
-        Assert.IsTrue(model.Equals(KernelConfigController.GetConfig().Get()));
+        Assert.IsTrue(model.Equals(KernelConfig.i.Get()));
 
-        Resources.UnloadAsset(KernelConfigController.GetConfig());
+        Resources.UnloadAsset(KernelConfig.i);
     }
 }

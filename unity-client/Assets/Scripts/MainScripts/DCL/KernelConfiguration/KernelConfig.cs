@@ -9,6 +9,19 @@ public class KernelConfig : ScriptableObject
 
     public event OnKernelConfigChanged OnChange;
 
+    public static KernelConfig i
+    {
+        get
+        {
+            if (!config)
+            {
+                config = Resources.Load<KernelConfig>("KernelConfiguration");
+            }
+            return config;
+        }
+    }
+    static KernelConfig config = null;
+
     [SerializeField] KernelConfigModel value;
 
     List<Promise<KernelConfigModel>> initializationPromises = new List<Promise<KernelConfigModel>>();
@@ -79,5 +92,19 @@ public class KernelConfig : ScriptableObject
             initializationPromises = null;
         }
         initialized = true;
+    }
+
+    internal void Set(string json)
+    {
+        try
+        {
+            var newConfig = value.Clone();
+            JsonUtility.FromJsonOverwrite(json, newConfig);
+            Set(newConfig);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error setting KernelConfig {e.Message}");
+        }
     }
 }
