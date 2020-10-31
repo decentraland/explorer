@@ -24,6 +24,7 @@ import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import { WebSocketTransport } from 'decentraland-rpc'
+import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 
 declare const globalThis: UnityInterfaceContainer &
@@ -101,6 +102,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   unityInterface.DeactivateRendering()
 
+  unityInterface.SetKernelConfiguration(kernelConfigForRenderer())
+
   if (DEBUG) {
     unityInterface.SetDebug()
   }
@@ -130,7 +133,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ; (browserInterface as any)[type](message)
+        ;(browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
