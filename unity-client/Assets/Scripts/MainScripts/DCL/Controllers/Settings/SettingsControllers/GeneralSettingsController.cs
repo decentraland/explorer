@@ -13,6 +13,10 @@ namespace DCL.SettingsController
         void Awake()
         {
             povCamera = firstPersonCamera.GetCinemachineComponent<CinemachinePOV>();
+        }
+
+        void Start()
+        {
             ApplyGeneralSettings(Settings.i.generalSettings);
         }
 
