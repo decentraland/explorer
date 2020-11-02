@@ -154,7 +154,7 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
     version: 0,
     ...profile
   }
-  yield put(signUpSetIdentity(userId, profile))
+  yield put(signUpSetIdentity(userId, identity))
   yield put(signUpSetProfile(profile))
 
   yield showAvatarEditor()
@@ -264,8 +264,8 @@ function* singUp() {
   profile.tutorialStep = 0
   profile.hasClaimedName = false
 
-  yield put(saveProfileRequest(profile, session.userId))
   yield signIn(session.userId, session.identity)
+  yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
   unityInterface.ActivateRendering()
 }

@@ -281,7 +281,7 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
                 disabled={!read}
                 onClick={handleClick}
               >
-                "I AGREE"
+                I AGREE
               </button>
             </React.Fragment>
           )}
