@@ -294,7 +294,6 @@ export class BrowserInterface {
 
   public ApplySettings(settingsMessage: { voiceChatVolume: number, voiceChatAllowCategory: number }) {
     globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
-    console.log(`PATO: voiceChatVolume: ${settingsMessage.voiceChatVolume} voiceChatAllowCategory: ${settingsMessage.voiceChatAllowCategory}`)
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {

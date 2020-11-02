@@ -11424,6 +11424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settingsAnimator: {fileID: 2942128906181074129}
+  generalSettingsTab: {fileID: 851296277194168379}
   closeAction: {fileID: 11400000, guid: 54539b42d809e284090ff4087d5c733b, type: 2}
   closeButton: {fileID: 2753986069255063991}
   doneButton: {fileID: 9057019394916313536}

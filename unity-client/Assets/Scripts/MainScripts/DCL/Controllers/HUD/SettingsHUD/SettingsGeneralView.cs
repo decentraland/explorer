@@ -242,7 +242,6 @@ namespace DCL.SettingsHUD
             mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
             voiceChatVolumeSlider.value = tempGeneralSetting.voiceChatVolume * 100;
             voiceChatAllowSpinBox.value = (int)tempGeneralSetting.voiceChatAllow;
-            Debug.Log($"PATO: voiceChatVolumeSlider = {tempGeneralSetting.voiceChatVolume}");
         }
 
         public void Apply()
