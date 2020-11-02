@@ -16,6 +16,10 @@ export class Web3Connector {
     this.factory = new ConnectorFactory(WALLET_API_KEYS.get(this.network)!)
   }
 
+  getType() {
+    return this.type
+  }
+
   static createWebSocketProvider() {
     const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
     return new WebSocketProvider(ethereumConfigurations[network].wss)

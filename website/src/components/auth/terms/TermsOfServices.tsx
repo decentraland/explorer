@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal } from "../../common/Modal";
+import { Spinner } from "../../common/Spinner";
 import "./TermsOfServices.css";
 
 export interface TermsOfServicesProps {
@@ -9,10 +10,15 @@ export interface TermsOfServicesProps {
 
 export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
   const [read, setRead] = useState(false);
+  const [loading, setLoading] = useState(false);
   const handleScroll = (e: any) => {
     const isBottom =
       e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     setRead(isBottom);
+  };
+  const handleClick = () => {
+    setLoading(true);
+    props.handleAgree();
   };
   return (
     <Modal>
@@ -260,16 +266,25 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
           <p>10.2 Contact Information: privacy@decentraland.org.</p>
         </div>
         <div className="actions">
-          <button className="btnBack" onClick={props.handleCancel}>
-            BACK
-          </button>
-          <button
-            className="btnAgree"
-            disabled={!read}
-            onClick={props.handleAgree}
-          >
-            I AGREE
-          </button>
+          {loading ? (
+            <div className="loadingContainer">
+              <Spinner />
+            </div>
+          ) : (
+            <React.Fragment>
+              <button className="btnBack" onClick={props.handleCancel}>
+                BACK
+              </button>
+
+              <button
+                className="btnAgree"
+                disabled={!read}
+                onClick={handleClick}
+              >
+                "I AGREE"
+              </button>
+            </React.Fragment>
+          )}
         </div>
       </div>
     </Modal>

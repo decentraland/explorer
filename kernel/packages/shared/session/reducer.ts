@@ -4,10 +4,15 @@ import { LoginStage, SessionState } from './types'
 import {
   CHANGE_LOGIN_STAGE,
   ChangeSignUpStageAction,
+  SIGNIN_CURRENT_PROVIDER,
+  SIGNIN_SET_SIGNINING,
+  SIGNUP_CLEAR_DATA,
   SIGNUP_FORM,
+  SIGNUP_SET_IDENTITY,
   SIGNUP_SET_PROFILE,
   SIGNUP_STAGE,
   SignUpFormAction,
+  SignUpSetIdentityAction,
   SignUpSetProfileAction,
   TOGGLE_WALLET_PROMPT,
   UPDATE_TOS,
@@ -15,6 +20,13 @@ import {
   UserAuthentified
 } from './actions'
 import defaultLogger from '../logger'
+
+const SIGNUP_INITIAL_STATE = {
+  stage: '',
+  profile: {},
+  userId: undefined,
+  identity: undefined
+}
 
 const INITIAL_STATE: SessionState = {
   initialized: false,
@@ -24,12 +36,9 @@ const INITIAL_STATE: SessionState = {
   loginStage: LoginStage.LOADING,
   tos: true,
   showWalletPrompt: false,
-  signup: {
-    active: false,
-    stage: '',
-    tos: true,
-    profile: {}
-  }
+  signing: false,
+  currentProvider: null,
+  signup: SIGNUP_INITIAL_STATE
 }
 
 export function sessionReducer(state?: SessionState, action?: AnyAction) {
@@ -82,6 +91,33 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
             ...values
           }
         }
+      }
+    }
+    case SIGNIN_SET_SIGNINING: {
+      return {
+        ...state,
+        ...action.payload
+      }
+    }
+    case SIGNUP_SET_IDENTITY: {
+      return {
+        ...state,
+        signup: {
+          ...state.signup,
+          ...(action as SignUpSetIdentityAction).payload
+        }
+      }
+    }
+    case SIGNUP_CLEAR_DATA: {
+      return {
+        ...state,
+        signup: SIGNUP_INITIAL_STATE
+      }
+    }
+    case SIGNIN_CURRENT_PROVIDER: {
+      return {
+        ...state,
+        currentProvider: action.payload.provider
       }
     }
   }

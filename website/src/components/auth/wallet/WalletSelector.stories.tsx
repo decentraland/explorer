@@ -6,6 +6,7 @@ export default {
   title: "Explorer/auth/WalletSelector",
   args: {
     show: true,
+    loading: false,
   },
   component: WalletSelector,
   argTypes: {
@@ -14,6 +15,17 @@ export default {
   },
 } as Meta;
 
-export const Template: Story<WalletSelectorProps> = (args) => (
+const Template: Story<WalletSelectorProps> = (args) => (
   <WalletSelector {...args} />
 );
+
+export const Default = Template.bind({});
+Default.args = {
+  ...Template.args,
+};
+
+export const Loading = Template.bind({});
+Loading.args = {
+  ...Template.args,
+  loading: true,
+};

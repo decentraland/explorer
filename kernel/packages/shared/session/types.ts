@@ -2,6 +2,7 @@ import { AuthIdentity } from 'dcl-crypto'
 
 import { ETHEREUM_NETWORK } from 'config'
 import { Profile } from '../profiles/types'
+import { ProviderType } from '../ethereum/ProviderType'
 
 export type RootSessionState = {
   session: SessionState
@@ -9,14 +10,15 @@ export type RootSessionState = {
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string
+  provider?: ProviderType
   hasConnectedWeb3: boolean
 }
 
 export type SignUpData = {
-  active: boolean
-  tos?: boolean
   stage: string
   profile: Partial<Profile>
+  userId?: string
+  identity?: ExplorerIdentity
 }
 
 export enum LoginStage {
@@ -42,6 +44,8 @@ export type SessionState = {
   loginStage: LoginStage | undefined
   tos: boolean
   showWalletPrompt: boolean
+  currentProvider: ProviderType | null
+  signing: boolean
   signup: SignUpData
 }
 

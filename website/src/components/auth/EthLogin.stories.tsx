@@ -5,7 +5,10 @@ import { EthLogin, EthLoginProps } from "./EthLogin";
 
 export default {
   title: "Explorer/auth/EthLogin",
-  args: {},
+  args: {
+    loading: false,
+    provider: null,
+  },
   component: EthLogin,
   argTypes: {
     onLogin: { action: "singing in/up..." },
@@ -14,6 +17,24 @@ export default {
   },
 } as Meta;
 
-export const Template: Story<EthLoginProps> = (args: EthLoginProps) => (
+const Template: Story<EthLoginProps> = (args: EthLoginProps) => (
   <EthLogin {...args} />
 );
+
+export const LoginHome = Template.bind({});
+LoginHome.args = {
+  ...Template.args,
+};
+
+export const LoginSinging = Template.bind({});
+LoginSinging.args = {
+  ...Template.args,
+  loading: true,
+};
+
+export const LoginPreviousSession = Template.bind({});
+LoginPreviousSession.args = {
+  ...Template.args,
+  loading: false,
+  provider: "Metamask",
+};

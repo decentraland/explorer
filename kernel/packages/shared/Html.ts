@@ -178,10 +178,14 @@ export default class Html {
       loadingAudio && loadingAudio.pause()
     }
   }
+
+  static switchGameContainer(shouldShow: boolean) {
+    showElementById('gameContainer', shouldShow, true)
+  }
 }
 
-function showElementById(id: string, show: boolean) {
-  if (isReact) return
+function showElementById(id: string, show: boolean, force: boolean = false) {
+  if (isReact && !force) return
   const element = document.getElementById(id)
   if (element) {
     element.style.display = show ? 'block' : 'none'

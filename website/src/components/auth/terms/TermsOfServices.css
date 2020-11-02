@@ -53,4 +53,11 @@
   box-shadow: 0 4px 0 #cb2242;
 }
 
+.termsOfServices .actions .loadingContainer {
+  display: flex;
+  width: 196px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+}
 

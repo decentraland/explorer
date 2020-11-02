@@ -59,7 +59,7 @@ const mapDispatchToProps = (dispatch: any) => ({
     dispatch({ type: "[SIGNUP_STAGE]", payload: { stage: "passport" } });
   },
   handleEditAvatar: () => {
-    // dispatch({ type: "[SIGNUP_STAGE]", payload: { stage: "editor" } });
+    dispatch({ type: "[SIGNUP_COME_BACK_TO_AVATAR_EDITOR]" });
   },
 });
 

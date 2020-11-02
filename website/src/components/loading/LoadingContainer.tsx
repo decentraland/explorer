@@ -60,12 +60,14 @@ export type LoadingState = {
 const mapStateToProps = (state: any) => {
   return {
     state: state.loading,
+    loginStage: state.session.loginStage,
     showWalletPrompt: state.session.showWalletPrompt || false,
   };
 };
 
 export interface LoadingContainerProps {
   state: LoadingState;
+  loginStage?: string;
   showWalletPrompt: boolean;
 }
 
@@ -93,12 +95,13 @@ export const LoadingContainer: React.FC<LoadingContainerProps> = (props) => {
       : state.loadPercentage,
     100
   );
+  const withImages = state.initialLoad || props.loginStage !== "completed";
   return (
     <React.Fragment>
       {state.showLoadingScreen && (
         <LoadingMessage
-          image={state.initialLoad ? tip.image : undefined}
-          message={state.initialLoad ? tip.text : undefined}
+          image={withImages ? tip.image : undefined}
+          message={withImages ? tip.text : undefined}
           subMessage={subMessage}
           showWalletPrompt={showWalletPrompt}
         />

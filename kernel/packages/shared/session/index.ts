@@ -48,7 +48,7 @@ export const getLastSessionWithoutWallet: () => StoredSession | null = () => {
   const lastSessionId = getFromLocalStorage(LAST_SESSION_KEY)
   if (lastSessionId) {
     const lastSession = getStoredSession(lastSessionId)
-    return lastSession && !lastSession.identity.hasConnectedWeb3 ? lastSession : null
+    return lastSession && lastSession.identity.hasConnectedWeb3 ? lastSession : null
   } else {
     return getFromLocalStorage('dcl-profile')
   }

@@ -27,7 +27,6 @@ export type UserAuthentified = ReturnType<typeof userAuthentified>
 
 export const LOGIN_COMPLETED = '[Success] Login'
 export const loginCompleted = () => action(LOGIN_COMPLETED)
-export type LoginCompleted = ReturnType<typeof loginCompleted>
 
 export const LOGOUT = '[Request] Logout'
 export const logout = () => action(LOGOUT)
@@ -53,3 +52,20 @@ export const toggleWalletPrompt = (show: boolean) => action(TOGGLE_WALLET_PROMPT
 export const SIGNUP_SET_PROFILE = '[SIGN-UP] signup set profile'
 export const signUpSetProfile = (profile: Partial<Profile>) => action(SIGNUP_SET_PROFILE, profile)
 export type SignUpSetProfileAction = ReturnType<typeof signUpSetProfile>
+
+export const SIGNUP_SET_IDENTITY = '[SIGN-UP] set identity'
+export const signUpSetIdentity = (userId: string, identity: ExplorerIdentity) =>
+  action(SIGNUP_SET_IDENTITY, { userId, identity })
+export type SignUpSetIdentityAction = ReturnType<typeof signUpSetIdentity>
+
+export const SIGNUP_CLEAR_DATA = '[SIGN-UP] clear data'
+export const signUpClearData = () => action(SIGNUP_CLEAR_DATA)
+
+export const SIGNIN_CURRENT_PROVIDER = '[SIGN-IN] set initial wallet'
+export const signInSetCurrentProvider = (provider: string) => action(SIGNIN_CURRENT_PROVIDER, { provider })
+
+export const SIGNUP_COME_BACK_TO_AVATAR_EDITOR = '[SIGNUP_COME_BACK_TO_AVATAR_EDITOR]'
+export const signUpComeBackToAvatarEditor = () => action(SIGNUP_COME_BACK_TO_AVATAR_EDITOR)
+
+export const SIGNIN_SET_SIGNINING = '[SIGN-IN] start authentication'
+export const signInSinging = (signing: boolean) => action(SIGNIN_SET_SIGNINING, { signing })

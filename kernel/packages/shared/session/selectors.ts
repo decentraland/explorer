@@ -7,3 +7,7 @@ export const getCurrentIdentity = (store: RootSessionState) => store.session.ide
 export const getCurrentNetwork = (store: RootSessionState) => store.session.network
 export const hasWallet = (store: RootSessionState) => store.session.identity?.hasConnectedWeb3
 export const getSignUpProfile = (store: RootSessionState) => store.session.signup.profile
+export const getSignUpIdentity = (store: RootSessionState) => ({
+  userId: store.session.signup.userId,
+  identity: store.session.signup.identity
+})

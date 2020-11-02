@@ -13,6 +13,10 @@ h2.walletSelectorTitle {
 .walletButtonContainer {
   display: flex;
   flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  min-width: 400px;
+  min-height: 170px;
 }
 
 .walletButtonContainer .walletButton:first-child {

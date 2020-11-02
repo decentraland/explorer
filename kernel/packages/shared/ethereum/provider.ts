@@ -50,6 +50,10 @@ export function isGuest(): boolean {
   return web3Connector.isType(ProviderType.GUEST)
 }
 
+export function getProviderType() {
+  return web3Connector.getType()
+}
+
 export async function awaitWeb3Approval(): Promise<void> {
   if (!providerRequested) {
     providerRequested = true
@@ -86,7 +90,7 @@ export async function getUserAccount(): Promise<string | undefined> {
 }
 
 export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
-  if (Eth.fromCurrentProvider()) {
+  if (!isGuest()) {
     return getUserAccount()
   }
 }

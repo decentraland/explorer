@@ -20,19 +20,23 @@ export enum LoginStage {
 
 const mapStateToProps = (state: any) => ({
   stage: state.session.loginStage,
+  signing: state.session.signing,
   subStage: state.session.signup.stage,
+  provider: state.session.currentProvider,
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
   onLogin: (provider: string) =>
     dispatch({ type: "[Authenticate]", payload: { provider } }),
   onGuest: () =>
-    dispatch({ type: "[Request] Login", payload: { provider: "Guest" } }),
+    dispatch({ type: "[Authenticate]", payload: { provider: "Guest" } }),
 });
 
 export interface LoginContainerProps {
   stage: LoginStage;
+  signing: boolean;
   subStage: string;
+  provider?: string | null;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
@@ -48,7 +52,12 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
           <div className="eth-login-popup">
             {props.stage === LoginStage.LOADING && <InitialLoading />}
             {props.stage === LoginStage.SIGN_IN && (
-              <EthLogin onLogin={props.onLogin} onGuest={props.onGuest} />
+              <EthLogin
+                loading={props.signing}
+                onLogin={props.onLogin}
+                onGuest={props.onGuest}
+                provider={props.provider}
+              />
             )}
             {props.stage === LoginStage.CONNECT_ADVICE && (
               <EthConnectAdvice onLogin={props.onLogin} />
