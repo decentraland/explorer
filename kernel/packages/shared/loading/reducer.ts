@@ -31,6 +31,10 @@ export type LoadingState = {
   } | null
 }
 
+export type RootLoadingState = {
+  loading: LoadingState
+}
+
 export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   if (!state) {
     return {

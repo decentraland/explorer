@@ -1,8 +1,8 @@
-import { LoadingState } from './loading/reducer'
 import { loadingTips } from './loading/types'
 import { future, IFuture } from 'fp-future'
 import { login, updateTOS } from './session/actions'
 import { StoreContainer } from './store/rootTypes'
+import { LoadingState } from './loading/reducer'
 
 declare const globalThis: StoreContainer
 const isReact = !!(window as any).reactVersion
@@ -181,6 +181,24 @@ export default class Html {
 
   static switchGameContainer(shouldShow: boolean) {
     showElementById('gameContainer', shouldShow, true)
+  }
+
+  static showTeleportAnimation() {
+    document
+      .getElementById('gameContainer')!
+      .setAttribute(
+        'style',
+        'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
+      )
+    document.body.setAttribute(
+      'style',
+      'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
+    )
+  }
+
+  static hideTeleportAnimation() {
+    document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
+    document.body.setAttribute('style', 'background: #151419')
   }
 }
 
