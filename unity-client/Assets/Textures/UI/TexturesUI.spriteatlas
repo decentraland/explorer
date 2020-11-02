@@ -55,7 +55,7 @@ SpriteAtlas:
     variantMultiplier: 1
     packables:
     - {fileID: 102900000, guid: 1eee3b038d846456b84c415627892c52, type: 3}
-    totalSpriteSurfaceArea: 2850710
+    totalSpriteSurfaceArea: 2835025
     bindAsDefault: 1
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
@@ -111,6 +111,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: b5c699d454d344addad40a2576c0349f, type: 3}
   - {fileID: 21300000, guid: 40f78cd4a097349a68457a6b56dc3bf1, type: 3}
   - {fileID: 21300000, guid: ffe80fd49c01b408d81e154b74ea74bd, type: 3}
+  - {fileID: 21300000, guid: f7cb20f4d2c0d4811b36bbc75a766342, type: 3}
   - {fileID: 21300000, guid: deb764059d1d1411bbe77fc7a862d919, type: 3}
   - {fileID: 21300000, guid: baeafb15684bb4604bd26954c2fc9240, type: 3}
   - {fileID: 21300000, guid: 6fbdd825c58334612a3d1645eba6da25, type: 3}
@@ -183,7 +184,6 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 0829529b4cd624727a16edcc165c4a97, type: 3}
   - {fileID: 21300000, guid: 01894c9b0e4cc4d15a7f0fe26505e2c9, type: 3}
   - {fileID: 21300000, guid: f3e766ab5571e436ebb74c06db87db7b, type: 3}
-  - {fileID: 21300000, guid: 546098abd03d3f160b2fc410be321844, type: 3}
   - {fileID: 21300000, guid: fe4a00db663ed4d3abe06167ea5b3317, type: 3}
   - {fileID: 21300000, guid: 07a400eb205264a4f9e2aad5d599b4a3, type: 3}
   - {fileID: 21300000, guid: 64b96cebc797f4e75ad10e05ff68466f, type: 3}
@@ -196,11 +196,11 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 31a98abcdcc4e4022b74038cdc7154be, type: 3}
   - {fileID: 21300000, guid: ce0e66cca3918473693726f3bf7da082, type: 3}
   - {fileID: 21300000, guid: 6d5f6edc2bfb441e1969ee1e10c3c572, type: 3}
-  - {fileID: 21300000, guid: 8665842d11f52460499302280a34618f, type: 3}
   - {fileID: 21300000, guid: 017eca2d81e3343959735e87d3b06c02, type: 3}
   - {fileID: 21300000, guid: ccff713df52bf45b5b10c8fcfb44fee7, type: 3}
   - {fileID: 21300000, guid: 3c2f4bed18ef84d5baeb2774df7d08df, type: 3}
   - {fileID: 21300000, guid: d91ddf0ee209e48899e1610c6636eb8a, type: 3}
+  - {fileID: 21300000, guid: 4fec551e960ee4ccca8b3390ea2d3071, type: 3}
   - {fileID: 21300000, guid: 24dc203e4e3c4422c92496e4ea5fb524, type: 3}
   - {fileID: 21300000, guid: ffc3be3e8ae37400bb01f74051bbc912, type: 3}
   - {fileID: 21300000, guid: 8141c84e8680a488d8dd05453596b0cc, type: 3}
@@ -208,7 +208,6 @@ SpriteAtlas:
   - {fileID: 21300000, guid: b01bb67eac45b4ce4b289efdfb7c1847, type: 3}
   - {fileID: 21300000, guid: 6e8b3a7ec6a0949b4a3ba5a6c983c30f, type: 3}
   - {fileID: 21300000, guid: c22ef80fbf1174314befe1d0347230d2, type: 3}
-  - {fileID: 21300000, guid: 03ae241f74a344a60adb1e509c74912a, type: 3}
   - {fileID: 21300000, guid: 7566cf5f3986d4c32a672de8279ced32, type: 3}
   - {fileID: 21300000, guid: d40ff76fa8b254a8c9ed7c57ce1c9e21, type: 3}
   - {fileID: 21300000, guid: 60e92aaf3c91f4bc18ec574bed72f832, type: 3}
@@ -269,6 +268,7 @@ SpriteAtlas:
   - ScenesContainer
   - TopGradientPopUp
   - ClaimIcon
+  - JumpInIcon
   - VoiceChatMute
   - DiscordIconHD
   - ContainerShadowRadiusSix
@@ -341,7 +341,6 @@ SpriteAtlas:
   - Button8
   - RectRadius12
   - ToggleCheckOff
-  - VoiceChatMutevvv
   - Compass
   - BackpackIconNew
   - ChatIcon
@@ -354,11 +353,11 @@ SpriteAtlas:
   - HelpIconNew
   - VoiceChatPlayer
   - ArrowGradient
-  - UnfriendIcon
   - ContainerStroke10
   - LeftClickWhite
   - ToggleCheckOn
   - Button12
+  - DeleteFriend
   - ContainerRectBottom
   - CardBlockIcon
   - Button10
@@ -366,7 +365,6 @@ SpriteAtlas:
   - Button6
   - EditIcon
   - PatternPC
-  - PasportIcon
   - LogOutIcon
   - RoundedContainerWhite
   - ControlsIconNew
