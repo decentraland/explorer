@@ -75,6 +75,7 @@ public class BuildEditorMode : BuildModeState
         base.Activate(scene);
 
         sceneToEdit = scene;
+        voxelController.SetSceneToEdit(scene);
 
         SetLookAtObject();
 
@@ -122,9 +123,9 @@ public class BuildEditorMode : BuildModeState
     }
 
 
-    public override void SetDuplicationOffset(DecentralandEntityToEdit entityToDuplicate,float offset)
+    public override void SetDuplicationOffset(float offset)
     {
-        base.SetDuplicationOffset(entityToDuplicate,offset);
+        base.SetDuplicationOffset(offset);
         editionGO.transform.position += Vector3.right * offset;
     }
 
@@ -139,6 +140,7 @@ public class BuildEditorMode : BuildModeState
             createdEntity.rootEntity.gameObject.tag = "Voxel";
             voxelController.SetVoxelSelected(createdEntity);
             ActivateVoxelMode();
+
         }
 
 
@@ -192,7 +194,7 @@ public class BuildEditorMode : BuildModeState
     public override void CheckInput()
     {
         base.CheckInput();
-   
+ 
     }
     public override void CheckInputSelectedEntities()
     {

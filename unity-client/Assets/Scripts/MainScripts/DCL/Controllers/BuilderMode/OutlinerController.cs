@@ -7,8 +7,8 @@ using UnityEngine;
 public class OutlinerController : MonoBehaviour
 {
     public Material outlineMaterial;
-    [ColorUsageAttribute(true, true)]
-    public Color outlineColor, lockedOutlineColor;
+    //[ColorUsageAttribute(true, true)]
+    //public Color outlineColor;
 
     List<DecentralandEntityToEdit> entitiesOutlined = new List<DecentralandEntityToEdit>();
 
@@ -29,8 +29,7 @@ public class OutlinerController : MonoBehaviour
             if (!entitiesOutlined.Contains(entity))
             {
                 entitiesOutlined.Add(entity);
-                if (entity.IsLocked) ChangeMaterialColor(lockedOutlineColor);
-                else ChangeMaterialColor(outlineColor);
+                if (entity.IsLocked) return;               
                 for (int i = 0; i < entity.rootEntity.meshesInfo.renderers.Length; i++)
                 {
                     entity.rootEntity.meshesInfo.renderers[i].gameObject.layer = LayerMask.NameToLayer("Selection");
@@ -43,13 +42,12 @@ public class OutlinerController : MonoBehaviour
 
     public void CancelUnselectedOutlines()
     {
-        ChangeMaterialColor(outlineColor);
+        //ChangeMaterialColor(outlineColor);
         for (int i = 0; i < entitiesOutlined.Count; i++)
         {
             if (!entitiesOutlined[i].IsSelected)
             {
                 CancelEntityOutline(entitiesOutlined[i]);
-                entitiesOutlined.Remove(entitiesOutlined[i]);
             }
         }
     }
@@ -57,9 +55,7 @@ public class OutlinerController : MonoBehaviour
     {
         for (int i = 0; i < entitiesOutlined.Count; i++)
         {
-            CancelEntityOutline(entitiesOutlined[i]);
-            entitiesOutlined.Remove(entitiesOutlined[i]);
-           
+            CancelEntityOutline(entitiesOutlined[i]);           
         }
     }
 
@@ -72,15 +68,16 @@ public class OutlinerController : MonoBehaviour
                 for (int x = 0; x < entityToQuitOutline.rootEntity.meshesInfo.renderers.Length; x++)
                 {
                     entityToQuitOutline.rootEntity.meshesInfo.renderers[x].gameObject.layer = LayerMask.NameToLayer("Default");
-                }
+                }             
             }
+           entitiesOutlined.Remove(entityToQuitOutline);
         }
     }
 
 
-    void ChangeMaterialColor(Color color)
-    {
-        string colorname = "_OutlineColour";
-        outlineMaterial.SetColor(colorname, color);
-    }
+    //void ChangeMaterialColor(Color color)
+    //{
+    //    string colorname = "_OutlineColour";
+    //    outlineMaterial.SetColor(colorname, color);
+    //}
 }

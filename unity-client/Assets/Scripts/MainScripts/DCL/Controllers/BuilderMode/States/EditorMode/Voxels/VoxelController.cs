@@ -1,3 +1,4 @@
+using DCL.Controllers;
 using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,19 +6,26 @@ using UnityEngine;
 
 public class VoxelController : MonoBehaviour
 {
+    //[Header("Design")]
+    //public float msToWaitForDestroyOutsideBoundaries = 1500;
+    [Header("References")]
+    public VoxelPrefab voxelPrefab;
     public BuilderInputWrapper builderInputWrapper;
     public BuildModeController buildModeController;
     public BuildEditorMode buildEditorMode;
+    public OutlinerController outlinerController;
     public FreeCameraMovement freeCameraMovement;
+    
     public LayerMask groundLayer;
 
     DecentralandEntityToEdit lastVoxelCreated;
 
     GameObject editionGO;
-    bool mousePressed = false, isVoxelModelActivated = false;
-    Vector3Int lastMousePositionPressed;
-    Dictionary<Vector3Int, GameObject> createdVoxels = new Dictionary<Vector3Int, GameObject>();
-
+    bool mousePressed = false, isVoxelModelActivated = false, isMakingMultiVoxelSelection = false,isCreatingMultipleVoxels = false; 
+    Vector3Int lastVoxelPositionPressed;
+    Vector3 lastMousePosition;
+    Dictionary<Vector3Int, VoxelPrefab> createdVoxels = new Dictionary<Vector3Int, VoxelPrefab>();
+    ParcelScene currentScene;
     private void Start()
     {
         builderInputWrapper.OnMouseDown += MouseDown;
@@ -25,49 +33,78 @@ public class VoxelController : MonoBehaviour
  
     }
 
-    int cont = 0;
     private void Update()
     {
-        if(mousePressed && isVoxelModelActivated)
+        if (mousePressed && isVoxelModelActivated && isCreatingMultipleVoxels)
         {
-            if (cont >= 10)
+
+            bool fillVoxels = false;
+            Vector3Int currentPosition = Vector3Int.zero;
+            VoxelEntityHit voxelHit = buildModeController.GetCloserUnselectedVoxelEntityOnPointer();
+            if (voxelHit != null && voxelHit.entityHitted.tag == "Voxel" && !voxelHit.entityHitted.IsSelected)
             {
-                bool fillVoxels = false;
-                Vector3Int currentPosition = Vector3Int.zero;
-                VoxelEntityHit voxelHit = buildModeController.GetCloserUnselectedVoxelEntityOnPointer();
-                if (voxelHit != null && voxelHit.entityHitted.tag == "Voxel" && !voxelHit.entityHitted.IsSelected)
-                {
 
-                    //Vector3Int position = ConverPositionToVoxelPosition(entityToEdit.rootEntity.gameObject.transform.position);    
-                    //position.y += 1;
-                    Vector3Int position = ConverPositionToVoxelPosition(voxelHit.entityHitted.rootEntity.gameObject.transform.position);
-                    position += voxelHit.hitVector;
+                //Vector3Int position = ConverPositionToVoxelPosition(entityToEdit.rootEntity.gameObject.transform.position);    
+                //position.y += 1;
+                Vector3Int position = ConverPositionToVoxelPosition(voxelHit.entityHitted.rootEntity.gameObject.transform.position);
+                position += voxelHit.hitVector;
 
-                    currentPosition = position;
-                    fillVoxels = true;
-                }
-                else
-                {
-                    RaycastHit hit;
-                    UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-                    if (Physics.Raycast(ray, out hit, 9999, groundLayer))
-                    {
-                        currentPosition = ConverPositionToVoxelPosition(hit.point);
-                        fillVoxels = true;
-
-                    }
-                }
-                if(fillVoxels)
-                {
-                    FillVoxels(lastMousePositionPressed, currentPosition);
-                }
-                cont = 0;
+                currentPosition = position;
+                fillVoxels = true;
             }
-            else cont++;
+            else
+            {
+                RaycastHit hit;
+                UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+                {
+                    currentPosition = ConverPositionToVoxelPosition(hit.point);
+                    fillVoxels = true;
+
+                }
+            }
+            if (fillVoxels)
+            {
+                FillVoxels(lastVoxelPositionPressed, currentPosition);
+            }
+
+        }
+        else if (isMakingMultiVoxelSelection)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift)) EndMultiVoxelSelection();
+            else
+            {
+
+                //outlinerController.CancelAllOutlines();
+                List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
+                foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
+                {
+                    if (IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
+                    {
+                        outlinerController.OutLineEntity(voxelEntity);
+                    }
+                    else outlinerController.CancelEntityOutline(voxelEntity);
+                }
+
+            }
         }
     }
 
+    private void OnGUI()
+    {
+        if (mousePressed && isMakingMultiVoxelSelection)
+        {
+            var rect = BuildModeUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
+            BuildModeUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
+            BuildModeUtils.DrawScreenRectBorder(rect, 1, Color.white);
+        }
+    }
+
+    public void SetSceneToEdit(ParcelScene scene)
+    {
+        currentScene = scene;
+    }
     public void SetEditObjectLikeVoxel()
     {
         if (!mousePressed && isVoxelModelActivated)
@@ -102,6 +139,8 @@ public class VoxelController : MonoBehaviour
         }
     }
 
+
+
     public void SetEditionGO(GameObject _editionGO)
     {
         editionGO = _editionGO;
@@ -116,6 +155,23 @@ public class VoxelController : MonoBehaviour
         isVoxelModelActivated = isActive;
     }
 
+    public void EndMultiVoxelSelection()
+    {
+        isMakingMultiVoxelSelection = false;
+
+        List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
+        //buildModeController.DeselectEntities();
+        foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
+        {
+            if (IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
+            {
+                buildModeController.SelectEntity(voxelEntity);
+            }
+        }
+        buildModeController.SetOutlineCheckActive(true);
+        outlinerController.CancelAllOutlines();
+    }
+
     void FillVoxels(Vector3Int firstPosition, Vector3Int lastPosition)
     {
         int xDifference = Mathf.Abs(firstPosition.x - lastPosition.x);
@@ -125,10 +181,12 @@ public class VoxelController : MonoBehaviour
 
         List<Vector3Int> mustContainVoxelList = new List<Vector3Int>();
         List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
+        List<DecentralandEntityToEdit> allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
         //CreateVoxel(firstPosition);
         //mustContainVoxelList.Add(firstPosition);
+        
 
-     
+
         for (int x = 0; x <= xDifference; x++)
         {
             int contX = x;
@@ -162,10 +220,14 @@ public class VoxelController : MonoBehaviour
 
         foreach(Vector3Int vector in voxelToRemove)
         {
-            Destroy(createdVoxels[vector]);
+            Destroy(createdVoxels[vector].gameObject);
             createdVoxels.Remove(vector);
         }
-
+        foreach (VoxelPrefab keyValuePair in createdVoxels.Values)
+        {
+            if (IsVoxelAtValidPoint(keyValuePair,allEntities)) keyValuePair.SetAvailability(true);
+            else keyValuePair.SetAvailability(false);
+        }
     }
     bool ExistVoxelAtPosition(Vector3Int position,List<DecentralandEntityToEdit> voxelEntities)
     {
@@ -175,45 +237,84 @@ public class VoxelController : MonoBehaviour
         }
         return false;
     }
-    void CreateVoxel(Vector3Int position)
+    VoxelPrefab CreateVoxel(Vector3Int position)
     {
         if (!createdVoxels.ContainsKey(position))
         {
-          
-            GameObject go = Instantiate(lastVoxelCreated.rootEntity.meshesInfo.meshRootGameObject, position, lastVoxelCreated.rootEntity.gameObject.transform.rotation);
+
+            VoxelPrefab go = Instantiate(voxelPrefab.gameObject, position, lastVoxelCreated.rootEntity.gameObject.transform.rotation).GetComponent<VoxelPrefab>();
             createdVoxels.Add(position, go);
+            return go;
         }
+        return null;
 
     }
     private void MouseUp(int buttonID, Vector3 position)
     {
         if (mousePressed && buttonID == 0)
         {
-            lastVoxelCreated.transform.SetParent(null);
+            if (isMakingMultiVoxelSelection)
+            {
+                EndMultiVoxelSelection();
+            }
+            else if(!isMakingMultiVoxelSelection && isCreatingMultipleVoxels)
+            {
+                lastVoxelCreated.transform.SetParent(null);
+                bool canVoxelsBeCreated = true;
+                foreach (VoxelPrefab voxel in createdVoxels.Values)
+                {
+                    if(!voxel.IsAvailable())
+                    {
+                        canVoxelsBeCreated = false;
+                        break;
+                    }
+                }
+
+                foreach (Vector3Int voxelPosition in createdVoxels.Keys)
+                {
+                    if (canVoxelsBeCreated)
+                    {
+
+                        DecentralandEntity entity = buildModeController.DuplicateEntity(lastVoxelCreated);
+                        entity.gameObject.tag = "Voxel";
+                        entity.gameObject.transform.position = voxelPosition;
+                    }
+                    Destroy(createdVoxels[voxelPosition].gameObject);
+                }
+                if (!canVoxelsBeCreated) buildModeController.DeleteEntity(lastVoxelCreated);
+                createdVoxels.Clear();
+                buildModeController.DeselectEntities();
+
+                lastVoxelCreated = null;
+                isCreatingMultipleVoxels = false;
+
+                //StartCoroutine(DestroyOutsideBoundariesItems());
+            }
             mousePressed = false;
             freeCameraMovement.SetCameraCanMove(true);
-            foreach (Vector3Int voxelPosition in createdVoxels.Keys)
-            {
-                DecentralandEntity entity = buildModeController.DuplicateEntity(lastVoxelCreated);
-                entity.gameObject.tag = "Voxel";
-                entity.gameObject.transform.position = voxelPosition;
-                Destroy(createdVoxels[voxelPosition]);
-            }
-            createdVoxels.Clear();
-            buildModeController.DeselectEntities();
-     
-     
-            lastVoxelCreated = null;
         }
     }
     void MouseDown(int buttonID, Vector3 position)
     {
-        if (isVoxelModelActivated && lastVoxelCreated != null && buttonID == 0)
+        if (buttonID == 0)
         {
-            mousePressed = true;
-            freeCameraMovement.SetCameraCanMove(false);
+ 
+            if (isVoxelModelActivated && lastVoxelCreated != null)
+            {         
+                lastVoxelPositionPressed = ConverPositionToVoxelPosition(lastVoxelCreated.transform.position);
+                mousePressed = true;
+                freeCameraMovement.SetCameraCanMove(false);
+                isCreatingMultipleVoxels = true;
 
-            lastMousePositionPressed = ConverPositionToVoxelPosition(lastVoxelCreated.transform.position);
+            }
+            else if(Input.GetKey(KeyCode.LeftShift))
+            {
+                isMakingMultiVoxelSelection = true;
+                lastMousePosition = position;
+                mousePressed = true;
+                freeCameraMovement.SetCameraCanMove(false);
+                buildModeController.SetOutlineCheckActive(false);
+            }
         }
     }
 
@@ -233,19 +334,30 @@ public class VoxelController : MonoBehaviour
         position.z = Mathf.CeilToInt(rawPosition.z);
         return position;
     }
-    //Vector3 GetConvertedVoxelPositionAt(Vector3 position)
-    //{
-    //    Vector3 result = Vector3.zero;
-    //    RaycastHit hit;
-    //    UnityEngine.Ray ray = Camera.main.ScreenPointToRay(position);
 
-    //    if (Physics.Raycast(ray, out hit, 9999, groundLayer))
-    //    {
-    //        Vector3 convertedPosition = hit.point;
-    //        result.x = Mathf.CeilToInt(convertedPosition.x);
-    //        result.y = Mathf.CeilToInt(convertedPosition.y);
-    //        result.z = Mathf.CeilToInt(convertedPosition.z);
-    //    }
-    //    return result;
+    bool IsVoxelAtValidPoint(VoxelPrefab voxelPrefab,List<DecentralandEntityToEdit> entitiesToCheck)
+    {
+        if (!currentScene.IsInsideSceneBoundaries(voxelPrefab.meshRenderer.bounds)) return false;
+        Bounds bounds = voxelPrefab.meshRenderer.bounds;
+        bounds.size -= Vector3.one * 0.05f; 
+        foreach (DecentralandEntityToEdit entity in entitiesToCheck)
+        {
+            if (entity.rootEntity.meshesInfo == null || entity.rootEntity.meshesInfo.renderers == null) continue;
+            if (bounds.Intersects(entity.rootEntity.meshesInfo.mergedBounds)) return false;
+        }
+        bounds.size += Vector3.one * 0.05f;
+        return true;
+    }
+    bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition)
+    {
+        Camera camera = Camera.main;
+        var viewPortBounds = BuildModeUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
+        return viewPortBounds.Contains(camera.WorldToViewportPoint(transform.position));
+    }
+
+    //IEnumerator DestroyOutsideBoundariesItems()
+    //{
+    //    yield return new WaitForSeconds(msToWaitForDestroyOutsideBoundaries / 1000f);
+    //    buildModeController.DeleteEntitiesOutsideSceneBoundaries();
     //}
 }

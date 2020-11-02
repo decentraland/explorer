@@ -77,7 +77,7 @@ public class BuildModeController : MonoBehaviour
 
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActive = true,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = true;
+    bool isEditModeActivated = false, isSnapActive = true,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = true, isOutlineCheckActive = true;
     List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
     Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
 
@@ -152,12 +152,12 @@ public class BuildModeController : MonoBehaviour
     {        
         if(isEditModeActivated)
         {
-            if (Input.GetKeyDown(KeyCode.LeftShift))
+            if (Input.GetKeyDown(KeyCode.LeftControl))
             {
                 StartMultiSelection();
             }
 
-            if (Input.GetKeyUp(KeyCode.LeftShift))
+            if (Input.GetKeyUp(KeyCode.LeftControl))
             {
                 EndMultiSelection();
             }
@@ -207,7 +207,7 @@ public class BuildModeController : MonoBehaviour
                         InputDone();
                         return;
                     }
-                    CheckEntityOnPointer();
+                    CheckOutline();
                 }
             }
         }
@@ -367,9 +367,9 @@ public class BuildModeController : MonoBehaviour
             InputDone();
         }
 
-        if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftShift))
+        if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftControl))
         {
-            CheckEntityOnPointer();
+            CheckOutline();
         }
 
         if (Input.GetKeyUp(KeyCode.I))
@@ -576,9 +576,9 @@ public class BuildModeController : MonoBehaviour
         }
         return areAllIn;
     }
-    private void CheckEntityOnPointer()
+    private void CheckOutline()
     {
-        if (outlinerOptimizationCounter >= 10)
+        if (outlinerOptimizationCounter >= 10 && isOutlineCheckActive)
         {
             if (!BuildModeUtils.IsPointerOverUIElement())
             {
@@ -625,6 +625,10 @@ public class BuildModeController : MonoBehaviour
     {
         currentActiveMode.ResetScaleAndRotation();
       
+    }
+    public void SetOutlineCheckActive(bool isActive)
+    {
+        isOutlineCheckActive = isActive;
     }
     public void SetSnapActive(bool isActive)
     {      
@@ -674,7 +678,7 @@ public class BuildModeController : MonoBehaviour
         }
        
     }
-    void Select(DecentralandEntity decentralandEntity)
+    public void Select(DecentralandEntity decentralandEntity)
     {
         if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id + decentralandEntity.entityId))
         {
@@ -682,7 +686,7 @@ public class BuildModeController : MonoBehaviour
             SelectEntity(entityEditable);
         }
     }
-    bool SelectEntity(DecentralandEntityToEdit entityEditable)
+   public  bool SelectEntity(DecentralandEntityToEdit entityEditable)
     {
         
         if (entityEditable.IsLocked) return false;
@@ -793,6 +797,16 @@ public class BuildModeController : MonoBehaviour
 
         return voxelEntityHit;
     }
+    public List<DecentralandEntityToEdit> GetAllEntitiesFromCurrentScene()
+    {
+        List<DecentralandEntityToEdit> entities = new List<DecentralandEntityToEdit>();
+        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        {
+            if (entity.rootEntity.scene == sceneToEdit) entities.Add(entity);
+        }
+
+        return entities;
+    }
     public List<DecentralandEntityToEdit> GetAllVoxelsEntities()
     {
         List<DecentralandEntityToEdit> voxelEntities = new List<DecentralandEntityToEdit>();
@@ -887,6 +901,26 @@ public class BuildModeController : MonoBehaviour
         }
 
     }
+    public void DeleteEntitiesOutsideSceneBoundaries()
+    {
+        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
+        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        {
+            if (entity.rootEntity.scene == sceneToEdit)
+            {
+                if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+                {
+                    entitiesToRemove.Add(entity);
+                }
+            }
+        }
+
+        foreach (DecentralandEntityToEdit entity in entitiesToRemove)
+        {
+            DeleteEntity(entity);
+        }
+
+    }
 
     public void DeleteEntity(string entityId)
     {
@@ -918,7 +952,7 @@ public class BuildModeController : MonoBehaviour
         SetupEntityToEdit(entity);
         sceneLimitInfoController.UpdateInfo();
 
-        currentActiveMode.SetDuplicationOffset(entityToDuplicate,duplicateOffset);
+   
 
         return entity;
     }
@@ -934,6 +968,7 @@ public class BuildModeController : MonoBehaviour
         {
             DuplicateEntity(selectedEntities[i]); 
         }
+        currentActiveMode.SetDuplicationOffset(duplicateOffset);
         Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
         EntityListChanged();
 
