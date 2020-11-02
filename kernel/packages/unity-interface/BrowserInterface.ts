@@ -15,10 +15,16 @@ import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition, LoadableParcelScene } from 'shared/types'
+import {
+  ChatMessage,
+  FriendshipUpdateStatusMessage,
+  FriendshipAction,
+  WorldPosition,
+  LoadableParcelScene
+} from 'shared/types'
 import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
@@ -111,11 +117,11 @@ export class BrowserInterface {
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
-    queueTrackingEvent('hiccup report', data)
-  }
-
   public PerformanceReport(samples: string) {
+    if (!isRendererEnabled() || !isForeground()) {
+      return
+    }
+
     const perfReport = getPerformanceInfo(samples)
     queueTrackingEvent('performance report', perfReport)
   }
@@ -205,7 +211,7 @@ export class BrowserInterface {
       }
       case 'ActivateRenderingACK': {
         if (!aborted) {
-          worldRunningObservable.notifyObservers(true)
+          renderStateObservable.notifyObservers(true)
         }
         break
       }
@@ -425,7 +431,7 @@ export class BrowserInterface {
     const parcelScene = worker.getParcelScene()
     stopParcelSceneWorker(worker)
     const data = parcelScene.data.data as LoadableParcelScene
-    unityInterface.LoadParcelScenes([data])  // Maybe unity should do it by itself?
+    unityInterface.LoadParcelScenes([data]) // Maybe unity should do it by itself?
     return parcelScene
   }
 }

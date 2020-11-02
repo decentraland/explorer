@@ -13,7 +13,7 @@ import {
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
@@ -291,7 +291,7 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-worldRunningObservable.add(async (isRunning) => {
+renderStateObservable.add(async (isRunning) => {
   if (isRunning) {
     await loginCompleted
     setLoadingScreenVisible(false)

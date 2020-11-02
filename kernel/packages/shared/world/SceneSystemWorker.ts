@@ -7,7 +7,7 @@ import { Vector3, Quaternion, Vector2 } from 'decentraland-ecs/src/decentraland/
 import { PositionReport, positionObservable } from './positionThings'
 import { Observer } from 'decentraland-ecs/src'
 import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
-import { worldRunningObservable, isWorldRunning } from './worldState'
+import { renderStateObservable, isRendererEnabled } from './worldState'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { CustomWebWorkerTransport } from './CustomWebWorkerTransport'
 
@@ -79,7 +79,7 @@ export class SceneSystemWorker extends SceneWorker {
       this.sceneLifeCycleObserver = null
     }
     if (this.worldRunningObserver) {
-      worldRunningObservable.remove(this.worldRunningObserver)
+      renderStateObservable.remove(this.worldRunningObserver)
       this.worldRunningObserver = null
     }
   }
@@ -122,7 +122,7 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   private subscribeToWorldRunningEvents() {
-    this.worldRunningObserver = worldRunningObservable.add(() => {
+    this.worldRunningObserver = renderStateObservable.add(() => {
       this.sendSceneReadyIfNecessary()
     })
   }
@@ -138,10 +138,10 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   private sendSceneReadyIfNecessary() {
-    if (!this.sceneStarted && isWorldRunning() && this.sceneReady) {
+    if (!this.sceneStarted && isRendererEnabled() && this.sceneReady) {
       this.sceneStarted = true
       this.engineAPI!.sendSubscriptionEvent('sceneStart', {})
-      worldRunningObservable.remove(this.worldRunningObserver)
+      renderStateObservable.remove(this.worldRunningObserver)
     }
   }
 
