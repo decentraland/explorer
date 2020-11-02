@@ -10,7 +10,7 @@ import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { AUTH_ERROR_LOGGED_OUT, experienceStarted, FAILED_FETCHING_UNITY, NOT_INVITED } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, VOICE_CHAT_ENABLED } from '../config'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
@@ -24,6 +24,7 @@ import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { WorldConfig } from 'shared/meta/types'
+import { isVoiceChatEnabled } from 'shared/meta/selectors'
 
 const logger = createLogger('website.ts: ')
 
@@ -73,21 +74,22 @@ namespace webApp {
     })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.TERMS_OF_SERVICE, { active: true, visible: true })
-    i.ConfigureHUDElement(
-      HUDElementID.TASKBAR,
-      { active: true, visible: true },
-      { enableVoiceChat: VOICE_CHAT_ENABLED }
-    )
+    //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
+    //             so ensuring meta configuration is initialized in this stage is a must
+    //NOTE(Pablo): We also need meta configuration to know if we need to enable voice chat
+    await ensureMetaConfigurationInitialized()
+
+    const voiceChatEnabled = isVoiceChatEnabled(globalThis.globalStore.getState())
+
+    i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: voiceChatEnabled })
     i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, {
-      active: true,
-      visible: false
-    })
+    i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
 
     userAuthentified()
       .then(() => {
@@ -112,10 +114,6 @@ namespace webApp {
     onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
-
-    //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
-    //             so ensuring meta configuration is initialized in this stage is a must
-    await ensureMetaConfigurationInitialized()
 
     await startUnitySceneWorkers()
 
@@ -145,6 +143,12 @@ namespace webApp {
 
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {
+      if (error.isSceneError) {
+        // @see packages/shared/world/SceneWorker.ts#loadSystem
+        debugger
+        return
+      }
+
       console['error'](error)
       ReportFatalError(error.message)
     }
