@@ -4808,7 +4808,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Allow all users
+  m_text: All users
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
@@ -4877,10 +4877,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0.46817017}
   m_textInfo:
     textComponent: {fileID: 7775677180483091146}
-    characterCount: 15
+    characterCount: 9
     spriteCount: 0
-    spaceCount: 2
-    wordCount: 3
+    spaceCount: 1
+    wordCount: 2
     linkCount: 0
     lineCount: 1
     pageCount: 1
@@ -5227,7 +5227,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE CHAT
+  m_text: ALLOW VOICE CHAT
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
@@ -5296,10 +5296,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0.46817017}
   m_textInfo:
     textComponent: {fileID: 2135073474698936635}
-    characterCount: 10
+    characterCount: 16
     spriteCount: 0
-    spaceCount: 1
-    wordCount: 2
+    spaceCount: 2
+    wordCount: 3
     linkCount: 0
     lineCount: 1
     pageCount: 1
@@ -13384,9 +13384,9 @@ MonoBehaviour:
   increaseButton: {fileID: 6229550955011701960}
   decreaseButton: {fileID: 1102750126936938006}
   labels:
-  - Allow all users
-  - Allow only verified users
-  - Allow only my friends
+  - All users
+  - Verified users
+  - Friends
   startingValue: 0
   loop: 1
   onValueChanged:
