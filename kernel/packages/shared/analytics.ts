@@ -66,7 +66,9 @@ export async function initialize(segmentKey: string): Promise<void> {
 
 export function identifyUser(id: string) {
   if (window.analytics) {
-    window.analytics.identify(id)
+    window.analytics.identify(id, {
+      explorer_commit_hash: (window as any)['VERSION']
+    })
   }
 }
 
@@ -95,7 +97,7 @@ function startTracking() {
 }
 
 function track({ name, data }: SegmentEvent) {
-  window.analytics.track(name, data, {}, () => {
+  window.analytics.track(name, data, { integrations: { Klaviyo: false } }, () => {
     if (trackingQueue.length === 0) {
       tracking = false
       return
@@ -104,9 +106,21 @@ function track({ name, data }: SegmentEvent) {
   })
 }
 
+const TRACEABLE_AVATAR_EVENTS = [
+  AvatarMessageType.ADD_FRIEND,
+  AvatarMessageType.USER_DATA,
+  AvatarMessageType.USER_EXPRESSION,
+  AvatarMessageType.USER_REMOVED,
+  AvatarMessageType.SET_LOCAL_UUID,
+  AvatarMessageType.USER_MUTED,
+  AvatarMessageType.USER_UNMUTED,
+  AvatarMessageType.USER_BLOCKED,
+  AvatarMessageType.USER_UNBLOCKED
+]
+
 function hookObservables() {
   avatarMessageObservable.add(({ type, ...data }) => {
-    if (type === AvatarMessageType.USER_VISIBLE || type === AvatarMessageType.USER_POSE) {
+    if (!TRACEABLE_AVATAR_EVENTS.includes(type)) {
       return
     }
 

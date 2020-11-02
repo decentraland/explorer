@@ -13,7 +13,30 @@ import { Realm } from 'shared/dao/types'
 import { realmToString } from 'shared/dao/utils/realmToString'
 import { createLogger } from 'shared/logger'
 
-import { connect } from '.'
+import {
+  connect,
+  updatePeerVoicePlaying,
+  updateVoiceCommunicatorMute,
+  updateVoiceCommunicatorVolume,
+  updateVoiceRecordingStatus
+} from '.'
+import {
+  SetVoiceMute,
+  SetVoiceVolume,
+  SET_VOICE_CHAT_RECORDING,
+  SET_VOICE_MUTE,
+  SET_VOICE_VOLUME,
+  TOGGLE_VOICE_CHAT_RECORDING,
+  VoicePlayingUpdate,
+  VoiceRecordingUpdate,
+  VOICE_PLAYING_UPDATE,
+  VOICE_RECORDING_UPDATE
+} from './actions'
+
+import { isVoiceChatRecording } from './selectors'
+import { unityInterface } from 'unity-interface/UnityInterface'
+import { ensureMetaConfigurationInitialized } from 'shared/meta'
+import { isVoiceChatEnabled } from 'shared/meta/selectors'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -21,6 +44,15 @@ const logger = createLogger('comms: ')
 export function* commsSaga() {
   yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
   yield takeLatest(CATALYST_REALMS_SCAN_SUCCESS, changeRealm)
+  yield ensureMetaConfigurationInitialized()
+  if (yield select(isVoiceChatEnabled)) {
+    yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+    yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
+    yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
+    yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
+    yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
+    yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
+  }
 }
 
 function* establishCommunications() {
@@ -37,6 +69,27 @@ function* establishCommunications() {
   if (context !== undefined) {
     yield put(setWorldContext(context))
   }
+}
+
+function* updateVoiceChatRecordingStatus() {
+  const recording = yield select(isVoiceChatRecording)
+  updateVoiceRecordingStatus(recording)
+}
+
+function* updateUserVoicePlaying(action: VoicePlayingUpdate) {
+  updatePeerVoicePlaying(action.payload.userId, action.payload.playing)
+}
+
+function* updateVoiceChatVolume(action: SetVoiceVolume) {
+  updateVoiceCommunicatorVolume(action.payload.volume)
+}
+
+function* updateVoiceChatMute(action: SetVoiceMute) {
+  updateVoiceCommunicatorMute(action.payload.mute)
+}
+
+function* updatePlayerVoiceRecording(action: VoiceRecordingUpdate) {
+  unityInterface.SetPlayerTalking(action.payload.recording)
 }
 
 function* changeRealm() {

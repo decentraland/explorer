@@ -29,7 +29,8 @@ TagManager:
   - NavmapChunk
   - FriendsHUDPlayerMenu
   - PlayerInfoCardMenu
-  - 
+  - AvatarTriggerDetection
+  - Tutorial
   - 
   - 
   - 

@@ -2,7 +2,6 @@ using System;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
-using System;
 using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -418,6 +417,18 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class SetVoiceChatRecordingPayload
+        {
+            public bool recording;
+        }
+
+        [System.Serializable]
+        public class ApplySettingsPayload
+        {
+            public float sfxVolume;
+        }
+
+        [System.Serializable]
         public class JumpInPayload
         {
             public FriendsController.UserStatus.Realm realm = new FriendsController.UserStatus.Realm();
@@ -430,6 +441,47 @@ namespace DCL.Interface
             public string message;
             public int loadPercentage;
         }
+
+        [System.Serializable]
+        public class AnalyticsPayload
+        {
+            [System.Serializable]
+            public class Property
+            {
+                public string key;
+                public string value;
+
+                public Property(string key, string value)
+                {
+                    this.key = key;
+                    this.value = value;
+                }
+            }
+
+            public string name;
+            public Property[] properties;
+        }
+
+        [System.Serializable]
+        public class DelightedSurveyEnabledPayload
+        {
+            public bool enabled;
+        }
+
+        [System.Serializable]
+        public class ExternalActionSceneEventPayload
+        {
+            public string type;
+            public string payload;
+        }
+
+        [System.Serializable]
+        public class MuteUserPayload
+        {
+            public string[] usersId;
+            public bool mute;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -491,11 +543,18 @@ namespace DCL.Interface
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
         private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
+        private static SetVoiceChatRecordingPayload setVoiceChatRecordingPayload = new SetVoiceChatRecordingPayload();
+
+        private static ApplySettingsPayload applySettingsPayload = new ApplySettingsPayload();
         private static GIFSetupPayload gifSetupPayload = new GIFSetupPayload();
         private static JumpInPayload jumpInPayload = new JumpInPayload();
         private static GotoEvent gotoEvent = new GotoEvent();
         private static SendChatMessageEvent sendChatMessageEvent = new SendChatMessageEvent();
         private static BaseResolution baseResEvent = new BaseResolution();
+        private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
+        private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
+        private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
+        private static MuteUserPayload muteUserEvent = new MuteUserPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -738,9 +797,10 @@ namespace DCL.Interface
             SendMessage("SendScreenshot", onSendScreenshot);
         }
 
-        public static void ReportEditAvatarClicked()
+        public static void SetDelightedSurveyEnabled(bool enabled)
         {
-            SendMessage("EditAvatarClicked");
+            delightedSurveyEnabled.enabled = enabled;
+            SendMessage("SetDelightedSurveyEnabled", delightedSurveyEnabled);
         }
 
         [System.Serializable]
@@ -753,15 +813,15 @@ namespace DCL.Interface
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
+        public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot)
         {
             var payload = new SaveAvatarPayload()
             {
                 avatar = avatar,
-                face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
-                face128 = System.Convert.ToBase64String(face128Snapshot.texture.EncodeToPNG()),
-                face256 = System.Convert.ToBase64String(face256Snapshot.texture.EncodeToPNG()),
-                body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
+                face = System.Convert.ToBase64String(faceSnapshot.EncodeToPNG()),
+                face128 = System.Convert.ToBase64String(face128Snapshot.EncodeToPNG()),
+                face256 = System.Convert.ToBase64String(face256Snapshot.EncodeToPNG()),
+                body = System.Convert.ToBase64String(bodySnapshot.EncodeToPNG())
             };
             SendMessage("SaveUserAvatar", payload);
         }
@@ -872,6 +932,23 @@ namespace DCL.Interface
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
 
+        public static void SendSetVoiceChatRecording(bool recording)
+        {
+            setVoiceChatRecordingPayload.recording = recording;
+            SendMessage("SetVoiceChatRecording", setVoiceChatRecordingPayload);
+        }
+
+        public static void ToggleVoiceChatRecording()
+        {
+            SendMessage("ToggleVoiceChatRecording");
+        }
+
+        public static void ApplySettings(float sfxVolume)
+        {
+            applySettingsPayload.sfxVolume = sfxVolume;
+            SendMessage("ApplySettings", applySettingsPayload);
+        }
+
         public static void RequestGIFProcessor(string gifURL, string gifId, bool isWebGL1)
         {
             gifSetupPayload.imageSource = gifURL;
@@ -934,6 +1011,37 @@ namespace DCL.Interface
         {
             baseResEvent.baseResolution = resolution;
             SendMessage("SetBaseResolution", baseResEvent);
+        }
+
+        public static void ReportAnalyticsEvent(string eventName)
+        {
+            ReportAnalyticsEvent(eventName, null);
+        }
+
+        public static void ReportAnalyticsEvent(string eventName, AnalyticsPayload.Property[] eventProperties)
+        {
+            analyticsEvent.name = eventName;
+            analyticsEvent.properties = eventProperties;
+            SendMessage("Track", analyticsEvent);
+        }
+
+        public static void FetchBalanceOfMANA()
+        {
+            SendMessage("FetchBalanceOfMANA");
+        }
+
+        public static void SendSceneExternalActionEvent(string sceneId, string type, string payload)
+        {
+            sceneExternalActionEvent.type = type;
+            sceneExternalActionEvent.payload = payload;
+            SendSceneEvent(sceneId, "externalAction", sceneExternalActionEvent);
+        }
+
+        public static void SetMuteUsers(string[] usersId, bool mute)
+        {
+            muteUserEvent.usersId = usersId;
+            muteUserEvent.mute = mute;
+            SendMessage("SetMuteUsers", muteUserEvent);
         }
     }
 }

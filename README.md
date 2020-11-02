@@ -13,17 +13,18 @@
 This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ and the latest version of GNU make, install it using `brew install make`
 If you are using Windows 10 we recommend you to enable the Linux subsystem and install a Linux distro from Windows Store like Ubuntu. Then install all tools and dependecies like nodejs, npm, typescript, make...
 
-## Running the kernel
+## Running the Explorer
 
 Make sure you have the following dependencies:
-- Node v10 or compatible installed
-- yarn installed globally via `npm install yarn -g`
+- Node v10 or compatible installed via `sudo apt install nodejs`
+- yarn installed globally via `sudo npm install yarn -g`
+
+IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path.
 
 Build the project:
 
     cd kernel
     npm install
-    make build-essentials
 
 To run and watch a server with the kernel build, run:
 
@@ -33,23 +34,31 @@ Optionally, you can build the test scenes which are used in `debug` mode:
 
     make test-scenes
 
-To run the Unity interface:
+Once the kernel is running, to run the Unity interface you will have to:
 
-1. Download and install Unity 2019.1.14f1 or a later 2019.1 version (note that 2019.2 does not work!)
+1. Download and install Unity 2019.4.0f1
 2. Open the Initial Scene
 3. Run the Initial Scene in the Unity editor!
 
-To run the client in `debug` mode append the following query parameter to the URL:
+And that should be it!
+
+Optionally, if you want to run the client in `debug` mode, append the following query parameter to the URL:
 
     http://localhost:8080/?DEBUG_MODE
 
-To run the client in first person perspective append the following query parameter to the URL:
-
-    http://localhost:8080/?DEBUG_MODE&fps
-
 To spawn in a specific set of coordinates append the following query paramter:
 
-    http://localhost:8080/?DEBUG_MODE&fps&position=10,10
+    http://localhost:8080/?DEBUG_MODE&position=10,10
+
+### Troubleshooting
+
+If while trying to compile the Unity project you get an error regarding some libraries that can not be added (for instance Newtonsoft
+Json.NET or Google Protobuf), please execute the following command in the root folder:
+
+    git lfs install
+    git lfs pull
+
+Then, on the Unity editor, click on `Assets > Reimport All`
 
 ## Running tests
 
@@ -59,7 +68,7 @@ To see test logs/errors directly in the browser, run:
 
 Now, navigate to [http://localhost:8080/test](http://localhost:8080/test)
 
-### Visual tests
+### Kernel Visual tests
 
 Visual tests are meant to work in a similar way as `snapshot tests`. Each time a test parcel changes the author is required to commit new screenshots along the other changes. These screenshots are then validated to detect regressions at the time of the pull request. To generate new snapshot images to compare run `npm run test:dry` (it requires docker)
 
@@ -87,10 +96,10 @@ describe('My example test', function() {
 4. In a new browser tab go to http://localhost:8000/?UNITY_ENABLED=true&DEBUG_MODE&LOCAL_COMMS&position=0%2C-1&ws=ws%3A%2F%2Flocalhost%3A5000%2Fdcl
 5. Go back to unity and the scene should start loading in there almost immediately
 
-### DCL scene in preview mode using a local explorer version
+### DCL scene in preview mode using a local Kernel version
 
-1. In the explorer repo directory, run a `make watch` or `make dev-watch` once
-2. Kill the server and run `make initialize-ecs-npm-link`
+1. In the explorer repo directory, run a `make watch` once
+2. Kill the server and run `make npm-link`
 3. In the scene directory run `npm link decentraland-ecs`
 4. In the scene directory run `dcl start` and it should already be using the local version of the client
 
@@ -123,38 +132,38 @@ Every component declaration should be under the **/packages/decentraland-ecs/src
 - Create the component script in MainScripts/DCL/Components/[Corresponding Folder]/
 - Edit the SharedComponentCreate() method in MainScripts/DCL/Controllers/Scene/ParcelScene.cs to make sure it instantiates the new shared component.
 
+### Adding/Updating protobuf-compiled components (instructions with macOS Homebrew package manager)
+
+0. Install protobuf 3.12 (if a different version is already installed you have to uninstall it first, running `brew uninstall protobuf`):
+    - edit the desired version config file (use code from https://github.com/Homebrew/homebrew-core/blob/53fb074d235fe0335fa8ee293a3f639f3cdffa45/Formula/protobuf.rb) replacing everything in the following file `code $(brew --repo homebrew/core)/Formula/protobuf.rb`
+    - run `HOMEBREW_NO_AUTO_UPDATE=1 brew install protobuf`
+
+1. Edit/add desired component structure at `kernel/packages/shared/proto/engineinterface.proto`
+
+2. In that same directory (`kernel/packages/shared/proto/engineinterface.proto`) run the following command:
+`protoc --plugin=../../../node_modules/ts-protoc-gen/bin/protoc-gen-ts --js_out="import_style=commonjs,binary:." --ts_out="." engineinterface.proto`
+
+3. In that same directory run the following command:
+`protoc --csharp_out=../../../../unity-client/Assets/Scripts/MainScripts/DCL/Models/Protocol/ --csharp_opt=base_namespace=DCL.Interface engineinterface.proto`
+
+4. Make sure to also update the custom "save/read" code we have at:
+    - `kernel/packages/scene-system/scene.system.ts` in `generatePBObject()`
+    - `unity-client/Assets/Scripts/MainScripts/DCL/Controllers/Scene/MessageDecoder.cs`
+
 ### Shaders Scene-Forced PreWarm
 
 To avoid extremely slow building times due to the Lightweight Render Pipeline shader variants compilation (LWRP shaders can't be packed in a 'shadervariants' file), we are using scene-instanced objects under the Environment/ShadersPrewarm/ prefab to force unity to pre-load them and be ready for using them on the fly. Please do not delete these objects.
 
 ### GLTF Dynamic Loading
 
-We are using [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF) as a Dynamic GLTF/GLB loader for unity to handle GLTF models.
+We are using a custom version of the [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF) as a Dynamic GLTF/GLB loader for unity to handle GLTF models.
 
-#### Local changes made to UnityGLTF plugin
-
-##### NOTE: UnityGLTF plugin update is discouraged until Unity WebGL supports multi-threading
-
-1. GLTFComponent.cs has been adapted to:
-
-- Be able to avoid loading on start by default (for remotely-fetched models that need to take some time to download)
-- Have a 'finished loading asset callback' providing the time it took to load the GLTF asset (initially used for measuring loading times)
-- StartCoroutine has been replaced by StartThrowingCoroutine so we catch the invalid GLTF assets gracefully.
-
-2. SpecGlossMap.cs and MetalRoughMap.cs were adapted to use "Lightweight Render Pipeline/Simple Lit" and "Lightweight Render Pipeline/Lit" shaders respectively (the original PbrMetallicRoughness and PbrSpecularGlossiness don't work with the Lightweight Render Pipeline)
-
-3. Several files were modified to replce Tasks (multi-threading) with Coroutines as Unity WebGL build doesn't support multi-threading.
-
-4. Animation curve processing methods were adapted to be spread through many frames.
-
-5. GameObject reparenting is made as soon the root GLTF loading object is created, so a big mesh can be seen in place before the loading finished.
-
-### Visual Tests Pipeline
+### Unity Visual Tests Pipeline
 
 #### How to create them
 
 1. Create a new test class that inherits from VisualTestsBase
-2. After the `InitScene()` call, initialize the visual tests using `VisualTestHelpers.InitVisualTestsScene(string)` passing the test name as parameter
+2. Initialize the visual tests using `VisualTestsBase.InitVisualTestsScene(string)` passing the test name as parameter
 3. Setup your scene as wanted and call `TestHelpers.TakeSnapshot(Vector3)`
 4. Tag the method with the attribute `[VisualTest]`. This isn't used yet but will be used to streamline the baseline images creation.
 
@@ -168,8 +177,7 @@ public class VisualTests : VisualTestsBase
     [UnityTest][VisualTest]
     public IEnumerator VisualTestStub()
     {
-        yield return InitScene();
-        yield return VisualTestHelpers.InitVisualTestsScene("VisualTestStub");
+        yield return InitVisualTestsScene("VisualTestStub");
 
         // Set up scene
 

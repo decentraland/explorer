@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace DCL.Components
 {
@@ -11,8 +12,7 @@ namespace DCL.Components
         [System.Serializable]
         public class Model
         {
-            [Range(0f, 1f)]
-            public float alphaTest = 0.5f;
+            [Range(0f, 1f)] public float alphaTest = 0.5f;
 
             public Color albedoColor = Color.white;
             public string albedoTexture;
@@ -32,10 +32,9 @@ namespace DCL.Components
             public float environmentIntensity = 1f;
             public string bumpTexture;
             public string refractionTexture;
-            public bool disableLighting = false;
+            public bool castShadows = true;
 
-            [Range(0, 4)]
-            public int transparencyMode = 4; // 0: OPAQUE; 1: ALPHATEST; 2: ALPHBLEND; 3: ALPHATESTANDBLEND; 4: AUTO (Engine decide)
+            [Range(0, 4)] public int transparencyMode = 4; // 0: OPAQUE; 1: ALPHATEST; 2: ALPHBLEND; 3: ALPHATESTANDBLEND; 4: AUTO (Engine decide)
         }
 
         enum TransparencyMode
@@ -49,12 +48,13 @@ namespace DCL.Components
 
         public Model model = new Model();
         public Material material { get; set; }
+        private string currentMaterialResourcesFilename;
 
         const string MATERIAL_RESOURCES_PATH = "Materials/";
-        const string BASIC_MATERIAL_NAME = "BasicShapeMaterial";
         const string PBR_MATERIAL_NAME = "ShapeMaterial";
 
         DCLTexture albedoDCLTexture = null;
+        DCLTexture alphaDCLTexture = null;
         DCLTexture emissiveDCLTexture = null;
         DCLTexture bumpDCLTexture = null;
 
@@ -62,7 +62,7 @@ namespace DCL.Components
         {
             model = new Model();
 
-            LoadMaterial("ShapeMaterial");
+            LoadMaterial(PBR_MATERIAL_NAME);
 
             OnAttach += OnMaterialAttached;
             OnDetach += OnMaterialDetached;
@@ -76,7 +76,6 @@ namespace DCL.Components
             }
 
             entity.RemoveSharedComponent(typeof(BasicMaterial));
-
             base.AttachTo(entity);
         }
 
@@ -84,52 +83,50 @@ namespace DCL.Components
         {
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
-            if (model.disableLighting)
+            LoadMaterial(PBR_MATERIAL_NAME);
+
+            material.SetColor(ShaderUtils.BaseColor, model.albedoColor);
+
+            if (model.emissiveColor != Color.clear && model.emissiveColor != Color.black)
             {
-                LoadMaterial(BASIC_MATERIAL_NAME);
+                material.EnableKeyword("_EMISSION");
             }
-            else
-            {
-                LoadMaterial(PBR_MATERIAL_NAME);
 
-                material.SetColor("_BaseColor", model.albedoColor);
+            // METALLIC/SPECULAR CONFIGURATIONS
+            material.SetColor(ShaderUtils.EmissionColor, model.emissiveColor * model.emissiveIntensity);
+            material.SetColor(ShaderUtils.SpecColor, model.reflectivityColor);
 
-                if (model.emissiveColor != Color.clear && model.emissiveColor != Color.black)
-                {
-                    material.EnableKeyword("_EMISSION");
-                }
+            material.SetFloat(ShaderUtils.Metallic, model.metallic);
+            material.SetFloat(ShaderUtils.Smoothness, 1 - model.roughness);
+            material.SetFloat(ShaderUtils.EnvironmentReflections, model.microSurface);
+            material.SetFloat(ShaderUtils.SpecularHighlights, model.specularIntensity * model.directIntensity);
 
-                // METALLIC/SPECULAR CONFIGURATIONS
-                material.SetColor("_EmissionColor", model.emissiveColor * model.emissiveIntensity);
-                material.SetColor("_SpecColor", model.reflectivityColor);
-
-                material.SetFloat("_Metallic", model.metallic);
-                material.SetFloat("_Smoothness", 1 - model.roughness);
-                material.SetFloat("_EnvironmentReflections", model.microSurface);
-                material.SetFloat("_SpecularHighlights", model.specularIntensity * model.directIntensity);
-
-                // FETCH AND LOAD EMISSIVE TEXTURE
-                SetMaterialTexture("_EmissionMap", model.emissiveTexture, emissiveDCLTexture);
-            }
+            // FETCH AND LOAD EMISSIVE TEXTURE
+            SetMaterialTexture(ShaderUtils.EmissionMap, model.emissiveTexture, emissiveDCLTexture);
 
             SetupTransparencyMode();
 
             // FETCH AND LOAD TEXTURES
-            SetMaterialTexture("_BaseMap", model.albedoTexture, albedoDCLTexture);
-            SetMaterialTexture("_BumpMap", model.bumpTexture, bumpDCLTexture);
+            SetMaterialTexture(ShaderUtils.BaseMap, model.albedoTexture, albedoDCLTexture);
+            SetMaterialTexture(ShaderUtils.AlphaTexture, model.alphaTexture, alphaDCLTexture);
+            SetMaterialTexture(ShaderUtils.BumpMap, model.bumpTexture, bumpDCLTexture);
+
+            foreach (DecentralandEntity decentralandEntity in attachedEntities)
+            {
+                InitMaterial(decentralandEntity.meshRootGameObject);
+            }
 
             return null;
         }
 
         private void SetupTransparencyMode()
         {
-
             // Reset shader keywords
             material.DisableKeyword("_ALPHATEST_ON"); // Cut Out Transparency
             material.DisableKeyword("_ALPHABLEND_ON"); // Fade Transparency
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON"); // Transparent
 
-            TransparencyMode transparencyMode = (TransparencyMode)model.transparencyMode;
+            TransparencyMode transparencyMode = (TransparencyMode) model.transparencyMode;
 
             if (transparencyMode == TransparencyMode.AUTO)
             {
@@ -146,51 +143,53 @@ namespace DCL.Components
             switch (transparencyMode)
             {
                 case TransparencyMode.OPAQUE:
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
-                    material.SetFloat("_AlphaClip", 0);
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry;
+                    material.SetFloat(ShaderUtils.AlphaClip, 0);
                     break;
                 case TransparencyMode.ALPHA_TEST: // ALPHATEST
                     material.EnableKeyword("_ALPHATEST_ON");
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                    material.SetInt("_ZWrite", 1);
-                    material.SetFloat("_AlphaClip", 1);
-                    material.SetFloat("_Cutoff", model.alphaTest);
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                    material.SetInt(ShaderUtils.SrcBlend, (int) UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt(ShaderUtils.DstBlend, (int) UnityEngine.Rendering.BlendMode.Zero);
+                    material.SetInt(ShaderUtils.ZWrite, 1);
+                    material.SetFloat(ShaderUtils.AlphaClip, 1);
+                    material.SetFloat(ShaderUtils.Cutoff, model.alphaTest);
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
                     break;
                 case TransparencyMode.ALPHA_BLEND: // ALPHABLEND
                     material.EnableKeyword("_ALPHABLEND_ON");
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.SetFloat("_AlphaClip", 0);
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                    material.SetInt(ShaderUtils.SrcBlend, (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt(ShaderUtils.DstBlend, (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt(ShaderUtils.ZWrite, 0);
+                    material.SetFloat(ShaderUtils.AlphaClip, 0);
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                     break;
                 case TransparencyMode.ALPHA_TEST_AND_BLEND:
                     material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.SetFloat("_AlphaClip", 1);
-                    material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                    material.SetInt(ShaderUtils.SrcBlend, (int) UnityEngine.Rendering.BlendMode.One);
+                    material.SetInt(ShaderUtils.DstBlend, (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt(ShaderUtils.ZWrite, 0);
+                    material.SetFloat(ShaderUtils.AlphaClip, 1);
+                    material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                     break;
             }
         }
 
-        private void LoadMaterial(string name)
+
+        private void LoadMaterial(string resourcesFilename)
         {
-            if (material == null || material.name != name)
+            if (material == null || currentMaterialResourcesFilename != resourcesFilename)
             {
                 if (material != null)
-                {
-                    UnityEngine.Object.Destroy(material);
-                }
+                    Object.Destroy(material);
 
-                material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + name));
-                material.name = name;
+                material = new Material(Utils.EnsureResourcesMaterial(MATERIAL_RESOURCES_PATH + resourcesFilename));
+#if UNITY_EDITOR
+                material.name = "PBRMaterial_" + id;
+#endif
+                currentMaterialResourcesFilename = resourcesFilename;
             }
         }
 
@@ -218,21 +217,23 @@ namespace DCL.Components
             }
 
             var meshRenderer = meshGameObject.GetComponent<MeshRenderer>();
+            if (meshRenderer == null)
+                return;
 
-            if (meshRenderer != null && meshRenderer.sharedMaterial != material)
+            meshRenderer.shadowCastingMode = model.castShadows ? ShadowCastingMode.On : ShadowCastingMode.Off;
+            if (meshRenderer.sharedMaterial != material)
             {
                 MaterialTransitionController
                     matTransition = meshGameObject.GetComponent<MaterialTransitionController>();
 
                 if (matTransition != null && matTransition.canSwitchMaterial)
                 {
-                    matTransition.finalMaterials = new Material[] { material };
+                    matTransition.finalMaterials = new Material[] {material};
                     matTransition.PopulateTargetRendererWithMaterial(matTransition.finalMaterials);
                 }
 
                 meshRenderer.sharedMaterial = material;
                 SRPBatchingHelper.OptimizeMaterial(meshRenderer, material);
-
             }
         }
 
@@ -263,25 +264,24 @@ namespace DCL.Components
             }
         }
 
-        void SetMaterialTexture(string materialPropertyName, string textureComponentId, DCLTexture cachedDCLTexture)
+        void SetMaterialTexture(int materialPropertyId, string textureComponentId, DCLTexture cachedDCLTexture)
         {
             if (!string.IsNullOrEmpty(textureComponentId))
             {
                 if (!AreSameTextureComponent(cachedDCLTexture, textureComponentId))
                 {
-                    scene.StartCoroutine(DCLTexture.FetchTextureComponent(scene, textureComponentId,
+                    CoroutineStarter.Start(DCLTexture.FetchTextureComponent(scene, textureComponentId,
                         (fetchedDCLTexture) =>
                         {
-                            material.SetTexture(materialPropertyName, fetchedDCLTexture.texture);
+                            material.SetTexture(materialPropertyId, fetchedDCLTexture.texture);
                             SwitchTextureComponent(cachedDCLTexture, fetchedDCLTexture);
                         }));
                 }
             }
             else
             {
-                material.SetTexture(materialPropertyName, null);
+                material.SetTexture(materialPropertyId, null);
                 cachedDCLTexture?.DetachFrom(this);
-                cachedDCLTexture = null;
             }
         }
 
@@ -301,12 +301,9 @@ namespace DCL.Components
         public override void Dispose()
         {
             albedoDCLTexture?.DetachFrom(this);
+            alphaDCLTexture?.DetachFrom(this);
             emissiveDCLTexture?.DetachFrom(this);
             bumpDCLTexture?.DetachFrom(this);
-
-            albedoDCLTexture?.Dispose();
-            emissiveDCLTexture?.Dispose();
-            bumpDCLTexture?.Dispose();
 
             if (material != null)
             {

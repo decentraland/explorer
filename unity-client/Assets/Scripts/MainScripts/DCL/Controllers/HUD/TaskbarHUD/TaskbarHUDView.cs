@@ -6,21 +6,51 @@ public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
 
-    [SerializeField] internal RectTransform windowContainer;
-    [SerializeField] internal ShowHideAnimator windowContainerAnimator;
-    [SerializeField] internal LayoutGroup windowContainerLayout;
+    [Header("Taskbar Animation")]
+    [SerializeField] internal ShowHideAnimator taskbarAnimator;
 
+    [Header("Left Side Config")]
+    [SerializeField] internal RectTransform leftWindowContainer;
+    [SerializeField] internal ShowHideAnimator leftWindowContainerAnimator;
+    [SerializeField] internal LayoutGroup leftWindowContainerLayout;
+    [SerializeField] internal GameObject voiceChatButtonContainer;
+    [SerializeField] internal VoiceChatButton voiceChatButton;
     [SerializeField] internal TaskbarButton chatButton;
     [SerializeField] internal TaskbarButton friendsButton;
-
     [SerializeField] internal ChatHeadGroupView chatHeadsGroup;
 
+    [Header("Right Side Config")]
+    [SerializeField] internal HorizontalLayoutGroup rightButtonsHorizontalLayout;
+    [SerializeField] internal TaskbarButton backpackButton;
+    [SerializeField] internal TaskbarButton exploreButton;
+
+    [Header("More Button Config")]
+    [SerializeField] internal TaskbarButton moreButton;
+    [SerializeField] internal TaskbarMoreMenu moreMenu;
+
+    [Header("Tutorial Config")]
+    [SerializeField] internal RectTransform exploreTooltipReference;
+    [SerializeField] internal RectTransform backpackTooltipReference;
+    [SerializeField] internal RectTransform moreTooltipReference;
+
+    [Header("Old TaskbarCompatibility (temporal)")]
+    [SerializeField] internal RectTransform taskbarPanelTransf;
+    [SerializeField] internal Image taskbarPanelImage;
+    [SerializeField] internal GameObject rightButtonsContainer;
+
     internal TaskbarHUDController controller;
+    internal bool isBarVisible = true;
 
     public event System.Action OnChatToggleOn;
     public event System.Action OnChatToggleOff;
     public event System.Action OnFriendsToggleOn;
     public event System.Action OnFriendsToggleOff;
+    public event System.Action OnBackpackToggleOn;
+    public event System.Action OnBackpackToggleOff;
+    public event System.Action OnExploreToggleOn;
+    public event System.Action OnExploreToggleOff;
+    public event System.Action OnMoreToggleOn;
+    public event System.Action OnMoreToggleOff;
 
     internal List<TaskbarButton> GetButtonList()
     {
@@ -28,6 +58,9 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(chatButton);
         taskbarButtonList.Add(friendsButton);
         taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
+        taskbarButtonList.Add(backpackButton);
+        taskbarButtonList.Add(exploreButton);
+        taskbarButtonList.Add(moreButton);
         return taskbarButtonList;
     }
 
@@ -44,9 +77,23 @@ public class TaskbarHUDView : MonoBehaviour
     {
         this.controller = controller;
 
+        ShowBar(true, true);
+        chatButton.transform.parent.gameObject.SetActive(false);
+        friendsButton.transform.parent.gameObject.SetActive(false);
+        backpackButton.transform.parent.gameObject.SetActive(false);
+        exploreButton.transform.parent.gameObject.SetActive(false);
+        voiceChatButtonContainer.SetActive(false);
+
+        moreButton.gameObject.SetActive(true);
+        moreMenu.Initialize(this);
+        moreMenu.ShowMoreMenu(false, true);
+
         chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
         friendsButton.Initialize();
+        backpackButton.Initialize();
+        exploreButton.Initialize();
+        moreButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -56,6 +103,15 @@ public class TaskbarHUDView : MonoBehaviour
 
         friendsButton.OnToggleOn += OnWindowToggleOn;
         friendsButton.OnToggleOff += OnWindowToggleOff;
+
+        backpackButton.OnToggleOn += OnWindowToggleOn;
+        backpackButton.OnToggleOff += OnWindowToggleOff;
+
+        exploreButton.OnToggleOn += OnWindowToggleOn;
+        exploreButton.OnToggleOff += OnWindowToggleOff;
+
+        moreButton.OnToggleOn += OnWindowToggleOn;
+        moreButton.OnToggleOff += OnWindowToggleOff;
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -64,6 +120,12 @@ public class TaskbarHUDView : MonoBehaviour
             OnFriendsToggleOff?.Invoke();
         else if (obj == chatButton)
             OnChatToggleOff?.Invoke();
+        else if (obj == backpackButton)
+            OnBackpackToggleOff?.Invoke();
+        else if (obj == exploreButton)
+            OnExploreToggleOff?.Invoke();
+        else if (obj == moreButton)
+            moreMenu.ShowMoreMenu(false);
 
         if (AllButtonsToggledOff())
         {
@@ -93,6 +155,12 @@ public class TaskbarHUDView : MonoBehaviour
             OnFriendsToggleOn?.Invoke();
         else if (obj == chatButton)
             OnChatToggleOn?.Invoke();
+        else if (obj == backpackButton)
+            OnBackpackToggleOn?.Invoke();
+        else if (obj == exploreButton)
+            OnExploreToggleOn?.Invoke();
+        else if (obj == moreButton)
+            moreMenu.ShowMoreMenu(true);
 
         SelectButton(obj);
     }
@@ -105,6 +173,11 @@ public class TaskbarHUDView : MonoBehaviour
         {
             if (btn != obj)
             {
+                // We let the use of the chat and friends windows while we are using the explore at the same time
+                if ((btn == exploreButton && (obj == chatButton || obj == friendsButton || obj is ChatHeadButton)) ||
+                    ((btn == chatButton || btn == friendsButton || btn is ChatHeadButton) && obj == exploreButton))
+                    continue;
+
                 btn.SetToggleState(false, useCallback: true);
             }
         }
@@ -112,12 +185,52 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal void OnAddChatWindow()
     {
-        chatButton.gameObject.SetActive(true);
+        chatButton.transform.parent.gameObject.SetActive(true);
     }
 
     internal void OnAddFriendsWindow()
     {
-        friendsButton.gameObject.SetActive(true);
+        friendsButton.transform.parent.gameObject.SetActive(true);
+    }
+
+    internal void OnAddSettingsWindow()
+    {
+        moreMenu.ActivateSettingsButton();
+    }
+
+    internal void OnAddBackpackWindow()
+    {
+        backpackButton.transform.parent.gameObject.SetActive(true);
+    }
+
+    internal void OnAddExploreWindow()
+    {
+        exploreButton.transform.parent.gameObject.SetActive(true);
+    }
+
+    internal void OnAddHelpAndSupportWindow()
+    {
+        moreMenu.ActivateHelpAndSupportButton();
+    }
+
+    internal void OnAddControlsMoreOption()
+    {
+        moreMenu.ActivateControlsButton();
+    }
+
+    internal void OnAddVoiceChat()
+    {
+        voiceChatButtonContainer.SetActive(true);
+    }
+
+    internal void ShowBar(bool visible, bool instant = false)
+    {
+        if (visible)
+            taskbarAnimator.Show(instant);
+        else
+            taskbarAnimator.Hide(instant);
+
+        isBarVisible = visible;
     }
 
     public void SetVisibility(bool visible)
@@ -156,6 +269,24 @@ public class TaskbarHUDView : MonoBehaviour
         {
             friendsButton.OnToggleOn -= OnWindowToggleOn;
             friendsButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (backpackButton != null)
+        {
+            backpackButton.OnToggleOn -= OnWindowToggleOn;
+            backpackButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (exploreButton != null)
+        {
+            exploreButton.OnToggleOn -= OnWindowToggleOn;
+            exploreButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (moreButton != null)
+        {
+            moreButton.OnToggleOn -= OnWindowToggleOn;
+            moreButton.OnToggleOff -= OnWindowToggleOff;
         }
     }
 }

@@ -8,8 +8,15 @@ import { Authenticator } from 'dcl-crypto'
 import { ENABLE_WEB3, WORLD_EXPLORER, PREVIEW, ETHEREUM_NETWORK, getTLD, setNetwork } from 'config'
 
 import { createLogger } from 'shared/logger'
-import { awaitWeb3Approval, isSessionExpired, providerFuture, loginCompleted } from 'shared/ethereum/provider'
-import { getUserProfile, setLocalProfile } from 'shared/comms/peers'
+import { referUser, initializeReferral } from 'shared/referral'
+import {
+  awaitWeb3Approval,
+  isSessionExpired,
+  providerFuture,
+  loginCompleted,
+  getUserEthAccountIfAvailable
+} from 'shared/ethereum/provider'
+import { setLocalInformationForComms } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
@@ -23,14 +30,15 @@ import { getNetwork } from 'shared/ethereum/EthereumService'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
-import { Session } from '.'
 import { ExplorerIdentity } from './types'
 import { userAuthentified, LOGOUT, LOGIN, loginCompleted as loginCompletedAction } from './actions'
+import { getLastSessionWithoutWallet, getStoredSession, Session, setStoredSession } from './index'
 
 const logger = createLogger('session: ')
 
 export function* sessionSaga(): any {
   yield call(initializeTos)
+  yield call(initializeReferral)
 
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
@@ -84,7 +92,8 @@ function* login() {
     }
 
     try {
-      const userData = getUserProfile()
+      const address = yield getUserEthAccountIfAvailable()
+      const userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
 
       // check that user data is stored & key is not expired
       if (isSessionExpired(userData)) {
@@ -93,18 +102,12 @@ function* login() {
         showAwaitingSignaturePrompt(false)
         userId = identity.address
 
-        setLocalProfile(userId, {
-          userId,
-          identity
-        })
+        saveSession(userId, identity)
       } else {
-        identity = userData.identity
-        userId = userData.identity.address
+        identity = userData!.identity
+        userId = userData!.identity.address
 
-        setLocalProfile(userId, {
-          userId,
-          identity
-        })
+        saveSession(userId, identity)
       }
     } catch (e) {
       logger.error(e)
@@ -114,16 +117,14 @@ function* login() {
 
     if (identity.hasConnectedWeb3) {
       identifyUser(userId)
+      referUser(identity)
     }
   } else {
     logger.log(`Using test user.`)
     identity = yield createAuthIdentity()
     userId = identity.address
 
-    setLocalProfile(userId, {
-      userId,
-      identity
-    })
+    saveSession(userId, identity)
 
     loginCompleted.resolve()
   }
@@ -138,11 +139,22 @@ function* login() {
     yield setNetwork(net)
     queueTrackingEvent('Use network', { net })
   }
-
   yield put(userAuthentified(userId, identity, net))
 
   yield loginCompleted
   yield put(loginCompletedAction())
+}
+
+function saveSession(userId: string, identity: ExplorerIdentity) {
+  setStoredSession({
+    userId,
+    identity
+  })
+
+  setLocalInformationForComms(userId, {
+    userId,
+    identity
+  })
 }
 
 async function checkTldVsNetwork() {
@@ -184,7 +196,7 @@ function showNetworkWarning() {
 async function createAuthIdentity() {
   const ephemeral = createIdentity()
 
-  const ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
+  let ephemeralLifespanMinutes = 7 * 24 * 60 // 1 week
 
   let address
   let signer
@@ -217,6 +229,10 @@ async function createAuthIdentity() {
 
       address = account.address.toJSON()
       signer = async (message: string) => account.sign(message).signature
+
+      // If we are using a local profile, we don't want the identity to expire.
+      // Eventually, if a wallet gets created, we can migrate the profile to the wallet.
+      ephemeralLifespanMinutes = 365 * 24 * 60 * 99
     }
   } else {
     const account = Account.create()
@@ -247,7 +263,7 @@ function showAwaitingSignaturePrompt(show: boolean) {
 }
 
 function* logout() {
-  Session.current.then((s) => s.logout()).catch((e) => logger.error('error while logging out', e))
+  Session.current.logout().catch((e) => logger.error('error while logging out', e))
 }
 
 function enableLogin() {

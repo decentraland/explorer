@@ -1,29 +1,12 @@
 import { Store } from 'redux'
-import { call, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { EntityType } from 'dcl-catalyst-commons'
+import { ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
+import { call, throttle, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
-import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { getServerConfigurations, ALL_WEARABLES, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
 
-import {
-  getServerConfigurations,
-  ALL_WEARABLES,
-  getWearablesSafeURL,
-  PIN_CATALYST,
-  PREVIEW,
-  ethereumConfigurations,
-  RESET_TUTORIAL,
-  DEBUG
-} from 'config'
-
-import { NotificationType } from 'shared/types'
 import defaultLogger from 'shared/logger'
-import { isInitialized } from 'shared/renderer/selectors'
-import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
-  addCatalog,
-  AddCatalogAction,
-  ADD_CATALOG,
-  catalogLoaded,
-  CATALOG_LOADED,
   inventoryFailure,
   InventoryRequest,
   inventoryRequest,
@@ -31,8 +14,6 @@ import {
   INVENTORY_FAILURE,
   INVENTORY_REQUEST,
   INVENTORY_SUCCESS,
-  notifyNewInventoryItem,
-  NOTIFY_NEW_INVENTORY_ITEM,
   InventorySuccess,
   PROFILE_REQUEST,
   PROFILE_SUCCESS,
@@ -47,60 +28,44 @@ import {
   profileRequest,
   saveProfileFailure,
   addedProfileToCatalog,
-  saveProfileRequest
+  saveProfileRequest,
+  LOCAL_PROFILE_RECEIVED,
+  LocalProfileReceived,
+  deployProfile,
+  DEPLOY_PROFILE_REQUEST,
+  deployProfileSuccess,
+  deployProfileFailure,
+  profileSavedNotDeployed,
+  DeployProfile
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import {
-  baseCatalogsLoaded,
-  getEthereumAddress,
-  getInventory,
-  getProfile,
-  getProfileDownloadServer,
-  getExclusiveCatalog
-} from './selectors'
+import { getProfile, getProfileDownloadServer, hasConnectedWeb3 } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
-import { ensureServerFormat } from './transformations/profileToServerFormat'
-import {
-  Catalog,
-  Profile,
-  WearableId,
-  Wearable,
-  Collection,
-  Entity,
-  EntityField,
-  ControllerEntity,
-  ControllerEntityContent,
-  EntityType,
-  Pointer,
-  ContentFile,
-  ENTITY_FILE_NAME,
-  DeployData,
-  Avatar
-} from './types'
+import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
+import { Profile, ContentFile, Avatar, ProfileType } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
-import { Authenticator, AuthLink } from 'dcl-crypto'
-import { sha3 } from 'web3x/utils'
+import { Authenticator } from 'dcl-crypto'
 import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
-import { getUserProfile } from '../comms/peers'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getResourcesURL } from '../location'
 import { takeLatestById } from './utils/takeLatestById'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
-import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
-import { retrieve, store } from 'shared/cache'
 import { getCurrentUserId, getCurrentIdentity, getCurrentNetwork } from 'shared/session/selectors'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { ProfileAsPromise } from './ProfileAsPromise'
 import { fetchOwnedENS } from 'shared/web3'
 import { RootState } from 'shared/store/rootTypes'
-import { persistCurrentUser } from 'shared/comms'
+import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
-
-type Timestamp = number
-type ContentFileHash = string
+import { ensureRenderer } from 'shared/renderer/sagas'
+import { ensureBaseCatalogs } from 'shared/catalogs/sagas'
+import { getExclusiveCatalog } from 'shared/catalogs/selectors'
+import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
+import { Wearable } from 'shared/catalogs/types'
+import { LocalProfilesRepository } from './LocalProfilesRepository'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -116,6 +81,9 @@ const concatenatedActionTypeUserId = (action: { type: string; payload: { userId:
 
 const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
   takeLatestById(patternOrChannel, concatenatedActionTypeUserId, saga, ...args)
+
+// This repository is for local profiles owned by this browser (without wallet)
+const localProfilesRepo = new LocalProfilesRepository()
 
 /**
  * This saga handles both passports and assets required for the renderer to show the
@@ -134,10 +102,6 @@ const takeLatestByUserId = (patternOrChannel: any, saga: any, ...args: any) =>
 export function* profileSaga(): any {
   yield takeEvery(USER_AUTHENTIFIED, initialProfileLoad)
 
-  yield takeEvery(RENDERER_INITIALIZED, initialLoad)
-
-  yield takeLatest(ADD_CATALOG, handleAddCatalog)
-
   yield takeLatestByUserId(PROFILE_REQUEST, handleFetchProfile)
   yield takeLatestByUserId(PROFILE_SUCCESS, submitProfileToRenderer)
   yield takeLatestByUserId(PROFILE_RANDOM, handleRandomAsSuccess)
@@ -146,17 +110,18 @@ export function* profileSaga(): any {
 
   yield takeLatestByUserId(INVENTORY_REQUEST, handleFetchInventory)
 
-  yield takeLatest(NOTIFY_NEW_INVENTORY_ITEM, handleNewInventoryItem)
+  yield takeLatestByUserId(LOCAL_PROFILE_RECEIVED, handleLocalProfile)
 
-  yield fork(queryInventoryEveryMinute)
+  yield throttle(3000, DEPLOY_PROFILE_REQUEST, handleDeployProfile)
 }
 
 function* initialProfileLoad() {
   yield call(ensureRealmInitialized)
 
   // initialize profile
-  const userId = yield select(getCurrentUserId)
-  let profile = yield ProfileAsPromise(userId)
+  const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+  const userId = identity.address
+  let profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
 
   if (!PREVIEW) {
     let profileDirty: boolean = false
@@ -166,7 +131,7 @@ function* initialProfileLoad() {
       const names = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
       // patch profile to readd missing name
-      profile = { ...profile, name: names[0], hasClaimedName: true, version: (profile.version || 0) + 1 }
+      profile = { ...profile, name: names[0], hasClaimedName: true }
 
       if (names && names.length > 0) {
         defaultLogger.info(`Found missing claimed name '${names[0]}' for profile ${userId}, consolidating profile... `)
@@ -182,14 +147,6 @@ function* initialProfileLoad() {
       profileDirty = true
     }
 
-    const localTutorialStep = getUserProfile().profile ? getUserProfile().profile.tutorialStep : 0
-
-    if (localTutorialStep !== profile.tutorialStep) {
-      let finalTutorialStep = Math.max(localTutorialStep, profile.tutorialStep)
-      profile = { ...profile, tutorialStep: finalTutorialStep }
-      profileDirty = true
-    }
-
     if (RESET_TUTORIAL) {
       profile = { ...profile, tutorialStep: 0 }
       profileDirty = true
@@ -200,12 +157,7 @@ function* initialProfileLoad() {
     }
   }
 
-  const identity = yield select(getCurrentIdentity)
-
-  persistCurrentUser({
-    version: profile.version,
-    profile: profileToRendererFormat(profile, identity)
-  })
+  updateCommsUser({ version: profile.version })
 }
 
 /**
@@ -227,82 +179,6 @@ function scheduleProfileUpdate(profile: Profile) {
   }).catch((e) => defaultLogger.error(`error while updating profile`, e))
 }
 
-function overrideBaseUrl(wearable: Wearable) {
-  return {
-    ...wearable,
-    baseUrl: getWearablesSafeURL() + '/contents/',
-    baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
-  }
-}
-
-function overrideSwankyRarity(wearable: Wearable) {
-  if ((wearable.rarity as any) === 'swanky') {
-    return {
-      ...wearable,
-      rarity: 'rare' as RarityEnum
-    }
-  }
-  return wearable
-}
-
-export function* initialLoad() {
-  yield call(ensureRealmInitialized)
-
-  if (WORLD_EXPLORER) {
-    try {
-      const catalogUrl = getServerConfigurations().avatar.catalog
-
-      let collections: Collection[] | undefined
-      if (globalThis.location.search.match(/TEST_WEARABLES/)) {
-        collections = [{ id: 'all', wearables: (yield call(fetchCatalog, catalogUrl))[0] }]
-      } else {
-        const cached = yield retrieve('catalog')
-
-        if (cached) {
-          const version = yield headCatalog(catalogUrl)
-          if (cached.version === version) {
-            collections = cached.data
-          }
-        }
-
-        if (!collections) {
-          const response = yield call(fetchCatalog, catalogUrl)
-          collections = response[0]
-
-          const version = response[1]
-          if (version) {
-            yield store('catalog', { version, data: response[0] })
-          }
-        }
-      }
-      const catalog = collections!
-        .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
-        .map(overrideBaseUrl)
-        // TODO - remove once all swankies are removed from service! - moliva - 22/05/2020
-        .map(overrideSwankyRarity)
-      const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
-      const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
-      if (!(yield select(isInitialized))) {
-        yield take(RENDERER_INITIALIZED)
-      }
-      yield put(addCatalog('base-avatars', baseAvatars))
-      yield put(addCatalog('base-exclusive', baseExclusive))
-    } catch (error) {
-      defaultLogger.error('[FATAL]: Could not load catalog!', error)
-    }
-  } else {
-    let baseCatalog = []
-    try {
-      const response = yield fetch(getResourcesURL() + '/default-profile/basecatalog.json')
-      baseCatalog = yield response.json()
-    } catch (e) {
-      defaultLogger.warn(`Could not load base catalog`)
-    }
-    yield put(addCatalog('base-avatars', baseCatalog))
-    yield put(addCatalog('base-exclusive', []))
-  }
-}
-
 export function* handleFetchProfile(action: ProfileRequestAction): any {
   const userId = action.payload.userId
   const email = ''
@@ -312,25 +188,30 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
-      const serverUrl = yield select(getProfileDownloadServer)
-      const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+      if (action.payload.profileType === ProfileType.LOCAL && currentId !== userId) {
+        const peerProfile: Profile = yield requestLocalProfileToPeers(action.payload.userId)
+        if (peerProfile) {
+          profile = ensureServerFormat(peerProfile)
+          profile.hasClaimedName = false // for now, comms profiles can't have claimed names
+        }
+      } else {
+        const serverUrl = yield select(getProfileDownloadServer)
+        const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
 
-      if (profiles.avatars.length !== 0) {
-        profile = profiles.avatars[0]
-        hasConnectedWeb3 = true
+        if (profiles.avatars.length !== 0) {
+          profile = profiles.avatars[0]
+          hasConnectedWeb3 = true
+        }
       }
     } catch (error) {
       defaultLogger.warn(`Error requesting profile for ${userId}, `, error)
     }
 
-    const userInfo = getUserProfile()
-    if (!profile && userInfo && userInfo.userId && userId === userInfo.userId && userInfo.profile) {
-      defaultLogger.info(`Recover profile from local storage`)
-      profile = yield call(
-        ensureServerFormat,
-        { ...userInfo.profile, avatar: { ...userInfo.profile.avatar, snapshots: userInfo.profile.snapshots } },
-        userInfo.version || 0
-      )
+    if (currentId === userId) {
+      const localProfile = fetchProfileLocally(userId)
+      if (!profile || (localProfile && profile.version < localProfile.version)) {
+        profile = localProfile
+      }
     }
 
     if (!profile) {
@@ -363,7 +244,12 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   const passport = yield call(processServerProfile, userId, profile)
+
   yield put(profileSuccess(userId, passport, hasConnectedWeb3))
+}
+
+function dropIndexFromExclusives(exclusive: string) {
+  return exclusive.split('/').slice(0, 4).join('/')
 }
 
 function lastSegment(url: string) {
@@ -419,66 +305,23 @@ export async function profileServerRequest(serverUrl: string, userId: string) {
   }
 }
 
-export function* handleRandomAsSuccess(action: ProfileRandomAction): any {
+function* handleRandomAsSuccess(action: ProfileRandomAction): any {
   // TODO (eordano, 16/Sep/2019): See if there's another way around people expecting PASSPORT_SUCCESS
   yield put(profileSuccess(action.payload.userId, action.payload.profile))
 }
 
-export function* handleAddCatalog(action: AddCatalogAction): any {
-  // TODO (eordano, 16/Sep/2019): Validate correct schema
-  if (!action.payload.catalog) {
-    return
-  }
-  if (!(yield select(isInitialized))) {
-    yield take(RENDERER_INITIALIZED)
-  }
-  yield call(sendWearablesCatalog, action.payload.catalog)
-  yield put(catalogLoaded(action.payload.name))
-}
+function* handleLocalProfile(action: LocalProfileReceived) {
+  const { userId, profile } = action.payload
 
-async function headCatalog(url: string) {
-  const request = await fetch(url, { method: 'HEAD' })
-  if (!request.ok) {
-    throw new Error('Catalog not found')
-  }
-  return request.headers.get('etag')
-}
+  const existingProfile = yield select(getProfile, userId)
+  const connectedWeb3 = yield select(hasConnectedWeb3, userId)
 
-export async function fetchCatalog(url: string) {
-  const request = await fetch(url)
-  if (!request.ok) {
-    throw new Error('Catalog not found')
-  }
-  const etag = request.headers.get('etag')
-  return [await request.json(), etag]
-}
-
-export function sendWearablesCatalog(catalog: Catalog) {
-  globalThis.unityInterface.AddWearablesToCatalog(catalog)
-}
-
-export function handleNewInventoryItem() {
-  globalThis.unityInterface.ShowNotification({
-    type: NotificationType.GENERIC,
-    message: 'You received an exclusive wearable NFT mask! Check it out in the avatar editor.',
-    buttonMessage: 'OK',
-    timer: 7
-  })
-}
-
-export function* ensureRenderer() {
-  while (!(yield select(isInitialized))) {
-    yield take(RENDERER_INITIALIZED)
+  if (!existingProfile || existingProfile.version < profile.version) {
+    yield put(profileSuccess(userId, profile, connectedWeb3))
   }
 }
 
-export function* ensureBaseCatalogs() {
-  while (!(yield select(baseCatalogsLoaded))) {
-    yield take(CATALOG_LOADED)
-  }
-}
-
-export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
+function* submitProfileToRenderer(action: ProfileSuccessAction): any {
   const profile = { ...action.payload.profile }
   if (profile.avatar) {
     const { snapshots } = profile.avatar
@@ -497,10 +340,6 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
       profile.inventory = (yield select(getExclusiveCatalog)).map((_: Wearable) => _.id)
     }
 
-    if (!DEBUG) {
-      globalThis.unityInterface.ConfigureEmailPrompt(profile.tutorialStep)
-    }
-
     yield call(sendLoadProfile, profile)
   } else {
     yield call(ensureRenderer)
@@ -516,15 +355,14 @@ export function* submitProfileToRenderer(action: ProfileSuccessAction): any {
 }
 
 function* sendLoadProfile(profile: Profile) {
-  while (!(yield select(baseCatalogsLoaded))) {
-    yield take(CATALOG_LOADED)
-  }
+  yield call(ensureBaseCatalogs)
+
   const identity = yield select(getCurrentIdentity)
   const rendererFormat = profileToRendererFormat(profile, identity)
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
 
-export function* handleFetchInventory(action: InventoryRequest) {
+function* handleFetchInventory(action: InventoryRequest) {
   const { userId, ethAddress } = action.payload
   try {
     const inventoryItems = yield call(fetchInventoryItemsByAddress, ethAddress)
@@ -532,10 +370,6 @@ export function* handleFetchInventory(action: InventoryRequest) {
   } catch (error) {
     yield put(inventoryFailure(userId, error))
   }
-}
-
-function dropIndexFromExclusives(exclusive: string) {
-  return exclusive.split('/').slice(0, 4).join('/')
 }
 
 export async function fetchInventoryItemsByAddress(address: string) {
@@ -551,99 +385,62 @@ export async function fetchInventoryItemsByAddress(address: string) {
   return inventory.map((wearable) => wearable.id)
 }
 
-export function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
+function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
   const userId = saveAvatar.payload.userId ? saveAvatar.payload.userId : yield select(getCurrentUserId)
 
   try {
-    const savedProfile = yield select(getProfile, userId)
-    const currentVersion = savedProfile.version || 0
-    const url: string = yield select(getUpdateProfileServer)
-    const profile = { ...savedProfile, ...saveAvatar.payload.profile }
+    const savedProfile: Profile | null = yield select(getProfile, userId)
+    const currentVersion: number = savedProfile?.version && savedProfile?.version > 0 ? savedProfile?.version : 0
+    const profile = { ...savedProfile, ...saveAvatar.payload.profile, ...{ version: currentVersion + 1 } } as Profile
 
-    const identity = yield select(getCurrentIdentity)
+    const identity: ExplorerIdentity = yield select(getCurrentIdentity)
 
-    // only update profile if wallet is connected
+    localProfilesRepo.persist(identity.address, profile)
+
+    yield put(saveProfileSuccess(userId, profile.version, profile))
+
+    // only update profile on server if wallet is connected
     if (identity.hasConnectedWeb3) {
-      const result = yield call(modifyAvatar, {
-        url,
-        userId,
-        currentVersion,
-        identity,
-        profile
-      })
-
-      const { creationTimestamp: version } = result
-
-      yield put(saveProfileSuccess(userId, version, profile))
-      yield put(profileRequest(userId))
+      yield put(deployProfile(profile))
+    } else {
+      yield put(profileSavedNotDeployed(userId, profile.version, profile))
     }
+
+    yield put(profileRequest(userId))
   } catch (error) {
     yield put(saveProfileFailure(userId, 'unknown reason'))
   }
 }
 
-export class ControllerEntityFactory {
-  static maskEntity(fullEntity: Entity, fields?: EntityField[]): ControllerEntity {
-    const { id, type, timestamp } = fullEntity
-    let content: ControllerEntityContent[] | undefined = undefined
-    let metadata: any
-    let pointers: string[] = []
-    if ((!fields || fields.includes(EntityField.CONTENT)) && fullEntity.content) {
-      content = Array.from(fullEntity.content.entries()).map(([file, hash]) => ({ file, hash }))
-    }
-    if (!fields || fields.includes(EntityField.METADATA)) {
-      metadata = fullEntity.metadata
-    }
-    if ((!fields || fields.includes(EntityField.POINTERS)) && fullEntity.pointers) {
-      pointers = fullEntity.pointers
-    }
-    return { id, type, timestamp, pointers, content, metadata }
+function* handleDeployProfile(deployProfileAction: DeployProfile) {
+  const url: string = yield select(getUpdateProfileServer)
+  const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+  const userId: string = yield select(getCurrentUserId)
+  const profile: Profile = deployProfileAction.payload.profile
+  try {
+    yield modifyAvatar({
+      url,
+      userId,
+      identity,
+      profile
+    })
+    yield put(deployProfileSuccess(userId, profile.version, profile))
+  } catch (e) {
+    defaultLogger.error('Error deploying profile!', e)
+    yield put(deployProfileFailure(userId, profile, e))
   }
 }
 
-async function buildControllerEntityAndFile(
-  type: EntityType,
-  pointers: Pointer[],
-  timestamp: Timestamp,
-  content?: Map<string, ContentFileHash>,
-  metadata?: any
-): Promise<[ControllerEntity, ContentFile]> {
-  const [entity, file]: [Entity, ContentFile] = await buildEntityAndFile(type, pointers, timestamp, content, metadata)
-  return [ControllerEntityFactory.maskEntity(entity), file]
+function fetchProfileLocally(address: string) {
+  const profile: Profile | null = localProfilesRepo.get(address)
+  if (profile?.userId === address) {
+    return ensureServerFormat(profile)
+  } else {
+    return null
+  }
 }
 
-export async function buildEntityAndFile(
-  type: EntityType,
-  pointers: Pointer[],
-  timestamp: Timestamp,
-  content?: Map<string, ContentFileHash>,
-  metadata?: any
-): Promise<[Entity, ContentFile]> {
-  const entity: Entity = new Entity('temp-id', type, pointers, timestamp, content, metadata)
-  const file: ContentFile = entityToFile(entity, ENTITY_FILE_NAME)
-  const fileHash: ContentFileHash = await calculateBufferHash(file.content)
-  const entityWithCorrectId = new Entity(
-    fileHash,
-    entity.type,
-    entity.pointers,
-    entity.timestamp,
-    entity.content,
-    entity.metadata
-  )
-  return [entityWithCorrectId, file]
-}
-
-export function entityToFile(entity: Entity, fileName?: string): ContentFile {
-  let copy: any = Object.assign({}, entity)
-  copy.content =
-    !copy.content || !(copy.content instanceof Map)
-      ? copy.content
-      : Array.from(copy.content.entries()).map(([key, value]: any) => ({ file: key, hash: value }))
-  delete copy.id
-  return { name: fileName || 'name', content: Buffer.from(JSON.stringify(copy)) }
-}
-
-export async function calculateBufferHash(buffer: Buffer): Promise<string> {
+async function calculateBufferHash(buffer: Buffer): Promise<string> {
   const hash = await multihashing(buffer, 'sha2-256')
   return new CID(0, 'dag-pb', hash).toBaseEncodedString()
 }
@@ -674,19 +471,13 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
   return [name, hash, contentFile]
 }
 
-export async function modifyAvatar(params: {
-  url: string
-  currentVersion: number
-  userId: string
-  identity: ExplorerIdentity
-  profile: Profile
-}) {
-  const { url, currentVersion, profile, identity } = params
+async function modifyAvatar(params: { url: string; userId: string; identity: ExplorerIdentity; profile: Profile }) {
+  const { url, profile, identity } = params
   const { avatar } = profile
 
   const newAvatar = { ...avatar }
 
-  let files: ContentFile[] = []
+  let files = new Map<string, Buffer>()
 
   const snapshots = avatar.snapshots || (profile as any).snapshots
   const content = new Map()
@@ -697,22 +488,35 @@ export async function modifyAvatar(params: {
 
       newSnapshots[selector] = hash
       content.set(name, hash)
-      contentFile && files.push(contentFile)
+      contentFile && files.set(contentFile.name, contentFile.content)
     }
     newAvatar.snapshots = newSnapshots as Avatar['snapshots']
   }
-  const newProfile = ensureServerFormat({ ...profile, avatar: newAvatar }, currentVersion)
 
-  const [data] = await buildDeployData(
-    identity,
-    [identity.address],
-    {
-      avatars: [newProfile]
-    },
-    files,
-    content
-  )
-  return deploy(url, data)
+  const metadata = buildServerMetadata({ ...profile, avatar: newAvatar })
+
+  return deploy(url, identity, metadata, files, content)
+}
+
+async function deploy(
+  url: string,
+  identity: ExplorerIdentity,
+  metadata: any,
+  contentFiles: Map<string, Buffer>,
+  contentHashes: Map<string, string>
+) {
+  // Build entity and group all files
+  const preparationData = await (contentFiles.size
+    ? DeploymentBuilder.buildEntity(EntityType.PROFILE, [identity.address], contentFiles, metadata)
+    : DeploymentBuilder.buildEntityWithoutNewFiles(EntityType.PROFILE, [identity.address], contentHashes, metadata))
+  // sign the entity id fetchMetaContentServer
+  const authChain = Authenticator.signPayload(identity, preparationData.entityId)
+  // Build the client
+  const catalyst = new ContentClient(url, 'explorer-kernel-profile')
+  // Build the deploy data
+  const deployData: DeploymentData = { ...preparationData, authChain }
+  // Deploy the actual entity
+  return catalyst.deployEntity(deployData)
 }
 
 export function makeContentFile(path: string, content: string | Blob): Promise<ContentFile> {
@@ -731,177 +535,6 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
   })
 }
 
-export async function buildDeployData(
-  identity: ExplorerIdentity,
-  pointers: Pointer[],
-  metadata: any,
-  files: ContentFile[] = [],
-  content: Map<string, string>,
-  afterEntity?: ControllerEntity
-): Promise<[DeployData, ControllerEntity]> {
-  const [entity, entityFile] = await buildControllerEntityAndFile(
-    EntityType.PROFILE,
-    pointers,
-    (afterEntity ? afterEntity.timestamp : Date.now()) + 1,
-    content,
-    metadata
-  )
-
-  const body = await hashAndSignMessage(identity, entity.id)
-  const deployData: DeployData = {
-    entityId: entity.id,
-    // Every position in the body ethAddress every position in the authLink is an slavon.
-    // 1 = ethAddress, 2 ehpemeral & signature w/ethAdrress, 3 request & signature with ephemeral
-    authChain: body,
-    files: [entityFile, ...files]
-  }
-
-  return [deployData, entity]
-}
-
-export async function hashAndSignMessage(identity: ExplorerIdentity, message: string): Promise<AuthLink[]> {
-  return Authenticator.signPayload(identity, message)
-}
-
-export function createEthereumMessageHash(msg: string) {
-  const msgWithPrefix: string = `\x19Ethereum Signed Message:\n${msg.length}${msg}`
-  return sha3(msgWithPrefix)
-}
-
-export async function calculateHashes(files: ContentFile[]): Promise<Map<string, ContentFile>> {
-  const entries: Promise<[string, ContentFile]>[] = Array.from(files).map((file) =>
-    calculateBufferHash(file.content).then((hash: string) => [hash, file])
-  )
-  return new Map(await Promise.all(entries))
-}
-
-export async function deploy(contentServerUrl: string, data: DeployData) {
-  const form = new FormData()
-  form.append('entityId', data.entityId)
-  convertModelToFormData(data.authChain, form, 'authChain')
-  for (let file of data.files) {
-    form.append(file.name, new Blob([file.content]), file.name)
-  }
-  const deployResponse = await fetch(`${contentServerUrl}/entities`, {
-    method: 'POST',
-    body: form
-  })
-  return deployResponse.json()
-}
-
-function convertModelToFormData(model: any, form: FormData = new FormData(), namespace = ''): FormData {
-  let formData = form || new FormData()
-  for (let propertyName in model) {
-    if (!model.hasOwnProperty(propertyName) || !model[propertyName]) continue
-    let formKey = namespace ? `${namespace}[${propertyName}]` : propertyName
-    if (model[propertyName] instanceof Date) {
-      formData.append(formKey, model[propertyName].toISOString())
-    } else if (model[propertyName] instanceof Array) {
-      model[propertyName].forEach((element: any, index: number) => {
-        const tempFormKey = `${formKey}[${index}]`
-        convertModelToFormData(element, formData, tempFormKey)
-      })
-    } else if (typeof model[propertyName] === 'object' && !(model[propertyName] instanceof File)) {
-      convertModelToFormData(model[propertyName], formData, formKey)
-    } else {
-      formData.append(formKey, model[propertyName].toString())
-    }
-  }
-  return formData
-}
-
-export function base64ToBlob(base64: string): Blob {
-  const sliceSize = 1024
-  const byteChars = globalThis.atob(base64)
-  const byteArrays = []
-  let len = byteChars.length
-
-  for (let offset = 0; offset < len; offset += sliceSize) {
-    const slice = byteChars.slice(offset, offset + sliceSize)
-
-    const byteNumbers = new Array(slice.length)
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i)
-    }
-
-    const byteArray = new Uint8Array(byteNumbers)
-
-    byteArrays.push(byteArray)
-    len = byteChars.length
-  }
-
-  return new Blob(byteArrays, { type: 'image/jpeg' })
-}
-
-const MILLIS_PER_SECOND = 1000
-const ONE_MINUTE = 60 * MILLIS_PER_SECOND
-
-export function delay(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time))
-}
-
-export function* queryInventoryEveryMinute() {
-  while (true) {
-    yield delay(ONE_MINUTE)
-    yield call(checkInventoryForUpdates)
-  }
-}
-
-export function* checkInventoryForUpdates() {
-  const userId = yield select(getCurrentUserId)
-  if (!userId) {
-    return
-  }
-  const ethAddress = yield select(getEthereumAddress, userId)
-  const inventory = yield select(getInventory, userId)
-  if (!inventory || (Array.isArray(inventory) && inventory.length === 0)) {
-    return
-  }
-  yield put(inventoryRequest(userId, ethAddress))
-  const fetchNewInventory = yield race({
-    success: take(INVENTORY_SUCCESS),
-    fail: take(INVENTORY_FAILURE)
-  })
-  if (fetchNewInventory.success) {
-    const newInventory: string[] = (fetchNewInventory.success as InventorySuccess).payload.inventory
-    yield call(compareInventoriesAndTriggerNotification, userId, inventory, newInventory)
-  }
-}
-
-export function* compareInventoriesAndTriggerNotification(
-  userId: string,
-  oldInventory: string[],
-  newInventory: string[],
-  fetchFromDb = getFromLocalStorage,
-  saveToDb = saveToLocalStorage
-) {
-  if (areInventoriesDifferent(oldInventory, newInventory)) {
-    const oldItemsDict = oldInventory.reduce<Record<WearableId, boolean>>(
-      (cumm: Record<WearableId, boolean>, id: string) => ({ ...cumm, [id]: true }),
-      {}
-    )
-    let shouldSendNotification = false
-    for (let item of newInventory) {
-      if (!oldItemsDict[item]) {
-        const storeKey = '__notified_' + item
-        if (!fetchFromDb(storeKey)) {
-          saveToDb(storeKey, 'notified')
-          shouldSendNotification = true
-        }
-      }
-    }
-    if (shouldSendNotification) {
-      yield put(notifyNewInventoryItem())
-    }
-    yield call(sendLoadProfile, yield select(getProfile, userId))
-  }
-}
-
-function areInventoriesDifferent(inventory1: WearableId[], inventory2: WearableId[]) {
-  const sort1 = inventory1.sort()
-  const sort2 = inventory2.sort()
-  return (
-    inventory1.length !== inventory2.length ||
-    sort1.reduce((result: boolean, next, index) => result && next !== sort2[index], true)
-  )
+export function getProfileType(identity?: ExplorerIdentity): ProfileType {
+  return identity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
 }

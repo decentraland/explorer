@@ -2,6 +2,7 @@ using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
+using DCL.Controllers.ParcelSceneDebug;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -41,19 +42,18 @@ namespace DCL.Controllers
         public ContentProvider contentProvider;
         public int disposableNotReadyCount => disposableNotReady.Count;
 
-        [System.NonSerialized] public bool useBlockers = true;
-
         [System.NonSerialized] public bool isTestScene = false;
 
         [System.NonSerialized] public bool isPersistent = false;
 
         [System.NonSerialized] public bool unloadWithDistance = true;
 
-        public BlockerHandler blockerHandler;
         public bool isReady => state == State.READY;
 
         readonly List<string> disposableNotReady = new List<string>();
         bool isReleased = false,isEditModeActive = false;
+
+        SceneDebugPlane sceneDebugPlane = null;
 
         State stateValue = State.NOT_READY;
 
@@ -81,11 +81,6 @@ namespace DCL.Controllers
         void OnDisable()
         {
             metricsController.Disable();
-        }
-
-        private void OnDestroy()
-        {
-            blockerHandler?.CleanBlockers();
         }
 
         private void Update()
@@ -149,9 +144,6 @@ namespace DCL.Controllers
                 parcels.Add(sceneData.parcels[i]);
             }
 
-            if (useBlockers)
-                blockerHandler = new BlockerHandler();
-
             if (DCLCharacterController.i != null)
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
 
@@ -163,7 +155,6 @@ namespace DCL.Controllers
                 return;
             }
 #endif
-            blockerHandler?.SetupBlockers(parcels, metricsController.GetLimits().sceneHeight, this.transform);
 
             if (isTestScene)
                 SetSceneReady();
@@ -184,46 +175,18 @@ namespace DCL.Controllers
 
         public void InitializeDebugPlane()
         {
-            if (EnvironmentSettings.DEBUG && sceneData.parcels != null)
+            if (EnvironmentSettings.DEBUG && sceneData.parcels != null && sceneDebugPlane == null)
             {
-                int sceneDataParcelsLength = sceneData.parcels.Length;
-                for (int j = 0; j < sceneDataParcelsLength; j++)
-                {
-                    GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                sceneDebugPlane = new SceneDebugPlane(sceneData, gameObject.transform);
+            }
+        }
 
-                    Object.Destroy(plane.GetComponent<MeshCollider>());
-
-                    plane.name = $"parcel:{sceneData.parcels[j].x},{sceneData.parcels[j].y}";
-
-                    plane.transform.SetParent(gameObject.transform);
-
-                    // the plane mesh with scale 1 occupies a 10 units space
-                    plane.transform.localScale = new Vector3(ParcelSettings.PARCEL_SIZE * 0.1f, 1f,
-                        ParcelSettings.PARCEL_SIZE * 0.1f);
-
-                    Vector3 position = Utils.GridToWorldPosition(sceneData.parcels[j].x, sceneData.parcels[j].y);
-                    // SET TO A POSITION RELATIVE TO basePosition
-
-                    position.Set(position.x + ParcelSettings.PARCEL_SIZE / 2, ParcelSettings.DEBUG_FLOOR_HEIGHT,
-                        position.z + ParcelSettings.PARCEL_SIZE / 2);
-
-                    plane.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(position);
-
-                    if (Configuration.ParcelSettings.VISUAL_LOADING_ENABLED)
-                    {
-                        Material finalMaterial = Utils.EnsureResourcesMaterial("Materials/DefaultPlane");
-                        var matTransition = plane.AddComponent<MaterialTransitionController>();
-                        matTransition.delay = 0;
-                        matTransition.useHologram = false;
-                        matTransition.fadeThickness = 20;
-                        matTransition.OnDidFinishLoading(finalMaterial);
-                    }
-                    else
-                    {
-                        plane.GetComponent<MeshRenderer>().sharedMaterial =
-                            Utils.EnsureResourcesMaterial("Materials/DefaultPlane");
-                    }
-                }
+        public void RemoveDebugPlane()
+        {
+            if (sceneDebugPlane != null)
+            {
+                sceneDebugPlane.Dispose();
+                sceneDebugPlane = null;
             }
         }
 
@@ -231,6 +194,12 @@ namespace DCL.Controllers
         {
             if (isReleased)
                 return;
+
+            if (sceneDebugPlane != null)
+            {
+                sceneDebugPlane.Dispose();
+                sceneDebugPlane = null;
+            }
 
             DisposeAllSceneComponents();
 
@@ -447,6 +416,12 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
+            if (SceneController.i.useBoundariesChecker)
+            {
+                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
+                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+            }
+
             if (removeImmediatelyFromEntitiesList)
             {
                 // Every entity ends up being removed through here
@@ -456,12 +431,6 @@ namespace DCL.Controllers
             else
             {
                 parcelScenesCleaner.MarkForCleanup(entity);
-            }
-
-            if (SceneController.i.useBoundariesChecker)
-            {
-                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
-                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
             }
         }
 
@@ -520,27 +489,32 @@ namespace DCL.Controllers
 
             if (me != null)
             {
-                if (parentId == "PlayerEntityReference")
+                if (parentId == "FirstPersonCameraEntityReference" || parentId == "PlayerEntityReference") // PlayerEntityReference is for compatibility purposes
                 {
-                    me.SetParent(DCLCharacterController.i.playerReference);
+                    // In this case, the entity will attached to the first person camera
+                    // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
+                    me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
                     SceneController.i.physicsSyncController.MarkDirty();
                 }
-                else if (parentId == "AvatarPositionEntityReference")
+                else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
                 {
-                    me.SetParent(DCLCharacterController.i.avatarPositionReference);
+                    // In this case, the entity will be attached to the avatar
+                    // It will simply rotate with the avatar, regardless of where the camera is pointing
+                    me.SetParent(DCLCharacterController.i.avatarReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
                     SceneController.i.physicsSyncController.MarkDirty();
                 }
                 else
                 {
-                    if (me.parent == DCLCharacterController.i.playerReference || me.parent == DCLCharacterController.i.avatarPositionReference)
+                    if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                     {
                         SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
                     }
 
                     if (parentId == "0")
                     {
+                        // The entity will be child of the scene directly
                         me.SetParent(null);
                         me.gameObject.transform.SetParent(gameObject.transform, false);
                         SceneController.i.physicsSyncController.MarkDirty();
@@ -555,7 +529,6 @@ namespace DCL.Controllers
                             SceneController.i.physicsSyncController.MarkDirty();
                         }
                     }
-                        
                 }
             }
         }
@@ -716,7 +689,9 @@ namespace DCL.Controllers
                 MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
 
                 if (!entity.components.ContainsKey(classId))
+                {
                     entity.components.Add(classId, null);
+                }
 
                 if (entity.OnTransformChange != null)
                 {
@@ -816,8 +791,14 @@ namespace DCL.Controllers
                 }
             }
 
-            if (newComponent != null && newComponent.isRoutineRunning)
-                yieldInstruction = newComponent.yieldInstruction;
+            if (newComponent != null)
+            {
+                if (newComponent is IOutOfSceneBoundariesHandler)
+                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+
+                if (newComponent.isRoutineRunning)
+                    yieldInstruction = newComponent.yieldInstruction;
+            }
 
             SceneController.i.physicsSyncController.MarkDirty();
             return newComponent;
@@ -1266,8 +1247,6 @@ namespace DCL.Controllers
                 Debug.Log($"{sceneData.basePosition} Scene Ready!");
 
             state = State.READY;
-
-            blockerHandler?.CleanBlockers();
 
             SceneController.i.SendSceneReady(sceneData.id);
             RefreshName();

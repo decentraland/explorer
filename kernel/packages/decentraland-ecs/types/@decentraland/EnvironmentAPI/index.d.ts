@@ -1,5 +1,5 @@
 declare module '@decentraland/EnvironmentAPI' {
-  type Realm = {
+  export type Realm = {
     domain: string
     layer: string
     serverName: string
@@ -9,4 +9,9 @@ declare module '@decentraland/EnvironmentAPI' {
    * Returns the current connected realm
    */
   export function getCurrentRealm(): Promise<Realm | undefined>
+
+  /**
+   * Returns whether the scene is running in preview mode or not
+   */
+  export function isPreviewMode(): Promise<boolean>
 }

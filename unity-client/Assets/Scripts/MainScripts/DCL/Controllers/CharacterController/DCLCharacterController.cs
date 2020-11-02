@@ -41,6 +41,7 @@ public class DCLCharacterController : MonoBehaviour
     float lastJumpButtonPressedTime = 0f;
     float lastMovementReportTime;
     float originalGravity;
+    Vector3 lastLocalGroundPosition;
     Vector3 velocity = Vector3.zero;
 
     bool isSprinting = false;
@@ -71,11 +72,11 @@ public class DCLCharacterController : MonoBehaviour
     public static System.Action<DCLCharacterPosition> OnPositionSet;
 
 
-    // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake 
-    [HideInInspector] public DCL.Models.DecentralandEntity avatarPositionReference;
-    [HideInInspector] public DCL.Models.DecentralandEntity playerReference;
-    [SerializeField] private GameObject avatarPositionGameObject;
-    [SerializeField] private GameObject playerGameObject;
+    // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake
+    public DCL.Models.DecentralandEntity avatarReference { get; private set; }
+    public DCL.Models.DecentralandEntity firstPersonCameraReference  { get; private set; }
+    [SerializeField] private GameObject avatarGameObject;
+    [SerializeField] private GameObject firstPersonCameraGameObject;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
@@ -115,12 +116,12 @@ public class DCLCharacterController : MonoBehaviour
         CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
         OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
 
-        if (avatarPositionGameObject == null || playerGameObject == null)
+        if (avatarGameObject == null || firstPersonCameraGameObject == null)
         {
-            throw new System.Exception("Both the avatar position and player game objects must be set.");
+            throw new System.Exception("Both the avatar and first person camera game objects must be set.");
         }
-        avatarPositionReference = new DCL.Models.DecentralandEntity { gameObject = avatarPositionGameObject };
-        playerReference = new DCL.Models.DecentralandEntity { gameObject = playerGameObject };
+        avatarReference = new DCL.Models.DecentralandEntity { gameObject = avatarGameObject };
+        firstPersonCameraReference = new DCL.Models.DecentralandEntity { gameObject = firstPersonCameraGameObject };
     }
 
     private void SuscribeToInput()
@@ -356,12 +357,13 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResetGround()
     {
+        if(isOnMovingPlatform)
+            CommonScriptableObjects.playerIsOnMovingPlatform.Set(false);
+
         isOnMovingPlatform = false;
         groundTransform = null;
         movingPlatformSpeed = 0;
     }
-
-    Vector3 lastLocalGroundPosition;
 
     void CheckGround()
     {
@@ -390,6 +392,7 @@ public class DCLCharacterController : MonoBehaviour
                     && groundHasMoved)
                 {
                     isOnMovingPlatform = true;
+                    CommonScriptableObjects.playerIsOnMovingPlatform.Set(true);
                     Physics.SyncTransforms();
                     lastLocalGroundPosition = groundTransform.InverseTransformPoint(transform.position);
                 }

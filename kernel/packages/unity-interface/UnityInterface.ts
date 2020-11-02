@@ -1,9 +1,8 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { WSS_ENABLED } from 'config'
+import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
-import { Wearable } from 'shared/profiles/types'
 import {
   HUDConfiguration,
   InstancedSpawnPoint,
@@ -13,11 +12,15 @@ import {
   HUDElementID,
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
-  UpdateUserStatusMessage
+  UpdateUserStatusMessage,
+  RenderProfile,
+  BuilderConfiguration,
+  Wearable
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
+import { setDelightedSurveyEnabled } from './delightedSurvey'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -66,6 +69,10 @@ export class UnityInterface {
   public Module: any
 
   public SetTargetHeight(height: number): void {
+    if (EDITOR) {
+      return
+    }
+
     if (targetHeight === height) {
       return
     }
@@ -91,9 +98,20 @@ export class UnityInterface {
     _gameInstance = gameInstance
 
     if (this.Module) {
-      window.addEventListener('resize', this.resizeCanvasDelayed)
-      this.resizeCanvasDelayed(null)
-      this.waitForFillMouseEventData()
+      if (EDITOR) {
+        const canvas = this.Module.canvas
+        canvas.width = canvas.parentElement.clientWidth
+        canvas.height = canvas.parentElement.clientHeight
+      } else {
+        window.addEventListener('resize', this.resizeCanvasDelayed)
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') resizeCanvas(this.Module)
+        })
+
+        this.resizeCanvasDelayed(null)
+        this.waitForFillMouseEventData()
+      }
     }
   }
 
@@ -120,6 +138,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
   }
 
+  public SetRenderProfile(id: RenderProfile) {
+    this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', JSON.stringify({ id: id }))
+  }
+
   public CreateUIScene(data: { id: string; baseUrl: string }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
@@ -132,12 +154,17 @@ export class UnityInterface {
 
   /** Sends the camera position & target to the engine */
 
-  public Teleport({ position: { x, y, z }, cameraTarget }: InstancedSpawnPoint) {
+  public Teleport(
+    { position: { x, y, z }, cameraTarget }: InstancedSpawnPoint,
+    rotateIfTargetIsNotSet: boolean = true
+  ) {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
     this.gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
-    this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    if (cameraTarget || rotateIfTargetIsNotSet) {
+      this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+    }
   }
 
   /** Tells the engine which scenes to load */
@@ -223,19 +250,23 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'ClearWearableCatalog')
   }
 
-  public ShowNewWearablesNotification(wearableNumber: number) {
-    // disabled
-  }
-
   public ShowNotification(notification: Notification) {
     this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
-  public ConfigureHUDElement(hudElementId: HUDElementID, configuration: HUDConfiguration) {
+  public ConfigureHUDElement(
+    hudElementId: HUDElementID,
+    configuration: HUDConfiguration,
+    extraPayload: any | null = null
+  ) {
     this.gameInstance.SendMessage(
       'HUDController',
       `ConfigureHUDElement`,
-      JSON.stringify({ hudElementId: hudElementId, configuration: configuration })
+      JSON.stringify({
+        hudElementId: hudElementId,
+        configuration: configuration,
+        extraPayload: extraPayload ? JSON.stringify(extraPayload) : null
+      })
     )
   }
 
@@ -254,8 +285,8 @@ export class UnityInterface {
     }
   }
 
-  public SetTutorialEnabled() {
-    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled')
+  public SetTutorialEnabled(fromDeepLink: boolean) {
+    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -307,12 +338,48 @@ export class UnityInterface {
     )
   }
 
+  public RejectGIFProcessingRequest() {
+    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
+  }
+
   public ConfigureEmailPrompt(tutorialStep: number) {
     const emailCompletedFlag = 128
     this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
       active: (tutorialStep & emailCompletedFlag) === 0,
       visible: false
     })
+  }
+
+  public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
+    const tutorialCompletedFlag = 256
+
+    if (WORLD_EXPLORER) {
+      if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
+        this.SetTutorialEnabled(fromDeepLink)
+      } else {
+        setDelightedSurveyEnabled(true)
+      }
+    }
+  }
+
+  public UpdateBalanceOfMANA(balance: string) {
+    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
+  }
+
+  public SetPlayerTalking(talking: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
+  }
+
+  public SetUserTalking(userId: string, talking: boolean) {
+    this.gameInstance.SendMessage(
+      'HUDController',
+      'SetUserTalking',
+      JSON.stringify({ userId: userId, talking: talking })
+    )
+  }
+
+  public SetUsersMuted(usersId: string[], muted: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
   }
 
   // *********************************************************************************
@@ -385,6 +452,10 @@ export class UnityInterface {
 
   public OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
+  }
+
+  public SetBuilderConfiguration(config: BuilderConfiguration) {
+    this.SendBuilderMessage('SetBuilderConfiguration', JSON.stringify(config))
   }
 
   private resizeCanvasDelayed(ev: UIEvent | null) {

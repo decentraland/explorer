@@ -2,16 +2,12 @@ using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using DCL;
 using UnityEngine;
 
 public class UIVisualTestsBase : VisualTestsBase
 {
     protected string screenSpaceId;
-
-    protected override IEnumerator SetUp()
-    {
-        yield break;
-    }
 
     protected IEnumerator InitUIVisualTestScene(string testName)
     {
@@ -22,6 +18,8 @@ public class UIVisualTestsBase : VisualTestsBase
 
         //NOTE(Brian): If we don't wait a frame, RenderingController.Awake sets the rendering state back to false.
         yield return null;
+
+        RenderProfileManifest.i.Initialize(RenderProfileManifest.i.testProfile);
 
         base.SetUp_Renderer();
 

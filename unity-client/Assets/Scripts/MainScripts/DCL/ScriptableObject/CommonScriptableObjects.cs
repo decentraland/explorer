@@ -12,6 +12,66 @@ public static class NotificationScriptableObjects
     public static FloatVariable pendingFriendRequests => CommonScriptableObjects.GetOrLoad(ref pendingFriendRequestsValue, "ScriptableObjects/NotificationBadge_PendingFriendRequests");
 }
 
+public static class AudioScriptableObjects
+{
+    private static AudioEvent buttonHoverEvent;
+    public static AudioEvent buttonHover => CommonScriptableObjects.GetOrLoad(ref buttonHoverEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
+
+    private static AudioEvent buttonClickEvent;
+    public static AudioEvent buttonClick => CommonScriptableObjects.GetOrLoad(ref buttonClickEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
+
+    private static AudioEvent buttonReleaseEvent;
+    public static AudioEvent buttonRelease => CommonScriptableObjects.GetOrLoad(ref buttonReleaseEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
+
+    private static AudioEvent dialogOpenEvent;
+    public static AudioEvent dialogOpen => CommonScriptableObjects.GetOrLoad(ref dialogOpenEvent, "ScriptableObjects/AudioEvents/HUDCommon/DialogOpen");
+
+    private static AudioEvent dialogCloseEvent;
+    public static AudioEvent dialogClose => CommonScriptableObjects.GetOrLoad(ref dialogCloseEvent, "ScriptableObjects/AudioEvents/HUDCommon/DialogClose");
+
+    private static AudioEvent enableEvent;
+    public static AudioEvent enable => CommonScriptableObjects.GetOrLoad(ref enableEvent, "ScriptableObjects/AudioEvents/HUDCommon/Enable");
+
+    private static AudioEvent disableEvent;
+    public static AudioEvent disable => CommonScriptableObjects.GetOrLoad(ref disableEvent, "ScriptableObjects/AudioEvents/HUDCommon/Disable");
+
+    private static AudioEvent fadeInEvent;
+    public static AudioEvent fadeIn => CommonScriptableObjects.GetOrLoad(ref fadeInEvent, "ScriptableObjects/AudioEvents/HUDCommon/FadeIn");
+
+    private static AudioEvent fadeOutEvent;
+    public static AudioEvent fadeOut => CommonScriptableObjects.GetOrLoad(ref fadeOutEvent, "ScriptableObjects/AudioEvents/HUDCommon/FadeOut");
+
+    private static AudioEvent_WithPitchIncrement listItemAppearEvent;
+    public static AudioEvent_WithPitchIncrement listItemAppear => CommonScriptableObjects.GetOrLoad(ref listItemAppearEvent, "ScriptableObjects/AudioEvents/HUDCommon/ListItemAppear");
+
+    private static AudioEvent chatReceiveGlobalEvent;
+    public static AudioEvent chatReceiveGlobal => CommonScriptableObjects.GetOrLoad(ref chatReceiveGlobalEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceiveGlobal");
+
+    private static AudioEvent chatReceivePrivateEvent;
+    public static AudioEvent chatReceivePrivate => CommonScriptableObjects.GetOrLoad(ref chatReceivePrivateEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceivePrivate");
+
+    private static AudioEvent chatSendEvent;
+    public static AudioEvent chatSend => CommonScriptableObjects.GetOrLoad(ref chatSendEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatSend");
+
+    private static AudioEvent notificationEvent;
+    public static AudioEvent notification => CommonScriptableObjects.GetOrLoad(ref notificationEvent, "ScriptableObjects/AudioEvents/HUDCommon/Notification");
+
+    private static AudioEvent sliderValueChangeEvent;
+    public static AudioEvent sliderValueChange => CommonScriptableObjects.GetOrLoad(ref sliderValueChangeEvent, "ScriptableObjects/AudioEvents/HUDCommon/SliderValueChange");
+
+    private static AudioEvent inputFieldFocusEvent;
+    public static AudioEvent inputFieldFocus => CommonScriptableObjects.GetOrLoad(ref inputFieldFocusEvent, "ScriptableObjects/AudioEvents/HUDCommon/InputFieldFocus");
+
+    private static AudioEvent inputFieldUnfocusEvent;
+    public static AudioEvent inputFieldUnfocus => CommonScriptableObjects.GetOrLoad(ref inputFieldUnfocusEvent, "ScriptableObjects/AudioEvents/HUDCommon/InputFieldUnfocus");
+
+    private static AudioEvent UIHideEvent;
+    public static AudioEvent UIHide => CommonScriptableObjects.GetOrLoad(ref UIHideEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIHide");
+
+    private static AudioEvent UIShowEvent;
+    public static AudioEvent UIShow => CommonScriptableObjects.GetOrLoad(ref UIShowEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIUnhide");
+}
+
 public static class CommonScriptableObjects
 {
     private static Vector3Variable playerUnityPositionValue;
@@ -28,6 +88,9 @@ public static class CommonScriptableObjects
 
     private static Vector2IntVariable playerCoordsValue;
     public static Vector2IntVariable playerCoords => GetOrLoad(ref playerCoordsValue, "ScriptableObjects/PlayerCoords");
+
+    private static BooleanVariable playerIsOnMovingPlatformValue;
+    public static BooleanVariable playerIsOnMovingPlatform => GetOrLoad(ref playerIsOnMovingPlatformValue, "ScriptableObjects/playerIsOnMovingPlatform");
 
     private static StringVariable sceneIDValue;
     public static StringVariable sceneID => GetOrLoad(ref sceneIDValue, "ScriptableObjects/SceneID");
@@ -46,6 +109,12 @@ public static class CommonScriptableObjects
 
     private static Vector3Variable cameraRightValue;
     public static Vector3Variable cameraRight => GetOrLoad(ref cameraRightValue, "ScriptableObjects/CameraRight");
+
+    private static BooleanVariable cameraIsBlendingValue;
+    public static BooleanVariable cameraIsBlending => GetOrLoad(ref cameraIsBlendingValue, "ScriptableObjects/CameraIsBlending");
+
+    private static BooleanVariable cameraBlockedValue;
+    public static BooleanVariable cameraBlocked => GetOrLoad(ref cameraBlockedValue, "ScriptableObjects/CameraBlocked");
 
     private static BooleanVariable playerInfoCardVisibleStateValue;
     public static BooleanVariable playerInfoCardVisibleState => GetOrLoad(ref playerInfoCardVisibleStateValue, "ScriptableObjects/PlayerInfoCardVisibleState");
@@ -67,6 +136,24 @@ public static class CommonScriptableObjects
 
     private static CameraMode cameraModeValue;
     public static CameraMode cameraMode => GetOrLoad(ref cameraModeValue, "ScriptableObjects/CameraMode");
+
+    private static BooleanVariable isProfileHUDOpenValue;
+    public static BooleanVariable isProfileHUDOpen => GetOrLoad(ref isProfileHUDOpenValue, "ScriptableObjects/IsProfileHUDOpen");
+
+    private static BooleanVariable isTaskbarHUDInitializedValue;
+    public static BooleanVariable isTaskbarHUDInitialized => GetOrLoad(ref isTaskbarHUDInitializedValue, "ScriptableObjects/IsTaskbarHUDInitialized");
+
+    private static BooleanVariable tutorialActiveValue;
+    public static BooleanVariable tutorialActive => GetOrLoad(ref tutorialActiveValue, "ScriptableObjects/TutorialActive");
+
+    private static BooleanVariable featureKeyTriggersBlockedValue;
+    public static BooleanVariable featureKeyTriggersBlocked => GetOrLoad(ref featureKeyTriggersBlockedValue, "ScriptableObjects/FeatureKeyTriggersBlocked");
+
+    private static BooleanVariable motdActiveValue;
+    public static BooleanVariable motdActive => GetOrLoad(ref motdActiveValue, "ScriptableObjects/MOTDActive");
+
+    private static BooleanVariable emailPromptActiveValue;
+    public static BooleanVariable emailPromptActive => GetOrLoad(ref emailPromptActiveValue, "ScriptableObjects/EmailPromptActive");
 
     internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {

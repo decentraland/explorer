@@ -7,9 +7,9 @@ global.enableWeb3 = window.enableWeb3
 
 import { initializeUnity } from 'unity-interface/initializer'
 import { loadPreviewScene } from 'unity-interface/dcl'
-import { DEBUG_WS_MESSAGES } from 'config'
+import { DEBUG_WS_MESSAGES, HALLOWEEN } from 'config'
 import defaultLogger from 'shared/logger'
-import { ILand, HUDElementID } from 'shared/types'
+import { ILand, HUDElementID, RenderProfile } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
 import { signalRendererInitialized } from 'shared/renderer/actions'
 import { StoreContainer } from 'shared/store/rootTypes'
@@ -25,12 +25,19 @@ if (!container) throw new Error('cannot find element #gameContainer')
 
 const defaultScene: IFuture<ILand> = future()
 
+let wsScene: string | undefined = undefined
+
+if (location.search.indexOf("WS_SCENE") !== -1) {
+  wsScene = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${document.location.host}/?scene`
+}
+
 function startPreviewWatcher() {
   // this is set to avoid double loading scenes due queued messages
   let isSceneLoading: boolean = true
 
   const loadScene = () => {
-    loadPreviewScene()
+    isSceneLoading = true
+    loadPreviewScene(wsScene)
       .then((scene) => {
         isSceneLoading = false
         defaultScene.resolve(scene)
@@ -57,7 +64,6 @@ function startPreviewWatcher() {
         return
       }
 
-      isSceneLoading = true
       loadScene()
     }
   }
@@ -83,11 +89,17 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
 
     global.globalStore.dispatch(signalRendererInitialized())
+
+    if (HALLOWEEN) {
+      i.SetRenderProfile(RenderProfile.HALLOWEEN)
+    } else {
+      i.SetRenderProfile(RenderProfile.DEFAULT)
+    }
 
     const renderable = sceneRenderable()
 

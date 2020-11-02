@@ -175,6 +175,7 @@ namespace Builder
             }
 
             SetCurrentScene();
+            HideHUDs();
         }
 
         public void SetBuilderCameraPosition(string position)
@@ -291,6 +292,24 @@ namespace Builder
                 out targetPosition))
             {
                 builderWebInterface.SendCameraTargetPosition(targetPosition, id);
+            }
+        }
+
+        public void SetBuilderConfiguration(string payloadJson)
+        {
+            if (LOG_MESSAGES) Debug.Log($"RECEIVE: SetBuilderConfiguration {payloadJson}");
+            DCLBuilderConfig.SetConfig(payloadJson);
+
+            if (!currentScene)
+                return;
+
+            if (DCLBuilderConfig.config.environment.disableFloor)
+            {
+                currentScene.RemoveDebugPlane();
+            }
+            else
+            {
+                currentScene.InitializeDebugPlane();
             }
         }
 
@@ -523,6 +542,11 @@ namespace Builder
             cameraController?.gameObject.SetActive(isPreviewMode);
             cursorController?.gameObject.SetActive(isPreviewMode);
 
+            if (!isPreview)
+            {
+                HideHUDs();
+            }
+
             SetCaptureKeyboardInputEnabled(isPreview);
         }
 
@@ -550,7 +574,30 @@ namespace Builder
                 currentScene.OnEntityAdded += OnEntityIsAdded;
                 currentScene.OnEntityRemoved += OnEntityIsRemoved;
                 currentScene.metricsController = new DCLBuilderSceneMetricsController(currentScene);
+
+                if (DCLBuilderConfig.config.environment.disableFloor)
+                {
+                    currentScene.RemoveDebugPlane();
+                }
+                else
+                {
+                    currentScene.InitializeDebugPlane();
+                }
+
                 OnSceneChanged?.Invoke(currentScene);
+            }
+        }
+
+        private void HideHUDs()
+        {
+            IHUD hud;
+            for (int i = 0; i < (int)HUDController.HUDElementID.COUNT; i++)
+            {
+                hud = HUDController.i.GetHUDElement((HUDController.HUDElementID)i);
+                if (hud != null)
+                {
+                    hud.SetVisibility(false);
+                }
             }
         }
 

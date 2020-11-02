@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using DCL;
 using UnityEngine;
 
 namespace Builder
@@ -66,6 +67,9 @@ namespace Builder
 
             entity.OnRemoved -= OnEntityRemoved;
             entity.OnRemoved += OnEntityRemoved;
+
+            AvatarShape.OnAvatarShapeUpdated -= OnAvatarShapeUpdated;
+            AvatarShape.OnAvatarShapeUpdated += OnAvatarShapeUpdated;
 
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
             DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
@@ -164,6 +168,7 @@ namespace Builder
             rootEntity.OnShapeUpdated -= OnShapeUpdated;
             rootEntity.OnTransformChange -= OnTransformUpdated;
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
+            AvatarShape.OnAvatarShapeUpdated -= OnAvatarShapeUpdated;
             DestroyColliders();
         }
 
@@ -171,9 +176,6 @@ namespace Builder
         {
             isShapeComponentSet = true;
             OnEntityShapeUpdated?.Invoke(this);
-
-            //let's reset scale so we generate colliders before any scaling animation
-            gameObject.transform.localScale = Vector3.one;
 
             // We don't want animation to be running on editor
             meshAnimations = GetComponentsInChildren<Animation>();
@@ -185,8 +187,6 @@ namespace Builder
             {
                 DefaultAnimationSample(0);
             }
-            ProcessEntityShape(entity);
-
 
             if (hasGizmoComponent)
             {
@@ -196,6 +196,7 @@ namespace Builder
             else if (isTransformComponentSet)
             {
                 gameObject.transform.localScale = scaleTarget;
+                ProcessEntityShape(entity);
             }
 
             if (OnShapeLoaded != null)
@@ -211,11 +212,11 @@ namespace Builder
             gameObject.transform.position = transformModel.position;
             gameObject.transform.rotation = transformModel.rotation;
 
-            if (isScalingAnimation)
+            if (isScalingAnimation || !isShapeComponentSet)
             {
                 scaleTarget = transformModel.scale;
             }
-            else
+            else if (isShapeComponentSet)
             {
                 scaleTarget = transformModel.scale;
                 gameObject.transform.localScale = transformModel.scale;
@@ -227,7 +228,20 @@ namespace Builder
                 OnEntityAddedWithTransform?.Invoke(this);
             }
 
-            OnEntityTransformUpdated?.Invoke(this);
+            if (isShapeComponentSet)
+            {
+                OnEntityTransformUpdated?.Invoke(this);
+            }
+        }
+
+        private void OnAvatarShapeUpdated(DecentralandEntity entity, AvatarShape avatarShape)
+        {
+            if (rootEntity != entity)
+            {
+                return;
+            }
+
+            OnShapeUpdated(rootEntity);
         }
 
         private void OnPreviewModeChanged(bool isPreview)
@@ -249,9 +263,10 @@ namespace Builder
 
         private void ProcessEntityShape(DecentralandEntity entity)
         {
-            if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0 && hasGizmoComponent)
+            if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
             {
                 CreateColliders(entity.meshesInfo);
+                SetCollidersActive(true);
             }
         }
 
@@ -262,6 +277,7 @@ namespace Builder
             {
                 meshColliders[i] = new GameObject("BuilderSelectionCollider").AddComponent<DCLBuilderSelectionCollider>();
                 meshColliders[i].Initialize(this, meshInfo.renderers[i]);
+                meshColliders[i].gameObject.SetActive(false);
             }
         }
 
@@ -283,6 +299,7 @@ namespace Builder
             }
             gameObject.transform.localScale = scaleTarget;
             isScalingAnimation = false;
+            ProcessEntityShape(rootEntity);
             OnEntityTransformUpdated?.Invoke(this);
         }
 

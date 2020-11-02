@@ -6,7 +6,6 @@ using UnityEngine;
 public class FriendsHUDController : IHUD
 {
     internal const string PLAYER_PREFS_SEEN_FRIEND_COUNT = "SeenFriendsCount";
-    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
     public FriendsHUDView view
     {
         get;
@@ -15,6 +14,8 @@ public class FriendsHUDController : IHUD
 
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
+    public event System.Action OnFriendsOpened;
+    public event System.Action OnFriendsClosed;
 
     UserProfile ownUserProfile;
 
@@ -34,13 +35,8 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.OnCancelConfirmation += Entry_OnRequestCancelled;
         view.friendRequestsList.OnRejectConfirmation += Entry_OnRequestRejected;
         view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
-        view.friendRequestsList.contextMenuPanel.OnBlock += Entry_OnBlock;
-        view.friendRequestsList.contextMenuPanel.OnPassport += Entry_OnPassport;
 
         view.friendsList.OnWhisper += Entry_OnWhisper;
-        view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
-        view.friendsList.contextMenuPanel.OnPassport += Entry_OnPassport;
-        view.friendsList.contextMenuPanel.OnReport += Entry_OnReport;
 
         view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
 
@@ -230,25 +226,6 @@ public class FriendsHUDController : IHUD
         OnPressWhisper?.Invoke(entry.userId);
     }
 
-    private void Entry_OnReport(string userId)
-    {
-        WebInterface.SendReportPlayer(userId);
-    }
-
-    private void Entry_OnPassport(string userId)
-    {
-        var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-        currentPlayerId.Set(userId);
-    }
-
-    private void Entry_OnBlock(string userId, bool blockUser)
-    {
-        if (blockUser)
-            WebInterface.SendBlockPlayer(userId);
-        else
-            WebInterface.SendUnblockPlayer(userId);
-    }
-
     private void Entry_OnDelete(string userId)
     {
         WebInterface.UpdateFriendshipStatus(
@@ -317,6 +294,14 @@ public class FriendsHUDController : IHUD
 
             if (view.friendsButton.interactable)
                 view.friendsButton.onClick.Invoke();
+
+            OnFriendsOpened?.Invoke();
+
+            AudioScriptableObjects.dialogOpen.Play(true);
+        }
+        else
+        {
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 }

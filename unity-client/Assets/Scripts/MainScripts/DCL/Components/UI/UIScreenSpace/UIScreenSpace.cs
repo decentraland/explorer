@@ -125,32 +125,30 @@ namespace DCL.Components
             // Graphics Raycaster (for allowing touch/click input on the ui components)
             canvasGameObject.AddComponent<GraphicRaycaster>();
 
-            if (scene.isPersistent)
-            {
-                childHookRectTransform = canvas.GetComponent<RectTransform>();
+            canvas.sortingOrder = -1;
 
-                // we make sure DCL UI renders above every parcel UI
-                canvas.sortingOrder = 1;
-            }
-            else
-            {
-                canvas.sortingOrder = -1;
+            // We create a middleman-gameobject to change the size of the parcel-devs accessible canvas, to have its bottom limit at the taskbar height, etc.
+            GameObject resizedPanel = new GameObject("ResizeUIArea");
 
-                // "Constrained" panel mask (to avoid rendering parcels UI on the viewport's top 10%)
-                GameObject constrainedPanel = new GameObject("ConstrainedPanel");
-                constrainedPanel.AddComponent<RectMask2D>();
-                childHookRectTransform = constrainedPanel.GetComponent<RectTransform>();
-                childHookRectTransform.SetParent(canvas.transform);
-                childHookRectTransform.ResetLocalTRS();
+            resizedPanel.AddComponent<CanvasRenderer>();
+            childHookRectTransform = resizedPanel.AddComponent<RectTransform>();
+            childHookRectTransform.SetParent(canvas.transform);
+            childHookRectTransform.ResetLocalTRS();
 
-                float canvasHeight = canvasScaler.referenceResolution.y;
+            childHookRectTransform.anchorMin = Vector2.zero;
+            childHookRectTransform.anchorMax = new Vector2(1, 0);
 
-                childHookRectTransform.anchorMin = Vector2.zero;
-                childHookRectTransform.anchorMax = new Vector2(1, 0);
-                childHookRectTransform.pivot = new Vector2(0.5f, 0f);
-                // We scale the panel downwards to release the viewport's top 10%
-                childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - (canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100));
-            }
+            // We scale the panel downwards to subtract the viewport's top 10%
+            float canvasHeight = canvasScaler.referenceResolution.y;
+            childHookRectTransform.pivot = new Vector2(0.5f, 0f);
+            float canvasSubtraction = canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100;
+            childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);
+
+            // We scale the panel upwards to subtract the viewport's bottom 5% for Decentraland's taskbar
+            canvasHeight = childHookRectTransform.sizeDelta.y;
+            childHookRectTransform.pivot = new Vector2(0.5f, 1f);
+            childHookRectTransform.anchoredPosition = new Vector3(0, canvasHeight, 0f);
+            childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction / 2);
 
             // Canvas group
             canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();

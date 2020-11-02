@@ -1,5 +1,6 @@
 using DCL;
 using System.Collections;
+using NSubstitute;
 using UnityEngine.TestTools;
 
 namespace AssetPromiseKeeper_Tests
@@ -15,7 +16,8 @@ namespace AssetPromiseKeeper_Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            MemoryManager.i.Initialize();
+            Environment.i.Initialize(Substitute.For<IMessageProcessHandler>(),
+                Substitute.For<ISceneHandler>());
             keeper = new APKType();
             yield break;
         }

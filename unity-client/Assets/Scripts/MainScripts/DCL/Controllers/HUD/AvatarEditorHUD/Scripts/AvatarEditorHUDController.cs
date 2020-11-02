@@ -21,10 +21,12 @@ public class AvatarEditorHUDController : IHUD
     private ColorList skinColorList;
     private ColorList eyeColorList;
     private ColorList hairColorList;
+    private bool prevMouseLockState = false;
 
     public AvatarEditorHUDView view;
 
-    public Action<bool> OnVisibilityChanged;
+    public event Action OnOpen;
+    public event Action OnClose;
 
     public AvatarEditorHUDController()
     {
@@ -36,6 +38,9 @@ public class AvatarEditorHUDController : IHUD
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
 
         view = AvatarEditorHUDView.Create(this);
+
+        view.OnToggleActionTriggered += ToggleVisibility;
+        view.OnCloseActionTriggered += Hide;
 
         skinColorList = Resources.Load<ColorList>("SkinTone");
         hairColorList = Resources.Load<ColorList>("HairColor");
@@ -412,12 +417,38 @@ public class AvatarEditorHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
+        var currentRenderProfile = DCL.RenderProfileManifest.i.currentProfile;
+
+        if (!visible && view.isOpen)
+        {
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
+            currentRenderProfile.avatarProfile.Apply();
+            if (prevMouseLockState)
+            {
+                Utils.LockCursor();
+            }
+
+            OnClose?.Invoke();
+        }
+        else if (visible && !view.isOpen)
+        {
+            currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
+            currentRenderProfile.avatarProfile.Apply();
+
+            prevMouseLockState = Utils.isCursorLocked;
+            Utils.UnlockCursor();
+            OnOpen?.Invoke();
+        }
+
+        currentRenderProfile.avatarProfile.Apply();
         view.SetVisibility(visible);
-        OnVisibilityChanged?.Invoke(visible);
     }
 
     public void Dispose()
     {
+        view.OnToggleActionTriggered -= ToggleVisibility;
+        view.OnCloseActionTriggered -= Hide;
+
         CleanUp();
     }
 
@@ -438,7 +469,7 @@ public class AvatarEditorHUDController : IHUD
         SetVisibility(configuration.active);
     }
 
-    public void SaveAvatar(Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
+    public void SaveAvatar(Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
         WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot);
@@ -464,5 +495,15 @@ public class AvatarEditorHUDController : IHUD
     public void SellCollectible(string collectibleId)
     {
         WebInterface.OpenURL("https://market.decentraland.org/account");
+    }
+
+    public void ToggleVisibility()
+    {
+        SetVisibility(!view.isOpen);
+    }
+
+    public void Hide()
+    {
+        SetVisibility(false);
     }
 }

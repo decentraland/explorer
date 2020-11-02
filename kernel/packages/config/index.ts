@@ -1,6 +1,5 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
-declare var window: any
 
 export const performanceConfigurations = [
   { antialiasing: true, downsampling: 0, shadows: true },
@@ -109,6 +108,8 @@ export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const REALM = qs.realm
 
+export const VOICE_CHAT_DISABLED_FLAG = location.search.indexOf('VOICE_CHAT_DISABLED') !== -1
+
 export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
 
 export const LOS = qs.LOS
@@ -122,7 +123,7 @@ export const DEBUG_WS_MESSAGES = location.search.indexOf('DEBUG_WS_MESSAGES') !=
 export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
 export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
 export const DEBUG_PM = location.search.indexOf('DEBUG_PM') !== -1
-export const DEBUG_SCENE_LOG = location.search.indexOf('DEBUG_SCENE_LOG') !== -1
+export const DEBUG_SCENE_LOG = DEBUG || location.search.indexOf('DEBUG_SCENE_LOG') !== -1
 
 export const INIT_PRE_LOAD = location.search.indexOf('INIT_PRE_LOAD') !== -1
 
@@ -139,9 +140,11 @@ export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== 
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
-export const ENABLE_EXPLORE_HUD = location.search.indexOf('ENABLE_EXPLORE_HUD') !== -1
-
 export const PIN_CATALYST = qs.PIN_CATALYST
+
+export const HALLOWEEN = location.search.indexOf('HALLOWEEN') !== -1
+
+export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
 
 export namespace commConfigurations {
   export const debug = true
@@ -174,6 +177,8 @@ export namespace commConfigurations {
       username: 'usernamedcl'
     }
   ]
+
+  export const voiceChatUseHRTF = location.search.indexOf('VOICE_CHAT_USE_HRTF') !== -1
 }
 export const loginConfig = {
   org: {
@@ -203,11 +208,9 @@ let network: ETHEREUM_NETWORK | null = null
 
 export function getTLD() {
   if (ENV_OVERRIDE) {
-    return window.location.search.match(/ENV=(\w+)/)[1]
+    return location.search.match(/ENV=(\w+)/)![1]
   }
-  if (window) {
-    return window.location.hostname.match(/(\w+)$/)[0]
-  }
+  return location.hostname.match(/(\w+)$/)![0]
 }
 
 export const knownTLDs = ['zone', 'org', 'today']
@@ -231,7 +234,16 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (window.location.search.match(/TEST_WEARABLES/)) {
+  const url = new URL(location.toString())
+  if (url.searchParams.has('TEST_WEARABLES')) {
+    const value = url.searchParams.get('TEST_WEARABLES')
+    if (value) {
+      try {
+        return new URL(value).toString()
+      } catch (e) {
+        return `https://${value}/index.json`
+      }
+    }
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'
@@ -254,7 +266,7 @@ export function getServerConfigurations() {
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json`,
+    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json?t=${new Date().getTime()}`,
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
@@ -324,3 +336,10 @@ export namespace ethereumConfigurations {
 }
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
+
+export const genericAvatarSnapshots: Record<string, string> = {
+  face: '/images/avatar_snapshot_default.png',
+  body: '/images/image_not_found.png',
+  face256: '/images/avatar_snapshot_default256.png',
+  face128: '/images/avatar_snapshot_default128.png'
+}

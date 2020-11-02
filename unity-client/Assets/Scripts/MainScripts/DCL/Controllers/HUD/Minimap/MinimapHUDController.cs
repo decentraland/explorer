@@ -11,6 +11,7 @@ public class MinimapHUDController : IHUD
     private StringVariable currentSceneId => CommonScriptableObjects.sceneID;
 
     public MinimapHUDModel model { get; private set; } = new MinimapHUDModel();
+    public RectTransform minimapTooltipReference { get => view.minimapTooltipReference; }
 
     public MinimapHUDController() : this(new MinimapHUDModel())
     {
@@ -91,5 +92,16 @@ public class MinimapHUDController : IHUD
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+    }
+
+    /// <summary>
+    /// Enable user's around button/indicator that shows the amount of users around player
+    /// and toggle the list of players' visibility when pressed
+    /// </summary>
+    /// <param name="controller">Controller for the players' list HUD</param>
+    public void AddUsersAroundIndicator(UsersAroundListHUDController controller)
+    {
+        view.usersAroundListHudButton.gameObject.SetActive(true);
+        controller.SetButtonView(view.usersAroundListHudButton);
     }
 }

@@ -1,7 +1,17 @@
 import { Position } from './utils'
-import { UserInformation, Package, ChatMessage, ProfileVersion, BusMessage } from './types'
+import {
+  UserInformation,
+  Package,
+  ChatMessage,
+  ProfileVersion,
+  BusMessage,
+  VoiceFragment,
+  ProfileResponse,
+  ProfileRequest
+} from './types'
 import { Stats } from '../debug'
 import { Realm } from 'shared/dao/types'
+import { Profile } from 'shared/types'
 
 export interface WorldInstanceConnection {
   stats: Stats | null
@@ -11,6 +21,9 @@ export interface WorldInstanceConnection {
   chatHandler: (alias: string, data: Package<ChatMessage>) => void
   profileHandler: (alias: string, identity: string, data: Package<ProfileVersion>) => void
   positionHandler: (alias: string, data: Package<Position>) => void
+  voiceHandler: (alias: string, data: Package<VoiceFragment>) => void
+  profileResponseHandler: (alias: string, data: Package<ProfileResponse>) => void
+  profileRequestHandler: (alias: string, data: Package<ProfileRequest>) => void
 
   readonly isAuthenticated: boolean
 
@@ -23,10 +36,13 @@ export interface WorldInstanceConnection {
 
   sendInitialMessage(userInfo: Partial<UserInformation>): Promise<void>
   sendProfileMessage(currentPosition: Position, userInfo: UserInformation): Promise<void>
+  sendProfileRequest(currentPosition: Position, userId: string, version: number | undefined): Promise<void>
+  sendProfileResponse(currentPosition: Position, profile: Profile): Promise<void>
   sendPositionMessage(p: Position): Promise<void>
   sendParcelUpdateMessage(currentPosition: Position, p: Position): Promise<void>
   sendParcelSceneCommsMessage(cid: string, message: string): Promise<void>
   sendChatMessage(currentPosition: Position, messageId: string, text: string): Promise<void>
+  sendVoiceMessage(currentPosition: Position, data: Uint8Array): Promise<void>
 
   updateSubscriptions(topics: string[]): Promise<void>
 

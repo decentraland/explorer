@@ -1,15 +1,31 @@
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace DCL.SettingsHUD
 {
     public class SettingsHUDView : MonoBehaviour
     {
+        public event UnityAction OnClose;
+        public event UnityAction OnDone;
+
+        [SerializeField] private ShowHideAnimator settingsAnimator;
+        [SerializeField] internal InputAction_Trigger closeAction;
+        private InputAction_Trigger.Triggered closeActionDelegate;
+
         public bool isOpen { get; private set; }
 
         private const string PATH = "SettingsHUD";
 
+        [SerializeField] internal Button closeButton;
+        [SerializeField] internal Button doneButton;
+
         private void Awake()
         {
+            closeActionDelegate = (x) => RaiseOnClose();
+            closeButton.onClick.AddListener(RaiseOnClose);
+            doneButton.onClick.AddListener(RaiseOnDone);
+
             isOpen = false;
         }
 
@@ -22,8 +38,33 @@ namespace DCL.SettingsHUD
 
         public void SetVisibility(bool visible)
         {
-            gameObject.SetActive(visible);
+            if (visible && !isOpen)
+                AudioScriptableObjects.dialogOpen.Play(true);
+            else if (isOpen)
+                AudioScriptableObjects.dialogClose.Play(true);
+
+            closeAction.OnTriggered -= closeActionDelegate;
+            if (visible)
+            {
+                closeAction.OnTriggered += closeActionDelegate;
+                settingsAnimator.Show();
+            }
+            else
+            {
+                settingsAnimator.Hide();
+            }
+
             isOpen = visible;
+        }
+
+        private void RaiseOnClose()
+        {
+            OnClose?.Invoke();
+        }
+
+        private void RaiseOnDone()
+        {
+            OnDone?.Invoke();
         }
     }
 }

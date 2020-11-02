@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -13,6 +13,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
+using DCL.Tutorial;
+using NSubstitute;
 
 public class TestsBase
 {
@@ -23,6 +25,12 @@ public class TestsBase
     protected SceneController sceneController;
     protected ParcelScene scene;
     protected CameraController cameraController;
+
+    /// <summary>
+    /// Use this as a parent for your dynamically created gameobjects in tests
+    /// so they are cleaned up automatically in the teardown
+    /// </summary>
+    private GameObject runtimeGameObjectsRoot;
 
     protected virtual bool justSceneSetUp => false;
     protected virtual bool enableSceneIntegrityChecker => true;
@@ -42,6 +50,7 @@ public class TestsBase
         {
             yield return SetUp_SceneIntegrityChecker();
             SetUp_Renderer();
+            Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>());
             yield break;
         }
 
@@ -53,6 +62,8 @@ public class TestsBase
         yield return SetUp_SceneIntegrityChecker();
 
         SetUp_Renderer();
+        runtimeGameObjectsRoot = new GameObject("_RuntimeGameObjectsRoot");
+        Environment.i.Initialize(new DummyMessageHandler(), Substitute.For<ISceneHandler>());
     }
 
 
@@ -61,10 +72,12 @@ public class TestsBase
     {
         yield return null;
 
+        if (runtimeGameObjectsRoot != null)
+            Object.Destroy(runtimeGameObjectsRoot.gameObject);
+
         TestHelpers.ForceUnloadAllScenes(SceneController.i);
 
-        if (PointerEventsController.i != null)
-            PointerEventsController.i.Cleanup();
+        Environment.i.Cleanup();
 
         if (DCLCharacterController.i != null)
         {
@@ -94,8 +107,8 @@ public class TestsBase
     {
         TearDown_PromiseKeepers();
 
-        if (MemoryManager.i != null)
-            yield return MemoryManager.i.CleanupPoolsIfNeeded(true);
+        if (Environment.i.memoryManager != null)
+            yield return Environment.i.memoryManager.CleanupPoolsIfNeeded(true);
 
         if (PoolManager.i != null)
             PoolManager.i.Cleanup();
@@ -184,7 +197,6 @@ public class TestsBase
         CommonScriptableObjects.rendererState.Set(true);
     }
 
-
     protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
     {
         yield return InitUnityScene("MainTest");
@@ -204,8 +216,6 @@ public class TestsBase
         {
             SetUp_UIScene();
         }
-
-        PointerEventsController.i.Initialize(isTesting: true);
     }
 
 
@@ -294,5 +304,12 @@ public class TestsBase
                 yield return null;
             }
         }
+    }
+
+    protected GameObject CreateTestGameObject(string name)
+    {
+        GameObject gameObject = new GameObject(name);
+        gameObject.transform.SetParent(runtimeGameObjectsRoot.transform);
+        return gameObject;
     }
 }

@@ -6,6 +6,11 @@ using System.Collections;
 
 namespace DCL.Controllers
 {
+    public interface IOutOfSceneBoundariesHandler
+    {
+        void UpdateOutOfBoundariesState(bool enable);
+    }
+
     public class SceneBoundariesChecker
     {
         [System.NonSerialized] public float timeBetweenChecks = 1f;
@@ -26,7 +31,6 @@ namespace DCL.Controllers
             sceneBoundariesEntityHandler = new SceneBoundariesEntityHandler();
             entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
             lastCheckTime = Time.realtimeSinceStartup;
-       
         }
 
         public void SetDebugMode()
@@ -89,7 +93,7 @@ namespace DCL.Controllers
         {
             if (!SceneController.i.useBoundariesChecker) return;
 
-            entitiesToCheck.Add(entity);
+            OnAddEntity(entity);
         }
 
         /// <summary>
@@ -116,13 +120,12 @@ namespace DCL.Controllers
         {
             if (!SceneController.i.useBoundariesChecker) return;
 
-            entitiesToCheck.Remove(entity);
-            persistentEntities.Remove(entity);
+            OnRemoveEntity(entity);
         }
 
         public void EvaluateEntityPosition(DecentralandEntity entity)
         {
-            if (entity == null || entity.scene == null) return;
+            if (entity == null || entity.scene == null || entity.gameObject == null) return;
 
             // Recursively evaluate entity children as well, we need to check this up front because this entity may not have meshes of its own, but the children may.
             if (entity.children.Count > 0)
@@ -136,20 +139,21 @@ namespace DCL.Controllers
                 }
             }
 
-            if (entity.meshRootGameObject == null || entity.meshesInfo.renderers == null || entity.meshesInfo.renderers.Length == 0) return;
+            if (entity.meshRootGameObject == null || entity.meshesInfo.renderers == null || entity.meshesInfo.renderers.Length == 0)
+            {
+                UpdateComponents(entity, entity.scene.IsInsideSceneBoundaries(entity.gameObject.transform.position + CommonScriptableObjects.playerUnityToWorldOffset.Get()));
+                return;
+            }
 
             // If the mesh is being loaded we should skip the evaluation (it will be triggered again later when the loading finishes)
             if (entity.meshRootGameObject.GetComponent<MaterialTransitionController>()) // the object's MaterialTransitionController is destroyed when it finishes loading
             {
                 return;
             }
-            else
-            {
-                var loadWrapper = LoadableShape.GetLoaderForEntity(entity);
 
-                if (loadWrapper != null && !loadWrapper.alreadyLoaded)
-                    return;
-            }
+            var loadWrapper = LoadableShape.GetLoaderForEntity(entity);
+            if (loadWrapper != null && !loadWrapper.alreadyLoaded)
+                return;
 
             EvaluateMeshBounds(entity);
         }
@@ -167,8 +171,10 @@ namespace DCL.Controllers
             {
                 isInsideBoundaries = AreSubmeshesInsideBoundaries(entity);
             }
+
             return isInsideBoundaries;
         }
+
         void EvaluateMeshBounds(DecentralandEntity entity)
         {
             bool isInsideBoundaries = IsEntityInsideSceneBoundaries(entity);
@@ -176,9 +182,8 @@ namespace DCL.Controllers
             sceneBoundariesEntityHandler.UpdateEntityMeshesValidState(entity, isInsideBoundaries);
             sceneBoundariesEntityHandler.UpdateEntityCollidersValidState(entity, isInsideBoundaries);
 
-            //UpdateEntityMeshesValidState(entity, isInsideBoundaries, meshBounds);
-
-            //UpdateEntityCollidersValidState(entity, isInsideBoundaries);
+            UpdateEntityCollidersValidState(entity, isInsideBoundaries);
+            UpdateComponents(entity, isInsideBoundaries);
         }
 
         protected virtual bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
@@ -194,7 +199,7 @@ namespace DCL.Controllers
             return true;
         }
 
-    
+
         protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries, Bounds meshBounds)
         {
             if (entity.meshesInfo.renderers[0] == null) return;
@@ -220,6 +225,27 @@ namespace DCL.Controllers
                         entity.meshesInfo.colliders[i].enabled = isInsideBoundaries;
                 }
             }
+        }
+
+        protected virtual void UpdateComponents(DecentralandEntity entity, bool isInsideBoundaries)
+        {
+            IOutOfSceneBoundariesHandler[] components = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundariesHandler>();
+
+            for (int i = 0; i < components.Length; i++)
+            {
+                components[i].UpdateOutOfBoundariesState(isInsideBoundaries);
+            }
+        }
+
+        protected virtual void OnAddEntity(DecentralandEntity entity)
+        {
+            entitiesToCheck.Add(entity);
+        }
+
+        protected virtual void OnRemoveEntity(DecentralandEntity entity)
+        {
+            entitiesToCheck.Remove(entity);
+            persistentEntities.Remove(entity);
         }
     }
 }

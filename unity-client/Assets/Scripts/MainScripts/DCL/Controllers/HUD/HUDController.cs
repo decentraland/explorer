@@ -1,3 +1,4 @@
+using DCL.HelpAndSupportHUD;
 using DCL.SettingsHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,15 +14,25 @@ public class HUDController : MonoBehaviour
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
 
+    private readonly Notification.Model hiddenUINotification = new Notification.Model()
+    {
+        timer = 3,
+        type = NotificationFactory.Type.UI_HIDDEN,
+        groupID = "UIHiddenNotification"
+    };
+
     private void Awake()
     {
         i = this;
 
         toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
+
+        CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenOnOnChange;
+        UserContextMenu.OnOpenPrivateChatRequest += OpenPrivateChatWindow;
     }
 
-    public AvatarHUDController avatarHud => GetHUDElement(HUDElementID.AVATAR) as AvatarHUDController;
+    public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -66,6 +77,12 @@ public class HUDController : MonoBehaviour
 
     public ExploreHUDController exploreHud => GetHUDElement(HUDElementID.EXPLORE_HUD) as ExploreHUDController;
 
+    public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
+
+    public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
+
+    public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -93,22 +110,25 @@ public class HUDController : MonoBehaviour
                                        EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
                                        (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
 
-        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen)
+        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen || CommonScriptableObjects.tutorialActive)
             return;
 
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 
-    private void OwnUserProfileUpdated(UserProfile profile)
+    private void AllUIHiddenOnOnChange(bool current, bool previous)
     {
-        UpdateAvatarHUD();
+        if (current)
+        {
+            NotificationsController.i?.ShowNotification(hiddenUINotification);
+        }
     }
 
     public enum HUDElementID
     {
         NONE = 0,
         MINIMAP = 1,
-        AVATAR = 2,
+        PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
         SETTINGS = 5,
@@ -125,9 +145,12 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        EMAIL_PROMPT = 19,
-        EXPLORE_HUD = 20,
-        COUNT = 21
+        EXPLORE_HUD = 19,
+        MANA_HUD = 20,
+        HELP_AND_SUPPORT_HUD = 21,
+        EMAIL_PROMPT = 22,
+        USERS_AROUND_LIST_HUD = 23,
+        COUNT = 24
     }
 
     [System.Serializable]
@@ -135,19 +158,21 @@ public class HUDController : MonoBehaviour
     {
         public HUDElementID hudElementId;
         public HUDConfiguration configuration;
+        public string extraPayload;
     }
 
     public void ConfigureHUDElement(string payload)
     {
         ConfigureHUDElementMessage message = JsonUtility.FromJson<ConfigureHUDElementMessage>(payload);
 
-        HUDConfiguration configuration = message.configuration;
         HUDElementID id = message.hudElementId;
+        HUDConfiguration configuration = message.configuration;
+        string extraPayload = message.extraPayload;
 
-        ConfigureHUDElement(id, configuration);
+        ConfigureHUDElement(id, configuration, extraPayload);
     }
 
-    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration)
+    public void ConfigureHUDElement(HUDElementID hudElementId, HUDConfiguration configuration, string extraPayload = null)
     {
         //TODO(Brian): For now, the factory code is using this switch approach.
         //             In order to avoid the factory upkeep we can transform the IHUD elements
@@ -164,19 +189,8 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MINIMAP:
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.AVATAR:
-                CreateHudElement<AvatarHUDController>(configuration, hudElementId);
-
-                if (avatarHud != null)
-                {
-                    avatarHud.Initialize();
-                    avatarHud.OnEditAvatarPressed += ShowAvatarEditor;
-                    avatarHud.OnSettingsPressed += ShowSettings;
-                    avatarHud.OnControlsPressed += ShowControls;
-                    ownUserProfile.OnUpdate += OwnUserProfileUpdated;
-                    OwnUserProfileUpdated(ownUserProfile);
-                }
-
+            case HUDElementID.PROFILE_HUD:
+                CreateHudElement<ProfileHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -267,10 +281,21 @@ public class HUDController : MonoBehaviour
 
                     if (taskbarHud != null)
                     {
-                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
-                            FriendsController.i);
+                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i, FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+
+                        taskbarHud.AddSettingsWindow(settingsHud);
+                        taskbarHud.AddBackpackWindow(avatarEditorHud);
+
+                        if (!string.IsNullOrEmpty(extraPayload))
+                        {
+                            var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
+                            if (config.enableVoiceChat)
+                            {
+                                taskbarHud.OnAddVoiceChat();
+                            }
+                        }
                     }
                 }
                 else
@@ -281,7 +306,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
-                messageOfTheDayHud?.Initialize(ownUserProfile.hasConnectedWeb3);
+                messageOfTheDayHud?.Initialize(JsonUtility.FromJson<MessageOfTheDayConfig>(extraPayload));
                 break;
             case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
                 CreateHudElement<ExternalUrlPromptHUDController>(configuration, hudElementId);
@@ -294,6 +319,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement<ControlsHUDController>(configuration, hudElementId);
+                taskbarHud?.AddControlsMoreOption();
                 break;
             case HUDElementID.EMAIL_PROMPT:
                 if (emailPromptHud == null)
@@ -307,6 +333,21 @@ public class HUDController : MonoBehaviour
                 if (exploreHud != null)
                 {
                     exploreHud.Initialize(FriendsController.i);
+                    taskbarHud?.AddExploreWindow(exploreHud);
+                }
+                break;
+            case HUDElementID.MANA_HUD:
+                CreateHudElement<ManaHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.HELP_AND_SUPPORT_HUD:
+                CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
+                taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
+                break;
+            case HUDElementID.USERS_AROUND_LIST_HUD:
+                CreateHudElement<UsersAroundListHUDController>(configuration, hudElementId);
+                if (usersAroundListHud != null)
+                {
+                    minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
                 }
                 break;
         }
@@ -362,14 +403,6 @@ public class HUDController : MonoBehaviour
         hudElements[id].SetVisibility(config.visible);
     }
 
-    public void ShowNewWearablesNotification(string wearableCountString)
-    {
-        if (int.TryParse(wearableCountString, out int wearableCount))
-        {
-            avatarHud.SetNewWearablesNotification(wearableCount);
-        }
-    }
-
     public void TriggerSelfUserExpression(string id)
     {
         expressionsHud?.ExpressionCalled(id);
@@ -387,19 +420,31 @@ public class HUDController : MonoBehaviour
         termsOfServiceHud?.ShowTermsOfService(model);
     }
 
-    private void UpdateAvatarHUD()
+    public void SetPlayerTalking(string talking)
     {
-        avatarHud?.UpdateData(new AvatarHUDModel()
-        {
-            name = ownUserProfile.userName,
-            mail = ownUserProfile.email,
-            avatarPic = ownUserProfile.faceSnapshot
-        });
+        taskbarHud?.SetVoiceChatRecording("true".Equals(talking));
+    }
+
+    public void SetUserTalking(string payload)
+    {
+        var model = JsonUtility.FromJson<UserTalkingModel>(payload);
+        usersAroundListHud?.SetUserRecording(model.userId, model.talking);
+    }
+
+    public void SetUsersMuted(string payload)
+    {
+        var model = JsonUtility.FromJson<UserMutedModel>(payload);
+        usersAroundListHud?.SetUsersMuted(model.usersId, model.muted);
     }
 
     public void RequestTeleport(string teleportDataJson)
     {
         teleportHud?.RequestTeleport(teleportDataJson);
+    }
+
+    public void UpdateBalanceOfMANA(string balance)
+    {
+        manaHud?.SetBalance(balance);
     }
 
     private void OnDestroy()
@@ -410,16 +455,7 @@ public class HUDController : MonoBehaviour
     public void Cleanup()
     {
         toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
-
-        if (ownUserProfile != null)
-            ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
-
-        if (avatarHud != null)
-        {
-            avatarHud.OnEditAvatarPressed -= ShowAvatarEditor;
-            avatarHud.OnSettingsPressed -= ShowSettings;
-            avatarHud.OnControlsPressed -= ShowControls;
-        }
+        CommonScriptableObjects.allUIHidden.OnChange -= AllUIHiddenOnOnChange;
 
         if (worldChatWindowHud != null)
         {
@@ -435,6 +471,8 @@ public class HUDController : MonoBehaviour
 
         if (taskbarHud != null)
             taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
+
+        UserContextMenu.OnOpenPrivateChatRequest -= OpenPrivateChatWindow;
 
         foreach (var kvp in hudElements)
         {

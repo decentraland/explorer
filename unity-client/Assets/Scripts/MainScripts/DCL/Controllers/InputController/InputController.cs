@@ -17,6 +17,8 @@ public enum DCLAction_Trigger
     ToggleControlsHud = 124,
     ToggleSettings = 125,
     ToggleExploreHud = 126,
+    ToggleVoiceChatRecording = 127,
+    ToggleAvatarEditorHud = 128,
 
     OpenExpressions = 200,
     Expression_Wave = 201,
@@ -36,6 +38,9 @@ public enum DCLAction_Hold
     Sprint = 1,
     Jump = 2,
     FreeCameraMode = 101,
+    VoiceChatRecording = 102,
+    DefaultConfirmAction = 300,
+    DefaultCancelAction = 301
 }
 
 public enum DCLAction_Measurable
@@ -71,6 +76,10 @@ public class InputController : MonoBehaviour
         for (var i = 0; i < triggerTimeActions.Length; i++)
         {
             var action = triggerTimeActions[i];
+
+            if (action.isTriggerBlocked != null && action.isTriggerBlocked.Get())
+                continue;
+
             switch (action.GetDCLAction())
             {
                 case DCLAction_Trigger.CameraChange:
@@ -137,6 +146,12 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.BuildEditModeChange:
                     InputProcessor.FromKey(action, KeyCode.H, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
+                case DCLAction_Trigger.ToggleVoiceChatRecording:
+                    InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftAlt });
+                    break;
+                case DCLAction_Trigger.ToggleAvatarEditorHud:
+                    InputProcessor.FromKey(action, KeyCode.I, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -159,7 +174,17 @@ public class InputController : MonoBehaviour
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
                     if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.FromKey(action, KeyCode.Y, InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Hold.VoiceChatRecording:
+                    // Push to talk functionality only triggers if no modifier key is pressed
+                    InputProcessor.FromKey(action, KeyCode.T, InputProcessor.Modifier.FocusNotInInput, null);
+                    break;
+                case DCLAction_Hold.DefaultConfirmAction:
+                    InputProcessor.FromKey(action, KeyCode.E, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.DefaultCancelAction:
+                    InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -195,7 +220,7 @@ public class InputController : MonoBehaviour
 
 public static class InputProcessor
 {
-    private static readonly KeyCode[] MODIFIER_KEYS = new[] {KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift};
+    private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
 
     [Flags]
     public enum Modifier
@@ -204,6 +229,25 @@ public static class InputProcessor
         None = 0b0000000,
         NeedsPointerLocked = 0b0000001,
         FocusNotInInput = 0b0000010,
+    }
+
+    public static Boolean PassModifierKeys(KeyCode[] modifierKeys)
+    {
+        for (var i = 0; i < MODIFIER_KEYS.Length; i++)
+        {
+            var keyCode = MODIFIER_KEYS[i];
+            var pressed = Input.GetKey(keyCode);
+            if (modifierKeys == null)
+            {
+                if (pressed) return false;
+            }
+            else
+            {
+                if (modifierKeys.Contains(keyCode) != pressed) return false;
+            }
+        }
+
+        return true;
     }
 
     public static bool PassModifiers(Modifier modifiers)
@@ -222,19 +266,7 @@ public static class InputProcessor
     {
         if (!PassModifiers(modifiers)) return;
 
-        for (var i = 0; i < MODIFIER_KEYS.Length; i++)
-        {
-            var keyCode = MODIFIER_KEYS[i];
-            var pressed = Input.GetKey(keyCode);
-            if (modifierKeys == null)
-            {
-                if (pressed) return;
-            }
-            else
-            {
-                if (modifierKeys.Contains(keyCode) != pressed) return;
-            }
-        }
+        if (!PassModifierKeys(modifierKeys)) return;
 
         if (Input.GetKeyDown(key)) action.RaiseOnTriggered();
     }
@@ -253,6 +285,13 @@ public static class InputProcessor
 
         if (Input.GetKeyDown(key)) action.RaiseOnStarted();
         if (Input.GetKeyUp(key)) action.RaiseOnFinished();
+    }
+
+    public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers, KeyCode[] modifierKeys)
+    {
+        if (!PassModifierKeys(modifierKeys)) return;
+
+        FromKey(action, key, modifiers);
     }
 
     public static void FromMouse(InputAction_Hold action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
@@ -276,8 +315,8 @@ public static class InputProcessor
 
     public static bool IsModifierSet(Modifier modifiers, Modifier value)
     {
-        int flagsValue = (int) modifiers;
-        int flagValue = (int) value;
+        int flagsValue = (int)modifiers;
+        int flagValue = (int)value;
 
         return (flagsValue & flagValue) != 0;
     }

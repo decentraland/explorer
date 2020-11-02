@@ -20,7 +20,6 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            PointerEventsController.i.Initialize(isTesting: true);
             SceneController.i.useBoundariesChecker = false;
 
             // Set character position and camera rotation
@@ -509,9 +508,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickEventIsTriggered()
         {
-            DecentralandEntity entity;
-            BoxShape shape;
-            InstantiateEntityWithShape(out entity, out shape);
+            InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
@@ -520,13 +517,18 @@ namespace Tests
             yield return shape.routine;
 
             string onPointerId = "pointerevent-1";
-            var OnClickComponentModel = new OnClick.Model()
+            var OnClickComponentModel = new OnPointerEvent.Model()
             {
                 type = OnClick.NAME,
                 uuid = onPointerId
             };
-            var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity,
-                OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+
+            var component = TestHelpers.EntityComponentCreate<OnClick, OnPointerEvent.Model>(
+                scene,
+                entity,
+                OnClickComponentModel,
+                CLASS_ID_COMPONENT.UUID_CALLBACK
+            );
 
             Assert.IsTrue(component != null);
 
@@ -543,17 +545,26 @@ namespace Tests
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
-                () => { InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
-                (pointerEvent) =>
+            yield return TestHelpers.ExpectMessageToKernel(
+                targetEventType,
+                sceneEvent,
+                () =>
                 {
-                    if (pointerEvent.eventType == sceneEvent.eventType && pointerEvent.payload.uuid == sceneEvent.payload.uuid)
-                    {
-                        eventTriggered = true;
-                        return true;
-                    }
+                    InputController_Legacy.i.RaiseEvent(
+                        WebInterface.ACTION_BUTTON.POINTER,
+                        DCL.InputController_Legacy.EVENT.BUTTON_DOWN,
+                        true);
+                },
+                (eventObj) =>
+                {
+                    if (eventObj.eventType != sceneEvent.eventType)
+                        return false;
 
-                    return false;
+                    if (eventObj.payload.uuid != sceneEvent.payload.uuid)
+                        return false;
+
+                    eventTriggered = true;
+                    return true;
                 });
 
             Assert.IsTrue(eventTriggered);
@@ -562,9 +573,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownEventIsTriggered()
         {
-            DecentralandEntity entity;
-            BoxShape shape;
-            InstantiateEntityWithShape(out entity, out shape);
+            InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
@@ -573,7 +582,7 @@ namespace Tests
             yield return shape.routine;
 
             string onPointerId = "pointerevent-1";
-            var OnPointerDownModel = new OnPointerDown.Model()
+            var OnPointerDownModel = new OnPointerEvent.Model()
             {
                 type = OnPointerDown.NAME,
                 uuid = onPointerId
@@ -598,7 +607,7 @@ namespace Tests
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -659,7 +668,7 @@ namespace Tests
 
             DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true); },
                 (pointerEvent) =>
                 {
@@ -718,7 +727,7 @@ namespace Tests
 
             DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true); },
                 (pointerEvent) =>
                 {
@@ -744,7 +753,7 @@ namespace Tests
 
             DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
             eventTriggered = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true); },
                 (pointerEvent) =>
                 {
@@ -814,7 +823,7 @@ namespace Tests
 
             // Check if target entity is hit behind other entity
             bool targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -839,7 +848,7 @@ namespace Tests
 
             // Check if target entity is hit in front of the camera without being blocked
             targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -916,7 +925,7 @@ namespace Tests
 
             // Check the target entity is not hit behind the 'isPointerBlocker' shape
             bool targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -940,7 +949,7 @@ namespace Tests
 
             // Check the target entity is hit behind the 'isPointerBlocker' shape now
             targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -1009,7 +1018,7 @@ namespace Tests
 
             // Check if target entity is triggered by hitting the parent entity
             bool targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -1033,7 +1042,7 @@ namespace Tests
 
             // Check if target entity is triggered when hit directly
             targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -1080,7 +1089,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvasController = PointerEventsController.i.interactionHoverCanvasController;
+            var hoverCanvasController = Environment.i.interactionHoverCanvasController;
             Assert.IsNotNull(hoverCanvasController);
             Assert.IsTrue(hoverCanvasController.canvas.enabled);
 
@@ -1133,7 +1142,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
+            var hoverCanvas = Environment.i.interactionHoverCanvasController.canvas;
             Assert.IsNotNull(hoverCanvas);
 
             Assert.IsTrue(hoverCanvas.enabled);

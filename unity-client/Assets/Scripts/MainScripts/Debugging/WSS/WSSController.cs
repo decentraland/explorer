@@ -364,6 +364,9 @@ namespace DCL
                             case "PreloadFile":
                                 GetBuilderBridge()?.PreloadFile(msg.payload);
                                 break;
+                            case "SetBuilderConfiguration":
+                                GetBuilderBridge()?.SetBuilderConfiguration(msg.payload);
+                                break;
                             case "AddWearableToCatalog":
                                 CatalogController.i?.AddWearableToCatalog(msg.payload);
                                 break;
@@ -375,9 +378,6 @@ namespace DCL
                                 break;
                             case "ClearWearableCatalog":
                                 CatalogController.i?.ClearWearableCatalog();
-                                break;
-                            case "ShowNewWearablesNotification":
-                                HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
                             case "ConfigureHUDElement":
                                 HUDController.i?.ConfigureHUDElement(msg.payload);
@@ -401,7 +401,7 @@ namespace DCL
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
                             case "SetTutorialEnabled":
-                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled();
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
                                 break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
@@ -423,6 +423,21 @@ namespace DCL
                                 break;
                             case "UpdateHotScenesList":
                                 HotScenesController.i.UpdateHotScenesList(msg.payload);
+                                break;
+                            case "UpdateBalanceOfMANA":
+                                HUDController.i.UpdateBalanceOfMANA(msg.payload);
+                                break;
+                            case "SetPlayerTalking":
+                                HUDController.i.SetPlayerTalking(msg.payload);
+                                break;
+                            case "SetRenderProfile":
+                                RenderProfileBridge.i.SetRenderProfile(msg.payload);
+                                break;
+                            case "SetUserTalking":
+                                HUDController.i.SetUserTalking(msg.payload);
+                                break;
+                            case "SetUsersMuted":
+                                HUDController.i.SetUsersMuted(msg.payload);
                                 break;
                             default:
                                 Debug.Log(

@@ -1,16 +1,38 @@
 import { WorldInstanceConnection } from '../interface/index'
 import { Stats } from '../debug'
-import { Package, BusMessage, ChatMessage, ProfileVersion, UserInformation, PackageType } from '../interface/types'
+import {
+  Package,
+  BusMessage,
+  ChatMessage,
+  ProfileVersion,
+  UserInformation,
+  PackageType,
+  VoiceFragment,
+  ProfileResponse,
+  ProfileRequest
+} from '../interface/types'
 import { Position, positionHash } from '../interface/utils'
 import defaultLogger, { createLogger } from 'shared/logger'
 import { PeerMessageTypes, PeerMessageType } from 'decentraland-katalyst-peer/src/messageTypes'
 import { Peer as PeerType } from 'decentraland-katalyst-peer/src/Peer'
 import { PacketCallback } from 'decentraland-katalyst-peer/src/types'
-import { ChatData, CommsMessage, ProfileData, SceneData, PositionData } from './proto/comms_pb'
+import {
+  ChatData,
+  CommsMessage,
+  ProfileData,
+  SceneData,
+  PositionData,
+  VoiceData,
+  ProfileRequestData,
+  ProfileResponseData
+} from './proto/comms_pb'
 import { Realm, CommsStatus } from 'shared/dao/types'
 import { compareVersions } from 'atomicHelpers/semverCompare'
 
 import * as Long from 'long'
+import { getProfileType } from 'shared/profiles/sagas'
+import { Profile } from 'shared/types'
+import { ProfileType } from 'shared/profiles/types'
 declare const window: any
 window.Long = Long
 
@@ -22,13 +44,38 @@ const NOOP = () => {
 
 const logger = createLogger('Lighthouse: ')
 
-type MessageData = ChatData | ProfileData | SceneData | PositionData
+type MessageData =
+  | ChatData
+  | ProfileData
+  | SceneData
+  | PositionData
+  | VoiceData
+  | ProfileRequestData
+  | ProfileResponseData
 
 const commsMessageType: PeerMessageType = {
   name: 'sceneComms',
   ttl: 10,
   expirationTime: 10 * 1000,
   optimistic: true
+}
+
+const VoiceType: PeerMessageType = {
+  name: 'voice',
+  ttl: 5,
+  optimistic: true,
+  discardOlderThan: 2000,
+  expirationTime: 10000
+}
+
+function ProfileRequestResponseType(action: 'request' | 'response'): PeerMessageType {
+  return {
+    name: 'profile_' + action,
+    ttl: 10,
+    optimistic: true,
+    discardOlderThan: 0,
+    expirationTime: 10000
+  }
 }
 
 declare var global: any
@@ -40,6 +87,9 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   chatHandler: (alias: string, data: Package<ChatMessage>) => void = NOOP
   profileHandler: (alias: string, identity: string, data: Package<ProfileVersion>) => void = NOOP
   positionHandler: (alias: string, data: Package<Position>) => void = NOOP
+  voiceHandler: (alias: string, data: Package<VoiceFragment>) => void = NOOP
+  profileResponseHandler: (alias: string, data: Package<ProfileResponse>) => void = NOOP
+  profileRequestHandler: (alias: string, data: Package<ProfileRequest>) => void = NOOP
 
   isAuthenticated: boolean = true // TODO - remove this
 
@@ -115,6 +165,25 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     await this.sendProfileData(userInfo, topic, 'profile')
   }
 
+  async sendProfileRequest(currentPosition: Position, userId: string, version: number | undefined): Promise<void> {
+    const topic = positionHash(currentPosition)
+
+    const profileRequestData = new ProfileRequestData()
+    profileRequestData.setUserId(userId)
+    profileRequestData.setProfileVersion(version?.toString() ?? '')
+
+    await this.sendData(topic, profileRequestData, ProfileRequestResponseType('request'))
+  }
+
+  async sendProfileResponse(currentPosition: Position, profile: Profile): Promise<void> {
+    const topic = positionHash(currentPosition)
+
+    const profileResponseData = new ProfileResponseData()
+    profileResponseData.setSerializedProfile(JSON.stringify(profile))
+
+    await this.sendData(topic, profileResponseData, ProfileRequestResponseType('response'))
+  }
+
   async sendPositionMessage(p: Position) {
     const topic = positionHash(p)
 
@@ -135,6 +204,15 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
     sceneData.setText(message)
 
     await this.sendData(topic, sceneData, commsMessageType)
+  }
+
+  async sendVoiceMessage(currentPosition: Position, data: Uint8Array): Promise<void> {
+    const topic = positionHash(currentPosition)
+
+    const voiceData = new VoiceData()
+    voiceData.setEncodedSamples(data)
+
+    await this.sendData(topic, voiceData, VoiceType)
   }
 
   async sendChatMessage(currentPosition: Position, messageId: string, text: string) {
@@ -172,12 +250,7 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
   }
 
   private async sendData(topic: string, messageData: MessageData, type: PeerMessageType) {
-    if (this.peer.currentRooms.some((it) => it.id === topic)) {
-      await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
-    } else {
-      // TODO: We may want to queue some messages
-      defaultLogger.warn('Tried to send a message to a topic that the peer is not subscribed to: ' + topic)
-    }
+    await this.peer.sendMessage(topic, createCommsMessage(messageData).serializeBinary(), type)
   }
 
   private async sendPositionData(p: Position, topic: string, typeName: string) {
@@ -246,6 +319,36 @@ export class LighthouseWorldInstanceConnection implements WorldInstanceConnectio
             createPackage(commsMessage, 'profile', mapToPackageProfile(commsMessage.getProfileData()!))
           )
           break
+        case CommsMessage.DataCase.VOICE_DATA:
+          this.voiceHandler(
+            sender,
+            createPackage(
+              commsMessage,
+              'voice',
+              mapToPackageVoice(commsMessage.getVoiceData()!.getEncodedSamples_asU8())
+            )
+          )
+          break
+        case CommsMessage.DataCase.PROFILE_REQUEST_DATA:
+          this.profileRequestHandler(
+            sender,
+            createPackage(
+              commsMessage,
+              'profileRequest',
+              mapToPackageProfileRequest(commsMessage.getProfileRequestData()!)
+            )
+          )
+          break
+        case CommsMessage.DataCase.PROFILE_RESPONSE_DATA:
+          this.profileResponseHandler(
+            sender,
+            createPackage(
+              commsMessage,
+              'profileResponse',
+              mapToPackageProfileResponse(commsMessage.getProfileResponseData()!)
+            )
+          )
+          break
         default: {
           logger.warn(`message with unknown type received ${commsMessage.getDataCase()}`)
           break
@@ -273,7 +376,8 @@ function mapToPositionMessage(positionData: PositionData): Position {
     positionData.getRotationX(),
     positionData.getRotationY(),
     positionData.getRotationZ(),
-    positionData.getRotationW()
+    positionData.getRotationW(),
+    positionData.getImmediate()
   ]
 }
 
@@ -292,14 +396,45 @@ function mapToPackageScene(sceneData: SceneData) {
 }
 
 function mapToPackageProfile(profileData: ProfileData) {
-  return { user: profileData.getUserId(), version: profileData.getProfileVersion() }
+  return {
+    user: profileData.getUserId(),
+    version: profileData.getProfileVersion(),
+    type: mapToPackageProfileType(profileData.getProfileType())
+  }
+}
+
+function mapToPackageProfileType(profileType: ProfileType) {
+  return profileType === ProfileData.ProfileType.LOCAL ? ProfileType.LOCAL : ProfileType.DEPLOYED
+}
+
+function mapToPackageProfileRequest(profileRequestData: ProfileRequestData) {
+  const versionData = profileRequestData.getProfileVersion()
+  return {
+    userId: profileRequestData.getUserId(),
+    version: versionData !== '' ? versionData : undefined
+  }
+}
+
+function mapToPackageProfileResponse(profileResponseData: ProfileResponseData) {
+  return {
+    profile: JSON.parse(profileResponseData.getSerializedProfile()) as Profile
+  }
+}
+
+function mapToPackageVoice(data: Uint8Array) {
+  return { encoded: data }
 }
 
 function createProfileData(userInfo: UserInformation) {
   const profileData = new ProfileData()
   profileData.setProfileVersion(userInfo.version ? userInfo.version.toString() : '')
   profileData.setUserId(userInfo.userId ? userInfo.userId : '')
+  profileData.setProfileType(getProtobufProfileType(getProfileType(userInfo.identity)))
   return profileData
+}
+
+function getProtobufProfileType(profileType: ProfileType) {
+  return profileType === ProfileType.LOCAL ? ProfileData.ProfileType.LOCAL : ProfileData.ProfileType.DEPLOYED
 }
 
 function createPositionData(p: Position) {
@@ -311,6 +446,7 @@ function createPositionData(p: Position) {
   positionData.setRotationY(p[4])
   positionData.setRotationZ(p[5])
   positionData.setRotationW(p[6])
+  positionData.setImmediate(p[7])
   return positionData
 }
 
@@ -322,6 +458,9 @@ function createCommsMessage(data: MessageData) {
   if (data instanceof SceneData) commsMessage.setSceneData(data)
   if (data instanceof ProfileData) commsMessage.setProfileData(data)
   if (data instanceof PositionData) commsMessage.setPositionData(data)
+  if (data instanceof VoiceData) commsMessage.setVoiceData(data)
+  if (data instanceof ProfileRequestData) commsMessage.setProfileRequestData(data)
+  if (data instanceof ProfileResponseData) commsMessage.setProfileResponseData(data)
 
   return commsMessage
 }
