@@ -292,8 +292,9 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { sfxVolume: number }) {
-    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.sfxVolume))
+  public ApplySettings(settingsMessage: { voiceChatVolume: number, voiceChatAllowCategory: number }) {
+    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
+    console.log(`PATO: voiceChatVolume: ${settingsMessage.voiceChatVolume} voiceChatAllowCategory: ${settingsMessage.voiceChatAllowCategory}`)
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
