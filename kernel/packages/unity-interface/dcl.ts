@@ -11,8 +11,7 @@ import {
   getParcelSceneID
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker } from 'shared/world/SceneWorker'
-import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
+import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
 import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
