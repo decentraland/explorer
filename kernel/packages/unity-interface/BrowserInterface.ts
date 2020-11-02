@@ -19,10 +19,9 @@ import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
   FriendshipAction,
-  WorldPosition,
-  LoadableParcelScene
+  WorldPosition
 } from 'shared/types'
-import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
 import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
@@ -32,6 +31,7 @@ import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
+import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 import { logout } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
@@ -44,9 +44,6 @@ import { reportHotScenes } from 'shared/social/hotScenes'
 import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
-import { SceneSystemWorker } from 'shared/world/SceneSystemWorker'
-import { StatefulWorker } from 'shared/world/StatefulWorker'
-import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 
@@ -104,7 +101,8 @@ export class BrowserInterface {
   public SceneEvent(data: { sceneId: string; eventType: string; payload: any }) {
     const scene = getSceneWorkerBySceneID(data.sceneId)
     if (scene) {
-      scene.emit(data.eventType as IEventNames, data.payload)
+      const parcelScene = scene.parcelScene as UnityParcelScene
+      parcelScene.emit(data.eventType as IEventNames, data.payload)
     } else {
       if (data.eventType !== 'metricsUpdate') {
         defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
@@ -213,18 +211,6 @@ export class BrowserInterface {
         if (!aborted) {
           renderStateObservable.notifyObservers(true)
         }
-        break
-      }
-      case 'StartStateMode': {
-        const { sceneId } = payload
-        const parcelScene = this.resetScene(sceneId)
-        setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
-        break
-      }
-      case 'StopStateMode': {
-        const { sceneId } = payload
-        const parcelScene = this.resetScene(sceneId)
-        setNewParcelScene(sceneId, new SceneSystemWorker(parcelScene))
         break
       }
       default: {
@@ -422,17 +408,6 @@ export class BrowserInterface {
     } else {
       globalThis.globalStore.dispatch(unmutePlayers(data.usersId))
     }
-  }
-
-  /** Kill the current worker, reset the scene in Unity and return the ParcelSceneAPI that was being used */
-  private resetScene(sceneId: string): ParcelSceneAPI {
-    const worker = getSceneWorkerBySceneID(sceneId)!
-    unityInterface.UnloadScene(sceneId) // Maybe unity should do it by itself?
-    const parcelScene = worker.getParcelScene()
-    stopParcelSceneWorker(worker)
-    const data = parcelScene.data.data as LoadableParcelScene
-    unityInterface.LoadParcelScenes([data]) // Maybe unity should do it by itself?
-    return parcelScene
   }
 }
 
