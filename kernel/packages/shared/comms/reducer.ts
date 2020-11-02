@@ -26,7 +26,7 @@ export function commsReducer(state?: CommsState, action?: AnyAction): CommsState
     case TOGGLE_VOICE_CHAT_RECORDING:
       return { ...state, voiceChatRecording: !state.voiceChatRecording }
     case SET_VOICE_POLICY:
-      return { ...state, voicePolicy: action.payload.voicePolicy}
+      return { ...state, voicePolicy: action.payload.voicePolicy }
     default:
       return state
   }
