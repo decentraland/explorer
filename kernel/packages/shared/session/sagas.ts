@@ -263,6 +263,7 @@ function* singUp() {
   profile.inventory = []
   profile.tutorialStep = 0
   profile.hasClaimedName = false
+  delete profile.email // We don't deploy the email because it is public
 
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
