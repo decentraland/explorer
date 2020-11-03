@@ -58,7 +58,7 @@ namespace DCL
                 sfxVolume = 1,
                 mouseSensitivity = 0.2f,
                 voiceChatVolume = 1,
-                voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.All_Users
+                voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.ALL_USERS
             };
 
             if (PlayerPrefs.HasKey(GENERAL_SETTINGS_KEY))
@@ -110,7 +110,7 @@ namespace DCL.SettingsData
     [Serializable]
     public struct GeneralSettings
     {
-        public enum VoiceChatAllow { All_Users, Verified_Only, Friends_Only }
+        public enum VoiceChatAllow { ALL_USERS, VERIFIED_ONLY, FRIENDS_ONLY }
 
         public float sfxVolume;
         public float mouseSensitivity;
