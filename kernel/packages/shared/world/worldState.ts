@@ -36,12 +36,12 @@ export async function ensureRendererEnabled() {
     return result
   }
 
-  onRendererEnabled(() => result.resolve())
+  onNextRendererEnabled(() => result.resolve())
 
   return result
 }
 
-export function onRendererEnabled(callback: Function) {
+export function onNextRendererEnabled(callback: Function) {
   const observer = renderStateObservable.add((isRunning) => {
     if (isRunning) {
       renderStateObservable.remove(observer)

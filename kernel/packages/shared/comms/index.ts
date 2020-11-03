@@ -47,7 +47,7 @@ import {
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
-import { renderStateObservable, isRendererEnabled, onRendererEnabled } from '../world/worldState'
+import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
@@ -980,7 +980,7 @@ export async function connect(userId: string) {
     if (isRendererEnabled()) {
       await startCommunications(context)
     } else {
-      onRendererEnabled(async () => {
+      onNextRendererEnabled(async () => {
         try {
           await startCommunications(context!)
         } catch (e) {

@@ -15,7 +15,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
-import { renderStateObservable, onRendererEnabled } from 'shared/world/worldState'
+import { renderStateObservable, onNextRendererEnabled } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -94,7 +94,7 @@ initializeUnity(container)
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
-    onRendererEnabled(() => globalThis.globalStore.dispatch(experienceStarted()))
+    onNextRendererEnabled(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
 
