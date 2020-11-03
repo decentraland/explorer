@@ -1,5 +1,4 @@
-import { saveToLocalStorage } from 'atomicHelpers/localStorage'
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, VOICE_CHAT_ENABLED } from 'config'
+import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, genericAvatarSnapshots } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
@@ -11,7 +10,6 @@ import { Stats } from './debug'
 import { IBrokerConnection } from '../comms/v1/IBrokerConnection'
 import {
   getCurrentPeer,
-  getCurrentUser,
   getPeer,
   getUser,
   localProfileUUID,
@@ -33,7 +31,9 @@ import {
   ConnectionEstablishmentError,
   IdTakenError,
   UnknownCommsModeError,
-  VoiceFragment
+  VoiceFragment,
+  ProfileRequest,
+  ProfileResponse
 } from './interface/types'
 import {
   CommunicationArea,
@@ -52,7 +52,7 @@ import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
 
-import { Authenticator } from 'dcl-crypto'
+import { Authenticator, AuthIdentity } from 'dcl-crypto'
 import { getCommsServer, getRealm, getAllCatalystCandidates } from '../dao/selectors'
 import { Realm, LayerUserInfo } from 'shared/dao/types'
 import { Store } from 'redux'
@@ -65,13 +65,13 @@ import {
   markCatalystRealmConnectionError
 } from 'shared/dao/actions'
 import { observeRealmChange, pickCatalystRealm, changeToCrowdedRealm } from 'shared/dao'
-import { getProfile } from 'shared/profiles/selectors'
-import { Profile } from 'shared/profiles/types'
+import { getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
+import { Profile, ProfileType, Snapshots } from 'shared/profiles/types'
 import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getCommsConfig } from 'shared/meta/selectors'
+import { getCommsConfig, isVoiceChatEnabled } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -81,12 +81,20 @@ import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
   commsErrorRetrying
 } from 'shared/loading/types'
-import { getIdentity } from 'shared/session'
+import { getIdentity, getStoredSession } from 'shared/session'
 import { createLogger } from '../logger'
 import { VoiceCommunicator, VoiceSpatialParams } from 'voice-chat-codec/VoiceCommunicator'
 import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
-import { isVoiceChatRecording } from './selectors'
+import { getVoicePolicy, isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
+import future, { IFuture } from 'fp-future'
+import { getProfileType } from 'shared/profiles/sagas'
+import { sleep } from 'atomicHelpers/sleep'
+import { localProfileReceived } from 'shared/profiles/actions'
+import { unityInterface } from 'unity-interface/UnityInterface'
+import { isURL } from 'atomicHelpers/isURL'
+import { VoicePolicy } from './types'
+import { isFriend } from 'shared/friends/selectors'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -131,13 +139,20 @@ export class PeerTrackingInfo {
   public receivedPublicChatMessages = new Set<string>()
   public talking = false
 
-  profilePromise: { promise: Promise<ProfileForRenderer | void>; version: number | null } = {
+  profilePromise: {
+    promise: Promise<ProfileForRenderer | void>
+    version: number | null
+    status: 'ok' | 'loading' | 'error'
+  } = {
     promise: Promise.resolve(),
-    version: null
+    version: null,
+    status: 'loading'
   }
 
+  profileType?: ProfileType
+
   public loadProfileIfNecessary(profileVersion: number) {
-    if (this.identity && profileVersion !== this.profilePromise.version) {
+    if (this.identity && (profileVersion !== this.profilePromise.version || this.profilePromise.status === 'error')) {
       if (!this.userInfo || !this.userInfo.userId) {
         this.userInfo = {
           ...(this.userInfo || {}),
@@ -145,20 +160,22 @@ export class PeerTrackingInfo {
         }
       }
       this.profilePromise = {
-        promise: ProfileAsPromise(this.identity, profileVersion)
+        promise: ProfileAsPromise(this.identity, profileVersion, this.profileType)
           .then((profile) => {
             const forRenderer = profileToRendererFormat(profile)
             this.lastProfileUpdate = new Date().getTime()
             const userInfo = this.userInfo || {}
-            userInfo.profile = forRenderer
             userInfo.version = profile.version
             this.userInfo = userInfo
+            this.profilePromise.status = 'ok'
             return forRenderer
           })
           .catch((error) => {
+            this.profilePromise.status = 'error'
             defaultLogger.error('Error fetching profile!', error)
           }),
-        version: profileVersion
+        version: profileVersion,
+        status: 'loading'
       }
     }
   }
@@ -182,6 +199,9 @@ export class Context {
   analyticsInterval?: NodeJS.Timer
 
   timeToChangeRealm: number = Date.now() + commConfigurations.autoChangeRealmInterval
+
+  lastProfileResponseTime: number = 0
+  sendingProfileResponse: boolean = false
 
   positionUpdatesPaused: boolean = false
 
@@ -270,11 +290,18 @@ export function updatePeerVoicePlaying(userId: string, playing: boolean) {
       }
     }
   }
+  unityInterface.SetUserTalking(userId, playing)
 }
 
 export function updateVoiceCommunicatorVolume(volume: number) {
   if (voiceCommunicator) {
     voiceCommunicator.setVolume(volume)
+  }
+}
+
+export function updateVoiceCommunicatorMute(mute: boolean) {
+  if (voiceCommunicator) {
+    voiceCommunicator.setMute(mute)
   }
 }
 
@@ -300,6 +327,38 @@ export function subscribeParcelSceneToCommsMessages(controller: CommunicationsCo
 
 export function unsubscribeParcelSceneToCommsMessages(controller: CommunicationsController) {
   scenesSubscribedToCommsEvents.delete(controller)
+}
+
+const pendingProfileRequests: Record<string, IFuture<Profile | null>[]> = {}
+
+export async function requestLocalProfileToPeers(userId: string, version?: number): Promise<Profile | null> {
+  if (context && context.worldInstanceConnection && context.currentPosition) {
+    if (!pendingProfileRequests[userId]) {
+      pendingProfileRequests[userId] = []
+    }
+
+    const thisFuture = future<Profile | null>()
+
+    pendingProfileRequests[userId].push(thisFuture)
+
+    await context.worldInstanceConnection.sendProfileRequest(context.currentPosition, userId, version)
+
+    setTimeout(function () {
+      if (thisFuture.isPending) {
+        // We resolve with a null profile. This will fallback to a random profile
+        thisFuture.resolve(null)
+        const pendingRequests = pendingProfileRequests[userId]
+        if (pendingRequests && pendingRequests.includes(thisFuture)) {
+          pendingRequests.splice(pendingRequests.indexOf(thisFuture), 1)
+        }
+      }
+    }, 10000)
+
+    return thisFuture
+  } else {
+    // We resolve with a null profile. This will fallback to a random profile
+    return Promise.resolve(null)
+  }
 }
 
 async function changeConnectionRealm(realm: Realm, url: string) {
@@ -331,15 +390,13 @@ export function processParcelSceneCommsMessage(context: Context, fromAlias: stri
   }
 }
 
-export function persistCurrentUser(changes: Partial<UserInformation>): Readonly<UserInformation> {
+export function updateCommsUser(changes: Partial<UserInformation>) {
   const peer = getCurrentPeer()
 
   if (!peer || !localProfileUUID) throw new Error('cannotGetCurrentPeer')
   if (!peer.user) throw new Error('cannotGetCurrentPeer.user')
 
   Object.assign(peer.user, changes)
-
-  saveToLocalStorage('dcl-profile', peer.user)
 
   receiveUserData(localProfileUUID, peer.user)
 
@@ -349,8 +406,6 @@ export function persistCurrentUser(changes: Partial<UserInformation>): Readonly<
       context.userInfo = user
     }
   }
-
-  return peer.user
 }
 
 function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingInfo {
@@ -365,7 +420,7 @@ function ensurePeerTrackingInfo(context: Context, alias: string): PeerTrackingIn
 
 function processChatMessage(context: Context, fromAlias: string, message: Package<ChatMessage>) {
   const msgId = message.data.id
-  const profile = getProfile(store.getState(), getIdentity().address)
+  const profile = getCurrentUserProfile(store.getState())
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
   if (!peerTrackingInfo.receivedPublicChatMessages.has(msgId)) {
@@ -374,8 +429,6 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 
     const user = getUser(fromAlias)
     if (user) {
-      const displayName = user.profile && user.profile.userId
-
       if (text.startsWith('␐')) {
         const [id, timestamp] = text.split(' ')
         avatarMessageObservable.notifyObservers({
@@ -389,7 +442,7 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
           const messageEntry: InternalChatMessage = {
             messageType: ChatMessageType.PUBLIC,
             messageId: msgId,
-            sender: displayName || 'unknown',
+            sender: user.userId || 'unknown',
             body: text,
             timestamp: message.time
           }
@@ -401,8 +454,7 @@ function processChatMessage(context: Context, fromAlias: string, message: Packag
 }
 
 function processVoiceFragment(context: Context, fromAlias: string, message: Package<VoiceFragment>) {
-  const myAddress = getIdentity().address
-  const profile = getProfile(store.getState(), myAddress)
+  const profile = getCurrentUserProfile(store.getState())
 
   const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
 
@@ -410,10 +462,8 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
     if (
       profile &&
       peerTrackingInfo.identity &&
-      !isBlocked(profile, peerTrackingInfo.identity) &&
-      !isMuted(profile, peerTrackingInfo.identity) &&
-      !hasBlockedMe(myAddress, peerTrackingInfo.identity) &&
-      peerTrackingInfo.position
+      peerTrackingInfo.position &&
+      shouldPlayVoice(profile, peerTrackingInfo.identity)
     ) {
       voiceCommunicator?.playEncodedAudio(
         peerTrackingInfo.identity,
@@ -425,6 +475,83 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
   }
 }
 
+function shouldPlayVoice(profile: Profile, voiceUserId: string) {
+  const myAddress = getIdentity()?.address
+  return (
+    isVoiceAllowedByPolicy(profile, voiceUserId) &&
+    !isBlocked(profile, voiceUserId) &&
+    !isMuted(profile, voiceUserId) &&
+    !hasBlockedMe(myAddress, voiceUserId)
+  )
+}
+
+function isVoiceAllowedByPolicy(profile: Profile, voiceUserId: string): boolean {
+  const policy = getVoicePolicy(store.getState())
+
+  switch (policy) {
+    case VoicePolicy.ALLOW_ALL:
+      return true
+    case VoicePolicy.ALLOW_FRIENDS_ONLY:
+      return isFriend(store.getState(), voiceUserId)
+    case VoicePolicy.ALLOW_VERIFIED_ONLY:
+      const theirProfile = getProfile(store.getState(), voiceUserId)
+      return !!theirProfile?.hasClaimedName
+  }
+}
+
+const TIME_BETWEEN_PROFILE_RESPONSES = 1000
+
+function processProfileRequest(context: Context, fromAlias: string, message: Package<ProfileRequest>) {
+  const myIdentity = getIdentity()
+  const myAddress = myIdentity?.address
+
+  // We only send profile responses for our own address
+  if (message.data.userId !== myAddress) return
+
+  // If we are already sending a profile response, we don't want to schedule another
+  if (context.sendingProfileResponse) return
+
+  context.sendingProfileResponse = true
+  ;(async () => {
+    const timeSinceLastProfile = Date.now() - context.lastProfileResponseTime
+
+    // We don't want to send profile responses too frequently, so we delay the response to send a maximum of 1 per TIME_BETWEEN_PROFILE_RESPONSES
+    if (timeSinceLastProfile < TIME_BETWEEN_PROFILE_RESPONSES) {
+      await sleep(TIME_BETWEEN_PROFILE_RESPONSES - timeSinceLastProfile)
+    }
+
+    const profile = await ProfileAsPromise(
+      myAddress,
+      message.data.version ? parseInt(message.data.version, 10) : undefined,
+      getProfileType(myIdentity)
+    )
+
+    if (context.currentPosition) {
+      context.worldInstanceConnection?.sendProfileResponse(context.currentPosition, stripSnapshots(profile))
+    }
+
+    context.lastProfileResponseTime = Date.now()
+  })()
+    .finally(() => (context.sendingProfileResponse = false))
+    .catch((e) => defaultLogger.error('Error getting profile for responding request to comms', e))
+}
+
+function processProfileResponse(context: Context, fromAlias: string, message: Package<ProfileResponse>) {
+  const peerTrackingInfo = ensurePeerTrackingInfo(context, fromAlias)
+
+  const profile = message.data.profile
+
+  if (peerTrackingInfo.identity !== profile.userId) return
+
+  if (pendingProfileRequests[profile.userId] && pendingProfileRequests[profile.userId].length > 0) {
+    pendingProfileRequests[profile.userId].forEach((it) => it.resolve(profile))
+    delete pendingProfileRequests[profile.userId]
+  } else {
+    // If we received an unexpected profile, maybe the profile saga can use this preemptively
+    store.dispatch(localProfileReceived(profile.userId, profile))
+  }
+}
+
 function isBlocked(profile: Profile, userId: string): boolean {
   return !!profile.blocked && profile.blocked.includes(userId)
 }
@@ -433,10 +560,10 @@ function isMuted(profile: Profile, userId: string): boolean {
   return !!profile.muted && profile.muted.includes(userId)
 }
 
-function hasBlockedMe(myAddress: string, theirAddress: string): boolean {
+function hasBlockedMe(myAddress: string | undefined, theirAddress: string): boolean {
   const profile = getProfile(store.getState(), theirAddress)
 
-  return !!profile && isBlocked(profile, myAddress)
+  return !!profile && !!myAddress && isBlocked(profile, myAddress)
 }
 
 export function processProfileMessage(
@@ -453,6 +580,7 @@ export function processProfileMessage(
     peerTrackingInfo.lastProfileUpdate = msgTimestamp
     peerTrackingInfo.identity = peerIdentity
     peerTrackingInfo.lastUpdate = Date.now()
+    peerTrackingInfo.profileType = message.data.type
 
     if (ensureTrackingUniqueAndLatest(context, fromAlias, peerIdentity, msgTimestamp)) {
       const profileVersion = message.data.version
@@ -554,7 +682,8 @@ export function onPositionUpdate(context: Context, p: Position) {
     }
   }
 
-  if (!immediateReposition) { // Otherwise the topics get lost on an immediate reposition...
+  if (!immediateReposition) {
+    // Otherwise the topics get lost on an immediate reposition...
     const parcelSceneSubscriptions = getParcelSceneSubscriptions()
     const parcelSceneCommsTopics = parcelSceneSubscriptions.join(' ')
 
@@ -618,7 +747,7 @@ function collectInfo(context: Context) {
       continue
     }
 
-    if (trackingInfo.identity === getIdentity().address) {
+    if (trackingInfo.identity === getIdentity()?.address) {
       // If we are tracking a peer that is ourselves, we remove it
       removePeer(context, peerAlias)
       continue
@@ -727,7 +856,7 @@ function subscribeToRealmChange(store: Store<RootState>) {
 
 export async function connect(userId: string) {
   try {
-    const user = getCurrentUser()
+    const user = getStoredSession(userId)
     if (!user) {
       return undefined
     }
@@ -785,7 +914,7 @@ export async function connect(userId: string) {
           },
           authHandler: async (msg: string) => {
             try {
-              return Authenticator.signPayload(getIdentity(), msg)
+              return Authenticator.signPayload(getIdentity() as AuthIdentity, msg)
             } catch (e) {
               defaultLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
             }
@@ -817,7 +946,7 @@ export async function connect(userId: string) {
         defaultLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
 
         connection = new LighthouseWorldInstanceConnection(
-          getIdentity().address,
+          getIdentity()?.address as string,
           realm!,
           lighthouseUrl,
           peerConfig,
@@ -943,6 +1072,12 @@ async function doStartCommunications(context: Context) {
     connection.voiceHandler = (alias: string, data: Package<VoiceFragment>) => {
       processVoiceFragment(context, alias, data)
     }
+    connection.profileRequestHandler = (alias: string, data: Package<ProfileRequest>) => {
+      processProfileRequest(context, alias, data)
+    }
+    connection.profileResponseHandler = (alias: string, data: Package<ProfileResponse>) => {
+      processProfileResponse(context, alias, data)
+    }
 
     if (commConfigurations.debug) {
       connection.stats = context.stats
@@ -1003,7 +1138,7 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && VOICE_CHAT_ENABLED) {
+    if (!voiceCommunicator && isVoiceChatEnabled(store.getState())) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
@@ -1148,7 +1283,8 @@ globalThis.bots = {
       time: Date.now(),
       data: {
         version: '1',
-        user: id
+        user: id,
+        type: ProfileType.DEPLOYED
       }
     })
     const position = { ...lastPlayerPosition }
@@ -1176,7 +1312,8 @@ globalThis.bots = {
     }
     return false
   },
-  reposition: (id: string) => { // to test immediate repositioning
+  reposition: (id: string) => {
+    // to test immediate repositioning
     let bot = bots.find((bot) => bot.id === id)
     if (bot) {
       const position = { ...lastPlayerPosition }
@@ -1189,4 +1326,21 @@ globalThis.bots = {
     }
   },
   list: () => bots.map((bot) => bot.id)
+}
+
+function stripSnapshots(profile: Profile): Profile {
+  const newSnapshots: Record<string, string> = {}
+  const currentSnapshots: Record<string, string> = profile.avatar.snapshots
+  Object.keys(currentSnapshots).forEach((snapshotKey) => {
+    const snapshot = currentSnapshots[snapshotKey]
+
+    newSnapshots[snapshotKey] =
+      snapshot.startsWith('/') || snapshot.startsWith('./') || isURL(snapshot)
+        ? snapshot
+        : genericAvatarSnapshots[snapshotKey]
+  })
+  return {
+    ...profile,
+    avatar: { ...profile.avatar, snapshots: newSnapshots as Snapshots }
+  }
 }
