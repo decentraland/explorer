@@ -7,7 +7,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prestart": "./scripts/pre-start.sh",
+    "prestart": "node ./scripts/pre-start.js",
     "postinstall": "./scripts/post-install.sh",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public"
