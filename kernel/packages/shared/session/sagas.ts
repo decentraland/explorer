@@ -80,7 +80,7 @@ export function* sessionSaga(): any {
   yield takeLatest(INIT_SESSION, initSession)
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
-  yield takeLatest(SIGNUP, singUp)
+  yield takeLatest(SIGNUP, signUp)
   yield takeLatest(AUTHENTICATE, authenticate)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
   yield takeLatest(SIGNUP_COME_BACK_TO_AVATAR_EDITOR, showAvatarEditor)
@@ -249,7 +249,7 @@ function* setUserAuthentified(userId: string, identity: ExplorerIdentity) {
   yield put(userAuthentified(userId, identity, net))
 }
 
-function* singUp() {
+function* signUp() {
   yield put(setLoadingScreen(true))
   yield put(changeLoginStage(LoginStage.COMPLETED))
   const session = yield select(getSignUpIdentity)

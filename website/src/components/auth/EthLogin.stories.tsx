@@ -11,7 +11,7 @@ export default {
   },
   component: EthLogin,
   argTypes: {
-    onLogin: { action: "singing in/up..." },
+    onLogin: { action: "signing in/up..." },
     onGuest: { action: "guest click..." },
     onTermsChange: { action: "terms changed..." },
   },

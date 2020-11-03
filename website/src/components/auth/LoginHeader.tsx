@@ -5,7 +5,7 @@ export const LoginHeader: React.FC = () => (
   <div className="eth-login-description">
     <Logo />
     <p>
-      Inmerse yourself into the first virtual world fully owned by its users.
+      Immerse yourself into the first virtual world fully owned by its users.
     </p>
   </div>
 );

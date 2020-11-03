@@ -14,7 +14,7 @@ export default {
   } as LoginContainerProps,
   component: LoginContainer,
   argTypes: {
-    onLogin: { action: "singing in..." },
+    onLogin: { action: "signing in..." },
     onTermsChange: { action: "terms changed..." },
   },
 } as Meta;
