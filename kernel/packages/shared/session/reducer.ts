@@ -70,13 +70,15 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
         }
       }
     case SIGNUP_FORM:
+      const { name, email } = (action as SignUpFormAction).payload
       return {
         ...state,
         signup: {
           ...state.signup,
           profile: {
             ...state.signup.profile,
-            ...(action as SignUpFormAction).payload
+            unclaimedName: name,
+            email
           }
         }
       }
