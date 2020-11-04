@@ -25,11 +25,14 @@ public class BuildEditorMode : BuildModeState
     public OutlinerController outlinerController;
     public BuildModeController buildModeController;
     public CameraController cameraController;
-   
-
-    //public CameraController cameraController;
     public Transform lookAtT;
     public MouseCatcher mouseCatcher;
+
+    [Header("InputActions")]
+    [SerializeField] internal InputAction_Trigger translateInputAction;
+    [SerializeField] internal InputAction_Trigger rotateInputAction;
+    [SerializeField] internal InputAction_Trigger scaleInputAction;
+    [SerializeField] internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
 
 
     ParcelScene sceneToEdit;
@@ -45,6 +48,11 @@ public class BuildEditorMode : BuildModeState
 
         builderInputWrapper.OnMouseDown += MouseDown;
         builderInputWrapper.OnMouseUp += MouseUp;
+
+        translateInputAction.OnTriggered += (o) => TranslateMode();
+        rotateInputAction.OnTriggered += (o) => RotateMode();
+        scaleInputAction.OnTriggered += (o) => ScaleMode();
+        focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
     }
 
 
@@ -295,24 +303,31 @@ public class BuildEditorMode : BuildModeState
         }
         else gizmoManager.SetSnapFactor(0, 0, 0);
     }
-    public override void CheckInput()
-    {
-        base.CheckInput();
+    //public override void CheckInput()
+    //{
+    //    base.CheckInput();
  
-    }
-    public override void CheckInputSelectedEntities()
+    //}
+    //public override void CheckInputSelectedEntities()
+    //{
+    //    base.CheckInputSelectedEntities();
+    //    //if (Input.GetKey(KeyCode.F))
+    //    //{
+    //    //    FocusOnSelectedEntitiesInput();
+    //    //    return;
+    //    //}
+  
+    //}
+
+
+    public void FocusOnSelectedEntitiesInput()
     {
-        base.CheckInputSelectedEntities();
-        if (Input.GetKey(KeyCode.F))
+        if (isModeActive)
         {
             FocusGameObject(selectedEntities);
             InputDone();
-            return;
         }
-  
     }
-
- 
 
     public void LookAtEntity(DecentralandEntity entity)
     {
@@ -332,25 +347,33 @@ public class BuildEditorMode : BuildModeState
 
     public void TranslateMode()
     {
-        gizmoManager.SetGizmoType("MOVE");
-        if (selectedEntities.Count > 0) ShowGizmos();
-        else gizmoManager.HideGizmo();
+        if (isModeActive)
+        {
+            gizmoManager.SetGizmoType("MOVE");
+            if (selectedEntities.Count > 0) ShowGizmos();
+            else gizmoManager.HideGizmo();
+        }
 
     }
 
     public void RotateMode()
     {
-        gizmoManager.SetGizmoType("ROTATE");
-        if (selectedEntities.Count > 0) ShowGizmos();
-        else gizmoManager.HideGizmo();
+        if (isModeActive)
+        {
+            gizmoManager.SetGizmoType("ROTATE");
+            if (selectedEntities.Count > 0) ShowGizmos();
+            else gizmoManager.HideGizmo();
+        }
         
     }
     public void ScaleMode()
     {
-        gizmoManager.SetGizmoType("SCALE");
-        if (selectedEntities.Count > 0) ShowGizmos();
-        else gizmoManager.HideGizmo();
- 
+        if (isModeActive)
+        {
+            gizmoManager.SetGizmoType("SCALE");
+            if (selectedEntities.Count > 0) ShowGizmos();
+            else gizmoManager.HideGizmo();
+        }
     }
     public void FocusGameObject(List<DecentralandEntityToEdit> entitiesToFocus)
     {

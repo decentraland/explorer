@@ -56,6 +56,7 @@ public class BuildModeController : MonoBehaviour
     public BuilderInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
+    public InputController inputController;
 
     [Header("Build Modes")]
 
@@ -71,6 +72,28 @@ public class BuildModeController : MonoBehaviour
 
     [Header("InputActions")]
     [SerializeField] internal InputAction_Trigger editModeChangeInputAction;
+    [SerializeField] internal InputAction_Trigger toggleCatalogInputAction;
+    [SerializeField] internal InputAction_Trigger toggleChangeCameraInputAction;
+    [SerializeField] internal InputAction_Trigger toggleControlsInputAction;
+    [SerializeField] internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
+    [SerializeField] internal InputAction_Trigger toggleDuplicateInputAction;
+    [SerializeField] internal InputAction_Trigger toggleEntityListInputAction;
+    [SerializeField] internal InputAction_Trigger toggleRedoActionInputAction;
+    [SerializeField] internal InputAction_Trigger toggleUndoActionInputAction;
+    [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
+    [SerializeField] internal InputAction_Trigger toggleSnapModeInputAction;
+    [SerializeField] internal InputAction_Trigger toggleUIInputAction;
+    [SerializeField] internal InputAction_Trigger toggleDeleteInputAction;
+
+    [SerializeField] internal InputAction_Trigger quickBar1InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar2InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar3InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar4InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar5InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar6InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar7InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar8InputAction;
+    [SerializeField] internal InputAction_Trigger quickBar9InputAction;
 
 
     BuildModeState currentActiveMode;
@@ -117,6 +140,34 @@ public class BuildModeController : MonoBehaviour
 
 
         editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
+        toggleCatalogInputAction.OnTriggered += (o) => ChangeVisibilityOfCatalog();
+        toggleControlsInputAction.OnTriggered += (o) => ChangeVisibilityOfControls();
+        toggleEntityListInputAction.OnTriggered += (o) => ChangeEntityListVisibility();
+        toggleSceneInfoInputAction.OnTriggered +=  (o) => ChangeVisibilityOfSceneInfo();
+        toggleUIInputAction.OnTriggered += (o) => ChangeVisibilityOfUI();
+        toggleChangeCameraInputAction.OnTriggered += (o) => ChangeAdvanceMode();
+
+        quickBar1InputAction.OnTriggered += (o) => QuickBarInput(0);
+        quickBar2InputAction.OnTriggered += (o) => QuickBarInput(1);
+        quickBar3InputAction.OnTriggered += (o) => QuickBarInput(2);
+        quickBar4InputAction.OnTriggered += (o) => QuickBarInput(3);
+        quickBar5InputAction.OnTriggered += (o) => QuickBarInput(4);
+        quickBar6InputAction.OnTriggered += (o) => QuickBarInput(5);
+        quickBar7InputAction.OnTriggered += (o) => QuickBarInput(6);
+        quickBar8InputAction.OnTriggered += (o) => QuickBarInput(7);
+        quickBar9InputAction.OnTriggered += (o) => QuickBarInput(8);
+
+        toggleCreateLastSceneObjectInputAction.OnTriggered += (o) => CreateLastSceneObject();
+        toggleRedoActionInputAction.OnTriggered += (o) => RedoAction();
+        toggleUndoActionInputAction.OnTriggered += (o) => UndoAction();
+        toggleSnapModeInputAction.OnTriggered += (o) => ChangeSnapMode();
+        toggleDeleteInputAction.OnTriggered += (o) => DeleteSelectedEntitiesInput();
+        toggleDuplicateInputAction.OnTriggered += (o) => DuplicateSelectedEntitiesInput();
+
+
+
+
+
         catalogController.OnSceneObjectSelected += CreateSceneObjectSelected;
         builderInputWrapper.OnMouseClick += MouseClick;
         buildModeEntityListController.OnEntityClick += ChangeEntitySelectionFromList;
@@ -302,157 +353,185 @@ public class BuildModeController : MonoBehaviour
 
     void CheckInputForShowingUI()
     {
-        if (Input.GetKey(KeyCode.O))
-        {
-            ChangeVisibilityOfUI();
-            InputDone();
-            return;
-        }
-        if (Input.GetKey(KeyCode.Y))
-        {
-            ChangeEntityListVisibility();
-            InputDone();
-            return;
-        }
-        if (Input.GetKey(KeyCode.J))
-        {
-            ChangeVisibilityOfCatalog();
+        //if (Input.GetKey(KeyCode.O))
+        //{
+        //    ChangeVisibilityOfUI();    
+        //    return;
+        //}
+        //if (Input.GetKey(KeyCode.Y))
+        //{
+        //    ChangeEntityListVisibility();
+        //    return;
+        //}
+        //if (Input.GetKey(KeyCode.J))
+        //{
+        //    ChangeVisibilityOfCatalog();
+        //    return;
+        //}
+        //if (Input.GetKey(KeyCode.G))
+        //{
+        //    ChangeVisibilityOfSceneInfo();
+        //    return;
+        //}
+        //if (Input.GetKey(KeyCode.L))
+        //{
+        //    ChangeAdvanceMode();
+        //    return;
+        //}
+        //if (Input.GetKey(KeyCode.N))
+        //{
 
-            InputDone();
-            return;
-        }
-        if (Input.GetKey(KeyCode.G))
-        {
-            ChangeVisibilityOfSceneInfo();
-            InputDone();
-            return;
-        }
-        if (Input.GetKey(KeyCode.L))
-        {
-            SetAdvanceMode(!isAdvancedModeActive);
-            InputDone();
-            return;
-        }
-            if (Input.GetKey(KeyCode.N))
-        {
-
-            ChangeVisibilityOfControls();
-            InputDone();
-            return;
-        }
-
-      
+        //    ChangeVisibilityOfControls();
+        //    return;
+        //}     
 
     }
 
-
-
-    void CheckEditModeInput()
-    {        
-        if (Input.GetKeyUp(KeyCode.Q))
+    void CreateLastSceneObject()
+    {
+        if (lastSceneObjectCreated != null)
         {
-   
-            if(lastSceneObjectCreated != null)
-            {
-                if (selectedEntities.Count > 0) DeselectEntities();
-                CreateSceneObjectSelected(lastSceneObjectCreated);
-                InputDone();
-            }
-            //CreateBoxEntity();
-        }
-
-        if(Input.GetKeyUp(KeyCode.T))
-        {
-            SetSnapActive(!isSnapActive);
+            if (selectedEntities.Count > 0) DeselectEntities();
+            CreateSceneObjectSelected(lastSceneObjectCreated);
             InputDone();
         }
+    }
+    void ChangeSnapMode()
+    {
+        SetSnapActive(!isSnapActive);
+        InputDone();
+    }
+
+    void RedoAction()
+    {
+        actionController.TryToRedoAction();
+        InputDone();
+    }
+
+    void UndoAction()
+    {
+        actionController.TryToUndoAction();
+        InputDone();
+    }
+
+    void QuickBarInput(int quickBarSlot)
+    {
+        catalogController.QuickBarObjectSelected(quickBarSlot);
+        InputDone();
+    }
+    void DeleteSelectedEntitiesInput()
+    {
+        if (selectedEntities.Count > 0)
+        {
+            DeletedSelectedEntities();
+            InputDone();
+        }
+    
+    }
+
+    void DuplicateSelectedEntitiesInput()
+    {
+        if (selectedEntities.Count > 0)
+        {
+            DuplicateEntities();
+            InputDone();
+        }
+    }
+    void CheckEditModeInput()
+    {        
+        //if (Input.GetKeyUp(KeyCode.Q))
+        //{
+
+        //    CreateLastSceneObject();
+        //    //CreateBoxEntity();
+        //}
+
+        //if(Input.GetKeyUp(KeyCode.T))
+        //{
+        //    ChangeSnapMode();
+        //}
 
         if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftControl))
         {
             CheckOutline();
         }
 
-        if (Input.GetKeyUp(KeyCode.I))
-        {
-            actionController.TryToRedoAction();
-            InputDone();
-        }
+        //if (Input.GetKeyUp(KeyCode.I))
+        //{
+        //    RedoAction();
+        //}
 
-        if (Input.GetKeyUp(KeyCode.K))
-        {
-            actionController.TryToUndoAction();
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha1))
-        {
-            catalogController.QuickBarObjectSelected(0);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha2))
-        {
-            catalogController.QuickBarObjectSelected(1);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha3))
-        {
-            catalogController.QuickBarObjectSelected(2);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha4))
-        {
-            catalogController.QuickBarObjectSelected(3);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha5))
-        {
-            catalogController.QuickBarObjectSelected(4);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha6))
-        {
-            catalogController.QuickBarObjectSelected(5);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha7))
-        {
-            catalogController.QuickBarObjectSelected(6);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha8))
-        {
-            catalogController.QuickBarObjectSelected(7);
-            InputDone();
-        }
-        if (Input.GetKey(KeyCode.Alpha9))
-        {
-            catalogController.QuickBarObjectSelected(8);
-            InputDone();
-        }
+        //if (Input.GetKeyUp(KeyCode.K))
+        //{
+        //    UndoAction();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha1))
+        //{
+        //    QuickBarInput(0);
+        //}
+        //if (Input.GetKey(KeyCode.Alpha2))
+        //{
+        //    catalogController.QuickBarObjectSelected(1);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha3))
+        //{
+        //    catalogController.QuickBarObjectSelected(2);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha4))
+        //{
+        //    catalogController.QuickBarObjectSelected(3);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha5))
+        //{
+        //    catalogController.QuickBarObjectSelected(4);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha6))
+        //{
+        //    catalogController.QuickBarObjectSelected(5);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha7))
+        //{
+        //    catalogController.QuickBarObjectSelected(6);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha8))
+        //{
+        //    catalogController.QuickBarObjectSelected(7);
+        //    InputDone();
+        //}
+        //if (Input.GetKey(KeyCode.Alpha9))
+        //{
+        //    catalogController.QuickBarObjectSelected(8);
+        //    InputDone();
+        //}
 
 
         if (selectedEntities.Count > 0)
         {
             currentActiveMode.CheckInputSelectedEntities();
 
-            if (Input.GetKey(KeyCode.Delete))
-            {
-                DeletedSelectedEntities();
-                InputDone();
-                return;
-            }
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.D))
-            {
-                DuplicateEntities();
-                InputDone();
-                return;
-            }
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
-            {
-                DestroyCreatedObjects();
-                DeselectEntities();
-                InputDone();
-                return;
-            }
+            //if (Input.GetKey(KeyCode.Delete))
+            //{
+            //    DeleteSelectedEntitiesInput();
+            //    return;
+            //}
+            //if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.D))
+            //{
+            //    DuplicateSelectedEntitiesInput();
+            //    return;
+            //}
+            //if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
+            //{
+            //    DestroyCreatedObjects();
+            //    DeselectEntities();
+            //    InputDone();
+            //    return;
+            //}
                  
         }
     }
@@ -460,14 +539,17 @@ public class BuildModeController : MonoBehaviour
     public void ChangeVisibilityOfControls()
     {
         shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
+        InputDone();
     }
     public void ChangeVisibilityOfExtraBtns()
     {
         extraBtnsGO.SetActive(!extraBtnsGO.activeSelf);
+        InputDone();
     }
     public void ChangeVisibilityOfUI()
     {
         buildModeCanvasGO.SetActive(!buildModeCanvasGO.activeSelf);
+        InputDone();
     }
     public void ChangeEntityListVisibility()
     {
@@ -517,11 +599,9 @@ public class BuildModeController : MonoBehaviour
             case EditModeState.Inactive:               
                 break;
             case EditModeState.FirstPerson:
-                Debug.Log("FirstPerson activated");
                 currentActiveMode = firstPersonMode;             
                 break;
             case EditModeState.Editor:
-                Debug.Log("Editor activated");
                 currentActiveMode = editorMode;
                 isAdvancedModeActive = true;
                 break;
@@ -1027,7 +1107,7 @@ public class BuildModeController : MonoBehaviour
     //    sceneLimitInfoController.UpdateInfo();
     //}
 
-
+    RenderProfileBridge.ID currentprofile;
     public void EnterEditMode()
     {
         
@@ -1036,6 +1116,10 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
+        inputController.isBuildModeActivate = true;
+        currentprofile = RenderProfileBridge.i.GetCurrentRenderProfileID();
+        RenderProfileBridge.i.SetRenderProfile(RenderProfileBridge.ID.DEFAULT);
+    
    
         FindSceneToEdit();
         sceneToEdit.SetEditMode(true);
@@ -1060,10 +1144,10 @@ public class BuildModeController : MonoBehaviour
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
         //
-
+        RenderProfileBridge.i.SetRenderProfile(currentprofile);
         CommonScriptableObjects.allUIHidden.Set(false);
         buildModeCanvasGO.SetActive(false);
-
+        inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
 
         ParcelSettings.VISUAL_LOADING_ENABLED = true;

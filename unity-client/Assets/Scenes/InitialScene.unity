@@ -121,6 +121,18 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &6056205 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4852920391666169108, guid: b0965b55b892d438da492708ea09799c,
+    type: 3}
+  m_PrefabInstance: {fileID: 326638024064006570}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f1a1c036a21184c9f07fda4aba88be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &134299876 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3666597879787490177, guid: b0965b55b892d438da492708ea09799c,
@@ -939,6 +951,11 @@ PrefabInstance:
       propertyPath: cameraParentGO
       value: 
       objectReference: {fileID: 1237533438}
+    - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: inputController
+      value: 
+      objectReference: {fileID: 6056205}
     - target: {fileID: 1208871511546216253, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: cursorCanvasGroup
@@ -1180,10 +1197,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1237533442, guid: b0965b55b892d438da492708ea09799c, type: 3}
-      propertyPath: m_RendererIndex
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 326638023455565216, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_Name
@@ -1249,6 +1262,12 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4852920391666169108, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: builderHoldActions.Array.data[4]
+      value: 
+      objectReference: {fileID: 11400000, guid: 3aea5eddf3f7c8a4988b3e4d951ca84a,
+        type: 2}
     - target: {fileID: 5671575169730573920, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: builderInputWrapper

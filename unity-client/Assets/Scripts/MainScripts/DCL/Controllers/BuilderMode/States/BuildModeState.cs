@@ -19,7 +19,7 @@ public class BuildModeState : MonoBehaviour
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 
-    protected bool isSnapActive = false, isMultiSelectionActive = false;
+    protected bool isSnapActive = false, isMultiSelectionActive = false, isModeActive = false;
     protected List<DecentralandEntityToEdit> selectedEntities;
     public virtual void Init(GameObject _goToEdit,GameObject _undoGo,GameObject _snapGO,GameObject _freeMovementGO,List<DecentralandEntityToEdit> _selectedEntities)
     {
@@ -35,11 +35,13 @@ public class BuildModeState : MonoBehaviour
     public virtual void Activate(ParcelScene scene)
     {
         gameObject.SetActive(true);
+        isModeActive = true;
     }
 
     public virtual void Desactivate()
     {
         gameObject.SetActive(false);
+        isModeActive = false;
     }
     public virtual void SetSnapActive(bool isActive)
     {

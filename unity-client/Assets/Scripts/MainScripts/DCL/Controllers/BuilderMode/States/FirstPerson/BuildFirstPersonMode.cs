@@ -17,12 +17,22 @@ public class BuildFirstPersonMode : BuildModeState
     public GameObject firstPersonCanvasGO;
     public CanvasGroup cursorCanvasGroup;
 
+    [Header("InputActions")]
+    [SerializeField] internal InputAction_Hold rotationHold;
+
+
     Quaternion initialRotation;
 
     float currentScaleAdded, currentYRotationAdded;
 
-    bool snapObjectAlreadyMoved = false;
+    bool snapObjectAlreadyMoved = false,shouldRotate = false;
     Transform originalParentGOEdit;
+
+    private void Start()
+    {
+        rotationHold.OnStarted += (o) => { shouldRotate = true; };
+        rotationHold.OnFinished += (o) => { shouldRotate = false; };
+    }
 
     void LateUpdate()
     {
@@ -154,24 +164,10 @@ public class BuildFirstPersonMode : BuildModeState
         base.CheckInputSelectedEntities();
         if (selectedEntities.Count > 0)
         {
-            if (Input.GetKey(KeyCode.R))
+            if (isModeActive && shouldRotate)
             {
-                if (isSnapActive)
-                {
-
-                    RotateSelection(snapRotationDegresFactor);
-                    InputDone();
-                }
-                else
-                {
-                    RotateSelection(rotationSpeed);
-                }
-            }
-
-            if (Input.mouseScrollDelta.y > 0.5f)
-            {
-                if (Input.GetKey(KeyCode.R))
-                {
+                //if (Input.GetKey(KeyCode.R))
+                //{
                     if (isSnapActive)
                     {
 
@@ -182,7 +178,11 @@ public class BuildFirstPersonMode : BuildModeState
                     {
                         RotateSelection(rotationSpeed);
                     }
-                }
+                //}
+            }
+            if (Input.mouseScrollDelta.y > 0.5f)
+            {
+                
 
                 if (isSnapActive)
                 {
@@ -208,6 +208,10 @@ public class BuildFirstPersonMode : BuildModeState
     }
 
 
+    void RotationActivated()
+    {
+        
+    }
     void SetObjectIfSnapOrNot()
     {
         if (!isMultiSelectionActive)

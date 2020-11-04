@@ -2898,6 +2898,7 @@ MonoBehaviour:
   builderInputWrapper: {fileID: 1208871511405416592}
   gizmoManager: {fileID: 1208871511615770936}
   actionController: {fileID: 1208871512032110241}
+  inputController: {fileID: 0}
   firstPersonMode: {fileID: 1208871511546216253}
   editorMode: {fileID: 1208871512657624393}
   duplicateCursorTexture: {fileID: 2800000, guid: 422889cd6c61279459cc3c6bfa00ed20,
@@ -2907,6 +2908,48 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 16384
   editModeChangeInputAction: {fileID: 11400000, guid: 4f763868020343f469cebb00aaf01960,
+    type: 2}
+  toggleCatalogInputAction: {fileID: 11400000, guid: 7a0d84998e5175746a922761f2a867fe,
+    type: 2}
+  toggleChangeCameraInputAction: {fileID: 11400000, guid: 02c21a2f1fb6f714f84c2fd94640f53a,
+    type: 2}
+  toggleControlsInputAction: {fileID: 11400000, guid: efecb0671e927ba4fa1dffff33d267a2,
+    type: 2}
+  toggleCreateLastSceneObjectInputAction: {fileID: 11400000, guid: 888a1a2d0ea847a40a6b201ed64f680e,
+    type: 2}
+  toggleDuplicateInputAction: {fileID: 11400000, guid: 43948507e81566e499e81e633a1dcf23,
+    type: 2}
+  toggleEntityListInputAction: {fileID: 11400000, guid: 8564ac18833cf9a4aa9290543b5698d3,
+    type: 2}
+  toggleRedoActionInputAction: {fileID: 11400000, guid: 04b9b1db1e772b84ba73426304948e60,
+    type: 2}
+  toggleUndoActionInputAction: {fileID: 11400000, guid: 4cee9aa16106c7d44900a13123280dac,
+    type: 2}
+  toggleSceneInfoInputAction: {fileID: 11400000, guid: b01ba6523971e0149a23c36b50259cdd,
+    type: 2}
+  toggleSnapModeInputAction: {fileID: 11400000, guid: 9069f92e06a1094478a137f5274d1ab6,
+    type: 2}
+  toggleUIInputAction: {fileID: 11400000, guid: 406d4343cf8bb7a4c9abde62ea95895c,
+    type: 2}
+  toggleDeleteInputAction: {fileID: 11400000, guid: 9ec10551302c6334da92572890605db3,
+    type: 2}
+  quickBar1InputAction: {fileID: 11400000, guid: 019a8b4972b1c1a45b15beba521da248,
+    type: 2}
+  quickBar2InputAction: {fileID: 11400000, guid: 702cc9951626b2342be70c2ea20e6b3c,
+    type: 2}
+  quickBar3InputAction: {fileID: 11400000, guid: 078b4efaef516bf49884dcc0f1b5a548,
+    type: 2}
+  quickBar4InputAction: {fileID: 11400000, guid: 64309d885afc99e40a66e73d021ca596,
+    type: 2}
+  quickBar5InputAction: {fileID: 11400000, guid: 1990a087888338544a13d0e1bf571111,
+    type: 2}
+  quickBar6InputAction: {fileID: 11400000, guid: 5aedd02bc65ca2b4c8d712d69e06a62d,
+    type: 2}
+  quickBar7InputAction: {fileID: 11400000, guid: 230c6a1a95c22cd4084a30b192b433f7,
+    type: 2}
+  quickBar8InputAction: {fileID: 11400000, guid: f458a244ef605bf4bbf6cb47c2cc7409,
+    type: 2}
+  quickBar9InputAction: {fileID: 11400000, guid: 80e3d0c91d2e18d45977a1f31b50621d,
     type: 2}
 --- !u!1 &1208871511276838369
 GameObject:
@@ -3198,7 +3241,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7102,6 +7145,7 @@ MonoBehaviour:
   distanceFromCameraForNewEntitties: 5
   firstPersonCanvasGO: {fileID: 1208871511960315287}
   cursorCanvasGroup: {fileID: 0}
+  rotationHold: {fileID: 11400000, guid: 3aea5eddf3f7c8a4988b3e4d951ca84a, type: 2}
 --- !u!1 &1208871511549656230
 GameObject:
   m_ObjectHideFlags: 0
@@ -12842,7 +12886,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13937,7 +13981,7 @@ MeshRenderer:
   m_RenderingLayerMask: 2147483648
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14940,7 +14984,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -20975,7 +21019,7 @@ MeshRenderer:
   m_RenderingLayerMask: 2147483648
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -23271,6 +23315,12 @@ MonoBehaviour:
   cameraController: {fileID: 0}
   lookAtT: {fileID: 1208871513090114763}
   mouseCatcher: {fileID: 0}
+  translateInputAction: {fileID: 11400000, guid: c30e7470bcfa51844ab8120da4ae4faf,
+    type: 2}
+  rotateInputAction: {fileID: 11400000, guid: 321cf4baeaa41d647a6198e45d74ee87, type: 2}
+  scaleInputAction: {fileID: 11400000, guid: 9e5ca5b6a25bef24eaa80d22ea3959ae, type: 2}
+  focusOnSelectedEntitiesInputAction: {fileID: 11400000, guid: a396b9c4e6cdea74380206e924f78bed,
+    type: 2}
   groundLayer:
     serializedVersion: 2
     m_Bits: 1024
@@ -23895,7 +23945,7 @@ MeshRenderer:
   m_RenderingLayerMask: 2147483648
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -26471,7 +26521,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 378a00f40976049a5872fddac4a20745, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c983eea4ebd9d43579acbb2e5c500480, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -27788,7 +27838,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -28167,7 +28217,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1b6d7b062282040878df170d9446a613, type: 2}
+  - {fileID: 2100000, guid: a9ee679e43d4d2944a02cdd5d24ef213, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
