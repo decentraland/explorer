@@ -10,14 +10,14 @@ import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { AUTH_ERROR_LOGGED_OUT, experienceStarted, FAILED_FETCHING_UNITY, NOT_INVITED } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config'
-import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
+import { NO_MOTD, DEBUG_PM, OPEN_AVATAR_EDITOR, HAS_INITIAL_POSITION_MARK } from '../config/index'
+import { signalRendererInitialized, signalParcelLoadingStarted } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
-import { onNextWorldRunning, worldRunningObservable } from 'shared/world/worldState'
+import { renderStateObservable, onNextRendererEnabled } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -37,9 +37,9 @@ namespace webApp {
   export async function initWeb(container: HTMLElement) {
     if (!container) throw new Error('cannot find element #gameContainer')
     const start = Date.now()
-    const observer = worldRunningObservable.add((isRunning) => {
+    const observer = renderStateObservable.add((isRunning) => {
       if (isRunning) {
-        worldRunningObservable.remove(observer)
+        renderStateObservable.remove(observer)
         DEBUG_PM && logger.info(`initial load: `, Date.now() - start)
       }
     })
@@ -111,7 +111,7 @@ namespace webApp {
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
 
-    onNextWorldRunning(() => globalThis.globalStore.dispatch(experienceStarted()))
+    onNextRendererEnabled(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
 

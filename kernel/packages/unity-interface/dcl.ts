@@ -11,8 +11,8 @@ import {
   stopParcelSceneWorker
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker, hudWorkerUrl } from 'shared/world/SceneWorker'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
+import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
@@ -24,6 +24,7 @@ import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
 import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
+import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 
 declare const globalThis: UnityInterfaceContainer &
@@ -90,6 +91,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   unityInterface.Init(_gameInstance)
 
   unityInterface.DeactivateRendering()
+
+  unityInterface.SetKernelConfiguration(kernelConfigForRenderer())
 
   if (DEBUG) {
     unityInterface.SetDebug()
@@ -283,7 +286,7 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-worldRunningObservable.add(async (isRunning) => {
+renderStateObservable.add(async (isRunning) => {
   if (isRunning) {
     await loginCompleted
     setLoadingScreenVisible(false)
