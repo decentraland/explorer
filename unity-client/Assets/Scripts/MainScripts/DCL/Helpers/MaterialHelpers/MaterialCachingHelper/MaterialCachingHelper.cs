@@ -109,10 +109,11 @@ namespace DCL.Helpers
                                 materialCopy.SetFloat("_Surface", 1);
                             else
                                 materialCopy.SetFloat("_Surface", 0);
-#endif
-                            SRPBatchingHelper.OptimizeMaterial(materialCopy);
 
                             materialCopy.name += $" (crc: {materialCopy.ComputeCRC()})";
+#endif
+
+                            SRPBatchingHelper.OptimizeMaterial(materialCopy);
                             PersistentAssetCache.MaterialCacheByCRC.Add(hash, new RefCountedMaterialData(hash, materialCopy));
                         }
 
