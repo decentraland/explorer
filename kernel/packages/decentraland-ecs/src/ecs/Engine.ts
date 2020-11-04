@@ -275,17 +275,21 @@ export class Engine implements IEngine {
         const components = requires.slice()
 
         // 2. search for a component group that has all the same requirements
-        componentGroups.forEach(traversedComponentGroup => {
-          if (components.length === traversedComponentGroup.requires.length) {
-            for (let i = 0; i < components.length; i++) {
-              if (traversedComponentGroup.requires.indexOf(components[i]) === -1) break
+        for (let i = 0; i < componentGroups.length; i++) {
+          const traversedComponentGroup = componentGroups[i]
 
-              if (i === (components.length - 1)) {
+          if (components.length === traversedComponentGroup.requires.length) {
+            for (let j = 0; j < components.length; j++) {
+              if (traversedComponentGroup.requires.indexOf(components[j]) === -1) break
+
+              if (j === (components.length - 1)) {
                 componentGroup = traversedComponentGroup
               }
             }
+
+            if (componentGroup) break
           }
-        })
+        }
       }
     }
 
