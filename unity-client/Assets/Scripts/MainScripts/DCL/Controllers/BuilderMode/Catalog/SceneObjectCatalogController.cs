@@ -336,18 +336,6 @@ public class SceneObjectCatalogController : MonoBehaviour
         StartCoroutine(CloseCatalogAfterOneFrame());
     }
 
-    [ContextMenu ("Iterate catalog")]
-    public void IterateCatalog()
-    {
-        foreach(SceneAssetPack pack in CatalogController.sceneObjectCatalog.GetValues())
-        {
-            foreach(SceneObject sceneObject in pack.assets)
-            {
-                Debug.Log("ID " + sceneObject);
-
-            }
-        }
-    }
 
     public void AddFullSceneObjectCatalog(string payload)
     {
@@ -385,25 +373,4 @@ public class SceneObjectCatalogController : MonoBehaviour
         catalogUIGO.SetActive(false);
     }
  
-    //IEnumerator GetCatalog()
-    //{
-    //    UnityWebRequest www = UnityWebRequest.Get("https://builder-api.decentraland.org/v1/assetPacks");
-    //    yield return www.SendWebRequest();
-
-    //    if (www.isNetworkError || www.isHttpError)
-    //    {
-    //        Debug.Log(www.error);
-    //    }
-    //    else
-    //    {
-    //        // Show results as text
-    //        Debug.Log(www.downloadHandler.text);
-
-    //        // Or retrieve results as binary data
-    //        byte[] byteArray = www.downloadHandler.data;
-
-    //        string result = System.Text.Encoding.UTF8.GetString(byteArray);
-    //        OnResultReceived?.Invoke(result);
-    //    }
-    //}
 }

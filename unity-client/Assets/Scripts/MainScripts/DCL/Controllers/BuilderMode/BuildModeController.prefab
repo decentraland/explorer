@@ -2951,6 +2951,8 @@ MonoBehaviour:
     type: 2}
   quickBar9InputAction: {fileID: 11400000, guid: 80e3d0c91d2e18d45977a1f31b50621d,
     type: 2}
+  multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
+    type: 2}
 --- !u!1 &1208871511276838369
 GameObject:
   m_ObjectHideFlags: 0
@@ -23320,6 +23322,8 @@ MonoBehaviour:
   rotateInputAction: {fileID: 11400000, guid: 321cf4baeaa41d647a6198e45d74ee87, type: 2}
   scaleInputAction: {fileID: 11400000, guid: 9e5ca5b6a25bef24eaa80d22ea3959ae, type: 2}
   focusOnSelectedEntitiesInputAction: {fileID: 11400000, guid: a396b9c4e6cdea74380206e924f78bed,
+    type: 2}
+  squareMultiSelectionInputAction: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,
     type: 2}
   groundLayer:
     serializedVersion: 2

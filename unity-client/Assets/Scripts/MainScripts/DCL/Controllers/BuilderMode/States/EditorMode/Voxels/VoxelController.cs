@@ -21,7 +21,7 @@ public class VoxelController : MonoBehaviour
     DecentralandEntityToEdit lastVoxelCreated;
 
     GameObject editionGO;
-    bool mousePressed = false, isVoxelModelActivated = false, isMakingMultiVoxelSelection = false,isCreatingMultipleVoxels = false; 
+    bool mousePressed = false, isVoxelModelActivated = false,isCreatingMultipleVoxels = false; 
     Vector3Int lastVoxelPositionPressed;
     Vector3 lastMousePosition;
     Dictionary<Vector3Int, VoxelPrefab> createdVoxels = new Dictionary<Vector3Int, VoxelPrefab>();
@@ -70,25 +70,25 @@ public class VoxelController : MonoBehaviour
             }
 
         }
-        else if (isMakingMultiVoxelSelection)
-        {
-            if (!Input.GetKey(KeyCode.LeftShift)) EndMultiVoxelSelection();
-            else
-            {
+        //else if (isMakingMultiVoxelSelection)
+        //{
+        //    if (!Input.GetKey(KeyCode.LeftShift)) EndMultiVoxelSelection();
+        //    else
+        //    {
 
-                //outlinerController.CancelAllOutlines();
-                List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
-                foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
-                {
-                    if (BuildModeUtils.IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
-                    {
-                        outlinerController.OutLineEntity(voxelEntity);
-                    }
-                    else outlinerController.CancelEntityOutline(voxelEntity);
-                }
+        //        //outlinerController.CancelAllOutlines();
+        //        List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
+        //        foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
+        //        {
+        //            if (BuildModeUtils.IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
+        //            {
+        //                outlinerController.OutLineEntity(voxelEntity);
+        //            }
+        //            else outlinerController.CancelEntityOutline(voxelEntity);
+        //        }
 
-            }
-        }
+        //    }
+        //}
     }
 
    
@@ -149,7 +149,7 @@ public class VoxelController : MonoBehaviour
 
     public void EndMultiVoxelSelection()
     {
-        isMakingMultiVoxelSelection = false;
+        //isMakingMultiVoxelSelection = false;
 
         List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
         //buildModeController.DeselectEntities();
@@ -245,11 +245,12 @@ public class VoxelController : MonoBehaviour
     {
         if (mousePressed && buttonID == 0)
         {
-            if (isMakingMultiVoxelSelection)
-            {
-                EndMultiVoxelSelection();
-            }
-            else if(!isMakingMultiVoxelSelection && isCreatingMultipleVoxels)
+            //if (isMakingMultiVoxelSelection)
+            //{
+            //    EndMultiVoxelSelection();
+            //}
+            //else if(!isMakingMultiVoxelSelection && isCreatingMultipleVoxels)
+            if(isCreatingMultipleVoxels)
             {
                 lastVoxelCreated.transform.SetParent(null);
                 bool canVoxelsBeCreated = true;
@@ -280,10 +281,10 @@ public class VoxelController : MonoBehaviour
                 lastVoxelCreated = null;
                 isCreatingMultipleVoxels = false;
 
-                //StartCoroutine(DestroyOutsideBoundariesItems());
+                mousePressed = false;
+                freeCameraMovement.SetCameraCanMove(true);
             }
-            mousePressed = false;
-            freeCameraMovement.SetCameraCanMove(true);
+     
         }
     }
     void MouseDown(int buttonID, Vector3 position)
@@ -299,14 +300,14 @@ public class VoxelController : MonoBehaviour
                 isCreatingMultipleVoxels = true;
 
             }
-            else if(Input.GetKey(KeyCode.LeftShift))
-            {
-                //isMakingMultiVoxelSelection = true;
-                //lastMousePosition = position;
-                //mousePressed = true;
-                //freeCameraMovement.SetCameraCanMove(false);
-                //buildModeController.SetOutlineCheckActive(false);
-            }
+            //else if(Input.GetKey(KeyCode.LeftShift))
+            //{
+            //    //isMakingMultiVoxelSelection = true;
+            //    //lastMousePosition = position;
+            //    //mousePressed = true;
+            //    //freeCameraMovement.SetCameraCanMove(false);
+            //    //buildModeController.SetOutlineCheckActive(false);
+            //}
         }
     }
 
@@ -342,9 +343,4 @@ public class VoxelController : MonoBehaviour
     }
    
 
-    //IEnumerator DestroyOutsideBoundariesItems()
-    //{
-    //    yield return new WaitForSeconds(msToWaitForDestroyOutsideBoundaries / 1000f);
-    //    buildModeController.DeleteEntitiesOutsideSceneBoundaries();
-    //}
 }

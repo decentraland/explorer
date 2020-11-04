@@ -69,6 +69,12 @@ public enum DCLAction_Hold
     BuildEditModeMultiSelection = 432,
     BuildEditModeSquareMultiSelection = 433,
     BuildEditModeFirstPersonRotation = 436,
+    BuildEditModeCameraAdvanceFoward = 437,
+    BuildEditModeCameraAdvanceBack = 438,
+    BuildEditModeCameraAdvanceLeft = 439,
+    BuildEditModeCameraAdvanceRight = 440,
+    BuildEditModeCameraAdvanceUp = 441,
+    BuildEditModeCameraAdvanceDown = 442,
 }
 
 public enum DCLAction_Measurable
@@ -305,11 +311,36 @@ public class InputController : MonoBehaviour
                 case DCLAction_Hold.DefaultCancelAction:
                     InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
+                case DCLAction_Hold.BuildEditModeMultiSelection:
+                    InputProcessor.FromKey(action, KeyCode.LeftControl, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.BuildEditModeSquareMultiSelection:
+                    InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.None);
+                    break;
                 case DCLAction_Hold.BuildEditModeFirstPersonRotation:
                     InputProcessor.FromKey(action, KeyCode.R, InputProcessor.Modifier.None);
                     break;
+                case DCLAction_Hold.BuildEditModeCameraAdvanceFoward:
+                    InputProcessor.FromKey(action, KeyCode.UpArrow, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.BuildEditModeCameraAdvanceBack:
+                    InputProcessor.FromKey(action, KeyCode.DownArrow, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.BuildEditModeCameraAdvanceLeft:
+                    InputProcessor.FromKey(action, KeyCode.LeftArrow, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.BuildEditModeCameraAdvanceRight:
+                    InputProcessor.FromKey(action, KeyCode.RightArrow, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.BuildEditModeCameraAdvanceUp:
+                    InputProcessor.FromKey(action, KeyCode.Space, InputProcessor.Modifier.None);
+                    break;
+                case DCLAction_Hold.BuildEditModeCameraAdvanceDown:
+                    InputProcessor.FromKey(action, KeyCode.X, InputProcessor.Modifier.None);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
+
             }
         }
     }

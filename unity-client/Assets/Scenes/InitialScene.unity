@@ -956,6 +956,12 @@ PrefabInstance:
       propertyPath: inputController
       value: 
       objectReference: {fileID: 6056205}
+    - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: multiSelectionInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
+        type: 2}
     - target: {fileID: 1208871511546216253, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: cursorCanvasGroup
@@ -986,6 +992,12 @@ PrefabInstance:
       propertyPath: mouseCatcher
       value: 
       objectReference: {fileID: 1441454338}
+    - target: {fileID: 1208871512657624393, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: squareMultiSelectionInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ceb04930a6bb25b44a6ad241f62abdf5, type: 3}
 --- !u!114 &1441454338 stripped
@@ -1044,7 +1056,7 @@ MonoBehaviour:
   allWearables: 0
   testWearables: 0
   enableTutorial: 0
-  soloScene: 1
+  soloScene: 0
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
@@ -1264,15 +1276,21 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4852920391666169108, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
-      propertyPath: builderHoldActions.Array.data[4]
+      propertyPath: builderHoldActions.Array.data[10]
       value: 
-      objectReference: {fileID: 11400000, guid: 3aea5eddf3f7c8a4988b3e4d951ca84a,
+      objectReference: {fileID: 11400000, guid: b5e5d3b2e9d2cc64eb6e99d39c7ab67b,
         type: 2}
     - target: {fileID: 5671575169730573920, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: builderInputWrapper
       value: 
       objectReference: {fileID: 361193545}
+    - target: {fileID: 5671575169730573920, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: advanceUpInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: b5e5d3b2e9d2cc64eb6e99d39c7ab67b,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b0965b55b892d438da492708ea09799c, type: 3}
 --- !u!1001 &943100645024490815

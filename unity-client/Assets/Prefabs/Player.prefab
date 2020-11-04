@@ -602,12 +602,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,
         type: 2}
-    - target: {fileID: 5175052615018462647, guid: ac14ae4eed4f6284ab80fc0881bc3f70,
-        type: 3}
-      propertyPath: builderHoldActions.Array.data[4]
-      value: 
-      objectReference: {fileID: 11400000, guid: 0cfb8d150b7d6934d856665cf924d01d,
-        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac14ae4eed4f6284ab80fc0881bc3f70, type: 3}
 --- !u!4 &4852920391666169109 stripped
@@ -810,6 +804,42 @@ PrefabInstance:
       propertyPath: m_HorizontalAxis.Value
       value: -45
       objectReference: {fileID: 0}
+    - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: advanceFowardInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: e1259dcd82d671841b98120f45cd5e1e,
+        type: 2}
+    - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: advanceBackInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: c7d2789965fbcb643ae73d7f5e49851c,
+        type: 2}
+    - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: advanceLeftInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: 7eb660acd8e8fdb4287f537b3f17e49d,
+        type: 2}
+    - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: advanceRightInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: 2ee64fe39f7539d4c9a54d793d776da5,
+        type: 2}
+    - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: advanceUpInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: b5e5d3b2e9d2cc64eb6e99d39c7ab67b,
+        type: 2}
+    - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
+        type: 3}
+      propertyPath: advanceDownInputAction
+      value: 
+      objectReference: {fileID: 11400000, guid: 04728f8a663911e4abf4424936bb9753,
+        type: 2}
     - target: {fileID: 5822833931380479610, guid: bc570f5e94906eb47814191e0beaee7a,
         type: 3}
       propertyPath: m_IsActive

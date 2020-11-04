@@ -24,10 +24,19 @@ public class FreeCameraMovement : CameraStateBase
 
     public float dragSpeed = 3f;
 
+    [Header("InputActions")]
+    [SerializeField] internal InputAction_Hold advanceFowardInputAction;
+    [SerializeField] internal InputAction_Hold advanceBackInputAction;
+    [SerializeField] internal InputAction_Hold advanceLeftInputAction;
+    [SerializeField] internal InputAction_Hold advanceRightInputAction;
+    [SerializeField] internal InputAction_Hold advanceUpInputAction;
+    [SerializeField] internal InputAction_Hold advanceDownInputAction;
+
+
     private float yaw = 0f;
     private float pitch = 0f;
 
-    bool isCameraAbleToMove = true;
+    bool isCameraAbleToMove = true, isAdvancingFoward = false,isAdvancingBackward = false, isAdvancingLeft = false, isAdvancingRight = false, isAdvancingUp = false, isAdvancingDown = false;
 
     Coroutine smoothLookAtCor;
     private void Awake()
@@ -40,31 +49,51 @@ public class FreeCameraMovement : CameraStateBase
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
 
     }
+    private void Start()
+    {
+        advanceFowardInputAction.OnStarted += (o) => { isAdvancingFoward = true; };
+        advanceFowardInputAction.OnFinished += (o) => { isAdvancingFoward = false; };
+
+        advanceBackInputAction.OnStarted += (o) => { isAdvancingBackward = true; };
+        advanceBackInputAction.OnFinished += (o) => { isAdvancingBackward = false; };
+
+        advanceLeftInputAction.OnStarted += (o) => { isAdvancingLeft = true; };
+        advanceLeftInputAction.OnFinished += (o) => { isAdvancingLeft = false; };
+
+        advanceRightInputAction.OnStarted += (o) => { isAdvancingRight = true; };
+        advanceRightInputAction.OnFinished += (o) => { isAdvancingRight = false; };
+
+        advanceUpInputAction.OnStarted += (o) => { isAdvancingUp = true; };
+        advanceUpInputAction.OnFinished += (o) => { isAdvancingUp = false; };
+
+        advanceDownInputAction.OnStarted += (o) => { isAdvancingDown = true; };
+        advanceDownInputAction.OnFinished += (o) => { isAdvancingDown = false; };
+    }
 
     private void Update()
     {
 
-        if (Input.GetKey("w"))
+        if (isAdvancingFoward)
         {
             transform.position += transform.forward * keyboardMovementSpeed * Time.deltaTime;
         }
-        if (Input.GetKey("s"))
+        if (isAdvancingBackward)
         {
             transform.position += -transform.forward *keyboardMovementSpeed* Time.deltaTime;
         }
-        if (Input.GetKey("d"))
+        if (isAdvancingRight)
         {
             transform.position += transform.right * keyboardMovementSpeed * Time.deltaTime;
         }
-        if (Input.GetKey("a"))
+        if (isAdvancingLeft)
         {
             transform.position += -transform.right * keyboardMovementSpeed * Time.deltaTime;
         }
-        if (Input.GetKey(KeyCode.Space))
+        if (isAdvancingUp)
         {
             transform.position += transform.up * keyboardMovementSpeed * Time.deltaTime;
         }
-        else if (Input.GetKey(KeyCode.X))
+        else if (isAdvancingDown)
         {
             transform.position += -transform.up * keyboardMovementSpeed * Time.deltaTime;
         }

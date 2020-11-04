@@ -166,24 +166,18 @@ public class BuildFirstPersonMode : BuildModeState
         {
             if (isModeActive && shouldRotate)
             {
-                //if (Input.GetKey(KeyCode.R))
-                //{
-                    if (isSnapActive)
-                    {
-
-                        RotateSelection(snapRotationDegresFactor);
-                        InputDone();
-                    }
-                    else
-                    {
-                        RotateSelection(rotationSpeed);
-                    }
-                //}
+                if (isSnapActive)
+                {
+                    RotateSelection(snapRotationDegresFactor);
+                    InputDone();
+                }
+                else
+                {
+                    RotateSelection(rotationSpeed);
+                }
             }
             if (Input.mouseScrollDelta.y > 0.5f)
             {
-                
-
                 if (isSnapActive)
                 {
                     ScaleSelection(snapScaleFactor);

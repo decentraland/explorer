@@ -34,12 +34,14 @@ public class BuildEditorMode : BuildModeState
     [SerializeField] internal InputAction_Trigger scaleInputAction;
     [SerializeField] internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
 
+    [SerializeField] internal InputAction_Hold squareMultiSelectionInputAction;
+
 
     ParcelScene sceneToEdit;
 
     public LayerMask groundLayer;
 
-    bool isPlacingNewObject = false, mousePressed = false, isMakingMultiSelection = false,isTypeOfBoundSelectionSelected = false, isVoxelBoundMultiSelection = false;
+    bool isPlacingNewObject = false, mousePressed = false, isMakingSquareMultiSelection = false,isTypeOfBoundSelectionSelected = false, isVoxelBoundMultiSelection = false,squareMultiSelectionButtonPressed = false;
     Vector3 lastMousePosition;
     private void Start()
     {
@@ -53,6 +55,9 @@ public class BuildEditorMode : BuildModeState
         rotateInputAction.OnTriggered += (o) => RotateMode();
         scaleInputAction.OnTriggered += (o) => ScaleMode();
         focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
+
+        squareMultiSelectionInputAction.OnStarted += (o) => squareMultiSelectionButtonPressed = true;;
+        squareMultiSelectionInputAction.OnFinished += (o) => squareMultiSelectionButtonPressed = false;
     }
 
 
@@ -63,9 +68,9 @@ public class BuildEditorMode : BuildModeState
             if (!voxelController.IsActive()) SetEditObjectAtMouse();
             else voxelController.SetEditObjectLikeVoxel();
         }
-        else if (isMakingMultiSelection)
+        else if (isMakingSquareMultiSelection)
         {
-            if (!Input.GetKey(KeyCode.LeftShift)) EndBoundMultiSelection();
+            if (!squareMultiSelectionButtonPressed) EndBoundMultiSelection();
             else
             {
                 List<DecentralandEntityToEdit> allEntities = null;
@@ -97,7 +102,7 @@ public class BuildEditorMode : BuildModeState
 
     private void OnGUI()
     {
-        if (mousePressed && isMakingMultiSelection)
+        if (mousePressed && isMakingSquareMultiSelection)
         {
             var rect = BuildModeUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
             BuildModeUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
@@ -115,9 +120,10 @@ public class BuildEditorMode : BuildModeState
     {
         if (mousePressed && buttonID == 0)
         {
-            if (isMakingMultiSelection)
+            if (isMakingSquareMultiSelection)
             {
                 EndBoundMultiSelection();
+               
             }
         }
     }
@@ -126,22 +132,24 @@ public class BuildEditorMode : BuildModeState
         if (buttonID == 0)
         {
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (squareMultiSelectionButtonPressed)
             {
-                isMakingMultiSelection = true;
+                isMakingSquareMultiSelection = true;
                 isTypeOfBoundSelectionSelected = false;
                 isVoxelBoundMultiSelection = false;
                 lastMousePosition = position;
                 mousePressed = true;
                 freeCameraController.SetCameraCanMove(false);
                 buildModeController.SetOutlineCheckActive(false);
+  
             }
         }
     }
 
     public void EndBoundMultiSelection()
     {
-        isMakingMultiSelection = false;
+   
+        isMakingSquareMultiSelection = false;
         mousePressed = false;
         freeCameraController.SetCameraCanMove(true);
         List<DecentralandEntityToEdit> allEntities = null;

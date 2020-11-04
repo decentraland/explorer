@@ -96,6 +96,9 @@ public class BuildModeController : MonoBehaviour
     [SerializeField] internal InputAction_Trigger quickBar9InputAction;
 
 
+    [SerializeField] internal InputAction_Hold multiSelectionInputAction;
+
+
     BuildModeState currentActiveMode;
 
     ParcelScene sceneToEdit;
@@ -165,6 +168,10 @@ public class BuildModeController : MonoBehaviour
         toggleDuplicateInputAction.OnTriggered += (o) => DuplicateSelectedEntitiesInput();
 
 
+        multiSelectionInputAction.OnStarted += (o) => StartMultiSelection();
+        multiSelectionInputAction.OnFinished += (o) => EndMultiSelection();
+
+
 
 
 
@@ -203,15 +210,15 @@ public class BuildModeController : MonoBehaviour
     {        
         if(isEditModeActivated)
         {
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                StartMultiSelection();
-            }
+            //if (Input.GetKeyDown(KeyCode.LeftControl))
+            //{
+            //    StartMultiSelection();
+            //}
 
-            if (Input.GetKeyUp(KeyCode.LeftControl))
-            {
-                EndMultiSelection();
-            }
+            //if (Input.GetKeyUp(KeyCode.LeftControl))
+            //{
+            //    EndMultiSelection();
+            //}
 
             if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
             {
@@ -451,7 +458,7 @@ public class BuildModeController : MonoBehaviour
         //    ChangeSnapMode();
         //}
 
-        if (selectedEntities.Count <= 0 || Input.GetKey(KeyCode.LeftControl))
+        if (selectedEntities.Count <= 0 || isMultiSelectionActive)
         {
             CheckOutline();
         }
