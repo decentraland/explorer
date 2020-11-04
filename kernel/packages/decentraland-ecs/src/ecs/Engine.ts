@@ -278,12 +278,9 @@ export class Engine implements IEngine {
         componentGroups.forEach(traversedComponentGroup => {
           if (components.length === traversedComponentGroup.requires.length) {
             for (let i = 0; i < components.length; i++) {
-              console.log("looking for " + getComponentName(components[i]) + " in " + traversedComponentGroup.requiresNames)
-
               if (traversedComponentGroup.requires.indexOf(components[i]) === -1) break
 
               if (i === (components.length - 1)) {
-                // 3. Found an existent component group with the exact same requirements
                 componentGroup = traversedComponentGroup
               }
             }
@@ -292,11 +289,10 @@ export class Engine implements IEngine {
       }
     }
 
-    if(componentGroup) {
-      console.log("returning EXISTENT component group")
+    if (componentGroup) {
+      // 3. Found an existent component group with the exact same requirements
       return componentGroup
     }
-    console.log("returning new component group")
 
     // Otherwise create and store it
     componentGroup = new ComponentGroup(...requires)
