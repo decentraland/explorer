@@ -9,20 +9,24 @@ export interface PassportProps {
   face: string;
   name?: string;
   email?: string;
-  onSubmit: any;
-  onEditAvatar: any;
+  handleSubmit: any;
+  handleCancel: any;
+  handleEditAvatar: any;
 }
 
 export const Passport: React.FC<PassportProps> = (props) => (
-  <Modal>
+  <Modal handleClose={props.handleCancel}>
     <div className="passport">
       <h2 className="passportTitle">Passport</h2>
       <div className="passportContainer">
-        <PassportAvatar face={props.face} onEditAvatar={props.onEditAvatar} />
+        <PassportAvatar
+          face={props.face}
+          onEditAvatar={props.handleEditAvatar}
+        />
         <PassportForm
           name={props.name}
           email={props.email}
-          onSubmit={props.onSubmit}
+          onSubmit={props.handleSubmit}
         />
       </div>
     </div>
