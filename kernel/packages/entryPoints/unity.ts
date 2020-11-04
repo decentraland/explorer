@@ -22,7 +22,7 @@ import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { WorldConfig } from 'shared/meta/types'
-import {  isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 
 const container = document.getElementById('gameContainer')
@@ -40,14 +40,13 @@ const observer = renderStateObservable.add((isRunning) => {
   }
 })
 
-function configureTaskbar(i: UnityInterface, voiceChatEnabled: boolean) {
+function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
   i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: voiceChatEnabled })
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
 
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
-  i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
 }
 
 initializeUnity(container)
@@ -83,7 +82,10 @@ initializeUnity(container)
       await userAuthentified()
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
-      configureTaskbar(i, isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address))
+      const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+      configureTaskbarDependentHUD(i, voiceChatEnabled)
+      
+      i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
 
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
       // NOTE (Santi): We have temporarily deactivated the MANA HUD until Product team designs a new place for it (probably inside the Profile HUD).
@@ -97,7 +99,7 @@ initializeUnity(container)
         .catch((e) => logger.error(`error getting profile ${e}`))
     } catch (e) {
       logger.error('error on configuring taskbar & friends hud / tutorial. Trying to default to simple taskbar', e)
-      configureTaskbar(i, false)
+      configureTaskbarDependentHUD(i, false)
     }
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
