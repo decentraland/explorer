@@ -13,7 +13,6 @@ import {
   createWeb3Connector,
   getProviderType,
   getUserEthAccountIfAvailable,
-  isGuest,
   isSessionExpired,
   loginCompleted,
   providerFuture,
@@ -48,7 +47,7 @@ import {
   loginCompleted as loginCompletedAction,
   LOGOUT,
   signInSetCurrentProvider,
-  signInSinging,
+  signInSigning,
   SIGNUP,
   SIGNUP_COME_BACK_TO_AVATAR_EDITOR,
   signUpClearData,
@@ -121,7 +120,7 @@ function* checkPreviousSession() {
   const session = getLastSessionWithoutWallet()
   if (!isSessionExpired(session) && session) {
     const identity = session.identity
-    if (identity && identity.provider) {
+    if (identity?.provider && identity.provider !== ProviderType.GUEST) {
       yield put(signInSetCurrentProvider(identity.provider))
     }
   } else {
@@ -130,18 +129,18 @@ function* checkPreviousSession() {
 }
 
 function* authenticate(action: AuthenticateAction) {
-  yield put(signInSinging(true))
+  yield put(signInSigning(true))
   const provider = yield requestProvider(action.payload.provider as ProviderType)
   if (!provider) {
-    yield put(signInSinging(false))
+    yield put(signInSigning(false))
     return
   }
-  const userData = yield authorize()
-  let profile = yield getProfileByUserId(userData.userId)
-  if (profile || isGuest()) {
-    return yield signIn(userData.userId, userData.identity)
+  const session = yield authorize()
+  let profile = yield getProfileByUserId(session.userId)
+  if (profile) {
+    return yield signIn(session.userId, session.identity)
   }
-  return yield startSignUp(userData.userId, userData.identity)
+  return yield startSignUp(session.userId, session.identity)
 }
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
@@ -229,7 +228,7 @@ function* signIn(userId: string, identity: ExplorerIdentity) {
     referUser(identity)
   }
 
-  yield put(signInSinging(false))
+  yield put(signInSigning(false))
   yield setUserAuthentified(userId, identity)
 
   loginCompleted.resolve()
