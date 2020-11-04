@@ -67,5 +67,5 @@ export const signInSetCurrentProvider = (provider: string) => action(SIGNIN_CURR
 export const SIGNUP_COME_BACK_TO_AVATAR_EDITOR = '[SIGNUP_COME_BACK_TO_AVATAR_EDITOR]'
 export const signUpComeBackToAvatarEditor = () => action(SIGNUP_COME_BACK_TO_AVATAR_EDITOR)
 
-export const SIGNIN_SET_SIGNINING = '[SIGN-IN] start authentication'
-export const signInSinging = (signing: boolean) => action(SIGNIN_SET_SIGNINING, { signing })
+export const SIGNIN_SET_SIGNING = '[SIGN-IN] start authentication'
+export const signInSigning = (signing: boolean) => action(SIGNIN_SET_SIGNING, { signing })
