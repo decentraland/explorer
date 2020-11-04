@@ -78,7 +78,7 @@ import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getCommsConfig, isVoiceChatEnabled } from 'shared/meta/selectors'
+import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -1145,7 +1145,7 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && isVoiceChatEnabled(store.getState())) {
+    if (!voiceCommunicator && isVoiceChatEnabledFor(store.getState(), context.userInfo.userId!)) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
