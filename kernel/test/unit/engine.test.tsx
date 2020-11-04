@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { Entity, BoxShape, Transform, Vector3, engine } from 'decentraland-ecs/src';
 
-describe.skip('Engine tests', () => {
+describe('Engine tests', () => {
   it('getComponentGroupReturnsCachedGroup', () => {
 
     let box = new Entity()
