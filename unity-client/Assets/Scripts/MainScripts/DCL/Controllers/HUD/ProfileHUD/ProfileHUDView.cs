@@ -35,6 +35,8 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonClaimName;
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
+    [SerializeField] internal Button_OnPointerDown buttonTermsOfService;
+    [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicy;
 
     private InputAction_Trigger.Triggered closeActionDelegate;
 
