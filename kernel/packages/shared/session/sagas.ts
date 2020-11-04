@@ -49,6 +49,7 @@ import {
   signInSetCurrentProvider,
   signInSigning,
   SIGNUP,
+  SIGNUP_CANCEL,
   SIGNUP_COME_BACK_TO_AVATAR_EDITOR,
   signUpClearData,
   signUpSetIdentity,
@@ -80,6 +81,7 @@ export function* sessionSaga(): any {
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(SIGNUP, signUp)
+  yield takeLatest(SIGNUP_CANCEL, cancelSignUp)
   yield takeLatest(AUTHENTICATE, authenticate)
   yield takeLatest(AWAITING_USER_SIGNATURE, scheduleAwaitingSignaturePrompt)
   yield takeLatest(SIGNUP_COME_BACK_TO_AVATAR_EDITOR, showAvatarEditor)
@@ -268,6 +270,12 @@ function* signUp() {
   yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
   unityInterface.ActivateRendering()
+}
+
+function* cancelSignUp() {
+  yield put(signUpClearData())
+  yield put(signInSigning(false))
+  yield put(changeLoginStage(LoginStage.SING_IN))
 }
 
 function* login(action: LoginAction) {

@@ -15,12 +15,7 @@ import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import {
-  ChatMessage,
-  FriendshipUpdateStatusMessage,
-  FriendshipAction,
-  WorldPosition
-} from 'shared/types'
+import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
 import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
@@ -33,7 +28,7 @@ import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, signUpSetProfile } from 'shared/session/actions'
+import { changeSignUpStage, logout, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -209,6 +204,13 @@ export class BrowserInterface {
     }
   }
 
+  public CloseUserAvatar(isSignUpFlow = false) {
+    if (isSignUpFlow) {
+      unityInterface.DeactivateRendering()
+      globalThis.globalStore.dispatch(signUpCancel())
+    }
+  }
+
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
     const update = { tutorialStep: data.tutorialStep }
     globalThis.globalStore.dispatch(saveProfileRequest(update))
@@ -298,7 +300,7 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { voiceChatVolume: number, voiceChatAllowCategory: number }) {
+  public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
     globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
     globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
