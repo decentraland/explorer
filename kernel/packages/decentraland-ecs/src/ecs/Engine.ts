@@ -264,6 +264,7 @@ export class Engine implements IEngine {
   }
 
   getComponentGroup(...requires: ComponentConstructor<any>[]) {
+    let componentGroup = undefined
 
     // Return an already created component-group if it already exists
     if (requires.length > 0) {
@@ -274,16 +275,16 @@ export class Engine implements IEngine {
         const components = requires.slice()
 
         // 2. search for a component group that has all the same requirements
-        componentGroups.forEach(componentGroup => {
-          if (components.length === componentGroup.requiresNames.length) {
-            for (let index = 0; index < components.length; index++) {
-              const componentName = getComponentName(components[index])
+        componentGroups.forEach(traversedComponentGroup => {
+          if (components.length === traversedComponentGroup.requires.length) {
+            for (let i = 0; i < components.length; i++) {
+              console.log("looking for " + getComponentName(components[i]) + " in " + traversedComponentGroup.requiresNames)
 
-              if (componentGroup.requiresNames.indexOf(componentName) === -1) break
+              if (traversedComponentGroup.requires.indexOf(components[i]) === -1) break
 
-              if (index === (components.length - 1)) {
+              if (i === (components.length - 1)) {
                 // 3. Found an existent component group with the exact same requirements
-                return componentGroup
+                componentGroup = traversedComponentGroup
               }
             }
           }
@@ -291,8 +292,14 @@ export class Engine implements IEngine {
       }
     }
 
+    if(componentGroup) {
+      console.log("returning EXISTENT component group")
+      return componentGroup
+    }
+    console.log("returning new component group")
+
     // Otherwise create and store it
-    const componentGroup = new ComponentGroup(...requires)
+    componentGroup = new ComponentGroup(...requires)
 
     componentGroup.active = true
 
