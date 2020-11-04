@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,6 +27,8 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     private int friendsCount = 0;
     private int playersCount = 0;
 
+    private bool isGameObjectDestroyed = false;
+
     private void Awake()
     {
         availableElements = new Queue<UsersAroundListHUDListElementView>();
@@ -45,6 +48,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
         if (FriendsController.i)
             FriendsController.i.OnUpdateFriendship += OnUpdateFriendship;
+    }
+
+    void OnDestroy()
+    {
+        isGameObjectDestroyed = true;
     }
 
     void IUsersAroundListHUDListView.AddOrUpdateUser(MinimapMetadata.MinimapUserInfo userInfo)
@@ -145,7 +153,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
         userElementDictionary.Clear();
         availableElements.Clear();
-        Destroy(gameObject);
+
+        if (!isGameObjectDestroyed)
+        {
+            Utils.SafeDestroy(gameObject);
+        }
     }
 
     void OnMuteUser(string userId, bool mute)
