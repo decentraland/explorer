@@ -60,7 +60,6 @@ namespace webApp {
     const i = (await instancedJS).unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
-    i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, {
       active: true,
@@ -94,9 +93,8 @@ namespace webApp {
     userAuthentified()
       .then(() => {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+        i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true }, { enableManaCounter: identity.hasConnectedWeb3 })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-        // NOTE (Santi): We have temporarily deactivated the MANA HUD until Product team designs a new place for it (probably inside the Profile HUD).
-        i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3 && false, visible: true })
 
         EnsureProfile(identity.address)
           .then((profile) => {

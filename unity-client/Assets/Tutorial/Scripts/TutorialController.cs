@@ -512,7 +512,6 @@ namespace DCL.Tutorial
             if (hideUIs)
             {
                 hudController?.minimapHud?.SetVisibility(false);
-                hudController?.manaHud?.SetVisibility(false);
                 hudController?.profileHud?.SetVisibility(false);
             }
 
@@ -526,7 +525,6 @@ namespace DCL.Tutorial
             if (!hideUIs)
             {
                 hudController?.minimapHud?.SetVisibility(true);
-                hudController?.manaHud?.SetVisibility(true);
                 hudController?.profileHud?.SetVisibility(true);
             }
         }

@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using UnityEngine.TestTools;
 
@@ -25,6 +26,7 @@ public class ProfileHUDTests : TestsBase
     public void Creation()
     {
         Assert.NotNull(controller.view);
+        Assert.NotNull(controller.manaCounterView);
     }
 
     [Test]
@@ -32,6 +34,7 @@ public class ProfileHUDTests : TestsBase
     {
         Assert.AreEqual(true, controller.view.gameObject.activeInHierarchy);
         Assert.AreEqual(false, controller.view.menuShowHideAnimator.isVisible);
+        Assert.AreEqual(false, controller.manaCounterView.gameObject.activeInHierarchy);
     }
 
     [Test]
@@ -92,5 +95,24 @@ public class ProfileHUDTests : TestsBase
         Assert.AreEqual($".{addressEnd}", controller.view.textPostfix.text);
         Assert.AreEqual(addressFormatted, controller.view.textAddress.text);
 
+    }
+
+    [Test]
+    public void ShowAndHideManaCounterCorrectly()
+    {
+        controller.SetManaCounterVisibility(true);
+        Assert.AreEqual(true, controller.manaCounterView.gameObject.activeInHierarchy);
+
+        controller.SetManaCounterVisibility(false);
+        Assert.AreEqual(false, controller.manaCounterView.gameObject.activeInHierarchy);
+    }
+
+    [Test]
+    public void SetManaBalanceCorrectly()
+    {
+        string balance = "5";
+
+        controller.SetManaBalance(balance);
+        Assert.AreEqual(Convert.ToDouble(balance), Convert.ToDouble(controller.manaCounterView.balanceText.text));
     }
 }
