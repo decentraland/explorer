@@ -11,9 +11,8 @@ import {
   getParcelSceneID
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker } from 'shared/world/SceneWorker'
-import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
+import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
@@ -154,7 +153,8 @@ export async function startGlobalScene(unityInterface: UnityInterface) {
     mappings: []
   })
 
-  const worker = loadParcelScene(scene, undefined, true)
+  const worker = loadParcelScene(scene)
+  worker.persistent = true
 
   await ensureUiApis(worker)
 
@@ -207,7 +207,7 @@ export async function loadPreviewScene(ws?: string) {
   let lastId: string | null = null
 
   if (currentLoadedScene) {
-    lastId = currentLoadedScene.getSceneId()
+    lastId = currentLoadedScene.parcelScene.data.sceneId
     stopParcelSceneWorker(currentLoadedScene)
   }
 
@@ -272,10 +272,11 @@ export function loadBuilderScene(sceneData: ILand) {
 export function unloadCurrentBuilderScene() {
   if (currentLoadedScene) {
     unityInterface.DeactivateRendering()
-    currentLoadedScene.emit('builderSceneUnloaded', {})
+    const parcelScene = currentLoadedScene.parcelScene as UnityParcelScene
+    parcelScene.emit('builderSceneUnloaded', {})
 
     stopParcelSceneWorker(currentLoadedScene)
-    unityInterface.SendBuilderMessage('UnloadBuilderScene', currentLoadedScene.getSceneId())
+    unityInterface.SendBuilderMessage('UnloadBuilderScene', parcelScene.data.sceneId)
     currentLoadedScene = null
   }
 }
@@ -294,7 +295,7 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-worldRunningObservable.add(async (isRunning) => {
+renderStateObservable.add(async (isRunning) => {
   if (isRunning) {
     await loginCompleted
     setLoadingScreenVisible(false)
