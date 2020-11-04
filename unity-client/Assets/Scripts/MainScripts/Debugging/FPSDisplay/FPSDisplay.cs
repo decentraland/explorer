@@ -12,12 +12,17 @@ namespace DCL.FPSDisplay
         [SerializeField] private Text label;
         [SerializeField] private PerformanceMetricsDataVariable performanceData;
 
-        private void Awake()
+        private void OnEnable()
         {
-            if (label == null || performanceData != null)
+            if (label == null || performanceData == null)
                 return;
 
             StartCoroutine(UpdateLabelLoop());
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
         }
 
         private IEnumerator UpdateLabelLoop()
@@ -40,6 +45,7 @@ namespace DCL.FPSDisplay
             string msFormatted = (dt * 1000).ToString("##");
 
             string targetText = string.Empty;
+
 
             string NO_DECIMALS = "##";
             string TWO_DECIMALS = "##.00";
