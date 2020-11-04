@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { Passport } from "./passport/Passport";
 import { TermsOfServices } from "./terms/TermsOfServices";
@@ -11,10 +11,16 @@ export interface SignUpContainerProps {
   handleForm: any;
   handleAgree: any;
   handleCancel: any;
-  handleEditAvatar: any;
+  handleBack: any;
 }
 
 export const SignUpContainer: React.FC<SignUpContainerProps> = (props) => {
+  const [loading, setLoading] = useState(false);
+  const signUp = () => {
+    setLoading(true);
+    props.handleAgree();
+  };
+
   return (
     <React.Fragment>
       {props.stage === "passport" && (
@@ -22,14 +28,17 @@ export const SignUpContainer: React.FC<SignUpContainerProps> = (props) => {
           face={props.face}
           name={props.name}
           email={props.email}
-          onSubmit={props.handleForm}
-          onEditAvatar={props.handleEditAvatar}
+          handleSubmit={props.handleForm}
+          handleCancel={props.handleCancel}
+          handleEditAvatar={() => props.handleBack("passport")}
         />
       )}
       {props.stage === "terms" && (
         <TermsOfServices
+          loading={loading}
+          handleBack={() => props.handleBack("terms")}
           handleCancel={props.handleCancel}
-          handleAgree={props.handleAgree}
+          handleAgree={signUp}
         />
       )}
     </React.Fragment>
@@ -56,10 +65,18 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
   handleAgree: () => dispatch({ type: "[SIGNUP]" }),
   handleCancel: () => {
-    dispatch({ type: "[SIGNUP_STAGE]", payload: { stage: "passport" } });
+    dispatch({ type: "[SIGN-UP-CANCEL]" });
   },
-  handleEditAvatar: () => {
-    dispatch({ type: "[SIGNUP_COME_BACK_TO_AVATAR_EDITOR]" });
+  handleBack: (from: "passport" | "terms") => {
+    if (from === "terms") {
+      dispatch({
+        type: "[SIGNUP_STAGE]",
+        payload: { stage: "passport" },
+      });
+    }
+    if (from === "passport") {
+      dispatch({ type: "[SIGNUP_COME_BACK_TO_AVATAR_EDITOR]" });
+    }
   },
 });
 

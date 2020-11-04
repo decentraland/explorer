@@ -58,7 +58,7 @@ export const signUpSetIdentity = (userId: string, identity: ExplorerIdentity) =>
   action(SIGNUP_SET_IDENTITY, { userId, identity })
 export type SignUpSetIdentityAction = ReturnType<typeof signUpSetIdentity>
 
-export const SIGNUP_CANCEL = '[SIGN-UP] canceled'
+export const SIGNUP_CANCEL = '[SIGN-UP-CANCEL]'
 export const signUpCancel = () => action(SIGNUP_CANCEL)
 
 export const SIGNUP_CLEAR_DATA = '[SIGN-UP] clear data'

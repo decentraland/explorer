@@ -10,8 +10,9 @@ export default {
   },
   component: Passport,
   argTypes: {
-    onSubmit: { action: "submit..." },
-    onEditAvatar: { action: "Go to Avatar Editor..." },
+    handleSubmit: { action: "submit..." },
+    handleCancel: { action: "canceling..." },
+    handleEditAvatar: { action: "Edit Avatar..." },
   },
 } as Meta;
 
