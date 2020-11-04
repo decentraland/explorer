@@ -13,7 +13,6 @@ import {
   createWeb3Connector,
   getProviderType,
   getUserEthAccountIfAvailable,
-  isGuest,
   isSessionExpired,
   loginCompleted,
   providerFuture,
@@ -121,7 +120,7 @@ function* checkPreviousSession() {
   const session = getLastSessionWithoutWallet()
   if (!isSessionExpired(session) && session) {
     const identity = session.identity
-    if (identity && identity.provider) {
+    if (identity?.provider && identity.provider !== ProviderType.GUEST) {
       yield put(signInSetCurrentProvider(identity.provider))
     }
   } else {
@@ -138,7 +137,7 @@ function* authenticate(action: AuthenticateAction) {
   }
   const session = yield authorize()
   let profile = yield getProfileByUserId(session.userId)
-  if (profile || isGuest()) {
+  if (profile) {
     return yield signIn(session.userId, session.identity)
   }
   return yield startSignUp(session.userId, session.identity)
