@@ -340,8 +340,8 @@ export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
 
 // @todo replace before merge
 export const WALLET_API_KEYS = new Map<ETHEREUM_NETWORK, Map<string, string>>([
-  [ETHEREUM_NETWORK.ROPSTEN, new Map([['Fortmatic', 'pk_test_A8AD7DB2F40251E7']])],
-  [ETHEREUM_NETWORK.MAINNET, new Map([['Fortmatic', 'pk_live_6CC35650CE445EFE']])]
+  [ETHEREUM_NETWORK.ROPSTEN, new Map([['Fortmatic', 'pk_test_198DDD3CA646DE2F']])],
+  [ETHEREUM_NETWORK.MAINNET, new Map([['Fortmatic', 'pk_live_D7297F51E9776DD2']])]
 ])
 
 export const genericAvatarSnapshots: Record<string, string> = {
