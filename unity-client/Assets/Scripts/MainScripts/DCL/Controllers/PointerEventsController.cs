@@ -3,6 +3,9 @@ using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 namespace DCL
 {
@@ -41,7 +44,22 @@ namespace DCL
             if (!CommonScriptableObjects.rendererState.Get() || charCamera == null) return;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
-            if (!Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter))
+            // TODO: POLISH AND OPTIMIZE
+            bool didHit = Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
+            bool UIIsBlocking = false;
+
+            if (didHit)
+            {
+                GraphicRaycaster raycaster = GameObject.FindObjectOfType<Canvas>().GetComponent<GraphicRaycaster>();
+                PointerEventData ped = new PointerEventData(null);
+                ped.position = new Vector2(Screen.width / 2, Screen.height / 2);
+                List<RaycastResult> results = new List<RaycastResult>();
+                raycaster.Raycast(ped, results);
+
+                UIIsBlocking = results.Count > 0;
+            }
+
+            if (!didHit || UIIsBlocking)
             {
                 clickHandler = null;
                 UnhoverLastHoveredObject(hoverController);
