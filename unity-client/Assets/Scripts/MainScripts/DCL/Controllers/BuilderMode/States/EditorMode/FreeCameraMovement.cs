@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FreeCameraMovement : MonoBehaviour
+public class FreeCameraMovement : CameraStateBase
 {
     public BuilderInputWrapper builderInputWrapper;
 
@@ -117,6 +117,10 @@ public class FreeCameraMovement : MonoBehaviour
         }
     }
 
+    public override Vector3 OnGetRotation()
+    {
+        return transform.eulerAngles;
+    }
     public void FocusOnEntities(List<DecentralandEntityToEdit> entitiesToFocus)
     {
         Vector3 middlePoint = FindMidPoint(entitiesToFocus);

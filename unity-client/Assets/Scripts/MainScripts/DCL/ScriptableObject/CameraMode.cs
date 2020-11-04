@@ -11,7 +11,7 @@ public class CameraMode : BaseVariable<CameraMode.ModeId>
     public enum ModeId {
         FirstPerson,
         ThirdPerson,
-        BuildingToolFreeMovement
+        BuildingToolGodMode
     }
     
 }

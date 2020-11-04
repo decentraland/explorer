@@ -33,6 +33,10 @@ namespace DCL.Controllers
             lastCheckTime = Time.realtimeSinceStartup;
         }
 
+        public bool IsDebugMode()
+        {
+            return sceneBoundariesEntityHandler.DEBUG_MODE;
+        }
         public void SetDebugMode()
         {
             sceneBoundariesEntityHandler.DEBUG_MODE = true;

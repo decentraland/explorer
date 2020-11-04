@@ -20,6 +20,11 @@ namespace DCL.Controllers
                 this.meshesInfo = meshesInfo;
             }
 
+            public void ResetMaterials(DecentralandEntity.MeshesInfo meshesInfo)
+            {
+                this.meshesInfo = meshesInfo;
+                ResetMaterials();
+            }
             public void ResetMaterials()
             {
                 if (meshesInfo.meshRootGameObject == null) return;

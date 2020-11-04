@@ -80,7 +80,7 @@ public class VoxelController : MonoBehaviour
                 List<DecentralandEntityToEdit> voxelEntities = buildModeController.GetAllVoxelsEntities();
                 foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
                 {
-                    if (IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
+                    if (BuildModeUtils.IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
                     {
                         outlinerController.OutLineEntity(voxelEntity);
                     }
@@ -91,15 +91,7 @@ public class VoxelController : MonoBehaviour
         }
     }
 
-    private void OnGUI()
-    {
-        if (mousePressed && isMakingMultiVoxelSelection)
-        {
-            var rect = BuildModeUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
-            BuildModeUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
-            BuildModeUtils.DrawScreenRectBorder(rect, 1, Color.white);
-        }
-    }
+   
 
     public void SetSceneToEdit(ParcelScene scene)
     {
@@ -163,7 +155,7 @@ public class VoxelController : MonoBehaviour
         //buildModeController.DeselectEntities();
         foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
         {
-            if (IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
+            if (BuildModeUtils.IsWithInSelectionBounds(voxelEntity.gameObject.transform, lastMousePosition, Input.mousePosition))
             {
                 buildModeController.SelectEntity(voxelEntity);
             }
@@ -309,11 +301,11 @@ public class VoxelController : MonoBehaviour
             }
             else if(Input.GetKey(KeyCode.LeftShift))
             {
-                isMakingMultiVoxelSelection = true;
-                lastMousePosition = position;
-                mousePressed = true;
-                freeCameraMovement.SetCameraCanMove(false);
-                buildModeController.SetOutlineCheckActive(false);
+                //isMakingMultiVoxelSelection = true;
+                //lastMousePosition = position;
+                //mousePressed = true;
+                //freeCameraMovement.SetCameraCanMove(false);
+                //buildModeController.SetOutlineCheckActive(false);
             }
         }
     }
@@ -348,12 +340,7 @@ public class VoxelController : MonoBehaviour
         bounds.size += Vector3.one * 0.05f;
         return true;
     }
-    bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition)
-    {
-        Camera camera = Camera.main;
-        var viewPortBounds = BuildModeUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
-        return viewPortBounds.Contains(camera.WorldToViewportPoint(transform.position));
-    }
+   
 
     //IEnumerator DestroyOutsideBoundariesItems()
     //{

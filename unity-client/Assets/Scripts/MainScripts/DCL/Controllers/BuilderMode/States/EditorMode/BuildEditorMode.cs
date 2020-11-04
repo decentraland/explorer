@@ -17,11 +17,15 @@ public class BuildEditorMode : BuildModeState
 
     [Header("Scenes References")]
     public FreeCameraMovement freeCameraController;
-    public GameObject eagleCamera, advancedModeUI;
+    public GameObject advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
     public ToolTipController toolTipController;
     public VoxelController voxelController;
-
+    public BuilderInputWrapper builderInputWrapper;
+    public OutlinerController outlinerController;
+    public BuildModeController buildModeController;
+    public CameraController cameraController;
+   
 
     //public CameraController cameraController;
     public Transform lookAtT;
@@ -32,13 +36,15 @@ public class BuildEditorMode : BuildModeState
 
     public LayerMask groundLayer;
 
-    bool isPlacingNewObject = false;
-
+    bool isPlacingNewObject = false, mousePressed = false, isMakingMultiSelection = false,isTypeOfBoundSelectionSelected = false, isVoxelBoundMultiSelection = false;
+    Vector3 lastMousePosition;
     private void Start()
     {
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
-     
+
+        builderInputWrapper.OnMouseDown += MouseDown;
+        builderInputWrapper.OnMouseUp += MouseUp;
     }
 
 
@@ -49,6 +55,46 @@ public class BuildEditorMode : BuildModeState
             if (!voxelController.IsActive()) SetEditObjectAtMouse();
             else voxelController.SetEditObjectLikeVoxel();
         }
+        else if (isMakingMultiSelection)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift)) EndBoundMultiSelection();
+            else
+            {
+                List<DecentralandEntityToEdit> allEntities = null;
+                if (!isTypeOfBoundSelectionSelected || !isVoxelBoundMultiSelection) allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
+                else if (isVoxelBoundMultiSelection) allEntities = buildModeController.GetAllVoxelsEntities();
+
+                foreach (DecentralandEntityToEdit entity in allEntities)
+                {
+                    if (entity.IsVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected) continue;
+                    if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
+                    {
+                        if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
+                        {
+                            if(!isTypeOfBoundSelectionSelected)
+                            {
+                                if (entity.IsVoxel) isVoxelBoundMultiSelection = true;
+                                else isVoxelBoundMultiSelection = false;
+                                isTypeOfBoundSelectionSelected = true;
+                            }
+                            outlinerController.OutLineEntity(entity);
+                        }
+                        else outlinerController.CancelEntityOutline(entity);
+                    }
+                }
+
+            }
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (mousePressed && isMakingMultiSelection)
+        {
+            var rect = BuildModeUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
+            BuildModeUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
+            BuildModeUtils.DrawScreenRectBorder(rect, 1, Color.white);
+        }
     }
 
     public override void Init(GameObject _goToEdit, GameObject _undoGo, GameObject _snapGO, GameObject _freeMovementGO, List<DecentralandEntityToEdit> _selectedEntities)
@@ -56,6 +102,60 @@ public class BuildEditorMode : BuildModeState
         base.Init(_goToEdit, _undoGo, _snapGO, _freeMovementGO, _selectedEntities);
         voxelController.SetEditionGO(_goToEdit);
     }
+
+    private void MouseUp(int buttonID, Vector3 position)
+    {
+        if (mousePressed && buttonID == 0)
+        {
+            if (isMakingMultiSelection)
+            {
+                EndBoundMultiSelection();
+            }
+        }
+    }
+    void MouseDown(int buttonID, Vector3 position)
+    {
+        if (buttonID == 0)
+        {
+
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                isMakingMultiSelection = true;
+                isTypeOfBoundSelectionSelected = false;
+                isVoxelBoundMultiSelection = false;
+                lastMousePosition = position;
+                mousePressed = true;
+                freeCameraController.SetCameraCanMove(false);
+                buildModeController.SetOutlineCheckActive(false);
+            }
+        }
+    }
+
+    public void EndBoundMultiSelection()
+    {
+        isMakingMultiSelection = false;
+        mousePressed = false;
+        freeCameraController.SetCameraCanMove(true);
+        List<DecentralandEntityToEdit> allEntities = null;
+        if (!isVoxelBoundMultiSelection) allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
+        else allEntities = buildModeController.GetAllVoxelsEntities();
+
+        foreach (DecentralandEntityToEdit entity in allEntities)
+        {
+            if (entity.IsVoxel && !isVoxelBoundMultiSelection) continue;
+            if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
+            {
+                if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
+                {
+                    buildModeController.SelectEntity(entity);
+                }
+            }
+        }
+        buildModeController.SetOutlineCheckActive(true);
+        outlinerController.CancelAllOutlines();
+    }
+
+
     #region Voxel
 
     public void ActivateVoxelMode()
@@ -88,7 +188,9 @@ public class BuildEditorMode : BuildModeState
         //
         freeCameraController.LookAt(lookAtT);
 
-        eagleCamera.gameObject.SetActive(true);
+        //eagleCamera.gameObject.SetActive(true);
+        cameraController.SetCameraMode(CameraMode.ModeId.BuildingToolGodMode);
+
         gizmoManager.InitializeGizmos(Camera.main,freeCameraController.transform);
         gizmoManager.SetAllGizmosInPosition(cameraPosition);
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE) gizmoManager.SetGizmoType("MOVE");
@@ -106,7 +208,9 @@ public class BuildEditorMode : BuildModeState
         base.Desactivate();
         mouseCatcher.enabled = true;
         Utils.LockCursor();
-        eagleCamera.gameObject.SetActive(false);
+        cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
+        //eagleCamera.gameObject.SetActive(false);
+
         SceneController.i.ReIntegrateIsolatedScene();
         advancedModeUI.SetActive(false);
         gizmoManager.HideGizmo();

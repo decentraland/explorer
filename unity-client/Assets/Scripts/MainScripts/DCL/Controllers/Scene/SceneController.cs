@@ -569,7 +569,7 @@ namespace DCL
             if (boundariesChecker != null)
                 boundariesChecker.Stop();
 
-            boundariesChecker = new SceneBoundariesChecker();
+            boundariesChecker = new SceneBoundariesDebugModeChecker();
             if (isDebugMode)
             {
                 boundariesChecker.SetDebugMode();

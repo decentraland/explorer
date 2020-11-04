@@ -47,7 +47,7 @@ public class BuildModeController : MonoBehaviour
 
     [Header ("Scene references")]
     public GameObject buildModeCanvasGO;
-    public GameObject shortCutsGO,extraBtnsGO;
+    public GameObject shortCutsGO,extraBtnsGO,cameraParentGO;
     public SceneObjectCatalogController catalogController;
     public SceneLimitInfoController sceneLimitInfoController;
     public EntityInformationController entityInformationController;
@@ -70,7 +70,7 @@ public class BuildModeController : MonoBehaviour
     public LayerMask layerToRaycast;
 
     [Header("InputActions")]
-    [SerializeField] internal InputAction_Trigger editModeChange;
+    [SerializeField] internal InputAction_Trigger editModeChangeInputAction;
 
 
     BuildModeState currentActiveMode;
@@ -100,15 +100,15 @@ public class BuildModeController : MonoBehaviour
         if (freeMovementGO == null)
         {
             freeMovementGO = new GameObject("FreeMovementGO");
-
+        
         }
-        freeMovementGO.transform.SetParent(Camera.main.transform);
+        freeMovementGO.transform.SetParent(cameraParentGO.transform);
         if (editionGO == null)
         {
             editionGO = new GameObject("EditionGO");
 
         }
-        editionGO.transform.SetParent(Camera.main.transform);
+        editionGO.transform.SetParent(cameraParentGO.transform);
         if (undoGO == null)
         {
             undoGO = new GameObject("UndoGameObject");
@@ -116,7 +116,7 @@ public class BuildModeController : MonoBehaviour
         }
 
 
-        editModeChange.OnTriggered += OnEditModeChangeAction;
+        editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
         catalogController.OnSceneObjectSelected += CreateSceneObjectSelected;
         builderInputWrapper.OnMouseClick += MouseClick;
         buildModeEntityListController.OnEntityClick += ChangeEntitySelectionFromList;
@@ -144,7 +144,7 @@ public class BuildModeController : MonoBehaviour
 
     private void OnDestroy()
     {
-        editModeChange.OnTriggered -= OnEditModeChangeAction;
+        editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
         DestroyCollidersForAllEntities();
     }
 
