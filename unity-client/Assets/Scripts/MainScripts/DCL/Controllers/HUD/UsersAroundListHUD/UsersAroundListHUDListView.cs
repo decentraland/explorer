@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -156,7 +155,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
         if (!isGameObjectDestroyed)
         {
-            Utils.SafeDestroy(gameObject);
+            Destroy(gameObject);
         }
     }
 
