@@ -5,7 +5,7 @@ import {
   CHANGE_LOGIN_STAGE,
   ChangeSignUpStageAction,
   SIGNIN_CURRENT_PROVIDER,
-  SIGNIN_SET_SIGNINING,
+  SIGNIN_SET_SIGNING,
   SIGNUP_CLEAR_DATA,
   SIGNUP_FORM,
   SIGNUP_SET_IDENTITY,
@@ -95,7 +95,7 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
         }
       }
     }
-    case SIGNIN_SET_SIGNINING: {
+    case SIGNIN_SET_SIGNING: {
       return {
         ...state,
         ...action.payload
