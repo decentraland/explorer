@@ -1,8 +1,8 @@
 import { uuid } from 'decentraland-ecs/src'
-import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
+import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
-import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
+import { avatarMessageObservable } from 'shared/comms/peers'
+import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
 import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
@@ -13,32 +13,39 @@ import { queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar, Profile } from 'shared/profiles/types'
+import { Avatar } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
+import {
+  ChatMessage,
+  FriendshipUpdateStatusMessage,
+  FriendshipAction,
+  WorldPosition
+} from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
-import { worldRunningObservable } from 'shared/world/worldState'
-import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
+import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
 import { logout } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
+import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
-import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
+import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
+import { getCurrentUserId } from 'shared/session/selectors'
+import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 
 declare const DCL: any
 
@@ -56,18 +63,32 @@ const positionEvent = {
   quaternion: Quaternion.Identity,
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
-  mousePosition: Vector3.Zero()
+  mousePosition: Vector3.Zero(),
+  immediate: false // By default the renderer lerps avatars position
 }
 
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
   /** Triggered when the camera moves */
-  public ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number }) {
+  public ReportPosition(data: {
+    position: ReadOnlyVector3
+    rotation: ReadOnlyQuaternion
+    playerHeight?: number
+    immediate?: boolean
+  }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
     positionEvent.quaternion.set(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w)
     positionEvent.rotation.copyFrom(positionEvent.quaternion.eulerAngles)
     positionEvent.playerHeight = data.playerHeight || playerConfigurations.height
+
+    // By default the renderer lerps avatars position
+    positionEvent.immediate = false
+
+    if (data.immediate !== undefined) {
+      positionEvent.immediate = data.immediate
+    }
+
     positionObservable.notifyObservers(positionEvent)
   }
 
@@ -94,11 +115,11 @@ export class BrowserInterface {
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
-    queueTrackingEvent('hiccup report', data)
-  }
-
   public PerformanceReport(samples: string) {
+    if (!isRendererEnabled() || !isForeground()) {
+      return
+    }
+
     const perfReport = getPerformanceInfo(samples)
     queueTrackingEvent('performance report', perfReport)
   }
@@ -164,26 +185,19 @@ export class BrowserInterface {
       return
     }
     const unique = new Set<string>(interests)
-    const profile: Profile = getUserProfile().profile as Profile
-    globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
+
+    globalThis.globalStore.dispatch(saveProfileRequest({ interests: Array.from(unique) }))
   }
 
   public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
     const { face, face128, face256, body, avatar } = changes
-    const profile: Profile = getUserProfile().profile as Profile
-    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    const update = { avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
+    globalThis.globalStore.dispatch(saveProfileRequest(update))
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile: Profile = getUserProfile().profile as Profile
-    profile.tutorialStep = data.tutorialStep
-    globalThis.globalStore.dispatch(saveProfileRequest(profile))
-
-    persistCurrentUser({
-      version: profile.version,
-      profile: profileToRendererFormat(profile, getIdentity())
-    })
+    const update = { tutorialStep: data.tutorialStep }
+    globalThis.globalStore.dispatch(saveProfileRequest(update))
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -195,7 +209,7 @@ export class BrowserInterface {
       }
       case 'ActivateRenderingACK': {
         if (!aborted) {
-          worldRunningObservable.notifyObservers(true)
+          renderStateObservable.notifyObservers(true)
         }
         break
       }
@@ -219,8 +233,8 @@ export class BrowserInterface {
     // It's disabled because of security reasons.
   }
 
-  public EditAvatarClicked() {
-    // We used to call delightedSurvey() here
+  public SetDelightedSurveyEnabled(data: { enabled: boolean }) {
+    setDelightedSurveyEnabled(data.enabled)
   }
 
   public ReportScene(sceneId: string) {
@@ -232,40 +246,18 @@ export class BrowserInterface {
   }
 
   public BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
-
-    if (profile) {
-      let blocked: string[] = [data.userId]
-
-      if (profile.blocked) {
-        for (let blockedUser of profile.blocked) {
-          if (blockedUser === data.userId) {
-            return
-          }
-        }
-
-        // Merge the existing array and any previously blocked users
-        blocked = [...profile.blocked, ...blocked]
-      }
-
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
-    }
+    globalThis.globalStore.dispatch(blockPlayers([data.userId]))
   }
 
   public UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
-
-    if (profile) {
-      const blocked = profile.blocked ? profile.blocked.filter((id) => id !== data.userId) : []
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
-    }
+    globalThis.globalStore.dispatch(unblockPlayers([data.userId]))
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
-    const profile = getUserProfile().profile
-    if (profile) {
+    const userId = getCurrentUserId(globalThis.globalStore.getState())
+    if (userId) {
       if (hasWallet()) {
-        window.analytics.identify(profile.userId, { email: data.userEmail })
+        window.analytics.identify(userId, { email: data.userEmail })
       } else {
         window.analytics.identify({ email: data.userEmail })
       }
@@ -292,8 +284,9 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { sfxVolume: number }) {
-    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.sfxVolume))
+  public ApplySettings(settingsMessage: { voiceChatVolume: number, voiceChatAllowCategory: number }) {
+    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
+    globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
@@ -302,7 +295,7 @@ export class BrowserInterface {
     // TODO - fix this hack: search should come from another message and method should only exec correct updates (userId, action) - moliva - 01/05/2020
     let found = false
     if (action === FriendshipAction.REQUESTED_TO) {
-      await ProfileAsPromise(userId) // ensure profile
+      await ensureFriendProfile(userId)
       found = hasConnectedWeb3(globalThis.globalStore.getState(), userId)
     }
 
@@ -399,7 +392,7 @@ export class BrowserInterface {
   public async FetchBalanceOfMANA() {
     const identity = getIdentity()
 
-    if (!identity.hasConnectedWeb3) {
+    if (!identity?.hasConnectedWeb3) {
       return
     }
 
@@ -407,6 +400,14 @@ export class BrowserInterface {
     if (this.lastBalanceOfMana !== balance) {
       this.lastBalanceOfMana = balance
       unityInterface.UpdateBalanceOfMANA(`${balance}`)
+    }
+  }
+
+  public SetMuteUsers(data: { usersId: string[]; mute: boolean }) {
+    if (data.mute) {
+      globalThis.globalStore.dispatch(mutePlayers(data.usersId))
+    } else {
+      globalThis.globalStore.dispatch(unmutePlayers(data.usersId))
     }
   }
 }

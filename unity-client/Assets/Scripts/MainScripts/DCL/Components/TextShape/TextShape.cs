@@ -15,6 +15,8 @@ namespace DCL.Components
             [Header("Font Properties")]
             public string value = "";
 
+            public bool visible = true;
+
             public Color color = Color.white;
             public float opacity = 1f;
             public float fontSize = 100f;
@@ -65,6 +67,8 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            if (rectTransform == null) yield break;
+
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
             rectTransform.sizeDelta = new Vector2(model.width, model.height);
@@ -86,7 +90,7 @@ namespace DCL.Components
 
             text.text = model.value;
 
-            text.color = new Color(model.color.r, model.color.g, model.color.b, model.color.a);
+            text.color = new Color(model.color.r, model.color.g, model.color.b, model.visible ? model.opacity : 0);
             text.fontSize = (int)model.fontSize;
             text.richText = true;
             text.overflowMode = TextOverflowModes.Overflow;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -10,17 +10,19 @@ internal class ProfileHUDView : MonoBehaviour
     private const int NAME_POSTFIX_LENGTH = 4;
     private const float COPY_TOAST_VISIBLE_TIME = 3;
 
-    [SerializeField] internal ShowHideAnimator showHideAnimator;
+    [SerializeField] internal ShowHideAnimator mainShowHideAnimator;
+    [SerializeField] internal ShowHideAnimator menuShowHideAnimator;
     [SerializeField] internal GameObject loadingSpinner;
 
     [SerializeField] internal ShowHideAnimator copyToast;
     [SerializeField] internal GameObject copyTooltip;
+    [SerializeField] internal InputAction_Trigger closeAction;
 
     [Header("Hide GOs on claimed name")]
     [SerializeField] internal GameObject[] hideOnNameClaimed;
 
     [Header("Thumbnail")]
-    [SerializeField] internal Image imageAvatarThumbnail;
+    [SerializeField] internal RawImage imageAvatarThumbnail;
     [SerializeField] internal Button buttonToggleMenu;
 
     [Header("Texts")]
@@ -34,23 +36,17 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
 
+    private InputAction_Trigger.Triggered closeActionDelegate;
 
     private Coroutine copyToastRoutine = null;
     private UserProfile profile = null;
 
     private void Awake()
     {
-        buttonToggleMenu.onClick.AddListener(ToggleMenu);
-        buttonCopyAddress.onClick.AddListener(() =>
-        {
-            copyTooltip.gameObject.SetActive(false);
-            if (copyToastRoutine != null)
-            {
-                StopCoroutine(copyToastRoutine);
-            }
+        closeActionDelegate = (x) => HideMenu();
 
-            copyToastRoutine = StartCoroutine(ShowCopyToast());
-        });
+        buttonToggleMenu.onClick.AddListener(ToggleMenu);
+        buttonCopyAddress.onClick.AddListener(CopyAddress);
         copyToast.gameObject.SetActive(false);
     }
 
@@ -72,14 +68,32 @@ internal class ProfileHUDView : MonoBehaviour
 
     public void ToggleMenu()
     {
-        if (showHideAnimator.isVisible)
+        if (menuShowHideAnimator.isVisible)
         {
-            showHideAnimator.Hide();
+            HideMenu();
         }
         else
         {
-            showHideAnimator.Show();
+            menuShowHideAnimator.Show();
+            CommonScriptableObjects.isProfileHUDOpen.Set(true);
         }
+    }
+
+    public void HideMenu()
+    {
+        if (menuShowHideAnimator.isVisible)
+        {
+            menuShowHideAnimator.Hide();
+            CommonScriptableObjects.isProfileHUDOpen.Set(false);
+        }
+    }
+
+    public void SetVisibility(bool visible)
+    {
+        if (visible && !mainShowHideAnimator.isVisible)
+            mainShowHideAnimator.Show();
+        else if (!visible && mainShowHideAnimator.isVisible)
+            mainShowHideAnimator.Hide();
     }
 
     private void HandleProfileSnapshot(UserProfile userProfile)
@@ -129,10 +143,10 @@ internal class ProfileHUDView : MonoBehaviour
         textAddress.text = $"{start}...{end}";
     }
 
-    private void SetProfileImage(Sprite snapshot)
+    private void SetProfileImage(Texture2D texture)
     {
         profile.OnFaceSnapshotReadyEvent -= SetProfileImage;
-        imageAvatarThumbnail.sprite = snapshot;
+        imageAvatarThumbnail.texture = texture;
         loadingSpinner.SetActive(false);
     }
 
@@ -144,6 +158,24 @@ internal class ProfileHUDView : MonoBehaviour
         }
     }
 
+    private void CopyAddress()
+    {
+        if (!profile)
+        {
+            return;
+        }
+
+        DCL.Environment.i.clipboard.WriteText(profile.userId);
+
+        copyTooltip.gameObject.SetActive(false);
+        if (copyToastRoutine != null)
+        {
+            StopCoroutine(copyToastRoutine);
+        }
+
+        copyToastRoutine = StartCoroutine(ShowCopyToast());
+    }
+
     private IEnumerator ShowCopyToast()
     {
         if (!copyToast.gameObject.activeSelf)
@@ -153,5 +185,15 @@ internal class ProfileHUDView : MonoBehaviour
         copyToast.Show();
         yield return new WaitForSeconds(COPY_TOAST_VISIBLE_TIME);
         copyToast.Hide();
+    }
+
+    private void OnEnable()
+    {
+        closeAction.OnTriggered += closeActionDelegate;
+    }
+
+    private void OnDisable()
+    {
+        closeAction.OnTriggered -= closeActionDelegate;
     }
 }

@@ -772,6 +772,15 @@ namespace UnityGLTF
                     yield return ConstructUnityTexture(memoryStream.ToArray(), false, linear, image, imageCacheIndex);
                 }
             }
+
+            if (stream is FileStream fileStream)
+            {
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    fileStream.CopyTo(memoryStream);
+                    yield return ConstructUnityTexture(memoryStream.ToArray(), false, linear, image, imageCacheIndex);
+                }
+            }
         }
 
         // Note that if the texture is reduced in size, the source one is destroyed
@@ -1030,7 +1039,10 @@ namespace UnityGLTF
                                 var quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w).ToUnityQuaternionConvert();
 
                                 return new float[] {quaternion.x, quaternion.y, quaternion.z, quaternion.w};
-                            });
+                            },
+                            // NOTE(Brian): Unity makes some conversion to eulers on AnimationClip.SetCurve
+                            // that breaks the keyframe optimization.
+                            optimizeKeyframes: false);
 
                         break;
 
@@ -1068,7 +1080,8 @@ namespace UnityGLTF
             NumericArray output,
             InterpolationType mode,
             Type curveType,
-            ValuesConvertion getConvertedValues)
+            ValuesConvertion getConvertedValues,
+            bool optimizeKeyframes = true)
         {
             var channelCount = propertyNames.Length;
             var frameCount = input.AsFloats.Length;
@@ -1128,7 +1141,7 @@ namespace UnityGLTF
                         SetTangentMode(keyframes[ci], i, mode);
                 }
 
-                var optimizedKeyframes = OptimizeKeyFrames(keyframes[ci]);
+                var optimizedKeyframes = optimizeKeyframes ? OptimizeKeyFrames(keyframes[ci]) : keyframes[ci];
 
                 // copy all key frames data to animation curve and add it to the clip
                 AnimationCurve curve = new AnimationCurve(optimizedKeyframes);
@@ -2188,6 +2201,13 @@ namespace UnityGLTF
                     _assetCache.TextureCache[textureId.Id].CachedTexture.IncreaseRefCount();
 
                     mrMapper.BaseColorTexCoord = pbr.BaseColorTexture.TexCoord;
+                    ExtTextureTransformExtension ext = GetTextureTransform(pbr.BaseColorTexture);
+                    if (ext != null)
+                    {
+                        mrMapper.BaseColorXOffset = ext.Offset;
+                        mrMapper.BaseColorXScale = ext.Scale;
+                        //TODO: Implement UVs multichannel for ext.TexCoord;
+                    }
                 }
 
                 mrMapper.MetallicFactor = pbr.MetallicFactor;
@@ -2221,6 +2241,13 @@ namespace UnityGLTF
                     sgMapper.DiffuseTexture = _assetCache.TextureCache[textureId.Id].CachedTexture.Texture;
                     _assetCache.TextureCache[textureId.Id].CachedTexture.IncreaseRefCount();
                     sgMapper.DiffuseTexCoord = specGloss.DiffuseTexture.TexCoord;
+                    ExtTextureTransformExtension ext = GetTextureTransform(specGloss.DiffuseTexture);
+                    if (ext != null)
+                    {
+                        sgMapper.DiffuseXOffset = ext.Offset;
+                        sgMapper.DiffuseXScale = ext.Scale;
+                        //TODO: Implement UVs multichannel for ext.TexCoord;
+                    }
                 }
 
                 sgMapper.SpecularFactor = specGloss.SpecularFactor;
@@ -2539,7 +2566,7 @@ namespace UnityGLTF
             };
         }
 
-        protected virtual void ApplyTextureTransform(TextureInfo def, Material mat, string texName)
+        protected virtual ExtTextureTransformExtension GetTextureTransform(TextureInfo def)
         {
             IExtension extension;
             if (_gltfRoot.ExtensionsUsed != null &&
@@ -2547,15 +2574,10 @@ namespace UnityGLTF
                 def.Extensions != null &&
                 def.Extensions.TryGetValue(ExtTextureTransformExtensionFactory.EXTENSION_NAME, out extension))
             {
-                ExtTextureTransformExtension ext = (ExtTextureTransformExtension) extension;
-
-                Vector2 temp = ext.Offset;
-                temp = new Vector2(temp.x, -temp.y);
-                mat.SetTextureOffset(texName, temp);
-                mat.SetTextureScale(texName, ext.Scale);
+                return (ExtTextureTransformExtension)extension;
             }
+            return null;
         }
-
 
         /// <summary>
         ///  Get the absolute path to a gltf uri reference.
@@ -2580,6 +2602,11 @@ namespace UnityGLTF
             var lastIndex = gltfPath.IndexOf(fileName, StringComparison.Ordinal);
             var partialPath = gltfPath.Substring(0, lastIndex);
             return partialPath;
+        }
+
+        public static Vector2 GLTFOffsetToUnitySpace(Vector2 offset, float textureYScale)
+        {
+            return new Vector2(offset.x, 1 - textureYScale - offset.y);
         }
     }
 }

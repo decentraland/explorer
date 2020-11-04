@@ -23,6 +23,8 @@ type VoiceOutput = {
   panNode?: PannerNode
   spatialParams: VoiceSpatialParams
   lastUpdateTime: number
+  playing: boolean
+  lastDecodedFrameOrder?: number
 }
 
 type VoiceInput = {
@@ -41,6 +43,8 @@ export type VoiceCommunicatorOptions = {
   panningModel?: PanningModelType
   distanceModel?: DistanceModelType
   loopbackAudioElement?: HTMLAudioElement
+  volume?: number
+  mute?: boolean
 }
 
 export type VoiceSpatialParams = {
@@ -130,7 +134,14 @@ export class VoiceCommunicator {
       this.setVoiceRelativePosition(src, relativePosition)
     }
 
-    this.outputs[src].encodedFramesQueue.queue({ frame: encoded, order: time })
+    const output = this.outputs[src]
+
+    if (output.lastDecodedFrameOrder && output.lastDecodedFrameOrder > time) {
+      // If we have already decoded a frame that comes after this one, we discard it
+      return
+    }
+
+    output.encodedFramesQueue.queue({ frame: encoded, order: time })
   }
 
   setListenerSpatialParams(spatialParams: VoiceSpatialParams) {
@@ -161,7 +172,16 @@ export class VoiceCommunicator {
   }
 
   setVolume(value: number) {
-    this.outputGainNode.gain.value = value
+    this.options.volume = value
+    const muted = this.options.mute ?? false
+    if (!muted) {
+      this.outputGainNode.gain.value = value
+    }
+  }
+
+  setMute(mute: boolean) {
+    this.options.mute = mute
+    this.outputGainNode.gain.value = mute ? 0 : this.options.volume ?? 1
   }
 
   createWorkletFor(src: string) {
@@ -173,6 +193,9 @@ export class VoiceCommunicator {
 
     workletNode.port.onmessage = (e) => {
       if (e.data.topic === OutputWorkletRequestTopic.STREAM_PLAYING) {
+        if (this.outputs[src]) {
+          this.outputs[src].playing = e.data.playing
+        }
         this.streamPlayingListeners.forEach((listener) => listener(src, e.data.playing))
       }
     }
@@ -311,7 +334,8 @@ export class VoiceCommunicator {
         (frameA, frameB) => frameA.order - frameB.order
       ),
       spatialParams: relativePosition,
-      lastUpdateTime: Date.now()
+      lastUpdateTime: Date.now(),
+      playing: false
     }
 
     const { workletNode, panNode } = await this.createOutputNodes(src)
@@ -321,9 +345,8 @@ export class VoiceCommunicator {
 
     const readEncodedBufferLoop = async () => {
       if (this.outputs[src]) {
-        // Leaving this buffer to fill too much causes a great deal of latency, so we leave this as 1 for now. In the future, we should adjust this based
-        // on packet loss or something like that
-        const framesToRead = 1
+        // We use three frames (120ms) as a jitter buffer. This is not mutch, but we don't want to add much latency. In the future we should maybe make this dynamic based on packet loss
+        const framesToRead = this.outputs[src].playing ? 3 : 1
 
         const frames = await this.outputs[src].encodedFramesQueue.dequeueItemsWhenAvailable(framesToRead, 2000)
 
@@ -343,6 +366,7 @@ export class VoiceCommunicator {
           }
 
           frames.forEach((it) => stream.decode(it.frame))
+          this.outputs[src].lastDecodedFrameOrder = frames[frames.length - 1].order
         }
 
         await readEncodedBufferLoop()

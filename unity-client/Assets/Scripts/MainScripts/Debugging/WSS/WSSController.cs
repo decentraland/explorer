@@ -102,6 +102,7 @@ namespace DCL
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
         public CameraController cameraController;
+        public GameObject bridgesGameObject;
 
         [System.NonSerialized] public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
 
@@ -364,6 +365,9 @@ namespace DCL
                             case "PreloadFile":
                                 GetBuilderBridge()?.PreloadFile(msg.payload);
                                 break;
+                            case "SetBuilderConfiguration":
+                                GetBuilderBridge()?.SetBuilderConfiguration(msg.payload);
+                                break;
                             case "AddWearableToCatalog":
                                 CatalogController.i?.AddWearableToCatalog(msg.payload);
                                 break;
@@ -375,9 +379,6 @@ namespace DCL
                                 break;
                             case "ClearWearableCatalog":
                                 CatalogController.i?.ClearWearableCatalog();
-                                break;
-                            case "ShowNewWearablesNotification":
-                                HUDController.i?.ShowNewWearablesNotification(msg.payload);
                                 break;
                             case "ConfigureHUDElement":
                                 HUDController.i?.ConfigureHUDElement(msg.payload);
@@ -430,8 +431,17 @@ namespace DCL
                             case "SetPlayerTalking":
                                 HUDController.i.SetPlayerTalking(msg.payload);
                                 break;
-                            case "EnableNewTaskbar":
-                                HUDController.i.EnableNewTaskbar(); // NOTE(Santi): This is temporal, until we remove the old taskbar
+                            case "SetRenderProfile":
+                                RenderProfileBridge.i.SetRenderProfile(msg.payload);
+                                break;
+                            case "SetUserTalking":
+                                HUDController.i.SetUserTalking(msg.payload);
+                                break;
+                            case "SetUsersMuted":
+                                HUDController.i.SetUsersMuted(msg.payload);
+                                break;
+                            case "SetKernelConfiguration":
+                                bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             default:
                                 Debug.Log(

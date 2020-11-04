@@ -20,7 +20,9 @@ import {
   ChatMessage,
   ProfileVersion,
   BusMessage,
-  VoiceFragment
+  VoiceFragment,
+  ProfileResponse,
+  ProfileRequest
 } from '../../comms/interface/types'
 import { IBrokerConnection, BrokerMessage } from './IBrokerConnection'
 import { Stats } from '../../comms/debug'
@@ -28,6 +30,9 @@ import { createLogger } from 'shared/logger'
 
 import { WorldInstanceConnection } from '../../comms/interface/index'
 import { Realm } from 'shared/dao/types'
+import { getProfileType } from 'shared/profiles/sagas'
+import { Profile } from 'shared/types'
+import { ProfileType } from 'shared/profiles/types'
 
 class SendResult {
   constructor(public bytesSize: number) {}
@@ -45,6 +50,8 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
   chatHandler: (fromAlias: string, chatData: Package<ChatMessage>) => void = NOOP
   sceneMessageHandler: (fromAlias: string, chatData: Package<BusMessage>) => void = NOOP
   voiceHandler: (alias: string, data: Package<VoiceFragment>) => void = NOOP
+  profileResponseHandler: (alias: string, data: Package<ProfileResponse>) => void = NOOP
+  profileRequestHandler: (alias: string, data: Package<ProfileRequest>) => void = NOOP
 
   ping: number = -1
 
@@ -126,6 +133,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     d.setRotationY(newPosition[4])
     d.setRotationZ(newPosition[5])
     d.setRotationW(newPosition[6])
+    // TODO ADD d.setImmediately(newPosition[7])
 
     const r = this.sendTopicMessage(false, topic, d)
     if (this._stats) {
@@ -139,6 +147,7 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     const d = new ProfileData()
     d.setCategory(Category.PROFILE)
     d.setTime(Date.now())
+    d.setProfileType(getProfileType(userProfile.identity))
     userProfile.version && d.setProfileVersion('' + userProfile.version)
 
     const r = this.sendTopicIdentityMessage(true, topic, d)
@@ -254,6 +263,16 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
     return Promise.resolve()
   }
 
+  sendProfileRequest(position: Position, userId: string, version: number | undefined): Promise<void> {
+    // To be implemented
+    return Promise.resolve()
+  }
+
+  sendProfileResponse(currentPosition: Position, profile: Profile): Promise<void> {
+    // To be implemented
+    return Promise.resolve()
+  }
+
   private handleMessage(message: BrokerMessage) {
     const msgSize = message.data.length
 
@@ -319,7 +338,8 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
                   positionData.getRotationX(),
                   positionData.getRotationY(),
                   positionData.getRotationZ(),
-                  positionData.getRotationW()
+                  positionData.getRotationW(),
+                  false
                 ]
               })
             break
@@ -403,7 +423,14 @@ export class BrokerWorldInstanceConnection implements WorldInstanceConnection {
               this.profileHandler(alias, userId, {
                 type: 'profile',
                 time: profileData.getTime(),
-                data: { user: userId, version: profileData.getProfileVersion() }
+                data: {
+                  user: userId,
+                  version: profileData.getProfileVersion(),
+                  type:
+                    profileData.getProfileType() === ProfileData.ProfileType.LOCAL
+                      ? ProfileType.LOCAL
+                      : ProfileType.DEPLOYED
+                } // We use deployed as default because that way we can emulate the old behaviour
               })
             break
           }

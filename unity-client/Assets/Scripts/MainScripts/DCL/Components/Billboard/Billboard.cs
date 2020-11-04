@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+﻿﻿using DCL.Components;
 using System.Collections;
 using UnityEngine;
 
@@ -22,8 +22,8 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(string newJson)
         {
-            DCLCharacterController.OnCharacterMoved -= OnCharacterMoved;
-            DCLCharacterController.OnCharacterMoved += OnCharacterMoved;
+            cameraPosition.OnChange -= CameraPositionChanged;
+            cameraPosition.OnChange += CameraPositionChanged;
 
             model = SceneController.i.SafeFromJson<Model>(newJson);
 
@@ -33,13 +33,19 @@ namespace DCL
             {
                 //NOTE(Zak): We have to wait one frame because if not the entity will be null. (I'm Brian, but Zak wrote the code so read this in his voice)
                 yield return null;
+                
+                if (entity == null || entity.gameObject == null)
+                {
+                    Debug.LogWarning("It seems skipping a frame didnt work, entity/GO is still null");
+                    yield break;
+                }
                 entityTransform = entity.gameObject.transform;
             }
         }
 
         public void OnDestroy()
         {
-            DCLCharacterController.OnCharacterMoved -= OnCharacterMoved;
+            cameraPosition.OnChange -= CameraPositionChanged;
         }
 
         // This runs on LateUpdate() instead of Update() to be applied AFTER the transform was moved by the transform component
@@ -76,17 +82,19 @@ namespace DCL
             return lookAtDir.normalized;
         }
 
-        void OnCharacterMoved(DCLCharacterPosition position)
-        {
-            ChangeOrientation();
-        }
-
         void ChangeOrientation()
         {
-            if (entityTransform != null)
-            {
-                entityTransform.forward = GetLookAtVector();
-            }
+            if (entityTransform == null)
+                return;
+
+            Vector3 lookAtVector = GetLookAtVector();
+            if(lookAtVector != Vector3.zero)
+                entityTransform.forward = lookAtVector;
+        }
+
+        private void CameraPositionChanged(Vector3 current, Vector3 previous)
+        {
+            ChangeOrientation();
         }
     }
 }

@@ -8,7 +8,7 @@ public interface IBodyShapeController
     string bodyShapeId { get; }
     void SetupEyes(Material material, Texture texture, Texture mask, Color color);
     void SetupEyebrows(Material material, Texture texture, Color color);
-    void SetupMouth(Material material, Texture texture, Color color);
+    void SetupMouth(Material material, Texture texture, Texture mask, Color color);
 }
 
 public class BodyShapeController : WearableController, IBodyShapeController
@@ -16,7 +16,7 @@ public class BodyShapeController : WearableController, IBodyShapeController
     public string bodyShapeId => wearable.id;
     private Transform animationTarget;
 
-    public BodyShapeController(WearableItem wearableItem) : base(wearableItem, wearableItem?.id)
+    public BodyShapeController(WearableItem wearableItem) : base(wearableItem)
     {
     }
 
@@ -33,10 +33,10 @@ public class BodyShapeController : WearableController, IBodyShapeController
 
     public SkinnedMeshRenderer skinnedMeshRenderer { get; private set; }
 
-    public override void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
+    public override void Load(string bodyShapeId, Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
     {
         animationTarget = parent;
-        base.Load(parent, onSuccess, onFail);
+        base.Load(bodyShapeId, parent, onSuccess, onFail);
     }
 
     public void SetActiveParts(bool lowerBodyActive, bool upperBodyActive, bool feetActive)
@@ -53,6 +53,12 @@ public class BodyShapeController : WearableController, IBodyShapeController
 
     public void SetupEyes(Material material, Texture texture, Texture mask, Color color)
     {
+        if (assetContainer?.transform == null)
+        {
+            Debug.LogWarning("Tried to setup eyes when the asset not ready");
+            return;
+        }
+
         AvatarUtils.MapSharedMaterialsRecursively(assetContainer.transform,
             (mat) =>
             {
@@ -66,6 +72,12 @@ public class BodyShapeController : WearableController, IBodyShapeController
 
     public void SetupEyebrows(Material material, Texture texture, Color color)
     {
+        if (assetContainer?.transform == null)
+        {
+            Debug.LogWarning("Tried to setup eyebrows when the asset not ready");
+            return;
+        }
+
         AvatarUtils.MapSharedMaterialsRecursively(assetContainer.transform,
             (mat) =>
             {
@@ -86,12 +98,19 @@ public class BodyShapeController : WearableController, IBodyShapeController
             skinnedMeshRenderer.enabled = true;
     }
 
-    public void SetupMouth(Material material, Texture texture, Color color)
+    public void SetupMouth(Material material, Texture texture, Texture mask, Color color)
     {
+        if (assetContainer?.transform == null)
+        {
+            Debug.LogWarning("Tried to setup mouth when the asset not ready");
+            return;
+        }
+
         AvatarUtils.MapSharedMaterialsRecursively(assetContainer.transform,
             (mat) =>
             {
                 material.SetTexture(AvatarUtils._BaseMap, texture);
+                material.SetTexture(AvatarUtils._TintMask, mask);
 
                 //NOTE(Brian): This isn't an error, we must also apply skin color to this mat
                 material.SetColor(AvatarUtils._BaseColor, color);

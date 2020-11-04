@@ -3,7 +3,6 @@ import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
-import { Wearable } from 'shared/profiles/types'
 import {
   HUDConfiguration,
   InstancedSpawnPoint,
@@ -13,11 +12,16 @@ import {
   HUDElementID,
   FriendsInitializationMessage,
   FriendshipUpdateStatusMessage,
-  UpdateUserStatusMessage
+  UpdateUserStatusMessage,
+  RenderProfile,
+  BuilderConfiguration,
+  Wearable,
+  KernelConfigForRenderer
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
+import { setDelightedSurveyEnabled } from './delightedSurvey'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -101,6 +105,11 @@ export class UnityInterface {
         canvas.height = canvas.parentElement.clientHeight
       } else {
         window.addEventListener('resize', this.resizeCanvasDelayed)
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') resizeCanvas(this.Module)
+        })
+
         this.resizeCanvasDelayed(null)
         this.waitForFillMouseEventData()
       }
@@ -128,6 +137,10 @@ export class UnityInterface {
 
   public LoadProfile(profile: ProfileForRenderer) {
     this.gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
+  }
+
+  public SetRenderProfile(id: RenderProfile) {
+    this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', JSON.stringify({ id: id }))
   }
 
   public CreateUIScene(data: { id: string; baseUrl: string }) {
@@ -188,11 +201,6 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
   }
 
-  /* NOTE(Santi): This is temporal, until we remove the old taskbar */
-  public EnableNewTaskbar() {
-    this.gameInstance.SendMessage('HUDController', 'EnableNewTaskbar')
-  }
-
   public HideFPSPanel() {
     this.gameInstance.SendMessage('SceneController', 'HideFPSPanel')
   }
@@ -241,10 +249,6 @@ export class UnityInterface {
 
   public ClearWearableCatalog() {
     this.gameInstance.SendMessage('SceneController', 'ClearWearableCatalog')
-  }
-
-  public ShowNewWearablesNotification(wearableNumber: number) {
-    // disabled
   }
 
   public ShowNotification(notification: Notification) {
@@ -339,16 +343,23 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
+  public ConfigureEmailPrompt(tutorialStep: number) {
+    const emailCompletedFlag = 128
+    this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {
+      active: (tutorialStep & emailCompletedFlag) === 0,
+      visible: false
+    })
+  }
+
   public ConfigureTutorial(tutorialStep: number, fromDeepLink: boolean) {
     const tutorialCompletedFlag = 256
 
-    this.ConfigureHUDElement(HUDElementID.GO_TO_GENESIS_PLAZA_HUD, {
-      active: true,
-      visible: false
-    })
-
-    if (WORLD_EXPLORER && (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0)) {
-      this.SetTutorialEnabled(fromDeepLink)
+    if (WORLD_EXPLORER) {
+      if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
+        this.SetTutorialEnabled(fromDeepLink)
+      } else {
+        setDelightedSurveyEnabled(true)
+      }
     }
   }
 
@@ -358,6 +369,22 @@ export class UnityInterface {
 
   public SetPlayerTalking(talking: boolean) {
     this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
+  }
+
+  public SetUserTalking(userId: string, talking: boolean) {
+    this.gameInstance.SendMessage(
+      'HUDController',
+      'SetUserTalking',
+      JSON.stringify({ userId: userId, talking: talking })
+    )
+  }
+
+  public SetUsersMuted(usersId: string[], muted: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
+  }
+
+  public SetKernelConfiguration(config: KernelConfigForRenderer) {
+    this.gameInstance.SendMessage('Bridges', 'SetKernelConfiguration', JSON.stringify(config))
   }
 
   // *********************************************************************************
@@ -430,6 +457,10 @@ export class UnityInterface {
 
   public OnBuilderKeyDown(key: string) {
     this.SendBuilderMessage('OnBuilderKeyDown', key)
+  }
+
+  public SetBuilderConfiguration(config: BuilderConfiguration) {
+    this.SendBuilderMessage('SetBuilderConfiguration', JSON.stringify(config))
   }
 
   private resizeCanvasDelayed(ev: UIEvent | null) {

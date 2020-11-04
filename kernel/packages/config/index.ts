@@ -1,6 +1,5 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
-declare var window: any
 
 export const performanceConfigurations = [
   { antialiasing: true, downsampling: 0, shadows: true },
@@ -100,6 +99,7 @@ const qs = queryString.parse(location.search)
 // Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
+export const COMMS_PROFILE_TIMEOUT = 10000
 
 export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
@@ -109,7 +109,7 @@ export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const REALM = qs.realm
 
-export const VOICE_CHAT_ENABLED = location.search.indexOf('VOICE_CHAT_ENABLED') !== -1
+export const VOICE_CHAT_DISABLED_FLAG = location.search.indexOf('VOICE_CHAT_DISABLED') !== -1
 
 export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
 
@@ -141,12 +141,9 @@ export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== 
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
-export const ENABLE_MANA_HUD = location.search.indexOf('ENABLE_MANA_HUD') !== -1
-export const ENABLE_NEW_TASKBAR =
-  location.search.indexOf('ENABLE_NEW_TASKBAR') !==
-  -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
-
 export const PIN_CATALYST = qs.PIN_CATALYST
+
+export const HALLOWEEN = location.search.indexOf('HALLOWEEN') !== -1
 
 export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
 
@@ -212,11 +209,9 @@ let network: ETHEREUM_NETWORK | null = null
 
 export function getTLD() {
   if (ENV_OVERRIDE) {
-    return window.location.search.match(/ENV=(\w+)/)[1]
+    return location.search.match(/ENV=(\w+)/)![1]
   }
-  if (window) {
-    return window.location.hostname.match(/(\w+)$/)[0]
-  }
+  return location.hostname.match(/(\w+)$/)![0]
 }
 
 export const knownTLDs = ['zone', 'org', 'today']
@@ -240,7 +235,7 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  const url = new URL(window.location)
+  const url = new URL(location.toString())
   if (url.searchParams.has('TEST_WEARABLES')) {
     const value = url.searchParams.get('TEST_WEARABLES')
     if (value) {
@@ -272,7 +267,7 @@ export function getServerConfigurations() {
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json`,
+    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json?t=${new Date().getTime()}`,
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
@@ -342,3 +337,10 @@ export namespace ethereumConfigurations {
 }
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
+
+export const genericAvatarSnapshots: Record<string, string> = {
+  face: '/images/avatar_snapshot_default.png',
+  body: '/images/image_not_found.png',
+  face256: '/images/avatar_snapshot_default256.png',
+  face128: '/images/avatar_snapshot_default128.png'
+}

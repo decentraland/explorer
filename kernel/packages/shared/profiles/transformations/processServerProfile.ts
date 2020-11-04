@@ -1,4 +1,5 @@
-import { Profile, WearableId } from '../types'
+import { Profile } from '../types'
+import { WearableId } from 'shared/catalogs/types'
 import { colorString } from './colorString'
 import { ALL_WEARABLES } from 'config'
 
@@ -43,10 +44,11 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     userId,
     email: receivedProfile.email || '',
     name: receivedProfile.name || name,
-    hasClaimedName: !!receivedProfile.name,
+    hasClaimedName:
+      typeof receivedProfile.hasClaimedName === 'undefined' ? !!receivedProfile.name : receivedProfile.hasClaimedName,
     description: receivedProfile.description || '',
     ethAddress: userId || 'noeth',
-    version: receivedProfile.avatar.version || 1,
+    version: receivedProfile.version ?? receivedProfile.avatar.version ?? 1,
     avatar: {
       eyeColor: colorString(eyeColor),
       hairColor: colorString(hairColor),
@@ -57,6 +59,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     },
     inventory: receivedProfile.inventory || [],
     blocked: receivedProfile.blocked,
+    muted: receivedProfile.muted,
     tutorialStep: receivedProfile.tutorialStep || 0,
     interests: receivedProfile.interests || []
   }
