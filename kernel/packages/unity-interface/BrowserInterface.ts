@@ -15,20 +15,20 @@ import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipAction, FriendshipUpdateStatusMessage, WorldPosition } from 'shared/types'
+import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
-import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
+import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { fetchOwner, getAppNetwork } from 'shared/web3'
+import { getAppNetwork, fetchOwner } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, signUpSetProfile } from 'shared/session/actions'
+import { changeSignUpStage, logout, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -110,11 +110,11 @@ export class BrowserInterface {
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
-    queueTrackingEvent('hiccup report', data)
-  }
-
   public PerformanceReport(samples: string) {
+    if (!isRendererEnabled() || !isForeground()) {
+      return
+    }
+
     const perfReport = getPerformanceInfo(samples)
     queueTrackingEvent('performance report', perfReport)
   }
@@ -204,6 +204,13 @@ export class BrowserInterface {
     }
   }
 
+  public CloseUserAvatar(isSignUpFlow = false) {
+    if (isSignUpFlow) {
+      unityInterface.DeactivateRendering()
+      globalThis.globalStore.dispatch(signUpCancel())
+    }
+  }
+
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
     const update = { tutorialStep: data.tutorialStep }
     globalThis.globalStore.dispatch(saveProfileRequest(update))
@@ -218,7 +225,7 @@ export class BrowserInterface {
       }
       case 'ActivateRenderingACK': {
         if (!aborted) {
-          worldRunningObservable.notifyObservers(true)
+          renderStateObservable.notifyObservers(true)
         }
         break
       }
@@ -293,7 +300,7 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { voiceChatVolume: number, voiceChatAllowCategory: number }) {
+  public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
     globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
     globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
