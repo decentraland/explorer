@@ -15,6 +15,8 @@ public class ProfileHUDController : IHUD
     private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
     private const string URL_MANA_INFO = "https://docs.decentraland.org/examples/get-a-wallet";
     private const string URL_MANA_PURCHASE = "https://market.decentraland.org/settings";
+    private const string URL_TERMS_OF_USE = "https://decentraland.org/terms";
+    private const string URL_PRIVACY_POLICY = "https://decentraland.org/privacy";
     private const float FETCH_MANA_INTERVAL = 60;
 
     internal ProfileHUDView view;
@@ -33,12 +35,14 @@ public class ProfileHUDController : IHUD
 
         view.buttonLogOut.onClick.AddListener(WebInterface.LogOut);
         view.buttonClaimName.onClick.AddListener(()=> WebInterface.OpenURL(URL_CLAIM_NAME));
+        view.buttonTermsOfService.onPointerDown += () => WebInterface.OpenURL(URL_TERMS_OF_USE);
+        view.buttonPrivacyPolicy.onPointerDown += () => WebInterface.OpenURL(URL_PRIVACY_POLICY);
 
         manaCounterView = view.GetComponentInChildren<ManaCounterView>();
         if (manaCounterView)
         {
-            manaCounterView.buttonManaInfo.onPointerDown += OnManaInfoPressed;
-            manaCounterView.buttonManaPurchase.onPointerDown += OnManaPurchasePressed;
+            manaCounterView.buttonManaInfo.onPointerDown += () => WebInterface.OpenURL(URL_MANA_INFO);
+            manaCounterView.buttonManaPurchase.onPointerDown += () => WebInterface.OpenURL(URL_MANA_PURCHASE);
         }
         SetManaCounterVisibility(false);
 
@@ -69,12 +73,6 @@ public class ProfileHUDController : IHUD
             fetchManaIntervalRoutine = null;
         }
 
-        if (manaCounterView != null)
-        {
-            manaCounterView.buttonManaInfo.onPointerDown -= OnManaInfoPressed;
-            manaCounterView.buttonManaPurchase.onPointerDown -= OnManaPurchasePressed;
-        }
-
         if (view)
         {
             GameObject.Destroy(view.gameObject);
@@ -91,16 +89,6 @@ public class ProfileHUDController : IHUD
     void OnMouseLocked()
     {
         view.HideMenu();
-    }
-
-    void OnManaInfoPressed()
-    {
-        WebInterface.OpenURL(URL_MANA_INFO);
-    }
-
-    void OnManaPurchasePressed()
-    {
-        WebInterface.OpenURL(URL_MANA_PURCHASE);
     }
 
     IEnumerator ManaIntervalRoutine()
