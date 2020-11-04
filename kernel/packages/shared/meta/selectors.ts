@@ -36,7 +36,7 @@ export const getMessageOfTheDay = (store: RootMetaState): MessageOfTheDayConfig 
 export const isVoiceChatEnabled = (store: RootMetaState): boolean =>
   (!!getCommsConfig(store).voiceChatEnabled && !VOICE_CHAT_DISABLED_FLAG) || VOICE_CHAT_ENABLED_FLAG
 
-export const getVoiceChatWhitelist = (store: RootMetaState): string[] => getCommsConfig(store).voiceChatAllowlist ?? []
+export const getVoiceChatAllowlist = (store: RootMetaState): string[] => getCommsConfig(store).voiceChatAllowlist ?? []
 
 export const isVoiceChatEnabledFor = (store: RootMetaState, userId: string): boolean =>
-  isVoiceChatEnabled(store) || getVoiceChatWhitelist(store).includes(userId)
+  isVoiceChatEnabled(store) || (getVoiceChatAllowlist(store).includes(userId) && !VOICE_CHAT_DISABLED_FLAG)
