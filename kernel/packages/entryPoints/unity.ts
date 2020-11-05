@@ -15,7 +15,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
-import { renderStateObservable, onNextRendererEnabled, foregroundObservable } from 'shared/world/worldState'
+import { renderStateObservable, onNextRendererEnabled, foregroundObservable, isForeground } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -121,6 +121,12 @@ initializeUnity(container)
     } else {
       i.SetRenderProfile(RenderProfile.DEFAULT)
     }
+
+    if ( isForeground() ) {
+      i.ReportFocusOn()
+    } else {
+      i.ReportFocusOff()
+    } 
 
     foregroundObservable.add((isForeground) => {
       if (isForeground) {
