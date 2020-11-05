@@ -95,3 +95,14 @@
   height: 23px;
   vertical-align: middle;
 }
+
+@media only screen and (max-width: 991px) {
+  .eth-login {
+    width: 100%;
+    padding: 0;
+  }
+
+  .eth-login .eth-avatars {
+    display: none;
+  }
+}
