@@ -309,10 +309,10 @@ namespace DCL
                                 renderingController.DeactivateRendering();
                                 break;
                             case "ReportFocusOn":
-                                CommonScriptableObjects.focusState.Set(true);
+                                bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             case "ReportFocusOff":
-                                CommonScriptableObjects.focusState.Set(false);
+                                bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             case "ShowNotificationFromJson":
                                 NotificationsController.i.ShowNotificationFromJson(msg.payload);
