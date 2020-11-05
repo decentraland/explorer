@@ -2,18 +2,19 @@
   display: flex;
   /*height: 40px;*/
   justify-content: space-between;
-  padding-top: 5px;
+  position: absolute;
+  width: 100%;
 }
 
 .nav-bar img.dcl-logo {
   width: 46px;
-  padding-left: 5px;
+  padding: .5rem 1rem;
 }
 
 .nav-bar-content {
   display: flex;
   align-items: center;
-  padding-right: 5px;
+  padding: .5rem 1rem;
 }
 
 .nav-text {

@@ -3,6 +3,7 @@ import { WalletSelector } from "./wallet/WalletSelector";
 import { LoginHeader } from "./LoginHeader";
 import "./EthLogin.css";
 import { Spinner } from "../common/Spinner";
+import { Avatars } from "../common/Avatars";
 
 export interface EthLoginProps {
   loading: boolean;
@@ -23,8 +24,9 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const walletLoading = props.loading && wallet;
   const showSignIn = !props.loading || walletLoading;
   return (
-    <div>
+    <div className="eth-login">
       <LoginHeader />
+      <Avatars />
       <div id="eth-login-confirmation-wrapper">
         {!showSignIn && <Spinner />}
         {showSignIn && (

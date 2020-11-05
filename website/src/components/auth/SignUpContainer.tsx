@@ -45,16 +45,16 @@ export const SignUpContainer: React.FC<SignUpContainerProps> = (props) => {
   );
 };
 
-const mapStateToProps = (state: any) => {
-  let face = state.session.signup.profile.avatar?.snapshots?.face256;
-  if (face) {
-    face = "data:image/jpg;base64," + face;
-  }
+const mapStateToProps = (state: any, props: any) => {
+  const signup = state?.session?.signup
+  const face256 = signup?.profile?.avatar?.snapshots?.face256;
+  console.log(state, props)
+
   return {
-    face,
-    name: state.session.signup.profile?.name,
-    email: state.session.signup.profile?.email,
-    stage: state.session.signup.stage,
+    face: props?.face ?? (face256 && `data:image/jpg;base64,${face256}`),
+    name: props?.name ?? signup?.profile?.name,
+    email: props?.email ?? signup?.profile?.email,
+    stage: props?.stage ?? signup?.stage,
   };
 };
 
