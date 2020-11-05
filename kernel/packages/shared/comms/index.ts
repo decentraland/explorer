@@ -1,4 +1,11 @@
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, genericAvatarSnapshots, COMMS_PROFILE_TIMEOUT } from 'config'
+import {
+  commConfigurations,
+  parcelLimits,
+  COMMS,
+  AUTO_CHANGE_REALM,
+  genericAvatarSnapshots,
+  COMMS_PROFILE_TIMEOUT
+} from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
@@ -47,7 +54,7 @@ import {
 import { BrokerWorldInstanceConnection } from '../comms/v1/brokerWorldInstanceConnection'
 import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 import { ProfileForRenderer, uuid } from 'decentraland-ecs/src'
-import { worldRunningObservable, isWorldRunning, onNextWorldRunning } from '../world/worldState'
+import { renderStateObservable, isRendererEnabled, onNextRendererEnabled } from '../world/worldState'
 import { WorldInstanceConnection } from './interface/index'
 
 import { LighthouseWorldInstanceConnection } from './v2/LighthouseWorldInstanceConnection'
@@ -71,7 +78,7 @@ import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getCommsConfig, isVoiceChatEnabled } from 'shared/meta/selectors'
+import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -95,6 +102,7 @@ import { unityInterface } from 'unity-interface/UnityInterface'
 import { isURL } from 'atomicHelpers/isURL'
 import { VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
+import { EncodedFrame } from 'voice-chat-codec/types'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -468,8 +476,7 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       voiceCommunicator?.playEncodedAudio(
         peerTrackingInfo.identity,
         getSpatialParamsFor(peerTrackingInfo.position),
-        message.data.encoded,
-        message.time
+        message.data
       )
     }
   }
@@ -489,13 +496,13 @@ function isVoiceAllowedByPolicy(profile: Profile, voiceUserId: string): boolean 
   const policy = getVoicePolicy(store.getState())
 
   switch (policy) {
-    case VoicePolicy.ALLOW_ALL:
-      return true
     case VoicePolicy.ALLOW_FRIENDS_ONLY:
       return isFriend(store.getState(), voiceUserId)
     case VoicePolicy.ALLOW_VERIFIED_ONLY:
       const theirProfile = getProfile(store.getState(), voiceUserId)
       return !!theirProfile?.hasClaimedName
+    default:
+      return true
   }
 }
 
@@ -977,10 +984,10 @@ export async function connect(userId: string) {
     context = new Context(userInfo)
     context.worldInstanceConnection = connection
 
-    if (isWorldRunning()) {
+    if (isRendererEnabled()) {
       await startCommunications(context)
     } else {
-      onNextWorldRunning(async () => {
+      onNextRendererEnabled(async () => {
         try {
           await startCommunications(context!)
         } catch (e) {
@@ -1106,7 +1113,7 @@ async function doStartCommunications(context: Context) {
       }, 30000)
     }
 
-    context.worldRunningObserver = worldRunningObservable.add((isRunning) => {
+    context.worldRunningObserver = renderStateObservable.add((isRunning) => {
       onWorldRunning(isRunning)
     })
 
@@ -1122,7 +1129,7 @@ async function doStartCommunications(context: Context) {
         obj.immediate
       ] as Position
 
-      if (context && isWorldRunning) {
+      if (context && isRendererEnabled) {
         onPositionUpdate(context, p)
       }
     })
@@ -1138,13 +1145,13 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && isVoiceChatEnabled(store.getState())) {
+    if (!voiceCommunicator && isVoiceChatEnabledFor(store.getState(), context.userInfo.userId!)) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
-          send(data: Uint8Array) {
+          send(frame: EncodedFrame) {
             if (context.currentPosition) {
-              context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, data)
+              context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, frame)
             }
           }
         },
@@ -1163,6 +1170,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
+      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     if (e.message && e.message.includes('is taken')) {
@@ -1242,7 +1250,7 @@ export function disconnect() {
       positionObservable.remove(context.positionObserver)
     }
     if (context.worldRunningObserver) {
-      worldRunningObservable.remove(context.worldRunningObserver)
+      renderStateObservable.remove(context.worldRunningObserver)
     }
     if (context.worldInstanceConnection) {
       context.worldInstanceConnection.close()
