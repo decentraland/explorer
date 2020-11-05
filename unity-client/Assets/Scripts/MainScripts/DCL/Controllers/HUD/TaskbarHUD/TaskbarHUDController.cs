@@ -21,7 +21,6 @@ public class TaskbarHUDController : IHUD
     public PrivateChatWindowHUDController privateChatWindowHud;
     public FriendsHUDController friendsHud;
     public SettingsHUDController settingsHud;
-    public AvatarEditorHUDController avatarEditorHud;
     public ExploreHUDController exploreHud;
     public HelpAndSupportHUDController helpAndSupportHud;
 
@@ -62,8 +61,6 @@ public class TaskbarHUDController : IHUD
         view.OnChatToggleOn += View_OnChatToggleOn;
         view.OnFriendsToggleOff += View_OnFriendsToggleOff;
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
-        view.OnBackpackToggleOff += View_OnBackpackToggleOff;
-        view.OnBackpackToggleOn += View_OnBackpackToggleOn;
         view.OnExploreToggleOff += View_OnExploreToggleOff;
         view.OnExploreToggleOn += View_OnExploreToggleOn;
 
@@ -153,17 +150,6 @@ public class TaskbarHUDController : IHUD
             return;
 
         OpenPrivateChatWindow(head.profile.userId);
-    }
-
-    private void View_OnBackpackToggleOn()
-    {
-        avatarEditorHud.SetVisibility(true);
-        OnAnyTaskbarButtonClicked?.Invoke();
-    }
-
-    private void View_OnBackpackToggleOff()
-    {
-        avatarEditorHud.SetVisibility(false);
     }
 
     private void View_OnExploreToggleOn()
@@ -316,23 +302,6 @@ public class TaskbarHUDController : IHUD
         };
     }
 
-    public void AddBackpackWindow(AvatarEditorHUDController controller)
-    {
-        if (controller == null)
-        {
-            Debug.LogWarning("AddBackpackWindow >>> Backpack window doesn't exist yet!");
-            return;
-        }
-
-        avatarEditorHud = controller;
-        view.OnAddBackpackWindow();
-        avatarEditorHud.OnClose += () =>
-        {
-            view.backpackButton.SetToggleState(false, false);
-            MarkWorldChatAsReadIfOtherWindowIsOpen();
-        };
-    }
-
     public void AddExploreWindow(ExploreHUDController controller)
     {
         if (controller == null)
@@ -401,8 +370,6 @@ public class TaskbarHUDController : IHUD
             view.OnChatToggleOn -= View_OnChatToggleOn;
             view.OnFriendsToggleOff -= View_OnFriendsToggleOff;
             view.OnFriendsToggleOn -= View_OnFriendsToggleOn;
-            view.OnBackpackToggleOff -= View_OnBackpackToggleOff;
-            view.OnBackpackToggleOn -= View_OnBackpackToggleOn;
             view.OnExploreToggleOff -= View_OnExploreToggleOff;
             view.OnExploreToggleOn -= View_OnExploreToggleOn;
 
