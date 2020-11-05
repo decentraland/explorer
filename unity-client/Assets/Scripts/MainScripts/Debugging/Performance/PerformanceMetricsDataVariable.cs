@@ -22,11 +22,7 @@ namespace DCL
 
         public void Set(float fpsCount, int hiccuptCount, float hiccupSum, float totalSeconds)
         {
-            value.fpsCount = fpsCount;
-            value.hiccupCount = hiccuptCount;
-            value.hiccupSum = hiccupSum;
-            value.totalSeconds = totalSeconds;
-            RaiseOnChange();
+            Set(new PerformanceMetricsData { fpsCount = fpsCount, hiccupCount = hiccuptCount, hiccupSum = hiccupSum, totalSeconds = totalSeconds });
         }
     }
 }
