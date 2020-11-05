@@ -33,5 +33,5 @@ export function getRawPerformanceInfo(samples: string) {
     entries[i] = samples.charCodeAt(i)
   }
 
-  return JSON.stringify({samples})
+  return JSON.stringify({ samples })
 }
