@@ -189,11 +189,17 @@ public class HUDController : MonoBehaviour
             case HUDElementID.PROFILE_HUD:
                 CreateHudElement<ProfileHUDController>(configuration, hudElementId);
 
-                if (!string.IsNullOrEmpty(extraPayload))
+                if (profileHud != null)
                 {
-                    var config = JsonUtility.FromJson<ProfileHUDController.Configuration>(extraPayload);
-                    profileHud.SetManaCounterVisibility(config.enableManaCounter);
+                    profileHud.AddBackpackWindow(avatarEditorHud);
+
+                    if (!string.IsNullOrEmpty(extraPayload))
+                    {
+                        var config = JsonUtility.FromJson<ProfileHUDController.Configuration>(extraPayload);
+                        profileHud.SetManaCounterVisibility(config.enableManaCounter);
+                    }
                 }
+
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -289,7 +295,6 @@ public class HUDController : MonoBehaviour
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
                         taskbarHud.AddSettingsWindow(settingsHud);
-                        taskbarHud.AddBackpackWindow(avatarEditorHud);
 
                         if (!string.IsNullOrEmpty(extraPayload))
                         {

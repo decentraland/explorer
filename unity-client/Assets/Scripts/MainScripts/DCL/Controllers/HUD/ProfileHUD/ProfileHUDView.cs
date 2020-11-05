@@ -33,10 +33,14 @@ internal class ProfileHUDView : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] internal Button buttonEditUnverifiedName;
     [SerializeField] internal Button buttonClaimName;
+    [SerializeField] internal Button buttonBackpack;
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
     [SerializeField] internal Button_OnPointerDown buttonTermsOfService;
     [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicy;
+
+    [Header("Tutorial Config")]
+    [SerializeField] internal RectTransform backpackTooltipReference;
 
     private InputAction_Trigger.Triggered closeActionDelegate;
 
@@ -96,6 +100,14 @@ internal class ProfileHUDView : MonoBehaviour
             mainShowHideAnimator.Show();
         else if (!visible && mainShowHideAnimator.isVisible)
             mainShowHideAnimator.Hide();
+    }
+
+    public void SetBackpackButtonVisibility(bool visible)
+    {
+        if (visible && !buttonBackpack.gameObject.activeSelf)
+            buttonBackpack.gameObject.SetActive(true);
+        else if (!visible && buttonBackpack.gameObject.activeSelf)
+            buttonBackpack.gameObject.SetActive(false);
     }
 
     private void HandleProfileSnapshot(UserProfile userProfile)

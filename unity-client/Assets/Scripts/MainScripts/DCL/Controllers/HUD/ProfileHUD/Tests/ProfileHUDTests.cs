@@ -32,24 +32,24 @@ public class ProfileHUDTests : TestsBase
     [Test]
     public void VisibilityDefaulted()
     {
-        Assert.AreEqual(true, controller.view.gameObject.activeInHierarchy);
-        Assert.AreEqual(false, controller.view.menuShowHideAnimator.isVisible);
-        Assert.AreEqual(false, controller.manaCounterView.gameObject.activeInHierarchy);
+        Assert.IsTrue(controller.view.gameObject.activeInHierarchy);
+        Assert.IsFalse(controller.view.menuShowHideAnimator.isVisible);
+        Assert.IsFalse(controller.manaCounterView.gameObject.activeInHierarchy);
     }
 
     [Test]
     public void VisibilityOverridenTrue()
     {
         controller.SetVisibility(true);
-        Assert.AreEqual(true, controller.view.gameObject.activeInHierarchy);
-        Assert.AreEqual(false, controller.view.menuShowHideAnimator.isVisible);
+        Assert.IsTrue(controller.view.gameObject.activeInHierarchy);
+        Assert.IsFalse(controller.view.menuShowHideAnimator.isVisible);
     }
 
     [Test]
     public void VisibilityOverridenFalse()
     {
         controller.SetVisibility(false);
-        Assert.AreEqual(false, controller.view.menuShowHideAnimator.isVisible);
+        Assert.IsFalse(controller.view.menuShowHideAnimator.isVisible);
     }
 
     [Test]
@@ -101,10 +101,10 @@ public class ProfileHUDTests : TestsBase
     public void ShowAndHideManaCounterCorrectly()
     {
         controller.SetManaCounterVisibility(true);
-        Assert.AreEqual(true, controller.manaCounterView.gameObject.activeInHierarchy);
+        Assert.IsTrue(controller.manaCounterView.gameObject.activeSelf);
 
         controller.SetManaCounterVisibility(false);
-        Assert.AreEqual(false, controller.manaCounterView.gameObject.activeInHierarchy);
+        Assert.IsFalse(controller.manaCounterView.gameObject.activeSelf);
     }
 
     [Test]
@@ -114,5 +114,31 @@ public class ProfileHUDTests : TestsBase
 
         controller.SetManaBalance(balance);
         Assert.AreEqual(Convert.ToDouble(balance), Convert.ToDouble(controller.manaCounterView.balanceText.text));
+    }
+
+    [Test]
+    public void AddBackpackWindowCorrectly()
+    {
+        Assert.IsNull(controller.avatarEditorHud);
+        Assert.IsFalse(controller.view.buttonBackpack.gameObject.activeSelf);
+
+        AvatarEditorHUDController testAvatarEditor = new AvatarEditorHUDController();
+        controller.AddBackpackWindow(testAvatarEditor);
+
+        Assert.IsNotNull(controller.avatarEditorHud);
+        Assert.IsTrue(controller.view.buttonBackpack.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void ShowAndHideBackpackButtonCorrectly()
+    {
+        AvatarEditorHUDController testAvatarEditor = new AvatarEditorHUDController();
+        controller.AddBackpackWindow(testAvatarEditor);
+
+        controller.SetBackpackButtonVisibility(true);
+        Assert.IsTrue(controller.view.buttonBackpack.gameObject.activeSelf);
+
+        controller.SetBackpackButtonVisibility(false);
+        Assert.IsFalse(controller.view.buttonBackpack.gameObject.activeSelf);
     }
 }

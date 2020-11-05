@@ -21,10 +21,13 @@ public class ProfileHUDController : IHUD
 
     internal ProfileHUDView view;
     internal ManaCounterView manaCounterView;
+    internal AvatarEditorHUDController avatarEditorHud;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private IMouseCatcher mouseCatcher;
     private Coroutine fetchManaIntervalRoutine = null;
+
+    public RectTransform backpackTooltipReference { get => view.backpackTooltipReference; }
 
     public ProfileHUDController()
     {
@@ -33,6 +36,8 @@ public class ProfileHUDController : IHUD
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
 
+        SetBackpackButtonVisibility(false);
+        view.buttonBackpack.onClick.AddListener(OpenBackpackWindow);
         view.buttonLogOut.onClick.AddListener(WebInterface.LogOut);
         view.buttonClaimName.onClick.AddListener(()=> WebInterface.OpenURL(URL_CLAIM_NAME));
         view.buttonTermsOfService.onPointerDown += () => WebInterface.OpenURL(URL_TERMS_OF_USE);
@@ -88,7 +93,7 @@ public class ProfileHUDController : IHUD
 
     void OnMouseLocked()
     {
-        view.HideMenu();
+        HideProfileMenu();
     }
 
     IEnumerator ManaIntervalRoutine()
@@ -100,13 +105,66 @@ public class ProfileHUDController : IHUD
         }
     }
 
+    /// <summary>
+    /// Set an amount of MANA on the HUD.
+    /// </summary>
+    /// <param name="balance">Amount of MANA.</param>
     public void SetManaBalance(string balance)
     {
         manaCounterView?.SetBalance(balance);
     }
 
+    /// <summary>
+    /// Show/Hide the MANA counter.
+    /// </summary>
+    /// <param name="visible">True for showing the counter.</param>
     public void SetManaCounterVisibility(bool visible)
     {
         manaCounterView?.gameObject.SetActive(visible);
+    }
+
+    /// <summary>
+    /// Configure an AvatarEditorHUDController for the Backpack button.
+    /// </summary>
+    /// <param name="controller">The avatar editor controller to asign.</param>
+    public void AddBackpackWindow(AvatarEditorHUDController controller)
+    {
+        if (controller == null)
+        {
+            Debug.LogWarning("AddBackpackWindow >>> Backpack window doesn't exist yet!");
+            return;
+        }
+
+        avatarEditorHud = controller;
+        SetBackpackButtonVisibility(true);
+    }
+
+    /// <summary>
+    /// Show/Hide the Backpack button.
+    /// </summary>
+    /// <param name="visible">True for showing the button.</param>
+    public void SetBackpackButtonVisibility(bool visible)
+    {
+        view.SetBackpackButtonVisibility(avatarEditorHud != null && visible);
+    }
+
+    /// <summary>
+    /// Open the AvatarEditorHUD view.
+    /// </summary>
+    private void OpenBackpackWindow()
+    {
+        if (avatarEditorHud == null)
+            return;
+
+        avatarEditorHud.SetVisibility(true);
+        HideProfileMenu();
+    }
+
+    /// <summary>
+    /// Close the Profile menu.
+    /// </summary>
+    public void HideProfileMenu()
+    {
+        view?.HideMenu();
     }
 }
