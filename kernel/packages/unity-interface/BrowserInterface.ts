@@ -14,16 +14,11 @@ import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
-import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import {
-  ChatMessage,
-  FriendshipUpdateStatusMessage,
-  FriendshipAction,
-  WorldPosition
-} from 'shared/types'
+import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
+import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
-import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
+import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
@@ -115,13 +110,16 @@ export class BrowserInterface {
     if (newWindow != null) newWindow.opener = null
   }
 
-  public PerformanceReport(samples: string) {
-    if (!isRendererEnabled() || !isForeground()) {
-      return
-    }
+  public PerformanceHiccupReport(data: { hiccupsInThousandFrames: number; hiccupsTime: number; totalTime: number }) {
+    queueTrackingEvent('hiccup report', data)
+  }
 
+  public PerformanceReport(samples: string) {
     const perfReport = getPerformanceInfo(samples)
     queueTrackingEvent('performance report', perfReport)
+
+    const rawPerfReport = getRawPerformanceInfo(samples)
+    queueTrackingEvent('raw performance report', rawPerfReport)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -284,7 +282,7 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { voiceChatVolume: number, voiceChatAllowCategory: number }) {
+  public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
     globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
     globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
