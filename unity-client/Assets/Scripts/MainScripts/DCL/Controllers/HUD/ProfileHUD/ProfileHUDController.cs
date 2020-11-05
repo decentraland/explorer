@@ -21,10 +21,13 @@ public class ProfileHUDController : IHUD
 
     internal ProfileHUDView view;
     internal ManaCounterView manaCounterView;
+    internal AvatarEditorHUDController avatarEditorHud;
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
     private IMouseCatcher mouseCatcher;
     private Coroutine fetchManaIntervalRoutine = null;
+
+    public RectTransform backpackTooltipReference { get => view.backpackTooltipReference; }
 
     public ProfileHUDController()
     {
@@ -33,6 +36,8 @@ public class ProfileHUDController : IHUD
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
 
+        view.SetBackpackButtonVisibility(false);
+        view.buttonBackpack.onClick.AddListener(OpenBackpackWindow);
         view.buttonLogOut.onClick.AddListener(WebInterface.LogOut);
         view.buttonClaimName.onClick.AddListener(()=> WebInterface.OpenURL(URL_CLAIM_NAME));
         view.buttonTermsOfService.onPointerDown += () => WebInterface.OpenURL(URL_TERMS_OF_USE);
@@ -88,7 +93,7 @@ public class ProfileHUDController : IHUD
 
     void OnMouseLocked()
     {
-        view.HideMenu();
+        HideProfileMenu();
     }
 
     IEnumerator ManaIntervalRoutine()
@@ -108,5 +113,39 @@ public class ProfileHUDController : IHUD
     public void SetManaCounterVisibility(bool visible)
     {
         manaCounterView?.gameObject.SetActive(visible);
+    }
+
+    public void AddBackpackWindow(AvatarEditorHUDController controller)
+    {
+        if (controller == null)
+        {
+            Debug.LogWarning("AddBackpackWindow >>> Backpack window doesn't exist yet!");
+            return;
+        }
+
+        avatarEditorHud = controller;
+        SetBackpackButtonVisibility(true);
+    }
+
+    public void SetBackpackButtonVisibility(bool visible)
+    {
+        if (avatarEditorHud == null)
+            return;
+
+        view.SetBackpackButtonVisibility(visible);
+    }
+
+    private void OpenBackpackWindow()
+    {
+        if (avatarEditorHud == null)
+            return;
+
+        avatarEditorHud.SetVisibility(true);
+        HideProfileMenu();
+    }
+
+    public void HideProfileMenu()
+    {
+        view?.HideMenu();
     }
 }
