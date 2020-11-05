@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using DCL.Configuration;
 
 internal class MoveVerticalOnVoiceChatDisabled : MonoBehaviour
 {
@@ -9,6 +10,9 @@ internal class MoveVerticalOnVoiceChatDisabled : MonoBehaviour
 
     void Awake()
     {
+        if (EnvironmentSettings.RUNNING_TESTS)
+            return;
+
         defaultPositionY = target.anchoredPosition.y;
 
         KernelConfig.i.EnsureConfigInitialized().Then(config => DoChanges(config));

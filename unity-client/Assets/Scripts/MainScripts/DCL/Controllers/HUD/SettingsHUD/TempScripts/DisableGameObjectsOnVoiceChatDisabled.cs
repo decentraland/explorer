@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using DCL.Configuration;
 
 internal class DisableGameObjectsOnVoiceChatDisabled : MonoBehaviour
 {
@@ -6,6 +7,9 @@ internal class DisableGameObjectsOnVoiceChatDisabled : MonoBehaviour
 
     void Awake()
     {
+        if (EnvironmentSettings.RUNNING_TESTS)
+            return;
+
         KernelConfig.i.EnsureConfigInitialized().Then(config => DoChanges(config));
 
         KernelConfig.i.OnChange += OnKernelConfigChanged;
