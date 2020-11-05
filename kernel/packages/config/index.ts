@@ -268,7 +268,7 @@ export function getServerConfigurations() {
 
   const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
-  const metaConfigBaseUrl = META_CONFIG_URL || `https://explorer-config.decentraland.${notToday}/configuration.json`
+  const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
 
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
