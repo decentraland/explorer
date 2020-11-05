@@ -47,6 +47,7 @@ import {
   LoginAction,
   loginCompleted as loginCompletedAction,
   LOGOUT,
+  REDIRECT_TO_SIGN_UP,
   signInSetCurrentProvider,
   signInSigning,
   SIGNUP,
@@ -82,6 +83,7 @@ export function* sessionSaga(): any {
   yield takeLatest(INIT_SESSION, initSession)
   yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
+  yield takeLatest(REDIRECT_TO_SIGN_UP, redirectToSignUp)
   yield takeLatest(SIGNUP, signUp)
   yield takeLatest(SIGNUP_CANCEL, cancelSignUp)
   yield takeLatest(AUTHENTICATE, authenticate)
@@ -454,4 +456,8 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
 
 function* logout() {
   Session.current.logout().catch((e) => logger.error('error while logging out', e))
+}
+
+function* redirectToSignUp() {
+  Session.current.redirectToSignUp().catch((e) => logger.error('error while redirecting to sign up', e))
 }

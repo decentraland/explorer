@@ -28,7 +28,7 @@ import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, signUpCancel, signUpSetProfile } from 'shared/session/actions'
+import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -173,6 +173,10 @@ export class BrowserInterface {
 
   public LogOut() {
     globalThis.globalStore.dispatch(logout())
+  }
+
+  public RedirectToSignUp() {
+    globalThis.globalStore.dispatch(redirectToSignUp())
   }
 
   public SaveUserInterests(interests: string[]) {
