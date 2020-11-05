@@ -122,7 +122,7 @@ initializeUnity(container)
       i.SetRenderProfile(RenderProfile.DEFAULT)
     }
 
-    if ( isForeground() ) {
+    if (isForeground()) {
       i.ReportFocusOn()
     } else {
       i.ReportFocusOff()
