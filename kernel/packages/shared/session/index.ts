@@ -70,9 +70,9 @@ export class Session {
     sendToMordor()
     disconnect()
     removeStoredSession(getIdentity()?.address)
-    
-    var url = window.location.href.replace('&show_wallet=1', '')
-    window.location.href = url;
+
+    let url = window.location.href.replace('&show_wallet=1', '')
+    window.location.href = url
   }
 
   async redirectToSignUp() {
@@ -80,15 +80,14 @@ export class Session {
     sendToMordor()
     disconnect()
     removeStoredSession(getIdentity()?.address)
-    
-    var url = window.location.href
+
+    let url = window.location.href
     if (url.indexOf('?') > -1) {
       url += '&show_wallet=1'
     } else {
       url += '?show_wallet=1'
     }
-    
-    window.location.href = url;
+    window.location.href = url
   }
 
   disable() {
