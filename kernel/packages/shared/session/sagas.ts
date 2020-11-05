@@ -29,7 +29,7 @@ import {
   setLoadingScreen,
   setTLDError
 } from 'shared/loading/types'
-import { identifyUser, queueTrackingEvent } from 'shared/analytics'
+import { identifyEmail, identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getAppNetwork, getNetworkFromTLD } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
@@ -267,8 +267,11 @@ function* signUp() {
   profile.ethAddress = session.userId.toString()
   profile.version = 0
   profile.inventory = []
-  profile.tutorialStep = 0
   profile.hasClaimedName = false
+  if (profile.email) {
+    identifyEmail(profile.email, isGuest() ? undefined : profile.userId)
+    profile.tutorialStep |= 128 // We use binary 256 for tutorial and 128 for email promp
+  }
   delete profile.email // We don't deploy the email because it is public
 
   yield signIn(session.userId, session.identity)
