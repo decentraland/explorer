@@ -13,6 +13,7 @@ import {
   createWeb3Connector,
   getProviderType,
   getUserEthAccountIfAvailable,
+  isGuest,
   isSessionExpired,
   loginCompleted,
   providerFuture,
@@ -32,10 +33,10 @@ import { identifyUser, queueTrackingEvent } from 'shared/analytics'
 import { getAppNetwork, getNetworkFromTLD } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
-import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
 import { getLastSessionWithoutWallet, getStoredSession, removeStoredSession, Session, setStoredSession } from './index'
-import { ExplorerIdentity, LoginStage, SignUpStage } from './types'
+import { ExplorerIdentity, LOCAL_GUEST_PROFILE_KEY, LoginStage, SignUpStage } from './types'
 import {
   AUTHENTICATE,
   AuthenticateAction,
@@ -68,6 +69,7 @@ import { getSignUpIdentity, getSignUpProfile } from './selectors'
 import { ensureRealmInitialized } from '../dao/sagas'
 import { ensureBaseCatalogs } from '../catalogs/sagas'
 import { saveProfileRequest } from '../profiles/actions'
+import { Profile } from '../profiles/types'
 
 const TOS_KEY = 'tos'
 const logger = createLogger('session: ')
@@ -146,18 +148,21 @@ function* authenticate(action: AuthenticateAction) {
 }
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
-  let profile = yield generateRandomUserProfile(userId)
-  profile = {
-    userId: identity.address.toString(),
-    ethAddress: identity.address.toString(),
-    hasClaimedName: false,
-    inventory: [],
-    version: 0,
-    ...profile
-  }
+  let prevGuest = isGuest() ? null : getFromLocalStorage(LOCAL_GUEST_PROFILE_KEY)
+  let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
+  profile.userId = identity.address.toString()
+  profile.ethAddress = identity.address.toString()
+  profile.hasClaimedName = false
+  profile.inventory = []
+  profile.version = 0
+
   yield put(signUpSetIdentity(userId, identity))
   yield put(signUpSetProfile(profile))
 
+  if (prevGuest) {
+    removeFromLocalStorage(LOCAL_GUEST_PROFILE_KEY)
+    return yield signUp()
+  }
   yield showAvatarEditor()
 }
 
@@ -269,6 +274,9 @@ function* signUp() {
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
+  if (isGuest()) {
+    saveToLocalStorage(LOCAL_GUEST_PROFILE_KEY, profile)
+  }
   unityInterface.ActivateRendering()
 }
 

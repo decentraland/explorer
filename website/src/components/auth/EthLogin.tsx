@@ -7,12 +7,13 @@ import { Spinner } from "../common/Spinner";
 export interface EthLoginProps {
   loading: boolean;
   provider: string | null | undefined;
+  showWallet?: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
-  const [wallet, setWallet] = useState(false);
+  const [wallet, setWallet] = useState(props.showWallet || false);
   const onClick = () => {
     if (props.provider) {
       return props.onLogin(props.provider);

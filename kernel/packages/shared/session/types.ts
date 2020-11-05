@@ -53,3 +53,5 @@ export type StoredSession = {
   userId: string
   identity: ExplorerIdentity
 }
+
+export const LOCAL_GUEST_PROFILE_KEY = 'dcl-guest-profile'

@@ -23,6 +23,7 @@ const mapStateToProps = (state: any) => ({
   signing: state.session.signing,
   subStage: state.session.signup.stage,
   provider: state.session.currentProvider,
+  showWallet: window.location.search.indexOf("show_wallet=1") !== -1,
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
@@ -37,6 +38,7 @@ export interface LoginContainerProps {
   signing: boolean;
   subStage: string;
   provider?: string | null;
+  showWallet?: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
@@ -57,6 +59,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
                 onLogin={props.onLogin}
                 onGuest={props.onGuest}
                 provider={props.provider}
+                showWallet={props.showWallet}
               />
             )}
             {props.stage === LoginStage.CONNECT_ADVICE && (
