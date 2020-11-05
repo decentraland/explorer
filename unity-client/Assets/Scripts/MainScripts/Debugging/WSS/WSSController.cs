@@ -302,11 +302,17 @@ namespace DCL
                             case "RemoveUserProfilesFromCatalog":
                                 UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
                                 break;
+                            case "ActivateRendering":
+                                renderingController.ActivateRendering();
+                                break;
                             case "DeactivateRendering":
                                 renderingController.DeactivateRendering();
                                 break;
-                            case "ActivateRendering":
-                                renderingController.ActivateRendering();
+                            case "ReportFocusOn":
+                                //
+                                break;
+                            case "ReportFocusOff":
+                                //
                                 break;
                             case "ShowNotificationFromJson":
                                 NotificationsController.i.ShowNotificationFromJson(msg.payload);
