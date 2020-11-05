@@ -32,6 +32,11 @@ namespace DCL.SettingsHUD
         public TextMeshProUGUI voiceChatVolumeValueLabel = null;
         public SpinBoxPresetted voiceChatAllowSpinBox = null;
 
+        [SerializeField] private Toggle autosettingsToggle;
+        [SerializeField] private CanvasGroup advancedCanvasGroup;
+        [SerializeField] private GameObject advancedBlocker;
+        [SerializeField] private BooleanVariable autosettingsEnabled;
+
         private DCL.SettingsData.QualitySettings currentQualitySetting;
         private DCL.SettingsData.GeneralSettings currentGeneralSetting;
 
@@ -162,6 +167,16 @@ namespace DCL.SettingsHUD
                 tempGeneralSetting.voiceChatAllow = (DCL.SettingsData.GeneralSettings.VoiceChatAllow)value;
                 isDirty = true;
             });
+
+            autosettingsToggle.onValueChanged.AddListener(value =>
+            {
+                advancedCanvasGroup.interactable = !value;
+                advancedBlocker.SetActive(value);
+                tempGeneralSetting.autoqualityOn = value;
+                isDirty = true;
+                autosettingsEnabled.Set(value);
+            });
+            autosettingsToggle.isOn = false;
         }
 
         void OnEnable()
@@ -242,6 +257,7 @@ namespace DCL.SettingsHUD
             mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
             voiceChatVolumeSlider.value = tempGeneralSetting.voiceChatVolume * 100;
             voiceChatAllowSpinBox.value = (int)tempGeneralSetting.voiceChatAllow;
+            autosettingsToggle.isOn = tempGeneralSetting.autoqualityOn;
         }
 
         public void Apply()

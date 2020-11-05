@@ -116,13 +116,15 @@ namespace DCL.SettingsData
         public float mouseSensitivity;
         public float voiceChatVolume;
         public VoiceChatAllow voiceChatAllow;
+        public bool autoqualityOn;
 
         public bool Equals(GeneralSettings settings)
         {
             return sfxVolume == settings.sfxVolume
                 && mouseSensitivity == settings.mouseSensitivity
                 && voiceChatVolume == settings.voiceChatVolume
-                && voiceChatAllow == settings.voiceChatAllow;
+                && voiceChatAllow == settings.voiceChatAllow
+                && autoqualityOn == settings.autoqualityOn;
         }
     }
 }
