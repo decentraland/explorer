@@ -9,21 +9,21 @@ import { decentralandConfigurations, ethereumConfigurations, playerConfiguration
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { queueTrackingEvent } from 'shared/analytics'
+import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
 import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
+import { ChatMessage, FriendshipAction, FriendshipUpdateStatusMessage, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
 import { isForeground, isRendererEnabled, renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
-import { updateUserData, updateFriendship } from 'shared/friends/actions'
-import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
+import { updateFriendship, updateUserData } from 'shared/friends/actions'
+import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { getAppNetwork, fetchOwner } from 'shared/web3'
+import { fetchOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { UnityParcelScene } from './UnityParcelScene'
@@ -276,11 +276,7 @@ export class BrowserInterface {
   public ReportUserEmail(data: { userEmail: string }) {
     const userId = getCurrentUserId(globalThis.globalStore.getState())
     if (userId) {
-      if (hasWallet()) {
-        window.analytics.identify(userId, { email: data.userEmail })
-      } else {
-        window.analytics.identify({ email: data.userEmail })
-      }
+      identifyEmail(data.userEmail, hasWallet() ? userId : undefined)
     }
   }
 
