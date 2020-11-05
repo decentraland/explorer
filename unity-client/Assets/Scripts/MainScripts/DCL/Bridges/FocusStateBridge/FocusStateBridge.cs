@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class FocusStateBridge : MonoBehaviour
 {
-    
+    public void Awake()
+    {
+        CommonScriptableObjects.focusState.Set(true);
+    }
+
     public void ReportFocusOn()
     {
         CommonScriptableObjects.focusState.Set(true);
