@@ -90,7 +90,7 @@ public class BuildEditorMode : BuildModeState
                                 else isVoxelBoundMultiSelection = false;
                                 isTypeOfBoundSelectionSelected = true;
                             }
-                            outlinerController.OutLineEntity(entity);
+                            outlinerController.OutlineEntity(entity);
                         }
                         else outlinerController.CancelEntityOutline(entity);
                     }
@@ -197,14 +197,13 @@ public class BuildEditorMode : BuildModeState
 
 
         // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player position and the camera 
-        Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;
-     
+        Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;   
         freeCameraController.SetPosition(cameraPosition + Vector3.up * distanceEagleCamera);
-
         //
+
         freeCameraController.LookAt(lookAtT);
 
-        //eagleCamera.gameObject.SetActive(true);
+   
         cameraController.SetCameraMode(CameraMode.ModeId.BuildingToolGodMode);
 
         gizmoManager.InitializeGizmos(Camera.main,freeCameraController.transform);
@@ -225,7 +224,7 @@ public class BuildEditorMode : BuildModeState
         mouseCatcher.enabled = true;
         Utils.LockCursor();
         cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
-        //eagleCamera.gameObject.SetActive(false);
+
 
         SceneController.i.ReIntegrateIsolatedScene();
         advancedModeUI.SetActive(false);
@@ -253,7 +252,7 @@ public class BuildEditorMode : BuildModeState
     {
         base.CreatedEntity(createdEntity);
         isPlacingNewObject = true;
-        //createdEntity.gameObject.transform.eulerAngles = Vector3.zero;
+
         gizmoManager.HideGizmo();
         if (createdEntity.IsVoxel)
         {
@@ -311,21 +310,7 @@ public class BuildEditorMode : BuildModeState
         }
         else gizmoManager.SetSnapFactor(0, 0, 0);
     }
-    //public override void CheckInput()
-    //{
-    //    base.CheckInput();
- 
-    //}
-    //public override void CheckInputSelectedEntities()
-    //{
-    //    base.CheckInputSelectedEntities();
-    //    //if (Input.GetKey(KeyCode.F))
-    //    //{
-    //    //    FocusOnSelectedEntitiesInput();
-    //    //    return;
-    //    //}
-  
-    //}
+
 
 
     public void FocusOnSelectedEntitiesInput()

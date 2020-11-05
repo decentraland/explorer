@@ -21,14 +21,14 @@ public class BuildModeState : MonoBehaviour
 
     protected bool isSnapActive = false, isMultiSelectionActive = false, isModeActive = false;
     protected List<DecentralandEntityToEdit> selectedEntities;
-    public virtual void Init(GameObject _goToEdit,GameObject _undoGo,GameObject _snapGO,GameObject _freeMovementGO,List<DecentralandEntityToEdit> _selectedEntities)
+    public virtual void Init(GameObject goToEdit,GameObject undoGO,GameObject snapGO,GameObject freeMovementGO,List<DecentralandEntityToEdit> selectedEntities)
     {
-        editionGO = _goToEdit;
-        undoGO = _undoGo;
-        snapGO = _snapGO;
-        freeMovementGO = _freeMovementGO;
+        editionGO = goToEdit;
+        this.undoGO = undoGO;
+        this.snapGO = snapGO;
+        this.freeMovementGO = freeMovementGO;
 
-        selectedEntities = _selectedEntities;
+        this.selectedEntities = selectedEntities;
         gameObject.SetActive(false);
 
     }
@@ -210,8 +210,8 @@ public class BuildModeState : MonoBehaviour
         {
             actionList.Remove(entityAction);
         }
-        //buildModeAction.CreateActionTypeMove(entity, entity.gameObject.transform);
     }
+
     protected void ActionFinish(BuildModeAction.ActionType type)
     {
         if (actionList.Count > 0 && selectedEntities.Count > 0)

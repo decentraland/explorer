@@ -72,32 +72,32 @@ public class FreeCameraMovement : CameraStateBase
 
     private void Update()
     {
-
+        Vector3 velocity = Vector3.zero;
         if (isAdvancingFoward)
         {
-            transform.position += transform.forward * keyboardMovementSpeed * Time.deltaTime;
+            velocity += transform.forward;
         }
         if (isAdvancingBackward)
         {
-            transform.position += -transform.forward *keyboardMovementSpeed* Time.deltaTime;
+            velocity += -transform.forward;
         }
         if (isAdvancingRight)
         {
-            transform.position += transform.right * keyboardMovementSpeed * Time.deltaTime;
+            velocity += transform.right;
         }
         if (isAdvancingLeft)
         {
-            transform.position += -transform.right * keyboardMovementSpeed * Time.deltaTime;
+            velocity += -transform.right;
         }
         if (isAdvancingUp)
         {
-            transform.position += transform.up * keyboardMovementSpeed * Time.deltaTime;
+            velocity += transform.up;
         }
-        else if (isAdvancingDown)
+        if (isAdvancingDown)
         {
-            transform.position += -transform.up * keyboardMovementSpeed * Time.deltaTime;
+            velocity += -transform.up;
         }
-
+        transform.position += velocity * keyboardMovementSpeed * Time.deltaTime;
     }
 
 

@@ -85,6 +85,7 @@ public class BuildFirstPersonMode : BuildModeState
         base.SetDuplicationOffset(offset);
         if(isSnapActive) editionGO.transform.position += Vector3.right * offset;
     }
+
     public override void ResetScaleAndRotation()
     {
         base.ResetScaleAndRotation();
@@ -132,6 +133,7 @@ public class BuildFirstPersonMode : BuildModeState
 
         SetObjectIfSnapOrNot();
     }
+
     public override void SelectedEntity(DecentralandEntityToEdit selectedEntity)
     {
         base.SelectedEntity(selectedEntity);
@@ -143,11 +145,13 @@ public class BuildFirstPersonMode : BuildModeState
         currentYRotationAdded = 0;
         BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
     }
+
     public override void CreatedEntity(DecentralandEntityToEdit createdEntity)
     {
         base.CreatedEntity(createdEntity);
         Utils.LockCursor();
     }
+
     public override void SetSnapActive(bool isActive)
     {
         base.SetSnapActive(isActive);
@@ -196,16 +200,12 @@ public class BuildFirstPersonMode : BuildModeState
             }
         }
     }
+
     public override Vector3 GetCreatedEntityPoint()
     {
         return Camera.main.transform.position + Camera.main.transform.forward * distanceFromCameraForNewEntitties;
     }
 
-
-    void RotationActivated()
-    {
-        
-    }
     void SetObjectIfSnapOrNot()
     {
         if (!isMultiSelectionActive)
@@ -236,7 +236,6 @@ public class BuildFirstPersonMode : BuildModeState
 
     }
 
-
     private void SetEditObjectParent()
     {
         Transform parentToAsign = null;
@@ -265,7 +264,6 @@ public class BuildFirstPersonMode : BuildModeState
 
         editionGO.transform.SetParent(parentToAsign, worldPositionStays);
     }
-
 
     void RotateSelection(float angleToRotate)
     {

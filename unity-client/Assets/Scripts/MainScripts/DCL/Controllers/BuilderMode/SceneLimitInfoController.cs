@@ -22,9 +22,9 @@ public class SceneLimitInfoController : MonoBehaviour
     ParcelScene currentParcelScene;
 
 
-    public void SetParcelScene(ParcelScene _parcelScene)
+    public void SetParcelScene(ParcelScene parcelScene)
     {
-        currentParcelScene = _parcelScene;
+        currentParcelScene = parcelScene;
         UpdateInfo();
     }
     public bool IsActive()

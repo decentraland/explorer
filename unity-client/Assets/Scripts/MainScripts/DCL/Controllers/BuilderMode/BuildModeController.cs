@@ -674,7 +674,7 @@ public class BuildModeController : MonoBehaviour
                 else outlinerController.CancelUnselectedOutlines();
                 if (entity != null && !entity.IsSelected)
                 {
-                    outlinerController.OutLineEntity(entity);
+                    outlinerController.OutlineEntity(entity);
                 }
             }
             outlinerOptimizationCounter = 0;
@@ -760,7 +760,7 @@ public class BuildModeController : MonoBehaviour
         if(!isMultiSelectionActive)DeselectEntities();
         if (SelectEntity(entityToEdit))
         {
-            if (!isMultiSelectionActive) outlinerController.OutLineEntity(entityToEdit);
+            if (!isMultiSelectionActive) outlinerController.OutlineEntity(entityToEdit);
             else outlinerController.OutlineEntities(selectedEntities);
         }
        
@@ -1119,7 +1119,7 @@ public class BuildModeController : MonoBehaviour
     {
         
         buildModeCanvasGO.SetActive(true);
-        DCLCharacterController.i.SetFreeMovementActive(true);
+        
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
@@ -1158,7 +1158,7 @@ public class BuildModeController : MonoBehaviour
         snapGO.transform.SetParent(transform);
 
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
-        DCLCharacterController.i.SetFreeMovementActive(false);
+        
         outlinerController.CancelAllOutlines();
         
         DeselectEntities();

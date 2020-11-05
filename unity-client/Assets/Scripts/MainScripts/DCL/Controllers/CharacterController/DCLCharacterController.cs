@@ -151,10 +151,6 @@ public class DCLCharacterController : MonoBehaviour
         CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
     }
 
-    public void SetFreeMovementActive(bool isActive)
-    {
-        //freeMovementController.SetActive(isActive);
-    }
     void OnPrecisionAdjust(DCLCharacterPosition charPos)
     {
         Vector3 oldPos = this.transform.position;

@@ -8,9 +8,9 @@ public class ListView<T> : MonoBehaviour
     public Transform contentPanelTransform;
 
     protected List<T> contentList;
-    public void SetContent(List<T> _content)
+    public void SetContent(List<T> content)
     {
-        contentList = _content;
+        contentList = content;
         RefreshDisplay();
     }
 

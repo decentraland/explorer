@@ -12,11 +12,11 @@ public class ActionAdapter : MonoBehaviour
     public System.Action<BuildModeAction, ActionAdapter> OnActionSelected;
 
     BuildModeAction action;
-    public void SetContent(BuildModeAction _action)
+    public void SetContent(BuildModeAction action)
     {
-        action = _action;
+        this.action = action;
 
-        switch (action.actionType)
+        switch (this.action.actionType)
         {
             case BuildModeAction.ActionType.MOVE:
                 actionImg.sprite = moveSprite;
@@ -36,7 +36,7 @@ public class ActionAdapter : MonoBehaviour
                 break;
         }
 
-        actionTitle.text = action.actionType.ToString().Replace("_", " ");
+        actionTitle.text = this.action.actionType.ToString().Replace("_", " ");
         RefreshIsDone();
     }
 

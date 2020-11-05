@@ -18,7 +18,7 @@ public class EntityListView : ListView<DecentralandEntityToEdit>
         {
             EntityListAdapter adapter = Instantiate(entityListAdapter, contentPanelTransform).GetComponent<EntityListAdapter>();
             adapter.SetContent(entity);
-            adapter.OnActioninvoked += EntityActionInvoked;
+            adapter.OnActionInvoked += EntityActionInvoked;
         }
     }
 

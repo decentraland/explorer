@@ -9,9 +9,9 @@ public class VoxelPrefab : MonoBehaviour
     public Renderer meshRenderer;
 
     bool isAvailable = true;
-    public void SetAvailability(bool _isAvailable)
+    public void SetAvailability(bool isAvailable)
     {
-        if (_isAvailable)
+        if (isAvailable)
         {
             if (meshRenderer.material != editMaterial) meshRenderer.material = editMaterial;
         }
@@ -19,7 +19,7 @@ public class VoxelPrefab : MonoBehaviour
         {
             if (meshRenderer.material != errorMaterial) meshRenderer.material = errorMaterial;
         }
-        isAvailable = _isAvailable;
+        this.isAvailable = isAvailable;
     }
 
     public bool IsAvailable()

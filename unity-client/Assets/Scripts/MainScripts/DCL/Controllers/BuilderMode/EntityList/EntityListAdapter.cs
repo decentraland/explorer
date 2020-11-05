@@ -11,7 +11,7 @@ public class EntityListAdapter : MonoBehaviour
     public Color iconsSelectedColor,iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
     public Image selectedImg, lockImg,showImg;
-    public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActioninvoked;
+    public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActionInvoked;
     DecentralandEntityToEdit currentEntity;
 
 
@@ -23,38 +23,38 @@ public class EntityListAdapter : MonoBehaviour
             currentEntity.OnDelete -= DeleteAdapter;
         }
     }
-    public void SetContent(DecentralandEntityToEdit _decentrelandEntity)
+    public void SetContent(DecentralandEntityToEdit decentrelandEntity)
     {
         if(currentEntity != null)
         {
             currentEntity.onStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
         }
-        currentEntity = _decentrelandEntity;
+        currentEntity = decentrelandEntity;
         currentEntity.onStatusUpdate += SetInfo;
         currentEntity.OnDelete += DeleteAdapter;
 
-        SetInfo(_decentrelandEntity);
+        SetInfo(decentrelandEntity);
     }
 
 
     public void SelectOrDeselect()
     {
-        OnActioninvoked?.Invoke(BuildModeEntityListController.EntityAction.SELECT,currentEntity, this);
+        OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.SELECT,currentEntity, this);
     }
     public void ShowOrHide()
     {
-         OnActioninvoked?.Invoke(BuildModeEntityListController.EntityAction.SHOW, currentEntity, this);
+         OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.SHOW, currentEntity, this);
     }
 
     public void LockOrUnlock()
     {
-        OnActioninvoked?.Invoke(BuildModeEntityListController.EntityAction.LOCK, currentEntity, this);
+        OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.LOCK, currentEntity, this);
     }
 
     public void DeleteEntity()
     {
-        OnActioninvoked?.Invoke(BuildModeEntityListController.EntityAction.DELETE, currentEntity, this);
+        OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.DELETE, currentEntity, this);
     }
 
     void SetInfo(DecentralandEntityToEdit entityToEdit)

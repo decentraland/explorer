@@ -9,14 +9,14 @@ public class BuildModeEntityAction
     public object oldValue, newValue;
 
 
-    public BuildModeEntityAction(DecentralandEntity _entity)
+    public BuildModeEntityAction(DecentralandEntity entity)
     {
-        entity = _entity;
+        this.entity = entity;
     }
-    public BuildModeEntityAction(DecentralandEntity _entity,object _oldValue,object _newValue)
+    public BuildModeEntityAction(DecentralandEntity entity,object oldValue,object newValue)
     {
-        entity = _entity;
-        oldValue = _oldValue;
-        newValue = _newValue;
+        this.entity = entity;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
     }
 }

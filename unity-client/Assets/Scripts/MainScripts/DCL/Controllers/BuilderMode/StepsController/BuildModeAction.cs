@@ -12,6 +12,7 @@ public class BuildModeAction
         SCALE = 2,
         CREATED = 3
     }
+
     public ActionType actionType;
     public bool isDone = true;
     public System.Action<DecentralandEntity, object,ActionType> OnApplyValue;
@@ -26,6 +27,7 @@ public class BuildModeAction
         isDone = true;
      
     }
+
     public void Undo()
     {
         foreach (BuildModeEntityAction action in entitiyApplied)
@@ -40,28 +42,6 @@ public class BuildModeAction
     void ApplyValue(DecentralandEntity entityToApply, object value)
     {
         OnApplyValue?.Invoke(entityToApply, value, actionType);
-        //switch (actionType)
-        //{
-        //    case ActionType.MOVE:
-        //        Vector3 convertedPosition = (Vector3)value;
-        //        entityToApply.gameObject.transform.position = convertedPosition;
-        //        break;
-        //    case ActionType.ROTATE:
-        //        Vector3 convertedAngles = (Vector3)value;
-        //        entityToApply.gameObject.transform.eulerAngles = convertedAngles;
-        //        break;
-        //    case ActionType.SCALE:
-        //        Vector3 convertedScale = (Vector3)value;
-        //        Transform parent = entityToApply.gameObject.transform.parent;
-
-        //        entityToApply.gameObject.transform.localScale = new Vector3( convertedScale.x / parent.localScale.x ,  convertedScale.y / parent.localScale.y ,convertedScale.z  / parent.localScale.z );
-        //        //entityToApply.gameObject.transform.localScale = convertedScale;
-        //        break;
-        //    case ActionType.CREATED:
-        //        if(value == null) 
-        //        break;
-
-        //}
     }
 
     public void CreateActionType(BuildModeEntityAction action, ActionType type)
@@ -70,23 +50,26 @@ public class BuildModeAction
         list.Add(action);
         CreateAction(list, type);
     }
+
     public void CreateActionType(List<BuildModeEntityAction> entitiesActions, ActionType type)
     {
         CreateAction(entitiesActions, type);
     }
+
     public void CreateActionTypeMove(List<BuildModeEntityAction> entitiesActions)
     {
         CreateAction(entitiesActions, ActionType.MOVE);
     }
+
     public void CreateActionTypeRotate(List<BuildModeEntityAction> entitiesActions)
     {
         CreateAction(entitiesActions, ActionType.ROTATE);
     }
+
     public void CreateActionTypeScale(List<BuildModeEntityAction> entitiesActions)
     {
         CreateAction(entitiesActions, ActionType.SCALE);
     }
-
 
     void CreateAction(List<BuildModeEntityAction> entitiesActions,ActionType type)
     {

@@ -7,8 +7,6 @@ using UnityEngine;
 public class OutlinerController : MonoBehaviour
 {
     public Material outlineMaterial;
-    //[ColorUsageAttribute(true, true)]
-    //public Color outlineColor;
 
     List<DecentralandEntityToEdit> entitiesOutlined = new List<DecentralandEntityToEdit>();
 
@@ -17,11 +15,11 @@ public class OutlinerController : MonoBehaviour
     {
         foreach(DecentralandEntityToEdit entityToEdit in entitiesToEdit)
         {
-            OutLineEntity(entityToEdit);
+            OutlineEntity(entityToEdit);
         }
     }
 
-    public void OutLineEntity(DecentralandEntityToEdit entity)
+    public void OutlineEntity(DecentralandEntityToEdit entity)
     {
 
         if (entity.rootEntity.meshRootGameObject && entity.rootEntity.renderers.Length > 0)
@@ -42,7 +40,6 @@ public class OutlinerController : MonoBehaviour
 
     public void CancelUnselectedOutlines()
     {
-        //ChangeMaterialColor(outlineColor);
         for (int i = 0; i < entitiesOutlined.Count; i++)
         {
             if (!entitiesOutlined[i].IsSelected)
@@ -74,10 +71,4 @@ public class OutlinerController : MonoBehaviour
         }
     }
 
-
-    //void ChangeMaterialColor(Color color)
-    //{
-    //    string colorname = "_OutlineColour";
-    //    outlineMaterial.SetColor(colorname, color);
-    //}
 }

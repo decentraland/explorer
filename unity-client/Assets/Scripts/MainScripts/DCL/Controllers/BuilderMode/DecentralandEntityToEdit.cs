@@ -258,9 +258,9 @@ public class DecentralandEntityToEdit : EditableEntity
         }
     }
 
-    void SetLockStatus(bool _isLocked)
+    void SetLockStatus(bool isLocked)
     {
-        isLocked = _isLocked;
+        this.isLocked = isLocked;
         onStatusUpdate?.Invoke(this);
     }
     void CheckIfEntityIsFloor()

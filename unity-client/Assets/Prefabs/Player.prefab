@@ -602,6 +602,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,
         type: 2}
+    - target: {fileID: 5175052615018462647, guid: ac14ae4eed4f6284ab80fc0881bc3f70,
+        type: 3}
+      propertyPath: builderHoldActions.Array.data[10]
+      value: 
+      objectReference: {fileID: 11400000, guid: b9d68cd32276d4d44804d2d9325da9ca,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac14ae4eed4f6284ab80fc0881bc3f70, type: 3}
 --- !u!4 &4852920391666169109 stripped
@@ -832,7 +838,7 @@ PrefabInstance:
         type: 3}
       propertyPath: advanceUpInputAction
       value: 
-      objectReference: {fileID: 11400000, guid: b5e5d3b2e9d2cc64eb6e99d39c7ab67b,
+      objectReference: {fileID: 11400000, guid: b9d68cd32276d4d44804d2d9325da9ca,
         type: 2}
     - target: {fileID: 5349440848783916001, guid: bc570f5e94906eb47814191e0beaee7a,
         type: 3}

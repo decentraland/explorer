@@ -36,13 +36,15 @@ public class EntityInformationController : MonoBehaviour
             }
         }
     }
-    public void SetEntity(DecentralandEntity _entity,ParcelScene currentScene)
+
+    public void SetEntity(DecentralandEntity entity,ParcelScene currentScene)
     {
-        currentEntity = _entity;
+        this.currentEntity = entity;
         parcelScene = currentScene;
         titleTxt.text = currentEntity.entityId;
         UpdateInfo();
     }
+
     public void Enable()
     {
         gameObject.SetActive(true);
@@ -63,9 +65,6 @@ public class EntityInformationController : MonoBehaviour
             Vector3 positionConverted = SceneController.i.ConvertUnityToScenePosition(currentEntity.gameObject.transform.position, parcelScene);
             Vector3 currentRotation = currentEntity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = currentEntity.gameObject.transform.localScale;
-            //string desc = "POSITION:   X: " + positionConverted.x + "  Y: " + positionConverted.y + "  Z:"+ positionConverted.z;
-            //desc +=   "\n\nROTATION:   X: " + currentRotation.x +   "  Y: " + currentRotation.y +   "  Z:" + currentRotation.z;
-            //desc +=   "\n\nSCALE:      X: " + currentScale.x +      "  Y: " + currentScale.y +      "  Z:" + currentScale.z;
 
             string desc = AppendUsageAndLimit("POSITION:   ", positionConverted, "0.#");
             desc += "\n\n" + AppendUsageAndLimit("ROTATION:  ", currentRotation, "0");
