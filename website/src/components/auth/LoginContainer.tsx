@@ -56,23 +56,25 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
           <Navbar />
 
           {/* Footer */}
-          <Container className="eth-login-popup">
-            {props.stage === LoginStage.LOADING && <InitialLoading />}
-            {props.stage === LoginStage.SIGN_IN && (
-              <EthLogin
-                loading={props.signing}
-                onLogin={props.onLogin}
-                onGuest={props.onGuest}
-                provider={props.provider}
-                showWallet={props.showWallet}
-              />
-            )}
-            {props.stage === LoginStage.CONNECT_ADVICE && (
-              <EthConnectAdvice onLogin={props.onLogin} />
-            )}
-            {props.stage === LoginStage.SIGN_ADVICE && <EthSignAdvice />}
-            {props.stage === LoginStage.SIGN_UP && <SignUpContainer />}
-          </Container>
+          <main>
+            <Container className="eth-login-popup">
+              {props.stage === LoginStage.LOADING && <InitialLoading />}
+              {props.stage === LoginStage.SIGN_IN && (
+                <EthLogin
+                  loading={props.signing}
+                  onLogin={props.onLogin}
+                  onGuest={props.onGuest}
+                  provider={props.provider}
+                  showWallet={props.showWallet}
+                />
+              )}
+              {props.stage === LoginStage.CONNECT_ADVICE && (
+                <EthConnectAdvice onLogin={props.onLogin} />
+              )}
+              {props.stage === LoginStage.SIGN_ADVICE && <EthSignAdvice />}
+              {props.stage === LoginStage.SIGN_UP && <SignUpContainer />}
+            </Container>
+          </main>
 
           {/* Beginner Guide */}
           {props.stage === LoginStage.SIGN_IN && <BeginnersGuide />}
