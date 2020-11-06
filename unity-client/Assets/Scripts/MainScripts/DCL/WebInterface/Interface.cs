@@ -2,7 +2,6 @@ using System;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
-using System;
 using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -426,7 +425,8 @@ namespace DCL.Interface
         [System.Serializable]
         public class ApplySettingsPayload
         {
-            public float sfxVolume;
+            public float voiceChatVolume;
+            public int voiceChatAllowCategory;
         }
 
         [System.Serializable]
@@ -475,6 +475,14 @@ namespace DCL.Interface
             public string type;
             public string payload;
         }
+
+        [System.Serializable]
+        public class MuteUserPayload
+        {
+            public string[] usersId;
+            public bool mute;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -547,6 +555,7 @@ namespace DCL.Interface
         private static AnalyticsPayload analyticsEvent = new AnalyticsPayload();
         private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
+        private static MuteUserPayload muteUserEvent = new MuteUserPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -805,15 +814,15 @@ namespace DCL.Interface
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Sprite faceSnapshot, Sprite face128Snapshot, Sprite face256Snapshot, Sprite bodySnapshot)
+        public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot)
         {
             var payload = new SaveAvatarPayload()
             {
                 avatar = avatar,
-                face = System.Convert.ToBase64String(faceSnapshot.texture.EncodeToPNG()),
-                face128 = System.Convert.ToBase64String(face128Snapshot.texture.EncodeToPNG()),
-                face256 = System.Convert.ToBase64String(face256Snapshot.texture.EncodeToPNG()),
-                body = System.Convert.ToBase64String(bodySnapshot.texture.EncodeToPNG())
+                face = System.Convert.ToBase64String(faceSnapshot.EncodeToPNG()),
+                face128 = System.Convert.ToBase64String(face128Snapshot.EncodeToPNG()),
+                face256 = System.Convert.ToBase64String(face256Snapshot.EncodeToPNG()),
+                body = System.Convert.ToBase64String(bodySnapshot.EncodeToPNG())
             };
             SendMessage("SaveUserAvatar", payload);
         }
@@ -935,9 +944,10 @@ namespace DCL.Interface
             SendMessage("ToggleVoiceChatRecording");
         }
 
-        public static void ApplySettings(float sfxVolume)
+        public static void ApplySettings(float voiceChatVolume, int voiceChatAllowCategory)
         {
-            applySettingsPayload.sfxVolume = sfxVolume;
+            applySettingsPayload.voiceChatVolume = voiceChatVolume;
+            applySettingsPayload.voiceChatAllowCategory = voiceChatAllowCategory;
             SendMessage("ApplySettings", applySettingsPayload);
         }
 
@@ -1027,6 +1037,13 @@ namespace DCL.Interface
             sceneExternalActionEvent.type = type;
             sceneExternalActionEvent.payload = payload;
             SendSceneEvent(sceneId, "externalAction", sceneExternalActionEvent);
+        }
+
+        public static void SetMuteUsers(string[] usersId, bool mute)
+        {
+            muteUserEvent.usersId = usersId;
+            muteUserEvent.mute = mute;
+            SendMessage("SetMuteUsers", muteUserEvent);
         }
     }
 }

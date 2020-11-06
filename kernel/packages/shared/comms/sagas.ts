@@ -1,6 +1,6 @@
 import { put, takeEvery, select, call, takeLatest } from 'redux-saga/effects'
 
-import { STATIC_WORLD, VOICE_CHAT_ENABLED } from 'config'
+import { STATIC_WORLD } from 'config'
 
 import { establishingComms } from 'shared/loading/types'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
@@ -13,10 +13,18 @@ import { Realm } from 'shared/dao/types'
 import { realmToString } from 'shared/dao/utils/realmToString'
 import { createLogger } from 'shared/logger'
 
-import { connect, updatePeerVoicePlaying, updateVoiceCommunicatorVolume, updateVoiceRecordingStatus } from '.'
 import {
+  connect,
+  updatePeerVoicePlaying,
+  updateVoiceCommunicatorMute,
+  updateVoiceCommunicatorVolume,
+  updateVoiceRecordingStatus
+} from '.'
+import {
+  SetVoiceMute,
   SetVoiceVolume,
   SET_VOICE_CHAT_RECORDING,
+  SET_VOICE_MUTE,
   SET_VOICE_VOLUME,
   TOGGLE_VOICE_CHAT_RECORDING,
   VoicePlayingUpdate,
@@ -27,6 +35,9 @@ import {
 
 import { isVoiceChatRecording } from './selectors'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { ensureMetaConfigurationInitialized } from 'shared/meta'
+import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { userAuthentified } from 'shared/session'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -34,12 +45,18 @@ const logger = createLogger('comms: ')
 export function* commsSaga() {
   yield takeEvery(USER_AUTHENTIFIED, establishCommunications)
   yield takeLatest(CATALYST_REALMS_SCAN_SUCCESS, changeRealm)
-  if (VOICE_CHAT_ENABLED) {
+  yield ensureMetaConfigurationInitialized()
+  yield userAuthentified()
+
+  const identity = yield select(getCurrentIdentity)
+
+  if (yield select(isVoiceChatEnabledFor, identity.address)) {
     yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
     yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
     yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
     yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
     yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
+    yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
   }
 }
 
@@ -70,6 +87,10 @@ function* updateUserVoicePlaying(action: VoicePlayingUpdate) {
 
 function* updateVoiceChatVolume(action: SetVoiceVolume) {
   updateVoiceCommunicatorVolume(action.payload.volume)
+}
+
+function* updateVoiceChatMute(action: SetVoiceMute) {
+  updateVoiceCommunicatorMute(action.payload.mute)
 }
 
 function* updatePlayerVoiceRecording(action: VoiceRecordingUpdate) {
