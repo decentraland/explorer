@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace DCL.SettingsHUD
 {
@@ -35,7 +36,6 @@ namespace DCL.SettingsHUD
         [SerializeField] private Toggle autosettingsToggle;
         [SerializeField] private CanvasGroup advancedCanvasGroup;
         [SerializeField] private GameObject advancedBlocker;
-        [SerializeField] private BooleanVariable autosettingsEnabled;
 
         private DCL.SettingsData.QualitySettings currentQualitySetting;
         private DCL.SettingsData.GeneralSettings currentGeneralSetting;
@@ -171,10 +171,15 @@ namespace DCL.SettingsHUD
             autosettingsToggle.onValueChanged.AddListener(value =>
             {
                 advancedCanvasGroup.interactable = !value;
-                advancedBlocker.SetActive(value);
                 tempGeneralSetting.autoqualityOn = value;
-                isDirty = true;
-                autosettingsEnabled.Set(value);
+                advancedBlocker.SetActive(value);
+                if (value)
+                {
+                    QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
+                    tempQualitySetting = Settings.i.lastValidAutoqualitySet;
+                    tempQualitySetting.baseResolution = currentBaseResolution;
+                    isDirty = true;
+                }
             });
             autosettingsToggle.isOn = false;
         }

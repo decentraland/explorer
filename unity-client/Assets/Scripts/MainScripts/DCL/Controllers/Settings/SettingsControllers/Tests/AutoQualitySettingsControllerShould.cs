@@ -16,7 +16,7 @@ namespace Tests
         {
             yield return base.SetUp();
             controller = CreateTestGameObject("controllerHolder").AddComponent<AutoQualitySettingsController>();
-            controller.qualitySettings = ScriptableObject.CreateInstance<QualitySettingsData>();
+            Settings.i.autoqualitySettings = ScriptableObject.CreateInstance<QualitySettingsData>();
             controller.qualitySettings.Set(new []
             {
                 Settings.i.qualitySettings,

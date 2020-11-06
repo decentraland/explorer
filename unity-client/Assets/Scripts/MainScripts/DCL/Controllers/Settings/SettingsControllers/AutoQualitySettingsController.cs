@@ -13,7 +13,7 @@ public class AutoQualitySettingsController : MonoBehaviour
 
     [SerializeField] internal BooleanVariable autoQualityEnabled;
     [SerializeField] internal PerformanceMetricsDataVariable performanceMetricsData;
-    [SerializeField] internal QualitySettingsData qualitySettings;
+    internal QualitySettingsData qualitySettings => Settings.i.autoqualitySettings;
 
     internal int currentQualityIndex;
     internal IAutoQualitySettingsEvaluator evaluator = new AutoQualitySettingsEvaluator();
@@ -81,14 +81,8 @@ public class AutoQualitySettingsController : MonoBehaviour
         if (newQualityIndex <= 0 || newQualityIndex >= qualitySettings.Length)
             return;
 
-        QualitySettings setting = qualitySettings[newQualityIndex];
-        setting.baseResolution = Settings.i.qualitySettings.baseResolution;
-
-        if (newQualityIndex == currentQualityIndex && setting.Equals(Settings.i.qualitySettings))
-            return;
-
         currentQualityIndex = newQualityIndex;
         evaluator.Reset();
-        Settings.i.ApplyQualitySettings(setting);
+        Settings.i.ApplyAutoQualitySettings(currentQualityIndex);
     }
 }
