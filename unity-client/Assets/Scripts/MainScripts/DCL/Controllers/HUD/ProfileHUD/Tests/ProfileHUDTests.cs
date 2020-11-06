@@ -68,10 +68,11 @@ public class ProfileHUDTests : TestsBase
         const string address = "0x12345678901234567890";
         const string addressEnd = "7890";
         const string addressFormatted = "0x1234...567890";
+        const string testUserName = "PraBian";
 
         UserProfileModel profileModel = new UserProfileModel()
         {
-            name = "PraBian",
+            name = testUserName,
             userId = address,
             hasClaimedName = true
         };
@@ -84,6 +85,7 @@ public class ProfileHUDTests : TestsBase
         }
         Assert.AreEqual(profileModel.name, controller.view.textName.text);
 
+        profileModel.name += "#1234";
         profileModel.hasClaimedName = false;
         profile.UpdateData(profileModel,true);
 
@@ -91,8 +93,8 @@ public class ProfileHUDTests : TestsBase
         {
             Assert.AreEqual(true, controller.view.hideOnNameClaimed[i].gameObject.activeSelf);
         }
-        Assert.AreEqual(profileModel.name, controller.view.textName.text);
-        Assert.AreEqual($".{addressEnd}", controller.view.textPostfix.text);
+        Assert.AreEqual(testUserName, controller.view.textName.text);
+        Assert.AreEqual($"#{addressEnd}", controller.view.textPostfix.text);
         Assert.AreEqual(addressFormatted, controller.view.textAddress.text);
 
     }
