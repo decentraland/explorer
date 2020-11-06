@@ -3,7 +3,7 @@
   display: flex;
   flex-flow: column wrap;
   background: white;
-  box-shadow: 0 2px #CACFE2;
+  box-shadow: 0 2px #cacfe2;
   border-radius: 8px;
   padding: 1em;
   cursor: pointer;
@@ -19,9 +19,14 @@
   display: flex;
   flex-flow: column wrap;
   align-items: center;
+  justify-content: space-around;
+  min-height: 90px;
 }
+
 .walletImage img {
   width: 50px;
+  height: auto;
+  min-height: 48px;
 }
 
 .walletImage span {

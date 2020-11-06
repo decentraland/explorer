@@ -8,13 +8,15 @@
 
 .nav-bar img.dcl-logo {
   width: 46px;
-  padding: .5rem 1rem;
+  height: auto;
+  padding: 0.5rem 1rem;
+  box-sizing: content-box;
 }
 
 .nav-bar-content {
   display: flex;
   align-items: center;
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
 }
 
 .nav-text {
