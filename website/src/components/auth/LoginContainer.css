@@ -46,7 +46,7 @@
   margin: 0 auto;
 }
 
-.eth-login-popup .popup-container {
+.eth-login-popup .eth-login .popup-container {
   position: absolute;
   top: 0;
   left: 0;
