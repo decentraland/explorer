@@ -75,6 +75,7 @@ namespace webApp {
     const i = (await instancedJS).unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.AVATAR_EDITOR, {
       active: true,
@@ -101,12 +102,12 @@ namespace webApp {
     userAuthentified()
       .then(() => {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
+        logger.info(`[SANTI LOG] identity.hasConnectedWeb3: `, identity.hasConnectedWeb3)
         
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
         configureTaskbarDependentHUD(i, voiceChatEnabled)
 
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
-        i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true }, { enableManaCounter: identity.hasConnectedWeb3 })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
         EnsureProfile(identity.address)

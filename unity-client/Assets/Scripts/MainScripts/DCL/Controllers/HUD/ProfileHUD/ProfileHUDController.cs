@@ -9,7 +9,7 @@ public class ProfileHUDController : IHUD
     [Serializable]
     public struct Configuration
     {
-        public bool enableManaCounter;
+        public bool connectedWallet;
     }
 
     private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
@@ -37,6 +37,9 @@ public class ProfileHUDController : IHUD
         view.name = "_ProfileHUD";
 
         SetBackpackButtonVisibility(false);
+        view.connectedWalletSection.SetActive(false);
+        view.nonConnectedWalletSection.SetActive(false);
+
         view.buttonBackpack.onClick.AddListener(OpenBackpackWindow);
         view.buttonLogOut.onClick.AddListener(WebInterface.LogOut);
         view.buttonSignUp.onClick.AddListener(WebInterface.RedirectToSignUp);
@@ -44,13 +47,12 @@ public class ProfileHUDController : IHUD
         view.buttonTermsOfService.onPointerDown += () => WebInterface.OpenURL(URL_TERMS_OF_USE);
         view.buttonPrivacyPolicy.onPointerDown += () => WebInterface.OpenURL(URL_PRIVACY_POLICY);
 
-        manaCounterView = view.GetComponentInChildren<ManaCounterView>();
+        manaCounterView = view.GetComponentInChildren<ManaCounterView>(true);
         if (manaCounterView)
         {
             manaCounterView.buttonManaInfo.onPointerDown += () => WebInterface.OpenURL(URL_MANA_INFO);
             manaCounterView.buttonManaPurchase.onPointerDown += () => WebInterface.OpenURL(URL_MANA_PURCHASE);
         }
-        SetManaCounterVisibility(false);
 
         ownUserProfile.OnUpdate += OnProfileUpdated;
         if (mouseCatcher != null) mouseCatcher.OnMouseLock += OnMouseLocked;
@@ -113,15 +115,6 @@ public class ProfileHUDController : IHUD
     public void SetManaBalance(string balance)
     {
         manaCounterView?.SetBalance(balance);
-    }
-
-    /// <summary>
-    /// Show/Hide the MANA counter.
-    /// </summary>
-    /// <param name="visible">True for showing the counter.</param>
-    public void SetManaCounterVisibility(bool visible)
-    {
-        manaCounterView?.gameObject.SetActive(visible);
     }
 
     /// <summary>
