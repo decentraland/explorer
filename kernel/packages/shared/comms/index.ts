@@ -1,4 +1,11 @@
-import { commConfigurations, parcelLimits, COMMS, AUTO_CHANGE_REALM, genericAvatarSnapshots, COMMS_PROFILE_TIMEOUT } from 'config'
+import {
+  commConfigurations,
+  parcelLimits,
+  COMMS,
+  AUTO_CHANGE_REALM,
+  genericAvatarSnapshots,
+  COMMS_PROFILE_TIMEOUT
+} from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
 import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
@@ -71,7 +78,7 @@ import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getCommsConfig, isVoiceChatEnabled } from 'shared/meta/selectors'
+import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -95,6 +102,7 @@ import { unityInterface } from 'unity-interface/UnityInterface'
 import { isURL } from 'atomicHelpers/isURL'
 import { VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
+import { EncodedFrame } from 'voice-chat-codec/types'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -468,8 +476,7 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       voiceCommunicator?.playEncodedAudio(
         peerTrackingInfo.identity,
         getSpatialParamsFor(peerTrackingInfo.position),
-        message.data.encoded,
-        message.time
+        message.data
       )
     }
   }
@@ -489,13 +496,13 @@ function isVoiceAllowedByPolicy(profile: Profile, voiceUserId: string): boolean 
   const policy = getVoicePolicy(store.getState())
 
   switch (policy) {
-    case VoicePolicy.ALLOW_ALL:
-      return true
     case VoicePolicy.ALLOW_FRIENDS_ONLY:
       return isFriend(store.getState(), voiceUserId)
     case VoicePolicy.ALLOW_VERIFIED_ONLY:
       const theirProfile = getProfile(store.getState(), voiceUserId)
       return !!theirProfile?.hasClaimedName
+    default:
+      return true
   }
 }
 
@@ -1138,13 +1145,13 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && isVoiceChatEnabled(store.getState())) {
+    if (!voiceCommunicator && isVoiceChatEnabledFor(store.getState(), context.userInfo.userId!)) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
-          send(data: Uint8Array) {
+          send(frame: EncodedFrame) {
             if (context.currentPosition) {
-              context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, data)
+              context.worldInstanceConnection?.sendVoiceMessage(context.currentPosition, frame)
             }
           }
         },
@@ -1163,6 +1170,7 @@ async function doStartCommunications(context: Context) {
       voiceCommunicator.addStreamRecordingListener((recording) => {
         store.dispatch(voiceRecordingUpdate(recording))
       })
+      ;(globalThis as any).__DEBUG_VOICE_COMMUNICATOR = voiceCommunicator
     }
   } catch (e) {
     if (e.message && e.message.includes('is taken')) {

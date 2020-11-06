@@ -111,6 +111,8 @@ export const REALM = qs.realm
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.indexOf('VOICE_CHAT_DISABLED') !== -1
 
+export const VOICE_CHAT_ENABLED_FLAG = location.search.indexOf('VOICE_CHAT_ENABLED') !== -1
+
 export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
 
 export const LOS = qs.LOS
@@ -146,6 +148,8 @@ export const PIN_CATALYST = qs.PIN_CATALYST
 export const HALLOWEEN = location.search.indexOf('HALLOWEEN') !== -1
 
 export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
+
+const META_CONFIG_URL = qs.META_CONFIG_URL
 
 export namespace commConfigurations {
   export const debug = true
@@ -264,10 +268,12 @@ export function getServerConfigurations() {
 
   const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
+  const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
+
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json?t=${new Date().getTime()}`,
+    explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
