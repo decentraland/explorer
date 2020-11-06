@@ -9,17 +9,22 @@ export interface AccordionProps {
 
 export function Accordion(props: AccordionProps) {
 
-  const [ open, setOpen ] = useState(false)
+  const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const  height = useMemo(() => {
+  const height = useMemo(() => {
     if (!ref.current || !open) {
       return 0
     }
 
     return ref.current.offsetHeight + 50
-  }, [ open, ref.current !== null ])
+  }, [open])
 
-  return <div className={'eth-accordion' + (open && ' eth-accordion-open' || '')}>
+  let className = 'eth-accordion'
+  if (open) {
+    className += ' eth-accordion-open'
+  }
+
+  return <div className={className}>
     <div className="eth-accordion-title" onClick={() => setOpen(!open)}>
       {props.title}
     </div>
