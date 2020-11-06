@@ -25,6 +25,9 @@ namespace DCL
         OnPointerEvent newHoveredEvent = null;
         OnPointerEvent[] lastHoveredEventList = null;
         RaycastHit hitInfo;
+        PointerEventData uiGraphicRaycastPointerEventData = new PointerEventData(null);
+        List<RaycastResult> uiGraphicRaycastResults = new List<RaycastResult>();
+        GraphicRaycaster uiGraphicRaycaster;
 
         public void Initialize()
         {
@@ -44,22 +47,23 @@ namespace DCL
             if (!CommonScriptableObjects.rendererState.Get() || charCamera == null) return;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
-            // TODO: POLISH AND OPTIMIZE
             bool didHit = Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
-            bool UIIsBlocking = false;
+            bool uiIsBlocking = false;
 
             if (didHit)
             {
-                GraphicRaycaster raycaster = GameObject.FindObjectOfType<Canvas>().GetComponent<GraphicRaycaster>();
-                PointerEventData ped = new PointerEventData(null);
-                ped.position = new Vector2(Screen.width / 2, Screen.height / 2);
-                List<RaycastResult> results = new List<RaycastResult>();
-                raycaster.Raycast(ped, results);
+                GraphicRaycaster raycaster = SceneController.i.loadedScenes[SceneController.i.currentSceneId].uiScreenSpace?.graphicRaycaster;
+                if (raycaster)
+                {
+                    uiGraphicRaycastPointerEventData.position = new Vector2(Screen.width / 2, Screen.height / 2);
+                    uiGraphicRaycastResults.Clear();
+                    raycaster.Raycast(uiGraphicRaycastPointerEventData, uiGraphicRaycastResults);
 
-                UIIsBlocking = results.Count > 0;
+                    uiIsBlocking = uiGraphicRaycastResults.Count > 0;
+                }
             }
 
-            if (!didHit || UIIsBlocking)
+            if (!didHit || uiIsBlocking)
             {
                 clickHandler = null;
                 UnhoverLastHoveredObject(hoverController);
