@@ -14,6 +14,12 @@ namespace DCL
 
         public void Update()
         {
+            if (!CommonScriptableObjects.focusState.Get())
+                return;
+
+            if (!CommonScriptableObjects.rendererState.Get())
+                return;
+
             var deltaInMs = Time.deltaTime * 1000;
 
             tracker.AddDeltaTime(Time.deltaTime);
@@ -24,12 +30,18 @@ namespace DCL
             {
                 currentIndex = 0;
                 Report(new string(encodedSamples));
+                GenerateHiccupReport();
             }
         }
 
         private void Report(string encodedSamples)
         {
             WebInterface.SendPerformanceReport(encodedSamples);
+        }
+
+        private void GenerateHiccupReport()
+        {
+            WebInterface.SendPerformanceHiccupReport(tracker.CurrentHiccupCount(), tracker.GetHiccupSum(), tracker.GetTotalSeconds());
         }
     }
 }
