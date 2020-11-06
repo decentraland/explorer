@@ -50,7 +50,7 @@ namespace DCL
             bool didHit = Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
             bool uiIsBlocking = false;
 
-            if (didHit)
+            if (didHit && SceneController.i.loadedScenes.ContainsKey(SceneController.i.currentSceneId))
             {
                 GraphicRaycaster raycaster = SceneController.i.loadedScenes[SceneController.i.currentSceneId].uiScreenSpace?.graphicRaycaster;
                 if (raycaster)
