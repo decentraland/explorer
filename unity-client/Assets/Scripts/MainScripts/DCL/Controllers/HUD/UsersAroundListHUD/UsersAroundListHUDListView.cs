@@ -7,6 +7,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 {
     public event Action<string, bool> OnRequestMuteUser;
     public event Action<bool> OnRequestMuteGlobal;
+    public event Action OnGoToCrowdPressed;
 
     [SerializeField] private UsersAroundListHUDListElementView listElementView;
     [SerializeField] private ShowHideAnimator showHideAnimator;
@@ -17,6 +18,9 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     [SerializeField] internal Toggle muteAllToggle;
     [SerializeField] internal UserContextMenu contextMenu;
     [SerializeField] internal UserContextConfirmationDialog confirmationDialog;
+    [SerializeField] internal GameObject listGameObject;
+    [SerializeField] internal GameObject emptyListGameObject;
+    [SerializeField] internal Button gotoCrowdButton;
 
     internal Queue<UsersAroundListHUDListElementView> availableElements;
     internal Dictionary<string, UsersAroundListHUDListElementView> userElementDictionary;
@@ -39,6 +43,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         textPlayersTitle.text = string.Format(playersTextPattern, playersCount);
 
         muteAllToggle.onValueChanged.AddListener(OnMuteGlobal);
+        gotoCrowdButton.onClick.AddListener(() => OnGoToCrowdPressed?.Invoke());
 
         listElementView.OnMuteUser += OnMuteUser;
         listElementView.OnShowUserContexMenu += OnUserContextMenu;
@@ -90,6 +95,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         view.SetUserProfile(profile);
         userElementDictionary.Add(userInfo.userId, view);
         ModifyListCount(isFriend, 1);
+        CheckListEmptyState();
     }
 
     void IUsersAroundListHUDListView.RemoveUser(string userId)
@@ -106,6 +112,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         ModifyListCount(elementView.transform.parent == contentFriends, -1);
         PoolElementView(elementView);
         userElementDictionary.Remove(userId);
+        CheckListEmptyState();
     }
 
     void IUsersAroundListHUDListView.SetUserRecording(string userId, bool isRecording)
@@ -136,6 +143,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
             }
 
             showHideAnimator.Show();
+            CheckListEmptyState();
         }
         else
         {
@@ -227,5 +235,12 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     bool IsFriend(FriendshipAction status)
     {
         return status == FriendshipAction.APPROVED;
+    }
+
+    void CheckListEmptyState()
+    {
+        bool isEmpty = userElementDictionary.Count == 0;
+        listGameObject.SetActive(!isEmpty);
+        emptyListGameObject.SetActive(isEmpty);
     }
 }
