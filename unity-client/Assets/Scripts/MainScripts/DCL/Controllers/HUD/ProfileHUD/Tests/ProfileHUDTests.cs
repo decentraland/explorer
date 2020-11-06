@@ -98,16 +98,6 @@ public class ProfileHUDTests : TestsBase
     }
 
     [Test]
-    public void ShowAndHideManaCounterCorrectly()
-    {
-        controller.SetManaCounterVisibility(true);
-        Assert.IsTrue(controller.manaCounterView.gameObject.activeSelf);
-
-        controller.SetManaCounterVisibility(false);
-        Assert.IsFalse(controller.manaCounterView.gameObject.activeSelf);
-    }
-
-    [Test]
     public void SetManaBalanceCorrectly()
     {
         string balance = "5";

@@ -188,18 +188,6 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.PROFILE_HUD:
                 CreateHudElement<ProfileHUDController>(configuration, hudElementId);
-
-                if (profileHud != null)
-                {
-                    profileHud.AddBackpackWindow(avatarEditorHud);
-
-                    if (!string.IsNullOrEmpty(extraPayload))
-                    {
-                        var config = JsonUtility.FromJson<ProfileHUDController.Configuration>(extraPayload);
-                        profileHud.SetManaCounterVisibility(config.enableManaCounter);
-                    }
-                }
-
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -207,7 +195,11 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
-                avatarEditorHud?.Initialize(ownUserProfile, wearableCatalog);
+                if (avatarEditorHud != null)
+                {
+                    avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
+                    profileHud?.AddBackpackWindow(avatarEditorHud);
+                }
                 break;
             case HUDElementID.SETTINGS:
                 CreateHudElement<SettingsHUDController>(configuration, hudElementId);

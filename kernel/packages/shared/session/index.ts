@@ -73,6 +73,10 @@ export class Session {
     window.location.reload()
   }
 
+  async redirectToSignUp() {
+    window.location.search += '&show_wallet=1'
+  }
+
   disable() {
     bringDownClientAndShowError(NEW_LOGIN)
     sendToMordor()

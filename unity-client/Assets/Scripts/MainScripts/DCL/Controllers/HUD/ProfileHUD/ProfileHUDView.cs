@@ -21,6 +21,10 @@ internal class ProfileHUDView : MonoBehaviour
     [Header("Hide GOs on claimed name")]
     [SerializeField] internal GameObject[] hideOnNameClaimed;
 
+    [Header("Connected wallet sections")]
+    [SerializeField] internal GameObject connectedWalletSection;
+    [SerializeField] internal GameObject nonConnectedWalletSection;
+
     [Header("Thumbnail")]
     [SerializeField] internal RawImage imageAvatarThumbnail;
     [SerializeField] internal Button buttonToggleMenu;
@@ -36,6 +40,7 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonBackpack;
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
+    [SerializeField] internal Button buttonSignUp;
     [SerializeField] internal Button_OnPointerDown buttonTermsOfService;
     [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicy;
 
@@ -67,6 +72,7 @@ internal class ProfileHUDView : MonoBehaviour
             HandleUnverifiedProfileName(userProfile);
         }
 
+        SetConnectedWalletSectionActive(userProfile.hasConnectedWeb3);
         HandleProfileAddress(userProfile);
         HandleProfileSnapshot(userProfile);
         profile = userProfile;
@@ -139,6 +145,12 @@ internal class ProfileHUDView : MonoBehaviour
         textName.text = userProfile.userName;
         textPostfix.text = $".{userProfile.userId.Substring(userProfile.userId.Length - NAME_POSTFIX_LENGTH)}";
         SetActiveUnverifiedNameGOs(true);
+    }
+
+    private void SetConnectedWalletSectionActive(bool active)
+    {
+        connectedWalletSection.SetActive(active);
+        nonConnectedWalletSection.SetActive(!active);
     }
 
     private void SetActiveUnverifiedNameGOs(bool active)

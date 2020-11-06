@@ -779,6 +779,11 @@ namespace DCL.Interface
             SendMessage("LogOut");
         }
 
+        public static void RedirectToSignUp()
+        {
+            SendMessage("RedirectToSignUp");
+        }
+
         public static void PreloadFinished(string sceneId)
         {
             SendMessage("PreloadFinished", sceneId);
