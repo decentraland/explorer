@@ -142,8 +142,17 @@ internal class ProfileHUDView : MonoBehaviour
 
     private void HandleUnverifiedProfileName(UserProfile userProfile)
     {
-        textName.text = userProfile.userName;
-        textPostfix.text = $".{userProfile.userId.Substring(userProfile.userId.Length - NAME_POSTFIX_LENGTH)}";
+        if (!String.IsNullOrEmpty(userProfile.userName) &&
+            userProfile.userName.Length > NAME_POSTFIX_LENGTH)
+        {
+            textName.text = userProfile.userName.Substring(0, userProfile.userName.Length - NAME_POSTFIX_LENGTH - 1);
+        }
+        else
+        {
+            textName.text = userProfile.userName;
+        }
+
+        textPostfix.text = $"#{userProfile.userId.Substring(userProfile.userId.Length - NAME_POSTFIX_LENGTH)}";
         SetActiveUnverifiedNameGOs(true);
     }
 
