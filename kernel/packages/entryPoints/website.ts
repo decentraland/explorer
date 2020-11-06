@@ -102,7 +102,6 @@ namespace webApp {
     userAuthentified()
       .then(() => {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
-        logger.info(`[SANTI LOG] identity.hasConnectedWeb3: `, identity.hasConnectedWeb3)
         
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
         configureTaskbarDependentHUD(i, voiceChatEnabled)
