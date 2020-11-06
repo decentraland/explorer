@@ -38,13 +38,13 @@ public class KernelConfigurationShould
 
         KernelConfigModel model = new KernelConfigModel() { comms = new Comms() { commRadius = testValue } };
 
-        KernelConfig.OnKernelConfigChanged onConfigChage = (current, prev) =>
+        KernelConfig.OnKernelConfigChanged onConfigChange = (current, prev) =>
         {
             onChangeCalled = true;
             onChangePass = current.comms.commRadius == testValue;
         };
 
-        KernelConfig.i.OnChange += onConfigChage;
+        KernelConfig.i.OnChange += onConfigChange;
 
         KernelConfig.i.Set(model);
         Assert.IsTrue(onChangePass);
@@ -56,20 +56,20 @@ public class KernelConfigurationShould
         KernelConfig.i.Set(modelUpdateWithSameValues); // this shouldn't trigger onChange cause it has the same values
         Assert.IsFalse(onChangeCalled, "OnChange was called even if the new value is equal to the new one");
 
-        KernelConfig.i.OnChange -= onConfigChage;
+        KernelConfig.i.OnChange -= onConfigChange;
 
-        onConfigChage = (current, prev) =>
+        onConfigChange = (current, prev) =>
         {
             onChangeCalled = true;
             onChangePass = current.comms.commRadius == testValue2 && prev.comms.commRadius == testValue;
         };
 
-        KernelConfig.i.OnChange += onConfigChage;
+        KernelConfig.i.OnChange += onConfigChange;
 
         KernelConfig.i.Set(new KernelConfigModel() { comms = new Comms() { commRadius = testValue2 } });
         Assert.IsTrue(onChangePass);
 
-        KernelConfig.i.OnChange -= onConfigChage;
+        KernelConfig.i.OnChange -= onConfigChange;
     }
 
     [Test]
