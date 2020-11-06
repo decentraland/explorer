@@ -14,11 +14,11 @@ import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
-import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
+import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
 import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
 import { positionObservable } from 'shared/world/positionThings'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
 import { updateUserData, updateFriendship } from 'shared/friends/actions'
 import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
@@ -37,7 +37,7 @@ import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
-import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
+import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
@@ -117,6 +117,9 @@ export class BrowserInterface {
   public PerformanceReport(samples: string) {
     const perfReport = getPerformanceInfo(samples)
     queueTrackingEvent('performance report', perfReport)
+
+    const rawPerfReport = getRawPerformanceInfo(samples)
+    queueTrackingEvent('raw perf report', rawPerfReport)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -204,7 +207,7 @@ export class BrowserInterface {
       }
       case 'ActivateRenderingACK': {
         if (!aborted) {
-          worldRunningObservable.notifyObservers(true)
+          renderStateObservable.notifyObservers(true)
         }
         break
       }
@@ -279,8 +282,9 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { sfxVolume: number }) {
-    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.sfxVolume))
+  public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
+    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
+    globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
