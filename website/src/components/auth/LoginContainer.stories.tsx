@@ -22,7 +22,6 @@ export default {
 } as Meta;
 
 const Template: Story<LoginContainerProps & { state: any }> = ({ state, ...props }) => (
-  console.log(props),
   <Provider store={createStore(() => state, state)}>
     <LoginContainer {...props} />
   </Provider>

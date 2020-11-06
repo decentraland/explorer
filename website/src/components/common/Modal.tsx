@@ -8,8 +8,13 @@ export interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ handleClose, withAvatars, children }) => {
+  let className = 'popup-container'
+  if (withAvatars) {
+    className += ' with-avatars'
+  }
+
   return (
-    <div className={'popup-container' + (withAvatars && ' with-avatars' || '')}>
+    <div className={className}>
       <div className="popup">
         {handleClose && <div className="close" onClick={handleClose} />}
         {children}

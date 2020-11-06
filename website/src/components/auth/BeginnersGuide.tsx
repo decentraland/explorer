@@ -40,7 +40,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (p
       </Accordion>
       <Accordion title={<h3>What is the <b>Marketplace</b>?</h3>}>
         <p>The Marketplace is the go-to place to trade and manage all your Decentraland on-chain assets.</p>
-        <p>Access the Marketplace at <a href="https://market.decentraland.org" target="_blank">market.decentraland.org</a>.</p>
+        <p>Access the Marketplace at <a href="https://market.decentraland.org" target="_blank" rel="noreferrer">market.decentraland.org</a>.</p>
         <p>The Marketplace allows you to:</p>
         <ul>
           <li><p>Sell parcels and Estates of LAND, wearables and unique names. Set your own price in MANA and an expiration date for the offer.</p>
