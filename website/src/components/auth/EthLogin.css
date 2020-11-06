@@ -6,16 +6,31 @@
   align-items: center;
 }
 
+.eth-login {
+  width: 100%;
+  padding-left: 475px;
+  padding-top: 96px;
+  position: relative;
+}
+
+.eth-login .eth-avatars {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .eth-login-description {
   color: white;
-  margin-top: 50px;
   margin-bottom: 50px;
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
   font-family: sfregular, "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
   font-size: 23px;
   line-height: 27px;
   text-shadow: 0 1px 0 #000000;
+  max-width: 463px;
 }
 
 .eth-login-welcome {
@@ -43,7 +58,7 @@
 }
 
 #eth-login-confirmation-wrapper .eth-login-guest-button {
-  margin-top: .5em;
+  margin-top: 26px;
 }
 
 .eth-login-confirm-button {
@@ -79,4 +94,15 @@
   width: 24px;
   height: 23px;
   vertical-align: middle;
+}
+
+@media only screen and (max-width: 991px) {
+  .eth-login {
+    width: 100%;
+    padding: 0;
+  }
+
+  .eth-login .eth-avatars {
+    display: none;
+  }
 }

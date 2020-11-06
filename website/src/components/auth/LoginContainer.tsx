@@ -7,6 +7,9 @@ import { EthSignAdvice } from "./EthSignAdvice";
 import { InitialLoading } from "./InitialLoading";
 import { connect } from "react-redux";
 import SignUpContainer from "./SignUpContainer";
+import { Container } from "../common/Container";
+import { BeginnersGuide } from "./BeginnersGuide";
+import { BigFooter } from "../common/BigFooter";
 import "./LoginContainer.css";
 
 export enum LoginStage {
@@ -51,7 +54,9 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
       {shouldShow && (
         <div className="LoginContainer">
           <Navbar />
-          <div className="eth-login-popup">
+
+          {/* Footer */}
+          <Container className="eth-login-popup">
             {props.stage === LoginStage.LOADING && <InitialLoading />}
             {props.stage === LoginStage.SIGN_IN && (
               <EthLogin
@@ -67,8 +72,14 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
             )}
             {props.stage === LoginStage.SIGN_ADVICE && <EthSignAdvice />}
             {props.stage === LoginStage.SIGN_UP && <SignUpContainer />}
-          </div>
-          <Footer />
+          </Container>
+
+          {/* Beginner Guide */}
+          {props.stage === LoginStage.SIGN_IN && <BeginnersGuide />}
+
+          {/* Footer */}
+          {props.stage !== LoginStage.SIGN_IN && <Footer />}
+          {props.stage === LoginStage.SIGN_IN && <BigFooter />}
         </div>
       )}
     </React.Fragment>
