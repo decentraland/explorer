@@ -17,7 +17,7 @@ export function Accordion(props: AccordionProps) {
     }
 
     return ref.current.offsetHeight + 50
-  }, [open, ref.current])
+  }, [open])
 
   let className = 'eth-accordion'
   if (open) {
