@@ -105,8 +105,8 @@ namespace webApp {
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
         configureTaskbarDependentHUD(i, voiceChatEnabled)
 
-        i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true }, { enableManaCounter: identity.hasConnectedWeb3 })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
+        i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true }, { enableManaCounter: identity.hasConnectedWeb3 })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
         EnsureProfile(identity.address)
