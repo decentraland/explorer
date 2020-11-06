@@ -245,9 +245,9 @@ public static class InputProcessor
     public enum Modifier
     {
         //Set the values as bit masks
-        None = 0b0000000,
-        NeedsPointerLocked = 0b0000001,
-        FocusNotInInput = 0b0000010,
+        None = 0b0000000, // No modifier needed
+        NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
+        FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
     }
 
     /// <summary>
@@ -275,7 +275,8 @@ public static class InputProcessor
     }
 
     /// <summary>
-    /// Check if the miscellaneous modifiers are present.
+    /// Check if a miscellaneous modifiers are present. These modifiers are related to the meta-state of the application
+    /// they can be anything such as mouse pointer state, where the focus is, camera mode...
     /// </summary>
     /// <param name="modifiers"></param>
     /// <returns></returns>
