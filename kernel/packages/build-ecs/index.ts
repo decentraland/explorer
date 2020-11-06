@@ -162,11 +162,11 @@ async function minify(files: string | string[] | { [file: string]: string }) {
     compress: {
       passes: 2
     },
-    format: {
-      ecma: 5,
-      comments: /^!/,
-      beautify: false
-    },
+    // format: {
+    //   ecma: 5,
+    //   comments: /^!/,
+    //   beautify: false
+    // },
     sourceMap: false,
     toplevel: false
   })
