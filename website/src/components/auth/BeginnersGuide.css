@@ -1,3 +1,6 @@
+.eth-beginners-guide {
+  color: #333;
+}
 .eth-beginners-guide h2 {
   font-size: 32px;
 }
@@ -19,7 +22,7 @@
 }
 
 .eth-beginners-guide li p {
-  margin: .5em 0;
+  margin: 0.5em 0;
 }
 
 .eth-beginners-guide a,
