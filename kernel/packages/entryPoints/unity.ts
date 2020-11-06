@@ -15,7 +15,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
-import { renderStateObservable, onNextRendererEnabled } from 'shared/world/worldState'
+import { renderStateObservable, onNextRendererEnabled, foregroundObservable, isForeground } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -24,6 +24,7 @@ import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shar
 import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
+import { kernelConfigForRenderer } from 'unity-interface/kernelConfigForRenderer'
 
 const container = document.getElementById('gameContainer')
 
@@ -83,8 +84,13 @@ initializeUnity(container)
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
       const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+
+      const configForRenderer = kernelConfigForRenderer()
+      configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
+      i.SetKernelConfiguration(configForRenderer)
+
       configureTaskbarDependentHUD(i, voiceChatEnabled)
-      
+
       i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
 
       i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
@@ -121,6 +127,20 @@ initializeUnity(container)
     } else {
       i.SetRenderProfile(RenderProfile.DEFAULT)
     }
+
+    if (isForeground()) {
+      i.ReportFocusOn()
+    } else {
+      i.ReportFocusOff()
+    } 
+
+    foregroundObservable.add((isForeground) => {
+      if (isForeground) {
+        i.ReportFocusOn()
+      } else {
+        i.ReportFocusOff()
+      }
+    })
 
     if (!NO_MOTD) {
       waitForMessageOfTheDay().then((messageOfTheDay) => {
