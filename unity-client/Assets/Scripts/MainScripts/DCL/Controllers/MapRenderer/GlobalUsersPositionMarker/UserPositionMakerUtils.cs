@@ -20,9 +20,12 @@ internal class ScenesFilter
         List<Vector2Int> result = new List<Vector2Int>(maxMarkers);
         List<Vector2Int> rawParcelCoords = GetRawParcelCoords(hotScenes);
         int step = rawParcelCoords.Count / maxMarkers;
-        /*
-        
-        */
+        if (step < 1) step = 1;
+
+        for (int i = 0; i < rawParcelCoords.Count; i += step)
+        {
+            result.Add(rawParcelCoords[i]);
+        }
 
         return result;
     }

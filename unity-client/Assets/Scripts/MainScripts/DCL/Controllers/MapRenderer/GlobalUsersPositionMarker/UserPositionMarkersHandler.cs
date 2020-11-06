@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 internal class UserPositionMarkersHandler : IDisposable
 {
-    Queue<UserPositionMarker> availableMarkers;
-    Queue<UserPositionMarker> onUseMarkers;
+    readonly Queue<UserPositionMarker> availableMarkers;
+    readonly Queue<UserPositionMarker> onUseMarkers;
+    readonly Func<float, float, Vector3> coordToMapPosition;
+
     int maxMarkers;
 
-    public UserPositionMarkersHandler(GameObject markerPrefab, Transform overlayContainer, int maxMarkers)
+    public UserPositionMarkersHandler(GameObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
     {
         this.maxMarkers = maxMarkers;
+        this.coordToMapPosition = coordToMapPosFunc;
+
         availableMarkers = new Queue<UserPositionMarker>(maxMarkers);
         onUseMarkers = new Queue<UserPositionMarker>(maxMarkers);
 
@@ -48,12 +53,24 @@ internal class UserPositionMarkersHandler : IDisposable
     private void SetMarkerAsAvailable(UserPositionMarker marker)
     {
         availableMarkers.Enqueue(marker);
-        marker.SetActive(false);
+        marker.gameObject.SetActive(false);
     }
 
-    private void SetMarkerAsUsed(UserPositionMarker marker)
+    private void SetMarkerAsUsed(UserPositionMarker marker, Vector2Int coords)
     {
         onUseMarkers.Enqueue(marker);
-        marker.SetActive(false);
+        SetMarkerAtCoord(marker, coords);
+        marker.gameObject.SetActive(true);
+    }
+
+    private void SetMarkerAtCoord(UserPositionMarker marker, Vector2Int coords)
+    {
+        marker.gameObject.name = $"UsersPositionMarker({coords.x},{coords.y})";
+
+        marker.gameObject.transform.localPosition = coordToMapPosition(
+            coords.x + Random.Range(-0.5f, 0.5f),
+            coords.y + Random.Range(-0.5f, 0.5f));
+
+        marker.coords = coords;
     }
 }
