@@ -11,13 +11,14 @@ export function Accordion(props: AccordionProps) {
 
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const refExists = ref.current !== null
   const height = useMemo(() => {
     if (!ref.current || !open) {
       return 0
     }
 
     return ref.current.offsetHeight + 50
-  }, [open, ref.current !== null])
+  }, [open, refExists])
 
   let className = 'eth-accordion'
   if (open) {
