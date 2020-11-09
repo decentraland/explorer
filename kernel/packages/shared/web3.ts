@@ -1,7 +1,7 @@
 import { ethereumConfigurations } from 'config'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
-import { WebsocketProvider } from 'web3x/providers'
+import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
 import { ETHEREUM_NETWORK, getTLD } from '../config'
 import { decentralandConfigurations } from '../config/index'
 import { queueTrackingEvent } from './analytics'
@@ -54,7 +54,7 @@ export async function initWeb3(): Promise<void> {
 
 export async function hasClaimedName(address: string) {
   const dclNameContract = Address.fromString(decentralandConfigurations.DCLRegistrar)
-  let eth = Eth.fromCurrentProvider()
+  let eth = createEthUsingWalletProvider()
 
   if (!eth) {
     const net = await getAppNetwork()
@@ -73,7 +73,7 @@ export async function hasClaimedName(address: string) {
 
 export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
   const contractAddress = Address.fromString(decentralandConfigurations.dao)
-  let eth = Eth.fromCurrentProvider()
+  let eth = createEthUsingWalletProvider()
 
   if (!eth) {
     const net = await getAppNetwork()
@@ -107,6 +107,11 @@ export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
   }
 
   return nodes
+}
+
+export function createEthUsingWalletProvider(): Eth | undefined {
+  const ethereum = (window as any).ethereum
+  return ethereum ? new Eth(new LegacyProviderAdapter(ethereum)) : undefined
 }
 
 export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string): Promise<string[]> {

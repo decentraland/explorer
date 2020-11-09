@@ -1,6 +1,5 @@
 import { put, takeLatest, call, delay, select } from 'redux-saga/effects'
 import { createIdentity } from 'eth-crypto'
-import { Eth } from 'web3x/eth'
 import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
@@ -25,7 +24,7 @@ import {
   AWAITING_USER_SIGNATURE
 } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
-import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
+import { getNetworkFromTLD, getAppNetwork, createEthUsingWalletProvider } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
@@ -205,7 +204,7 @@ async function createAuthIdentity() {
   if (ENABLE_WEB3) {
     const result = await providerFuture
     if (result.successful) {
-      const eth = Eth.fromCurrentProvider()!
+      const eth = createEthUsingWalletProvider()!
       const account = (await eth.getAccounts())[0]
 
       address = account.toJSON()
