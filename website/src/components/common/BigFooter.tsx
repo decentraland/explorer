@@ -18,7 +18,7 @@ export const BigFooter: React.FC = () => (
         <div>
           <a
             className="big-footer-button"
-            href="https://dcl.gg/discord"
+            href="https://discord.gg/k5ydeZp"
             target="about:blank"
           >
             <Discord /> Join our Discord
