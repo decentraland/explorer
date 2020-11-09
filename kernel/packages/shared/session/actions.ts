@@ -28,7 +28,7 @@ export const LOGOUT = '[Request] Logout'
 export const logout = () => action(LOGOUT)
 export type Logout = ReturnType<typeof logout>
 
-export const UPDATE_TOS = 'UPDATE_TOS'
+export const UPDATE_TOS = '[UPDATE_TOS]'
 export const updateTOS = (agreed: boolean) => action(UPDATE_TOS, agreed)
 
 export const SIGNUP_FORM = '[SIGNUP_FORM]'
