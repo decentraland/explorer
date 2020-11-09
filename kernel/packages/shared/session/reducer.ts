@@ -61,7 +61,6 @@ export function sessionReducer(state?: SessionState, action?: AnyAction) {
     case TOGGLE_WALLET_PROMPT:
       return { ...state, showWalletPrompt: action.payload.show }
     case SIGNUP_STAGE:
-      defaultLogger.log('SIGNUP_STAGE: ', action.payload)
       return {
         ...state,
         signup: {

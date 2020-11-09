@@ -72,7 +72,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -224,7 +224,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -335,7 +335,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -446,7 +446,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -587,7 +587,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -728,7 +728,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -874,7 +874,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 1em;
   font-stretch: 125%;
   font-weight: 600;
@@ -950,9 +950,9 @@
 }
 
 #error-nomobile-mobile.error-container
-.errormessage
-.givesomedetailof
-a:visited {
+  .errormessage
+  .givesomedetailof
+  a:visited {
   color: rgba(255, 255, 255, 1);
 }
 
@@ -962,26 +962,26 @@ a:visited {
 }
 
 #error-nomobile-mobile.error-container
-.errormessage
-.notavailable-mobile
-.givesomedetailof {
+  .errormessage
+  .notavailable-mobile
+  .givesomedetailof {
   margin-bottom: 32px;
   line-height: 25px;
 }
 
 #error-nomobile-mobile.error-container
-.errormessage
-.notavailable-mobile
-.cta
-.submitemail {
+  .errormessage
+  .notavailable-mobile
+  .cta
+  .submitemail {
   width: 100%;
   margin-top: 10px;
 }
 
 #error-nomobile-mobile.error-container
-.errormessage
-.notavailable-mobile
-input.enteremail {
+  .errormessage
+  .notavailable-mobile
+  input.enteremail {
   background-color: rgb(255, 255, 255);
   border-color: rgb(115, 110, 125);
   border-radius: 8px;
@@ -1040,7 +1040,7 @@ input.enteremail {
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;
@@ -1090,7 +1090,7 @@ input.enteremail {
   flex-grow: 0;
   flex-shrink: 0;
   font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto,
-  "Helvetica Neue", Arial, sans-serif;
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 13px;
   font-stretch: 125%;
   font-weight: 600;

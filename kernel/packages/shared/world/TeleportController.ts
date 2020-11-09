@@ -14,6 +14,7 @@ import { StoreContainer } from '../store/rootTypes'
 import { WORLD_EXPLORER } from '../../config/index'
 import { isInitialLoading } from '../loading/selectors'
 import Html from '../Html'
+import { isLoginStageCompleted } from '../session/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -70,7 +71,10 @@ export const CAMPAIGN_PARCEL_SEQUENCE = [
 
 export class TeleportController {
   public static ensureTeleportAnimation() {
-    if (!isInitialLoading(globalThis.globalStore.getState())) {
+    if (
+      !isInitialLoading(globalThis.globalStore.getState()) &&
+      isLoginStageCompleted(globalThis.globalStore.getState())
+    ) {
       Html.showTeleportAnimation()
     }
   }

@@ -460,7 +460,7 @@ function* handleDeployProfile(deployProfileAction: DeployProfile) {
   }
 }
 
-function fetchProfileLocally(address: string) {
+export function fetchProfileLocally(address: string) {
   const profile: Profile | null = localProfilesRepo.get(address)
   if (profile?.userId === address) {
     return ensureServerFormat(profile)

@@ -1,4 +1,4 @@
-import { RootSessionState } from './types'
+import { LoginStage, RootSessionState } from './types'
 
 // TODO use userId
 export const getUserId = (state: RootSessionState) => state.session.userId
@@ -11,3 +11,4 @@ export const getSignUpIdentity = (store: RootSessionState) => ({
   userId: store.session.signup.userId,
   identity: store.session.signup.identity
 })
+export const isLoginStageCompleted = (state: RootSessionState) => state.session.loginStage === LoginStage.COMPLETED
