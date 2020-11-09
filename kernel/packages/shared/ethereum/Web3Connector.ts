@@ -4,6 +4,7 @@ import { WebSocketProvider } from 'eth-connect'
 import { ConnectorFactory } from './connector/ConnectorFactory'
 import { ProviderType } from './ProviderType'
 import { ConnectorInterface } from './connector/ConnectorInterface'
+import { LegacyProviderAdapter } from 'web3x/providers'
 
 export class Web3Connector {
   private type: ProviderType | undefined
@@ -48,9 +49,11 @@ export class Web3Connector {
     if (!this.connector || this.isType(ProviderType.GUEST)) {
       return undefined
     }
+
     if (this.isType(ProviderType.METAMASK)) {
-      return Eth.fromCurrentProvider()
+      return new Eth(new LegacyProviderAdapter(this.connector.getProvider()))
     }
+
     return new Eth(this.connector.getProvider())
   }
 }

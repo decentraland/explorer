@@ -6,10 +6,11 @@ import { Eth } from 'web3x/eth'
 import { Web3Connector } from './Web3Connector'
 import { ProviderType } from './ProviderType'
 import { WORLD_EXPLORER } from '../../config'
+import { EthereumProvider, LegacyProviderAdapter } from 'web3x/providers'
 
 let web3Connector: Web3Connector
 export const providerFuture = future()
-export const requestManager = new RequestManager(null)
+export const requestManager = new RequestManager((window as any).ethereum ?? null)
 
 export const loginCompleted = future<void>()
 ;(window as any).loginCompleted = loginCompleted
@@ -92,5 +93,16 @@ export async function getUserAccount(): Promise<string | undefined> {
 export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
   if (!isGuest()) {
     return getUserAccount()
+  }
+}
+
+export function metamaskLegacyProvider(): EthereumProvider | undefined {
+  const ethereum = (window as any).ethereum
+  if (ethereum) {
+    const provider: any = new LegacyProviderAdapter(ethereum)
+    provider.sendAsync = function () {
+      return ethereum.sendAsync.apply(ethereum, arguments)
+    }
+    return provider
   }
 }

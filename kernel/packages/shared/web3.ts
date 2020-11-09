@@ -1,4 +1,4 @@
-import { ethereumConfigurations } from 'config'
+import { ethereumConfigurations, getDefaultTLD, setNetwork } from 'config'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
 import { WebsocketProvider } from 'web3x/providers'
@@ -8,7 +8,7 @@ import { queueTrackingEvent } from './analytics'
 import { Catalyst } from './dao/contracts/Catalyst'
 import { ERC721 } from './dao/contracts/ERC721'
 import { getNetwork, getUserAccount } from './ethereum/EthereumService'
-import { awaitWeb3Approval, createEth } from './ethereum/provider'
+import { awaitWeb3Approval, createEth, metamaskLegacyProvider } from './ethereum/provider'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
@@ -22,8 +22,7 @@ async function getAddress(): Promise<string | undefined> {
   }
 }
 
-export function getNetworkFromTLD(): ETHEREUM_NETWORK | null {
-  const tld = getTLD()
+export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
   if (tld === 'zone') {
     return ETHEREUM_NETWORK.ROPSTEN
   }
@@ -34,6 +33,10 @@ export function getNetworkFromTLD(): ETHEREUM_NETWORK | null {
 
   // if localhost
   return null
+}
+
+export function getNetworkFromDefaultTLD(): ETHEREUM_NETWORK {
+  return getNetworkFromTLD(getDefaultTLD())!
 }
 
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
@@ -71,15 +74,34 @@ export async function hasClaimedName(address: string) {
   }
 }
 
+// function patchProvider(provider?: any) {
+//   // Patch for old providers and mobile providers which do not use promises at send as sendAsync
+//   if (
+//     provider &&
+//     typeof provider.sendAsync === 'function' &&
+//     provider.send !== provider.sendAsync
+//   ) {
+//     provider.send = provider.sendAsync
+//   }
+// }
+
 export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
+  const legacyProvider = metamaskLegacyProvider()
+
+  let eth: Eth | undefined = legacyProvider ? new Eth(legacyProvider) : undefined
+
+  const network = legacyProvider ? await getAppNetwork() : getNetworkFromDefaultTLD()
+  if (!decentralandConfigurations.dao) {
+    setNetwork(network)
+  }
+
   const contractAddress = Address.fromString(decentralandConfigurations.dao)
-  let eth = createEth()
 
   if (!eth) {
-    const net = await getAppNetwork()
+    const net = getNetworkFromDefaultTLD()
     const provider = new WebsocketProvider(ethereumConfigurations[net].wss)
 
-    eth = createEth(provider)
+    eth = new Eth(provider)
   }
 
   const contract = new Catalyst(eth, contractAddress)
