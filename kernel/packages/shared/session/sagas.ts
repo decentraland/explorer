@@ -13,7 +13,8 @@ import {
   isSessionExpired,
   providerFuture,
   loginCompleted,
-  getUserEthAccountIfAvailable
+  getUserEthAccountIfAvailable,
+  createEthUsingWalletProvider
 } from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
@@ -24,7 +25,7 @@ import {
   AWAITING_USER_SIGNATURE
 } from 'shared/loading/types'
 import { identifyUser, queueTrackingEvent } from 'shared/analytics'
-import { getNetworkFromTLD, getAppNetwork, createEthUsingWalletProvider } from 'shared/web3'
+import { getNetworkFromTLD, getAppNetwork } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'

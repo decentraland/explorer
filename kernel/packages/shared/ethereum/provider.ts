@@ -6,7 +6,8 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { getTLD } from '../../config/index'
 import { getLastSessionWithoutWallet, getStoredSession } from 'shared/session'
-import { createEthUsingWalletProvider } from 'shared/web3'
+import { Eth } from 'web3x/eth'
+import { LegacyProviderAdapter } from 'web3x/providers'
 
 declare var window: Window & {
   ethereum: any
@@ -207,4 +208,9 @@ export async function getUserEthAccountIfAvailable(): Promise<string | undefined
   if (createEthUsingWalletProvider()) {
     return getUserAccount()
   }
+}
+
+export function createEthUsingWalletProvider(): Eth | undefined {
+  const ethereum = (window as any).ethereum
+  return ethereum ? new Eth(new LegacyProviderAdapter(ethereum)) : undefined
 }

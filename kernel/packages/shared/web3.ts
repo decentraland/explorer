@@ -1,14 +1,14 @@
 import { ethereumConfigurations } from 'config'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
-import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
+import { WebsocketProvider } from 'web3x/providers'
 import { ETHEREUM_NETWORK, getTLD } from '../config'
 import { decentralandConfigurations } from '../config/index'
 import { queueTrackingEvent } from './analytics'
 import { Catalyst } from './dao/contracts/Catalyst'
 import { ERC721 } from './dao/contracts/ERC721'
 import { getNetwork, getUserAccount } from './ethereum/EthereumService'
-import { awaitWeb3Approval } from './ethereum/provider'
+import { awaitWeb3Approval, createEthUsingWalletProvider } from './ethereum/provider'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
@@ -107,11 +107,6 @@ export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
   }
 
   return nodes
-}
-
-export function createEthUsingWalletProvider(): Eth | undefined {
-  const ethereum = (window as any).ethereum
-  return ethereum ? new Eth(new LegacyProviderAdapter(ethereum)) : undefined
 }
 
 export async function fetchOwnedENS(theGraphBaseUrl: string, ethAddress: string): Promise<string[]> {
