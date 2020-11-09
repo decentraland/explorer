@@ -55,6 +55,7 @@ public enum DCLAction_Trigger
     BuildEditModeScale = 431,
     BuildEditModeDelete = 434,
     BuildEditModeFocusSelectedEntities = 435,
+    BuildEditModeReset = 443,
 }
 
 public enum DCLAction_Hold
@@ -276,6 +277,9 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.BuildEditModeFocusSelectedEntities:
                     InputProcessor.FromKey(action, KeyCode.F, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.BuildEditModeReset:
+                    InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

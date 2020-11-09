@@ -152,9 +152,12 @@ public class FreeCameraMovement : CameraStateBase
     }
     public void FocusOnEntities(List<DecentralandEntityToEdit> entitiesToFocus)
     {
-        Vector3 middlePoint = FindMidPoint(entitiesToFocus);
-        StartCoroutine(SmoothFocusOnTarget(middlePoint));
-        SmoothLookAt(middlePoint);
+        if (entitiesToFocus.Count > 0)
+        {
+            Vector3 middlePoint = FindMidPoint(entitiesToFocus);
+            StartCoroutine(SmoothFocusOnTarget(middlePoint));
+            SmoothLookAt(middlePoint);
+        }
     }
 
 

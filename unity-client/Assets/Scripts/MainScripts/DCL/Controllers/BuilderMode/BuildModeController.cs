@@ -21,7 +21,7 @@ public class BuildModeController : MonoBehaviour
     {
         Inactive = 0,
         FirstPerson = 1,
-        Editor =2
+        Editor = 2
     }
 
     [Header("Activation of Feature")]
@@ -35,7 +35,7 @@ public class BuildModeController : MonoBehaviour
     public float distanceLimitToSelectObjects = 50;
     public float duplicateOffset = 2f;
 
- 
+
 
     [Header("Snap variables")]
     public float snapFactor = 1f;
@@ -45,11 +45,9 @@ public class BuildModeController : MonoBehaviour
     public float snapDistanceToActivateMovement = 10f;
 
 
-    [Header ("Scene references")]
-    public GameObject buildModeCanvasGO;
-    public GameObject shortCutsGO,extraBtnsGO,cameraParentGO;
-    public SceneObjectCatalogController catalogController;
-    public SceneLimitInfoController sceneLimitInfoController;
+    [Header("Scene references")]
+    public GameObject shortCutsGO, extraBtnsGO, cameraParentGO;
+
     public EntityInformationController entityInformationController;
     public BuildModeEntityListController buildModeEntityListController;
     public OutlinerController outlinerController;
@@ -57,6 +55,7 @@ public class BuildModeController : MonoBehaviour
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
     public InputController inputController;
+    public HUDController hudController;
 
     [Header("Build Modes")]
 
@@ -67,34 +66,15 @@ public class BuildModeController : MonoBehaviour
 
     public Texture2D duplicateCursorTexture;
     public Material editMaterial;
- 
+
     public LayerMask layerToRaycast;
 
     [Header("InputActions")]
     [SerializeField] internal InputAction_Trigger editModeChangeInputAction;
-    [SerializeField] internal InputAction_Trigger toggleCatalogInputAction;
-    [SerializeField] internal InputAction_Trigger toggleChangeCameraInputAction;
-    [SerializeField] internal InputAction_Trigger toggleControlsInputAction;
     [SerializeField] internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
-    [SerializeField] internal InputAction_Trigger toggleDuplicateInputAction;
-    [SerializeField] internal InputAction_Trigger toggleEntityListInputAction;
     [SerializeField] internal InputAction_Trigger toggleRedoActionInputAction;
     [SerializeField] internal InputAction_Trigger toggleUndoActionInputAction;
-    [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
     [SerializeField] internal InputAction_Trigger toggleSnapModeInputAction;
-    [SerializeField] internal InputAction_Trigger toggleUIInputAction;
-    [SerializeField] internal InputAction_Trigger toggleDeleteInputAction;
-
-    [SerializeField] internal InputAction_Trigger quickBar1InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar2InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar3InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar4InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar5InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar6InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar7InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar8InputAction;
-    [SerializeField] internal InputAction_Trigger quickBar9InputAction;
-
 
     [SerializeField] internal InputAction_Hold multiSelectionInputAction;
 
@@ -103,7 +83,7 @@ public class BuildModeController : MonoBehaviour
 
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActive = true,isSceneEntitiesListActive = false, isMultiSelectionActive = false,isAdvancedModeActive = true, isOutlineCheckActive = true;
+    bool isEditModeActivated = false, isSnapActive = true, isMultiSelectionActive = false, isAdvancedModeActive = true, isOutlineCheckActive = true;
     List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
     Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
 
@@ -126,7 +106,7 @@ public class BuildModeController : MonoBehaviour
         if (freeMovementGO == null)
         {
             freeMovementGO = new GameObject("FreeMovementGO");
-        
+
         }
         freeMovementGO.transform.SetParent(cameraParentGO.transform);
         if (editionGO == null)
@@ -141,52 +121,43 @@ public class BuildModeController : MonoBehaviour
             undoGO.transform.SetParent(transform);
         }
 
+        HUDConfiguration hudConfig = new HUDConfiguration();
+        hudConfig.active = true;
+        hudConfig.visible = false;
+        hudController.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILD_MODE);
 
         editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
-        toggleCatalogInputAction.OnTriggered += (o) => ChangeVisibilityOfCatalog();
-        toggleControlsInputAction.OnTriggered += (o) => ChangeVisibilityOfControls();
-        toggleEntityListInputAction.OnTriggered += (o) => ChangeEntityListVisibility();
-        toggleSceneInfoInputAction.OnTriggered +=  (o) => ChangeVisibilityOfSceneInfo();
-        toggleUIInputAction.OnTriggered += (o) => ChangeVisibilityOfUI();
-        toggleChangeCameraInputAction.OnTriggered += (o) => ChangeAdvanceMode();
-
-        quickBar1InputAction.OnTriggered += (o) => QuickBarInput(0);
-        quickBar2InputAction.OnTriggered += (o) => QuickBarInput(1);
-        quickBar3InputAction.OnTriggered += (o) => QuickBarInput(2);
-        quickBar4InputAction.OnTriggered += (o) => QuickBarInput(3);
-        quickBar5InputAction.OnTriggered += (o) => QuickBarInput(4);
-        quickBar6InputAction.OnTriggered += (o) => QuickBarInput(5);
-        quickBar7InputAction.OnTriggered += (o) => QuickBarInput(6);
-        quickBar8InputAction.OnTriggered += (o) => QuickBarInput(7);
-        quickBar9InputAction.OnTriggered += (o) => QuickBarInput(8);
 
         toggleCreateLastSceneObjectInputAction.OnTriggered += (o) => CreateLastSceneObject();
         toggleRedoActionInputAction.OnTriggered += (o) => RedoAction();
         toggleUndoActionInputAction.OnTriggered += (o) => UndoAction();
         toggleSnapModeInputAction.OnTriggered += (o) => ChangeSnapMode();
-        toggleDeleteInputAction.OnTriggered += (o) => DeleteSelectedEntitiesInput();
-        toggleDuplicateInputAction.OnTriggered += (o) => DuplicateSelectedEntitiesInput();
 
+        HUDController.i.buildModeHud.OnChangeModeAction += ChangeAdvanceMode;
+        HUDController.i.buildModeHud.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
+        HUDController.i.buildModeHud.OnDeleteSelectedAction += DeleteSelectedEntitiesInput;
+        HUDController.i.buildModeHud.OnResetAction += ResetScaleAndRotation;
 
         multiSelectionInputAction.OnStarted += (o) => StartMultiSelection();
         multiSelectionInputAction.OnFinished += (o) => EndMultiSelection();
 
+        HUDController.i.buildModeHud.OnEntityClick += ChangeEntitySelectionFromList;
+        HUDController.i.buildModeHud.OnEntityDelete += DeleteEntity;
+        HUDController.i.buildModeHud.OnEntityLock += ChangeEntityLockStatus;
+        HUDController.i.buildModeHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
 
-
-
-
-        catalogController.OnSceneObjectSelected += CreateSceneObjectSelected;
+        HUDController.i.buildModeHud.OnStopInput += () => builderInputWrapper.StopInput();
+        HUDController.i.buildModeHud.OnResumeInput += () => builderInputWrapper.ResumeInput();
+        HUDController.i.buildModeHud.OnSceneObjectSelected += CreateSceneObjectSelected;
         builderInputWrapper.OnMouseClick += MouseClick;
-        buildModeEntityListController.OnEntityClick += ChangeEntitySelectionFromList;
-        buildModeEntityListController.OnEntityDelete += DeleteEntity;
-        buildModeEntityListController.OnEntityLock += ChangeEntityLockStatus;
-        buildModeEntityListController.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
+
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
 
         InitEditModes();
 
     }
+
 
     private void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
     {
@@ -207,22 +178,11 @@ public class BuildModeController : MonoBehaviour
     }
 
     private void Update()
-    {        
-        if(isEditModeActivated)
+    {
+        if (isEditModeActivated)
         {
-            //if (Input.GetKeyDown(KeyCode.LeftControl))
-            //{
-            //    StartMultiSelection();
-            //}
-
-            //if (Input.GetKeyUp(KeyCode.LeftControl))
-            //{
-            //    EndMultiSelection();
-            //}
-
             if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
             {
-                CheckInputForShowingUI();
                 if (Utils.isCursorLocked || isAdvancedModeActive) CheckEditModeInput();
                 if (currentActiveMode != null) currentActiveMode.CheckInput();
             }
@@ -233,14 +193,13 @@ public class BuildModeController : MonoBehaviour
                 checkerInsideSceneOptimizationCounter = 0;
             }
             else checkerInsideSceneOptimizationCounter++;
-
         }
     }
 
     void InitEditModes()
     {
         firstPersonMode.Init(editionGO, undoGO, snapGO, freeMovementGO, selectedEntities);
-        editorMode.Init(editionGO, undoGO,  snapGO, freeMovementGO, selectedEntities);
+        editorMode.Init(editionGO, undoGO, snapGO, freeMovementGO, selectedEntities);
 
         firstPersonMode.OnInputDone += InputDone;
         editorMode.OnInputDone += InputDone;
@@ -250,7 +209,7 @@ public class BuildModeController : MonoBehaviour
 
     }
 
- 
+
     void MouseClick(int buttonID, Vector3 position)
     {
         if (isEditModeActivated)
@@ -277,40 +236,41 @@ public class BuildModeController : MonoBehaviour
 
         if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
         {
-            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
+
+            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return;
         }
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
-            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
+            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return;
         }
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
-            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
+            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return;
         }
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
-            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
+            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return;
         }
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
-            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
+            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return;
         }
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
-            if (!sceneLimitInfoController.IsActive()) ChangeVisibilityOfSceneInfo();
+            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return;
         }
 
-        LoadParcelScenesMessage.UnityParcelScene data =  sceneToEdit.sceneData;
-        data.baseUrl = "https://builder-api.decentraland.org/v1/storage/contents/";
+        LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
+        data.baseUrl = BuilderConstants.BASE_URL_CATALOG;
 
 
-        foreach(KeyValuePair<string,string> content in sceneObject.contents)
+        foreach (KeyValuePair<string, string> content in sceneObject.contents)
         {
             ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
             mappingPair.file = content.Key;
@@ -324,7 +284,7 @@ public class BuildModeController : MonoBehaviour
                     break;
                 }
             }
-            if(!found) data.contents.Add(mappingPair);
+            if (!found) data.contents.Add(mappingPair);
         }
         SceneController.i.UpdateParcelScenesExecute(data);
 
@@ -344,53 +304,10 @@ public class BuildModeController : MonoBehaviour
         entity.gameObject.transform.eulerAngles = Vector3.zero;
 
         currentActiveMode.CreatedEntity(convertedEntities[GetConvertedUniqueKeyForEntity(entity)]);
-        catalogController.CloseCatalog();
+        if (!isAdvancedModeActive) Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
-        //BuildModeEntityAction newEntity = new BuildModeEntityAction(entity,null, JsonConvert.SerializeObject(entity));
-        //BuildModeAction buildModeAction = new BuildModeAction();
-        //buildModeAction.CreateActionType(newEntity,BuildModeAction.ActionType.CREATED);
-        //actionController.AddAction(buildModeAction);
 
         InputDone();
-
-    }
-
-
- 
-
-    void CheckInputForShowingUI()
-    {
-        //if (Input.GetKey(KeyCode.O))
-        //{
-        //    ChangeVisibilityOfUI();    
-        //    return;
-        //}
-        //if (Input.GetKey(KeyCode.Y))
-        //{
-        //    ChangeEntityListVisibility();
-        //    return;
-        //}
-        //if (Input.GetKey(KeyCode.J))
-        //{
-        //    ChangeVisibilityOfCatalog();
-        //    return;
-        //}
-        //if (Input.GetKey(KeyCode.G))
-        //{
-        //    ChangeVisibilityOfSceneInfo();
-        //    return;
-        //}
-        //if (Input.GetKey(KeyCode.L))
-        //{
-        //    ChangeAdvanceMode();
-        //    return;
-        //}
-        //if (Input.GetKey(KeyCode.N))
-        //{
-
-        //    ChangeVisibilityOfControls();
-        //    return;
-        //}     
 
     }
 
@@ -421,11 +338,7 @@ public class BuildModeController : MonoBehaviour
         InputDone();
     }
 
-    void QuickBarInput(int quickBarSlot)
-    {
-        catalogController.QuickBarObjectSelected(quickBarSlot);
-        InputDone();
-    }
+
     void DeleteSelectedEntitiesInput()
     {
         if (selectedEntities.Count > 0)
@@ -433,7 +346,7 @@ public class BuildModeController : MonoBehaviour
             DeletedSelectedEntities();
             InputDone();
         }
-    
+
     }
 
     void DuplicateSelectedEntitiesInput()
@@ -445,149 +358,18 @@ public class BuildModeController : MonoBehaviour
         }
     }
     void CheckEditModeInput()
-    {        
-        //if (Input.GetKeyUp(KeyCode.Q))
-        //{
-
-        //    CreateLastSceneObject();
-        //    //CreateBoxEntity();
-        //}
-
-        //if(Input.GetKeyUp(KeyCode.T))
-        //{
-        //    ChangeSnapMode();
-        //}
+    {
 
         if (selectedEntities.Count <= 0 || isMultiSelectionActive)
         {
             CheckOutline();
         }
 
-        //if (Input.GetKeyUp(KeyCode.I))
-        //{
-        //    RedoAction();
-        //}
-
-        //if (Input.GetKeyUp(KeyCode.K))
-        //{
-        //    UndoAction();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha1))
-        //{
-        //    QuickBarInput(0);
-        //}
-        //if (Input.GetKey(KeyCode.Alpha2))
-        //{
-        //    catalogController.QuickBarObjectSelected(1);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha3))
-        //{
-        //    catalogController.QuickBarObjectSelected(2);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha4))
-        //{
-        //    catalogController.QuickBarObjectSelected(3);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha5))
-        //{
-        //    catalogController.QuickBarObjectSelected(4);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha6))
-        //{
-        //    catalogController.QuickBarObjectSelected(5);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha7))
-        //{
-        //    catalogController.QuickBarObjectSelected(6);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha8))
-        //{
-        //    catalogController.QuickBarObjectSelected(7);
-        //    InputDone();
-        //}
-        //if (Input.GetKey(KeyCode.Alpha9))
-        //{
-        //    catalogController.QuickBarObjectSelected(8);
-        //    InputDone();
-        //}
-
 
         if (selectedEntities.Count > 0)
         {
             currentActiveMode.CheckInputSelectedEntities();
-
-            //if (Input.GetKey(KeyCode.Delete))
-            //{
-            //    DeleteSelectedEntitiesInput();
-            //    return;
-            //}
-            //if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.D))
-            //{
-            //    DuplicateSelectedEntitiesInput();
-            //    return;
-            //}
-            //if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.Z))
-            //{
-            //    DestroyCreatedObjects();
-            //    DeselectEntities();
-            //    InputDone();
-            //    return;
-            //}
-                 
         }
-    }
-
-    public void ChangeVisibilityOfControls()
-    {
-        shortCutsGO.SetActive(!shortCutsGO.gameObject.activeSelf);
-        InputDone();
-    }
-    public void ChangeVisibilityOfExtraBtns()
-    {
-        extraBtnsGO.SetActive(!extraBtnsGO.activeSelf);
-        InputDone();
-    }
-    public void ChangeVisibilityOfUI()
-    {
-        buildModeCanvasGO.SetActive(!buildModeCanvasGO.activeSelf);
-        InputDone();
-    }
-    public void ChangeEntityListVisibility()
-    {
-        if (isSceneEntitiesListActive) buildModeEntityListController.CloseList();
-        else buildModeEntityListController.OpenEntityList(GetEntitiesInCurrentScene(),sceneToEdit);
-        isSceneEntitiesListActive = !isSceneEntitiesListActive;
-        InputDone();
-    }
-    public void ChangeVisibilityOfCatalog()
-    {
-        if (catalogController.IsCatalogOpen())
-        {
-            catalogController.CloseCatalog();
-            if (!isAdvancedModeActive) Utils.LockCursor();
-        }
-        else catalogController.OpenCatalog();
-        InputDone();
-    }
-
-    public void ChangeVisibilityOfSceneInfo()
-    {
-        if (sceneLimitInfoController.IsActive())
-        {
-            sceneLimitInfoController.Disable();
-        }
-        else
-        {
-            sceneLimitInfoController.Enable();
-
-        }
-        InputDone();
     }
 
     public void ChangeAdvanceMode()
@@ -606,11 +388,15 @@ public class BuildModeController : MonoBehaviour
             case EditModeState.Inactive:               
                 break;
             case EditModeState.FirstPerson:
-                currentActiveMode = firstPersonMode;             
+                currentActiveMode = firstPersonMode;
+                HUDController.i.buildModeHud.ActivateFirstPersonModeUI();
+                HUDController.i.buildModeHud.SetVisibilityOfCatalog(false);
+                
                 break;
             case EditModeState.Editor:
                 currentActiveMode = editorMode;
                 isAdvancedModeActive = true;
+                HUDController.i.buildModeHud.ActivateGodModeUI();
                 break;
         }
         if (currentActiveMode != null)
@@ -694,9 +480,6 @@ public class BuildModeController : MonoBehaviour
 
         foreach(DecentralandEntityToEdit entity in entitiesToRemove)
         {
-            //selectedEntities.Remove(entity);
-            //convertedEntities.Remove(entity.entityUniqueId);
-            //sceneToEdit.RemoveEntity(entity.rootEntity.entityId, true);
             DeleteEntity(entity,false);
         }
     
@@ -705,7 +488,7 @@ public class BuildModeController : MonoBehaviour
 
     void EntityListChanged()
     {
-        buildModeEntityListController.SetEntityList(GetEntitiesInCurrentScene());
+        HUDController.i.buildModeHud.SetEntityList(GetEntitiesInCurrentScene());
     }
 
     public void ResetScaleAndRotation()
@@ -791,9 +574,8 @@ public class BuildModeController : MonoBehaviour
         entityInformationController.Enable();
         entityInformationController.SetEntity(entityEditable.rootEntity, sceneToEdit);
 
-    
 
-        sceneLimitInfoController.UpdateInfo();
+        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         outlinerController.CancelAllOutlines();
         return true;
     }
@@ -1026,7 +808,7 @@ public class BuildModeController : MonoBehaviour
         string idToRemove = entityToDelete.rootEntity.entityId;
         Destroy(entityToDelete);
         sceneToEdit.RemoveEntity(idToRemove, true);
-        sceneLimitInfoController.UpdateInfo();
+        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
     }
 
@@ -1037,9 +819,8 @@ public class BuildModeController : MonoBehaviour
 
         BuildModeUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
-        sceneLimitInfoController.UpdateInfo();
+        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
 
-   
 
         return entity;
     }
@@ -1067,7 +848,7 @@ public class BuildModeController : MonoBehaviour
         sceneToEdit.CreateEntity(newEntity.entityId);
 
         SetupEntityToEdit(newEntity, true);
-        sceneLimitInfoController.UpdateInfo();
+        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
         return newEntity;
     }
@@ -1090,35 +871,15 @@ public class BuildModeController : MonoBehaviour
 
       
         SetupEntityToEdit(newEntity,true);
-        sceneLimitInfoController.UpdateInfo();
+        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
         return newEntity;
     }
-    //void CreateBoxEntity()
-    //{
-
-    //    DecentralandEntity newEntity = CreateEntity();
-
-    //    BaseDisposable mesh = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.BOX_SHAPE));
-    //    sceneToEdit.SharedComponentAttach(newEntity.entityId, mesh.id);
-
-    //    BaseDisposable material = sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.PBR_MATERIAL));
-
-    //    ((PBRMaterial)material).model.albedoColor = editMaterial.color;
-    //    sceneToEdit.SharedComponentAttach(newEntity.entityId, material.id);
-
-    //    if(isSnapActive) newEntity.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
-
-    //    Select(newEntity);
-
-    //    sceneLimitInfoController.UpdateInfo();
-    //}
 
     RenderProfileBridge.ID currentprofile;
     public void EnterEditMode()
-    {
-        
-        buildModeCanvasGO.SetActive(true);
+    {       
+        HUDController.i.buildModeHud.SetVisibility(true);
         
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
@@ -1130,7 +891,8 @@ public class BuildModeController : MonoBehaviour
    
         FindSceneToEdit();
         sceneToEdit.SetEditMode(true);
-        sceneLimitInfoController.SetParcelScene(sceneToEdit);
+        HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
+      
     
 
         if(currentActiveMode == null) SetBuildMode(EditModeState.Editor);
@@ -1143,6 +905,7 @@ public class BuildModeController : MonoBehaviour
         SetupAllEntities();
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(true);
+        EntityListChanged();
     }
 
 
@@ -1153,7 +916,9 @@ public class BuildModeController : MonoBehaviour
         //
         RenderProfileBridge.i.SetRenderProfile(currentprofile);
         CommonScriptableObjects.allUIHidden.Set(false);
-        buildModeCanvasGO.SetActive(false);
+
+        HUDController.i.buildModeHud.SetVisibility(false);
+
         inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
 
@@ -1166,7 +931,6 @@ public class BuildModeController : MonoBehaviour
         sceneToEdit.SetEditMode(false);
         SetBuildMode(EditModeState.Inactive);
 
-        if (isSceneEntitiesListActive) ChangeEntityListVisibility();
     
            
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;

@@ -83,6 +83,8 @@ public class HUDController : MonoBehaviour
 
     public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
 
+    public BuildModeHUDController buildModeHud => GetHUDElement(HUDElementID.BUILD_MODE) as BuildModeHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -150,7 +152,9 @@ public class HUDController : MonoBehaviour
         HELP_AND_SUPPORT_HUD = 21,
         EMAIL_PROMPT = 22,
         USERS_AROUND_LIST_HUD = 23,
-        COUNT = 24
+        BUILD_MODE = 24,
+        COUNT = 25
+      
     }
 
     [System.Serializable]
@@ -349,6 +353,9 @@ public class HUDController : MonoBehaviour
                 {
                     minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
                 }
+                break;
+            case HUDElementID.BUILD_MODE:
+                CreateHudElement<BuildModeHUDController>(configuration, hudElementId);
                 break;
         }
 

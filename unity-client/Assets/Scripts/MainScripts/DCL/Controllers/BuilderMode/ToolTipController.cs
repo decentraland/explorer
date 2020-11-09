@@ -12,7 +12,6 @@ public class ToolTipController : MonoBehaviour
     public TextMeshProUGUI tooltipTxt;
 
     Coroutine changeAlphaCor;
-    // Start is called before the first frame update
 
 
     public void Desactivate()

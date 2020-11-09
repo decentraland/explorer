@@ -48,8 +48,6 @@ public class BuildFirstPersonMode : BuildModeState
 
                         float currentSnapFactor = snapFactor;
 
-                        //float currentSnapFactor = snapFactor * currentScaleAdded;
-
                         objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
                         objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
                         objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
@@ -217,7 +215,6 @@ public class BuildFirstPersonMode : BuildModeState
                 freeMovementGO.transform.rotation = editionGO.transform.rotation;
                 freeMovementGO.transform.localScale = editionGO.transform.localScale;
 
-                //SetEditObjectParent();
                 editionGO.transform.SetParent(null);
 
                 Vector3 pointToLookAt = Camera.main.transform.position;
@@ -229,7 +226,6 @@ public class BuildFirstPersonMode : BuildModeState
             }
             else
             {
-                //snapGO.transform.SetParent(Camera.main.transform);
                 editionGO.transform.SetParent(null);
             }
         }

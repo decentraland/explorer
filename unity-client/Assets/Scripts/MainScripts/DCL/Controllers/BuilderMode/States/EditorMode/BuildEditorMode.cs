@@ -29,9 +29,7 @@ public class BuildEditorMode : BuildModeState
     public MouseCatcher mouseCatcher;
 
     [Header("InputActions")]
-    [SerializeField] internal InputAction_Trigger translateInputAction;
-    [SerializeField] internal InputAction_Trigger rotateInputAction;
-    [SerializeField] internal InputAction_Trigger scaleInputAction;
+
     [SerializeField] internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
 
     [SerializeField] internal InputAction_Hold squareMultiSelectionInputAction;
@@ -51,9 +49,9 @@ public class BuildEditorMode : BuildModeState
         builderInputWrapper.OnMouseDown += MouseDown;
         builderInputWrapper.OnMouseUp += MouseUp;
 
-        translateInputAction.OnTriggered += (o) => TranslateMode();
-        rotateInputAction.OnTriggered += (o) => RotateMode();
-        scaleInputAction.OnTriggered += (o) => ScaleMode();
+        HUDController.i.buildModeHud.OnTranslateSelectedAction += TranslateMode;
+        HUDController.i.buildModeHud.OnRotateSelectedAction += RotateMode;
+        HUDController.i.buildModeHud.OnScaleSelectedAction += ScaleMode;
         focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
 
         squareMultiSelectionInputAction.OnStarted += (o) => squareMultiSelectionButtonPressed = true;;
@@ -189,7 +187,7 @@ public class BuildEditorMode : BuildModeState
     public override void Activate(ParcelScene scene)
     {
         base.Activate(scene);
-
+        gameObject.SetActive(true);
         sceneToEdit = scene;
         voxelController.SetSceneToEdit(scene);
 
@@ -287,8 +285,6 @@ public class BuildEditorMode : BuildModeState
         if (selectedEntity.IsVoxel && selectedEntities.Count == 0)
         {
             editionGO.transform.position = voxelController.ConverPositionToVoxelPosition(editionGO.transform.position);
-            //voxelController.SetVoxelSelected(selectedEntity);
-            //ActivateVoxelMode();
         }
     }
 

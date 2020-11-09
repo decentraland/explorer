@@ -82,7 +82,6 @@ public class ActionController : MonoBehaviour
     
         currentStepIndex = actionsMade.Count-1;
         if (removedActions) actionListview.SetContent(actionsMade);
-        //else actionListview.AddAdapter(action);
         action.OnApplyValue += ApplyAction;
     }
 
@@ -104,7 +103,6 @@ public class ActionController : MonoBehaviour
                 Transform parent = entityToApply.gameObject.transform.parent;
 
                 entityToApply.gameObject.transform.localScale = new Vector3(convertedScale.x / parent.localScale.x, convertedScale.y / parent.localScale.y, convertedScale.z / parent.localScale.z);
-                //entityToApply.gameObject.transform.localScale = convertedScale;
                 break;
             case ActionType.CREATED:
                 string entityString = (string)value;

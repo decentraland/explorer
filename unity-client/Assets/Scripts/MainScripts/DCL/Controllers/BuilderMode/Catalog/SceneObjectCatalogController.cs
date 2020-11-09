@@ -17,12 +17,10 @@ public class SceneObjectCatalogController : MonoBehaviour
     public System.Action<string> OnResultReceived;
     public System.Action<SceneObject> OnSceneObjectSelected;
     public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
+    public System.Action OnStopInput, OnResumeInput;
 
-
-    public BuilderInputWrapper builderInputWrapper;
     public Canvas generalCanvas;
     public TextMeshProUGUI catalogTitleTxt;
-    public GameObject catalogUIGO;
     public CatalogAssetPackListView catalogAssetPackListView;
     public CatalogGroupListView catalogGroupListView;
     public TMP_InputField searchInputField;
@@ -117,13 +115,14 @@ public class SceneObjectCatalogController : MonoBehaviour
         newAdapter.canvasGroup.alpha = 0.6f;
         newAdapter.SetContent(adapter.GetContent());
         newAdapterRT.sizeDelta = adapterRT.sizeDelta*0.75f;
-        builderInputWrapper.StopInput();
+        OnStopInput?.Invoke();
     }
 
     void OnEndDrag(PointerEventData data)
     {     
         Destroy(draggedObject,0.1f);
-        builderInputWrapper.ResumeInput();
+        //builderInputWrapper.ResumeInput();
+        OnResumeInput?.Invoke();
     }
     public void SceneObjectDropped(BaseEventData data)
     {
@@ -295,7 +294,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     }
     public bool IsCatalogOpen()
     {
-        return catalogUIGO.activeSelf;
+        return gameObject.activeSelf;
     }
 
     public void ShowAssetsPacks()
@@ -315,10 +314,8 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         catalogTitleTxt.text = "Asset Packs";
         Utils.UnlockCursor();
-        catalogUIGO.SetActive(true);
-        //catalogAssetPackListView.gameObject.SetActive(true);
-        //catalogGroupListView.gameObject.SetActive(false);
-        //backBtn.gameObject.SetActive(false);
+        gameObject.SetActive(true);
+
 
         if (!catalogInitializaed)
         {
@@ -332,8 +329,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void CloseCatalog()
     {
-        //catalogUIGO.SetActive(false);
-        StartCoroutine(CloseCatalogAfterOneFrame());
+        if(gameObject.activeSelf) StartCoroutine(CloseCatalogAfterOneFrame());
     }
 
 
@@ -370,7 +366,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     IEnumerator CloseCatalogAfterOneFrame()
     {
         yield return null;
-        catalogUIGO.SetActive(false);
+        gameObject.SetActive(false);
     }
  
 }

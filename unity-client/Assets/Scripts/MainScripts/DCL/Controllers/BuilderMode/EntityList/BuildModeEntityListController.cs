@@ -31,26 +31,17 @@ public class BuildModeEntityListController : MonoBehaviour
         entityListView.OnActioninvoked -= EntityActionInvoked;
     }
 
-    public void OpenEntityList(List<DecentralandEntityToEdit> sceneEntities,ParcelScene parcelScene)
-    {
-        if (currentScene == null)
-        {
-            currentScene = parcelScene;
-            SetEntityList(sceneEntities);
-        }
-        else
-        {
-            if (currentScene != parcelScene) SetEntityList(sceneEntities);
-        }
+    public void OpenEntityList()
+    {        
+        entityListView.SetContent(entitiesList);
         gameObject.SetActive(true);
         entityListView.gameObject.SetActive(true);
-
     }
 
     public void SetEntityList(List<DecentralandEntityToEdit> sceneEntities)
     {
         entitiesList = sceneEntities;
-        entityListView.SetContent(sceneEntities);
+        if (entityListView.gameObject.activeSelf) entityListView.SetContent(entitiesList);
     }
 
     public void CloseList()
