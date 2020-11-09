@@ -133,4 +133,43 @@ public class ProfileHUDTests : TestsBase
         controller.SetBackpackButtonVisibility(false);
         Assert.IsFalse(controller.view.buttonBackpack.gameObject.activeSelf);
     }
+
+    [Test]
+    public void ActivateAndDeactivateProfileNameEditionCorrectly()
+    {
+        controller.view.textName.text = "test name";
+
+        controller.view.ActivateProfileNameEditionMode(true);
+        Assert.IsFalse(controller.view.editNameTooltipGO.activeSelf);
+        Assert.IsFalse(controller.view.textName.gameObject.activeSelf);
+        Assert.IsTrue(controller.view.inputName.gameObject.activeSelf);
+        Assert.IsTrue(controller.view.inputName.text == controller.view.textName.text);
+
+        controller.view.ActivateProfileNameEditionMode(false);
+        Assert.IsTrue(controller.view.editNameTooltipGO.activeSelf);
+        Assert.IsTrue(controller.view.textName.gameObject.activeSelf);
+        Assert.IsFalse(controller.view.inputName.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void UpdateCharactersLimitLabelCorrectly()
+    {
+        controller.view.inputName.characterLimit = 100;
+        controller.view.inputName.text = "";
+        Assert.IsTrue(controller.view.textCharLimit.text == $"{controller.view.inputName.text.Length}/{controller.view.inputName.characterLimit}");
+
+        controller.view.inputName.characterLimit = 50;
+        controller.view.inputName.text = "test name";
+        Assert.IsTrue(controller.view.textCharLimit.text == $"{controller.view.inputName.text.Length}/{controller.view.inputName.characterLimit}");
+    }
+
+    [Test]
+    public void SetProfileNameCorrectly()
+    {
+        string newName = "new test name";
+
+        controller.view.textName.text = "test name";
+        controller.view.SetProfileName(newName);
+        Assert.IsTrue(controller.view.textName.text == newName);
+    }
 }

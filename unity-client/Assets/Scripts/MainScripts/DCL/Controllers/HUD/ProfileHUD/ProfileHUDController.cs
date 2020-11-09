@@ -46,6 +46,7 @@ public class ProfileHUDController : IHUD
         view.buttonClaimName.onClick.AddListener(()=> WebInterface.OpenURL(URL_CLAIM_NAME));
         view.buttonTermsOfService.onPointerDown += () => WebInterface.OpenURL(URL_TERMS_OF_USE);
         view.buttonPrivacyPolicy.onPointerDown += () => WebInterface.OpenURL(URL_PRIVACY_POLICY);
+        view.inputName.onSubmit.AddListener(UpdateProfileName);
 
         manaCounterView = view.GetComponentInChildren<ManaCounterView>(true);
         if (manaCounterView)
@@ -139,12 +140,9 @@ public class ProfileHUDController : IHUD
     /// <param name="visible">True for showing the button.</param>
     public void SetBackpackButtonVisibility(bool visible)
     {
-        view.SetBackpackButtonVisibility(avatarEditorHud != null && visible);
+        view?.SetBackpackButtonVisibility(avatarEditorHud != null && visible);
     }
 
-    /// <summary>
-    /// Open the AvatarEditorHUD view.
-    /// </summary>
     private void OpenBackpackWindow()
     {
         if (avatarEditorHud == null)
@@ -160,5 +158,16 @@ public class ProfileHUDController : IHUD
     public void HideProfileMenu()
     {
         view?.HideMenu();
+    }
+
+    private void UpdateProfileName(string newName)
+    {
+        if (view != null)
+        {
+            view.SetProfileName(newName);
+            view.ActivateProfileNameEditionMode(false);
+        }
+
+        WebInterface.SendSaveUserUnverifiedName(newName);
     }
 }
