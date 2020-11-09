@@ -19,7 +19,6 @@ import {
   USER_AUTHENTIFIED,
   UserAuthentified
 } from './actions'
-import defaultLogger from '../logger'
 
 const SIGNUP_INITIAL_STATE = {
   stage: '',
