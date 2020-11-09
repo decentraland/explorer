@@ -1,3 +1,5 @@
+import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
+
 declare const globalThis: { UnityLoader: any } & StoreContainer
 declare const global: any
 ;(window as any).reactVersion = true
@@ -104,6 +106,11 @@ namespace webApp {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
         
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+
+        const configForRenderer = kernelConfigForRenderer()
+        configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
+        i.SetKernelConfiguration(configForRenderer)
+
         configureTaskbarDependentHUD(i, voiceChatEnabled)
 
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
