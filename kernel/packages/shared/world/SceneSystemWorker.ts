@@ -59,6 +59,7 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   setPosition(position: Vector3) {
+    // This method is called before position is reported by the renderer
     if (!this.position) {
       this.position = new Vector3()
     }
