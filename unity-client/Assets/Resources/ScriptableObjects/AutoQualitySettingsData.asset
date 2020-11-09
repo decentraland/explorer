@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultPresetIndex: 1
   settings:
-  - displayName: Basic
+  - displayName: Auto0
     baseResolution: 0
     antiAliasing: 1
     renderScale: 0.7
@@ -25,20 +25,97 @@ MonoBehaviour:
     bloom: 0
     colorGrading: 0
     shadowDistance: 30
-  - displayName: Medium
-    baseResolution: 1
+  - displayName: Auto1
+    baseResolution: 0
     antiAliasing: 1
-    renderScale: 0.8
+    renderScale: 0.7
     shadows: 1
-    softShadows: 1
+    softShadows: 0
+    shadowResolution: 256
+    cameraDrawDistance: 50
+    bloom: 0
+    colorGrading: 0
+    shadowDistance: 30
+  - displayName: Auto2
+    baseResolution: 0
+    antiAliasing: 1
+    renderScale: 0.7
+    shadows: 1
+    softShadows: 0
     shadowResolution: 256
     cameraDrawDistance: 80
+    bloom: 0
+    colorGrading: 0
+    shadowDistance: 50
+  - displayName: Auto3
+    baseResolution: 0
+    antiAliasing: 1
+    renderScale: 0.7
+    shadows: 1
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 80
+    bloom: 1
+    colorGrading: 0
+    shadowDistance: 50
+  - displayName: Auto4
+    baseResolution: 0
+    antiAliasing: 1
+    renderScale: 0.7
+    shadows: 1
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 100
+    bloom: 1
+    colorGrading: 0
+    shadowDistance: 50
+  - displayName: Auto5
+    baseResolution: 0
+    antiAliasing: 1
+    renderScale: 1
+    shadows: 1
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 100
+    bloom: 1
+    colorGrading: 0
+    shadowDistance: 50
+  - displayName: Auto6
+    baseResolution: 0
+    antiAliasing: 1
+    renderScale: 1
+    shadows: 1
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 100
+    bloom: 1
+    colorGrading: 0
+    shadowDistance: 50
+  - displayName: Auto7
+    baseResolution: 0
+    antiAliasing: 2
+    renderScale: 1
+    shadows: 1
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 100
+    bloom: 1
+    colorGrading: 0
+    shadowDistance: 50
+  - displayName: Auto8
+    baseResolution: 0
+    antiAliasing: 4
+    renderScale: 1
+    shadows: 1
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 100
     bloom: 1
     colorGrading: 1
-    shadowDistance: 45
-  - displayName: High
-    baseResolution: 2
-    antiAliasing: 2
+    shadowDistance: 50
+  - displayName: Auto9
+    baseResolution: 0
+    antiAliasing: 8
     renderScale: 1
     shadows: 1
     softShadows: 1

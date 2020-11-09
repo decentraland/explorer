@@ -10,6 +10,7 @@ using QualitySettings = DCL.SettingsData.QualitySettings;
 public class AutoQualitySettingsController : MonoBehaviour
 {
     private const float LOOP_TIME_SECONDS = 1f;
+    private const string LAST_QUALITY_INDEX = "LAST_QUALITY_INDEX";
 
     [SerializeField] internal BooleanVariable autoQualityEnabled;
     [SerializeField] internal PerformanceMetricsDataVariable performanceMetricsData;
@@ -24,7 +25,7 @@ public class AutoQualitySettingsController : MonoBehaviour
         if (autoQualityEnabled == null || qualitySettings == null || qualitySettings.Length == 0)
             return;
 
-        currentQualityIndex = (qualitySettings.Length - 1) / 2;
+        currentQualityIndex = PlayerPrefs.GetInt(LAST_QUALITY_INDEX,(qualitySettings.Length - 1) / 2);
         autoQualityEnabled.OnChange += SetAutoSettings;
         SetAutoSettings(autoQualityEnabled.Get(), !autoQualityEnabled.Get());
     }
@@ -81,6 +82,7 @@ public class AutoQualitySettingsController : MonoBehaviour
         if (newQualityIndex <= 0 || newQualityIndex >= qualitySettings.Length)
             return;
 
+        PlayerPrefs.SetInt(LAST_QUALITY_INDEX, currentQualityIndex);
         currentQualityIndex = newQualityIndex;
         evaluator.Reset();
         Settings.i.ApplyAutoQualitySettings(currentQualityIndex);
