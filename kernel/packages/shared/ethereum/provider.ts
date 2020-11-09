@@ -5,7 +5,6 @@ import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
 import { Web3Connector } from './Web3Connector'
 import { ProviderType } from './ProviderType'
-import { WORLD_EXPLORER } from '../../config'
 
 let web3Connector: Web3Connector
 export const providerFuture = future()
@@ -13,10 +12,6 @@ export const requestManager = new RequestManager(null)
 
 export const loginCompleted = future<void>()
 ;(window as any).loginCompleted = loginCompleted
-
-let providerRequested = false
-
-type LoginData = { successful: boolean; provider: any; localIdentity?: Account }
 
 export function createEth(provider: any = null): Eth {
   return web3Connector.createEth(provider)!
@@ -55,18 +50,6 @@ export function getProviderType() {
 }
 
 export async function awaitWeb3Approval(): Promise<void> {
-  if (!providerRequested) {
-    providerRequested = true
-    if (!WORLD_EXPLORER) {
-      // otherwise, login element not found (preview, builder)
-      providerFuture.resolve({
-        successful: false,
-        provider: Web3Connector.createWebSocketProvider(),
-        localIdentity: Account.create()
-      })
-    }
-  }
-  providerFuture.then((result: LoginData) => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
   return providerFuture
 }
 

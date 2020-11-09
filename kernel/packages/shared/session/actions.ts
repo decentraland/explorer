@@ -16,10 +16,6 @@ export type AuthenticateAction = ReturnType<typeof authenticate>
 export const SIGNUP = '[SIGNUP]'
 export const signUp = () => action(SIGNUP)
 
-export const LOGIN = '[Request] Login'
-export const login = (provider: string) => action(LOGIN, { provider })
-export type LoginAction = ReturnType<typeof login>
-
 export const USER_AUTHENTIFIED = '[Success] User authentified'
 export const userAuthentified = (userId: string, identity: ExplorerIdentity, network: ETHEREUM_NETWORK) =>
   action(USER_AUTHENTIFIED, { userId, identity, network })
