@@ -16,7 +16,7 @@ export const PassportAvatar: React.FC<PassportAvatarProps> = (props) => (
       height="180"
       src={props.face || defaultAvatar}
     />
-    <em>Active since Aug 2020</em>
+    {/*<em>Active since Aug 2020</em>*/}
     <button onClick={props.onEditAvatar}>Edit Avatar</button>
   </div>
 );

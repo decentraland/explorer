@@ -7,10 +7,14 @@ export interface ModalProps {
   handleClose?: () => void;
 }
 
-export const Modal: React.FC<ModalProps> = ({ handleClose, withAvatars, children }) => {
-  let className = 'popup-container'
+export const Modal: React.FC<ModalProps> = ({
+  handleClose,
+  withAvatars,
+  children,
+}) => {
+  let className = "popup-container";
   if (withAvatars) {
-    className += ' with-avatars'
+    className += " with-avatars";
   }
 
   return (

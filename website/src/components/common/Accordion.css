@@ -22,7 +22,7 @@
   left: 0;
   width: 1em;
   height: 1em;
-  transition: opacity .3s ease;
+  transition: opacity 0.3s ease;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -51,5 +51,5 @@
 .eth-accordion .eth-accordion-description {
   overflow: hidden;
   height: 0;
-  transition: height .3s ease;
+  transition: height 0.3s ease;
 }

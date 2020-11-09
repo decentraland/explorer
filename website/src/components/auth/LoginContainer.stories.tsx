@@ -21,7 +21,10 @@ export default {
   },
 } as Meta;
 
-const Template: Story<LoginContainerProps & { state: any }> = ({ state, ...props }) => (
+const Template: Story<LoginContainerProps & { state: any }> = ({
+  state,
+  ...props
+}) => (
   <Provider store={createStore(() => state, state)}>
     <LoginContainer {...props} />
   </Provider>
@@ -42,16 +45,14 @@ export const passport = Template.bind({});
 passport.args = {
   ...Template.args,
   stage: LoginStage.SIGN_UP,
-  state: { session: { signup: { stage: 'passport' } } }
+  state: { session: { signup: { stage: "passport" } } },
 };
 
-export const terms = Template.bind({
-
-});
+export const terms = Template.bind({});
 terms.args = {
   ...Template.args,
   stage: LoginStage.SIGN_UP,
-  state: { session: { signup: { stage: 'terms' } } }
+  state: { session: { signup: { stage: "terms" } } },
 };
 
 export const ConnectAdvice = Template.bind({});

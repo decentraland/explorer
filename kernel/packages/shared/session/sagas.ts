@@ -16,7 +16,6 @@ import {
   isGuest,
   isSessionExpired,
   loginCompleted,
-  providerFuture,
   requestWeb3Provider
 } from 'shared/ethereum/provider'
 import { setLocalInformationForComms } from 'shared/comms/peers'
@@ -33,10 +32,17 @@ import { identifyEmail, identifyUser, queueTrackingEvent } from 'shared/analytic
 import { getAppNetwork, getNetworkFromTLD } from 'shared/web3'
 import { getNetwork } from 'shared/ethereum/EthereumService'
 
-import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
+import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
-import { getLastSessionWithoutWallet, getStoredSession, removeStoredSession, Session, setStoredSession } from './index'
-import { ExplorerIdentity, LOCAL_GUEST_PROFILE_KEY, LoginStage, SignUpStage } from './types'
+import {
+  getLastSessionByProvider,
+  getLastSessionWithoutWallet,
+  getStoredSession,
+  removeStoredSession,
+  Session,
+  setStoredSession
+} from './index'
+import { ExplorerIdentity, LoginStage, SignUpStage, StoredSession } from './types'
 import {
   AUTHENTICATE,
   AuthenticateAction,
@@ -63,7 +69,7 @@ import {
 } from './actions'
 import { ProviderType } from '../ethereum/ProviderType'
 import Html from '../Html'
-import { getProfileByUserId } from '../profiles/sagas'
+import { fetchProfileLocally, getProfileByUserId } from '../profiles/sagas'
 import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
 import { unityInterface } from '../../unity-interface/UnityInterface'
 import { getSignUpIdentity, getSignUpProfile } from './selectors'
@@ -143,14 +149,19 @@ function* authenticate(action: AuthenticateAction) {
   }
   const session = yield authorize()
   let profile = yield getProfileByUserId(session.userId)
-  if (profile) {
+  if (profile || isGuestWithProfile(session)) {
     return yield signIn(session.userId, session.identity)
   }
   return yield startSignUp(session.userId, session.identity)
 }
 
+function isGuestWithProfile(session: StoredSession) {
+  const profile = fetchProfileLocally(session.userId)
+  return isGuest() && profile
+}
+
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
-  let prevGuest = isGuest() ? null : getFromLocalStorage(LOCAL_GUEST_PROFILE_KEY)
+  let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
   profile.userId = identity.address.toString()
   profile.ethAddress = identity.address.toString()
@@ -162,7 +173,6 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
   yield put(signUpSetProfile(profile))
 
   if (prevGuest) {
-    removeFromLocalStorage(LOCAL_GUEST_PROFILE_KEY)
     return yield signUp()
   }
   yield showAvatarEditor()
@@ -199,10 +209,15 @@ function* requestProvider(providerType: ProviderType) {
 function* authorize() {
   if (ENABLE_WEB3) {
     try {
-      let address = yield getUserEthAccountIfAvailable()
-      let userData = address ? getStoredSession(address) : undefined
+      let userData
+      if (isGuest()) {
+        userData = getLastSessionByProvider(ProviderType.GUEST)
+      } else {
+        const address = yield getUserEthAccountIfAvailable()
+        userData = getStoredSession(address)
+      }
       // check that user data is stored & key is not expired
-      if (!userData || isSessionExpired(userData) || (address && userData.userId !== address.toLowerCase())) {
+      if (!userData || isSessionExpired(userData)) {
         const identity = yield createAuthIdentity()
         return {
           userId: identity.address,
@@ -279,9 +294,6 @@ function* signUp() {
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
-  if (isGuest()) {
-    saveToLocalStorage(LOCAL_GUEST_PROFILE_KEY, profile)
-  }
   unityInterface.ActivateRendering()
 }
 
@@ -409,48 +421,39 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
   let provider: ProviderType | undefined
   let hasConnectedWeb3 = false
 
-  if (ENABLE_WEB3) {
-    const result = await providerFuture
-    if (result.successful) {
-      const eth = createEth()
-      const account = (await eth.getAccounts())[0]
+  if (ENABLE_WEB3 && !isGuest()) {
+    const eth = createEth()
+    const account = (await eth.getAccounts())[0]
 
-      address = account.toJSON()
-      provider = getProviderType()
-      signer = async (message: string) => {
-        let result
-        while (!result) {
-          try {
-            result = await new Personal(eth.provider).sign(message, account, '')
-          } catch (e) {
-            if (e.message && e.message.includes('User denied message signature')) {
-              put(changeLoginStage(LoginStage.SING_ADVICE))
-              Html.showEthSignAdvice(true)
-            }
+    address = account.toJSON()
+    provider = getProviderType()
+    signer = async (message: string) => {
+      let result
+      while (!result) {
+        try {
+          result = await new Personal(eth.provider).sign(message, account, '')
+        } catch (e) {
+          if (e.message && e.message.includes('User denied message signature')) {
+            put(changeLoginStage(LoginStage.SING_ADVICE))
+            Html.showEthSignAdvice(true)
           }
         }
-        put(changeLoginStage(LoginStage.COMPLETED))
-        Html.showEthSignAdvice(false)
-        return result
       }
-      hasConnectedWeb3 = true
-    } else {
-      const account: Account = result.localIdentity
-
-      provider = ProviderType.GUEST
-      address = account.address.toJSON()
-      signer = async (message: string) => account.sign(message).signature
-
-      // If we are using a local profile, we don't want the identity to expire.
-      // Eventually, if a wallet gets created, we can migrate the profile to the wallet.
-      ephemeralLifespanMinutes = 365 * 24 * 60 * 99
+      put(changeLoginStage(LoginStage.COMPLETED))
+      Html.showEthSignAdvice(false)
+      return result
     }
+    hasConnectedWeb3 = true
   } else {
-    const account = Account.create()
+    const account: Account = Account.create()
 
     provider = ProviderType.GUEST
     address = account.address.toJSON()
     signer = async (message: string) => account.sign(message).signature
+
+    // If we are using a local profile, we don't want the identity to expire.
+    // Eventually, if a wallet gets created, we can migrate the profile to the wallet.
+    ephemeralLifespanMinutes = 365 * 24 * 60 * 99
   }
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)

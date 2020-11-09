@@ -8,7 +8,7 @@ import twitter from "../../images/footer/Twitter.png";
 export const Footer: React.FC = () => (
   <footer className="footer-bar">
     <div className="footer-bar-content">
-      <a href="https://dcl.gg/discord" target="about:blank">
+      <a href="https://discord.gg/k5ydeZp" target="about:blank">
         <img alt="" src={discord} />
       </a>
       <a href="https://www.reddit.com/r/decentraland/" target="about:blank">

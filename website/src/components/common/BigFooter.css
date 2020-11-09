@@ -39,7 +39,7 @@
   height: 68px;
   justify-content: center;
   align-items: center;
-  background-color:  rgba(115, 110, 125, 0.1);
+  background-color: rgba(115, 110, 125, 0.1);
   border-radius: 68px;
   margin-right: 26px;
 }
@@ -63,14 +63,13 @@
 
 .big-footer a.big-footer-button:hover {
   text-decoration: none;
-  background-color:  rgba(115, 110, 125, 0.1);
+  background-color: rgba(115, 110, 125, 0.1);
 }
 
 .big-footer a.big-footer-button svg {
   width: 48px;
   height: auto;
 }
-
 
 @media only screen and (max-width: 991px) {
   .big-footer .eth-container {

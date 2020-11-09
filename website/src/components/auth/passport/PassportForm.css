@@ -17,11 +17,11 @@
   font-weight: normal;
   font-size: 15px;
   line-height: 18px;
-  color: #FF2D55;
+  color: #ff2d55;
 }
 
 .passportForm form .inputGroup input.hasError {
-  border-color: #FF2D55;
+  border-color: #ff2d55;
 }
 
 .passportForm form .inputGroup em.warningLength {
@@ -44,11 +44,11 @@
 .passportForm form input {
   width: 345px;
   height: 45px;
-  border: 2px solid #C4C7D3;
+  border: 2px solid #c4c7d3;
   border-radius: 10px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   font-weight: bold;
-  margin: .2em 0;
+  margin: 0.2em 0;
   padding: 0 0.5em;
   font-size: 20px;
   line-height: 25px;
@@ -79,4 +79,3 @@
   font-size: 17px;
   line-height: 20px;
 }
-
