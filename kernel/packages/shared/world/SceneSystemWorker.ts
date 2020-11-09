@@ -22,7 +22,7 @@ export const hudWorkerUrl = URL.createObjectURL(hudWorkerBLOB)
 export class SceneSystemWorker extends SceneWorker {
   private sceneStarted: boolean = false
 
-  private position: Vector3 = new Vector3()
+  private position!: Vector3
   private readonly lastSentPosition = new Vector3(0, 0, 0)
   private readonly lastSentRotation = new Quaternion(0, 0, 0, 1)
   private positionObserver: Observer<any> | null = null
@@ -59,7 +59,10 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   setPosition(position: Vector3) {
-    this.position = position
+    if (!this.position) {
+      this.position = new Vector3()
+    }
+    this.position.copyFrom(position)
   }
   isPersistent(): boolean {
     return this.persistent
