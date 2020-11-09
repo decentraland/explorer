@@ -11,14 +11,9 @@ import {
   getParcelSceneID
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-<<<<<<< HEAD
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
-import { worldRunningObservable } from 'shared/world/worldState'
-=======
-import { hudWorkerUrl, SceneWorker } from 'shared/world/SceneWorker'
 import { renderStateObservable } from 'shared/world/worldState'
->>>>>>> master
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
@@ -138,7 +133,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     onMessage(type: string, message: any) {
       if (type in browserInterface) {
         // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
+        ; (browserInterface as any)[type](message)
       } else {
         defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
       }
