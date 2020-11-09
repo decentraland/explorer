@@ -6,8 +6,8 @@ import { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
 import { EngineAPI } from 'shared/apis/EngineAPI'
 import { Vector3 } from 'decentraland-ecs/src/decentraland/math'
 import { IEventNames, IEvents } from 'decentraland-ecs/src'
-import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { PREVIEW } from 'config'
+import { ParcelSceneAPI } from './ParcelSceneAPI'
 
 export abstract class SceneWorker {
   protected engineAPI: EngineAPI | null = null

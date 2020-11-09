@@ -7,7 +7,7 @@ import { Vector3, Quaternion, Vector2 } from 'decentraland-ecs/src/decentraland/
 import { PositionReport, positionObservable } from './positionThings'
 import { Observer } from 'decentraland-ecs/src'
 import { sceneLifeCycleObservable } from '../../decentraland-loader/lifecycle/controllers/scene'
-import { worldRunningObservable, isWorldRunning } from './worldState'
+import { renderStateObservable, isRendererEnabled } from './worldState'
 import { ParcelSceneAPI } from './ParcelSceneAPI'
 import { CustomWebWorkerTransport } from './CustomWebWorkerTransport'
 
@@ -27,7 +27,7 @@ export class SceneSystemWorker extends SceneWorker {
   private readonly lastSentRotation = new Quaternion(0, 0, 0, 1)
   private positionObserver: Observer<any> | null = null
   private sceneLifeCycleObserver: Observer<any> | null = null
-  private worldRunningObserver: Observer<any> | null = null
+  private renderStateObserver: Observer<any> | null = null
 
   private sceneReady: boolean = false
 
@@ -81,9 +81,9 @@ export class SceneSystemWorker extends SceneWorker {
       sceneLifeCycleObservable.remove(this.sceneLifeCycleObserver)
       this.sceneLifeCycleObserver = null
     }
-    if (this.worldRunningObserver) {
-      worldRunningObservable.remove(this.worldRunningObserver)
-      this.worldRunningObserver = null
+    if (this.renderStateObserver) {
+      renderStateObservable.remove(this.renderStateObserver)
+      this.renderStateObserver = null
     }
   }
 
@@ -125,7 +125,7 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   private subscribeToWorldRunningEvents() {
-    this.worldRunningObserver = worldRunningObservable.add(() => {
+    this.renderStateObserver = renderStateObservable.add(() => {
       this.sendSceneReadyIfNecessary()
     })
   }
@@ -141,10 +141,10 @@ export class SceneSystemWorker extends SceneWorker {
   }
 
   private sendSceneReadyIfNecessary() {
-    if (!this.sceneStarted && isWorldRunning() && this.sceneReady) {
+    if (!this.sceneStarted && isRendererEnabled() && this.sceneReady) {
       this.sceneStarted = true
       this.engineAPI!.sendSubscriptionEvent('sceneStart', {})
-      worldRunningObservable.remove(this.worldRunningObserver)
+      renderStateObservable.remove(this.renderStateObserver)
     }
   }
 
