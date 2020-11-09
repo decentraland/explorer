@@ -7,7 +7,7 @@ import { Discord } from "./Icon.tsx/Discord";
 
 import "./BigFooter.css";
 
-const year = new Date().getFullYear()
+const year = new Date().getFullYear();
 export const BigFooter: React.FC = () => (
   <footer className="big-footer">
     <Container>
@@ -16,7 +16,11 @@ export const BigFooter: React.FC = () => (
           <h4>NEED SUPPORT?</h4>
         </div>
         <div>
-          <a className="big-footer-button" href="https://dcl.gg/discord" target="about:blank">
+          <a
+            className="big-footer-button"
+            href="https://dcl.gg/discord"
+            target="about:blank"
+          >
             <Discord /> Join our Discord
           </a>
         </div>
@@ -26,20 +30,32 @@ export const BigFooter: React.FC = () => (
           <h4>FOLLOW US</h4>
         </div>
         <div>
-          <a className="big-footer-icon" href="https://www.reddit.com/r/decentraland/" target="about:blank">
+          <a
+            className="big-footer-icon"
+            href="https://www.reddit.com/r/decentraland/"
+            target="about:blank"
+          >
             <Reddit />
           </a>
-          <a className="big-footer-icon" href="http://github.com/decentraland" target="about:blank">
+          <a
+            className="big-footer-icon"
+            href="http://github.com/decentraland"
+            target="about:blank"
+          >
             <Github />
           </a>
-          <a className="big-footer-icon" href="https://twitter.com/decentraland" target="about:blank">
+          <a
+            className="big-footer-icon"
+            href="https://twitter.com/decentraland"
+            target="about:blank"
+          >
             <Twitter />
           </a>
         </div>
       </div>
     </Container>
     <Container>
-        <p className="right">© {year} Decentraland</p>
+      <p className="right">© {year} Decentraland</p>
     </Container>
   </footer>
 );
