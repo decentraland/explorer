@@ -1,5 +1,3 @@
-import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
-
 declare const globalThis: { UnityLoader: any } & StoreContainer
 declare const global: any
 ;(window as any).reactVersion = true
@@ -33,6 +31,7 @@ import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shar
 import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
+import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 
 const logger = createLogger('website.ts: ')
 
