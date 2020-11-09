@@ -46,9 +46,8 @@ export const SignUpContainer: React.FC<SignUpContainerProps> = (props) => {
 };
 
 const mapStateToProps = (state: any, props: any) => {
-  const signup = state?.session?.signup
+  const signup = state?.session?.signup;
   const face256 = signup?.profile?.avatar?.snapshots?.face256;
-  console.log(state, props)
 
   return {
     face: props?.face ?? (face256 && `data:image/jpg;base64,${face256}`),
