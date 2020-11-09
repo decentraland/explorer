@@ -26,6 +26,7 @@ import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shar
 import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
+import { kernelConfigForRenderer } from 'unity-interface/kernelConfigForRenderer'
 
 const container = document.getElementById('gameContainer')
 
@@ -85,6 +86,11 @@ initializeUnity(container)
       const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
       const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+
+      const configForRenderer = kernelConfigForRenderer()
+      configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
+      i.SetKernelConfiguration(configForRenderer)
+
       configureTaskbarDependentHUD(i, voiceChatEnabled)
 
       i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
