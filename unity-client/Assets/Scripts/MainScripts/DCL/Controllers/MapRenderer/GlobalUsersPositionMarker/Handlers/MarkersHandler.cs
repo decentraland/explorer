@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-internal class UserPositionMarkersHandler : IDisposable
+internal class MarkersHandler : IDisposable
 {
     readonly List<UserPositionMarker> availableMarkers;
     readonly List<UserPositionMarker> usedMarkers;
@@ -14,7 +14,7 @@ internal class UserPositionMarkersHandler : IDisposable
 
     int maxMarkers;
 
-    public UserPositionMarkersHandler(GameObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
+    public MarkersHandler(GameObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
     {
         this.maxMarkers = maxMarkers;
         this.coordToMapPosition = coordToMapPosFunc;
