@@ -211,6 +211,10 @@ export class BrowserInterface {
     }
   }
 
+  public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
+    globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
+  }
+
   public CloseUserAvatar(isSignUpFlow = false) {
     if (isSignUpFlow) {
       unityInterface.DeactivateRendering()

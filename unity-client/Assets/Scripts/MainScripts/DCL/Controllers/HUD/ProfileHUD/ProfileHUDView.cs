@@ -35,7 +35,6 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal TextMeshProUGUI textAddress;
 
     [Header("Buttons")]
-    [SerializeField] internal Button buttonEditUnverifiedName;
     [SerializeField] internal Button buttonClaimName;
     [SerializeField] internal Button buttonBackpack;
     [SerializeField] internal Button buttonCopyAddress;
@@ -43,6 +42,12 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonSignUp;
     [SerializeField] internal Button_OnPointerDown buttonTermsOfService;
     [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicy;
+
+    [Header("Name Edition")]
+    [SerializeField] internal GameObject editNameTooltipGO;
+    [SerializeField] internal Button_OnPointerDown buttonEditUnverifiedName;
+    [SerializeField] internal TMP_InputField inputName;
+    [SerializeField] internal TextMeshProUGUI textCharLimit;
 
     [Header("Tutorial Config")]
     [SerializeField] internal RectTransform backpackTooltipReference;
@@ -58,10 +63,13 @@ internal class ProfileHUDView : MonoBehaviour
 
         buttonToggleMenu.onClick.AddListener(ToggleMenu);
         buttonCopyAddress.onClick.AddListener(CopyAddress);
+        buttonEditUnverifiedName.onPointerDown += () => ActivateProfileNameEditionMode(true);
+        inputName.onValueChanged.AddListener(UpdateCharLimit);
+        inputName.onDeselect.AddListener((x) => ActivateProfileNameEditionMode(false));
         copyToast.gameObject.SetActive(false);
     }
 
-    public void SetProfile(UserProfile userProfile)
+    internal void SetProfile(UserProfile userProfile)
     {
         if (userProfile.hasClaimedName)
         {
@@ -78,7 +86,7 @@ internal class ProfileHUDView : MonoBehaviour
         profile = userProfile;
     }
 
-    public void ToggleMenu()
+    internal void ToggleMenu()
     {
         if (menuShowHideAnimator.isVisible)
         {
@@ -91,7 +99,7 @@ internal class ProfileHUDView : MonoBehaviour
         }
     }
 
-    public void HideMenu()
+    internal void HideMenu()
     {
         if (menuShowHideAnimator.isVisible)
         {
@@ -100,20 +108,12 @@ internal class ProfileHUDView : MonoBehaviour
         }
     }
 
-    public void SetVisibility(bool visible)
+    internal void SetVisibility(bool visible)
     {
         if (visible && !mainShowHideAnimator.isVisible)
             mainShowHideAnimator.Show();
         else if (!visible && mainShowHideAnimator.isVisible)
             mainShowHideAnimator.Hide();
-    }
-
-    public void SetBackpackButtonVisibility(bool visible)
-    {
-        if (visible && !buttonBackpack.gameObject.activeSelf)
-            buttonBackpack.gameObject.SetActive(true);
-        else if (!visible && buttonBackpack.gameObject.activeSelf)
-            buttonBackpack.gameObject.SetActive(false);
     }
 
     private void HandleProfileSnapshot(UserProfile userProfile)
@@ -142,8 +142,17 @@ internal class ProfileHUDView : MonoBehaviour
 
     private void HandleUnverifiedProfileName(UserProfile userProfile)
     {
-        textName.text = userProfile.userName;
-        textPostfix.text = $".{userProfile.userId.Substring(userProfile.userId.Length - NAME_POSTFIX_LENGTH)}";
+        if (!String.IsNullOrEmpty(userProfile.userName) &&
+            userProfile.userName.Length > NAME_POSTFIX_LENGTH)
+        {
+            textName.text = userProfile.userName.Substring(0, userProfile.userName.Length - NAME_POSTFIX_LENGTH - 1);
+        }
+        else
+        {
+            textName.text = userProfile.userName;
+        }
+
+        textPostfix.text = $"#{userProfile.userId.Substring(userProfile.userId.Length - NAME_POSTFIX_LENGTH)}";
         SetActiveUnverifiedNameGOs(true);
     }
 
@@ -221,5 +230,36 @@ internal class ProfileHUDView : MonoBehaviour
     private void OnDisable()
     {
         closeAction.OnTriggered -= closeActionDelegate;
+    }
+
+    internal void SetBackpackButtonVisibility(bool visible)
+    {
+        if (visible && !buttonBackpack.gameObject.activeSelf)
+            buttonBackpack.gameObject.SetActive(true);
+        else if (!visible && buttonBackpack.gameObject.activeSelf)
+            buttonBackpack.gameObject.SetActive(false);
+    }
+
+    internal void ActivateProfileNameEditionMode(bool activate)
+    {
+        editNameTooltipGO.SetActive(!activate);
+        textName.gameObject.SetActive(!activate);
+        inputName.gameObject.SetActive(activate);
+
+        if (activate)
+        {
+            inputName.text = textName.text;
+            inputName.Select();
+        }
+    }
+
+    private void UpdateCharLimit(string newValue)
+    {
+        textCharLimit.text = $"{newValue.Length}/{inputName.characterLimit}";
+    }
+
+    internal void SetProfileName(string newName)
+    {
+        textName.text = newName;
     }
 }

@@ -820,6 +820,12 @@ namespace DCL.Interface
             public AvatarModel avatar;
         }
 
+        [System.Serializable]
+        public class SendSaveUserUnverifiedNamePayload
+        {
+            public string newUnverifiedName;
+        }
+
         public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot, bool isSignUpFlow = false)
         {
             var payload = new SaveAvatarPayload()
@@ -832,6 +838,16 @@ namespace DCL.Interface
                 isSignUpFlow = isSignUpFlow
             };
             SendMessage("SaveUserAvatar", payload);
+        }
+
+        public static void SendSaveUserUnverifiedName(string newName)
+        {
+            var payload = new SendSaveUserUnverifiedNamePayload()
+            {
+                newUnverifiedName = newName
+            };
+
+            SendMessage("SaveUserUnverifiedName", payload);
         }
 
         public static void SendUserAcceptedCollectibles(string airdropId)
