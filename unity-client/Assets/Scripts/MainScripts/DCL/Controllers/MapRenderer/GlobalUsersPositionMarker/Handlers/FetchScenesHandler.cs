@@ -13,16 +13,18 @@ internal class FetchScenesHandler : IDisposable
     float backgroundIntervalTime;
     float foregroundIntervalTime;
 
-    bool isFirstFetch;
-    float updateInterval;
     Coroutine updateCoroutine;
     UpdateMode updateMode;
+
+    internal bool isFirstFetch;
+    internal float updateInterval;
 
     public FetchScenesHandler(float initialIntevalTime, float foregroundIntervalTime, float backgroundIntervalTime)
     {
         this.initialIntevalTime = initialIntevalTime;
         this.backgroundIntervalTime = backgroundIntervalTime;
         this.foregroundIntervalTime = foregroundIntervalTime;
+        this.updateInterval = initialIntevalTime;
     }
 
     public void Init()
