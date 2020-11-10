@@ -28,7 +28,7 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
 }
 
 export function calculateDisplayName(userId: string, profile: any): string {
-  if (profile.name) {
+  if (profile.name && profile.hasClaimedName) {
     return profile.name
   }
 

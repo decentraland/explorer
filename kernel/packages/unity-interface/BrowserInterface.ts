@@ -33,7 +33,7 @@ import { fetchOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, signUpCancel, signUpSetProfile } from 'shared/session/actions'
+import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -185,6 +185,10 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(logout())
   }
 
+  public RedirectToSignUp() {
+    globalThis.globalStore.dispatch(redirectToSignUp())
+  }
+
   public SaveUserInterests(interests: string[]) {
     if (!interests) {
       return
@@ -212,6 +216,10 @@ export class BrowserInterface {
       unityInterface.DeactivateRendering()
       document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
     }
+  }
+
+  public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
+    globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
   }
 
   public CloseUserAvatar(isSignUpFlow = false) {

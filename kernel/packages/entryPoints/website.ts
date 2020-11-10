@@ -103,7 +103,7 @@ namespace webApp {
     userAuthentified()
       .then(() => {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
-
+        
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
 
         const configForRenderer = kernelConfigForRenderer()
@@ -113,10 +113,7 @@ namespace webApp {
         configureTaskbarDependentHUD(i, voiceChatEnabled)
 
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
-
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-        // NOTE (Santi): We have temporarily deactivated the MANA HUD until Product team designs a new place for it (probably inside the Profile HUD).
-        i.ConfigureHUDElement(HUDElementID.MANA_HUD, { active: identity.hasConnectedWeb3 && false, visible: true })
 
         EnsureProfile(identity.address)
           .then((profile) => {
