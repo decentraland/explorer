@@ -4,12 +4,14 @@ using UnityEngine;
 
 internal class ExclusionArea
 {
+    const int AREA_THRESHOLD = 2;
+
     public Vector2Int position;
     public int area;
 
     public bool Contains(Vector2Int coords)
     {
-        return (coords - position).sqrMagnitude <= area * area;
+        return (coords - position).sqrMagnitude <= (area + AREA_THRESHOLD) * (area + AREA_THRESHOLD);
     }
 }
 
