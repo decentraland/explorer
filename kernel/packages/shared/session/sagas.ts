@@ -122,7 +122,7 @@ function* initSession() {
   } else {
     yield previewAutoSignIn()
   }
-  yield put(changeLoginStage(LoginStage.SING_IN))
+  yield put(changeLoginStage(LoginStage.SIGN_IN))
   Html.bindLoginEvent()
 }
 
@@ -184,7 +184,7 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
 
 function* showAvatarEditor() {
   yield put(setLoadingScreen(true))
-  yield put(changeLoginStage(LoginStage.SING_UP))
+  yield put(changeLoginStage(LoginStage.SIGN_UP))
   yield put(changeSignUpStage(SignUpStage.AVATAR))
 
   const profile = yield select(getSignUpProfile)
@@ -303,7 +303,7 @@ function* signUp() {
 function* cancelSignUp() {
   yield put(signUpClearData())
   yield put(signInSigning(false))
-  yield put(changeLoginStage(LoginStage.SING_IN))
+  yield put(changeLoginStage(LoginStage.SIGN_IN))
 }
 
 function saveSession(userId: string, identity: ExplorerIdentity) {
@@ -367,7 +367,7 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
           result = await new Personal(eth.provider).sign(message, account, '')
         } catch (e) {
           if (e.message && e.message.includes('User denied message signature')) {
-            put(changeLoginStage(LoginStage.SING_ADVICE))
+            put(changeLoginStage(LoginStage.SIGN_ADVICE))
             Html.showEthSignAdvice(true)
           }
         }

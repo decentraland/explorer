@@ -26,8 +26,8 @@ LoginHome.args = {
   ...Template.args,
 };
 
-export const LoginSinging = Template.bind({});
-LoginSinging.args = {
+export const LoginSigning = Template.bind({});
+LoginSigning.args = {
   ...Template.args,
   loading: true,
 };
