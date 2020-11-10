@@ -59,7 +59,7 @@ export async function hasClaimedName(address: string) {
 
 export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
   if (!decentralandConfigurations.dao) {
-    setNetwork(getNetworkFromDefaultTLD())
+    await setNetwork(getNetworkFromDefaultTLD())
   }
 
   const contractAddress = Address.fromString(decentralandConfigurations.dao)
