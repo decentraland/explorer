@@ -10,6 +10,8 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
 
     private const int MAX_MARKERS = 200;
 
+    public enum UpdateMode { FOREGROUND, BACKGROUND }
+
     FetchScenesHandler fetchScenesHandler;
     MarkersHandler markersHandler;
     UserPositionHandler userPositionHandler;
@@ -34,14 +36,9 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
         OnRenderStateChanged(CommonScriptableObjects.rendererState.Get(), false);
     }
 
-    public void SetInForeground()
+    public void SetUpdateMode(UpdateMode updateMode)
     {
-        fetchScenesHandler.SetUpdateMode(FetchScenesHandler.UpdateMode.FOREGROUND);
-    }
-
-    public void SetInBackground()
-    {
-        fetchScenesHandler.SetUpdateMode(FetchScenesHandler.UpdateMode.BACKGROUND);
+        fetchScenesHandler.SetUpdateMode(updateMode);
     }
 
     public void Dispose()

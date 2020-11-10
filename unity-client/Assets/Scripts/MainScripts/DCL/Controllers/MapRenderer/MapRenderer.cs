@@ -49,11 +49,12 @@ namespace DCL
         public MapSceneIcon scenesOfInterestIconPrefab;
         public MapSceneIcon userIconPrefab;
 
+        public MapGlobalUsersPositionMarkerController usersPositionMarkerController { private set; get; }
+
         private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
         private Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
         private Dictionary<string, MinimapMetadata.MinimapUserInfo> usersInfo = new Dictionary<string, MinimapMetadata.MinimapUserInfo>();
         private Dictionary<string, PoolableObject> usersInfoMarkers = new Dictionary<string, PoolableObject>();
-        private MapGlobalUsersPositionMarkerController usersPositionMarkerController;
 
         private Pool usersInfoPool;
 
@@ -112,7 +113,7 @@ namespace DCL
                 overlayContainer.transform,
                 MapUtils.GetTileToLocalPosition);
 
-            usersPositionMarkerController.SetInBackground();
+            usersPositionMarkerController.SetUpdateMode(MapGlobalUsersPositionMarkerController.UpdateMode.BACKGROUND);
         }
 
         private void EnsurePools()

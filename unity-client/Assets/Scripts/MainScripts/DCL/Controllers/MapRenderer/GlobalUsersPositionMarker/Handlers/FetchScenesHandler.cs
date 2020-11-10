@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using DCL.Interface;
 using System.Collections;
+using UpdateMode = MapGlobalUsersPositionMarkerController.UpdateMode;
 
 internal class FetchScenesHandler : IDisposable
 {
     public event Action<List<HotScenesController.HotSceneInfo>> OnScenesFetched;
-    public enum UpdateMode { FOREGROUND, BACKGROUND }
 
     float initialIntevalTime;
     float backgroundIntervalTime;
