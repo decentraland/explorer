@@ -92,10 +92,13 @@ export class Session {
     sendToMordor()
     disconnect()
     removeStoredSession(getIdentity()?.address)
+    removeUrlParam('position')
+    removeUrlParam('show_wallet')
     window.location.reload()
   }
 
   async redirectToSignUp() {
+    removeUrlParam('position')
     window.location.search += '&show_wallet=1'
   }
 
@@ -123,4 +126,19 @@ export async function userAuthentified(): Promise<void> {
       }
     })
   })
+}
+
+function removeUrlParam(paramToRemove: string) {
+  let url = window.location.href.split('?')[0] + '?'
+  let pageURL = decodeURIComponent(window.location.search.substring(1))
+  let urlVariables = pageURL.split('&')
+  let parameterName
+
+  for (let i = 0; i < urlVariables.length; i++) {
+    parameterName = urlVariables[i].split('=')
+    if (parameterName[0] !== paramToRemove) {
+      url = url + parameterName[0] + '=' + parameterName[1] + '&'
+    }
+  }
+  window.history.replaceState({}, document.title, url.substring(0, url.length - 1))
 }
