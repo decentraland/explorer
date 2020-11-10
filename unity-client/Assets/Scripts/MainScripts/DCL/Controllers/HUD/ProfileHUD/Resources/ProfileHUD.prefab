@@ -3145,7 +3145,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sign In-Up
+  m_text: Sign In
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
@@ -3215,7 +3215,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 6280105334476485985}
-    characterCount: 10
+    characterCount: 7
     spriteCount: 0
     spaceCount: 1
     wordCount: 2
@@ -5750,7 +5750,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 118.99997, y: -54}
+  m_AnchoredPosition: {x: 118.99997, y: -211}
   m_SizeDelta: {x: 237.99994, y: 124}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &4694356544223813351
@@ -6963,7 +6963,7 @@ GameObject:
   - component: {fileID: 2139349118484140314}
   - component: {fileID: 3548025402700250293}
   m_Layer: 5
-  m_Name: SignUpTitle
+  m_Name: SignInTitle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6986,7 +6986,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 118.99997, y: -30}
-  m_SizeDelta: {x: 230, y: 60}
+  m_SizeDelta: {x: 200, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2139349118484140314
 CanvasRenderer:
@@ -7015,9 +7015,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Create an account to
-
-    fully experience Decentraland'
+  m_text: Sign In or create an account to fully experience Decentraland
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
@@ -7086,10 +7084,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 3548025402700250293}
-    characterCount: 50
+    characterCount: 61
     spriteCount: 0
-    spaceCount: 6
-    wordCount: 7
+    spaceCount: 9
+    wordCount: 10
     linkCount: 0
     lineCount: 2
     pageCount: 1
