@@ -92,7 +92,13 @@ export class Session {
     sendToMordor()
     disconnect()
     removeStoredSession(getIdentity()?.address)
+    removeUrlParam('position')
+    removeUrlParam('show_wallet')
     window.location.reload()
+  }
+
+  async redirectToSignUp() {
+    window.location.search += '&show_wallet=1'
   }
 
   disable() {
@@ -119,4 +125,10 @@ export async function userAuthentified(): Promise<void> {
       }
     })
   })
+}
+
+function removeUrlParam(paramToRemove: string) {
+  let params = new URLSearchParams(window.location.search)
+  params.delete(paramToRemove)
+  window.history.replaceState({}, document.title, '?' + params.toString())
 }
