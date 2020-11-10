@@ -120,9 +120,9 @@ namespace webApp {
 
         EnsureProfile(identity.address)
           .then((profile) => {
+            i.ActivateRendering()
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            i.ActivateRendering()
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
