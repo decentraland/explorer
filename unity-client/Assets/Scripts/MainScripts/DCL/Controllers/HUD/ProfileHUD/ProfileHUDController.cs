@@ -162,6 +162,9 @@ public class ProfileHUDController : IHUD
 
     private void UpdateProfileName(string newName)
     {
+        if (view.inputName.wasCanceled)
+            return;
+
         if (view != null)
         {
             view.SetProfileName(newName);
