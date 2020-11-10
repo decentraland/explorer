@@ -15,7 +15,8 @@ import {
   UpdateUserStatusMessage,
   RenderProfile,
   BuilderConfiguration,
-  Wearable
+  Wearable,
+  KernelConfigForRenderer
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -220,6 +221,14 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'DeactivateRendering')
   }
 
+  public ReportFocusOn() {
+    this.gameInstance.SendMessage('Bridges', 'ReportFocusOn')
+  }
+
+  public ReportFocusOff() {
+    this.gameInstance.SendMessage('Bridges', 'ReportFocusOff')
+  }
+
   public UnlockCursor() {
     this.SetCursorState(false)
   }
@@ -380,6 +389,10 @@ export class UnityInterface {
 
   public SetUsersMuted(usersId: string[], muted: boolean) {
     this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
+  }
+
+  public SetKernelConfiguration(config: KernelConfigForRenderer) {
+    this.gameInstance.SendMessage('Bridges', 'SetKernelConfiguration', JSON.stringify(config))
   }
 
   // *********************************************************************************

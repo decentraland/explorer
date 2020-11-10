@@ -514,3 +514,10 @@ export type BuilderConfiguration = {
     disableFloor: boolean
   }
 }
+
+export type KernelConfigForRenderer = {
+  comms: {
+    commRadius: number
+    voiceChatEnabled: boolean
+  }
+}

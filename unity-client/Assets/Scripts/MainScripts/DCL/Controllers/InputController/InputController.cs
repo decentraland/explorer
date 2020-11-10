@@ -4,6 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// Mapping for Trigger actions
+/// </summary>
 public enum DCLAction_Trigger
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
@@ -58,6 +61,9 @@ public enum DCLAction_Trigger
     BuildEditModeReset = 443,
 }
 
+/// <summary>
+/// Mapping for hold actions
+/// </summary>
 public enum DCLAction_Hold
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
@@ -78,6 +84,9 @@ public enum DCLAction_Hold
     BuildEditModeCameraAdvanceDown = 442,
 }
 
+/// <summary>
+/// Mapping for measurable actions
+/// </summary>
 public enum DCLAction_Measurable
 {
     //Remember to explicitly assign the value to each entry so we minimize issues with serialization + conflicts
@@ -87,6 +96,9 @@ public enum DCLAction_Measurable
     CameraYAxis = 4,
 }
 
+/// <summary>
+/// Input Controller will map inputs(keys/mouse/axis) to DCL actions, check if they can be triggered (modifiers) and raise the events
+/// </summary>
 public class InputController : MonoBehaviour
 {
     public static bool ENABLE_THIRD_PERSON_CAMERA = true;
@@ -122,6 +134,9 @@ public class InputController : MonoBehaviour
         Update_Measurable(measurableActions);
     }
 
+    /// <summary>
+    /// Map the trigger actions to inputs + modifiers and check if their events must be triggered
+    /// </summary>
     public void Update_Trigger(InputAction_Trigger[] triggerTimeActions)
     {
         for (var i = 0; i < triggerTimeActions.Length; i++)
@@ -288,6 +303,9 @@ public class InputController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Map the hold actions to inputs + modifiers and check if their events must be triggered
+    /// </summary>
     private void Update_Hold(InputAction_Hold[] holdActions)
     {
         for (var i = 0; i < holdActions.Length; i++)
@@ -350,6 +368,9 @@ public class InputController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Map the measurable actions to inputs + modifiers and check if their events must be triggered
+    /// </summary>
     private void Update_Measurable(InputAction_Measurable[] measurableActions)
     {
         for (var i = 0; i < measurableActions.Length; i++)
@@ -376,6 +397,9 @@ public class InputController : MonoBehaviour
     }
 }
 
+/// <summary>
+/// Helper class that wraps the processing of inputs and modifiers to trigger actions events
+/// </summary>
 public static class InputProcessor
 {
     private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
@@ -384,11 +408,16 @@ public static class InputProcessor
     public enum Modifier
     {
         //Set the values as bit masks
-        None = 0b0000000,
-        NeedsPointerLocked = 0b0000001,
-        FocusNotInInput = 0b0000010,
+        None = 0b0000000, // No modifier needed
+        NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
+        FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
     }
 
+    /// <summary>
+    /// Check if the modifier keys are pressed
+    /// </summary>
+    /// <param name="modifierKeys"> Keycodes modifiers</param>
+    /// <returns></returns>
     public static Boolean PassModifierKeys(KeyCode[] modifierKeys)
     {
         for (var i = 0; i < MODIFIER_KEYS.Length; i++)
@@ -408,6 +437,12 @@ public static class InputProcessor
         return true;
     }
 
+    /// <summary>
+    /// Check if a miscellaneous modifiers are present. These modifiers are related to the meta-state of the application
+    /// they can be anything such as mouse pointer state, where the focus is, camera mode...
+    /// </summary>
+    /// <param name="modifiers"></param>
+    /// <returns></returns>
     public static bool PassModifiers(Modifier modifiers)
     {
         if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.isCursorLocked)
@@ -419,6 +454,13 @@ public static class InputProcessor
         return true;
     }
 
+    /// <summary>
+    /// Process an input action mapped to a keyboard key.
+    /// </summary>
+    /// <param name="action">Trigger Action to perform</param>
+    /// <param name="key">KeyCode mapped to this action</param>
+    /// <param name="modifierKeys">KeyCodes required to perform the action</param>
+    /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
     public static void FromKey(InputAction_Trigger action, KeyCode key, KeyCode[] modifierKeys = null,
         Modifier modifiers = Modifier.None)
     {
@@ -429,6 +471,12 @@ public static class InputProcessor
         if (Input.GetKeyDown(key)) action.RaiseOnTriggered();
     }
 
+    /// <summary>
+    /// Process an input action mapped to a button.
+    /// </summary>
+    /// <param name="action">Trigger Action to perform</param>
+    /// <param name="mouseButtonIdx">Index of the mouse button mapped to this action</param>
+    /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
     public static void FromMouseButton(InputAction_Trigger action, int mouseButtonIdx,
         Modifier modifiers = Modifier.None)
     {
@@ -437,6 +485,12 @@ public static class InputProcessor
         if (Input.GetMouseButton(mouseButtonIdx)) action.RaiseOnTriggered();
     }
 
+    /// <summary>
+    /// Process an input action mapped to a keyboard key
+    /// </summary>
+    /// <param name="action">Hold Action to perform</param>
+    /// <param name="key">KeyCode mapped to this action</param>
+    /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
     public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
@@ -445,6 +499,13 @@ public static class InputProcessor
         if (Input.GetKeyUp(key)) action.RaiseOnFinished();
     }
 
+    /// <summary>
+    /// Process an input action mapped to a keyboard key
+    /// </summary>
+    /// <param name="action">Hold Action to perform</param>
+    /// <param name="key">KeyCode mapped to this action</param>
+    /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
+    /// <param name="modifierKeys">KeyCodes required to perform the action</param>
     public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers, KeyCode[] modifierKeys)
     {
         if (!PassModifierKeys(modifierKeys)) return;
@@ -452,6 +513,12 @@ public static class InputProcessor
         FromKey(action, key, modifiers);
     }
 
+    /// <summary>
+    /// Process an input action mapped to a mouse button
+    /// </summary>
+    /// <param name="action">Hold Action to perform</param>
+    /// <param name="mouseButtonIdx">Index of the mouse button</param>
+    /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
     public static void FromMouse(InputAction_Hold action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers)) return;
@@ -460,6 +527,12 @@ public static class InputProcessor
         if (Input.GetMouseButtonUp(mouseButtonIdx)) action.RaiseOnFinished();
     }
 
+    /// <summary>
+    /// Process an input action mapped to an axis
+    /// </summary>
+    /// <param name="action">Measurable Action to perform</param>
+    /// <param name="axisName">Axis name</param>
+    /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
     public static void FromAxis(InputAction_Measurable action, string axisName, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers))
@@ -471,6 +544,12 @@ public static class InputProcessor
         action.RaiseOnValueChanged(Input.GetAxis(axisName));
     }
 
+    /// <summary>
+    /// Bitwise check for the modifiers flags
+    /// </summary>
+    /// <param name="modifiers">Modifier to check</param>
+    /// <param name="value">Modifier mapped to a bit to check</param>
+    /// <returns></returns>
     public static bool IsModifierSet(Modifier modifiers, Modifier value)
     {
         int flagsValue = (int)modifiers;
