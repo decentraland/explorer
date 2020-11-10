@@ -128,16 +128,7 @@ export async function userAuthentified(): Promise<void> {
 }
 
 function removeUrlParam(paramToRemove: string) {
-  let url = window.location.href.split('?')[0] + '?'
-  let pageURL = decodeURIComponent(window.location.search.substring(1))
-  let urlVariables = pageURL.split('&')
-  let parameterName
-
-  for (let i = 0; i < urlVariables.length; i++) {
-    parameterName = urlVariables[i].split('=')
-    if (parameterName[0] !== paramToRemove) {
-      url = url + parameterName[0] + '=' + parameterName[1] + '&'
-    }
-  }
-  window.history.replaceState({}, document.title, url.substring(0, url.length - 1))
+  let params = new URLSearchParams(window.location.search)
+  params.delete(paramToRemove)
+  window.history.replaceState({}, document.title, '?' + params.toString())
 }
