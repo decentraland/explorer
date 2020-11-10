@@ -17,29 +17,37 @@ internal class ExclusionArea
 
 internal class ScenesFilter
 {
-    public List<Vector2Int> Filter(List<HotScenesController.HotSceneInfo> hotScenes, int maxMarkers)
+    public List<Vector2Int> Filter(List<HotScenesController.HotSceneInfo> hotScenesList, int maxMarkers)
     {
         List<Vector2Int> result = new List<Vector2Int>(maxMarkers);
-        List<Vector2Int> rawParcelCoords = GetRawParcelCoords(hotScenes);
-        int step = rawParcelCoords.Count / maxMarkers;
-        if (step < 1) step = 1;
+        List<Vector2Int> rawParcelCoords = GetRawParcelCoords(hotScenesList);
+        float stepAmount = rawParcelCoords.Count / (float)maxMarkers;
+        if (stepAmount < 1) stepAmount = 1;
 
-        for (int i = 0; i < rawParcelCoords.Count; i += step)
+        float lastIndex = -1;
+        for (float step = 0; step < rawParcelCoords.Count; step += stepAmount)
         {
-            result.Add(rawParcelCoords[i]);
+            if ((step - lastIndex) >= 1)
+            {
+                lastIndex = step;
+                result.Add(rawParcelCoords[(int)lastIndex]);
+
+                if (result.Count >= maxMarkers)
+                    break;
+            }
         }
 
         return result;
     }
 
-    private List<Vector2Int> GetRawParcelCoords(List<HotScenesController.HotSceneInfo> hotScenes)
+    private List<Vector2Int> GetRawParcelCoords(List<HotScenesController.HotSceneInfo> hotScenesList)
     {
         List<Vector2Int> result = new List<Vector2Int>();
 
         HotScenesController.HotSceneInfo sceneInfo;
-        for (int sceneIdx = 0; sceneIdx < HotScenesController.i.hotScenesList.Count; sceneIdx++)
+        for (int sceneIdx = 0; sceneIdx < hotScenesList.Count; sceneIdx++)
         {
-            sceneInfo = HotScenesController.i.hotScenesList[sceneIdx];
+            sceneInfo = hotScenesList[sceneIdx];
             if (sceneInfo.usersTotalCount <= 0) continue;
 
             for (int realmIdx = 0; realmIdx < sceneInfo.realms.Length; realmIdx++)
