@@ -98,7 +98,6 @@ export class Session {
   }
 
   async redirectToSignUp() {
-    removeUrlParam('position')
     window.location.search += '&show_wallet=1'
   }
 
