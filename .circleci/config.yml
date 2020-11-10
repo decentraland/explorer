@@ -295,12 +295,13 @@ jobs:
           command: sh scripts/post-install.sh
       - run:
           name: "creating .env (ignore master)"
-          command: echo "PUBLIC_URL=\"https://play.decentraland.zone/branch-website/${CIRCLE_BRANCH}\"" >> .env
+          command: echo "PUBLIC_URL=\"https://play.decentraland.zone/branch/${CIRCLE_BRANCH}\"" >> .env
           filters:
             branches:
-              ignore: master
-            tags:
-              ignore: /.*/
+              ignore:
+                - master
+                - staging
+                - release
       - run:
           name: "show .env"
           command: cat .env
@@ -377,10 +378,7 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
-      - run:
-          name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/branch-website/${CIRCLE_BRANCH} --acl public-read
+          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -399,7 +397,7 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) if tests pass and branch is master
-          command: aws s3 sync static s3://explorer.decentraland.zone/ --acl public-read
+          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/ --acl public-read
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -419,7 +417,7 @@ jobs:
       - run:
           name: Deploy to .today
           command: |
-            aws s3 sync static s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
+            aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
       - run:
           name: Invalidate cloudfront cache .today
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E315GYHDRD7XX6 --paths "/*"
@@ -439,7 +437,7 @@ jobs:
       - run:
           name: Deploy to .org
           command: |
-            aws s3 sync static s3://explorer.decentraland.org/ --exclude "tags/*" --acl public-read
+            aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.org/ --exclude "tags/*" --acl public-read
       - run:
           name: Invalidate cloudfront cache .org
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
