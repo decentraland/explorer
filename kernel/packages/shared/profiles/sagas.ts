@@ -216,6 +216,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]
+          profile.hasClaimedName = !!profile.name // lambdas profiles don't have claimed names if they don't have the "name" property
           hasConnectedWeb3 = true
         }
       }

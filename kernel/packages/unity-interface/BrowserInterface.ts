@@ -33,7 +33,7 @@ import { fetchOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
-import { changeSignUpStage, logout, signUpCancel, signUpSetProfile } from 'shared/session/actions'
+import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -185,6 +185,10 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(logout())
   }
 
+  public RedirectToSignUp() {
+    globalThis.globalStore.dispatch(redirectToSignUp())
+  }
+
   public SaveUserInterests(interests: string[]) {
     if (!interests) {
       return
@@ -214,6 +218,10 @@ export class BrowserInterface {
     }
   }
 
+  public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
+    globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
+  }
+
   public CloseUserAvatar(isSignUpFlow = false) {
     if (isSignUpFlow) {
       unityInterface.DeactivateRendering()
@@ -239,13 +247,13 @@ export class BrowserInterface {
         }
         break
       }
-      case 'StartStateMode': {
+      case 'StartStatefulMode': {
         const { sceneId } = payload
         const parcelScene = this.resetScene(sceneId)
         setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
         break
       }
-      case 'StopStateMode': {
+      case 'StopStatefulMode': {
         const { sceneId } = payload
         const parcelScene = this.resetScene(sceneId)
         setNewParcelScene(sceneId, new SceneSystemWorker(parcelScene))

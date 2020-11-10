@@ -28,6 +28,10 @@ export const LOGOUT = '[Request] Logout'
 export const logout = () => action(LOGOUT)
 export type Logout = ReturnType<typeof logout>
 
+export const REDIRECT_TO_SIGN_UP = '[Request] Redirect to SignUp'
+export const redirectToSignUp = () => action(REDIRECT_TO_SIGN_UP)
+export type RedirectToSignUp = ReturnType<typeof redirectToSignUp>
+
 export const UPDATE_TOS = '[UPDATE_TOS]'
 export const updateTOS = (agreed: boolean) => action(UPDATE_TOS, agreed)
 
