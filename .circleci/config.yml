@@ -295,7 +295,7 @@ jobs:
           command: sh scripts/post-install.sh
       - run:
           name: "add PUBLIC_URL to .env (ignore master, staging, release)"
-          run: |
+          command: |
             if [[ "$CIRCLE_BRANCH" =~ ^(master|staging|release)$ ]]; then
               echo "skipped";
             else
