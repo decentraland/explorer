@@ -1,6 +1,6 @@
 import { loadingTips } from './loading/types'
 import { future, IFuture } from 'fp-future'
-import { login, updateTOS } from './session/actions'
+import { authenticate, updateTOS } from './session/actions'
 import { StoreContainer } from './store/rootTypes'
 import { LoadingState } from './loading/reducer'
 
@@ -133,7 +133,7 @@ export default class Html {
     if (isReact) return
     const button = document.getElementById('eth-login-confirm-button')
     button!.onclick = () => {
-      globalThis.globalStore && globalThis.globalStore.dispatch(login('Metamask'))
+      globalThis.globalStore && globalThis.globalStore.dispatch(authenticate('Metamask'))
     }
   }
 

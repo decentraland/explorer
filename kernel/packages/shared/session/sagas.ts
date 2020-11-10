@@ -23,7 +23,6 @@ import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
   AWAITING_USER_SIGNATURE,
-  awaitingUserSignature,
   NETWORK_MISMATCH,
   setLoadingScreen,
   setTLDError
@@ -49,8 +48,6 @@ import {
   changeLoginStage,
   changeSignUpStage,
   INIT_SESSION,
-  LOGIN,
-  LoginAction,
   loginCompleted as loginCompletedAction,
   LOGOUT,
   REDIRECT_TO_SIGN_UP,
@@ -87,7 +84,6 @@ export function* sessionSaga(): any {
 
   yield takeEvery(UPDATE_TOS, updateTermOfService)
   yield takeLatest(INIT_SESSION, initSession)
-  yield takeLatest(LOGIN, login)
   yield takeLatest(LOGOUT, logout)
   yield takeLatest(REDIRECT_TO_SIGN_UP, redirectToSignUp)
   yield takeLatest(SIGNUP, signUp)
@@ -119,10 +115,12 @@ function* scheduleAwaitingSignaturePrompt() {
 
 function* initSession() {
   yield ensureRealmInitialized()
+  yield createWeb3Connector()
   if (ENABLE_WEB3) {
     Html.showEthLogin()
-    yield createWeb3Connector()
     yield checkPreviousSession()
+  } else {
+    yield previewAutoSignIn()
   }
   yield put(changeLoginStage(LoginStage.SING_IN))
   Html.bindLoginEvent()
@@ -140,6 +138,12 @@ function* checkPreviousSession() {
   }
 }
 
+function* previewAutoSignIn() {
+  yield requestProvider(ProviderType.GUEST)
+  const session = yield authorize()
+  yield signIn(session.userId, session.identity)
+}
+
 function* authenticate(action: AuthenticateAction) {
   yield put(signInSigning(true))
   const provider = yield requestProvider(action.payload.provider as ProviderType)
@@ -149,7 +153,7 @@ function* authenticate(action: AuthenticateAction) {
   }
   const session = yield authorize()
   let profile = yield getProfileByUserId(session.userId)
-  if (profile || isGuestWithProfile(session)) {
+  if (profile || isGuestWithProfile(session) || PREVIEW) {
     return yield signIn(session.userId, session.identity)
   }
   return yield startSignUp(session.userId, session.identity)
@@ -236,9 +240,9 @@ function* authorize() {
   } else {
     logger.log(`Using test user.`)
     const identity = yield createAuthIdentity()
-    const profile = { userId: identity.address, identity }
-    saveSession(profile.userId, profile.identity)
-    return profile
+    const session = { userId: identity.address, identity }
+    saveSession(session.userId, session.identity)
+    return session
   }
 }
 
@@ -301,76 +305,6 @@ function* cancelSignUp() {
   yield put(signUpClearData())
   yield put(signInSigning(false))
   yield put(changeLoginStage(LoginStage.SING_IN))
-}
-
-function* login(action: LoginAction) {
-  let userId: string
-  let identity: ExplorerIdentity
-
-  if (ENABLE_WEB3) {
-    try {
-      if (!(yield requestProvider(action.payload.provider as ProviderType))) {
-        yield put(changeLoginStage(LoginStage.CONNECT_ADVICE))
-        return
-      }
-    } catch (e) {
-      return
-    }
-    yield put(changeLoginStage(LoginStage.COMPLETED))
-    Html.hideEthLogin()
-    try {
-      const address = yield getUserEthAccountIfAvailable()
-      const userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
-
-      // check that user data is stored & key is not expired
-      if (isSessionExpired(userData)) {
-        yield put(awaitingUserSignature())
-        identity = yield createAuthIdentity()
-        yield put(toggleWalletPrompt(false))
-        Html.showAwaitingSignaturePrompt(false)
-        userId = identity.address
-
-        saveSession(userId, identity)
-      } else {
-        identity = userData!.identity
-        userId = userData!.identity.address
-
-        saveSession(userId, identity)
-      }
-    } catch (e) {
-      logger.error(e)
-      ReportFatalError(AUTH_ERROR_LOGGED_OUT)
-      throw e
-    }
-
-    if (identity.hasConnectedWeb3) {
-      identifyUser(userId)
-      referUser(identity)
-    }
-  } else {
-    logger.log(`Using test user.`)
-    identity = yield createAuthIdentity()
-    userId = identity.address
-
-    saveSession(userId, identity)
-
-    loginCompleted.resolve()
-  }
-
-  logger.log(`User ${userId} logged in`)
-
-  let net: ETHEREUM_NETWORK = ETHEREUM_NETWORK.MAINNET
-  if (WORLD_EXPLORER) {
-    net = yield getAppNetwork()
-
-    // Load contracts from https://contracts.decentraland.org
-    yield setNetwork(net)
-    queueTrackingEvent('Use network', { net })
-  }
-  yield put(userAuthentified(userId, identity, net))
-
-  loginCompleted.resolve()
-  yield put(loginCompletedAction())
 }
 
 function saveSession(userId: string, identity: ExplorerIdentity) {

@@ -82,8 +82,10 @@ function* loadDefaultCatalystRealms() {
       ])
     )
     yield put(initCatalystRealm(realm))
-    yield put(catalystRealmInitialized())
+  } else {
+    yield initLocalCatalyst()
   }
+  yield put(catalystRealmInitialized())
 }
 
 /**
@@ -140,22 +142,26 @@ function* loadCatalystRealms() {
 
     yield put(initCatalystRealm(realm!))
   } else {
-    yield put(setCatalystCandidates([]))
-    yield put(setAddedCatalystCandidates([]))
-    yield put(setContentWhitelist([]))
-    yield put(
-      initCatalystRealm({
-        domain: window.location.origin,
-        catalystName: 'localhost',
-        layer: 'stub',
-        lighthouseVersion: '0.1'
-      })
-    )
+    yield initLocalCatalyst()
   }
 
   yield put(catalystRealmInitialized())
 
   defaultLogger.info(`Using Catalyst configuration: `, yield select((state) => state.dao))
+}
+
+function* initLocalCatalyst() {
+  yield put(setCatalystCandidates([]))
+  yield put(setAddedCatalystCandidates([]))
+  yield put(setContentWhitelist([]))
+  yield put(
+    initCatalystRealm({
+      domain: window.location.origin,
+      catalystName: 'localhost',
+      layer: 'stub',
+      lighthouseVersion: '0.1'
+    })
+  )
 }
 
 export function* selectRealm() {
