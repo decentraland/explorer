@@ -5,8 +5,8 @@ using Random = UnityEngine.Random;
 
 internal class MarkersHandler : IDisposable
 {
-    readonly List<UserPositionMarker> availableMarkers;
-    readonly List<UserPositionMarker> usedMarkers;
+    internal readonly List<UserPositionMarker> availableMarkers;
+    internal readonly List<UserPositionMarker> usedMarkers;
     readonly Func<float, float, Vector3> coordToMapPosition;
 
     readonly ExclusionArea exclusionArea;
@@ -101,7 +101,8 @@ internal class MarkersHandler : IDisposable
     {
         if (amountToBeUsed > usedMarkers.Count)
         {
-            for (int i = 0; i < amountToBeUsed - usedMarkers.Count && i < availableMarkers.Count; i++)
+            int addAmount = amountToBeUsed - usedMarkers.Count;
+            for (int i = 0; i < addAmount && i < availableMarkers.Count; i++)
             {
                 var marker = availableMarkers[i];
                 availableMarkers.RemoveAt(i);
@@ -110,7 +111,8 @@ internal class MarkersHandler : IDisposable
         }
         else if (amountToBeUsed < usedMarkers.Count)
         {
-            for (int i = 0; i < usedMarkers.Count - amountToBeUsed && i < usedMarkers.Count; i++)
+            int removeAmount = usedMarkers.Count - amountToBeUsed;
+            for (int i = 0; i < removeAmount && i < usedMarkers.Count; i++)
             {
                 var marker = usedMarkers[i];
                 usedMarkers.RemoveAt(i);

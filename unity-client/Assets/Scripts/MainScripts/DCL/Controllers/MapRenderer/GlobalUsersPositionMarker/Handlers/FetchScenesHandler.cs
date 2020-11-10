@@ -25,6 +25,7 @@ internal class FetchScenesHandler : IDisposable
         this.backgroundIntervalTime = backgroundIntervalTime;
         this.foregroundIntervalTime = foregroundIntervalTime;
         this.updateInterval = initialIntevalTime;
+        this.isFirstFetch = true;
     }
 
     public void Init()
@@ -32,8 +33,6 @@ internal class FetchScenesHandler : IDisposable
         if (updateCoroutine != null)
             return;
 
-        this.updateInterval = initialIntevalTime;
-        isFirstFetch = true;
         updateCoroutine = CoroutineStarter.Start(UpdateCoroutine());
     }
 
