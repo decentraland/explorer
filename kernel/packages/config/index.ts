@@ -262,6 +262,23 @@ export function getWearablesSafeURL() {
   return 'https://content.decentraland.org'
 }
 
+export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
+  if (tld === 'zone') {
+    return ETHEREUM_NETWORK.ROPSTEN
+  }
+
+  if (tld === 'today' || tld === 'org') {
+    return ETHEREUM_NETWORK.MAINNET
+  }
+
+  // if localhost
+  return null
+}
+
+export function getNetworkFromDefaultTLD(): ETHEREUM_NETWORK {
+  return getNetworkFromTLD(getDefaultTLD())!
+}
+
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   const notToday = TLDDefault === 'today' ? 'org' : TLDDefault
