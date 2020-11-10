@@ -1,4 +1,5 @@
 import { Eth } from 'web3x/eth'
+import { LegacyProviderAdapter } from 'web3x/providers'
 import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD, WALLET_API_KEYS } from '../../config'
 import { WebSocketProvider } from 'eth-connect'
 import { ConnectorFactory } from './connector/ConnectorFactory'
@@ -49,7 +50,7 @@ export class Web3Connector {
       return undefined
     }
     if (this.isType(ProviderType.METAMASK)) {
-      return Eth.fromCurrentProvider()
+      return new Eth(new LegacyProviderAdapter((window as any).ethereum))
     }
     return new Eth(this.connector.getProvider())
   }
