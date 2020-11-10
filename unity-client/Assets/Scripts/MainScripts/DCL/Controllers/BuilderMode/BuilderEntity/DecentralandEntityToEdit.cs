@@ -1,7 +1,6 @@
 using DCL;
 using DCL.Models;
 using DCL.Components;
-//using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using System.Collections;
@@ -171,7 +170,6 @@ public class DecentralandEntityToEdit : EditableEntity
     {
         if (rootEntity.meshesInfo.renderers != null)
         {
-            //originalRenderers.material = originalMaterials;
             int cont = 0;
             foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
             {
@@ -237,8 +235,7 @@ public class DecentralandEntityToEdit : EditableEntity
                 t.ResetLocalTRS();
 
                 var meshCollider = entityCollider.AddComponent<MeshCollider>();
-                //meshCollider.convex = true;
-                //meshCollider.isTrigger = true;
+
                 if (meshInfo.renderers[i] is SkinnedMeshRenderer)
                 {
                     Mesh meshColliderForSkinnedMesh = new Mesh();

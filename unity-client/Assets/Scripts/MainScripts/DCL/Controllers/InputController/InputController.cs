@@ -207,7 +207,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.J, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleUI:
-                    InputProcessor.FromKey(action, KeyCode.O, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleEntityList:
                     InputProcessor.FromKey(action, KeyCode.Y, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -216,7 +216,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.G, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleChangeCamera:
-                    InputProcessor.FromKey(action, KeyCode.L, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.I, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleControls:
                     InputProcessor.FromKey(action, KeyCode.N, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -228,10 +228,10 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeRedoAction:
-                    InputProcessor.FromKey(action, KeyCode.I, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Z, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl,KeyCode.LeftShift });
                     break;
                 case DCLAction_Trigger.BuildEditModeUndoAction:
-                    InputProcessor.FromKey(action, KeyCode.K, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Z, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl });
                     break;
                 case DCLAction_Trigger.BuildEditModeQuickBar1:
                     InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -262,9 +262,10 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.BuildEditModeDelete:
                     InputProcessor.FromKey(action, KeyCode.Delete, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.Backspace, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeDuplicate:
-                    InputProcessor.FromKey(action, KeyCode.B, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.D, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeTranslate:
                     InputProcessor.FromKey(action, KeyCode.W, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -279,7 +280,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.F, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeReset:
-                    InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.S, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

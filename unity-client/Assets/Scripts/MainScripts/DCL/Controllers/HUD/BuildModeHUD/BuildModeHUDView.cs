@@ -9,9 +9,10 @@ public class BuildModeHUDView : MonoBehaviour
 
     public SceneLimitInfoController sceneLimitInfoController;
     public SceneObjectCatalogController sceneObjectCatalogController;
+    public ToolTipController toolTipController;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
-    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,closeEntityListBtn,catalogBtn,closeCatalogBtn;
+    public Button firstPersonChangeModeBtn,changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,closeEntityListBtn,catalogBtn,closeCatalogBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
@@ -84,6 +85,7 @@ public class BuildModeHUDView : MonoBehaviour
 
 
         changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
+        firstPersonChangeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
         extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
         controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
         closeControlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
@@ -176,6 +178,10 @@ public class BuildModeHUDView : MonoBehaviour
         godModeCanvasGO.SetActive(true);
     }
 
+    public void HideToolTip()
+    {
+        toolTipController.Desactivate();
+    }
 
 
     void QuickBarInput(int quickBarSlot)

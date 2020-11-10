@@ -15,7 +15,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class BuildModeController : MonoBehaviour
+public class BuildModeController : ViewController
 {
     public enum EditModeState
     {
@@ -46,7 +46,7 @@ public class BuildModeController : MonoBehaviour
 
 
     [Header("Scene references")]
-    public GameObject shortCutsGO, extraBtnsGO, cameraParentGO;
+    public GameObject shortCutsGO, extraBtnsGO, cameraParentGO,cursorGO;
 
     public EntityInformationController entityInformationController;
     public BuildModeEntityListController buildModeEntityListController;
@@ -156,6 +156,7 @@ public class BuildModeController : MonoBehaviour
 
         InitEditModes();
 
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
     }
 
 
@@ -382,6 +383,7 @@ public class BuildModeController : MonoBehaviour
     {
         if(currentActiveMode != null)currentActiveMode.Desactivate();
         isAdvancedModeActive = false;
+
         currentActiveMode = null;
         switch (state)
         {
@@ -391,9 +393,10 @@ public class BuildModeController : MonoBehaviour
                 currentActiveMode = firstPersonMode;
                 HUDController.i.buildModeHud.ActivateFirstPersonModeUI();
                 HUDController.i.buildModeHud.SetVisibilityOfCatalog(false);
-                
+                cursorGO.SetActive(true);
                 break;
             case EditModeState.Editor:
+                cursorGO.SetActive(false);
                 currentActiveMode = editorMode;
                 isAdvancedModeActive = true;
                 HUDController.i.buildModeHud.ActivateGodModeUI();
@@ -876,7 +879,6 @@ public class BuildModeController : MonoBehaviour
         return newEntity;
     }
 
-    RenderProfileBridge.ID currentprofile;
     public void EnterEditMode()
     {       
         HUDController.i.buildModeHud.SetVisibility(true);
@@ -885,12 +887,12 @@ public class BuildModeController : MonoBehaviour
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
         inputController.isBuildModeActivate = true;
-        currentprofile = RenderProfileBridge.i.GetCurrentRenderProfileID();
-        RenderProfileBridge.i.SetRenderProfile(RenderProfileBridge.ID.DEFAULT);
+
     
    
         FindSceneToEdit();
         sceneToEdit.SetEditMode(true);
+        cursorGO.SetActive(false);
         HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
       
     
@@ -900,8 +902,10 @@ public class BuildModeController : MonoBehaviour
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
         //
-        CommonScriptableObjects.allUIHidden.Set(true);
 
+
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
+     
         SetupAllEntities();
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(true);
@@ -914,8 +918,8 @@ public class BuildModeController : MonoBehaviour
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
         //
-        RenderProfileBridge.i.SetRenderProfile(currentprofile);
-        CommonScriptableObjects.allUIHidden.Set(false);
+
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
         HUDController.i.buildModeHud.SetVisibility(false);
 
@@ -925,7 +929,8 @@ public class BuildModeController : MonoBehaviour
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
         
         outlinerController.CancelAllOutlines();
-        
+
+        cursorGO.SetActive(true);
         DeselectEntities();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);

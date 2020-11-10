@@ -65,10 +65,7 @@ public class ExternalCallsController : MonoBehaviour
             Debug.Log(www.error);
         }
         else
-        {
-           
-
-            // Or retrieve results as binary data
+        {         
             byte[] byteArray = www.downloadHandler.data;
             if(byteArrayFunctionToCall != null)
             {

@@ -121,9 +121,9 @@ public class SceneObjectCatalogController : MonoBehaviour
     void OnEndDrag(PointerEventData data)
     {     
         Destroy(draggedObject,0.1f);
-        //builderInputWrapper.ResumeInput();
         OnResumeInput?.Invoke();
     }
+
     public void SceneObjectDropped(BaseEventData data)
     {
      
@@ -320,7 +320,6 @@ public class SceneObjectCatalogController : MonoBehaviour
         if (!catalogInitializaed)
         {
             CatalogController.sceneObjectCatalog.GetValues();
-            //StartCoroutine(GetCatalog());
             ExternalCallsController.i.GetContentAsString("https://builder-api.decentraland.org/v1/assetPacks", AddFullSceneObjectCatalog);
             catalogInitializaed = true;
         }

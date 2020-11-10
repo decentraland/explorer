@@ -23,6 +23,7 @@ public class EntityListAdapter : MonoBehaviour
             currentEntity.OnDelete -= DeleteAdapter;
         }
     }
+
     public void SetContent(DecentralandEntityToEdit decentrelandEntity)
     {
         if(currentEntity != null)
@@ -36,7 +37,6 @@ public class EntityListAdapter : MonoBehaviour
 
         SetInfo(decentrelandEntity);
     }
-
 
     public void SelectOrDeselect()
     {

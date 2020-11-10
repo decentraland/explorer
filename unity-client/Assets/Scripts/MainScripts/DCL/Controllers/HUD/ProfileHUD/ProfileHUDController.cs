@@ -15,6 +15,7 @@ public class ProfileHUDController : IHUD
     {
         mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
 
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange += ChangeVisibilityForBuilderInWorld;
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
 
@@ -25,6 +26,10 @@ public class ProfileHUDController : IHUD
         if (mouseCatcher != null) mouseCatcher.OnMouseLock += OnMouseLocked;
     }
 
+    public void ChangeVisibilityForBuilderInWorld(bool current, bool previus)
+    {
+        SetVisibility(current);
+    }
     public void SetVisibility(bool visible)
     {
         view?.SetVisibility(visible);
