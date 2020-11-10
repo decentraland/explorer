@@ -23,10 +23,10 @@ export type SignUpData = {
 
 export enum LoginStage {
   LOADING = 'loading',
-  SING_IN = 'signIn',
-  SING_UP = 'signUp',
+  SIGN_IN = 'signIn',
+  SIGN_UP = 'signUp',
   CONNECT_ADVICE = 'connect_advice',
-  SING_ADVICE = 'sign_advice',
+  SIGN_ADVICE = 'sign_advice',
   COMPLETED = 'completed'
 }
 
