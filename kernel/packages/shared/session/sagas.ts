@@ -296,7 +296,6 @@ function* signUp() {
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
-  unityInterface.ActivateRendering()
 }
 
 function* cancelSignUp() {
