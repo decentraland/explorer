@@ -298,8 +298,6 @@ function* signUp() {
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
   yield put(signUpClearData())
-  logger.info('[SANTI] SESSION/SAGAS.TS -> signUp() -> setLoadingScreen(true)')
-  yield put(setLoadingScreen(true))
 }
 
 function* cancelSignUp() {

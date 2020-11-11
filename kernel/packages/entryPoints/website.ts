@@ -115,13 +115,13 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
+        logger.info('[SANTI] WEBSITE.TS -> loadUnity() -> userAuthentified() -> EnsureProfile() STARTS...')
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
-            logger.info('[SANTI] WEBSITE.TS -> loadUnity() -> userAuthentified() -> EnsureProfile() -> ConfigureTutorial()')
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            logger.info('[SANTI] WEBSITE.TS -> loadUnity() -> userAuthentified() -> EnsureProfile() -> ActivateRendering()')
             i.ActivateRendering()
+            logger.info('[SANTI] WEBSITE.TS -> loadUnity() -> userAuthentified() -> EnsureProfile() FINISH -> ConfigureTutorial() and ActivateRendering()')
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
