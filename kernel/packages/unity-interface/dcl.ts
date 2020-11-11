@@ -180,7 +180,6 @@ export async function startUnitySceneWorkers() {
     onPositionSettled: (spawnPoint) => {
       if (!aborted) {
         unityInterface.Teleport(spawnPoint)
-        defaultLogger.info('[SANTI] DCL.TS -> startUnitySceneWorkers() -> onPositionSettled() -> ActivateRendering()')
         unityInterface.ActivateRendering()
       }
     },
