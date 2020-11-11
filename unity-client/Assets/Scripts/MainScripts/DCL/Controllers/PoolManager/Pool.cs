@@ -232,10 +232,6 @@ namespace DCL
 
         public void Cleanup()
         {
-#if UNITY_EDITOR
-            if (isQuitting)
-                return;
-#endif
             ReleaseAll();
 
             while (unusedObjects.Count > 0)
@@ -336,7 +332,7 @@ namespace DCL
 
         // We need to check if application is quitting in editor
         // to prevent the pool from releasing objects that are
-        // being destroyed
+        // being destroyed 
         void OnIsQuitting()
         {
             Application.quitting -= OnIsQuitting;
