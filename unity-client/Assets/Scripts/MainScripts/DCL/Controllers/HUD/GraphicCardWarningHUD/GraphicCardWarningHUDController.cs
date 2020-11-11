@@ -34,7 +34,12 @@ public class GraphicCardWarningHUDController : IHUD
         }
     }
 
-    private bool IsIntegratedGraphicCard() => DCL.Interface.WebInterface.GetGraphicCard().ToLower().Contains("intel");
+    private bool IsIntegratedGraphicCard()
+    {
+        UnityEngine.Debug.unityLogger.logEnabled = true;
+        UnityEngine.Debug.Log($"Graphic Card {DCL.Interface.WebInterface.GetGraphicCard()}");
+        return DCL.Interface.WebInterface.GetGraphicCard().ToLower().Contains("intel");
+    }
 
     public void Dispose()
     {
