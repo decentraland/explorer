@@ -94,7 +94,6 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 
     //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //             so ensuring meta configuration is initialized in this stage is a must
@@ -115,6 +114,7 @@ namespace webApp {
 
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+        i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 
         EnsureProfile(identity.address)
           .then((profile) => {
