@@ -295,7 +295,6 @@ function* signUp() {
   }
   delete profile.email // We don't deploy the email because it is public
 
-  logger.info('[SANTI] SESSION/SAGAS.TS -> signUp() -> ConfigureTutorial()')
   unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
 
   yield signIn(session.userId, session.identity)
