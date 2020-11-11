@@ -258,12 +258,6 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
         this.target = target;
         this.animation = animation;
 
-        var test = animation.GetComponent<TEST>();
-        if (test == null)
-        {
-            animation.gameObject.AddComponent<TEST>();
-        }
-
         if (bodyShapeType.Contains(WearableLiterals.BodyShapes.MALE))
         {
             currentAnimations = maleAnimations;
