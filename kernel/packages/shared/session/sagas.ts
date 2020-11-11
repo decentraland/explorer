@@ -4,7 +4,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, HAS_INITIAL_POSITION_MARK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
+import { ENABLE_WEB3, ETHEREUM_NETWORK, getTLD, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -294,8 +294,6 @@ function* signUp() {
     profile.tutorialStep |= 128 // We use binary 256 for tutorial and 128 for email promp
   }
   delete profile.email // We don't deploy the email because it is public
-
-  unityInterface.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
 
   yield signIn(session.userId, session.identity)
   yield put(saveProfileRequest(profile, session.userId))
