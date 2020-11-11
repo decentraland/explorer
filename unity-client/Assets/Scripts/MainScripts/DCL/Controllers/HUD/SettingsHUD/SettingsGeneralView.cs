@@ -168,20 +168,23 @@ namespace DCL.SettingsHUD
                 isDirty = true;
             });
 
-            autosettingsToggle.onValueChanged.AddListener(value =>
-            {
-                advancedCanvasGroup.interactable = !value;
-                tempGeneralSetting.autoqualityOn = value;
-                advancedBlocker.SetActive(value);
-                if (value)
-                {
-                    QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
-                    tempQualitySetting = Settings.i.lastValidAutoqualitySet;
-                    tempQualitySetting.baseResolution = currentBaseResolution;
-                    isDirty = true;
-                }
-            });
+            autosettingsToggle.onValueChanged.AddListener(SetAutoQualityActive);
             autosettingsToggle.isOn = false;
+        }
+
+        private void SetAutoQualityActive(bool active)
+        {
+
+            advancedCanvasGroup.interactable = !active;
+            tempGeneralSetting.autoqualityOn = active;
+            advancedBlocker.SetActive(active);
+            if (active)
+            {
+                QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
+                tempQualitySetting = Settings.i.lastValidAutoqualitySet;
+                tempQualitySetting.baseResolution = currentBaseResolution;
+                isDirty = true;
+            }
         }
 
         void OnEnable()

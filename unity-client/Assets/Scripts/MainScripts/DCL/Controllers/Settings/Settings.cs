@@ -91,6 +91,10 @@ namespace DCL
             }
         }
 
+        /// <summary>
+        /// Apply the auto quality setting by its index on the array
+        /// </summary>
+        /// <param name="index"></param>
         public void ApplyAutoQualitySettings(int index)
         {
             if (index < 0 || index >= autoqualitySettings.Length)
