@@ -214,6 +214,18 @@ public IEnumerator VisualTestStub_Generate()
 2. In Unity Editor, build unity WASM with its name as `unity` into your desired folder. **It's very important that the folder/build name is `unity`**.
 3. When the building process finishes, move the 3 ".unityweb" files that will end up inside `[ChosenDestination]/unity/Build/` into `kernel/static/unity/Build/`. Just remember that if you run the `make watch` after this last step, your new files may be replaced by the latest published build files during the `make watch` process.
 
+Just to be clear, the .unityweb files should end up in the following path
+```
+kernel
+ /- static
+    /- unity
+        /- Build
+            /- unity.data.unityweb
+            /- unity.wasm.code.unityweb
+            /- unity.wasm.framework.unityweb
+            /- ...
+```
+
 #### Option 2
 1. Run `make watch` in a terminal at `kernel/`. Wait for it to finish and leave it watching for changes. **This step must be done before replacing the build files or they may be replaced again with the latest published build files when the `make watch` process runs**
 2. Build unity WASM with its name as `unity` into the folder `kernel/static`. **It's very important that the folder/build name is `unity`**.
