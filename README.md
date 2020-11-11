@@ -229,7 +229,7 @@ git checkout -- kernel/static/unity/Build/DCLUnityLoader.js
 git checkout -- kernel/static/unity/Build/unity.json
 ```
 
-6. Testing how your new build performs:
+5. Testing how your new build performs:
 
 - Open **[http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&position=-100,100](http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&position=-100,100)** to go to an area with a high density of test parcels.
 - Open **[http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0](http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0)** to open an area with real-life deployments (but without communicating with other users).
