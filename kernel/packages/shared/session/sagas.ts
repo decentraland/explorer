@@ -248,7 +248,6 @@ function* authorize() {
 
 function* signIn(userId: string, identity: ExplorerIdentity) {
   logger.log(`User ${userId} logged in`)
-  yield put(changeLoginStage(LoginStage.COMPLETED))
 
   saveSession(userId, identity)
   if (identity.hasConnectedWeb3) {
@@ -278,7 +277,6 @@ function* setUserAuthentified(userId: string, identity: ExplorerIdentity) {
 
 function* signUp() {
   yield put(setLoadingScreen(true))
-  yield put(changeLoginStage(LoginStage.COMPLETED))
   const session = yield select(getSignUpIdentity)
 
   logger.log(`User ${session.userId} signed up`)
