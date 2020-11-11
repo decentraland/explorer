@@ -373,3 +373,7 @@ export const genericAvatarSnapshots: Record<string, string> = {
   face256: '/images/avatar_snapshot_default256.png',
   face128: '/images/avatar_snapshot_default128.png'
 }
+
+export function getCatalystNodesDefaultURL() {
+  return `https://peer.decentraland.${getDefaultTLD()}/lambdas/contracts/servers`
+}

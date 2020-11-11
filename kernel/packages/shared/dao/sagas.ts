@@ -28,7 +28,7 @@ import {
   ping,
   commsStatusUrl
 } from '.'
-import { getAddedServers, getContentWhitelist } from 'shared/meta/selectors'
+import { getAddedServers, getCatalystNodesEndpoint, getContentWhitelist } from 'shared/meta/selectors'
 import { getAllCatalystCandidates, isRealmInitialized } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
 import defaultLogger from '../logger'
@@ -141,7 +141,8 @@ function getConfiguredRealm(candidates: Candidate[]) {
 
 function* initializeCatalystCandidates() {
   yield put(catalystRealmsScanRequested())
-  const candidates: Candidate[] = yield call(fecthCatalystRealms)
+  const catalystsNodesEndpointURL = yield select(getCatalystNodesEndpoint)
+  const candidates: Candidate[] = yield call(fecthCatalystRealms, catalystsNodesEndpointURL)
 
   yield put(setCatalystCandidates(candidates))
 
