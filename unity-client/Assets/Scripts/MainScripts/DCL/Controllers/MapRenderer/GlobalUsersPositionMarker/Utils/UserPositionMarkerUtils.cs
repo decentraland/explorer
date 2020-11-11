@@ -43,7 +43,8 @@ internal class ScenesFilter
         List<Vector2Int> result = new List<Vector2Int>();
 
         HotScenesController.HotSceneInfo sceneInfo;
-        for (int sceneIdx = 0; sceneIdx < hotScenesList.Count; sceneIdx++)
+        int scenesCount = hotScenesList.Count;
+        for (int sceneIdx = 0; sceneIdx < scenesCount; sceneIdx++)
         {
             sceneInfo = hotScenesList[sceneIdx];
             if (sceneInfo.usersTotalCount <= 0) continue;

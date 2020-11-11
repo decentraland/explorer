@@ -70,7 +70,8 @@ internal class MarkersHandler : IDisposable
 
     public void Dispose()
     {
-        for (int i = 0; i < availableMarkers.Count; i++)
+        int markersCount = availableMarkers.Count;
+        for (int i = 0; i < markersCount; i++)
         {
             availableMarkers[i].Dispose();
         }
