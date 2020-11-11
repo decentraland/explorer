@@ -4,17 +4,18 @@ using UnityEngine.UI;
 
 public class GraphicCardNotification : Notification
 {
-    [SerializeField] private string moreInfoUrl;
+    // Filling this with the URL will automatically make the button visible
+    private const string MORE_INFO_URL = null;
     [SerializeField] private Button moreInfoButton;
 
     private void Awake()
     {
-        moreInfoButton.gameObject.SetActive(string.IsNullOrEmpty(moreInfoUrl));
+        moreInfoButton.gameObject.SetActive(!string.IsNullOrEmpty(MORE_INFO_URL));
         moreInfoButton.onClick.AddListener(OpenMoreInfoUrl);
     }
 
     private void OpenMoreInfoUrl()
     {
-        WebInterface.OpenURL(moreInfoUrl);
+        WebInterface.OpenURL(MORE_INFO_URL);
     }
 }
