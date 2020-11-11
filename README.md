@@ -210,7 +210,12 @@ public IEnumerator VisualTestStub_Generate()
 ### Making a manual build
 
 #### Option 1
-1. Run `make watch` in a terminal at `kernel/static`. Wait for it to finish and leave it watching for changes. **This step must be done before replacing the build files or they may be replaced again with the latest published build files when the `make watch` process runs**
+1. Run `make watch` in a terminal at `kernel/`. Wait for it to finish and leave it watching for changes. **This step must be done before replacing the build files or they may be replaced again with the latest published build files when the `make watch` process runs**
+2. In Unity Editor, build unity WASM with its name as `unity` into your desired folder. **It's very important that the folder/build name is `unity`**.
+3. When the building process finishes, move the 3 ".unityweb" files that will end up inside `[ChosenDestination]/unity/Build/` into `kernel/static/unity/Build/`. Just remember that if you run the `make watch` after this last step, your new files may be replaced by the latest published build files during the `make watch` process.
+
+#### Option 2
+1. Run `make watch` in a terminal at `kernel/`. Wait for it to finish and leave it watching for changes. **This step must be done before replacing the build files or they may be replaced again with the latest published build files when the `make watch` process runs**
 2. Build unity WASM with its name as `unity` into the folder `kernel/static`. **It's very important that the folder/build name is `unity`**.
 3. In another terminal checkout the deletion of the file named `kernel/static/unity/Build/DCLUnityLoader.js`. Unity deletes anything on this folder as part of the build process and we need that file.
 
@@ -229,9 +234,6 @@ git checkout -- kernel/static/unity/Build/unity.json
 - Open **[http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&position=-100,100](http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&position=-100,100)** to go to an area with a high density of test parcels.
 - Open **[http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0](http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0)** to open an area with real-life deployments (but without communicating with other users).
 - Open **[http://localhost:8080/?ENV=org&position=0,90](http://localhost:8080/?ENV=org&position=0,90)** to open the explorer near the Decentraland Museum
-
-#### Option 2
-Alternatively you can build into any other folder in your disk and then just move the 3 ".unityweb" files that will end up inside `[ChosenDestination]/unity/Build/` into `kernel/static/unity/Build/`. Just remember that if you run the `make watch` after this, your new files may be replaced by the latest published build files during the `make watch` process.
 
 ### Profiling a build with Unity Editor
 1. In Unity Editor open the profiler at window -> analysis -> profiler
