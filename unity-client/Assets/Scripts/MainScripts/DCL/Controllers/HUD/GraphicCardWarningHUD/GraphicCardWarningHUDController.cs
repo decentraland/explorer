@@ -20,7 +20,7 @@ public class GraphicCardWarningHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
-        if (visible)
+        if (visible && IsIntegratedGraphicCard())
         {
             NotificationsController.i.ShowNotification(new Notification.Model
             {
@@ -33,6 +33,8 @@ public class GraphicCardWarningHUDController : IHUD
             });
         }
     }
+
+    private bool IsIntegratedGraphicCard() => DCL.Interface.WebInterface.GetGraphicCard().ToLower().Contains("intel");
 
     public void Dispose()
     {
