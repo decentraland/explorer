@@ -34,11 +34,14 @@ SubShader {
             };
  
             sampler2D _BaseMap;
-            float4 _BaseMap_ST;
             sampler2D _TintMask;
-            fixed _Cutoff;
-            fixed4 _BaseColor;
- 
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _BaseMap_ST;
+                fixed _Cutoff;
+                fixed4 _BaseColor;
+            CBUFFER_END
+            
             v2f vert (appdata_t v)
             {
                 v2f o;

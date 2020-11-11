@@ -28,9 +28,7 @@ Shader "DCL/Eyes Shader"
             Blend One Zero
 			ZWrite On
 			ZTest LEqual
-			Offset 0 , 0
 			ColorMask RGBA
-			
 
             HLSLPROGRAM
             // Required to compile gles 2.0 with standard srp library
@@ -44,10 +42,6 @@ Shader "DCL/Eyes Shader"
             // -------------------------------------
             // Unity defined keywords
             #pragma multi_compile_fog
-
-            //--------------------------------------
-            // GPU Instancing
-            #pragma multi_compile_instancing
             
             #pragma vertex vert
             #pragma fragment frag
@@ -64,11 +58,14 @@ Shader "DCL/Eyes Shader"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
 
 			sampler2D _EyesTexture;
+			sampler2D _IrisMask;
+			
+            CBUFFER_START(UnityPerMaterial)
 			float4 _EyesTexture_ST;
 			float4 _EyeTint;
-			sampler2D _IrisMask;
 			float4 _IrisMask_ST;
-
+            CBUFFER_END
+            
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
