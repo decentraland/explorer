@@ -19,6 +19,12 @@ internal class FetchScenesHandler : IDisposable
     internal bool isFirstFetch;
     internal float updateInterval;
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="initialIntevalTime">seconds for interval until the first populated scenes are fetched</param>
+    /// <param name="foregroundIntervalTime">seconds for interval when update mode is in FOREGROUND</param>
+    /// <param name="backgroundIntervalTime">seconds for interval when update mode is in BACKGROUND</param>
     public FetchScenesHandler(float initialIntevalTime, float foregroundIntervalTime, float backgroundIntervalTime)
     {
         this.initialIntevalTime = initialIntevalTime;
@@ -28,6 +34,9 @@ internal class FetchScenesHandler : IDisposable
         this.isFirstFetch = true;
     }
 
+    /// <summary>
+    /// Initialize fetch intervals
+    /// </summary>
     public void Init()
     {
         if (updateCoroutine != null)
@@ -36,6 +45,10 @@ internal class FetchScenesHandler : IDisposable
         updateCoroutine = CoroutineStarter.Start(UpdateCoroutine());
     }
 
+    /// <summary>
+    /// Set update mode. Scene's fetch intervals will smaller when updating in FOREGROUND than when updating in BACKGROUND
+    /// </summary>
+    /// <param name="mode">update mode</param>
     public void SetUpdateMode(UpdateMode mode)
     {
         updateMode = mode;
@@ -56,7 +69,9 @@ internal class FetchScenesHandler : IDisposable
     public void Dispose()
     {
         CoroutineStarter.Stop(updateCoroutine);
-        HotScenesController.i.OnHotSceneListFinishUpdating -= OnHotSceneListFinishUpdating;
+
+        if (HotScenesController.i)
+            HotScenesController.i.OnHotSceneListFinishUpdating -= OnHotSceneListFinishUpdating;
     }
 
     private IEnumerator UpdateCoroutine()

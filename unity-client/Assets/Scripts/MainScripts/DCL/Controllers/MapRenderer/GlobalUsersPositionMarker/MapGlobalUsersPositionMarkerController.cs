@@ -18,6 +18,12 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
 
     int commsRadius = 4;
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="markerPrefab">prefab for markers</param>
+    /// <param name="overlayContainer">parent for markers</param>
+    /// <param name="coordToMapPosFunc">function to transform coords to map position</param>
     public MapGlobalUsersPositionMarkerController(GameObject markerPrefab, Transform overlayContainer, Func<float, float, Vector3> coordToMapPosFunc)
     {
         fetchScenesHandler = new FetchScenesHandler(UPDATE_INTERVAL_INITIAL, UPDATE_INTERVAL_FOREGROUND, UPDATE_INTERVAL_BACKGROUND);
@@ -36,6 +42,10 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
         OnRenderStateChanged(CommonScriptableObjects.rendererState.Get(), false);
     }
 
+    /// <summary>
+    /// Set update mode. Scene's fetch intervals will smaller when updating in FOREGROUND than when updating in BACKGROUND
+    /// </summary>
+    /// <param name="updateMode">update mode</param>
     public void SetUpdateMode(UpdateMode updateMode)
     {
         fetchScenesHandler.SetUpdateMode(updateMode);

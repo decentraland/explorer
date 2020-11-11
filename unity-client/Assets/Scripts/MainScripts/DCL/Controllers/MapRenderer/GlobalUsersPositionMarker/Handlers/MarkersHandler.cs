@@ -14,6 +14,13 @@ internal class MarkersHandler : IDisposable
 
     int maxMarkers;
 
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="markerPrefab">prefab for markers</param>
+    /// <param name="overlayContainer">parent for markers</param>
+    /// <param name="maxMarkers">max amount of markers (pool)</param>
+    /// <param name="coordToMapPosFunc">function to transform coords to map position</param>
     public MarkersHandler(GameObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
     {
         this.maxMarkers = maxMarkers;
@@ -33,6 +40,34 @@ internal class MarkersHandler : IDisposable
         }
     }
 
+    /// <summary>
+    /// Set exclusion area. Markers inside this area will be hidden, to avoid overlapping with markers set with comms info for example.
+    /// After set it will iterate through current markers to hide or show them respectively.
+    /// </summary>
+    /// <param name="center">center of the exclusion area</param>
+    /// <param name="area">size of the exclusion area</param>
+    public void SetExclusionArea(Vector2Int center, int area)
+    {
+        exclusionArea.position = center;
+        exclusionArea.area = area;
+        ApplyExclusionArea();
+    }
+
+    /// <summary>
+    /// Set scenes to set markers to. Scenes will be filtered and it coordinates will be extracted.
+    /// Then markers will be set and will be shown or hidden according to the current exclusion area.
+    /// </summary>
+    /// <param name="hotScenes">list of populated scenes</param>
+    public void SetMarkers(List<HotScenesController.HotSceneInfo> hotScenes)
+    {
+        var parcelList = scenesFilter.Filter(hotScenes, maxMarkers);
+        ResfreshMarkersPoolLists(parcelList.Count);
+        for (int i = 0; i < parcelList.Count && i < usedMarkers.Count; i++)
+        {
+            SetMarker(usedMarkers[i], parcelList[i]);
+        }
+    }
+
     public void Dispose()
     {
         for (int i = 0; i < availableMarkers.Count; i++)
@@ -45,23 +80,6 @@ internal class MarkersHandler : IDisposable
         }
         availableMarkers.Clear();
         usedMarkers.Clear();
-    }
-
-    public void SetExclusionArea(Vector2Int center, int area)
-    {
-        exclusionArea.position = center;
-        exclusionArea.area = area;
-        ApplyExclusionArea();
-    }
-
-    public void SetMarkers(List<HotScenesController.HotSceneInfo> hotScenes)
-    {
-        var parcelList = scenesFilter.Filter(hotScenes, maxMarkers);
-        ResfreshMarkersPoolLists(parcelList.Count);
-        for (int i = 0; i < parcelList.Count && i < usedMarkers.Count; i++)
-        {
-            SetMarker(usedMarkers[i], parcelList[i]);
-        }
     }
 
     private void SetMarker(UserPositionMarker marker, Vector2Int coords)
