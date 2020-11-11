@@ -17,9 +17,7 @@ public class BuildEditorMode : BuildModeState
 
     [Header("Scenes References")]
     public FreeCameraMovement freeCameraController;
-    public GameObject advancedModeUI;
     public DCLBuilderGizmoManager gizmoManager;
-    public ToolTipController toolTipController;
     public VoxelController voxelController;
     public BuilderInputWrapper builderInputWrapper;
     public OutlinerController outlinerController;
@@ -49,9 +47,7 @@ public class BuildEditorMode : BuildModeState
         builderInputWrapper.OnMouseDown += MouseDown;
         builderInputWrapper.OnMouseUp += MouseUp;
 
-        HUDController.i.buildModeHud.OnTranslateSelectedAction += TranslateMode;
-        HUDController.i.buildModeHud.OnRotateSelectedAction += RotateMode;
-        HUDController.i.buildModeHud.OnScaleSelectedAction += ScaleMode;
+
         focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
 
         squareMultiSelectionInputAction.OnStarted += (o) => squareMultiSelectionButtonPressed = true;;
@@ -82,7 +78,7 @@ public class BuildEditorMode : BuildModeState
                     {
                         if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
                         {
-                            if(!isTypeOfBoundSelectionSelected)
+                            if(!isTypeOfBoundSelectionSelected && !entity.IsLocked)
                             {
                                 if (entity.IsVoxel) isVoxelBoundMultiSelection = true;
                                 else isVoxelBoundMultiSelection = false;
@@ -112,6 +108,10 @@ public class BuildEditorMode : BuildModeState
     {
         base.Init(_goToEdit, _undoGo, _snapGO, _freeMovementGO, _selectedEntities);
         voxelController.SetEditionGO(_goToEdit);
+
+        HUDController.i.buildModeHud.OnTranslateSelectedAction += TranslateMode;
+        HUDController.i.buildModeHud.OnRotateSelectedAction += RotateMode;
+        HUDController.i.buildModeHud.OnScaleSelectedAction += ScaleMode;
     }
 
     private void MouseUp(int buttonID, Vector3 position)
@@ -210,7 +210,6 @@ public class BuildEditorMode : BuildModeState
         mouseCatcher.enabled = false;
         SceneController.i.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
-        advancedModeUI.SetActive(true);
        
         RenderSettings.fog = false;
         gizmoManager.HideGizmo();
@@ -225,9 +224,8 @@ public class BuildEditorMode : BuildModeState
 
 
         SceneController.i.ReIntegrateIsolatedScene();
-        advancedModeUI.SetActive(false);
+        
         gizmoManager.HideGizmo();
-        toolTipController.Desactivate();
         RenderSettings.fog = true;
     }
 

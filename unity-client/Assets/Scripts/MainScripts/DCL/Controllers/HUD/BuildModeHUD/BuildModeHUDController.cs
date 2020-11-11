@@ -8,10 +8,12 @@ using DCL.Controllers;
 public class BuildModeHUDController : IHUD
 {
     public event Action OnChangeModeAction, OnTranslateSelectedAction, OnRotateSelectedAction, OnScaleSelectedAction, OnResetAction, OnDuplicateSelectedAction, OnDeleteSelectedAction;
-    public event Action OnEntityListVisible, OnStopInput,OnResumeInput;
+    public event Action OnEntityListVisible, OnStopInput,OnResumeInput, OnTutorialAction;
     public event Action<SceneObject> OnSceneObjectSelected;
-    public Action<DecentralandEntityToEdit> OnEntityClick, OnEntityDelete, OnEntityLock, OnEntityChangeVisibility;
+    public event Action<DecentralandEntityToEdit> OnEntityClick, OnEntityDelete, OnEntityLock, OnEntityChangeVisibility;
 
+    //Note(Adrian): This is used right now for tutorial purposes
+    public event Action OnCatalogOpen;
 
     internal BuildModeHUDView view;
     BuildModeEntityListController buildModeEntityListController;
@@ -54,6 +56,8 @@ public class BuildModeHUDController : IHUD
 
 
         view.OnEntityListChangeVisibilityAction += () => ChangeVisibilityOfEntityList();
+
+        view.OnTutorialAction += () => OnTutorialAction?.Invoke();
     }
 
     public void SetParcelScene(ParcelScene parcelScene)
@@ -69,15 +73,18 @@ public class BuildModeHUDController : IHUD
         OnSceneObjectSelected?.Invoke(sceneObject);
         SetVisibilityOfCatalog(false);
     }
+
     public void SetVisibilityOfCatalog(bool isVisible)
     {
         isCatalogOpen = isVisible;
         view.SetVisibilityOfCatalog(isCatalogOpen);
+        if (isVisible) OnCatalogOpen?.Invoke();
     }
+
     public void ChangeVisibilityOfCatalog()
     {
         isCatalogOpen = !view.sceneObjectCatalogController.IsCatalogOpen();
-        view.SetVisibilityOfCatalog(isCatalogOpen);
+        SetVisibilityOfCatalog(isCatalogOpen);
     }
 
     #endregion

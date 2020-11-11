@@ -15,7 +15,7 @@ public class ActionController : MonoBehaviour
 
     private void Awake()
     {
-        actionListview.OnActionSelected += GoToAction;
+        if(actionListview != null)actionListview.OnActionSelected += GoToAction;
     }
 
     int currentStepIndex = 0;
@@ -81,7 +81,7 @@ public class ActionController : MonoBehaviour
         actionsMade.Add(action);
     
         currentStepIndex = actionsMade.Count-1;
-        if (removedActions) actionListview.SetContent(actionsMade);
+        if (removedActions && actionListview != null) actionListview.SetContent(actionsMade);
         action.OnApplyValue += ApplyAction;
     }
 
@@ -121,7 +121,7 @@ public class ActionController : MonoBehaviour
         if (!actionsMade[currentStepIndex].isDone)
         {
             actionsMade[currentStepIndex].ReDo();
-            actionListview.RefreshInfo();
+            if (actionListview != null) actionListview.RefreshInfo();
             OnRedo?.Invoke();
           
         }
@@ -133,7 +133,7 @@ public class ActionController : MonoBehaviour
         if (actionsMade[currentStepIndex].isDone)
         {
             actionsMade[currentStepIndex].Undo();
-            actionListview.RefreshInfo();
+            if (actionListview != null) actionListview.RefreshInfo();
             OnUndo?.Invoke();         
         }
     }

@@ -10,5 +10,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6168d88286f9d954bb963c1a8b38d41a, type: 3}
-  m_Name: SceneObjectDictionary
+  m_Name: SceneAssetPackCatalog
   m_EditorClassIdentifier: 

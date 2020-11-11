@@ -12,10 +12,6 @@ public class BuildFirstPersonMode : BuildModeState
     public float rotationSpeed = 0.5f;
     public float distanceFromCameraForNewEntitties = 5;
 
-    [Header("References")]
-
-    public GameObject firstPersonCanvasGO;
-    public CanvasGroup cursorCanvasGroup;
 
     [Header("InputActions")]
     [SerializeField] internal InputAction_Hold rotationHold;
@@ -99,14 +95,10 @@ public class BuildFirstPersonMode : BuildModeState
         base.Activate(scene);
         SetEditObjectParent();
         freeMovementGO.transform.SetParent(Camera.main.transform);
-        firstPersonCanvasGO.SetActive(true);
-        cursorCanvasGroup.alpha = 1;
     }
     public override void Desactivate()
     {
         base.Desactivate();
-        firstPersonCanvasGO.SetActive(false);
-        cursorCanvasGroup.alpha = 0;
     }
 
     public override void StartMultiSelection()

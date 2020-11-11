@@ -1,5 +1,5 @@
 {
-    "name": "BuildingTool",
+    "name": "BuildingToolInWorld",
     "references": [
         "GUID:4720e174f2805c74bb7aa94cc8bb5bf8",
         "GUID:4307f53044263cf4b835bd812fc161a4",
@@ -25,7 +25,8 @@
         "GUID:92d421569a4b2234c837b61c50b146c8",
         "GUID:ab850ca46f546ef40a5e8ab4de984aed",
         "GUID:6d5af96ebed7ed345910feebddf05c1a",
-        "GUID:36f22d845f1f3174da2d5fb876f4d3c6"
+        "GUID:36f22d845f1f3174da2d5fb876f4d3c6",
+        "GUID:8e14059e964ca49aeb55d0e7b2b14c3c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

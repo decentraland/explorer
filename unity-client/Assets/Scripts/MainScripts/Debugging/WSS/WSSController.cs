@@ -408,7 +408,7 @@ namespace DCL
                                 MinimapMetadataController.i?.UpdateMinimapSceneInformation(msg.payload);
                                 break;
                             case "SetTutorialEnabled":
-                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload, DCL.Tutorial.TutorialController.TutorialType.Initital);
                                 break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);

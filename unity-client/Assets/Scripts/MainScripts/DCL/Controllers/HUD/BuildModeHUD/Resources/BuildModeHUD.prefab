@@ -5192,7 +5192,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Help & Support
+  m_text: 'Tutorial '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
   m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
@@ -5262,10 +5262,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 851071763935129457}
-    characterCount: 14
+    characterCount: 9
     spriteCount: 0
-    spaceCount: 2
-    wordCount: 2
+    spaceCount: 1
+    wordCount: 1
     linkCount: 0
     lineCount: 1
     pageCount: 1
@@ -9733,7 +9733,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00010244903}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0.000091552734, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &851071764306684488
@@ -9933,12 +9933,12 @@ GameObject:
   - component: {fileID: 851071764309699370}
   - component: {fileID: 851071764309699371}
   m_Layer: 5
-  m_Name: Help&SupportBtn
+  m_Name: TutorialBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &851071764309699368
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11911,7 +11911,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0.09075928}
   m_SizeDelta: {x: 0, y: -0.18151093}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -11963,7 +11963,7 @@ GameObject:
   m_Component:
   - component: {fileID: 851071764515424546}
   m_Layer: 5
-  m_Name: ObjectsShortcuts
+  m_Name: QuickBarShortcuts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13391,7 +13391,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &851071764665949381
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13491,7 +13491,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 851071764514386324}
   m_HandleRect: {fileID: 851071764514386325}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -13992,7 +13992,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 5a32114ebc74ccc48abfa8b307be6d33, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 194fcbd882d15453b90e80d668ab4bad, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -14386,6 +14386,7 @@ MonoBehaviour:
   resetBtn: {fileID: 851071765254395040}
   duplicateBtn: {fileID: 851071765304597556}
   deleteBtn: {fileID: 851071765209009535}
+  tutorialBtn: {fileID: 851071764309699371}
   showHideAnimator: {fileID: -7688998270734876550}
   toggleUIVisibilityInputAction: {fileID: 11400000, guid: 406d4343cf8bb7a4c9abde62ea95895c,
     type: 2}
@@ -16180,8 +16181,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 160.87, y: -35}
-  m_SizeDelta: {x: 151.67773, y: 142.9743}
+  m_AnchoredPosition: {x: 160.87, y: -30.034}
+  m_SizeDelta: {x: 151.67773, y: 133.04169}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &851071764926792508
 GameObject:

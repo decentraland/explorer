@@ -6,6 +6,7 @@ using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
+using DCL.Tutorial;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -46,16 +47,14 @@ public class BuildModeController : ViewController
 
 
     [Header("Scene references")]
-    public GameObject shortCutsGO, extraBtnsGO, cameraParentGO,cursorGO;
+    public GameObject cameraParentGO,cursorGO;
 
     public EntityInformationController entityInformationController;
-    public BuildModeEntityListController buildModeEntityListController;
     public OutlinerController outlinerController;
     public BuilderInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
     public InputController inputController;
-    public HUDController hudController;
 
     [Header("Build Modes")]
 
@@ -78,6 +77,8 @@ public class BuildModeController : ViewController
 
     [SerializeField] internal InputAction_Hold multiSelectionInputAction;
 
+    //Note(Adrian): This is for tutorial purposes
+    public Action OnSceneObjectPlaced;
 
     BuildModeState currentActiveMode;
 
@@ -95,6 +96,7 @@ public class BuildModeController : ViewController
     int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
 
     SceneObject lastSceneObjectCreated;
+
     void Start()
     {
         if (snapGO == null)
@@ -120,11 +122,11 @@ public class BuildModeController : ViewController
             undoGO = new GameObject("UndoGameObject");
             undoGO.transform.SetParent(transform);
         }
-
         HUDConfiguration hudConfig = new HUDConfiguration();
         hudConfig.active = true;
         hudConfig.visible = false;
-        hudController.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILD_MODE);
+        HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILD_MODE);
+
 
         editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
 
@@ -149,6 +151,7 @@ public class BuildModeController : ViewController
         HUDController.i.buildModeHud.OnStopInput += () => builderInputWrapper.StopInput();
         HUDController.i.buildModeHud.OnResumeInput += () => builderInputWrapper.ResumeInput();
         HUDController.i.buildModeHud.OnSceneObjectSelected += CreateSceneObjectSelected;
+        HUDController.i.buildModeHud.OnTutorialAction += StartTutorial;
         builderInputWrapper.OnMouseClick += MouseClick;
 
         actionController.OnRedo += ReSelectEntities;
@@ -159,18 +162,6 @@ public class BuildModeController : ViewController
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
     }
 
-
-    private void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
-    {
-        entityToApply.ChangeShowStatus();
-        if (!entityToApply.IsVisible && selectedEntities.Contains(entityToApply)) DeselectEntity(entityToApply);
-    }
-
-    private void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
-    {
-        entityToApply.ChangeLockStatus();
-        if (entityToApply.IsLocked && selectedEntities.Contains(entityToApply)) DeselectEntity(entityToApply);
-    }
 
     private void OnDestroy()
     {
@@ -210,7 +201,21 @@ public class BuildModeController : ViewController
 
     }
 
+    void StartTutorial()
+    {
+        TutorialController.i.SetTutorialEnabled(false.ToString(),TutorialController.TutorialType.BuilderInWorld);
+    }
+    private void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
+    {
+        entityToApply.ChangeShowStatus();
+        if (!entityToApply.IsVisible && selectedEntities.Contains(entityToApply)) DeselectEntity(entityToApply);
+    }
 
+    private void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
+    {
+        entityToApply.ChangeLockStatus();
+        if (entityToApply.IsLocked && selectedEntities.Contains(entityToApply)) DeselectEntity(entityToApply);
+    }
     void MouseClick(int buttonID, Vector3 position)
     {
         if (isEditModeActivated)
@@ -309,7 +314,7 @@ public class BuildModeController : ViewController
         lastSceneObjectCreated = sceneObject;
 
         InputDone();
-
+        OnSceneObjectPlaced?.Invoke();
     }
 
     void CreateLastSceneObject()
@@ -574,8 +579,11 @@ public class BuildModeController : ViewController
         currentActiveMode.SelectedEntity(entityEditable);
 
 
-        entityInformationController.Enable();
-        entityInformationController.SetEntity(entityEditable.rootEntity, sceneToEdit);
+        if (entityInformationController != null)
+        {
+            entityInformationController.Enable();
+            entityInformationController.SetEntity(entityEditable.rootEntity, sceneToEdit);
+        }
 
 
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
@@ -718,7 +726,7 @@ public class BuildModeController : ViewController
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
         currentActiveMode.EntityDeselected(entity);
-        if (selectedEntities.Count <= 0) entityInformationController.Disable();
+        if (selectedEntities.Count <= 0 && entityInformationController != null) entityInformationController.Disable();
     }
     public void DeselectEntities()
     {
