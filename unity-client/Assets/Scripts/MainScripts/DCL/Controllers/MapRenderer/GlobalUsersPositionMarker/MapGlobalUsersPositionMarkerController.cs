@@ -8,7 +8,9 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
     private const float UPDATE_INTERVAL_FOREGROUND = 60f;
     private const float UPDATE_INTERVAL_BACKGROUND = 5 * 60f;
 
-    private const int MAX_MARKERS = 200;
+    private const int MAX_MARKERS = 100;
+
+    private const int COMMS_RADIUS_THRESHOLD = 2;
 
     public enum UpdateMode { FOREGROUND, BACKGROUND }
 
@@ -36,7 +38,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
 
         KernelConfig.i.EnsureConfigInitialized().Then(config =>
         {
-            commsRadius = (int)config.comms.commRadius;
+            commsRadius = (int)config.comms.commRadius + COMMS_RADIUS_THRESHOLD;
             OnPlayerCoordsChanged(userPositionHandler.playerCoords);
         });
         OnRenderStateChanged(CommonScriptableObjects.rendererState.Get(), false);
