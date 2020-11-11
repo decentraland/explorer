@@ -106,7 +106,7 @@ async function fetchCatalystNodes(endpoint: string | undefined) {
   return await fetchCatalystNodesFromDAO()
 }
 
-export async function fecthCatalystRealms(nodesEndpoint: string | undefined): Promise<Candidate[]> {
+export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Promise<Candidate[]> {
   const nodes: CatalystNode[] = PIN_CATALYST ? [{ domain: PIN_CATALYST }] : await fetchCatalystNodes(nodesEndpoint)
   if (nodes.length === 0) {
     throw new Error('no nodes are available in the DAO for the current network')

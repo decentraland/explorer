@@ -21,7 +21,7 @@ import { WORLD_EXPLORER, REALM, getDefaultTLD, PIN_CATALYST } from 'config'
 import { waitForMetaConfigurationInitialization } from '../meta/sagas'
 import { Candidate, Realm, ServerConnectionStatus } from './types'
 import {
-  fecthCatalystRealms,
+  fetchCatalystRealms,
   fetchCatalystStatuses,
   pickCatalystRealm,
   getRealmFromString,
@@ -142,7 +142,7 @@ function getConfiguredRealm(candidates: Candidate[]) {
 function* initializeCatalystCandidates() {
   yield put(catalystRealmsScanRequested())
   const catalystsNodesEndpointURL = yield select(getCatalystNodesEndpoint)
-  const candidates: Candidate[] = yield call(fecthCatalystRealms, catalystsNodesEndpointURL)
+  const candidates: Candidate[] = yield call(fetchCatalystRealms, catalystsNodesEndpointURL)
 
   yield put(setCatalystCandidates(candidates))
 
