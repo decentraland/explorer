@@ -24,7 +24,7 @@ public class GraphicCardWarningHUDController : IHUD
         {
             NotificationsController.i.ShowNotification(new Notification.Model
             {
-                buttonMessage = "Dismish",
+                buttonMessage = "Dismiss",
                 destroyOnFinish = true,
                 groupID = "GraphicCard",
                 message = GRAPHIC_CARD_MESSAGE,
