@@ -103,7 +103,7 @@ async function fetchCatalystNodes(endpoint: string | undefined) {
     }
   }
 
-  return await fetchCatalystNodesFromDAO()
+  return fetchCatalystNodesFromDAO()
 }
 
 export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Promise<Candidate[]> {
