@@ -43,6 +43,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
         public bool isGrounded;
         public string expressionTriggerId;
         public long expressionTriggerTimestamp;
+        public float deltaTime;
     }
 
     [SerializeField] internal AvatarAnimationsVariable maleAnimations;
@@ -53,9 +54,8 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
     public BlackBoard blackboard;
     public Transform target;
 
-    public AnimationCurve walkBlendtreeCurve;
-    public AnimationCurve runBlendtreeCurve;
-    public AnimationCurve idleBlendtreeCurve;
+    [SerializeField] float runMinSpeed = 6f;
+    [SerializeField] float walkMinSpeed = 0.1f;
 
     internal System.Action<BlackBoard> currentState;
 
@@ -71,13 +71,27 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
     public void OnPoolGet()
     {
         if (DCLCharacterController.i != null)
+        {
             isOwnPlayer = DCLCharacterController.i.transform == transform.parent;
+
+            // NOTE: disable MonoBehaviour's update to use DCLCharacterController event instead
+            this.enabled = !isOwnPlayer;
+
+            if (isOwnPlayer)
+            {
+                DCLCharacterController.i.OnUpdateFinish += Update;
+            }
+        }
 
         currentState = State_Init;
     }
 
     public void OnPoolRelease()
     {
+        if (isOwnPlayer && DCLCharacterController.i)
+        {
+            DCLCharacterController.i.OnUpdateFinish -= Update;
+        }
     }
 
     void Update()
@@ -85,6 +99,13 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
         if (target == null || animation == null)
             return;
 
+        float dt = Time.deltaTime;
+        Update(dt);
+    }
+
+    void Update(float deltaTime)
+    {
+        blackboard.deltaTime = deltaTime;
         UpdateInterface();
         currentState?.Invoke(blackboard);
     }
@@ -133,32 +154,28 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 
     void State_Ground(BlackBoard bb)
     {
-        float dt = Time.deltaTime;
+        animation[baseClipsIds.run].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.runSpeedFactor;
+        animation[baseClipsIds.walk].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.walkSpeedFactor;
 
-        animation[baseClipsIds.run].normalizedSpeed = bb.movementSpeed / dt * bb.runSpeedFactor;
-        animation[baseClipsIds.walk].normalizedSpeed = bb.movementSpeed / dt * bb.walkSpeedFactor;
+        float movementSpeed = bb.movementSpeed / bb.deltaTime;
 
-        float normalizedSpeed = bb.movementSpeed / dt / MAX_VELOCITY;
-
-        float idleWeight = idleBlendtreeCurve.Evaluate(normalizedSpeed);
-        float runWeight = runBlendtreeCurve.Evaluate(normalizedSpeed);
-        float walkWeight = walkBlendtreeCurve.Evaluate(normalizedSpeed);
-
-        //NOTE(Brian): Normalize weights
-        float weightSum = idleWeight + runWeight + walkWeight;
-
-        idleWeight /= weightSum;
-        runWeight /= weightSum;
-        walkWeight /= weightSum;
-
-        animation.Blend(baseClipsIds.idle, idleWeight, GROUND_BLENDTREE_TRANSITION_TIME);
-        animation.Blend(baseClipsIds.run, runWeight, GROUND_BLENDTREE_TRANSITION_TIME);
-        animation.Blend(baseClipsIds.walk, walkWeight, GROUND_BLENDTREE_TRANSITION_TIME);
+        if (movementSpeed > runMinSpeed)
+        {
+            animation.Play(baseClipsIds.run);
+        }
+        else if (movementSpeed > walkMinSpeed)
+        {
+            animation.Play(baseClipsIds.walk);
+        }
+        else
+        {
+            animation.Play(baseClipsIds.idle);
+        }
 
         if (!bb.isGrounded)
         {
             currentState = State_Air;
-            Update();
+            Update(bb.deltaTime);
         }
     }
 
@@ -178,7 +195,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
             animation.Blend(baseClipsIds.jump, 0, AIR_EXIT_TRANSITION_TIME);
             animation.Blend(baseClipsIds.fall, 0, AIR_EXIT_TRANSITION_TIME);
             currentState = State_Ground;
-            Update();
+            Update(bb.deltaTime);
         }
     }
 
@@ -197,7 +214,7 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
             else
                 currentState = State_Ground;
 
-            Update();
+            Update(bb.deltaTime);
         }
     }
 
@@ -240,6 +257,12 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
     {
         this.target = target;
         this.animation = animation;
+
+        var test = animation.GetComponent<TEST>();
+        if (test == null)
+        {
+            animation.gameObject.AddComponent<TEST>();
+        }
 
         if (bodyShapeType.Contains(WearableLiterals.BodyShapes.MALE))
         {
