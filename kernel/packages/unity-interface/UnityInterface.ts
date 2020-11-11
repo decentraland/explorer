@@ -214,10 +214,12 @@ export class UnityInterface {
   }
 
   public ActivateRendering() {
+    defaultLogger.info('[SANTI] =============================================> UNITYINTERFACE.TS -> ActivateRendering()')
     this.gameInstance.SendMessage('SceneController', 'ActivateRendering')
   }
 
   public DeactivateRendering() {
+    defaultLogger.info('[SANTI] =============================================> UNITYINTERFACE.TS -> DeactivateRendering()')
     this.gameInstance.SendMessage('SceneController', 'DeactivateRendering')
   }
 

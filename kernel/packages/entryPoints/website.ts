@@ -118,7 +118,10 @@ namespace webApp {
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
+            logger.info('[SANTI] WEBSITE.TS -> loadUnity() -> userAuthentified() -> EnsureProfile() -> ConfigureTutorial()')
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            logger.info('[SANTI] WEBSITE.TS -> loadUnity() -> userAuthentified() -> EnsureProfile() -> ActivateRendering()')
+            i.ActivateRendering()
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
