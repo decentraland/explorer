@@ -242,7 +242,7 @@ Alternatively you can build into any other folder in your disk and then just mov
 #### Important notes and recommendations
 * The same Unity Editor instance that made the build **shouldn't be closed**, as that will make the new build useless for profiling, at least at the time of writting this, **it only sends the data to the same Unity Editor instance that built it**.
 
-* Since the profiler data comes from the build, you can't "pause the game" and analyze the data, that should be done toggling the "record" button, keep in mind it doesn't work as it should when untoggled, and you probably have to toggle/untoggle it several times to start receiving the data again, in the same session in which the button was untoggled.
+* Since the profiler data comes from the build, you can't "pause the game" and analyze the data, that should be done toggling the "record" button, keep in mind that it doesn't work as expected when re-toggled, and you probably have to toggle/untoggle it several times to start receiving the data again, in the same session in which the button was untoggled to analyze the data.
 
 * Recommended setup: Only CPU, Rendering and Memory modules on display; Disable VSync and "Others" from CPU module.
 
