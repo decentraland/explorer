@@ -66,7 +66,6 @@ export enum CLASS_ID {
   SMART_ITEM = 204,
   AVATAR_MODIFIER_AREA = 205,
 
-
   // For state sync only
   NAME = 300
 }
