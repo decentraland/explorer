@@ -96,15 +96,14 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 
     void Update()
     {
-        if (target == null || animation == null)
-            return;
-
-        float dt = Time.deltaTime;
-        Update(dt);
+        Update(Time.deltaTime);
     }
 
     void Update(float deltaTime)
     {
+        if (target == null || animation == null)
+            return;
+
         blackboard.deltaTime = deltaTime;
         UpdateInterface();
         currentState?.Invoke(blackboard);
