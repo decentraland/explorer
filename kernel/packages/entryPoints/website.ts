@@ -38,6 +38,7 @@ import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
+import Html from 'shared/Html'
 
 const logger = createLogger('website.ts: ')
 
@@ -125,9 +126,8 @@ namespace webApp {
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            setTimeout(() => {
-              globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-            }, 2000)
+            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            Html.switchGameContainer(true)
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
