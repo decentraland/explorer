@@ -153,6 +153,12 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 
     void State_Ground(BlackBoard bb)
     {
+        if (bb.deltaTime <= 0)
+        {
+            Debug.LogError("deltaTime should be > 0", gameObject);
+            return;
+        }
+
         animation[baseClipsIds.run].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.runSpeedFactor;
         animation[baseClipsIds.walk].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.walkSpeedFactor;
 
@@ -160,15 +166,15 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 
         if (movementSpeed > runMinSpeed)
         {
-            animation.Play(baseClipsIds.run);
+            animation.CrossFade(baseClipsIds.run, RUN_TRANSITION_TIME);
         }
         else if (movementSpeed > walkMinSpeed)
         {
-            animation.Play(baseClipsIds.walk);
+            animation.CrossFade(baseClipsIds.walk, WALK_TRANSITION_TIME);
         }
         else
         {
-            animation.Play(baseClipsIds.idle);
+            animation.CrossFade(baseClipsIds.idle, IDLE_TRANSITION_TIME);
         }
 
         if (!bb.isGrounded)
