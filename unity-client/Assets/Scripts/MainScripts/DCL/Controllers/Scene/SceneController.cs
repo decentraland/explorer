@@ -42,8 +42,6 @@ namespace DCL
 
             i = this;
 
-            Application.targetFrameRate = 30;
-
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = false;
