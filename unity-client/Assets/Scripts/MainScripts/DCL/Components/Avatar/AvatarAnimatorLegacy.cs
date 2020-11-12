@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler
 {
-    const float IDLE_TRANSITION_TIME = 0.25f;
+    const float IDLE_TRANSITION_TIME = 0.2f;
     const float STRAFE_TRANSITION_TIME = 0.25f;
     const float RUN_TRANSITION_TIME = 0.15f;
     const float WALK_TRANSITION_TIME = 0.15f;
