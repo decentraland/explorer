@@ -125,7 +125,9 @@ namespace webApp {
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            setTimeout(() => {
+              globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            }, 2000)
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
