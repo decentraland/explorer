@@ -3,24 +3,33 @@ public class GraphicCardWarningHUDController : IHUD
 {
     private const string GRAPHIC_CARD_MESSAGE = "An integrated Graphic Card has been detected.\nYou might encounter performance issues";
 
-    [System.Serializable]
-    public class Model
-    {
-        public string graphicCardVendor;
-    }
-
-    private Model model;
-
     public GraphicCardWarningHUDController() { }
-
-    public GraphicCardWarningHUDController(Model model)
-    {
-        this.model = model;
-    }
 
     public void SetVisibility(bool visible)
     {
-        if (visible && IsIntegratedGraphicCard())
+        CommonScriptableObjects.rendererState.OnChange -= RendererStateChanged;
+
+        if (!visible)
+            return;
+
+        if (CommonScriptableObjects.rendererState)
+            TryShowNotification();
+        else
+            CommonScriptableObjects.rendererState.OnChange += RendererStateChanged;
+
+    }
+
+    private void RendererStateChanged(bool newState, bool oldState)
+    {
+        if (!newState) return;
+
+        CommonScriptableObjects.rendererState.OnChange -= RendererStateChanged;
+        TryShowNotification();
+    }
+
+    private void TryShowNotification()
+    {
+        if (IsIntegratedGraphicCard())
         {
             NotificationsController.i.ShowNotification(new Notification.Model
             {
@@ -34,15 +43,7 @@ public class GraphicCardWarningHUDController : IHUD
         }
     }
 
-    private bool IsIntegratedGraphicCard()
-    {
-        UnityEngine.Debug.unityLogger.logEnabled = true;
-        UnityEngine.Debug.Log($"Graphic Card {DCL.Interface.WebInterface.GetGraphicCard()}");
-        return DCL.Interface.WebInterface.GetGraphicCard().ToLower().Contains("intel");
-    }
+    private bool IsIntegratedGraphicCard() => DCL.Interface.WebInterface.GetGraphicCard().ToLower().Contains("intel");
 
-    public void Dispose()
-    {
-
-    }
+    public void Dispose() { }
 }
