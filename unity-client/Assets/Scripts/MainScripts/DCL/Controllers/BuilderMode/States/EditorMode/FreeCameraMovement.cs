@@ -49,6 +49,7 @@ public class FreeCameraMovement : CameraStateBase
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
 
     }
+
     private void Start()
     {
         advanceFowardInputAction.OnStarted += (o) => { isAdvancingFoward = true; };
@@ -100,7 +101,6 @@ public class FreeCameraMovement : CameraStateBase
         transform.position += velocity * keyboardMovementSpeed * Time.deltaTime;
     }
 
-
     public void SetCameraCanMove(bool canMove)
     {
         isCameraAbleToMove = canMove;
@@ -116,25 +116,30 @@ public class FreeCameraMovement : CameraStateBase
         isCameraAbleToMove = false;
     }
 
-
     private void MouseWheel(float axis)
     {
-      if(isCameraAbleToMove)  transform.Translate(0, 0, axis * zoomSpeed, Space.Self);
+         if(isCameraAbleToMove)
+            transform.Translate(0, 0, axis * zoomSpeed, Space.Self);
     }
+
     private void MouseDragRaw(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if(buttonId == 1) CameraLook(axisX, axisY);
+        if(buttonId == 1)
+            CameraLook(axisX, axisY);
     }
+
     private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if (buttonId == 0 ||buttonId == 2) CameraDrag(axisX, axisY);
+        if (buttonId == 0 ||buttonId == 2)
+            CameraDrag(axisX, axisY);
     }
  
-
     public void CameraDrag(float axisX, float axisY)
     {
-        if (isCameraAbleToMove) transform.Translate(-axisX * Time.deltaTime * dragSpeed, -axisY * Time.deltaTime * dragSpeed, 0);
+        if (isCameraAbleToMove)
+            transform.Translate(-axisX * Time.deltaTime * dragSpeed, -axisY * Time.deltaTime * dragSpeed, 0);
     }
+
     public void CameraLook(float axisX, float axisY)
     {
         if (isCameraAbleToMove)
@@ -150,6 +155,7 @@ public class FreeCameraMovement : CameraStateBase
     {
         return transform.eulerAngles;
     }
+
     public void FocusOnEntities(List<DecentralandEntityToEdit> entitiesToFocus)
     {
         if (entitiesToFocus.Count > 0)
@@ -165,20 +171,23 @@ public class FreeCameraMovement : CameraStateBase
     {
         transform.position = position;
     }
+
     public void LookAt(Transform transformToLookAt)
     {
         transform.LookAt(transformToLookAt);
         yaw = transform.eulerAngles.y;
         pitch = transform.eulerAngles.x;
-
     }
+
     public void SmoothLookAt(Transform transform)
     {
+
         SmoothLookAt(transform.position);
     }
     public void SmoothLookAt(Vector3 position)
     {
-        if (smoothLookAtCor != null) StopCoroutine(smoothLookAtCor);
+        if (smoothLookAtCor != null)
+            StopCoroutine(smoothLookAtCor);
         smoothLookAtCor = StartCoroutine(SmoothLookAtCorutine(position));
     }
 
@@ -188,7 +197,8 @@ public class FreeCameraMovement : CameraStateBase
         int totalPoints = 0;
         foreach(DecentralandEntityToEdit entity in entitiesToLook)
         {
-            if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0) {
+            if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
+            {
                 Vector3 midPointFromEntity = Vector3.zero;
                 foreach (Renderer render in entity.rootEntity.renderers)
                 {
@@ -205,7 +215,6 @@ public class FreeCameraMovement : CameraStateBase
         return finalPosition;
     }
 
-
     IEnumerator SmoothFocusOnTarget(Vector3 targetPosition)
     {
         float advance = 0;
@@ -213,10 +222,12 @@ public class FreeCameraMovement : CameraStateBase
         {
             transform.position = Vector3.Lerp(transform.position, targetPosition, advance);
             advance += smoothLookAtSpeed * Time.deltaTime;
-            if (Vector3.Distance(transform.position, targetPosition) <= focusDistance) advance = 2;
+            if (Vector3.Distance(transform.position, targetPosition) <= focusDistance)
+                advance = 2;
             yield return null;
         }
     }
+
     IEnumerator SmoothLookAtCorutine(Vector3 targetPosition)
     {
         Quaternion targetRotation = Quaternion.LookRotation(targetPosition - transform.position);

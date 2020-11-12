@@ -77,7 +77,8 @@ public class BuildFirstPersonMode : BuildModeState
     public override void SetDuplicationOffset(float offset)
     {
         base.SetDuplicationOffset(offset);
-        if(isSnapActive) editionGO.transform.position += Vector3.right * offset;
+        if(isSnapActive)
+            editionGO.transform.position += Vector3.right * offset;
     }
 
     public override void ResetScaleAndRotation()
@@ -95,10 +96,6 @@ public class BuildFirstPersonMode : BuildModeState
         base.Activate(scene);
         SetEditObjectParent();
         freeMovementGO.transform.SetParent(Camera.main.transform);
-    }
-    public override void Desactivate()
-    {
-        base.Desactivate();
     }
 
     public override void StartMultiSelection()
@@ -177,7 +174,10 @@ public class BuildFirstPersonMode : BuildModeState
                     ScaleSelection(snapScaleFactor);
                     InputDone();
                 }
-                else ScaleSelection(scaleSpeed);
+                else
+                {
+                    ScaleSelection(scaleSpeed);
+                }
             }
             else if (Input.mouseScrollDelta.y < -0.5f)
             {
@@ -186,7 +186,10 @@ public class BuildFirstPersonMode : BuildModeState
                     ScaleSelection(-snapScaleFactor);
                     InputDone();
                 }
-                else ScaleSelection(-scaleSpeed);
+                else
+                {
+                    ScaleSelection(-scaleSpeed);
+                }
             }
         }
     }
@@ -232,7 +235,8 @@ public class BuildFirstPersonMode : BuildModeState
         {
             if (isSnapActive)
             {
-                if (snapObjectAlreadyMoved) parentToAsign = Camera.main.transform;
+                if (snapObjectAlreadyMoved)
+                    parentToAsign = Camera.main.transform;
             }
             else
             {

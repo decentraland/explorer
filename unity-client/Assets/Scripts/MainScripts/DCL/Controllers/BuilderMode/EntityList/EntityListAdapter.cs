@@ -42,6 +42,7 @@ public class EntityListAdapter : MonoBehaviour
     {
         OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.SELECT,currentEntity, this);
     }
+
     public void ShowOrHide()
     {
          OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.SHOW, currentEntity, this);
@@ -62,20 +63,28 @@ public class EntityListAdapter : MonoBehaviour
         if (this != null)
         {
             nameTxt.text = entityToEdit.rootEntity.entityId;
-            if (entityToEdit.IsVisible) showImg.color = iconsSelectedColor;
-            else showImg.color = iconsUnselectedColor;
+            if (entityToEdit.IsVisible)
+                showImg.color = iconsSelectedColor;
+            else
+                showImg.color = iconsUnselectedColor;
 
-            if (entityToEdit.IsLocked) lockImg.color = iconsSelectedColor;
-            else lockImg.color = iconsUnselectedColor;
+            if (entityToEdit.IsLocked)
+                lockImg.color = iconsSelectedColor;
+            else
+                lockImg.color = iconsUnselectedColor;
 
 
-            if (entityToEdit.IsSelected) selectedImg.color = entitySelectedColor;
-            else selectedImg.color = entityUnselectedColor;
+            if (entityToEdit.IsSelected)
+                selectedImg.color = entitySelectedColor;
+            else
+                selectedImg.color = entityUnselectedColor;
         }
     }
+
     void DeleteAdapter(DecentralandEntityToEdit entityToEdit)
     {
         if (this != null)
-            if (entityToEdit.entityUniqueId == currentEntity.entityUniqueId) Destroy(gameObject);
+            if (entityToEdit.entityUniqueId == currentEntity.entityUniqueId)
+                Destroy(gameObject);
     }
 }

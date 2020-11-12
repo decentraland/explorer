@@ -13,11 +13,13 @@ public class VoxelPrefab : MonoBehaviour
     {
         if (isAvailable)
         {
-            if (meshRenderer.material != editMaterial) meshRenderer.material = editMaterial;
+            if (meshRenderer.material != editMaterial)
+                meshRenderer.material = editMaterial;
         }
         else
         {
-            if (meshRenderer.material != errorMaterial) meshRenderer.material = errorMaterial;
+            if (meshRenderer.material != errorMaterial)
+                meshRenderer.material = errorMaterial;
         }
         this.isAvailable = isAvailable;
     }

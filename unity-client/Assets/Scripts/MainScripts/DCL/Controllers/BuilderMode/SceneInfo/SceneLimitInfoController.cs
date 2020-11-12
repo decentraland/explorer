@@ -27,10 +27,12 @@ public class SceneLimitInfoController : MonoBehaviour
         currentParcelScene = parcelScene;
         UpdateInfo();
     }
+
     public bool IsActive()
     {
         return gameObject.activeSelf;
     }
+
     public void Enable()
     {
         gameObject.SetActive(true);
@@ -44,11 +46,8 @@ public class SceneLimitInfoController : MonoBehaviour
         landHoverBtn.SetActive(true);
     }
 
-
     public void UpdateInfo()
     {
-
-
         if (IsParcelSceneSquare(currentParcelScene))
         {
             int size = (int)Math.Sqrt(currentParcelScene.sceneData.parcels.Length);
@@ -80,13 +79,14 @@ public class SceneLimitInfoController : MonoBehaviour
         SetFillInfo();
     }
 
-
     void SetFillInfo()
     {
         float percentAmount = GetHigherLimitPercentInfo();
         Color colorToUse = lowFillColor;
-        if (percentAmount > 66) colorToUse = mediumFillColor; 
-        if (percentAmount > 85) colorToUse = highFillColor; 
+        if (percentAmount > 66)
+            colorToUse = mediumFillColor; 
+        if (percentAmount > 85)
+            colorToUse = highFillColor; 
         foreach(Image img in fillsImgs)
         {
             img.fillAmount = percentAmount/100f;
@@ -94,11 +94,11 @@ public class SceneLimitInfoController : MonoBehaviour
         }
     }
 
-
     string AppendUsageAndLimit(string name, int usage, int limit)
     {
         string currentString = name + ":   " + usage + " / <color=#959696>" + limit + "</color>";
-        if (usage >= limit) currentString = "<color=red>" + currentString + "</color>";
+        if (usage >= limit)
+            currentString = "<color=red>" + currentString + "</color>";
         return currentString;
     }
 
@@ -116,14 +116,20 @@ public class SceneLimitInfoController : MonoBehaviour
         float percentMeshes = usage.meshes*100/ limits.meshes;
 
         float result = percentEntities;
-        if (percentBodies > result) result = percentBodies;
-        if (percentTris > result) result = percentTris;
-        if (percentTexture > result) result = percentTexture;
-        if (percentmats > result) result = percentBodies;
-        if (percentMeshes > result) result = percentBodies;
+        if (percentBodies > result)
+            result = percentBodies;
+        if (percentTris > result)
+            result = percentTris;
+        if (percentTexture > result)
+            result = percentTexture;
+        if (percentmats > result)
+            result = percentBodies;
+        if (percentMeshes > result)
+            result = percentBodies;
 
         return result;
     }
+
     bool IsParcelSceneSquare(ParcelScene scene)
     {
         Vector2Int[] parcelsPoints = scene.sceneData.parcels;
@@ -140,10 +146,12 @@ public class SceneLimitInfoController : MonoBehaviour
             if (vector.y > maxY) maxY = vector.y;
         }
 
-        if(maxX - minX != maxY - minY) return false;
+        if(maxX - minX != maxY - minY)
+            return false;
 
         int lateralLengh = Math.Abs((maxX - minX) + 1);
-        if (parcelsPoints.Length != lateralLengh * lateralLengh) return false;
+        if (parcelsPoints.Length != lateralLengh * lateralLengh)
+            return false;
         
         return true;
     }

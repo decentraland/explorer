@@ -25,7 +25,6 @@ public class BuildModeAction
             ApplyValue(action.entity,action.newValue);
         }
         isDone = true;
-     
     }
 
     public void Undo()

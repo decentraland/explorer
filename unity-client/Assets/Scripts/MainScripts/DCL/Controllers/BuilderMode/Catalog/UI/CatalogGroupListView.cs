@@ -31,7 +31,6 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
         }         
     }
 
-
     void OnDrag(PointerEventData eventData)
     {
         OnAdapterDrag?.Invoke(eventData);
@@ -51,11 +50,9 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
     {
         OnSceneObjectClicked?.Invoke(sceneObject);
     }
+
     void SceneObjectFavorite(SceneObject sceneObject,CatalogItemAdapter adapter)
     {
-
         OnSceneObjectFavorite?.Invoke(sceneObject, adapter);
-
-
     }
 }

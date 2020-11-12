@@ -49,8 +49,6 @@ public class BuildModeHUDView : MonoBehaviour
 
     private void Awake()
     {
-    
-
         toggleUIVisibilityInputAction.OnTriggered += OnUIVisiblityToggleActionTriggered;
         toggleControlsVisibilityInputAction.OnTriggered += OnControlsToggleActionTriggered;
 
@@ -104,10 +102,7 @@ public class BuildModeHUDView : MonoBehaviour
         sceneObjectCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
         sceneObjectCatalogController.OnStopInput += () => OnStopInput?.Invoke();
 
-        tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
-
-
- 
+        tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke()); 
     }
 
     private void OnDestroy()
@@ -145,6 +140,7 @@ public class BuildModeHUDView : MonoBehaviour
         else
             sceneObjectCatalogController.CloseCatalog();
     }
+
     public void ChangeVisibilityOfSceneLimit(bool shouldBeVisible)
     {
         OnSceneLimitInfoChangeVisibility?.Invoke(shouldBeVisible);
@@ -159,13 +155,14 @@ public class BuildModeHUDView : MonoBehaviour
         else
         {
             sceneLimitInfoController.Enable();
-
         }
     }
+
     public void SetVisibilityOfControls(bool isVisible)
     {
         shortCutsGO.SetActive(isVisible);
     }
+
     public void SetVisibilityOfExtraBtns(bool isVisible)
     {
         extraBtnsGO.SetActive(isVisible);
@@ -176,6 +173,7 @@ public class BuildModeHUDView : MonoBehaviour
         firstPersonCanvasGO.SetActive(true);
         godModeCanvasGO.SetActive(false);
     }
+
     public void SetGodModeView()
     {
         firstPersonCanvasGO.SetActive(false);

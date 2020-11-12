@@ -54,22 +54,28 @@ public class BuildEditorMode : BuildModeState
         squareMultiSelectionInputAction.OnFinished += (o) => squareMultiSelectionButtonPressed = false;
     }
 
-
     private void Update()
     {
         if (isPlacingNewObject)
         {
-            if (!voxelController.IsActive()) SetEditObjectAtMouse();
-            else voxelController.SetEditObjectLikeVoxel();
+            if (!voxelController.IsActive())
+                SetEditObjectAtMouse();
+            else
+                voxelController.SetEditObjectLikeVoxel();
         }
         else if (isMakingSquareMultiSelection)
         {
-            if (!squareMultiSelectionButtonPressed) EndBoundMultiSelection();
+            if (!squareMultiSelectionButtonPressed)
+            {
+                EndBoundMultiSelection();
+            }
             else
             {
                 List<DecentralandEntityToEdit> allEntities = null;
-                if (!isTypeOfBoundSelectionSelected || !isVoxelBoundMultiSelection) allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
-                else if (isVoxelBoundMultiSelection) allEntities = buildModeController.GetAllVoxelsEntities();
+                if (!isTypeOfBoundSelectionSelected || !isVoxelBoundMultiSelection)
+                    allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
+                else if (isVoxelBoundMultiSelection)
+                    allEntities = buildModeController.GetAllVoxelsEntities();
 
                 foreach (DecentralandEntityToEdit entity in allEntities)
                 {
@@ -78,15 +84,20 @@ public class BuildEditorMode : BuildModeState
                     {
                         if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
                         {
-                            if(!isTypeOfBoundSelectionSelected && !entity.IsLocked)
+                            if (!isTypeOfBoundSelectionSelected && !entity.IsLocked)
                             {
-                                if (entity.IsVoxel) isVoxelBoundMultiSelection = true;
-                                else isVoxelBoundMultiSelection = false;
+                                if (entity.IsVoxel)
+                                    isVoxelBoundMultiSelection = true;
+                                else
+                                    isVoxelBoundMultiSelection = false;
                                 isTypeOfBoundSelectionSelected = true;
                             }
                             outlinerController.OutlineEntity(entity);
                         }
-                        else outlinerController.CancelEntityOutline(entity);
+                        else
+                        {
+                            outlinerController.CancelEntityOutline(entity);
+                        }
                     }
                 }
 
@@ -120,16 +131,15 @@ public class BuildEditorMode : BuildModeState
         {
             if (isMakingSquareMultiSelection)
             {
-                EndBoundMultiSelection();
-               
+                EndBoundMultiSelection();          
             }
         }
     }
+
     void MouseDown(int buttonID, Vector3 position)
     {
         if (buttonID == 0)
         {
-
             if (squareMultiSelectionButtonPressed)
             {
                 isMakingSquareMultiSelection = true;
@@ -206,7 +216,8 @@ public class BuildEditorMode : BuildModeState
 
         gizmoManager.InitializeGizmos(Camera.main,freeCameraController.transform);
         gizmoManager.SetAllGizmosInPosition(cameraPosition);
-        if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE) gizmoManager.SetGizmoType("MOVE");
+        if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE)
+            gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
         SceneController.i.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
@@ -237,7 +248,6 @@ public class BuildEditorMode : BuildModeState
         freeMovementGO.transform.SetParent(null);
     }
 
-
     public override void SetDuplicationOffset(float offset)
     {
         base.SetDuplicationOffset(offset);
@@ -255,10 +265,7 @@ public class BuildEditorMode : BuildModeState
             createdEntity.rootEntity.gameObject.tag = "Voxel";
             voxelController.SetVoxelSelected(createdEntity);
             ActivateVoxelMode();
-
         }
-
-
     }
     public override Vector3 GetCreatedEntityPoint()
     {
@@ -277,7 +284,8 @@ public class BuildEditorMode : BuildModeState
 
         gizmoManager.SelectedEntities(editionGO.transform, editableEntities);
 
-        if (!isMultiSelectionActive && !selectedEntity.IsNew) LookAtEntity(selectedEntity.rootEntity);
+        if (!isMultiSelectionActive && !selectedEntity.IsNew)
+            LookAtEntity(selectedEntity.rootEntity);
 
         snapGO.transform.SetParent(null);
         if (selectedEntity.IsVoxel && selectedEntities.Count == 0)
@@ -289,7 +297,8 @@ public class BuildEditorMode : BuildModeState
     public override void EntityDeselected(DecentralandEntityToEdit entityDeselected)
     {
         base.EntityDeselected(entityDeselected);
-        if(selectedEntities.Count <= 0) gizmoManager.HideGizmo();
+        if(selectedEntities.Count <= 0)
+            gizmoManager.HideGizmo();
         isPlacingNewObject = false;
         DesactivateVoxelMode();
     }
@@ -302,10 +311,11 @@ public class BuildEditorMode : BuildModeState
         {
             gizmoManager.SetSnapFactor(snapFactor, snapRotationDegresFactor, snapScaleFactor);
         }
-        else gizmoManager.SetSnapFactor(0, 0, 0);
+        else
+        {
+            gizmoManager.SetSnapFactor(0, 0, 0);
+        }
     }
-
-
 
     public void FocusOnSelectedEntitiesInput()
     {
@@ -337,8 +347,10 @@ public class BuildEditorMode : BuildModeState
         if (isModeActive)
         {
             gizmoManager.SetGizmoType("MOVE");
-            if (selectedEntities.Count > 0) ShowGizmos();
-            else gizmoManager.HideGizmo();
+            if (selectedEntities.Count > 0)
+                ShowGizmos();
+            else
+                gizmoManager.HideGizmo();
         }
 
     }
@@ -348,20 +360,26 @@ public class BuildEditorMode : BuildModeState
         if (isModeActive)
         {
             gizmoManager.SetGizmoType("ROTATE");
-            if (selectedEntities.Count > 0) ShowGizmos();
-            else gizmoManager.HideGizmo();
+            if (selectedEntities.Count > 0)
+                ShowGizmos();
+            else
+                gizmoManager.HideGizmo();
         }
         
     }
+
     public void ScaleMode()
     {
         if (isModeActive)
         {
             gizmoManager.SetGizmoType("SCALE");
-            if (selectedEntities.Count > 0) ShowGizmos();
-            else gizmoManager.HideGizmo();
+            if (selectedEntities.Count > 0)
+                ShowGizmos();
+            else
+                gizmoManager.HideGizmo();
         }
     }
+
     public void FocusGameObject(List<DecentralandEntityToEdit> entitiesToFocus)
     {
         freeCameraController.FocusOnEntities(entitiesToFocus);
@@ -397,11 +415,11 @@ public class BuildEditorMode : BuildModeState
         }
     }   
 
-
     void ShowGizmos()
     {
         gizmoManager.ShowGizmo();
     }
+
     void SetLookAtObject()
     {
         Vector3 middlePoint = CalculateMiddlePoint(sceneToEdit.sceneData.parcels);
@@ -447,8 +465,6 @@ public class BuildEditorMode : BuildModeState
         return position;
     }
 
-
-
     void SetEditObjectAtMouse()
     {
         RaycastHit hit;
@@ -459,7 +475,6 @@ public class BuildEditorMode : BuildModeState
             editionGO.transform.position = hit.point;
         }
     }
-
 
     Vector3 GetFloorPointAtMouse()
     {

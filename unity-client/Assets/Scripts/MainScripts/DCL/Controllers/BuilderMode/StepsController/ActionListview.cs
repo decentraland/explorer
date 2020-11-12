@@ -25,7 +25,6 @@ public class ActionListview : ListView<BuildModeAction>
         OnActionSelected?.Invoke(action);
     }
 
-
     public override void RemoveAdapters()
     {
         base.RemoveAdapters();
@@ -34,7 +33,8 @@ public class ActionListview : ListView<BuildModeAction>
 
     public void AddAdapter(BuildModeAction action)
     {
-        if (contentList == null) contentList = new List<BuildModeAction>();
+        if (contentList == null)
+            contentList = new List<BuildModeAction>();
         contentList.Add(action);
         CreateAdapter(action);
     }
@@ -47,7 +47,6 @@ public class ActionListview : ListView<BuildModeAction>
         }
     }
 
-
     void CreateAdapter(BuildModeAction action)
     {
         ActionAdapter instanciatedAdapter = Instantiate(adapter, contentPanelTransform).GetComponent<ActionAdapter>();
@@ -55,5 +54,4 @@ public class ActionListview : ListView<BuildModeAction>
         instanciatedAdapter.OnActionSelected += ActionSelected;
         actionList.Add(instanciatedAdapter);
     }
-
 }

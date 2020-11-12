@@ -21,8 +21,7 @@ public class VoxelEntityHit
 
         if (Mathf.Abs(min.x -hit.point.x) < 0.001f)
         {
-            hitVector = Vector3Int.left;
-           
+            hitVector = Vector3Int.left;        
         }
         else if (Mathf.Abs(max.x - hit.point.x) < 0.001f)
         {

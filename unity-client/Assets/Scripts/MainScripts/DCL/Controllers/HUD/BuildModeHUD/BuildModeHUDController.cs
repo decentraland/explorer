@@ -78,7 +78,8 @@ public class BuildModeHUDController : IHUD
     {
         isCatalogOpen = isVisible;
         view.SetVisibilityOfCatalog(isCatalogOpen);
-        if (isVisible) OnCatalogOpen?.Invoke();
+        if (isVisible)
+            OnCatalogOpen?.Invoke();
     }
 
     public void ChangeVisibilityOfCatalog()
@@ -93,17 +94,21 @@ public class BuildModeHUDController : IHUD
 
     public void ShowSceneLimitsPassed()
     {
-        if (!isSceneLimitInfoVisibile) ChangeVisibilityOfSceneInfo();
+        if (!isSceneLimitInfoVisibile)
+            ChangeVisibilityOfSceneInfo();
     }
+
     public void UpdateSceneLimitInfo()
     {
         view.sceneLimitInfoController.UpdateInfo();
     }
+
     public void ChangeVisibilityOfSceneInfo(bool shouldBeVisibile)
     {
         isSceneLimitInfoVisibile = shouldBeVisibile;
         view.SetVisibilityOfSceneInfo(isSceneLimitInfoVisibile);
     }
+
     public void ChangeVisibilityOfSceneInfo()
     {
         isSceneLimitInfoVisibile = !isSceneLimitInfoVisibile;
@@ -127,7 +132,6 @@ public class BuildModeHUDController : IHUD
         buildModeEntityListController.SetEntityList(entityList);
     }
 
-
     public void ChangeVisibilityOfEntityList()
     {
         isEntityListVisible = !isEntityListVisible;
@@ -136,8 +140,12 @@ public class BuildModeHUDController : IHUD
             OnEntityListVisible?.Invoke();
             buildModeEntityListController.OpenEntityList();
         }
-        else buildModeEntityListController.CloseList();
+        else
+        {
+            buildModeEntityListController.CloseList();
+        }
     }
+
     public void ChangeVisibilityOfControls()
     {
         isControlsVisible = !isControlsVisible;

@@ -29,6 +29,7 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
     {
         return sceneObject;
     }
+
     public void SetContent(SceneObject sceneObject)
     {
         this.sceneObject = sceneObject;
@@ -37,8 +38,6 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         else favImg.color = offFavoriteColor;
         GetThumbnail();
     }
-
-
 
     private void GetThumbnail()
     {
@@ -65,23 +64,25 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         loadedThumbnailURL = newLoadedThumbnailURL;
     }
 
-
     public void SetFavorite(bool isOn)
     {
-        if (isOn) favImg.color = onFavoriteColor;
-        else favImg.color = offFavoriteColor;
+        if (isOn)
+            favImg.color = onFavoriteColor;
+        else
+            favImg.color = offFavoriteColor;
     }
 
-  
     public void AdapterStartDragging(BaseEventData baseEventData)
     {
         OnAdapterStartDrag?.Invoke(sceneObject,this, baseEventData);
     }
+
     public void FavoriteIconClicked()
     {
         
         OnSceneObjectFavorite?.Invoke(sceneObject, this);
     }
+
     public void SceneObjectClicked()
     {
         OnSceneObjectClicked?.Invoke(sceneObject);
@@ -112,6 +113,4 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         
         OnAdapterEndDrag?.Invoke(eventData);
     }
-
-
 }

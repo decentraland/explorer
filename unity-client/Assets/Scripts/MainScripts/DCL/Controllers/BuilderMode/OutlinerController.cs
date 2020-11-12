@@ -27,7 +27,8 @@ public class OutlinerController : MonoBehaviour
             if (!entitiesOutlined.Contains(entity))
             {
                 entitiesOutlined.Add(entity);
-                if (entity.IsLocked) return;               
+                if (entity.IsLocked)
+                    return;               
                 for (int i = 0; i < entity.rootEntity.meshesInfo.renderers.Length; i++)
                 {
                     entity.rootEntity.meshesInfo.renderers[i].gameObject.layer = LayerMask.NameToLayer("Selection");
@@ -36,7 +37,6 @@ public class OutlinerController : MonoBehaviour
         }
 
     }
-
 
     public void CancelUnselectedOutlines()
     {
@@ -48,6 +48,7 @@ public class OutlinerController : MonoBehaviour
             }
         }
     }
+
     public void CancelAllOutlines()
     {
         for (int i = 0; i < entitiesOutlined.Count; i++)

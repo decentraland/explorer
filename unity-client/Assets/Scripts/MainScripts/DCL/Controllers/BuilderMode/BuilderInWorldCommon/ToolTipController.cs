@@ -13,12 +13,13 @@ public class ToolTipController : MonoBehaviour
 
     Coroutine changeAlphaCor;
 
-
     public void Desactivate()
     {
-        if (changeAlphaCor != null) StopCoroutine(changeAlphaCor);
+        if (changeAlphaCor != null)
+            StopCoroutine(changeAlphaCor);
         changeAlphaCor = StartCoroutine(ChangeAlpha(1, 0));
     }
+
     public void OnHoverEnter(BaseEventData data)
     {
     
@@ -28,7 +29,8 @@ public class ToolTipController : MonoBehaviour
 
         
         tooltipRT.position = selectedRT.position-Vector3.up*selectedRT.rect.height;
-        if (changeAlphaCor != null) StopCoroutine(changeAlphaCor);
+        if (changeAlphaCor != null)
+            StopCoroutine(changeAlphaCor);
         changeAlphaCor = StartCoroutine(ChangeAlpha(0, 1));
     }
 
@@ -58,7 +60,8 @@ public class ToolTipController : MonoBehaviour
             float lerpedAlpha = Mathf.Lerp(currentAlpha, destinationAlpha, fractionOfJourney);
             tooltipCG.alpha = lerpedAlpha;
             yield return null;
-            if (fractionOfJourney >= 1) exit = true;
+            if (fractionOfJourney >= 1)
+                exit = true;
         }
     }
 }

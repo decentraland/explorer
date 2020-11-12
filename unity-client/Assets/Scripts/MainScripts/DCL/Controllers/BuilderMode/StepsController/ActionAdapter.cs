@@ -44,6 +44,7 @@ public class ActionAdapter : MonoBehaviour
     {
         notDoneImg.enabled = !action.isDone;
     }
+
     public void Selected()
     {
         OnActionSelected?.Invoke(action, this);

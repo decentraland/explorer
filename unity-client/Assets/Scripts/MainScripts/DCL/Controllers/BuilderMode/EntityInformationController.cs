@@ -32,7 +32,10 @@ public class EntityInformationController : MonoBehaviour
                     UpdateInfo();
                     framesCount = 0;
                 }
-                else framesCount++;
+                else
+                {
+                    framesCount++;
+                }
             }
         }
     }

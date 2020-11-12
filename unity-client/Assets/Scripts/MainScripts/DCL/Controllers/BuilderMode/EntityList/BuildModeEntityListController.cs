@@ -41,7 +41,8 @@ public class BuildModeEntityListController : MonoBehaviour
     public void SetEntityList(List<DecentralandEntityToEdit> sceneEntities)
     {
         entitiesList = sceneEntities;
-        if (entityListView.gameObject.activeSelf) entityListView.SetContent(entitiesList);
+        if (entityListView.gameObject.activeSelf)
+            entityListView.SetContent(entitiesList);
     }
 
     public void CloseList()

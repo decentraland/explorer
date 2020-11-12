@@ -31,24 +31,24 @@ public class BuilderInputWrapper : MonoBehaviour
     {
         canInputBeMade = false;
     }
+
     public void ResumeInput()
     {
         canInputBeMade = true;
     }
 
-
-
     private void MouseUp(int buttonId, Vector3 mousePosition)
     {
-        if (!canInputBeMade) return;
-     
-     
-
+        if (!canInputBeMade)
+            return;
+    
         if (!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick))
         {
             OnMouseUp?.Invoke(buttonId, mousePosition);
-            if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold) return;
-            if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000) return;
+            if (Vector3.Distance(mousePosition, lastMousePosition) >= movementClickThreshold)
+                return;
+            if (Time.unscaledTime >= lastTimeMouseDown + msClickThreshold / 1000)
+                return;
             OnMouseClick?.Invoke(buttonId, mousePosition);          
         }
     }
@@ -58,24 +58,33 @@ public class BuilderInputWrapper : MonoBehaviour
         lastTimeMouseDown = Time.unscaledTime;
         lastMousePosition = mousePosition;
 
-        if (!canInputBeMade) return;
-        if (!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick)) OnMouseDown?.Invoke(buttonId, mousePosition);
+        if (!canInputBeMade)
+            return;
+        if (!BuildModeUtils.IsPointerOverUIElement() && !BuildModeUtils.IsPointerOverMaskElement(layerToStopClick))
+            OnMouseDown?.Invoke(buttonId, mousePosition);
     }
 
     private void MouseWheel(float axisValue)
     {
-        if (!canInputBeMade) return;
-        if (!BuildModeUtils.IsPointerOverUIElement()) OnMouseWheel?.Invoke(axisValue);
+        if (!canInputBeMade)
+            return;
+        if (!BuildModeUtils.IsPointerOverUIElement())
+            OnMouseWheel?.Invoke(axisValue);
     }
 
     private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if (!canInputBeMade) return;
-        if (!BuildModeUtils.IsPointerOverUIElement()) OnMouseDrag?.Invoke(buttonId, mousePosition, axisX, axisY);
+        if (!canInputBeMade)
+            return;
+        if (!BuildModeUtils.IsPointerOverUIElement())
+            OnMouseDrag?.Invoke(buttonId, mousePosition, axisX, axisY);
     }
+
     private void MouseRawDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if (!canInputBeMade) return;
-        if (!BuildModeUtils.IsPointerOverUIElement()) OnMouseDragRaw?.Invoke(buttonId, mousePosition, axisX, axisY);
+        if (!canInputBeMade)
+            return;
+        if (!BuildModeUtils.IsPointerOverUIElement())
+            OnMouseDragRaw?.Invoke(buttonId, mousePosition, axisX, axisY);
     }
 }

@@ -15,7 +15,8 @@ public class ActionController : MonoBehaviour
 
     private void Awake()
     {
-        if(actionListview != null)actionListview.OnActionSelected += GoToAction;
+        if(actionListview != null)
+            actionListview.OnActionSelected += GoToAction;
     }
 
     int currentStepIndex = 0;
@@ -34,19 +35,18 @@ public class ActionController : MonoBehaviour
             if (stepsAmount > 0)
             {
                 UndoCurrentAction();
-                if (currentStepIndex > 0) currentStepIndex--;
+                if (currentStepIndex > 0)
+                    currentStepIndex--;
             }
             else
             {
                 RedoCurrentAction();
-                if (currentStepIndex + 1 < actionsMade.Count) currentStepIndex++;
+                if (currentStepIndex + 1 < actionsMade.Count)
+                    currentStepIndex++;
             }
         }
 
     }
-
-
-
 
     public void TryToRedoAction()
     {
@@ -54,8 +54,10 @@ public class ActionController : MonoBehaviour
         {
             if (currentStepIndex + 1 < actionsMade.Count)
             {
-                if(currentStepIndex == 0 && actionsMade[currentStepIndex].isDone) currentStepIndex++;
-                else if(currentStepIndex != 0) currentStepIndex++;
+                if(currentStepIndex == 0 && actionsMade[currentStepIndex].isDone)
+                    currentStepIndex++;
+                else if(currentStepIndex != 0)
+                    currentStepIndex++;
                 RedoCurrentAction();
             }
         }
@@ -66,7 +68,8 @@ public class ActionController : MonoBehaviour
         if (currentStepIndex >= 0 && actionsMade.Count > 0)
         {
             UndoCurrentAction();
-            if (currentStepIndex > 0) currentStepIndex--;
+            if (currentStepIndex > 0)
+                currentStepIndex--;
         }
     }
 
@@ -81,10 +84,10 @@ public class ActionController : MonoBehaviour
         actionsMade.Add(action);
     
         currentStepIndex = actionsMade.Count-1;
-        if (removedActions && actionListview != null) actionListview.SetContent(actionsMade);
+        if (removedActions && actionListview != null)
+            actionListview.SetContent(actionsMade);
         action.OnApplyValue += ApplyAction;
     }
-
 
     void ApplyAction(DecentralandEntity entityToApply, object value,BuildModeAction.ActionType actionType)
     {
@@ -106,22 +109,25 @@ public class ActionController : MonoBehaviour
                 break;
             case ActionType.CREATED:
                 string entityString = (string)value;
-                if (entityString.Length < 255) buildModeController.DeleteEntity((string)value);
+                if (entityString.Length < 255)
+                {
+                    buildModeController.DeleteEntity((string)value);
+                }
                 else
                 {
                     buildModeController.CreateEntityFromJSON((string)value);
                 }
                     break;
-
         }
-
     }
+
     void RedoCurrentAction()
     {
         if (!actionsMade[currentStepIndex].isDone)
         {
             actionsMade[currentStepIndex].ReDo();
-            if (actionListview != null) actionListview.RefreshInfo();
+            if (actionListview != null)
+                actionListview.RefreshInfo();
             OnRedo?.Invoke();
           
         }
@@ -133,7 +139,8 @@ public class ActionController : MonoBehaviour
         if (actionsMade[currentStepIndex].isDone)
         {
             actionsMade[currentStepIndex].Undo();
-            if (actionListview != null) actionListview.RefreshInfo();
+            if (actionListview != null)
+                actionListview.RefreshInfo();
             OnUndo?.Invoke();         
         }
     }

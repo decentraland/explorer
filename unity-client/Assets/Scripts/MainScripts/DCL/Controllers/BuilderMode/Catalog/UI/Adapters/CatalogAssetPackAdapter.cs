@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DCL;
 
 public class CatalogAssetPackAdapter : MonoBehaviour
 {
@@ -49,7 +48,6 @@ public class CatalogAssetPackAdapter : MonoBehaviour
         loadedThumbnailURL = newLoadedThumbnailURL;
     }
 
-
     public void SetThumbnail(Asset_Texture texture)
     {
         if (packImg != null)
@@ -59,11 +57,8 @@ public class CatalogAssetPackAdapter : MonoBehaviour
         }
     }
 
-
     public void SceneAssetPackClick()
     {
         OnSceneAssetPackClick?.Invoke(sceneAssetPack);
     }
-
-  
 }

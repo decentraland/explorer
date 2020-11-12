@@ -32,6 +32,7 @@ public class BuildModeState : MonoBehaviour
         gameObject.SetActive(false);
 
     }
+
     public virtual void Activate(ParcelScene scene)
     {
         gameObject.SetActive(true);
@@ -43,6 +44,7 @@ public class BuildModeState : MonoBehaviour
         gameObject.SetActive(false);
         isModeActive = false;
     }
+
     public virtual void SetSnapActive(bool isActive)
     {
         isSnapActive = isActive;
@@ -59,6 +61,7 @@ public class BuildModeState : MonoBehaviour
         isMultiSelectionActive = false;
 
     }
+
     public virtual void SetDuplicationOffset(float offset)
     {
 
@@ -88,22 +91,27 @@ public class BuildModeState : MonoBehaviour
             }
         }
     }
+
     public virtual void CreatedEntity(DecentralandEntityToEdit createdEntity)
     {
 
     }
+
     public virtual void EntityDeselected(DecentralandEntityToEdit entityDeselected)
     {
         CenterGameObjectToEdit();
     }
+
     public virtual void DeselectedEntities()
     {
 
     }
+
     public virtual void CheckInput()
     {
        
     }
+
     public virtual void CheckInputSelectedEntities()
     {
 
@@ -224,6 +232,5 @@ public class BuildModeState : MonoBehaviour
 
             actionList = new List<BuildModeEntityAction>();
         }
-
     }
 }

@@ -52,13 +52,15 @@ public class SceneObjectCatalogController : MonoBehaviour
     #region Filter
     void OnSearchInputChanged(string currentSearchInput)
     {
-        if (string.IsNullOrEmpty(currentSearchInput)) ShowAssetsPacks();
+        if (string.IsNullOrEmpty(currentSearchInput))
+        {
+            ShowAssetsPacks();
+        }
         else
         {
             ShowCatalogContent();
             FilterAssets(currentSearchInput);
             catalogGroupListView.SetContent(filterObjects);
-
         }
         lastFilterName = currentSearchInput;
     }
@@ -78,7 +80,8 @@ public class SceneObjectCatalogController : MonoBehaviour
                         if (groupedSceneObjects.ContainsKey(sceneObject.category))
                         {
                             foundCategory = true;
-                            if (!groupedSceneObjects[sceneObject.category].Contains(sceneObject)) groupedSceneObjects[sceneObject.category].Add(sceneObject);
+                            if (!groupedSceneObjects[sceneObject.category].Contains(sceneObject))
+                                groupedSceneObjects[sceneObject.category].Add(sceneObject);
                         }
                     }
                     if (!foundCategory)
@@ -91,23 +94,28 @@ public class SceneObjectCatalogController : MonoBehaviour
             }
         }
     }
+
     #endregion
 
     #region DragAndDrop
+
     int lastIndexDroped = -1;
     GameObject draggedObject;
     public void SetIndexToDrop(int index)
     {
         lastIndexDroped = index;
     }
+
     void OnDrag(PointerEventData data)
     {
         draggedObject.transform.position = data.position;
     }
+
     void SceneObjectStartDragged(SceneObject sceneObjectClicked, CatalogItemAdapter adapter, BaseEventData data)
     {
         PointerEventData eventData = data as PointerEventData;
-        if(draggedObject== null) draggedObject = Instantiate(adapter.gameObject, generalCanvas.transform);
+        if(draggedObject== null)
+            draggedObject = Instantiate(adapter.gameObject, generalCanvas.transform);
         RectTransform adapterRT = adapter.GetComponent<RectTransform>();
         RectTransform newAdapterRT = draggedObject.GetComponent<RectTransform>();
         CatalogItemAdapter newAdapter = draggedObject.GetComponent<CatalogItemAdapter>();
@@ -137,6 +145,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         }
         Destroy(draggedObject);
     }
+
     #endregion
 
     void SetQuickBarShortcut(SceneObject sceneObject, int index,Texture texture)
@@ -163,7 +172,7 @@ public class SceneObjectCatalogController : MonoBehaviour
             {
                 foreach (SceneObject sceneObject in assetPack.assets)
                 {
-                    foreach(SceneObject favObject in favoritesSceneObjects)
+                    foreach (SceneObject favObject in favoritesSceneObjects)
                     {
                         if (favObject != null)
                         {
@@ -175,7 +184,8 @@ public class SceneObjectCatalogController : MonoBehaviour
                                     if (groupedSceneObjects.ContainsKey(favoriteName))
                                     {
                                         foundCategory = true;
-                                        if (!groupedSceneObjects[favoriteName].Contains(sceneObject)) groupedSceneObjects[favoriteName].Add(sceneObject);
+                                        if (!groupedSceneObjects[favoriteName].Contains(sceneObject))
+                                            groupedSceneObjects[favoriteName].Add(sceneObject);
                                     }
                                 }
                                 if (!foundCategory)
@@ -195,7 +205,10 @@ public class SceneObjectCatalogController : MonoBehaviour
             ShowCatalogContent();
             catalogGroupListView.SetContent(favorites);
         }
-        else ShowAssetsPacks();
+        else
+        {
+            ShowAssetsPacks();
+        }
        
     }
     public void AsignFavorite(SceneObject sceneObject, CatalogItemAdapter adapter)
@@ -253,8 +266,8 @@ public class SceneObjectCatalogController : MonoBehaviour
         }
     }
 
-
     #endregion
+
     void SceneObjectSelected(SceneObject sceneObject)
     {
         OnSceneObjectSelected?.Invoke(sceneObject);
@@ -288,10 +301,13 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void Back()
     {
-        if (isShowingAssetPacks) CloseCatalog();
-        else ShowAssetsPacks();
+        if (isShowingAssetPacks)
+            CloseCatalog();
+        else
+            ShowAssetsPacks();
         isFavoriteFilterActive = false;
     }
+
     public bool IsCatalogOpen()
     {
         return gameObject.activeSelf;
@@ -304,12 +320,14 @@ public class SceneObjectCatalogController : MonoBehaviour
         catalogAssetPackListView.gameObject.SetActive(true);
         catalogGroupListView.gameObject.SetActive(false);
     }
+
     public void ShowCatalogContent()
     {
         isShowingAssetPacks = false;
         catalogAssetPackListView.gameObject.SetActive(false);
         catalogGroupListView.gameObject.SetActive(true);
     }
+
     public void OpenCatalog()
     {
         catalogTitleTxt.text = "Asset Packs";
@@ -328,9 +346,9 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void CloseCatalog()
     {
-        if(gameObject.activeSelf) StartCoroutine(CloseCatalogAfterOneFrame());
+        if(gameObject.activeSelf)
+            StartCoroutine(CloseCatalogAfterOneFrame());
     }
-
 
     public void AddFullSceneObjectCatalog(string payload)
     {

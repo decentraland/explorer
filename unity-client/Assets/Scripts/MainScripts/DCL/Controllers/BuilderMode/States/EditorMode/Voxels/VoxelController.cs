@@ -159,8 +159,10 @@ public class VoxelController : MonoBehaviour
                     if (firstPosition.z > lastPosition.z) contZ = -contZ;
 
                     Vector3Int positionOfVoxel = new Vector3Int(firstPosition.x + contX, firstPosition.y + contY, firstPosition.z + contZ);
-                    if (positionOfVoxel == firstPosition) continue;
-                    if (ExistVoxelAtPosition(positionOfVoxel,voxelEntities)) continue;
+                    if (positionOfVoxel == firstPosition)
+                        continue;
+                    if (ExistVoxelAtPosition(positionOfVoxel,voxelEntities))
+                        continue;
                     CreateVoxel(positionOfVoxel);
                     mustContainVoxelList.Add(positionOfVoxel);
                 }
@@ -190,7 +192,8 @@ public class VoxelController : MonoBehaviour
     {
         foreach (DecentralandEntityToEdit voxelEntity in voxelEntities)
         {
-            if (position == ConverPositionToVoxelPosition(voxelEntity.transform.position)) return true;
+            if (position == ConverPositionToVoxelPosition(voxelEntity.transform.position))
+                return true;
         }
         return false;
     }
@@ -272,7 +275,6 @@ public class VoxelController : MonoBehaviour
         lastVoxelCreated.transform.localPosition = Vector3.zero;
     }
 
-
     public Vector3Int ConverPositionToVoxelPosition(Vector3 rawPosition)
     {
         Vector3Int position = Vector3Int.zero;
@@ -295,6 +297,5 @@ public class VoxelController : MonoBehaviour
         bounds.size += Vector3.one * 0.05f;
         return true;
     }
-   
-
+  
 }

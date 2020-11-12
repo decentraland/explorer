@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public static partial class BuildModeUtils 
+public static partial class BuildModeUtils
 {
     static Texture2D _whiteTexture;
     public static Texture2D WhiteTexture
@@ -72,37 +71,48 @@ public static partial class BuildModeUtils
         var viewPortBounds = BuildModeUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
         return viewPortBounds.Contains(camera.WorldToViewportPoint(point));
     }
+
     public static bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition)
     {
         Camera camera = Camera.main;
         var viewPortBounds = BuildModeUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
         return viewPortBounds.Contains(camera.WorldToViewportPoint(transform.position));
     }
+
     public static bool IsWithInSelectionBounds(Bounds bounds, Vector3 lastClickMousePosition, Vector3 mousePosition)
     {
         Camera camera = Camera.main;
         var viewPortBounds = BuildModeUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
         return viewPortBounds.Intersects(bounds);
     }
+
     public static void CopyGameObjectStatus(GameObject gameObjectToCopy, GameObject gameObjectToReceive, bool copyParent = true, bool localRotation = true)
     {
-        if (copyParent) gameObjectToReceive.transform.SetParent(gameObjectToCopy.transform.parent);
+        if (copyParent)
+            gameObjectToReceive.transform.SetParent(gameObjectToCopy.transform.parent);
+
         gameObjectToReceive.transform.position = gameObjectToCopy.transform.position;
-        if (localRotation) gameObjectToReceive.transform.localRotation = gameObjectToCopy.transform.localRotation;
-        else gameObjectToReceive.transform.rotation = gameObjectToCopy.transform.rotation;
+
+        if (localRotation)
+            gameObjectToReceive.transform.localRotation = gameObjectToCopy.transform.localRotation;
+        else
+            gameObjectToReceive.transform.rotation = gameObjectToCopy.transform.rotation;
+
         gameObjectToReceive.transform.localScale = gameObjectToCopy.transform.lossyScale;
+
     }
 
     public static bool IsPointerOverMaskElement(LayerMask mask)
     {
         RaycastHit hitInfo;
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if(Physics.Raycast(mouseRay, out hitInfo, 5555, mask))
+        if (Physics.Raycast(mouseRay, out hitInfo, 5555, mask))
         {
             return true;
         }
         return false;
     }
+
     public static bool IsPointerOverUIElement()
     {
         var eventData = new PointerEventData(EventSystem.current);
@@ -111,4 +121,6 @@ public static partial class BuildModeUtils
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 1;
     }
+
 }
+

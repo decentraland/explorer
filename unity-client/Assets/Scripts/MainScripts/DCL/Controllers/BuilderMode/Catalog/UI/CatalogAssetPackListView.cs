@@ -21,8 +21,6 @@ public class CatalogAssetPackListView : ListView<SceneAssetPack>
         }
     }
 
-
-
     void SceneAssetPackClick(SceneAssetPack sceneAssetPack)
     {
         OnSceneAssetPackClick?.Invoke(sceneAssetPack);

@@ -26,7 +26,6 @@ public class ExternalCallsController : MonoBehaviour
         }
     }
 
-
     public void GetContentAsString(string url, Action<string> functionToCall)
     {
         CoroutineStarter.Start(MakeGetCall(url,null, functionToCall));
@@ -36,7 +35,8 @@ public class ExternalCallsController : MonoBehaviour
     public void GetContentAsByteArray(string url, Action<string,byte[]> functionToCall)
     {
         callList.Add(MakeGetCall(url, functionToCall, null));
-        if(!isRunningCalls)   callerCourutine = CoroutineStarter.Start(MakeExternalCalls());
+        if(!isRunningCalls)  
+                callerCourutine = CoroutineStarter.Start(MakeExternalCalls());
     }
 
     IEnumerator MakeExternalCalls()
