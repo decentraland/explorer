@@ -12,7 +12,7 @@
         Browser.nextRAF += (1000/targetFPS);
       }
     }
-    console.log('pravs - custom RAF, fps: ' + targetFPS)
+
     var delay = Math.max(Browser.nextRAF - now, 0);
     setTimeout(rafCallback, delay);
   };
