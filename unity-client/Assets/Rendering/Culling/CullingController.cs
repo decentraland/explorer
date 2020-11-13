@@ -112,8 +112,8 @@ namespace DCL.Rendering
                 {
                     visibleDistanceThreshold = 30,
                     shadowDistanceThreshold = 20,
-                    emissiveSizeThreshold = 1,
-                    opaqueSizeThreshold = 4,
+                    emissiveSizeThreshold = 3,
+                    opaqueSizeThreshold = 6,
                     shadowRendererSizeThreshold = 10,
                     shadowMapProjectionSizeThreshold = 4
                 },
@@ -121,8 +121,8 @@ namespace DCL.Rendering
                 {
                     visibleDistanceThreshold = 50,
                     shadowDistanceThreshold = 40,
-                    emissiveSizeThreshold = 1,
-                    opaqueSizeThreshold = 4,
+                    emissiveSizeThreshold = 3,
+                    opaqueSizeThreshold = 6,
                     shadowRendererSizeThreshold = 5,
                     shadowMapProjectionSizeThreshold = 4,
                 }
