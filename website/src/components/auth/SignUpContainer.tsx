@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
-import { Kernel } from "../types";
 import { Passport } from "./passport/Passport";
 import { TermsOfServices } from "./terms/TermsOfServices";
 
