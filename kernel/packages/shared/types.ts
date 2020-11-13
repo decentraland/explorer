@@ -519,4 +519,8 @@ export type KernelConfigForRenderer = {
     commRadius: number
     voiceChatEnabled: boolean
   }
+  profiles: {
+    nameValidRegex: string
+    nameValidCharacterRegex: string
+  }
 }
