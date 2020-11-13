@@ -119,12 +119,10 @@ namespace DCL.Tutorial
 
             CommonScriptableObjects.isTaskbarHUDInitialized.OnChange -= IsTaskbarHUDInitialized_OnChange;
 
-            if (hudController != null)
+            if (hudController != null &&
+                hudController.taskbarHud != null)
             {
-                if (hudController.taskbarHud != null)
-                {
-                    hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
-                }
+                hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
             }
 
             NotificationsController.disableWelcomeNotification = false;
@@ -145,11 +143,8 @@ namespace DCL.Tutorial
             openedFromDeepLink = Convert.ToBoolean(fromDeepLink);
             this.tutorialType = tutorialType;
 
-            if (hudController != null)
-            {
-                if (hudController.taskbarHud != null)
-                    hudController.taskbarHud.ShowTutorialOption(false);
-            }
+            hudController?.taskbarHud?.ShowTutorialOption(false);
+            hudController?.profileHud?.HideProfileMenu();
 
             NotificationsController.disableWelcomeNotification = true;
 
@@ -192,11 +187,7 @@ namespace DCL.Tutorial
 
             NotificationsController.disableWelcomeNotification = false;
 
-            if (hudController != null)
-            {
-                if (hudController.taskbarHud != null)
-                    hudController.taskbarHud.ShowTutorialOption(true);
-            }
+            hudController?.taskbarHud?.ShowTutorialOption(true);
 
             CommonScriptableObjects.tutorialActive.Set(false);
 
@@ -311,6 +302,7 @@ namespace DCL.Tutorial
             StartCoroutine(StartTutorialFromStep(skipIndex));
 
             hudController?.taskbarHud?.SetVisibility(true);
+            hudController?.profileHud?.SetBackpackButtonVisibility(true);
         }
 
         /// <summary>
@@ -458,7 +450,9 @@ namespace DCL.Tutorial
 
         private void IsTaskbarHUDInitialized_OnChange(bool current, bool previous)
         {
-            if (current && hudController != null && hudController.taskbarHud != null)
+            if (current &&
+                hudController != null &&
+                hudController.taskbarHud != null)
             {
                 hudController.taskbarHud.moreMenu.OnRestartTutorial -= MoreMenu_OnRestartTutorial;
                 hudController.taskbarHud.moreMenu.OnRestartTutorial += MoreMenu_OnRestartTutorial;
@@ -538,7 +532,6 @@ namespace DCL.Tutorial
             if (hideUIs)
             {
                 hudController?.minimapHud?.SetVisibility(false);
-                hudController?.manaHud?.SetVisibility(false);
                 hudController?.profileHud?.SetVisibility(false);
             }
 
@@ -552,7 +545,6 @@ namespace DCL.Tutorial
             if (!hideUIs)
             {
                 hudController?.minimapHud?.SetVisibility(true);
-                hudController?.manaHud?.SetVisibility(true);
                 hudController?.profileHud?.SetVisibility(true);
             }
         }
