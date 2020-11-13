@@ -32,9 +32,10 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
 
   const onChangeName = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
     if (target.value.length <= 15) {
+      const value = filterInvalidNameCharacters(target.value);
       setNameError(false);
-      setName(filterInvalidNameCharacters(target.value));
-      setChars(target.value.length);
+      setName(value);
+      setChars(value.length);
     }
   };
 
