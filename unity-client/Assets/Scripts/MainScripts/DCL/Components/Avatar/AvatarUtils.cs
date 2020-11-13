@@ -119,7 +119,6 @@ public static class AvatarUtils
                 if (_MatCap != null)
                     copy.SetTexture(ShaderUtils.MatCap, _MatCap);
 
-                copy.SetInt(ShaderUtils.Cull, (int) UnityEngine.Rendering.CullMode.Off);
                 SRPBatchingHelper.OptimizeMaterial(copy);
 
                 result.Add(copy);
