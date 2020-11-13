@@ -14,8 +14,14 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
   const [read, setRead] = useState(false);
   const handleScroll = (e: any) => {
     const isBottom =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+      e.target.scrollHeight - e.target.scrollTop <=
+      e.target.clientHeight * 1.15;
     setRead(isBottom);
+    console.log("Height: ", e.target.scrollHeight);
+    console.log("ScrollTop: ", e.target.scrollTop);
+    console.log("clientHeight: ", e.target.clientHeight);
+    console.log("DIFF: ", e.target.scrollHeight - e.target.scrollTop);
+    console.log("WIN: ", e.target.clientHeight * 1.15);
   };
   const handleClose = props.loading ? null : props.handleCancel;
   return (
