@@ -11,14 +11,14 @@ export interface PassportFormProps {
 }
 
 export const PassportForm: React.FC<PassportFormProps> = (props) => {
-  const [chars, setChars] = useState(props.name ? props.name.length : 0);
+  const [chars, setChars] = useState(props.name ? props.name.length : null);
   const [name, setName] = useState(props.name || "");
   const [email, setEmail] = useState(props.email || "");
   const [hasNameError, setNameError] = useState(false);
   const [hasEmailError, setEmailError] = useState(false);
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!name || name.trim().length > 15) {
+    if (!name || name.trim().length > 10) {
       setNameError(true);
       return;
     }
@@ -55,7 +55,9 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
             value={name}
             onChange={onChangeName}
           />
-          {chars > 0 && <em className="warningLength">{chars}/15</em>}
+          <em className={"warningLength " + (chars === 0 ? "error" : "")}>
+            {chars || 0}/10
+          </em>
           {hasNameError && (
             <em className="error">*required field (you can edit it later)</em>
           )}
@@ -70,7 +72,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
             value={email}
             onChange={onChangeEmail}
           />
-          {hasEmailError && <em className="error">*email not valid</em>}
+          {hasEmailError && <em className="hasError">Email not valid</em>}
         </div>
         <div className="actions">
           <button type="submit" className="btnSubmit">
