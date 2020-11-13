@@ -1,278 +1,359 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Configuration;
-using TMPro;
-using UnityEditor;
+using System.ComponentModel;
+using DCL.Helpers;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
-using Object = System.Object;
+using UniversalRenderPipelineAsset = UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
 
-public class CullingController : MonoBehaviour
+// Culling logic:
+//
+//    - Keep dirtyness of renderers
+//    - Iterate new renderers every X time, when the player moves or they are dirty
+//
+//    SkinnedMeshRenderers:
+//    - If they are far, set updateWhenOffscreen accordingly
+//    - different size values than other renderers
+//
+//    All renderers visibility logic:
+//    - Is less than X distance? -> should be visible
+//    - player is inside the renderer bounds? -> should be visible
+//    - is emissive and is very small size? -> should be visible
+//    - is opaque and is small size? -> should be visible
+//
+//    All renderers shadow logic:
+//    - Is less than Y distance? -> should have shadow
+//    - Is medium size? -> should have shadow
+//    - shadowmap shadow size is less than 4 texels? -> shouldn't have shadow
+//    
+//    
+//    Sizes:
+//    - Distance threshold
+//    - Emissive renderer size culling
+//    - Opaque renderer size culling
+//    - Shadow renderer size culling
+//    - ShadowMap projection size threshold
+
+namespace DCL.Rendering
 {
-    [System.Serializable]
-    public class Profile
+    public interface ICullingController
     {
-        public float mediumSize = 300;
-        public float smallSize = 100;
-        public float rendererVisibilityDistThreshold = 64;
-        public float rendererShadowDistThreshold = 45;
+        event CullingController.DataReport OnDataReport;
+        void SetDirty();
     }
 
-    public Profile rendererProfile = new Profile();
-    public Profile skinnedRendererProfile = new Profile();
-
-    private List<Profile> profiles = null;
-
-    private Renderer[] rs;
-    private SkinnedMeshRenderer[] skrs;
-    private Animation[] anims;
-
-    private HashSet<Renderer> hiddenRenderers = new HashSet<Renderer>();
-    private HashSet<Renderer> shadowlessRenderers = new HashSet<Renderer>();
-    private HashSet<Material> uniqueMaterials = new HashSet<Material>();
-    private Dictionary<Material, List<Renderer>> matToRends = new Dictionary<Material, List<Renderer>>();
-
-    public static bool cullingListDirty = true;
-    public static Vector3 lastPlayerPos;
-
-    public Text panel;
-
-    void UpdatePanel()
+    public class CullingController : ICullingController
     {
-        int rendererCount = (rs?.Length ?? 0) + (skrs?.Length ?? 0);
+        private const float MAX_TIME_BUDGET = 1 / 1000f; // 1 ms
 
-        string text = $"Renderer count: {rendererCount}\nHidden count: {hiddenRenderers.Count}\nShadows hidden:{shadowlessRenderers.Count}";
-        text += $"\nUnique materials: {uniqueMaterials.Count}";
-        panel.text = text;
-    }
-
-    void DrawBounds(Bounds b, Color color, float delay = 0)
-    {
-        // bottom
-        var p1 = new Vector3(b.min.x, b.min.y, b.min.z);
-        var p2 = new Vector3(b.max.x, b.min.y, b.min.z);
-        var p3 = new Vector3(b.max.x, b.min.y, b.max.z);
-        var p4 = new Vector3(b.min.x, b.min.y, b.max.z);
-
-        Debug.DrawLine(p1, p2, color, delay);
-        Debug.DrawLine(p2, p3, color, delay);
-        Debug.DrawLine(p3, p4, color, delay);
-        Debug.DrawLine(p4, p1, color, delay);
-
-        // top
-        var p5 = new Vector3(b.min.x, b.max.y, b.min.z);
-        var p6 = new Vector3(b.max.x, b.max.y, b.min.z);
-        var p7 = new Vector3(b.max.x, b.max.y, b.max.z);
-        var p8 = new Vector3(b.min.x, b.max.y, b.max.z);
-
-        Debug.DrawLine(p5, p6, color, delay);
-        Debug.DrawLine(p6, p7, color, delay);
-        Debug.DrawLine(p7, p8, color, delay);
-        Debug.DrawLine(p8, p5, color, delay);
-
-        // sides
-        Debug.DrawLine(p1, p5, color, delay);
-        Debug.DrawLine(p2, p6, color, delay);
-        Debug.DrawLine(p3, p7, color, delay);
-        Debug.DrawLine(p4, p8, color, delay);
-    }
-
-    IEnumerator PopulateRenderersList()
-    {
-        rs = FindObjectsOfType<Renderer>().Where(x => !(x is SkinnedMeshRenderer)).ToArray();
-        yield return null;
-        skrs = FindObjectsOfType<SkinnedMeshRenderer>();
-        yield return null;
-        anims = FindObjectsOfType<Animation>();
-    }
-
-    const int MAX_CHECKS_PER_FRAME = 250;
-
-    IEnumerator SetAnimationsCulling()
-    {
-        Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
-        int counter = 0;
-
-        for (var i = 0; i < anims.Length; i++)
+        [System.Serializable]
+        public class Profile
         {
-            counter++;
+            public float visibleDistanceThreshold;
+            public float shadowDistanceThreshold;
 
-            if (counter == MAX_CHECKS_PER_FRAME)
+            public float emissiveSizeThreshold;
+            public float opaqueSizeThreshold;
+            public float shadowRendererSizeThreshold;
+            public float shadowMapProjectionSizeThreshold;
+
+            public static Profile Lerp(Profile p1, Profile p2, float t)
             {
-                counter = 0;
-                yield return null;
-            }
-
-            Animation anim = anims[i];
-
-            if (anim == null)
-                continue;
-
-            Transform t = anim.transform;
-
-            float distance = Vector3.Distance(playerPosition, t.position);
-
-            if (distance > 15)
-            {
-                anim.cullingType = AnimationCullingType.BasedOnRenderers;
-            }
-            else
-            {
-                anim.cullingType = AnimationCullingType.AlwaysAnimate;
+                //TODO(Brian): Use this to implement settings slider
+                return new Profile
+                {
+                    visibleDistanceThreshold = Mathf.Lerp(p1.visibleDistanceThreshold, p2.visibleDistanceThreshold, t),
+                    shadowDistanceThreshold = Mathf.Lerp(p1.shadowDistanceThreshold, p2.shadowDistanceThreshold, t),
+                    emissiveSizeThreshold = Mathf.Lerp(p1.emissiveSizeThreshold, p2.emissiveSizeThreshold, t),
+                    opaqueSizeThreshold = Mathf.Lerp(p1.opaqueSizeThreshold, p2.opaqueSizeThreshold, t),
+                    shadowRendererSizeThreshold = Mathf.Lerp(p1.shadowRendererSizeThreshold, p2.shadowRendererSizeThreshold, t),
+                    shadowMapProjectionSizeThreshold = Mathf.Lerp(p1.shadowMapProjectionSizeThreshold, p2.shadowMapProjectionSizeThreshold, t)
+                };
             }
         }
-    }
 
-    public UniversalRenderPipelineAsset urpAsset;
-
-    IEnumerator Start()
-    {
-        profiles = new List<Profile> {rendererProfile, skinnedRendererProfile};
-        UpdatePanel();
-
-        CommonScriptableObjects.rendererState.OnChange += (current, previous) => cullingListDirty = true;
-
-        while (true)
+        [System.Serializable]
+        public class Settings
         {
-            bool shouldCheck = false;
+            public float enableAnimationCullingDistance;
+            public Profile rendererProfile = new Profile();
+            public Profile skinnedRendererProfile = new Profile();
+        }
 
-            if (cullingListDirty)
+        public Settings settings;
+
+        private List<Profile> profiles = null;
+
+        private HashSet<Renderer> hiddenRenderers = new HashSet<Renderer>();
+        private HashSet<Renderer> shadowlessRenderers = new HashSet<Renderer>();
+
+        public static Vector3 lastPlayerPos;
+
+        public UniversalRenderPipelineAsset urpAsset;
+        private CullingObjectsTracker sceneObjects;
+        float timer = 0;
+
+        public delegate void DataReport(int rendererCount, int hiddenRendererCount, int hiddenShadowCount);
+
+        public event DataReport OnDataReport;
+
+        public void SetDirty()
+        {
+            sceneObjects.dirty = true;
+        }
+
+        public static CullingController Create()
+        {
+            var settings = new Settings()
             {
-                yield return PopulateRenderersList();
-                cullingListDirty = false;
-                shouldCheck = true;
-            }
-
-            Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
-
-            if (Vector3.Distance(playerPosition, lastPlayerPos) > 1.0f)
-            {
-                shouldCheck = true;
-                lastPlayerPos = playerPosition;
-            }
-
-            if (!shouldCheck)
-            {
-                yield return null;
-                continue;
-            }
-
-            hiddenRenderers.Clear();
-            shadowlessRenderers.Clear();
-
-            yield return SetAnimationsCulling();
-
-            foreach (Profile p in profiles)
-            {
-                Renderer[] rsList = null;
-
-                if (p == rendererProfile)
-                    rsList = rs;
-                else
-                    rsList = skrs;
-
-                int counter = 0;
-
-                for (var i = 0; i < rsList.Length; i++)
+                enableAnimationCullingDistance = 15,
+                rendererProfile = new Profile
                 {
-                    counter++;
+                    visibleDistanceThreshold = 30,
+                    shadowDistanceThreshold = 20,
+                    emissiveSizeThreshold = 1,
+                    opaqueSizeThreshold = 4,
+                    shadowRendererSizeThreshold = 10,
+                    shadowMapProjectionSizeThreshold = 4
+                },
+                skinnedRendererProfile = new Profile()
+                {
+                    visibleDistanceThreshold = 50,
+                    shadowDistanceThreshold = 40,
+                    emissiveSizeThreshold = 1,
+                    opaqueSizeThreshold = 4,
+                    shadowRendererSizeThreshold = 5,
+                    shadowMapProjectionSizeThreshold = 4,
+                }
+            };
 
-                    if (counter == MAX_CHECKS_PER_FRAME)
+            return new CullingController(GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset, settings);
+        }
+
+        public CullingController(UniversalRenderPipelineAsset urpAsset, Settings settings)
+        {
+            sceneObjects = new CullingObjectsTracker();
+            this.urpAsset = urpAsset;
+            this.settings = settings;
+            CoroutineStarter.Start(UpdateCoroutine());
+        }
+
+        IEnumerator UpdateCoroutine()
+        {
+            RaiseDataReport();
+            profiles = new List<Profile> {settings.rendererProfile, settings.skinnedRendererProfile};
+            CommonScriptableObjects.rendererState.OnChange += (current, previous) => SetDirty();
+
+            while (true)
+            {
+                bool shouldCheck = sceneObjects.dirty;
+
+                yield return sceneObjects.PopulateRenderersList();
+
+                Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
+
+                if (Vector3.Distance(playerPosition, lastPlayerPos) > 1.0f)
+                {
+                    //NOTE(Brian): If player moves, we should always check.
+                    shouldCheck = true;
+                    lastPlayerPos = playerPosition;
+                }
+
+                if (!shouldCheck)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                hiddenRenderers.Clear();
+                shadowlessRenderers.Clear();
+
+                yield return SetAnimationsCulling();
+
+                int profilesCount = profiles.Count;
+
+                for (var pIndex = 0; pIndex < profilesCount; pIndex++)
+                {
+                    Profile profile = profiles[pIndex];
+                    Renderer[] renderers = null;
+
+                    if (profile == settings.rendererProfile)
+                        renderers = sceneObjects.renderers;
+                    else
+                        renderers = sceneObjects.skinnedRenderers;
+
+                    for (var i = 0; i < renderers.Length; i++)
                     {
-                        counter = 0;
-                        yield return null;
-                    }
-
-                    Renderer r = rsList[i];
-
-                    if (r == null)
-                        continue;
-
-                    Transform t = r.transform;
-                    Bounds bounds = r.bounds;
-
-                    Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
-                    float distance = Vector3.Distance(playerPosition, boundingPoint);
-                    float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
-
-                    float shadowSize = bounds.size.magnitude / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
-                    float visThreshold = p.rendererVisibilityDistThreshold;
-                    float shadowThreshold = p.rendererShadowDistThreshold;
-
-                    bool shouldBeVisible = distance < visThreshold || bounds.Contains(playerPosition);
-
-                    bool isOpaque = true;
-
-                    Material firstMat = r.sharedMaterials[0];
-
-                    if (firstMat != null)
-                    {
-                        if (firstMat.HasProperty("_ZWrite") &&
-                            firstMat.GetFloat("_ZWrite") == 0)
+                        if (timer > MAX_TIME_BUDGET)
                         {
-                            isOpaque = false;
+                            timer = 0;
+                            yield return null;
                         }
 
-                        bool hasEmission = false;
+                        Renderer r = renderers[i];
 
-                        if (firstMat.HasProperty("_EmissionMap") && firstMat.GetTexture("_EmissionMap") != null)
-                            hasEmission = true;
+                        if (r == null)
+                            continue;
 
-                        if (firstMat.HasProperty("_EmissionColor") && firstMat.GetColor("_EmissionColor") != Color.clear)
-                            hasEmission = true;
+                        float startTime = Time.realtimeSinceStartup;
 
-                        if (hasEmission)
-                            shouldBeVisible |= size > p.smallSize / 4;
-                    }
+                        Bounds bounds = r.bounds;
+                        Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
+                        float distance = Vector3.Distance(playerPosition, boundingPoint);
 
-                    if (r is SkinnedMeshRenderer)
-                    {
-                        if (distance > 15)
-                            (r as SkinnedMeshRenderer).updateWhenOffscreen = false;
-                        else
-                            (r as SkinnedMeshRenderer).updateWhenOffscreen = true;
-                    }
+                        bool shouldBeVisible = ShouldBeVisible(distance, bounds, playerPosition, r, profile);
+                        bool shouldHaveShadow = ShouldHaveShadow(distance, bounds, profile);
 
-                    if (isOpaque)
-                        shouldBeVisible |= size > p.smallSize;
+                        SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
+
+                        if (!shouldBeVisible && !hiddenRenderers.Contains(r))
+                            hiddenRenderers.Add(r);
+
+                        if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
+                            shadowlessRenderers.Add(r);
+
+                        var skr = r as SkinnedMeshRenderer;
+
+                        if (skr != null)
+                        {
+                            if (distance > settings.enableAnimationCullingDistance)
+                                skr.updateWhenOffscreen = false;
+                            else
+                                skr.updateWhenOffscreen = true;
+                        }
 
 #if UNITY_EDITOR
-                    if (!shouldBeVisible)
-                    {
-                        DrawBounds(bounds, Color.blue, 1);
-                        DrawBounds(new Bounds() {center = boundingPoint, size = Vector3.one}, Color.red, 1);
-                    }
+                        DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
 #endif
-                    bool shouldHaveShadow = distance < shadowThreshold;
-                    shouldHaveShadow |= size > p.mediumSize;
-                    shouldHaveShadow &= shadowSize > 4;
-
-                    if (r.forceRenderingOff != !shouldBeVisible)
-                    {
-                        r.forceRenderingOff = !shouldBeVisible;
+                        timer += Time.realtimeSinceStartup - startTime;
                     }
-
-                    if (!shouldBeVisible && !hiddenRenderers.Contains(r))
-                        hiddenRenderers.Add(r);
-
-                    var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
-
-                    if (r.shadowCastingMode != targetMode)
-                    {
-                        r.shadowCastingMode = targetMode;
-                    }
-
-                    if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
-                        shadowlessRenderers.Add(r);
                 }
+
+                RaiseDataReport();
+                yield return null;
+            }
+        }
+
+        private void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
+        {
+            var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
+
+            if (r.forceRenderingOff != !shouldBeVisible)
+                r.forceRenderingOff = !shouldBeVisible;
+
+            if (r.shadowCastingMode != targetMode)
+                r.shadowCastingMode = targetMode;
+        }
+
+        private bool ShouldBeVisible(float distance, Bounds bounds, Vector3 playerPosition, Renderer r, Profile profile)
+        {
+            float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+
+            bool isOpaque = IsOpaque(r);
+            bool isEmissive = IsEmissive(r);
+
+            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || bounds.Contains(playerPosition);
+
+            if (isEmissive) shouldBeVisible |= size > profile.emissiveSizeThreshold;
+
+            if (isOpaque) shouldBeVisible |= size > profile.opaqueSizeThreshold;
+
+            return shouldBeVisible;
+        }
+
+        private bool ShouldHaveShadow(float distance, Bounds bounds, Profile profile)
+        {
+            float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+
+            float shadowSize = bounds.size.magnitude / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
+            bool shouldHaveShadow = distance < profile.shadowDistanceThreshold;
+            shouldHaveShadow |= size > profile.shadowRendererSizeThreshold;
+            shouldHaveShadow &= shadowSize > profile.shadowMapProjectionSizeThreshold;
+            return shouldHaveShadow;
+        }
+
+        IEnumerator SetAnimationsCulling()
+        {
+            Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
+
+            int animsLength = sceneObjects.animations.Length;
+
+            for (var i = 0; i < animsLength; i++)
+            {
+                if (timer > MAX_TIME_BUDGET)
+                {
+                    timer = 0;
+                    yield return null;
+                }
+
+                Animation anim = sceneObjects.animations[i];
+
+                if (anim == null)
+                    continue;
+
+                float startTime = Time.realtimeSinceStartup;
+                Transform t = anim.transform;
+
+                float distance = Vector3.Distance(playerPosition, t.position);
+
+                if (distance > settings.enableAnimationCullingDistance)
+                    anim.cullingType = AnimationCullingType.BasedOnRenderers;
+                else
+                    anim.cullingType = AnimationCullingType.AlwaysAnimate;
+
+                timer += Time.realtimeSinceStartup - startTime;
+            }
+        }
+
+        private void RaiseDataReport()
+        {
+            if (OnDataReport == null)
+                return;
+
+            int rendererCount = (sceneObjects.renderers?.Length ?? 0) + (sceneObjects.skinnedRenderers?.Length ?? 0);
+            OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
+        }
+
+        private bool IsOpaque(Renderer renderer)
+        {
+            Material firstMat = renderer.sharedMaterials[0];
+
+            if (firstMat == null)
+                return true;
+
+            if (firstMat.HasProperty(ShaderUtils.ZWrite) &&
+                (int) firstMat.GetFloat(ShaderUtils.ZWrite) == 0)
+            {
+                return false;
             }
 
-            UpdatePanel();
-            yield return null;
+            return true;
+        }
+
+        private bool IsEmissive(Renderer renderer)
+        {
+            Material firstMat = renderer.sharedMaterials[0];
+
+            if (firstMat == null)
+                return false;
+
+            if (firstMat.HasProperty(ShaderUtils.EmissionMap) && firstMat.GetTexture(ShaderUtils.EmissionMap) != null)
+                return true;
+
+            if (firstMat.HasProperty(ShaderUtils.EmissionColor) && firstMat.GetColor(ShaderUtils.EmissionColor) != Color.clear)
+                return true;
+
+            return false;
+        }
+
+        private static void DrawDebugGizmos(bool shouldBeVisible, Bounds bounds, Vector3 boundingPoint)
+        {
+            if (!shouldBeVisible)
+            {
+                CullingControllerUtils.DrawBounds(bounds, Color.blue, 1);
+                CullingControllerUtils.DrawBounds(new Bounds() {center = boundingPoint, size = Vector3.one}, Color.red, 1);
+            }
         }
     }
 }

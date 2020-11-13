@@ -343,7 +343,7 @@ namespace DCL.Controllers
                 }
 
                 entities.Remove(id);
-                CullingController.cullingListDirty = true;
+                Environment.i.cullingController.SetDirty();
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
