@@ -297,7 +297,8 @@ namespace DCL.Tutorial
 
             int skipIndex = stepsOnGenesisPlaza.Count +
                 stepsFromDeepLink.Count +
-                stepsFromReset.Count;
+                stepsFromReset.Count +
+                stepsFromBuilderInWorld.Count;
 
             StartCoroutine(StartTutorialFromStep(skipIndex));
 
@@ -419,7 +420,7 @@ namespace DCL.Tutorial
                     yield return new WaitForSeconds(timeBetweenSteps);
             }
 
-            if (!debugRunTutorial)
+            if (!debugRunTutorial && tutorialPath != TutorialPath.FromBuilderInWorld)
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
 
             runningStep = null;
