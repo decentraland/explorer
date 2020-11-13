@@ -10,7 +10,6 @@ import { buildStore } from './store/store'
 import { initializeUrlPositionObserver } from './world/positionThings'
 import { StoreContainer } from './store/rootTypes'
 import { initSession } from './session/actions'
-import { PREVIEW, WORLD_EXPLORER } from 'config'
 
 declare const globalThis: StoreContainer
 
@@ -31,9 +30,7 @@ export function initShared() {
   store.dispatch(notStarted())
   store.dispatch(loadingStarted())
 
-  if (WORLD_EXPLORER || PREVIEW) {
-    store.dispatch(initSession())
-  }
+  store.dispatch(initSession())
 
   initializeUrlPositionObserver()
   initializeUrlRealmObserver()
