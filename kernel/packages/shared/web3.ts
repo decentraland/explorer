@@ -1,4 +1,4 @@
-import { ethereumConfigurations, getNetworkFromDefaultTLD, setNetwork } from 'config'
+import { ethereumConfigurations, getNetworkFromDefaultTLD, getNetworkFromTLD, getTLD, setNetwork } from 'config'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
 import { WebsocketProvider } from 'web3x/providers'
@@ -12,6 +12,12 @@ import { awaitWeb3Approval, createEth, createEthWhenNotConnectedToWeb3 } from '.
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
+import { NETWORK_MISMATCH, setTLDError } from './loading/types'
+import Html from './Html'
+import { ReportFatalError } from './loading/ReportFatalError'
+import { StoreContainer } from './store/rootTypes'
+
+declare const globalThis: StoreContainer
 
 async function getAddress(): Promise<string | undefined> {
   try {
@@ -25,8 +31,37 @@ async function getAddress(): Promise<string | undefined> {
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   const web3Network = await getNetwork()
   const web3net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-  defaultLogger.info('Using ETH network: ', web3net)
   return web3net
+}
+
+export async function checkTldVsWeb3Network() {
+  try {
+    const web3Net = await getAppNetwork()
+
+    return checkTldVsNetwork(web3Net)
+  } catch (e) {
+    // If we have an exception here, most likely it is that we didn't have a provider configured for request manager. Not critical.
+    return false
+  }
+}
+
+export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
+  const tld = getTLD()
+  const tldNet = getNetworkFromTLD()
+
+  if (tld === 'localhost') {
+    // localhost => allow any network
+    return false
+  }
+
+  if (tldNet !== web3Net) {
+    globalThis.globalStore.dispatch(setTLDError({ tld, web3Net, tldNet }))
+    Html.updateTLDInfo(tld, web3Net, tldNet as string)
+    ReportFatalError(NETWORK_MISMATCH)
+    return true
+  }
+
+  return false
 }
 
 export async function initWeb3(): Promise<void> {
