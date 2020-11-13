@@ -45,4 +45,4 @@ ENV_CONTENT.push("REACT_APP_WEBSITE_VERSION=" + websiteVersion);
 
 console.log("VERSIONS:", ENV_CONTENT, "\n");
 
-fs.writeFileSync(".env", ENV_CONTENT.join("\n"));
+fs.writeFileSync(".env", ENV_CONTENT.join("\n") + "\n");
