@@ -39,13 +39,6 @@ export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   return web3net
 }
 
-// This method is similar to the one above, but only returns a network if window.ethereum is defined
-export function getWeb3Network(): ETHEREUM_NETWORK | undefined {
-  if (window.ethereum) {
-    return window.ethereum.chainId === '0x1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-  }
-}
-
 export async function checkTldVsWeb3Network() {
   try {
     const web3Net = await getAppNetwork()
