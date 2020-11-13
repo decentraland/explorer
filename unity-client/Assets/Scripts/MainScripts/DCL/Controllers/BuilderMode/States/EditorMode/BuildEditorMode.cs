@@ -79,14 +79,14 @@ public class BuildEditorMode : BuildModeState
 
                 foreach (DecentralandEntityToEdit entity in allEntities)
                 {
-                    if (entity.IsVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected) continue;
+                    if (entity.isVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected) continue;
                     if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
                     {
                         if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
                         {
                             if (!isTypeOfBoundSelectionSelected && !entity.IsLocked)
                             {
-                                if (entity.IsVoxel)
+                                if (entity.isVoxel)
                                     isVoxelBoundMultiSelection = true;
                                 else
                                     isVoxelBoundMultiSelection = false;
@@ -166,7 +166,7 @@ public class BuildEditorMode : BuildModeState
 
         foreach (DecentralandEntityToEdit entity in allEntities)
         {
-            if (entity.IsVoxel && !isVoxelBoundMultiSelection) continue;
+            if (entity.isVoxel && !isVoxelBoundMultiSelection) continue;
             if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
             {
                 if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
@@ -260,7 +260,7 @@ public class BuildEditorMode : BuildModeState
         isPlacingNewObject = true;
 
         gizmoManager.HideGizmo();
-        if (createdEntity.IsVoxel)
+        if (createdEntity.isVoxel)
         {
             createdEntity.rootEntity.gameObject.tag = "Voxel";
             voxelController.SetVoxelSelected(createdEntity);
@@ -282,13 +282,13 @@ public class BuildEditorMode : BuildModeState
             editableEntities.Add(entity);
         }
 
-        gizmoManager.SelectedEntities(editionGO.transform, editableEntities);
+        gizmoManager.SetSelectedEntities(editionGO.transform, editableEntities);
 
         if (!isMultiSelectionActive && !selectedEntity.IsNew)
             LookAtEntity(selectedEntity.rootEntity);
 
         snapGO.transform.SetParent(null);
-        if (selectedEntity.IsVoxel && selectedEntities.Count == 0)
+        if (selectedEntity.isVoxel && selectedEntities.Count == 0)
         {
             editionGO.transform.position = voxelController.ConverPositionToVoxelPosition(editionGO.transform.position);
         }

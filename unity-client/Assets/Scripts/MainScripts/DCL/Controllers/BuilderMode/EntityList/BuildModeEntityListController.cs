@@ -16,9 +16,10 @@ public class BuildModeEntityListController : MonoBehaviour
         SHOW = 3
     }
 
-    public System.Action<DecentralandEntityToEdit> OnEntityClick,OnEntityDelete,OnEntityLock,OnEntityChangeVisibility;
+    public Action<DecentralandEntityToEdit>
+        OnEntityClick,OnEntityDelete,OnEntityLock,OnEntityChangeVisibility;
     public EntityListView entityListView;
-    ParcelScene currentScene;
+
     List<DecentralandEntityToEdit> entitiesList;
 
     private void Awake()

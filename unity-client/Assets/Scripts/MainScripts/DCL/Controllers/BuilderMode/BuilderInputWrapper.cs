@@ -10,10 +10,15 @@ public class BuilderInputWrapper : MonoBehaviour
     public LayerMask layerToStopClick;
     public float msClickThreshold = 200;
     public float movementClickThreshold = 50;
+
     public Action<int,Vector3> OnMouseClick,OnMouseDown,OnMouseUp;
-    public Action<int,Vector3,float,float> OnMouseDrag;
-    public Action<int,Vector3,float,float> OnMouseDragRaw;
+    public event OnMouseDragDelegate OnMouseDrag;
+    public event OnMouseDragDelegateRaw OnMouseDragRaw;
     public Action<float> OnMouseWheel;
+
+    public delegate void OnMouseDragDelegate(int buttonId, Vector3 position, float axisX, float axisY);
+    public delegate void OnMouseDragDelegateRaw(int buttonId, Vector3 position, float axisX, float axisY);
+
 
     float lastTimeMouseDown = 0;
     Vector3 lastMousePosition;

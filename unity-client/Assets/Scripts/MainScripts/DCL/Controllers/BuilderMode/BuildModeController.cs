@@ -5,6 +5,7 @@ using DCL.Components;
 using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Interface;
 using DCL.Models;
 using DCL.Tutorial;
 using Newtonsoft.Json;
@@ -16,7 +17,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class BuildModeController : ViewController
+public class BuildModeController : MonoBehaviour
 {
     public enum EditModeState
     {
@@ -152,6 +153,7 @@ public class BuildModeController : ViewController
         HUDController.i.buildModeHud.OnResumeInput += () => builderInputWrapper.ResumeInput();
         HUDController.i.buildModeHud.OnSceneObjectSelected += CreateSceneObjectSelected;
         HUDController.i.buildModeHud.OnTutorialAction += StartTutorial;
+        HUDController.i.buildModeHud.OnPublishAction += PublishScene;
         builderInputWrapper.OnMouseClick += MouseClick;
 
         actionController.OnRedo += ReSelectEntities;
@@ -166,6 +168,12 @@ public class BuildModeController : ViewController
     {
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
         DestroyCollidersForAllEntities();
+
+        firstPersonMode.OnInputDone -= InputDone;
+        editorMode.OnInputDone -= InputDone;
+
+        firstPersonMode.OnActionGenerated -= actionController.AddAction;
+        editorMode.OnActionGenerated -= actionController.AddAction;
     }
 
     private void Update()
@@ -211,16 +219,16 @@ public class BuildModeController : ViewController
         TutorialController.i.SetTutorialEnabled(false.ToString(),TutorialController.TutorialType.BuilderInWorld);
     }
 
-    private void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
+    void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
     {
-        entityToApply.ChangeShowStatus();
+        entityToApply.ToggleShowStatus();
         if (!entityToApply.IsVisible && selectedEntities.Contains(entityToApply))
             DeselectEntity(entityToApply);
     }
 
-    private void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
+    void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
     {
-        entityToApply.ChangeLockStatus();
+        entityToApply.ToggleLockStatus();
         if (entityToApply.IsLocked && selectedEntities.Contains(entityToApply))
             DeselectEntity(entityToApply);
     }
@@ -283,7 +291,7 @@ public class BuildModeController : ViewController
         }
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
-        data.baseUrl = BuilderConstants.BASE_URL_CATALOG;
+        data.baseUrl = BuilderSettings.BASE_URL_CATALOG;
 
 
         foreach (KeyValuePair<string, string> content in sceneObject.contents)
@@ -314,7 +322,7 @@ public class BuildModeController : ViewController
         sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
 
         if (sceneObject.asset_pack_id == "b51e5e7c-c56b-4ad9-b9d2-1dc1c6546169")
-            convertedEntities[GetConvertedUniqueKeyForEntity(entity)].IsVoxel = true;
+            convertedEntities[GetConvertedUniqueKeyForEntity(entity)].isVoxel = true;
         DeselectEntities();
         Select(entity);
 
@@ -326,6 +334,7 @@ public class BuildModeController : ViewController
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
 
+        AddEntityOnKernel(entity);
         InputDone();
         OnSceneObjectPlaced?.Invoke();
     }
@@ -547,7 +556,7 @@ public class BuildModeController : ViewController
             }
             else
             {
-                EnterEditMode();
+                StartEnterEditMode();
             }
         }
     }
@@ -727,7 +736,7 @@ public class BuildModeController : ViewController
         List<DecentralandEntityToEdit> voxelEntities = new List<DecentralandEntityToEdit>();
         foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
         {
-            if (entity.rootEntity.scene == sceneToEdit && entity.IsVoxel)
+            if (entity.rootEntity.scene == sceneToEdit && entity.isVoxel)
                 voxelEntities.Add(entity);
         }
 
@@ -792,7 +801,7 @@ public class BuildModeController : ViewController
     {
         foreach (DecentralandEntityToEdit entity in selectedEntities)
         {
-            entity.ChangeLockStatus();
+            entity.ToggleLockStatus();
         }
         DeselectEntities();
     }
@@ -801,7 +810,7 @@ public class BuildModeController : ViewController
     {
         foreach (DecentralandEntityToEdit entity in selectedEntities)
         {
-            entity.ChangeShowStatus();
+            entity.ToggleShowStatus();
         }
     }
 
@@ -865,6 +874,7 @@ public class BuildModeController : ViewController
         sceneToEdit.RemoveEntity(idToRemove, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
+        RemoveEntityOnKernel(idToRemove);
     }
 
     public DecentralandEntity DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
@@ -875,6 +885,7 @@ public class BuildModeController : ViewController
         SetupEntityToEdit(entity);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
 
+        AddEntityOnKernel(entity);
         return entity;
     }
 
@@ -930,8 +941,16 @@ public class BuildModeController : ViewController
         return newEntity;
     }
 
+    public void StartEnterEditMode()
+    {
+        FindSceneToEdit();
+        StartKernelEditMode();
+        StartCoroutine(WaitUntilNewSceneIsLoaded());
+    }
+
     public void EnterEditMode()
-    {       
+    {
+
         HUDController.i.buildModeHud.SetVisibility(true);
         
         isEditModeActivated = true;
@@ -942,6 +961,8 @@ public class BuildModeController : ViewController
     
    
         FindSceneToEdit();
+
+
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
         HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
@@ -963,6 +984,8 @@ public class BuildModeController : ViewController
         builderInputWrapper.gameObject.SetActive(true);
         EntityListChanged();
     }
+
+
 
     public void ExitEditMode()
     {
@@ -991,6 +1014,7 @@ public class BuildModeController : ViewController
            
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
+        ExitKernelEditMode();
     }
 
     void ExitAfterCharacterTeleport(DCLCharacterPosition position)
@@ -1066,4 +1090,70 @@ public class BuildModeController : ViewController
     {
         return entity.scene.sceneData.id + entity.entityId;
     }
+
+    IEnumerator WaitUntilNewSceneIsLoaded()
+    {
+        yield return new WaitForSeconds(0.8f);
+        EnterEditMode();
+
+    }
+
+
+    #region Reporting To Kernel
+
+    void AddEntityOnKernel(DecentralandEntity entity)
+    {
+        List<WebInterface.EntityComponentModel> list = new List<WebInterface.EntityComponentModel>();
+        foreach(KeyValuePair<CLASS_ID_COMPONENT,BaseComponent> keyValuePair in entity.components)
+        {
+            if(keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
+            {
+                WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
+                entityComponentModel.id = (int) CLASS_ID_COMPONENT.TRANSFORM;
+                DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, sceneToEdit);
+                DCLTransform.model.rotation = entity.gameObject.transform.rotation;
+                DCLTransform.model.scale = entity.gameObject.transform.localScale;
+
+                entityComponentModel.data = "{\"position\":"+JsonUtility.ToJson(DCLTransform.model.position)+"}";
+                list.Add(entityComponentModel);
+
+            }
+        }
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
+        {
+            if (keyValuePair.Value is GLTFShape)
+            {
+                WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
+                entityComponentModel.id = (int) CLASS_ID.GLTF_SHAPE;
+                GLTFShape gLTFShape = (GLTFShape)keyValuePair.Value;
+                entityComponentModel.data = "\"src\": \""+gLTFShape.model.src+"\"";
+                list.Add(entityComponentModel);
+
+            }
+        }
+
+        WebInterface.AddEntity(sceneToEdit.sceneData.id,entity.entityId, list.ToArray());
+    }
+
+    void RemoveEntityOnKernel(string entityId)
+    {
+        WebInterface.RemoveEntity(sceneToEdit.sceneData.id, entityId);
+    }
+
+    void StartKernelEditMode()
+    {
+        WebInterface.ReportControlEvent(new WebInterface.StartStatefulMode(sceneToEdit.sceneData.id));
+    }
+
+    void ExitKernelEditMode()
+    {
+        WebInterface.ReportControlEvent(new WebInterface.StopStatefulMode(sceneToEdit.sceneData.id));
+    }
+
+    void PublishScene()
+    {
+        WebInterface.ReportStoreSceneState(sceneToEdit.sceneData.id);
+    }
+    #endregion
 }

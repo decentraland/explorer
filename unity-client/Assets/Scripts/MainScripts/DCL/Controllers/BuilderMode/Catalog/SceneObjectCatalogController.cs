@@ -1,4 +1,5 @@
 
+using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
@@ -26,6 +27,9 @@ public class SceneObjectCatalogController : MonoBehaviour
     public TMP_InputField searchInputField;
     public RawImage[] shortcutsImgs;
 
+    const string favoriteName = "Favorites";
+
+
     List<Dictionary<string, List<SceneObject>>> filterObjects = new List<Dictionary<string, List<SceneObject>>>();
     string lastFilterName = "";
     bool catalogInitializaed = false, isShowingAssetPacks = false, isFavoriteFilterActive = false;
@@ -36,7 +40,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         OnResultReceived += AddFullSceneObjectCatalog;
         catalogAssetPackListView.OnSceneAssetPackClick += OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked += SceneObjectSelected;
-        catalogGroupListView.OnSceneObjectFavorite += AsignFavorite;
+        catalogGroupListView.OnSceneObjectFavorite += ToggleFavoriteState;
         catalogGroupListView.OnAdapterStartDragging += SceneObjectStartDragged;
         catalogGroupListView.OnAdapterDrag += OnDrag;
         catalogGroupListView.OnAdapterEndDrag += OnEndDrag;
@@ -47,6 +51,11 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         catalogAssetPackListView.OnSceneAssetPackClick -= OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked -= SceneObjectSelected;
+        OnResultReceived -= AddFullSceneObjectCatalog;
+        catalogGroupListView.OnSceneObjectFavorite -= ToggleFavoriteState;
+        catalogGroupListView.OnAdapterStartDragging -= SceneObjectStartDragged;
+        catalogGroupListView.OnAdapterDrag -= OnDrag;
+        catalogGroupListView.OnAdapterEndDrag -= OnEndDrag;
     }
 
     #region Filter
@@ -116,13 +125,13 @@ public class SceneObjectCatalogController : MonoBehaviour
         PointerEventData eventData = data as PointerEventData;
         if(draggedObject== null)
             draggedObject = Instantiate(adapter.gameObject, generalCanvas.transform);
-        RectTransform adapterRT = adapter.GetComponent<RectTransform>();
-        RectTransform newAdapterRT = draggedObject.GetComponent<RectTransform>();
+       
         CatalogItemAdapter newAdapter = draggedObject.GetComponent<CatalogItemAdapter>();
-        newAdapter.canvasGroup.blocksRaycasts = false;
-        newAdapter.canvasGroup.alpha = 0.6f;
+
+        RectTransform adapterRT = adapter.GetComponent<RectTransform>();
         newAdapter.SetContent(adapter.GetContent());
-        newAdapterRT.sizeDelta = adapterRT.sizeDelta*0.75f;
+        newAdapter.EnableDragMode(adapterRT.sizeDelta);
+
         OnStopInput?.Invoke();
     }
 
@@ -160,75 +169,64 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     #region Favorites
 
-    public void ShowFavorites()
+    public void ToggleFavorites()
     {
         isFavoriteFilterActive = !isFavoriteFilterActive;
 
-        if (isFavoriteFilterActive)
-        {
-            string favoriteName = "Favorites";
-            List<Dictionary<string, List<SceneObject>>> favorites = new List<Dictionary<string, List<SceneObject>>>();
-            foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
-            {
-                foreach (SceneObject sceneObject in assetPack.assets)
-                {
-                    foreach (SceneObject favObject in favoritesSceneObjects)
-                    {
-                        if (favObject != null)
-                        {
-                            if (sceneObject.id == favObject.id && sceneObject.asset_pack_id == favObject.asset_pack_id)
-                            {
-                                bool foundCategory = false;
-                                foreach (Dictionary<string, List<SceneObject>> groupedSceneObjects in favorites)
-                                {
-                                    if (groupedSceneObjects.ContainsKey(favoriteName))
-                                    {
-                                        foundCategory = true;
-                                        if (!groupedSceneObjects[favoriteName].Contains(sceneObject))
-                                            groupedSceneObjects[favoriteName].Add(sceneObject);
-                                    }
-                                }
-                                if (!foundCategory)
-                                {
-                                    Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
-                                    groupedSceneObjects.Add(favoriteName, new List<SceneObject>() { sceneObject });
-                                    favorites.Add(groupedSceneObjects);
-                                }
-                                break;
-
-                            }
-                        }
-                    }
-                }
-            }
-            catalogTitleTxt.text = favoriteName;
-            ShowCatalogContent();
-            catalogGroupListView.SetContent(favorites);
-        }
-        else
+        if (!isFavoriteFilterActive)
         {
             ShowAssetsPacks();
+            return;
         }
-       
+
+      
+        List<Dictionary<string, List<SceneObject>>> favorites = new List<Dictionary<string, List<SceneObject>>>();
+        foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+        {
+            foreach (SceneObject sceneObject in assetPack.assets)
+            {
+                foreach (SceneObject favObject in favoritesSceneObjects)
+                {
+                    if (favObject == null) continue;
+
+                    if (sceneObject.id == favObject.id && sceneObject.asset_pack_id == favObject.asset_pack_id)
+                    {
+                        bool foundCategory = false;
+                        foreach (Dictionary<string, List<SceneObject>> groupedSceneObjects in favorites)
+                        {
+                            if (groupedSceneObjects.ContainsKey(favoriteName))
+                            {
+                                foundCategory = true;
+                                if (!groupedSceneObjects[favoriteName].Contains(sceneObject))
+                                    groupedSceneObjects[favoriteName].Add(sceneObject);
+                            }
+                        }
+                        if (!foundCategory)
+                        {
+                            Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
+                            groupedSceneObjects.Add(favoriteName, new List<SceneObject>() { sceneObject });
+                            favorites.Add(groupedSceneObjects);
+                        }
+                        break;
+
+                    }
+
+                }
+            }
+        }
+        catalogTitleTxt.text = favoriteName;
+        ShowCatalogContent();
+        catalogGroupListView.SetContent(favorites);
     }
-    public void AsignFavorite(SceneObject sceneObject, CatalogItemAdapter adapter)
+
+    public void ToggleFavoriteState(SceneObject sceneObject, CatalogItemAdapter adapter)
     {
 
         if (!favoritesSceneObjects.Contains(sceneObject))
         {
             favoritesSceneObjects.Add(sceneObject);
 
-            int index = quickBarShortcutsSceneObjects.Count;
-            int cont = 0;
-            foreach (SceneObject sceneObjectIteration in quickBarShortcutsSceneObjects)
-            {
-                if (sceneObjectIteration == null)
-                {
-                    index = cont;
-                    break;
-                }
-                cont++;
-            }
+            int index = FindEmptyShortcutSlot();
             SetQuickBarShortcut(sceneObject,index,adapter.thumbnailImg.texture);
 
             sceneObject.isFavorite = true;
@@ -257,13 +255,24 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void QuickBarObjectSelected(int index)
     {
-        if (quickBarShortcutsSceneObjects.Count > index)
+        if (quickBarShortcutsSceneObjects.Count > index && quickBarShortcutsSceneObjects[index] != null)
+            OnSceneObjectSelected?.Invoke(quickBarShortcutsSceneObjects[index]);
+    }
+
+    int FindEmptyShortcutSlot()
+    {
+        int index = quickBarShortcutsSceneObjects.Count;
+        int cont = 0;
+        foreach (SceneObject sceneObjectIteration in quickBarShortcutsSceneObjects)
         {
-            if (quickBarShortcutsSceneObjects[index] != null)
+            if (sceneObjectIteration == null)
             {
-                OnSceneObjectSelected?.Invoke(quickBarShortcutsSceneObjects[index]);
+                index = cont;
+                break;
             }
+            cont++;
         }
+        return index;
     }
 
     #endregion
@@ -338,7 +347,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         if (!catalogInitializaed)
         {
             CatalogController.sceneObjectCatalog.GetValues();
-            ExternalCallsController.i.GetContentAsString("https://builder-api.decentraland.org/v1/assetPacks", AddFullSceneObjectCatalog);
+            ExternalCallsController.i.GetContentAsString(BuilderSettings.BASE_URL_ASSETS_PACK, AddFullSceneObjectCatalog);
             catalogInitializaed = true;
         }
     

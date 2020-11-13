@@ -22,16 +22,15 @@ public class ToolTipController : MonoBehaviour
 
     public void OnHoverEnter(BaseEventData data)
     {
-    
-        PointerEventData dataConverted = data as PointerEventData;
-
+        if (!(data is PointerEventData dataConverted))
+            return;
         RectTransform selectedRT = dataConverted.pointerEnter.GetComponent<RectTransform>();
-
         
         tooltipRT.position = selectedRT.position-Vector3.up*selectedRT.rect.height;
         if (changeAlphaCor != null)
-            StopCoroutine(changeAlphaCor);
-        changeAlphaCor = StartCoroutine(ChangeAlpha(0, 1));
+            CoroutineStarter.Stop(changeAlphaCor);
+        changeAlphaCor = CoroutineStarter.Start(ChangeAlpha(0, 1));
+
     }
 
     public void SetText(string text)
@@ -53,15 +52,13 @@ public class ToolTipController : MonoBehaviour
 
         float fractionOfJourney = 0;
         float speed = alphaSpeed;
-        bool exit = false;
-        while (!exit)
+        while (fractionOfJourney < 1)
         {
             fractionOfJourney += Time.unscaledDeltaTime * speed;
             float lerpedAlpha = Mathf.Lerp(currentAlpha, destinationAlpha, fractionOfJourney);
             tooltipCG.alpha = lerpedAlpha;
             yield return null;
-            if (fractionOfJourney >= 1)
-                exit = true;
         }
+        changeAlphaCor = null;
     }
 }

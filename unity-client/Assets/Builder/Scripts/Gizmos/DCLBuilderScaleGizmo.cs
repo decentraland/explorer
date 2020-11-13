@@ -13,7 +13,7 @@ namespace Builder.Gizmos
         private Vector3 initialHitPoint;
         private Vector3 lastHitPoint;
 
-        public override void Initialize(Camera camera,Transform cameraTransform)
+        public override void Initialize(Camera camera, Transform cameraTransform)
         {
             base.Initialize(camera, cameraTransform);
             axisProportionalScale.SetGizmo(this);

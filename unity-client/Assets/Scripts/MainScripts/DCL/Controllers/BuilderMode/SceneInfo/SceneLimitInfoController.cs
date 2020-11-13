@@ -133,10 +133,10 @@ public class SceneLimitInfoController : MonoBehaviour
     bool IsParcelSceneSquare(ParcelScene scene)
     {
         Vector2Int[] parcelsPoints = scene.sceneData.parcels;
-        int minX = 9999;
-        int minY = 9999;
-        int maxX = -9999;
-        int maxY = -9999;
+        int minX = int.MaxValue;
+        int minY = int.MaxValue;
+        int maxX = int.MinValue;
+        int maxY = int.MinValue;
 
         foreach(Vector2Int vector in parcelsPoints)
         {

@@ -28,22 +28,21 @@ namespace Builder.Gizmos
 
         public void SetColorHighlight()
         {
-            if (props != null)
-            {
-                objectRenderer.GetPropertyBlock(props);
-                props.SetColor(colorPropertyID, highLightColor);
-                objectRenderer.SetPropertyBlock(props);
-            }
+            if (props == null) return;
+
+            objectRenderer.GetPropertyBlock(props);
+            props.SetColor(colorPropertyID, highLightColor);
+            objectRenderer.SetPropertyBlock(props);
+
         }
 
         public void SetColorDefault()
         {
-            if (props != null)
-            {
-                objectRenderer.GetPropertyBlock(props);
-                props.SetColor(colorPropertyID, defaultColor);
-                objectRenderer.SetPropertyBlock(props);
-            }
+            if (props == null) return;
+
+            objectRenderer.GetPropertyBlock(props);
+            props.SetColor(colorPropertyID, defaultColor);
+            objectRenderer.SetPropertyBlock(props);
         }
 
         private void Awake()

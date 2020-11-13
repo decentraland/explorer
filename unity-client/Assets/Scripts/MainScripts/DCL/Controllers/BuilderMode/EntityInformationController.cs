@@ -23,20 +23,18 @@ public class EntityInformationController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if(isEnable)
+        if (!isEnable) return;
+
+        if (currentEntity == null) return;
+
+        if (framesCount >= framesBetweenUpdate)
         {
-            if (currentEntity != null)
-            {
-                if (framesCount >= framesBetweenUpdate)
-                {
-                    UpdateInfo();
-                    framesCount = 0;
-                }
-                else
-                {
-                    framesCount++;
-                }
-            }
+            UpdateInfo();
+            framesCount = 0;
+        }
+        else
+        {
+            framesCount++;
         }
     }
 

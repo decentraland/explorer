@@ -13,7 +13,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
     public Button firstPersonChangeModeBtn,changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,closeEntityListBtn,catalogBtn,closeCatalogBtn;
-    public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
+    public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
 
     public Button tutorialBtn;
     [SerializeField] internal ShowHideAnimator showHideAnimator;
@@ -45,7 +45,7 @@ public class BuildModeHUDView : MonoBehaviour
     public event Action<bool> OnSceneLimitInfoChangeVisibility;
 
     public event Action<SceneObject> OnSceneObjectSelected;
-    public event Action OnStopInput, OnResumeInput,OnTutorialAction;
+    public event Action OnStopInput, OnResumeInput,OnTutorialAction,OnPublishAction;
 
     private void Awake()
     {
@@ -102,7 +102,8 @@ public class BuildModeHUDView : MonoBehaviour
         sceneObjectCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
         sceneObjectCatalogController.OnStopInput += () => OnStopInput?.Invoke();
 
-        tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke()); 
+        tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
+        publishBtn.onClick.AddListener(() => OnPublishAction?.Invoke()); 
     }
 
     private void OnDestroy()

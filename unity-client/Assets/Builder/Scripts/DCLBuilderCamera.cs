@@ -15,7 +15,6 @@ namespace Builder
         public Transform yawPivot;
         public Transform rootPivot;
         public Camera builderCamera;
-        public GameObject builderCameraObject;
 
         [Space()]
         [Header("Input Settings")]
@@ -85,7 +84,7 @@ namespace Builder
 
             float zoomPrev = zoomCurrent;
             zoomCurrent += (zoomTarget - zoomCurrent) * Time.deltaTime * zoomSpeed;
-            builderCameraObject.transform.localPosition = new Vector3(0, 0, zoomCurrent);
+            builderCamera.transform.localPosition = new Vector3(0, 0, zoomCurrent);
 
             Vector3 panOffset = panTarget - panCurrent;
             float sqDist = panOffset.magnitude;
@@ -215,7 +214,7 @@ namespace Builder
             OnDragObjectEnd();
         }
 
-        public void OnSetCameraPosition(Vector3 position)
+        private void OnSetCameraPosition(Vector3 position)
         {
             panCurrent = position;
             rootPivot.transform.localPosition = panCurrent;

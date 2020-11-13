@@ -64,6 +64,13 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         loadedThumbnailURL = newLoadedThumbnailURL;
     }
 
+    public void EnableDragMode(Vector2 sizeDelta)
+    {
+        RectTransform newAdapterRT = GetComponent<RectTransform>();
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.alpha = 0.6f;
+        newAdapterRT.sizeDelta = sizeDelta* 0.75f;
+    }
     public void SetFavorite(bool isOn)
     {
         if (isOn)

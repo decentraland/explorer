@@ -90,10 +90,10 @@ namespace Builder.Gizmos
         {
             for (int i = 0; i < gizmos.Length; i++)
             {
-                //gizmos[i].transform.position = position;
                 gizmos[i].ForceRelativeScaleRatio();
             }
         }
+
         public void ShowGizmo()
         {
             if (activeGizmo != null)
@@ -133,7 +133,7 @@ namespace Builder.Gizmos
                 DCLBuilderBridge.OnSelectGizmo += SetGizmoType;
                 DCLBuilderBridge.OnSetGridResolution += OnSetGridResolution;
                 DCLBuilderCamera.OnCameraZoomChanged += OnCameraZoomChanged;
-                DCLBuilderObjectSelector.OnSelectedObjectListChanged += SelectedEntities;
+                DCLBuilderObjectSelector.OnSelectedObjectListChanged += SetSelectedEntities;
                 DCLBuilderObjectSelector.OnGizmosAxisPressed += OnGizmosAxisPressed;
                 DCLBuilderInput.OnMouseUp += OnMouseUp;
                 DCLBuilderInput.OnMouseDrag += OnMouseDrag;
@@ -146,7 +146,7 @@ namespace Builder.Gizmos
             DCLBuilderBridge.OnSelectGizmo -= SetGizmoType;
             DCLBuilderBridge.OnSetGridResolution -= OnSetGridResolution;
             DCLBuilderCamera.OnCameraZoomChanged -= OnCameraZoomChanged;
-            DCLBuilderObjectSelector.OnSelectedObjectListChanged -= SelectedEntities;
+            DCLBuilderObjectSelector.OnSelectedObjectListChanged -= SetSelectedEntities;
             DCLBuilderObjectSelector.OnGizmosAxisPressed -= OnGizmosAxisPressed;
             DCLBuilderInput.OnMouseUp -= OnMouseUp;
             DCLBuilderInput.OnMouseDrag -= OnMouseDrag;
@@ -199,7 +199,8 @@ namespace Builder.Gizmos
         {
             InitializeGizmos(camera, camera.transform);
         }
-        public void InitializeGizmos(Camera camera,Transform cameraTransform)
+
+        public void InitializeGizmos(Camera camera, Transform cameraTransform)
         {
             if (!isGizmosInitialized)
             {
@@ -214,7 +215,7 @@ namespace Builder.Gizmos
             }
         }
 
-            private void OnCameraZoomChanged(Camera camera, float zoom)
+        private void OnCameraZoomChanged(Camera camera, float zoom)
         {
             InitializeGizmos(camera);
         }
@@ -224,7 +225,7 @@ namespace Builder.Gizmos
             SetSnapFactor(position, rotation, scale);
         }
 
-        public void SelectedEntities(Transform selectionParent, List<EditableEntity> entities)
+        public void SetSelectedEntities(Transform selectionParent, List<EditableEntity> entities)
         {
             selectedEntities = entities;
             selectedEntitiesParent = selectionParent;

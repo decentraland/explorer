@@ -13,75 +13,63 @@ public class DecentralandEntityToEdit : EditableEntity
 
     public System.Action<DecentralandEntityToEdit> onStatusUpdate,OnDelete;
 
-    private bool isLocked = false;
+    private bool isLockedValue = false;
     public bool IsLocked
     {
         get
         {
-            return isLocked;
+            return isLockedValue;
         }
         set
         {
-            isLocked = value;
+            isLockedValue = value;
             onStatusUpdate?.Invoke(this);
         }
     }
 
-    private bool isSelected = false;
+    private bool isSelectedValue = false;
     public bool IsSelected
     {
         get
         {
-            return isSelected;
+            return isSelectedValue;
         }
         set
         {
-            isSelected = value;
+            isSelectedValue = value;
             onStatusUpdate?.Invoke(this);
         }
     }
 
-    private bool isNew = false;
+    private bool isNewValue = false;
     public bool IsNew
     {
         get
         {
-            return isNew;
+            return isNewValue;
         }
         set
         {
-            isNew = value;
+            isNewValue = value;
             onStatusUpdate?.Invoke(this);
         }
     }
 
-    private bool isVisible = true;
+    private bool isVisibleValue = true;
     public bool IsVisible
     {
         get
         {
-            return isVisible;
+            return isVisibleValue;
         }
         set
         {
-            isVisible = value;
+            isVisibleValue = value;
             onStatusUpdate?.Invoke(this);
         }
     }
 
-
-    private bool isVoxel = false;
-    public bool IsVoxel
-    {
-        get
-        {
-            return isVoxel;
-        }
-        set
-        {
-            isVoxel = value;
-        }
-    }
+    public bool isVoxel { get; set; } = false;
 
     Transform originalParent;
 
@@ -106,8 +94,8 @@ public class DecentralandEntityToEdit : EditableEntity
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
             CreateCollidersForEntity(rootEntity);
-            CheckIfEntityIsFloor();
-            CheckIfEntityIsVoxel();
+            LockEntityIfIsFloor();
+            TestIfEntityIsVoxel();
         }
     }
 
@@ -121,26 +109,26 @@ public class DecentralandEntityToEdit : EditableEntity
 
     public void Deselect()
     {
-        if (IsSelected)
-        {
-            IsSelected = false;
-            if(rootEntity.gameObject != null)
-                rootEntity.gameObject.transform.SetParent(originalParent);
-            SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
-            SetOriginalMaterials();
-        }
+        if (!IsSelected) return;
+
+        IsSelected = false;
+        if (rootEntity.gameObject != null)
+            rootEntity.gameObject.transform.SetParent(originalParent);
+        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
+        SetOriginalMaterials();
+
     }
 
-    public void ChangeShowStatus()
+    public void ToggleShowStatus()
     {
         rootEntity.gameObject.SetActive(!gameObject.activeSelf);
         IsVisible = gameObject.activeSelf;
         onStatusUpdate?.Invoke(this);
     }
 
-    public void ChangeLockStatus()
+    public void ToggleLockStatus()
     {
-        SetLockStatus(!isLocked);
+        IsLocked = !IsLocked;
     }
 
     public void Delete()
@@ -169,15 +157,15 @@ public class DecentralandEntityToEdit : EditableEntity
 
     void SetOriginalMaterials()
     {
-        if (rootEntity.meshesInfo.renderers != null)
+        if (rootEntity.meshesInfo.renderers == null) return;
+
+        int cont = 0;
+        foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
         {
-            int cont = 0;
-            foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
-            {
-                renderer.material = originalMaterials[cont];
-                cont++;
-            }
+            renderer.material = originalMaterials[cont];
+            cont++;
         }
+
     }
 
     void SaveOriginalMaterialAndSetEditMaterials()
@@ -201,8 +189,8 @@ public class DecentralandEntityToEdit : EditableEntity
         if (IsSelected)
             SaveOriginalMaterialAndSetEditMaterials();
         CreateCollidersForEntity(decentralandEntity);
-        CheckIfEntityIsFloor();
-        CheckIfEntityIsVoxel();
+        LockEntityIfIsFloor();
+        TestIfEntityIsVoxel();
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
@@ -212,83 +200,73 @@ public class DecentralandEntityToEdit : EditableEntity
             return;
         if (!meshInfo.currentShape.IsVisible())
             return;
-        if (!meshInfo.currentShape.IsVisible() && meshInfo.currentShape.HasCollisions())
-            return;
-        if (!meshInfo.currentShape.IsVisible() && !meshInfo.currentShape.HasCollisions())
-            return;
 
-        if (!collidersDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId))
+        if (collidersDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId)) return;
+
+        if (entity.children.Count > 0)
         {
-            if (entity.children.Count > 0)
+            using (var iterator = entity.children.GetEnumerator())
             {
-                using (var iterator = entity.children.GetEnumerator())
+                while (iterator.MoveNext())
                 {
-                    while (iterator.MoveNext())
-                    {
-                        CreateCollidersForEntity(iterator.Current.Value);
-                    }
+                    CreateCollidersForEntity(iterator.Current.Value);
                 }
             }
-
-
-            GameObject entityCollider = new GameObject(entity.entityId);
-            entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
-
-
-            for (int i = 0; i < meshInfo.renderers.Length; i++)
-            {
-                Transform t = entityCollider.transform;
-                t.SetParent(meshInfo.renderers[i].transform);
-                t.ResetLocalTRS();
-
-                var meshCollider = entityCollider.AddComponent<MeshCollider>();
-
-                if (meshInfo.renderers[i] is SkinnedMeshRenderer)
-                {
-                    Mesh meshColliderForSkinnedMesh = new Mesh();
-                    (meshInfo.renderers[i] as SkinnedMeshRenderer).BakeMesh(meshColliderForSkinnedMesh);
-                    meshCollider.sharedMesh = meshColliderForSkinnedMesh;
-                    t.localScale = new Vector3(1 / entity.gameObject.transform.lossyScale.x, 1 / entity.gameObject.transform.lossyScale.y, 1 / entity.gameObject.transform.lossyScale.z);
-                }
-                else
-                {
-                    meshCollider.sharedMesh = meshInfo.renderers[i].GetComponent<MeshFilter>().sharedMesh;
-                }
-                meshCollider.enabled = meshInfo.renderers[i].enabled;
-
-            }
-
-            collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
         }
+
+
+        GameObject entityCollider = new GameObject(entity.entityId);
+        entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+
+
+        for (int i = 0; i < meshInfo.renderers.Length; i++)
+        {
+            Transform t = entityCollider.transform;
+            t.SetParent(meshInfo.renderers[i].transform);
+            t.ResetLocalTRS();
+
+            var meshCollider = entityCollider.AddComponent<MeshCollider>();
+
+            if (meshInfo.renderers[i] is SkinnedMeshRenderer)
+            {
+                Mesh meshColliderForSkinnedMesh = new Mesh();
+                (meshInfo.renderers[i] as SkinnedMeshRenderer).BakeMesh(meshColliderForSkinnedMesh);
+                meshCollider.sharedMesh = meshColliderForSkinnedMesh;
+                t.localScale = new Vector3(1 / entity.gameObject.transform.lossyScale.x, 1 / entity.gameObject.transform.lossyScale.y, 1 / entity.gameObject.transform.lossyScale.z);
+            }
+            else
+            {
+                meshCollider.sharedMesh = meshInfo.renderers[i].GetComponent<MeshFilter>().sharedMesh;
+            }
+            meshCollider.enabled = meshInfo.renderers[i].enabled;
+
+        }
+
+        collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
+
     }
 
-    void SetLockStatus(bool isLocked)
+    void LockEntityIfIsFloor()
     {
-        this.isLocked = isLocked;
-        onStatusUpdate?.Invoke(this);
-    }
-
-    void CheckIfEntityIsFloor()
-    {
-        if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.currentShape == null)
+        if (rootEntity.meshesInfo?.currentShape == null)
             return;
-        if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length <= 0)
+        if (rootEntity.meshesInfo.renderers?.Length <= 0)
             return;
         if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.05f)
             return;
         if (rootEntity.gameObject.transform.position.y >= 0.05f)
             return;
 
-        SetLockStatus(true);
+        IsLocked = true;
     }
 
-    void CheckIfEntityIsVoxel()
+    void TestIfEntityIsVoxel()
     {
-        if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.currentShape == null) return;
-        if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length <= 0) return;
+        if (rootEntity.meshesInfo?.currentShape == null) return;
+        if (rootEntity.meshesInfo.renderers?.Length <= 0) return;
         if (rootEntity.meshesInfo.mergedBounds.size != Vector3.one) return;
 
-        IsVoxel = true;
+        isVoxel = true;
         gameObject.tag = "Voxel";
 
     }

@@ -8,7 +8,7 @@ using DCL.Controllers;
 public class BuildModeHUDController : IHUD
 {
     public event Action OnChangeModeAction, OnTranslateSelectedAction, OnRotateSelectedAction, OnScaleSelectedAction, OnResetAction, OnDuplicateSelectedAction, OnDeleteSelectedAction;
-    public event Action OnEntityListVisible, OnStopInput,OnResumeInput, OnTutorialAction;
+    public event Action OnEntityListVisible, OnStopInput,OnResumeInput, OnTutorialAction,OnPublishAction;
     public event Action<SceneObject> OnSceneObjectSelected;
     public event Action<DecentralandEntityToEdit> OnEntityClick, OnEntityDelete, OnEntityLock, OnEntityChangeVisibility;
 
@@ -58,6 +58,7 @@ public class BuildModeHUDController : IHUD
         view.OnEntityListChangeVisibilityAction += () => ChangeVisibilityOfEntityList();
 
         view.OnTutorialAction += () => OnTutorialAction?.Invoke();
+        view.OnPublishAction += () => OnPublishAction?.Invoke();
     }
 
     public void SetParcelScene(ParcelScene parcelScene)

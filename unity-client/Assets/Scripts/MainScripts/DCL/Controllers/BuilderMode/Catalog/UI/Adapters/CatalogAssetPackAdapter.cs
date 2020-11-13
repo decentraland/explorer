@@ -11,7 +11,7 @@ public class CatalogAssetPackAdapter : MonoBehaviour
     public TextMeshProUGUI titleTxt;
     public RawImage packImg;
 
-    public System.Action<SceneAssetPack> OnSceneAssetPackClick;
+    public event Action<SceneAssetPack> OnSceneAssetPackClick;
     SceneAssetPack sceneAssetPack;
 
     string loadedThumbnailURL;
