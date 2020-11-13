@@ -45,7 +45,7 @@ namespace DCL.Rendering
 
     public class CullingController : ICullingController
     {
-        private const float MAX_TIME_BUDGET = 1 / 1000f; // 1 ms
+        private const float MAX_TIME_BUDGET = 4 / 1000f; // 4 ms
 
         [System.Serializable]
         public class Profile
@@ -92,7 +92,7 @@ namespace DCL.Rendering
 
         public UniversalRenderPipelineAsset urpAsset;
         private CullingObjectsTracker sceneObjects;
-        float timer = 0;
+        float timeBudgetCount = 0;
 
         public delegate void DataReport(int rendererCount, int hiddenRendererCount, int hiddenShadowCount);
 
@@ -162,6 +162,7 @@ namespace DCL.Rendering
 
                 if (!shouldCheck)
                 {
+                    timeBudgetCount = 0;
                     yield return null;
                     continue;
                 }
@@ -185,9 +186,9 @@ namespace DCL.Rendering
 
                     for (var i = 0; i < renderers.Length; i++)
                     {
-                        if (timer > MAX_TIME_BUDGET)
+                        if (timeBudgetCount > MAX_TIME_BUDGET)
                         {
-                            timer = 0;
+                            timeBudgetCount = 0;
                             yield return null;
                         }
 
@@ -226,11 +227,12 @@ namespace DCL.Rendering
 #if UNITY_EDITOR
                         DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
 #endif
-                        timer += Time.realtimeSinceStartup - startTime;
+                        timeBudgetCount += Time.realtimeSinceStartup - startTime;
                     }
                 }
 
                 RaiseDataReport();
+                timeBudgetCount = 0;
                 yield return null;
             }
         }
@@ -281,9 +283,9 @@ namespace DCL.Rendering
 
             for (var i = 0; i < animsLength; i++)
             {
-                if (timer > MAX_TIME_BUDGET)
+                if (timeBudgetCount > MAX_TIME_BUDGET)
                 {
-                    timer = 0;
+                    timeBudgetCount = 0;
                     yield return null;
                 }
 
@@ -302,7 +304,7 @@ namespace DCL.Rendering
                 else
                     anim.cullingType = AnimationCullingType.AlwaysAnimate;
 
-                timer += Time.realtimeSinceStartup - startTime;
+                timeBudgetCount += Time.realtimeSinceStartup - startTime;
             }
         }
 
@@ -312,6 +314,7 @@ namespace DCL.Rendering
                 return;
 
             int rendererCount = (sceneObjects.renderers?.Length ?? 0) + (sceneObjects.skinnedRenderers?.Length ?? 0);
+
             OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
         }
 
