@@ -1,4 +1,4 @@
-import { ethereumConfigurations, getNetworkFromDefaultTLD, getNetworkFromTLD, getTLD, setNetwork } from 'config'
+import { ethereumConfigurations, getNetworkFromTLD, getTLD, setNetwork } from 'config'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
 import { WebsocketProvider } from 'web3x/providers'
@@ -16,8 +16,13 @@ import { NETWORK_MISMATCH, setTLDError } from './loading/types'
 import Html from './Html'
 import { ReportFatalError } from './loading/ReportFatalError'
 import { StoreContainer } from './store/rootTypes'
+import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 
 declare const globalThis: StoreContainer
+
+declare var window: Window & {
+  ethereum: any
+}
 
 async function getAddress(): Promise<string | undefined> {
   try {
@@ -32,6 +37,13 @@ export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   const web3Network = await getNetwork()
   const web3net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
   return web3net
+}
+
+// This method is similar to the one above, but only returns a network if window.ethereum is defined
+export function getWeb3Network(): ETHEREUM_NETWORK | undefined {
+  if (window.ethereum) {
+    return window.ethereum.chainId === '0x1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
+  }
 }
 
 export async function checkTldVsWeb3Network() {
@@ -94,7 +106,7 @@ export async function hasClaimedName(address: string) {
 
 export async function fetchCatalystNodesFromDAO(): Promise<CatalystNode[]> {
   if (!decentralandConfigurations.dao) {
-    await setNetwork(getNetworkFromDefaultTLD())
+    await setNetwork(getNetworkFromTLDOrWeb3())
   }
 
   const contractAddress = Address.fromString(decentralandConfigurations.dao)
@@ -190,4 +202,15 @@ async function queryGraph(url: string, query: string, variables: any, totalAttem
   }
 
   throw new Error(`Error while querying graph url=${url}, query=${query}, variables=${JSON.stringify(variables)}`)
+}
+
+/**
+ * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
+ */
+export function registerProviderChanges() {
+  if (window.ethereum && typeof window.ethereum.on === 'function') {
+    window.ethereum.on('accountsChanged', (accounts: string[]) => location.reload())
+    window.ethereum.on('chainChanged', (networkId: string) => location.reload())
+    window.ethereum.on('disconnect', (code: number, reason: string) => location.reload())
+  }
 }
