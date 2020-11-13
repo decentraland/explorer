@@ -99,6 +99,7 @@ const qs = queryString.parse(location.search)
 // Comms
 export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
+export const COMMS_PROFILE_TIMEOUT = 10000
 
 export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
@@ -108,7 +109,9 @@ export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const REALM = qs.realm
 
-export const VOICE_CHAT_ENABLED = location.search.indexOf('VOICE_CHAT_ENABLED') !== -1
+export const VOICE_CHAT_DISABLED_FLAG = location.search.indexOf('VOICE_CHAT_DISABLED') !== -1
+
+export const VOICE_CHAT_ENABLED_FLAG = location.search.indexOf('VOICE_CHAT_ENABLED') !== -1
 
 export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
 
@@ -140,11 +143,13 @@ export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== 
 export const WSS_ENABLED = qs.ws !== undefined
 export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
 
-export const PIN_CATALYST = qs.PIN_CATALYST
+export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
 
 export const HALLOWEEN = location.search.indexOf('HALLOWEEN') !== -1
 
 export const TEST_WEARABLES_OVERRIDE = location.search.indexOf('TEST_WEARABLES') !== -1
+
+const META_CONFIG_URL = qs.META_CONFIG_URL
 
 export namespace commConfigurations {
   export const debug = true
@@ -257,16 +262,35 @@ export function getWearablesSafeURL() {
   return 'https://content.decentraland.org'
 }
 
+export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
+  if (tld === 'zone') {
+    return ETHEREUM_NETWORK.ROPSTEN
+  }
+
+  if (tld === 'today' || tld === 'org') {
+    return ETHEREUM_NETWORK.MAINNET
+  }
+
+  // if localhost
+  return null
+}
+
+export function getNetworkFromDefaultTLD(): ETHEREUM_NETWORK {
+  return getNetworkFromTLD(getDefaultTLD())!
+}
+
 export function getServerConfigurations() {
   const TLDDefault = getDefaultTLD()
   const notToday = TLDDefault === 'today' ? 'org' : TLDDefault
 
   const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
+  const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
+
   return {
     contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
     wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json`,
+    explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
@@ -336,3 +360,27 @@ export namespace ethereumConfigurations {
 }
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
+
+// @todo replace before merge
+export const WALLET_API_KEYS = new Map<ETHEREUM_NETWORK, Map<string, string>>([
+  [ETHEREUM_NETWORK.ROPSTEN, new Map([['Fortmatic', 'pk_test_198DDD3CA646DE2F']])],
+  [ETHEREUM_NETWORK.MAINNET, new Map([['Fortmatic', 'pk_live_D7297F51E9776DD2']])]
+])
+
+export const genericAvatarSnapshots: Record<string, string> = {
+  face: '/images/avatar_snapshot_default.png',
+  body: '/images/image_not_found.png',
+  face256: '/images/avatar_snapshot_default256.png',
+  face128: '/images/avatar_snapshot_default128.png'
+}
+
+export function getCatalystNodesDefaultURL() {
+  return `https://peer.decentraland.${getDefaultTLD()}/lambdas/contracts/servers`
+}
+
+function addHttpsIfNoProtocolIsSet(domain: string): string {
+  if (!domain.startsWith('http')) {
+    return `https://${domain}`
+  }
+  return domain
+}

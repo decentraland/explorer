@@ -7,6 +7,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 {
     public event Action<string, bool> OnRequestMuteUser;
     public event Action<bool> OnRequestMuteGlobal;
+    public event Action OnGoToCrowdPressed;
 
     [SerializeField] private UsersAroundListHUDListElementView listElementView;
     [SerializeField] private ShowHideAnimator showHideAnimator;
@@ -15,6 +16,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     [SerializeField] internal Transform contentFriends;
     [SerializeField] internal Transform contentPlayers;
     [SerializeField] internal Toggle muteAllToggle;
+    [SerializeField] internal UserContextMenu contextMenu;
+    [SerializeField] internal UserContextConfirmationDialog confirmationDialog;
+    [SerializeField] internal GameObject listGameObject;
+    [SerializeField] internal GameObject emptyListGameObject;
+    [SerializeField] internal Button gotoCrowdButton;
 
     internal Queue<UsersAroundListHUDListElementView> availableElements;
     internal Dictionary<string, UsersAroundListHUDListElementView> userElementDictionary;
@@ -23,6 +29,8 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     private string playersTextPattern;
     private int friendsCount = 0;
     private int playersCount = 0;
+
+    private bool isGameObjectDestroyed = false;
 
     private void Awake()
     {
@@ -35,13 +43,20 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         textPlayersTitle.text = string.Format(playersTextPattern, playersCount);
 
         muteAllToggle.onValueChanged.AddListener(OnMuteGlobal);
+        gotoCrowdButton.onClick.AddListener(() => OnGoToCrowdPressed?.Invoke());
 
         listElementView.OnMuteUser += OnMuteUser;
+        listElementView.OnShowUserContexMenu += OnUserContextMenu;
         listElementView.OnPoolRelease();
         availableElements.Enqueue(listElementView);
 
         if (FriendsController.i)
             FriendsController.i.OnUpdateFriendship += OnUpdateFriendship;
+    }
+
+    void OnDestroy()
+    {
+        isGameObjectDestroyed = true;
     }
 
     void IUsersAroundListHUDListView.AddOrUpdateUser(MinimapMetadata.MinimapUserInfo userInfo)
@@ -56,7 +71,12 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         if (profile == null)
             return;
 
-        bool isFriend = FriendsController.i?.friends.ContainsKey(userInfo.userId) ?? false;
+        bool isFriend = false;
+
+        if (FriendsController.i && FriendsController.i.friends.TryGetValue(userInfo.userId, out FriendsController.UserStatus status))
+        {
+            isFriend = status.friendshipStatus == FriendshipStatus.FRIEND;
+        }
 
         UsersAroundListHUDListElementView view = null;
         if (availableElements.Count > 0)
@@ -68,12 +88,14 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         {
             view = Instantiate(listElementView, isFriend ? contentFriends : contentPlayers);
             view.OnMuteUser += OnMuteUser;
+            view.OnShowUserContexMenu += OnUserContextMenu;
         }
 
         view.OnPoolGet();
         view.SetUserProfile(profile);
         userElementDictionary.Add(userInfo.userId, view);
         ModifyListCount(isFriend, 1);
+        CheckListEmptyState();
     }
 
     void IUsersAroundListHUDListView.RemoveUser(string userId)
@@ -90,6 +112,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         ModifyListCount(elementView.transform.parent == contentFriends, -1);
         PoolElementView(elementView);
         userElementDictionary.Remove(userId);
+        CheckListEmptyState();
     }
 
     void IUsersAroundListHUDListView.SetUserRecording(string userId, bool isRecording)
@@ -110,6 +133,15 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         elementView.SetMuted(isMuted);
     }
 
+    void IUsersAroundListHUDListView.SetUserBlocked(string userId, bool blocked)
+    {
+        if (!userElementDictionary.TryGetValue(userId, out UsersAroundListHUDListElementView elementView))
+        {
+            return;
+        }
+        elementView.SetBlocked(blocked);
+    }
+
     void IUsersAroundListHUDListView.SetVisibility(bool visible)
     {
         if (visible)
@@ -120,10 +152,13 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
             }
 
             showHideAnimator.Show();
+            CheckListEmptyState();
         }
         else
         {
             showHideAnimator.Hide();
+            contextMenu.Hide();
+            confirmationDialog.Hide();
         }
     }
 
@@ -134,7 +169,11 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
         userElementDictionary.Clear();
         availableElements.Clear();
-        Destroy(gameObject);
+
+        if (!isGameObjectDestroyed)
+        {
+            Destroy(gameObject);
+        }
     }
 
     void OnMuteUser(string userId, bool mute)
@@ -145,6 +184,12 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     void OnMuteGlobal(bool mute)
     {
         OnRequestMuteGlobal?.Invoke(mute);
+    }
+
+    void OnUserContextMenu(Vector3 position, string userId)
+    {
+        contextMenu.transform.position = position;
+        contextMenu.Show(userId);
     }
 
     void PoolElementView(UsersAroundListHUDListElementView element)
@@ -179,18 +224,32 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
             return;
         }
 
+        bool isFriend = IsFriend(status);
         bool isInFriendsList = IsInFriendsList(elementView);
-        if (status == FriendshipAction.APPROVED && !isInFriendsList)
+
+        if (isFriend && !isInFriendsList)
         {
             ModifyListCount(friendList: false, -1);
             ModifyListCount(friendList: true, 1);
             elementView.transform.SetParent(contentFriends);
         }
-        else if (status == FriendshipAction.DELETED && isInFriendsList)
+        else if (!isFriend && isInFriendsList)
         {
             ModifyListCount(friendList: true, -1);
             ModifyListCount(friendList: false, 1);
             elementView.transform.SetParent(contentPlayers);
         }
+    }
+
+    bool IsFriend(FriendshipAction status)
+    {
+        return status == FriendshipAction.APPROVED;
+    }
+
+    void CheckListEmptyState()
+    {
+        bool isEmpty = userElementDictionary.Count == 0;
+        listGameObject.SetActive(!isEmpty);
+        emptyListGameObject.SetActive(isEmpty);
     }
 }

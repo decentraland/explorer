@@ -14,6 +14,7 @@ export type MetaConfiguration = {
     added: string[]
     denied: string[]
     contentWhitelist: string[]
+    catalystsNodesEndpoint?: string
   }
   world: WorldConfig
   comms: CommsConfig
@@ -55,4 +56,6 @@ export type CommsConfig = {
   relaySuspensionDisabled?: boolean
   relaySuspensionInterval?: number
   relaySuspensionDuration?: number
+  voiceChatEnabled?: boolean
+  voiceChatAllowlist?: string[]
 }

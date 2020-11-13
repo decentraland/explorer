@@ -3,7 +3,6 @@ import { WSS_ENABLED, WORLD_EXPLORER, RESET_TUTORIAL, EDITOR } from 'config'
 import { Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { ProfileForRenderer, MinimapSceneInfo } from '../decentraland-ecs/src/decentraland/Types'
 import { AirdropInfo } from 'shared/airdrops/interface'
-import { Wearable } from 'shared/profiles/types'
 import {
   HUDConfiguration,
   InstancedSpawnPoint,
@@ -15,7 +14,9 @@ import {
   FriendshipUpdateStatusMessage,
   UpdateUserStatusMessage,
   RenderProfile,
-  BuilderConfiguration
+  BuilderConfiguration,
+  Wearable,
+  KernelConfigForRenderer
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -220,6 +221,14 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'DeactivateRendering')
   }
 
+  public ReportFocusOn() {
+    this.gameInstance.SendMessage('Bridges', 'ReportFocusOn')
+  }
+
+  public ReportFocusOff() {
+    this.gameInstance.SendMessage('Bridges', 'ReportFocusOff')
+  }
+
   public UnlockCursor() {
     this.SetCursorState(false)
   }
@@ -370,6 +379,11 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
   }
 
+  public ShowAvatarEditorInSignIn() {
+    this.gameInstance.SendMessage('HUDController', 'ShowAvatarEditorInSignUp')
+    this.gameInstance.SendMessage('SceneController', 'ForceActivateRendering')
+  }
+
   public SetUserTalking(userId: string, talking: boolean) {
     this.gameInstance.SendMessage(
       'HUDController',
@@ -380,6 +394,10 @@ export class UnityInterface {
 
   public SetUsersMuted(usersId: string[], muted: boolean) {
     this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
+  }
+
+  public SetKernelConfiguration(config: KernelConfigForRenderer) {
+    this.gameInstance.SendMessage('Bridges', 'SetKernelConfiguration', JSON.stringify(config))
   }
 
   // *********************************************************************************

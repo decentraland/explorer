@@ -8,7 +8,7 @@ import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
 
 import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
-import { Wearable } from '../shared/profiles/types'
+import { Wearable } from '../shared/types'
 import { SceneJsonData, ILand, HUDElementID, BuilderConfiguration } from '../shared/types'
 import { normalizeContentMappings } from '../shared/selectors'
 import { SceneWorker } from '../shared/world/SceneWorker'
@@ -211,7 +211,7 @@ namespace editor {
         const scene = { ...action.payload.scene }
         await renewBuilderScene(scene, action.payload.mappings)
       }
-      worker.engineAPI!.sendSubscriptionEvent('externalAction', action)
+      worker.sendSubscriptionEvent('externalAction', action)
     }
   }
 

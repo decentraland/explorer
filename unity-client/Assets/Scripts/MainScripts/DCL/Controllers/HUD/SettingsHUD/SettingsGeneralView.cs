@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace DCL.SettingsHUD
 {
@@ -28,6 +29,13 @@ namespace DCL.SettingsHUD
         public TextMeshProUGUI renderingScaleValueLabel = null;
         public TextMeshProUGUI drawDistanceValueLabel = null;
         public TextMeshProUGUI shadowDistanceValueLabel = null;
+        public Slider voiceChatVolumeSlider = null;
+        public TextMeshProUGUI voiceChatVolumeValueLabel = null;
+        public SpinBoxPresetted voiceChatAllowSpinBox = null;
+
+        [SerializeField] private Toggle autosettingsToggle;
+        [SerializeField] private CanvasGroup advancedCanvasGroup;
+        [SerializeField] private GameObject advancedBlocker;
 
         private DCL.SettingsData.QualitySettings currentQualitySetting;
         private DCL.SettingsData.GeneralSettings currentGeneralSetting;
@@ -147,6 +155,36 @@ namespace DCL.SettingsHUD
                 isDirty = true;
             });
 
+            voiceChatVolumeSlider.onValueChanged.AddListener(value =>
+            {
+                tempGeneralSetting.voiceChatVolume = value * 0.01f;
+                voiceChatVolumeValueLabel.text = value.ToString();
+                isDirty = true;
+            });
+
+            voiceChatAllowSpinBox.onValueChanged.AddListener(value =>
+            {
+                tempGeneralSetting.voiceChatAllow = (DCL.SettingsData.GeneralSettings.VoiceChatAllow)value;
+                isDirty = true;
+            });
+
+            autosettingsToggle.onValueChanged.AddListener(SetAutoQualityActive);
+            autosettingsToggle.isOn = false;
+        }
+
+        private void SetAutoQualityActive(bool active)
+        {
+
+            advancedCanvasGroup.interactable = !active;
+            tempGeneralSetting.autoqualityOn = active;
+            advancedBlocker.SetActive(active);
+            if (active)
+            {
+                QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
+                tempQualitySetting = Settings.i.lastValidAutoqualitySet;
+                tempQualitySetting.baseResolution = currentBaseResolution;
+                isDirty = true;
+            }
         }
 
         void OnEnable()
@@ -158,6 +196,7 @@ namespace DCL.SettingsHUD
             tempGeneralSetting = currentGeneralSetting;
 
             SetupQualityPreset(currentQualitySetting);
+            UpdateGeneralSettings();
         }
 
         void Update()
@@ -210,17 +249,23 @@ namespace DCL.SettingsHUD
         {
             baseResSpinBox.value = (int)tempQualitySetting.baseResolution;
             shadowResSpinBox.value = (int)Mathf.Log((int)tempQualitySetting.shadowResolution, 2) - 8;
-            soundToggle.isOn = tempGeneralSetting.sfxVolume > 0 ? true : false;
             colorGradingToggle.isOn = tempQualitySetting.colorGrading;
             softShadowToggle.isOn = tempQualitySetting.softShadows;
             shadowToggle.isOn = tempQualitySetting.shadows;
             bloomToggle.isOn = tempQualitySetting.bloom;
-            mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
             antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
             shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
+        }
 
+        void UpdateGeneralSettings()
+        {
+            soundToggle.isOn = tempGeneralSetting.sfxVolume > 0 ? true : false;
+            mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
+            voiceChatVolumeSlider.value = tempGeneralSetting.voiceChatVolume * 100;
+            voiceChatAllowSpinBox.value = (int)tempGeneralSetting.voiceChatAllow;
+            autosettingsToggle.isOn = tempGeneralSetting.autoqualityOn;
         }
 
         public void Apply()

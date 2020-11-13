@@ -1,14 +1,14 @@
-import { call, put, take, takeEvery } from 'redux-saga/effects'
+import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 
 import { DEBUG_MESSAGES } from 'config'
-import { initializeEngine } from 'unity-interface/dcl'
+import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
 
 import { waitingForRenderer, UNEXPECTED_ERROR } from 'shared/loading/types'
 import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { StoreContainer } from 'shared/store/rootTypes'
 
-import { UnityLoaderType, UnityGame } from './types'
+import { UnityLoaderType, UnityGame, RENDERER_INITIALIZED } from './types'
 import {
   INITIALIZE_RENDERER,
   InitializeRenderer,
@@ -19,6 +19,7 @@ import {
   MESSAGE_FROM_ENGINE,
   rendererEnabled
 } from './actions'
+import { isInitialized } from './selectors'
 
 const queryString = require('query-string')
 
@@ -44,12 +45,20 @@ export function* rendererSaga() {
   _instancedJS = yield call(wrapEngineInstance, _gameInstance)
 }
 
+export function* ensureRenderer() {
+  while (!(yield select(isInitialized))) {
+    yield take(RENDERER_INITIALIZED)
+  }
+}
+
 function* initializeRenderer(action: InitializeRenderer) {
   const { container, buildConfigPath } = action.payload
 
   const qs = queryString.parse(document.location.search)
 
   preventUnityKeyboardLock()
+
+  setLoadingScreenVisible(true)
 
   if (qs.ws) {
     _gameInstance = initializeUnityEditor(qs.ws, container)

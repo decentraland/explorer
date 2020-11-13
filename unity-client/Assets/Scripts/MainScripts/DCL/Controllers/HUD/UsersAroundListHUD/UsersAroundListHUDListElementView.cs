@@ -4,18 +4,24 @@ using DCL.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler
+internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler, IPointerEnterHandler, IPointerExitHandler
 {
     const float USER_NOT_RECORDING_THROTTLING = 2;
 
     public event Action<string, bool> OnMuteUser;
+    public event Action<Vector3, string> OnShowUserContexMenu;
 
     [SerializeField] internal TextMeshProUGUI userName;
     [SerializeField] internal RawImage avatarPreview;
+    [SerializeField] internal GameObject blockedGO;
     [SerializeField] internal Button soundButton;
     [SerializeField] internal GameObject muteGO;
     [SerializeField] internal GameObject recordingGO;
+    [SerializeField] internal GameObject backgroundHover;
+    [SerializeField] internal Button menuButton;
+    [SerializeField] internal Transform contexMenuRefPosition;
 
     private UserProfile profile;
     private bool isMuted = false;
@@ -25,6 +31,13 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     private void Start()
     {
         soundButton.onClick.AddListener(OnSoundButtonPressed);
+        menuButton.onClick.AddListener(() =>
+        {
+            if (profile)
+            {
+                OnShowUserContexMenu?.Invoke(contexMenuRefPosition.position, profile.userId);
+            }
+        });
     }
 
     public void SetUserProfile(UserProfile profile)
@@ -57,9 +70,14 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         this.isRecording = isRecording;
         if (setUserRecordingRoutine != null)
         {
-            StopCoroutine(setUserRecordingRoutine);
+            CoroutineStarter.Stop(setUserRecordingRoutine);
         }
-        setUserRecordingRoutine = StartCoroutine(SetRecordingRoutine(isRecording));
+        setUserRecordingRoutine = CoroutineStarter.Start(SetRecordingRoutine(isRecording));
+    }
+
+    public void SetBlocked(bool blocked)
+    {
+        blockedGO.SetActive(blocked);
     }
 
     public void OnPoolRelease()
@@ -75,7 +93,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         }
         if (setUserRecordingRoutine != null)
         {
-            StopCoroutine(setUserRecordingRoutine);
+            CoroutineStarter.Stop(setUserRecordingRoutine);
             setUserRecordingRoutine = null;
         }
         gameObject.SetActive(false);
@@ -87,6 +105,9 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         recordingGO.SetActive(false);
         avatarPreview.texture = null;
         userName.text = string.Empty;
+        backgroundHover.SetActive(false);
+        menuButton.gameObject.SetActive(false);
+        blockedGO.SetActive(false);
         gameObject.SetActive(true);
     }
 
@@ -113,5 +134,17 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         }
         yield return WaitForSecondsCache.Get(USER_NOT_RECORDING_THROTTLING);
         recordingGO.SetActive(false);
+    }
+
+    void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
+    {
+        backgroundHover.SetActive(true);
+        menuButton.gameObject.SetActive(true);
+    }
+
+    void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
+    {
+        backgroundHover.SetActive(false);
+        menuButton.gameObject.SetActive(false);
     }
 }

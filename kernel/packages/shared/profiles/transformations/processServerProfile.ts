@@ -1,4 +1,5 @@
-import { Profile, WearableId } from '../types'
+import { Profile } from '../types'
+import { WearableId } from 'shared/catalogs/types'
 import { colorString } from './colorString'
 import { ALL_WEARABLES } from 'config'
 
@@ -27,7 +28,15 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
 }
 
 export function calculateDisplayName(userId: string, profile: any): string {
-  return profile.name || 'Guest-' + userId.substr(2, 6)
+  if (profile.name && profile.hasClaimedName) {
+    return profile.name
+  }
+
+  if (profile.unclaimedName) {
+    return `${profile.unclaimedName}#${userId.slice(-4)}`
+  }
+
+  return 'Guest-' + userId.substr(2, 6)
 }
 export function processServerProfile(userId: string, receivedProfile: any): Profile {
   const name = calculateDisplayName(userId, receivedProfile)
@@ -42,11 +51,12 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
   return {
     userId,
     email: receivedProfile.email || '',
-    name: receivedProfile.name || name,
-    hasClaimedName: !!receivedProfile.name,
+    name: name,
+    hasClaimedName:
+      typeof receivedProfile.hasClaimedName === 'undefined' ? !!receivedProfile.name : receivedProfile.hasClaimedName,
     description: receivedProfile.description || '',
     ethAddress: userId || 'noeth',
-    version: receivedProfile.avatar.version || 1,
+    version: receivedProfile.version ?? receivedProfile.avatar.version ?? 1,
     avatar: {
       eyeColor: colorString(eyeColor),
       hairColor: colorString(hairColor),
@@ -59,7 +69,8 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     blocked: receivedProfile.blocked,
     muted: receivedProfile.muted,
     tutorialStep: receivedProfile.tutorialStep || 0,
-    interests: receivedProfile.interests || []
+    interests: receivedProfile.interests || [],
+    unclaimedName: receivedProfile.unclaimedName
   }
 }
 
