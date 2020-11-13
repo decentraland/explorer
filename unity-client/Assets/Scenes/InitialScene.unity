@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.76268536, g: 0.7965816, b: 0.830822, a: 1}
+  m_IndirectSpecularColor: {r: 0.7626854, g: 0.79658186, b: 0.8308228, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1004,9 +1004,9 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 0
-  baseUrlCustom: 
-  environment: 0
+  baseUrlMode: 1
+  baseUrlCustom: http://play.decentraland.zone/?
+  environment: 4
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
   allWearables: 0
@@ -1421,7 +1421,7 @@ PrefabInstance:
     - target: {fileID: 8061181831308292514, guid: 43fa50a8db1ccce408da8f997d35d8fc,
         type: 3}
       propertyPath: m_RootOrder
-      value: 12
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 8061181831308292514, guid: 43fa50a8db1ccce408da8f997d35d8fc,
         type: 3}
@@ -1437,11 +1437,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8388877238875588033, guid: 43fa50a8db1ccce408da8f997d35d8fc,
-        type: 3}
-      propertyPath: m_Text
-      value: '-'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43fa50a8db1ccce408da8f997d35d8fc, type: 3}

@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using Object = System.Object;
 
@@ -126,6 +127,8 @@ public class CullingController : MonoBehaviour
         }
     }
 
+    public UniversalRenderPipelineAsset urpAsset;
+
     IEnumerator Start()
     {
         profiles = new List<Profile> {rendererProfile, skinnedRendererProfile};
@@ -196,6 +199,7 @@ public class CullingController : MonoBehaviour
                     float distance = Vector3.Distance(playerPosition, boundingPoint);
                     float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
 
+                    float shadowSize = bounds.size.magnitude / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
                     float visThreshold = p.rendererVisibilityDistThreshold;
                     float shadowThreshold = p.rendererShadowDistThreshold;
 
@@ -245,6 +249,7 @@ public class CullingController : MonoBehaviour
 #endif
                     bool shouldHaveShadow = distance < shadowThreshold;
                     shouldHaveShadow |= size > p.mediumSize;
+                    shouldHaveShadow &= shadowSize > 4;
 
                     if (r.forceRenderingOff != !shouldBeVisible)
                     {

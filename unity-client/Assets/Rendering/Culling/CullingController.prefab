@@ -78,7 +78,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: '-'
 --- !u!114 &7668058222210069609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,3 +248,4 @@ MonoBehaviour:
     rendererVisibilityDistThreshold: 50
     rendererShadowDistThreshold: 40
   panel: {fileID: 8388877238875588033}
+  urpAsset: {fileID: 11400000, guid: 4ef42bb6871b2e545b8c1a77a3bca1fb, type: 2}
