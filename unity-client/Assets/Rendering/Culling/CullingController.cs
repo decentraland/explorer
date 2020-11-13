@@ -107,12 +107,12 @@ namespace DCL.Rendering
         {
             var settings = new Settings()
             {
-                enableAnimationCullingDistance = 15,
+                enableAnimationCullingDistance = 7.5f,
                 rendererProfile = new Profile
                 {
                     visibleDistanceThreshold = 30,
                     shadowDistanceThreshold = 20,
-                    emissiveSizeThreshold = 3,
+                    emissiveSizeThreshold = 2.5f,
                     opaqueSizeThreshold = 6,
                     shadowRendererSizeThreshold = 10,
                     shadowMapProjectionSizeThreshold = 4
@@ -121,7 +121,7 @@ namespace DCL.Rendering
                 {
                     visibleDistanceThreshold = 50,
                     shadowDistanceThreshold = 40,
-                    emissiveSizeThreshold = 3,
+                    emissiveSizeThreshold = 2.5f,
                     opaqueSizeThreshold = 6,
                     shadowRendererSizeThreshold = 5,
                     shadowMapProjectionSizeThreshold = 4,
