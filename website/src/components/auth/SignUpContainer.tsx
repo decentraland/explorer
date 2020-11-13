@@ -4,8 +4,6 @@ import { Kernel } from "../types";
 import { Passport } from "./passport/Passport";
 import { TermsOfServices } from "./terms/TermsOfServices";
 
-const kernel = (window as Kernel).webApp;
-
 export interface SignUpContainerProps {
   face: string;
   name: string;
