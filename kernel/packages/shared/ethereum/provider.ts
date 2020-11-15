@@ -1,187 +1,69 @@
-import { WebSocketProvider, RequestManager } from 'eth-connect'
-import { future, IFuture } from 'fp-future'
-
-import { ethereumConfigurations, ETHEREUM_NETWORK } from 'config'
+import { RequestManager } from 'eth-connect'
+import { future } from 'fp-future'
 import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
-import { getTLD } from '../../config/index'
 import { Eth } from 'web3x/eth'
-import { getLastSessionWithoutWallet, getStoredSession } from 'shared/session'
+import { Web3Connector } from './Web3Connector'
+import { ProviderType } from './ProviderType'
+import { LegacyProviderAdapter } from 'web3x/providers'
 
-declare var window: Window & {
-  ethereum: any
-  web3: any
-}
-
+let web3Connector: Web3Connector
 export const providerFuture = future()
-export const requestManager = new RequestManager(null)
+export const requestManager = new RequestManager((window as any).ethereum ?? null)
 
 export const loginCompleted = future<void>()
 ;(window as any).loginCompleted = loginCompleted
 
-let providerRequested = false
-
-type LoginData = { successful: boolean; provider: any; localIdentity?: Account }
-
-function processLoginAttempt(response: IFuture<LoginData>, backgroundLogin: IFuture<LoginData>) {
-  return async () => {
-    if (!backgroundLogin.isPending) {
-      backgroundLogin
-        .then((result) => response.resolve(result))
-        .catch((e) => defaultLogger.error('could not resolve login', e))
-      return
-    }
-
-    const address = await getUserEthAccountIfAvailable()
-
-    let userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
-
-    // Modern dapp browsers...
-    if (window['ethereum'] && isSessionExpired(userData)) {
-      showEthConnectAdvice(false)
-
-      let result
-      try {
-        // Request account access if needed
-        const accounts: string[] | undefined = await window.ethereum.enable()
-
-        if (accounts && accounts.length > 0) {
-          result = { successful: true, provider: window.ethereum }
-        } else {
-          // whether accounts is undefined or empty array => provider not enabled
-          result = {
-            successful: false,
-            provider: createProvider()
-          }
-        }
-      } catch (error) {
-        // User denied account access...
-        result = {
-          successful: false,
-          provider: createProvider()
-        }
-      }
-      backgroundLogin.resolve(result)
-      response.resolve(result)
-    } else {
-      defaultLogger.error('invalid login state!')
-    }
-  }
+export function createEth(provider: any = null): Eth {
+  return web3Connector.createEth(provider)!
 }
 
-function processLoginBackground(address: string | undefined) {
-  const response = future()
-
-  const userData = address ? getStoredSession(address) : getLastSessionWithoutWallet()
-  if (window['ethereum']) {
-    if (!isSessionExpired(userData)) {
-      response.resolve({ successful: true, provider: window.ethereum })
-    }
-  } else if (window.web3 && window.web3.currentProvider) {
-    if (!isSessionExpired(userData)) {
-      response.resolve({ successful: true, provider: window.web3.currentProvider })
-    }
+// This function creates a Web3x eth object without the need of having initiated sign in / sign up. Used when requesting the catalysts
+export function createEthWhenNotConnectedToWeb3(): Eth {
+  const ethereum = (window as any).ethereum
+  if (ethereum) {
+    // If we have a web3 enabled browser, we can use that
+    return new Eth(new LegacyProviderAdapter((window as any).ethereum))
   } else {
-    // otherwise, create a local identity
-    response.resolve({
-      successful: false,
-      provider: createProvider(),
-      localIdentity: Account.create()
+    // If not, we use infura
+    return new Eth(Web3Connector.createWeb3xWebsocketProvider())
+  }
+}
+
+export function createWeb3Connector(): Web3Connector {
+  if (!web3Connector) {
+    web3Connector = new Web3Connector()
+  }
+  return web3Connector
+}
+
+export async function requestWeb3Provider(type: ProviderType) {
+  try {
+    const provider = await web3Connector.connect(type)
+    requestManager.setProvider(provider)
+    providerFuture.resolve({
+      successful: !isGuest(),
+      provider: provider,
+      localIdentity: isGuest() ? Account.create() : undefined
     })
+    return provider
+  } catch (e) {
+    defaultLogger.log('Could not get a wallet connection', e)
+    requestManager.setProvider(null)
   }
-
-  return response
+  return null
 }
 
-export function awaitWeb3Approval(): Promise<void> {
-  if (!providerRequested) {
-    providerRequested = true
+export function isGuest(): boolean {
+  return web3Connector.isType(ProviderType.GUEST)
+}
 
-    new Promise(async () => {
-      const element = document.getElementById('eth-login')
-      if (element) {
-        element.style.display = 'block'
+export function getProviderType() {
+  return web3Connector.getType()
+}
 
-        const address = await getUserEthAccountIfAvailable()
-
-        if (window['ethereum']) {
-          window['ethereum'].autoRefreshOnNetworkChange = false
-        }
-
-        const background = processLoginBackground(address)
-        background.then((result) => providerFuture.resolve(result)).catch((e) => providerFuture.reject(e))
-
-        const button = document.getElementById('eth-login-confirm-button')
-
-        let response = future()
-
-        button!.onclick = processLoginAttempt(response, background)
-
-        let result
-        while (true) {
-          result = await response
-
-          element.style.display = 'none'
-
-          const button = document.getElementById('eth-relogin-confirm-button')
-
-          response = future()
-
-          button!.onclick = processLoginAttempt(response, background)
-
-          // if the user signed properly or doesn't have a wallet => move on with login
-          if (result.successful || !window['ethereum']) {
-            break
-          } else {
-            showEthConnectAdvice(true)
-          }
-        }
-
-        showEthConnectAdvice(false)
-
-        // post check
-        if (window['ethereum']) {
-          registerProviderChanges()
-        }
-      } else {
-        // otherwise, login element not found (preview, builder)
-        providerFuture.resolve({
-          successful: false,
-          provider: createProvider(),
-          localIdentity: Account.create()
-        })
-      }
-
-      loginCompleted.resolve()
-    }).catch((e) => defaultLogger.error('error in login process', e))
-  }
-
-  providerFuture.then((result) => requestManager.setProvider(result.provider)).catch(defaultLogger.error)
-
+export async function awaitWeb3Approval(): Promise<void> {
   return providerFuture
-}
-
-/**
- * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
- */
-function registerProviderChanges() {
-  if (window.ethereum && typeof window.ethereum.on === 'function') {
-    window.ethereum.on('accountsChanged', (accounts: string[]) => location.reload())
-    window.ethereum.on('networkChanged', (networkId: string) => location.reload())
-    window.ethereum.on('close', (code: number, reason: string) => location.reload())
-  }
-}
-
-function createProvider() {
-  const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
-  return new WebSocketProvider(ethereumConfigurations[network].wss)
-}
-
-function showEthConnectAdvice(show: boolean) {
-  const element = document.getElementById('eth-connect-advice')
-  if (element) {
-    element.style.display = show ? 'block' : 'none'
-  }
 }
 
 export function isSessionExpired(userData: any) {
@@ -190,7 +72,7 @@ export function isSessionExpired(userData: any) {
 
 export async function getUserAccount(): Promise<string | undefined> {
   try {
-    const eth = Eth.fromCurrentProvider()!
+    const eth = createEth()
     const accounts = await eth.getAccounts()
 
     if (!accounts || accounts.length === 0) {
@@ -204,7 +86,7 @@ export async function getUserAccount(): Promise<string | undefined> {
 }
 
 export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
-  if (Eth.fromCurrentProvider()) {
+  if (!isGuest()) {
     return getUserAccount()
   }
 }

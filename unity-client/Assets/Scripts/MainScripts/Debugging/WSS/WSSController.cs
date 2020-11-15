@@ -102,6 +102,7 @@ namespace DCL
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
         public CameraController cameraController;
+        public GameObject bridgesGameObject;
 
         [System.NonSerialized] public static Queue<DCLWebSocketService.Message> queuedMessages = new Queue<DCLWebSocketService.Message>();
 
@@ -160,7 +161,7 @@ namespace DCL
                 if (baseUrlMode == BaseUrl.CUSTOM)
                     baseUrl = baseUrlCustom;
                 else
-                    baseUrl = "http://localhost:8080/?";
+                    baseUrl = "http://localhost:3000/?";
 
                 switch (environment)
                 {
@@ -301,11 +302,20 @@ namespace DCL
                             case "RemoveUserProfilesFromCatalog":
                                 UserProfileController.i.RemoveUserProfilesFromCatalog(msg.payload);
                                 break;
+                            case "ActivateRendering":
+                                renderingController.ActivateRendering();
+                                break;
                             case "DeactivateRendering":
                                 renderingController.DeactivateRendering();
                                 break;
-                            case "ActivateRendering":
-                                renderingController.ActivateRendering();
+                            case "ReportFocusOn":
+                                bridgesGameObject.SendMessage(msg.type, msg.payload);
+                                break;
+                            case "ReportFocusOff":
+                                bridgesGameObject.SendMessage(msg.type, msg.payload);
+                                break;
+                            case "ForceActivateRendering":
+                                renderingController.ForceActivateRendering();
                                 break;
                             case "ShowNotificationFromJson":
                                 NotificationsController.i.ShowNotificationFromJson(msg.payload);
@@ -433,11 +443,17 @@ namespace DCL
                             case "SetRenderProfile":
                                 RenderProfileBridge.i.SetRenderProfile(msg.payload);
                                 break;
+                            case "ShowAvatarEditorInSignUp":
+                                HUDController.i.ShowAvatarEditorInSignUp();
+                                break;
                             case "SetUserTalking":
                                 HUDController.i.SetUserTalking(msg.payload);
                                 break;
                             case "SetUsersMuted":
                                 HUDController.i.SetUsersMuted(msg.payload);
+                                break;
+                            case "SetKernelConfiguration":
+                                bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             default:
                                 Debug.Log(

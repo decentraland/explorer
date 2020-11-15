@@ -5,29 +5,35 @@ import { avatarMessageObservable } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
-import { ReadOnlyQuaternion, ReadOnlyVector3, Vector3, Quaternion } from '../decentraland-ecs/src/decentraland/math'
+import { decentralandConfigurations, ethereumConfigurations, playerConfigurations } from 'config'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { queueTrackingEvent } from 'shared/analytics'
+import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
-import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition, LoadableParcelScene } from 'shared/types'
+import {
+  ChatMessage,
+  FriendshipUpdateStatusMessage,
+  FriendshipAction,
+  WorldPosition,
+  LoadableParcelScene
+} from 'shared/types'
 import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
-import { updateUserData, updateFriendship } from 'shared/friends/actions'
-import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
+import { updateFriendship, updateUserData } from 'shared/friends/actions'
+import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { getAppNetwork, fetchOwner } from 'shared/web3'
+import { fetchOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
-import { logout } from 'shared/session/actions'
+import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
@@ -36,13 +42,14 @@ import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
 
 import { GIFProcessor } from 'gif-processor/processor'
-import { setVoiceChatRecording, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
+import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { SceneSystemWorker } from 'shared/world/SceneSystemWorker'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
+import Html from 'shared/Html'
 
 declare const DCL: any
 
@@ -118,6 +125,9 @@ export class BrowserInterface {
   public PerformanceReport(samples: string) {
     const perfReport = getPerformanceInfo(samples)
     queueTrackingEvent('performance report', perfReport)
+
+    const rawPerfReport = getRawPerformanceInfo(samples)
+    queueTrackingEvent('raw perf report', rawPerfReport)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
@@ -176,6 +186,10 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(logout())
   }
 
+  public RedirectToSignUp() {
+    globalThis.globalStore.dispatch(redirectToSignUp())
+  }
+
   public SaveUserInterests(interests: string[]) {
     if (!interests) {
       return
@@ -185,10 +199,35 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(saveProfileRequest({ interests: Array.from(unique) }))
   }
 
-  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
+  public SaveUserAvatar(changes: {
+    face: string
+    face128: string
+    face256: string
+    body: string
+    avatar: Avatar
+    isSignUpFlow?: boolean
+  }) {
     const { face, face128, face256, body, avatar } = changes
     const update = { avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(update))
+    if (!changes.isSignUpFlow) {
+      globalThis.globalStore.dispatch(saveProfileRequest(update))
+    } else {
+      globalThis.globalStore.dispatch(signUpSetProfile(update))
+      globalThis.globalStore.dispatch(changeSignUpStage('passport'))
+      unityInterface.DeactivateRendering()
+      Html.switchGameContainer(false)
+    }
+  }
+
+  public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
+    globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
+  }
+
+  public CloseUserAvatar(isSignUpFlow = false) {
+    if (isSignUpFlow) {
+      unityInterface.DeactivateRendering()
+      globalThis.globalStore.dispatch(signUpCancel())
+    }
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
@@ -205,17 +244,17 @@ export class BrowserInterface {
       }
       case 'ActivateRenderingACK': {
         if (!aborted) {
-          worldRunningObservable.notifyObservers(true)
+          renderStateObservable.notifyObservers(true)
         }
         break
       }
-      case 'StartStateMode': {
+      case 'StartStatefulMode': {
         const { sceneId } = payload
         const parcelScene = this.resetScene(sceneId)
         setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
         break
       }
-      case 'StopStateMode': {
+      case 'StopStatefulMode': {
         const { sceneId } = payload
         const parcelScene = this.resetScene(sceneId)
         setNewParcelScene(sceneId, new SceneSystemWorker(parcelScene))
@@ -264,11 +303,7 @@ export class BrowserInterface {
   public ReportUserEmail(data: { userEmail: string }) {
     const userId = getCurrentUserId(globalThis.globalStore.getState())
     if (userId) {
-      if (hasWallet()) {
-        window.analytics.identify(userId, { email: data.userEmail })
-      } else {
-        window.analytics.identify({ email: data.userEmail })
-      }
+      identifyEmail(data.userEmail, hasWallet() ? userId : undefined)
     }
   }
 
@@ -292,8 +327,9 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(toggleVoiceChatRecording())
   }
 
-  public ApplySettings(settingsMessage: { sfxVolume: number }) {
-    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.sfxVolume))
+  public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
+    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
+    globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
   }
 
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
@@ -425,7 +461,7 @@ export class BrowserInterface {
     const parcelScene = worker.getParcelScene()
     stopParcelSceneWorker(worker)
     const data = parcelScene.data.data as LoadableParcelScene
-    unityInterface.LoadParcelScenes([data])  // Maybe unity should do it by itself?
+    unityInterface.LoadParcelScenes([data]) // Maybe unity should do it by itself?
     return parcelScene
   }
 }
