@@ -12,12 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9988baed5dc8ecd469322b1c7d95b381, type: 3}
   m_Name: FootstepWalk
   m_EditorClassIdentifier: 
-  eventName: FootstepWalk
   loop: 0
   initialVolume: 1
   initialPitch: 1
   randomPitch: 0.05
-  cooldownSeconds: 0.1
+  cooldownSeconds: 0
   clips:
     array:
     - {fileID: 8300000, guid: 3048a39dca9dd004190ba1da2b03617b, type: 3}

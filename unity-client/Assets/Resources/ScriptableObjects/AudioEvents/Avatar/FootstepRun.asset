@@ -10,22 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9988baed5dc8ecd469322b1c7d95b381, type: 3}
-  m_Name: FootstepWalk
+  m_Name: FootstepRun
   m_EditorClassIdentifier: 
-  eventName: FootstepWalk
   loop: 0
   initialVolume: 1
   initialPitch: 1
   randomPitch: 0.05
-  cooldownSeconds: 0.1
+  cooldownSeconds: 0
   clips:
     array:
-    - {fileID: 8300000, guid: 3048a39dca9dd004190ba1da2b03617b, type: 3}
-    - {fileID: 8300000, guid: f696b213cc17352409c0bf45b0383941, type: 3}
-    - {fileID: 8300000, guid: a43e6b967fc454b499d2ad79e4d8e8a3, type: 3}
-    - {fileID: 8300000, guid: f677ed2ac6b83fa41afb8e2fb19749d0, type: 3}
-    - {fileID: 8300000, guid: f8357537760d84349965f4f22d819125, type: 3}
-    - {fileID: 8300000, guid: c09abbfc732dee8429ee079718eec391, type: 3}
-    - {fileID: 8300000, guid: 332d9669efb527045b9e67c11fb9714f, type: 3}
-    - {fileID: 8300000, guid: ae1ffc4af1f55c742bfd4136f9578d54, type: 3}
+    - {fileID: 8300000, guid: 92d1db87b27e94c4382ec34623eeb97e, type: 3}
+    - {fileID: 8300000, guid: 4afa8a61e348b464bb7cc4acec069b56, type: 3}
+    - {fileID: 8300000, guid: 4bc72cad916542a4a8599ba4b8e6498f, type: 3}
+    - {fileID: 8300000, guid: 5c589db0d12fe5145b533faa727d6ffb, type: 3}
+    - {fileID: 8300000, guid: a56a0bcce9c751f45819f1f3bbecaafc, type: 3}
+    - {fileID: 8300000, guid: e644b5dd590cc8e40a31e2d6cd05f6db, type: 3}
+    - {fileID: 8300000, guid: d6ad0a49193e3504c913b49840559e98, type: 3}
+    - {fileID: 8300000, guid: f3f2308d04aa1f742ad32d9cd2f205b1, type: 3}
   source: {fileID: 0}
