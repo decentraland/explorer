@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AvatarAnimationEventAudioHandler : MonoBehaviour
 {
-    AudioEvent footstepWalkEvent;
+    AudioEvent footstepWalkEvent, footstepRunEvent;
 
     public void Init(AudioContainer audioContainer)
     {
@@ -12,18 +12,23 @@ public class AvatarAnimationEventAudioHandler : MonoBehaviour
             return;
 
         footstepWalkEvent = audioContainer.GetEvent("FootstepWalk");
+        footstepRunEvent = audioContainer.GetEvent("FootstepRun");
     }
 
     public void AnimEvent_FootstepWalk()
     {
-        Debug.Log("AnimEvent_FootstepWalk");
-
-        if (footstepWalkEvent != null)
-            footstepWalkEvent.Play(true);
+        TryPlayingEvent(footstepWalkEvent);
     }
 
     public void AnimEvent_FootstepRun()
     {
-        Debug.Log("AnimEvent_FootstepRun");
+        Debug.Log("FootstepRun");
+        TryPlayingEvent(footstepRunEvent);
+    }
+
+    void TryPlayingEvent(AudioEvent audioEvent)
+    {
+        if (audioEvent != null)
+            audioEvent.Play(true);
     }
 }

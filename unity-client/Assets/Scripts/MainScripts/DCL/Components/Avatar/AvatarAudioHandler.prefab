@@ -54,3 +54,4 @@ MonoBehaviour:
   audioEvents:
     array:
     - {fileID: 11400000, guid: 4e11900dfc51073418978b5087a509f5, type: 2}
+    - {fileID: 11400000, guid: b6c07da0df02ec341b9cf4f622f3d3a2, type: 2}

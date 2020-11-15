@@ -34,8 +34,10 @@ public class AudioContainer : MonoBehaviour
         {
             for(int i = 0; i < audioEvents.Count; i++)
             {
+                string str = audioEvents[i].name;
                 AudioEvent instance = Instantiate(audioEvents[i]);
                 audioEvents[i] = instance;
+                instance.name = str;
             }
         }
 
@@ -47,12 +49,9 @@ public class AudioContainer : MonoBehaviour
 
     public AudioEvent GetEvent(string eventName)
     {
-        Debug.Log(":: -> Looking for " + eventName + "  <- ::");
-
         for (int i = 0; i < audioEvents.Count; i++)
         {
-            Debug.Log(audioEvents[i].eventName);
-            if (audioEvents[i].eventName == eventName)
+            if (audioEvents[i].name == eventName)
                 return audioEvents[i];
         }
 
