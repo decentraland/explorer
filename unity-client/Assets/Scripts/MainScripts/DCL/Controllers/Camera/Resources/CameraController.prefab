@@ -74,7 +74,7 @@ MonoBehaviour:
   m_YAxis:
     Value: 0
     m_MaxSpeed: 2
-    m_AccelTime: 0.2
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse Y
     m_InputAxisValue: 0
@@ -96,8 +96,8 @@ MonoBehaviour:
     m_LegacyVelocityFilterStrength: -1
   m_XAxis:
     Value: 0
-    m_MaxSpeed: 300
-    m_AccelTime: 0.2
+    m_MaxSpeed: 250
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse X
     m_InputAxisValue: 0
@@ -332,8 +332,8 @@ MonoBehaviour:
     m_LegacyVelocityFilterStrength: -1
   m_XAxis:
     Value: 0
-    m_MaxSpeed: 300
-    m_AccelTime: 0.2
+    m_MaxSpeed: 250
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse X
     m_InputAxisValue: 0
@@ -457,8 +457,8 @@ MonoBehaviour:
     m_LegacyVelocityFilterStrength: -1
   m_XAxis:
     Value: 0
-    m_MaxSpeed: 300
-    m_AccelTime: 0.2
+    m_MaxSpeed: 250
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse X
     m_InputAxisValue: 0
@@ -656,8 +656,8 @@ MonoBehaviour:
     m_LegacyVelocityFilterStrength: -1
   m_XAxis:
     Value: 0
-    m_MaxSpeed: 300
-    m_AccelTime: 0.2
+    m_MaxSpeed: 250
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse X
     m_InputAxisValue: 0
@@ -836,7 +836,7 @@ MonoBehaviour:
   m_VerticalAxis:
     Value: 0
     m_MaxSpeed: 200
-    m_AccelTime: 0.2
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse Y
     m_InputAxisValue: 0
@@ -859,7 +859,7 @@ MonoBehaviour:
   m_HorizontalAxis:
     Value: 0
     m_MaxSpeed: 200
-    m_AccelTime: 0.2
+    m_AccelTime: 0.3
     m_DecelTime: 0.03
     m_InputAxisName: Mouse X
     m_InputAxisValue: 0
