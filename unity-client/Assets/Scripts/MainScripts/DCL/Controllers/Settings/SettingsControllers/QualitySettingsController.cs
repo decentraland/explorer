@@ -1,6 +1,8 @@
+using System;
 using Cinemachine;
 using System.Reflection;
 using DCL.Interface;
+using DCL.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -11,7 +13,7 @@ namespace DCL.SettingsController
 {
     public class QualitySettingsController : MonoBehaviour
     {
-        private UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
+        private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
         private FieldInfo lwrpaShadowField = null;
         private FieldInfo lwrpaSoftShadowField = null;
@@ -23,11 +25,13 @@ namespace DCL.SettingsController
         public CinemachineFreeLook thirdPersonCamera = null;
         public CinemachineVirtualCamera firstPersonCamera = null;
 
+        public CullingControllerSettingsData cullingControllerSettingsData = null;
+
         void Start()
         {
             if (lightweightRenderPipelineAsset == null)
             {
-                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
 
                 // NOTE: LightweightRenderPipelineAsset doesn't expose properties to set any of the following fields
                 lwrpaShadowField = lightweightRenderPipelineAsset.GetType().GetField("m_MainLightShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -98,6 +102,27 @@ namespace DCL.SettingsController
                 {
                     toneMapping.active = qualitySettings.colorGrading;
                 }
+            }
+
+            Environment.i.cullingController.SetObjectCulling(qualitySettings.limitSmallObjectsDetail);
+            Environment.i.cullingController.SetShadowCulling(qualitySettings.limitSmallObjectsDetail);
+            Environment.i.cullingController.SetDirty();
+
+            if (qualitySettings.limitSmallObjectsDetail)
+            {
+                var settings = Environment.i.cullingController.GetSettings();
+
+                settings.rendererProfile = CullingControllerProfile.Lerp(
+                    cullingControllerSettingsData.rendererProfileMin,
+                    cullingControllerSettingsData.rendererProfileMax,
+                    qualitySettings.limitSmallObjectsRange);
+
+                settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
+                    cullingControllerSettingsData.skinnedRendererProfileMin,
+                    cullingControllerSettingsData.skinnedRendererProfileMax,
+                    qualitySettings.limitSmallObjectsRange);
+
+                Environment.i.cullingController.SetSettings(settings);
             }
 
             if (thirdPersonCamera)

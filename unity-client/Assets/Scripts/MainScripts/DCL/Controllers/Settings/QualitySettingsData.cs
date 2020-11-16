@@ -75,18 +75,27 @@ namespace DCL.SettingsData
         [Tooltip("Shadow Distance")] [Range(30, 100)]
         public float shadowDistance;
 
+        [Tooltip("Enable culling for small objects in the viewport.")] [Range(30, 100)]
+        public bool limitSmallObjectsDetail;
+
+        [Tooltip("If limit small objects detail is ON, this slider determines the relative size of culled objects from tiny to big. Bigger values gives better performance, but more objects will be hidden.")] [Range(0, 1)]
+        public float limitSmallObjectsRange;
+
         public bool Equals(QualitySettings otherSetting)
         {
             if (baseResolution != otherSetting.baseResolution) return false;
             if (antiAliasing != otherSetting.antiAliasing) return false;
-            if (renderScale != otherSetting.renderScale) return false;
+            if (Mathf.Abs(renderScale - otherSetting.renderScale) < 0.001f) return false;
             if (shadows != otherSetting.shadows) return false;
             if (softShadows != otherSetting.softShadows) return false;
             if (shadowResolution != otherSetting.shadowResolution) return false;
-            if (cameraDrawDistance != otherSetting.cameraDrawDistance) return false;
+            if (Mathf.Abs(cameraDrawDistance - otherSetting.cameraDrawDistance) < 0.001f) return false;
             if (bloom != otherSetting.bloom) return false;
             if (colorGrading != otherSetting.colorGrading) return false;
-            if (shadowDistance != otherSetting.shadowDistance) return false;
+            if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) < 0.001f) return false;
+            if (limitSmallObjectsDetail != otherSetting.limitSmallObjectsDetail) return false;
+            if (Mathf.Abs(limitSmallObjectsRange - otherSetting.limitSmallObjectsRange) < 0.001f) return false;
+
             return true;
         }
     }

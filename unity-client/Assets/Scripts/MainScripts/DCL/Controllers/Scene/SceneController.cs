@@ -78,6 +78,7 @@ namespace DCL
             worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
 #endif
             performanceMetricsController = new PerformanceMetricsController();
+            Environment.i.cullingController.Start();
         }
 
         void Start()
@@ -110,6 +111,7 @@ namespace DCL
             PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             ParcelScene.parcelScenesCleaner.Stop();
+            Environment.i.cullingController.Stop();
         }
 
 
