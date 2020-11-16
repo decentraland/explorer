@@ -5,8 +5,8 @@ namespace DCL.SettingsController
 {
     public class GeneralSettingsController : MonoBehaviour
     {
-        private const float SENSITIVITY_MAX_MULTIPLIER = 2f;
-        private const float SENSITIVITY_MIN_MULTIPLIER = 0.5f;
+        internal const float SENSITIVITY_MAX_MULTIPLIER = 2f;
+        internal const float SENSITIVITY_MIN_MULTIPLIER = 0.5f;
 
         public CinemachineFreeLook thirdPersonCamera;
         public CinemachineVirtualCamera firstPersonCamera;

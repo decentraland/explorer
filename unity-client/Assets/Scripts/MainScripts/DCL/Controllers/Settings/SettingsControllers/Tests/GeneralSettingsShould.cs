@@ -195,10 +195,12 @@ namespace Tests
 
         private void CheckIfGeneralSettingsAreApplied()
         {
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_HorizontalAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_VerticalAxis) mouseSensitivity mismatch");
+            float sensitivityMultiplier = Mathf.LerpUnclamped(GeneralSettingsController.SENSITIVITY_MIN_MULTIPLIER, GeneralSettingsController.SENSITIVITY_MAX_MULTIPLIER, DCL.Settings.i.generalSettings.mouseSensitivity);
+
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, 250f*sensitivityMultiplier, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, 2f*sensitivityMultiplier, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, 200f*sensitivityMultiplier, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, 200f*sensitivityMultiplier, "pov (m_VerticalAxis) mouseSensitivity mismatch");
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
         }
     }
