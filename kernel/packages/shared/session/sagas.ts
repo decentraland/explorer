@@ -4,7 +4,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, ETHEREUM_NETWORK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
+import { ENABLE_WEB3, ETHEREUM_NETWORK, HAS_INITIAL_POSITION_MARK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -119,6 +119,12 @@ function* initSession() {
     yield checkPreviousSession()
   } else {
     yield previewAutoSignIn()
+    return
+  }
+  // deep link
+  if (HAS_INITIAL_POSITION_MARK) {
+    yield previewAutoSignIn()
+    return
   }
   yield put(changeLoginStage(LoginStage.SIGN_IN))
   Html.bindLoginEvent()
@@ -198,7 +204,7 @@ function* requestProvider(providerType: ProviderType) {
   const provider = yield requestWeb3Provider(providerType)
   if (provider) {
     if (WORLD_EXPLORER && (yield checkTldVsWeb3Network())) {
-      throw new Error('Network mismatch')
+      return
     }
 
     if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getAppNetwork())) {
