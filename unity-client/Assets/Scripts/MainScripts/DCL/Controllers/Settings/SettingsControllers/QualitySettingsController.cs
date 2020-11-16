@@ -7,6 +7,10 @@ using UnityEngine.Rendering.Universal;
 using QualitySettings = DCL.SettingsData.QualitySettings;
 using UnitySettings = UnityEngine.QualitySettings;
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
+
 namespace DCL.SettingsController
 {
     public class QualitySettingsController : MonoBehaviour
@@ -65,7 +69,7 @@ namespace DCL.SettingsController
 
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.msaaSampleCount = (int) qualitySettings.antiAliasing;
+                lightweightRenderPipelineAsset.msaaSampleCount = (int)qualitySettings.antiAliasing;
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
                 lightweightRenderPipelineAsset.shadowDistance = qualitySettings.shadowDistance;
 
@@ -109,6 +113,14 @@ namespace DCL.SettingsController
             {
                 firstPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
             }
+
+            SetTargetFPS(qualitySettings.fpsCap ? 30 : -1);
         }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")] public static extern void SetTargetFPS(int targetValue);
+#else
+        public static void SetTargetFPS(int targetValue) { }
+#endif
     }
 }
