@@ -21,7 +21,7 @@ public class BuildModeState : MonoBehaviour
 
     protected bool isSnapActive = false, isMultiSelectionActive = false, isModeActive = false;
     protected List<DecentralandEntityToEdit> selectedEntities;
-    public virtual void Init(GameObject goToEdit,GameObject undoGO,GameObject snapGO,GameObject freeMovementGO,List<DecentralandEntityToEdit> selectedEntities)
+    public virtual void Init(GameObject goToEdit, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO, List<DecentralandEntityToEdit> selectedEntities)
     {
         editionGO = goToEdit;
         this.undoGO = undoGO;
@@ -184,7 +184,7 @@ public class BuildModeState : MonoBehaviour
 
 
     }
-    protected void TransformActionEnd(DecentralandEntity entity,string type)
+    protected void TransformActionEnd(DecentralandEntity entity, string type)
     {
 
         List<BuildModeEntityAction> removeList = new List<BuildModeEntityAction>();

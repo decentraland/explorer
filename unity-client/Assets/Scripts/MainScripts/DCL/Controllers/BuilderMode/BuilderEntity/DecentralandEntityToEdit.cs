@@ -172,7 +172,7 @@ public class DecentralandEntityToEdit : EditableEntity
     void SetEntityAsVoxel()
     {
         isVoxel = true;
-        gameObject.tag = BuilderSettings.VOXEL_TAG;
+        gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
     }
     void SaveOriginalMaterialAndSetEditMaterials()
     {

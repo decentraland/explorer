@@ -57,13 +57,10 @@ public class CatalogController : MonoBehaviour
         i = this;
     }
 
-
     public void AddSceneObjectToCatalog(JObject payload)
     {
 
         SceneAssetPack sceneAssetPack = JsonConvert.DeserializeObject<SceneAssetPack>(payload.ToString());
-     
-        //SceneObject sceneObject = JsonConvert.DeserializeObject<SceneObject>(payload);
 
         if (VERBOSE)
             Debug.Log("add sceneObject: " + payload);

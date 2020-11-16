@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Configuration;
 using DCL.Controllers;
 using System;
 using System.Collections;
@@ -16,7 +17,7 @@ public class SceneLimitInfoController : MonoBehaviour
 
     public GameObject landHoverBtn;
     public TextMeshProUGUI[] titleTxt;
-    public TextMeshProUGUI leftDescTxt,rightDescTxt;
+    public TextMeshProUGUI leftDescTxt, rightDescTxt;
     public Image[] fillsImgs;
 
     ParcelScene currentParcelScene;
@@ -57,8 +58,8 @@ public class SceneLimitInfoController : MonoBehaviour
         }
         else
         {
-            titleTxt[0].text = "CUSTOM LAND";
-            titleTxt[1].text = "CUSTOM LAND";
+            titleTxt[0].text = BuilderInWorldSettings.CUSTOM_LAND;
+            titleTxt[1].text = BuilderInWorldSettings.CUSTOM_LAND;
         }
 
 

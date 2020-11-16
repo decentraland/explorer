@@ -25,14 +25,10 @@ public class FreeMovementController : MonoBehaviour
 
     Vector3 velocity = Vector3.zero;
 
-
-    private InputAction_Hold.Started sprintStartedDelegate;
-    private InputAction_Hold.Finished sprintFinishedDelegate;
     private Vector3NullableVariable characterForward => CommonScriptableObjects.characterForward;
 
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
     private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
-    private Vector3Variable cameraUp => CommonScriptableObjects.cameraRight;
 
     [SerializeField] private InputAction_Measurable characterYAxis;
     [SerializeField] private InputAction_Measurable characterXAxis;
@@ -41,11 +37,6 @@ public class FreeMovementController : MonoBehaviour
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-
-        //sprintStartedDelegate = (action) => isSprinting = true;
-        //sprintFinishedDelegate = (action) => isSprinting = false;
-        sprintAction.OnStarted += sprintStartedDelegate;
-        sprintAction.OnFinished += sprintFinishedDelegate;
     }
 
     public bool IsActive()

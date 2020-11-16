@@ -7,10 +7,10 @@ using UnityEngine.UI;
 
 public class EntityListAdapter : MonoBehaviour
 {
-    public Color entitySelectedColor,entityUnselectedColor;
-    public Color iconsSelectedColor,iconsUnselectedColor;
+    public Color entitySelectedColor, entityUnselectedColor;
+    public Color iconsSelectedColor, iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
-    public Image selectedImg, lockImg,showImg;
+    public Image selectedImg, lockImg, showImg;
     public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActionInvoked;
     DecentralandEntityToEdit currentEntity;
 

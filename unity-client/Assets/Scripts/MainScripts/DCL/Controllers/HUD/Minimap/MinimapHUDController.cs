@@ -33,6 +33,7 @@ public class MinimapHUDController : IHUD
             UnityEngine.Object.Destroy(view.gameObject);
 
         CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChange;
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange -= ChangeVisibilityForBuilderInWorld;
     }
 
     private void OnPlayerCoordsChange(Vector2Int current, Vector2Int previous)

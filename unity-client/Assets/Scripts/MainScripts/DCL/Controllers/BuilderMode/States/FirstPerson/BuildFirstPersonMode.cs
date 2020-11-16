@@ -32,46 +32,46 @@ public class BuildFirstPersonMode : BuildModeState
 
     void LateUpdate()
     {
-        if (selectedEntities.Count > 0 && !isMultiSelectionActive)
+        if (selectedEntities.Count <= 0 || isMultiSelectionActive) return;
+
+        if (isSnapActive)
         {
-            if (isSnapActive)
+            if (snapObjectAlreadyMoved)
             {
-                if (snapObjectAlreadyMoved)
-                {
-                   
-                        Vector3 objectPosition = snapGO.transform.position;
-                        Vector3 eulerRotation = snapGO.transform.rotation.eulerAngles;
 
-                        float currentSnapFactor = snapFactor;
+                Vector3 objectPosition = snapGO.transform.position;
+                Vector3 eulerRotation = snapGO.transform.rotation.eulerAngles;
 
-                        objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
-                        objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
-                        objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
-                        eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
+                float currentSnapFactor = snapFactor;
 
-                        Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
-                        editionGO.transform.rotation = initialRotation * destinationRotation;
-                        editionGO.transform.position = objectPosition;
-                   
-                }
-                else if (Vector3.Distance(snapGO.transform.position, editionGO.transform.position) >= snapDistanceToActivateMovement)
-                {
-                    BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
+                objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
+                objectPosition.y = Mathf.RoundToInt(objectPosition.y / currentSnapFactor) * currentSnapFactor;
+                objectPosition.z = Mathf.RoundToInt(objectPosition.z / currentSnapFactor) * currentSnapFactor;
+                eulerRotation.y = snapRotationDegresFactor * Mathf.FloorToInt((eulerRotation.y % snapRotationDegresFactor));
 
-
-                    snapObjectAlreadyMoved = true;
-                    SetEditObjectParent();
-                }
+                Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
+                editionGO.transform.rotation = initialRotation * destinationRotation;
+                editionGO.transform.position = objectPosition;
 
             }
-            else
+            else if (Vector3.Distance(snapGO.transform.position, editionGO.transform.position) >= snapDistanceToActivateMovement)
             {
-                Vector3 pointToLookAt = Camera.main.transform.position;
-                pointToLookAt.y = editionGO.transform.position.y;
-                Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
-                freeMovementGO.transform.rotation = lookOnLook;
+                BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
+
+
+                snapObjectAlreadyMoved = true;
+                SetEditObjectParent();
             }
+
         }
+        else
+        {
+            Vector3 pointToLookAt = Camera.main.transform.position;
+            pointToLookAt.y = editionGO.transform.position.y;
+            Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
+            freeMovementGO.transform.rotation = lookOnLook;
+        }
+
     }
 
     public override void SetDuplicationOffset(float offset)
@@ -201,28 +201,27 @@ public class BuildFirstPersonMode : BuildModeState
 
     void SetObjectIfSnapOrNot()
     {
-        if (!isMultiSelectionActive)
+        if (isMultiSelectionActive) return;
+
+        if (!isSnapActive)
         {
-            if (!isSnapActive)
-            {
-                editionGO.transform.SetParent(null);
-                freeMovementGO.transform.position = editionGO.transform.position;
-                freeMovementGO.transform.rotation = editionGO.transform.rotation;
-                freeMovementGO.transform.localScale = editionGO.transform.localScale;
+            editionGO.transform.SetParent(null);
+            freeMovementGO.transform.position = editionGO.transform.position;
+            freeMovementGO.transform.rotation = editionGO.transform.rotation;
+            freeMovementGO.transform.localScale = editionGO.transform.localScale;
 
-                editionGO.transform.SetParent(null);
+            editionGO.transform.SetParent(null);
 
-                Vector3 pointToLookAt = Camera.main.transform.position;
-                pointToLookAt.y = editionGO.transform.position.y;
-                Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
+            Vector3 pointToLookAt = Camera.main.transform.position;
+            pointToLookAt.y = editionGO.transform.position.y;
+            Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
 
-                freeMovementGO.transform.rotation = lookOnLook;
-                editionGO.transform.SetParent(freeMovementGO.transform, true);
-            }
-            else
-            {
-                editionGO.transform.SetParent(null);
-            }
+            freeMovementGO.transform.rotation = lookOnLook;
+            editionGO.transform.SetParent(freeMovementGO.transform, true);
+        }
+        else
+        {
+            editionGO.transform.SetParent(null);
         }
 
     }

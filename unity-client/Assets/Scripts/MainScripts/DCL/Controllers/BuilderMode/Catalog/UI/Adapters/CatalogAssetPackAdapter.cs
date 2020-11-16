@@ -16,10 +16,10 @@ public class CatalogAssetPackAdapter : MonoBehaviour
 
     string loadedThumbnailURL;
     AssetPromise_Texture loadedThumbnailPromise;
-    public void SetContent(SceneAssetPack _sceneAssetPack)
+    public void SetContent(SceneAssetPack sceneAssetPack)
     {
-        sceneAssetPack = _sceneAssetPack;
-        titleTxt.text = sceneAssetPack.title;
+        this.sceneAssetPack = sceneAssetPack;
+        titleTxt.text = this.sceneAssetPack.title;
         GetThumbnail();
     }
 

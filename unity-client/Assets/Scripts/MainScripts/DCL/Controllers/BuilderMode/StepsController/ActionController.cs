@@ -12,6 +12,7 @@ public class ActionController : MonoBehaviour
     public System.Action OnUndo, OnRedo;
     List<BuildModeAction> actionsMade = new List<BuildModeAction>();
 
+    int currentStepIndex = 0;
 
     private void Awake()
     {
@@ -19,7 +20,6 @@ public class ActionController : MonoBehaviour
             actionListview.OnActionSelected += GoToAction;
     }
 
-    int currentStepIndex = 0;
     public void ClearActionList()
     {
         actionsMade.Clear();
@@ -89,7 +89,7 @@ public class ActionController : MonoBehaviour
         action.OnApplyValue += ApplyAction;
     }
 
-    void ApplyAction(DecentralandEntity entityToApply, object value,BuildModeAction.ActionType actionType)
+    void ApplyAction(DecentralandEntity entityToApply, object value, BuildModeAction.ActionType actionType)
     {
         switch (actionType)
         {

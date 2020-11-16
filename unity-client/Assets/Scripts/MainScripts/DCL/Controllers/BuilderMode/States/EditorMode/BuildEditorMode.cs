@@ -37,7 +37,13 @@ public class BuildEditorMode : BuildModeState
 
     public LayerMask groundLayer;
 
-    bool isPlacingNewObject = false, mousePressed = false, isMakingSquareMultiSelection = false,isTypeOfBoundSelectionSelected = false, isVoxelBoundMultiSelection = false,squareMultiSelectionButtonPressed = false;
+    bool isPlacingNewObject = false,
+         mousePressed = false,
+         isMakingSquareMultiSelection = false,
+         isTypeOfBoundSelectionSelected = false,
+         isVoxelBoundMultiSelection = false,
+         squareMultiSelectionButtonPressed = false;
+
     Vector3 lastMousePosition;
 
     const float RAYCAST_MAX_DISTANCE = 10000f;
@@ -265,7 +271,7 @@ public class BuildEditorMode : BuildModeState
         gizmoManager.HideGizmo();
         if (createdEntity.isVoxel)
         {
-            createdEntity.rootEntity.gameObject.tag = BuilderSettings.VOXEL_TAG;
+            createdEntity.rootEntity.gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
             voxelController.SetVoxelSelected(createdEntity);
             ActivateVoxelMode();
         }

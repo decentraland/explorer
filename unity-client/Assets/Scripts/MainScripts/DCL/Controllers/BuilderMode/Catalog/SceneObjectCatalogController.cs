@@ -336,7 +336,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     public void ShowAssetsPacks()
     {
         isShowingAssetPacks = true;
-        catalogTitleTxt.text = BuilderSettings.CATALOG_ASSET_PACK_TITLE;
+        catalogTitleTxt.text = BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE;
         catalogAssetPackListView.gameObject.SetActive(true);
         catalogGroupListView.gameObject.SetActive(false);
     }
@@ -350,7 +350,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void OpenCatalog()
     {
-        catalogTitleTxt.text = BuilderSettings.CATALOG_ASSET_PACK_TITLE;
+        catalogTitleTxt.text = BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE;
         Utils.UnlockCursor();
         gameObject.SetActive(true);
 
@@ -358,7 +358,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         if (!catalogInitializaed)
         {
             CatalogController.sceneObjectCatalog.GetValues();
-            ExternalCallsController.i.GetContentAsString(BuilderSettings.BASE_URL_ASSETS_PACK, AddFullSceneObjectCatalog);
+            ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, AddFullSceneObjectCatalog);
             catalogInitializaed = true;
         }
     

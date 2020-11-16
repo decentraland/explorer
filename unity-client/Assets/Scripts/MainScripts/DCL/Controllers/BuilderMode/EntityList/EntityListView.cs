@@ -21,6 +21,16 @@ public class EntityListView : ListView<DecentralandEntityToEdit>
             adapter.OnActionInvoked += EntityActionInvoked;
         }
     }
+    public override void RemoveAdapters()
+    {
+
+        for (int i = 0; i < contentPanelTransform.transform.childCount; i++)
+        {
+            EntityListAdapter toRemove = contentPanelTransform.transform.GetChild(i).gameObject.GetComponent<EntityListAdapter>();
+            toRemove.OnActionInvoked -= EntityActionInvoked;
+            Destroy(toRemove);
+        }
+    }
 
     public void EntityActionInvoked(BuildModeEntityListController.EntityAction action, DecentralandEntityToEdit entityToApply,EntityListAdapter adapter)
     {

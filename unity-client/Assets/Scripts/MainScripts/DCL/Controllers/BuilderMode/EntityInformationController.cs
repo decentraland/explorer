@@ -38,7 +38,7 @@ public class EntityInformationController : MonoBehaviour
         }
     }
 
-    public void SetEntity(DecentralandEntity entity,ParcelScene currentScene)
+    public void SetEntity(DecentralandEntity entity, ParcelScene currentScene)
     {
         this.currentEntity = entity;
         parcelScene = currentScene;
@@ -58,7 +58,6 @@ public class EntityInformationController : MonoBehaviour
         isEnable = false;
     }
 
-
     public void UpdateInfo()
     {
         if (currentEntity.gameObject != null)
@@ -67,7 +66,7 @@ public class EntityInformationController : MonoBehaviour
             Vector3 currentRotation = currentEntity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = currentEntity.gameObject.transform.localScale;
 
-            string desc = AppendUsageAndLimit("POSITION:   ", positionConverted, "0.#");
+            string desc =    AppendUsageAndLimit("POSITION:   ", positionConverted, "0.#");
             desc += "\n\n" + AppendUsageAndLimit("ROTATION:  ", currentRotation, "0");
             desc += "\n\n" + AppendUsageAndLimit("SCALE:        ", currentScale, "0.##");
 
@@ -76,9 +75,8 @@ public class EntityInformationController : MonoBehaviour
 
     }
 
-
-    string AppendUsageAndLimit(string name, Vector3 currentVector,string format)
+    string AppendUsageAndLimit(string name, Vector3 currentVector, string format)
     {
-        return name + "X: " + currentVector.x.ToString(format) + "  Y: " + currentVector.y.ToString(format) + "  Z:" + currentVector.z.ToString(format);
+        return $"{name}X: {currentVector.x.ToString(format)}  Y: {currentVector.y.ToString(format)}  Z:{currentVector.z.ToString(format)}";
     }
 }

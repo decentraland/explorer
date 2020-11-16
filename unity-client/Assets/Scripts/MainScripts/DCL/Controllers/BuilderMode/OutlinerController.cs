@@ -9,11 +9,7 @@ public class OutlinerController : MonoBehaviour
 {
     public Material outlineMaterial;
    
-
     List<DecentralandEntityToEdit> entitiesOutlined = new List<DecentralandEntityToEdit>();
-
-
-
 
     public void OutlineEntities(List<DecentralandEntityToEdit> entitiesToEdit)
     {
@@ -34,7 +30,7 @@ public class OutlinerController : MonoBehaviour
             return;
         for (int i = 0; i < entity.rootEntity.meshesInfo.renderers.Length; i++)
         {
-            entity.rootEntity.meshesInfo.renderers[i].gameObject.layer = BuilderSettings.SELECTION_LAYER;
+            entity.rootEntity.meshesInfo.renderers[i].gameObject.layer = BuilderInWorldSettings.SELECTION_LAYER;
         }
     }
 
@@ -59,17 +55,17 @@ public class OutlinerController : MonoBehaviour
 
     public void CancelEntityOutline(DecentralandEntityToEdit entityToQuitOutline)
     {
-        if (entitiesOutlined.Contains(entityToQuitOutline))
+        if (!entitiesOutlined.Contains(entityToQuitOutline)) return;
+
+        if (entityToQuitOutline.rootEntity.meshRootGameObject && entityToQuitOutline.rootEntity.meshesInfo.renderers.Length > 0)
         {
-            if (entityToQuitOutline.rootEntity.meshRootGameObject && entityToQuitOutline.rootEntity.meshesInfo.renderers.Length > 0)
+            for (int x = 0; x < entityToQuitOutline.rootEntity.meshesInfo.renderers.Length; x++)
             {
-                for (int x = 0; x < entityToQuitOutline.rootEntity.meshesInfo.renderers.Length; x++)
-                {
-                    entityToQuitOutline.rootEntity.meshesInfo.renderers[x].gameObject.layer = BuilderSettings.DEFAULT_LAYER;
-                }             
+                entityToQuitOutline.rootEntity.meshesInfo.renderers[x].gameObject.layer = BuilderInWorldSettings.DEFAULT_LAYER;
             }
-           entitiesOutlined.Remove(entityToQuitOutline);
         }
+        entitiesOutlined.Remove(entityToQuitOutline);
+
     }
 
 }

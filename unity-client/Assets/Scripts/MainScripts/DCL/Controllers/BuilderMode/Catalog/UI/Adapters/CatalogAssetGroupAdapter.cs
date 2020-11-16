@@ -59,10 +59,12 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     {
         OnSceneObjectClicked?.Invoke(sceneObjectClicked);
     }
+
     void SceneObjectFavorite(SceneObject sceneObjectClicked, CatalogItemAdapter adapter)
     {
         OnSceneObjectFavorite?.Invoke(sceneObjectClicked, adapter);
     }
+
     void AdapterStartDragging(SceneObject sceneObjectClicked, CatalogItemAdapter adapter, BaseEventData data)
     {
         OnAdapterStartDragging?.Invoke(sceneObjectClicked, adapter, data);

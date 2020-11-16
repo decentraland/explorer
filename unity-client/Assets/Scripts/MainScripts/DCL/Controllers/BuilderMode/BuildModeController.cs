@@ -296,7 +296,7 @@ public class BuildModeController : MonoBehaviour
         }
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
-        data.baseUrl = BuilderSettings.BASE_URL_CATALOG;
+        data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
 
 
         foreach (KeyValuePair<string, string> content in sceneObject.contents)
@@ -326,7 +326,7 @@ public class BuildModeController : MonoBehaviour
         DecentralandEntity entity = CreateEntity();
         sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
 
-        if (sceneObject.asset_pack_id == BuilderSettings.VOXEL_ASSETS_PACK_ID)
+        if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
             convertedEntities[GetConvertedUniqueKeyForEntity(entity)].isVoxel = true;
         DeselectEntities();
         Select(entity);
@@ -709,7 +709,7 @@ public class BuildModeController : MonoBehaviour
                 if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])))
                 {
                     DecentralandEntityToEdit entityToCheck  = convertedEntities[GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])];
-                    if(!entityToCheck.IsSelected && entityToCheck.tag == BuilderSettings.VOXEL_TAG)
+                    if(!entityToCheck.IsSelected && entityToCheck.tag == BuilderInWorldSettings.VOXEL_TAG)
                     {
                         if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
                         {

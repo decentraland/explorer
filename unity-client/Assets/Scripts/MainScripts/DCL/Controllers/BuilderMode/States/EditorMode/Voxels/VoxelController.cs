@@ -43,7 +43,7 @@ public class VoxelController : MonoBehaviour
             bool fillVoxels = false;
             Vector3Int currentPosition = Vector3Int.zero;
             VoxelEntityHit voxelHit = buildModeController.GetCloserUnselectedVoxelEntityOnPointer();
-            if (voxelHit != null && voxelHit.entityHitted.tag == BuilderSettings.VOXEL_TAG && !voxelHit.entityHitted.IsSelected)
+            if (voxelHit != null && voxelHit.entityHitted.tag == BuilderInWorldSettings.VOXEL_TAG && !voxelHit.entityHitted.IsSelected)
             {
                 Vector3Int position = ConverPositionToVoxelPosition(voxelHit.entityHitted.rootEntity.gameObject.transform.position);
                 position += voxelHit.hitVector;
@@ -83,7 +83,7 @@ public class VoxelController : MonoBehaviour
             VoxelEntityHit voxelHit = buildModeController.GetCloserUnselectedVoxelEntityOnPointer();
 
             if (voxelHit != null && voxelHit.entityHitted.IsSelected) return;
-            if (voxelHit != null && voxelHit.entityHitted.tag == BuilderSettings.VOXEL_TAG)
+            if (voxelHit != null && voxelHit.entityHitted.tag == BuilderInWorldSettings.VOXEL_TAG)
             {
 
 
@@ -238,7 +238,7 @@ public class VoxelController : MonoBehaviour
                     {
 
                         DecentralandEntity entity = buildModeController.DuplicateEntity(lastVoxelCreated);
-                        entity.gameObject.tag = BuilderSettings.VOXEL_TAG;
+                        entity.gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
                         entity.gameObject.transform.position = voxelPosition;
                     }
                     Destroy(createdVoxels[voxelPosition].gameObject);
@@ -288,7 +288,7 @@ public class VoxelController : MonoBehaviour
         return position;
     }
 
-    bool IsVoxelAtValidPoint(VoxelPrefab voxelPrefab,List<DecentralandEntityToEdit> entitiesToCheck)
+    bool IsVoxelAtValidPoint(VoxelPrefab voxelPrefab, List<DecentralandEntityToEdit> entitiesToCheck)
     {
         if (!currentScene.IsInsideSceneBoundaries(voxelPrefab.meshRenderer.bounds)) return false;
         Bounds bounds = voxelPrefab.meshRenderer.bounds;
