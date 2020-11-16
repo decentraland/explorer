@@ -490,9 +490,10 @@ public class AvatarEditorHUDController : IHUD
     {
         if (!IsSignUpFlowValue)
             LoadUserProfile(userProfile);
+        else
+            WebInterface.SendCloseUserAvatar(true);
 
         SetVisibility(false);
-        WebInterface.SendCloseUserAvatar(IsSignUpFlowValue);
     }
 
     public void GoToMarketplace()
