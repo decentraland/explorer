@@ -10,21 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9988baed5dc8ecd469322b1c7d95b381, type: 3}
-  m_Name: ExpressionClap
+  m_Name: ExpressionThrowMoney
   m_EditorClassIdentifier: 
   loop: 0
   initialVolume: 1
   initialPitch: 1
   randomPitch: 0.05
-  cooldownSeconds: 0
+  cooldownSeconds: 0.15
   clips:
     array:
-    - {fileID: 8300000, guid: 8c7779192f04cb44c96aa6f958cf100a, type: 3}
-    - {fileID: 8300000, guid: da38e4f7abbd42f488b0353f34dcf474, type: 3}
-    - {fileID: 8300000, guid: ec799cab5ea6b9d44b6aeece58010d83, type: 3}
-    - {fileID: 8300000, guid: 16d1c61a4d8cdbb40a61f5eed3eac871, type: 3}
-    - {fileID: 8300000, guid: d3673ded2375dac4f925191fcd517cf4, type: 3}
-    - {fileID: 8300000, guid: 29db79c9a0b3c4b48bab4c8de253a5e5, type: 3}
-    - {fileID: 8300000, guid: 1790ca1d070d1a442ba891c964c755d4, type: 3}
-    - {fileID: 8300000, guid: efabba5c953d7a74383ae39115b29272, type: 3}
+    - {fileID: 8300000, guid: a5ea1f1aaaf562f448b1cb7cc5a3edd8, type: 3}
+    - {fileID: 8300000, guid: 672aedd459103cb43a9554ceed6a4838, type: 3}
+    - {fileID: 8300000, guid: e922678dabc87f74695604a34f0e8156, type: 3}
+    - {fileID: 8300000, guid: b52a27a5dd50541479bf41e2646ce7b4, type: 3}
+    - {fileID: 8300000, guid: 425a56109c0f2c1468ed7b3db7d6662c, type: 3}
   source: {fileID: 0}
