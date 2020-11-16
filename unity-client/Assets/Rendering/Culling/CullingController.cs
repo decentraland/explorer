@@ -436,20 +436,32 @@ namespace DCL.Rendering
 
         public void SetObjectCulling(bool enabled)
         {
+            if (settings.enableObjectCulling == enabled)
+                return;
+
             settings.enableObjectCulling = enabled;
             resetObjectsNextFrame = true;
+            SetDirty();
         }
 
         public void SetAnimationCulling(bool enabled)
         {
+            if (settings.enableAnimationCulling == enabled)
+                return;
+
             settings.enableAnimationCulling = enabled;
             resetObjectsNextFrame = true;
+            SetDirty();
         }
 
         public void SetShadowCulling(bool enabled)
         {
+            if (settings.enableShadowCulling == enabled)
+                return;
+
             settings.enableShadowCulling = enabled;
             resetObjectsNextFrame = true;
+            SetDirty();
         }
 
         private void RaiseDataReport()
