@@ -5,14 +5,20 @@ import imgDiscord from "../../images/discord.png";
 
 export const Navbar: React.FC = () => (
   <nav className="nav-bar">
-    <Logo icon={true} />
+    <a
+      href="https://decentraland.org/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Logo icon={true} />
+    </a>
     <div className="nav-bar-content">
       <div className="nav-text nav-need-support">
         <span>Need support?</span>
       </div>
       <a
         className="nav-discord"
-        href="https://dcl.gg/discord"
+        href="https://discord.gg/k5ydeZp"
         target="about:blank"
       >
         <img alt="Discord" className="nav-discord-img" src={imgDiscord} />

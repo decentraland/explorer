@@ -10,12 +10,14 @@ import "./WalletSelector.css";
 export interface WalletSelectorProps {
   show: boolean;
   loading: boolean;
+  metamask: boolean;
   onClick: (provider: string) => void;
   onCancel: () => void;
 }
 
 export const WalletSelector: React.FC<WalletSelectorProps> = ({
   show,
+  metamask,
   loading,
   onClick,
   onCancel,
@@ -23,13 +25,14 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
   return show ? (
     <Modal handleClose={onCancel}>
       <div className="walletSelector">
-        <h2 className="walletSelectorTitle">Sign In - Up</h2>
+        <h2 className="walletSelectorTitle">Sign In or Create an Account</h2>
         <div className="walletButtonContainer">
           {loading && <Spinner />}
           {!loading && (
             <WalletButton
               title="Metamask"
               logo={MetamaskLogo}
+              disabled={!metamask}
               description="Using a browser extension"
               onClick={() => onClick("Metamask")}
             />
