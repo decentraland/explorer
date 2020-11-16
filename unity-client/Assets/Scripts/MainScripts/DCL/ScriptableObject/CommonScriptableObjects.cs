@@ -72,10 +72,6 @@ public static class AudioScriptableObjects
 
     private static AudioEvent UIShowEvent;
     public static AudioEvent UIShow => CommonScriptableObjects.GetOrLoad(ref UIShowEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIUnhide");
-
-    // Avatar animation events
-    private static AudioEvent AvatarFootstepWalkEvent;
-    public static AudioEvent AvatarFootstepWalk => CommonScriptableObjects.GetOrLoad(ref AvatarFootstepWalkEvent, "ScriptableObjects/AudioEvents/Avatar/FootstepWalk");
 }
 
 public static class CommonScriptableObjects

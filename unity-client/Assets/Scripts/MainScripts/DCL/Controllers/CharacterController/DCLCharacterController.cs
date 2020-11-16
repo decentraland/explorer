@@ -84,6 +84,7 @@ public class DCLCharacterController : MonoBehaviour
     [System.NonSerialized] public float movingPlatformSpeed;
 
     [HideInInspector] public System.Action OnJump, OnHitGround;
+    [HideInInspector] public System.Action<float> OnMoved;
 
     void Awake()
     {
@@ -184,6 +185,10 @@ public class DCLCharacterController : MonoBehaviour
                 ReportMovement();
 
             OnCharacterMoved?.Invoke(characterPosition);
+
+            float distance = Vector3.Distance(characterPosition.worldPosition, lastPosition);
+            if (distance != 0f && isGrounded)
+                OnMoved?.Invoke(distance / Time.deltaTime);
         }
 
         lastPosition = transform.position;

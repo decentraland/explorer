@@ -60,9 +60,9 @@ MonoBehaviour:
   audioMixerGroup: {fileID: 8338445547935177358, guid: 97507d628c02bcf47859b9f108ab1823,
     type: 2}
   spatialBlend: 1
-  overrideDefaults: 0
-  dopplerLevel: 1
-  minDistance: 1
+  overrideDefaults: 1
+  dopplerLevel: 0.5
+  minDistance: 2
   maxDistance: 500
   audioEvents:
     array:
@@ -71,3 +71,5 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 21039f12d18a89b48b0ee2a087acf9d4, type: 2}
     - {fileID: 11400000, guid: e960a6404c9a878479891ff90559d7b0, type: 2}
     - {fileID: 11400000, guid: 506450d19c1651d4f8dce8ee689d7678, type: 2}
+    - {fileID: 11400000, guid: 99232dd7eef00db4694bb48ed9c4caf5, type: 2}
+    - {fileID: 11400000, guid: f7b39b485be25574fb9d33f37d5f3e9b, type: 2}

@@ -55,6 +55,7 @@ public class AudioContainer : MonoBehaviour
                 return audioEvents[i];
         }
 
+        Debug.Log(name + "'s AudioContainer couldn't find an event called " + eventName);
         return null;
     }
 }
