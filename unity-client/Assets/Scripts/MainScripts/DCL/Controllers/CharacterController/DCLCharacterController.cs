@@ -83,6 +83,8 @@ public class DCLCharacterController : MonoBehaviour
 
     [System.NonSerialized] public float movingPlatformSpeed;
 
+    [HideInInspector] public System.Action OnJump, OnHitGround;
+
     void Awake()
     {
         if (i != null)
@@ -296,6 +298,12 @@ public class DCLCharacterController : MonoBehaviour
             }
         }
 
+        //NOTE(Mordi): Detecting when the character hits the ground (for landing-SFX)
+        if (isGrounded && !previouslyGrounded && (Time.time - lastUngroundedTime) > 0.4f)
+        {
+            OnHitGround?.Invoke();
+        }
+
         bool movingPlatformMovedTooMuch = Vector3.Distance(lastPosition, transform.position) > movingPlatformAllowedPosDelta;
 
         if (isOnMovingPlatform && !characterPosition.RepositionedWorldLastFrame() && movingPlatformMovedTooMuch)
@@ -338,6 +346,8 @@ public class DCLCharacterController : MonoBehaviour
         ResetGround();
 
         velocity.y = jumpForce;
+
+        OnJump?.Invoke();
     }
 
     public void ResetGround()

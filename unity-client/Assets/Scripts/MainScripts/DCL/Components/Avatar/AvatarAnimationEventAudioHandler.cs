@@ -4,26 +4,31 @@ using UnityEngine;
 
 public class AvatarAnimationEventAudioHandler : MonoBehaviour
 {
-    AudioEvent footstepWalkEvent, footstepRunEvent;
+    AudioEvent footstepWalk, footstepRun, clothesRustleShort;
 
     public void Init(AudioContainer audioContainer)
     {
         if (audioContainer == null)
             return;
 
-        footstepWalkEvent = audioContainer.GetEvent("FootstepWalk");
-        footstepRunEvent = audioContainer.GetEvent("FootstepRun");
+        footstepWalk = audioContainer.GetEvent("FootstepWalk");
+        footstepRun = audioContainer.GetEvent("FootstepRun");
+        clothesRustleShort = audioContainer.GetEvent("ClothesRustleShort");
     }
 
     public void AnimEvent_FootstepWalk()
     {
-        TryPlayingEvent(footstepWalkEvent);
+        TryPlayingEvent(footstepWalk);
     }
 
     public void AnimEvent_FootstepRun()
     {
-        Debug.Log("FootstepRun");
-        TryPlayingEvent(footstepRunEvent);
+        TryPlayingEvent(footstepRun);
+    }
+
+    public void AnimEvent_ClothesRustleShort()
+    {
+        TryPlayingEvent(clothesRustleShort);
     }
 
     void TryPlayingEvent(AudioEvent audioEvent)
