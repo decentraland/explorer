@@ -4,7 +4,13 @@ import { nameValidCharacterRegex, nameValidRegex } from 'shared/profiles/utils/n
 
 export function kernelConfigForRenderer(): KernelConfigForRenderer {
   return {
-    comms: { commRadius: commConfigurations.commRadius, voiceChatEnabled: false },
-    profiles: { nameValidCharacterRegex: nameValidCharacterRegex.toString(), nameValidRegex: nameValidRegex.toString() }
+    comms: {
+      commRadius: commConfigurations.commRadius,
+      voiceChatEnabled: false
+    },
+    profiles: {
+      nameValidCharacterRegex: nameValidCharacterRegex.toString().replace(/[/]/g, ""),
+      nameValidRegex: nameValidRegex.toString().replace(/[/]/g, "")
+    }
   }
 }
