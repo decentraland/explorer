@@ -6,10 +6,11 @@ import { Eth } from 'web3x/eth'
 import { Web3Connector } from './Web3Connector'
 import { ProviderType } from './ProviderType'
 import { LegacyProviderAdapter } from 'web3x/providers'
+import { WORLD_EXPLORER } from 'config'
 
 let web3Connector: Web3Connector
 export const providerFuture = future()
-export const requestManager = new RequestManager(null)
+export const requestManager = new RequestManager((window as any).ethereum ?? null)
 
 export const loginCompleted = future<void>()
 ;(window as any).loginCompleted = loginCompleted
@@ -63,6 +64,9 @@ export function getProviderType() {
 }
 
 export async function awaitWeb3Approval(): Promise<void> {
+  if (!WORLD_EXPLORER) {
+    await requestWeb3Provider(ProviderType.GUEST)
+  }
   return providerFuture
 }
 
