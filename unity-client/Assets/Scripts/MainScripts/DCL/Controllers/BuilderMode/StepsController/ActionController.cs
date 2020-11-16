@@ -8,7 +8,7 @@ using static BuildModeAction;
 public class ActionController : MonoBehaviour
 {
     public ActionListview actionListview;
-    public BuildModeController buildModeController;
+    public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public System.Action OnUndo, OnRedo;
     List<BuildModeAction> actionsMade = new List<BuildModeAction>();
 
@@ -111,11 +111,11 @@ public class ActionController : MonoBehaviour
                 string entityString = (string)value;
                 if (entityString.Length < 255)
                 {
-                    buildModeController.DeleteEntity((string)value);
+                    builderInWorldEntityHandler.DeleteEntity((string)value);
                 }
                 else
                 {
-                    buildModeController.CreateEntityFromJSON((string)value);
+                    builderInWorldEntityHandler.CreateEntityFromJSON((string)value);
                 }
                     break;
         }

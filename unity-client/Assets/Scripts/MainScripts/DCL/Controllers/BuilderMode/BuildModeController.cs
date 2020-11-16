@@ -38,8 +38,6 @@ public class BuildModeController : MonoBehaviour
     public float msBetweenInputInteraction = 200;
 
     public float distanceLimitToSelectObjects = 50;
-    public float duplicateOffset = 2f;
-
 
 
     [Header("Snap variables")]
@@ -50,15 +48,18 @@ public class BuildModeController : MonoBehaviour
     public float snapDistanceToActivateMovement = 10f;
 
 
-    [Header("Scene references")]
-    public GameObject cameraParentGO,cursorGO;
+    [Header("Scene References")]
+    public GameObject cameraParentGO;
+    public GameObject cursorGO;
+    public InputController inputController;
 
-    public EntityInformationController entityInformationController;
+    [Header("Prefab References")]
     public OutlinerController outlinerController;
     public BuilderInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
-    public InputController inputController;
+    public BuilderInWorldEntityHandler builderInWorldEntityHandler;
+    public BuilderInWorldBridge builderInWorldBridge;
 
     [Header("Build Modes")]
 
@@ -66,9 +67,6 @@ public class BuildModeController : MonoBehaviour
     public BuildEditorMode editorMode;
 
     [Header("Build References")]
-
-    public Texture2D duplicateCursorTexture;
-    public Material editMaterial;
 
     public LayerMask layerToRaycast;
 
@@ -84,13 +82,16 @@ public class BuildModeController : MonoBehaviour
     //Note(Adrian): This is for tutorial purposes
     public Action OnSceneObjectPlaced;
 
-    BuildModeState currentActiveMode;
+    BuildMode currentActiveMode;
 
     ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false, isSnapActive = true, isMultiSelectionActive = false, isAdvancedModeActive = true, isOutlineCheckActive = true;
-    List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
-    Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
+    bool isEditModeActivated = false,
+         isSnapActive = true,
+         isMultiSelectionActive = false,
+         isAdvancedModeActive = true,
+         isOutlineCheckActive = true;
+
 
     GameObject editionGO;
     GameObject undoGO, snapGO, freeMovementGO;
@@ -103,66 +104,72 @@ public class BuildModeController : MonoBehaviour
 
     const float RAYCAST_MAX_DISTANCE = 10000f;
 
+    InputAction_Hold.Started multiSelectionStartDelegate;
+    InputAction_Hold.Finished multiSelectionFinishedDelegate;
+
+    InputAction_Trigger.Triggered createLastSceneObjectDelegate;
+    InputAction_Trigger.Triggered redoDelegate;
+    InputAction_Trigger.Triggered undoDelegate;
+    InputAction_Trigger.Triggered snapModeDelegate;
+
     void Start()
     {
-        if (snapGO == null)
-        {
+        if (snapGO == null)       
             snapGO = new GameObject("SnapGameObject");
-
-        }
+        
         snapGO.transform.SetParent(transform);
-        if (freeMovementGO == null)
-        {
+
+        if (freeMovementGO == null)       
             freeMovementGO = new GameObject("FreeMovementGO");
-
-        }
+    
         freeMovementGO.transform.SetParent(cameraParentGO.transform);
-        if (editionGO == null)
-        {
-            editionGO = new GameObject("EditionGO");
 
-        }
+        if (editionGO == null)        
+            editionGO = new GameObject("EditionGO");
+        
         editionGO.transform.SetParent(cameraParentGO.transform);
+
         if (undoGO == null)
         {
             undoGO = new GameObject("UndoGameObject");
             undoGO.transform.SetParent(transform);
         }
+
         HUDConfiguration hudConfig = new HUDConfiguration();
         hudConfig.active = true;
         hudConfig.visible = false;
         HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILD_MODE);
 
-
         editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
 
-        toggleCreateLastSceneObjectInputAction.OnTriggered += (o) => CreateLastSceneObject();
-        toggleRedoActionInputAction.OnTriggered += (o) => RedoAction();
-        toggleUndoActionInputAction.OnTriggered += (o) => UndoAction();
-        toggleSnapModeInputAction.OnTriggered += (o) => ChangeSnapMode();
+        createLastSceneObjectDelegate = (action) => CreateLastSceneObject();
+        redoDelegate = (action) => RedoAction();
+        undoDelegate = (action) => UndoAction();
+        snapModeDelegate = (action) => ChangeSnapMode();
+
+        toggleCreateLastSceneObjectInputAction.OnTriggered += createLastSceneObjectDelegate;
+        toggleRedoActionInputAction.OnTriggered += redoDelegate;
+        toggleUndoActionInputAction.OnTriggered += undoDelegate;
+        toggleSnapModeInputAction.OnTriggered += snapModeDelegate;
+
+        multiSelectionStartDelegate = (action) => StartMultiSelection();
+        multiSelectionFinishedDelegate = (action) => EndMultiSelection();
+
+        multiSelectionInputAction.OnStarted += multiSelectionStartDelegate;
+        multiSelectionInputAction.OnFinished += multiSelectionFinishedDelegate;
+
+        HUDController.i.buildModeHud.OnStopInput += StopInput;
+        HUDController.i.buildModeHud.OnResumeInput += ResumeInput;
+
 
         HUDController.i.buildModeHud.OnChangeModeAction += ChangeAdvanceMode;
-        HUDController.i.buildModeHud.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
-        HUDController.i.buildModeHud.OnDeleteSelectedAction += DeleteSelectedEntitiesInput;
         HUDController.i.buildModeHud.OnResetAction += ResetScaleAndRotation;
 
-        multiSelectionInputAction.OnStarted += (o) => StartMultiSelection();
-        multiSelectionInputAction.OnFinished += (o) => EndMultiSelection();
-
-        HUDController.i.buildModeHud.OnEntityClick += ChangeEntitySelectionFromList;
-        HUDController.i.buildModeHud.OnEntityDelete += DeleteEntity;
-        HUDController.i.buildModeHud.OnEntityLock += ChangeEntityLockStatus;
-        HUDController.i.buildModeHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
-
-        HUDController.i.buildModeHud.OnStopInput += () => builderInputWrapper.StopInput();
-        HUDController.i.buildModeHud.OnResumeInput += () => builderInputWrapper.ResumeInput();
         HUDController.i.buildModeHud.OnSceneObjectSelected += CreateSceneObjectSelected;
         HUDController.i.buildModeHud.OnTutorialAction += StartTutorial;
         HUDController.i.buildModeHud.OnPublishAction += PublishScene;
-        builderInputWrapper.OnMouseClick += MouseClick;
 
-        actionController.OnRedo += ReSelectEntities;
-        actionController.OnUndo += ReSelectEntities;
+        builderInputWrapper.OnMouseClick += MouseClick;
 
         InitEditModes();
 
@@ -172,13 +179,34 @@ public class BuildModeController : MonoBehaviour
     private void OnDestroy()
     {
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
-        DestroyCollidersForAllEntities();
+
+        toggleCreateLastSceneObjectInputAction.OnTriggered -= createLastSceneObjectDelegate;
+        toggleRedoActionInputAction.OnTriggered -= redoDelegate;
+        toggleUndoActionInputAction.OnTriggered -= undoDelegate;
+        toggleSnapModeInputAction.OnTriggered -= snapModeDelegate;
+
+        multiSelectionInputAction.OnStarted -= multiSelectionStartDelegate;
+        multiSelectionInputAction.OnFinished -= multiSelectionFinishedDelegate;
+
+        HUDController.i.buildModeHud.OnStopInput -= StopInput;
+        HUDController.i.buildModeHud.OnResumeInput -= ResumeInput;
+
+        HUDController.i.buildModeHud.OnChangeModeAction -= ChangeAdvanceMode;
+        HUDController.i.buildModeHud.OnResetAction -= ResetScaleAndRotation;
+
+        HUDController.i.buildModeHud.OnSceneObjectSelected -= CreateSceneObjectSelected;
+        HUDController.i.buildModeHud.OnTutorialAction -= StartTutorial;
+        HUDController.i.buildModeHud.OnPublishAction -= PublishScene;
+
+
+        builderInputWrapper.OnMouseClick -= MouseClick;
 
         firstPersonMode.OnInputDone -= InputDone;
         editorMode.OnInputDone -= InputDone;
 
         firstPersonMode.OnActionGenerated -= actionController.AddAction;
         editorMode.OnActionGenerated -= actionController.AddAction;
+
     }
 
     private void Update()
@@ -206,10 +234,20 @@ public class BuildModeController : MonoBehaviour
 
     }
 
+    void StopInput()
+    {
+        builderInputWrapper.StopInput();
+    }
+
+    void ResumeInput()
+    {
+        builderInputWrapper.ResumeInput();
+    }
+
     void InitEditModes()
     {
-        firstPersonMode.Init(editionGO, undoGO, snapGO, freeMovementGO, selectedEntities);
-        editorMode.Init(editionGO, undoGO, snapGO, freeMovementGO, selectedEntities);
+        firstPersonMode.Init(editionGO, undoGO, snapGO, freeMovementGO, builderInWorldEntityHandler.GetSelectedEntityList());
+        editorMode.Init(editionGO, undoGO, snapGO, freeMovementGO, builderInWorldEntityHandler.GetSelectedEntityList());
 
         firstPersonMode.OnInputDone += InputDone;
         editorMode.OnInputDone += InputDone;
@@ -224,20 +262,6 @@ public class BuildModeController : MonoBehaviour
         TutorialController.i.SetTutorialEnabled(false.ToString(),TutorialController.TutorialType.BuilderInWorld);
     }
 
-    void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
-    {
-        entityToApply.ToggleShowStatus();
-        if (!entityToApply.IsVisible && selectedEntities.Contains(entityToApply))
-            DeselectEntity(entityToApply);
-    }
-
-    void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
-    {
-        entityToApply.ToggleLockStatus();
-        if (entityToApply.IsLocked && selectedEntities.Contains(entityToApply))
-            DeselectEntity(entityToApply);
-    }
-
     void MouseClick(int buttonID, Vector3 position)
     {
         if (!isEditModeActivated) return;
@@ -248,7 +272,7 @@ public class BuildModeController : MonoBehaviour
             {
                 if (buttonID == 0)
                 {
-                    ClickDetected();
+                    MouseClickDetected();
                     InputDone();
                     return;
                 }
@@ -258,7 +282,7 @@ public class BuildModeController : MonoBehaviour
 
     }
 
-    void CreateSceneObjectSelected(SceneObject sceneObject)
+    bool IsInsideTheLimits(SceneObject sceneObject)
     {
         SceneMetricsController.Model limits = sceneToEdit.metricsController.GetLimits();
         SceneMetricsController.Model usage = sceneToEdit.metricsController.GetModel();
@@ -267,37 +291,43 @@ public class BuildModeController : MonoBehaviour
         {
 
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
-            return;
+            return false;
         }
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
-            return;
+            return false;
         }
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
-            return;
+            return false;
         }
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
-            return;
+            return false;
         }
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
-            return;
+            return false;
         }
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
-            return;
+            return false;
         }
+        return true;
+    }
+    void CreateSceneObjectSelected(SceneObject sceneObject)
+    {
+        if (!IsInsideTheLimits(sceneObject)) return;
+
+        //Note (Adrian): This is a workaround until the mapping is handle by kernel
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
         data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
-
 
         foreach (KeyValuePair<string, string> content in sceneObject.contents)
         {
@@ -318,28 +348,30 @@ public class BuildModeController : MonoBehaviour
         }
         SceneController.i.UpdateParcelScenesExecute(data);
 
+        //
+
         GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
         mesh.model.src = sceneObject.model;
 
 
-        DecentralandEntity entity = CreateEntity();
-        sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
+        DecentralandEntityToEdit entity = builderInWorldEntityHandler.CreateEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
-            convertedEntities[GetConvertedUniqueKeyForEntity(entity)].isVoxel = true;
-        DeselectEntities();
-        Select(entity);
+            entity.isVoxel = true;
+        builderInWorldEntityHandler.DeselectEntities();
+        builderInWorldEntityHandler.Select(entity.rootEntity);
 
 
         entity.gameObject.transform.eulerAngles = Vector3.zero;
 
-        currentActiveMode.CreatedEntity(convertedEntities[GetConvertedUniqueKeyForEntity(entity)]);
+        currentActiveMode.CreatedEntity(entity);
         if (!isAdvancedModeActive)
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
 
-        AddEntityOnKernel(entity);
+        builderInWorldBridge.AddEntityOnKernel(entity.rootEntity,sceneToEdit); 
         InputDone();
         OnSceneObjectPlaced?.Invoke();
     }
@@ -348,8 +380,8 @@ public class BuildModeController : MonoBehaviour
     {
         if (lastSceneObjectCreated != null)
         {
-            if (selectedEntities.Count > 0)
-                DeselectEntities();
+            if (builderInWorldEntityHandler.IsAnyEntitySelected())
+                builderInWorldEntityHandler.DeselectEntities();
             CreateSceneObjectSelected(lastSceneObjectCreated);
             InputDone();
         }
@@ -373,35 +405,15 @@ public class BuildModeController : MonoBehaviour
         InputDone();
     }
 
-
-    void DeleteSelectedEntitiesInput()
-    {
-        if (selectedEntities.Count > 0)
-        {
-            DeletedSelectedEntities();
-            InputDone();
-        }
-
-    }
-
-    void DuplicateSelectedEntitiesInput()
-    {
-        if (selectedEntities.Count > 0)
-        {
-            DuplicateEntities();
-            InputDone();
-        }
-    }
     void CheckEditModeInput()
     {
 
-        if (selectedEntities.Count <= 0 || isMultiSelectionActive)
+        if (!builderInWorldEntityHandler.IsAnyEntitySelected() || isMultiSelectionActive)
         {
             CheckOutline();
         }
 
-
-        if (selectedEntities.Count > 0)
+        if (builderInWorldEntityHandler.IsAnyEntitySelected())
         {
             currentActiveMode.CheckInputSelectedEntities();
         }
@@ -441,8 +453,9 @@ public class BuildModeController : MonoBehaviour
         {
             currentActiveMode.Activate(sceneToEdit);
             currentActiveMode.SetSnapActive(isSnapActive);
+            builderInWorldEntityHandler.SetActiveMode(currentActiveMode);
         }
-        DeselectEntities();
+
     }
     public void SetAdvanceMode(bool advanceModeActive)
     {
@@ -462,31 +475,19 @@ public class BuildModeController : MonoBehaviour
     void StartMultiSelection()
     {
         isMultiSelectionActive = true;
+        builderInWorldEntityHandler.SetMultiSelectionActive(isMultiSelectionActive);
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
         currentActiveMode.StartMultiSelection();
-
     }
 
     void EndMultiSelection()
     {
         isMultiSelectionActive = false;
+        builderInWorldEntityHandler.SetMultiSelectionActive(isMultiSelectionActive);
         currentActiveMode.EndMultiSelection();
         outlinerController.CancelUnselectedOutlines();
     }
 
-    bool AreAllSelectedEntitiesInsideBoundaries()
-    {
-        bool areAllIn = true;
-        foreach(DecentralandEntityToEdit entity in selectedEntities)
-        {
-            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-            {
-                areAllIn = false;
-                break;
-            }
-        }
-        return areAllIn;
-    }
     private void CheckOutline()
     {
         if (outlinerOptimizationCounter >= 10 && isOutlineCheckActive)
@@ -508,27 +509,9 @@ public class BuildModeController : MonoBehaviour
         else outlinerOptimizationCounter++;
     }
 
-    public void DestroyCreatedObjects()
+    public void UndoEditionGOLastStep()
     {
-        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
-        foreach(DecentralandEntityToEdit entity in selectedEntities)
-        {
-            if (entity.IsSelected && entity.IsNew) entitiesToRemove.Add(entity);
-        }
-
-        BuildModeUtils.CopyGameObjectStatus(undoGO, editionGO,false,false);
-
-        foreach(DecentralandEntityToEdit entity in entitiesToRemove)
-        {
-            DeleteEntity(entity,false);
-        }
-    
-
-    }
-
-    void EntityListChanged()
-    {
-        HUDController.i.buildModeHud.SetEntityList(GetEntitiesInCurrentScene());
+        BuildModeUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
     }
 
     public void ResetScaleAndRotation()
@@ -566,96 +549,16 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
-    void EntityClicked(DecentralandEntityToEdit entityCliked)
-    {
-        if (entityCliked.IsSelected)
-            DeselectEntity(entityCliked);
-        else
-            SelectEntity(entityCliked);
-    }
-
-    void ChangeEntitySelectionFromList(DecentralandEntityToEdit entityToEdit)
-    {
-        if (!selectedEntities.Contains(entityToEdit))
-            SelectFromList(entityToEdit);
-        else
-            DeselectEntity(entityToEdit);
-    }
-
-    void SelectFromList(DecentralandEntityToEdit entityToEdit)
-    {
-        if(!isMultiSelectionActive)
-            DeselectEntities();
-        if (SelectEntity(entityToEdit))
-        {
-            if (!isMultiSelectionActive)
-                outlinerController.OutlineEntity(entityToEdit);
-            else
-                outlinerController.OutlineEntities(selectedEntities);
-        }
-       
-    }
-
-    public void Select(DecentralandEntity decentralandEntity)
-    {
-        if (convertedEntities.ContainsKey(sceneToEdit.sceneData.id + decentralandEntity.entityId))
-        {
-            DecentralandEntityToEdit entityEditable = convertedEntities[sceneToEdit.sceneData.id + decentralandEntity.entityId];
-            SelectEntity(entityEditable);
-        }
-    }
-
-    public bool SelectEntity(DecentralandEntityToEdit entityEditable)
-    {
-
-        if (entityEditable.IsLocked) return false;
-
-        if (entityEditable.IsSelected) return false;
-
-        entityEditable.Select();
-
-        selectedEntities.Add(entityEditable);
-
-
-        currentActiveMode.SelectedEntity(entityEditable);
-
-
-        if (entityInformationController != null)
-        {
-            entityInformationController.Enable();
-            entityInformationController.SetEntity(entityEditable.rootEntity, sceneToEdit);
-        }
-
-
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
-        outlinerController.CancelAllOutlines();
-        return true;
-    }
-
-    void ClickDetected()
+    void MouseClickDetected()
     {        
         DecentralandEntityToEdit entityToSelect = GetEntityOnPointer();
         if (entityToSelect != null)
         {
-            if (selectedEntities.Count <= 0)
-            {
-                EntityClicked(entityToSelect);
-            }
-            else
-            {
-                if (!isMultiSelectionActive)
-                {
-                    DeselectEntities();
-                }
-                else
-                {
-                    EntityClicked(entityToSelect);
-                }
-            }
+            builderInWorldEntityHandler.EntityClicked(entityToSelect);
         }
         else if (!isMultiSelectionActive)
         {
-            DeselectEntities();
+            builderInWorldEntityHandler.DeselectEntities();
         }
     }
 
@@ -680,11 +583,7 @@ public class BuildModeController : MonoBehaviour
 
             if (sceneToEdit.entities.ContainsKey(entityID))
             {
-                if(convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])))
-                {
-                    return convertedEntities[GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])];
-                }
-              
+                return builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);             
             }
         }
         return null;
@@ -706,250 +605,27 @@ public class BuildModeController : MonoBehaviour
 
             if (sceneToEdit.entities.ContainsKey(entityID))
             {
-                if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])))
+                DecentralandEntityToEdit entityToCheck = builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
+                if (entityToCheck == null) continue;
+
+                if (!entityToCheck.IsSelected && entityToCheck.tag == BuilderInWorldSettings.VOXEL_TAG)
                 {
-                    DecentralandEntityToEdit entityToCheck  = convertedEntities[GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])];
-                    if(!entityToCheck.IsSelected && entityToCheck.tag == BuilderInWorldSettings.VOXEL_TAG)
+                    if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
                     {
-                        if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
-                        {
-                            unselectedEntity = entityToCheck;
-                            voxelEntityHit = new VoxelEntityHit(unselectedEntity,hit);
-                            currentDistance = Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
-                        }
+                        unselectedEntity = entityToCheck;
+                        voxelEntityHit = new VoxelEntityHit(unselectedEntity, hit);
+                        currentDistance = Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
                     }
                 }
-
             }
         }
         return voxelEntityHit;
     }
 
-    public List<DecentralandEntityToEdit> GetAllEntitiesFromCurrentScene()
-    {
-        List<DecentralandEntityToEdit> entities = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
-        {
-            if (entity.rootEntity.scene == sceneToEdit) entities.Add(entity);
-        }
-
-        return entities;
-    }
-
-    public List<DecentralandEntityToEdit> GetAllVoxelsEntities()
-    {
-        List<DecentralandEntityToEdit> voxelEntities = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
-        {
-            if (entity.rootEntity.scene == sceneToEdit && entity.isVoxel)
-                voxelEntities.Add(entity);
-        }
-
-        return voxelEntities;
-    }
-
-    void ReSelectEntities()
-    {
-        List<DecentralandEntityToEdit> entitiesToReselect = new List<DecentralandEntityToEdit>();
-        foreach(DecentralandEntityToEdit entity in selectedEntities)
-        {
-            entitiesToReselect.Add(entity);
-        }
-        DeselectEntities();
-
-        foreach (DecentralandEntityToEdit entity in entitiesToReselect)
-        {
-            SelectEntity(entity);
-        }
-    }
-
-    public void DeselectEntity(DecentralandEntityToEdit entity)
-    {
-        if (!selectedEntities.Contains(entity))
-            return;
-
-        if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-        {
-            DestroyCreatedObjects();
-        }
- 
-        SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
-        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.rootEntity);
-        entity.Deselect();
-        outlinerController.CancelEntityOutline(entity);
-        selectedEntities.Remove(entity);
-        currentActiveMode.EntityDeselected(entity);
-        if (selectedEntities.Count <= 0 && entityInformationController != null)
-            entityInformationController.Disable();
-    }
-
-    public void DeselectEntities()
-    {
-        if (selectedEntities.Count > 0)
-        {
-            if (!AreAllSelectedEntitiesInsideBoundaries()) DestroyCreatedObjects();
-
-            int amountToDeselect = selectedEntities.Count;
-            for(int i = 0; i < amountToDeselect; i++)
-            {
-                DeselectEntity(selectedEntities[0]);
-            }
-
-            currentActiveMode.DeselectedEntities();
-
-            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-        }
-   
-    }
-
-    public void ChangeLockStateSelectedEntities()
-    {
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
-        {
-            entity.ToggleLockStatus();
-        }
-        DeselectEntities();
-    }
-
-    public void ChangeShowStateSelectedEntities()
-    {
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
-        {
-            entity.ToggleShowStatus();
-        }
-    }
-
-    public void DeletedSelectedEntities()
-    {
-        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
-
-        for (int i = 0; i < selectedEntities.Count; i++)
-        {         
-            entitiesToRemove.Add(selectedEntities[i]);          
-        }
-
-        DeselectEntities();
-
-        foreach(DecentralandEntityToEdit entity in entitiesToRemove)
-        {
-            DeleteEntity(entity);
-        }
-
-    }
-    public void DeleteEntitiesOutsideSceneBoundaries()
-    {
-        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
-        {
-            if (entity.rootEntity.scene == sceneToEdit)
-            {
-                if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-                {
-                    entitiesToRemove.Add(entity);
-                }
-            }
-        }
-
-        foreach (DecentralandEntityToEdit entity in entitiesToRemove)
-        {
-            DeleteEntity(entity);
-        }
-
-    }
-
-    public void DeleteEntity(string entityId)
-    {
-        DecentralandEntityToEdit entity = convertedEntities[GetConvertedUniqueKeyForEntity(entityId)];
-        DeleteEntity(entity, true);
-    }
-
-    public void DeleteEntity(DecentralandEntityToEdit entityToDelete)
-    {
-        DeleteEntity(entityToDelete, true);
-    }
-
-    public void DeleteEntity(DecentralandEntityToEdit entityToDelete, bool checkSelection = true)
-    {
-        if (entityToDelete.IsSelected && checkSelection)
-            DeselectEntity(entityToDelete);
-        RemoveConvertedEntity(entityToDelete.rootEntity);
-        entityToDelete.Delete();
-        string idToRemove = entityToDelete.rootEntity.entityId;
-        Destroy(entityToDelete);
-        sceneToEdit.RemoveEntity(idToRemove, true);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
-        EntityListChanged();
-        RemoveEntityOnKernel(idToRemove);
-    }
-
-    public DecentralandEntity DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
-    {
-        DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToDuplicate.rootEntity);
-
-        BuildModeUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
-        SetupEntityToEdit(entity);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
-
-        AddEntityOnKernel(entity);
-        return entity;
-    }
-
-    public void DuplicateEntities()
-    {
-        foreach(DecentralandEntityToEdit entity in selectedEntities)
-        {
-            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-                return;
-        }
-
-        int amount = selectedEntities.Count;
-        for (int i = 0; i < amount; i++)
-        {
-            DuplicateEntity(selectedEntities[i]); 
-        }
-        currentActiveMode.SetDuplicationOffset(duplicateOffset);
-        Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
-        EntityListChanged();
-
-    }
-
-    public DecentralandEntity CreateEntityFromJSON(string entityJson)
-    {
-        DecentralandEntity newEntity = JsonConvert.DeserializeObject<DecentralandEntity>(entityJson);
-        sceneToEdit.CreateEntity(newEntity.entityId);
-
-        SetupEntityToEdit(newEntity, true);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
-        EntityListChanged();
-        return newEntity;
-    }
-
-    DecentralandEntity CreateEntity()
-    {
-
-        DecentralandEntity newEntity = sceneToEdit.CreateEntity(Guid.NewGuid().ToString());
-
-        DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(currentActiveMode.GetCreatedEntityPoint(), sceneToEdit);
-
-        Vector3 pointToLookAt = Camera.main.transform.position;
-        pointToLookAt.y = editionGO.transform.position.y;
-        Quaternion lookOnLook = Quaternion.LookRotation(editionGO.transform.position - pointToLookAt);
-
-        DCLTransform.model.rotation = lookOnLook;
-        DCLTransform.model.scale = newEntity.gameObject.transform.lossyScale;
-
-        sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);      
-     
-        SetupEntityToEdit(newEntity,true);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
-        EntityListChanged();
-        return newEntity;
-    }
-
     public void StartEnterEditMode()
     {
         FindSceneToEdit();
-        StartKernelEditMode();
+        builderInWorldBridge.StartKernelEditMode(sceneToEdit);
         StartCoroutine(WaitUntilNewSceneIsLoaded());
     }
 
@@ -961,18 +637,14 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
-        inputController.isBuildModeActivate = true;
-
-    
+        inputController.isBuildModeActivate = true;  
    
         FindSceneToEdit();
 
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
-        HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
-      
-    
+        HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);   
 
         if(currentActiveMode == null)
             SetBuildMode(EditModeState.Editor);
@@ -984,12 +656,11 @@ public class BuildModeController : MonoBehaviour
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
      
-        SetupAllEntities();
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(true);
-        EntityListChanged();
+        builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
+     
     }
-
 
 
     public void ExitEditMode()
@@ -1010,16 +681,15 @@ public class BuildModeController : MonoBehaviour
         outlinerController.CancelAllOutlines();
 
         cursorGO.SetActive(true);
-        DeselectEntities();
+        builderInWorldEntityHandler.DeselectEntities();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
         SetBuildMode(EditModeState.Inactive);
-
     
            
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
-        ExitKernelEditMode();
+        builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
     }
 
     void ExitAfterCharacterTeleport(DCLCharacterPosition position)
@@ -1038,127 +708,16 @@ public class BuildModeController : MonoBehaviour
                 sceneToEdit = scene;
                 break;
             }
-        }
-     
+        }    
     }
-
-    void DestroyCollidersForAllEntities()
+    void PublishScene()
     {
-        foreach(DecentralandEntityToEdit entity in convertedEntities.Values)
-        {
-            entity.DestroyColliders();
-        }
-    }
-
-    void SetupAllEntities()
-    {       
-        foreach (DecentralandEntity entity in sceneToEdit.entities.Values)
-        {
-            SetupEntityToEdit(entity);
-        }
-    }
-
-    void SetupEntityToEdit(DecentralandEntity entity,bool hasBeenCreated = false)
-    {
-        if (!convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entity)))
-        {           
-            DecentralandEntityToEdit entityToEdit = Utils.GetOrCreateComponent<DecentralandEntityToEdit>(entity.gameObject);
-            entityToEdit.Init(entity, editMaterial);
-            convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);
-            entity.OnRemoved += RemoveConvertedEntity;
-            entityToEdit.IsNew = hasBeenCreated;
-        }
-
-    }
-
-    List<DecentralandEntityToEdit> GetEntitiesInCurrentScene()
-    {
-        List<DecentralandEntityToEdit> currentEntitiesInScene = new List<DecentralandEntityToEdit>();
-        foreach(DecentralandEntityToEdit entity in convertedEntities.Values)
-        {
-            if (entity.rootEntity.scene == sceneToEdit) currentEntitiesInScene.Add(entity);
-        }
-        return currentEntitiesInScene;
-    }
-
-    void RemoveConvertedEntity(DecentralandEntity entity)
-    {
-        convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
-    }
-
-    string GetConvertedUniqueKeyForEntity(string entityID)
-    {
-        return sceneToEdit + entityID;
-    }
-
-    string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)
-    {
-        return entity.scene.sceneData.id + entity.entityId;
+        builderInWorldBridge.PublishScene(sceneToEdit);
     }
 
     IEnumerator WaitUntilNewSceneIsLoaded()
     {
         yield return new WaitForSeconds(0.8f);
         EnterEditMode();
-
     }
-
-
-    #region Reporting To Kernel
-
-    void AddEntityOnKernel(DecentralandEntity entity)
-    {
-        List<WebInterface.EntityComponentModel> list = new List<WebInterface.EntityComponentModel>();
-        foreach(KeyValuePair<CLASS_ID_COMPONENT,BaseComponent> keyValuePair in entity.components)
-        {
-            if(keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
-            {
-                WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
-                entityComponentModel.id = (int) CLASS_ID_COMPONENT.TRANSFORM;
-                DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, sceneToEdit);
-                DCLTransform.model.rotation = entity.gameObject.transform.rotation;
-                DCLTransform.model.scale = entity.gameObject.transform.localScale;
-
-                entityComponentModel.data = "{\"position\":"+JsonUtility.ToJson(DCLTransform.model.position)+"}";
-                list.Add(entityComponentModel);
-
-            }
-        }
-
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
-        {
-            if (keyValuePair.Value is GLTFShape)
-            {
-                WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
-                entityComponentModel.id = (int) CLASS_ID.GLTF_SHAPE;
-                GLTFShape gLTFShape = (GLTFShape)keyValuePair.Value;
-                entityComponentModel.data = "\"src\": \""+gLTFShape.model.src+"\"";
-                list.Add(entityComponentModel);
-
-            }
-        }
-
-        WebInterface.AddEntity(sceneToEdit.sceneData.id,entity.entityId, list.ToArray());
-    }
-
-    void RemoveEntityOnKernel(string entityId)
-    {
-        WebInterface.RemoveEntity(sceneToEdit.sceneData.id, entityId);
-    }
-
-    void StartKernelEditMode()
-    {
-        WebInterface.ReportControlEvent(new WebInterface.StartStatefulMode(sceneToEdit.sceneData.id));
-    }
-
-    void ExitKernelEditMode()
-    {
-        WebInterface.ReportControlEvent(new WebInterface.StopStatefulMode(sceneToEdit.sceneData.id));
-    }
-
-    void PublishScene()
-    {
-        WebInterface.ReportStoreSceneState(sceneToEdit.sceneData.id);
-    }
-    #endregion
 }

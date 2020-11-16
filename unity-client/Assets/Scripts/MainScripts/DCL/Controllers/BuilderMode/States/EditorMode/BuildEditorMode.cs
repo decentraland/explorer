@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildEditorMode : BuildModeState
+public class BuildEditorMode : BuildMode
 {
     [Header("Editor Design")]
     public float distanceEagleCamera = 20f;
@@ -22,6 +22,7 @@ public class BuildEditorMode : BuildModeState
     public BuilderInputWrapper builderInputWrapper;
     public OutlinerController outlinerController;
     public BuildModeController buildModeController;
+    public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public CameraController cameraController;
     public Transform lookAtT;
     public MouseCatcher mouseCatcher;
@@ -82,9 +83,9 @@ public class BuildEditorMode : BuildModeState
             {
                 List<DecentralandEntityToEdit> allEntities = null;
                 if (!isTypeOfBoundSelectionSelected || !isVoxelBoundMultiSelection)
-                    allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
+                    allEntities = builderInWorldEntityHandler.GetAllEntitiesFromCurrentScene();
                 else if (isVoxelBoundMultiSelection)
-                    allEntities = buildModeController.GetAllVoxelsEntities();
+                    allEntities = builderInWorldEntityHandler.GetAllVoxelsEntities();
 
                 foreach (DecentralandEntityToEdit entity in allEntities)
                 {
@@ -170,8 +171,8 @@ public class BuildEditorMode : BuildModeState
         mousePressed = false;
         freeCameraController.SetCameraCanMove(true);
         List<DecentralandEntityToEdit> allEntities = null;
-        if (!isVoxelBoundMultiSelection) allEntities = buildModeController.GetAllEntitiesFromCurrentScene();
-        else allEntities = buildModeController.GetAllVoxelsEntities();
+        if (!isVoxelBoundMultiSelection) allEntities = builderInWorldEntityHandler.GetAllEntitiesFromCurrentScene();
+        else allEntities = builderInWorldEntityHandler.GetAllVoxelsEntities();
 
         foreach (DecentralandEntityToEdit entity in allEntities)
         {
@@ -180,14 +181,13 @@ public class BuildEditorMode : BuildModeState
             {
                 if (BuildModeUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
                 {
-                    buildModeController.SelectEntity(entity);
+                    builderInWorldEntityHandler.SelectEntity(entity);
                 }
             }
         }
         buildModeController.SetOutlineCheckActive(true);
         outlinerController.CancelAllOutlines();
     }
-
 
     #region Voxel
 

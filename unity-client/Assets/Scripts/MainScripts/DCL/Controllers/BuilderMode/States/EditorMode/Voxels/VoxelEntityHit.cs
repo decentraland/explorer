@@ -7,6 +7,8 @@ public class VoxelEntityHit
     public DecentralandEntityToEdit entityHitted;
     public Vector3Int hitVector;
 
+    const float HIT_VECTOR_SENSITIVITY = 0.001f;
+
     public VoxelEntityHit(DecentralandEntityToEdit entity, RaycastHit hit)
     {
         entityHitted = entity;
@@ -19,27 +21,27 @@ public class VoxelEntityHit
         Vector3 min = entityHitted.rootEntity.meshesInfo.mergedBounds.min;
         Vector3 max = entityHitted.rootEntity.meshesInfo.mergedBounds.max;
 
-        if (Mathf.Abs(min.x -hit.point.x) < 0.001f)
+        if (Mathf.Abs(min.x -hit.point.x) < HIT_VECTOR_SENSITIVITY)
         {
             hitVector = Vector3Int.left;        
         }
-        else if (Mathf.Abs(max.x - hit.point.x) < 0.001f)
+        else if (Mathf.Abs(max.x - hit.point.x) < HIT_VECTOR_SENSITIVITY)
         {
             hitVector = Vector3Int.right;
         }
-        else if (Mathf.Abs(min.y - hit.point.y) < 0.001f)
+        else if (Mathf.Abs(min.y - hit.point.y) < HIT_VECTOR_SENSITIVITY)
         {
             hitVector = Vector3Int.down;       
         }
-        else if (Mathf.Abs(max.y - hit.point.y) < 0.001f)
+        else if (Mathf.Abs(max.y - hit.point.y) < HIT_VECTOR_SENSITIVITY)
         {
             hitVector = Vector3Int.up;
         }
-        else if (Mathf.Abs(min.z - hit.point.z) < 0.001f)
+        else if (Mathf.Abs(min.z - hit.point.z) < HIT_VECTOR_SENSITIVITY)
         {
             hitVector = new Vector3Int(0, 0, -1);
         }
-        else if (Mathf.Abs(max.z - hit.point.z) < 0.001f)
+        else if (Mathf.Abs(max.z - hit.point.z) < HIT_VECTOR_SENSITIVITY)
         {
             hitVector = new Vector3Int(0, 0, 1);
         }

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildModeState : MonoBehaviour
+public class BuildMode : MonoBehaviour
 {
 
     [Header("Snap variables")]

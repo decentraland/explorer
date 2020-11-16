@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildFirstPersonMode : BuildModeState
+public class BuildFirstPersonMode : BuildMode
 {
     [Header("Design variables")]
     public float scaleSpeed = 0.25f;
@@ -24,10 +24,22 @@ public class BuildFirstPersonMode : BuildModeState
     bool snapObjectAlreadyMoved = false,shouldRotate = false;
     Transform originalParentGOEdit;
 
+    InputAction_Hold.Started rotationHoldStartDelegate;
+    InputAction_Hold.Finished rotationHoldFinishedDelegate;
+
     private void Start()
     {
-        rotationHold.OnStarted += (o) => { shouldRotate = true; };
-        rotationHold.OnFinished += (o) => { shouldRotate = false; };
+        rotationHoldStartDelegate = (action) => { shouldRotate = true; };
+        rotationHoldFinishedDelegate = (action) => { shouldRotate = false; };
+
+        rotationHold.OnStarted += rotationHoldStartDelegate;
+        rotationHold.OnFinished += rotationHoldFinishedDelegate;
+    }
+
+    private void OnDestroy()
+    {
+        rotationHold.OnStarted -= rotationHoldStartDelegate;
+        rotationHold.OnFinished -= rotationHoldFinishedDelegate;
     }
 
     void LateUpdate()
@@ -113,10 +125,8 @@ public class BuildFirstPersonMode : BuildModeState
         base.EndMultiSelection();
         SetEditObjectParent();
 
-
         snapGO.transform.SetParent(Camera.main.transform);
         freeMovementGO.transform.SetParent(Camera.main.transform);
-
 
         SetObjectIfSnapOrNot();
     }
@@ -153,45 +163,46 @@ public class BuildFirstPersonMode : BuildModeState
     public override void CheckInputSelectedEntities()
     {
         base.CheckInputSelectedEntities();
-        if (selectedEntities.Count > 0)
+        if (selectedEntities.Count <= 0) return;
+
+        if (isModeActive && shouldRotate)
         {
-            if (isModeActive && shouldRotate)
+            if (isSnapActive)
             {
-                if (isSnapActive)
-                {
-                    RotateSelection(snapRotationDegresFactor);
-                    InputDone();
-                }
-                else
-                {
-                    RotateSelection(rotationSpeed);
-                }
+                RotateSelection(snapRotationDegresFactor);
+                InputDone();
             }
-            if (Input.mouseScrollDelta.y > 0.5f)
+            else
             {
-                if (isSnapActive)
-                {
-                    ScaleSelection(snapScaleFactor);
-                    InputDone();
-                }
-                else
-                {
-                    ScaleSelection(scaleSpeed);
-                }
-            }
-            else if (Input.mouseScrollDelta.y < -0.5f)
-            {
-                if (isSnapActive)
-                {
-                    ScaleSelection(-snapScaleFactor);
-                    InputDone();
-                }
-                else
-                {
-                    ScaleSelection(-scaleSpeed);
-                }
+                RotateSelection(rotationSpeed);
             }
         }
+
+        if (Input.mouseScrollDelta.y > 0.5f)
+        {
+            if (isSnapActive)
+            {
+                ScaleSelection(snapScaleFactor);
+                InputDone();
+            }
+            else
+            {
+                ScaleSelection(scaleSpeed);
+            }
+        }
+        else if (Input.mouseScrollDelta.y < -0.5f)
+        {
+            if (isSnapActive)
+            {
+                ScaleSelection(-snapScaleFactor);
+                InputDone();
+            }
+            else
+            {
+                ScaleSelection(-scaleSpeed);
+            }
+        }
+
     }
 
     public override Vector3 GetCreatedEntityPoint()

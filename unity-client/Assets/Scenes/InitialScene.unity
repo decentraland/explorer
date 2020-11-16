@@ -36,7 +36,7 @@ RenderSettings:
   m_DefaultReflectionResolution: 512
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
-  m_CustomReflection: {fileID: 8900000, guid: ade92094798774df4a51b327374145b8, type: 3}
+  m_CustomReflection: {fileID: 8900000, guid: b4f78c510a8526547ab9c9946449480e, type: 3}
   m_Sun: {fileID: 943100645024490816}
   m_IndirectSpecularColor: {r: 0.10252202, g: 0.24458984, b: 0.36489132, a: 1}
   m_UseRadianceAmbientProbe: 0
@@ -988,8 +988,8 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 1
-  startInCoords: {x: 0, y: 0}
+  environment: 4
+  startInCoords: {x: 3, y: 18}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
