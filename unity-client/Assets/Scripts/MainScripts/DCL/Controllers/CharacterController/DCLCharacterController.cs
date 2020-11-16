@@ -70,11 +70,12 @@ public class DCLCharacterController : MonoBehaviour
 
     public static System.Action<DCLCharacterPosition> OnCharacterMoved;
     public static System.Action<DCLCharacterPosition> OnPositionSet;
+    public event System.Action<float> OnUpdateFinish;
 
 
     // Will allow the game objects to be set, and create the DecentralandEntity manually during the Awake
     public DCL.Models.DecentralandEntity avatarReference { get; private set; }
-    public DCL.Models.DecentralandEntity firstPersonCameraReference  { get; private set; }
+    public DCL.Models.DecentralandEntity firstPersonCameraReference { get; private set; }
     [SerializeField] private GameObject avatarGameObject;
     [SerializeField] private GameObject firstPersonCameraGameObject;
 
@@ -337,6 +338,8 @@ public class DCLCharacterController : MonoBehaviour
         {
             lastLocalGroundPosition = groundTransform.InverseTransformPoint(transform.position);
         }
+
+        OnUpdateFinish?.Invoke(deltaTime);
     }
 
     void Jump()
@@ -353,7 +356,7 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResetGround()
     {
-        if(isOnMovingPlatform)
+        if (isOnMovingPlatform)
             CommonScriptableObjects.playerIsOnMovingPlatform.Set(false);
 
         isOnMovingPlatform = false;
