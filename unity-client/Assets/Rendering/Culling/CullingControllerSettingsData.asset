@@ -15,28 +15,28 @@ MonoBehaviour:
   rendererProfileMin:
     visibleDistanceThreshold: 30
     shadowDistanceThreshold: 20
-    emissiveSizeThreshold: 2.5
+    emissiveSizeThreshold: 1.5
     opaqueSizeThreshold: 6
     shadowRendererSizeThreshold: 10
     shadowMapProjectionSizeThreshold: 4
   rendererProfileMax:
     visibleDistanceThreshold: 25
     shadowDistanceThreshold: 15
-    emissiveSizeThreshold: 4
-    opaqueSizeThreshold: 10
-    shadowRendererSizeThreshold: 15
-    shadowMapProjectionSizeThreshold: 8
+    emissiveSizeThreshold: 2.5
+    opaqueSizeThreshold: 20
+    shadowRendererSizeThreshold: 20
+    shadowMapProjectionSizeThreshold: 16
   skinnedRendererProfileMin:
     visibleDistanceThreshold: 50
     shadowDistanceThreshold: 40
-    emissiveSizeThreshold: 2.5
+    emissiveSizeThreshold: 1.5
     opaqueSizeThreshold: 6
     shadowRendererSizeThreshold: 5
     shadowMapProjectionSizeThreshold: 4
   skinnedRendererProfileMax:
     visibleDistanceThreshold: 45
     shadowDistanceThreshold: 35
-    emissiveSizeThreshold: 4
+    emissiveSizeThreshold: 2.5
     opaqueSizeThreshold: 10
     shadowRendererSizeThreshold: 10
     shadowMapProjectionSizeThreshold: 8

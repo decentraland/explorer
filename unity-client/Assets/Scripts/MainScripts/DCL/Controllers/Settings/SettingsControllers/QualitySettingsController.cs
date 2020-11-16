@@ -115,12 +115,12 @@ namespace DCL.SettingsController
                 settings.rendererProfile = CullingControllerProfile.Lerp(
                     cullingControllerSettingsData.rendererProfileMin,
                     cullingControllerSettingsData.rendererProfileMax,
-                    qualitySettings.limitSmallObjectsRange);
+                    qualitySettings.limitSmallObjectsRange / 100.0f);
 
                 settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
                     cullingControllerSettingsData.skinnedRendererProfileMin,
                     cullingControllerSettingsData.skinnedRendererProfileMax,
-                    qualitySettings.limitSmallObjectsRange);
+                    qualitySettings.limitSmallObjectsRange / 100.0f);
 
                 Environment.i.cullingController.SetSettings(settings);
             }

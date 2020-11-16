@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using DCL.Helpers;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
@@ -427,6 +428,8 @@ namespace DCL.Rendering
         public void SetSettings(CullingControllerSettings settings)
         {
             this.settings = settings;
+            profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
+            SetDirty();
         }
 
         public CullingControllerSettings GetSettings()
