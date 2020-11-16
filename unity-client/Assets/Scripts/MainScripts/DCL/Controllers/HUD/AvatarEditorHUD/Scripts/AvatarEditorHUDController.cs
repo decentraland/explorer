@@ -29,11 +29,7 @@ public class AvatarEditorHUDController : IHUD
     public bool IsSignUpFlowValue
     {
         get => isSignUpFlow;
-        set
-        {
-            isSignUpFlow = value;
-            view.exitButton.gameObject.SetActive(!isSignUpFlow);
-        }
+        set => isSignUpFlow = value;
     }
 
     public event Action OnOpen;
@@ -492,8 +488,11 @@ public class AvatarEditorHUDController : IHUD
 
     public void DiscardAndClose()
     {
-        LoadUserProfile(userProfile);
+        if (!IsSignUpFlowValue)
+            LoadUserProfile(userProfile);
+
         SetVisibility(false);
+        WebInterface.SendCloseUserAvatar(IsSignUpFlowValue);
     }
 
     public void GoToMarketplace()
