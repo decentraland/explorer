@@ -28,7 +28,11 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
 }
 
 export function calculateDisplayName(userId: string, profile: any): string {
-  return profile.name || 'Guest-' + userId.substr(2, 6)
+  if (profile.name && profile.hasClaimedName) {
+    return profile.name
+  }
+
+  return 'Guest-' + userId.substr(2, 6)
 }
 export function processServerProfile(userId: string, receivedProfile: any): Profile {
   const name = calculateDisplayName(userId, receivedProfile)
@@ -43,7 +47,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
   return {
     userId,
     email: receivedProfile.email || '',
-    name: receivedProfile.name || name,
+    name: name,
     hasClaimedName:
       typeof receivedProfile.hasClaimedName === 'undefined' ? !!receivedProfile.name : receivedProfile.hasClaimedName,
     description: receivedProfile.description || '',
