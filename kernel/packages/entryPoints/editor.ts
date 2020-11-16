@@ -3,13 +3,13 @@ declare var global: any & { isEditor: boolean; editor: any }
 declare var window: Window & { isEditor: boolean }
 
 global.isEditor = window.isEditor = true
+;(window as any).reactVersion = true
 
 import { EventEmitter } from 'events'
 import future, { IFuture } from 'fp-future'
 
 import { loadedSceneWorkers } from '../shared/world/parcelSceneManager'
-import { Wearable } from '../shared/types'
-import { SceneJsonData, ILand, HUDElementID, BuilderConfiguration } from '../shared/types'
+import { SceneJsonData, ILand, HUDElementID, BuilderConfiguration, Wearable } from '../shared/types'
 import { normalizeContentMappings } from '../shared/selectors'
 import { SceneWorker } from '../shared/world/SceneWorker'
 import { initializeUnity } from '../unity-interface/initializer'

@@ -1,10 +1,10 @@
 import { Eth } from 'web3x/eth'
-import { LegacyProviderAdapter } from 'web3x/providers'
-import { ETHEREUM_NETWORK, ethereumConfigurations, getTLD, WALLET_API_KEYS } from '../../config'
-import { WebSocketProvider } from 'eth-connect'
+import { LegacyProviderAdapter, WebsocketProvider } from 'web3x/providers'
+import { ETHEREUM_NETWORK, ethereumConfigurations, WALLET_API_KEYS } from '../../config'
 import { ConnectorFactory } from './connector/ConnectorFactory'
 import { ProviderType } from './ProviderType'
 import { ConnectorInterface } from './connector/ConnectorInterface'
+import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 
 export class Web3Connector {
   private type: ProviderType | undefined
@@ -13,13 +13,13 @@ export class Web3Connector {
   private readonly network: ETHEREUM_NETWORK
 
   constructor() {
-    this.network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
+    this.network = getNetworkFromTLDOrWeb3()
     this.factory = new ConnectorFactory(WALLET_API_KEYS.get(this.network)!)
   }
 
-  static createWebSocketProvider() {
-    const network = getTLD() === 'zone' ? ETHEREUM_NETWORK.ROPSTEN : ETHEREUM_NETWORK.MAINNET
-    return new WebSocketProvider(ethereumConfigurations[network].wss)
+  static createWeb3xWebsocketProvider() {
+    const network = getNetworkFromTLDOrWeb3()
+    return new WebsocketProvider(ethereumConfigurations[network].wss)
   }
 
   getType() {

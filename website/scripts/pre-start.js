@@ -13,33 +13,28 @@ let files = [
 ];
 
 console.log("\nREFRESH KERNEL FILES\n");
-const kernelPath = path.resolve("../kernel");
+const kernelPath = path.resolve( __dirname + "/../../kernel");
 files
   .map((p) => ({
-    dest: path.resolve(p.dest),
+    dest: path.resolve( __dirname + "/../" + p.dest),
     origin: path.resolve(kernelPath + "/" + p.origin),
   }))
   .map((p) => {
     if (fs.existsSync(p.dest)) {
       console.log("removing old version of ", path.basename(p.dest));
-      fs.unlinkSync(p.dest);
+      const lstat = fs.lstatSync(p.dest)
+      if (lstat.isDirectory()) {
+        fs.rmdirSync(p.dest, { recursive:true } );
+      } else {
+        fs.unlinkSync(p.dest);
+      }
     }
     return p;
   })
-  .map(({ origin, dest }) => {
+  .map(({ origin, dest, type }) => {
     console.log(`linking ${origin} -> ${dest}`);
-    fs.symlinkSync(origin, dest);
+    fs.symlinkSync(origin, dest, 'junction');
   });
 
 console.log("\nREPLACE KERNEL VERSION\n");
-let content = "";
-if (fs.existsSync(".env")) {
-  content = fs.readFileSync(".env").toString();
-  content = content.replace(/REACT_APP_EXPLORER_VERSION.*/, "");
-  content = content
-    .split("\n")
-    .filter((line) => line)
-    .join("\n");
-}
-content += "\nREACT_APP_EXPLORER_VERSION=" + Date.now().toString();
-fs.writeFileSync(".env", content);
+require("./hash_generator");
