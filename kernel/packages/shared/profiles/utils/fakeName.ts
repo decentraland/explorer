@@ -1,6 +1,6 @@
 export const createFakeName = (userId: string) => {
   const names = [
-    //unisex names
+    // unisex names
     'Sam',
     'Tanner',
     'Asra',
