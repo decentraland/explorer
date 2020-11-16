@@ -27,7 +27,10 @@ public class BuildModeController : MonoBehaviour
     }
 
     [Header("Activation of Feature")]
+
     public bool activeFeature = false;
+
+
     [Header("Design variables")]
 
     public float scaleSpeed = 0.25f;
@@ -97,6 +100,8 @@ public class BuildModeController : MonoBehaviour
     int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
 
     SceneObject lastSceneObjectCreated;
+
+    const float RAYCAST_MAX_DISTANCE = 10000f;
 
     void Start()
     {
@@ -178,27 +183,27 @@ public class BuildModeController : MonoBehaviour
 
     private void Update()
     {
-        if (isEditModeActivated)
-        {
-            if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
-            {
-                if (Utils.isCursorLocked || isAdvancedModeActive)
-                    CheckEditModeInput();
-                if (currentActiveMode != null)
-                    currentActiveMode.CheckInput();
-            }
+        if (!isEditModeActivated) return;
 
-            if (checkerInsideSceneOptimizationCounter >= 60)
-            {
-                if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
-                    ExitEditMode();
-                checkerInsideSceneOptimizationCounter = 0;
-            }
-            else
-            {
-                checkerInsideSceneOptimizationCounter++;
-            }
+        if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
+        {
+            if (Utils.isCursorLocked || isAdvancedModeActive)
+                CheckEditModeInput();
+            if (currentActiveMode != null)
+                currentActiveMode.CheckInput();
         }
+
+        if (checkerInsideSceneOptimizationCounter >= 60)
+        {
+            if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
+                ExitEditMode();
+            checkerInsideSceneOptimizationCounter = 0;
+        }
+        else
+        {
+            checkerInsideSceneOptimizationCounter++;
+        }
+
     }
 
     void InitEditModes()
@@ -235,22 +240,22 @@ public class BuildModeController : MonoBehaviour
 
     void MouseClick(int buttonID, Vector3 position)
     {
-        if (isEditModeActivated)
+        if (!isEditModeActivated) return;
+
+        if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
         {
-            if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
+            if (Utils.isCursorLocked || isAdvancedModeActive)
             {
-                if (Utils.isCursorLocked || isAdvancedModeActive)
+                if (buttonID == 0)
                 {
-                    if (buttonID == 0)
-                    {
-                        ClickDetected();
-                        InputDone();
-                        return;
-                    }
-                    CheckOutline();
+                    ClickDetected();
+                    InputDone();
+                    return;
                 }
+                CheckOutline();
             }
         }
+
     }
 
     void CreateSceneObjectSelected(SceneObject sceneObject)
@@ -321,7 +326,7 @@ public class BuildModeController : MonoBehaviour
         DecentralandEntity entity = CreateEntity();
         sceneToEdit.SharedComponentAttach(entity.entityId, mesh.id);
 
-        if (sceneObject.asset_pack_id == "b51e5e7c-c56b-4ad9-b9d2-1dc1c6546169")
+        if (sceneObject.asset_pack_id == BuilderSettings.VOXEL_ASSETS_PACK_ID)
             convertedEntities[GetConvertedUniqueKeyForEntity(entity)].isVoxel = true;
         DeselectEntities();
         Select(entity);
@@ -694,7 +699,7 @@ public class BuildModeController : MonoBehaviour
         VoxelEntityHit voxelEntityHit = null;
         DecentralandEntityToEdit unselectedEntity = null;
 
-        hits = Physics.RaycastAll(ray, 9999, layerToRaycast);
+        hits = Physics.RaycastAll(ray, RAYCAST_MAX_DISTANCE, layerToRaycast);
         foreach (RaycastHit hit in hits)
         {
             string entityID = hit.collider.gameObject.name;
@@ -704,7 +709,7 @@ public class BuildModeController : MonoBehaviour
                 if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])))
                 {
                     DecentralandEntityToEdit entityToCheck  = convertedEntities[GetConvertedUniqueKeyForEntity(sceneToEdit.entities[entityID])];
-                    if(!entityToCheck.IsSelected && entityToCheck.tag == "Voxel")
+                    if(!entityToCheck.IsSelected && entityToCheck.tag == BuilderSettings.VOXEL_TAG)
                     {
                         if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
                         {

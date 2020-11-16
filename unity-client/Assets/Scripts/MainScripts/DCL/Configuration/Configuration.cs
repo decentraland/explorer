@@ -7,6 +7,11 @@ namespace DCL.Configuration
     {
         public static string BASE_URL_CATALOG = "https://builder-api.decentraland.org/v1/storage/contents/";
         public static string BASE_URL_ASSETS_PACK = "https://builder-api.decentraland.org/v1/assetPacks";
+        public static string VOXEL_ASSETS_PACK_ID = "b51e5e7c-c56b-4ad9-b9d2-1dc1c6546169";
+        public static string CATALOG_ASSET_PACK_TITLE = "Asset Packs";
+        public static string VOXEL_TAG = "Voxel";
+        public static int SELECTION_LAYER = LayerMask.NameToLayer("Selection");
+        public static int DEFAULT_LAYER = LayerMask.NameToLayer("Default");
     }
 
     public static class ApplicationSettings

@@ -82,11 +82,7 @@ public static partial class BuildModeUtils
     {
         RaycastHit hitInfo;
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(mouseRay, out hitInfo, 5555, mask))
-        {
-            return true;
-        }
-        return false;
+        return Physics.Raycast(mouseRay, out hitInfo, 5555, mask);
     }
 
     public static bool IsPointerOverUIElement()

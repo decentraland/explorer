@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Models;
 using System.Collections;
@@ -24,6 +25,9 @@ public class VoxelController : MonoBehaviour
     Vector3 lastMousePosition;
     Dictionary<Vector3Int, VoxelPrefab> createdVoxels = new Dictionary<Vector3Int, VoxelPrefab>();
     ParcelScene currentScene;
+
+    const float RAYCAST_MAX_DISTANCE = 10000f;
+
     private void Start()
     {
         builderInputWrapper.OnMouseDown += MouseDown;
@@ -39,7 +43,7 @@ public class VoxelController : MonoBehaviour
             bool fillVoxels = false;
             Vector3Int currentPosition = Vector3Int.zero;
             VoxelEntityHit voxelHit = buildModeController.GetCloserUnselectedVoxelEntityOnPointer();
-            if (voxelHit != null && voxelHit.entityHitted.tag == "Voxel" && !voxelHit.entityHitted.IsSelected)
+            if (voxelHit != null && voxelHit.entityHitted.tag == BuilderSettings.VOXEL_TAG && !voxelHit.entityHitted.IsSelected)
             {
                 Vector3Int position = ConverPositionToVoxelPosition(voxelHit.entityHitted.rootEntity.gameObject.transform.position);
                 position += voxelHit.hitVector;
@@ -52,7 +56,7 @@ public class VoxelController : MonoBehaviour
                 RaycastHit hit;
                 UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+                if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
                 {
                     currentPosition = ConverPositionToVoxelPosition(hit.point);
                     fillVoxels = true;
@@ -79,7 +83,7 @@ public class VoxelController : MonoBehaviour
             VoxelEntityHit voxelHit = buildModeController.GetCloserUnselectedVoxelEntityOnPointer();
 
             if (voxelHit != null && voxelHit.entityHitted.IsSelected) return;
-            if (voxelHit != null && voxelHit.entityHitted.tag == "Voxel")
+            if (voxelHit != null && voxelHit.entityHitted.tag == BuilderSettings.VOXEL_TAG)
             {
 
 
@@ -92,7 +96,7 @@ public class VoxelController : MonoBehaviour
                 RaycastHit hit;
                 UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+                if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
                 {
                     Vector3 position = hit.point;
                     editionGO.transform.position = ConverPositionToVoxelPosition(hit.point);
@@ -234,7 +238,7 @@ public class VoxelController : MonoBehaviour
                     {
 
                         DecentralandEntity entity = buildModeController.DuplicateEntity(lastVoxelCreated);
-                        entity.gameObject.tag = "Voxel";
+                        entity.gameObject.tag = BuilderSettings.VOXEL_TAG;
                         entity.gameObject.transform.position = voxelPosition;
                     }
                     Destroy(createdVoxels[voxelPosition].gameObject);

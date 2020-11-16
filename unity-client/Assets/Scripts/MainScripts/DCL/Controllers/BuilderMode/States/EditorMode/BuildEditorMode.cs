@@ -39,6 +39,9 @@ public class BuildEditorMode : BuildModeState
 
     bool isPlacingNewObject = false, mousePressed = false, isMakingSquareMultiSelection = false,isTypeOfBoundSelectionSelected = false, isVoxelBoundMultiSelection = false,squareMultiSelectionButtonPressed = false;
     Vector3 lastMousePosition;
+
+    const float RAYCAST_MAX_DISTANCE = 10000f;
+
     private void Start()
     {
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
@@ -262,7 +265,7 @@ public class BuildEditorMode : BuildModeState
         gizmoManager.HideGizmo();
         if (createdEntity.isVoxel)
         {
-            createdEntity.rootEntity.gameObject.tag = "Voxel";
+            createdEntity.rootEntity.gameObject.tag = BuilderSettings.VOXEL_TAG;
             voxelController.SetVoxelSelected(createdEntity);
             ActivateVoxelMode();
         }
@@ -470,7 +473,7 @@ public class BuildEditorMode : BuildModeState
         RaycastHit hit;
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+        if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
         {
             editionGO.transform.position = hit.point;
         }
@@ -481,7 +484,7 @@ public class BuildEditorMode : BuildModeState
         RaycastHit hit;
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(ray, out hit, 9999, groundLayer))
+        if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
         {
             return hit.point;
         }

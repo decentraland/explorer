@@ -25,6 +25,7 @@ public class FreeCameraMovement : CameraStateBase
     public float dragSpeed = 3f;
 
     [Header("InputActions")]
+
     [SerializeField] internal InputAction_Hold advanceFowardInputAction;
     [SerializeField] internal InputAction_Hold advanceBackInputAction;
     [SerializeField] internal InputAction_Hold advanceLeftInputAction;
@@ -36,11 +37,37 @@ public class FreeCameraMovement : CameraStateBase
     private float yaw = 0f;
     private float pitch = 0f;
 
-    bool isCameraAbleToMove = true, isAdvancingFoward = false,isAdvancingBackward = false, isAdvancingLeft = false, isAdvancingRight = false, isAdvancingUp = false, isAdvancingDown = false;
+    bool isCameraAbleToMove = true;
+    bool isAdvancingForward = false;
+    bool isAdvancingBackward = false;
+    bool isAdvancingLeft = false;
+    bool isAdvancingRight = false;
+    bool isAdvancingUp = false;
+    bool isAdvancingDown = false;
 
-    Coroutine smoothLookAtCor;
+    Coroutine smoothLookAtCor, smoothFocusOnTargetCor;
+
+    InputAction_Hold.Started advanceForwardStartDelegate;
+    InputAction_Hold.Finished advanceForwardFinishedDelegate;
+
+    InputAction_Hold.Started advanceBackStartDelegate;
+    InputAction_Hold.Finished advanceBackFinishedDelegate;
+
+    InputAction_Hold.Started advanceLeftStartDelegate;
+    InputAction_Hold.Finished advanceLeftFinishedDelegate;
+
+    InputAction_Hold.Started advanceRightStartDelegate;
+    InputAction_Hold.Finished advanceRightFinishedDelegate;
+
+    InputAction_Hold.Started advanceDownStartDelegate;
+    InputAction_Hold.Finished advanceDownFinishedDelegate;
+
+    InputAction_Hold.Started advanceUpStartDelegate;
+    InputAction_Hold.Finished advanceUpFinishedDelegate;
+
+
     private void Awake()
-    {
+    {    
         builderInputWrapper.OnMouseDrag += MouseDrag;
         builderInputWrapper.OnMouseDragRaw += MouseDragRaw;
         builderInputWrapper.OnMouseWheel += MouseWheel;
@@ -48,33 +75,73 @@ public class FreeCameraMovement : CameraStateBase
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
 
+
+        advanceForwardStartDelegate = (action) => isAdvancingForward = true;
+        advanceForwardFinishedDelegate = (action) => isAdvancingForward = false;
+
+        advanceFowardInputAction.OnStarted += advanceForwardStartDelegate;
+        advanceFowardInputAction.OnFinished += advanceForwardFinishedDelegate;
+
+        advanceBackStartDelegate = (action) => isAdvancingBackward = true;
+        advanceBackFinishedDelegate = (action) => isAdvancingBackward = false;
+
+        advanceBackInputAction.OnStarted += advanceBackStartDelegate;
+        advanceBackInputAction.OnFinished += advanceBackFinishedDelegate;
+
+        advanceLeftStartDelegate = (action) => isAdvancingLeft = true;
+        advanceLeftFinishedDelegate = (action) => isAdvancingLeft = false;
+
+        advanceLeftInputAction.OnStarted += advanceLeftStartDelegate;
+        advanceLeftInputAction.OnFinished += advanceLeftFinishedDelegate;
+
+        advanceRightStartDelegate = (action) => isAdvancingRight = true;
+        advanceRightFinishedDelegate = (action) => isAdvancingRight = false;
+
+        advanceRightInputAction.OnStarted += advanceRightStartDelegate;
+        advanceRightInputAction.OnFinished += advanceRightFinishedDelegate;
+
+        advanceUpStartDelegate = (action) => isAdvancingUp = true;
+        advanceUpFinishedDelegate = (action) => isAdvancingUp = false;
+
+        advanceUpInputAction.OnStarted += advanceUpStartDelegate;
+        advanceUpInputAction.OnFinished += advanceUpFinishedDelegate;
+
+        advanceDownStartDelegate = (action) => isAdvancingDown = true;
+        advanceDownFinishedDelegate = (action) => isAdvancingDown = false;
+
+        advanceDownInputAction.OnStarted += advanceDownStartDelegate;
+        advanceDownInputAction.OnFinished += advanceDownFinishedDelegate;
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        advanceFowardInputAction.OnStarted += (o) => { isAdvancingFoward = true; };
-        advanceFowardInputAction.OnFinished += (o) => { isAdvancingFoward = false; };
+        builderInputWrapper.OnMouseDrag -= MouseDrag;
+        builderInputWrapper.OnMouseDragRaw -= MouseDragRaw;
+        builderInputWrapper.OnMouseWheel -= MouseWheel;
 
-        advanceBackInputAction.OnStarted += (o) => { isAdvancingBackward = true; };
-        advanceBackInputAction.OnFinished += (o) => { isAdvancingBackward = false; };
+        advanceFowardInputAction.OnStarted -= advanceForwardStartDelegate;
+        advanceFowardInputAction.OnFinished -= advanceForwardFinishedDelegate;
 
-        advanceLeftInputAction.OnStarted += (o) => { isAdvancingLeft = true; };
-        advanceLeftInputAction.OnFinished += (o) => { isAdvancingLeft = false; };
+        advanceBackInputAction.OnStarted -= advanceBackStartDelegate;
+        advanceBackInputAction.OnFinished -= advanceBackFinishedDelegate;
 
-        advanceRightInputAction.OnStarted += (o) => { isAdvancingRight = true; };
-        advanceRightInputAction.OnFinished += (o) => { isAdvancingRight = false; };
+        advanceLeftInputAction.OnStarted -= advanceLeftStartDelegate;
+        advanceLeftInputAction.OnFinished -= advanceLeftFinishedDelegate;
 
-        advanceUpInputAction.OnStarted += (o) => { isAdvancingUp = true; };
-        advanceUpInputAction.OnFinished += (o) => { isAdvancingUp = false; };
+        advanceRightInputAction.OnStarted -= advanceRightStartDelegate;
+        advanceRightInputAction.OnFinished -= advanceRightFinishedDelegate;
 
-        advanceDownInputAction.OnStarted += (o) => { isAdvancingDown = true; };
-        advanceDownInputAction.OnFinished += (o) => { isAdvancingDown = false; };
+        advanceDownInputAction.OnStarted -= advanceDownStartDelegate;
+        advanceDownInputAction.OnFinished -= advanceDownFinishedDelegate;
+
+        advanceUpInputAction.OnStarted -= advanceUpStartDelegate;
+        advanceUpInputAction.OnFinished -= advanceUpFinishedDelegate;
     }
 
     private void Update()
     {
         Vector3 velocity = Vector3.zero;
-        if (isAdvancingFoward)
+        if (isAdvancingForward)
         {
             velocity += transform.forward;
         }
@@ -161,7 +228,8 @@ public class FreeCameraMovement : CameraStateBase
         if (entitiesToFocus.Count > 0)
         {
             Vector3 middlePoint = FindMidPoint(entitiesToFocus);
-            StartCoroutine(SmoothFocusOnTarget(middlePoint));
+            if (smoothFocusOnTargetCor != null) CoroutineStarter.Stop(smoothFocusOnTargetCor);
+            smoothFocusOnTargetCor = CoroutineStarter.Start(SmoothFocusOnTarget(middlePoint));
             SmoothLookAt(middlePoint);
         }
     }
@@ -187,8 +255,8 @@ public class FreeCameraMovement : CameraStateBase
     public void SmoothLookAt(Vector3 position)
     {
         if (smoothLookAtCor != null)
-            StopCoroutine(smoothLookAtCor);
-        smoothLookAtCor = StartCoroutine(SmoothLookAtCorutine(position));
+            CoroutineStarter.Stop(smoothLookAtCor);
+        smoothLookAtCor = CoroutineStarter.Start(SmoothLookAtCorutine(position));
     }
 
     Vector3 FindMidPoint(List<DecentralandEntityToEdit> entitiesToLook)
@@ -220,10 +288,10 @@ public class FreeCameraMovement : CameraStateBase
         float advance = 0;
         while (advance <= 1)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPosition, advance);
             advance += smoothLookAtSpeed * Time.deltaTime;
+            transform.position = Vector3.Lerp(transform.position, targetPosition, advance);
             if (Vector3.Distance(transform.position, targetPosition) <= focusDistance)
-                advance = 2;
+                yield break;
             yield return null;
         }
     }
@@ -234,8 +302,8 @@ public class FreeCameraMovement : CameraStateBase
         float advance = 0;
         while(advance <= 1)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, advance);
             advance += smoothLookAtSpeed * Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, advance);
             yield return null;
         }
         yaw = transform.eulerAngles.y;

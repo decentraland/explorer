@@ -35,6 +35,8 @@ public class SceneObjectCatalogController : MonoBehaviour
     bool catalogInitializaed = false, isShowingAssetPacks = false, isFavoriteFilterActive = false;
     List<SceneObject> favoritesSceneObjects = new List<SceneObject>();
     List<SceneObject> quickBarShortcutsSceneObjects = new List<SceneObject>() { null, null, null,null,null,null,null,null,null };
+
+
     private void Start()
     {
         OnResultReceived += AddFullSceneObjectCatalog;
@@ -95,13 +97,18 @@ public class SceneObjectCatalogController : MonoBehaviour
                     }
                     if (!foundCategory)
                     {
-                        Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
-                        groupedSceneObjects.Add(sceneObject.category, new List<SceneObject>() { sceneObject });
-                        filterObjects.Add(groupedSceneObjects);
+                        AddNewSceneObjectCategoryToFilter(sceneObject);
                     }
                 }
             }
         }
+    }
+
+    void AddNewSceneObjectCategoryToFilter(SceneObject sceneObject)
+    {
+        Dictionary<string, List<SceneObject>> groupedSceneObjects = new Dictionary<string, List<SceneObject>>();
+        groupedSceneObjects.Add(sceneObject.category, new List<SceneObject>() { sceneObject });
+        filterObjects.Add(groupedSceneObjects);
     }
 
     #endregion
@@ -123,7 +130,8 @@ public class SceneObjectCatalogController : MonoBehaviour
     void SceneObjectStartDragged(SceneObject sceneObjectClicked, CatalogItemAdapter adapter, BaseEventData data)
     {
         PointerEventData eventData = data as PointerEventData;
-        if(draggedObject== null)
+
+        if(draggedObject == null)
             draggedObject = Instantiate(adapter.gameObject, generalCanvas.transform);
        
         CatalogItemAdapter newAdapter = draggedObject.GetComponent<CatalogItemAdapter>();
@@ -137,7 +145,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     void OnEndDrag(PointerEventData data)
     {     
-        Destroy(draggedObject,0.1f);
+        Destroy(draggedObject, 0.1f);
         OnResumeInput?.Invoke();
     }
 
@@ -301,10 +309,12 @@ public class SceneObjectCatalogController : MonoBehaviour
                 groupedSceneObjects.Add(sceneObject.category, GetAssetsListByCategory(sceneObject.category, sceneAssetPack));
             }
         }
+
         List<Dictionary<string, List<SceneObject>>> contentList = new List<Dictionary<string, List<SceneObject>>>
         {
             groupedSceneObjects
         };
+
         catalogGroupListView.SetContent(contentList);
     }
 
@@ -314,6 +324,7 @@ public class SceneObjectCatalogController : MonoBehaviour
             CloseCatalog();
         else
             ShowAssetsPacks();
+
         isFavoriteFilterActive = false;
     }
 
@@ -325,7 +336,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     public void ShowAssetsPacks()
     {
         isShowingAssetPacks = true;
-        catalogTitleTxt.text = "Asset Packs";
+        catalogTitleTxt.text = BuilderSettings.CATALOG_ASSET_PACK_TITLE;
         catalogAssetPackListView.gameObject.SetActive(true);
         catalogGroupListView.gameObject.SetActive(false);
     }
@@ -339,7 +350,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void OpenCatalog()
     {
-        catalogTitleTxt.text = "Asset Packs";
+        catalogTitleTxt.text = BuilderSettings.CATALOG_ASSET_PACK_TITLE;
         Utils.UnlockCursor();
         gameObject.SetActive(true);
 
