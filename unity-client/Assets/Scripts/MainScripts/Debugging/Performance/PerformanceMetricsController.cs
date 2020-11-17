@@ -33,7 +33,7 @@ namespace DCL
 
             performanceMetricsDataVariable?.Set(tracker.CurrentFPSCount(), tracker.CurrentHiccupCount(), tracker.HiccupsSum, tracker.GetTotalSeconds());
 
-            encodedSamples[currentIndex++] = (char) deltaInMs;
+            encodedSamples[currentIndex++] = (char)deltaInMs;
 
             if (currentIndex == SAMPLES_SIZE)
             {
@@ -45,7 +45,7 @@ namespace DCL
 
         private void Report(string encodedSamples)
         {
-            WebInterface.SendPerformanceReport(encodedSamples);
+            WebInterface.SendPerformanceReport(encodedSamples, Settings.i.currentQualitySettings.fpsCap);
         }
 
         private void GenerateHiccupReport()
