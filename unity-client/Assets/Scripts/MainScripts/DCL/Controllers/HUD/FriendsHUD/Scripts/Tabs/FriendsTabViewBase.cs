@@ -123,6 +123,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
     protected Dictionary<string, PoolableObject> instantiatedFriendEntries = new Dictionary<string, PoolableObject>();
     protected Pool friendEntriesPool;
+    private bool forceLayout = false;
 
     internal List<FriendEntryBase> GetAllEntries()
     {
@@ -142,13 +143,22 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         if (rectTransform == null)
             rectTransform = transform as RectTransform;
 
-        rectTransform.ForceUpdateLayout();
+        forceLayout = true;
     }
 
     protected virtual void OnDisable()
     {
         confirmationDialog.Hide();
         contextMenuPanel.Hide();
+    }
+
+    private void LateUpdate()
+    {
+        if (forceLayout)
+        {
+            forceLayout = false;
+            rectTransform.ForceUpdateLayout();
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -233,7 +243,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         entry.Populate(model);
         entry.userId = userId;
 
-        rectTransform.ForceUpdateLayout();
+        forceLayout = true;
         return true;
     }
 
@@ -250,7 +260,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
         UpdateEmptyListObjects();
 
-        rectTransform.ForceUpdateLayout();
+        forceLayout = true;
         return true;
     }
 
