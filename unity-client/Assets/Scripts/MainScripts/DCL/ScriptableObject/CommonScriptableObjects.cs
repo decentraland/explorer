@@ -135,8 +135,8 @@ public static class CommonScriptableObjects
     private static BooleanVariable allUIHiddenValue;
     public static BooleanVariable allUIHidden => GetOrLoad(ref allUIHiddenValue, "ScriptableObjects/AllUIHidden");
 
-    private static BooleanVariable builderInWorldUIHiddenValue;
-    public static BooleanVariable builderInWorldNotNecessaryUIVisibilityStatus => GetOrLoad(ref builderInWorldUIHiddenValue, "ScriptableObjects/BuilderInWorldUIHidden");
+    private static BooleanVariable builderInWorldNotNecessaryUIVisibilityStatusValue;
+    public static BooleanVariable builderInWorldNotNecessaryUIVisibilityStatus => GetOrLoad(ref builderInWorldNotNecessaryUIVisibilityStatusValue, "ScriptableObjects/BuilderInWorldUIHidden");
 
     private static LatestOpenChatsList latestOpenChatsValue;
     public static LatestOpenChatsList latestOpenChats => GetOrLoad(ref latestOpenChatsValue, "ScriptableObjects/LatestOpenChats");

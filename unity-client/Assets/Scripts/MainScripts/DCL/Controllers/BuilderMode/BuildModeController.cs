@@ -171,7 +171,9 @@ public class BuildModeController : MonoBehaviour
 
         builderInputWrapper.OnMouseClick += MouseClick;
 
+        builderInWorldEntityHandler.Init();
         InitEditModes();
+
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
     }

@@ -149,6 +149,7 @@ namespace DCL.Models
         {
             return sharedComponents;
         }
+
         private void AddChild(DecentralandEntity entity)
         {
             if (!children.ContainsKey(entity.entityId))

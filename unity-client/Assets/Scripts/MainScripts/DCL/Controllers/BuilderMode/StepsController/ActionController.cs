@@ -8,8 +8,12 @@ using static BuildModeAction;
 public class ActionController : MonoBehaviour
 {
     public ActionListview actionListview;
+
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
+
     public System.Action OnUndo, OnRedo;
+
+
     List<BuildModeAction> actionsMade = new List<BuildModeAction>();
 
     int currentStepIndex = 0;

@@ -55,6 +55,7 @@ namespace DCL.Interface
                 this.payload = payload;
             }
         }
+
         [System.Serializable]
         public class StartStatefulMode : ControlEvent<StartStatefulMode.Payload>
         {
@@ -68,6 +69,7 @@ namespace DCL.Interface
             {
             }
         }
+
         [System.Serializable]
         public class StopStatefulMode : ControlEvent<StopStatefulMode.Payload>
         {
@@ -81,7 +83,6 @@ namespace DCL.Interface
             {
             }
         }
-
 
         [System.Serializable]
         public class SceneReady : ControlEvent<SceneReady.Payload>
@@ -208,6 +209,7 @@ namespace DCL.Interface
 
          
         };
+
         [System.Serializable]
         public class EntityComponentModel
         {
@@ -230,6 +232,7 @@ namespace DCL.Interface
 
 
         };
+
         [System.Serializable]
         public class RemoveEntityPayLoad
         {
@@ -244,6 +247,7 @@ namespace DCL.Interface
 
 
         };
+
         [System.Serializable]
         public class ModifyEntityComponentsPayLoad
         {
@@ -259,6 +263,7 @@ namespace DCL.Interface
 
 
         };
+
         [System.Serializable]
         public class RemoveEntityComponentsPayLoad
         {
@@ -266,15 +271,12 @@ namespace DCL.Interface
             public string componentId;
         };
 
-
-
         [System.Serializable]
         public class StoreSceneStateEvent
         {
             public string type = "StoreSceneState";
             public string payload = "";
         };
-
 
         [System.Serializable]
         public class OnPointerEventPayload

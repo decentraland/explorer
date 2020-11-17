@@ -576,8 +576,6 @@ namespace DCL.Controllers
        
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
-
-
                 if (!(data is DCLTransform.Model))
                 {
                     Debug.LogError("Data is not a DCLTransform.Model type!");

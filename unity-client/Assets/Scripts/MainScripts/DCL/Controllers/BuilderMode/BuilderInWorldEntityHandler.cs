@@ -36,7 +36,25 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     BuildMode currentActiveMode;
     bool isMultiSelectionActive = false;
 
-    private void Start()
+    private void OnDestroy()
+    {
+        DestroyCollidersForAllEntities();
+
+        actionController.OnRedo -= ReSelectEntities;
+        actionController.OnUndo -= ReSelectEntities;
+
+        if (HUDController.i.buildModeHud == null) return;
+
+        HUDController.i.buildModeHud.OnEntityDelete -= DeleteEntity;
+        HUDController.i.buildModeHud.OnDuplicateSelectedAction -= DuplicateSelectedEntitiesInput;
+        HUDController.i.buildModeHud.OnDeleteSelectedAction -= DeleteSelectedEntitiesInput;
+        HUDController.i.buildModeHud.OnEntityClick -= ChangeEntitySelectionFromList;
+        HUDController.i.buildModeHud.OnEntityLock -= ChangeEntityLockStatus;
+        HUDController.i.buildModeHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
+     
+    }
+
+    public void Init()
     {
         HUDController.i.buildModeHud.OnEntityDelete += DeleteEntity;
         HUDController.i.buildModeHud.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
@@ -47,21 +65,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
-    }
-
-    private void OnDestroy()
-    {
-        DestroyCollidersForAllEntities();
-
-        HUDController.i.buildModeHud.OnEntityDelete -= DeleteEntity;
-        HUDController.i.buildModeHud.OnDuplicateSelectedAction -= DuplicateSelectedEntitiesInput;
-        HUDController.i.buildModeHud.OnDeleteSelectedAction -= DeleteSelectedEntitiesInput;
-        HUDController.i.buildModeHud.OnEntityClick -= ChangeEntitySelectionFromList;
-        HUDController.i.buildModeHud.OnEntityLock -= ChangeEntityLockStatus;
-        HUDController.i.buildModeHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-
-        actionController.OnRedo -= ReSelectEntities;
-        actionController.OnUndo -= ReSelectEntities;
     }
 
     public List<DecentralandEntityToEdit> GetSelectedEntityList()

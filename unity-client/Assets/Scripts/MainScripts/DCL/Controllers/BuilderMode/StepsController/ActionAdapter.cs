@@ -7,11 +7,17 @@ using UnityEngine.UI;
 public class ActionAdapter : MonoBehaviour
 {
     public Image actionImg,notDoneImg;
-    public Sprite moveSprite, rotateSprite,scaleSprite, createdSprite;
+
+    public Sprite moveSprite,
+                  rotateSprite,
+                  scaleSprite,
+                  createdSprite;
+
     public TextMeshProUGUI actionTitle;
     public System.Action<BuildModeAction, ActionAdapter> OnActionSelected;
 
     BuildModeAction action;
+
     public void SetContent(BuildModeAction action)
     {
         this.action = action;

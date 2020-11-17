@@ -1,3 +1,4 @@
+using DCL.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -15,9 +16,9 @@ public class SceneAssetPack
     public string updated_at;
     public string eth_address;
     public List<SceneObject> assets;
+   
+    string baseUrl = BuilderInWorldSettings.BASE_URL_ASSETS_PACK_CONTENT;
 
-
-    string baseUrl = "https://builder-api.decentraland.org/v1/storage/assetPacks/";
     public string ComposeThumbnailUrl()
     {
         return baseUrl + thumbnail;

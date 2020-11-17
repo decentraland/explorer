@@ -7,10 +7,26 @@ using DCL.Controllers;
 
 public class BuildModeHUDController : IHUD
 {
-    public event Action OnChangeModeAction, OnTranslateSelectedAction, OnRotateSelectedAction, OnScaleSelectedAction, OnResetAction, OnDuplicateSelectedAction, OnDeleteSelectedAction;
-    public event Action OnEntityListVisible, OnStopInput,OnResumeInput, OnTutorialAction,OnPublishAction;
+    public event Action OnChangeModeAction,
+                        OnTranslateSelectedAction,
+                        OnRotateSelectedAction,
+                        OnScaleSelectedAction,
+                        OnResetAction,
+                        OnDuplicateSelectedAction,
+                        OnDeleteSelectedAction;
+
+    public event Action OnEntityListVisible,
+                        OnStopInput,
+                        OnResumeInput,
+                        OnTutorialAction,
+                        OnPublishAction;
+
     public event Action<SceneObject> OnSceneObjectSelected;
-    public event Action<DecentralandEntityToEdit> OnEntityClick, OnEntityDelete, OnEntityLock, OnEntityChangeVisibility;
+
+    public event Action<DecentralandEntityToEdit> OnEntityClick,
+                                                  OnEntityDelete,
+                                                  OnEntityLock,
+                                                  OnEntityChangeVisibility;
 
     //Note(Adrian): This is used right now for tutorial purposes
     public event Action OnCatalogOpen;

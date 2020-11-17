@@ -23,7 +23,6 @@ public class RenderProfileBridge : MonoBehaviour
 
     public static RenderProfileBridge i { get; private set; }
 
-    public ID currentID;
     public void Awake()
     {
         i = this;
@@ -46,12 +45,10 @@ public class RenderProfileBridge : MonoBehaviour
     public void SetRenderProfile(ID id)
     {
         RenderProfileWorld newProfile;
-        currentID = id;
         switch (id)
         {
             default:
                 newProfile = RenderProfileManifest.i.defaultProfile;
-                currentID = ID.DEFAULT;
                 break;
             case ID.HALLOWEEN:
                 newProfile = RenderProfileManifest.i.halloweenProfile;
@@ -60,9 +57,5 @@ public class RenderProfileBridge : MonoBehaviour
 
         RenderProfileManifest.i.currentProfile = newProfile;
         RenderProfileManifest.i.currentProfile.Apply();
-    }
-    public ID GetCurrentRenderProfileID()
-    {
-        return currentID;
     }
 }
