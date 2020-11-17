@@ -1,16 +1,6 @@
 
 (function () {
   if (window.requestAnimationFrame && document) {
-    window.backgroundFPS = 30;
-    window.__requestAnimationFrame = window.requestAnimationFrame;
-    window.__CURRENT_RAFS = {};
-
-    function backgroundRAF(rafCallback) {
-      setTimeout(function(){
-        rafCallback(performance.now())
-      }, 1000 / window.backgroundFPS);
-    }
-
     window.setTargetFPS = function (targetFPS) {
       const TARGET_FPS = (targetFPS > 0) ? (targetFPS + 10) : 70; // ENDS UP WITH A FRAMERATE EQUAL TO THE "target fps - 10" -> 70 -> 60FPS
 
@@ -54,20 +44,5 @@
     };
 
     scheduleNext();
-
-    function switchToBackground() {
-      Object.keys(__CURRENT_RAFS).forEach(function(rafId) {
-        window.cancelAnimationFrame(rafId);
-        rafCallback = __CURRENT_RAFS[rafId];
-        delete __CURRENT_RAFS[rafId];
-        backgroundRAF(rafCallback);
-      });
-    }
-
-    document.addEventListener("visibilitychange", function() {
-      if(document.hidden) {
-        switchToBackground();
-      }
-    })
   }
 })();
