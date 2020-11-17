@@ -24,8 +24,8 @@ mergeInto(LibraryManager.library, {
     stringToUTF8(graphicCard, buffer, bufferSize);
     return buffer;
   },
-  SetTargetFPS: function(targetvalue) {
-    window.setTargetFPS(targetvalue);
+  ToggleFPSCap: function(useFPSCap) {
+    window.capFPS = useFPSCap;
   }
 });
 

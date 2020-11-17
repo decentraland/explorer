@@ -1,29 +1,25 @@
 
 (function () {
   if (window.requestAnimationFrame && document) {
-    window.setTargetFPS = function (targetFPS) {
-      const TARGET_FPS = (targetFPS > 0) ? (targetFPS + 10) : 70; // ENDS UP WITH A FRAMERATE EQUAL TO THE "target fps - 10" -> 70 -> 60FPS
+    window.capFPS = false;
 
-      window.targetFPSMS = 1000 / TARGET_FPS;
-    };
-    window.setTargetFPS(-1);
-
+    const FPS_CAP = 40; // float precision when comparing times affects calculations, "target fps - 10" -> 40 -> 30FPS
+    const FRAME_MS = 1000 / FPS_CAP;
     var callbacks = [];
     window.__requestAnimationFrame = window.__requestAnimationFrame || window.requestAnimationFrame;
     const originalRaf = window.__requestAnimationFrame || window.requestAnimationFrame;
     var prevTime = 0;
 
+    // called every frame
     function tick(time) {
-      if (time - prevTime > window.targetFPSMS) {
+      if (!window.capFPS || time - prevTime > FRAME_MS) {
         var oldCallbacks = callbacks;
         callbacks = [];
+
         for (var i = 0; i < oldCallbacks.length; i++) {
-          try {
             oldCallbacks[i](time);
-          } catch (e) {
-            console.error(e);
-          }
         }
+
         oldCallbacks.length = 0;
         prevTime = time;
       }
@@ -33,7 +29,7 @@
 
     function scheduleNext() {
       if (document.hidden) {
-        setTimeout(function() { tick(performance.now()); }, window.targetFPSMS);
+        setTimeout(function() { tick(performance.now()); }, FRAME_MS);
       } else {
         originalRaf(tick);
       }

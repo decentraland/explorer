@@ -114,13 +114,13 @@ namespace DCL.SettingsController
                 firstPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
             }
 
-            SetTargetFPS(qualitySettings.fpsCap ? 30 : -1);
+            ToggleFPSCap(qualitySettings.fpsCap);
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")] public static extern void SetTargetFPS(int targetValue);
+    [DllImport("__Internal")] public static extern void ToggleFPSCap(bool useFPSCap);
 #else
-        public static void SetTargetFPS(int targetValue) { }
+        public static void ToggleFPSCap(bool useFPSCap) { }
 #endif
     }
 }
