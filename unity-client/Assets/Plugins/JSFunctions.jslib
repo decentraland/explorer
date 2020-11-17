@@ -25,7 +25,7 @@ mergeInto(LibraryManager.library, {
     return buffer;
   },
   SetTargetFPS: function(targetvalue) {
-    window.setTargetFPS(targetvalue ? 30 : -1);
+    window.setTargetFPS(targetvalue);
   }
 });
 

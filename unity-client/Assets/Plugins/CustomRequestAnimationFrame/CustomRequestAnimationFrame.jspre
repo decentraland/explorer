@@ -12,7 +12,7 @@
     }
 
     window.setTargetFPS = function (targetFPS) {
-      const TARGET_FPS = (targetFPS > 0) ? (targetFPS + 10) : 70; // ENDS UP WITH A FRAMERATE EQUAL TO THE "TARGET_FPS - 10" -> 70 -> 60FPS
+      const TARGET_FPS = (targetFPS > 0) ? (targetFPS + 10) : 70; // ENDS UP WITH A FRAMERATE EQUAL TO THE "target fps - 10" -> 70 -> 60FPS
 
       window.targetFPSMS = 1000 / TARGET_FPS;
     };
