@@ -6,6 +6,7 @@ namespace DCL.Helpers
     public static class SRPBatchingHelper
     {
         static Dictionary<int, int> crcToQueue = new Dictionary<int, int>();
+        static Dictionary<int, int> textureOffsets = new Dictionary<int, int>();
         static List<int> textureIds = new List<int>();
 
         public static void OptimizeMaterial(Material material)
@@ -54,11 +55,18 @@ namespace DCL.Helpers
             //NOTE(Brian): This guarantees grouping calls by same shader keywords. Needed to take advantage of SRP batching.
             string appendedKeywords = material.shader.name + string.Join("", material.shaderKeywords);
 
+            //string textureHash = "";
             material.GetTexturePropertyNameIDs(textureIds);
             for (var i = 0; i < textureIds.Count; i++)
             {
-                appendedKeywords += material.GetTexture(textureIds[i]).GetNativeTexturePtr();
+                material.SetTexture(textureIds[i], Texture2D.whiteTexture);
+                //textureHash += material.GetTexture(textureIds[i]).GetNativeTexturePtr();
             }
+
+            //int textureGroupCrc = Shader.PropertyToID(textureHash);
+
+            //if (!textureOffsets.ContainsKey(textureGroupCrc))
+            //    textureOffsets.Add(textureGroupCrc, textureOffsets.Count + 1);
 
             int crc = Shader.PropertyToID(appendedKeywords);
 
@@ -67,6 +75,7 @@ namespace DCL.Helpers
 
             //NOTE(Brian): we use 0, 100, 200 to group calls by culling mode (must group them or batches will break).
             int queueOffset = (cullMode + 1) * 150;
+            //int textureOffset = textureOffsets[textureGroupCrc] * 10;
             material.renderQueue = baseQueue + crcToQueue[crc] + queueOffset;
         }
     }
