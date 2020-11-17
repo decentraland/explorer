@@ -180,6 +180,13 @@ namespace DCL.Rendering
 
             while (true)
             {
+                if (!CommonScriptableObjects.rendererState.Get())
+                {
+                    timeBudgetCount = 0;
+                    yield return null;
+                    continue;
+                }
+
                 bool shouldCheck = sceneObjects.dirty;
 
                 yield return sceneObjects.PopulateRenderersList();
