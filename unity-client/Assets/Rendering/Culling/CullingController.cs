@@ -238,6 +238,10 @@ namespace DCL.Rendering
 
                         float startTime = Time.realtimeSinceStartup;
 
+                        //NOTE(Brian): Need to retrieve positions every frame to take into account
+                        //             world repositioning.
+                        playerPosition = CommonScriptableObjects.playerUnityPosition;
+
                         Bounds bounds = r.bounds;
                         Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
                         float distance = Vector3.Distance(playerPosition, boundingPoint);
