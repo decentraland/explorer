@@ -6,6 +6,7 @@ namespace DCL.Helpers
     public static class SRPBatchingHelper
     {
         static Dictionary<int, int> crcToQueue = new Dictionary<int, int>();
+        static List<int> textureIds = new List<int>();
 
         public static void OptimizeMaterial(Material material)
         {
@@ -16,6 +17,7 @@ namespace DCL.Helpers
             material.DisableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
             material.DisableKeyword("_SPECULARHIGHLIGHTS_OFF");
             material.DisableKeyword("VERTEX_COLOR_ON");
+
             material.SetFloat(ShaderUtils.SpecularHighlights, 1);
             material.SetFloat(ShaderUtils.EnvironmentReflections, 1);
 
@@ -48,8 +50,16 @@ namespace DCL.Helpers
             else
                 baseQueue = (int) UnityEngine.Rendering.RenderQueue.Geometry;
 
+
             //NOTE(Brian): This guarantees grouping calls by same shader keywords. Needed to take advantage of SRP batching.
             string appendedKeywords = material.shader.name + string.Join("", material.shaderKeywords);
+
+            material.GetTexturePropertyNameIDs(textureIds);
+            for (var i = 0; i < textureIds.Count; i++)
+            {
+                appendedKeywords += material.GetTexture(textureIds[i]).GetNativeTexturePtr();
+            }
+
             int crc = Shader.PropertyToID(appendedKeywords);
 
             if (!crcToQueue.ContainsKey(crc))
