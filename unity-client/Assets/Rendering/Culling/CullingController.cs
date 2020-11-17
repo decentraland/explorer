@@ -1,119 +1,34 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using DCL.Helpers;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 using UniversalRenderPipelineAsset = UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
-
-// Culling logic:
-//
-//    - Keep dirtyness of renderers
-//    - Iterate new renderers every X time, when the player moves or they are dirty
-//
-//    SkinnedMeshRenderers:
-//    - If they are far, set updateWhenOffscreen accordingly
-//    - different size values than other renderers
-//
-//    All renderers visibility logic:
-//    - Is less than X distance? -> should be visible
-//    - player is inside the renderer bounds? -> should be visible
-//    - is emissive and is very small size? -> should be visible
-//    - is opaque and is small size? -> should be visible
-//
-//    All renderers shadow logic:
-//    - Is less than Y distance? -> should have shadow
-//    - Is medium size? -> should have shadow
-//    - shadowmap shadow size is less than 4 texels? -> shouldn't have shadow
-//    
-//    
-//    Sizes:
-//    - Distance threshold
-//    - Emissive renderer size culling
-//    - Opaque renderer size culling
-//    - Shadow renderer size culling
-//    - ShadowMap projection size threshold
 
 namespace DCL.Rendering
 {
-    [System.Serializable]
-    public class CullingControllerProfile
-    {
-        public float visibleDistanceThreshold;
-        public float shadowDistanceThreshold;
-
-        public float emissiveSizeThreshold;
-        public float opaqueSizeThreshold;
-        public float shadowRendererSizeThreshold;
-        public float shadowMapProjectionSizeThreshold;
-
-        public static CullingControllerProfile Lerp(CullingControllerProfile p1, CullingControllerProfile p2, float t)
-        {
-            //TODO(Brian): Use this to implement settings slider
-            return new CullingControllerProfile
-            {
-                visibleDistanceThreshold = Mathf.Lerp(p1.visibleDistanceThreshold, p2.visibleDistanceThreshold, t),
-                shadowDistanceThreshold = Mathf.Lerp(p1.shadowDistanceThreshold, p2.shadowDistanceThreshold, t),
-                emissiveSizeThreshold = Mathf.Lerp(p1.emissiveSizeThreshold, p2.emissiveSizeThreshold, t),
-                opaqueSizeThreshold = Mathf.Lerp(p1.opaqueSizeThreshold, p2.opaqueSizeThreshold, t),
-                shadowRendererSizeThreshold = Mathf.Lerp(p1.shadowRendererSizeThreshold, p2.shadowRendererSizeThreshold, t),
-                shadowMapProjectionSizeThreshold = Mathf.Lerp(p1.shadowMapProjectionSizeThreshold, p2.shadowMapProjectionSizeThreshold, t)
-            };
-        }
-    }
-
-    [System.Serializable]
-    public class CullingControllerSettings
-    {
-        public bool enableObjectCulling = true;
-        public bool enableShadowCulling = true;
-        public bool enableAnimationCulling = true;
-
-        public float enableAnimationCullingDistance;
-
-        public CullingControllerProfile rendererProfile = new CullingControllerProfile();
-        public CullingControllerProfile skinnedRendererProfile = new CullingControllerProfile();
-    }
-
-    public interface ICullingController
-    {
-        void Start();
-        void Stop();
-        event CullingController.DataReport OnDataReport;
-        void SetDirty();
-
-        void SetSettings(CullingControllerSettings settings);
-        CullingControllerSettings GetSettings();
-
-        void SetObjectCulling(bool enabled);
-        void SetAnimationCulling(bool enabled);
-        void SetShadowCulling(bool enabled);
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class CullingController : ICullingController, IDisposable
     {
-        private const float MAX_TIME_BUDGET = 4 / 1000f; // 4 ms
+        public float maxTimeBudget = 4 / 1000f;
+
+        internal List<CullingControllerProfile> profiles = null;
 
         public CullingControllerSettings settings;
-
-        private List<CullingControllerProfile> profiles = null;
 
         private HashSet<Renderer> hiddenRenderers = new HashSet<Renderer>();
         private HashSet<Renderer> shadowlessRenderers = new HashSet<Renderer>();
 
-        public static Vector3 lastPlayerPos;
-
         public UniversalRenderPipelineAsset urpAsset;
 
-        private bool resetObjectsNextFrame = false;
         private CullingObjectsTracker sceneObjects;
         private Coroutine updateCoroutine;
         private float timeBudgetCount = 0;
+        private Vector3 lastPlayerPos;
+        private bool resetObjectsNextFrame = false;
 
         public delegate void DataReport(int rendererCount, int hiddenRendererCount, int hiddenShadowCount);
 
@@ -122,30 +37,10 @@ namespace DCL.Rendering
 
         public static CullingController Create()
         {
-            var settings = new CullingControllerSettings()
-            {
-                enableAnimationCullingDistance = 7.5f,
-                rendererProfile = new CullingControllerProfile
-                {
-                    visibleDistanceThreshold = 30,
-                    shadowDistanceThreshold = 20,
-                    emissiveSizeThreshold = 2.5f,
-                    opaqueSizeThreshold = 6,
-                    shadowRendererSizeThreshold = 10,
-                    shadowMapProjectionSizeThreshold = 4
-                },
-                skinnedRendererProfile = new CullingControllerProfile()
-                {
-                    visibleDistanceThreshold = 50,
-                    shadowDistanceThreshold = 40,
-                    emissiveSizeThreshold = 2.5f,
-                    opaqueSizeThreshold = 6,
-                    shadowRendererSizeThreshold = 5,
-                    shadowMapProjectionSizeThreshold = 4,
-                }
-            };
-
-            return new CullingController(GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset, settings);
+            return new CullingController(
+                GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset,
+                new CullingControllerSettings()
+            );
         }
 
         public CullingController(UniversalRenderPipelineAsset urpAsset, CullingControllerSettings settings)
@@ -170,6 +65,67 @@ namespace DCL.Rendering
 
             CoroutineStarter.Stop(updateCoroutine);
             updateCoroutine = null;
+        }
+
+        internal IEnumerator ProcessProfile(CullingControllerProfile profile)
+        {
+            Renderer[] renderers = null;
+
+            if (profile == settings.rendererProfile)
+                renderers = sceneObjects.renderers;
+            else
+                renderers = sceneObjects.skinnedRenderers;
+
+            for (var i = 0; i < renderers.Length; i++)
+            {
+                if (timeBudgetCount > maxTimeBudget)
+                {
+                    timeBudgetCount = 0;
+                    yield return null;
+                }
+
+                Renderer r = renderers[i];
+
+                if (r == null)
+                    continue;
+
+                float startTime = Time.realtimeSinceStartup;
+
+                //NOTE(Brian): Need to retrieve positions every frame to take into account
+                //             world repositioning.
+                Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
+
+                Bounds bounds = r.bounds;
+                Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
+                float distance = Vector3.Distance(playerPosition, boundingPoint);
+                bool boundsContainsPlayer = bounds.Contains(playerPosition);
+                float viewportSize = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+
+                bool isEmissive = IsEmissive(r);
+                bool isOpaque = IsOpaque(r);
+
+                bool shouldBeVisible = ShouldBeVisible(profile, viewportSize, distance, boundsContainsPlayer, isOpaque, isEmissive);
+                bool shouldHaveShadow = ShouldHaveShadow(profile, viewportSize, bounds.size.magnitude, distance);
+
+                SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
+
+                if (!shouldBeVisible && !hiddenRenderers.Contains(r))
+                    hiddenRenderers.Add(r);
+
+                if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
+                    shadowlessRenderers.Add(r);
+
+                var skmr = r as SkinnedMeshRenderer;
+
+                if (skmr != null)
+                {
+                    skmr.updateWhenOffscreen = ShouldUpdateSkinnedWhenOffscreen(settings, distance);
+                }
+#if UNITY_EDITOR
+                DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
+#endif
+                timeBudgetCount += Time.realtimeSinceStartup - startTime;
+            }
         }
 
         IEnumerator UpdateCoroutine()
@@ -213,64 +169,17 @@ namespace DCL.Rendering
                     resetObjectsNextFrame = false;
                 }
 
+                yield return ProcessAnimations();
+
                 hiddenRenderers.Clear();
                 shadowlessRenderers.Clear();
-
-                yield return SetAnimationsCulling();
 
                 int profilesCount = profiles.Count;
 
                 for (var pIndex = 0; pIndex < profilesCount; pIndex++)
                 {
-                    CullingControllerProfile cullingControllerProfile = profiles[pIndex];
-                    Renderer[] renderers = null;
-
-                    if (cullingControllerProfile == settings.rendererProfile)
-                        renderers = sceneObjects.renderers;
-                    else
-                        renderers = sceneObjects.skinnedRenderers;
-
-                    for (var i = 0; i < renderers.Length; i++)
-                    {
-                        if (timeBudgetCount > MAX_TIME_BUDGET)
-                        {
-                            timeBudgetCount = 0;
-                            yield return null;
-                        }
-
-                        Renderer r = renderers[i];
-
-                        if (r == null)
-                            continue;
-
-                        float startTime = Time.realtimeSinceStartup;
-
-                        //NOTE(Brian): Need to retrieve positions every frame to take into account
-                        //             world repositioning.
-                        playerPosition = CommonScriptableObjects.playerUnityPosition;
-
-                        Bounds bounds = r.bounds;
-                        Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
-                        float distance = Vector3.Distance(playerPosition, boundingPoint);
-
-                        bool shouldBeVisible = ShouldBeVisible(distance, bounds, playerPosition, r, cullingControllerProfile);
-                        bool shouldHaveShadow = ShouldHaveShadow(distance, bounds, cullingControllerProfile);
-
-                        SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
-
-                        if (!shouldBeVisible && !hiddenRenderers.Contains(r))
-                            hiddenRenderers.Add(r);
-
-                        if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
-                            shadowlessRenderers.Add(r);
-
-                        ShouldUpdateSkinnedWhenOffscreen(r as SkinnedMeshRenderer, settings, distance);
-
-#if UNITY_EDITOR
-                        DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
-#endif
-                        timeBudgetCount += Time.realtimeSinceStartup - startTime;
-                    }
+                    CullingControllerProfile profile = profiles[pIndex];
+                    yield return ProcessProfile(profile);
                 }
 
                 RaiseDataReport();
@@ -279,11 +188,14 @@ namespace DCL.Rendering
             }
         }
 
-        private void ShouldUpdateSkinnedWhenOffscreen(SkinnedMeshRenderer r, CullingControllerSettings settings, float distance)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        private bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
         {
-            if (r == null)
-                return;
-
             bool finalValue = true;
 
             if (settings.enableAnimationCulling)
@@ -292,9 +204,15 @@ namespace DCL.Rendering
                     finalValue = false;
             }
 
-            r.updateWhenOffscreen = finalValue;
+            return finalValue;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="shouldBeVisible"></param>
+        /// <param name="shouldHaveShadow"></param>
         private void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
         {
             var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
@@ -312,34 +230,52 @@ namespace DCL.Rendering
             }
         }
 
-        private bool ShouldBeVisible(float distance, Bounds bounds, Vector3 playerPosition, Renderer r, CullingControllerProfile cullingControllerProfile)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <param name="size"></param>
+        /// <param name="distance"></param>
+        /// <param name="boundsContainsPlayer"></param>
+        /// <param name="isOpaque"></param>
+        /// <param name="isEmissive"></param>
+        /// <returns></returns>
+        internal bool ShouldBeVisible(CullingControllerProfile profile, float size, float distance, bool boundsContainsPlayer, bool isOpaque, bool isEmissive)
         {
-            float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || boundsContainsPlayer;
 
-            bool isOpaque = IsOpaque(r);
-            bool isEmissive = IsEmissive(r);
+            if (isEmissive)
+                shouldBeVisible |= size > profile.emissiveSizeThreshold;
 
-            bool shouldBeVisible = distance < cullingControllerProfile.visibleDistanceThreshold || bounds.Contains(playerPosition);
-
-            if (isEmissive) shouldBeVisible |= size > cullingControllerProfile.emissiveSizeThreshold;
-
-            if (isOpaque) shouldBeVisible |= size > cullingControllerProfile.opaqueSizeThreshold;
+            if (isOpaque)
+                shouldBeVisible |= size > profile.opaqueSizeThreshold;
 
             return shouldBeVisible;
         }
 
-        private bool ShouldHaveShadow(float distance, Bounds bounds, CullingControllerProfile cullingControllerProfile)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <param name="viewportSize"></param>
+        /// <param name="boundsSize"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        internal bool ShouldHaveShadow(CullingControllerProfile profile, float viewportSize, float boundsSize, float distance)
         {
-            float size = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+            float shadowMapRenderSize = boundsSize / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
 
-            float shadowSize = bounds.size.magnitude / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
-            bool shouldHaveShadow = distance < cullingControllerProfile.shadowDistanceThreshold;
-            shouldHaveShadow |= size > cullingControllerProfile.shadowRendererSizeThreshold;
-            shouldHaveShadow &= shadowSize > cullingControllerProfile.shadowMapProjectionSizeThreshold;
+            bool shouldHaveShadow = distance < profile.shadowDistanceThreshold;
+            shouldHaveShadow |= viewportSize > profile.shadowRendererSizeThreshold;
+            shouldHaveShadow &= shadowMapRenderSize > profile.shadowMapProjectionSizeThreshold;
             return shouldHaveShadow;
         }
 
-        IEnumerator SetAnimationsCulling()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        internal IEnumerator ProcessAnimations()
         {
             if (!settings.enableAnimationCulling)
                 yield break;
@@ -350,7 +286,7 @@ namespace DCL.Rendering
 
             for (var i = 0; i < animsLength; i++)
             {
-                if (timeBudgetCount > MAX_TIME_BUDGET)
+                if (timeBudgetCount > maxTimeBudget)
                 {
                     timeBudgetCount = 0;
                     yield return null;
@@ -375,6 +311,11 @@ namespace DCL.Rendering
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="renderer"></param>
+        /// <returns></returns>
         private bool IsOpaque(Renderer renderer)
         {
             Material firstMat = renderer.sharedMaterials[0];
@@ -391,6 +332,11 @@ namespace DCL.Rendering
             return true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="renderer"></param>
+        /// <returns></returns>
         private bool IsEmissive(Renderer renderer)
         {
             Material firstMat = renderer.sharedMaterials[0];
@@ -408,6 +354,9 @@ namespace DCL.Rendering
         }
 
 
+        /// <summary>
+        /// 
+        /// </summary>
         void ResetObjects()
         {
             foreach (var r in sceneObjects.skinnedRenderers)
@@ -431,11 +380,18 @@ namespace DCL.Rendering
             Stop();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void SetDirty()
         {
             sceneObjects.dirty = true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
         public void SetSettings(CullingControllerSettings settings)
         {
             this.settings = settings;
@@ -443,11 +399,19 @@ namespace DCL.Rendering
             SetDirty();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public CullingControllerSettings GetSettings()
         {
             return settings;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enabled"></param>
         public void SetObjectCulling(bool enabled)
         {
             if (settings.enableObjectCulling == enabled)
@@ -458,6 +422,10 @@ namespace DCL.Rendering
             SetDirty();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enabled"></param>
         public void SetAnimationCulling(bool enabled)
         {
             if (settings.enableAnimationCulling == enabled)
@@ -468,6 +436,10 @@ namespace DCL.Rendering
             SetDirty();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enabled"></param>
         public void SetShadowCulling(bool enabled)
         {
             if (settings.enableShadowCulling == enabled)
@@ -478,6 +450,9 @@ namespace DCL.Rendering
             SetDirty();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void RaiseDataReport()
         {
             if (OnDataReport == null)
@@ -488,6 +463,12 @@ namespace DCL.Rendering
             OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="shouldBeVisible"></param>
+        /// <param name="bounds"></param>
+        /// <param name="boundingPoint"></param>
         private static void DrawDebugGizmos(bool shouldBeVisible, Bounds bounds, Vector3 boundingPoint)
         {
             if (!shouldBeVisible)
