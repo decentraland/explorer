@@ -10,6 +10,7 @@
   cursor: pointer;
   text-align: center;
   text-decoration: none;
+  box-sizing: content-box;
 }
 
 .walletButton.disabled {
