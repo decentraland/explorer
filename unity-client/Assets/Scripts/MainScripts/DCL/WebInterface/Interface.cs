@@ -199,7 +199,7 @@ namespace DCL.Interface
             public string type = "AddEntity";
             public AddEntityPayLoad payload;
 
-         
+
         };
         [System.Serializable]
         public class AddEntityPayLoad
@@ -207,7 +207,7 @@ namespace DCL.Interface
             public string entityId;
             public EntityComponentModel[] components;
 
-         
+
         };
 
         [System.Serializable]
@@ -595,6 +595,12 @@ namespace DCL.Interface
             public bool mute;
         }
 
+        [System.Serializable]
+        public class CloseUserAvatarPayload
+        {
+            public bool isSignUpFlow;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -672,6 +678,7 @@ namespace DCL.Interface
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
         private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
+        private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -697,7 +704,7 @@ namespace DCL.Interface
             SendMessage("ControlEvent", controlEvent);
         }
 
-        public static void AddEntity(string sceneId,string entityId, EntityComponentModel[] components)
+        public static void AddEntity(string sceneId, string entityId, EntityComponentModel[] components)
         {
             AddEntityEvent addEntityEvent = new AddEntityEvent();
             AddEntityPayLoad addEntityPayLoad = new AddEntityPayLoad();
@@ -709,7 +716,7 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "stateEvent", addEntityEvent);
             VERBOSE = false;
         }
-        public static void RemoveEntity(string sceneId,string entityId)
+        public static void RemoveEntity(string sceneId, string entityId)
         {
             RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent();
             RemoveEntityPayLoad removeEntityPayLoad = new RemoveEntityPayLoad();
@@ -1211,6 +1218,12 @@ namespace DCL.Interface
             muteUserEvent.usersId = usersId;
             muteUserEvent.mute = mute;
             SendMessage("SetMuteUsers", muteUserEvent);
+        }
+
+        public static void SendCloseUserAvatar(bool isSignUpFlow)
+        {
+            closeUserAvatarPayload.isSignUpFlow = isSignUpFlow;
+            SendMessage("CloseUserAvatar", closeUserAvatarPayload);
         }
     }
 }

@@ -60,6 +60,12 @@ public class ProfileHUDController : IHUD
 
         ownUserProfile.OnUpdate += OnProfileUpdated;
         if (mouseCatcher != null) mouseCatcher.OnMouseLock += OnMouseLocked;
+
+        if (!DCL.Configuration.EnvironmentSettings.RUNNING_TESTS)
+        {
+            KernelConfig.i.EnsureConfigInitialized().Then(config => OnKernelConfigChanged(config, null));
+            KernelConfig.i.OnChange += OnKernelConfigChanged;
+        }
     }
 
     public void ChangeVisibilityForBuilderInWorld(bool current, bool previus)
@@ -96,6 +102,11 @@ public class ProfileHUDController : IHUD
         ownUserProfile.OnUpdate -= OnProfileUpdated;
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange -= ChangeVisibilityForBuilderInWorld;
         if (mouseCatcher != null) mouseCatcher.OnMouseLock -= OnMouseLocked;
+
+        if (!DCL.Configuration.EnvironmentSettings.RUNNING_TESTS)
+        {
+            KernelConfig.i.OnChange -= OnKernelConfigChanged;
+        }
     }
 
     void OnProfileUpdated(UserProfile profile)
@@ -173,6 +184,12 @@ public class ProfileHUDController : IHUD
         if (view.inputName.wasCanceled)
             return;
 
+        if (!view.IsValidAvatarName(newName))
+        {
+            view.inputName.ActivateInputField();
+            return;
+        }
+
         if (view != null)
         {
             view.SetProfileName(newName);
@@ -180,5 +197,10 @@ public class ProfileHUDController : IHUD
         }
 
         WebInterface.SendSaveUserUnverifiedName(newName);
+    }
+
+    private void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        view?.SetNameRegex(current.profiles.nameValidRegex);
     }
 }
