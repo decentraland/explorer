@@ -8,30 +8,24 @@ import "./EthLogin.css";
 export interface EthLoginProps {
   loading: boolean;
   provider: string | null | undefined;
-  showWalletSelector?: boolean;
-  showGuestLogin?: boolean;
+  showWallet?: boolean;
+  hasWallet?: boolean;
+  hasMetamask?: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
 
 export const EthLogin: React.FC<EthLoginProps> = (props) => {
-  const [showWalletSelector, setShowWalletSelector] = useState(props.showWalletSelector || false);
-  const [showGuestLogin, setShowGuestLogin] = useState(props.showGuestLogin || false);
-  useEffect(() => {
-    if (!props.showGuestLogin && !(window as any).ethereum) {
-      setShowGuestLogin(true)
-    }
-  }, [props.showGuestLogin])
-
-  const walletLoading = props.loading && showWalletSelector;
-  const isLoading = props.loading || showWalletSelector
+  const [showWallet, setShowWallet] = useState(props.showWallet || false);
+  const walletLoading = props.loading && showWallet;
+  const isLoading = props.loading || showWallet
 
   function handlePlay(event: React.MouseEvent) {
     if (props.provider) {
       return props.onLogin(props.provider);
     }
 
-    setShowWalletSelector(true);
+    setShowWallet(true);
   }
 
   function handlePlayAsGuest(event: React.MouseEvent) {
@@ -51,17 +45,18 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
             Play
           </button>
         )}
-        {!isLoading && showGuestLogin && (
+        {!isLoading && !props.hasWallet && (
           <button className="eth-login-guest-button" onClick={handlePlayAsGuest}>
             Enter as Guest
           </button>
         )}
       </div>
       <WalletSelector
-        show={showWalletSelector}
+        show={showWallet}
+        metamask={!!props.hasMetamask}
         loading={walletLoading}
         onClick={props.onLogin}
-        onCancel={() => setShowWalletSelector(false)}
+        onCancel={() => setShowWallet(false)}
       />
     </div>
   );

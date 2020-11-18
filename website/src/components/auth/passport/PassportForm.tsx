@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { filterInvalidNameCharacters } from "../../../utils";
 import "./PassportForm.css";
 
 // eslint-disable-next-line

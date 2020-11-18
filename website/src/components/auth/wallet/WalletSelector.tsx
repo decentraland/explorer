@@ -7,18 +7,20 @@ import "./WalletSelector.css";
 export interface WalletSelectorProps {
   show: boolean;
   loading: boolean;
+  metamask: boolean;
   onClick: (provider: string) => void;
   onCancel: () => void;
 }
 
 export const WalletSelector: React.FC<WalletSelectorProps> = ({
   show,
+  metamask,
   loading,
   onClick,
   onCancel,
 }) => {
 
-  function handleClick(_: React.MouseEvent<HTMLDivElement>, provider: WalletButtonLogo) {
+  function handleClick(_: React.MouseEvent, provider: WalletButtonLogo) {
     if (onClick) {
       onClick(provider)
     }
@@ -30,10 +32,10 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
         <h2 className="walletSelectorTitle">Sign In or Create an Account</h2>
         <div className="walletButtonContainer">
           {loading && <Spinner />}
-          {!loading && <WalletButton logo="Metamask" onClick={handleClick} />}
+          {!loading && <WalletButton logo="Metamask" disabled={!metamask} href="https://metamask.io/" onClick={handleClick} />}
           {!loading && <WalletButton logo="Fortmatic" onClick={handleClick} />}
         </div>
       </div>
-    </Modal>
+    </Modal >
   ) : null;
 };

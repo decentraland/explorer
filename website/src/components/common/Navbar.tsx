@@ -12,7 +12,7 @@ export type NavbarProps = {
 export const Navbar = (props: NavbarProps) => (
   <nav className="nav-bar">
     {!props.full && <Isologotipo onClick={props.onClickLogo} />}
-    {!!props.full && <a href="https://decentraland.org/">
+    {!!props.full && <a href="https://decentraland.org/" target="_blank" rel="noopener noreferrer">
       <Logo onClick={props.onClickLogo} />
     </a>}
     {!!props.full && <div className="nav-bar-content">
@@ -21,7 +21,7 @@ export const Navbar = (props: NavbarProps) => (
       </div>
       <a
         className="nav-discord"
-        href="https://dcl.gg/discord"
+        href="https://discord.gg/k5ydeZp"
         target="about:blank"
       >
         <Discord />

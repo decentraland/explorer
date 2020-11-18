@@ -23,6 +23,12 @@ MetamaskButton.args = {
   logo: "Metamask",
 };
 
+export const MetamaskDisabledButton = MetamaskButton.bind({});
+MetamaskDisabledButton.args = {
+  ...MetamaskButton.args,
+  disabled: true,
+};
+
 export const FortmaticButton = Template.bind({});
 FortmaticButton.args = {
   ...Template.args,

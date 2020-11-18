@@ -11,6 +11,10 @@ import { BeginnersGuide } from "./BeginnersGuide";
 import { BigFooter } from "../common/BigFooter";
 import "./LoginContainer.css";
 
+declare var window: Window & {
+  ethereum: any;
+};
+
 export enum LoginStage {
   LOADING = "loading",
   SIGN_IN = "signIn",
@@ -28,7 +32,8 @@ const mapStateToProps = (state: any) => {
     subStage: state.session.signup.stage,
     provider: state.session.currentProvider,
     showWalletSelector: params.has('show_wallet'),
-    showGuestLogin: params.has('show_guest'),
+    hasWallet: !!window.ethereum,
+    hasMetamask: !!(window.ethereum && window.ethereum.isMetaMask),
   }
 };
 
@@ -44,8 +49,9 @@ export interface LoginContainerProps {
   signing: boolean;
   subStage: string;
   provider?: string | null;
-  showWalletSelector?: boolean;
-  showGuestLogin?: boolean;
+  showWallet?: boolean;
+  hasWallet?: boolean;
+  hasMetamask?: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
@@ -66,12 +72,13 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
               {props.stage === LoginStage.LOADING && <InitialLoading />}
               {props.stage === LoginStage.SIGN_IN && (
                 <EthLogin
+                  hasWallet={props.hasWallet}
+                  hasMetamask={props.hasMetamask}
                   loading={props.signing}
                   onLogin={props.onLogin}
                   onGuest={props.onGuest}
                   provider={props.provider}
-                  showWalletSelector={props.showWalletSelector}
-                  showGuestLogin={props.showGuestLogin}
+                  showWallet={props.showWallet}
                 />
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && (

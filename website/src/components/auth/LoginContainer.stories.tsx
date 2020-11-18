@@ -13,6 +13,7 @@ export default {
   args: {
     stage: LoginStage.LOADING,
     subStage: "",
+    hasMetamask: true,
   } as LoginContainerProps,
   component: LoginContainer,
   argTypes: {
@@ -39,14 +40,16 @@ export const play = Template.bind({});
 play.args = {
   ...Template.args,
   stage: LoginStage.SIGN_IN,
-  showGuestLogin: false
+  hasWallet: true,
+  hasMetamask: true
 };
 
 export const playAsGuest = Template.bind({});
 playAsGuest.args = {
   ...Template.args,
   stage: LoginStage.SIGN_IN,
-  showGuestLogin: true
+  hasWallet: false,
+  hasMetamask: false
 };
 
 export const passport = Template.bind({});
