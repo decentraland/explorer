@@ -54,6 +54,7 @@
     url("../../images/login/background@3x.jpg") 3x
   );
   overflow: visible;
+  align-items: flex-start;
 }
 
 .eth-login-popup {
