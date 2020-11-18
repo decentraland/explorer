@@ -22,15 +22,11 @@ const Template: Story<WalletButtonProps> = (args) => <WalletButton {...args} />;
 export const MetamaskButton = Template.bind({});
 MetamaskButton.args = {
   ...Template.args,
-  logo: MetamaskLogo,
-  title: "Metamask",
-  description: "Using a browser extension",
+  logo: "Metamask",
 };
 
 export const FortmaticButton = Template.bind({});
 FortmaticButton.args = {
   ...Template.args,
-  logo: FortmaticLogo,
-  title: "Metamask",
-  description: "Using your Email account",
+  logo: "Fortmatic",
 };
