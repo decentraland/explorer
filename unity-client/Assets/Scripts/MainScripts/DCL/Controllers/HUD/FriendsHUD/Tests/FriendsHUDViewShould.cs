@@ -65,7 +65,7 @@ public class FriendsHUDViewShould : TestsBase
 
         var model2 = entry2.model;
         model2.status = PresenceStatus.ONLINE;
-        controller.view.friendsList.RequestCreateEntry(id2, model2);
+        controller.view.friendsList.CreateOrUpdateEntryDeferred(id2, model2);
 
         Assert.AreEqual(controller.view.friendsList.onlineFriendsList.container, entry2.transform.parent);
     }
@@ -230,7 +230,7 @@ public class FriendsHUDViewShould : TestsBase
             userName = name,
         };
 
-        controller.view.friendsList.RequestCreateEntry(id, model1);
+        controller.view.friendsList.CreateOrUpdateEntryDeferred(id, model1);
     }
 
     FriendEntry GetFriendEntry(string id)

@@ -126,12 +126,12 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     protected Pool friendEntriesPool;
     protected bool layoutIsDirty = false;
 
-    private Coroutine processPerFrameCoroutine = null;
+    private Coroutine updateRoutine = null;
 
     private void Awake()
     {
         //Use a coroutine instead of an Update method to load the entries in the background while the gameobject is disabled
-        processPerFrameCoroutine = CoroutineStarter.Start(ProcessInFrameLoop());
+        updateRoutine = CoroutineStarter.Start(UpdateCoroutine());
     }
 
     internal List<FriendEntryBase> GetAllEntries()
@@ -161,7 +161,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         contextMenuPanel.Hide();
     }
 
-    protected virtual void ProcessInFrame()
+    protected virtual void UpdateLayout()
     {
         if (layoutIsDirty)
         {
@@ -170,11 +170,11 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    private IEnumerator ProcessInFrameLoop()
+    private IEnumerator UpdateCoroutine()
     {
         while (true)
         {
-            ProcessInFrame();
+            UpdateLayout();
             yield return null;
         }
     }
@@ -210,10 +210,10 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         contextMenuPanel.OnBlock -= OnPressBlockButton;
         contextMenuPanel.OnUnfriend -= OnPressDeleteButton;
-        if (processPerFrameCoroutine != null)
+        if (updateRoutine != null)
         {
-            CoroutineStarter.Stop(processPerFrameCoroutine);
-            processPerFrameCoroutine = null;
+            CoroutineStarter.Stop(updateRoutine);
+            updateRoutine = null;
         }
     }
 
@@ -236,7 +236,6 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         if (entries.ContainsKey(userId)) return false;
 
         PoolableObject newFriendEntry = friendEntriesPool.Get();
-        newFriendEntry.gameObject.name = $"FriendEntry {userId}";
         instantiatedFriendEntries.Add(userId, newFriendEntry);
         var entry = newFriendEntry.gameObject.GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);

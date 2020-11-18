@@ -64,6 +64,7 @@ public class FriendsTabView : FriendsTabViewBase
     {
         if (!base.UpdateEntry(userId, model))
         {
+            //Replace the queued model for creation for the updated one.
             if (creationQueue.ContainsKey(userId))
                 creationQueue[userId] = model;
             return false;
@@ -146,12 +147,19 @@ public class FriendsTabView : FriendsTabViewBase
         lastProcessedFriend = friend.userId;
     }
 
-    public void RequestCreateEntry(string userId, FriendEntryBase.Model model)
+    public void CreateOrUpdateEntryDeferred(string userId, FriendEntryBase.Model model)
     {
-        creationQueue[userId] = model;
+        if(creationQueue.ContainsKey(userId))
+            creationQueue[userId] = model;
+        else
+            creationQueue.Add(userId, model);
     }
 
-    protected override void ProcessInFrame()
+    /// <summary>
+    /// To avoid having hiccups when a player with dozens of friends load into the game
+    /// we deferred the entries instantiation to multiple frames
+    /// </summary>
+    protected override void UpdateLayout()
     {
         if (creationQueue.Count == 0)
             return;
@@ -170,6 +178,6 @@ public class FriendsTabView : FriendsTabViewBase
             layoutIsDirty = false;
         }
 
-        base.ProcessInFrame();
+        base.UpdateLayout();
     }
 }

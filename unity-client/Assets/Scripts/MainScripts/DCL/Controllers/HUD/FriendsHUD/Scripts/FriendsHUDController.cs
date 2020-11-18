@@ -139,7 +139,7 @@ public class FriendsHUDController : IHUD
                 break;
             case FriendshipAction.APPROVED:
                 view.friendRequestsList.RemoveEntry(userId);
-                view.friendsList.RequestCreateEntry(userId, friendEntryModel);
+                view.friendsList.CreateOrUpdateEntryDeferred(userId, friendEntryModel);
                 break;
             case FriendshipAction.REJECTED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
