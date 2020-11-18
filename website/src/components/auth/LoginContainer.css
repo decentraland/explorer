@@ -6,24 +6,61 @@
   left: 0;
   width: 100%;
   height: 100%;
-  min-height: 700px;
+  /* min-height: 86vh; */
   overflow: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.LoginContainer.FullPage {
+  height: auto;
+  min-height: 86vh;
 }
 
 .LoginContainer main {
   background-size: cover;
-  background-color: #74a4d5;
-  background-image: url("../../images/background.png");
+  background-color: white;
+  background-position: bottom center;
+  background-image: url("../../images/login/background-secondary@1x.jpg");
+  background-image: -webkit-image-set(
+    url("../../images/login/background-secondary@1x.jpg") 1x,
+    url("../../images/login/background-secondary@2x.jpg") 2x,
+    url("../../images/login/background-secondary@3x.jpg") 3x
+  );
+  background-image: image-set(
+    url("../../images/login/background-secondary@1x.jpg") 1x,
+    url("../../images/login/background-secondary@2x.jpg") 2x,
+    url("../../images/login/background-secondary@3x.jpg") 3x
+  );
   background-repeat: no-repeat;
   background-origin: border-box;
-  background-position: 0 0;
   width: 100%;
   height: 100%;
-  min-height: 700px;
+}
+
+.LoginContainer.FullPage main {
+  height: auto;
+  min-height: 86vh;
+  background-size: contain;
+  background-color: white;
+  background-position: top center;
+  background-image: url("../../images/login/background@1x.jpg");
+  background-image: -webkit-image-set(
+    url("../../images/login/background@1x.jpg") 1x,
+    url("../../images/login/background@2x.jpg") 2x,
+    url("../../images/login/background@3x.jpg") 3x
+  );
+  background-image: image-set(
+    url("../../images/login/background@1x.jpg") 1x,
+    url("../../images/login/background@2x.jpg") 2x,
+    url("../../images/login/background@3x.jpg") 3x
+  );
 }
 
 .eth-login-popup {
   height: 100%;
+  min-height: 657px;
 
   /*position: absolute;*/
   /*left: 50%;*/
@@ -44,12 +81,4 @@
   align-items: flex-start;
   min-height: 480px;
   margin: 0 auto;
-}
-
-.eth-login-popup .eth-login .popup-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
 }

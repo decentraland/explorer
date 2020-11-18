@@ -4,22 +4,49 @@ import "./Modal.css";
 
 export interface ModalProps {
   withAvatars?: boolean;
-  handleClose?: () => void;
+  withOverlay?: boolean;
+  withFlatBackground?: boolean;
+  className?: string;
+  onClose?: () => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
-  handleClose,
+  onClose,
   withAvatars,
+  withFlatBackground,
+  withOverlay,
+  className,
   children,
 }) => {
-  let className = "popup-container";
+  let containerClassName = 'popup-container';
+
   if (withAvatars) {
-    className += " with-avatars";
+    containerClassName += ' with-avatars';
+  }
+
+  if (withOverlay) {
+    containerClassName += ' with-overlay';
+  }
+
+  if (withFlatBackground) {
+    containerClassName += ' with-flat-background';
+  }
+
+  let popupClassName = 'popup'
+
+  if (className) {
+    popupClassName += ' ' + className;
+  }
+
+  function handleClose() {
+    if (onClose) {
+      onClose()
+    }
   }
 
   return (
-    <div className={className}>
-      <div className="popup">
+    <div className={containerClassName} onClick={handleClose}>
+      <div className={popupClassName} onClick={(e) => e.stopPropagation()}>
         {handleClose && <div className="close" onClick={handleClose} />}
         {children}
       </div>

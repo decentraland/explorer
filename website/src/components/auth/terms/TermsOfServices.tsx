@@ -19,7 +19,7 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
   };
   const handleClose = props.loading ? null : props.handleCancel;
   return (
-    <Modal withAvatars handleClose={handleClose}>
+    <Modal withAvatars onClose={handleClose}>
       <div className="termsOfServices">
         <h2>Terms of Service and Privacy Policy</h2>
         <div className="content" onScroll={handleScroll}>
@@ -269,20 +269,20 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
               <Spinner />
             </div>
           ) : (
-            <React.Fragment>
-              <button className="btnBack" onClick={props.handleBack}>
-                BACK
+              <React.Fragment>
+                <button className="btnBack" onClick={props.handleBack}>
+                  BACK
               </button>
 
-              <button
-                className="btnAgree"
-                disabled={!read}
-                onClick={props.handleAgree}
-              >
-                I AGREE
+                <button
+                  className="btnAgree"
+                  disabled={!read}
+                  onClick={props.handleAgree}
+                >
+                  I AGREE
               </button>
-            </React.Fragment>
-          )}
+              </React.Fragment>
+            )}
         </div>
       </div>
     </Modal>

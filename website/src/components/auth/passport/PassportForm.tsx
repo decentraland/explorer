@@ -46,31 +46,31 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
     <div className="passportForm">
       <form method="POST" onSubmit={handleSubmit}>
         <div className="inputGroup">
+          {hasNameError && (
+            <em className="error">*required field (you can edit it later)</em>
+          )}
           <label>Name your avatar</label>
           <input
             type="text"
             name="name"
             className={hasNameError ? "hasError" : ""}
-            placeholder="your avatar name"
+            placeholder="Your avatar name"
             value={name}
             onChange={onChangeName}
           />
           {chars > 0 && <em className="warningLength">{chars}/15</em>}
-          {hasNameError && (
-            <em className="error">*required field (you can edit it later)</em>
-          )}
         </div>
         <div className="inputGroup">
+          {hasEmailError && <em className="error">*email not valid</em>}
           <label>Let's stay in touch</label>
           <input
             type="text"
             name="email"
             className={hasEmailError ? "hasError" : ""}
-            placeholder="enter your email"
+            placeholder="Enter your email"
             value={email}
             onChange={onChangeEmail}
           />
-          {hasEmailError && <em className="error">*email not valid</em>}
         </div>
         <div className="actions">
           <button type="submit" className="btnSubmit">

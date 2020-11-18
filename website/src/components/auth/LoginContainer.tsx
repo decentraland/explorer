@@ -1,6 +1,5 @@
 import React from "react";
 import { Navbar } from "../common/Navbar";
-import { Footer } from "../common/Footer";
 import { EthLogin } from "./EthLogin";
 import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
@@ -47,13 +46,14 @@ export interface LoginContainerProps {
 }
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
+  const fullPage = props.stage === LoginStage.SIGN_IN
   const shouldShow =
     LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar";
   return (
     <React.Fragment>
       {shouldShow && (
-        <div className="LoginContainer">
-          <Navbar />
+        <div className={'LoginContainer' + (fullPage ? ' FullPage' : '')}>
+          <Navbar full={fullPage} />
 
           {/* Footer */}
           <main>
@@ -77,11 +77,10 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
           </main>
 
           {/* Beginner Guide */}
-          {props.stage === LoginStage.SIGN_IN && <BeginnersGuide />}
+          {fullPage && <BeginnersGuide />}
 
           {/* Footer */}
-          {props.stage !== LoginStage.SIGN_IN && <Footer />}
-          {props.stage === LoginStage.SIGN_IN && <BigFooter />}
+          {fullPage && <BigFooter />}
         </div>
       )}
     </React.Fragment>

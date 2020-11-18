@@ -35,10 +35,10 @@
 }
 
 .passportForm form label {
-  font-size: 1.3em;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 600;
   font-style: normal;
-  line-height: 2em;
+  line-height: 26px;
 }
 
 .passportForm form input {

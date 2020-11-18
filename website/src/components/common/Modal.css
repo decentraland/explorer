@@ -11,6 +11,30 @@
   padding-left: 350px;
 }
 
+.popup-container.with-overlay {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.popup-container.with-overlay::before {
+  display: block;
+  position: absolute;
+  content: "";
+  background-color: #000;
+  opacity: 0.5;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .popup-container.with-avatars .eth-avatars {
   position: absolute;
   top: 96px;
@@ -29,6 +53,10 @@
 
 .popup-container.with-avatars .popup {
   width: 100%;
+}
+
+.popup-container.with-flat-background .popup {
+  background: #f7f7f7;
 }
 
 .popup-container .popup.big {
