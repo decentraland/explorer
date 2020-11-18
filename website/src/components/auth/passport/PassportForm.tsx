@@ -41,7 +41,13 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
   };
 
   const onChangeName = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    const name = filterInvalidNameCharacters((target.value || '').trim())
+    let name = (target.value || '').trim()
+    try {
+      name = filterInvalidNameCharacters(name)
+    } catch (err) {
+      // ignore
+    }
+
     setState((current) => ({
       ...current,
       name,
