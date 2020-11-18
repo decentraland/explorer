@@ -105,6 +105,10 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
             model.OnTextureUpdateEvent -= OnAvatarImageChange;
             model.OnTextureUpdateEvent += OnAvatarImageChange;
         }
+        else
+        {
+            OnAvatarImageChange(model.avatarImage);
+        }
 
         if (model.avatarImage != playerImage.texture)
             playerImage.texture = model.avatarImage;
