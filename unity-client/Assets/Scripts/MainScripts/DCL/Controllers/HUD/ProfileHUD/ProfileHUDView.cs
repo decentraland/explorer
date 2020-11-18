@@ -46,7 +46,8 @@ internal class ProfileHUDView : MonoBehaviour
 
     [Header("Name Edition")]
     [SerializeField] internal GameObject editNameTooltipGO;
-    [SerializeField] internal Button_OnPointerDown buttonEditUnverifiedName;
+    [SerializeField] internal Button_OnPointerDown buttonEditName;
+    [SerializeField] internal Button_OnPointerDown buttonEditNamePrefix;
     [SerializeField] internal TMP_InputField inputName;
     [SerializeField] internal TextMeshProUGUI textCharLimit;
 
@@ -65,7 +66,8 @@ internal class ProfileHUDView : MonoBehaviour
 
         buttonToggleMenu.onClick.AddListener(ToggleMenu);
         buttonCopyAddress.onClick.AddListener(CopyAddress);
-        buttonEditUnverifiedName.onPointerDown += () => ActivateProfileNameEditionMode(true);
+        buttonEditName.onPointerDown += () => ActivateProfileNameEditionMode(true);
+        buttonEditNamePrefix.onPointerDown += () => ActivateProfileNameEditionMode(true);
         inputName.onValueChanged.AddListener(UpdateCharLimit);
         inputName.onDeselect.AddListener((x) => ActivateProfileNameEditionMode(false));
         copyToast.gameObject.SetActive(false);
