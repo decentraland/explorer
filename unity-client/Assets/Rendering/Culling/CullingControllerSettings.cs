@@ -30,5 +30,13 @@
                 shadowRendererSizeThreshold = 5,
                 shadowMapProjectionSizeThreshold = 4,
             };
+
+        public CullingControllerSettings Clone()
+        {
+            var clone = this.MemberwiseClone() as CullingControllerSettings;
+            clone.rendererProfile = rendererProfile.Clone();
+            clone.skinnedRendererProfile = skinnedRendererProfile.Clone();
+            return clone;
+        }
     }
 }

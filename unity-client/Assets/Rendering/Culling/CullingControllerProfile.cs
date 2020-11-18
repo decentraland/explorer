@@ -32,5 +32,10 @@ namespace DCL.Rendering
                 shadowMapProjectionSizeThreshold = Mathf.Lerp(p1.shadowMapProjectionSizeThreshold, p2.shadowMapProjectionSizeThreshold, t)
             };
         }
+
+        public CullingControllerProfile Clone()
+        {
+            return this.MemberwiseClone() as CullingControllerProfile;
+        }
     }
 }

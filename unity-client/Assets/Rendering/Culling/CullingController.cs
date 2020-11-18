@@ -9,7 +9,10 @@ using UniversalRenderPipelineAsset = UnityEngine.Rendering.Universal.UniversalRe
 namespace DCL.Rendering
 {
     /// <summary>
-    /// 
+    /// CullingController has the following responsibilities:
+    /// - Hides small renderers (detail objects).
+    /// - Disable unneeded shadows.
+    /// - Enable/disable animation culling for skinned renderers and animation components.
     /// </summary>
     public class CullingController : ICullingController, IDisposable
     {
@@ -50,6 +53,10 @@ namespace DCL.Rendering
             this.settings = settings;
         }
 
+        /// <summary>
+        /// Starts culling update coroutine.
+        /// The coroutine will keep running until Stop() is called or this class is disposed.
+        /// </summary>
         public void Start()
         {
             if (updateCoroutine != null)
@@ -58,6 +65,9 @@ namespace DCL.Rendering
             updateCoroutine = CoroutineStarter.Start(UpdateCoroutine());
         }
 
+        /// <summary>
+        /// Stops culling update coroutine.
+        /// </summary>
         public void Stop()
         {
             if (updateCoroutine == null)
@@ -67,6 +77,13 @@ namespace DCL.Rendering
             updateCoroutine = null;
         }
 
+        /// <summary>
+        /// Process all sceneObject renderers with the parameters set by the given profile.
+        /// 
+        /// If profile matches the skinned renderer profile in settings, the skinned renderers are going to be used.
+        /// </summary>
+        /// <param name="profile">any CullingControllerProfile</param>
+        /// <returns>IEnumerator to be yielded.</returns>
         internal IEnumerator ProcessProfile(CullingControllerProfile profile)
         {
             Renderer[] renderers = null;
@@ -128,6 +145,9 @@ namespace DCL.Rendering
             }
         }
 
+        /// <summary>
+        /// Main culling loop. Controlled by Start() and Stop() methods. 
+        /// </summary>
         IEnumerator UpdateCoroutine()
         {
             RaiseDataReport();
@@ -189,11 +209,12 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Computes the rule used for toggling skinned meshes updateWhenOffscreen param.
+        /// Skinned meshes should be always updated if near the camera to avoid false culling positives on screen edges.
         /// </summary>
-        /// <param name="settings"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
+        /// <param name="settings">Any settings object to use thresholds for computing the rule.</param>
+        /// <param name="distance">Mesh distance from camera used for computing the rule.</param>
+        /// <returns>True if mesh should be updated when offscreen, false if otherwise.</returns>
         private bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
         {
             bool finalValue = true;
@@ -208,11 +229,11 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Sets shadows and visibility for a given renderer.
         /// </summary>
-        /// <param name="r"></param>
-        /// <param name="shouldBeVisible"></param>
-        /// <param name="shouldHaveShadow"></param>
+        /// <param name="r">Renderer to be culled</param>
+        /// <param name="shouldBeVisible">If false, the renderer visibility will be set to false.</param>
+        /// <param name="shouldHaveShadow">If false, the renderer shadow will be toggled off.</param>
         private void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
         {
             var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
@@ -231,36 +252,36 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Computes the rule used for toggling renderers visibility.
         /// </summary>
-        /// <param name="profile"></param>
-        /// <param name="size"></param>
-        /// <param name="distance"></param>
-        /// <param name="boundsContainsPlayer"></param>
-        /// <param name="isOpaque"></param>
-        /// <param name="isEmissive"></param>
-        /// <returns></returns>
-        internal bool ShouldBeVisible(CullingControllerProfile profile, float size, float distance, bool boundsContainsPlayer, bool isOpaque, bool isEmissive)
+        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
+        /// <param name="viewportSize">Diagonal viewport size of the renderer.</param>
+        /// <param name="distance">Distance to camera of the renderer.</param>
+        /// <param name="boundsContainsCamera">Renderer bounds contains camera?</param>
+        /// <param name="isOpaque">Renderer is opaque?</param>
+        /// <param name="isEmissive">Renderer is emissive?</param>
+        /// <returns>True if renderer should be visible, false if otherwise.</returns>
+        internal bool ShouldBeVisible(CullingControllerProfile profile, float viewportSize, float distance, bool boundsContainsCamera, bool isOpaque, bool isEmissive)
         {
-            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || boundsContainsPlayer;
+            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || boundsContainsCamera;
 
             if (isEmissive)
-                shouldBeVisible |= size > profile.emissiveSizeThreshold;
+                shouldBeVisible |= viewportSize > profile.emissiveSizeThreshold;
 
             if (isOpaque)
-                shouldBeVisible |= size > profile.opaqueSizeThreshold;
+                shouldBeVisible |= viewportSize > profile.opaqueSizeThreshold;
 
             return shouldBeVisible;
         }
 
         /// <summary>
-        /// 
+        /// Computes the rule used for toggling renderer shadow casting.
         /// </summary>
-        /// <param name="profile"></param>
-        /// <param name="viewportSize"></param>
-        /// <param name="boundsSize"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
+        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
+        /// <param name="viewportSize">Diagonal viewport size of the renderer</param>
+        /// <param name="boundsSize">Bounds size of the renderer computed using bounds.size.magnitude</param>
+        /// <param name="distance">Distance from renderer to camera.</param>
+        /// <returns>True if renderer should have shadow, false otherwise</returns>
         internal bool ShouldHaveShadow(CullingControllerProfile profile, float viewportSize, float boundsSize, float distance)
         {
             float shadowMapRenderSize = boundsSize / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
@@ -272,9 +293,9 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Sets cullingType to all tracked animation components according to our culling rules.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>IEnumerator to be yielded.</returns>
         internal IEnumerator ProcessAnimations()
         {
             if (!settings.enableAnimationCulling)
@@ -312,10 +333,10 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Determines if the given renderer is going to be enqueued at the opaque section of the rendering pipeline.
         /// </summary>
-        /// <param name="renderer"></param>
-        /// <returns></returns>
+        /// <param name="renderer">Renderer to be checked.</param>
+        /// <returns>True if its opaque</returns>
         private bool IsOpaque(Renderer renderer)
         {
             Material firstMat = renderer.sharedMaterials[0];
@@ -333,10 +354,10 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Determines if the given renderer has emissive material traits.
         /// </summary>
-        /// <param name="renderer"></param>
-        /// <returns></returns>
+        /// <param name="renderer">Renderer to be checked.</param>
+        /// <returns>True if the renderer is emissive.</returns>
         private bool IsEmissive(Renderer renderer)
         {
             Material firstMat = renderer.sharedMaterials[0];
@@ -355,7 +376,7 @@ namespace DCL.Rendering
 
 
         /// <summary>
-        /// 
+        /// Reset all tracked renderers properties. Needed when toggling or changing settings.
         /// </summary>
         void ResetObjects()
         {
@@ -381,7 +402,9 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Sets the scene objects dirtiness.
+        /// In the next update iteration, all the scene objects are going to be gathered.
+        /// This method has performance impact. 
         /// </summary>
         public void SetDirty()
         {
@@ -389,9 +412,9 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Set settings. This will dirty the scene objects and has performance impact.
         /// </summary>
-        /// <param name="settings"></param>
+        /// <param name="settings">Settings to be set</param>
         public void SetSettings(CullingControllerSettings settings)
         {
             this.settings = settings;
@@ -400,18 +423,19 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Get current settings copy. If you need to modify it, you must set them via SetSettings afterwards.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Current settings object copy.</returns>
         public CullingControllerSettings GetSettings()
         {
-            return settings;
+            return settings.Clone();
         }
 
         /// <summary>
-        /// 
+        /// Enable or disable object visibility culling.
         /// </summary>
-        /// <param name="enabled"></param>
+        /// <param name="enabled">If disabled, object visibility culling will be toggled.
+        /// </param>
         public void SetObjectCulling(bool enabled)
         {
             if (settings.enableObjectCulling == enabled)
@@ -423,9 +447,9 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Enable or disable animation culling.
         /// </summary>
-        /// <param name="enabled"></param>
+        /// <param name="enabled">If disabled, animation culling will be toggled.</param>
         public void SetAnimationCulling(bool enabled)
         {
             if (settings.enableAnimationCulling == enabled)
@@ -437,9 +461,9 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Enable or disable shadow culling
         /// </summary>
-        /// <param name="enabled"></param>
+        /// <param name="enabled">If disabled, no shadows will be toggled.</param>
         public void SetShadowCulling(bool enabled)
         {
             if (settings.enableShadowCulling == enabled)
@@ -451,7 +475,7 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Fire the DataReport event. This will be useful for showing stats in a debug panel.
         /// </summary>
         private void RaiseDataReport()
         {
@@ -464,7 +488,7 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// 
+        /// Draw debug gizmos on the scene view.  
         /// </summary>
         /// <param name="shouldBeVisible"></param>
         /// <param name="bounds"></param>
