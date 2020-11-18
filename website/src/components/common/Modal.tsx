@@ -47,7 +47,7 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className={containerClassName} onClick={handleClose}>
       <div className={popupClassName} onClick={(e) => e.stopPropagation()}>
-        {handleClose && <div className="close" onClick={handleClose} />}
+        {onClose && <div className="close" onClick={handleClose} />}
         {children}
       </div>
       {withAvatars && <Avatars />}

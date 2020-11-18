@@ -19,7 +19,7 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
   };
   const handleClose = props.loading ? null : props.handleCancel;
   return (
-    <Modal withAvatars onClose={handleClose}>
+    <Modal withAvatars>
       <div className="termsOfServices">
         <h2>Terms of Service and Privacy Policy</h2>
         <div className="content" onScroll={handleScroll}>

@@ -1,17 +1,25 @@
-.passport {
-  min-height: 470px;
-}
+/* .passport {} */
 
 .passport h2.passportTitle {
   text-align: left;
   margin-top: 0;
-  margin-bottom: 70px;
+  margin-bottom: 50px;
   font-weight: 300;
 }
 
 .passportContainer {
   display: flex;
   flex-flow: row nowrap;
-  /* min-width: 750px; */
+  width: 702px;
   justify-content: space-around;
+}
+
+@media only screen and (min-width: 1441px) {
+  .passportContainer {
+    width: 762px;
+  }
+
+  .passport h2.passportTitle {
+    margin-bottom: 70px;
+  }
 }

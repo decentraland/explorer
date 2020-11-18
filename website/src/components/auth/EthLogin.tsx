@@ -18,7 +18,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const [showWalletSelector, setShowWalletSelector] = useState(props.showWalletSelector || false);
   const [showGuestLogin, setShowGuestLogin] = useState(props.showGuestLogin || false);
   useEffect(() => {
-    if (props.showGuestLogin === undefined && !(window as any).ethereum) {
+    if (!props.showGuestLogin && !(window as any).ethereum) {
       setShowGuestLogin(true)
     }
   }, [props.showGuestLogin])

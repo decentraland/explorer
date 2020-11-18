@@ -36,7 +36,10 @@
   background-repeat: no-repeat;
   background-origin: border-box;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  align-items: center;
+  display: flex;
 }
 
 .LoginContainer.FullPage main {
@@ -56,6 +59,7 @@
     url("../../images/login/background@2x.jpg") 2x,
     url("../../images/login/background@3x.jpg") 3x
   );
+  overflow: visible;
 }
 
 .eth-login-popup {
@@ -70,7 +74,7 @@
 
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .eth-login-popup .eth-avatars {
@@ -81,4 +85,14 @@
   align-items: flex-start;
   min-height: 480px;
   margin: 0 auto;
+}
+
+@media only screen and (max-width: 991px) {
+  .LoginContainer.FullPage main {
+    background-size: cover;
+  }
+
+  .eth-login-popup .eth-login {
+    min-height: auto;
+  }
 }

@@ -9,13 +9,13 @@
 .eth-login {
   width: 100%;
   padding-left: 475px;
-  padding-top: 96px;
+  padding-top: 168px;
   position: relative;
 }
 
 .eth-login .eth-avatars {
   position: absolute;
-  top: 0;
+  top: 72px;
   left: 0;
 }
 
@@ -117,6 +117,10 @@
   .eth-login {
     width: 100%;
     padding: 0;
+  }
+
+  .eth-login-popup .eth-login {
+    min-height: auto;
   }
 
   .eth-login .eth-avatars {

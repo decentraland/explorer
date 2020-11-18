@@ -15,7 +15,7 @@ export interface PassportProps {
 }
 
 export const Passport: React.FC<PassportProps> = (props) => (
-  <Modal withAvatars onClose={props.handleCancel}>
+  <Modal withAvatars>
     <div className="passport">
       <h2 className="passportTitle">Tell us more about you</h2>
       <div className="passportContainer">

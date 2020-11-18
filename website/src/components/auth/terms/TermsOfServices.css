@@ -1,14 +1,13 @@
 .termsOfServices {
-  /* max-width: 600px; */
   display: flex;
   flex-flow: column;
-  min-height: 470px;
+  width: 702px;
 }
 
 .termsOfServices h2 {
   text-align: left;
   margin-top: 0;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
   font-weight: 300;
 }
 
@@ -17,7 +16,7 @@
 }
 
 .termsOfServices .content {
-  margin: 1em 4em 2em;
+  margin: 0.5em 30px 2em;
   height: 300px;
   overflow: scroll;
 }
@@ -37,9 +36,10 @@
   border-radius: 12px;
   padding: 10px;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 17px;
   line-height: 20px;
+  outline: 0;
 }
 
 .termsOfServices .actions button.btnBack {
@@ -63,4 +63,14 @@
   height: 46px;
   align-items: center;
   justify-content: center;
+}
+
+@media only screen and (min-width: 1441px) {
+  .termsOfServices {
+    width: 762px;
+  }
+
+  .termsOfServices h2 {
+    margin-bottom: 50px;
+  }
 }
