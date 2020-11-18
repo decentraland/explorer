@@ -1451,7 +1451,6 @@ GameObject:
   - component: {fileID: 4422217532664195375}
   - component: {fileID: 5836100710023360963}
   - component: {fileID: 8482192270054604325}
-  - component: {fileID: 3958431274163396228}
   m_Layer: 5
   m_Name: ManaCounter
   m_TagString: Untagged
@@ -1534,23 +1533,6 @@ MonoBehaviour:
   balanceText: {fileID: 260707084216732349}
   buttonManaInfo: {fileID: 2912712797336689829}
   buttonManaPurchase: {fileID: 1057500330004096553}
---- !u!114 &3958431274163396228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2270724777094856601}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea39ce90c1a674c749c66ba7bcf164da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showHideAnimator: {fileID: 4057628118517757677}
-  hideAnimatorOnAwake: 1
-  enableAnimatorOnHover: 1
-  setVisibleDelay: 0.2
-  setHideDelay: 0.4
 --- !u!1 &2361506138328249044
 GameObject:
   m_ObjectHideFlags: 0
@@ -3281,6 +3263,7 @@ GameObject:
   - component: {fileID: 7833792406369631195}
   - component: {fileID: 1710101016293799801}
   - component: {fileID: 260707084216732349}
+  - component: {fileID: 7787482495000470817}
   m_Layer: 5
   m_Name: TextBalance
   m_TagString: Untagged
@@ -3426,6 +3409,23 @@ MonoBehaviour:
   - {fileID: 0}
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7787482495000470817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4409726587664064903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea39ce90c1a674c749c66ba7bcf164da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 4057628118517757677}
+  hideAnimatorOnAwake: 1
+  enableAnimatorOnHover: 1
+  setVisibleDelay: 0.2
+  setHideDelay: 0.4
 --- !u!1 &4447516850850615125
 GameObject:
   m_ObjectHideFlags: 0
@@ -5895,6 +5895,7 @@ GameObject:
   - component: {fileID: 5810197556616442307}
   - component: {fileID: 6012588961200596656}
   - component: {fileID: 255073619042268289}
+  - component: {fileID: 1975473615317092491}
   m_Layer: 5
   m_Name: ImageIcon
   m_TagString: Untagged
@@ -5958,6 +5959,23 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1975473615317092491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7682211542283288779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea39ce90c1a674c749c66ba7bcf164da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 4057628118517757677}
+  hideAnimatorOnAwake: 1
+  enableAnimatorOnHover: 1
+  setVisibleDelay: 0.2
+  setHideDelay: 0.4
 --- !u!1 &7763659904959465448
 GameObject:
   m_ObjectHideFlags: 0
