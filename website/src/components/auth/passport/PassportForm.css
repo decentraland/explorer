@@ -93,6 +93,7 @@
   font-weight: 800;
   font-size: 17px;
   line-height: 20px;
+  outline: 0;
 }
 
 @media only screen and (min-width: 1441px) {

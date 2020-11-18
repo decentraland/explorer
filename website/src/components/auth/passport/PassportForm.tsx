@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import "./PassportForm.css";
 
 // eslint-disable-next-line
@@ -10,31 +10,51 @@ export interface PassportFormProps {
   onSubmit: (name: string, email: string) => void;
 }
 
+export interface PassportFormState {
+  name: string,
+  hasNameError: boolean,
+  email: string,
+  hasEmailError: boolean,
+}
+
 const MAX_NAME_LENGTH = 15
 
 export const PassportForm: React.FC<PassportFormProps> = (props) => {
-  const [name, setName] = useState(props.name || "");
-  const [email, setEmail] = useState(props.email || "");
-  const hasNameError = useMemo(() => name.length > MAX_NAME_LENGTH, [name])
-  const hasEmailError = useMemo(() => email.trim().length > 0 && !emailPattern.test(email), [email])
+  const [state, setState] = useState<PassportFormState>({
+    name: props.name || '',
+    hasNameError: false,
+    email: props.email || '',
+    hasEmailError: false
+  })
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!name || name.trim().length > MAX_NAME_LENGTH) {
-      return;
-    }
-    if (email.trim().length > 0 && !emailPattern.test(email)) {
-      return;
-    }
+    const hasNameError = state.name.length > MAX_NAME_LENGTH
+    const hasEmailError = state.email.length > 0 && !emailPattern.test(state.email)
 
-    props.onSubmit(name.trim(), email.trim());
+    if (hasNameError || hasEmailError) {
+      setState((current) => ({ ...current, hasNameError, hasEmailError }))
+    } else if (!!props.onSubmit) {
+      props.onSubmit(state.name, state.email);
+    }
   };
 
   const onChangeName = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    setName(target.value);
+    const name = (target.value || '').trim()
+    setState((current) => ({
+      ...current,
+      name,
+      hasNameError: name.length > MAX_NAME_LENGTH
+    }));
   };
 
   const onChangeEmail = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(target.value);
+    const email = (target.value || '').trim()
+    setState((current) => ({
+      ...current,
+      email,
+      hasEmailError: false,
+    }));
   };
 
   return (
@@ -46,24 +66,25 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
           <input
             type="text"
             name="name"
-            className={hasNameError ? "hasError" : ""}
+            className={state.hasNameError ? "hasError" : ""}
             placeholder="Your avatar name"
-            value={name}
+            autoComplete="0"
+            value={state.name}
             onChange={onChangeName}
           />
-          <em className={'hint' + (hasNameError ? ' hasError' : '')}>{Math.max(MAX_NAME_LENGTH - name.length, 0)}/{MAX_NAME_LENGTH}</em>
+          <em className={'hint' + (state.hasNameError ? ' hasError' : '')}>{Math.max(MAX_NAME_LENGTH - state.name.length, 0)}/{MAX_NAME_LENGTH}</em>
         </div>
         <div className="inputGroup">
           <label>Let's stay in touch</label>
           <input
             type="text"
             name="email"
-            className={hasEmailError ? "hasError" : ""}
+            className={state.hasEmailError ? "hasError" : ""}
             placeholder="Enter your email"
-            value={email}
+            value={state.email}
             onChange={onChangeEmail}
           />
-          <em className="hint hasError">{hasEmailError ? 'Enter a valid email' : ''}</em>
+          <em className="hint hasError">{state.hasEmailError ? 'Enter a valid email' : ''}</em>
         </div>
         <div className="actions">
           <button type="submit" className="btnSubmit">
