@@ -23,27 +23,6 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
             avatarImage = texture;
             OnTextureUpdateEvent?.Invoke(texture);
         }
-
-       public static Model FromUserStatus(FriendsController.UserStatus newStatus)
-        {
-            var model = new Model
-            {
-                status = newStatus.presence,
-                coords = newStatus.position,
-                realm = string.Empty,
-                realmServerName = string.Empty,
-                realmLayerName = string.Empty
-            };
-
-            if (newStatus.realm != null)
-            {
-                model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
-                model.realmServerName = newStatus.realm.serverName;
-                model.realmLayerName = newStatus.realm.layer;
-            }
-
-            return model;
-        }
     }
 
     public Model model { get; private set; } = new Model();
@@ -108,7 +87,7 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
 
         if (model.avatarImage != playerImage.texture)
-            playerImage.texture = model.avatarImage;
+            OnAvatarImageChange(model.avatarImage);
 
         playerBlockedImage.enabled = model.blocked;
     }

@@ -94,7 +94,29 @@ public class FriendsHUDController : IHUD
 
     private void OnUpdateUserStatus(string userId, FriendsController.UserStatus newStatus)
     {
-        FriendEntryBase.Model model = FriendEntryBase.Model.FromUserStatus(newStatus);
+        var model = new FriendEntry.Model();
+
+        FriendEntryBase entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
+
+        if (entry != null)
+            model = entry.model;
+
+        model.status = newStatus.presence;
+        model.coords = newStatus.position;
+
+        if (newStatus.realm != null)
+        {
+            model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+            model.realmServerName = newStatus.realm.serverName;
+            model.realmLayerName = newStatus.realm.layer;
+        }
+        else
+        {
+            model.realm = string.Empty;
+            model.realmServerName = string.Empty;
+            model.realmLayerName = string.Empty;
+        }
+
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);
     }
