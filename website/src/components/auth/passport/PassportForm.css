@@ -9,29 +9,34 @@
 .passportForm form .inputGroup {
   display: flex;
   flex-flow: column nowrap;
-  padding: 1em;
+  padding: 16px 16px 32px 16px;
+  position: relative;
 }
 
-.passportForm form .inputGroup em.error {
+.passportForm form .inputGroup em.hint,
+.passportForm form .inputGroup em.required {
   font-style: normal;
   font-weight: normal;
   font-size: 15px;
   line-height: 18px;
-  color: #ff2d55;
+}
+
+.passportForm form .inputGroup em.hint {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  color: #333333;
+  opacity: 0.5;
 }
 
 .passportForm form .inputGroup input.hasError {
   border-color: #ff2d55;
 }
 
-.passportForm form .inputGroup em.warningLength {
-  font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
-  line-height: 17px;
-  text-align: right;
-  color: #333333;
-  opacity: 0.5;
+.passportForm form .inputGroup em.required,
+.passportForm form .inputGroup em.hint.hasError {
+  color: #ff2d55;
+  opacity: 1;
 }
 
 .passportForm form label {
@@ -44,14 +49,24 @@
 .passportForm form input {
   width: 345px;
   height: 45px;
-  border: 2px solid #c4c7d3;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   background-color: #ffffff;
-  font-weight: bold;
-  margin: 0.2em 0;
+  margin: 10px 0 8px;
   padding: 0 0.5em;
-  font-size: 20px;
   line-height: 25px;
+  outline: 0;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.passportForm form input:focus,
+.passportForm form input:active {
+  border: 2px solid #c4c7d3;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.05);
 }
 
 .passportForm form input::placeholder {

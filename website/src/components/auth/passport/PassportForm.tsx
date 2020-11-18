@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "./PassportForm.css";
 
 // eslint-disable-next-line
@@ -10,35 +10,30 @@ export interface PassportFormProps {
   onSubmit: (name: string, email: string) => void;
 }
 
+const MAX_NAME_LENGTH = 15
+
 export const PassportForm: React.FC<PassportFormProps> = (props) => {
-  const [chars, setChars] = useState(props.name ? props.name.length : 0);
   const [name, setName] = useState(props.name || "");
   const [email, setEmail] = useState(props.email || "");
-  const [hasNameError, setNameError] = useState(false);
-  const [hasEmailError, setEmailError] = useState(false);
+  const hasNameError = useMemo(() => name.length > MAX_NAME_LENGTH, [name])
+  const hasEmailError = useMemo(() => email.trim().length > 0 && !emailPattern.test(email), [email])
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!name || name.trim().length > 15) {
-      setNameError(true);
+    if (!name || name.trim().length > MAX_NAME_LENGTH) {
       return;
     }
     if (email.trim().length > 0 && !emailPattern.test(email)) {
-      setEmailError(true);
       return;
     }
+
     props.onSubmit(name.trim(), email.trim());
   };
 
   const onChangeName = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    if (target.value.length <= 15) {
-      setNameError(false);
-      setName(target.value);
-      setChars(target.value.length);
-    }
+    setName(target.value);
   };
 
   const onChangeEmail = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    setEmailError(false);
     setEmail(target.value);
   };
 
@@ -46,9 +41,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
     <div className="passportForm">
       <form method="POST" onSubmit={handleSubmit}>
         <div className="inputGroup">
-          {hasNameError && (
-            <em className="error">*required field (you can edit it later)</em>
-          )}
+          <em className="required">* required field (you can edit it later)</em>
           <label>Name your avatar</label>
           <input
             type="text"
@@ -58,10 +51,9 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
             value={name}
             onChange={onChangeName}
           />
-          {chars > 0 && <em className="warningLength">{chars}/15</em>}
+          <em className={'hint' + (hasNameError ? ' hasError' : '')}>{Math.max(MAX_NAME_LENGTH - name.length, 0)}/{MAX_NAME_LENGTH}</em>
         </div>
         <div className="inputGroup">
-          {hasEmailError && <em className="error">*email not valid</em>}
           <label>Let's stay in touch</label>
           <input
             type="text"
@@ -71,6 +63,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
             value={email}
             onChange={onChangeEmail}
           />
+          <em className="hint hasError">{hasEmailError ? 'Enter a valid email' : ''}</em>
         </div>
         <div className="actions">
           <button type="submit" className="btnSubmit">
