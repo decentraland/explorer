@@ -48,42 +48,28 @@
 }
 
 .eth-login-guest-button {
-  border: 0;
-  width: 280px;
-  height: 66px;
   color: white;
+  background: transparent;
+  border: 0;
   cursor: pointer;
-  border-radius: 16px;
-  background-color: rgba(255, 255, 255, 0.2);
   font-style: normal;
-  font-weight: normal;
-  font-size: 25px;
-  line-height: 30px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 19px;
   text-align: center;
-  mix-blend-mode: normal;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  text-decoration: underline;
   outline: 0;
-  transition: transform 0.1s ease;
-}
-
-.eth-login-guest-button:hover {
-  transform: translateY(-5px);
-}
-
-.eth-login-guest-button:active {
-  background-color: rgba(255, 255, 255, 0.1);
-  text-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
-  transform: translateY(0);
 }
 
 #eth-login-confirmation-wrapper .eth-login-guest-button {
-  margin-top: 26px;
+  margin-top: 21px;
 }
 
 .eth-login-confirm-button {
   color: #ffffff;
-  width: 280px;
-  height: 65px;
+  width: 216px;
+  height: 60px;
   cursor: pointer;
   border: 0;
   border-radius: 16px;

@@ -20,13 +20,17 @@ export enum LoginStage {
   COMPLETED = "completed",
 }
 
-const mapStateToProps = (state: any) => ({
-  stage: state.session.loginStage,
-  signing: state.session.signing,
-  subStage: state.session.signup.stage,
-  provider: state.session.currentProvider,
-  showWallet: window.location.search.indexOf("show_wallet=1") !== -1,
-});
+const mapStateToProps = (state: any) => {
+  const params = new URLSearchParams(window.location.search)
+  return {
+    stage: state.session.loginStage,
+    signing: state.session.signing,
+    subStage: state.session.signup.stage,
+    provider: state.session.currentProvider,
+    showWalletSelector: params.has('show_wallet'),
+    showGuestLogin: params.has('show_guest'),
+  }
+};
 
 const mapDispatchToProps = (dispatch: any) => ({
   onLogin: (provider: string) =>
@@ -40,7 +44,8 @@ export interface LoginContainerProps {
   signing: boolean;
   subStage: string;
   provider?: string | null;
-  showWallet?: boolean;
+  showWalletSelector?: boolean;
+  showGuestLogin?: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
@@ -65,7 +70,8 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
                   onLogin={props.onLogin}
                   onGuest={props.onGuest}
                   provider={props.provider}
-                  showWallet={props.showWallet}
+                  showWalletSelector={props.showWalletSelector}
+                  showGuestLogin={props.showGuestLogin}
                 />
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && (

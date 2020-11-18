@@ -25,20 +25,28 @@ const Template: Story<LoginContainerProps & { state: any }> = ({
   state,
   ...props
 }) => (
-  <Provider store={createStore(() => state, state)}>
-    <LoginContainer {...props} />
-  </Provider>
-);
+    <Provider store={createStore(() => state, state)}>
+      <LoginContainer {...props} />
+    </Provider>
+  );
 
 export const LoadingState = Template.bind({});
 LoadingState.args = {
   ...Template.args,
 };
 
-export const signInUp = Template.bind({});
-signInUp.args = {
+export const play = Template.bind({});
+play.args = {
   ...Template.args,
   stage: LoginStage.SIGN_IN,
+  showGuestLogin: false
+};
+
+export const playAsGuest = Template.bind({});
+playAsGuest.args = {
+  ...Template.args,
+  stage: LoginStage.SIGN_IN,
+  showGuestLogin: true
 };
 
 export const passport = Template.bind({});

@@ -42,7 +42,7 @@
 .LoginContainer.FullPage main {
   height: auto;
   min-height: 86vh;
-  background-size: contain;
+  background-size: 100%;
   background-color: white;
   background-position: top center;
   background-image: url("../../images/login/background@1x.jpg");
