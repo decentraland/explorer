@@ -177,7 +177,7 @@ namespace DCL.SettingsHUD
 
             cullingToggle.onValueChanged.AddListener(value =>
                 {
-                    tempQualitySetting.limitSmallObjectsDetail = value;
+                    tempQualitySetting.enableDetailObjectCulling = value;
                     cullingSlider.enabled = value;
                     isDirty = true;
                 }
@@ -185,7 +185,7 @@ namespace DCL.SettingsHUD
 
             cullingSlider.onValueChanged.AddListener(value =>
             {
-                tempQualitySetting.limitSmallObjectsRange = value;
+                tempQualitySetting.detailObjectCullingThreshold = value;
                 cullingSliderValueLabel.text = value.ToString();
                 isDirty = true;
             });

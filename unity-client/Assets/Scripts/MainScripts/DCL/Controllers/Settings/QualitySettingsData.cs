@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.Serialization;
 
 namespace DCL.SettingsData
 {
@@ -75,11 +76,11 @@ namespace DCL.SettingsData
         [Tooltip("Shadow Distance")] [Range(30, 100)]
         public float shadowDistance;
 
-        [Tooltip("Enable culling for small objects in the viewport.")] [Range(30, 100)]
-        public bool limitSmallObjectsDetail;
+        [Tooltip("Enable culling for detail objects in the viewport.")]
+        public bool enableDetailObjectCulling;
 
-        [Tooltip("If limit small objects detail is ON, this slider determines the relative size of culled objects from tiny to big. Bigger values gives better performance, but more objects will be hidden.")] [Range(0, 1)]
-        public float limitSmallObjectsRange;
+        [Tooltip("If detail object culling is ON, this slider determines the relative size of culled objects from tiny to big. Bigger values gives better performance, but more objects will be hidden.")] [Range(0, 100)]
+        public float detailObjectCullingThreshold;
 
         public bool Equals(QualitySettings otherSetting)
         {
@@ -93,8 +94,8 @@ namespace DCL.SettingsData
             if (bloom != otherSetting.bloom) return false;
             if (colorGrading != otherSetting.colorGrading) return false;
             if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) < 0.001f) return false;
-            if (limitSmallObjectsDetail != otherSetting.limitSmallObjectsDetail) return false;
-            if (Mathf.Abs(limitSmallObjectsRange - otherSetting.limitSmallObjectsRange) < 0.001f) return false;
+            if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
+            if (Mathf.Abs(detailObjectCullingThreshold - otherSetting.detailObjectCullingThreshold) < 0.001f) return false;
 
             return true;
         }

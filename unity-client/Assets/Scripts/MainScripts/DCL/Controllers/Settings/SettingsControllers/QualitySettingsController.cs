@@ -104,23 +104,23 @@ namespace DCL.SettingsController
                 }
             }
 
-            Environment.i.cullingController.SetObjectCulling(qualitySettings.limitSmallObjectsDetail);
-            Environment.i.cullingController.SetShadowCulling(qualitySettings.limitSmallObjectsDetail);
+            Environment.i.cullingController.SetObjectCulling(qualitySettings.enableDetailObjectCulling);
+            Environment.i.cullingController.SetShadowCulling(qualitySettings.enableDetailObjectCulling);
             Environment.i.cullingController.SetDirty();
 
-            if (qualitySettings.limitSmallObjectsDetail)
+            if (qualitySettings.enableDetailObjectCulling)
             {
                 var settings = Environment.i.cullingController.GetSettings();
 
                 settings.rendererProfile = CullingControllerProfile.Lerp(
                     cullingControllerSettingsData.rendererProfileMin,
                     cullingControllerSettingsData.rendererProfileMax,
-                    qualitySettings.limitSmallObjectsRange / 100.0f);
+                    qualitySettings.detailObjectCullingThreshold / 100.0f);
 
                 settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
                     cullingControllerSettingsData.skinnedRendererProfileMin,
                     cullingControllerSettingsData.skinnedRendererProfileMax,
-                    qualitySettings.limitSmallObjectsRange / 100.0f);
+                    qualitySettings.detailObjectCullingThreshold / 100.0f);
 
                 Environment.i.cullingController.SetSettings(settings);
             }
