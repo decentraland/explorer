@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,6 +21,27 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         public void OnSpriteUpdate(Texture2D texture)
         {
             OnTextureUpdateEvent?.Invoke(texture);
+        }
+
+       public static Model FromUserStatus(FriendsController.UserStatus newStatus)
+        {
+            var model = new Model
+            {
+                status = newStatus.presence,
+                coords = newStatus.position,
+                realm = string.Empty,
+                realmServerName = string.Empty,
+                realmLayerName = string.Empty
+            };
+
+            if (newStatus.realm != null)
+            {
+                model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
+                model.realmServerName = newStatus.realm.serverName;
+                model.realmLayerName = newStatus.realm.layer;
+            }
+
+            return model;
         }
     }
 

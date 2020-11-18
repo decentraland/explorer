@@ -94,29 +94,7 @@ public class FriendsHUDController : IHUD
 
     private void OnUpdateUserStatus(string userId, FriendsController.UserStatus newStatus)
     {
-        var model = new FriendEntry.Model();
-
-        FriendEntryBase entry = view.friendsList.GetEntry(userId) ?? view.friendRequestsList.GetEntry(userId);
-
-        if (entry != null)
-            model = entry.model;
-
-        model.status = newStatus.presence;
-        model.coords = newStatus.position;
-
-        if (newStatus.realm != null)
-        {
-            model.realm = $"{newStatus.realm.serverName.ToUpperFirst()} {newStatus.realm.layer.ToUpperFirst()}";
-            model.realmServerName = newStatus.realm.serverName;
-            model.realmLayerName = newStatus.realm.layer;
-        }
-        else
-        {
-            model.realm = string.Empty;
-            model.realmServerName = string.Empty;
-            model.realmLayerName = string.Empty;
-        }
-
+        FriendEntryBase.Model model = FriendEntryBase.Model.FromUserStatus(newStatus);
         view.friendsList.UpdateEntry(userId, model);
         view.friendRequestsList.UpdateEntry(userId, model);
     }
@@ -161,7 +139,7 @@ public class FriendsHUDController : IHUD
                 break;
             case FriendshipAction.APPROVED:
                 view.friendRequestsList.RemoveEntry(userId);
-                view.friendsList.CreateOrUpdateEntry(userId, friendEntryModel);
+                view.friendsList.RequestCreateEntry(userId, friendEntryModel);
                 break;
             case FriendshipAction.REJECTED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
@@ -175,7 +153,7 @@ public class FriendsHUDController : IHUD
                 view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, true);
                 break;
             case FriendshipAction.REQUESTED_TO:
-                view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, false);
+                view.friendRequestsList.CreateOrUpdateEntry(userId,  friendEntryModel, false);
                 break;
             case FriendshipAction.DELETED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;

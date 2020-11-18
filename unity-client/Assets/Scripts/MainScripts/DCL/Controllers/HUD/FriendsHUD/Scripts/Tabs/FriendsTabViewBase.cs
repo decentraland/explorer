@@ -1,3 +1,4 @@
+using System.Collections;
 using DCL.Helpers;
 using DCL.Configuration;
 using System.Collections.Generic;
@@ -123,7 +124,15 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     protected Dictionary<string, FriendEntryBase> entries = new Dictionary<string, FriendEntryBase>();
     protected Dictionary<string, PoolableObject> instantiatedFriendEntries = new Dictionary<string, PoolableObject>();
     protected Pool friendEntriesPool;
-    private bool forceLayout = false;
+    protected bool layoutIsDirty = false;
+
+    private Coroutine processPerFrameCoroutine = null;
+
+    private void Awake()
+    {
+        //Use a coroutine instead of an Update method to load the entries in the background while the gameobject is disabled
+        processPerFrameCoroutine = CoroutineStarter.Start(ProcessInFrameLoop());
+    }
 
     internal List<FriendEntryBase> GetAllEntries()
     {
@@ -143,7 +152,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         if (rectTransform == null)
             rectTransform = transform as RectTransform;
 
-        forceLayout = true;
+        layoutIsDirty = true;
     }
 
     protected virtual void OnDisable()
@@ -152,12 +161,21 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         contextMenuPanel.Hide();
     }
 
-    private void LateUpdate()
+    protected virtual void ProcessInFrame()
     {
-        if (forceLayout)
+        if (layoutIsDirty)
         {
-            forceLayout = false;
+            layoutIsDirty = false;
             rectTransform.ForceUpdateLayout();
+        }
+    }
+
+    private IEnumerator ProcessInFrameLoop()
+    {
+        while (true)
+        {
+            ProcessInFrame();
+            yield return null;
         }
     }
 
@@ -192,6 +210,11 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
     {
         contextMenuPanel.OnBlock -= OnPressBlockButton;
         contextMenuPanel.OnUnfriend -= OnPressDeleteButton;
+        if (processPerFrameCoroutine != null)
+        {
+            CoroutineStarter.Stop(processPerFrameCoroutine);
+            processPerFrameCoroutine = null;
+        }
     }
 
     protected virtual void OnPressDeleteButton(string userId)
@@ -208,17 +231,12 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public virtual void CreateOrUpdateEntry(string userId, FriendEntryBase.Model model)
-    {
-        CreateEntry(userId);
-        UpdateEntry(userId, model);
-    }
-
-    public virtual bool CreateEntry(string userId)
+    protected virtual bool CreateEntry(string userId)
     {
         if (entries.ContainsKey(userId)) return false;
 
         PoolableObject newFriendEntry = friendEntriesPool.Get();
+        newFriendEntry.gameObject.name = $"FriendEntry {userId}";
         instantiatedFriendEntries.Add(userId, newFriendEntry);
         var entry = newFriendEntry.gameObject.GetComponent<FriendEntryBase>();
         entries.Add(userId, entry);
@@ -230,7 +248,6 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         };
 
         UpdateEmptyListObjects();
-
         return true;
     }
 
@@ -243,7 +260,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
         entry.Populate(model);
         entry.userId = userId;
 
-        forceLayout = true;
+        layoutIsDirty = true;
         return true;
     }
 
@@ -260,7 +277,7 @@ public class FriendsTabViewBase : MonoBehaviour, IPointerDownHandler
 
         UpdateEmptyListObjects();
 
-        forceLayout = true;
+        layoutIsDirty = true;
         return true;
     }
 
