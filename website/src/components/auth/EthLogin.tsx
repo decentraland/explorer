@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { WalletSelector } from "./wallet/WalletSelector";
 import { LoginHeader } from "./LoginHeader";
 import { Spinner } from "../common/Spinner";
