@@ -17,7 +17,7 @@ export const TermsOfServices: React.FC<TermsOfServicesProps> = (props) => {
       e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     setRead(isBottom);
   };
-  const handleClose = props.loading ? null : props.handleCancel;
+
   return (
     <Modal withAvatars>
       <div className="termsOfServices">
