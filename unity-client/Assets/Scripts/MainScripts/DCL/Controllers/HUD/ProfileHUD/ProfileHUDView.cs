@@ -248,6 +248,9 @@ internal class ProfileHUDView : MonoBehaviour
 
     internal void ActivateProfileNameEditionMode(bool activate)
     {
+        if (profile.hasClaimedName)
+            return;
+
         editNameTooltipGO.SetActive(!activate);
         textName.gameObject.SetActive(!activate);
         inputName.gameObject.SetActive(activate);
