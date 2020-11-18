@@ -15,7 +15,14 @@ export class MetamaskConnector implements ConnectorInterface {
   }
 
   async login() {
-    return window.ethereum.request({ method: 'eth_requestAccounts' })
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    this.subscribeToChanges()
+    return accounts
+  }
+
+  private subscribeToChanges() {
+    window.ethereum.on('accountsChanged', (accounts: string[]) => location.reload())
+    window.ethereum.on('disconnect', (code: number, reason: string) => location.reload())
   }
 
   async logout() {
