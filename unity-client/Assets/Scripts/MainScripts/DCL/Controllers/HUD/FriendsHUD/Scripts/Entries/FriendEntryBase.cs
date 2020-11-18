@@ -20,7 +20,6 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         public event System.Action<Texture2D> OnTextureUpdateEvent;
         public void OnSpriteUpdate(Texture2D texture)
         {
-            avatarImage = texture;
             OnTextureUpdateEvent?.Invoke(texture);
         }
 
@@ -87,6 +86,11 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     protected virtual void OnDisable()
     {
         OnPointerExit(null);
+    }
+
+    protected void OnDestroy()
+    {
+        model.OnTextureUpdateEvent -= OnAvatarImageChange;
     }
 
     public virtual void Populate(Model model)
