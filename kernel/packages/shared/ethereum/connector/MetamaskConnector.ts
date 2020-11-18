@@ -20,12 +20,12 @@ export class MetamaskConnector implements ConnectorInterface {
     return accounts
   }
 
+  async logout() {
+    return true
+  }
+
   private subscribeToChanges() {
     window.ethereum.on('accountsChanged', (accounts: string[]) => location.reload())
     window.ethereum.on('disconnect', (code: number, reason: string) => location.reload())
-  }
-
-  async logout() {
-    return true
   }
 }
