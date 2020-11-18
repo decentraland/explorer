@@ -41,8 +41,10 @@ internal class ProfileHUDView : MonoBehaviour
     [SerializeField] internal Button buttonCopyAddress;
     [SerializeField] internal Button buttonLogOut;
     [SerializeField] internal Button buttonSignUp;
-    [SerializeField] internal Button_OnPointerDown buttonTermsOfService;
-    [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicy;
+    [SerializeField] internal Button_OnPointerDown buttonTermsOfServiceForConnectedWallets;
+    [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicyForConnectedWallets;
+    [SerializeField] internal Button_OnPointerDown buttonTermsOfServiceForNonConnectedWallets;
+    [SerializeField] internal Button_OnPointerDown buttonPrivacyPolicyForNonConnectedWallets;
 
     [Header("Name Edition")]
     [SerializeField] internal GameObject editNameTooltipGO;

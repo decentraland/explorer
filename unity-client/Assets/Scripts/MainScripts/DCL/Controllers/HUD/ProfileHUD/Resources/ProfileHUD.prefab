@@ -4761,8 +4761,10 @@ MonoBehaviour:
   buttonCopyAddress: {fileID: 579196943523515688}
   buttonLogOut: {fileID: 2439665739510493948}
   buttonSignUp: {fileID: 3277634955613374390}
-  buttonTermsOfService: {fileID: 2723056823137290535}
-  buttonPrivacyPolicy: {fileID: 5791542833153009396}
+  buttonTermsOfServiceForConnectedWallets: {fileID: 2723056823137290535}
+  buttonPrivacyPolicyForConnectedWallets: {fileID: 5791542833153009396}
+  buttonTermsOfServiceForNonConnectedWallets: {fileID: 8381696594370864404}
+  buttonPrivacyPolicyForNonConnectedWallets: {fileID: 469574609952201613}
   editNameTooltipGO: {fileID: 3739227615172725189}
   buttonEditName: {fileID: 4842267451200066465}
   buttonEditNamePrefix: {fileID: 25184568078992844}
