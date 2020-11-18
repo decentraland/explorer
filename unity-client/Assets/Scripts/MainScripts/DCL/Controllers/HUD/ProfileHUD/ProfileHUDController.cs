@@ -52,7 +52,7 @@ public class ProfileHUDController : IHUD
         if (manaCounterView)
         {
             manaCounterView.buttonManaInfo.onPointerDown += () => WebInterface.OpenURL(URL_MANA_INFO);
-            manaCounterView.buttonManaPurchase.onPointerDown += () => WebInterface.OpenURL(URL_MANA_PURCHASE);
+            manaCounterView.buttonManaPurchase.onClick.AddListener(() => WebInterface.OpenURL(URL_MANA_PURCHASE));
         }
 
         ownUserProfile.OnUpdate += OnProfileUpdated;
