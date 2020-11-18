@@ -32,7 +32,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
         <h2 className="walletSelectorTitle">Sign In or Create an Account</h2>
         <div className="walletButtonContainer">
           {loading && <Spinner />}
-          {!loading && <WalletButton logo="Metamask" disabled={!metamask} href="https://metamask.io/" onClick={handleClick} />}
+          {!loading && <WalletButton logo="Metamask" active={!!metamask} href="https://metamask.io/" onClick={handleClick} />}
           {!loading && <WalletButton logo="Fortmatic" onClick={handleClick} />}
         </div>
       </div>

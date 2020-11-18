@@ -7,7 +7,7 @@ export type WalletButtonLogo = 'Metamask' | 'Fortmatic'
 
 export interface WalletButtonProps {
   logo: WalletButtonLogo
-  disabled?: boolean;
+  active?: boolean;
   href?: string;
   onClick: (event: React.MouseEvent<HTMLAnchorElement>, logo: WalletButtonLogo) => void;
 }
@@ -15,7 +15,7 @@ export interface WalletButtonProps {
 export const WalletButton: React.FC<WalletButtonProps> = ({
   logo,
   href,
-  disabled,
+  active,
   onClick,
 }) => {
 
@@ -50,16 +50,17 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
   }, [logo])
 
   function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
-    if (!href) {
+    if (active) {
       event.preventDefault()
     }
+
     if (onClick) {
       onClick(event, logo)
     }
   }
 
   let className = 'walletButton'
-  if (disabled) {
+  if (!active) {
     className += ' disabled'
   }
 

@@ -26,7 +26,7 @@ MetamaskButton.args = {
 export const MetamaskDisabledButton = MetamaskButton.bind({});
 MetamaskDisabledButton.args = {
   ...MetamaskButton.args,
-  disabled: true,
+  active: true,
 };
 
 export const FortmaticButton = Template.bind({});
