@@ -39,7 +39,7 @@ import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
-import { filterInvalidNameCharacters } from 'shared/profiles/utils/names'
+import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 
 const logger = createLogger('website.ts: ')
 
@@ -127,7 +127,7 @@ namespace webApp {
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: false, visible: false })
             globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
             Html.switchGameContainer(true)
           })
@@ -202,6 +202,7 @@ namespace webApp {
   // This is not very good because we can't type check it.
   // In the future, we should probably replace this with a library
   export const utils = {
+    isBadWord,
     filterInvalidNameCharacters
   }
 }
