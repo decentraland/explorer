@@ -22,6 +22,12 @@
   margin: 0.5em 30px 2em;
   height: 300px;
   overflow: scroll;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+}
+
+.termsOfServices .content::-webkit-scrollbar {
+  display: none;
 }
 
 .termsOfServices .actions {
@@ -43,7 +49,7 @@
   font-size: 17px;
   line-height: 20px;
   outline: 0;
-  margin: 0 10px;
+  margin: 0 34px;
 }
 
 .termsOfServices .actions button.btnBack {
