@@ -114,7 +114,7 @@ export const createFakeName = (userId: string) => {
     'Walrus',
     'Wolf',
     'Worm',
-    'Zebra',
+    'Zebra'
   ]
   return names[Math.floor(Math.random() * names.length)] + '-' + userId.substr(2, 6)
 }
