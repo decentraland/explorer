@@ -71,8 +71,6 @@ namespace SceneBoundariesCheckerTests
             yield return new WaitUntil(() => gltfShape2.alreadyLoaded);
             yield return null;
 
-            Debug.Log(entity2.meshesInfo.meshRootGameObject);
-
             Assert.IsFalse(SBC_Asserts.MeshIsInvalid(entity2.meshesInfo));
         }
 
