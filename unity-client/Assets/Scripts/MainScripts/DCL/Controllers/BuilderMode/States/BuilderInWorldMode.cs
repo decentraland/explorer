@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildMode : MonoBehaviour
+public class BuilderInWorldMode : MonoBehaviour
 {
 
     [Header("Snap variables")]
@@ -15,13 +15,13 @@ public class BuildMode : MonoBehaviour
     public float snapDistanceToActivateMovement = 10f;
 
     public System.Action OnInputDone;
-    public System.Action<BuildModeAction> OnActionGenerated;
+    public System.Action<BuildInWorldCompleteAction> OnActionGenerated;
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 
     protected bool isSnapActive = false, isMultiSelectionActive = false, isModeActive = false;
-    protected List<DecentralandEntityToEdit> selectedEntities;
-    public virtual void Init(GameObject goToEdit, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO, List<DecentralandEntityToEdit> selectedEntities)
+    protected List<DCLBuilderInWorldEntity> selectedEntities;
+    public virtual void Init(GameObject goToEdit, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO, List<DCLBuilderInWorldEntity> selectedEntities)
     {
         editionGO = goToEdit;
         this.undoGO = undoGO;
@@ -67,37 +67,37 @@ public class BuildMode : MonoBehaviour
 
     }
 
-    public virtual void SelectedEntity(DecentralandEntityToEdit selectedEntity)
+    public virtual void SelectedEntity(DCLBuilderInWorldEntity selectedEntity)
     {
         CenterGameObjectToEdit();
 
-        BuildModeUtils.CopyGameObjectStatus(editionGO, undoGO, false, false);
+        BuilderInWorldUtils.CopyGameObjectStatus(editionGO, undoGO, false, false);
     }
 
     public virtual void CenterGameObjectToEdit()
     {
         if (selectedEntities.Count > 0)
         {
-            foreach (DecentralandEntityToEdit entity in selectedEntities)
+            foreach (DCLBuilderInWorldEntity entity in selectedEntities)
             {
                 entity.rootEntity.gameObject.transform.SetParent(null);
             }
             editionGO.transform.position = GetCenterPointOfSelectedObjects();
             editionGO.transform.rotation = Quaternion.Euler(0, 0, 0);
             editionGO.transform.localScale = Vector3.one;
-            foreach (DecentralandEntityToEdit entity in selectedEntities)
+            foreach (DCLBuilderInWorldEntity entity in selectedEntities)
             {
                 entity.rootEntity.gameObject.transform.SetParent(editionGO.transform);
             }
         }
     }
 
-    public virtual void CreatedEntity(DecentralandEntityToEdit createdEntity)
+    public virtual void CreatedEntity(DCLBuilderInWorldEntity createdEntity)
     {
 
     }
 
-    public virtual void EntityDeselected(DecentralandEntityToEdit entityDeselected)
+    public virtual void EntityDeselected(DCLBuilderInWorldEntity entityDeselected)
     {
         CenterGameObjectToEdit();
     }
@@ -134,7 +134,7 @@ public class BuildMode : MonoBehaviour
         freeMovementGO.transform.rotation = zeroAnglesQuaternion;
         editionGO.transform.rotation = zeroAnglesQuaternion;
 
-        foreach(DecentralandEntityToEdit decentralandEntityToEdit in selectedEntities)
+        foreach(DCLBuilderInWorldEntity decentralandEntityToEdit in selectedEntities)
         {
             decentralandEntityToEdit.rootEntity.gameObject.transform.eulerAngles = Vector3.zero;
         }
@@ -151,7 +151,7 @@ public class BuildMode : MonoBehaviour
         float totalX = 0f;
         float totalY = 0f;
         float totalZ = 0f;
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             totalX += entity.rootEntity.gameObject.transform.position.x;
             totalY += entity.rootEntity.gameObject.transform.position.y;
@@ -163,11 +163,11 @@ public class BuildMode : MonoBehaviour
         return new Vector3(centerX, centerY, centerZ);
     }
 
-    protected List<BuildModeEntityAction> actionList = new List<BuildModeEntityAction>();
+    protected List<BuilderInWorldEntityAction> actionList = new List<BuilderInWorldEntityAction>();
     protected void TransformActionStarted(DecentralandEntity entity, string type)
     {
         
-        BuildModeEntityAction buildModeEntityAction = new BuildModeEntityAction(entity);
+        BuilderInWorldEntityAction buildModeEntityAction = new BuilderInWorldEntityAction(entity);
         switch (type)
         {
             case "MOVE":
@@ -187,8 +187,8 @@ public class BuildMode : MonoBehaviour
     protected void TransformActionEnd(DecentralandEntity entity, string type)
     {
 
-        List<BuildModeEntityAction> removeList = new List<BuildModeEntityAction>();
-        foreach (BuildModeEntityAction entityAction in actionList)
+        List<BuilderInWorldEntityAction> removeList = new List<BuilderInWorldEntityAction>();
+        foreach (BuilderInWorldEntityAction entityAction in actionList)
         {
             if (entityAction.entity == entity)
             {
@@ -214,23 +214,23 @@ public class BuildMode : MonoBehaviour
              
             }
         }
-        foreach (BuildModeEntityAction entityAction in removeList)
+        foreach (BuilderInWorldEntityAction entityAction in removeList)
         {
             actionList.Remove(entityAction);
         }
     }
 
-    protected void ActionFinish(BuildModeAction.ActionType type)
+    protected void ActionFinish(BuildInWorldCompleteAction.ActionType type)
     {
         if (actionList.Count > 0 && selectedEntities.Count > 0)
         {
-            BuildModeAction buildModeAction = new BuildModeAction();
+            BuildInWorldCompleteAction buildModeAction = new BuildInWorldCompleteAction();
 
             buildModeAction.actionType = type;
             buildModeAction.CreateActionType(actionList, type);
             OnActionGenerated?.Invoke(buildModeAction);
 
-            actionList = new List<BuildModeEntityAction>();
+            actionList = new List<BuilderInWorldEntityAction>();
         }
     }
 }

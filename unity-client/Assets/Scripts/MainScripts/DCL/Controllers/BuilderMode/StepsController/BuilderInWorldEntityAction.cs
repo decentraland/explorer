@@ -3,17 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildModeEntityAction 
+public class BuilderInWorldEntityAction 
 {
     public DecentralandEntity entity;
     public object oldValue, newValue;
 
 
-    public BuildModeEntityAction(DecentralandEntity entity)
+    public BuilderInWorldEntityAction(DecentralandEntity entity)
     {
         this.entity = entity;
     }
-    public BuildModeEntityAction(DecentralandEntity entity,object oldValue,object newValue)
+    public BuilderInWorldEntityAction(DecentralandEntity entity,object oldValue,object newValue)
     {
         this.entity = entity;
         this.oldValue = oldValue;

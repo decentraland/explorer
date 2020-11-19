@@ -11,8 +11,8 @@ public class EntityListAdapter : MonoBehaviour
     public Color iconsSelectedColor, iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
     public Image selectedImg, lockImg, showImg;
-    public System.Action<BuildModeEntityListController.EntityAction, DecentralandEntityToEdit, EntityListAdapter> OnActionInvoked;
-    DecentralandEntityToEdit currentEntity;
+    public System.Action<BuilderInWorldEntityListController.EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
+    DCLBuilderInWorldEntity currentEntity;
 
 
     private void OnDestroy()
@@ -24,7 +24,7 @@ public class EntityListAdapter : MonoBehaviour
         }
     }
 
-    public void SetContent(DecentralandEntityToEdit decentrelandEntity)
+    public void SetContent(DCLBuilderInWorldEntity decentrelandEntity)
     {
         if(currentEntity != null)
         {
@@ -40,25 +40,25 @@ public class EntityListAdapter : MonoBehaviour
 
     public void SelectOrDeselect()
     {
-        OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.SELECT,currentEntity, this);
+        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.SELECT,currentEntity, this);
     }
 
     public void ShowOrHide()
     {
-         OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.SHOW, currentEntity, this);
+         OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.SHOW, currentEntity, this);
     }
 
     public void LockOrUnlock()
     {
-        OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.LOCK, currentEntity, this);
+        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.LOCK, currentEntity, this);
     }
 
     public void DeleteEntity()
     {
-        OnActionInvoked?.Invoke(BuildModeEntityListController.EntityAction.DELETE, currentEntity, this);
+        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.DELETE, currentEntity, this);
     }
 
-    void SetInfo(DecentralandEntityToEdit entityToEdit)
+    void SetInfo(DCLBuilderInWorldEntity entityToEdit)
     {
         if (this != null)
         {
@@ -81,7 +81,7 @@ public class EntityListAdapter : MonoBehaviour
         }
     }
 
-    void DeleteAdapter(DecentralandEntityToEdit entityToEdit)
+    void DeleteAdapter(DCLBuilderInWorldEntity entityToEdit)
     {
         if (this != null)
             if (entityToEdit.entityUniqueId == currentEntity.entityUniqueId)

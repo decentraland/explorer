@@ -3,33 +3,26 @@ using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static BuildModeAction;
+using static BuildInWorldCompleteAction;
 
 public class ActionController : MonoBehaviour
 {
-    public ActionListview actionListview;
 
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
 
     public System.Action OnUndo, OnRedo;
 
 
-    List<BuildModeAction> actionsMade = new List<BuildModeAction>();
+    List<BuildInWorldCompleteAction> actionsMade = new List<BuildInWorldCompleteAction>();
 
     int currentStepIndex = 0;
-
-    private void Awake()
-    {
-        if(actionListview != null)
-            actionListview.OnActionSelected += GoToAction;
-    }
 
     public void ClearActionList()
     {
         actionsMade.Clear();
     }
 
-    public void GoToAction(BuildModeAction action)
+    public void GoToAction(BuildInWorldCompleteAction action)
     {
         int index = actionsMade.IndexOf(action);
         int stepsAmount = currentStepIndex - index;
@@ -77,23 +70,27 @@ public class ActionController : MonoBehaviour
         }
     }
 
-    public void AddAction(BuildModeAction action)
+    public void CreateActionEntityCreated(DecentralandEntity entity)
     {
-        bool removedActions = false;
-        if (currentStepIndex < actionsMade.Count-1)
-        {
+        BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entity, entity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entity));
+
+        BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
+        buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATED;
+        buildAction.CreateActionType(builderInWorldEntityAction, BuildInWorldCompleteAction.ActionType.CREATED);
+        AddAction(buildAction);
+    }
+    public void AddAction(BuildInWorldCompleteAction action)
+    {
+        if (currentStepIndex < actionsMade.Count-1)       
             actionsMade.RemoveRange(currentStepIndex, actionsMade.Count - currentStepIndex);
-            removedActions = true;
-        }
+        
         actionsMade.Add(action);
     
         currentStepIndex = actionsMade.Count-1;
-        if (removedActions && actionListview != null)
-            actionListview.SetContent(actionsMade);
         action.OnApplyValue += ApplyAction;
     }
 
-    void ApplyAction(DecentralandEntity entityToApply, object value, BuildModeAction.ActionType actionType)
+    void ApplyAction(DecentralandEntity entityToApply, object value, BuildInWorldCompleteAction.ActionType actionType, bool isUndo)
     {
         switch (actionType)
         {
@@ -113,7 +110,7 @@ public class ActionController : MonoBehaviour
                 break;
             case ActionType.CREATED:
                 string entityString = (string)value;
-                if (entityString.Length < 255)
+                if (isUndo)
                 {
                     builderInWorldEntityHandler.DeleteEntity((string)value);
                 }
@@ -121,7 +118,7 @@ public class ActionController : MonoBehaviour
                 {
                     builderInWorldEntityHandler.CreateEntityFromJSON((string)value);
                 }
-                    break;
+                break;
         }
     }
 
@@ -130,12 +127,8 @@ public class ActionController : MonoBehaviour
         if (!actionsMade[currentStepIndex].isDone)
         {
             actionsMade[currentStepIndex].ReDo();
-            if (actionListview != null)
-                actionListview.RefreshInfo();
-            OnRedo?.Invoke();
-          
-        }
-  
+            OnRedo?.Invoke();        
+        }  
     }
 
     void UndoCurrentAction()
@@ -143,11 +136,8 @@ public class ActionController : MonoBehaviour
         if (actionsMade[currentStepIndex].isDone)
         {
             actionsMade[currentStepIndex].Undo();
-            if (actionListview != null)
-                actionListview.RefreshInfo();
             OnUndo?.Invoke();         
         }
     }
-
 
 }

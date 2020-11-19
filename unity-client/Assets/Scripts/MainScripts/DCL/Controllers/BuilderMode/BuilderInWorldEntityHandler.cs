@@ -19,7 +19,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     [Header("Prefab References")]
     public OutlinerController outlinerController;
     public EntityInformationController entityInformationController;
-    public BuildModeController buildModeController;
+    public BuilderInWorldController buildModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
 
@@ -27,13 +27,13 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     public Material editMaterial;
     public Texture2D duplicateCursorTexture;
 
-    public event Action<DecentralandEntityToEdit> onSelectedEntity;
+    public event Action<DCLBuilderInWorldEntity> onSelectedEntity;
     ParcelScene sceneToEdit;
 
-    Dictionary<string, DecentralandEntityToEdit> convertedEntities = new Dictionary<string, DecentralandEntityToEdit>();
-    List<DecentralandEntityToEdit> selectedEntities = new List<DecentralandEntityToEdit>();
+    Dictionary<string, DCLBuilderInWorldEntity> convertedEntities = new Dictionary<string, DCLBuilderInWorldEntity>();
+    List<DCLBuilderInWorldEntity> selectedEntities = new List<DCLBuilderInWorldEntity>();
 
-    BuildMode currentActiveMode;
+    BuilderInWorldMode currentActiveMode;
     bool isMultiSelectionActive = false;
 
     private void OnDestroy()
@@ -67,7 +67,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         actionController.OnUndo += ReSelectEntities;
     }
 
-    public List<DecentralandEntityToEdit> GetSelectedEntityList()
+    public List<DCLBuilderInWorldEntity> GetSelectedEntityList()
     {
         return selectedEntities;
     }
@@ -77,7 +77,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return selectedEntities.Count > 0;
     }
 
-    public void SetActiveMode(BuildMode buildMode)
+    public void SetActiveMode(BuilderInWorldMode buildMode)
     {
         currentActiveMode = buildMode;
         DeselectEntities();
@@ -108,7 +108,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         
     }
 
-    void ChangeEntitySelectionFromList(DecentralandEntityToEdit entityToEdit)
+    void ChangeEntitySelectionFromList(DCLBuilderInWorldEntity entityToEdit)
     {
         if (!selectedEntities.Contains(entityToEdit))
             SelectFromList(entityToEdit);
@@ -116,7 +116,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             DeselectEntity(entityToEdit);
     }
 
-    void SelectFromList(DecentralandEntityToEdit entityToEdit)
+    void SelectFromList(DCLBuilderInWorldEntity entityToEdit)
     {
         if (!isMultiSelectionActive)
             DeselectEntities();
@@ -130,7 +130,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     }
 
-    public void DeselectEntity(DecentralandEntityToEdit entity)
+    public void DeselectEntity(DCLBuilderInWorldEntity entity)
     {
         if (!selectedEntities.Contains(entity))
             return;
@@ -168,7 +168,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     }
     
-    public void EntityClicked(DecentralandEntityToEdit entityToSelect)
+    public void EntityClicked(DCLBuilderInWorldEntity entityToSelect)
     {
         if (entityToSelect != null)
         {
@@ -196,20 +196,20 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     void ReSelectEntities()
     {
-        List<DecentralandEntityToEdit> entitiesToReselect = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        List<DCLBuilderInWorldEntity> entitiesToReselect = new List<DCLBuilderInWorldEntity>();
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             entitiesToReselect.Add(entity);
         }
         DeselectEntities();
 
-        foreach (DecentralandEntityToEdit entity in entitiesToReselect)
+        foreach (DCLBuilderInWorldEntity entity in entitiesToReselect)
         {
             SelectEntity(entity);
         }
     }
 
-    void ChangeEntitySelectStatus(DecentralandEntityToEdit entityCliked)
+    void ChangeEntitySelectStatus(DCLBuilderInWorldEntity entityCliked)
     {
         if (entityCliked.IsSelected)
             DeselectEntity(entityCliked);
@@ -219,7 +219,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void ChangeLockStateSelectedEntities()
     {
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             entity.ToggleLockStatus();
         }
@@ -228,7 +228,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void ChangeShowStateSelectedEntities()
     {
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             entity.ToggleShowStatus();
         }
@@ -236,13 +236,13 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void Select(DecentralandEntity decentralandEntity)
     {
-        DecentralandEntityToEdit entityEditable = GetConvertedEntity(decentralandEntity);
+        DCLBuilderInWorldEntity entityEditable = GetConvertedEntity(decentralandEntity);
         if (entityEditable == null) return;
 
         SelectEntity(entityEditable);
     }
 
-    public bool SelectEntity(DecentralandEntityToEdit entityEditable)
+    public bool SelectEntity(DCLBuilderInWorldEntity entityEditable)
     {
 
         if (entityEditable.IsLocked) return false;
@@ -269,10 +269,10 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return true;
     }
 
-    public List<DecentralandEntityToEdit> GetAllVoxelsEntities()
+    public List<DCLBuilderInWorldEntity> GetAllVoxelsEntities()
     {
-        List<DecentralandEntityToEdit> voxelEntities = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        List<DCLBuilderInWorldEntity> voxelEntities = new List<DCLBuilderInWorldEntity>();
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
             if (entity.rootEntity.scene == sceneToEdit && entity.isVoxel)
                 voxelEntities.Add(entity);
@@ -281,10 +281,10 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return voxelEntities;
     }
 
-    public List<DecentralandEntityToEdit> GetAllEntitiesFromCurrentScene()
+    public List<DCLBuilderInWorldEntity> GetAllEntitiesFromCurrentScene()
     {
-        List<DecentralandEntityToEdit> entities = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        List<DCLBuilderInWorldEntity> entities = new List<DCLBuilderInWorldEntity>();
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
             if (entity.rootEntity.scene == sceneToEdit) entities.Add(entity);
         }
@@ -292,7 +292,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return entities;
     }
 
-    public DecentralandEntityToEdit GetConvertedEntity(DecentralandEntity decentralandEntity)
+    public DCLBuilderInWorldEntity GetConvertedEntity(DecentralandEntity decentralandEntity)
     {
         if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(decentralandEntity)))
             return convertedEntities[GetConvertedUniqueKeyForEntity(decentralandEntity)];
@@ -303,7 +303,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void DuplicateSelectedEntities()
     {
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 return;
@@ -318,15 +318,15 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
     }
 
-    public DecentralandEntity DuplicateEntity(DecentralandEntityToEdit entityToDuplicate)
+    public DecentralandEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
     {
         DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToDuplicate.rootEntity);
 
-        BuildModeUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
+        BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
 
-        builderInWorldBridge.AddEntityOnKernel(entity,sceneToEdit);
+        NotifyEntityIsCreated(entity);
         EntityListChanged();
         return entity;
     }
@@ -342,7 +342,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return newEntity;
     }
 
-    public DecentralandEntityToEdit CreateEntity(ParcelScene parcelScene, Vector3 entryPoint, Vector3 editionGOPosition)
+    public DCLBuilderInWorldEntity CreateEmptyEntity(ParcelScene parcelScene, Vector3 entryPoint, Vector3 editionGOPosition)
     {
         DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
@@ -357,7 +357,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         parcelScene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
 
-        DecentralandEntityToEdit convertedEntity = SetupEntityToEdit(newEntity, true);
+        DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(newEntity, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
         return convertedEntity;
@@ -373,8 +373,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     void DestroyLastCreatedEntities()
     {
-        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        List<DCLBuilderInWorldEntity> entitiesToRemove = new List<DCLBuilderInWorldEntity>();
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             if (entity.IsSelected && entity.IsNew)
                 entitiesToRemove.Add(entity);
@@ -382,7 +382,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         buildModeController.UndoEditionGOLastStep();
 
-        foreach (DecentralandEntityToEdit entity in entitiesToRemove)
+        foreach (DCLBuilderInWorldEntity entity in entitiesToRemove)
         {
             DeleteEntity(entity, false);
         }
@@ -393,10 +393,10 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.buildModeHud.SetEntityList(GetEntitiesInCurrentScene());
     }
 
-    List<DecentralandEntityToEdit> GetEntitiesInCurrentScene()
+    List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
     {
-        List<DecentralandEntityToEdit> currentEntitiesInScene = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        List<DCLBuilderInWorldEntity> currentEntitiesInScene = new List<DCLBuilderInWorldEntity>();
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
             if (entity.rootEntity.scene == sceneToEdit)
                 currentEntitiesInScene.Add(entity);
@@ -404,11 +404,11 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return currentEntitiesInScene;
     }
 
-    DecentralandEntityToEdit SetupEntityToEdit(DecentralandEntity entity, bool hasBeenCreated = false)
+    DCLBuilderInWorldEntity SetupEntityToEdit(DecentralandEntity entity, bool hasBeenCreated = false)
     {
         if (!convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entity)))
         {
-            DecentralandEntityToEdit entityToEdit = Utils.GetOrCreateComponent<DecentralandEntityToEdit>(entity.gameObject);
+            DCLBuilderInWorldEntity entityToEdit = Utils.GetOrCreateComponent<DCLBuilderInWorldEntity>(entity.gameObject);
             entityToEdit.Init(entity, editMaterial);
             convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);
             entity.OnRemoved += RemoveConvertedEntity;
@@ -423,16 +423,16 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void DeleteEntity(string entityId)
     {
-        DecentralandEntityToEdit entity = convertedEntities[GetConvertedUniqueKeyForEntity(entityId)];
+        DCLBuilderInWorldEntity entity = convertedEntities[GetConvertedUniqueKeyForEntity(entityId)];
         DeleteEntity(entity, true);
     }
 
-    public void DeleteEntity(DecentralandEntityToEdit entityToDelete)
+    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete)
     {
         DeleteEntity(entityToDelete, true);
     }
 
-    public void DeleteEntity(DecentralandEntityToEdit entityToDelete, bool checkSelection = true)
+    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete, bool checkSelection = true)
     {
         if (entityToDelete.IsSelected && checkSelection)
             DeselectEntity(entityToDelete);
@@ -449,7 +449,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void DeletedSelectedEntities()
     {
-        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
+        List<DCLBuilderInWorldEntity> entitiesToRemove = new List<DCLBuilderInWorldEntity>();
 
         for (int i = 0; i < selectedEntities.Count; i++)
         {
@@ -458,7 +458,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         DeselectEntities();
 
-        foreach (DecentralandEntityToEdit entity in entitiesToRemove)
+        foreach (DCLBuilderInWorldEntity entity in entitiesToRemove)
         {
             DeleteEntity(entity);
         }
@@ -467,8 +467,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void DeleteEntitiesOutsideSceneBoundaries()
     {
-        List<DecentralandEntityToEdit> entitiesToRemove = new List<DecentralandEntityToEdit>();
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        List<DCLBuilderInWorldEntity> entitiesToRemove = new List<DCLBuilderInWorldEntity>();
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
             if (entity.rootEntity.scene == sceneToEdit)
             {
@@ -479,7 +479,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             }
         }
 
-        foreach (DecentralandEntityToEdit entity in entitiesToRemove)
+        foreach (DCLBuilderInWorldEntity entity in entitiesToRemove)
         {
             DeleteEntity(entity);
         }
@@ -487,7 +487,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     void DestroyCollidersForAllEntities()
     {
-        foreach (DecentralandEntityToEdit entity in convertedEntities.Values)
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
             entity.DestroyColliders();
         }
@@ -498,14 +498,21 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
     }
 
-    void ChangeEntityVisibilityStatus(DecentralandEntityToEdit entityToApply)
+    public void NotifyEntityIsCreated(DecentralandEntity entity)
+    {
+        builderInWorldBridge.AddEntityOnKernel(entity, sceneToEdit);
+
+   
+    }
+
+    void ChangeEntityVisibilityStatus(DCLBuilderInWorldEntity entityToApply)
     {
         entityToApply.ToggleShowStatus();
         if (!entityToApply.IsVisible && selectedEntities.Contains(entityToApply))
             DeselectEntity(entityToApply);
     }
 
-    void ChangeEntityLockStatus(DecentralandEntityToEdit entityToApply)
+    void ChangeEntityLockStatus(DCLBuilderInWorldEntity entityToApply)
     {
         entityToApply.ToggleLockStatus();
         if (entityToApply.IsLocked && selectedEntities.Contains(entityToApply))
@@ -525,7 +532,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     bool AreAllSelectedEntitiesInsideBoundaries()
     {
         bool areAllIn = true;
-        foreach (DecentralandEntityToEdit entity in selectedEntities)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {

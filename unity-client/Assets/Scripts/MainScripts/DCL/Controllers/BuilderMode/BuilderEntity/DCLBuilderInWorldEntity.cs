@@ -8,11 +8,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using DCL.Configuration;
 
-public class DecentralandEntityToEdit : EditableEntity
+public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
 
-    public System.Action<DecentralandEntityToEdit> onStatusUpdate, OnDelete;
+    public System.Action<DCLBuilderInWorldEntity> onStatusUpdate, OnDelete;
 
     private bool isLockedValue = false;
     public bool IsLocked

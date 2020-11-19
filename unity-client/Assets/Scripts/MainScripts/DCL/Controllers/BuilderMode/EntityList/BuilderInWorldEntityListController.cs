@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BuildModeEntityListController : MonoBehaviour
+public class BuilderInWorldEntityListController : MonoBehaviour
 {
     public enum EntityAction
     {
@@ -16,11 +16,11 @@ public class BuildModeEntityListController : MonoBehaviour
         SHOW = 3
     }
 
-    public Action<DecentralandEntityToEdit>
+    public Action<DCLBuilderInWorldEntity>
         OnEntityClick,OnEntityDelete,OnEntityLock,OnEntityChangeVisibility;
     public EntityListView entityListView;
 
-    List<DecentralandEntityToEdit> entitiesList;
+    List<DCLBuilderInWorldEntity> entitiesList;
 
     private void Awake()
     {
@@ -39,7 +39,7 @@ public class BuildModeEntityListController : MonoBehaviour
         entityListView.gameObject.SetActive(true);
     }
 
-    public void SetEntityList(List<DecentralandEntityToEdit> sceneEntities)
+    public void SetEntityList(List<DCLBuilderInWorldEntity> sceneEntities)
     {
         entitiesList = sceneEntities;
         if (entityListView.gameObject.activeSelf)
@@ -52,7 +52,7 @@ public class BuildModeEntityListController : MonoBehaviour
         entityListView.gameObject.SetActive(false);
     }
 
-    public void EntityActionInvoked(EntityAction action, DecentralandEntityToEdit entityToApply,EntityListAdapter adapter)
+    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply,EntityListAdapter adapter)
     {
         switch (action)
         {

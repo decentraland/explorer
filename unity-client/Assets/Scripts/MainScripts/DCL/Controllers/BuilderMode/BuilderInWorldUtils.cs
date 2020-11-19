@@ -1,8 +1,9 @@
+using DCL.Models;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public static partial class BuildModeUtils
+public static partial class BuilderInWorldUtils
 {
 
     public static void DrawScreenRect(Rect rect, Color color)
@@ -58,7 +59,7 @@ public static partial class BuildModeUtils
     public static bool IsWithInSelectionBounds(Vector3 point, Vector3 lastClickMousePosition, Vector3 mousePosition)
     {
         Camera camera = Camera.main;
-        var viewPortBounds = BuildModeUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
+        var viewPortBounds = BuilderInWorldUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
         return viewPortBounds.Contains(camera.WorldToViewportPoint(point));
     }
 
@@ -81,7 +82,7 @@ public static partial class BuildModeUtils
     public static bool IsPointerOverMaskElement(LayerMask mask)
     {
         RaycastHit hitInfo;
-        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        UnityEngine.Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         return Physics.Raycast(mouseRay, out hitInfo, 5555, mask);
     }
 
@@ -92,6 +93,11 @@ public static partial class BuildModeUtils
         var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 1;
+    }
+
+    public static string ConvertEntityToJSON(DecentralandEntity entity)
+    {
+        return "";
     }
 
 }

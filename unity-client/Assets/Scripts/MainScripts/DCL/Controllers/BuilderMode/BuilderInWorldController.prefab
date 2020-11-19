@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 1208871511274338202}
   - component: {fileID: 1208871511274338203}
   m_Layer: 0
-  m_Name: BuildModeController
+  m_Name: BuilderInWorldController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -962,7 +962,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b96042e804882648915f5b4d1daa70b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionListview: {fileID: 0}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
 --- !u!1 &1208871512097731729
 GameObject:
@@ -1705,7 +1704,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1208871512899340006}
   m_Layer: 0
-  m_Name: BuildModes
+  m_Name: BuilderInWorldModes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -17,7 +17,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class BuildModeController : MonoBehaviour
+public class BuilderInWorldController : MonoBehaviour
 {
     public enum EditModeState
     {
@@ -55,7 +55,7 @@ public class BuildModeController : MonoBehaviour
 
     [Header("Prefab References")]
     public OutlinerController outlinerController;
-    public BuilderInputWrapper builderInputWrapper;
+    public BuilderInWorldInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
@@ -63,8 +63,8 @@ public class BuildModeController : MonoBehaviour
 
     [Header("Build Modes")]
 
-    public BuildFirstPersonMode firstPersonMode;
-    public BuildEditorMode editorMode;
+    public BuilderInWorldFirstPersonMode firstPersonMode;
+    public BuilderInWorldGodMode editorMode;
 
     [Header("Build References")]
 
@@ -82,7 +82,7 @@ public class BuildModeController : MonoBehaviour
     //Note(Adrian): This is for tutorial purposes
     public Action OnSceneObjectPlaced;
 
-    BuildMode currentActiveMode;
+    BuilderInWorldMode currentActiveMode;
 
     ParcelScene sceneToEdit;
 
@@ -357,7 +357,7 @@ public class BuildModeController : MonoBehaviour
         mesh.model.src = sceneObject.model;
 
 
-        DecentralandEntityToEdit entity = builderInWorldEntityHandler.CreateEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
+        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
@@ -373,7 +373,8 @@ public class BuildModeController : MonoBehaviour
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
 
-        builderInWorldBridge.AddEntityOnKernel(entity.rootEntity,sceneToEdit); 
+        builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
+
         InputDone();
         OnSceneObjectPlaced?.Invoke();
     }
@@ -494,9 +495,9 @@ public class BuildModeController : MonoBehaviour
     {
         if (outlinerOptimizationCounter >= 10 && isOutlineCheckActive)
         {
-            if (!BuildModeUtils.IsPointerOverUIElement())
+            if (!BuilderInWorldUtils.IsPointerOverUIElement())
             {
-                DecentralandEntityToEdit entity = GetEntityOnPointer();
+                DCLBuilderInWorldEntity entity = GetEntityOnPointer();
                 if (!isMultiSelectionActive)
                     outlinerController.CancelAllOutlines();
                 else
@@ -513,7 +514,7 @@ public class BuildModeController : MonoBehaviour
 
     public void UndoEditionGOLastStep()
     {
-        BuildModeUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
+        BuilderInWorldUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
     }
 
     public void ResetScaleAndRotation()
@@ -553,7 +554,7 @@ public class BuildModeController : MonoBehaviour
 
     void MouseClickDetected()
     {        
-        DecentralandEntityToEdit entityToSelect = GetEntityOnPointer();
+        DCLBuilderInWorldEntity entityToSelect = GetEntityOnPointer();
         if (entityToSelect != null)
         {
             builderInWorldEntityHandler.EntityClicked(entityToSelect);
@@ -564,7 +565,7 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
-    public DecentralandEntityToEdit GetEntityOnPointer()
+    public DCLBuilderInWorldEntity GetEntityOnPointer()
     {
         RaycastHit hit;
         UnityEngine.Ray ray;
@@ -598,7 +599,7 @@ public class BuildModeController : MonoBehaviour
 
         float currentDistance = 9999;
         VoxelEntityHit voxelEntityHit = null;
-        DecentralandEntityToEdit unselectedEntity = null;
+        DCLBuilderInWorldEntity unselectedEntity = null;
 
         hits = Physics.RaycastAll(ray, RAYCAST_MAX_DISTANCE, layerToRaycast);
         foreach (RaycastHit hit in hits)
@@ -607,7 +608,7 @@ public class BuildModeController : MonoBehaviour
 
             if (sceneToEdit.entities.ContainsKey(entityID))
             {
-                DecentralandEntityToEdit entityToCheck = builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
+                DCLBuilderInWorldEntity entityToCheck = builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
                 if (entityToCheck == null) continue;
 
                 if (!entityToCheck.IsSelected && entityToCheck.tag == BuilderInWorldSettings.VOXEL_TAG)
@@ -652,7 +653,7 @@ public class BuildModeController : MonoBehaviour
             SetBuildMode(EditModeState.Editor);
 
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
-        DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
+        //DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
         //
 
 
@@ -668,7 +669,7 @@ public class BuildModeController : MonoBehaviour
     public void ExitEditMode()
     {
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
-        DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
+        //DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
         //
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
@@ -719,7 +720,7 @@ public class BuildModeController : MonoBehaviour
 
     IEnumerator WaitUntilNewSceneIsLoaded()
     {
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(18f);
         EnterEditMode();
     }
 }

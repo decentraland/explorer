@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildFirstPersonMode : BuildMode
+public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
 {
     [Header("Design variables")]
     public float scaleSpeed = 0.25f;
@@ -68,7 +68,7 @@ public class BuildFirstPersonMode : BuildMode
             }
             else if (Vector3.Distance(snapGO.transform.position, editionGO.transform.position) >= snapDistanceToActivateMovement)
             {
-                BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
+                BuilderInWorldUtils.CopyGameObjectStatus(editionGO, snapGO, false);
 
 
                 snapObjectAlreadyMoved = true;
@@ -131,7 +131,7 @@ public class BuildFirstPersonMode : BuildMode
         SetObjectIfSnapOrNot();
     }
 
-    public override void SelectedEntity(DecentralandEntityToEdit selectedEntity)
+    public override void SelectedEntity(DCLBuilderInWorldEntity selectedEntity)
     {
         base.SelectedEntity(selectedEntity);
 
@@ -140,10 +140,10 @@ public class BuildFirstPersonMode : BuildMode
         SetObjectIfSnapOrNot();
 
         currentYRotationAdded = 0;
-        BuildModeUtils.CopyGameObjectStatus(editionGO, snapGO, false);
+        BuilderInWorldUtils.CopyGameObjectStatus(editionGO, snapGO, false);
     }
 
-    public override void CreatedEntity(DecentralandEntityToEdit createdEntity)
+    public override void CreatedEntity(DCLBuilderInWorldEntity createdEntity)
     {
         base.CreatedEntity(createdEntity);
         Utils.LockCursor();

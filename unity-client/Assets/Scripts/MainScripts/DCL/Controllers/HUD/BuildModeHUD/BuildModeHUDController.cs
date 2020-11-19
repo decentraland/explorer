@@ -23,7 +23,7 @@ public class BuildModeHUDController : IHUD
 
     public event Action<SceneObject> OnSceneObjectSelected;
 
-    public event Action<DecentralandEntityToEdit> OnEntityClick,
+    public event Action<DCLBuilderInWorldEntity> OnEntityClick,
                                                   OnEntityDelete,
                                                   OnEntityLock,
                                                   OnEntityChangeVisibility;
@@ -32,7 +32,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnCatalogOpen;
 
     internal BuildModeHUDView view;
-    BuildModeEntityListController buildModeEntityListController;
+    BuilderInWorldEntityListController buildModeEntityListController;
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
     public BuildModeHUDController()
@@ -41,7 +41,7 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
-        buildModeEntityListController = view.GetComponentInChildren<BuildModeEntityListController>();
+        buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -144,7 +144,7 @@ public class BuildModeHUDController : IHUD
         view.SetGodModeView();
     }
 
-    public void SetEntityList(List<DecentralandEntityToEdit> entityList)
+    public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
         buildModeEntityListController.SetEntityList(entityList);
     }
