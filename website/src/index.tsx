@@ -16,7 +16,11 @@ ReactDOM.render(
   () => {
     if (INITIAL_RENDER) {
       INITIAL_RENDER = false
-      document.getElementById("root-loading")!.style.display = 'none'
+      const initial = document.getElementById("root-loading")
+      if (initial) {
+        initial.style.opacity = '0'
+        setTimeout(() => initial.style.display = 'none', 300)
+      }
     }
   }
 );
