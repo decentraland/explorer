@@ -18,8 +18,12 @@ public class NFTShapeHQImageHandler : IDisposable
     AssetPromise_Texture hqTexture;
 
     bool isPlayerNear;
+    bool isCameraInFront;
+    bool isPlayerLooking;
+
     Camera camera;
     Vector2 screenCenter;
+    RaycastHit raycastHitInfo;
 
     static public NFTShapeHQImageHandler Create(NFTShapeHQImageConfig config)
     {
@@ -41,27 +45,40 @@ public class NFTShapeHQImageHandler : IDisposable
 
     public void Update()
     {
+        if (config.controller.collider == null)
+            return;
+
         if (!isPlayerNear)
             return;
 
-        bool isPlayerLookingAtNFT;
+        isCameraInFront = Vector3.Dot(config.controller.transform.forward, config.controller.transform.position - camera.transform.position)
+            > config.nftConfig.hqImgInFrontDotProdMinValue;
 
-        // NOTE: currently all of our NFTShapes have a collider... but... better to be safe 🤷‍♂️
-        if (config.controller.collider != null)
+        if (config.nftConfig.verbose)
         {
-            isPlayerLookingAtNFT = config.controller.collider.Raycast(camera.ScreenPointToRay(screenCenter),
-                out RaycastHit hitInfo,
-                config.nftConfig.highQualityImageMinDistance);
+            Debug.Log($"Camera is in front of {config.nftInfo.name}? {isCameraInFront}");
+        }
+
+        if (!isCameraInFront)
+        {
+            RestorePreviewTextureIfInHQ();
+            return;
+        }
+
+        isPlayerLooking = Vector3.Dot(config.controller.transform.forward, camera.transform.forward) >= config.nftConfig.hqImgFacingDotProdMinValue;
+
+        if (config.nftConfig.verbose)
+        {
+            Debug.Log($"Player is looking at {config.nftInfo.name}? {isPlayerLooking}");
+        }
+
+        if (isPlayerLooking)
+        {
+            FetchHQTexture();
         }
         else
         {
-            isPlayerLookingAtNFT = Vector3.Dot(config.controller.transform.forward, camera.transform.forward) >= config.nftConfig.highQualityImageAngleRatio;
-        }
-
-
-        if (isPlayerLookingAtNFT && hqTexture == null)
-        {
-            FetchHQTexture();
+            RestorePreviewTextureIfInHQ();
         }
     }
 
@@ -77,35 +94,35 @@ public class NFTShapeHQImageHandler : IDisposable
 
     private void OnPlayerPositionChanged(Vector3 current, Vector3 prev)
     {
-        // NOTE: currently all of our NFTShapes have a collider... but... better to be safe 🤷‍♂️
-        if (config.controller.collider != null)
-        {
-            isPlayerNear = ((current - config.controller.collider.ClosestPointOnBounds(current)).sqrMagnitude
-                < (config.nftConfig.highQualityImageMinDistance * config.nftConfig.highQualityImageMinDistance));
-        }
-        else
-        {
-            isPlayerNear = ((current - config.controller.transform.position).sqrMagnitude
-                < (config.nftConfig.highQualityImageMinDistance * config.nftConfig.highQualityImageMinDistance));
-        }
+        isPlayerNear = false;
+        isCameraInFront = false;
 
-        if (!isPlayerNear && hqTexture != null)
+        if (config.controller.collider == null)
+            return;
+
+        isPlayerNear = ((current - config.controller.collider.ClosestPointOnBounds(current)).sqrMagnitude
+            < (config.nftConfig.hqImgMinDistance * config.nftConfig.hqImgMinDistance));
+
+        if (!isPlayerNear)
         {
-            ForgetHQTexture();
-            RestorePreviewTexture();
+            RestorePreviewTextureIfInHQ();
         }
 
         if (config.nftConfig.verbose)
         {
-            Debug.Log($"Player near {config.nftInfo.name}? {isPlayerNear}");
+            Debug.Log($"Player position relative to {config.nftInfo.name} is near? {isPlayerNear}");
         }
     }
 
     private void FetchHQTexture()
     {
-        hqTexture = new AssetPromise_Texture(string.Format("{0}=s{1}", config.nftInfo.imageUrl, config.nftConfig.highQualityImageResolution));
+        if (hqTexture != null)
+            return;
+
+        hqTexture = new AssetPromise_Texture(string.Format("{0}=s{1}", config.nftInfo.imageUrl, config.nftConfig.hqImgResolution));
         AssetPromiseKeeper_Texture.i.Keep(hqTexture);
         hqTexture.OnSuccessEvent += (asset) => config.controller.UpdateTexture(asset.texture);
+        hqTexture.OnFailEvent += (asset) => hqTexture = null;
         if (config.nftConfig.verbose)
         {
             Debug.Log($"Fetch {config.nftInfo.name} HQ image");
@@ -129,5 +146,14 @@ public class NFTShapeHQImageHandler : IDisposable
         {
             Debug.Log($"Restore {config.nftInfo.name} preview image");
         }
+    }
+
+    private void RestorePreviewTextureIfInHQ()
+    {
+        if (hqTexture == null)
+            return;
+
+        ForgetHQTexture();
+        RestorePreviewTexture();
     }
 }

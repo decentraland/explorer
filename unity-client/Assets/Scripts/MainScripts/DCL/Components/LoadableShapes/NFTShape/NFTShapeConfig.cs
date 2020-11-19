@@ -3,8 +3,9 @@
 public class NFTShapeConfig : ScriptableObject
 {
     public float loadingMinDistance = 30;
-    public float highQualityImageMinDistance = 3;
-    public float highQualityImageAngleRatio = 0.8f; //Only used when shape doesn't contain a collider
-    public int highQualityImageResolution = 1024;
+    public float hqImgMinDistance = 5;
+    public float hqImgFacingDotProdMinValue = 0.4f;
+    public float hqImgInFrontDotProdMinValue = 0.2f;
+    public int hqImgResolution = 1024;
     public bool verbose = false;
 }
