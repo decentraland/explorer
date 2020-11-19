@@ -15,6 +15,7 @@ export class SceneStateStorageController extends ExposableAPI {
       saveToLocalStorage(`scene-state-${sceneId}`, sceneState)
     } else {
       defaultLogger.error('Content server storage not yet supported')
+      saveToLocalStorage(`scene-state-${sceneId}`, sceneState)
     }
   }
 
@@ -24,38 +25,13 @@ export class SceneStateStorageController extends ExposableAPI {
       const sceneState = getFromLocalStorage(`scene-state-${sceneId}`)
       if (!sceneState) {
         defaultLogger.warn(`Couldn't find a stored scene state for scene ${sceneId}`)
-        return TEST_SCENE
+        return { entities: [] }
       }
       return sceneState
     } else {
       defaultLogger.error('Content server storage not yet supported')
+      const sceneState = getFromLocalStorage(`scene-state-${sceneId}`)
+      return sceneState ?? { entities: [] }
     }
   }
-}
-
-// This is just here until the renderer integrates with scene state. Until then, it's easier to have a default scene
-const TEST_SCENE = {
-  entities: [
-    {
-      id: 'E1',
-      components: [
-        {
-          type: "Transform",
-          value: {
-            position: {
-              x: 8,
-              y: 0,
-              z: 8
-            }
-          }
-        },
-        {
-          type: "GLTFShape",
-          value: {
-            src: 'models/BlockDog.glb'
-          }
-        }
-      ]
-    }
-  ]
 }
