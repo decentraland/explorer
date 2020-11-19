@@ -1,7 +1,12 @@
+using DCL;
+using DCL.Components;
 using DCL.Models;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public static partial class BuilderInWorldUtils
 {
@@ -97,8 +102,46 @@ public static partial class BuilderInWorldUtils
 
     public static string ConvertEntityToJSON(DecentralandEntity entity)
     {
-        return "";
+        BuilderInWorldEntityData builderInWorldEntityData = new BuilderInWorldEntityData();
+        builderInWorldEntityData.entityId = entity.entityId;
+
+
+        foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
+        {
+            if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
+            {
+                BuilderInWorldEntityData.TransformComponent entityComponentModel = new BuilderInWorldEntityData.TransformComponent();
+                entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
+                entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+                entityComponentModel.rotation = entity.gameObject.transform.rotation.eulerAngles;
+                entityComponentModel.scale = entity.gameObject.transform.localScale;
+
+                builderInWorldEntityData.transformComponent = entityComponentModel;
+
+            }
+        }
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
+        {
+            if (keyValuePair.Value is GLTFShape)
+            {
+                BuilderInWorldEntityData.GTLFShapeComponent entityComponentModel = new BuilderInWorldEntityData.GTLFShapeComponent();
+                entityComponentModel.componentId = (int)CLASS_ID.GLTF_SHAPE;
+                GLTFShape gLTFShape = (GLTFShape)keyValuePair.Value;
+                entityComponentModel.src = gLTFShape.model.src;
+                entityComponentModel.sharedId = keyValuePair.Value.id;
+
+                builderInWorldEntityData.gTLFShapeComponent = entityComponentModel;
+            }
+        }
+
+
+        return JsonConvert.SerializeObject(builderInWorldEntityData);
     }
 
+    public static BuilderInWorldEntityData ConvertJSONToEntityData(string json)
+    {
+        return JsonConvert.DeserializeObject<BuilderInWorldEntityData>(json);
+    }
 }
 

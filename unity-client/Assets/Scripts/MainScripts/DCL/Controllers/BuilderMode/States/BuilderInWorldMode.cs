@@ -14,6 +14,10 @@ public class BuilderInWorldMode : MonoBehaviour
 
     public float snapDistanceToActivateMovement = 10f;
 
+    [Header("Prefab references")]
+    public BuilderInWorldEntityHandler builderInWorldEntityHandler;
+    public ActionController actionController;
+
     public System.Action OnInputDone;
     public System.Action<BuildInWorldCompleteAction> OnActionGenerated;
 
@@ -21,6 +25,9 @@ public class BuilderInWorldMode : MonoBehaviour
 
     protected bool isSnapActive = false, isMultiSelectionActive = false, isModeActive = false;
     protected List<DCLBuilderInWorldEntity> selectedEntities;
+
+    bool isNewObjectPlaced = false;
+
     public virtual void Init(GameObject goToEdit, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO, List<DCLBuilderInWorldEntity> selectedEntities)
     {
         editionGO = goToEdit;
@@ -94,12 +101,20 @@ public class BuilderInWorldMode : MonoBehaviour
 
     public virtual void CreatedEntity(DCLBuilderInWorldEntity createdEntity)
     {
-
+        isNewObjectPlaced = true;
     }
 
     public virtual void EntityDeselected(DCLBuilderInWorldEntity entityDeselected)
     {
         CenterGameObjectToEdit();
+
+        if (isNewObjectPlaced)
+        {
+            builderInWorldEntityHandler.NotifyEntityIsCreated(entityDeselected.rootEntity);
+            actionController.CreateActionEntityCreated(entityDeselected.rootEntity);
+        }
+
+        isNewObjectPlaced = false;
     }
 
     public virtual void DeselectedEntities()

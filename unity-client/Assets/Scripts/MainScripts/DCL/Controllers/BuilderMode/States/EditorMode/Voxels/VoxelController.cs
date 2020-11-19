@@ -15,6 +15,7 @@ public class VoxelController : MonoBehaviour
     public OutlinerController outlinerController;
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public FreeCameraMovement freeCameraMovement;
+    public ActionController actionController;
     
     public LayerMask groundLayer;
 
@@ -228,6 +229,11 @@ public class VoxelController : MonoBehaviour
                 }
             }
 
+            BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
+            buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATED;
+
+            List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
+
             foreach (Vector3Int voxelPosition in createdVoxels.Keys)
             {
                 if (canVoxelsBeCreated)
@@ -235,11 +241,22 @@ public class VoxelController : MonoBehaviour
                     DecentralandEntity entity = builderInWorldEntityHandler.DuplicateEntity(lastVoxelCreated);
                     entity.gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
                     entity.gameObject.transform.position = voxelPosition;
+
+                    BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entity, entity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entity));
+                    entityActionList.Add(builderInWorldEntityAction);
                 }
                 Destroy(createdVoxels[voxelPosition].gameObject);
             }
+
             if (!canVoxelsBeCreated)
+            {
                 builderInWorldEntityHandler.DeleteEntity(lastVoxelCreated);
+            }
+            else
+            {
+                buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATED);
+                actionController.AddAction(buildAction);
+            }
 
             createdVoxels.Clear();
             builderInWorldEntityHandler.DeselectEntities();

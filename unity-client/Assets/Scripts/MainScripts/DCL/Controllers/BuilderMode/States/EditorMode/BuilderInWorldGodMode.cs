@@ -22,7 +22,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public BuilderInWorldInputWrapper builderInputWrapper;
     public OutlinerController outlinerController;
     public BuilderInWorldController buildModeController;
-    public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public CameraController cameraController;
     public Transform lookAtT;
     public MouseCatcher mouseCatcher;

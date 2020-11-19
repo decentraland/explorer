@@ -420,7 +420,7 @@ PrefabInstance:
     - target: {fileID: 6782600336131460688, guid: b387035aa46399445bdc7951a41d5213,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 1430
       objectReference: {fileID: 0}
     - target: {fileID: 6782600336131460688, guid: b387035aa46399445bdc7951a41d5213,
         type: 3}
@@ -1038,8 +1038,8 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 0
   baseUrlCustom: 
-  environment: 1
-  startInCoords: {x: -100, y: 40}
+  environment: 4
+  startInCoords: {x: 3, y: 18}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
@@ -1076,7 +1076,7 @@ PrefabInstance:
     - target: {fileID: 1208871511274338200, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: m_Name
-      value: BuildModeController
+      value: BuilderInWorldController
       objectReference: {fileID: 0}
     - target: {fileID: 1208871511274338202, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
@@ -1150,8 +1150,8 @@ PrefabInstance:
       objectReference: {fileID: 326638024064006571}
     - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
-      propertyPath: activeFeature
-      value: 1
+      propertyPath: msToWaitUntilSceneIsLoaded
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 1208871511845330199, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}

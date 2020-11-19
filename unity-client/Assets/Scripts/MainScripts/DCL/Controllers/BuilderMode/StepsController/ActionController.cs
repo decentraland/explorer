@@ -75,10 +75,11 @@ public class ActionController : MonoBehaviour
         BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entity, entity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entity));
 
         BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
-        buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATED;
-        buildAction.CreateActionType(builderInWorldEntityAction, BuildInWorldCompleteAction.ActionType.CREATED);
+        buildAction.actionType = ActionType.CREATED;
+        buildAction.CreateActionType(builderInWorldEntityAction, ActionType.CREATED);
         AddAction(buildAction);
     }
+
     public void AddAction(BuildInWorldCompleteAction action)
     {
         if (currentStepIndex < actionsMade.Count-1)       
@@ -90,7 +91,7 @@ public class ActionController : MonoBehaviour
         action.OnApplyValue += ApplyAction;
     }
 
-    void ApplyAction(DecentralandEntity entityToApply, object value, BuildInWorldCompleteAction.ActionType actionType, bool isUndo)
+    void ApplyAction(DecentralandEntity entityToApply, object value, ActionType actionType, bool isUndo)
     {
         switch (actionType)
         {

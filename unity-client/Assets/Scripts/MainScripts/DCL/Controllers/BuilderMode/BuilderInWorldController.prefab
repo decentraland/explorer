@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce9f3e99bfa1950438d79c75c333a17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeFeature: 0
+  activeFeature: 1
   scaleSpeed: 0.05
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
@@ -446,6 +446,8 @@ MonoBehaviour:
   snapRotationDegresFactor: 30
   snapScaleFactor: 0.25
   snapDistanceToActivateMovement: 1
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  actionController: {fileID: 1208871512032110241}
   scaleSpeed: 0.25
   rotationSpeed: 0.5
   distanceFromCameraForNewEntitties: 5
@@ -1543,6 +1545,8 @@ MonoBehaviour:
   snapRotationDegresFactor: 0.5
   snapScaleFactor: 0.5
   snapDistanceToActivateMovement: 1
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  actionController: {fileID: 1208871512032110241}
   distanceEagleCamera: 20
   freeCameraController: {fileID: 0}
   gizmoManager: {fileID: 1208871511615770936}
@@ -1550,7 +1554,6 @@ MonoBehaviour:
   builderInputWrapper: {fileID: 1208871511405416592}
   outlinerController: {fileID: 1208871511725701524}
   buildModeController: {fileID: 1208871511274338203}
-  builderInWorldEntityHandler: {fileID: 7801740759641975108}
   cameraController: {fileID: 0}
   lookAtT: {fileID: 1208871513090114763}
   mouseCatcher: {fileID: 0}
@@ -1581,6 +1584,7 @@ MonoBehaviour:
   outlinerController: {fileID: 1208871511725701524}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   freeCameraMovement: {fileID: 0}
+  actionController: {fileID: 0}
   groundLayer:
     serializedVersion: 2
     m_Bits: 1024

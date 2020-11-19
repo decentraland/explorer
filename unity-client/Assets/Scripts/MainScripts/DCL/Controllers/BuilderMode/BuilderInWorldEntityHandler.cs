@@ -309,13 +309,25 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
                 return;
         }
 
+        BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
+        buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATED;
+
+        List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
+
         int amount = selectedEntities.Count;
         for (int i = 0; i < amount; i++)
         {
-            DuplicateEntity(selectedEntities[i]);
+            DecentralandEntity entityDuplicated = DuplicateEntity(selectedEntities[i]);
+            BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated, entityDuplicated.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated));
+            entityActionList.Add(builderInWorldEntityAction);
         }
+
         currentActiveMode.SetDuplicationOffset(duplicateOffset);
         Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
+
+     
+        buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATED);
+        actionController.AddAction(buildAction);       
     }
 
     public DecentralandEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
@@ -333,8 +345,24 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public DecentralandEntity CreateEntityFromJSON(string entityJson)
     {
-        DecentralandEntity newEntity = JsonConvert.DeserializeObject<DecentralandEntity>(entityJson);
-        sceneToEdit.CreateEntity(newEntity.entityId);
+        BuilderInWorldEntityData data = BuilderInWorldUtils.ConvertJSONToEntityData(entityJson);
+
+        DecentralandEntity newEntity = sceneToEdit.CreateEntity(data.entityId);
+
+
+        if (data.transformComponent != null)
+        {
+            DCLTransform.model.position = transform.position;
+            DCLTransform.model.rotation = transform.rotation;
+            DCLTransform.model.scale = transform.localScale;
+            sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
+        }
+
+        if (data.gTLFShapeComponent != null)
+        {
+            sceneToEdit.SharedComponentAttach(newEntity.entityId, data.gTLFShapeComponent.sharedId);
+        }
+
 
         SetupEntityToEdit(newEntity, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
@@ -359,6 +387,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(newEntity, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
+
         EntityListChanged();
         return convertedEntity;
     }
@@ -500,9 +529,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void NotifyEntityIsCreated(DecentralandEntity entity)
     {
-        builderInWorldBridge.AddEntityOnKernel(entity, sceneToEdit);
-
-   
+        builderInWorldBridge.AddEntityOnKernel(entity, sceneToEdit);  
     }
 
     void ChangeEntityVisibilityStatus(DCLBuilderInWorldEntity entityToApply)
@@ -521,7 +548,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     string GetConvertedUniqueKeyForEntity(string entityID)
     {
-        return sceneToEdit + entityID;
+        return sceneToEdit.sceneData.id + entityID;
     }
 
     string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)

@@ -39,6 +39,8 @@ public class BuilderInWorldController : MonoBehaviour
 
     public float distanceLimitToSelectObjects = 50;
 
+    public float msToWaitUntilSceneIsLoaded = 5000;
+
 
     [Header("Snap variables")]
     public float snapFactor = 1f;
@@ -322,6 +324,7 @@ public class BuilderInWorldController : MonoBehaviour
         }
         return true;
     }
+
     void CreateSceneObjectSelected(SceneObject sceneObject)
     {
         if (!IsInsideTheLimits(sceneObject)) return;
@@ -372,8 +375,6 @@ public class BuilderInWorldController : MonoBehaviour
         if (!isAdvancedModeActive)
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
-
-        builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
 
         InputDone();
         OnSceneObjectPlaced?.Invoke();
@@ -720,7 +721,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     IEnumerator WaitUntilNewSceneIsLoaded()
     {
-        yield return new WaitForSeconds(18f);
+        yield return new WaitForSeconds(msToWaitUntilSceneIsLoaded/1000f);
         EnterEditMode();
     }
 }
