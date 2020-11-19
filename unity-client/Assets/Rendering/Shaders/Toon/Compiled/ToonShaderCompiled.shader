@@ -151,7 +151,6 @@
             float4 _EmissionColor;
             float _SSSIntensity;
             float4 _SSSParams;
-            float4 _TintColor;
             float _Cutoff;
 
             float4 _BaseMap_TexelSize;
@@ -161,6 +160,7 @@
             float4 _FresnelMatCap_TexelSize;
             CBUFFER_END
 
+            float4 _TintColor;
             float3 _LightDir;
             float4 _LightColor;
 
