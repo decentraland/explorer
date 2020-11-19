@@ -20,6 +20,7 @@ public class NFTShapeLoaderController : MonoBehaviour
         None
     }
 
+    public NFTShapeConfig config;
     public MeshRenderer meshRenderer;
     public new BoxCollider collider;
     public Color backgroundColor;
@@ -55,8 +56,6 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     DCL.ITexture nftAsset;
     AssetPromise_Texture texturePromise = null;
-
-    bool VERBOSE = false;
 
     void Awake()
     {
@@ -127,13 +126,6 @@ public class NFTShapeLoaderController : MonoBehaviour
         darURLRegistry = match.Groups["registry"].ToString();
         darURLAsset = match.Groups["asset"].ToString();
 
-        if (VERBOSE)
-        {
-            Debug.Log("protocol: " + darURLProtocol);
-            Debug.Log("registry: " + darURLRegistry);
-            Debug.Log("asset: " + darURLAsset);
-        }
-
         alreadyLoadedAsset = false;
 
         StartCoroutine(FetchNFTImage());
@@ -147,7 +139,6 @@ public class NFTShapeLoaderController : MonoBehaviour
         backgroundMaterial.SetColor(COLOR_SHADER_PROPERTY, newColor);
     }
 
-    string lastURLUsed = string.Empty;
     IEnumerator FetchNFTImage()
     {
         if (spinner != null)
@@ -156,6 +147,8 @@ public class NFTShapeLoaderController : MonoBehaviour
         string thumbnailImageURL = null;
         string previewImageURL = null;
         string originalImageURL = null;
+
+        bool isError = false;
 
         yield return NFTHelper.FetchNFTInfo(darURLRegistry, darURLAsset,
             (nftInfo) =>
@@ -166,39 +159,57 @@ public class NFTShapeLoaderController : MonoBehaviour
             },
             (error) =>
             {
-                Debug.LogError($"Didn't find any asset image for '{darURLRegistry}/{darURLAsset}' for the NFTShape.\n{error}");
+                Debug.LogError($"Couldn't fetch NFT: '{darURLRegistry}/{darURLAsset}' {error}");
                 OnLoadingAssetFail?.Invoke();
+                isError = true;
             });
 
-        yield return new DCL.WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < 900f);
+        if (isError)
+            yield break;
+
+        yield return new DCL.WaitUntil(() => (CommonScriptableObjects.playerUnityPosition - transform.position).sqrMagnitude < (config.loadingMinDistance * config.loadingMinDistance));
+
+        string imageType = "";
+        yield return WrappedTextureUtils.GetHeader(previewImageURL, "Content-Type", type => imageType = type, error => isError = true);
+
+        if (isError)
+        {
+            Debug.LogError($"Couldn't fetch NFT image header: '{darURLRegistry}/{darURLAsset}' {previewImageURL}");
+            OnLoadingAssetFail?.Invoke();
+            yield break;
+        }
 
         // We download the "preview" 256px image
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(previewImageURL))
         {
-            lastURLUsed = previewImageURL;
-
-            yield return WrappedTextureUtils.Fetch(previewImageURL, (downloadedTex, texturePromise) =>
+            yield return WrappedTextureUtils.Fetch(imageType, previewImageURL, Asset_Gif.MaxSize.DONT_RESIZE, (downloadedTex, texturePromise) =>
             {
-
                 foundDCLImage = true;
                 this.texturePromise = texturePromise;
                 SetFrameImage(downloadedTex, resizeFrameMesh: true);
-            }, Asset_Gif.MaxSize.DONT_RESIZE);
+            });
         }
 
         //We fall back to the nft original image which can have a really big size
         if (!foundDCLImage && !string.IsNullOrEmpty(originalImageURL))
         {
-            lastURLUsed = originalImageURL;
+            yield return WrappedTextureUtils.GetHeader(previewImageURL, "Content-Type", type => imageType = type, error => isError = true);
 
-            yield return WrappedTextureUtils.Fetch(originalImageURL, (downloadedTex, texturePromise) =>
+            if (isError)
             {
+                Debug.LogError($"Couldn't fetch NFT image header: '{darURLRegistry}/{darURLAsset}' {originalImageURL}");
+                OnLoadingAssetFail?.Invoke();
+                yield break;
+            }
 
-                foundDCLImage = true;
-                this.texturePromise = texturePromise;
-                SetFrameImage(downloadedTex, resizeFrameMesh: true);
-            }, Asset_Gif.MaxSize._256);
+            yield return WrappedTextureUtils.Fetch(imageType, originalImageURL, Asset_Gif.MaxSize._256,
+                (downloadedTex, texturePromise) =>
+                {
+                    foundDCLImage = true;
+                    this.texturePromise = texturePromise;
+                    SetFrameImage(downloadedTex, resizeFrameMesh: true);
+                });
         }
 
         FinishLoading(foundDCLImage);
