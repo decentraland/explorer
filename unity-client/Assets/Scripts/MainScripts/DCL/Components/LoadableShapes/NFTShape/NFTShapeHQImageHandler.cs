@@ -62,7 +62,7 @@ public class NFTShapeHQImageHandler : IDisposable
 
     private void OnPlayerPositionChanged(Vector3 current, Vector3 prev)
     {
-        // NOTE: currently all of our NFTShapes hava collider... but... better to be safe 🤷‍♂️
+        // NOTE: currently all of our NFTShapes have a collider... but... better to be safe 🤷‍♂️
         if (config.controller.collider != null)
         {
             isPlayerNear = ((current - config.controller.collider.ClosestPointOnBounds(current)).sqrMagnitude

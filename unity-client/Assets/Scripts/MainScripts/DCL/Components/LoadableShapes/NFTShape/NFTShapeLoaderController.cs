@@ -56,7 +56,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     DCL.ITexture nftAsset;
     AssetPromise_Texture texturePromise = null;
-    NFTShapeHQImageHandler hqTextureHanlder = null;
+    NFTShapeHQImageHandler hqTextureHandler = null;
 
     void Awake()
     {
@@ -89,7 +89,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void Update()
     {
-        hqTextureHanlder?.Update();
+        hqTextureHandler?.Update();
     }
 
     public void LoadAsset(string url, bool loadEvenIfAlreadyLoaded = false)
@@ -199,7 +199,7 @@ public class NFTShapeLoaderController : MonoBehaviour
                     nftInfo = nftInfo,
                     previewTexture = texturePromise
                 };
-                hqTextureHanlder = NFTShapeHQImageHandler.Create(hqImageHandlerConfig);
+                hqTextureHandler = NFTShapeHQImageHandler.Create(hqImageHandlerConfig);
             });
         }
 
@@ -323,10 +323,10 @@ public class NFTShapeLoaderController : MonoBehaviour
             nftAsset?.Dispose();
         }
 
-        if (hqTextureHanlder != null)
+        if (hqTextureHandler != null)
         {
-            hqTextureHanlder.Dispose();
-            hqTextureHanlder = null;
+            hqTextureHandler.Dispose();
+            hqTextureHandler = null;
         }
 
         if (backgroundMaterial != null)
