@@ -50,7 +50,7 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
   }, [logo])
 
   function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
-    if (active) {
+    if (active !== false) {
       event.preventDefault()
     }
 
@@ -60,7 +60,7 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
   }
 
   let className = 'walletButton'
-  if (!active) {
+  if (active === false) {
     className += ' disabled'
   }
 
