@@ -1,27 +1,31 @@
 
 (function () {
   if (window.requestAnimationFrame && document) {
+    // limit or not FPS
     window.capFPS = false;
+    
+    // float precision when comparing times affects calculations, "target fps - 10" -> 40 -> 30FPS
+    window.targetFPS = 40;
 
-    window.backgroundFPS = 30;
-    window.__CURRENT_RAFS = {};
+    // how much time (ms) should take to render a frame
+    const FRAME_MS = 1000 / window.targetFPS;
 
-    const FPS_CAP = 40; // float precision when comparing times affects calculations, "target fps - 10" -> 40 -> 30FPS
-    const FRAME_MS = 1000 / FPS_CAP;
+    // store a backup of the original requestAnimationFrame just in case
+    const originalRaf = window.__requestAnimationFrame = window.__requestAnimationFrame || window.requestAnimationFrame;
+    
+    // callbacks sent to requestAnimationFrame. The list is cleared once per frame
     var callbacks = [];
-    window.__requestAnimationFrame = window.__requestAnimationFrame || window.requestAnimationFrame;
-    const originalRaf = window.__requestAnimationFrame || window.requestAnimationFrame;
     var prevTime = 0;
 
-    function backgroundRAF(rafCallback) {
-      setTimeout(function(){
-        rafCallback(performance.now())
-      }, 1000 / window.backgroundFPS);
-    }
+    // keep track of the last created handler (raf or timeout) to reschedule a timeout when the document looses visibility
+    var lastHandler = null;
+    var lastHandlerWasRaf = false;
 
     // called every frame
     function tick(time) {
-      if (!window.capFPS || time - prevTime > FRAME_MS) {
+      lastHandler = null;
+
+      if (!window.capFPS || time - prevTime >= FRAME_MS) {
         var oldCallbacks = callbacks;
         callbacks = [];
 
@@ -35,18 +39,25 @@
 
       scheduleNext();
     }
-
+    
     function scheduleNext() {
-      if (document.hidden) {
-        backgroundRAF(tick);
-      } else {
-        // originalRaf(tick);
+      // if we had a scheduled tick, we cancel it and reschedule again
+      if (lastHandler !== null) {
+        if (lastHandlerWasRaf) {
+          window.cancelAnimationFrame(lastHandler);
+        } else {
+          clearTimeout(lastHandler);
+        }
+        lastHandler = null;
+      }
 
-        var rafId = originalRaf(function(stamp) {
-          tick(stamp);
-          delete __CURRENT_RAFS[rafId];
-        });
-        __CURRENT_RAFS[rafId] = tick;
+      // depending on the document visibility, we schedule a setTimeout or rAF
+      if (document.hidden) {
+        lastHandler = setTimeout(function() { tick(performance.now()); }, FRAME_MS);
+        lastHandlerWasRaf = false;
+      } else {
+        lastHandler = originalRaf(tick);
+        lastHandlerWasRaf = true;
       }
     }
 
@@ -54,18 +65,11 @@
       return callbacks.push(cb);
     };
 
-    function switchToBackground() {
-      Object.keys(__CURRENT_RAFS).forEach(function(rafId) {
-        window.cancelAnimationFrame(rafId);
-        rafCallback = __CURRENT_RAFS[rafId];
-        delete __CURRENT_RAFS[rafId];
-        backgroundRAF(rafCallback);
-      });
-    }
-
+    // if the document looses visibility, the render loop should keep working. but rAF doesn't
+    // We reschedule the next frame, with a setTimeout this time.
     document.addEventListener("visibilitychange", function() {
-      if(document.hidden) {
-        switchToBackground();
+      if (document.hidden) {
+        scheduleNext();
       }
     })
 
