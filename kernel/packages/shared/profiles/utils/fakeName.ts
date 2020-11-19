@@ -46,7 +46,7 @@ export const createFakeName = (userId: string) => {
     'Phoragus',
     'Ember',
     'Eomquat',
-    'Mogricress'
+    'Mogricress',
     // colors
     'Yellow',
     'Red',
