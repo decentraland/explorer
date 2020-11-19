@@ -352,9 +352,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         if (data.transformComponent != null)
         {
-            DCLTransform.model.position = transform.position;
-            DCLTransform.model.rotation = transform.rotation;
-            DCLTransform.model.scale = transform.localScale;
+            DCLTransform.model.position = data.transformComponent.position;
+            DCLTransform.model.rotation = Quaternion.Euler(data.transformComponent.rotation);
+            DCLTransform.model.scale = data.transformComponent.scale;
             sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
         }
 
