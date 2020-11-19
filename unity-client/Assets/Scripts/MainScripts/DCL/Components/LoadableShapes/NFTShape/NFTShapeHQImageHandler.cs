@@ -19,6 +19,7 @@ public class NFTShapeHQImageHandler : IDisposable
 
     bool isPlayerNear;
     Camera camera;
+    Vector2 screenCenter;
 
     static public NFTShapeHQImageHandler Create(NFTShapeHQImageConfig config)
     {
@@ -43,9 +44,22 @@ public class NFTShapeHQImageHandler : IDisposable
         if (!isPlayerNear)
             return;
 
-        float dot = Vector3.Dot(config.controller.transform.forward, camera.transform.forward);
+        bool isPlayerLookingAtNFT;
 
-        if (dot >= config.nftConfig.highQualityImageAngleRatio && hqTexture == null)
+        // NOTE: currently all of our NFTShapes have a collider... but... better to be safe 🤷‍♂️
+        if (config.controller.collider != null)
+        {
+            isPlayerLookingAtNFT = config.controller.collider.Raycast(camera.ScreenPointToRay(screenCenter),
+                out RaycastHit hitInfo,
+                config.nftConfig.highQualityImageMinDistance);
+        }
+        else
+        {
+            isPlayerLookingAtNFT = Vector3.Dot(config.controller.transform.forward, camera.transform.forward) >= config.nftConfig.highQualityImageAngleRatio;
+        }
+
+
+        if (isPlayerLookingAtNFT && hqTexture == null)
         {
             FetchHQTexture();
         }
@@ -55,6 +69,7 @@ public class NFTShapeHQImageHandler : IDisposable
     {
         this.config = config;
         camera = Camera.main;
+        screenCenter = new Vector2(Screen.width / 2, Screen.height / 2);
 
         CommonScriptableObjects.playerUnityPosition.OnChange += OnPlayerPositionChanged;
         OnPlayerPositionChanged(CommonScriptableObjects.playerUnityPosition, Vector3.zero);
