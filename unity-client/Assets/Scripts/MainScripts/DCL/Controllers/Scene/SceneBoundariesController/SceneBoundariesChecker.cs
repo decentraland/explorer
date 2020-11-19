@@ -24,22 +24,10 @@ namespace DCL.Controllers
 
         public int entitiesToCheckCount => entitiesToCheck.Count;
 
-        private SceneBoundariesEntityHandler sceneBoundariesEntityHandler;
-
         public SceneBoundariesChecker()
         {
-            sceneBoundariesEntityHandler = new SceneBoundariesEntityHandler();
             entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
             lastCheckTime = Time.realtimeSinceStartup;
-        }
-
-        public bool IsDebugMode()
-        {
-            return sceneBoundariesEntityHandler.DEBUG_MODE;
-        }
-        public void SetDebugMode()
-        {
-            sceneBoundariesEntityHandler.DEBUG_MODE = true;
         }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
@@ -165,10 +153,9 @@ namespace DCL.Controllers
         public bool IsEntityInsideSceneBoundaries(DecentralandEntity entity)
         {
             if (entity.meshesInfo == null || entity.meshesInfo.meshRootGameObject == null || entity.meshesInfo.mergedBounds == null) return false;
-            Bounds meshBounds = entity.meshesInfo.mergedBounds;
 
             // 1st check (full mesh AABB)
-            bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(meshBounds);
+            bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.mergedBounds);
 
             // 2nd check (submeshes AABB)
             if (!isInsideBoundaries)
@@ -183,9 +170,7 @@ namespace DCL.Controllers
         {
             bool isInsideBoundaries = IsEntityInsideSceneBoundaries(entity);
 
-            sceneBoundariesEntityHandler.UpdateEntityMeshesValidState(entity, isInsideBoundaries);
-            sceneBoundariesEntityHandler.UpdateEntityCollidersValidState(entity, isInsideBoundaries);
-
+            UpdateEntityMeshesValidState(entity, isInsideBoundaries);
             UpdateEntityCollidersValidState(entity, isInsideBoundaries);
             UpdateComponents(entity, isInsideBoundaries);
         }
@@ -203,8 +188,7 @@ namespace DCL.Controllers
             return true;
         }
 
-
-        protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries, Bounds meshBounds)
+        protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
             if (entity.meshesInfo.renderers[0] == null) return;
 

@@ -661,9 +661,10 @@ public class BuildModeController : MonoBehaviour
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
+
+        SceneController.i.ActiveBuilderInWorldEditScene();
      
     }
-
 
     public void ExitEditMode()
     {
@@ -692,6 +693,8 @@ public class BuildModeController : MonoBehaviour
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
+
+        SceneController.i.DesactiveBuilderInWorldEditScene();
     }
 
     void ExitAfterCharacterTeleport(DCLCharacterPosition position)
