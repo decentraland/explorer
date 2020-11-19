@@ -12,3 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc94a50fd1a6a4c8abb0e6d15a59ff20, type: 3}
   m_Name: NFTShapeConfig
   m_EditorClassIdentifier: 
+  loadingMinDistance: 30
+  highQualityImageMinDistance: 3
+  highQualityImageAngleRatio: 0.94
+  highQualityImageResolution: 1024
+  verbose: 0
