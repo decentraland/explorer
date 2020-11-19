@@ -48,11 +48,14 @@
   bottom: 30px;
 }
 
+.passportForm form .inputGroup em.required {
+  color: #333;
+}
+
 .passportForm form .inputGroup input.hasError {
   border-color: #ff2d55;
 }
 
-.passportForm form .inputGroup em.required,
 .passportForm form .inputGroup em.hint.hasError {
   color: #ff2d55;
   opacity: 1;
