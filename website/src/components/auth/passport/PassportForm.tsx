@@ -74,7 +74,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
   return (
     <div className="passportForm">
       <form method="POST" onSubmit={handleSubmit}>
-        <div className="inputGroup">
+        <div className="inputGroup inputGroupName">
           <em className="required">* required field (you can edit it later)</em>
           <label>Name your avatar</label>
           <input
@@ -90,7 +90,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
             {Math.max(MAX_NAME_LENGTH - state.name.length, 0)}/{MAX_NAME_LENGTH}
           </em>
         </div>
-        <div className="inputGroup">
+        <div className="inputGroup inputGroupEmail">
           <label>Let's stay in touch</label>
           <input
             type="text"
