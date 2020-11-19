@@ -20,7 +20,7 @@ namespace DCL.Rendering
 
         internal List<CullingControllerProfile> profiles = null;
 
-        public CullingControllerSettings settings;
+        private CullingControllerSettings settings;
 
         private HashSet<Renderer> hiddenRenderers = new HashSet<Renderer>();
         private HashSet<Renderer> shadowlessRenderers = new HashSet<Renderer>();
@@ -126,11 +126,14 @@ namespace DCL.Rendering
 
                 SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
 
-                if (!shouldBeVisible && !hiddenRenderers.Contains(r))
-                    hiddenRenderers.Add(r);
+                if (OnDataReport != null)
+                {
+                    if (!shouldBeVisible && !hiddenRenderers.Contains(r))
+                        hiddenRenderers.Add(r);
 
-                if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
-                    shadowlessRenderers.Add(r);
+                    if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
+                        shadowlessRenderers.Add(r);
+                }
 
                 var skmr = r as SkinnedMeshRenderer;
 
@@ -191,15 +194,17 @@ namespace DCL.Rendering
 
                 yield return ProcessAnimations();
 
-                hiddenRenderers.Clear();
-                shadowlessRenderers.Clear();
+                if (OnDataReport != null)
+                {
+                    hiddenRenderers.Clear();
+                    shadowlessRenderers.Clear();
+                }
 
                 int profilesCount = profiles.Count;
 
                 for (var pIndex = 0; pIndex < profilesCount; pIndex++)
                 {
-                    CullingControllerProfile profile = profiles[pIndex];
-                    yield return ProcessProfile(profile);
+                    yield return ProcessProfile(profiles[pIndex]);
                 }
 
                 RaiseDataReport();
@@ -215,7 +220,7 @@ namespace DCL.Rendering
         /// <param name="settings">Any settings object to use thresholds for computing the rule.</param>
         /// <param name="distance">Mesh distance from camera used for computing the rule.</param>
         /// <returns>True if mesh should be updated when offscreen, false if otherwise.</returns>
-        private bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
+        internal bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
         {
             bool finalValue = true;
 
@@ -378,7 +383,7 @@ namespace DCL.Rendering
         /// <summary>
         /// Reset all tracked renderers properties. Needed when toggling or changing settings.
         /// </summary>
-        void ResetObjects()
+        internal void ResetObjects()
         {
             foreach (var r in sceneObjects.skinnedRenderers)
             {
