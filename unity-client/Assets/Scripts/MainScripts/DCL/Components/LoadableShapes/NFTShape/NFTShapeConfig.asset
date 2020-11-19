@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: NFTShapeConfig
   m_EditorClassIdentifier: 
   loadingMinDistance: 30
-  highQualityImageMinDistance: 3
-  highQualityImageAngleRatio: 0.94
+  highQualityImageMinDistance: 5
+  highQualityImageAngleRatio: 0.8
   highQualityImageResolution: 1024
   verbose: 0
