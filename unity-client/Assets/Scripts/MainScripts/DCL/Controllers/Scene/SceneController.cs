@@ -576,7 +576,6 @@ namespace DCL
             InitializeSceneBoundariesChecker(false);
         }
 
-        // TODO: We should call this with the pertinent param when we toggle the builder in-world
         void InitializeSceneBoundariesChecker(bool debugMode)
         {
             if (!useBoundariesChecker) return;
@@ -593,16 +592,6 @@ namespace DCL
             {
                 boundariesChecker = new SceneBoundariesChecker();
             }
-
-            // BUILDER in-world
-            /*
-            boundariesChecker = new SceneBoundariesDebugModeChecker();
-            if (isDebugMode)
-            {
-                boundariesChecker.SetDebugMode();
-                boundariesChecker.timeBetweenChecks = 0f;
-            }
-            */
         }
 
         private void SetPositionDirty(DCLCharacterPosition character)

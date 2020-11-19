@@ -83,39 +83,7 @@ namespace DCL.Controllers
                 RemoveInvalidMeshEffect(entity);
             else
                 AddInvalidMeshEffect(entity);
-
-            // SBEntityHandler
-            /*
-            if (entity.scene.IsEditModeActive() || DEBUG_MODE)
-            {
-                if (isInsideBoundaries)
-                    RemoveInvalidMeshEffect(entity);
-                else
-                    AddInvalidMeshEffect(entity);
-            }
-            else // Pravus: do we still need this 'else' part for the builder in-world ?
-            {
-                SetEntityMeshesVisibilityState(entity, isInsideBoundaries);
-            }
-            */
         }
-
-        // SBEntityHandler
-        /*
-        void SetEntityMeshesVisibilityState(DecentralandEntity entity, bool isInsideBoundaries)
-        {
-            if (entity.meshesInfo.renderers[0] == null) return;
-
-            if (isInsideBoundaries != entity.meshesInfo.renderers[0].enabled && entity.meshesInfo.currentShape.IsVisible())
-            {
-                for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
-                {
-                    if (entity.meshesInfo.renderers[i] != null)
-                        entity.meshesInfo.renderers[i].enabled = isInsideBoundaries;
-                }
-            }
-        }
-        */
 
         void RemoveInvalidMeshEffect(DecentralandEntity entity)
         {
@@ -138,23 +106,6 @@ namespace DCL.Controllers
             }
 
             invalidMeshesInfo[entity.gameObject].ResetMaterials();
-
-            // SBEntityHAndler
-            /*
-            if (WasEntityInAValidPosition(entity)) return; // Pravus: Not sure why we need to accept entity == null here for the builder in-world ?
-
-            PoolableObject shapePoolableObjectBehaviour = PoolManager.i.GetPoolable(entity.meshesInfo.meshRootGameObject);
-            if (shapePoolableObjectBehaviour != null)
-                shapePoolableObjectBehaviour.OnRelease -= invalidMeshesInfo[entity.gameObject].ResetMaterials;
-
-            for (int i = 0; i < entity.renderers.Length; i++)
-            {
-                if (invalidSubmeshes.Contains(entity.renderers[i]))
-                    invalidSubmeshes.Remove(entity.renderers[i]);
-            }
-
-            invalidMeshesInfo[entity.gameObject].ResetMaterials();
-            */
         }
 
         void AddInvalidMeshEffect(DecentralandEntity entity)
@@ -196,28 +147,6 @@ namespace DCL.Controllers
                 {
                     entityRenderers[i].sharedMaterial = invalidMeshMaterial;
                 }
-
-                // SBEntityHandler
-                /*
-                if (!invalidSubmeshes.Contains(entityRenderers[i])) // Pravus: not sure why we'd have this check reverted and the new line at 214 ?
-                {
-                    // Wireframe that shows the boundaries to the dev (We don't use the GameObject.Instantiate(prefab, parent)
-                    // overload because we need to set the position and scale before parenting, to deal with scaled objects)
-                    GameObject wireframeObject = GameObject.Instantiate(Resources.Load<GameObject>(WIREFRAME_PREFAB_NAME));
-                    wireframeObject.transform.position = entityRenderers[i].bounds.center;
-                    wireframeObject.transform.localScale = entityRenderers[i].bounds.size * 1.01f;
-                    wireframeObject.transform.SetParent(entity.gameObject.transform);
-
-                    entityRenderers[i].sharedMaterial = invalidSubMeshMaterial;
-
-                    invalidMeshInfo.wireframeObjects.Add(wireframeObject);
-                    invalidSubmeshes.Add(entityRenderers[i]);
-                }
-                else
-                {
-                    entityRenderers[i].sharedMaterial = invalidMeshMaterial;
-                }
-                */
             }
 
             invalidMeshesInfo.Add(entity.gameObject, invalidMeshInfo);
