@@ -24,24 +24,11 @@ namespace DCL.Controllers
 
         public int entitiesToCheckCount => entitiesToCheck.Count;
 
-        // private SceneBoundariesEntityHandler sceneBoundariesEntityHandler;
-
         public SceneBoundariesChecker()
         {
-            // sceneBoundariesEntityHandler = new SceneBoundariesEntityHandler();
             entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
             lastCheckTime = Time.realtimeSinceStartup;
         }
-
-        // public bool IsDebugMode()
-        // {
-        //     return sceneBoundariesEntityHandler.DEBUG_MODE;
-        // }
-
-        // public void SetDebugMode()
-        // {
-        //     sceneBoundariesEntityHandler.DEBUG_MODE = true;
-        // }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         IEnumerator CheckEntities()
