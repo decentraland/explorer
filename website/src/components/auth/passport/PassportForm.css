@@ -9,8 +9,10 @@
 .passportForm form .inputGroup {
   display: flex;
   flex-flow: column nowrap;
+  height: 112px;
   padding: 16px 16px 32px 16px;
   position: relative;
+  box-sizing: content-box;
 }
 
 .passportForm form .inputGroup em.hint,
@@ -90,14 +92,8 @@
   border-radius: 12px;
   box-shadow: 0 3px 0 #cb2242;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 17px;
   line-height: 20px;
   outline: 0;
-}
-
-@media only screen and (min-width: 1441px) {
-  .passportForm form .actions {
-    padding: 2em 0 0;
-  }
 }

@@ -12,6 +12,12 @@
     sans-serif;
 }
 
+.LoginContainer button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
 .LoginContainer main {
   background-size: cover;
   background-color: white;
