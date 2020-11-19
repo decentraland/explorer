@@ -566,6 +566,16 @@ namespace DCL
             return solvedPosition;
         }
 
+        public void ActiveBuilderInWorldEditScene()
+        {
+            InitializeSceneBoundariesChecker(true);
+        }
+
+        public void DesactiveBuilderInWorldEditScene()
+        {
+            InitializeSceneBoundariesChecker(false);
+        }
+
         // TODO: We should call this with the pertinent param when we toggle the builder in-world
         void InitializeSceneBoundariesChecker(bool debugMode)
         {

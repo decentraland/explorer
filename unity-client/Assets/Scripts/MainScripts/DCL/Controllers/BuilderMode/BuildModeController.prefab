@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce9f3e99bfa1950438d79c75c333a17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeFeature: 1
+  activeFeature: 0
   scaleSpeed: 0.05
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
@@ -182,8 +182,6 @@ MonoBehaviour:
   builderInWorldBridge: {fileID: 3917703040089432743}
   firstPersonMode: {fileID: 1208871511546216253}
   editorMode: {fileID: 1208871512657624393}
-  duplicateCursorTexture: {fileID: 2800000, guid: 422889cd6c61279459cc3c6bfa00ed20,
-    type: 3}
   layerToRaycast:
     serializedVersion: 2
     m_Bits: 16384
