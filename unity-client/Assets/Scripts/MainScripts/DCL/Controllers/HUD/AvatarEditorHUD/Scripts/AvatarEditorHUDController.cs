@@ -441,7 +441,6 @@ public class AvatarEditorHUDController : IHUD
         else if (visible && !view.isOpen)
         {
             DCL.Environment.i.messagingControllersManager.paused = IsSignUpFlowValue;
-
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
             currentRenderProfile.avatarProfile.Apply();
 
