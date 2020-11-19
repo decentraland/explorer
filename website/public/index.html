@@ -84,6 +84,18 @@
       body.error #gameContainer {
         background: black none !important;
       }
+
+      #root-loading {
+        background-size: cover;
+        background-image: url(images/background-secondary@blur.jpg);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        left: 100%;
+        z-index: 10000;
+      }
+
       @font-face {
         font-family: sfregular;
         src: url(images/decentraland-connect/SF-UI-Text-Regular.otf);
@@ -100,6 +112,7 @@
   </head>
   <body class="dcl-loading">
     <div id="root"></div>
+    <div id="root-loading"></div>
     <div id="gameContainer"></div>
     <audio autoplay id="voice-chat-audio"></audio>
     <!-- span.progress is to avoid a error on DCLUnityLoader  -->

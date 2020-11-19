@@ -58,18 +58,20 @@ export interface LoginContainerProps {
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const fullPage = props.stage === LoginStage.SIGN_IN
+  const loadingPage = props.stage === LoginStage.LOADING
   const shouldShow =
     LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar";
   return (
     <React.Fragment>
       {shouldShow && (
         <div className={'LoginContainer' + (fullPage ? ' FullPage' : '')}>
-          <Navbar full={fullPage} />
+          {/* Nabvar */}
+          {!loadingPage && <Navbar full={fullPage} />}
 
-          {/* Footer */}
+          {/* Main */}
           <main>
             <Container className="eth-login-popup">
-              {props.stage === LoginStage.LOADING && <InitialLoading />}
+              {loadingPage && <InitialLoading />}
               {props.stage === LoginStage.SIGN_IN && (
                 <EthLogin
                   hasWallet={props.hasWallet}
