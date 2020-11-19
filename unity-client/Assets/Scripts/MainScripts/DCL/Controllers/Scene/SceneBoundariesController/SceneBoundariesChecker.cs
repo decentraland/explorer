@@ -202,7 +202,7 @@ namespace DCL.Controllers
             }
         }
 
-        public void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        protected virtual void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
             int collidersCount = entity.meshesInfo.colliders.Count;
             if (collidersCount > 0 && isInsideBoundaries != entity.meshesInfo.colliders[0].enabled && entity.meshesInfo.currentShape.HasCollisions())
