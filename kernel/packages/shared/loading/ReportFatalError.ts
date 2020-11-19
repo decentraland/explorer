@@ -3,6 +3,7 @@ import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
   errorMessage,
   ExecutionLifecycleEvent,
+  ExecutionLifecycleEventsList,
   MOBILE_NOT_SUPPORTED,
   NETWORK_MISMATCH,
   NEW_LOGIN,
@@ -11,6 +12,7 @@ import {
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import Html from '../Html'
+import { genericError } from '../store/metricSaga'
 
 declare const globalThis: StoreContainer
 
@@ -49,5 +51,9 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
 
 export function ReportFatalError(event: ExecutionLifecycleEvent) {
   bringDownClientAndShowError(event)
-  globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
+  if (ExecutionLifecycleEventsList.includes(event)) {
+    globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
+  } else {
+    globalThis.globalStore && globalThis.globalStore.dispatch(genericError(event))
+  }
 }
