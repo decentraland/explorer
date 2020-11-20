@@ -17,6 +17,7 @@ public class BuilderInWorldMode : MonoBehaviour
     [Header("Prefab references")]
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public ActionController actionController;
+    public BuilderInWorldBridge builderInWorldBridge;
 
     public System.Action OnInputDone;
     public System.Action<BuildInWorldCompleteAction> OnActionGenerated;
@@ -242,7 +243,23 @@ public class BuilderInWorldMode : MonoBehaviour
             buildModeAction.CreateActionType(actionList, type);
             OnActionGenerated?.Invoke(buildModeAction);
 
+            //EntityTransformChanged(selectedEntities);
+
             actionList = new List<BuilderInWorldEntityAction>();
+           
         }
     }
+
+    //protected void EntityTransformChanged(List<DCLBuilderInWorldEntity> entityList)
+    //{
+    //    foreach(DCLBuilderInWorldEntity entity in entityList)
+    //    {
+    //        EntityTransformChanged(entity.rootEntity);
+    //    }
+    //}
+
+    //protected void EntityTransformChanged(DecentralandEntity entity)
+    //{
+    //    builderInWorldBridge.EntityTransformReport(entity, builderInWorldEntityHandler.GetParcelSceneToEdit());
+    //}
 }

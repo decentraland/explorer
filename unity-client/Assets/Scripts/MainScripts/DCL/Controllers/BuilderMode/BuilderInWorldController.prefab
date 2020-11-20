@@ -167,6 +167,7 @@ MonoBehaviour:
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
   distanceLimitToSelectObjects: 50
+  msToWaitUntilSceneIsLoaded: 5000
   snapFactor: 1
   snapRotationDegresFactor: 30
   snapScaleFactor: 0.25
@@ -448,6 +449,7 @@ MonoBehaviour:
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   actionController: {fileID: 1208871512032110241}
+  builderInWorldBridge: {fileID: 3917703040089432743}
   scaleSpeed: 0.25
   rotationSpeed: 0.5
   distanceFromCameraForNewEntitties: 5
@@ -1547,6 +1549,7 @@ MonoBehaviour:
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   actionController: {fileID: 1208871512032110241}
+  builderInWorldBridge: {fileID: 0}
   distanceEagleCamera: 20
   freeCameraController: {fileID: 0}
   gizmoManager: {fileID: 1208871511615770936}

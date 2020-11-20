@@ -453,6 +453,9 @@ namespace DCL
         #region SCENES_MANAGEMENT
 
         //======================================================================
+
+        public Action<string> OnReadyScene;
+
         public HashSet<string> readyScenes = new HashSet<string>();
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
         [System.NonSerialized] public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
@@ -510,6 +513,8 @@ namespace DCL
             WebInterface.ReportControlEvent(new WebInterface.SceneReady(sceneId));
 
             Environment.i.worldBlockersController.SetupWorldBlockers();
+
+            OnReadyScene?.Invoke(sceneId);
         }
 
         public string TryToGetSceneCoordsID(string id)

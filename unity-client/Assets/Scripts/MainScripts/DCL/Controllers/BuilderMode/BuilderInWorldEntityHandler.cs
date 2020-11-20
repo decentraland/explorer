@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
@@ -36,6 +37,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     BuilderInWorldMode currentActiveMode;
     bool isMultiSelectionActive = false;
 
+    float lastTransformReportTime;
+
     private void OnDestroy()
     {
         DestroyCollidersForAllEntities();
@@ -54,6 +57,22 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
      
     }
 
+    private void Update()
+    {
+        if (selectedEntities.Count <= 0) return;
+        if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY) return;
+
+        ReportTransform();
+    }
+
+    void ReportTransform()
+    {
+        foreach(DCLBuilderInWorldEntity entity in selectedEntities)
+        {
+            builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
+        }
+    }
+
     public void Init()
     {
         HUDController.i.buildModeHud.OnEntityDelete += DeleteEntity;
@@ -65,6 +84,11 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
+    }
+
+    public ParcelScene GetParcelSceneToEdit()
+    {
+        return sceneToEdit;
     }
 
     public List<DCLBuilderInWorldEntity> GetSelectedEntityList()

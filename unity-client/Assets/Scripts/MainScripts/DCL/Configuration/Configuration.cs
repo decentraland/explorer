@@ -16,6 +16,8 @@ namespace DCL.Configuration
         public const string CATALOG_ASSET_PACK_TITLE = "Asset Packs";
         public const string VOXEL_TAG = "Voxel";
         public const string CUSTOM_LAND = "CUSTOM LAND";
+
+        public static float ENTITY_POSITION_REPORTING_DELAY = 0.1f; // In seconds
     }
 
     public static class ApplicationSettings

@@ -102,6 +102,8 @@ public class BuilderInWorldController : MonoBehaviour
 
     int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
 
+    string sceneToEditId;
+
     SceneObject lastSceneObjectCreated;
 
     const float RAYCAST_MAX_DISTANCE = 10000f;
@@ -601,7 +603,6 @@ public class BuilderInWorldController : MonoBehaviour
 
         float currentDistance = 9999;
         VoxelEntityHit voxelEntityHit = null;
-        DCLBuilderInWorldEntity unselectedEntity = null;
 
         hits = Physics.RaycastAll(ray, RAYCAST_MAX_DISTANCE, layerToRaycast);
         foreach (RaycastHit hit in hits)
@@ -617,8 +618,7 @@ public class BuilderInWorldController : MonoBehaviour
                 {
                     if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
                     {
-                        unselectedEntity = entityToCheck;
-                        voxelEntityHit = new VoxelEntityHit(unselectedEntity, hit);
+                        voxelEntityHit = new VoxelEntityHit(entityToCheck, hit);
                         currentDistance = Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
                     }
                 }
@@ -627,11 +627,24 @@ public class BuilderInWorldController : MonoBehaviour
         return voxelEntityHit;
     }
 
+    void NewSceneReady(string id)
+    {
+        if (sceneToEditId != id) return;
+        SceneController.i.OnReadyScene -= NewSceneReady;
+        sceneToEditId = null;
+        EnterEditMode();
+    }
+
     public void StartEnterEditMode()
     {
+        if (sceneToEditId != null) return;
+
         FindSceneToEdit();
+        sceneToEditId = sceneToEdit.sceneData.id;
+        SceneController.i.OnReadyScene += NewSceneReady;
+
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
-        StartCoroutine(WaitUntilNewSceneIsLoaded());
+    
     }
 
     public void EnterEditMode()
@@ -718,11 +731,5 @@ public class BuilderInWorldController : MonoBehaviour
     void PublishScene()
     {
         builderInWorldBridge.PublishScene(sceneToEdit);
-    }
-
-    IEnumerator WaitUntilNewSceneIsLoaded()
-    {
-        yield return new WaitForSeconds(msToWaitUntilSceneIsLoaded/1000f);
-        EnterEditMode();
     }
 }

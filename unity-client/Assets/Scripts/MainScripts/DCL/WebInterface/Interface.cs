@@ -193,14 +193,44 @@ namespace DCL.Interface
             public ChatMessage message;
         }
 
+        #region BuilderInWorld
+
+        [System.Serializable]
+        public class ReportEntityPositionPayload
+        {
+            public string entityId;
+            public int componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
+            public ComponentData componentData = new ComponentData();
+
+            [System.Serializable]
+            public class ComponentData
+            {
+      
+
+                public Vector3 position;
+
+                public Quaternion rotation;
+
+                public Vector3 scale;
+            }
+        }
+
         [System.Serializable]
         public class AddEntityEvent
         {
             public string type = "AddEntity";
             public AddEntityPayLoad payload;
 
+        };
+
+        [System.Serializable]
+        public class ModifyEntityComponentEvent
+        {
+            public string type = "SetComponent";
+            public ReportEntityPositionPayload payload;
 
         };
+
         [System.Serializable]
         public class AddEntityPayLoad
         {
@@ -277,6 +307,8 @@ namespace DCL.Interface
             public string type = "StoreSceneState";
             public string payload = "";
         };
+
+        #endregion
 
         [System.Serializable]
         public class OnPointerEventPayload
@@ -679,6 +711,8 @@ namespace DCL.Interface
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
         private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
+        private static ReportEntityPositionPayload reportEntityPositionPayload = new ReportEntityPositionPayload();
+        private static ModifyEntityComponentEvent modifyEntityComponentEvent = new ModifyEntityComponentEvent();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -704,6 +738,8 @@ namespace DCL.Interface
             SendMessage("ControlEvent", controlEvent);
         }
 
+        #region BuilderInWorld
+
         public static void AddEntity(string sceneId, string entityId, EntityComponentModel[] components)
         {
             AddEntityEvent addEntityEvent = new AddEntityEvent();
@@ -713,6 +749,17 @@ namespace DCL.Interface
 
             addEntityEvent.payload = addEntityPayLoad;
             SendSceneEvent(sceneId, "stateEvent", addEntityEvent);
+        }
+
+        public static void ReportEntityTransform(Vector3 position, Quaternion rotation, Vector3 scale,string sceneId, string entityId)
+        {
+            reportEntityPositionPayload.entityId = entityId;
+            reportEntityPositionPayload.componentData.position = position;
+            reportEntityPositionPayload.componentData.rotation = rotation;
+            reportEntityPositionPayload.componentData.scale = scale;
+
+            modifyEntityComponentEvent.payload = reportEntityPositionPayload;
+            SendSceneEvent(sceneId, "stateEvent", modifyEntityComponentEvent);
         }
 
         public static void RemoveEntity(string sceneId, string entityId)
@@ -729,6 +776,8 @@ namespace DCL.Interface
         {
             SendSceneEvent(sceneId, "stateEvent", storeSceneState);
         }
+
+        #endregion
 
         public static void ReportOnClickEvent(string sceneId, string uuid)
         {
