@@ -366,6 +366,13 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class PerformanceReportPayload
+        {
+            public string samples;
+            public bool fpsIsCapped;
+        }
+
+        [System.Serializable]
         public class PerformanceHiccupPayload
         {
             public int hiccupsInThousandFrames;
@@ -483,6 +490,12 @@ namespace DCL.Interface
             public bool mute;
         }
 
+        [System.Serializable]
+        public class CloseUserAvatarPayload
+        {
+            public bool isSignUpFlow;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -491,6 +504,7 @@ namespace DCL.Interface
      */
     [DllImport("__Internal")] public static extern void StartDecentraland();
     [DllImport("__Internal")] public static extern void MessageFromEngine(string type, string message);
+    [DllImport("__Internal")] public static extern string GetGraphicCard();
 #else
         public static void StartDecentraland()
         {
@@ -508,6 +522,8 @@ namespace DCL.Interface
                 Debug.Log("MessageFromEngine called with: " + type + ", " + message);
             }
         }
+
+        public static string GetGraphicCard() => "In Editor Graphic Card";
 #endif
 
         public static void SendMessage(string type)
@@ -556,6 +572,7 @@ namespace DCL.Interface
         private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
+        private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -860,9 +877,13 @@ namespace DCL.Interface
             SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
         }
 
-        public static void SendPerformanceReport(string encodedFrameTimesInMS)
+        public static void SendPerformanceReport(string encodedFrameTimesInMS, bool usingFPSCap)
         {
-            MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+            SendMessage("PerformanceReport", new PerformanceReportPayload()
+            {
+                samples = encodedFrameTimesInMS,
+                fpsIsCapped = usingFPSCap
+            });
         }
 
         public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
@@ -1067,6 +1088,12 @@ namespace DCL.Interface
             muteUserEvent.usersId = usersId;
             muteUserEvent.mute = mute;
             SendMessage("SetMuteUsers", muteUserEvent);
+        }
+
+        public static void SendCloseUserAvatar(bool isSignUpFlow)
+        {
+            closeUserAvatarPayload.isSignUpFlow = isSignUpFlow;
+            SendMessage("CloseUserAvatar", closeUserAvatarPayload);
         }
     }
 }

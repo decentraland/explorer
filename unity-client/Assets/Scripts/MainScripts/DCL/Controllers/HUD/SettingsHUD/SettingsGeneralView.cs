@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace DCL.SettingsHUD
 {
@@ -18,6 +19,7 @@ namespace DCL.SettingsHUD
         public Toggle shadowToggle = null;
         public Toggle softShadowToggle = null;
         public Toggle bloomToggle = null;
+        public Toggle fpsCapToggle = null;
         public Slider mouseSensitivitySlider = null;
         public Slider antiAliasingSlider = null;
         public Slider renderingScaleSlider = null;
@@ -31,6 +33,10 @@ namespace DCL.SettingsHUD
         public Slider voiceChatVolumeSlider = null;
         public TextMeshProUGUI voiceChatVolumeValueLabel = null;
         public SpinBoxPresetted voiceChatAllowSpinBox = null;
+
+        [SerializeField] private Toggle autosettingsToggle;
+        [SerializeField] private CanvasGroup advancedCanvasGroup;
+        [SerializeField] private GameObject advancedBlocker;
 
         private DCL.SettingsData.QualitySettings currentQualitySetting;
         private DCL.SettingsData.GeneralSettings currentGeneralSetting;
@@ -103,6 +109,13 @@ namespace DCL.SettingsHUD
                 isDirty = true;
             });
 
+            fpsCapToggle.onValueChanged.AddListener(isOn =>
+            {
+                tempQualitySetting.fpsCap = isOn;
+                shouldSetAsCustom = true;
+                isDirty = true;
+            });
+
             mouseSensitivitySlider.onValueChanged.AddListener(value =>
             {
                 tempGeneralSetting.mouseSensitivity = value;
@@ -162,6 +175,24 @@ namespace DCL.SettingsHUD
                 tempGeneralSetting.voiceChatAllow = (DCL.SettingsData.GeneralSettings.VoiceChatAllow)value;
                 isDirty = true;
             });
+
+            autosettingsToggle.onValueChanged.AddListener(SetAutoQualityActive);
+            autosettingsToggle.isOn = false;
+        }
+
+        private void SetAutoQualityActive(bool active)
+        {
+
+            advancedCanvasGroup.interactable = !active;
+            tempGeneralSetting.autoqualityOn = active;
+            advancedBlocker.SetActive(active);
+            if (active)
+            {
+                QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
+                tempQualitySetting = Settings.i.lastValidAutoqualitySet;
+                tempQualitySetting.baseResolution = currentBaseResolution;
+                isDirty = true;
+            }
         }
 
         void OnEnable()
@@ -230,6 +261,7 @@ namespace DCL.SettingsHUD
             softShadowToggle.isOn = tempQualitySetting.softShadows;
             shadowToggle.isOn = tempQualitySetting.shadows;
             bloomToggle.isOn = tempQualitySetting.bloom;
+            fpsCapToggle.isOn = tempQualitySetting.fpsCap;
             antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
@@ -242,6 +274,7 @@ namespace DCL.SettingsHUD
             mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
             voiceChatVolumeSlider.value = tempGeneralSetting.voiceChatVolume * 100;
             voiceChatAllowSpinBox.value = (int)tempGeneralSetting.voiceChatAllow;
+            autosettingsToggle.isOn = tempGeneralSetting.autoqualityOn;
         }
 
         public void Apply()

@@ -1,17 +1,28 @@
-import { ethereumConfigurations } from 'config'
+import { ethereumConfigurations, getNetworkFromTLD, getTLD, setNetwork } from 'config'
 import { Address } from 'web3x/address'
 import { Eth } from 'web3x/eth'
 import { WebsocketProvider } from 'web3x/providers'
-import { ETHEREUM_NETWORK, getTLD } from '../config'
+import { ETHEREUM_NETWORK } from '../config'
 import { decentralandConfigurations } from '../config/index'
 import { queueTrackingEvent } from './analytics'
 import { Catalyst } from './dao/contracts/Catalyst'
 import { ERC721 } from './dao/contracts/ERC721'
 import { getNetwork, getUserAccount } from './ethereum/EthereumService'
-import { awaitWeb3Approval, createEth } from './ethereum/provider'
+import { awaitWeb3Approval, createEth, createEthWhenNotConnectedToWeb3 } from './ethereum/provider'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
+import { NETWORK_MISMATCH, setTLDError } from './loading/types'
+import Html from './Html'
+import { ReportFatalError } from './loading/ReportFatalError'
+import { StoreContainer } from './store/rootTypes'
+import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
+
+declare const globalThis: StoreContainer
+
+declare var window: Window & {
+  ethereum: any
+}
 
 async function getAddress(): Promise<string | undefined> {
   try {
@@ -22,25 +33,40 @@ async function getAddress(): Promise<string | undefined> {
   }
 }
 
-export function getNetworkFromTLD(): ETHEREUM_NETWORK | null {
-  const tld = getTLD()
-  if (tld === 'zone') {
-    return ETHEREUM_NETWORK.ROPSTEN
-  }
-
-  if (tld === 'today' || tld === 'org') {
-    return ETHEREUM_NETWORK.MAINNET
-  }
-
-  // if localhost
-  return null
-}
-
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   const web3Network = await getNetwork()
   const web3net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-  defaultLogger.info('Using ETH network: ', web3net)
   return web3net
+}
+
+export async function checkTldVsWeb3Network() {
+  try {
+    const web3Net = await getAppNetwork()
+
+    return checkTldVsNetwork(web3Net)
+  } catch (e) {
+    // If we have an exception here, most likely it is that we didn't have a provider configured for request manager. Not critical.
+    return false
+  }
+}
+
+export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
+  const tld = getTLD()
+  const tldNet = getNetworkFromTLD()
+
+  if (tld === 'localhost') {
+    // localhost => allow any network
+    return false
+  }
+
+  if (tldNet !== web3Net) {
+    globalThis.globalStore.dispatch(setTLDError({ tld, web3Net, tldNet }))
+    Html.updateTLDInfo(tld, web3Net, tldNet as string)
+    ReportFatalError(NETWORK_MISMATCH)
+    return true
+  }
+
+  return false
 }
 
 export async function initWeb3(): Promise<void> {
@@ -71,16 +97,13 @@ export async function hasClaimedName(address: string) {
   }
 }
 
-export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
-  const contractAddress = Address.fromString(decentralandConfigurations.dao)
-  let eth = createEth()
-
-  if (!eth) {
-    const net = await getAppNetwork()
-    const provider = new WebsocketProvider(ethereumConfigurations[net].wss)
-
-    eth = createEth(provider)
+export async function fetchCatalystNodesFromDAO(): Promise<CatalystNode[]> {
+  if (!decentralandConfigurations.dao) {
+    await setNetwork(getNetworkFromTLDOrWeb3())
   }
+
+  const contractAddress = Address.fromString(decentralandConfigurations.dao)
+  const eth = createEthWhenNotConnectedToWeb3()
 
   const contract = new Catalyst(eth, contractAddress)
 
@@ -172,4 +195,13 @@ async function queryGraph(url: string, query: string, variables: any, totalAttem
   }
 
   throw new Error(`Error while querying graph url=${url}, query=${query}, variables=${JSON.stringify(variables)}`)
+}
+
+/**
+ * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
+ */
+export function registerProviderNetChanges() {
+  if (window.ethereum && typeof window.ethereum.on === 'function') {
+    window.ethereum.on('chainChanged', (networkId: string) => location.reload())
+  }
 }

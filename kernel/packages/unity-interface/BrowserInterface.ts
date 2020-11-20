@@ -49,6 +49,7 @@ import { StatefulWorker } from 'shared/world/StatefulWorker'
 import { ParcelSceneAPI } from 'shared/world/ParcelSceneAPI'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
+import Html from 'shared/Html'
 
 declare const DCL: any
 
@@ -121,11 +122,11 @@ export class BrowserInterface {
     queueTrackingEvent('hiccup report', data)
   }
 
-  public PerformanceReport(samples: string) {
-    const perfReport = getPerformanceInfo(samples)
+  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean }) {
+    const perfReport = getPerformanceInfo(data)
     queueTrackingEvent('performance report', perfReport)
 
-    const rawPerfReport = getRawPerformanceInfo(samples)
+    const rawPerfReport = getRawPerformanceInfo(data)
     queueTrackingEvent('raw perf report', rawPerfReport)
   }
 
@@ -214,7 +215,7 @@ export class BrowserInterface {
       globalThis.globalStore.dispatch(signUpSetProfile(update))
       globalThis.globalStore.dispatch(changeSignUpStage('passport'))
       unityInterface.DeactivateRendering()
-      document.getElementById('gameContainer')!.setAttribute('style', 'display: none')
+      Html.switchGameContainer(false)
     }
   }
 
