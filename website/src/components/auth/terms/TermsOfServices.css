@@ -19,7 +19,8 @@
 }
 
 .termsOfServices .content {
-  margin: 0.5em 30px 2em;
+  margin: 6px 0 26px;
+  padding: 0 30px;
   height: 306px;
   overflow: auto;
 }
