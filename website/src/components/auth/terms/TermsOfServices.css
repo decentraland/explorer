@@ -20,7 +20,7 @@
 
 .termsOfServices .content {
   margin: 0.5em 30px 2em;
-  height: 300px;
+  height: 306px;
   overflow: auto;
 }
 
@@ -54,6 +54,7 @@
 .termsOfServices .actions button.btnAgree:disabled {
   background: #b9818b;
   box-shadow: 0 4px 0 #b37882;
+  cursor: not-allowed;
 }
 
 .termsOfServices .actions button.btnAgree {
