@@ -27,7 +27,7 @@ namespace DCL.Rendering
 
         public UniversalRenderPipelineAsset urpAsset;
 
-        private CullingObjectsTracker sceneObjects;
+        private ICullingObjectsTracker sceneObjects;
         private Coroutine updateCoroutine;
         private float timeBudgetCount = 0;
         private Vector3 lastPlayerPos;
@@ -46,9 +46,13 @@ namespace DCL.Rendering
             );
         }
 
-        public CullingController(UniversalRenderPipelineAsset urpAsset, CullingControllerSettings settings)
+        public CullingController(UniversalRenderPipelineAsset urpAsset, CullingControllerSettings settings, ICullingObjectsTracker cullingObjectsTracker = null)
         {
-            sceneObjects = new CullingObjectsTracker();
+            if (cullingObjectsTracker == null)
+                sceneObjects = new CullingObjectsTracker();
+            else
+                sceneObjects = cullingObjectsTracker;
+
             this.urpAsset = urpAsset;
             this.settings = settings;
         }
@@ -89,9 +93,9 @@ namespace DCL.Rendering
             Renderer[] renderers = null;
 
             if (profile == settings.rendererProfile)
-                renderers = sceneObjects.renderers;
+                renderers = sceneObjects.GetRenderers();
             else
-                renderers = sceneObjects.skinnedRenderers;
+                renderers = sceneObjects.GetSkinnedRenderers();
 
             for (var i = 0; i < renderers.Length; i++)
             {
@@ -167,7 +171,7 @@ namespace DCL.Rendering
                     continue;
                 }
 
-                bool shouldCheck = sceneObjects.dirty;
+                bool shouldCheck = sceneObjects.IsDirty();
 
                 yield return sceneObjects.PopulateRenderersList();
 
@@ -248,7 +252,8 @@ namespace DCL.Rendering
 
             Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
 
-            int animsLength = sceneObjects.animations.Length;
+            Animation[] animations = sceneObjects.GetAnimations();
+            int animsLength = animations.Length;
 
             for (var i = 0; i < animsLength; i++)
             {
@@ -258,7 +263,7 @@ namespace DCL.Rendering
                     yield return null;
                 }
 
-                Animation anim = sceneObjects.animations[i];
+                Animation anim = animations[i];
 
                 if (anim == null)
                     continue;
@@ -275,6 +280,122 @@ namespace DCL.Rendering
 
                 timeBudgetCount += Time.realtimeSinceStartup - startTime;
             }
+        }
+
+        /// <summary>
+        /// Reset all tracked renderers properties. Needed when toggling or changing settings.
+        /// </summary>
+        internal void ResetObjects()
+        {
+            var skinnedRenderers = sceneObjects.GetSkinnedRenderers();
+            var renderers = sceneObjects.GetRenderers();
+            var animations = sceneObjects.GetAnimations();
+
+            for (var i = 0; i < skinnedRenderers.Length; i++)
+            {
+                skinnedRenderers[i].updateWhenOffscreen = true;
+            }
+
+            for (var i = 0; i < animations.Length; i++)
+            {
+                animations[i].cullingType = AnimationCullingType.AlwaysAnimate;
+            }
+
+            for (var i = 0; i < renderers.Length; i++)
+            {
+                renderers[i].forceRenderingOff = false;
+            }
+        }
+
+        public void Dispose()
+        {
+            Stop();
+        }
+
+        /// <summary>
+        /// Sets the scene objects dirtiness.
+        /// In the next update iteration, all the scene objects are going to be gathered.
+        /// This method has performance impact. 
+        /// </summary>
+        public void SetDirty()
+        {
+            sceneObjects.SetDirty();
+        }
+
+        /// <summary>
+        /// Set settings. This will dirty the scene objects and has performance impact.
+        /// </summary>
+        /// <param name="settings">Settings to be set</param>
+        public void SetSettings(CullingControllerSettings settings)
+        {
+            this.settings = settings;
+            profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
+            SetDirty();
+        }
+
+        /// <summary>
+        /// Get current settings copy. If you need to modify it, you must set them via SetSettings afterwards.
+        /// </summary>
+        /// <returns>Current settings object copy.</returns>
+        public CullingControllerSettings GetSettings()
+        {
+            return settings.Clone();
+        }
+
+        /// <summary>
+        /// Enable or disable object visibility culling.
+        /// </summary>
+        /// <param name="enabled">If disabled, object visibility culling will be toggled.
+        /// </param>
+        public void SetObjectCulling(bool enabled)
+        {
+            if (settings.enableObjectCulling == enabled)
+                return;
+
+            settings.enableObjectCulling = enabled;
+            resetObjectsNextFrame = true;
+            SetDirty();
+        }
+
+        /// <summary>
+        /// Enable or disable animation culling.
+        /// </summary>
+        /// <param name="enabled">If disabled, animation culling will be toggled.</param>
+        public void SetAnimationCulling(bool enabled)
+        {
+            if (settings.enableAnimationCulling == enabled)
+                return;
+
+            settings.enableAnimationCulling = enabled;
+            resetObjectsNextFrame = true;
+            SetDirty();
+        }
+
+        /// <summary>
+        /// Enable or disable shadow culling
+        /// </summary>
+        /// <param name="enabled">If disabled, no shadows will be toggled.</param>
+        public void SetShadowCulling(bool enabled)
+        {
+            if (settings.enableShadowCulling == enabled)
+                return;
+
+            settings.enableShadowCulling = enabled;
+            resetObjectsNextFrame = true;
+            SetDirty();
+        }
+
+        /// <summary>
+        /// Fire the DataReport event. This will be useful for showing stats in a debug panel.
+        /// </summary>
+        private void RaiseDataReport()
+        {
+            if (OnDataReport == null)
+                return;
+
+            int rendererCount = (sceneObjects.GetRenderers()?.Length ?? 0) + (sceneObjects.GetSkinnedRenderers()?.Length ?? 0);
+
+            OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
         }
 
         /// <summary>
@@ -379,7 +500,6 @@ namespace DCL.Rendering
             return false;
         }
 
-
         /// <summary>
         /// ComputeShadowMapTexelSize computes the shadow-map bounding box diagonal texel size
         /// for the given bounds size.
@@ -411,119 +531,6 @@ namespace DCL.Rendering
         internal static float ComputeShadowMapTexelSize(float boundsSize, float shadowDistance, float shadowMapRes)
         {
             return boundsSize / shadowDistance * shadowMapRes;
-        }
-
-
-        /// <summary>
-        /// Reset all tracked renderers properties. Needed when toggling or changing settings.
-        /// </summary>
-        internal void ResetObjects()
-        {
-            foreach (var r in sceneObjects.skinnedRenderers)
-            {
-                r.updateWhenOffscreen = true;
-            }
-
-            foreach (var anim in sceneObjects.animations)
-            {
-                anim.cullingType = AnimationCullingType.AlwaysAnimate;
-            }
-
-            foreach (var r in sceneObjects.renderers)
-            {
-                r.forceRenderingOff = false;
-            }
-        }
-
-        public void Dispose()
-        {
-            Stop();
-        }
-
-        /// <summary>
-        /// Sets the scene objects dirtiness.
-        /// In the next update iteration, all the scene objects are going to be gathered.
-        /// This method has performance impact. 
-        /// </summary>
-        public void SetDirty()
-        {
-            sceneObjects.dirty = true;
-        }
-
-        /// <summary>
-        /// Set settings. This will dirty the scene objects and has performance impact.
-        /// </summary>
-        /// <param name="settings">Settings to be set</param>
-        public void SetSettings(CullingControllerSettings settings)
-        {
-            this.settings = settings;
-            profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
-            SetDirty();
-        }
-
-        /// <summary>
-        /// Get current settings copy. If you need to modify it, you must set them via SetSettings afterwards.
-        /// </summary>
-        /// <returns>Current settings object copy.</returns>
-        public CullingControllerSettings GetSettings()
-        {
-            return settings.Clone();
-        }
-
-        /// <summary>
-        /// Enable or disable object visibility culling.
-        /// </summary>
-        /// <param name="enabled">If disabled, object visibility culling will be toggled.
-        /// </param>
-        public void SetObjectCulling(bool enabled)
-        {
-            if (settings.enableObjectCulling == enabled)
-                return;
-
-            settings.enableObjectCulling = enabled;
-            resetObjectsNextFrame = true;
-            SetDirty();
-        }
-
-        /// <summary>
-        /// Enable or disable animation culling.
-        /// </summary>
-        /// <param name="enabled">If disabled, animation culling will be toggled.</param>
-        public void SetAnimationCulling(bool enabled)
-        {
-            if (settings.enableAnimationCulling == enabled)
-                return;
-
-            settings.enableAnimationCulling = enabled;
-            resetObjectsNextFrame = true;
-            SetDirty();
-        }
-
-        /// <summary>
-        /// Enable or disable shadow culling
-        /// </summary>
-        /// <param name="enabled">If disabled, no shadows will be toggled.</param>
-        public void SetShadowCulling(bool enabled)
-        {
-            if (settings.enableShadowCulling == enabled)
-                return;
-
-            settings.enableShadowCulling = enabled;
-            resetObjectsNextFrame = true;
-            SetDirty();
-        }
-
-        /// <summary>
-        /// Fire the DataReport event. This will be useful for showing stats in a debug panel.
-        /// </summary>
-        private void RaiseDataReport()
-        {
-            if (OnDataReport == null)
-                return;
-
-            int rendererCount = (sceneObjects.renderers?.Length ?? 0) + (sceneObjects.skinnedRenderers?.Length ?? 0);
-
-            OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
         }
 
         /// <summary>
