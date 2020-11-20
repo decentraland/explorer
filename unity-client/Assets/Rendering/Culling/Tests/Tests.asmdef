@@ -3,14 +3,17 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "CullingController"
+        "CullingController",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "NSubstitute.dll",
+        "System.Threading.Tasks.Extensions.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

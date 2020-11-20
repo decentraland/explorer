@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using DCL.Rendering;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -17,7 +18,7 @@ namespace CullingControllerTests
         [SetUp]
         public void SetUp()
         {
-            cullingController = new CullingController(GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset, new CullingControllerSettings());
+            cullingController = CullingController.Create();
         }
 
         [TearDown]
@@ -50,8 +51,6 @@ namespace CullingControllerTests
             Assert.IsNotNull(settings, "Settings should never be null!");
 
             var prevAnimationCulling = settings.enableAnimationCulling;
-            var prevRendererProfile = settings.rendererProfile;
-            var prevSkinnedProfile = settings.skinnedRendererProfile;
 
             // Ensure SetSettings works as intended.
             settings.enableAnimationCulling = !settings.enableAnimationCulling;
@@ -63,46 +62,52 @@ namespace CullingControllerTests
         [Test]
         public void EvaluateRendererVisibility()
         {
+            //Arrange
             var profile = new CullingControllerProfile();
             profile.emissiveSizeThreshold = 10;
             profile.opaqueSizeThreshold = 20;
             profile.visibleDistanceThreshold = 5;
 
+            // Act
             // Truth tests
             var farAndBigTest = CullingController.ShouldBeVisible(profile, 30, 20, false, true, true);
             var smallAndNearTest = CullingController.ShouldBeVisible(profile, 5, 2, false, true, true);
             var cameraInBoundsTest = CullingController.ShouldBeVisible(profile, 1, 100, true, true, true);
             var emissiveTest = CullingController.ShouldBeVisible(profile, 15, 20, false, false, true);
-            var translucentTest = CullingController.ShouldBeVisible(profile, 1, 50, false, false, false);
 
+            // Falsehood tests
+            var farAndSmallTest = CullingController.ShouldBeVisible(profile, 5, 20, false, true, true);
+            var emissiveAndFarTest = CullingController.ShouldBeVisible(profile, 5, 20, false, false, true);
+            var farAndTransparentTest = CullingController.ShouldBeVisible(profile, 1, 50, false, false, false);
+
+            // Assert
             Assert.IsTrue(farAndBigTest);
             Assert.IsTrue(smallAndNearTest);
             Assert.IsTrue(cameraInBoundsTest);
             Assert.IsTrue(emissiveTest);
-            Assert.IsTrue(translucentTest);
-
-            // False tests
-            var farAndSmallTest = CullingController.ShouldBeVisible(profile, 5, 20, false, true, true);
-            var emissiveAndFarTest = CullingController.ShouldBeVisible(profile, 5, 20, false, false, true);
 
             Assert.IsFalse(farAndSmallTest);
             Assert.IsFalse(emissiveAndFarTest);
+            Assert.IsFalse(farAndTransparentTest);
         }
 
         [Test]
         public void EvaluateShadowVisibility()
         {
+            // Arrange
             var profile = new CullingControllerProfile();
             profile.shadowMapProjectionSizeThreshold = 6;
             profile.shadowRendererSizeThreshold = 20;
             profile.shadowDistanceThreshold = 15;
 
+            // Act
             var nearTest = CullingController.ShouldHaveShadow(profile, 1, 5, 10);
             var nearButSmallTexel = CullingController.ShouldHaveShadow(profile, 1, 5, 1);
             var farAndBigEnough = CullingController.ShouldHaveShadow(profile, 30, 30, 30);
             var farAndSmall = CullingController.ShouldHaveShadow(profile, 10, 30, 30);
             var farAndSmallTexel = CullingController.ShouldHaveShadow(profile, 10, 30, 1);
 
+            // Assert
             Assert.IsTrue(nearTest);
             Assert.IsTrue(farAndBigEnough);
             Assert.IsFalse(nearButSmallTexel);
@@ -118,16 +123,48 @@ namespace CullingControllerTests
         [Test]
         public void ResetObjects()
         {
+            // Arrange
+            GameObject go1 = new GameObject();
+            GameObject go2 = new GameObject();
+
+            var r = go1.AddComponent<MeshRenderer>();
+            var skr = go2.AddComponent<SkinnedMeshRenderer>();
+            var anim = go2.AddComponent<Animation>();
+
+            r.forceRenderingOff = true;
+            skr.updateWhenOffscreen = false;
+            anim.cullingType = AnimationCullingType.BasedOnRenderers;
+
+            var mockTracker = Substitute.For<ICullingObjectsTracker>();
+            cullingController.objectsTracker = mockTracker;
+
+            mockTracker.GetRenderers().Returns(info => go1.GetComponentsInChildren<Renderer>());
+            mockTracker.GetSkinnedRenderers().Returns(info => go2.GetComponentsInChildren<SkinnedMeshRenderer>());
+            mockTracker.GetAnimations().Returns(info => go2.GetComponentsInChildren<Animation>());
+
+            // Act
+            cullingController.ResetObjects();
+
+            // Assert
+            Assert.IsFalse(r.forceRenderingOff);
+            Assert.IsTrue(skr.updateWhenOffscreen);
+            Assert.IsTrue(anim.cullingType == AnimationCullingType.AlwaysAnimate);
+
+            // Annihilate
+            Object.Destroy(go1);
+            Object.Destroy(go2);
         }
 
-        [Test]
-        public void ProcessAnimationCulling()
+        [UnityTest]
+        public IEnumerator ProcessAnimationCulling()
         {
+            yield break;
         }
 
-        [Test]
-        public void ProcessProfile()
+        [UnityTest]
+        public IEnumerator ProcessProfile()
         {
+            yield break;
         }
     }
 }

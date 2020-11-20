@@ -27,7 +27,7 @@ namespace DCL.Rendering
 
         public UniversalRenderPipelineAsset urpAsset;
 
-        private ICullingObjectsTracker sceneObjects;
+        internal ICullingObjectsTracker objectsTracker;
         private Coroutine updateCoroutine;
         private float timeBudgetCount = 0;
         private Vector3 lastPlayerPos;
@@ -49,9 +49,9 @@ namespace DCL.Rendering
         public CullingController(UniversalRenderPipelineAsset urpAsset, CullingControllerSettings settings, ICullingObjectsTracker cullingObjectsTracker = null)
         {
             if (cullingObjectsTracker == null)
-                sceneObjects = new CullingObjectsTracker();
+                objectsTracker = new CullingObjectsTracker();
             else
-                sceneObjects = cullingObjectsTracker;
+                objectsTracker = cullingObjectsTracker;
 
             this.urpAsset = urpAsset;
             this.settings = settings;
@@ -93,9 +93,9 @@ namespace DCL.Rendering
             Renderer[] renderers = null;
 
             if (profile == settings.rendererProfile)
-                renderers = sceneObjects.GetRenderers();
+                renderers = objectsTracker.GetRenderers();
             else
-                renderers = sceneObjects.GetSkinnedRenderers();
+                renderers = objectsTracker.GetSkinnedRenderers();
 
             for (var i = 0; i < renderers.Length; i++)
             {
@@ -171,9 +171,9 @@ namespace DCL.Rendering
                     continue;
                 }
 
-                bool shouldCheck = sceneObjects.IsDirty();
+                bool shouldCheck = objectsTracker.IsDirty();
 
-                yield return sceneObjects.PopulateRenderersList();
+                yield return objectsTracker.PopulateRenderersList();
 
                 Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
 
@@ -252,7 +252,7 @@ namespace DCL.Rendering
 
             Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
 
-            Animation[] animations = sceneObjects.GetAnimations();
+            Animation[] animations = objectsTracker.GetAnimations();
             int animsLength = animations.Length;
 
             for (var i = 0; i < animsLength; i++)
@@ -287,9 +287,9 @@ namespace DCL.Rendering
         /// </summary>
         internal void ResetObjects()
         {
-            var skinnedRenderers = sceneObjects.GetSkinnedRenderers();
-            var renderers = sceneObjects.GetRenderers();
-            var animations = sceneObjects.GetAnimations();
+            var skinnedRenderers = objectsTracker.GetSkinnedRenderers();
+            var renderers = objectsTracker.GetRenderers();
+            var animations = objectsTracker.GetAnimations();
 
             for (var i = 0; i < skinnedRenderers.Length; i++)
             {
@@ -319,7 +319,7 @@ namespace DCL.Rendering
         /// </summary>
         public void SetDirty()
         {
-            sceneObjects.SetDirty();
+            objectsTracker.SetDirty();
         }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace DCL.Rendering
             if (OnDataReport == null)
                 return;
 
-            int rendererCount = (sceneObjects.GetRenderers()?.Length ?? 0) + (sceneObjects.GetSkinnedRenderers()?.Length ?? 0);
+            int rendererCount = (objectsTracker.GetRenderers()?.Length ?? 0) + (objectsTracker.GetSkinnedRenderers()?.Length ?? 0);
 
             OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
         }
