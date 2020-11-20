@@ -68,7 +68,11 @@ namespace DCL.SettingsData
         [Tooltip("Camera Far")] [Range(40, 100)]
         public float cameraDrawDistance;
 
-        [Tooltip("Enable bloom post process")] public bool bloom;
+        [Tooltip("Enable bloom post process")]
+        public bool bloom;
+
+        [Tooltip("Enable 30 FPS capping for more stable framerate")]
+        public bool fpsCap;
 
         [Tooltip("Enable color grading post process")]
         public bool colorGrading;
@@ -92,6 +96,7 @@ namespace DCL.SettingsData
             if (shadowResolution != otherSetting.shadowResolution) return false;
             if (Mathf.Abs(cameraDrawDistance - otherSetting.cameraDrawDistance) < 0.001f) return false;
             if (bloom != otherSetting.bloom) return false;
+            if (fpsCap != otherSetting.fpsCap) return false;
             if (colorGrading != otherSetting.colorGrading) return false;
             if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) < 0.001f) return false;
             if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
