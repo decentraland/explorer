@@ -82,13 +82,29 @@ public class ActionController : MonoBehaviour
 
     }
 
+    public void CreateActionEntityDeleted(List<DCLBuilderInWorldEntity> entityList)
+    {
+        BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
+        List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
+
+        foreach (DCLBuilderInWorldEntity entity in entityList)
+        {
+            BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entity.rootEntity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entity.rootEntity), entity.rootEntity.entityId);
+            entityActionList.Add(builderInWorldEntityAction);
+        }
+
+        buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.DELETED);
+
+        AddAction(buildAction);
+    }
+
     public void CreateActionEntityCreated(DecentralandEntity entity)
     {
         BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entity, entity.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entity));
 
         BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
-        buildAction.actionType = ActionType.CREATED;
         buildAction.CreateActionType(builderInWorldEntityAction, ActionType.CREATED);
+
         AddAction(buildAction);
     }
 
@@ -117,10 +133,12 @@ public class ActionController : MonoBehaviour
                 Vector3 convertedPosition = (Vector3)value;
                 builderInWorldEntityHandler.GetEntity(entityIdToApply).rootEntity.gameObject.transform.position = convertedPosition;
                 break;
+
             case ActionType.ROTATE:
                 Vector3 convertedAngles = (Vector3)value;
                 builderInWorldEntityHandler.GetEntity(entityIdToApply).rootEntity.gameObject.transform.eulerAngles = convertedAngles;
                 break;
+
             case ActionType.SCALE:
                 Vector3 convertedScale = (Vector3)value;
                 DecentralandEntity entityToApply = builderInWorldEntityHandler.GetEntity(entityIdToApply).rootEntity;
@@ -128,16 +146,24 @@ public class ActionController : MonoBehaviour
 
                 entityToApply.gameObject.transform.localScale = new Vector3(convertedScale.x / parent.localScale.x, convertedScale.y / parent.localScale.y, convertedScale.z / parent.localScale.z);
                 break;
+
             case ActionType.CREATED:
                 string entityString = (string)value;
-                if (isUndo)
-                {
-                    builderInWorldEntityHandler.DeleteEntity((string)value);
-                }
-                else
-                {
-                    builderInWorldEntityHandler.CreateEntityFromJSON((string)value);
-                }
+                if (isUndo)                
+                    builderInWorldEntityHandler.DeleteEntity(entityString);                
+                else               
+                    builderInWorldEntityHandler.CreateEntityFromJSON(entityString);
+                
+                break;
+
+            case ActionType.DELETED:
+                string deletedEntityString = (string)value;
+
+                if (isUndo)               
+                    builderInWorldEntityHandler.CreateEntityFromJSON(deletedEntityString);                                
+                else               
+                    builderInWorldEntityHandler.DeleteEntity(deletedEntityString);
+                
                 break;
         }
     }

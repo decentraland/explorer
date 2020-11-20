@@ -10,7 +10,8 @@ public class BuildInWorldCompleteAction
         MOVE = 0,
         ROTATE = 1,
         SCALE = 2,
-        CREATED = 3
+        CREATED = 3,
+        DELETED = 4
     }
 
     public ActionType actionType;

@@ -491,11 +491,13 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         for (int i = 0; i < selectedEntities.Count; i++)
         {
-            entitiesToRemove.Add(selectedEntities[i]);
+            entitiesToRemove.Add(selectedEntities[i]);        
         }
 
-        DeselectEntities();
+        actionController.CreateActionEntityDeleted(entitiesToRemove);
 
+        DeselectEntities();
+  
         foreach (DCLBuilderInWorldEntity entity in entitiesToRemove)
         {
             DeleteEntity(entity);
