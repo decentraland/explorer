@@ -199,13 +199,13 @@ namespace DCL.Interface
         public class ReportEntityPositionPayload
         {
             public string entityId;
-            public int componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
-            public ComponentData componentData = new ComponentData();
+            public int componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
+            public ComponentData data = new ComponentData();
 
             [System.Serializable]
             public class ComponentData
             {
-      
+
 
                 public Vector3 position;
 
@@ -243,7 +243,7 @@ namespace DCL.Interface
         [System.Serializable]
         public class EntityComponentModel
         {
-            public int id;
+            public int componentId;
             public string data;
         };
 
@@ -251,7 +251,7 @@ namespace DCL.Interface
         public class EntityModifyComponentModel
         {
             public int componentId;
-            public string componentData;
+            public string data;
         };
 
         [System.Serializable]
@@ -751,12 +751,12 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "stateEvent", addEntityEvent);
         }
 
-        public static void ReportEntityTransform(Vector3 position, Quaternion rotation, Vector3 scale,string sceneId, string entityId)
+        public static void ReportEntityTransform(Vector3 position, Quaternion rotation, Vector3 scale, string sceneId, string entityId)
         {
             reportEntityPositionPayload.entityId = entityId;
-            reportEntityPositionPayload.componentData.position = position;
-            reportEntityPositionPayload.componentData.rotation = rotation;
-            reportEntityPositionPayload.componentData.scale = scale;
+            reportEntityPositionPayload.data.position = position;
+            reportEntityPositionPayload.data.rotation = rotation;
+            reportEntityPositionPayload.data.scale = scale;
 
             modifyEntityComponentEvent.payload = reportEntityPositionPayload;
             SendSceneEvent(sceneId, "stateEvent", modifyEntityComponentEvent);

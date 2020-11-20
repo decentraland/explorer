@@ -11,7 +11,7 @@ using UnityEngine;
 public class BuilderInWorldBridge : MonoBehaviour
 {
 
-    public void AddEntityOnKernel(DecentralandEntity entity,ParcelScene scene)
+    public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
     {
         List<WebInterface.EntityComponentModel> list = new List<WebInterface.EntityComponentModel>();
         foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
@@ -19,12 +19,12 @@ public class BuilderInWorldBridge : MonoBehaviour
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
-                entityComponentModel.id = (int)CLASS_ID_COMPONENT.TRANSFORM;
+                entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
                 DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
                 DCLTransform.model.rotation = entity.gameObject.transform.rotation;
                 DCLTransform.model.scale = entity.gameObject.transform.localScale;
 
-                entityComponentModel.data = "{\"position\":" + JsonUtility.ToJson(DCLTransform.model.position) + "}"+
+                entityComponentModel.data = "{\"position\":" + JsonUtility.ToJson(DCLTransform.model.position) + "}" +
                                             //"{\"rotation\":" + JsonUtility.ToJson(DCLTransform.model.rotation.eulerAngles) + "}"+
                                             "{\"scale\":" + JsonUtility.ToJson(DCLTransform.model.scale) + "}";
                 //entityComponentModel.data = JsonConvert.SerializeObject(DCLTransform.model);
@@ -38,7 +38,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             if (keyValuePair.Value is GLTFShape gtlfShape)
             {
                 WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
-                entityComponentModel.id = (int)CLASS_ID.GLTF_SHAPE;
+                entityComponentModel.componentId = (int)CLASS_ID.GLTF_SHAPE;
                 //entityComponentModel.data = "\"src\": \"" + gLTFShape.model.src + "\"";
                 entityComponentModel.data = JsonConvert.SerializeObject(gtlfShape.model);
                 list.Add(entityComponentModel);
@@ -54,7 +54,7 @@ public class BuilderInWorldBridge : MonoBehaviour
     {
 
         WebInterface.EntityComponentModel entityComponentModel = new WebInterface.EntityComponentModel();
-        entityComponentModel.id = (int)CLASS_ID_COMPONENT.TRANSFORM;
+        entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
         DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
         DCLTransform.model.rotation = entity.gameObject.transform.rotation;
         DCLTransform.model.scale = entity.gameObject.transform.localScale;
@@ -68,7 +68,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         WebInterface.VERBOSE = false;
     }
 
-    public void RemoveEntityOnKernel(string entityId,ParcelScene scene)
+    public void RemoveEntityOnKernel(string entityId, ParcelScene scene)
     {
         WebInterface.VERBOSE = true;
         WebInterface.RemoveEntity(scene.sceneData.id, entityId);
