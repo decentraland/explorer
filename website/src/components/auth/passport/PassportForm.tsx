@@ -112,7 +112,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
           </em>
         </div>
         <div className="actions">
-          <button type="submit" className={'btnSubmit' + (disabled ? ' disabled' : '')} disabled={disabled}>
+          <button type="submit" className="btnSubmit" disabled={disabled}>
             NEXT
           </button>
         </div>
