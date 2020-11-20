@@ -116,13 +116,16 @@ namespace DCL.Rendering
                 Vector3 boundingPoint = bounds.ClosestPoint(playerPosition);
                 float distance = Vector3.Distance(playerPosition, boundingPoint);
                 bool boundsContainsPlayer = bounds.Contains(playerPosition);
-                float viewportSize = (bounds.size.magnitude / distance) * Mathf.Rad2Deg;
+                float boundsSize = bounds.size.magnitude;
+                float viewportSize = (boundsSize / distance) * Mathf.Rad2Deg;
 
                 bool isEmissive = IsEmissive(r);
                 bool isOpaque = IsOpaque(r);
 
+                float shadowTexelSize = ComputeShadowMapTexelSize(boundsSize, urpAsset.shadowDistance, urpAsset.mainLightShadowmapResolution);
+
                 bool shouldBeVisible = ShouldBeVisible(profile, viewportSize, distance, boundsContainsPlayer, isOpaque, isEmissive);
-                bool shouldHaveShadow = ShouldHaveShadow(profile, viewportSize, bounds.size.magnitude, distance);
+                bool shouldHaveShadow = ShouldHaveShadow(profile, viewportSize, distance, shadowTexelSize);
 
                 SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
 
@@ -135,11 +138,9 @@ namespace DCL.Rendering
                         shadowlessRenderers.Add(r);
                 }
 
-                var skmr = r as SkinnedMeshRenderer;
-
-                if (skmr != null)
+                if (r is SkinnedMeshRenderer skr)
                 {
-                    skmr.updateWhenOffscreen = ShouldUpdateSkinnedWhenOffscreen(settings, distance);
+                    skr.updateWhenOffscreen = ShouldUpdateSkinnedWhenOffscreen(settings, distance);
                 }
 #if UNITY_EDITOR
                 DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
@@ -214,26 +215,6 @@ namespace DCL.Rendering
         }
 
         /// <summary>
-        /// Computes the rule used for toggling skinned meshes updateWhenOffscreen param.
-        /// Skinned meshes should be always updated if near the camera to avoid false culling positives on screen edges.
-        /// </summary>
-        /// <param name="settings">Any settings object to use thresholds for computing the rule.</param>
-        /// <param name="distance">Mesh distance from camera used for computing the rule.</param>
-        /// <returns>True if mesh should be updated when offscreen, false if otherwise.</returns>
-        internal bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
-        {
-            bool finalValue = true;
-
-            if (settings.enableAnimationCulling)
-            {
-                if (distance > settings.enableAnimationCullingDistance)
-                    finalValue = false;
-            }
-
-            return finalValue;
-        }
-
-        /// <summary>
         /// Sets shadows and visibility for a given renderer.
         /// </summary>
         /// <param name="r">Renderer to be culled</param>
@@ -254,47 +235,6 @@ namespace DCL.Rendering
                 if (r.shadowCastingMode != targetMode)
                     r.shadowCastingMode = targetMode;
             }
-        }
-
-        /// <summary>
-        /// Computes the rule used for toggling renderers visibility.
-        /// </summary>
-        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
-        /// <param name="viewportSize">Diagonal viewport size of the renderer.</param>
-        /// <param name="distance">Distance to camera of the renderer.</param>
-        /// <param name="boundsContainsCamera">Renderer bounds contains camera?</param>
-        /// <param name="isOpaque">Renderer is opaque?</param>
-        /// <param name="isEmissive">Renderer is emissive?</param>
-        /// <returns>True if renderer should be visible, false if otherwise.</returns>
-        internal bool ShouldBeVisible(CullingControllerProfile profile, float viewportSize, float distance, bool boundsContainsCamera, bool isOpaque, bool isEmissive)
-        {
-            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || boundsContainsCamera;
-
-            if (isEmissive)
-                shouldBeVisible |= viewportSize > profile.emissiveSizeThreshold;
-
-            if (isOpaque)
-                shouldBeVisible |= viewportSize > profile.opaqueSizeThreshold;
-
-            return shouldBeVisible;
-        }
-
-        /// <summary>
-        /// Computes the rule used for toggling renderer shadow casting.
-        /// </summary>
-        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
-        /// <param name="viewportSize">Diagonal viewport size of the renderer</param>
-        /// <param name="boundsSize">Bounds size of the renderer computed using bounds.size.magnitude</param>
-        /// <param name="distance">Distance from renderer to camera.</param>
-        /// <returns>True if renderer should have shadow, false otherwise</returns>
-        internal bool ShouldHaveShadow(CullingControllerProfile profile, float viewportSize, float boundsSize, float distance)
-        {
-            float shadowMapRenderSize = boundsSize / urpAsset.shadowDistance * urpAsset.mainLightShadowmapResolution;
-
-            bool shouldHaveShadow = distance < profile.shadowDistanceThreshold;
-            shouldHaveShadow |= viewportSize > profile.shadowRendererSizeThreshold;
-            shouldHaveShadow &= shadowMapRenderSize > profile.shadowMapProjectionSizeThreshold;
-            return shouldHaveShadow;
         }
 
         /// <summary>
@@ -338,11 +278,71 @@ namespace DCL.Rendering
         }
 
         /// <summary>
+        /// Computes the rule used for toggling skinned meshes updateWhenOffscreen param.
+        /// Skinned meshes should be always updated if near the camera to avoid false culling positives on screen edges.
+        /// </summary>
+        /// <param name="settings">Any settings object to use thresholds for computing the rule.</param>
+        /// <param name="distance">Mesh distance from camera used for computing the rule.</param>
+        /// <returns>True if mesh should be updated when offscreen, false if otherwise.</returns>
+        internal static bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
+        {
+            bool finalValue = true;
+
+            if (settings.enableAnimationCulling)
+            {
+                if (distance > settings.enableAnimationCullingDistance)
+                    finalValue = false;
+            }
+
+            return finalValue;
+        }
+
+        /// <summary>
+        /// Computes the rule used for toggling renderers visibility.
+        /// </summary>
+        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
+        /// <param name="viewportSize">Diagonal viewport size of the renderer.</param>
+        /// <param name="distance">Distance to camera of the renderer.</param>
+        /// <param name="boundsContainsCamera">Renderer bounds contains camera?</param>
+        /// <param name="isOpaque">Renderer is opaque?</param>
+        /// <param name="isEmissive">Renderer is emissive?</param>
+        /// <returns>True if renderer should be visible, false if otherwise.</returns>
+        internal static bool ShouldBeVisible(CullingControllerProfile profile, float viewportSize, float distance, bool boundsContainsCamera, bool isOpaque, bool isEmissive)
+        {
+            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || boundsContainsCamera;
+
+            if (isEmissive)
+                shouldBeVisible |= viewportSize > profile.emissiveSizeThreshold;
+
+            if (isOpaque)
+                shouldBeVisible |= viewportSize > profile.opaqueSizeThreshold;
+
+            return shouldBeVisible;
+        }
+
+        /// <summary>
+        /// Computes the rule used for toggling renderer shadow casting.
+        /// </summary>
+        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
+        /// <param name="viewportSize">Diagonal viewport size of the renderer</param>
+        /// <param name="boundsSize">Bounds size of the renderer computed using bounds.size.magnitude</param>
+        /// <param name="distance">Distance from renderer to camera.</param>
+        /// <param name="shadowMapSizeTerm">Used for calculating the shadow texel size. Shadow distance * shadow map resolution.</param>
+        /// <returns>True if renderer should have shadow, false otherwise</returns>
+        internal static bool ShouldHaveShadow(CullingControllerProfile profile, float viewportSize, float distance, float shadowMapTexelSize)
+        {
+            bool shouldHaveShadow = distance < profile.shadowDistanceThreshold;
+            shouldHaveShadow |= viewportSize > profile.shadowRendererSizeThreshold;
+            shouldHaveShadow &= shadowMapTexelSize > profile.shadowMapProjectionSizeThreshold;
+            return shouldHaveShadow;
+        }
+
+        /// <summary>
         /// Determines if the given renderer is going to be enqueued at the opaque section of the rendering pipeline.
         /// </summary>
         /// <param name="renderer">Renderer to be checked.</param>
         /// <returns>True if its opaque</returns>
-        private bool IsOpaque(Renderer renderer)
+        private static bool IsOpaque(Renderer renderer)
         {
             Material firstMat = renderer.sharedMaterials[0];
 
@@ -363,7 +363,7 @@ namespace DCL.Rendering
         /// </summary>
         /// <param name="renderer">Renderer to be checked.</param>
         /// <returns>True if the renderer is emissive.</returns>
-        private bool IsEmissive(Renderer renderer)
+        private static bool IsEmissive(Renderer renderer)
         {
             Material firstMat = renderer.sharedMaterials[0];
 
@@ -377,6 +377,40 @@ namespace DCL.Rendering
                 return true;
 
             return false;
+        }
+
+
+        /// <summary>
+        /// ComputeShadowMapTexelSize computes the shadow-map bounding box diagonal texel size
+        /// for the given bounds size.
+        /// </summary>
+        /// <param name="boundsSize">Diagonal bounds size of the object</param>
+        /// <param name="shadowDistance">Shadow distance as set in the quality settings</param>
+        /// <param name="shadowMapRes">Shadow map resolution as set in the quality settings (128, 256, etc)</param>
+        /// <returns>The computed shadow map diagonal texel size for the object.</returns>
+        /// <remarks>
+        /// This is calculated by doing the following:
+        /// 
+        /// - We get the boundsSize to a normalized viewport size.
+        /// - We multiply the resulting value by the shadow map resolution.
+        /// 
+        /// To get the viewport size, we assume the shadow distance value is directly correlated by
+        /// the orthogonal projection size used for rendering the shadow map.
+        /// 
+        /// We can use the bounds size and shadow distance to obtain the normalized shadow viewport
+        /// value because both are expressed in world units.
+        /// 
+        /// After getting the normalized size, we scale it by the shadow map resolution to get the
+        /// diagonal texel size of the bounds shadow.
+        /// 
+        /// This leaves us with:
+        ///     <c>shadowTexelSize = boundsSize / shadow dist * shadow res</c>
+        /// 
+        /// This is a lazy approximation and most likely will need some refinement in the future.
+        /// </remarks>
+        internal static float ComputeShadowMapTexelSize(float boundsSize, float shadowDistance, float shadowMapRes)
+        {
+            return boundsSize / shadowDistance * shadowMapRes;
         }
 
 

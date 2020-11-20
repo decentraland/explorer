@@ -69,11 +69,11 @@ namespace CullingControllerTests
             profile.visibleDistanceThreshold = 5;
 
             // Truth tests
-            var farAndBigTest = cullingController.ShouldBeVisible(profile, 30, 20, false, true, true);
-            var smallAndNearTest = cullingController.ShouldBeVisible(profile, 5, 2, false, true, true);
-            var cameraInBoundsTest = cullingController.ShouldBeVisible(profile, 1, 100, true, true, true);
-            var emissiveTest = cullingController.ShouldBeVisible(profile, 15, 20, false, false, true);
-            var translucentTest = cullingController.ShouldBeVisible(profile, 1, 50, false, false, false);
+            var farAndBigTest = CullingController.ShouldBeVisible(profile, 30, 20, false, true, true);
+            var smallAndNearTest = CullingController.ShouldBeVisible(profile, 5, 2, false, true, true);
+            var cameraInBoundsTest = CullingController.ShouldBeVisible(profile, 1, 100, true, true, true);
+            var emissiveTest = CullingController.ShouldBeVisible(profile, 15, 20, false, false, true);
+            var translucentTest = CullingController.ShouldBeVisible(profile, 1, 50, false, false, false);
 
             Assert.IsTrue(farAndBigTest);
             Assert.IsTrue(smallAndNearTest);
@@ -82,8 +82,8 @@ namespace CullingControllerTests
             Assert.IsTrue(translucentTest);
 
             // False tests
-            var farAndSmallTest = cullingController.ShouldBeVisible(profile, 5, 20, false, true, true);
-            var emissiveAndFarTest = cullingController.ShouldBeVisible(profile, 5, 20, false, false, true);
+            var farAndSmallTest = CullingController.ShouldBeVisible(profile, 5, 20, false, true, true);
+            var emissiveAndFarTest = CullingController.ShouldBeVisible(profile, 5, 20, false, false, true);
 
             Assert.IsFalse(farAndSmallTest);
             Assert.IsFalse(emissiveAndFarTest);
@@ -93,17 +93,26 @@ namespace CullingControllerTests
         public void EvaluateShadowVisibility()
         {
             var profile = new CullingControllerProfile();
-            profile.emissiveSizeThreshold = 10;
-            profile.opaqueSizeThreshold = 20;
-            profile.visibleDistanceThreshold = 5;
+            profile.shadowMapProjectionSizeThreshold = 6;
+            profile.shadowRendererSizeThreshold = 20;
+            profile.shadowDistanceThreshold = 15;
 
-            var farAndSmallTest = cullingController.ShouldHaveShadow(profile, 5, 20, 10);
+            var nearTest = CullingController.ShouldHaveShadow(profile, 1, 5, 10);
+            var nearButSmallTexel = CullingController.ShouldHaveShadow(profile, 1, 5, 1);
+            var farAndBigEnough = CullingController.ShouldHaveShadow(profile, 30, 30, 30);
+            var farAndSmall = CullingController.ShouldHaveShadow(profile, 10, 30, 30);
+            var farAndSmallTexel = CullingController.ShouldHaveShadow(profile, 10, 30, 1);
+
+            Assert.IsTrue(nearTest);
+            Assert.IsTrue(farAndBigEnough);
+            Assert.IsFalse(nearButSmallTexel);
+            Assert.IsFalse(farAndSmall);
+            Assert.IsFalse(farAndSmallTexel);
         }
 
         [Test]
         public void EvaluateSkinnedMeshesOffscreenUpdate()
         {
-            cullingController.
         }
 
         [Test]
