@@ -292,6 +292,14 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         return entities;
     }
 
+    public DCLBuilderInWorldEntity GetEntity(string entityId)
+    {
+        if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entityId)))
+            return convertedEntities[GetConvertedUniqueKeyForEntity(entityId)];
+        else
+            return null;
+    }
+
     public DCLBuilderInWorldEntity GetConvertedEntity(DecentralandEntity decentralandEntity)
     {
         if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(decentralandEntity)))
@@ -349,9 +357,10 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         DecentralandEntity newEntity = sceneToEdit.CreateEntity(data.entityId);
 
-
+        
         if (data.transformComponent != null)
         {
+            //DCLTransform.model.position = SceneController.i.ConvertSceneToUnityPosition(data.transformComponent.position,sceneToEdit);
             DCLTransform.model.position = data.transformComponent.position;
             DCLTransform.model.rotation = Quaternion.Euler(data.transformComponent.rotation);
             DCLTransform.model.scale = data.transformComponent.scale;

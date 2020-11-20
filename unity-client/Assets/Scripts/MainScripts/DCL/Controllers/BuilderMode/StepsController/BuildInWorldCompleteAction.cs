@@ -15,14 +15,14 @@ public class BuildInWorldCompleteAction
 
     public ActionType actionType;
     public bool isDone = true;
-    public System.Action<DecentralandEntity, object, ActionType, bool> OnApplyValue;
+    public System.Action<string, object, ActionType, bool> OnApplyValue;
     List<BuilderInWorldEntityAction> entitiyApplied = new List<BuilderInWorldEntityAction>();
     
     public void ReDo()
     {
         foreach(BuilderInWorldEntityAction action in entitiyApplied)
         {
-            ApplyValue(action.entity,action.newValue, false);
+            ApplyValue(action.entityId,action.newValue, false);
         }
         isDone = true;
     }
@@ -31,14 +31,14 @@ public class BuildInWorldCompleteAction
     {
         foreach (BuilderInWorldEntityAction action in entitiyApplied)
         {
-            ApplyValue(action.entity, action.oldValue, true);
+            ApplyValue(action.entityId, action.oldValue, true);
         }
 
         isDone = false;
 
     }
 
-    void ApplyValue(DecentralandEntity entityToApply, object value, bool isUndo)
+    void ApplyValue(string entityToApply, object value, bool isUndo)
     {
         OnApplyValue?.Invoke(entityToApply, value, actionType, isUndo);
     }

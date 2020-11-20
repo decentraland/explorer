@@ -5,17 +5,27 @@ using UnityEngine;
 
 public class BuilderInWorldEntityAction 
 {
-    public DecentralandEntity entity;
+    public string entityId;
     public object oldValue, newValue;
 
 
+    public BuilderInWorldEntityAction(string entityId)
+    {
+        this.entityId = entityId;
+    }
+    public BuilderInWorldEntityAction(string entityId, object oldValue, object newValue)
+    {
+        this.entityId = entityId;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
     public BuilderInWorldEntityAction(DecentralandEntity entity)
     {
-        this.entity = entity;
+        this.entityId = entity.entityId;
     }
     public BuilderInWorldEntityAction(DecentralandEntity entity,object oldValue,object newValue)
     {
-        this.entity = entity;
+        this.entityId = entity.entityId;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }

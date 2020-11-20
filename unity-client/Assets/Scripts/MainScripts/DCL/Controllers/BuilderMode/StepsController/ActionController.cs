@@ -15,31 +15,34 @@ public class ActionController : MonoBehaviour
 
     List<BuildInWorldCompleteAction> actionsMade = new List<BuildInWorldCompleteAction>();
 
-    int currentStepIndex = 0;
+    int currentUndoStepIndex = 0;
+    int currentRedoStepIndex = 0;
 
-    public void ClearActionList()
+    public void ResetActionList()
     {
         actionsMade.Clear();
+        currentUndoStepIndex = 0;
+        currentRedoStepIndex = 0;
     }
 
     public void GoToAction(BuildInWorldCompleteAction action)
     {
         int index = actionsMade.IndexOf(action);
-        int stepsAmount = currentStepIndex - index;
+        int stepsAmount = currentUndoStepIndex - index;
 
         for(int i = 0; i <= Mathf.Abs(stepsAmount); i++)
         {
             if (stepsAmount > 0)
             {
                 UndoCurrentAction();
-                if (currentStepIndex > 0)
-                    currentStepIndex--;
+                if (currentUndoStepIndex > 0)
+                    currentUndoStepIndex--;
             }
             else
             {
                 RedoCurrentAction();
-                if (currentStepIndex + 1 < actionsMade.Count)
-                    currentStepIndex++;
+                if (currentUndoStepIndex + 1 < actionsMade.Count)
+                    currentUndoStepIndex++;
             }
         }
 
@@ -47,27 +50,36 @@ public class ActionController : MonoBehaviour
 
     public void TryToRedoAction()
     {
-        if (currentStepIndex < actionsMade.Count)
-        {
-            if (currentStepIndex + 1 < actionsMade.Count)
-            {
-                if(currentStepIndex == 0 && actionsMade[currentStepIndex].isDone)
-                    currentStepIndex++;
-                else if(currentStepIndex != 0)
-                    currentStepIndex++;
-                RedoCurrentAction();
-            }
-        }
+        if (currentRedoStepIndex >= actionsMade.Count || currentRedoStepIndex < 0) return;
+
+        RedoCurrentAction();
+
+        if (currentRedoStepIndex + 1 < actionsMade.Count)
+            currentRedoStepIndex++;
+
+        if (currentUndoStepIndex < actionsMade.Count - 1) currentUndoStepIndex++;
+
+        Debug.Log("Redo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
+
     }
 
     public void TryToUndoAction()
     {
-        if (currentStepIndex >= 0 && actionsMade.Count > 0)
+        if (currentUndoStepIndex < 0 || !actionsMade[0].isDone) return;
+
+        UndoCurrentAction();
+
+        if (currentUndoStepIndex > 0)
         {
-            UndoCurrentAction();
-            if (currentStepIndex > 0)
-                currentStepIndex--;
+            currentUndoStepIndex--;
+            if (currentRedoStepIndex < actionsMade.Count - 1 || currentRedoStepIndex - currentUndoStepIndex > 1) currentRedoStepIndex--;
         }
+        else if (!actionsMade[currentUndoStepIndex].isDone && currentRedoStepIndex > 0)
+        {
+            currentRedoStepIndex--;
+        }
+        Debug.Log("Undo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
+
     }
 
     public void CreateActionEntityCreated(DecentralandEntity entity)
@@ -82,29 +94,36 @@ public class ActionController : MonoBehaviour
 
     public void AddAction(BuildInWorldCompleteAction action)
     {
-        if (currentStepIndex < actionsMade.Count-1)       
-            actionsMade.RemoveRange(currentStepIndex, actionsMade.Count - currentStepIndex);
+        if (currentRedoStepIndex < actionsMade.Count - 1)
+            actionsMade.RemoveRange(currentRedoStepIndex, actionsMade.Count - currentRedoStepIndex);
+        else if (actionsMade.Count > 0 && !actionsMade[currentRedoStepIndex].isDone)
+            actionsMade.RemoveAt(actionsMade.Count - 1);
         
         actionsMade.Add(action);
     
-        currentStepIndex = actionsMade.Count-1;
+        currentUndoStepIndex = actionsMade.Count - 1;
+        currentRedoStepIndex = actionsMade.Count - 1;
+
+
+        Debug.Log("Redo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
         action.OnApplyValue += ApplyAction;
     }
 
-    void ApplyAction(DecentralandEntity entityToApply, object value, ActionType actionType, bool isUndo)
+    void ApplyAction(string entityIdToApply, object value, ActionType actionType, bool isUndo)
     {
         switch (actionType)
         {
             case ActionType.MOVE:
                 Vector3 convertedPosition = (Vector3)value;
-                entityToApply.gameObject.transform.position = convertedPosition;
+                builderInWorldEntityHandler.GetEntity(entityIdToApply).rootEntity.gameObject.transform.position = convertedPosition;
                 break;
             case ActionType.ROTATE:
                 Vector3 convertedAngles = (Vector3)value;
-                entityToApply.gameObject.transform.eulerAngles = convertedAngles;
+                builderInWorldEntityHandler.GetEntity(entityIdToApply).rootEntity.gameObject.transform.eulerAngles = convertedAngles;
                 break;
             case ActionType.SCALE:
                 Vector3 convertedScale = (Vector3)value;
+                DecentralandEntity entityToApply = builderInWorldEntityHandler.GetEntity(entityIdToApply).rootEntity;
                 Transform parent = entityToApply.gameObject.transform.parent;
 
                 entityToApply.gameObject.transform.localScale = new Vector3(convertedScale.x / parent.localScale.x, convertedScale.y / parent.localScale.y, convertedScale.z / parent.localScale.z);
@@ -125,18 +144,18 @@ public class ActionController : MonoBehaviour
 
     void RedoCurrentAction()
     {
-        if (!actionsMade[currentStepIndex].isDone)
+        if (!actionsMade[currentRedoStepIndex].isDone)
         {
-            actionsMade[currentStepIndex].ReDo();
+            actionsMade[currentRedoStepIndex].ReDo();
             OnRedo?.Invoke();        
         }  
     }
 
     void UndoCurrentAction()
     {
-        if (actionsMade[currentStepIndex].isDone)
+        if (actionsMade[currentUndoStepIndex].isDone)
         {
-            actionsMade[currentStepIndex].Undo();
+            actionsMade[currentUndoStepIndex].Undo();
             OnUndo?.Invoke();         
         }
     }

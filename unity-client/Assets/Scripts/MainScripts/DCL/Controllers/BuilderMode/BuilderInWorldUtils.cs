@@ -112,8 +112,9 @@ public static partial class BuilderInWorldUtils
             {
                 BuilderInWorldEntityData.TransformComponent entityComponentModel = new BuilderInWorldEntityData.TransformComponent();
                 entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
-                entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
-                entityComponentModel.rotation = entity.gameObject.transform.rotation.eulerAngles;
+
+                entityComponentModel.position = entity.gameObject.transform.localPosition;
+                entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 
                 builderInWorldEntityData.transformComponent = entityComponentModel;

@@ -192,15 +192,18 @@ public class BuilderInWorldController : MonoBehaviour
         multiSelectionInputAction.OnStarted -= multiSelectionStartDelegate;
         multiSelectionInputAction.OnFinished -= multiSelectionFinishedDelegate;
 
-        HUDController.i.buildModeHud.OnStopInput -= StopInput;
-        HUDController.i.buildModeHud.OnResumeInput -= ResumeInput;
+        if (HUDController.i.buildModeHud != null)
+        {
+            HUDController.i.buildModeHud.OnStopInput -= StopInput;
+            HUDController.i.buildModeHud.OnResumeInput -= ResumeInput;
 
-        HUDController.i.buildModeHud.OnChangeModeAction -= ChangeAdvanceMode;
-        HUDController.i.buildModeHud.OnResetAction -= ResetScaleAndRotation;
+            HUDController.i.buildModeHud.OnChangeModeAction -= ChangeAdvanceMode;
+            HUDController.i.buildModeHud.OnResetAction -= ResetScaleAndRotation;
 
-        HUDController.i.buildModeHud.OnSceneObjectSelected -= CreateSceneObjectSelected;
-        HUDController.i.buildModeHud.OnTutorialAction -= StartTutorial;
-        HUDController.i.buildModeHud.OnPublishAction -= PublishScene;
+            HUDController.i.buildModeHud.OnSceneObjectSelected -= CreateSceneObjectSelected;
+            HUDController.i.buildModeHud.OnTutorialAction -= StartTutorial;
+            HUDController.i.buildModeHud.OnPublishAction -= PublishScene;
+        }
 
 
         builderInputWrapper.OnMouseClick -= MouseClick;
@@ -375,7 +378,7 @@ public class BuilderInWorldController : MonoBehaviour
         if (!isAdvancedModeActive)
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
-
+   
         InputDone();
         OnSceneObjectPlaced?.Invoke();
     }
@@ -461,6 +464,7 @@ public class BuilderInWorldController : MonoBehaviour
         }
 
     }
+
     public void SetAdvanceMode(bool advanceModeActive)
     {
         if (!advanceModeActive)
@@ -471,9 +475,6 @@ public class BuilderInWorldController : MonoBehaviour
         {
             SetBuildMode(EditModeState.Editor);
         }
-
-   
-
     }
 
     void StartMultiSelection()
@@ -708,7 +709,7 @@ public class BuilderInWorldController : MonoBehaviour
             if(scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {
                 if (sceneToEdit != null && sceneToEdit != scene)
-                    actionController.ClearActionList();
+                    actionController.ResetActionList();
                 sceneToEdit = scene;
                 break;
             }

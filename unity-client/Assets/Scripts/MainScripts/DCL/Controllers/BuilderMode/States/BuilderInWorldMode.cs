@@ -205,9 +205,8 @@ public class BuilderInWorldMode : MonoBehaviour
         List<BuilderInWorldEntityAction> removeList = new List<BuilderInWorldEntityAction>();
         foreach (BuilderInWorldEntityAction entityAction in actionList)
         {
-            if (entityAction.entity == entity)
-            {
-         
+            if (entityAction.entityId == entity.entityId)
+            {        
                 switch (type)
                 {
                     case "MOVE":
@@ -224,9 +223,7 @@ public class BuilderInWorldMode : MonoBehaviour
                         entityAction.newValue = entity.gameObject.transform.lossyScale;
                         if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
                         break;
-                }
-
-             
+                }        
             }
         }
         foreach (BuilderInWorldEntityAction entityAction in removeList)

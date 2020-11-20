@@ -712,10 +712,9 @@ namespace DCL.Interface
             addEntityPayLoad.components = components;
 
             addEntityEvent.payload = addEntityPayLoad;
-            VERBOSE = true;
             SendSceneEvent(sceneId, "stateEvent", addEntityEvent);
-            VERBOSE = false;
         }
+
         public static void RemoveEntity(string sceneId, string entityId)
         {
             RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent();
@@ -723,15 +722,14 @@ namespace DCL.Interface
             removeEntityPayLoad.entityId = entityId;
             removeEntityEvent.payload = removeEntityPayLoad;
 
-            VERBOSE = true;
             SendSceneEvent(sceneId, "stateEvent", removeEntityEvent);
-            VERBOSE = false;
         }
 
         public static void ReportStoreSceneState(string sceneId)
         {
             SendSceneEvent(sceneId, "stateEvent", storeSceneState);
         }
+
         public static void ReportOnClickEvent(string sceneId, string uuid)
         {
             if (string.IsNullOrEmpty(uuid))
