@@ -78,7 +78,12 @@ namespace DCL
             worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
 #endif
             performanceMetricsController = new PerformanceMetricsController();
-            Environment.i.cullingController.Start();
+
+            // TODO(Brian): This should be fixed when we do the proper initialization layer
+            if (!EnvironmentSettings.RUNNING_TESTS)
+            {
+                Environment.i.cullingController.Start();
+            }
         }
 
         void Start()
