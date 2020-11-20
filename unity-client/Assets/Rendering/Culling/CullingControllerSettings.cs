@@ -1,5 +1,8 @@
 ﻿namespace DCL.Rendering
 {
+    /// <summary>
+    /// This class contains the settings CullingController. Mainly used by the quality settings panel. 
+    /// </summary>
     [System.Serializable]
     public class CullingControllerSettings
     {
@@ -31,6 +34,10 @@
                 shadowMapProjectionSizeThreshold = 4,
             };
 
+        /// <summary>
+        /// Returns a clone of this object. The profiles are also cloned, making this return a deep clone.
+        /// </summary>
+        /// <returns>The deep clone.</returns>
         public CullingControllerSettings Clone()
         {
             var clone = this.MemberwiseClone() as CullingControllerSettings;

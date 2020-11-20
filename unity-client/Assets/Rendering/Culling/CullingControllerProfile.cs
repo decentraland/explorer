@@ -2,6 +2,10 @@
 
 namespace DCL.Rendering
 {
+    /// <summary>
+    /// Group of arguments for configuring the rules of a group of renderers of skinned renderers.
+    /// Used by CullingControllerSettings.
+    /// </summary>
     [System.Serializable]
     public class CullingControllerProfile
     {
@@ -14,12 +18,13 @@ namespace DCL.Rendering
         public float shadowMapProjectionSizeThreshold;
 
         /// <summary>
-        /// 
+        /// Performs a linear interpolation between the values of two CullingControllerProfiles.
+        /// Used for controlling the settings panel slider.
         /// </summary>
-        /// <param name="p1"></param>
-        /// <param name="p2"></param>
-        /// <param name="t"></param>
-        /// <returns></returns>
+        /// <param name="p1">Starting profile</param>
+        /// <param name="p2">Ending profile</param>
+        /// <param name="t">Time value for the linear interpolation.</param>
+        /// <returns>A new CullingControllerProfile with the interpolated values.</returns>
         public static CullingControllerProfile Lerp(CullingControllerProfile p1, CullingControllerProfile p2, float t)
         {
             return new CullingControllerProfile
@@ -33,6 +38,10 @@ namespace DCL.Rendering
             };
         }
 
+        /// <summary>
+        /// Returns a clone of this object.
+        /// </summary>
+        /// <returns>The clone.</returns>
         public CullingControllerProfile Clone()
         {
             return this.MemberwiseClone() as CullingControllerProfile;
