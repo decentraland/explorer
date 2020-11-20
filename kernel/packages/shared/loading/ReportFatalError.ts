@@ -12,7 +12,7 @@ import {
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import Html from '../Html'
-import { genericError } from '../store/metricSaga'
+import { queueTrackingEvent } from '../analytics'
 
 declare const globalThis: StoreContainer
 
@@ -49,11 +49,21 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   aborted = true
 }
 
-export function ReportFatalError(event: ExecutionLifecycleEvent) {
+export type FatalErrorInfo = {
+  type: string
+  message: string
+  stack?: string
+  sagaStack?: string
+  filename?: string
+}
+
+export function ReportFatalError(event: ExecutionLifecycleEvent, errorInfo?: FatalErrorInfo) {
   bringDownClientAndShowError(event)
   if (ExecutionLifecycleEventsList.includes(event)) {
-    globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
-  } else {
-    globalThis.globalStore && globalThis.globalStore.dispatch(genericError(event))
+    return globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
   }
+  queueTrackingEvent('generic_error', {
+    message: event,
+    errorInfo
+  })
 }

@@ -1,4 +1,3 @@
-import { action } from 'typesafe-actions'
 import { takeEvery } from 'redux-saga/effects'
 import { queueTrackingEvent } from '../analytics'
 import { SAVE_PROFILE_SUCCESS, SaveProfileSuccess } from '../profiles/actions'
@@ -61,12 +60,8 @@ const trackingEvents: Record<ExecutionLifecycleEvent, string> = {
   [MOBILE_NOT_SUPPORTED]: 'unsupported_mobile',
   [NOT_INVITED]: 'error_not_invited'
 }
-const GENERIC_ERROR = '[GENERIC_ERROR] track a generic error'
-export const genericError = (error: any) => action(GENERIC_ERROR, { error })
-export type GenericErrorAction = ReturnType<typeof genericError>
 
 export function* metricSaga() {
-  yield takeEvery(GENERIC_ERROR, trackGenericError)
   for (const event of ExecutionLifecycleEventsList) {
     yield takeEvery(event, (action) => {
       const _action: any = action
@@ -88,8 +83,4 @@ function toTrackingEvent(event: ExecutionLifecycleEvent, payload: any) {
 
 function toAvatarEditSuccess({ userId, version, profile }: SaveProfileSuccess['payload']) {
   return { userId, version, wearables: profile.avatar.wearables }
-}
-
-function* trackGenericError(action: GenericErrorAction) {
-  queueTrackingEvent('generic_error', { ...action.payload })
 }

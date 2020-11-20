@@ -193,7 +193,12 @@ namespace webApp {
       }
 
       console['error'](error)
-      ReportFatalError(error.message)
+      ReportFatalError(error.message, {
+        type: error.type,
+        message: error.error.error,
+        stack: error.error.stack,
+        filename: error.filename
+      })
     }
     return true
   }
