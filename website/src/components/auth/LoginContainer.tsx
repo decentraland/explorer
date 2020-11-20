@@ -64,7 +64,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   return (
     <React.Fragment>
       {shouldShow && (
-        <div className={'LoginContainer' + (fullPage ? ' FullPage' : '')}>
+        <div className={'LoginContainer' + (fullPage ? ' FullPage' : '') + (loadingPage ? ' LoadingPage' : '')}>
           {/* Nabvar */}
           {!loadingPage && <Navbar full={fullPage} />}
 

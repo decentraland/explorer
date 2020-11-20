@@ -53,6 +53,7 @@
   display: flex;
 }
 
+.LoginContainer.LoadingPage main,
 .LoginContainer.FullPage main {
   height: auto;
   min-height: 640px;
