@@ -201,10 +201,10 @@ MonoBehaviour:
   blockedGO: {fileID: 8720862433428437312}
   soundButton: {fileID: 8522172340332194820}
   muteGO: {fileID: 5882466693401708938}
-  recordingGO: {fileID: 4132515277196897225}
   backgroundHover: {fileID: 4821310409670062188}
   menuButton: {fileID: 6765319225219337802}
   contexMenuRefPosition: {fileID: 8368122532035636769}
+  talkingAnimator: {fileID: 5516049754101860836}
 --- !u!222 &6809395994633376136
 CanvasRenderer:
   m_ObjectHideFlags: 0
