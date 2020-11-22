@@ -77,7 +77,7 @@ export const PREVIEW: boolean = !!(global as any).preview
 export const EDITOR: boolean = !!(global as any).isEditor
 export const WORLD_EXPLORER = !EDITOR && !PREVIEW
 
-export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR')  && WORLD_EXPLORER
+export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR') && WORLD_EXPLORER
 
 export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(global as any).staticWorld || EDITOR
 
@@ -279,7 +279,6 @@ export function getServerConfigurations() {
 
   return {
     contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
-    
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
