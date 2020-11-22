@@ -107,6 +107,7 @@ export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
 export const FETCH_META_CONTENT_SERVICE = qs.FETCH_META_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
+export const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || 'content-assets-as-bundle.decentraland.org'
 export const REALM = qs.realm
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.indexOf('VOICE_CHAT_DISABLED') !== -1
@@ -130,18 +131,18 @@ export const DEBUG_SCENE_LOG = DEBUG || location.search.indexOf('DEBUG_SCENE_LOG
 
 export const INIT_PRE_LOAD = location.search.indexOf('INIT_PRE_LOAD') !== -1
 
-export const AWS = location.search.indexOf('AWS') !== -1
-export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
-export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
+export const AWS = location.search.includes('AWS')
+export const NO_MOTD = location.search.includes('NO_MOTD')
+export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
 
-export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
-export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
-export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
-export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
-export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !== -1
-export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== -1
+export const DISABLE_AUTH = location.search.includes('DISABLE_AUTH') || DEBUG
+export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL') !== -1
+export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
+export const SHOW_FPS_COUNTER = location.search.includes('SHOW_FPS_COUNTER') || DEBUG
+export const HAS_INITIAL_POSITION_MARK = location.search.includes('position')
+export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
 export const WSS_ENABLED = qs.ws !== undefined
-export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
+export const FORCE_SEND_MESSAGE = location.search.includes('FORCE_SEND_MESSAGE')
 
 export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
 
@@ -255,7 +256,8 @@ export function getExclusiveServer() {
 }
 
 export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
-
+export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
+export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
 export function getWearablesSafeURL() {
@@ -284,8 +286,9 @@ export function getServerConfigurations() {
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
 
   return {
-    contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    wearablesApi: `https://wearable-api.decentraland.org/v2`,
+    contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
+    
+    wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
