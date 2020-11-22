@@ -1,14 +1,6 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
 
-export const performanceConfigurations = [
-  { antialiasing: true, downsampling: 0, shadows: true },
-  { antialiasing: false, downsampling: 1, shadows: true },
-  { antialiasing: false, downsampling: 1, shadows: false },
-  { antialiasing: false, downsampling: 1, shadows: true },
-  { antialiasing: false, downsampling: 2, shadows: false }
-]
-
 export const NETWORK_HZ = 10
 
 export namespace interactionLimits {
