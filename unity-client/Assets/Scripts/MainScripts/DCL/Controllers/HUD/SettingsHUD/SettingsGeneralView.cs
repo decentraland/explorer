@@ -286,10 +286,12 @@ namespace DCL.SettingsHUD
             shadowToggle.isOn = tempQualitySetting.shadows;
             bloomToggle.isOn = tempQualitySetting.bloom;
             fpsCapToggle.isOn = tempQualitySetting.fpsCap;
-            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
+            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int) currentQualitySetting.antiAliasing >> 2) + 1;
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
             shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
+            cullingSlider.value = tempQualitySetting.detailObjectCullingThreshold;
+            cullingToggle.isOn = tempQualitySetting.enableDetailObjectCulling;
         }
 
         void UpdateGeneralSettings()
