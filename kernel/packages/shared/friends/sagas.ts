@@ -71,6 +71,7 @@ type PresenceMemoization = { realm: SocialRealm | undefined; position: UserPosit
 const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 
 const CLOCK_SERVICE_URL = 'https://worldtimeapi.org/api/timezone/Etc/UTC'
+const DATE_TIME_HTTP_HEADER = 'date'
 
 export function* friendsSaga() {
   yield takeEvery(USER_AUTHENTIFIED, initializeSaga)
@@ -111,13 +112,16 @@ function* initializeSaga() {
 
 function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdentity) {
   const { address: ethAddress } = identity
-  let timestamp
+  let timestamp: number
 
-  try {
-    const response = yield fetch(CLOCK_SERVICE_URL)
-    const { datetime } = yield response.json()
-    timestamp = new Date(datetime).getTime()
-  } catch (e) {
+  // Try to fetch time from the synapse server
+  timestamp = yield fetchTimeFromSynapseServer(synapseUrl)
+
+  // If that fails, use the global time API
+  timestamp = timestamp ?? (yield fetchTimeFromClockService())
+
+  // If that fails, fall back to local time
+  if (!timestamp) {
     logger.warn(`Failed to fetch global time. Will fall back to local time`)
     timestamp = Date.now()
   }
@@ -702,4 +706,26 @@ function toSocialData(socialIds: string[]) {
       socialId
     }))
     .filter(({ userId }) => !!userId) as SocialData[]
+}
+
+function* fetchTimeFromSynapseServer(synapseUrl: string) {
+  try {
+    const response = yield fetch(`${synapseUrl}/.well-known/matrix/client`)
+    if (response.ok && response.headers.has(DATE_TIME_HTTP_HEADER)) {
+      const dateTime = response.headers.get(DATE_TIME_HTTP_HEADER)!
+      return new Date(dateTime).getTime()
+    }
+  } catch (e) {
+    logger.warn(`Failed to fetch time from synapse server`, e)
+  }
+}
+
+function* fetchTimeFromClockService() {
+  try {
+    const response = yield fetch(CLOCK_SERVICE_URL)
+    const { datetime } = yield response.json()
+    return new Date(datetime).getTime()
+  } catch (e) {
+    logger.warn(`Failed to fetch time from clock service`)
+  }
 }
