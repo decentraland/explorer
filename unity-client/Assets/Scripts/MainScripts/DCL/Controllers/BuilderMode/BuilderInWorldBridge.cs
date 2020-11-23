@@ -22,6 +22,7 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         public QuaternionRepresentantion(Quaternion quaternion)
         {
+
             x = quaternion.x;
             y = quaternion.y;
             z = quaternion.z;
@@ -34,9 +35,9 @@ public class BuilderInWorldBridge : MonoBehaviour
     [System.Serializable]
     public class GenericComponent
     {
-        public int componentId;
     }
 
+    [System.Serializable]
     public class TransformComponent : GenericComponent
     {
         public Vector3 position;
@@ -45,34 +46,23 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         public Vector3 scale;
 
-        public TransformComponent()
-        {
-            componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
-        }
     }
 
+    [System.Serializable]
     public class GTLShapeComponent : GenericComponent
     {
         public string src;
-
-        public GTLShapeComponent()
-        {
-            componentId = (int)CLASS_ID.GLTF_SHAPE;
-        }
     }
 
+    [System.Serializable]
     public class NameComponent : GenericComponent
     {
         public string value;
-
-        public NameComponent()
-        {
-            componentId = (int) CLASS_ID.NAME;
-        }
     }
 
     #endregion
 
+    [System.Serializable]
     public class EntityTransformPayload<T>
     {
         public string entityId;
@@ -84,63 +74,71 @@ public class BuilderInWorldBridge : MonoBehaviour
     public class EntityPayLoad
     {
         public string entityId;
-        public GenericComponent[] data;
-    };
+        public ComponentPayLoad[] components;
+    }
+
+    [System.Serializable]
+    public class ComponentPayLoad
+    {
+        public int componentId;
+        public GenericComponent data;
+    }
 
     [System.Serializable]
     public class EntitySingleComponentPayLoad
     {
         public string entityId;
-        public GenericComponent data;
-    };
+        public int componentId;
+        public GenericComponent componentData;
+    }
 
     [System.Serializable]
     public class RemoveEntityPayLoad
     {
         public string entityId;
-    };
+    }
 
     [System.Serializable]
     public class RemoveEntityComponentsPayLoad
     {
         public string entityId;
         public string componentId;
-    };
+    }
 
     [System.Serializable]
     public class AddEntityEvent
     {
         public string type = "AddEntity";
         public EntityPayLoad payload;
-    };
+    }
 
     [System.Serializable]
     public class ModifyEntityComponentEvent
     {
         public string type = "SetComponent";
         public EntitySingleComponentPayLoad payload;
-    };
+    }
 
     [System.Serializable]
     public class RemoveEntityEvent
     {
         public string type = "RemoveEntity";
         public RemoveEntityPayLoad payload;
-    };
+    }
 
     [System.Serializable]
     public class RemoveEntityComponentsEvent
     {
         public string type = "RemoveComponent";
         public RemoveEntityComponentsPayLoad payload;
-    };
+    }
 
     [System.Serializable]
     public class StoreSceneStateEvent
     {
         public string type = "StoreSceneState";
         public string payload = "";
-    };
+    }
 
     #endregion
 
@@ -155,11 +153,12 @@ public class BuilderInWorldBridge : MonoBehaviour
     public void ChangedEntityName(DCLBuilderInWorldEntity entity, ParcelScene scene)
     {
         entitySingleComponentPayload.entityId = entity.rootEntity.entityId;
+        entitySingleComponentPayload.componentId = (int) CLASS_ID.NAME;
 
         NameComponent nameComponent = new NameComponent();
         nameComponent.value = entity.descriptiveName;
 
-        entitySingleComponentPayload.data = nameComponent;
+        entitySingleComponentPayload.componentData = nameComponent;
 
         modifyEntityComponentEvent.payload = entitySingleComponentPayload;
 
@@ -180,11 +179,14 @@ public class BuilderInWorldBridge : MonoBehaviour
 
     public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
     {
-        List<GenericComponent> list = new List<GenericComponent>();
+        List<ComponentPayLoad> list = new List<ComponentPayLoad>();
         foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
         {
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
+                ComponentPayLoad componentPayLoad = new ComponentPayLoad();
+
+                componentPayLoad.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
                 TransformComponent entityComponentModel = new TransformComponent();
                 //entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
 
@@ -192,12 +194,15 @@ public class BuilderInWorldBridge : MonoBehaviour
                 entityComponentModel.rotation = new QuaternionRepresentantion(entity.gameObject.transform.rotation);
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 
+                if (entityComponentModel.rotation == null)
+                {
+                    Debug.Log("es nulo wtf");
+                }
 
-                DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
-                DCLTransform.model.rotation = entity.gameObject.transform.rotation;
-                DCLTransform.model.scale = entity.gameObject.transform.localScale;
 
-                list.Add(entityComponentModel);
+                componentPayLoad.data = entityComponentModel;
+
+                list.Add(componentPayLoad);
 
             }
         }
@@ -206,26 +211,35 @@ public class BuilderInWorldBridge : MonoBehaviour
         {
             if (keyValuePair.Value is GLTFShape gtlfShape)
             {
+                ComponentPayLoad componentPayLoad = new ComponentPayLoad();
+
                 GTLShapeComponent entityComponentModel = new GTLShapeComponent();
                 //entityComponentModel.componentId = (int)CLASS_ID.GLTF_SHAPE;
-
+                componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
                 entityComponentModel.src = gtlfShape.model.src;
-                list.Add(entityComponentModel);
+                componentPayLoad.data = entityComponentModel;
+
+                list.Add(componentPayLoad);
             }
         }
 
+        if (((TransformComponent)list[0].data).rotation == null) Debug.Log("es nulo wtf");
+
+
+       Debug.Log("List " + ((TransformComponent)list[0].data).rotation);
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
     }
 
     public void EntityTransformReport(DecentralandEntity entity, ParcelScene scene)
     {
         entitySingleComponentPayload.entityId = entity.entityId;
+        entitySingleComponentPayload.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
 
         entityTransformComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
         entityTransformComponentModel.rotation = new QuaternionRepresentantion(entity.gameObject.transform.rotation);
         entityTransformComponentModel.scale = entity.gameObject.transform.localScale;
 
-        entitySingleComponentPayload.data = entityTransformComponentModel;
+        entitySingleComponentPayload.componentData = entityTransformComponentModel;
 
         modifyEntityComponentEvent.payload = entitySingleComponentPayload;
 
@@ -277,11 +291,11 @@ public class BuilderInWorldBridge : MonoBehaviour
         WebInterface.VERBOSE = false;
     }
 
-    void SendNewEntityToKernel(string sceneId, string entityId, GenericComponent[] components)
+    void SendNewEntityToKernel(string sceneId, string entityId, ComponentPayLoad[] componentsPayload)
     {
         AddEntityEvent addEntityEvent = new AddEntityEvent();
         entityPayload.entityId = entityId;
-        entityPayload.data = components;
+        entityPayload.components = componentsPayload;
 
         addEntityEvent.payload = entityPayload;
 
