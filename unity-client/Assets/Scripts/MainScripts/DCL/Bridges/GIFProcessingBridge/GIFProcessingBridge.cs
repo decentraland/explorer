@@ -89,6 +89,11 @@ namespace DCL
                 pendingGIFs[parsedPayload.id].data = parsedPayload;
         }
 
+        public void DeleteGIF(string id)
+        {
+            DCL.Interface.WebInterface.DeleteGIF(id);
+        }
+
         public List<UniGif.GifTexture> GenerateTexturesList(int width, int height, int[] pointers, float[] frameDelays)
         {
             if (width == 0 || height == 0)

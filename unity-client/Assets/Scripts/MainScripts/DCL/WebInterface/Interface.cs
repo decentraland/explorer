@@ -1004,6 +1004,11 @@ namespace DCL.Interface
             SendMessage("RequestGIFProcessor", gifSetupPayload);
         }
 
+        public static void DeleteGIF(string id)
+        {
+            SendMessage("DeleteGIF", id);
+        }
+
         public static void GoTo(int x, int y)
         {
             gotoEvent.x = x;
