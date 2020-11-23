@@ -16,7 +16,7 @@ import {
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, ENABLE_NEW_SETTINGS } from '../config/index'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
@@ -44,7 +44,7 @@ import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/na
 const logger = createLogger('website.ts: ')
 
 function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
-  i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: voiceChatEnabled })
+  i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: voiceChatEnabled, enableNewSettings: ENABLE_NEW_SETTINGS })
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
 
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
@@ -90,6 +90,7 @@ namespace webApp {
       visible: OPEN_AVATAR_EDITOR
     })
     i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
       active: true,

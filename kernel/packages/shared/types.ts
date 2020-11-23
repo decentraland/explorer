@@ -409,7 +409,8 @@ export enum HUDElementID {
   HELP_AND_SUPPORT_HUD = 20,
   EMAIL_PROMPT = 21,
   USERS_AROUND_LIST_HUD = 22,
-  GRAPHIC_CARD_WARNING = 23
+  GRAPHIC_CARD_WARNING = 23,
+  SETTINGS_PANEL = 24
 }
 
 export type HUDConfiguration = {

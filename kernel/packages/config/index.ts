@@ -133,6 +133,7 @@ export const INIT_PRE_LOAD = location.search.indexOf('INIT_PRE_LOAD') !== -1
 export const AWS = location.search.indexOf('AWS') !== -1
 export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
 export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
+export const ENABLE_NEW_SETTINGS = location.search.indexOf('ENABLE_NEW_SETTINGS') !== -1
 
 export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
