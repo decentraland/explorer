@@ -712,7 +712,7 @@ function* fetchTimeFromSynapseServer(synapseUrl: string) {
   try {
     const response = yield fetch(`${synapseUrl}/.well-known/matrix/client`)
     if (response.ok && response.headers.has(DATE_TIME_HTTP_HEADER)) {
-      const dateTime = response.headers.get(DATE_TIME_HTTP_HEADER)!
+      const dateTime: string = response.headers.get(DATE_TIME_HTTP_HEADER)
       return new Date(dateTime).getTime()
     }
   } catch (e) {
