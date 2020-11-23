@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AvatarAnimationEventAudioHandler : MonoBehaviour
 {
-    AudioEvent footstepLight, footstepSlide, footstepWalk, footstepRun, clothesRustleShort, clap, throwMoney;
+    AudioEvent footstepLight, footstepSlide, footstepWalk, footstepRun, footstepJump, footstepLand, clothesRustleShort, clap, throwMoney;
 
     public void Init(AudioContainer audioContainer)
     {
@@ -15,6 +15,8 @@ public class AvatarAnimationEventAudioHandler : MonoBehaviour
         footstepSlide = audioContainer.GetEvent("FootstepSlide");
         footstepWalk = audioContainer.GetEvent("FootstepWalk");
         footstepRun = audioContainer.GetEvent("FootstepRun");
+        footstepJump = audioContainer.GetEvent("FootstepJump");
+        footstepLand = audioContainer.GetEvent("FootstepLand");
         clothesRustleShort = audioContainer.GetEvent("ClothesRustleShort");
         clap = audioContainer.GetEvent("ExpressionClap");
         throwMoney = audioContainer.GetEvent("ExpressionThrowMoney");
@@ -40,9 +42,18 @@ public class AvatarAnimationEventAudioHandler : MonoBehaviour
         TryPlayingEvent(footstepRun);
     }
 
+    public void AnimEvent_FootstepJump()
+    {
+        TryPlayingEvent(footstepJump);
+    }
+
+    public void AnimEvent_FootstepLand()
+    {
+        TryPlayingEvent(footstepLand);
+    }
+
     public void AnimEvent_ClothesRustleShort()
     {
-        Debug.Log("Rustle!");
         TryPlayingEvent(clothesRustleShort);
     }
 
