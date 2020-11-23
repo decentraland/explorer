@@ -1,4 +1,5 @@
 import { GIF_WORKERS } from 'config'
+import { GifAsset, ProcessorMessageData, WorkerMessage, WorkerMessageData } from './types'
 
 declare const Worker: any
 declare const DCL: any
@@ -18,8 +19,9 @@ export class GIFProcessor {
   unityInterface: any
   isWebGL1: boolean = false
   lastCreatedWorker: any
+  assets: Record<string, GifAsset> = {}
 
-  constructor (gameInstance: any, unityInterface: any, isWebGL1: boolean) {
+  constructor(gameInstance: any, unityInterface: any, isWebGL1: boolean) {
     this.gameInstance = gameInstance
     this.GLctx = this.gameInstance.Module.ctx
     this.unityInterface = unityInterface
@@ -31,10 +33,43 @@ export class GIFProcessor {
    * Triggers the GIF processing in the worker (the comeback is executed at worker.onmessage)
    *
    */
-  ProcessGIF(data: { imageSource: string, id: string }) {
-    const worker = this.GetWorker()
+  ProcessGIF(data: { imageSource: string; id: string }) {
+    const gifInMemory = this.assets[data.id]
 
-    worker.postMessage({ src: data.imageSource, id: data.id })
+    if (gifInMemory) {
+      if (!gifInMemory.pending) {
+        this.setGLTextures(gifInMemory)
+        this.reportToRenderer(gifInMemory)
+        return
+      }
+    }
+
+    this.assets[data.id] = {
+      pending: true,
+      id: data.id,
+      url: data.imageSource,
+      delays: [],
+      width: 0,
+      height: 0,
+      textures: []
+    }
+
+    const worker = this.GetWorker()
+    worker.postMessage({ url: data.imageSource, id: data.id } as ProcessorMessageData)
+  }
+
+  DeleteGIF(id: string) {
+    const asset = this.assets[id]
+    if (asset) {
+      const GLctx = this.gameInstance.Module.ctx
+      for (let i = 0; i < asset.textures.length; i++) {
+        const textureIdx = asset.textures[i].name
+        const texture = DCL.GL.textures[textureIdx]
+        GLctx.deleteTexture(texture)
+        DCL.GL.textures[textureIdx] = null
+      }
+      delete this.assets[id]
+    }
   }
 
   /**
@@ -48,14 +83,12 @@ export class GIFProcessor {
 
     if (!texture) {
       DCL.GL.recordError(1282)
-      this.gameInstance.Module.HEAP32[ptr + 4 >> 2] = 0
       return
     }
 
     let id = DCL.GL.getNewId(DCL.GL.textures)
     texture.name = id
     DCL.GL.textures[id] = texture
-    this.gameInstance.Module.HEAP32[ptr >> 2] = id
 
     return texture
   }
@@ -69,14 +102,7 @@ export class GIFProcessor {
     this.GLctx.bindTexture(this.GLctx.TEXTURE_2D, DCL.GL.textures[texId])
 
     if (this.isWebGL1) {
-      this.GLctx.texImage2D(
-        this.GLctx.TEXTURE_2D,
-        0,
-        this.GLctx.RGBA,
-        this.GLctx.RGBA,
-        this.GLctx.UNSIGNED_BYTE,
-        image
-      )
+      this.GLctx.texImage2D(this.GLctx.TEXTURE_2D, 0, this.GLctx.RGBA, this.GLctx.RGBA, this.GLctx.UNSIGNED_BYTE, image)
     } else {
       this.GLctx.texImage2D(
         this.GLctx.TEXTURE_2D,
@@ -96,31 +122,13 @@ export class GIFProcessor {
     if (!this.lastCreatedWorker || multipleGIFWorkers) {
       const worker = new Worker(gifProcessorWorkerUrl, { name: 'gifProcessorWorker' })
 
-      worker.onmessage = (e: any) => {
-        if (e.data.arrayBufferFrames.length <= 0) return
-
-        const textures = new Array()
-        const texIDs = new Array()
-        const frames = e.data.arrayBufferFrames
-        const width = e.data.width
-        const height = e.data.height
-        const frameDelays = e.data.delays
-        const id = e.data.id
-
-        // Generate all the GIF textures
-        for (let index = 0; index < frames.length; index++) {
-          const ptr: GLuint = this.gameInstance.Module._malloc(4)
-          const tex = this.GenerateTexture(ptr)
-
-          textures.push(tex)
-          texIDs.push(tex.name)
-
-          // print current image data onto current tex
-          const frameImageData = new ImageData(new Uint8ClampedArray(frames[index]), width, height)
-          this.UpdateGIFTex(frameImageData, tex.name)
+      worker.onmessage = (e: WorkerMessage) => {
+        const asset = this.assets[e.data.id]
+        if (asset) {
+          if (this.setGifAsset(asset, e.data)) {
+            this.reportToRenderer(asset)
+          }
         }
-
-        this.unityInterface.SendGIFPointers(id, width, height, texIDs, frameDelays)
 
         if (multipleGIFWorkers) {
           worker.terminate()
@@ -131,5 +139,40 @@ export class GIFProcessor {
     }
 
     return this.lastCreatedWorker
+  }
+
+  private setGLTextures(gifAsset: GifAsset) {
+    for (let i = 0; i < gifAsset.textures.length; i++) {
+      this.UpdateGIFTex(gifAsset.textures[i].imageData, gifAsset.textures[i].name)
+    }
+  }
+
+  private reportToRenderer(gifAsset: GifAsset) {
+    this.unityInterface.SendGIFPointers(
+      gifAsset.id,
+      gifAsset.width,
+      gifAsset.height,
+      gifAsset.textures.map((id) => id.name),
+      gifAsset.delays
+    )
+  }
+
+  private setGifAsset(asset: GifAsset, data: WorkerMessageData): boolean {
+    if (!data.arrayBufferFrames || data.arrayBufferFrames.length <= 0) return false
+
+    asset.width = data.width
+    asset.height = data.height
+    asset.delays = data.delays
+
+    for (let i = 0; i < data.arrayBufferFrames.length; i++) {
+      const ptr: GLuint = this.gameInstance.Module._malloc(4)
+      const tex = this.GenerateTexture(ptr)
+      const frameImageData = new ImageData(new Uint8ClampedArray(data.arrayBufferFrames[i]), data.width, data.height)
+      asset.textures.push({ name: tex.name, imageData: frameImageData })
+      this.UpdateGIFTex(frameImageData, tex.name)
+    }
+
+    asset.pending = false
+    return true
   }
 }

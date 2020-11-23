@@ -1,26 +1,27 @@
 import defaultLogger from 'shared/logger'
 import { parseGIF, decompressFrames } from 'gifuct-js'
+import { ProcessorMessage, WorkerMessageData } from './types'
 
 declare const self: any
 
-const gifCanvas = new OffscreenCanvas(1,1)
+const gifCanvas = new OffscreenCanvas(1, 1)
 const gifCanvasCtx = gifCanvas.getContext('2d')
-const gifPatchCanvas = new OffscreenCanvas(1,1)
+const gifPatchCanvas = new OffscreenCanvas(1, 1)
 const gifPatchCanvasCtx = gifPatchCanvas.getContext('2d')
-const resizedCanvas = new OffscreenCanvas(1,1)
+const resizedCanvas = new OffscreenCanvas(1, 1)
 const resizedCanvasCtx = gifCanvas.getContext('2d')
 const maxGIFDimension = 512
 
 let frameImageData: any = undefined
 
 {
-  let payloads: any[] = new Array()
+  let payloads: ProcessorMessage[] = new Array()
 
-  self.onmessage = (e: any) => {
+  self.onmessage = (e: ProcessorMessage) => {
     EnqueuePayload(e)
   }
 
-  function EnqueuePayload(e: any) {
+  function EnqueuePayload(e: ProcessorMessage) {
     payloads.push(e)
     if (payloads.length === 1) {
       const promise = ConsumePayload()
@@ -35,8 +36,8 @@ let frameImageData: any = undefined
     }
   }
 
-  async function DownloadAndProcessGIF(e: any) {
-    const imageFetch = fetch(e.data.src)
+  async function DownloadAndProcessGIF(e: ProcessorMessage) {
+    const imageFetch = fetch(e.data.url)
     const response = await imageFetch
     const buffer = await response.arrayBuffer()
     const parsedGif = await parseGIF(buffer)
@@ -55,7 +56,8 @@ let frameImageData: any = undefined
 
     hasToBeResized = gifCanvas.width > maxGIFDimension || gifCanvas.height > maxGIFDimension
     if (hasToBeResized) {
-      let scalingFactor = (gifCanvas.width > gifCanvas.height) ? (gifCanvas.width / maxGIFDimension) : (gifCanvas.height / maxGIFDimension)
+      let scalingFactor =
+        gifCanvas.width > gifCanvas.height ? gifCanvas.width / maxGIFDimension : gifCanvas.height / maxGIFDimension
       resizedCanvas.width = gifCanvas.width / scalingFactor
       finalWidth = resizedCanvas.width
 
@@ -67,7 +69,7 @@ let frameImageData: any = undefined
       frameDelays.push(decompressedFrames[key].delay)
 
       const processedImageData = GenerateFinalImageData(decompressedFrames[key], hasToBeResized)
-      framesAsArrayBuffer.push(processedImageData.data.buffer)
+      if (processedImageData) framesAsArrayBuffer.push(processedImageData.data.buffer)
     }
 
     self.postMessage({
@@ -75,11 +77,12 @@ let frameImageData: any = undefined
       width: finalWidth,
       height: finalHeight,
       delays: frameDelays,
-      id: e.data.id,
-    }, framesAsArrayBuffer)
+      url: e.data.url,
+      id: e.data.id
+    } as WorkerMessageData)
   }
 
-  function GenerateFinalImageData(frame: any, hasToBeResized: boolean): any {
+  function GenerateFinalImageData(frame: any, hasToBeResized: boolean): ImageData | undefined {
     if (!frameImageData || frame.dims.width !== frameImageData.width || frame.dims.height !== frameImageData.height) {
       gifPatchCanvas.width = frame.dims.width
       gifPatchCanvas.height = frame.dims.height
@@ -102,7 +105,17 @@ let frameImageData: any = undefined
     gifCanvasCtx?.setTransform(1, 0, 0, 1, 0, 0)
 
     if (finalImageData && hasToBeResized) {
-      resizedCanvasCtx?.drawImage(gifCanvas, 0, 0, gifCanvas.width, gifCanvas.height, 0, 0, resizedCanvas.width, resizedCanvas.height)
+      resizedCanvasCtx?.drawImage(
+        gifCanvas,
+        0,
+        0,
+        gifCanvas.width,
+        gifCanvas.height,
+        0,
+        0,
+        resizedCanvas.width,
+        resizedCanvas.height
+      )
 
       finalImageData = resizedCanvasCtx?.getImageData(0, 0, resizedCanvas.width, resizedCanvas.height)
     }

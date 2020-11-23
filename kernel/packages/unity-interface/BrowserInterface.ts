@@ -432,6 +432,12 @@ export class BrowserInterface {
     DCL.gifProcessor.ProcessGIF(data)
   }
 
+  public DeleteGIF(id: string) {
+    if (DCL.gifProcessor) {
+      DCL.gifProcessor.DeleteGIF(id)
+    }
+  }
+
   public async FetchBalanceOfMANA() {
     const identity = getIdentity()
 
