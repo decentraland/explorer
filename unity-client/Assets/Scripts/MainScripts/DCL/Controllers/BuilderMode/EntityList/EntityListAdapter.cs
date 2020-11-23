@@ -10,6 +10,7 @@ public class EntityListAdapter : MonoBehaviour
     public Color entitySelectedColor, entityUnselectedColor;
     public Color iconsSelectedColor, iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
+    public TMP_InputField nameIF;
     public Image selectedImg, lockImg, showImg;
     public System.Action<BuilderInWorldEntityListController.EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     DCLBuilderInWorldEntity currentEntity;
@@ -63,6 +64,12 @@ public class EntityListAdapter : MonoBehaviour
         if (this != null)
         {
             nameTxt.text = entityToEdit.rootEntity.entityId;
+
+            if(string.IsNullOrEmpty(entityToEdit.descriptiveName))
+                nameIF.text = entityToEdit.rootEntity.entityId;
+            else
+                nameIF.text = entityToEdit.descriptiveName;
+
             if (entityToEdit.IsVisible)
                 showImg.color = iconsSelectedColor;
             else
@@ -79,6 +86,12 @@ public class EntityListAdapter : MonoBehaviour
             else
                 selectedImg.color = entityUnselectedColor;
         }
+    }
+
+    public void Rename(string newName)
+    {
+        currentEntity.descriptiveName = newName;
+        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.RENAME, currentEntity, this);
     }
 
     void DeleteAdapter(DCLBuilderInWorldEntity entityToEdit)

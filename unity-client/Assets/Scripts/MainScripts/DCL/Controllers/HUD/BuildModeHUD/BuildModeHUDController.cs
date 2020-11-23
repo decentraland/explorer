@@ -23,10 +23,11 @@ public class BuildModeHUDController : IHUD
 
     public event Action<SceneObject> OnSceneObjectSelected;
 
-    public event Action<DCLBuilderInWorldEntity> OnEntityClick,
-                                                  OnEntityDelete,
-                                                  OnEntityLock,
-                                                  OnEntityChangeVisibility;
+    public event Action<DCLBuilderInWorldEntity> OnEntityClick;
+    public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
+    public event Action<DCLBuilderInWorldEntity> OnEntityLock;
+    public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
+    public event Action<DCLBuilderInWorldEntity> OnEntityRename;
 
     //Note(Adrian): This is used right now for tutorial purposes
     public event Action OnCatalogOpen;
@@ -47,6 +48,7 @@ public class BuildModeHUDController : IHUD
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
         buildModeEntityListController.OnEntityLock += (x) => OnEntityLock(x);
         buildModeEntityListController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
+        buildModeEntityListController.OnEntityRename += (x) => OnEntityRename(x);
 
         buildModeEntityListController.CloseList();
 
@@ -161,6 +163,11 @@ public class BuildModeHUDController : IHUD
         {
             buildModeEntityListController.CloseList();
         }
+    }
+
+    public void ClearEntityList()
+    {
+        buildModeEntityListController.ClearList();
     }
 
     public void ChangeVisibilityOfControls()

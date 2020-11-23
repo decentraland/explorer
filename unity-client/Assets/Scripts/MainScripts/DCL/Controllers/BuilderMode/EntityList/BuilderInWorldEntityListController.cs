@@ -13,11 +13,16 @@ public class BuilderInWorldEntityListController : MonoBehaviour
         SELECT = 0,
         LOCK = 1,
         DELETE = 2,
-        SHOW = 3
+        SHOW = 3,
+        RENAME = 4
     }
 
-    public Action<DCLBuilderInWorldEntity>
-        OnEntityClick,OnEntityDelete,OnEntityLock,OnEntityChangeVisibility;
+    public Action<DCLBuilderInWorldEntity> OnEntityClick;
+    public Action<DCLBuilderInWorldEntity> OnEntityDelete;
+    public Action<DCLBuilderInWorldEntity> OnEntityLock;
+    public Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
+    public Action<DCLBuilderInWorldEntity> OnEntityRename;
+
     public EntityListView entityListView;
 
     List<DCLBuilderInWorldEntity> entitiesList;
@@ -46,6 +51,12 @@ public class BuilderInWorldEntityListController : MonoBehaviour
             entityListView.SetContent(entitiesList);
     }
 
+    public void ClearList()
+    {
+        entitiesList.Clear();
+        entityListView.RemoveAdapters();
+    }
+
     public void CloseList()
     {
         gameObject.SetActive(false);
@@ -57,20 +68,24 @@ public class BuilderInWorldEntityListController : MonoBehaviour
         switch (action)
         {
             case EntityAction.SELECT:
+
                 OnEntityClick?.Invoke(entityToApply);
-                
                 break;
             case EntityAction.LOCK:
-              
+
                 OnEntityLock?.Invoke(entityToApply);
                 break;
             case EntityAction.DELETE:
-              
+
                 OnEntityDelete?.Invoke(entityToApply);
                 break;
             case EntityAction.SHOW:
+
                 OnEntityChangeVisibility?.Invoke(entityToApply);
-      
+                break;
+            case EntityAction.RENAME:
+
+                OnEntityRename?.Invoke(entityToApply);
                 break;
         }
 

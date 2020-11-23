@@ -1,6 +1,6 @@
-using System;
 using DCL.Helpers;
 using DCL.Models;
+using Newtonsoft.Json;
 using UnityEngine;
 using Ray = UnityEngine.Ray;
 
@@ -191,124 +191,7 @@ namespace DCL.Interface
         public class SendChatMessageEvent
         {
             public ChatMessage message;
-        }
-
-        #region BuilderInWorld
-
-        [System.Serializable]
-        public class ReportEntityPositionPayload
-        {
-            public string entityId;
-            public int componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
-            public ComponentData data = new ComponentData();
-
-            [System.Serializable]
-            public class ComponentData
-            {
-
-
-                public Vector3 position;
-
-                public Quaternion rotation;
-
-                public Vector3 scale;
-            }
-        }
-
-        [System.Serializable]
-        public class AddEntityEvent
-        {
-            public string type = "AddEntity";
-            public AddEntityPayLoad payload;
-
-        };
-
-        [System.Serializable]
-        public class ModifyEntityComponentEvent
-        {
-            public string type = "SetComponent";
-            public ReportEntityPositionPayload payload;
-
-        };
-
-        [System.Serializable]
-        public class AddEntityPayLoad
-        {
-            public string entityId;
-            public EntityComponentModel[] components;
-
-
-        };
-
-        [System.Serializable]
-        public class EntityComponentModel
-        {
-            public int componentId;
-            public string data;
-        };
-
-        [System.Serializable]
-        public class EntityModifyComponentModel
-        {
-            public int componentId;
-            public string data;
-        };
-
-        [System.Serializable]
-        public class RemoveEntityEvent
-        {
-            public string type = "RemoveEntity";
-            public RemoveEntityPayLoad payload;
-
-
-        };
-
-        [System.Serializable]
-        public class RemoveEntityPayLoad
-        {
-            public string entityId;
-        };
-
-        [System.Serializable]
-        public class ModifyEntityComponentsEvent
-        {
-            public string type = "SetComponent";
-            public ModifyEntityComponentsPayLoad payload;
-
-
-        };
-
-        [System.Serializable]
-        public class ModifyEntityComponentsPayLoad
-        {
-            public string entityId;
-            public Component[] components;
-        };
-
-        [System.Serializable]
-        public class RemoveEntityComponentsEvent
-        {
-            public string type = "RemoveComponent";
-            public RemoveEntityComponentsPayLoad payload;
-
-
-        };
-
-        [System.Serializable]
-        public class RemoveEntityComponentsPayLoad
-        {
-            public string entityId;
-            public string componentId;
-        };
-
-        [System.Serializable]
-        public class StoreSceneStateEvent
-        {
-            public string type = "StoreSceneState";
-            public string payload = "";
-        };
-
-        #endregion
+        }     
 
         [System.Serializable]
         public class OnPointerEventPayload
@@ -709,10 +592,7 @@ namespace DCL.Interface
         private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
-        private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
-        private static ReportEntityPositionPayload reportEntityPositionPayload = new ReportEntityPositionPayload();
-        private static ModifyEntityComponentEvent modifyEntityComponentEvent = new ModifyEntityComponentEvent();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -738,46 +618,10 @@ namespace DCL.Interface
             SendMessage("ControlEvent", controlEvent);
         }
 
-        #region BuilderInWorld
-
-        public static void AddEntity(string sceneId, string entityId, EntityComponentModel[] components)
+        public static void BuilderInWorldMessage(string type, string message)
         {
-            AddEntityEvent addEntityEvent = new AddEntityEvent();
-            AddEntityPayLoad addEntityPayLoad = new AddEntityPayLoad();
-            addEntityPayLoad.entityId = entityId;
-            addEntityPayLoad.components = components;
-
-            addEntityEvent.payload = addEntityPayLoad;
-            SendSceneEvent(sceneId, "stateEvent", addEntityEvent);
+            MessageFromEngine(type, message);
         }
-
-        public static void ReportEntityTransform(Vector3 position, Quaternion rotation, Vector3 scale, string sceneId, string entityId)
-        {
-            reportEntityPositionPayload.entityId = entityId;
-            reportEntityPositionPayload.data.position = position;
-            reportEntityPositionPayload.data.rotation = rotation;
-            reportEntityPositionPayload.data.scale = scale;
-
-            modifyEntityComponentEvent.payload = reportEntityPositionPayload;
-            SendSceneEvent(sceneId, "stateEvent", modifyEntityComponentEvent);
-        }
-
-        public static void RemoveEntity(string sceneId, string entityId)
-        {
-            RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent();
-            RemoveEntityPayLoad removeEntityPayLoad = new RemoveEntityPayLoad();
-            removeEntityPayLoad.entityId = entityId;
-            removeEntityEvent.payload = removeEntityPayLoad;
-
-            SendSceneEvent(sceneId, "stateEvent", removeEntityEvent);
-        }
-
-        public static void ReportStoreSceneState(string sceneId)
-        {
-            SendSceneEvent(sceneId, "stateEvent", storeSceneState);
-        }
-
-        #endregion
 
         public static void ReportOnClickEvent(string sceneId, string uuid)
         {

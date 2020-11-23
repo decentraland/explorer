@@ -16,6 +16,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     [Header("Design variables")]
     public float duplicateOffset = 2f;
+    public float msBetweenTransformUpdates = 2000;
+
 
     [Header("Prefab References")]
     public OutlinerController outlinerController;
@@ -39,6 +41,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     float lastTransformReportTime;
 
+    float nextTimeToUpdateTransform = 0;
+
     private void OnDestroy()
     {
         DestroyCollidersForAllEntities();
@@ -54,7 +58,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.buildModeHud.OnEntityClick -= ChangeEntitySelectionFromList;
         HUDController.i.buildModeHud.OnEntityLock -= ChangeEntityLockStatus;
         HUDController.i.buildModeHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-     
+        HUDController.i.buildModeHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
+        HUDController.i.buildModeHud.OnEntityRename -= ChangeEntityName;
+
     }
 
     private void Update()
@@ -67,10 +73,16 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     void ReportTransform()
     {
-        foreach(DCLBuilderInWorldEntity entity in selectedEntities)
+        if (DCLTime.realtimeSinceStartup >= nextTimeToUpdateTransform)
         {
-            builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
+            foreach (DCLBuilderInWorldEntity entity in selectedEntities)
+            {
+                builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
+            }
+
+            nextTimeToUpdateTransform = DCLTime.realtimeSinceStartup + msBetweenTransformUpdates/1000f;
         }
+        
     }
 
     public void Init()
@@ -81,6 +93,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.buildModeHud.OnEntityClick += ChangeEntitySelectionFromList;
         HUDController.i.buildModeHud.OnEntityLock += ChangeEntityLockStatus;
         HUDController.i.buildModeHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
+        HUDController.i.buildModeHud.OnEntityRename += ChangeEntityName;
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
@@ -565,6 +578,11 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     public void NotifyEntityIsCreated(DecentralandEntity entity)
     {
         builderInWorldBridge.AddEntityOnKernel(entity, sceneToEdit);  
+    }
+
+    void ChangeEntityName(DCLBuilderInWorldEntity entityToApply)
+    {
+        builderInWorldBridge.ChangedEntityName(entityToApply, sceneToEdit);
     }
 
     void ChangeEntityVisibilityStatus(DCLBuilderInWorldEntity entityToApply)

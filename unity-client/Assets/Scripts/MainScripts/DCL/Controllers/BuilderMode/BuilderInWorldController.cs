@@ -30,7 +30,6 @@ public class BuilderInWorldController : MonoBehaviour
 
     public bool activeFeature = false;
 
-
     [Header("Design variables")]
 
     public float scaleSpeed = 0.25f;
@@ -39,23 +38,22 @@ public class BuilderInWorldController : MonoBehaviour
 
     public float distanceLimitToSelectObjects = 50;
 
-    public float msToWaitUntilSceneIsLoaded = 5000;
-
-
     [Header("Snap variables")]
+
     public float snapFactor = 1f;
     public float snapRotationDegresFactor = 15f;
     public float snapScaleFactor = 0.5f;
 
     public float snapDistanceToActivateMovement = 10f;
 
-
     [Header("Scene References")]
+
     public GameObject cameraParentGO;
     public GameObject cursorGO;
     public InputController inputController;
 
     [Header("Prefab References")]
+
     public OutlinerController outlinerController;
     public BuilderInWorldInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
@@ -380,7 +378,8 @@ public class BuilderInWorldController : MonoBehaviour
         if (!isAdvancedModeActive)
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
-   
+
+        builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
         InputDone();
         OnSceneObjectPlaced?.Invoke();
     }
@@ -708,6 +707,8 @@ public class BuilderInWorldController : MonoBehaviour
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
+
+        HUDController.i.buildModeHud.ClearEntityList();
     }
 
     void ExitAfterCharacterTeleport(DCLCharacterPosition position)

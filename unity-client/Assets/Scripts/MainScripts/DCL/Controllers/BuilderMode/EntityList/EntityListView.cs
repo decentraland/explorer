@@ -21,14 +21,14 @@ public class EntityListView : ListView<DCLBuilderInWorldEntity>
             adapter.OnActionInvoked += EntityActionInvoked;
         }
     }
+
     public override void RemoveAdapters()
     {
-
         for (int i = 0; i < contentPanelTransform.transform.childCount; i++)
         {
             EntityListAdapter toRemove = contentPanelTransform.transform.GetChild(i).gameObject.GetComponent<EntityListAdapter>();
-            toRemove.OnActionInvoked -= EntityActionInvoked;
-            Destroy(toRemove);
+            if (toRemove != null)   toRemove.OnActionInvoked -= EntityActionInvoked;
+            Destroy(toRemove.gameObject);
         }
     }
 

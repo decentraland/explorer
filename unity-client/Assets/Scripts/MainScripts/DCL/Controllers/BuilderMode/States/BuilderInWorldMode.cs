@@ -111,7 +111,6 @@ public class BuilderInWorldMode : MonoBehaviour
 
         if (isNewObjectPlaced)
         {
-            builderInWorldEntityHandler.NotifyEntityIsCreated(entityDeselected.rootEntity);
             actionController.CreateActionEntityCreated(entityDeselected.rootEntity);
         }
 

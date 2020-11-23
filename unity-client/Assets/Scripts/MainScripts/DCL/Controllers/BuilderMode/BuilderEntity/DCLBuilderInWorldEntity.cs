@@ -11,6 +11,7 @@ using DCL.Configuration;
 public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
+    public string descriptiveName;
 
     public System.Action<DCLBuilderInWorldEntity> onStatusUpdate, OnDelete;
 
@@ -92,6 +93,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
         entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
         IsVisible = rootEntity.gameObject.activeSelf;
 
+        SearchForName();
+
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
             CreateCollidersForEntity(rootEntity);
@@ -154,6 +157,17 @@ public class DCLBuilderInWorldEntity : EditableEntity
             GameObject.Destroy(entityCollider);
         }
         collidersDictionary.Clear();
+    }
+
+    void SearchForName()
+    {
+        //foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in rootEntity.components)
+        //{
+        //    if (keyValuePair.Key == CLASS_ID.NAME)
+        //    {
+
+        //    }
+        //}
     }
 
     void SetOriginalMaterials()
