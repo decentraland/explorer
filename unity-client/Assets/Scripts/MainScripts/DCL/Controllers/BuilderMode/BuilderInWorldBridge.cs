@@ -89,7 +89,7 @@ public class BuilderInWorldBridge : MonoBehaviour
     {
         public string entityId;
         public int componentId;
-        public GenericComponent componentData;
+        public GenericComponent data;
     }
 
     [System.Serializable]
@@ -158,7 +158,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         NameComponent nameComponent = new NameComponent();
         nameComponent.value = entity.descriptiveName;
 
-        entitySingleComponentPayload.componentData = nameComponent;
+        entitySingleComponentPayload.data = nameComponent;
 
         modifyEntityComponentEvent.payload = entitySingleComponentPayload;
 
@@ -239,7 +239,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entityTransformComponentModel.rotation = new QuaternionRepresentantion(entity.gameObject.transform.rotation);
         entityTransformComponentModel.scale = entity.gameObject.transform.localScale;
 
-        entitySingleComponentPayload.componentData = entityTransformComponentModel;
+        entitySingleComponentPayload.data = entityTransformComponentModel;
 
         modifyEntityComponentEvent.payload = entitySingleComponentPayload;
 
