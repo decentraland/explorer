@@ -60,7 +60,7 @@ namespace DCL.Models
 
         AUDIO_CLIP = 200,
 
-        NAME = 206
+        NAME = 300
     }
 
     public static class Protocol
