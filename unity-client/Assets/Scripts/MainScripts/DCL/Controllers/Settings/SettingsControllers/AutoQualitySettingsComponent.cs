@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using DCL;
-using DCL.FPSDisplay;
 using DCL.SettingsData;
 using UnityEngine;
 using QualitySettings = DCL.SettingsData.QualitySettings;
@@ -19,7 +18,8 @@ public class AutoQualitySettingsComponent : MonoBehaviour
 
     internal int currentQualityIndex;
     private Coroutine settingsCheckerCoroutine;
-    private AutoQualitySettingsController controller;
+    private IAutoQualityController controller;
+    private bool fpsCapped;
 
     void Start()
     {
@@ -28,10 +28,26 @@ public class AutoQualitySettingsComponent : MonoBehaviour
 
         currentQualityIndex = PlayerPrefs.GetInt(LAST_QUALITY_INDEX,(qualitySettings.Length - 1) / 2);
 
-        controller = new AutoQualitySettingsController(currentQualityIndex, qualitySettings);
+        controller = new AutoQualityUncappedFPSController(currentQualityIndex, qualitySettings);
 
+        Settings.i.OnQualitySettingsChanged += OnQualitySettingsChanged;
         autoQualityEnabled.OnChange += SetAutoSettings;
+
+        fpsCapped = !Settings.i.currentQualitySettings.fpsCap;
+        OnQualitySettingsChanged(Settings.i.qualitySettings);
         SetAutoSettings(autoQualityEnabled.Get(), !autoQualityEnabled.Get());
+    }
+
+    private void OnQualitySettingsChanged(QualitySettings settings)
+    {
+        if (fpsCapped == settings.fpsCap)
+            return;
+
+        fpsCapped = settings.fpsCap;
+        if (settings.fpsCap)
+            controller = new AutoQualityCappedFPSController(30, currentQualityIndex, qualitySettings);
+        else
+            controller = new AutoQualityUncappedFPSController(currentQualityIndex, qualitySettings);
     }
 
     private void SetAutoSettings(bool newValue, bool oldValue)
@@ -72,43 +88,5 @@ public class AutoQualitySettingsComponent : MonoBehaviour
         PlayerPrefs.SetInt(LAST_QUALITY_INDEX, currentQualityIndex);
         currentQualityIndex = newQualityIndex;
         Settings.i.ApplyAutoQualitySettings(currentQualityIndex);
-    }
-}
-
-
-public class AutoQualitySettingsController
-{
-    internal int currentQualityIndex;
-    internal readonly QualitySettingsData qualitySettings;
-    internal readonly IAutoQualitySettingsEvaluator evaluator;
-
-    public AutoQualitySettingsController(int startIndex, QualitySettingsData qualitySettings)
-    {
-        currentQualityIndex = startIndex;
-        this.qualitySettings = qualitySettings;
-        evaluator = new AutoQualitySettingsEvaluator(FPSEvaluation.WORSE, FPSEvaluation.GREAT);
-    }
-
-    public int EvaluateQuality(PerformanceMetricsData metrics)
-    {
-        switch (evaluator.Evaluate(metrics))
-        {
-            case -1:
-                currentQualityIndex = Mathf.Max(0, currentQualityIndex - 1);
-                break;
-            case 1:
-                currentQualityIndex = Mathf.Min(qualitySettings.Length - 1, currentQualityIndex + 1);
-                break;
-            default:
-                return currentQualityIndex;
-        }
-
-        ResetEvaluation();
-        return currentQualityIndex;
-    }
-
-    public void ResetEvaluation()
-    {
-        evaluator.Reset();
     }
 }
