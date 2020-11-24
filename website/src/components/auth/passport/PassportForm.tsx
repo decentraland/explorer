@@ -47,6 +47,10 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
   const onChangeName = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
     let name = (target.value || "").trim();
     if (name.length > MAX_NAME_LENGTH) {
+      setState((current) => ({
+        ...current,
+        hasNameError: true,
+      }));
       return;
     }
     try {
@@ -71,12 +75,14 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
     }));
   };
 
+  const disabled = state.name.length === 0 || state.name.length > MAX_NAME_LENGTH
+
   return (
     <div className="passportForm">
       <form method="POST" onSubmit={handleSubmit}>
-        <div className="inputGroup">
-          <em className="required">* required field (you can edit it later)</em>
+        <div className="inputGroup inputGroupName">
           <label>Name your avatar</label>
+          <em className="required">non-alphanumeric characters or spaces allowed</em>
           <input
             type="text"
             name="name"
@@ -87,11 +93,12 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
             onChange={onChangeName}
           />
           <em className={"hint" + (state.hasNameError ? " hasError" : "")}>
-            {Math.max(MAX_NAME_LENGTH - state.name.length, 0)}/{MAX_NAME_LENGTH}
+            {Math.max(state.name.length, 0)}/{MAX_NAME_LENGTH}
           </em>
         </div>
-        <div className="inputGroup">
+        <div className="inputGroup inputGroupEmail">
           <label>Let's stay in touch</label>
+          <em className="required">susbscribe to our newsletter (optional)</em>
           <input
             type="text"
             name="email"
@@ -105,7 +112,7 @@ export const PassportForm: React.FC<PassportFormProps> = (props) => {
           </em>
         </div>
         <div className="actions">
-          <button type="submit" className="btnSubmit">
+          <button type="submit" className="btnSubmit" disabled={disabled}>
             NEXT
           </button>
         </div>
