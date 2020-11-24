@@ -573,12 +573,12 @@ namespace DCL
             return solvedPosition;
         }
 
-        public void ActiveBuilderInWorldEditScene()
+        public void ActivateBuilderInWorldEditScene()
         {
             InitializeSceneBoundariesChecker(true);
         }
 
-        public void DesactiveBuilderInWorldEditScene()
+        public void DeactivateBuilderInWorldEditScene()
         {
             InitializeSceneBoundariesChecker(false);
         }
