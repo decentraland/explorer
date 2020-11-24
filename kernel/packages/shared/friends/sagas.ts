@@ -29,7 +29,7 @@ import {
   HUDElementID
 } from 'shared/types'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { getRealm } from 'shared/dao/selectors'
+import { getRealm, getUpdateProfileServer } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
 import { lastPlayerPosition, positionObservable } from 'shared/world/positionThings'
 import { ensureRenderer } from 'shared/renderer/sagas'
@@ -71,7 +71,6 @@ type PresenceMemoization = { realm: SocialRealm | undefined; position: UserPosit
 const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 
 const CLOCK_SERVICE_URL = 'https://worldtimeapi.org/api/timezone/Etc/UTC'
-const DATE_TIME_HTTP_HEADER = 'date'
 
 export function* friendsSaga() {
   yield takeEvery(USER_AUTHENTIFIED, initializeSaga)
@@ -115,8 +114,8 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
   const { address: ethAddress } = identity
   let timestamp: number
 
-  // Try to fetch time from the synapse server
-  timestamp = yield fetchTimeFromSynapseServer(synapseUrl)
+  // Try to fetch time from the catalyst server
+  timestamp = yield fetchTimeFromCatalystServer()
 
   // If that fails, use the global time API
   timestamp = timestamp ?? (yield fetchTimeFromClockService())
@@ -709,12 +708,13 @@ function toSocialData(socialIds: string[]) {
     .filter(({ userId }) => !!userId) as SocialData[]
 }
 
-function* fetchTimeFromSynapseServer(synapseUrl: string) {
+function* fetchTimeFromCatalystServer() {
   try {
-    const response = yield fetch(`${synapseUrl}/.well-known/matrix/client`, { method: 'HEAD', mode: 'no-cors' })
-    if (response.ok && response.headers.has(DATE_TIME_HTTP_HEADER)) {
-      const dateTime: string = response.headers.get(DATE_TIME_HTTP_HEADER)
-      return new Date(dateTime).getTime()
+    const contentServer = getUpdateProfileServer(globalThis.globalStore.getState())
+    const response = yield fetch(`${contentServer}/status`)
+    if (response.ok) {
+      const { currentTime } = yield response.json()
+      return currentTime
     }
   } catch (e) {
     logger.warn(`Failed to fetch time from synapse server`, e)
