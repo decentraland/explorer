@@ -6,15 +6,15 @@ using UnityEngine;
 
 public class AutoQualityCappedFPSController : IAutoQualityController
 {
-    private const int EVALUATIONS_SIZE = 5;
-    private const float INCREASE_MARGIN = 0.9f;
-    private const float STAY_MARGIN = 0.8f;
+    internal const int EVALUATIONS_SIZE = 5;
+    internal const float INCREASE_MARGIN = 0.9f;
+    internal const float STAY_MARGIN = 0.8f;
 
     internal int targetFPS;
     internal int currentQualityIndex;
     internal readonly QualitySettingsData qualitySettings;
 
-    private readonly List<float> fpsEvaluations = new List<float>();
+    internal readonly List<float> fpsEvaluations = new List<float>();
 
     public AutoQualityCappedFPSController(int targetFPS, int startIndex, QualitySettingsData qualitySettings)
     {
