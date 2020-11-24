@@ -433,7 +433,7 @@ public class BuildModeController : MonoBehaviour
     public void SetBuildMode(EditModeState state)
     {
         if (currentActiveMode != null)
-            currentActiveMode.Desactivate();
+            currentActiveMode.Deactivate();
         isAdvancedModeActive = false;
 
         currentActiveMode = null;
