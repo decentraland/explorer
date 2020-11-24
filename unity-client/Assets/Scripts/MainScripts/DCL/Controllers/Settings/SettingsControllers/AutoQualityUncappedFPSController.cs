@@ -12,7 +12,7 @@ public class AutoQualityUncappedFPSController : IAutoQualityController
     internal int currentQualityIndex;
     internal readonly QualitySettingsData qualitySettings;
 
-    private readonly List<float> fpsEvaluations = new List<float>();
+    internal readonly List<float> fpsEvaluations = new List<float>();
 
     public AutoQualityUncappedFPSController(int startIndex, QualitySettingsData qualitySettings)
     {
@@ -27,7 +27,7 @@ public class AutoQualityUncappedFPSController : IAutoQualityController
         //TODO refine this evaluation
         fpsEvaluations.Add(metrics.fpsCount);
         if (fpsEvaluations.Count <= EVALUATIONS_SIZE)
-            return 0;
+            return currentQualityIndex;
 
         fpsEvaluations.RemoveAt(0);
         float average = fpsEvaluations.Average();

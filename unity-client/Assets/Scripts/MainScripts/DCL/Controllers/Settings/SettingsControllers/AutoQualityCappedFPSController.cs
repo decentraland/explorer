@@ -29,7 +29,7 @@ public class AutoQualityCappedFPSController : IAutoQualityController
 
         fpsEvaluations.Add(metrics.fpsCount);
         if (fpsEvaluations.Count <= EVALUATIONS_SIZE)
-            return 0;
+            return currentQualityIndex;
 
         fpsEvaluations.RemoveAt(0);
         float performance = fpsEvaluations.Average() / targetFPS;

@@ -30,39 +30,23 @@ namespace Tests
         }
 
         [Test]
-        public void LowerTheQualityOnPerformanceDrop()
+        public void CreateCappedControllerProperly()
         {
-            component.currentQualityIndex = 2;
-            //component.evaluator = Substitute.For<IAutoQualitySettingsEvaluator>();
-            //component.evaluator.Evaluate(null).ReturnsForAnyArgs( -1);
+            component.fpsCapped = false;
+            component.OnQualitySettingsChanged(new QualitySettings { fpsCap = true });
 
-            //component.EvaluateQuality();
-
-            Assert.AreEqual(1, component.currentQualityIndex);
+            Assert.IsTrue(component.fpsCapped);
+            Assert.IsInstanceOf<AutoQualityCappedFPSController>(component.controller);
         }
 
         [Test]
-        public void MaintainTheQualityOnAcceptablePerformance()
+        public void CreateUncappedControllerProperly()
         {
-            component.currentQualityIndex = 2;
-            //component.evaluator = Substitute.For<IAutoQualitySettingsEvaluator>();
-            //component.evaluator.Evaluate(null).ReturnsForAnyArgs( 0);
+            component.fpsCapped = true;
+            component.OnQualitySettingsChanged(new QualitySettings { fpsCap = false });
 
-            //component.EvaluateQuality();
-
-            Assert.AreEqual(2, component.currentQualityIndex);
-        }
-
-        [Test]
-        public void IncreaseTheQualityOnAcceptablePerformance()
-        {
-            component.currentQualityIndex = 2;
-            //component.evaluator = Substitute.For<IAutoQualitySettingsEvaluator>();
-            //component.evaluator.Evaluate(null).ReturnsForAnyArgs( 1);
-
-            //component.EvaluateQuality();
-
-            Assert.AreEqual(3, component.currentQualityIndex);
+            Assert.IsFalse(component.fpsCapped);
+            Assert.IsInstanceOf<AutoQualityUncappedFPSController>(component.controller);
         }
     }
 
@@ -70,15 +54,18 @@ namespace Tests
     {
         private AutoQualityCappedFPSController controller;
         private QualitySettingsData qualities;
-        protected override bool justSceneSetUp => true;
 
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            yield break;
             qualities = ScriptableObject.CreateInstance<QualitySettingsData>();
             qualities.Set(new []
             {
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
                 Settings.i.qualitySettings,
                 Settings.i.qualitySettings,
                 Settings.i.qualitySettings,
@@ -88,17 +75,13 @@ namespace Tests
         }
 
         [Test]
-        public void IsCrashing() { Assert.IsTrue(true); }
-
-
-        [Test]
         public void StayIfNotEnoughData()
         {
             int initialIndex = qualities.Length / 2;
             controller.currentQualityIndex = initialIndex;
 
             int newQualityIndex;
-            for (int i = 0; i < AutoQualityCappedFPSController.EVALUATIONS_SIZE - 1; i++)
+            for (int i = 0; i < AutoQualityCappedFPSController.EVALUATIONS_SIZE; i++)
             {
                 newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = 0 });
                 Assert.AreEqual(initialIndex, newQualityIndex);
@@ -111,7 +94,6 @@ namespace Tests
         [Test]
         public void DecreaseIfBadPerformance()
         {
-            return;
             int initialIndex = qualities.Length / 2;
             controller.currentQualityIndex = initialIndex;
 
@@ -134,7 +116,7 @@ namespace Tests
             controller.fpsEvaluations.AddRange(Enumerable.Repeat(acceptableFPS, AutoQualityCappedFPSController.EVALUATIONS_SIZE));
 
             int newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = acceptableFPS });
-            Assert.AreEqual(initialIndex + 1, newQualityIndex);
+            Assert.AreEqual(initialIndex, newQualityIndex);
         }
 
         [Test]
@@ -144,6 +126,90 @@ namespace Tests
             controller.currentQualityIndex = initialIndex;
 
             float greatFPS = controller.targetFPS * Mathf.Lerp( AutoQualityCappedFPSController.INCREASE_MARGIN, 1, 0.5f);
+            controller.fpsEvaluations.Clear();
+            controller.fpsEvaluations.AddRange(Enumerable.Repeat(greatFPS, AutoQualityCappedFPSController.EVALUATIONS_SIZE));
+
+            int newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = greatFPS });
+            Assert.AreEqual(initialIndex + 2, newQualityIndex);
+        }
+    }
+
+     public class AutoQualityUncappedFPSControllerShould : TestsBase
+    {
+        private AutoQualityUncappedFPSController controller;
+        private QualitySettingsData qualities;
+
+        protected override IEnumerator SetUp()
+        {
+            yield return base.SetUp();
+            qualities = ScriptableObject.CreateInstance<QualitySettingsData>();
+            qualities.Set(new []
+            {
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+                Settings.i.qualitySettings,
+            });
+            controller = new AutoQualityUncappedFPSController(0, qualities);
+        }
+
+        [Test]
+        public void StayIfNotEnoughData()
+        {
+            int initialIndex = qualities.Length / 2;
+            controller.currentQualityIndex = initialIndex;
+
+            int newQualityIndex;
+            for (int i = 0; i < AutoQualityCappedFPSController.EVALUATIONS_SIZE; i++)
+            {
+                newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = 0 });
+                Assert.AreEqual(initialIndex, newQualityIndex);
+            }
+
+            newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = 0 });
+            Assert.AreNotEqual(initialIndex, newQualityIndex);
+        }
+
+        [Test]
+        public void DecreaseIfBadPerformance()
+        {
+            int initialIndex = qualities.Length / 2;
+            controller.currentQualityIndex = initialIndex;
+
+            float belowAcceptableFPS = FPSEvaluation.WORSE;
+            controller.fpsEvaluations.Clear();
+            controller.fpsEvaluations.AddRange(Enumerable.Repeat(belowAcceptableFPS, AutoQualityCappedFPSController.EVALUATIONS_SIZE));
+
+            int newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = belowAcceptableFPS });
+            Assert.AreEqual(initialIndex - 1, newQualityIndex);
+        }
+
+        [Test]
+        public void StayIfAcceptablePerformance()
+        {
+            int initialIndex = qualities.Length / 2;
+            controller.currentQualityIndex = initialIndex;
+
+            float acceptableFPS = FPSEvaluation.GOOD;
+            controller.fpsEvaluations.Clear();
+            controller.fpsEvaluations.AddRange(Enumerable.Repeat(acceptableFPS, AutoQualityCappedFPSController.EVALUATIONS_SIZE));
+
+            int newQualityIndex = controller.EvaluateQuality(new PerformanceMetricsData { fpsCount = acceptableFPS });
+            Assert.AreEqual(initialIndex, newQualityIndex);
+        }
+
+        [Test]
+        public void IncreaseIfGreatPerformance()
+        {
+            int initialIndex = qualities.Length / 2;
+            controller.currentQualityIndex = initialIndex;
+
+            float greatFPS = FPSEvaluation.GREAT;
             controller.fpsEvaluations.Clear();
             controller.fpsEvaluations.AddRange(Enumerable.Repeat(greatFPS, AutoQualityCappedFPSController.EVALUATIONS_SIZE));
 

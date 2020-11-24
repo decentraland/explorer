@@ -18,8 +18,8 @@ public class AutoQualitySettingsComponent : MonoBehaviour
 
     internal int currentQualityIndex;
     private Coroutine settingsCheckerCoroutine;
-    private IAutoQualityController controller;
-    private bool fpsCapped;
+    internal IAutoQualityController controller;
+    internal bool fpsCapped;
 
     void Start()
     {
@@ -38,7 +38,7 @@ public class AutoQualitySettingsComponent : MonoBehaviour
         SetAutoSettings(autoQualityEnabled.Get(), !autoQualityEnabled.Get());
     }
 
-    private void OnQualitySettingsChanged(QualitySettings settings)
+    internal void OnQualitySettingsChanged(QualitySettings settings)
     {
         if (fpsCapped == settings.fpsCap)
             return;
