@@ -8,11 +8,11 @@ public class TutorialStep_PutSceneObject : TutorialStep
     [SerializeField] AudioEvent audioEventSuccess;
     bool sceneObjectSet = false;
 
-    BuilderInWorldController buildModeController;
+    BuildModeController buildModeController;
     public override void OnStepStart()
     {
         base.OnStepStart();
-        buildModeController = FindObjectOfType<BuilderInWorldController>();
+        buildModeController = FindObjectOfType<BuildModeController>();
         buildModeController.OnSceneObjectPlaced += SceneObjectSelected;
     }
 

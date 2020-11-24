@@ -1,6 +1,6 @@
+using System;
 using DCL.Helpers;
 using DCL.Models;
-using Newtonsoft.Json;
 using UnityEngine;
 using Ray = UnityEngine.Ray;
 
@@ -192,6 +192,20 @@ namespace DCL.Interface
         {
             public ChatMessage message;
         }     
+
+        [System.Serializable]
+        public class RemoveEntityComponentsPayLoad
+        {
+            public string entityId;
+            public string componentId;
+        };
+
+        [System.Serializable]
+        public class StoreSceneStateEvent
+        {
+            public string type = "StoreSceneState";
+            public string payload = "";
+        };
 
         [System.Serializable]
         public class OnPointerEventPayload
@@ -390,6 +404,13 @@ namespace DCL.Interface
         public class TutorialStepPayload
         {
             public int tutorialStep;
+        }
+
+        [System.Serializable]
+        public class PerformanceReportPayload
+        {
+            public string samples;
+            public bool fpsIsCapped;
         }
 
         [System.Serializable]
@@ -592,6 +613,7 @@ namespace DCL.Interface
         private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
+        private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
@@ -902,9 +924,13 @@ namespace DCL.Interface
             SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
         }
 
-        public static void SendPerformanceReport(string encodedFrameTimesInMS)
+        public static void SendPerformanceReport(string encodedFrameTimesInMS, bool usingFPSCap)
         {
-            MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+            SendMessage("PerformanceReport", new PerformanceReportPayload()
+            {
+                samples = encodedFrameTimesInMS,
+                fpsIsCapped = usingFPSCap
+            });
         }
 
         public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
