@@ -48,18 +48,27 @@ describe('RestrictedActions tests', () => {
       await module.triggerEmote({ predefined: 'emote' })
       sinon.verify()
     })
+
+    it('should fail when player is out of scene and try to move', async () => {
+      mockLastPlayerPosition(false)
+      mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
+
+      sinon.mock(unityInterface).expects('TriggerSelfUserExpression').never()
+
+      sinon
+        .mock(defaultLogger)
+        .expects('error')
+        .once()
+        .withExactArgs('Error: Player is not inside of scene', lastPlayerPosition)
+
+      const module = new RestrictedActions(options)
+
+      await module.movePlayerTo(new Vector3(8, 0, 8))
+      sinon.verify()
+    })
   })
 
   describe('MovePlayerTo tests', () => {
-
-    const mockLastPlayerPosition = (inside: boolean = true) => {
-      const position = inside
-        ? { x: 7.554769515991211, y: 1.7549998760223389, z: 1622.2711181640625 } // in
-        : { x: -1.0775706768035889, y: 1.774094820022583, z: 1621.8487548828125 } // out
-      sinon.stub(lastPlayerPosition, 'x').value(position.x)
-      sinon.stub(lastPlayerPosition, 'y').value(position.y)
-      sinon.stub(lastPlayerPosition, 'z').value(position.z)
-    }
 
     it('should move the player', async () => {
       mockLastPlayerPosition()
@@ -127,6 +136,15 @@ describe('RestrictedActions tests', () => {
       sinon.verify()
     })
   })
+
+  const mockLastPlayerPosition = (inside: boolean = true) => {
+    const position = inside
+      ? { x: 7.554769515991211, y: 1.7549998760223389, z: 1622.2711181640625 } // in
+      : { x: -1.0775706768035889, y: 1.774094820022583, z: 1621.8487548828125 } // out
+    sinon.stub(lastPlayerPosition, 'x').value(position.x)
+    sinon.stub(lastPlayerPosition, 'y').value(position.y)
+    sinon.stub(lastPlayerPosition, 'z').value(position.z)
+  }
 
   function mockPermissionsWith(...permissions: Permission[]) {
     sinon
