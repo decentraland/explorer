@@ -22,6 +22,7 @@ describe('RestrictedActions tests', () => {
     it('should trigger emote', async () => {
       const emote = 'emote'
 
+      mockLastPlayerPosition()
       mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
       sinon
         .mock(unityInterface)
@@ -36,6 +37,7 @@ describe('RestrictedActions tests', () => {
 
 
     it('should fail when scene does not have permissions', async () => {
+      mockLastPlayerPosition()
       mockPermissionsWith()
       sinon.mock(unityInterface).expects('TriggerSelfUserExpression').never()
       sinon
