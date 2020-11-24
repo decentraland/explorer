@@ -90,7 +90,8 @@ function* initializeSaga() {
 
     const identity = yield select(getCurrentIdentity)
     try {
-      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+      const { synapseUrl } = getServerConfigurations()
+      yield call(initializePrivateMessaging, synapseUrl, identity)
     } catch (e) {
       logger.error(`error initializing private messaging`, e)
 
@@ -710,7 +711,7 @@ function toSocialData(socialIds: string[]) {
 
 function* fetchTimeFromSynapseServer(synapseUrl: string) {
   try {
-    const response = yield fetch(`${synapseUrl}/.well-known/matrix/client`)
+    const response = yield fetch(`${synapseUrl}/.well-known/matrix/client`, { method: 'HEAD', mode: 'no-cors' })
     if (response.ok && response.headers.has(DATE_TIME_HTTP_HEADER)) {
       const dateTime: string = response.headers.get(DATE_TIME_HTTP_HEADER)
       return new Date(dateTime).getTime()
