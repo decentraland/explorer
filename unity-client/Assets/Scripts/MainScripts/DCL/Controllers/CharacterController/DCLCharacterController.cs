@@ -314,12 +314,12 @@ public class DCLCharacterController : MonoBehaviour
                     Jump();
                 }
             }
-        }
 
-        //NOTE(Mordi): Detecting when the character hits the ground (for landing-SFX)
-        if (isGrounded && !previouslyGrounded && (Time.time - lastUngroundedTime) > 0.4f)
-        {
-            OnHitGround?.Invoke();
+            //NOTE(Mordi): Detecting when the character hits the ground (for landing-SFX)
+            if (isGrounded && !previouslyGrounded && (Time.time - lastUngroundedTime) > 0.4f)
+            {
+                OnHitGround?.Invoke();
+            }
         }
 
         bool movingPlatformMovedTooMuch = Vector3.Distance(lastPosition, transform.position) > movingPlatformAllowedPosDelta;

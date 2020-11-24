@@ -1036,8 +1036,8 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 0
-  baseUrlCustom: 
+  baseUrlMode: 1
+  baseUrlCustom: http://localhost:8080/?
   environment: 4
   startInCoords: {x: 3, y: 18}
   forceLocalComms: 0
