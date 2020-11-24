@@ -5,6 +5,9 @@ using DCL.FPSDisplay;
 using DCL.SettingsData;
 using UnityEngine;
 
+/// <summary>
+/// An implementation of an AutoQualityController for uncapped FPS
+/// </summary>
 public class AutoQualityUncappedFPSController : IAutoQualityController
 {
     private const int EVALUATIONS_SIZE = 5;

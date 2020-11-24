@@ -4,6 +4,9 @@ using DCL;
 using DCL.SettingsData;
 using UnityEngine;
 
+/// <summary>
+/// An implementation of an AutoQualityController for capped FPS
+/// </summary>
 public class AutoQualityCappedFPSController : IAutoQualityController
 {
     internal const int EVALUATIONS_SIZE = 5;
