@@ -351,6 +351,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
   }
 
+  public SendGIFFetchFailure(id: string) {
+    this.gameInstance.SendMessage('SceneController', 'FailGIFFetch', id)
+  }
+
   public ConfigureEmailPrompt(tutorialStep: number) {
     const emailCompletedFlag = 128
     this.ConfigureHUDElement(HUDElementID.EMAIL_PROMPT, {

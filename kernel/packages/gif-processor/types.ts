@@ -6,6 +6,7 @@ export type GifAsset = {
   width: number
   height: number
   pending: boolean
+  worker: any
 }
 
 export type WorkerMessage = {
@@ -19,6 +20,7 @@ export type WorkerMessageData = {
   delays: number[]
   url: string
   id: string
+  success: boolean
 }
 
 export type ProcessorMessage = {
@@ -28,4 +30,7 @@ export type ProcessorMessage = {
 export type ProcessorMessageData = {
   url: string
   id: string
+  type: ProcessorMessageType
 }
+
+export type ProcessorMessageType = 'FETCH' | 'CANCEL'

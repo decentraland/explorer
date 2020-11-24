@@ -16,9 +16,24 @@ let frameImageData: any = undefined
 
 {
   let payloads: ProcessorMessage[] = new Array()
+  let payloadInProcess: ProcessorMessage | null = null
+  let abortController: AbortController | null
 
   self.onmessage = (e: ProcessorMessage) => {
-    EnqueuePayload(e)
+    if (e.data.type === 'FETCH') {
+      EnqueuePayload(e)
+    } else if (e.data.type === 'CANCEL') {
+      if (abortController && payloadInProcess && payloadInProcess.data.id === e.data.id) {
+        abortController.abort()
+      } else {
+        for (let i = 0; i < payloads.length; i++) {
+          if (payloads[i].data.id === e.data.id) {
+            payloads.slice(i, 0)
+            break
+          }
+        }
+      }
+    }
   }
 
   function EnqueuePayload(e: ProcessorMessage) {
@@ -31,55 +46,72 @@ let frameImageData: any = undefined
 
   async function ConsumePayload() {
     while (payloads.length > 0) {
-      await DownloadAndProcessGIF(payloads[0])
+      payloadInProcess = payloads[0]
+      await DownloadAndProcessGIF(payloadInProcess)
+      payloadInProcess = null
       payloads.splice(0, 1)
     }
   }
 
   async function DownloadAndProcessGIF(e: ProcessorMessage) {
-    const imageFetch = fetch(e.data.url)
-    const response = await imageFetch
-    const buffer = await response.arrayBuffer()
-    const parsedGif = await parseGIF(buffer)
-    const decompressedFrames = decompressFrames(parsedGif, true)
-    const frameDelays = new Array()
-    const framesAsArrayBuffer = new Array()
-    let hasToBeResized = false
+    abortController = new AbortController()
 
-    frameImageData = undefined
+    const signal = abortController.signal
 
-    gifCanvas.width = decompressedFrames[0].dims.width
-    let finalWidth = gifCanvas.width
+    try {
+      const imageFetch = fetch(e.data.url, { signal })
+      const response = await imageFetch
+      abortController = null
 
-    gifCanvas.height = decompressedFrames[0].dims.height
-    let finalHeight = gifCanvas.height
+      const buffer = await response.arrayBuffer()
+      const parsedGif = await parseGIF(buffer)
+      const decompressedFrames = decompressFrames(parsedGif, true)
+      const frameDelays = new Array()
+      const framesAsArrayBuffer = new Array()
+      let hasToBeResized = false
 
-    hasToBeResized = gifCanvas.width > maxGIFDimension || gifCanvas.height > maxGIFDimension
-    if (hasToBeResized) {
-      let scalingFactor =
-        gifCanvas.width > gifCanvas.height ? gifCanvas.width / maxGIFDimension : gifCanvas.height / maxGIFDimension
-      resizedCanvas.width = gifCanvas.width / scalingFactor
-      finalWidth = resizedCanvas.width
+      frameImageData = undefined
 
-      resizedCanvas.height = gifCanvas.height / scalingFactor
-      finalHeight = resizedCanvas.height
+      gifCanvas.width = decompressedFrames[0].dims.width
+      let finalWidth = gifCanvas.width
+
+      gifCanvas.height = decompressedFrames[0].dims.height
+      let finalHeight = gifCanvas.height
+
+      hasToBeResized = gifCanvas.width > maxGIFDimension || gifCanvas.height > maxGIFDimension
+      if (hasToBeResized) {
+        let scalingFactor =
+          gifCanvas.width > gifCanvas.height ? gifCanvas.width / maxGIFDimension : gifCanvas.height / maxGIFDimension
+        resizedCanvas.width = gifCanvas.width / scalingFactor
+        finalWidth = resizedCanvas.width
+
+        resizedCanvas.height = gifCanvas.height / scalingFactor
+        finalHeight = resizedCanvas.height
+      }
+
+      for (const key in decompressedFrames) {
+        frameDelays.push(decompressedFrames[key].delay)
+
+        const processedImageData = GenerateFinalImageData(decompressedFrames[key], hasToBeResized)
+        if (processedImageData) framesAsArrayBuffer.push(processedImageData.data.buffer)
+      }
+
+      self.postMessage({
+        success: true,
+        arrayBufferFrames: framesAsArrayBuffer,
+        width: finalWidth,
+        height: finalHeight,
+        delays: frameDelays,
+        url: e.data.url,
+        id: e.data.id
+      } as WorkerMessageData)
+    } catch (err) {
+      abortController = null
+      self.postMessage({
+        success: false,
+        id: e.data.id
+      } as Partial<WorkerMessageData>)
     }
-
-    for (const key in decompressedFrames) {
-      frameDelays.push(decompressedFrames[key].delay)
-
-      const processedImageData = GenerateFinalImageData(decompressedFrames[key], hasToBeResized)
-      if (processedImageData) framesAsArrayBuffer.push(processedImageData.data.buffer)
-    }
-
-    self.postMessage({
-      arrayBufferFrames: framesAsArrayBuffer,
-      width: finalWidth,
-      height: finalHeight,
-      delays: frameDelays,
-      url: e.data.url,
-      id: e.data.id
-    } as WorkerMessageData)
   }
 
   function GenerateFinalImageData(frame: any, hasToBeResized: boolean): ImageData | undefined {

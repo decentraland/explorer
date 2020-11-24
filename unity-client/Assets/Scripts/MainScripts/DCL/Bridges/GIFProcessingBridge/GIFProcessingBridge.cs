@@ -89,6 +89,11 @@ namespace DCL
                 pendingGIFs[parsedPayload.id].data = parsedPayload;
         }
 
+        public void FailGIFFetch(string id)
+        {
+            // TODO
+        }
+
         public void DeleteGIF(string id)
         {
             DCL.Interface.WebInterface.DeleteGIF(id);

@@ -44,6 +44,8 @@ export class GIFProcessor {
       }
     }
 
+    const worker = this.GetWorker()
+
     this.assets[data.id] = {
       pending: true,
       id: data.id,
@@ -51,16 +53,17 @@ export class GIFProcessor {
       delays: [],
       width: 0,
       height: 0,
-      textures: []
+      textures: [],
+      worker: worker
     }
-
-    const worker = this.GetWorker()
-    worker.postMessage({ url: data.imageSource, id: data.id } as ProcessorMessageData)
+    worker.postMessage({ url: data.imageSource, id: data.id, type: 'FETCH' } as ProcessorMessageData)
   }
 
   DeleteGIF(id: string) {
     const asset = this.assets[id]
-    if (asset) {
+    if (!asset) return
+
+    if (!asset.pending) {
       const GLctx = this.gameInstance.Module.ctx
       for (let i = 0; i < asset.textures.length; i++) {
         const textureIdx = asset.textures[i].name
@@ -68,8 +71,11 @@ export class GIFProcessor {
         GLctx.deleteTexture(texture)
         DCL.GL.textures[textureIdx] = null
       }
-      delete this.assets[id]
+    } else {
+      const worker = asset.worker
+      worker.postMessage({ id: asset.id, type: 'CANCEL' } as Partial<ProcessorMessageData>)
     }
+    delete this.assets[id]
   }
 
   /**
@@ -125,8 +131,13 @@ export class GIFProcessor {
       worker.onmessage = (e: WorkerMessage) => {
         const asset = this.assets[e.data.id]
         if (asset) {
-          if (this.setGifAsset(asset, e.data)) {
-            this.reportToRenderer(asset)
+          if (e.data.success) {
+            if (this.setGifAsset(asset, e.data)) {
+              this.reportToRenderer(asset)
+            }
+          } else {
+            this.reportFailureToRenderer(e.data.id)
+            delete this.assets[e.data.id]
           }
         }
 
@@ -155,6 +166,10 @@ export class GIFProcessor {
       gifAsset.textures.map((id) => id.name),
       gifAsset.delays
     )
+  }
+
+  private reportFailureToRenderer(id: string) {
+    this.unityInterface.SendGIFFetchFailure(id)
   }
 
   private setGifAsset(asset: GifAsset, data: WorkerMessageData): boolean {
