@@ -77,7 +77,7 @@ export class GIFProcessor {
    * Based on WebGL compiled "glGenTextures", created a WebGL texture and returns it
    *
    */
-  GenerateTexture(ptr: any): any {
+  GenerateTexture(): any {
     let GLctx = this.gameInstance.Module.ctx
     let texture = GLctx.createTexture()
 
@@ -165,8 +165,7 @@ export class GIFProcessor {
     asset.delays = data.delays
 
     for (let i = 0; i < data.arrayBufferFrames.length; i++) {
-      const ptr: GLuint = this.gameInstance.Module._malloc(4)
-      const tex = this.GenerateTexture(ptr)
+      const tex = this.GenerateTexture()
       const frameImageData = new ImageData(new Uint8ClampedArray(data.arrayBufferFrames[i]), data.width, data.height)
       asset.textures.push({ name: tex.name, imageData: frameImageData })
       this.UpdateGIFTex(frameImageData, tex.name)
