@@ -410,7 +410,8 @@ export enum HUDElementID {
   EMAIL_PROMPT = 21,
   USERS_AROUND_LIST_HUD = 22,
   GRAPHIC_CARD_WARNING = 23,
-  SETTINGS_PANEL = 24
+  BUILD_MODE = 24,
+  SETTINGS_PANEL = 25
 }
 
 export type HUDConfiguration = {
