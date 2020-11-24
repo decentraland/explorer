@@ -128,8 +128,10 @@ namespace webApp {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: false, visible: false })
-            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-            Html.switchGameContainer(true)
+            setTimeout(() => {
+              globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+              Html.switchGameContainer(true)
+            }, 600)
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
