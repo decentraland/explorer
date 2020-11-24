@@ -161,13 +161,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void SearchForName()
     {
-        //foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in rootEntity.components)
-        //{
-        //    if (keyValuePair.Key == CLASS_ID.NAME)
-        //    {
-
-        //    }
-        //}
+        //TODO: After the implementation of the NAME component in master this should be fully implmented
     }
 
     void SetOriginalMaterials()

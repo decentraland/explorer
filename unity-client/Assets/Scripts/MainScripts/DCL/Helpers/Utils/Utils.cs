@@ -363,24 +363,6 @@ namespace DCL.Helpers
             return returningValue;
         }
 
-        public static string SafeToJson<T>(T genericObject)
-        {
-            string returningValue = "";
-
-         
-                try
-                {
-                    returningValue = JsonUtility.ToJson(genericObject);
-                }
-                catch (System.ArgumentException e)
-                {
-                    Debug.LogError("ArgumentException Fail!... Json = " + genericObject + " " + e.ToString());
-                }
-            
-
-            return returningValue;
-        }
-
         public static GameObject AttachPlaceholderRendererGameObject(UnityEngine.Transform targetTransform)
         {
             var placeholderRenderer = GameObject.CreatePrimitive(PrimitiveType.Cube).GetComponent<MeshRenderer>();

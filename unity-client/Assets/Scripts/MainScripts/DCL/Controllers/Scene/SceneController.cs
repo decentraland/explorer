@@ -497,8 +497,7 @@ namespace DCL
             Environment.i.messagingControllersManager.AddControllerIfNotExists(this, data.id);
 
             loadedScenes.Add(data.id, newScene);
-            OnNewSceneAdded?.Invoke(newScene);
-          
+            OnNewSceneAdded?.Invoke(newScene);        
 
             return newScene;
         }
