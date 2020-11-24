@@ -54,6 +54,20 @@ namespace Builder
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
         }
 
+        public void Activate()
+        {
+            outlineCamera.gameObject.SetActive(true);
+            outlineCanvas.gameObject.SetActive(true);
+            outlineRawImage.gameObject.SetActive(true);
+        }
+    
+        public void Desactivate()
+        {
+            outlineCamera.gameObject.SetActive(false);
+            outlineCanvas.gameObject.SetActive(false);
+            outlineRawImage.gameObject.SetActive(false);
+        }
+
         public void SetOutlinerMaterial(Material mat)
         {
             OutlineMaterial = mat;

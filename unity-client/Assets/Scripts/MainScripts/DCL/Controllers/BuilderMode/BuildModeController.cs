@@ -716,8 +716,9 @@ public class BuildModeController : MonoBehaviour
             outliner.enabled = true;
         }
 
-        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+        outliner.Activate();
 
+        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(builderRendererIndex);
     }
 
@@ -725,6 +726,8 @@ public class BuildModeController : MonoBehaviour
     {
         DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
         outliner.enabled = false;
+        outliner.Desactivate();
+
         UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(0);
     }
