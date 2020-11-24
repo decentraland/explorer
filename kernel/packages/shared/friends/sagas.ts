@@ -717,7 +717,7 @@ function* fetchTimeFromCatalystServer() {
       return currentTime
     }
   } catch (e) {
-    logger.warn(`Failed to fetch time from synapse server`, e)
+    logger.warn(`Failed to fetch time from catalyst server`, e)
   }
 }
 
