@@ -167,7 +167,6 @@ MonoBehaviour:
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
   distanceLimitToSelectObjects: 50
-  msToWaitUntilSceneIsLoaded: 5000
   snapFactor: 1
   snapRotationDegresFactor: 30
   snapScaleFactor: 0.25
@@ -1549,7 +1548,7 @@ MonoBehaviour:
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   actionController: {fileID: 1208871512032110241}
-  builderInWorldBridge: {fileID: 0}
+  builderInWorldBridge: {fileID: 3917703040089432743}
   distanceEagleCamera: 20
   freeCameraController: {fileID: 0}
   gizmoManager: {fileID: 1208871511615770936}
@@ -1587,7 +1586,7 @@ MonoBehaviour:
   outlinerController: {fileID: 1208871511725701524}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   freeCameraMovement: {fileID: 0}
-  actionController: {fileID: 0}
+  actionController: {fileID: 1208871512032110241}
   groundLayer:
     serializedVersion: 2
     m_Bits: 1024
@@ -2119,6 +2118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duplicateOffset: 2
+  msBetweenTransformUpdates: 2000
   outlinerController: {fileID: 1208871511725701524}
   entityInformationController: {fileID: 0}
   buildModeController: {fileID: 1208871511274338203}

@@ -240,6 +240,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
+
         WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
     }
 
@@ -287,8 +288,6 @@ public class BuilderInWorldBridge : MonoBehaviour
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
-        WebInterface.VERBOSE = true;
         WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
-        WebInterface.VERBOSE = false;
     }
 }
