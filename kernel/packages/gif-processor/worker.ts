@@ -23,16 +23,7 @@ let frameImageData: any = undefined
     if (e.data.type === 'FETCH') {
       EnqueuePayload(e)
     } else if (e.data.type === 'CANCEL') {
-      if (abortController && payloadInProcess && payloadInProcess.data.id === e.data.id) {
-        abortController.abort()
-      } else {
-        for (let i = 0; i < payloads.length; i++) {
-          if (payloads[i].data.id === e.data.id) {
-            payloads.slice(i, 0)
-            break
-          }
-        }
-      }
+      CancelPayload(e)
     }
   }
 
@@ -41,6 +32,21 @@ let frameImageData: any = undefined
     if (payloads.length === 1) {
       const promise = ConsumePayload()
       promise.catch((error) => defaultLogger.log(error))
+    }
+  }
+
+  function CancelPayload(e: ProcessorMessage) {
+    const isDownloading = abortController && payloadInProcess && payloadInProcess.data.id === e.data.id
+    if (isDownloading) {
+      abortController!.abort()
+      return
+    }
+
+    for (let i = 0; i < payloads.length; i++) {
+      if (payloads[i].data.id === e.data.id) {
+        payloads.slice(i, 0)
+        return
+      }
     }
   }
 
@@ -55,7 +61,6 @@ let frameImageData: any = undefined
 
   async function DownloadAndProcessGIF(e: ProcessorMessage) {
     abortController = new AbortController()
-
     const signal = abortController.signal
 
     try {
