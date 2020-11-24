@@ -19,9 +19,9 @@ describe('RestrictedActions tests', () => {
   }
 
   describe('TriggerEmote tests', () => {
-    it('should trigger emote', async () => {
-      const emote = 'emote'
+    const emote = 'emote'
 
+    it('should trigger emote', async () => {
       mockLastPlayerPosition()
       mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
       sinon
@@ -53,7 +53,7 @@ describe('RestrictedActions tests', () => {
 
     it('should fail when player is out of scene and try to move', async () => {
       mockLastPlayerPosition(false)
-      mockPermissionsWith(Permission.ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE)
+      mockPermissionsWith(Permission.ALLOW_TO_TRIGGER_AVATAR_EMOTE)
 
       sinon.mock(unityInterface).expects('TriggerSelfUserExpression').never()
 
@@ -64,8 +64,7 @@ describe('RestrictedActions tests', () => {
         .withExactArgs('Error: Player is not inside of scene', lastPlayerPosition)
 
       const module = new RestrictedActions(options)
-
-      await module.movePlayerTo(new Vector3(8, 0, 8))
+      await module.triggerEmote({ predefined: emote })
       sinon.verify()
     })
   })
