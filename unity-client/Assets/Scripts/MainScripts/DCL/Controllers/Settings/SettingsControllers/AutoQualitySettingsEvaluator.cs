@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DCL;
-using DCL.FPSDisplay;
-using UnityEngine;
 
 public interface IAutoQualitySettingsEvaluator
 {
@@ -19,6 +17,14 @@ public class AutoQualitySettingsEvaluator : IAutoQualitySettingsEvaluator
 
     private readonly List<float> fpsEvaluations = new List<float>();
 
+    private readonly int minAcceptableFPS;
+    private readonly int maxAcceptableFPS;
+    public AutoQualitySettingsEvaluator(int minAcceptableFPS, int maxAcceptableFPS)
+    {
+        this.minAcceptableFPS = minAcceptableFPS;
+        this.maxAcceptableFPS = maxAcceptableFPS;
+    }
+
     public void Reset()
     {
         fpsEvaluations.Clear();
@@ -34,17 +40,16 @@ public class AutoQualitySettingsEvaluator : IAutoQualitySettingsEvaluator
         if (performanceMetrics == null) return 0;
 
         //TODO refine this evaluation
-
         fpsEvaluations.Add(performanceMetrics.fpsCount);
         if (fpsEvaluations.Count <= EVALUATIONS_SIZE)
             return 0;
 
         fpsEvaluations.RemoveAt(0);
         float average = fpsEvaluations.Average();
-        if (average <= FPSEvaluation.WORSE)
+        if (average <= minAcceptableFPS)
             return -1;
 
-        if (average >= FPSEvaluation.GREAT)
+        if (average >= maxAcceptableFPS)
             return 1;
 
         return 0;
