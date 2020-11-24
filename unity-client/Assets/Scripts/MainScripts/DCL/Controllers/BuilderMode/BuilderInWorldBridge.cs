@@ -35,6 +35,7 @@ public class BuilderInWorldBridge : MonoBehaviour
     [System.Serializable]
     public class GenericComponent
     {
+
     }
 
     [System.Serializable]
@@ -172,9 +173,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
-        WebInterface.VERBOSE = true;
         WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
-        WebInterface.VERBOSE = false;
     }
 
     public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
@@ -188,17 +187,10 @@ public class BuilderInWorldBridge : MonoBehaviour
 
                 componentPayLoad.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
                 TransformComponent entityComponentModel = new TransformComponent();
-                //entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
 
                 entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
                 entityComponentModel.rotation = new QuaternionRepresentantion(entity.gameObject.transform.rotation);
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
-
-                if (entityComponentModel.rotation == null)
-                {
-                    Debug.Log("es nulo wtf");
-                }
-
 
                 componentPayLoad.data = entityComponentModel;
 
@@ -214,7 +206,6 @@ public class BuilderInWorldBridge : MonoBehaviour
                 ComponentPayLoad componentPayLoad = new ComponentPayLoad();
 
                 GTLShapeComponent entityComponentModel = new GTLShapeComponent();
-                //entityComponentModel.componentId = (int)CLASS_ID.GLTF_SHAPE;
                 componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
                 entityComponentModel.src = gtlfShape.model.src;
                 componentPayLoad.data = entityComponentModel;
@@ -223,10 +214,6 @@ public class BuilderInWorldBridge : MonoBehaviour
             }
         }
 
-        if (((TransformComponent)list[0].data).rotation == null) Debug.Log("es nulo wtf");
-
-
-       Debug.Log("List " + ((TransformComponent)list[0].data).rotation);
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
     }
 
@@ -253,9 +240,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
-        WebInterface.VERBOSE = true;
         WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
-        WebInterface.VERBOSE = false;
     }
 
     public void RemoveEntityOnKernel(string entityId, ParcelScene scene)
@@ -265,30 +250,22 @@ public class BuilderInWorldBridge : MonoBehaviour
         removeEntityPayLoad.entityId = entityId;
         removeEntityEvent.payload = removeEntityPayLoad;
 
-        WebInterface.VERBOSE = true;
         WebInterface.SendSceneEvent(scene.sceneData.id, "stateEvent", removeEntityEvent);
-        WebInterface.VERBOSE = false;
     }
 
     public void StartKernelEditMode(ParcelScene scene)
     {
-        WebInterface.VERBOSE = true;
         WebInterface.ReportControlEvent(new WebInterface.StartStatefulMode(scene.sceneData.id));
-        WebInterface.VERBOSE = false;
     }
 
     public void ExitKernelEditMode(ParcelScene scene)
     {
-        WebInterface.VERBOSE = true;
         WebInterface.ReportControlEvent(new WebInterface.StopStatefulMode(scene.sceneData.id));
-        WebInterface.VERBOSE = false;
     }
 
     public void PublishScene(ParcelScene scene)
     {
-        WebInterface.VERBOSE = true;
         WebInterface.SendSceneEvent(scene.sceneData.id, "stateEvent", storeSceneState);
-        WebInterface.VERBOSE = false;
     }
 
     void SendNewEntityToKernel(string sceneId, string entityId, ComponentPayLoad[] componentsPayload)

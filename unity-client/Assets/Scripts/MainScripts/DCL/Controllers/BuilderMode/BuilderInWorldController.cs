@@ -666,11 +666,6 @@ public class BuilderInWorldController : MonoBehaviour
         if(currentActiveMode == null)
             SetBuildMode(EditModeState.Editor);
 
-        // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
-        //DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
-        //
-
-
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
      
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
@@ -682,9 +677,6 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void ExitEditMode()
     {
-        // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
-        //DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Start();
-        //
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 

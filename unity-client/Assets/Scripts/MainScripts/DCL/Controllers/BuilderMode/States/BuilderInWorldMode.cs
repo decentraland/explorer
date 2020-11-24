@@ -29,6 +29,8 @@ public class BuilderInWorldMode : MonoBehaviour
 
     bool isNewObjectPlaced = false;
 
+    protected List<BuilderInWorldEntityAction> actionList = new List<BuilderInWorldEntityAction>();
+
     public virtual void Init(GameObject goToEdit, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO, List<DCLBuilderInWorldEntity> selectedEntities)
     {
         editionGO = goToEdit;
@@ -178,7 +180,6 @@ public class BuilderInWorldMode : MonoBehaviour
         return new Vector3(centerX, centerY, centerZ);
     }
 
-    protected List<BuilderInWorldEntityAction> actionList = new List<BuilderInWorldEntityAction>();
     protected void TransformActionStarted(DecentralandEntity entity, string type)
     {
         
@@ -242,23 +243,7 @@ public class BuilderInWorldMode : MonoBehaviour
             buildModeAction.CreateActionType(actionList, type);
             OnActionGenerated?.Invoke(buildModeAction);
 
-            //EntityTransformChanged(selectedEntities);
-
-            actionList = new List<BuilderInWorldEntityAction>();
-           
+            actionList = new List<BuilderInWorldEntityAction>();          
         }
     }
-
-    //protected void EntityTransformChanged(List<DCLBuilderInWorldEntity> entityList)
-    //{
-    //    foreach(DCLBuilderInWorldEntity entity in entityList)
-    //    {
-    //        EntityTransformChanged(entity.rootEntity);
-    //    }
-    //}
-
-    //protected void EntityTransformChanged(DecentralandEntity entity)
-    //{
-    //    builderInWorldBridge.EntityTransformReport(entity, builderInWorldEntityHandler.GetParcelSceneToEdit());
-    //}
 }
