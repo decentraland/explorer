@@ -117,19 +117,19 @@ public class BuildModeController : MonoBehaviour
 
     void Start()
     {
-        if (snapGO == null)       
+        if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
-        
+
         snapGO.transform.SetParent(transform);
 
-        if (freeMovementGO == null)       
+        if (freeMovementGO == null)
             freeMovementGO = new GameObject("FreeMovementGO");
-    
+
         freeMovementGO.transform.SetParent(cameraParentGO.transform);
 
-        if (editionGO == null)        
+        if (editionGO == null)
             editionGO = new GameObject("EditionGO");
-        
+
         editionGO.transform.SetParent(cameraParentGO.transform);
 
         if (undoGO == null)
@@ -264,7 +264,7 @@ public class BuildModeController : MonoBehaviour
 
     void StartTutorial()
     {
-        TutorialController.i.SetTutorialEnabled(false.ToString(),TutorialController.TutorialType.BuilderInWorld);
+        TutorialController.i.SetTutorialEnabled(false.ToString(), TutorialController.TutorialType.BuilderInWorld);
     }
 
     void MouseClick(int buttonID, Vector3 position)
@@ -376,7 +376,7 @@ public class BuildModeController : MonoBehaviour
             Utils.LockCursor();
         lastSceneObjectCreated = sceneObject;
 
-        builderInWorldBridge.AddEntityOnKernel(entity.rootEntity,sceneToEdit); 
+        builderInWorldBridge.AddEntityOnKernel(entity.rootEntity, sceneToEdit);
         InputDone();
         OnSceneObjectPlaced?.Invoke();
     }
@@ -432,14 +432,14 @@ public class BuildModeController : MonoBehaviour
 
     public void SetBuildMode(EditModeState state)
     {
-        if(currentActiveMode != null)
+        if (currentActiveMode != null)
             currentActiveMode.Desactivate();
         isAdvancedModeActive = false;
 
         currentActiveMode = null;
         switch (state)
         {
-            case EditModeState.Inactive:               
+            case EditModeState.Inactive:
                 break;
             case EditModeState.FirstPerson:
                 currentActiveMode = firstPersonMode;
@@ -473,7 +473,7 @@ public class BuildModeController : MonoBehaviour
             SetBuildMode(EditModeState.Editor);
         }
 
-   
+
 
     }
 
@@ -505,9 +505,9 @@ public class BuildModeController : MonoBehaviour
                 else
                     outlinerController.CancelUnselectedOutlines();
 
-                if (entity != null && !entity.IsSelected)             
+                if (entity != null && !entity.IsSelected)
                     outlinerController.OutlineEntity(entity);
-                
+
             }
             outlinerOptimizationCounter = 0;
         }
@@ -522,21 +522,21 @@ public class BuildModeController : MonoBehaviour
     public void ResetScaleAndRotation()
     {
         currentActiveMode.ResetScaleAndRotation();
-      
+
     }
     public void SetOutlineCheckActive(bool isActive)
     {
         isOutlineCheckActive = isActive;
     }
     public void SetSnapActive(bool isActive)
-    {      
+    {
         isSnapActive = isActive;
         currentActiveMode.SetSnapActive(isActive);
     }
 
     void InputDone()
     {
-        nexTimeToReceiveInput = Time.timeSinceLevelLoad+msBetweenInputInteraction/1000;      
+        nexTimeToReceiveInput = Time.timeSinceLevelLoad + msBetweenInputInteraction / 1000;
     }
 
     private void OnEditModeChangeAction(DCLAction_Trigger action)
@@ -555,7 +555,7 @@ public class BuildModeController : MonoBehaviour
     }
 
     void MouseClickDetected()
-    {        
+    {
         DecentralandEntityToEdit entityToSelect = GetEntityOnPointer();
         if (entityToSelect != null)
         {
@@ -588,7 +588,7 @@ public class BuildModeController : MonoBehaviour
 
             if (sceneToEdit.entities.ContainsKey(entityID))
             {
-                return builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);             
+                return builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
             }
         }
         return null;
@@ -597,7 +597,7 @@ public class BuildModeController : MonoBehaviour
     public VoxelEntityHit GetCloserUnselectedVoxelEntityOnPointer()
     {
         RaycastHit[] hits;
-        UnityEngine.Ray ray  = Camera.main.ScreenPointToRay(Input.mousePosition); ;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); ;
 
         float currentDistance = 9999;
         VoxelEntityHit voxelEntityHit = null;
@@ -638,20 +638,20 @@ public class BuildModeController : MonoBehaviour
     {
 
         HUDController.i.buildModeHud.SetVisibility(true);
-        
+
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
-        inputController.isBuildModeActivate = true;  
-   
+        inputController.isBuildModeActivate = true;
+
         FindSceneToEdit();
 
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
-        HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);   
+        HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
 
-        if(currentActiveMode == null)
+        if (currentActiveMode == null)
             SetBuildMode(EditModeState.Editor);
 
         // NOTE(Adrian): This is a temporary as the kernel should do this job instead of the client
@@ -659,14 +659,14 @@ public class BuildModeController : MonoBehaviour
         //
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
-     
+
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
-        SceneController.i.ActiveBuilderInWorldEditScene();
+        SceneController.i.ActivateBuilderInWorldEditScene();
 
-        ActiveBuilderInWorldCamera();
+        ActivateBuilderInWorldCamera();
     }
 
     public void ExitEditMode()
@@ -697,19 +697,19 @@ public class BuildModeController : MonoBehaviour
         builderInputWrapper.gameObject.SetActive(false);
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
 
-        SceneController.i.DesactiveBuilderInWorldEditScene();
+        SceneController.i.DeactivateBuilderInWorldEditScene();
 
-        DesactiveBuilderInWorldCamera();
+        DeactivateBuilderInWorldCamera();
     }
 
-    public void ActiveBuilderInWorldCamera()
+    public void ActivateBuilderInWorldCamera()
     {
         DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
 
         if (outliner == null)
         {
             outliner = Camera.main.gameObject.AddComponent(typeof(DCLBuilderOutline)) as DCLBuilderOutline;
-            outliner.SetOutlinerMaterial(outlinerMaterial);
+            outliner.SetOutlineMaterial(outlinerMaterial);
         }
         else
         {
@@ -722,11 +722,11 @@ public class BuildModeController : MonoBehaviour
         additionalCameraData.SetRenderer(builderRendererIndex);
     }
 
-    public void DesactiveBuilderInWorldCamera()
+    public void DeactivateBuilderInWorldCamera()
     {
         DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
         outliner.enabled = false;
-        outliner.Desactivate();
+        outliner.Deactivate();
 
         UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(0);
@@ -738,17 +738,17 @@ public class BuildModeController : MonoBehaviour
     }
 
     void FindSceneToEdit()
-    {      
-        foreach(ParcelScene scene in SceneController.i.scenesSortedByDistance)
+    {
+        foreach (ParcelScene scene in SceneController.i.scenesSortedByDistance)
         {
-            if(scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
+            if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {
                 if (sceneToEdit != null && sceneToEdit != scene)
                     actionController.ClearActionList();
                 sceneToEdit = scene;
                 break;
             }
-        }    
+        }
     }
     void PublishScene()
     {
