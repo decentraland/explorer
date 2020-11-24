@@ -54,6 +54,12 @@ namespace Builder
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
         }
 
+        public void SetOutlinerMaterial(Material mat)
+        {
+            OutlineMaterial = mat;
+            outlineRawImage.material = OutlineMaterial;
+        }
+
         private void OnResize()
         {
             outlineRawImage.gameObject.SetActive(false); // Hack: force Unity to refresh the texture

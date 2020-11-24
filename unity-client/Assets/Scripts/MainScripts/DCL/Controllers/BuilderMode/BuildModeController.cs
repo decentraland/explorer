@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.XR;
 
 public class BuildModeController : MonoBehaviour
@@ -60,6 +61,7 @@ public class BuildModeController : MonoBehaviour
     public ActionController actionController;
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BuilderInWorldBridge builderInWorldBridge;
+    public Material outlinerMaterial;
 
     [Header("Build Modes")]
 
@@ -68,6 +70,7 @@ public class BuildModeController : MonoBehaviour
 
     [Header("Build References")]
 
+    public int builderRendererIndex = 1;
     public LayerMask layerToRaycast;
 
     [Header("InputActions")]
@@ -655,7 +658,6 @@ public class BuildModeController : MonoBehaviour
         DCL.Environment.i.messagingControllersManager.messagingControllers[sceneToEdit.sceneData.id].systemBus.Stop();
         //
 
-
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
      
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
@@ -663,7 +665,8 @@ public class BuildModeController : MonoBehaviour
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
         SceneController.i.ActiveBuilderInWorldEditScene();
-     
+
+        ActiveBuilderInWorldCamera();
     }
 
     public void ExitEditMode()
@@ -680,7 +683,7 @@ public class BuildModeController : MonoBehaviour
         snapGO.transform.SetParent(transform);
 
         ParcelSettings.VISUAL_LOADING_ENABLED = true;
-        
+
         outlinerController.CancelAllOutlines();
 
         cursorGO.SetActive(true);
@@ -688,13 +691,42 @@ public class BuildModeController : MonoBehaviour
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
         SetBuildMode(EditModeState.Inactive);
-    
-           
+
+
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
 
         SceneController.i.DesactiveBuilderInWorldEditScene();
+
+        DesactiveBuilderInWorldCamera();
+    }
+
+    public void ActiveBuilderInWorldCamera()
+    {
+        DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+
+        if (outliner == null)
+        {
+            outliner = Camera.main.gameObject.AddComponent(typeof(DCLBuilderOutline)) as DCLBuilderOutline;
+            outliner.SetOutlinerMaterial(outlinerMaterial);
+        }
+        else
+        {
+            outliner.enabled = true;
+        }
+
+        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+
+        additionalCameraData.SetRenderer(builderRendererIndex);
+    }
+
+    public void DesactiveBuilderInWorldCamera()
+    {
+        DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+        outliner.enabled = false;
+        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+        additionalCameraData.SetRenderer(0);
     }
 
     void ExitAfterCharacterTeleport(DCLCharacterPosition position)
