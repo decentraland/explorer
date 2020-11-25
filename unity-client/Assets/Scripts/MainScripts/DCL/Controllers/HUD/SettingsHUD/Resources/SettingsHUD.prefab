@@ -9357,10 +9357,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 4697044312257259121}
   m_HandleRect: {fileID: 4123787256978987272}
   m_Direction: 0
-  m_MinValue: 30
+  m_MinValue: 0
   m_MaxValue: 100
   m_WholeNumbers: 1
-  m_Value: 30
+  m_Value: 50
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

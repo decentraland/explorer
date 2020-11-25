@@ -186,7 +186,6 @@ namespace DCL.SettingsHUD
             cullingToggle.onValueChanged.AddListener(value =>
                 {
                     tempQualitySetting.enableDetailObjectCulling = value;
-                    cullingSlider.enabled = value;
                     isDirty = true;
                 }
             );
