@@ -68,7 +68,7 @@ namespace DCL.SettingsData
         [Tooltip("Camera Far")] [Range(40, 100)]
         public float cameraDrawDistance;
 
-        [Tooltip("Enable bloom post process")]
+        [Tooltip("Enable bloom post process")] 
         public bool bloom;
 
         [Tooltip("Enable 30 FPS capping for more stable framerate")]
@@ -90,17 +90,17 @@ namespace DCL.SettingsData
         {
             if (baseResolution != otherSetting.baseResolution) return false;
             if (antiAliasing != otherSetting.antiAliasing) return false;
-            if (Mathf.Abs(renderScale - otherSetting.renderScale) < 0.001f) return false;
+            if (Mathf.Abs(renderScale - otherSetting.renderScale) > 0.001f) return false;
             if (shadows != otherSetting.shadows) return false;
             if (softShadows != otherSetting.softShadows) return false;
             if (shadowResolution != otherSetting.shadowResolution) return false;
-            if (Mathf.Abs(cameraDrawDistance - otherSetting.cameraDrawDistance) < 0.001f) return false;
+            if (Mathf.Abs(cameraDrawDistance - otherSetting.cameraDrawDistance) > 0.001f) return false;
             if (bloom != otherSetting.bloom) return false;
             if (fpsCap != otherSetting.fpsCap) return false;
             if (colorGrading != otherSetting.colorGrading) return false;
-            if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) < 0.001f) return false;
+            if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) > 0.001f) return false;
             if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
-            if (Mathf.Abs(detailObjectCullingThreshold - otherSetting.detailObjectCullingThreshold) < 0.001f) return false;
+            if (Mathf.Abs(detailObjectCullingThreshold - otherSetting.detailObjectCullingThreshold) > 0.001f) return false;
 
             return true;
         }
