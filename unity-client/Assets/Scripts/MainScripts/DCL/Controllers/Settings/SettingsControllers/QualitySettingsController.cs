@@ -114,7 +114,7 @@ namespace DCL.SettingsController
 
             if (qualitySettings.enableDetailObjectCulling)
             {
-                var settings = Environment.i.cullingController.GetSettings();
+                var settings = Environment.i.cullingController.GetSettingsCopy();
 
                 settings.rendererProfile = CullingControllerProfile.Lerp(
                     cullingControllerSettingsData.rendererProfileMin,

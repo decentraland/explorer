@@ -17,7 +17,7 @@ namespace DCL.Rendering
         void SetDirty();
 
         void SetSettings(CullingControllerSettings settings);
-        CullingControllerSettings GetSettings();
+        CullingControllerSettings GetSettingsCopy();
 
         void SetObjectCulling(bool enabled);
         void SetAnimationCulling(bool enabled);
@@ -378,7 +378,7 @@ namespace DCL.Rendering
         /// Get current settings copy. If you need to modify it, you must set them via SetSettings afterwards.
         /// </summary>
         /// <returns>Current settings object copy.</returns>
-        public CullingControllerSettings GetSettings()
+        public CullingControllerSettings GetSettingsCopy()
         {
             return settings.Clone();
         }

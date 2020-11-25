@@ -31,7 +31,7 @@ namespace CullingControllerTests
         public void ReturnCopyWhenGetSettingsIsCalled()
         {
             // Ensure settings never return null
-            var settings = cullingController.GetSettings();
+            var settings = cullingController.GetSettingsCopy();
             Assert.IsNotNull(settings, "Settings should never be null!");
 
             var prevAnimationCulling = settings.enableAnimationCulling;
@@ -39,7 +39,7 @@ namespace CullingControllerTests
             // This is needed because SetSettings sets dirty flag and other stuff. We don't want direct access.
             // Settings is not a property because to make the SetSetting performance hit more obvious.
             settings.enableAnimationCulling = !settings.enableAnimationCulling;
-            settings = cullingController.GetSettings();
+            settings = cullingController.GetSettingsCopy();
             Assert.IsTrue(settings.enableAnimationCulling == prevAnimationCulling, "GetSettings should return a copy!");
         }
 
@@ -47,7 +47,7 @@ namespace CullingControllerTests
         public void SetSettingsProperly()
         {
             // Ensure settings never return null
-            var settings = cullingController.GetSettings();
+            var settings = cullingController.GetSettingsCopy();
             Assert.IsNotNull(settings, "Settings should never be null!");
 
             var prevAnimationCulling = settings.enableAnimationCulling;
@@ -55,7 +55,7 @@ namespace CullingControllerTests
             // Ensure SetSettings works as intended.
             settings.enableAnimationCulling = !settings.enableAnimationCulling;
             cullingController.SetSettings(settings);
-            settings = cullingController.GetSettings();
+            settings = cullingController.GetSettingsCopy();
             Assert.IsTrue(settings.enableAnimationCulling != prevAnimationCulling, "SetSettings should assign the settings!");
         }
 
