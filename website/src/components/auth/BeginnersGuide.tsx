@@ -124,7 +124,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             Decentraland on-chain assets.
         </p>
           <p>
-            Access the Marketplace at{" "}
+            Access the Marketplace at
             <a
               href="https://market.decentraland.org"
               target="_blank"
