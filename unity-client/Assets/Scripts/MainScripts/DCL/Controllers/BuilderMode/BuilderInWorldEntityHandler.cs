@@ -403,9 +403,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
         }
 
-        if (data.gTLFShapeComponent != null)
+        if (data.gltfShapeComponent != null)
         {
-            sceneToEdit.SharedComponentAttach(newEntity.entityId, data.gTLFShapeComponent.sharedId);
+            sceneToEdit.SharedComponentAttach(newEntity.entityId, data.gltfShapeComponent.sharedId);
         }
 
 

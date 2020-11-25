@@ -16,12 +16,15 @@ public class BuildInWorldCompleteAction
 
     public ActionType actionType;
     public bool isDone = true;
-    public System.Action<string, object, ActionType, bool> OnApplyValue;
-    List<BuilderInWorldEntityAction> entitiyApplied = new List<BuilderInWorldEntityAction>();
+
+    public delegate void OnApplyValueDelegate(string entityId, object value, ActionType actionType, bool isUndo);
+    public event OnApplyValueDelegate OnApplyValue;
+
+    List<BuilderInWorldEntityAction> entityApplied = new List<BuilderInWorldEntityAction>();
     
-    public void ReDo()
+    public void Redo()
     {
-        foreach(BuilderInWorldEntityAction action in entitiyApplied)
+        foreach(BuilderInWorldEntityAction action in entityApplied)
         {
             ApplyValue(action.entityId,action.newValue, false);
         }
@@ -30,7 +33,7 @@ public class BuildInWorldCompleteAction
 
     public void Undo()
     {
-        foreach (BuilderInWorldEntityAction action in entitiyApplied)
+        foreach (BuilderInWorldEntityAction action in entityApplied)
         {
             ApplyValue(action.entityId, action.oldValue, true);
         }
@@ -59,7 +62,7 @@ public class BuildInWorldCompleteAction
     void CreateAction(List<BuilderInWorldEntityAction> entitiesActions,ActionType type)
     {
         actionType = type;
-        entitiyApplied = entitiesActions;
+        entityApplied = entitiesActions;
         isDone = true;
     }
 }

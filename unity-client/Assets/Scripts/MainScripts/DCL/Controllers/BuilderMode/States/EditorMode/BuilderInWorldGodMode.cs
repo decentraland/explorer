@@ -124,10 +124,10 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    public override void Init(GameObject _goToEdit, GameObject _undoGo, GameObject _snapGO, GameObject _freeMovementGO, List<DCLBuilderInWorldEntity> _selectedEntities)
+    public override void Init(GameObject goToEdit, GameObject undoGo, GameObject snapGO, GameObject freeMovementGO, List<DCLBuilderInWorldEntity> selectedEntities)
     {
-        base.Init(_goToEdit, _undoGo, _snapGO, _freeMovementGO, _selectedEntities);
-        voxelController.SetEditionGO(_goToEdit);
+        base.Init(goToEdit, undoGo, snapGO, freeMovementGO, selectedEntities);
+        voxelController.SetEditionGO(goToEdit);
 
         HUDController.i.buildModeHud.OnTranslateSelectedAction += TranslateMode;
         HUDController.i.buildModeHud.OnRotateSelectedAction += RotateMode;

@@ -126,13 +126,13 @@ public static partial class BuilderInWorldUtils
         {
             if (keyValuePair.Value is GLTFShape)
             {
-                BuilderInWorldEntityData.GTLFShapeComponent entityComponentModel = new BuilderInWorldEntityData.GTLFShapeComponent();
+                BuilderInWorldEntityData.GLTFShapeComponent entityComponentModel = new BuilderInWorldEntityData.GLTFShapeComponent();
                 entityComponentModel.componentId = (int)CLASS_ID.GLTF_SHAPE;
                 GLTFShape gLTFShape = (GLTFShape)keyValuePair.Value;
                 entityComponentModel.src = gLTFShape.model.src;
                 entityComponentModel.sharedId = keyValuePair.Value.id;
 
-                builderInWorldEntityData.gTLFShapeComponent = entityComponentModel;
+                builderInWorldEntityData.gltfShapeComponent = entityComponentModel;
             }
         }
 

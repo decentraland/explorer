@@ -19,8 +19,8 @@ public class BuilderInWorldMode : MonoBehaviour
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
 
-    public System.Action OnInputDone;
-    public System.Action<BuildInWorldCompleteAction> OnActionGenerated;
+    public event System.Action OnInputDone;
+    public event System.Action<BuildInWorldCompleteAction> OnActionGenerated;
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 

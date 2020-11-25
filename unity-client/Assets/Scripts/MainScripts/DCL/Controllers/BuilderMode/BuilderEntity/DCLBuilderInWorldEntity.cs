@@ -13,7 +13,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     public string entityUniqueId;
     public string descriptiveName;
 
-    public System.Action<DCLBuilderInWorldEntity> onStatusUpdate, OnDelete;
+    public event System.Action<DCLBuilderInWorldEntity> onStatusUpdate, OnDelete;
 
     private bool isLockedValue = false;
     public bool IsLocked

@@ -7,6 +7,7 @@ using static BuildInWorldCompleteAction;
 
 public class ActionController : MonoBehaviour
 {
+    public static bool VERBOSE = false;
 
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
 
@@ -59,7 +60,8 @@ public class ActionController : MonoBehaviour
 
         if (currentUndoStepIndex < actionsMade.Count - 1) currentUndoStepIndex++;
 
-        Debug.Log("Redo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
+        if(VERBOSE)
+            Debug.Log("Redo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
 
     }
 
@@ -78,7 +80,8 @@ public class ActionController : MonoBehaviour
         {
             currentRedoStepIndex--;
         }
-        Debug.Log("Undo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
+        if (VERBOSE)
+            Debug.Log("Undo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
 
     }
 
@@ -121,7 +124,8 @@ public class ActionController : MonoBehaviour
         currentRedoStepIndex = actionsMade.Count - 1;
 
 
-        Debug.Log("Redo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
+        if (VERBOSE)
+            Debug.Log("Redo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
         action.OnApplyValue += ApplyAction;
     }
 
@@ -172,7 +176,7 @@ public class ActionController : MonoBehaviour
     {
         if (!actionsMade[currentRedoStepIndex].isDone)
         {
-            actionsMade[currentRedoStepIndex].ReDo();
+            actionsMade[currentRedoStepIndex].Redo();
             OnRedo?.Invoke();        
         }  
     }

@@ -7,7 +7,7 @@ public class BuilderInWorldEntityData
 {
     public string entityId;
     public TransformComponent transformComponent;
-    public GTLFShapeComponent gTLFShapeComponent;
+    public GLTFShapeComponent gltfShapeComponent;
 
 
     [System.Serializable]
@@ -20,7 +20,7 @@ public class BuilderInWorldEntityData
     }
 
     [System.Serializable]
-    public class GTLFShapeComponent
+    public class GLTFShapeComponent
     {
         public int componentId;
         public string src;

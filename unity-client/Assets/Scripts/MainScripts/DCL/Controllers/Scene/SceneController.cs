@@ -457,7 +457,7 @@ namespace DCL
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
         [System.NonSerialized] public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
 
-        public Action<string> OnReadyScene;
+        public event Action<string> OnReadyScene;
 
         public ParcelScene CreateTestScene(LoadParcelScenesMessage.UnityParcelScene data = null)
         {

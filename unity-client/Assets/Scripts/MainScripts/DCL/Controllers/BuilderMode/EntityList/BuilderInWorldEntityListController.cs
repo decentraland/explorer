@@ -17,11 +17,11 @@ public class BuilderInWorldEntityListController : MonoBehaviour
         RENAME = 4
     }
 
-    public Action<DCLBuilderInWorldEntity> OnEntityClick;
-    public Action<DCLBuilderInWorldEntity> OnEntityDelete;
-    public Action<DCLBuilderInWorldEntity> OnEntityLock;
-    public Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
-    public Action<DCLBuilderInWorldEntity> OnEntityRename;
+    public event Action<DCLBuilderInWorldEntity> OnEntityClick;
+    public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
+    public event Action<DCLBuilderInWorldEntity> OnEntityLock;
+    public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
+    public event Action<DCLBuilderInWorldEntity> OnEntityRename;
 
     public EntityListView entityListView;
 
