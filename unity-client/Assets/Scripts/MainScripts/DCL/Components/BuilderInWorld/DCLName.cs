@@ -5,6 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This component is a descriptive name of the Entity. In the BuilderInWorld you can give an entity a descriptive name through the entity list.
+/// Builder in World send a message to kernel to change the value of this component in order to assign a descriptive name
+/// </summary>
 public class DCLName : BaseDisposable
 {
     [System.Serializable]
@@ -29,6 +33,6 @@ public class DCLName : BaseDisposable
             RaiseOnAppliedChanges();
         }
     
-        yield return null;
+        return null;
     }
 }
