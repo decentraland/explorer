@@ -64,7 +64,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </p>
           <p>
             If this is the first time you’re hearing about digital wallets, we
-            recommend reading
+            recommend reading{" "}
             <a
               href="https://docs.decentraland.org/examples/get-a-wallet/"
               target="_blank"
@@ -85,7 +85,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             MANA is Decentraland’s fungible, ERC20 cryptocurrency token. MANA is
             burned, or spent, in exchange for LAND parcels. For a current summary
             of critical stats like total and circulating supply, please visit our
-            MANA Token Information transparency dashboard. See the
+            MANA Token Information transparency dashboard. See the{" "}
             <a
               href="https://docs.decentraland.org/decentraland/glossary/"
               target="_blank"
@@ -124,7 +124,7 @@ export const BeginnersGuide: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             Decentraland on-chain assets.
         </p>
           <p>
-            Access the Marketplace at
+            Access the Marketplace at{" "}
             <a
               href="https://market.decentraland.org"
               target="_blank"
