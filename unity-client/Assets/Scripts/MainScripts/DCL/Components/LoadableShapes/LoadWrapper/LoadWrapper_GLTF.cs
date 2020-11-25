@@ -9,6 +9,7 @@ namespace DCL.Components
     {
         static readonly bool VERBOSE = false;
         RendereableAssetLoadHelper loadHelper;
+        public ContentProvider contentProvider;
 
         public override void Load(string targetUrl, Action<LoadWrapper> OnSuccess, Action<LoadWrapper> OnFail)
         {
@@ -22,7 +23,11 @@ namespace DCL.Components
 
             alreadyLoaded = false;
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
-            loadHelper = new RendereableAssetLoadHelper(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles);
+
+            if (contentProvider == null)
+                contentProvider = this.entity.scene.contentProvider;
+
+            loadHelper = new RendereableAssetLoadHelper(contentProvider, entity.scene.sceneData.baseUrlBundles);
 
             loadHelper.settings.parent = entity.meshRootGameObject.transform;
 

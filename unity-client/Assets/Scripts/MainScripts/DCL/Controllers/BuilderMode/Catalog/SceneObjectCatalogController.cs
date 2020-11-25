@@ -79,7 +79,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     void FilterAssets(string nameToFilter)
     {
         filterObjects.Clear();
-        foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+        foreach (SceneAssetPack assetPack in AssetCatalog.sceneAssetPackCatalog.GetValues().ToList())
         {
             foreach (SceneObject sceneObject in assetPack.assets)
             {
@@ -189,7 +189,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
       
         List<Dictionary<string, List<SceneObject>>> favorites = new List<Dictionary<string, List<SceneObject>>>();
-        foreach (SceneAssetPack assetPack in CatalogController.sceneObjectCatalog.GetValues().ToList())
+        foreach (SceneAssetPack assetPack in AssetCatalog.sceneAssetPackCatalog.GetValues().ToList())
         {
             foreach (SceneObject sceneObject in assetPack.assets)
             {
@@ -357,7 +357,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
         if (!catalogInitializaed)
         {
-            CatalogController.sceneObjectCatalog.GetValues();
+            AssetCatalog.sceneAssetPackCatalog.GetValues();
             ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, AddFullSceneObjectCatalog);
             catalogInitializaed = true;
         }
@@ -381,10 +381,10 @@ public class SceneObjectCatalogController : MonoBehaviour
 
             foreach (JObject item in array)
             {
-                CatalogController.i.AddSceneObjectToCatalog(item);
+                AssetCatalog.i.AddSceneAssetPackToCatalog(item);
             }
 
-            catalogAssetPackListView.SetContent(CatalogController.sceneObjectCatalog.GetValues().ToList());
+            catalogAssetPackListView.SetContent(AssetCatalog.sceneAssetPackCatalog.GetValues().ToList());
         }
     }
 

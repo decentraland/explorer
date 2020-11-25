@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -15,6 +15,7 @@ namespace DCL.Components
         public new class Model : BaseShape.Model
         {
             public string src;
+            public string assetId;
         }
 
         public Model model = new Model();
@@ -127,13 +128,24 @@ namespace DCL.Components
 
         protected virtual void AttachShape(DecentralandEntity entity)
         {
-            if (scene.contentProvider.HasContentsUrl(model.src))
+            ContentProvider provider = null;
+
+            if (!string.IsNullOrEmpty(model.assetId))
+                provider = AssetCatalog.GetContentProviderForAssetId(model.assetId);
+                             
+            if(provider == null)
+                provider = scene.contentProvider;
+            
+            if (provider.HasContentsUrl(model.src))
             {
                 isLoaded = false;
                 entity.EnsureMeshGameObject(componentName + " mesh");
 
                 LoadWrapperType loadableShape = GetOrAddLoaderForEntity<LoadWrapperType>(entity);
 
+                if(loadableShape is LoadWrapper_GLTF gltfLoadWrapper)
+                    gltfLoadWrapper.contentProvider = provider;
+                
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
                 loadableShape.initialVisibility = model.visible;
