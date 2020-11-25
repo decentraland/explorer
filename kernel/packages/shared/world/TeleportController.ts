@@ -14,7 +14,7 @@ import { StoreContainer } from '../store/rootTypes'
 import { WORLD_EXPLORER } from '../../config/index'
 import { isInitialLoading, isWaitingTutorial } from '../loading/selectors'
 import Html from '../Html'
-import { isLoginStageCompleted } from '../session/selectors'
+import { isLoginStageCompleted, isSignUp } from '../session/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -80,13 +80,13 @@ export class TeleportController {
   }
 
   public static stopTeleportAnimation() {
-    if (!isWaitingTutorial(globalThis.globalStore.getState())) {
+    if (!isSignUp(globalThis.globalStore.getState()) && !isWaitingTutorial(globalThis.globalStore.getState())) {
       Html.hideTeleportAnimation()
-    }
-    if (WORLD_EXPLORER) {
-      ensureUnityInterface()
-        .then((unity) => unity.ShowWelcomeNotification())
-        .catch(defaultLogger.error)
+      if (WORLD_EXPLORER) {
+        ensureUnityInterface()
+          .then((unity) => unity.ShowWelcomeNotification())
+          .catch(defaultLogger.error)
+      }
     }
   }
 

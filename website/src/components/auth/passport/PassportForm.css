@@ -9,49 +9,84 @@
 .passportForm form .inputGroup {
   display: flex;
   flex-flow: column nowrap;
-  padding: 1em;
+  height: 111px;
+  padding: 0px 16px 44px 16px;
+  position: relative;
 }
 
-.passportForm form .inputGroup em.error {
+.passportForm form .inputGroup.inputGroupName {
+  padding-bottom: 28px;
+}
+
+.passportForm form .inputGroup.inputGroupEmail {
+  padding-bottom: 58px;
+}
+
+.passportForm form .inputGroup em.hint,
+.passportForm form .inputGroup em.required {
   font-style: normal;
   font-weight: normal;
   font-size: 15px;
   line-height: 18px;
-  color: #ff2d55;
+}
+
+.passportForm form .inputGroup em.hint {
+  position: absolute;
+  bottom: 32px;
+  right: 16px;
+  color: #333333;
+  opacity: 0.5;
+}
+
+.passportForm form .inputGroup.inputGroupName em.hint {
+  bottom: 14px;
+}
+
+.passportForm form .inputGroup.inputGroupEmail em.hint {
+  bottom: 46px;
+}
+
+.passportForm form .inputGroup em.required {
+  color: #333;
 }
 
 .passportForm form .inputGroup input.hasError {
   border-color: #ff2d55;
 }
 
-.passportForm form .inputGroup em.warningLength {
-  font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
-  line-height: 17px;
-  text-align: right;
-  color: #333333;
-  opacity: 0.5;
+.passportForm form .inputGroup em.hint.hasError {
+  color: #ff2d55;
+  opacity: 1;
 }
 
 .passportForm form label {
-  font-size: 1.3em;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 600;
   font-style: normal;
-  line-height: 2em;
+  line-height: 26px;
 }
 
 .passportForm form input {
-  width: 345px;
+  width: 323px;
   height: 45px;
-  border: 2px solid #c4c7d3;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   background-color: #ffffff;
-  font-weight: bold;
-  margin: 0.2em 0;
-  padding: 0 0.5em;
-  font-size: 20px;
+  margin: 10px 0 8px;
+  padding: 0 10px;
   line-height: 25px;
+  outline: 0;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.passportForm form input:focus,
+.passportForm form input:active {
+  border: 2px solid #c4c7d3;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.05);
 }
 
 .passportForm form input::placeholder {
@@ -62,7 +97,7 @@
 .passportForm form .actions {
   display: flex;
   justify-content: center;
-  padding: 2em 0 0;
+  padding: 0;
 }
 
 .passportForm form button.btnSubmit {
@@ -75,7 +110,15 @@
   border-radius: 12px;
   box-shadow: 0 3px 0 #cb2242;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 17px;
   line-height: 20px;
+  padding: 0;
+  outline: 0;
+}
+
+.passportForm form button.btnSubmit:disabled {
+  background: #b9818b;
+  box-shadow: 0 4px 0 #b37882;
+  cursor: not-allowed;
 }

@@ -1,23 +1,32 @@
 import React from "react";
 import { Logo } from "./Logo";
+import { Isologotipo } from "./Isologotipo";
+import { Discord } from "./Icon.tsx/Discord";
 import "./Navbar.css";
-import imgDiscord from "../../images/discord.png";
 
-export const Navbar: React.FC = () => (
+export type NavbarProps = {
+  full?: boolean,
+  onClickLogo?: (event: React.MouseEvent<SVGElement>) => void
+}
+
+export const Navbar = (props: NavbarProps) => (
   <nav className="nav-bar">
-    <Logo icon={true} />
-    <div className="nav-bar-content">
-      <div className="nav-text nav-need-support">
+    {!props.full && <Isologotipo onClick={props.onClickLogo} />}
+    {!!props.full && <a href="https://decentraland.org/" target="_blank" rel="noopener noreferrer">
+      <Logo onClick={props.onClickLogo} />
+    </a>}
+    {!!props.full && <div className="nav-bar-content">
+      <div className="nav-text">
         <span>Need support?</span>
       </div>
       <a
         className="nav-discord"
-        href="https://dcl.gg/discord"
+        href="https://discord.gg/k5ydeZp"
         target="about:blank"
       >
-        <img alt="Discord" className="nav-discord-img" src={imgDiscord} />
-        <span className="nav-text nav-discord-text">JOIN OUR DISCORD</span>
+        <Discord />
+        <div>Join our discord</div>
       </a>
-    </div>
+    </div>}
   </nav>
 );

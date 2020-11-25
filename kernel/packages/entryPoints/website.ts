@@ -39,6 +39,7 @@ import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
+import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 
 const logger = createLogger('website.ts: ')
 
@@ -50,6 +51,18 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
 }
+/**
+ * Subscribe to uncaught errors
+ */
+window.addEventListener('error', (event: ErrorEvent) => {
+  ReportFatalError(event.message as any, {
+    type: event.type,
+    message: event.message,
+    stack: event.error.stack,
+    filename: event.filename
+  })
+  return false
+})
 
 namespace webApp {
   export function createStore(): RootStore {
@@ -121,12 +134,12 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
-        i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
 
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: false, visible: false })
             globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
             Html.switchGameContainer(true)
           })
@@ -192,9 +205,16 @@ namespace webApp {
       }
 
       console['error'](error)
-      ReportFatalError(error.message)
     }
     return true
+  }
+
+  // This is for shared functionality between kernel and website.
+  // This is not very good because we can't type check it.
+  // In the future, we should probably replace this with a library
+  export const utils = {
+    isBadWord,
+    filterInvalidNameCharacters
   }
 }
 
