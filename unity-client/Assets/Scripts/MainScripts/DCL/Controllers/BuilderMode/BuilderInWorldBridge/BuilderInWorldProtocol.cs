@@ -28,7 +28,7 @@ public class BuilderInWorldProtocol
     #region Components
 
     [System.Serializable]
-    public class GenericComponent
+    public abstract class GenericComponent
     {
 
     }
@@ -57,14 +57,6 @@ public class BuilderInWorldProtocol
     }
 
     #endregion
-
-    [System.Serializable]
-    public class EntityTransformPayload<T>
-    {
-        public string entityId;
-        public int componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
-        public T data;
-    }
 
     [System.Serializable]
     public class EntityPayload
