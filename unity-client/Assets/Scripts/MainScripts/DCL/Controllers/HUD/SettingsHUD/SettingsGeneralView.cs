@@ -189,8 +189,10 @@ namespace DCL.SettingsHUD
             if (active)
             {
                 QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
+                bool currentFpsCap = tempQualitySetting.fpsCap;
                 tempQualitySetting = Settings.i.lastValidAutoqualitySet;
                 tempQualitySetting.baseResolution = currentBaseResolution;
+                tempQualitySetting.fpsCap = currentFpsCap;
                 isDirty = true;
             }
         }
