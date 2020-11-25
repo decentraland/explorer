@@ -9,8 +9,10 @@ export function kernelConfigForRenderer(): KernelConfigForRenderer {
       voiceChatEnabled: false
     },
     profiles: {
-      nameValidCharacterRegex: nameValidCharacterRegex.toString().replace(/[/]/g, ""),
-      nameValidRegex: nameValidRegex.toString().replace(/[/]/g, "")
-    }
+      nameValidCharacterRegex: nameValidCharacterRegex.toString().replace(/[/]/g, ''),
+      nameValidRegex: nameValidRegex.toString().replace(/[/]/g, '')
+    },
+    // tslint:disable-next-line
+    gifSupported: typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function'
   }
 }
