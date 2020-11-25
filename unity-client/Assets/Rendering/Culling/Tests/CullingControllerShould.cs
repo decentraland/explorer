@@ -257,6 +257,24 @@ namespace CullingControllerTests
         }
 
         [UnityTest]
+        public IEnumerator ReactToRendererState()
+        {
+            cullingController.Start();
+            yield return null;
+            CommonScriptableObjects.rendererState.Set(true);
+            CommonScriptableObjects.rendererState.Set(false);
+            Assert.IsFalse(cullingController.IsRunning());
+            CommonScriptableObjects.rendererState.Set(true);
+            Assert.IsTrue(cullingController.IsRunning());
+            CommonScriptableObjects.rendererState.Set(false);
+            Assert.IsFalse(cullingController.IsRunning());
+            cullingController.Stop();
+            yield return null;
+            CommonScriptableObjects.rendererState.Set(true);
+            Assert.IsFalse(cullingController.IsRunning());
+        }
+
+        [UnityTest]
         public IEnumerator ProcessProfile()
         {
             // Pre-arrange

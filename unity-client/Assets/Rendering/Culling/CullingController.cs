@@ -22,6 +22,7 @@ namespace DCL.Rendering
         void SetObjectCulling(bool enabled);
         void SetAnimationCulling(bool enabled);
         void SetShadowCulling(bool enabled);
+        bool IsRunning();
     }
 
     /// <summary>
@@ -84,7 +85,12 @@ namespace DCL.Rendering
         /// </summary>
         public void Start()
         {
+            if (running)
+                return;
+
             running = true;
+            CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
+            CommonScriptableObjects.playerUnityPosition.OnChange += OnPlayerUnityPositionChange;
             StartInternal();
         }
 
@@ -94,8 +100,6 @@ namespace DCL.Rendering
                 return;
 
             RaiseDataReport();
-            CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
-            CommonScriptableObjects.playerUnityPosition.OnChange += OnPlayerUnityPositionChange;
             profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
             updateCoroutine = CoroutineStarter.Start(UpdateCoroutine());
         }
@@ -105,7 +109,12 @@ namespace DCL.Rendering
         /// </summary>
         public void Stop()
         {
+            if (!running)
+                return;
+
             running = false;
+            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
+            CommonScriptableObjects.playerUnityPosition.OnChange -= OnPlayerUnityPositionChange;
             StopInternal();
         }
 
@@ -114,8 +123,6 @@ namespace DCL.Rendering
             if (updateCoroutine == null)
                 return;
 
-            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
-            CommonScriptableObjects.playerUnityPosition.OnChange -= OnPlayerUnityPositionChange;
             CoroutineStarter.Stop(updateCoroutine);
             updateCoroutine = null;
         }
@@ -335,7 +342,7 @@ namespace DCL.Rendering
         /// <summary>
         /// Method suscribed to renderer state change
         /// </summary>
-        private void OnRendererStateChange(bool oldRendererState, bool rendererState)
+        private void OnRendererStateChange(bool rendererState, bool oldRendererState)
         {
             if (!running)
                 return;
@@ -440,6 +447,14 @@ namespace DCL.Rendering
             int rendererCount = (objectsTracker.GetRenderers()?.Length ?? 0) + (objectsTracker.GetSkinnedRenderers()?.Length ?? 0);
 
             OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
+        }
+
+        /// <summary>
+        /// Returns true if the culling loop is running
+        /// </summary>
+        public bool IsRunning()
+        {
+            return updateCoroutine != null;
         }
 
         /// <summary>

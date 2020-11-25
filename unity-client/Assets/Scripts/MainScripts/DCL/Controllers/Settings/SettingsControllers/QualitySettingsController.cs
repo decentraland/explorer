@@ -73,7 +73,7 @@ namespace DCL.SettingsController
 
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.msaaSampleCount = (int)qualitySettings.antiAliasing;
+                lightweightRenderPipelineAsset.msaaSampleCount = (int) qualitySettings.antiAliasing;
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
                 lightweightRenderPipelineAsset.shadowDistance = qualitySettings.shadowDistance;
 
@@ -145,7 +145,9 @@ namespace DCL.SettingsController
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")] public static extern void ToggleFPSCap(bool useFPSCap);
 #else
-        public static void ToggleFPSCap(bool useFPSCap) { }
+        public static void ToggleFPSCap(bool useFPSCap)
+        {
+        }
 #endif
     }
 }
