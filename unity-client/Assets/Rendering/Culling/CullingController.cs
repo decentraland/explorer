@@ -5,6 +5,7 @@ using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UniversalRenderPipelineAsset = UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+using static DCL.Rendering.CullingControllerUtils;
 
 namespace DCL.Rendering
 {
@@ -30,8 +31,9 @@ namespace DCL.Rendering
         internal ICullingObjectsTracker objectsTracker;
         private Coroutine updateCoroutine;
         private float timeBudgetCount = 0;
-        private Vector3 lastPlayerPos;
         private bool resetObjectsNextFrame = false;
+        private bool playerPositionDirty;
+        private bool running = false;
 
         public delegate void DataReport(int rendererCount, int hiddenRendererCount, int hiddenShadowCount);
 
@@ -63,9 +65,19 @@ namespace DCL.Rendering
         /// </summary>
         public void Start()
         {
+            running = true;
+            StartInternal();
+        }
+
+        private void StartInternal()
+        {
             if (updateCoroutine != null)
                 return;
 
+            RaiseDataReport();
+            CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
+            CommonScriptableObjects.playerUnityPosition.OnChange += OnPlayerUnityPositionChange;
+            profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
             updateCoroutine = CoroutineStarter.Start(UpdateCoroutine());
         }
 
@@ -74,24 +86,32 @@ namespace DCL.Rendering
         /// </summary>
         public void Stop()
         {
+            running = false;
+            StopInternal();
+        }
+
+        public void StopInternal()
+        {
             if (updateCoroutine == null)
                 return;
 
+            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
+            CommonScriptableObjects.playerUnityPosition.OnChange -= OnPlayerUnityPositionChange;
             CoroutineStarter.Stop(updateCoroutine);
             updateCoroutine = null;
         }
 
         /// <summary>
         /// Process all sceneObject renderers with the parameters set by the given profile.
-        /// 
-        /// If profile matches the skinned renderer profile in settings, the skinned renderers are going to be used.
         /// </summary>
         /// <param name="profile">any CullingControllerProfile</param>
         /// <returns>IEnumerator to be yielded.</returns>
         internal IEnumerator ProcessProfile(CullingControllerProfile profile)
         {
-            Renderer[] renderers = null;
+            Renderer[] renderers;
 
+            // If profile matches the skinned renderer profile in settings,
+            // the skinned renderers are going to be used.
             if (profile == settings.rendererProfile)
                 renderers = objectsTracker.GetRenderers();
             else
@@ -128,8 +148,8 @@ namespace DCL.Rendering
 
                 float shadowTexelSize = ComputeShadowMapTexelSize(boundsSize, urpAsset.shadowDistance, urpAsset.mainLightShadowmapResolution);
 
-                bool shouldBeVisible = ShouldBeVisible(profile, viewportSize, distance, boundsContainsPlayer, isOpaque, isEmissive);
-                bool shouldHaveShadow = ShouldHaveShadow(profile, viewportSize, distance, shadowTexelSize);
+                bool shouldBeVisible = TestRendererVisibleRule(profile, viewportSize, distance, boundsContainsPlayer, isOpaque, isEmissive);
+                bool shouldHaveShadow = TestRendererShadowRule(profile, viewportSize, distance, shadowTexelSize);
 
                 SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
 
@@ -144,7 +164,7 @@ namespace DCL.Rendering
 
                 if (r is SkinnedMeshRenderer skr)
                 {
-                    skr.updateWhenOffscreen = ShouldUpdateSkinnedWhenOffscreen(settings, distance);
+                    skr.updateWhenOffscreen = TestSkinnedRendererOffscreenRule(settings, distance);
                 }
 #if UNITY_EDITOR
                 DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
@@ -158,31 +178,11 @@ namespace DCL.Rendering
         /// </summary>
         IEnumerator UpdateCoroutine()
         {
-            RaiseDataReport();
-            profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
-            CommonScriptableObjects.rendererState.OnChange += (current, previous) => SetDirty();
-
             while (true)
             {
-                if (!CommonScriptableObjects.rendererState.Get())
-                {
-                    timeBudgetCount = 0;
-                    yield return null;
-                    continue;
-                }
+                bool shouldCheck = objectsTracker.IsDirty() | playerPositionDirty;
 
-                bool shouldCheck = objectsTracker.IsDirty();
-
-                yield return objectsTracker.PopulateRenderersList();
-
-                Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
-
-                if (Vector3.Distance(playerPosition, lastPlayerPos) > 1.0f)
-                {
-                    //NOTE(Brian): If player moves, we should always check.
-                    shouldCheck = true;
-                    lastPlayerPos = playerPosition;
-                }
+                playerPositionDirty = false;
 
                 if (!shouldCheck)
                 {
@@ -190,6 +190,8 @@ namespace DCL.Rendering
                     yield return null;
                     continue;
                 }
+
+                yield return objectsTracker.PopulateRenderersList();
 
                 if (resetObjectsNextFrame)
                 {
@@ -313,6 +315,30 @@ namespace DCL.Rendering
         }
 
         /// <summary>
+        /// Method suscribed to renderer state change
+        /// </summary>
+        private void OnRendererStateChange(bool oldRendererState, bool rendererState)
+        {
+            if (!running)
+                return;
+
+            SetDirty();
+
+            if (rendererState)
+                StartInternal();
+            else
+                StopInternal();
+        }
+
+        /// <summary>
+        /// Method suscribed to playerUnityPosition change
+        /// </summary>
+        private void OnPlayerUnityPositionChange(Vector3 previous, Vector3 current)
+        {
+            playerPositionDirty = true;
+        }
+
+        /// <summary>
         /// Sets the scene objects dirtiness.
         /// In the next update iteration, all the scene objects are going to be gathered.
         /// This method has performance impact. 
@@ -396,141 +422,6 @@ namespace DCL.Rendering
             int rendererCount = (objectsTracker.GetRenderers()?.Length ?? 0) + (objectsTracker.GetSkinnedRenderers()?.Length ?? 0);
 
             OnDataReport.Invoke(rendererCount, hiddenRenderers.Count, shadowlessRenderers.Count);
-        }
-
-        /// <summary>
-        /// Computes the rule used for toggling skinned meshes updateWhenOffscreen param.
-        /// Skinned meshes should be always updated if near the camera to avoid false culling positives on screen edges.
-        /// </summary>
-        /// <param name="settings">Any settings object to use thresholds for computing the rule.</param>
-        /// <param name="distance">Mesh distance from camera used for computing the rule.</param>
-        /// <returns>True if mesh should be updated when offscreen, false if otherwise.</returns>
-        internal static bool ShouldUpdateSkinnedWhenOffscreen(CullingControllerSettings settings, float distance)
-        {
-            bool finalValue = true;
-
-            if (settings.enableAnimationCulling)
-            {
-                if (distance > settings.enableAnimationCullingDistance)
-                    finalValue = false;
-            }
-
-            return finalValue;
-        }
-
-        /// <summary>
-        /// Computes the rule used for toggling renderers visibility.
-        /// </summary>
-        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
-        /// <param name="viewportSize">Diagonal viewport size of the renderer.</param>
-        /// <param name="distance">Distance to camera of the renderer.</param>
-        /// <param name="boundsContainsCamera">Renderer bounds contains camera?</param>
-        /// <param name="isOpaque">Renderer is opaque?</param>
-        /// <param name="isEmissive">Renderer is emissive?</param>
-        /// <returns>True if renderer should be visible, false if otherwise.</returns>
-        internal static bool ShouldBeVisible(CullingControllerProfile profile, float viewportSize, float distance, bool boundsContainsCamera, bool isOpaque, bool isEmissive)
-        {
-            bool shouldBeVisible = distance < profile.visibleDistanceThreshold || boundsContainsCamera;
-
-            if (isEmissive)
-                shouldBeVisible |= viewportSize > profile.emissiveSizeThreshold;
-
-            if (isOpaque)
-                shouldBeVisible |= viewportSize > profile.opaqueSizeThreshold;
-
-            return shouldBeVisible;
-        }
-
-        /// <summary>
-        /// Computes the rule used for toggling renderer shadow casting.
-        /// </summary>
-        /// <param name="profile">Profile used for size and distance thresholds needed for the rule.</param>
-        /// <param name="viewportSize">Diagonal viewport size of the renderer</param>
-        /// <param name="boundsSize">Bounds size of the renderer computed using bounds.size.magnitude</param>
-        /// <param name="distance">Distance from renderer to camera.</param>
-        /// <param name="shadowMapSizeTerm">Used for calculating the shadow texel size. Shadow distance * shadow map resolution.</param>
-        /// <returns>True if renderer should have shadow, false otherwise</returns>
-        internal static bool ShouldHaveShadow(CullingControllerProfile profile, float viewportSize, float distance, float shadowMapTexelSize)
-        {
-            bool shouldHaveShadow = distance < profile.shadowDistanceThreshold;
-            shouldHaveShadow |= viewportSize > profile.shadowRendererSizeThreshold;
-            shouldHaveShadow &= shadowMapTexelSize > profile.shadowMapProjectionSizeThreshold;
-            return shouldHaveShadow;
-        }
-
-        /// <summary>
-        /// Determines if the given renderer is going to be enqueued at the opaque section of the rendering pipeline.
-        /// </summary>
-        /// <param name="renderer">Renderer to be checked.</param>
-        /// <returns>True if its opaque</returns>
-        private static bool IsOpaque(Renderer renderer)
-        {
-            Material firstMat = renderer.sharedMaterials[0];
-
-            if (firstMat == null)
-                return true;
-
-            if (firstMat.HasProperty(ShaderUtils.ZWrite) &&
-                (int) firstMat.GetFloat(ShaderUtils.ZWrite) == 0)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Determines if the given renderer has emissive material traits.
-        /// </summary>
-        /// <param name="renderer">Renderer to be checked.</param>
-        /// <returns>True if the renderer is emissive.</returns>
-        private static bool IsEmissive(Renderer renderer)
-        {
-            Material firstMat = renderer.sharedMaterials[0];
-
-            if (firstMat == null)
-                return false;
-
-            if (firstMat.HasProperty(ShaderUtils.EmissionMap) && firstMat.GetTexture(ShaderUtils.EmissionMap) != null)
-                return true;
-
-            if (firstMat.HasProperty(ShaderUtils.EmissionColor) && firstMat.GetColor(ShaderUtils.EmissionColor) != Color.clear)
-                return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// ComputeShadowMapTexelSize computes the shadow-map bounding box diagonal texel size
-        /// for the given bounds size.
-        /// </summary>
-        /// <param name="boundsSize">Diagonal bounds size of the object</param>
-        /// <param name="shadowDistance">Shadow distance as set in the quality settings</param>
-        /// <param name="shadowMapRes">Shadow map resolution as set in the quality settings (128, 256, etc)</param>
-        /// <returns>The computed shadow map diagonal texel size for the object.</returns>
-        /// <remarks>
-        /// This is calculated by doing the following:
-        /// 
-        /// - We get the boundsSize to a normalized viewport size.
-        /// - We multiply the resulting value by the shadow map resolution.
-        /// 
-        /// To get the viewport size, we assume the shadow distance value is directly correlated by
-        /// the orthogonal projection size used for rendering the shadow map.
-        /// 
-        /// We can use the bounds size and shadow distance to obtain the normalized shadow viewport
-        /// value because both are expressed in world units.
-        /// 
-        /// After getting the normalized size, we scale it by the shadow map resolution to get the
-        /// diagonal texel size of the bounds shadow.
-        /// 
-        /// This leaves us with:
-        ///     <c>shadowTexelSize = boundsSize / shadow dist * shadow res</c>
-        /// 
-        /// This is a lazy approximation and most likely will need some refinement in the future.
-        /// </remarks>
-        internal static float ComputeShadowMapTexelSize(float boundsSize, float shadowDistance, float shadowMapRes)
-        {
-            return boundsSize / shadowDistance * shadowMapRes;
         }
 
         /// <summary>

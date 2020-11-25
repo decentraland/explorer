@@ -70,15 +70,15 @@ namespace CullingControllerTests
 
             // Act
             // Truth tests
-            var farAndBigTest = CullingController.ShouldBeVisible(profile, 30, 20, false, true, true);
-            var smallAndNearTest = CullingController.ShouldBeVisible(profile, 5, 2, false, true, true);
-            var cameraInBoundsTest = CullingController.ShouldBeVisible(profile, 1, 100, true, true, true);
-            var emissiveTest = CullingController.ShouldBeVisible(profile, 15, 20, false, false, true);
+            var farAndBigTest = CullingControllerUtils.TestRendererVisibleRule(profile, 30, 20, false, true, true);
+            var smallAndNearTest = CullingControllerUtils.TestRendererVisibleRule(profile, 5, 2, false, true, true);
+            var cameraInBoundsTest = CullingControllerUtils.TestRendererVisibleRule(profile, 1, 100, true, true, true);
+            var emissiveTest = CullingControllerUtils.TestRendererVisibleRule(profile, 15, 20, false, false, true);
 
             // Falsehood tests
-            var farAndSmallTest = CullingController.ShouldBeVisible(profile, 5, 20, false, true, true);
-            var emissiveAndFarTest = CullingController.ShouldBeVisible(profile, 5, 20, false, false, true);
-            var farAndTransparentTest = CullingController.ShouldBeVisible(profile, 1, 50, false, false, false);
+            var farAndSmallTest = CullingControllerUtils.TestRendererVisibleRule(profile, 5, 20, false, true, true);
+            var emissiveAndFarTest = CullingControllerUtils.TestRendererVisibleRule(profile, 5, 20, false, false, true);
+            var farAndTransparentTest = CullingControllerUtils.TestRendererVisibleRule(profile, 1, 50, false, false, false);
 
             // Assert
             Assert.IsTrue(farAndBigTest);
@@ -101,11 +101,11 @@ namespace CullingControllerTests
             profile.shadowDistanceThreshold = 15;
 
             // Act
-            var nearTest = CullingController.ShouldHaveShadow(profile, 1, 5, 10);
-            var nearButSmallTexel = CullingController.ShouldHaveShadow(profile, 1, 5, 1);
-            var farAndBigEnough = CullingController.ShouldHaveShadow(profile, 30, 30, 30);
-            var farAndSmall = CullingController.ShouldHaveShadow(profile, 10, 30, 30);
-            var farAndSmallTexel = CullingController.ShouldHaveShadow(profile, 10, 30, 1);
+            var nearTest = CullingControllerUtils.TestRendererShadowRule(profile, 1, 5, 10);
+            var nearButSmallTexel = CullingControllerUtils.TestRendererShadowRule(profile, 1, 5, 1);
+            var farAndBigEnough = CullingControllerUtils.TestRendererShadowRule(profile, 30, 30, 30);
+            var farAndSmall = CullingControllerUtils.TestRendererShadowRule(profile, 10, 30, 30);
+            var farAndSmallTexel = CullingControllerUtils.TestRendererShadowRule(profile, 10, 30, 1);
 
             // Assert
             Assert.IsTrue(nearTest);
