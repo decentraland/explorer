@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DCL.Rendering;
 using NSubstitute;
+using NSubstitute.Exceptions;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -18,7 +19,11 @@ namespace CullingControllerTests
         [SetUp]
         public void SetUp()
         {
-            cullingController = CullingController.Create();
+            cullingController = Substitute.ForPartsOf<CullingController>();
+            cullingController.objectsTracker = new CullingObjectsTracker();
+            cullingController.urpAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+            cullingController.SetSettings(new CullingControllerSettings());
+            cullingController.maxTimeBudget = float.MaxValue;
         }
 
         [TearDown]
@@ -118,6 +123,26 @@ namespace CullingControllerTests
         [Test]
         public void EvaluateSkinnedMeshesOffscreenUpdate()
         {
+            // Arrange
+            var profile = new CullingControllerProfile();
+            profile.shadowMapProjectionSizeThreshold = 6;
+            profile.shadowRendererSizeThreshold = 20;
+            profile.shadowDistanceThreshold = 15;
+
+            var settings = new CullingControllerSettings();
+            settings.enableAnimationCullingDistance = 20;
+
+            // Act
+            var farTest = CullingControllerUtils.TestSkinnedRendererOffscreenRule(settings, 30);
+            var nearTest = CullingControllerUtils.TestSkinnedRendererOffscreenRule(settings, 10);
+
+            settings.enableAnimationCulling = false;
+            var farTestWithCullingDisabled = CullingControllerUtils.TestSkinnedRendererOffscreenRule(settings, 30);
+
+            // Assert
+            Assert.IsTrue(nearTest);
+            Assert.IsFalse(farTest);
+            Assert.IsTrue(farTestWithCullingDisabled);
         }
 
         [Test]
@@ -158,13 +183,142 @@ namespace CullingControllerTests
         [UnityTest]
         public IEnumerator ProcessAnimationCulling()
         {
-            yield break;
+            // Pre-arrange
+            const int GO_COUNT = 3;
+            GameObject[] gos = new GameObject[GO_COUNT];
+            Animation[] anims = new Animation[GO_COUNT];
+
+            for (int i = 0; i < GO_COUNT; i++)
+            {
+                gos[i] = new GameObject("Test " + i);
+                anims[i] = gos[i].AddComponent<Animation>();
+                anims[i].cullingType = AnimationCullingType.AlwaysAnimate;
+            }
+
+            var settings = cullingController.GetSettingsCopy();
+
+            settings.enableAnimationCulling = true;
+            settings.enableAnimationCullingDistance = 15;
+
+            cullingController.SetSettings(settings);
+
+            cullingController.objectsTracker.SetDirty();
+            yield return cullingController.objectsTracker.PopulateRenderersList();
+
+            // Test #1
+            gos[0].transform.position = Vector3.zero;
+            gos[1].transform.position = new Vector3(0, 0, 30);
+            gos[2].transform.position = new Vector3(0, 0, 10);
+            CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
+
+            yield return cullingController.ProcessAnimations();
+
+            Assert.AreEqual(AnimationCullingType.AlwaysAnimate, anims[0].cullingType);
+            Assert.AreEqual(AnimationCullingType.BasedOnRenderers, anims[1].cullingType);
+            Assert.AreEqual(AnimationCullingType.AlwaysAnimate, anims[2].cullingType);
+
+            // Test #2
+            gos[2].transform.position = new Vector3(0, 0, 30);
+            CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
+
+            yield return cullingController.ProcessAnimations();
+
+            Assert.AreEqual(AnimationCullingType.BasedOnRenderers, anims[2].cullingType);
+
+            // Test #3
+            gos[2].transform.position = new Vector3(0, 0, 10);
+            CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
+
+            yield return cullingController.ProcessAnimations();
+
+            // Test #4
+            settings.enableAnimationCulling = false;
+            CommonScriptableObjects.playerUnityPosition.Set(Vector3.one * 10000);
+
+            for (int i = 0; i < GO_COUNT; i++)
+            {
+                anims[i].cullingType = AnimationCullingType.AlwaysAnimate;
+            }
+
+            cullingController.SetSettings(settings);
+
+            yield return cullingController.ProcessAnimations();
+
+            for (int i = 0; i < GO_COUNT; i++)
+            {
+                Assert.AreEqual(AnimationCullingType.AlwaysAnimate, anims[i].cullingType);
+            }
+
+            // Annihilate
+            for (int i = 0; i < GO_COUNT; i++)
+            {
+                Object.Destroy(gos[i]);
+            }
         }
 
         [UnityTest]
         public IEnumerator ProcessProfile()
         {
-            yield break;
+            // Pre-arrange
+            const int GO_COUNT = 10;
+            GameObject[] gos = new GameObject[GO_COUNT];
+            Renderer[] rends = new Renderer[GO_COUNT];
+
+            for (int i = 0; i < GO_COUNT; i++)
+            {
+                gos[i] = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+                if (i >= GO_COUNT >> 1)
+                {
+                    Object.DestroyImmediate(gos[i].GetComponent<Renderer>());
+                    gos[i].AddComponent<SkinnedMeshRenderer>();
+                }
+
+                rends[i] = gos[i].GetComponent<Renderer>();
+            }
+
+            var settings = cullingController.GetSettingsCopy();
+
+            settings.skinnedRendererProfile.visibleDistanceThreshold = 0;
+            settings.skinnedRendererProfile.emissiveSizeThreshold = 0;
+            settings.skinnedRendererProfile.opaqueSizeThreshold = 0;
+            settings.skinnedRendererProfile.shadowDistanceThreshold = 0;
+            settings.skinnedRendererProfile.shadowRendererSizeThreshold = 0;
+            settings.skinnedRendererProfile.shadowMapProjectionSizeThreshold = 0;
+
+            settings.rendererProfile.visibleDistanceThreshold = 0;
+            settings.rendererProfile.emissiveSizeThreshold = 0;
+            settings.rendererProfile.opaqueSizeThreshold = 0;
+            settings.rendererProfile.shadowDistanceThreshold = 0;
+            settings.rendererProfile.shadowRendererSizeThreshold = 0;
+            settings.rendererProfile.shadowMapProjectionSizeThreshold = 0;
+
+            settings.enableObjectCulling = true;
+
+            cullingController.SetSettings(settings);
+            cullingController.objectsTracker.SetDirty();
+
+            yield return cullingController.objectsTracker.PopulateRenderersList();
+
+            yield return cullingController.ProcessProfile(settings.rendererProfile);
+
+            for (int i = 0; i < 5; i++)
+            {
+                cullingController.Received().SetCullingForRenderer(rends[i], true, true);
+            }
+
+            yield return cullingController.ProcessProfile(settings.skinnedRendererProfile);
+
+            for (int i = 5; i < GO_COUNT; i++)
+            {
+                cullingController.Received().SetCullingForRenderer(rends[i], true, true);
+            }
+
+            // Annihilate
+            for (int i = 0; i < GO_COUNT; i++)
+            {
+                Object.Destroy(gos[i]);
+            }
         }
     }
 }

@@ -63,6 +63,10 @@ namespace DCL.Rendering
             );
         }
 
+        public CullingController()
+        {
+        }
+
         public CullingController(UniversalRenderPipelineAsset urpAsset, CullingControllerSettings settings, ICullingObjectsTracker cullingObjectsTracker = null)
         {
             if (cullingObjectsTracker == null)
@@ -241,7 +245,7 @@ namespace DCL.Rendering
         /// <param name="r">Renderer to be culled</param>
         /// <param name="shouldBeVisible">If false, the renderer visibility will be set to false.</param>
         /// <param name="shouldHaveShadow">If false, the renderer shadow will be toggled off.</param>
-        private void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
+        internal void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
         {
             var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
 
@@ -267,8 +271,6 @@ namespace DCL.Rendering
             if (!settings.enableAnimationCulling)
                 yield break;
 
-            Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
-
             Animation[] animations = objectsTracker.GetAnimations();
             int animsLength = animations.Length;
 
@@ -288,6 +290,7 @@ namespace DCL.Rendering
                 float startTime = Time.realtimeSinceStartup;
                 Transform t = anim.transform;
 
+                Vector3 playerPosition = CommonScriptableObjects.playerUnityPosition;
                 float distance = Vector3.Distance(playerPosition, t.position);
 
                 if (distance > settings.enableAnimationCullingDistance)

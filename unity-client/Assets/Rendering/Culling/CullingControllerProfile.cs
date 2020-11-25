@@ -9,13 +9,35 @@ namespace DCL.Rendering
     [System.Serializable]
     public class CullingControllerProfile
     {
+        /// <summary>
+        /// Less than this distance from camera: should be always visible, regardless other checks
+        /// </summary>
         public float visibleDistanceThreshold;
+
+        /// <summary>
+        /// Less than this distance from camera: should always have shadow, regardless other checks
+        /// </summary>
         public float shadowDistanceThreshold;
 
+        /// <summary>
+        /// Emissive and bigger than this, should be visible
+        /// </summary>
         public float emissiveSizeThreshold;
+
+        /// <summary>
+        /// Opaque and bigger than this, should be visible
+        /// </summary>
         public float opaqueSizeThreshold;
+
+        /// <summary>
+        /// Bigger than this size: has shadow
+        /// </summary>
         public float shadowRendererSizeThreshold;
-        public float shadowMapProjectionSizeThreshold;
+
+        /// <summary>
+        /// Bigger than this size: has shadow
+        /// </summary>
+        public float shadowMapProjectionSizeThreshold; //
 
         /// <summary>
         /// Performs a linear interpolation between the values of two CullingControllerProfiles.
