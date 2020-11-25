@@ -48,7 +48,8 @@ namespace DCL.SettingsData
 
         public string displayName;
 
-        [Tooltip("Base resolution level")] public BaseResolution baseResolution;
+        [Tooltip("Base resolution level")] 
+        public BaseResolution baseResolution;
 
         [Tooltip("Controls the global anti aliasing setting")]
         public UnityEngine.Rendering.Universal.MsaaQuality antiAliasing;
