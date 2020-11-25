@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace DCL.SettingsPanelHUD
+namespace DCL.SettingsPanelHUD.Sections
 {
     public class SettingsButtonEntry : MonoBehaviour
     {
@@ -16,10 +16,10 @@ namespace DCL.SettingsPanelHUD
         [SerializeField]
         private Button button;
 
-        public void Initialize(SettingsButtonData buttonConfig)
+        public void Initialize(Sprite icon, string text)
         {
-            icon.sprite = buttonConfig.icon;
-            text.text = buttonConfig.text;
+            this.icon.sprite = icon;
+            this.text.text = text;
         }
 
         public void ConfigureAction(UnityAction action)

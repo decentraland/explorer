@@ -1,12 +1,12 @@
+using DCL.SettingsPanelHUD.Sections;
 using System.Collections.Generic;
 
 namespace DCL.SettingsPanelHUD
 {
     public interface ISettingsPanelHUDController
     {
-        void AddMenuButton(SettingsButtonEntry newButton, SettingsButtonData buttonConfig);
-        void AddSection(SettingsSection newSection, bool isActive = true);
-        void OpenSection(SettingsSection sectionToOpen);
+        void AddSection(SettingsButtonEntry newMenuButton, SettingsSectionView newSection, SettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
+        void OpenSection(SettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
     }
 
@@ -15,10 +15,8 @@ namespace DCL.SettingsPanelHUD
         public SettingsPanelHUDView view { get; private set; }
 
         public event System.Action OnClose;
-        public event System.Action<SettingsSection> OnSectionOpen;
 
-        private List<SettingsButtonEntry> settingsMenuButtons = new List<SettingsButtonEntry>();
-        private List<SettingsSection> settingsSections = new List<SettingsSection>();
+        private List<SettingsSectionView> settingsSections = new List<SettingsSectionView>();
 
         public SettingsPanelHUDController()
         {
@@ -40,19 +38,20 @@ namespace DCL.SettingsPanelHUD
             view.SetVisibility(visible);
         }
 
-        public void AddMenuButton(SettingsButtonEntry newButton, SettingsButtonData buttonConfig)
+        public void AddSection(
+            SettingsButtonEntry newMenuButton,
+            SettingsSectionView newSection,
+            SettingsSectionController newSectionController,
+            SettingsSectionModel sectionConfig)
         {
-            newButton.Initialize(buttonConfig);
-            settingsMenuButtons.Add(newButton);
-        }
-
-        public void AddSection(SettingsSection newSection, bool isActive = true)
-        {
-            newSection.SetActive(isActive);
+            newMenuButton.Initialize(sectionConfig.icon, sectionConfig.text);
+            newSection.Initialize(newSectionController, sectionConfig.widgets);
+            newSection.SetActive(false);
             settingsSections.Add(newSection);
+            newMenuButton.ConfigureAction(() => OpenSection(newSection));
         }
 
-        public void OpenSection(SettingsSection sectionToOpen)
+        public void OpenSection(SettingsSectionView sectionToOpen)
         {
             foreach (var section in settingsSections)
             {

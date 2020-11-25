@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using DCL.SettingsPanelHUD.Sections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,12 +6,9 @@ namespace DCL.SettingsPanelHUD
 {
     public class SettingsPanelHUDView : MonoBehaviour
     {
-        [Header("Menu configuration")]
-        [SerializeField] private SettingsButtonEntry menuButtonPrefab;
-        [SerializeField] private List<SettingsButtonData> menuButtonList;
-        [SerializeField] private Transform buttonsContainer;
-
         [Header("Sections configuration")]
+        [SerializeField] private SettingsSectionsConfig sectionsConfig;
+        [SerializeField] private Transform menuButtonsContainer;
         [SerializeField] private Transform sectionsContainer;
 
         [Header("Close Settings")]
@@ -40,31 +37,23 @@ namespace DCL.SettingsPanelHUD
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
 
-            CreateAndConfigureMenus();
+            CreateSections();
             isOpen = !settingsAnimator.hideOnEnable;
 
             closeButton.onClick.AddListener(() => CloseSettingsPanel());
         }
 
-        private void CreateAndConfigureMenus()
+        private void CreateSections()
         {
-            foreach (SettingsButtonData menuButtonConfig in menuButtonList)
+            foreach (SettingsSectionModel sectionConfig in sectionsConfig.sections)
             {
-                var newMenuButton = Instantiate(menuButtonPrefab, buttonsContainer);
-                settingsPanelController.AddMenuButton(newMenuButton, menuButtonConfig);
-
-                var newSection = Instantiate(menuButtonConfig.sectionToOpen, sectionsContainer);
-                settingsPanelController.AddSection(newSection, false);
-
-                newMenuButton.ConfigureAction(() => OpenSection(newSection));
+                var newMenuButton = Instantiate(sectionConfig.menuButtonPrefab, menuButtonsContainer);
+                var newSection = Instantiate(sectionConfig.sectionPrefab, sectionsContainer);
+                var newSectionController = Instantiate(sectionConfig.sectionController);
+                settingsPanelController.AddSection(newMenuButton, newSection, newSectionController, sectionConfig);
             }
 
             settingsPanelController.OpenSection(0);
-        }
-
-        private void OpenSection(SettingsSection sectionToOpen)
-        {
-            settingsPanelController.OpenSection(sectionToOpen);
         }
 
         private void CloseSettingsPanel()

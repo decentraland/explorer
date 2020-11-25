@@ -163,22 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f27ff56bbf7894194c841a7aa0b7c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuButtonPrefab: {fileID: 2470334045984490575, guid: 829d414daa3047541a35abc7d88a1fe5,
-    type: 3}
-  menuButtonList:
-  - icon: {fileID: 21300000, guid: 914d7e458aea54023ade17e08c509416, type: 3}
-    text: General
-    sectionToOpen: {fileID: 5813236629143711783, guid: eb979bec9ddc8d04291cbfd7ff64b626,
-      type: 3}
-  - icon: {fileID: 21300000, guid: 914d7e458aea54023ade17e08c509416, type: 3}
-    text: Video
-    sectionToOpen: {fileID: 8587832263832877060, guid: 8756854bf7a3c564195d3586be4e2759,
-      type: 3}
-  - icon: {fileID: 21300000, guid: 914d7e458aea54023ade17e08c509416, type: 3}
-    text: Audio
-    sectionToOpen: {fileID: 6435142801234834992, guid: bf2f89eea00f95a4994c15c063e7d99d,
-      type: 3}
-  buttonsContainer: {fileID: 3164546539369866496}
+  sectionsConfig: {fileID: 11400000, guid: 51d63453390f1e543ad92d63947851cd, type: 2}
+  menuButtonsContainer: {fileID: 3164546539369866496}
   sectionsContainer: {fileID: 7391549290767826622}
   closeButton: {fileID: 636651055379034414}
   closeAction: {fileID: 11400000, guid: 54539b42d809e284090ff4087d5c733b, type: 2}
@@ -482,8 +468,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8625736755376044189}
   m_HandleRect: {fileID: 6429412650772352685}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.99998844
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -789,7 +775,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00005341875}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2973141775402951563
