@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6559289174053957746}
-  - component: {fileID: 1434507556363074168}
+  - component: {fileID: 388868447176590252}
   - component: {fileID: 4977077271324015645}
   m_Layer: 0
-  m_Name: AvatarAudioHandler
+  m_Name: AvatarAudioHandlerLocal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1434507556363074168
+--- !u!114 &388868447176590252
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61,9 +61,9 @@ MonoBehaviour:
     type: 2}
   spatialBlend: 1
   overrideDefaults: 1
-  dopplerLevel: 0.5
-  minDistance: 2
-  maxDistance: 500
+  dopplerLevel: 1
+  minDistance: 5
+  maxDistance: 200
   audioEvents:
     array:
     - {fileID: 11400000, guid: be626685a98630b4895b28f3fbedc601, type: 2}

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AvatarAudioHandler : MonoBehaviour
+public class AvatarAudioHandlerLocal : MonoBehaviour
 {
     const float WALK_INTERVAL_SEC = 0.4f, RUN_INTERVAL_SEC = 0.27f;
     float intervalTimer = 0f;

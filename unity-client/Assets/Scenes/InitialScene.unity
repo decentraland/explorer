@@ -1036,9 +1036,9 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 1
+  baseUrlMode: 0
   baseUrlCustom: http://localhost:8080/?
-  environment: 2
+  environment: 4
   startInCoords: {x: 0, y: 0}
   forceLocalComms: 0
   allWearables: 0

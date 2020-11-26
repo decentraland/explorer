@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using UnityEngine;
 
 namespace DCL
@@ -12,6 +12,8 @@ namespace DCL
         const float SPEED_GRAVITY = 8.0f;
         const float ROTATION_SPEED = 6.25f;
         const float SPEED_EPSILON = 0.0001f;
+
+        public System.Action<float> OnMove;
 
         Transform avatarTransform
         {
@@ -114,6 +116,8 @@ namespace DCL
             {
                 this.movementSpeed = SPEED_SLOW;
             }
+
+            OnMove?.Invoke(distance);
         }
 
 
