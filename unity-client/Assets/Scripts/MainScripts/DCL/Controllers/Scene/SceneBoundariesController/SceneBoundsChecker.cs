@@ -204,7 +204,7 @@ namespace DCL.Controllers
             UpdateComponents(entity, isInsideBoundaries);
         }
 
-        protected virtual bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
+        protected bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
         {
             for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
             {
@@ -218,7 +218,7 @@ namespace DCL.Controllers
             return true;
         }
 
-        protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        protected void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
             feedbackStyle.ApplyFeedback(entity, isInsideBoundaries);
         }
@@ -251,7 +251,7 @@ namespace DCL.Controllers
             entitiesToCheck.Add(entity);
         }
 
-        protected virtual void OnRemoveEntity(DecentralandEntity entity)
+        protected void OnRemoveEntity(DecentralandEntity entity)
         {
             entitiesToCheck.Remove(entity);
             persistentEntities.Remove(entity);
