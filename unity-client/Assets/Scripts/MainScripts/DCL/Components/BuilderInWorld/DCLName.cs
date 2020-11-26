@@ -1,6 +1,7 @@
 using DCL;
 using DCL.Components;
 using DCL.Controllers;
+using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,10 +30,20 @@ public class DCLName : BaseDisposable
         Model newModel = SceneController.i.SafeFromJson<Model>(newJson);
         if(newModel.value != model.value)
         {
+            string oldValue = model.value;
+
             model = newModel;
             RaiseOnAppliedChanges();
+
+#if UNITY_EDITOR
+            foreach (DecentralandEntity decentralandEntity in this.attachedEntities)
+            {
+                decentralandEntity.gameObject.name.Replace(oldValue, "");
+                decentralandEntity.gameObject.name += "-"+model.value;
+            }
+#endif
         }
-    
+
         return null;
     }
 }
