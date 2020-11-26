@@ -31,6 +31,7 @@ export class SceneStateStorageController extends ExposableAPI {
   async storeState(sceneId: string, sceneState: SerializedSceneState): Promise<void> {
     // Convert to storable format
     const storableFormat = fromSerializedStateToStorableFormat(sceneState)
+
     if (DEBUG) {
       saveToLocalStorage(`scene-state-${sceneId}`, storableFormat)
 

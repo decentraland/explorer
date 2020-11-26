@@ -47,8 +47,8 @@ export class RendererStatefulActor extends StatefulActor {
     ])
   }
 
-  async setComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): Promise<void> {
-    const updates = await this.mapComponentToActions(entityId, componentId, data)
+  setComponent(entityId: EntityId, componentId: ComponentId, data: ComponentData): void {
+    const updates = this.mapComponentToActions(entityId, componentId, data)
     this.engine.sendBatch(updates)
   }
 
