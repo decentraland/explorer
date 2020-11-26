@@ -28,7 +28,8 @@ namespace DCL.SettingsPanelHUD.Sections
             foreach (SettingsWidgetModel widgetConfig in widgetsConfig.widgets)
             {
                 var newWidget = Instantiate(widgetConfig.widgetPrefab, widgetsContainer);
-                settingsSectionController.AddWidget(newWidget, widgetConfig);
+                var newWidgetController = Instantiate(widgetConfig.widgetController);
+                settingsSectionController.AddWidget(newWidget, newWidgetController, widgetConfig);
             }
         }
     }

@@ -10,12 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2b7d68ceeaa29c9438917bf6d2d70073, type: 3}
-  m_Name: GeneralSectionWidgetsConfig
+  m_Name: AudioWidgetsConfig
   m_EditorClassIdentifier: 
   widgets:
-  - title: Mouse
+  - title: Volume
     widgetPrefab: {fileID: 5794240731996032819, guid: cc8cedcaa38f2424b9f20b88b673f8a9,
       type: 3}
-  - title: Scenes content
+    widgetController: {fileID: 11400000, guid: 58b3a5282c16beb42a91390cf2ddfc85, type: 2}
+    controls: {fileID: 11400000, guid: 58d1212a3a95488429b422ce64afbdce, type: 2}
+  - title: Voice chat
     widgetPrefab: {fileID: 5794240731996032819, guid: cc8cedcaa38f2424b9f20b88b673f8a9,
       type: 3}
+    widgetController: {fileID: 11400000, guid: 58b3a5282c16beb42a91390cf2ddfc85, type: 2}
+    controls: {fileID: 11400000, guid: 9c194767c7361e54597afd29259076fe, type: 2}

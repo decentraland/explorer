@@ -22,12 +22,14 @@ namespace DCL.SettingsPanelHUD.Sections
             Sprite icon,
             string text,
             SettingsButtonEntry menuButtonPrefab,
-            SettingsSectionView sectionPrefab)
+            SettingsSectionView sectionPrefab,
+            SettingsSectionController sectionController)
         {
             this.icon = icon;
             this.text = text;
             this.menuButtonPrefab = menuButtonPrefab;
             this.sectionPrefab = sectionPrefab;
+            this.sectionController = sectionController;
         }
     }
 }

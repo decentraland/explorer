@@ -5,7 +5,7 @@ namespace DCL.SettingsPanelHUD
 {
     public interface ISettingsPanelHUDController
     {
-        void AddSection(SettingsButtonEntry newMenuButton, SettingsSectionView newSection, SettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
+        void AddSection(SettingsButtonEntry newMenuButton, SettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
         void OpenSection(SettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
     }
@@ -41,7 +41,7 @@ namespace DCL.SettingsPanelHUD
         public void AddSection(
             SettingsButtonEntry newMenuButton,
             SettingsSectionView newSection,
-            SettingsSectionController newSectionController,
+            ISettingsSectionController newSectionController,
             SettingsSectionModel sectionConfig)
         {
             newMenuButton.Initialize(sectionConfig.icon, sectionConfig.text);

@@ -10,8 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1375673250459735641}
   - component: {fileID: 5813236629143711783}
+  - component: {fileID: 1244561979755116451}
   m_Layer: 5
-  m_Name: DefaultSettingsSection
+  m_Name: DefaultSettingsSectionTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,8 +50,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc1c816bd41f124699f40a8d6c72c46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  widgetsConfig: {fileID: 11400000, guid: 0150196ea2fa8e24a9dd8ea13c9da3d5, type: 2}
   widgetsContainer: {fileID: 1517513337811367436}
+--- !u!222 &1244561979755116451
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301902642198799160}
+  m_CullTransparentMesh: 0
 --- !u!1 &2223375550895257321
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,6 +500,7 @@ GameObject:
   - component: {fileID: 1517513337811367436}
   - component: {fileID: 1123851350194270197}
   - component: {fileID: 5989373837563302460}
+  - component: {fileID: 3881716049129081149}
   m_Layer: 5
   m_Name: WidgetsContainer
   m_TagString: Untagged
@@ -533,7 +542,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 15
     m_Right: 15
-    m_Top: 0
+    m_Top: 15
     m_Bottom: 0
   m_ChildAlignment: 0
   m_Spacing: 10
@@ -557,3 +566,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!222 &3881716049129081149
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7650178520454918622}
+  m_CullTransparentMesh: 0
