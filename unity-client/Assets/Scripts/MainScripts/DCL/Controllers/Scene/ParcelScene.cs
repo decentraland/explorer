@@ -996,11 +996,16 @@ namespace DCL.Controllers
                 }
 
                 case CLASS_ID.FONT:
-                {
-                    newComponent = new DCLFont(this);
-                    break;
-                }
-
+                    {
+                        newComponent = new DCLFont(this);
+                        break;
+                    }
+               
+                case CLASS_ID.NAME:
+                    {
+                        newComponent = new DCLName(this);                      
+                        break;
+                    }
                 default:
                     Debug.LogError($"Unknown classId");
                     break;
