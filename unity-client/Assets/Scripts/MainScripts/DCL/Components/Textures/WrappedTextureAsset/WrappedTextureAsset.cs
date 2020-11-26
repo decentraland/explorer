@@ -1,32 +1,38 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using DCL.Controllers.Gif;
 using DCL.Helpers;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace DCL
 {
     public static class WrappedTextureUtils
     {
+        public static IEnumerator GetHeader(string url, string headerField, Action<string> OnSuccess, Action<string> OnFail)
+        {
+            using (var headReq = UnityWebRequest.Head(url))
+            {
+                yield return headReq.SendWebRequest();
+
+                if (headReq.WebRequestSucceded())
+                {
+                    OnSuccess?.Invoke(headReq.GetResponseHeader(headerField));
+                }
+                else
+                {
+                    OnFail?.Invoke(headReq.error);
+                }
+            }
+        }
+
         public static IEnumerator Fetch(string url, Action<ITexture, AssetPromise_Texture> OnSuccess)
         {
             string contentType = null;
-
-            var headReq = UnityWebRequest.Head(url);
-
-            yield return headReq.SendWebRequest();
-
-            if (headReq.WebRequestSucceded())
-            {
-                contentType = headReq.GetResponseHeader("Content-Type");
-            }
-
-            yield return Create(contentType, url, OnSuccess);
+            yield return GetHeader(url, "Content-Type", type => contentType = type, null);
+            yield return Fetch(contentType, url, OnSuccess);
         }
 
-        private static IEnumerator Create(string contentType, string url, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
+        public static IEnumerator Fetch(string contentType, string url, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
         {
             if (contentType != "image/gif")
             {
