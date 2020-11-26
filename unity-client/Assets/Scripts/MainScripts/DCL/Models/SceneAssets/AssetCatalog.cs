@@ -44,7 +44,22 @@ public class AssetCatalog : MonoBehaviour
         i = this;
     }
 
-    public static ContentProvider GetContentProviderForAssetId(string assetId)
+    public static ContentProvider GetContentProviderForAssetIdInSceneAsetPackCatalog(string assetId)
+    {
+        foreach (SceneAssetPack assetPack in sceneAssetPackCatalog.GetValues())
+        {
+            foreach (SceneObject sceneObject in assetPack.assets)
+            {
+                if (sceneObject.id == assetId)
+                {
+                    return CreateContentProviderForSceneObject(sceneObject);
+                }
+            }
+        }
+        return null;
+    }
+
+    public static ContentProvider GetContentProviderForAssetIdInSceneObjectCatalog(string assetId)
     {
         ContentProvider contentProvider = null;
         if (sceneObjectCatalogValue.ContainsKey(assetId))        
@@ -77,6 +92,21 @@ public class AssetCatalog : MonoBehaviour
         }
 
         return null;
+    }
+
+    public void AddFullSceneObjectCatalog(string payload)
+    {
+        JObject jObject = (JObject)JsonConvert.DeserializeObject(payload);
+        if (jObject["ok"].ToObject<bool>())
+        {
+
+            JArray array = JArray.Parse(jObject["data"].ToString());
+
+            foreach (JObject item in array)
+            {
+                i.AddSceneAssetPackToCatalog(item);
+            }
+        }
     }
 
     public static void AddSceneObjectToCatalog(SceneObject sceneObject)

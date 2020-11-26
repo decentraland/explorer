@@ -107,7 +107,8 @@ namespace DCL.Components
 
             bool updateVisibility = previousModel.visible != model.visible;
             bool updateCollisions = previousModel.withCollisions != model.withCollisions || previousModel.isPointerBlocker != model.isPointerBlocker;
-            bool triggerAttachment = !string.IsNullOrEmpty(model.src) && previousModel.src != model.src;
+            bool triggerAttachment = (!string.IsNullOrEmpty(model.src) && previousModel.src != model.src) ||
+                                     (!string.IsNullOrEmpty(model.assetId) && previousModel.assetId != model.assetId); 
 
             foreach (var entity in attachedEntities)
             {
@@ -131,7 +132,7 @@ namespace DCL.Components
             ContentProvider provider = null;
 
             if (!string.IsNullOrEmpty(model.assetId))
-                provider = AssetCatalog.GetContentProviderForAssetId(model.assetId);
+                provider = AssetCatalog.GetContentProviderForAssetIdInSceneAsetPackCatalog(model.assetId);
                              
             if(provider == null)
                 provider = scene.contentProvider;

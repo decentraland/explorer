@@ -112,6 +112,9 @@ public class BuildModeController : MonoBehaviour
     InputAction_Trigger.Triggered undoDelegate;
     InputAction_Trigger.Triggered snapModeDelegate;
 
+    bool catalogInitializaed = false;
+    bool catalogAdded = false;
+
     void Start()
     {
         if (snapGO == null)       
@@ -176,6 +179,13 @@ public class BuildModeController : MonoBehaviour
 
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
+
+        if (!catalogInitializaed)
+        {
+            AssetCatalog.sceneAssetPackCatalog.GetValues();
+            ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+            catalogInitializaed = true;
+        }
     }
 
     private void OnDestroy()
@@ -234,6 +244,12 @@ public class BuildModeController : MonoBehaviour
             checkerInsideSceneOptimizationCounter++;
         }
 
+    }
+
+    void CatalogReceived(string catalogJson)
+    {
+        AssetCatalog.i.AddFullSceneObjectCatalog(catalogJson);
+        catalogAdded = true;
     }
 
     void StopInput()
@@ -409,7 +425,6 @@ public class BuildModeController : MonoBehaviour
 
     void CheckEditModeInput()
     {
-
         if (!builderInWorldEntityHandler.IsAnyEntitySelected() || isMultiSelectionActive)
         {
             CheckOutline();
