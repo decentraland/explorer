@@ -112,24 +112,23 @@ public class BuildModeController : MonoBehaviour
     InputAction_Trigger.Triggered undoDelegate;
     InputAction_Trigger.Triggered snapModeDelegate;
 
-    bool catalogInitializaed = false;
     bool catalogAdded = false;
 
     void Start()
     {
-        if (snapGO == null)       
+        if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
-        
+
         snapGO.transform.SetParent(transform);
 
-        if (freeMovementGO == null)       
+        if (freeMovementGO == null)
             freeMovementGO = new GameObject("FreeMovementGO");
-    
+
         freeMovementGO.transform.SetParent(cameraParentGO.transform);
 
-        if (editionGO == null)        
+        if (editionGO == null)
             editionGO = new GameObject("EditionGO");
-        
+
         editionGO.transform.SetParent(cameraParentGO.transform);
 
         if (undoGO == null)
@@ -180,12 +179,10 @@ public class BuildModeController : MonoBehaviour
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
-        if (!catalogInitializaed)
-        {
-            AssetCatalog.sceneAssetPackCatalog.GetValues();
-            ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
-            catalogInitializaed = true;
-        }
+
+        AssetCatalog.sceneAssetPackCatalog.GetValues();
+        ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+
     }
 
     private void OnDestroy()
