@@ -14,14 +14,10 @@ export class DapperConnector implements ConnectorInterface {
   }
 
   async login() {
-    const accounts = await window.ethereum.enable()
-    this.subscribeToChanges()
-    return accounts
+    return window.ethereum.enable()
   }
 
   async logout() {
     return true
   }
-
-  private subscribeToChanges() {}
 }
