@@ -49,7 +49,7 @@ public class BuilderInWorldMode : MonoBehaviour
         isModeActive = true;
     }
 
-    public virtual void Desactivate()
+    public virtual void Deactivate()
     {
         gameObject.SetActive(false);
         isModeActive = false;
@@ -126,7 +126,7 @@ public class BuilderInWorldMode : MonoBehaviour
 
     public virtual void CheckInput()
     {
-       
+
     }
 
     public virtual void CheckInputSelectedEntities()
@@ -182,7 +182,6 @@ public class BuilderInWorldMode : MonoBehaviour
 
     protected void TransformActionStarted(DecentralandEntity entity, string type)
     {
-        
         BuilderInWorldEntityAction buildModeEntityAction = new BuilderInWorldEntityAction(entity);
         switch (type)
         {
@@ -206,26 +205,26 @@ public class BuilderInWorldMode : MonoBehaviour
         List<BuilderInWorldEntityAction> removeList = new List<BuilderInWorldEntityAction>();
         foreach (BuilderInWorldEntityAction entityAction in actionList)
         {
-            if (entityAction.entityId == entity.entityId)
-            {        
-                switch (type)
-                {
-                    case "MOVE":
-                      
-                        entityAction.newValue = entity.gameObject.transform.position;
-                        if (Vector3.Distance((Vector3)entityAction.oldValue ,(Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
-                        break;
-                    case "ROTATE":
-                    
-                        entityAction.newValue = entity.gameObject.transform.rotation.eulerAngles;
-                        if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
-                        break;
-                    case "SCALE":
-                        entityAction.newValue = entity.gameObject.transform.lossyScale;
-                        if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
-                        break;
-                }        
+            if (entityAction.entityId != entity.entityId) continue;
+
+            switch (type)
+            {
+                case "MOVE":
+
+                    entityAction.newValue = entity.gameObject.transform.position;
+                    if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
+                    break;
+                case "ROTATE":
+
+                    entityAction.newValue = entity.gameObject.transform.rotation.eulerAngles;
+                    if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
+                    break;
+                case "SCALE":
+                    entityAction.newValue = entity.gameObject.transform.lossyScale;
+                    if (Vector3.Distance((Vector3)entityAction.oldValue, (Vector3)entityAction.newValue) <= 0.09f) removeList.Add(entityAction);
+                    break;
             }
+
         }
         foreach (BuilderInWorldEntityAction entityAction in removeList)
         {
