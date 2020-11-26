@@ -184,7 +184,7 @@ public class NFTShapeLoaderController : MonoBehaviour
                 foundDCLImage = true;
                 this.texturePromise = texturePromise;
                 SetFrameImage(downloadedTex, resizeFrameMesh: true);
-            }, Asset_Gif.MaxSize.DONT_RESIZE);
+            }, Asset_Gif.MaxSize._128);
         }
 
         //We fall back to the nft original image which can have a really big size

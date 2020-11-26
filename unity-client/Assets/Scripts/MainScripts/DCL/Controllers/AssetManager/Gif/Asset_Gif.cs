@@ -35,7 +35,9 @@ namespace DCL.Controllers.Gif
             get
             {
                 if (isLoaded)
-                    return gifTextures[currentTextureIdx].m_texture2d;
+                {
+                    return gifModifiedTextures != null ? gifModifiedTextures[currentTextureIdx] : gifTextures[currentTextureIdx].m_texture2d;
+                }
 
                 return null;
             }
@@ -45,6 +47,7 @@ namespace DCL.Controllers.Gif
         public int height => texture.height;
 
         private List<UniGif.GifTexture> gifTextures;
+        private List<Texture2D> gifModifiedTextures;
 
         private int currentLoopCount;
         private float currentTimeDelay;
@@ -59,12 +62,16 @@ namespace DCL.Controllers.Gif
         public event Action<ITexture, AssetPromise_Texture> OnSuccessEvent;
         public event Action OnFailEvent;
 
+        private bool processedGIFInJS = false;
+
         public Asset_Gif(string url, MaxSize maxSize, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
         {
             this.url = url;
             this.maxSize = maxSize;
             this.OnSuccessEvent = OnSuccess;
             this.OnFailEvent = OnFail;
+
+            KernelConfig.i.EnsureConfigInitialized().Then(config => processedGIFInJS = config.gifSupported);
         }
 
         public IEnumerator Load()
@@ -72,23 +79,24 @@ namespace DCL.Controllers.Gif
             if (isLoaded)
                 Dispose();
 
-            bool processedGIFInJS = false;
-
-#if !UNITY_EDITOR && UNITY_WEBGL
-            yield return DCL.GIFProcessingBridge.i.RequestGIFProcessor(url,
-            (List<UniGif.GifTexture> newTextures) => // Override textures with JS processed ones
+            if (processedGIFInJS)
             {
-                if (newTextures == null || newTextures.Count == 0) return;
-                processedGIFInJS = true;
-                OnGifLoaded(newTextures, 0, newTextures[0].m_texture2d.width, newTextures[0].m_texture2d.height);
-            },
-            () =>
-            {
-                processedGIFInJS = false;
-            });
-#endif
+                bool fetchFailed = false;
+                yield return DCL.GIFProcessingBridge.i.RequestGIFProcessor(url,
+                    (List<UniGif.GifTexture> newTextures) => // Override textures with JS processed ones
+                    {
+                        if (newTextures == null || newTextures.Count == 0) return;
+                        processedGIFInJS = true;
+                        OnGifLoaded(newTextures, 0, newTextures[0].m_texture2d.width, newTextures[0].m_texture2d.height);
+                    }, () => fetchFailed = true);
 
-            if (!processedGIFInJS)
+                if (fetchFailed)
+                {
+                    OnFailEvent?.Invoke();
+                    yield break;
+                }
+            }
+            else
             {
                 byte[] bytes = null;
 
@@ -115,18 +123,22 @@ namespace DCL.Controllers.Gif
                 return;
 
             Cleanup();
+            GIFProcessingBridge.i.DeleteGIF(url);
         }
 
         void Cleanup()
         {
-            for (int i = 0; i < gifTextures.Count; i++)
+            if (gifModifiedTextures != null)
             {
-                if (gifTextures[i].m_texture2d)
-                    UnityEngine.Object.Destroy(gifTextures[i].m_texture2d);
+                int count = gifModifiedTextures.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    if (gifModifiedTextures[i])
+                        UnityEngine.Object.Destroy(gifModifiedTextures[i]);
+                }
+                gifModifiedTextures.Clear();
+                gifModifiedTextures = null;
             }
-
-            gifTextures.Clear();
-            gifTextures = null;
 
             Stop();
         }
@@ -199,10 +211,12 @@ namespace DCL.Controllers.Gif
             if (size == MaxSize.DONT_RESIZE)
                 return;
 
+            // NOTE: we create a new resized texture to not mess up original cached textures
             int texturesCount = gifTextures.Count;
+            gifModifiedTextures = new List<Texture2D>(gifTextures.Count);
             for (int i = 0; i < texturesCount; i++)
             {
-                TextureHelpers.EnsureTexture2DMaxSize(ref gifTextures[i].m_texture2d, (int)size);
+                gifModifiedTextures.Add(TextureHelpers.CopyTexture(gifTextures[i].m_texture2d, (int)size));
             }
         }
 

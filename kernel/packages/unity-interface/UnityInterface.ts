@@ -347,10 +347,6 @@ export class UnityInterface {
     )
   }
 
-  public RejectGIFProcessingRequest() {
-    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
-  }
-
   public SendGIFFetchFailure(id: string) {
     this.gameInstance.SendMessage('SceneController', 'FailGIFFetch', id)
   }
