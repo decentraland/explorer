@@ -1,0 +1,92 @@
+.big-footer {
+  background: #1c191f;
+  color: #736e7d;
+  width: 100%;
+}
+
+.big-footer h4 {
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 1.2;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.big-footer a,
+.big-footer a:hover,
+.big-footer p {
+  color: #736e7d;
+}
+
+.big-footer p.copyright {
+  text-align: right;
+  width: 100%;
+}
+
+.big-footer .eth-container {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 70px;
+}
+
+.big-footer:last-child {
+  padding-bottom: 30px;
+}
+
+.big-footer .big-footer-icon {
+  display: inline-flex;
+  width: 68px;
+  height: 68px;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(115, 110, 125, 0.1);
+  border-radius: 68px;
+  margin-right: 26px;
+}
+
+.big-footer .big-footer-icon svg {
+  width: 48px;
+  height: auto;
+}
+
+.big-footer a.big-footer-button {
+  display: inline-flex;
+  font-size: 18px;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  border-radius: 15px;
+  border: 1px solid #736e7d;
+  padding: 2px 40px 2px 36px;
+  position: relative;
+  transform: translateY(7px);
+}
+
+.big-footer a.big-footer-button:hover {
+  text-decoration: none;
+  background-color: rgba(115, 110, 125, 0.1);
+}
+
+.big-footer a.big-footer-button svg {
+  width: 48px;
+  height: auto;
+}
+
+@media only screen and (max-width: 991px) {
+  .big-footer .eth-container {
+    width: 90%;
+    flex-wrap: wrap;
+  }
+
+  .big-footer .eth-container > div {
+    padding-bottom: 50px;
+  }
+
+  .big-footer .eth-container > div:last-child {
+    padding-bottom: 0;
+  }
+
+  .big-footer p.copyright {
+    text-align: center;
+  }
+}

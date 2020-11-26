@@ -79,8 +79,6 @@ public class HUDController : MonoBehaviour
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
 
-    public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
-
     public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
@@ -146,10 +144,10 @@ public class HUDController : MonoBehaviour
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
         EXPLORE_HUD = 19,
-        MANA_HUD = 20,
-        HELP_AND_SUPPORT_HUD = 21,
-        EMAIL_PROMPT = 22,
-        USERS_AROUND_LIST_HUD = 23,
+        HELP_AND_SUPPORT_HUD = 20,
+        EMAIL_PROMPT = 21,
+        USERS_AROUND_LIST_HUD = 22,
+        GRAPHIC_CARD_WARNING = 23,
         COUNT = 24
     }
 
@@ -191,6 +189,10 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.PROFILE_HUD:
                 CreateHudElement<ProfileHUDController>(configuration, hudElementId);
+                if (profileHud != null)
+                {
+                    profileHud?.AddBackpackWindow(avatarEditorHud);
+                }
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -198,7 +200,10 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
-                avatarEditorHud?.Initialize(ownUserProfile, wearableCatalog);
+                if (avatarEditorHud != null)
+                {
+                    avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
+                }
                 break;
             case HUDElementID.SETTINGS:
                 CreateHudElement<SettingsHUDController>(configuration, hudElementId);
@@ -286,7 +291,6 @@ public class HUDController : MonoBehaviour
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
                         taskbarHud.AddSettingsWindow(settingsHud);
-                        taskbarHud.AddBackpackWindow(avatarEditorHud);
 
                         if (!string.IsNullOrEmpty(extraPayload))
                         {
@@ -336,9 +340,6 @@ public class HUDController : MonoBehaviour
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
                 break;
-            case HUDElementID.MANA_HUD:
-                CreateHudElement<ManaHUDController>(configuration, hudElementId);
-                break;
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
@@ -349,6 +350,9 @@ public class HUDController : MonoBehaviour
                 {
                     minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
                 }
+                break;
+            case HUDElementID.GRAPHIC_CARD_WARNING:
+                CreateHudElement<GraphicCardWarningHUDController>(configuration, hudElementId);
                 break;
         }
 
@@ -444,7 +448,16 @@ public class HUDController : MonoBehaviour
 
     public void UpdateBalanceOfMANA(string balance)
     {
-        manaHud?.SetBalance(balance);
+        profileHud?.SetManaBalance(balance);
+    }
+
+    public void ShowAvatarEditorInSignUp()
+    {
+        if (avatarEditorHud != null)
+        {
+            avatarEditorHud.IsSignUpFlowValue = true;
+            ShowAvatarEditor();
+        }
     }
 
     private void OnDestroy()

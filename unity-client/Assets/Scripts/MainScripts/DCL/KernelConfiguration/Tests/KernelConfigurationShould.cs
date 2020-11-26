@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using UnityEngine;
 using KernelConfigurationTypes;
 
@@ -7,115 +7,129 @@ public class KernelConfigurationShould
     [Test]
     public void TriggerInitializePromiseCorrectly()
     {
-        const float testValue = 1234;
-
-        var loadedConfigSO = Resources.Load<KernelConfig>("KernelConfiguration");
-        var promiseFromLoaded = loadedConfigSO.EnsureConfigInitialized();
-        Assert.IsTrue(promiseFromLoaded.keepWaiting, "Promise shouldn't be resolved until first value is set");
+        const float commRadiusTestValue = 1234;
+        const bool voiceChatEnabledTestValue = false;
+        const string regexTestValue = "1234";
+        KernelConfig.i.initialized = false;
 
         var promiseFromController = KernelConfig.i.EnsureConfigInitialized();
         Assert.IsTrue(promiseFromController.keepWaiting, "Promise shouldn't be resolved until first value is set");
 
-        KernelConfig.i.Set(new KernelConfigModel() { comms = new Comms() { commRadius = testValue } });
+        KernelConfig.i.Set(new KernelConfigModel()
+        {
+            comms = new Comms()
+            {
+                commRadius = commRadiusTestValue,
+                voiceChatEnabled = voiceChatEnabledTestValue
+            },
+            profiles = new Profiles()
+            {
+                nameValidCharacterRegex = regexTestValue,
+                nameValidRegex = regexTestValue
+            }
+        });
 
         Assert.IsFalse(promiseFromController.keepWaiting, "Promise should be resolved");
-        Assert.IsFalse(promiseFromLoaded.keepWaiting, "Promise should be resolved");
+        Assert.AreEqual(commRadiusTestValue, promiseFromController.value?.comms.commRadius, "Promise value should match configs value");
+        Assert.AreEqual(voiceChatEnabledTestValue, promiseFromController.value?.comms.voiceChatEnabled, "Promise value should match configs value");
+        Assert.AreEqual(regexTestValue, promiseFromController.value?.profiles.nameValidCharacterRegex, "Promise value should match configs value");
+        Assert.AreEqual(regexTestValue, promiseFromController.value?.profiles.nameValidRegex, "Promise value should match configs value");
 
-        Assert.AreEqual(testValue, promiseFromController.value?.comms.commRadius, "Promise value should match configs value");
-        Assert.AreEqual(testValue, promiseFromLoaded.value?.comms.commRadius, "Promise value should match configs value");
-
-        var secondLoadedConfigSO = Resources.Load<KernelConfig>("KernelConfiguration");
-        var promiseFromSecondLoaded = secondLoadedConfigSO.EnsureConfigInitialized();
-
-        Assert.IsFalse(promiseFromSecondLoaded.keepWaiting, "Promise should be resolved");
-        Assert.AreEqual(testValue, promiseFromSecondLoaded.value?.comms.commRadius, "Promise value should match configs value");
-
-        bool promiseFromLoadedPass = false;
         bool promiseFromControllerPass = false;
-        bool promiseFromSecondLoadedPass = false;
 
-        promiseFromLoaded.Then((config) => promiseFromLoadedPass = config.comms.commRadius == testValue);
-        promiseFromController.Then((config) => promiseFromControllerPass = config.comms.commRadius == testValue);
-        promiseFromSecondLoaded.Then((config) => promiseFromSecondLoadedPass = config.comms.commRadius == testValue);
+        promiseFromController.Then((config) =>
+        {
+            promiseFromControllerPass =
+                config.comms.commRadius == commRadiusTestValue &&
+                config.comms.voiceChatEnabled == voiceChatEnabledTestValue &&
+                config.profiles.nameValidCharacterRegex == regexTestValue &&
+                config.profiles.nameValidRegex == regexTestValue;
+        });
 
-        Assert.IsTrue(promiseFromLoadedPass);
         Assert.IsTrue(promiseFromControllerPass);
-        Assert.IsTrue(promiseFromSecondLoadedPass);
-
-
-        Resources.UnloadAsset(loadedConfigSO);
-        Resources.UnloadAsset(secondLoadedConfigSO);
-        Resources.UnloadAsset(KernelConfig.i);
     }
 
     [Test]
     public void TriggerOnChangeCorrectly()
     {
-        const float testValue = 1234;
-        const float testValue2 = 5678;
+        const float commRadiusTestValue = 1234;
+        const float commRadiusTestValue2 = 5678;
+        const bool voiceChatEnabledTestValue = false;
+        const bool voiceChatEnabledTestValue2 = true;
+        const string regexTestValue = "1234";
+        const string regexTestValue2 = "5678";
 
-        bool onChange1Called = false;
-        bool onChange2Called = false;
-        bool onChange1Pass = false;
-        bool onChange2Pass = false;
+        bool onChangeCalled = false;
+        bool onChangePass = false;
 
-        KernelConfigModel model = new KernelConfigModel() { comms = new Comms() { commRadius = testValue } };
+        KernelConfig.i.Set(new KernelConfigModel());
 
-        KernelConfig.OnKernelConfigChanged onConfigChage1 = (current, prev) =>
+        KernelConfigModel model = new KernelConfigModel()
         {
-            onChange1Called = true;
-            onChange1Pass = current.comms.commRadius == testValue;
-        };
-        KernelConfig.OnKernelConfigChanged onConfigChage2 = (current, prev) =>
-        {
-            onChange2Called = true;
-            onChange2Pass = current.comms.commRadius == testValue;
+            comms = new Comms()
+            {
+                commRadius = commRadiusTestValue,
+                voiceChatEnabled = voiceChatEnabledTestValue
+            },
+            profiles = new Profiles()
+            {
+                nameValidCharacterRegex = regexTestValue,
+                nameValidRegex = regexTestValue
+            }
         };
 
-        var loadedConfigSO = Resources.Load<KernelConfig>("KernelConfiguration");
-        loadedConfigSO.OnChange += onConfigChage1;
-        KernelConfig.i.OnChange += onConfigChage2;
+        KernelConfig.OnKernelConfigChanged onConfigChange = (current, prev) =>
+        {
+            onChangeCalled = true;
+            onChangePass =
+                current.comms.commRadius == commRadiusTestValue &&
+                current.comms.voiceChatEnabled == voiceChatEnabledTestValue &&
+                current.profiles.nameValidCharacterRegex == regexTestValue &&
+                current.profiles.nameValidRegex == regexTestValue;
+        };
+
+        KernelConfig.i.OnChange += onConfigChange;
 
         KernelConfig.i.Set(model);
-        Assert.IsTrue(onChange1Pass);
-        Assert.IsTrue(onChange2Pass);
+        Assert.IsTrue(onChangePass);
 
-        onChange1Called = false;
-        onChange2Called = false;
-        onChange1Pass = false;
-        onChange2Pass = false;
+        onChangeCalled = false;
+        onChangePass = false;
 
         KernelConfigModel modelUpdateWithSameValues = model.Clone();
         KernelConfig.i.Set(modelUpdateWithSameValues); // this shouldn't trigger onChange cause it has the same values
-        Assert.IsFalse(onChange1Called, "OnChange was called even if the new value is equal to the new one");
-        Assert.IsFalse(onChange2Called, "OnChange was called even if the new value is equal to the new one");
+        Assert.IsFalse(onChangeCalled, "OnChange was called even if the new value is equal to the new one");
 
-        loadedConfigSO.OnChange -= onConfigChage1;
-        KernelConfig.i.OnChange -= onConfigChage2;
+        KernelConfig.i.OnChange -= onConfigChange;
 
-        onConfigChage1 = (current, prev) =>
+        onConfigChange = (current, prev) =>
         {
-            onChange1Called = true;
-            onChange1Pass = current.comms.commRadius == testValue2 && prev.comms.commRadius == testValue;
-        };
-        onConfigChage2 = (current, prev) =>
-        {
-            onChange2Called = true;
-            onChange2Pass = current.comms.commRadius == testValue2 && prev.comms.commRadius == testValue;
+            onChangeCalled = true;
+            onChangePass =
+                current.comms.commRadius == commRadiusTestValue2 && prev.comms.commRadius == commRadiusTestValue &&
+                current.comms.voiceChatEnabled == voiceChatEnabledTestValue2 && prev.comms.voiceChatEnabled == voiceChatEnabledTestValue &&
+                current.profiles.nameValidCharacterRegex == regexTestValue2 && prev.profiles.nameValidRegex == regexTestValue &&
+                current.profiles.nameValidRegex == regexTestValue2 && prev.profiles.nameValidRegex == regexTestValue;
         };
 
-        loadedConfigSO.OnChange += onConfigChage1;
-        KernelConfig.i.OnChange += onConfigChage2;
+        KernelConfig.i.OnChange += onConfigChange;
 
-        KernelConfig.i.Set(new KernelConfigModel() { comms = new Comms() { commRadius = testValue2 } });
-        Assert.IsTrue(onChange1Pass);
-        Assert.IsTrue(onChange2Pass);
+        KernelConfig.i.Set(new KernelConfigModel()
+        {
+            comms = new Comms()
+            {
+                commRadius = commRadiusTestValue2,
+                voiceChatEnabled = voiceChatEnabledTestValue2
+            },
+            profiles = new Profiles()
+            {
+                nameValidCharacterRegex = regexTestValue2,
+                nameValidRegex = regexTestValue2
+            }
+        });
+        Assert.IsTrue(onChangePass);
 
-        loadedConfigSO.OnChange -= onConfigChage1;
-        KernelConfig.i.OnChange -= onConfigChage2;
-
-        Resources.UnloadAsset(loadedConfigSO);
-        Resources.UnloadAsset(KernelConfig.i);
+        KernelConfig.i.OnChange -= onConfigChange;
     }
 
     [Test]
@@ -126,7 +140,5 @@ public class KernelConfigurationShould
         KernelConfig.i.Set(json);
 
         Assert.IsTrue(model.Equals(KernelConfig.i.Get()));
-
-        Resources.UnloadAsset(KernelConfig.i);
     }
 }

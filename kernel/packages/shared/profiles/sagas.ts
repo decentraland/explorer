@@ -66,6 +66,9 @@ import { getExclusiveCatalog } from 'shared/catalogs/selectors'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { Wearable } from 'shared/catalogs/types'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
+import { getProfileType } from './getProfileType'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { UNEXPECTED_ERROR } from 'shared/loading/types'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -121,7 +124,15 @@ function* initialProfileLoad() {
   // initialize profile
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
   const userId = identity.address
-  let profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
+
+  let profile = undefined
+
+  try {
+    profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
+  } catch (e) {
+    ReportFatalError(UNEXPECTED_ERROR)
+    throw e
+  }
 
   if (!PREVIEW) {
     let profileDirty: boolean = false
@@ -177,6 +188,22 @@ function scheduleProfileUpdate(profile: Profile) {
       }
     })
   }).catch((e) => defaultLogger.error(`error while updating profile`, e))
+}
+
+export function* getProfileByUserId(userId: string): any {
+  try {
+    const server = yield select(getProfileDownloadServer)
+    const profiles: { avatars: object[] } = yield profileServerRequest(server, userId)
+
+    if (profiles.avatars.length !== 0) {
+      return profiles.avatars[0]
+    }
+  } catch (error) {
+    if (error.message !== 'Profile not found') {
+      defaultLogger.log(`Error requesting profile for auth check ${userId}, `, error)
+    }
+  }
+  return null
 }
 
 export function* handleFetchProfile(action: ProfileRequestAction): any {
@@ -306,6 +333,19 @@ export async function profileServerRequest(serverUrl: string, userId: string) {
   }
 }
 
+export function* createSignUpProfile(profile: Profile, identity: ExplorerIdentity) {
+  const url: string = yield select(getUpdateProfileServer)
+  const userId = profile.userId
+  // to prevent save a email on profile
+  profile.email = ''
+  return yield modifyAvatar({
+    url,
+    userId,
+    identity,
+    profile
+  })
+}
+
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {
   // TODO (eordano, 16/Sep/2019): See if there's another way around people expecting PASSPORT_SUCCESS
   yield put(profileSuccess(action.payload.userId, action.payload.profile))
@@ -432,7 +472,7 @@ function* handleDeployProfile(deployProfileAction: DeployProfile) {
   }
 }
 
-function fetchProfileLocally(address: string) {
+export function fetchProfileLocally(address: string) {
   const profile: Profile | null = localProfilesRepo.get(address)
   if (profile?.userId === address) {
     return ensureServerFormat(profile)
@@ -534,8 +574,4 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
       reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
     }
   })
-}
-
-export function getProfileType(identity?: ExplorerIdentity): ProfileType {
-  return identity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
 }

@@ -483,6 +483,12 @@ namespace DCL.Interface
             public bool mute;
         }
 
+        [System.Serializable]
+        public class CloseUserAvatarPayload
+        {
+            public bool isSignUpFlow;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -491,6 +497,7 @@ namespace DCL.Interface
      */
     [DllImport("__Internal")] public static extern void StartDecentraland();
     [DllImport("__Internal")] public static extern void MessageFromEngine(string type, string message);
+    [DllImport("__Internal")] public static extern string GetGraphicCard();
 #else
         public static void StartDecentraland()
         {
@@ -508,6 +515,8 @@ namespace DCL.Interface
                 Debug.Log("MessageFromEngine called with: " + type + ", " + message);
             }
         }
+
+        public static string GetGraphicCard() => "In Editor Graphic Card";
 #endif
 
         public static void SendMessage(string type)
@@ -556,6 +565,7 @@ namespace DCL.Interface
         private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
+        private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -779,6 +789,11 @@ namespace DCL.Interface
             SendMessage("LogOut");
         }
 
+        public static void RedirectToSignUp()
+        {
+            SendMessage("RedirectToSignUp");
+        }
+
         public static void PreloadFinished(string sceneId)
         {
             SendMessage("PreloadFinished", sceneId);
@@ -811,10 +826,17 @@ namespace DCL.Interface
             public string face128;
             public string face256;
             public string body;
+            public bool isSignUpFlow;
             public AvatarModel avatar;
         }
 
-        public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot)
+        [System.Serializable]
+        public class SendSaveUserUnverifiedNamePayload
+        {
+            public string newUnverifiedName;
+        }
+
+        public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot, bool isSignUpFlow = false)
         {
             var payload = new SaveAvatarPayload()
             {
@@ -822,9 +844,20 @@ namespace DCL.Interface
                 face = System.Convert.ToBase64String(faceSnapshot.EncodeToPNG()),
                 face128 = System.Convert.ToBase64String(face128Snapshot.EncodeToPNG()),
                 face256 = System.Convert.ToBase64String(face256Snapshot.EncodeToPNG()),
-                body = System.Convert.ToBase64String(bodySnapshot.EncodeToPNG())
+                body = System.Convert.ToBase64String(bodySnapshot.EncodeToPNG()),
+                isSignUpFlow = isSignUpFlow
             };
             SendMessage("SaveUserAvatar", payload);
+        }
+
+        public static void SendSaveUserUnverifiedName(string newName)
+        {
+            var payload = new SendSaveUserUnverifiedNamePayload()
+            {
+                newUnverifiedName = newName
+            };
+
+            SendMessage("SaveUserUnverifiedName", payload);
         }
 
         public static void SendUserAcceptedCollectibles(string airdropId)
@@ -1044,6 +1077,12 @@ namespace DCL.Interface
             muteUserEvent.usersId = usersId;
             muteUserEvent.mute = mute;
             SendMessage("SetMuteUsers", muteUserEvent);
+        }
+
+        public static void SendCloseUserAvatar(bool isSignUpFlow)
+        {
+            closeUserAvatarPayload.isSignUpFlow = isSignUpFlow;
+            SendMessage("CloseUserAvatar", closeUserAvatarPayload);
         }
     }
 }

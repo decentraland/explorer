@@ -2,6 +2,8 @@ import { Profile } from '../types'
 import { WearableId } from 'shared/catalogs/types'
 import { colorString } from './colorString'
 import { ALL_WEARABLES } from 'config'
+import { filterInvalidNameCharacters } from '../utils/names'
+import { createFakeName } from '../utils/fakeName'
 
 export function fixWearableIds(wearableId: string) {
   return wearableId.replace('/male_body', '/BaseMale').replace('/female_body', '/BaseFemale')
@@ -32,7 +34,11 @@ export function calculateDisplayName(userId: string, profile: any): string {
     return profile.name
   }
 
-  return 'Guest-' + userId.substr(2, 6)
+  if (profile.unclaimedName) {
+    return `${filterInvalidNameCharacters(profile.unclaimedName)}#${userId.slice(-4)}`
+  }
+
+  return createFakeName(userId)
 }
 export function processServerProfile(userId: string, receivedProfile: any): Profile {
   const name = calculateDisplayName(userId, receivedProfile)
@@ -65,7 +71,8 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     blocked: receivedProfile.blocked,
     muted: receivedProfile.muted,
     tutorialStep: receivedProfile.tutorialStep || 0,
-    interests: receivedProfile.interests || []
+    interests: receivedProfile.interests || [],
+    unclaimedName: receivedProfile.unclaimedName
   }
 }
 

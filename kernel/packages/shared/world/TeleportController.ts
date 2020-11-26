@@ -1,9 +1,9 @@
 import { parcelLimits } from 'config'
 
-import { teleportObservable, lastPlayerPosition } from 'shared/world/positionThings'
+import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { POIs } from 'shared/comms/POIs'
 import { fetchLayerUsersParcels } from 'shared/comms'
-import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
+import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
 import { ensureUnityInterface } from 'shared/renderer'
 
@@ -12,6 +12,9 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 
 import { StoreContainer } from '../store/rootTypes'
 import { WORLD_EXPLORER } from '../../config/index'
+import { isInitialLoading, isWaitingTutorial } from '../loading/selectors'
+import Html from '../Html'
+import { isLoginStageCompleted, isSignUp } from '../session/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -68,25 +71,22 @@ export const CAMPAIGN_PARCEL_SEQUENCE = [
 
 export class TeleportController {
   public static ensureTeleportAnimation() {
-    document
-      .getElementById('gameContainer')!
-      .setAttribute(
-        'style',
-        'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-      )
-    document.body.setAttribute(
-      'style',
-      'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-    )
+    if (
+      !isInitialLoading(globalThis.globalStore.getState()) &&
+      isLoginStageCompleted(globalThis.globalStore.getState())
+    ) {
+      Html.showTeleportAnimation()
+    }
   }
 
   public static stopTeleportAnimation() {
-    document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
-    document.body.setAttribute('style', 'background: #151419')
-    if (WORLD_EXPLORER) {
-      ensureUnityInterface()
-        .then((unity) => unity.ShowWelcomeNotification())
-        .catch(defaultLogger.error)
+    if (!isSignUp(globalThis.globalStore.getState()) && !isWaitingTutorial(globalThis.globalStore.getState())) {
+      Html.hideTeleportAnimation()
+      if (WORLD_EXPLORER) {
+        ensureUnityInterface()
+          .then((unity) => unity.ShowWelcomeNotification())
+          .catch(defaultLogger.error)
+      }
     }
   }
 
