@@ -17,6 +17,10 @@ namespace DCL.Configuration
         public const string VOXEL_TAG = "Voxel";
         public const string CUSTOM_LAND = "CUSTOM LAND";
 
+
+        //Kernel Report
+        public const string STATE_EVENT_NAME = "stateEvent";
+        public const string SCENE_EVENT_NAME = "SceneEvent";
         public static float ENTITY_POSITION_REPORTING_DELAY = 0.1f; // In seconds
     }
 

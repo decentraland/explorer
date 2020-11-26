@@ -6,23 +6,27 @@ using UnityEngine;
 public class BuilderInWorldEntityAction 
 {
     public string entityId;
-    public object oldValue, newValue;
 
+    public object oldValue;
+    public object newValue;
 
     public BuilderInWorldEntityAction(string entityId)
     {
         this.entityId = entityId;
     }
+
     public BuilderInWorldEntityAction(string entityId, object oldValue, object newValue)
     {
         this.entityId = entityId;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
+
     public BuilderInWorldEntityAction(DecentralandEntity entity)
     {
         this.entityId = entity.entityId;
     }
+
     public BuilderInWorldEntityAction(DecentralandEntity entity,object oldValue,object newValue)
     {
         this.entityId = entity.entityId;

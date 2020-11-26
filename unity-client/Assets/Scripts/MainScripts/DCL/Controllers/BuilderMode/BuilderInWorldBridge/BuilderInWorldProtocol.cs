@@ -8,14 +8,14 @@ public class BuilderInWorldProtocol
     #region Class Declarations
 
     [System.Serializable]
-    public class QuaternionRepresentantion
+    public class QuaternionRepresentation
     {
         public float x;
         public float y;
         public float z;
         public float w;
 
-        public QuaternionRepresentantion(Quaternion quaternion)
+        public QuaternionRepresentation(Quaternion quaternion)
         {
 
             x = quaternion.x;
@@ -38,7 +38,7 @@ public class BuilderInWorldProtocol
     {
         public Vector3 position;
 
-        public QuaternionRepresentantion rotation;
+        public QuaternionRepresentation rotation;
 
         public Vector3 scale;
 

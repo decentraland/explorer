@@ -111,7 +111,6 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 BuilderInWorldEntityData.TransformComponent entityComponentModel = new BuilderInWorldEntityData.TransformComponent();
-                entityComponentModel.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
 
                 entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene); 
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
@@ -127,7 +126,6 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Value is GLTFShape)
             {
                 BuilderInWorldEntityData.GLTFShapeComponent entityComponentModel = new BuilderInWorldEntityData.GLTFShapeComponent();
-                entityComponentModel.componentId = (int)CLASS_ID.GLTF_SHAPE;
                 GLTFShape gLTFShape = (GLTFShape)keyValuePair.Value;
                 entityComponentModel.src = gLTFShape.model.src;
                 entityComponentModel.sharedId = keyValuePair.Value.id;

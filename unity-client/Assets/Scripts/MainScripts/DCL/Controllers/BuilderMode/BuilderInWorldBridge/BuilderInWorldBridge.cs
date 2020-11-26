@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Interface;
 using DCL.Models;
@@ -15,7 +16,7 @@ using static BuilderInWorldProtocol;
 public class BuilderInWorldBridge : MonoBehaviour
 {
 
-    //This is done for optimization purposes, recreating new objects can increase garbaje collection
+    //This is done for optimization purposes, recreating new objects can increase garbage collection
     TransformComponent entityTransformComponentModel = new TransformComponent();
 
     StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
@@ -37,15 +38,17 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         WebInterface.SceneEvent<ModifyEntityComponentEvent> sceneEvent = new WebInterface.SceneEvent<ModifyEntityComponentEvent>();
         sceneEvent.sceneId = scene.sceneData.id;
-        sceneEvent.eventType = "stateEvent";
+        sceneEvent.eventType = BuilderInWorldSettings.STATE_EVENT_NAME;
         sceneEvent.payload = modifyEntityComponentEvent;
 
-        string messasage = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
+
+        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't enconde them
+        string message = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
-        WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
+        WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
 
     public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
@@ -53,37 +56,37 @@ public class BuilderInWorldBridge : MonoBehaviour
         List<ComponentPayload> list = new List<ComponentPayload>();
         foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
         {
-            if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
-            {
-                ComponentPayload componentPayLoad = new ComponentPayload();
+            if (keyValuePair.Key != CLASS_ID_COMPONENT.TRANSFORM) continue;
 
-                componentPayLoad.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
-                TransformComponent entityComponentModel = new TransformComponent();
+            ComponentPayload componentPayLoad = new ComponentPayload();
 
-                entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
-                entityComponentModel.rotation = new QuaternionRepresentantion(entity.gameObject.transform.rotation);
-                entityComponentModel.scale = entity.gameObject.transform.localScale;
+            componentPayLoad.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
+            TransformComponent entityComponentModel = new TransformComponent();
 
-                componentPayLoad.data = entityComponentModel;
+            entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
+            entityComponentModel.rotation = new QuaternionRepresentation(entity.gameObject.transform.rotation);
+            entityComponentModel.scale = entity.gameObject.transform.localScale;
 
-                list.Add(componentPayLoad);
+            componentPayLoad.data = entityComponentModel;
 
-            }
+            list.Add(componentPayLoad);
+
+
         }
 
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
         {
-            if (keyValuePair.Value is GLTFShape gtlfShape)
-            {
-                ComponentPayload componentPayLoad = new ComponentPayload();
+            if (!(keyValuePair.Value is GLTFShape gtlfShape)) continue;
 
-                GLTFShapeComponent entityComponentModel = new GLTFShapeComponent();
-                componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
-                entityComponentModel.src = gtlfShape.model.src;
-                componentPayLoad.data = entityComponentModel;
+            ComponentPayload componentPayLoad = new ComponentPayload();
 
-                list.Add(componentPayLoad);
-            }
+            GLTFShapeComponent entityComponentModel = new GLTFShapeComponent();
+            componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
+            entityComponentModel.src = gtlfShape.model.src;
+            componentPayLoad.data = entityComponentModel;
+
+            list.Add(componentPayLoad);
+
         }
 
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
@@ -95,7 +98,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;
 
         entityTransformComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
-        entityTransformComponentModel.rotation = new QuaternionRepresentantion(entity.gameObject.transform.rotation);
+        entityTransformComponentModel.rotation = new QuaternionRepresentation(entity.gameObject.transform.rotation);
         entityTransformComponentModel.scale = entity.gameObject.transform.localScale;
 
         entitySingleComponentPayload.data = entityTransformComponentModel;
@@ -104,16 +107,19 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         WebInterface.SceneEvent<ModifyEntityComponentEvent> sceneEvent = new WebInterface.SceneEvent<ModifyEntityComponentEvent>();
         sceneEvent.sceneId = scene.sceneData.id;
-        sceneEvent.eventType = "stateEvent";
+        sceneEvent.eventType = BuilderInWorldSettings.STATE_EVENT_NAME;
         sceneEvent.payload = modifyEntityComponentEvent;
 
-        string messasage = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
+
+        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't enconde them
+    
+        string message = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
 
-        WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
+        WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
 
     public void RemoveEntityOnKernel(string entityId, ParcelScene scene)
@@ -123,7 +129,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         removeEntityPayLoad.entityId = entityId;
         removeEntityEvent.payload = removeEntityPayLoad;
 
-        WebInterface.SendSceneEvent(scene.sceneData.id, "stateEvent", removeEntityEvent);
+        WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, removeEntityEvent);
     }
 
     public void StartKernelEditMode(ParcelScene scene)
@@ -138,7 +144,7 @@ public class BuilderInWorldBridge : MonoBehaviour
 
     public void PublishScene(ParcelScene scene)
     {
-        WebInterface.SendSceneEvent(scene.sceneData.id, "stateEvent", storeSceneState);
+        WebInterface.SendSceneEvent(scene.sceneData.id, BuilderInWorldSettings.STATE_EVENT_NAME, storeSceneState);
     }
 
     void SendNewEntityToKernel(string sceneId, string entityId, ComponentPayload[] componentsPayload)
@@ -151,15 +157,16 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         WebInterface.SceneEvent<AddEntityEvent> sceneEvent = new WebInterface.SceneEvent<AddEntityEvent>();
         sceneEvent.sceneId = sceneId;
-        sceneEvent.eventType = "stateEvent";
+        sceneEvent.eventType = BuilderInWorldSettings.STATE_EVENT_NAME;
         sceneEvent.payload = addEntityEvent;
 
 
-        string messasage = Newtonsoft.Json.JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
+        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't enconde them
+        string message = Newtonsoft.Json.JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
 
-        WebInterface.BuilderInWorldMessage("SceneEvent", messasage);
+        WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
 }
