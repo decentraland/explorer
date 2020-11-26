@@ -445,7 +445,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
     }
 
-    void DestroyLastCreatedEntities()
+    public void DestroyLastCreatedEntities()
     {
         List<DCLBuilderInWorldEntity> entitiesToRemove = new List<DCLBuilderInWorldEntity>();
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
@@ -510,6 +510,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     {
         if (entityToDelete.IsSelected && checkSelection)
             DeselectEntity(entityToDelete);
+
+        if (selectedEntities.Contains(entityToDelete))
+            selectedEntities.Remove(entityToDelete);
         RemoveConvertedEntity(entityToDelete.rootEntity);
         entityToDelete.rootEntity.OnRemoved -= RemoveConvertedEntity;
         entityToDelete.Delete();

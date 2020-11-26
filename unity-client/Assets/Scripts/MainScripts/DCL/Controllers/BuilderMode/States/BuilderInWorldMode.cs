@@ -72,6 +72,11 @@ public class BuilderInWorldMode : MonoBehaviour
 
     }
 
+    public virtual bool ShouldCancelUndoAction()
+    {
+        return false;
+    }
+
     public virtual void SetDuplicationOffset(float offset)
     {
 

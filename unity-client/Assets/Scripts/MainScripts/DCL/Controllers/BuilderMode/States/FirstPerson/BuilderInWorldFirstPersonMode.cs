@@ -12,6 +12,8 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
     public float rotationSpeed = 0.5f;
     public float distanceFromCameraForNewEntitties = 5;
 
+    [Header("Prefab references")]
+    public BuilderInWorldInputWrapper builderInputWrapper;
 
     [Header("InputActions")]
     [SerializeField] internal InputAction_Hold rotationHold;
@@ -34,6 +36,8 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
 
         rotationHold.OnStarted += rotationHoldStartDelegate;
         rotationHold.OnFinished += rotationHoldFinishedDelegate;
+
+        builderInputWrapper.OnMouseClick += MouseClick;
     }
 
     private void OnDestroy()
@@ -84,6 +88,31 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
             freeMovementGO.transform.rotation = lookOnLook;
         }
 
+    }
+
+    public void MouseClick(int buttonId, Vector3 mouseposition)
+    {
+        if (!isModeActive) return;
+        if (buttonId != 1) return;
+        if (selectedEntities.Count <= 0) return;
+
+        UndoSelection();
+    }
+
+    public override bool ShouldCancelUndoAction()
+    {      
+        if (builderInWorldEntityHandler.GetSelectedEntityList().Count >= 1)
+        {
+            UndoSelection();
+            return true;
+        }
+        return false;
+    }
+
+    public void UndoSelection()
+    {
+        BuilderInWorldUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
+        builderInWorldEntityHandler.DeselectEntities();
     }
 
     public override void SetDuplicationOffset(float offset)

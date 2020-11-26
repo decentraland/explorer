@@ -117,6 +117,8 @@ public class BuilderInWorldController : MonoBehaviour
     InputAction_Trigger.Triggered undoDelegate;
     InputAction_Trigger.Triggered snapModeDelegate;
 
+    EditModeState currentEditModeState = EditModeState.Inactive;
+
     void Start()
     {
         if (snapGO == null)
@@ -412,8 +414,13 @@ public class BuilderInWorldController : MonoBehaviour
 
     void UndoAction()
     {
-        actionController.TryToUndoAction();
         InputDone();
+
+        if (currentActiveMode.ShouldCancelUndoAction())
+            return;
+
+        actionController.TryToUndoAction();
+
     }
 
     void CheckEditModeInput()
@@ -460,6 +467,9 @@ public class BuilderInWorldController : MonoBehaviour
                 HUDController.i.buildModeHud.ActivateGodModeUI();
                 break;
         }
+
+        currentEditModeState = state;
+
         if (currentActiveMode != null)
         {
             currentActiveMode.Activate(sceneToEdit);

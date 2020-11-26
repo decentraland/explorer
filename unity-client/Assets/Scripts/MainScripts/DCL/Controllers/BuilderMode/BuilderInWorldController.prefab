@@ -454,6 +454,7 @@ MonoBehaviour:
   scaleSpeed: 0.25
   rotationSpeed: 0.5
   distanceFromCameraForNewEntitties: 5
+  builderInputWrapper: {fileID: 1208871511405416592}
   rotationHold: {fileID: 11400000, guid: 3aea5eddf3f7c8a4988b3e4d951ca84a, type: 2}
 --- !u!1 &1208871511595241338
 GameObject:

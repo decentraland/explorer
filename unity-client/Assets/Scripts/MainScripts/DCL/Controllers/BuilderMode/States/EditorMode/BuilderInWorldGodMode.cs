@@ -310,6 +310,16 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         isPlacingNewObject = false;
         DesactivateVoxelMode();
     }
+    public override bool ShouldCancelUndoAction()
+    {
+        if (isPlacingNewObject)
+        {
+            builderInWorldEntityHandler.DestroyLastCreatedEntities();
+            isPlacingNewObject = false;
+            return true;
+        }
+        return false;
+    }
 
     public override void SetSnapActive(bool isActive)
     {
