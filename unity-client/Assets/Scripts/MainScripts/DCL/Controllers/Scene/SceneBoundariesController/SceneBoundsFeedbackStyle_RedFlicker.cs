@@ -1,11 +1,12 @@
+﻿using System.Collections.Generic;
+using System.Linq;
 using DCL.Helpers;
 using DCL.Models;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Controllers
 {
-    public class SceneBoundariesDebugModeChecker : SceneBoundariesChecker
+    public class SceneBoundsFeedbackStyle_RedFlicker : ISceneBoundsFeedbackStyle
     {
         class InvalidMeshInfo
         {
@@ -53,36 +54,27 @@ namespace DCL.Controllers
         Dictionary<GameObject, InvalidMeshInfo> invalidMeshesInfo = new Dictionary<GameObject, InvalidMeshInfo>();
         HashSet<Renderer> invalidSubmeshes = new HashSet<Renderer>();
 
-        public SceneBoundariesDebugModeChecker() : base()
+        public SceneBoundsFeedbackStyle_RedFlicker()
         {
             invalidMeshesInfo = new Dictionary<GameObject, InvalidMeshInfo>();
             invalidMeshMaterial = Resources.Load(INVALID_MESH_MATERIAL_NAME) as Material;
             invalidSubMeshMaterial = Resources.Load(INVALID_SUBMESH_MATERIAL_NAME) as Material;
         }
 
-        protected override bool AreSubmeshesInsideBoundaries(DecentralandEntity entity)
+        public void OnRendererExitBounds(Renderer renderer)
         {
-            bool isInsideBoundaries = true;
-
-            for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
-            {
-                if (!entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
-                {
-                    isInsideBoundaries = false;
-
-                    invalidSubmeshes.Add(entity.renderers[i]);
-                }
-            }
-
-            return isInsideBoundaries;
+            invalidSubmeshes.Add(renderer);
         }
 
-        protected override void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        public void ApplyFeedback(DecentralandEntity entity, bool isInsideBoundaries)
         {
             if (isInsideBoundaries)
+            {
                 RemoveInvalidMeshEffect(entity);
-            else
-                AddInvalidMeshEffect(entity);
+                return;
+            }
+
+            AddInvalidMeshEffect(entity);
         }
 
         void RemoveInvalidMeshEffect(DecentralandEntity entity)
@@ -157,24 +149,14 @@ namespace DCL.Controllers
             return !invalidMeshesInfo.ContainsKey(entity.gameObject);
         }
 
-        public Dictionary<Renderer, Material> GetOriginalMaterials(DecentralandEntity entity)
+        public Material[] GetOriginalMaterials(DecentralandEntity entity)
         {
             if (invalidMeshesInfo.ContainsKey(entity.gameObject))
             {
-                return invalidMeshesInfo[entity.gameObject].originalMaterials;
+                return invalidMeshesInfo[entity.gameObject].originalMaterials.Values.ToArray();
             }
 
             return null;
-        }
-
-        protected override void OnRemoveEntity(DecentralandEntity entity)
-        {
-            base.OnRemoveEntity(entity);
-
-            if (entity.gameObject != null)
-            {
-                RemoveInvalidMeshEffect(entity);
-            }
         }
     }
 }

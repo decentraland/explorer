@@ -22,10 +22,10 @@ namespace SceneBoundariesCheckerTests
             yield return SetUp_SceneController(debugMode: true);
             yield return SetUp_CharacterController();
 
-            sceneController.boundariesChecker.timeBetweenChecks = 0f;
+            sceneController.boundsChecker.timeBetweenChecks = 0f;
 
             UnityEngine.Assertions.Assert.IsTrue(sceneController.useBoundariesChecker);
-            UnityEngine.Assertions.Assert.IsTrue(sceneController.boundariesChecker is SceneBoundariesDebugModeChecker);
+            //UnityEngine.Assertions.Assert.IsTrue(sceneController.boundsChecker is SceneBoundsDebugModeChecker);
         }
 
         [UnityTest]

@@ -6,12 +6,19 @@ using System.Collections;
 
 namespace DCL.Controllers
 {
+    public interface ISceneBoundsFeedbackStyle
+    {
+        void OnRendererExitBounds(Renderer renderer);
+        void ApplyFeedback(DecentralandEntity entity, bool isInsideBoundaries);
+        Material[] GetOriginalMaterials(DecentralandEntity entity);
+    }
+
     public interface IOutOfSceneBoundariesHandler
     {
         void UpdateOutOfBoundariesState(bool enable);
     }
 
-    public class SceneBoundariesChecker
+    public class SceneBoundsChecker
     {
         [System.NonSerialized] public float timeBetweenChecks = 1f;
 
@@ -24,10 +31,21 @@ namespace DCL.Controllers
 
         public int entitiesToCheckCount => entitiesToCheck.Count;
 
-        public SceneBoundariesChecker()
+        private ISceneBoundsFeedbackStyle feedbackStyle;
+
+        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null)
         {
-            entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
-            lastCheckTime = Time.realtimeSinceStartup;
+            this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple();
+        }
+
+        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyleStyle)
+        {
+            this.feedbackStyle = feedbackStyleStyle;
+        }
+
+        public Material[] GetOriginalMaterials(DecentralandEntity entity)
+        {
+            return feedbackStyle.GetOriginalMaterials(entity);
         }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
@@ -75,10 +93,21 @@ namespace DCL.Controllers
             }
         }
 
-        public void Stop()
+        public void Start()
         {
             if (entitiesCheckRoutine != null)
-                CoroutineStarter.Stop(entitiesCheckRoutine);
+                return;
+
+            lastCheckTime = Time.realtimeSinceStartup;
+            entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
+        }
+
+        public void Stop()
+        {
+            if (entitiesCheckRoutine == null)
+                return;
+
+            CoroutineStarter.Stop(entitiesCheckRoutine);
         }
 
         public void AddEntityToBeChecked(DecentralandEntity entity)
@@ -181,6 +210,7 @@ namespace DCL.Controllers
             {
                 if (!entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
                 {
+                    feedbackStyle.OnRendererExitBounds(entity.meshesInfo.renderers[i]);
                     return false;
                 }
             }
@@ -190,19 +220,10 @@ namespace DCL.Controllers
 
         protected virtual void UpdateEntityMeshesValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
-            if (entity.meshesInfo.renderers[0] == null) return;
-
-            if (isInsideBoundaries != entity.meshesInfo.renderers[0].enabled && entity.meshesInfo.currentShape.IsVisible())
-            {
-                for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
-                {
-                    if (entity.meshesInfo.renderers[i] != null)
-                        entity.meshesInfo.renderers[i].enabled = isInsideBoundaries;
-                }
-            }
+            feedbackStyle.ApplyFeedback(entity, isInsideBoundaries);
         }
 
-        protected virtual void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
+        protected void UpdateEntityCollidersValidState(DecentralandEntity entity, bool isInsideBoundaries)
         {
             int collidersCount = entity.meshesInfo.colliders.Count;
             if (collidersCount > 0 && isInsideBoundaries != entity.meshesInfo.colliders[0].enabled && entity.meshesInfo.currentShape.HasCollisions())
@@ -215,7 +236,7 @@ namespace DCL.Controllers
             }
         }
 
-        protected virtual void UpdateComponents(DecentralandEntity entity, bool isInsideBoundaries)
+        protected void UpdateComponents(DecentralandEntity entity, bool isInsideBoundaries)
         {
             IOutOfSceneBoundariesHandler[] components = entity.gameObject.GetComponentsInChildren<IOutOfSceneBoundariesHandler>();
 
@@ -225,7 +246,7 @@ namespace DCL.Controllers
             }
         }
 
-        protected virtual void OnAddEntity(DecentralandEntity entity)
+        protected void OnAddEntity(DecentralandEntity entity)
         {
             entitiesToCheck.Add(entity);
         }
@@ -234,6 +255,7 @@ namespace DCL.Controllers
         {
             entitiesToCheck.Remove(entity);
             persistentEntities.Remove(entity);
+            feedbackStyle.ApplyFeedback(entity, true);
         }
     }
 }

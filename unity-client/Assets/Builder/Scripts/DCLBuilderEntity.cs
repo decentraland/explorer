@@ -76,7 +76,7 @@ namespace Builder
 
             //builder evaluate boundaries by itself
             if (DCL.SceneController.i.useBoundariesChecker)
-                entity.OnShapeUpdated -= DCL.SceneController.i.boundariesChecker.EvaluateEntityPosition;
+                entity.OnShapeUpdated -= DCL.SceneController.i.boundsChecker.EvaluateEntityPosition;
 
             gameObject.transform.localScale = Vector3.zero;
 

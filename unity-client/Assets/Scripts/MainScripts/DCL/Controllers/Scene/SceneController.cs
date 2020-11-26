@@ -53,7 +53,8 @@ namespace DCL
             DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
-            InitializeSceneBoundariesChecker(DataStore.debugConfig.isDebugMode);
+            boundsChecker = new SceneBoundsChecker();
+            boundsChecker.Start();
 
             RenderProfileManifest.i.Initialize();
             Environment.i.Initialize(this);
@@ -524,31 +525,15 @@ namespace DCL
 
         public void ActivateBuilderInWorldEditScene()
         {
-            InitializeSceneBoundariesChecker(true);
+            boundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
 
         public void DeactivateBuilderInWorldEditScene()
         {
-            InitializeSceneBoundariesChecker(false);
+            boundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_Simple());
         }
 
-        public void InitializeSceneBoundariesChecker(bool debugMode)
-        {
-            if (!useBoundariesChecker) return;
 
-            if (boundariesChecker != null)
-                boundariesChecker.Stop();
-
-            if (debugMode)
-            {
-                boundariesChecker = new SceneBoundariesDebugModeChecker();
-                boundariesChecker.timeBetweenChecks = 0f;
-            }
-            else
-            {
-                boundariesChecker = new SceneBoundariesChecker();
-            }
-        }
 
         private void SetPositionDirty(DCLCharacterPosition character)
         {
@@ -892,7 +877,7 @@ namespace DCL
         [System.NonSerialized]
         public bool prewarmEntitiesPool = true;
 
-        public SceneBoundariesChecker boundariesChecker { get; private set; }
+        public SceneBoundsChecker boundsChecker { get; private set; }
 
         private bool sceneSortDirty = false;
         private bool positionDirty = true;

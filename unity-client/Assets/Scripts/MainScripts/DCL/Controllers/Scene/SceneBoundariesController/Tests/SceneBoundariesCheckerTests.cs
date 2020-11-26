@@ -15,7 +15,7 @@ namespace SceneBoundariesCheckerTests
         {
             yield return base.SetUp();
 
-            sceneController.boundariesChecker.timeBetweenChecks = 0f;
+            sceneController.boundsChecker.timeBetweenChecks = 0f;
         }
 
         [UnityTest]

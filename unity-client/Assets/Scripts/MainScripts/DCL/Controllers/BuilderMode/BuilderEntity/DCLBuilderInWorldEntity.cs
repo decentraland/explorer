@@ -112,7 +112,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
         SaveOriginalMaterialAndSetEditMaterials();
-        SceneController.i.boundariesChecker.AddPersistent(rootEntity);
+        SceneController.i.boundsChecker.AddPersistent(rootEntity);
     }
 
     public void Deselect()
@@ -122,7 +122,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = false;
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
-        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(rootEntity);
+        SceneController.i.boundsChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
 
     }
