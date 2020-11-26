@@ -6,7 +6,17 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class ParcelScenesCleaner
+    public interface IParcelScenesCleaner
+    {
+        void Start();
+        void Stop();
+        void MarkForCleanup(DecentralandEntity entity);
+        void MarkRootEntityForCleanup(ParcelScene scene, DecentralandEntity entity);
+        void MarkDisposableComponentForCleanup(ParcelScene scene, string componentId);
+        void ForceCleanup();
+    }
+
+    public class ParcelScenesCleaner : IParcelScenesCleaner
     {
         const float MAX_TIME_BUDGET = 0.01f;
 

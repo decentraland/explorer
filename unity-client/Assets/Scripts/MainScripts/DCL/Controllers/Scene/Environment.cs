@@ -16,6 +16,10 @@ namespace DCL
         public WorldBlockersController worldBlockersController { get; private set; }
         public ICullingController cullingController { get; private set; }
         public InteractionHoverCanvasController interactionHoverCanvasController { get; private set; }
+
+        public IParcelScenesCleaner parcelScenesCleaner { get; private set; }
+
+
         public Clipboard clipboard { get; }
 
         private bool initialized;
@@ -38,6 +42,7 @@ namespace DCL
             memoryManager.Initialize();
             cullingController = CullingController.Create();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(sceneHandler, DCLCharacterController.i.characterPosition);
+            parcelScenesCleaner = new ParcelScenesCleaner();
 
             initialized = true;
         }
