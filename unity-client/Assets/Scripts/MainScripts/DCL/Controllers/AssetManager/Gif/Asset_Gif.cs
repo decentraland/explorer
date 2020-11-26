@@ -9,18 +9,6 @@ namespace DCL.Controllers.Gif
 {
     public class Asset_Gif : IDisposable, ITexture
     {
-        public enum MaxSize
-        {
-            DONT_RESIZE = -1,
-            _32 = 32,
-            _64 = 64,
-            _128 = 128,
-            _256 = 256,
-            _512 = 512,
-            _1024 = 1024,
-            _2048 = 2048
-        }
-
         public event Action<Texture2D> OnFrameTextureChanged;
 
         public bool isLoaded
@@ -36,7 +24,7 @@ namespace DCL.Controllers.Gif
             {
                 if (isLoaded)
                 {
-                    return gifModifiedTextures != null ? gifModifiedTextures[currentTextureIdx] : gifTextures[currentTextureIdx].m_texture2d;
+                    return gifTextures[currentTextureIdx].m_texture2d;
                 }
 
                 return null;
@@ -47,7 +35,6 @@ namespace DCL.Controllers.Gif
         public int height => texture.height;
 
         private List<UniGif.GifTexture> gifTextures;
-        private List<Texture2D> gifModifiedTextures;
 
         private int currentLoopCount;
         private float currentTimeDelay;
@@ -57,17 +44,15 @@ namespace DCL.Controllers.Gif
         private Coroutine updateRoutine = null;
 
         private string url;
-        private MaxSize maxSize;
 
         public event Action<ITexture, AssetPromise_Texture> OnSuccessEvent;
         public event Action OnFailEvent;
 
         private bool processedGIFInJS = false;
 
-        public Asset_Gif(string url, MaxSize maxSize, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
+        public Asset_Gif(string url, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
         {
             this.url = url;
-            this.maxSize = maxSize;
             this.OnSuccessEvent = OnSuccess;
             this.OnFailEvent = OnFail;
 
@@ -111,7 +96,6 @@ namespace DCL.Controllers.Gif
                 yield return UniGif.GetTextureListCoroutine(bytes, OnGifLoaded);
             }
 
-            SetMaxTextureSize(maxSize);
             Play();
 
             OnSuccessEvent?.Invoke(this, null);
@@ -128,18 +112,6 @@ namespace DCL.Controllers.Gif
 
         void Cleanup()
         {
-            if (gifModifiedTextures != null)
-            {
-                int count = gifModifiedTextures.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    if (gifModifiedTextures[i])
-                        UnityEngine.Object.Destroy(gifModifiedTextures[i]);
-                }
-                gifModifiedTextures.Clear();
-                gifModifiedTextures = null;
-            }
-
             Stop();
         }
 
@@ -200,23 +172,6 @@ namespace DCL.Controllers.Gif
 
                 currentTimeDelay = gifTextures[currentTextureIdx].m_delaySec;
                 OnFrameTextureChanged?.Invoke(texture);
-            }
-        }
-
-        public void SetMaxTextureSize(MaxSize size)
-        {
-            if (!isLoaded)
-                return;
-
-            if (size == MaxSize.DONT_RESIZE)
-                return;
-
-            // NOTE: we create a new resized texture to not mess up original cached textures
-            int texturesCount = gifTextures.Count;
-            gifModifiedTextures = new List<Texture2D>(gifTextures.Count);
-            for (int i = 0; i < texturesCount; i++)
-            {
-                gifModifiedTextures.Add(TextureHelpers.CopyTexture(gifTextures[i].m_texture2d, (int)size));
             }
         }
 
