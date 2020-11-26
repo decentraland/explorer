@@ -5,8 +5,9 @@ namespace DCL.SettingsPanelHUD
 {
     public interface ISettingsPanelHUDController
     {
-        void AddSection(SettingsButtonEntry newMenuButton, SettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
-        void OpenSection(SettingsSectionView sectionToOpen);
+        List<ISettingsSectionView> sections { get; }
+        void AddSection(SettingsButtonEntry newMenuButton, ISettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
+        void OpenSection(ISettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
     }
 
@@ -16,7 +17,8 @@ namespace DCL.SettingsPanelHUD
 
         public event System.Action OnClose;
 
-        private List<SettingsSectionView> settingsSections = new List<SettingsSectionView>();
+        public List<ISettingsSectionView> sections { get => sectionList; }
+        private List<ISettingsSectionView> sectionList = new List<ISettingsSectionView>();
 
         public SettingsPanelHUDController()
         {
@@ -40,20 +42,20 @@ namespace DCL.SettingsPanelHUD
 
         public void AddSection(
             SettingsButtonEntry newMenuButton,
-            SettingsSectionView newSection,
+            ISettingsSectionView newSection,
             ISettingsSectionController newSectionController,
             SettingsSectionModel sectionConfig)
         {
             newMenuButton.Initialize(sectionConfig.icon, sectionConfig.text);
             newSection.Initialize(newSectionController, sectionConfig.widgets);
             newSection.SetActive(false);
-            settingsSections.Add(newSection);
+            sectionList.Add(newSection);
             newMenuButton.ConfigureAction(() => OpenSection(newSection));
         }
 
-        public void OpenSection(SettingsSectionView sectionToOpen)
+        public void OpenSection(ISettingsSectionView sectionToOpen)
         {
-            foreach (var section in settingsSections)
+            foreach (var section in sectionList)
             {
                 section.SetActive(false);
             }
@@ -63,12 +65,12 @@ namespace DCL.SettingsPanelHUD
 
         public void OpenSection(int sectionIndex)
         {
-            foreach (var section in settingsSections)
+            foreach (var section in sectionList)
             {
                 section.SetActive(false);
             }
 
-            settingsSections[sectionIndex].SetActive(true);
+            sectionList[sectionIndex].SetActive(true);
         }
     }
 }

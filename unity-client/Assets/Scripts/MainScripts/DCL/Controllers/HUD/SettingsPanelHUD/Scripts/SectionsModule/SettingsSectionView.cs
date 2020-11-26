@@ -3,7 +3,13 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
-    public class SettingsSectionView : MonoBehaviour
+    public interface ISettingsSectionView
+    {
+        void Initialize(ISettingsSectionController settingsSectionController, SettingsWidgetsConfig widgetsConfig);
+        void SetActive(bool active);
+    }
+
+    public class SettingsSectionView : MonoBehaviour, ISettingsSectionView
     {
         [SerializeField] private Transform widgetsContainer;
 

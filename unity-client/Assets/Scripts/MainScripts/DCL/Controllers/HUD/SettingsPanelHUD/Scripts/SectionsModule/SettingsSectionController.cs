@@ -6,21 +6,23 @@ namespace DCL.SettingsPanelHUD.Sections
 {
     public interface ISettingsSectionController
     {
-        void AddWidget(SettingsWidgetView newWidget, ISettingsWidgetController newWidgetController, SettingsWidgetModel widgetConfig);
+        List<ISettingsWidgetView> widgets { get; }
+        void AddWidget(ISettingsWidgetView newWidget, ISettingsWidgetController newWidgetController, SettingsWidgetModel widgetConfig);
     }
 
     [CreateAssetMenu(menuName = "Settings/Controllers/Section Controller", fileName = "SettingsSectionController")]
     public class SettingsSectionController : ScriptableObject, ISettingsSectionController
     {
-        private List<SettingsWidgetView> settingsWidgets = new List<SettingsWidgetView>();
+        public List<ISettingsWidgetView> widgets { get => widgetList; }
+        private List<ISettingsWidgetView> widgetList = new List<ISettingsWidgetView>();
 
         public void AddWidget(
-            SettingsWidgetView newWidget,
+            ISettingsWidgetView newWidget,
             ISettingsWidgetController newWidgetController,
             SettingsWidgetModel widgetConfig)
         {
             newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controls);
-            settingsWidgets.Add(newWidget);
+            widgetList.Add(newWidget);
         }
     }
 }

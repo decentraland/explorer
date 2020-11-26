@@ -6,6 +6,6 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Configuration/Controls")]
     public class SettingsControlsConfig : ScriptableObject
     {
-        public List<SettingsControlModel> controls;
+        public List<SettingsControlList> columns;
     }
 }

@@ -1,7 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+    [System.Serializable]
+    public class SettingsControlList
+    {
+        public List<SettingsControlModel> controls;
+    }
+
     [System.Serializable]
     public class SettingsControlModel
     {

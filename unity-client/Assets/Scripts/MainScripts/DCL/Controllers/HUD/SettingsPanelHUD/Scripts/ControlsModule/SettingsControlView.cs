@@ -3,13 +3,18 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
-    public class SettingsControlView : MonoBehaviour
+    public interface ISettingsControlView
+    {
+        void Initialize(string title, ISettingsControlController settingsControlController);
+    }
+
+    public class SettingsControlView : MonoBehaviour, ISettingsControlView
     {
         [SerializeField] private TextMeshProUGUI title;
 
         private ISettingsControlController settingsControlController;
 
-        internal void Initialize(string title, ISettingsControlController settingsControlController)
+        public void Initialize(string title, ISettingsControlController settingsControlController)
         {
             this.settingsControlController = settingsControlController;
 

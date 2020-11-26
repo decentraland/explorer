@@ -12,14 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3e4862edd5941d4bb1832fb9245d24f, type: 3}
   m_Name: MouseControls
   m_EditorClassIdentifier: 
-  controls:
-  - title: MOUSE SENSIVITY
-    controlPrefab: {fileID: 337097500535954107, guid: 57378e92be08f4d468077d6fc619db9b,
-      type: 3}
-    controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8,
-      type: 2}
-  - title: INVERT MOUSE
-    controlPrefab: {fileID: 337097500535954107, guid: 57378e92be08f4d468077d6fc619db9b,
-      type: 3}
-    controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8,
-      type: 2}
+  columns:
+  - controls:
+    - title: MOUSE SENSIVITY
+      controlPrefab: {fileID: 337097500535954107, guid: 57378e92be08f4d468077d6fc619db9b,
+        type: 3}
+      controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8,
+        type: 2}
+    - title: MOUSE SPEED
+      controlPrefab: {fileID: 337097500535954107, guid: 57378e92be08f4d468077d6fc619db9b,
+        type: 3}
+      controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8,
+        type: 2}
+  - controls:
+    - title: INVERT MOUSE
+      controlPrefab: {fileID: 337097500535954107, guid: 57378e92be08f4d468077d6fc619db9b,
+        type: 3}
+      controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8,
+        type: 2}
