@@ -33,20 +33,20 @@ public static class TestResultToXml
     public class InnerTestSuite
     {
         public string name;
-        public string total
-        {
-            get => totalParsed.ToString();
-            set => totalParsed = float.Parse(value);
-        }
+
+        public string passed;
+        public string failed;
+        public string inconclusive;
+
         public string duration
         {
             get => durationParsed.ToString();
             set => durationParsed = float.Parse(value);
         }
 
-        public float totalParsed;
+        public float totalParsed => int.Parse(passed) + int.Parse(failed) + int.Parse(inconclusive);
         public float durationParsed;
-        public float averageByTest => durationParsed / totalParsed;
+        public float averageByTest =>  totalParsed == 0 ? 0 : durationParsed / totalParsed;
     }
 
     private static string GetClipboard() => EditorGUIUtility.systemCopyBuffer;
