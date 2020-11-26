@@ -206,7 +206,7 @@ namespace DCL.Rendering
         {
             while (true)
             {
-                bool shouldCheck = objectsTracker.IsDirty() | playerPositionDirty;
+                bool shouldCheck = objectsTracker.IsDirty() || playerPositionDirty;
 
                 playerPositionDirty = false;
 
