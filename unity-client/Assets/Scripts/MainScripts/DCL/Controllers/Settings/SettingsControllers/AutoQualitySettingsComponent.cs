@@ -38,6 +38,13 @@ public class AutoQualitySettingsComponent : MonoBehaviour
         SetAutoSettings(autoQualityEnabled.Get(), !autoQualityEnabled.Get());
     }
 
+    private void OnDestroy()
+    {
+        if(autoQualityEnabled != null)
+            autoQualityEnabled.OnChange -= SetAutoSettings;
+        Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
+    }
+
     internal void OnQualitySettingsChanged(QualitySettings settings)
     {
         if (fpsCapped == settings.fpsCap)
