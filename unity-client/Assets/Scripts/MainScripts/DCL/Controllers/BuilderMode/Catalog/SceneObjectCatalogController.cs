@@ -47,7 +47,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
 
      
-        catalogAssetPackListView.SetContent(AssetCatalog.sceneAssetPackCatalog.GetValues().ToList());
+        catalogAssetPackListView.SetContent(AssetCatalogBridge.sceneAssetPackCatalog.GetValues().ToList());
     }
 
     private void OnDestroy()
@@ -79,7 +79,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     void FilterAssets(string nameToFilter)
     {
         filterObjects.Clear();
-        foreach (SceneAssetPack assetPack in AssetCatalog.sceneAssetPackCatalog.GetValues().ToList())
+        foreach (SceneAssetPack assetPack in AssetCatalogBridge.sceneAssetPackCatalog.GetValues().ToList())
         {
             foreach (SceneObject sceneObject in assetPack.assets)
             {
@@ -189,7 +189,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
       
         List<Dictionary<string, List<SceneObject>>> favorites = new List<Dictionary<string, List<SceneObject>>>();
-        foreach (SceneAssetPack assetPack in AssetCatalog.sceneAssetPackCatalog.GetValues().ToList())
+        foreach (SceneAssetPack assetPack in AssetCatalogBridge.sceneAssetPackCatalog.GetValues().ToList())
         {
             foreach (SceneObject sceneObject in assetPack.assets)
             {

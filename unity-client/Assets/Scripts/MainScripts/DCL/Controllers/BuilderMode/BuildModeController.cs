@@ -180,7 +180,7 @@ public class BuildModeController : MonoBehaviour
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
 
-        AssetCatalog.sceneAssetPackCatalog.GetValues();
+        AssetCatalogBridge.sceneAssetPackCatalog.GetValues();
         ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
 
     }
@@ -245,7 +245,7 @@ public class BuildModeController : MonoBehaviour
 
     void CatalogReceived(string catalogJson)
     {
-        AssetCatalog.i.AddFullSceneObjectCatalog(catalogJson);
+        AssetCatalogBridge.i.AddFullSceneObjectCatalog(catalogJson);
         catalogAdded = true;
     }
 

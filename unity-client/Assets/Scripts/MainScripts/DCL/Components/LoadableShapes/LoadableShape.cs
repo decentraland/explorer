@@ -132,7 +132,7 @@ namespace DCL.Components
             ContentProvider provider = null;
 
             if (!string.IsNullOrEmpty(model.assetId))
-                provider = AssetCatalog.GetContentProviderForAssetIdInSceneAsetPackCatalog(model.assetId);
+                provider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneAsetPackCatalog(model.assetId);
                              
             if(provider == null)
                 provider = scene.contentProvider;

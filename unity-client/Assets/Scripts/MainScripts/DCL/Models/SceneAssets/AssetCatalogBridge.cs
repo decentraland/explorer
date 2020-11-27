@@ -6,10 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AssetCatalog : MonoBehaviour
+public class AssetCatalogBridge : MonoBehaviour
 {
     public static bool VERBOSE = false;
-    public static AssetCatalog i { get; private set; }
+    public static AssetCatalogBridge i { get; private set; }
 
     private static SceneAssetPackDictionary sceneAssetPackCatalogValue;
     public static SceneAssetPackDictionary sceneAssetPackCatalog
