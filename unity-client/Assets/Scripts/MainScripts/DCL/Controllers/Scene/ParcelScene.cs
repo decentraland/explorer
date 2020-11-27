@@ -411,10 +411,10 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
-            if (SceneController.i.boundsChecker.enabled)
+            if (Environment.i.sceneBoundsChecker.enabled)
             {
-                entity.OnShapeUpdated -= SceneController.i.boundsChecker.AddEntityToBeChecked;
-                SceneController.i.boundsChecker.RemoveEntityToBeChecked(entity);
+                entity.OnShapeUpdated -= Environment.i.sceneBoundsChecker.AddEntityToBeChecked;
+                Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(entity);
             }
 
             if (removeImmediatelyFromEntitiesList)
@@ -580,7 +580,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = modelRecovered.rotation;
                     entity.gameObject.transform.localScale = modelRecovered.scale;
 
-                    SceneController.i.boundsChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.sceneBoundsChecker?.AddEntityToBeChecked(entity);
                 }
 
                 Environment.i.physicsSyncController.MarkDirty();
@@ -685,7 +685,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    SceneController.i.boundsChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.sceneBoundsChecker?.AddEntityToBeChecked(entity);
                 }
 
                 Environment.i.physicsSyncController.MarkDirty();
@@ -776,7 +776,7 @@ namespace DCL.Controllers
             if (newComponent != null)
             {
                 if (newComponent is IOutOfSceneBoundariesHandler)
-                    SceneController.i.boundsChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.sceneBoundsChecker?.AddEntityToBeChecked(entity);
 
                 if (newComponent.isRoutineRunning)
                     yieldInstruction = newComponent.yieldInstruction;

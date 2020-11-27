@@ -19,12 +19,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
     public event System.Action<DCLBuilderInWorldEntity> OnDelete;
 
     private bool isLockedValue = false;
+
     public bool IsLocked
     {
-        get
-        {
-            return isLockedValue;
-        }
+        get { return isLockedValue; }
         set
         {
             isLockedValue = value;
@@ -33,12 +31,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
     private bool isSelectedValue = false;
+
     public bool IsSelected
     {
-        get
-        {
-            return isSelectedValue;
-        }
+        get { return isSelectedValue; }
         set
         {
             isSelectedValue = value;
@@ -47,12 +43,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
     private bool isNewValue = false;
+
     public bool IsNew
     {
-        get
-        {
-            return isNewValue;
-        }
+        get { return isNewValue; }
         set
         {
             isNewValue = value;
@@ -61,12 +55,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
     private bool isVisibleValue = true;
+
     public bool IsVisible
     {
-        get
-        {
-            return isVisibleValue;
-        }
+        get { return isVisibleValue; }
         set
         {
             isVisibleValue = value;
@@ -124,7 +116,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
             rootEntity.gameObject.transform.SetParent(originalParent);
         DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
-
     }
 
     public void ToggleShowStatus()
@@ -163,6 +154,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         {
             GameObject.Destroy(entityCollider);
         }
+
         collidersDictionary.Clear();
     }
 
@@ -210,7 +202,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
             renderer.material = originalMaterials[cont];
             cont++;
         }
-
     }
 
     void SetEntityAsVoxel()
@@ -218,6 +209,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         isVoxel = true;
         gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
     }
+
     void SaveOriginalMaterialAndSetEditMaterials()
     {
         if (rootEntity.meshesInfo.renderers != null && rootEntity.meshesInfo.renderers.Length >= 1)
@@ -226,7 +218,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             int cont = 0;
             foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
             {
-                if(renderer.material != editMaterial)originalMaterials[cont] = renderer.material;
+                if (renderer.material != editMaterial) originalMaterials[cont] = renderer.material;
                 renderer.material = editMaterial;
                 cont++;
             }
@@ -294,12 +286,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
             {
                 meshCollider.sharedMesh = meshInfo.renderers[i].GetComponent<MeshFilter>().sharedMesh;
             }
-            meshCollider.enabled = meshInfo.renderers[i].enabled;
 
+            meshCollider.enabled = meshInfo.renderers[i].enabled;
         }
 
         collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
-
     }
 
     bool IsEntityAFloor()

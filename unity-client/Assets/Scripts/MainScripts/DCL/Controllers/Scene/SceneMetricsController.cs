@@ -285,7 +285,7 @@ namespace DCL
 
         void CalculateMaterials(DecentralandEntity entity, EntityMetrics entityMetrics)
         {
-            var originalMaterials = SceneController.i.boundsChecker.GetOriginalMaterials(entity.meshesInfo);
+            var originalMaterials = Environment.i.sceneBoundsChecker.GetOriginalMaterials(entity.meshesInfo);
 
             int originalMaterialsCount = originalMaterials.Count;
 
@@ -294,7 +294,7 @@ namespace DCL
                 AddMaterial(entityMetrics, originalMaterials[i]);
 
                 if (VERBOSE)
-                    Debug.Log($"SceneMetrics: material (style: {SceneController.i.boundsChecker.GetFeedbackStyle().GetType().FullName}) {originalMaterials[i].name} of entity {entity.entityId}");
+                    Debug.Log($"SceneMetrics: material (style: {Environment.i.sceneBoundsChecker.GetFeedbackStyle().GetType().FullName}) {originalMaterials[i].name} of entity {entity.entityId}");
             }
         }
 

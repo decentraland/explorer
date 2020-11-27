@@ -522,15 +522,13 @@ namespace DCL
 
         public void ActivateBuilderInWorldEditScene()
         {
-            boundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
+            Environment.i.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
 
         public void DeactivateBuilderInWorldEditScene()
         {
-            boundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_Simple());
+            Environment.i.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_Simple());
         }
-
-
 
         private void SetPositionDirty(DCLCharacterPosition character)
         {
@@ -870,8 +868,6 @@ namespace DCL
 
         [System.NonSerialized]
         public bool prewarmEntitiesPool = true;
-
-        public SceneBoundsChecker boundsChecker { get; private set; }
 
         private bool sceneSortDirty = false;
         private bool positionDirty = true;
