@@ -47,7 +47,6 @@ namespace AvatarShape_Tests
                 wearableItem.thumbnail = "";
             }
 
-            //ToTriggerCI
             CatalogController.wearableCatalog.Clear();
             CatalogController.wearableCatalog.Add(wearables.Select(x => new KeyValuePair<string, WearableItem>(x.id, x)).ToArray());
 
