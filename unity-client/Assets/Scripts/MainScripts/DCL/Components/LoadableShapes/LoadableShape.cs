@@ -145,7 +145,7 @@ namespace DCL.Components
                 LoadWrapperType loadableShape = GetOrAddLoaderForEntity<LoadWrapperType>(entity);
 
                 if(loadableShape is LoadWrapper_GLTF gltfLoadWrapper)
-                    gltfLoadWrapper.contentProvider = provider;
+                    gltfLoadWrapper.customContentProvider = provider;
                 
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
