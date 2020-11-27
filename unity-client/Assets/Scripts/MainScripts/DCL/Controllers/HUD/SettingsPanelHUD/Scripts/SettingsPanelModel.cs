@@ -1,12 +1,18 @@
 using DCL.SettingsPanelHUD.Sections;
-using System.Collections.Generic;
+using ReorderableList;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD
 {
+    [System.Serializable]
+    public class SettingsSectionList : ReorderableArray<SettingsSectionModel>
+    {
+    }
+
     [CreateAssetMenu(menuName = "Settings/Configuration/MainPanel")]
     public class SettingsPanelModel : ScriptableObject
     {
-        public List<SettingsSectionModel> sections;
+        [Reorderable]
+        public SettingsSectionList sections;
     }
 }

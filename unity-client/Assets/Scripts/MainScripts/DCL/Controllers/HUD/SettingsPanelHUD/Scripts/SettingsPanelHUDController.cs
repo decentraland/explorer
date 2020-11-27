@@ -1,5 +1,6 @@
 using DCL.SettingsPanelHUD.Sections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DCL.SettingsPanelHUD
 {
@@ -46,7 +47,7 @@ namespace DCL.SettingsPanelHUD
             SettingsSectionModel sectionConfig)
         {
             newMenuButton.Initialize(sectionConfig.icon, sectionConfig.text);
-            newSection.Initialize(newSectionController, sectionConfig.widgets);
+            newSection.Initialize(newSectionController, sectionConfig.widgets.ToList());
             newSection.SetActive(false);
             sections.Add(newSection);
             newMenuButton.ConfigureAction(() => OpenSection(newSection));

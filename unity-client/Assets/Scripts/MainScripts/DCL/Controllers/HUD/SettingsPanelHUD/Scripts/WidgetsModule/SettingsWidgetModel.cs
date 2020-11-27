@@ -1,6 +1,5 @@
 using DCL.SettingsPanelHUD.Controls;
-using System;
-using System.Collections.Generic;
+using ReorderableList;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Widgets
@@ -11,13 +10,15 @@ namespace DCL.SettingsPanelHUD.Widgets
         public string title;
         public SettingsWidgetView widgetPrefab;
         public SettingsWidgetController widgetController;
-        public List<SettingsControlGroup> controlColumns;
+
+        [Reorderable]
+        public SettingsControlGroupList controlColumns;
 
         public SettingsWidgetModel(
             string title,
             SettingsWidgetView widgetPrefab,
             SettingsWidgetController widgetController,
-            List<SettingsControlGroup> controlGroups)
+            SettingsControlGroupList controlGroups)
         {
             this.title = title;
             this.widgetPrefab = widgetPrefab;

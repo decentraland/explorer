@@ -20,6 +20,7 @@ MonoBehaviour:
     type: 3}
   sectionController: {fileID: 11400000, guid: cac7ad54d7c04464a868e7768f9cb004, type: 2}
   widgets:
-  - {fileID: 11400000, guid: 4461cd11dc368714cae5cc5a4519a9ac, type: 2}
-  - {fileID: 11400000, guid: 9852f11ccd30fb64b8647bc6078bfcc7, type: 2}
-  - {fileID: 11400000, guid: f926ae77c3afaeb4da3bdceabd4c7b95, type: 2}
+    array:
+    - {fileID: 11400000, guid: 4461cd11dc368714cae5cc5a4519a9ac, type: 2}
+    - {fileID: 11400000, guid: 9852f11ccd30fb64b8647bc6078bfcc7, type: 2}
+    - {fileID: 11400000, guid: f926ae77c3afaeb4da3bdceabd4c7b95, type: 2}

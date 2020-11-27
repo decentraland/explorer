@@ -1,6 +1,7 @@
 using DCL.SettingsPanelHUD.Widgets;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
@@ -20,7 +21,7 @@ namespace DCL.SettingsPanelHUD.Sections
             ISettingsWidgetController newWidgetController,
             SettingsWidgetModel widgetConfig)
         {
-            newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns);
+            newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns.ToList());
             widgets.Add(newWidget);
         }
     }

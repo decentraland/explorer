@@ -17,7 +17,10 @@ MonoBehaviour:
     type: 3}
   widgetController: {fileID: 11400000, guid: 58b3a5282c16beb42a91390cf2ddfc85, type: 2}
   controlColumns:
-  - controls:
-    - {fileID: 11400000, guid: f6f07554f3e03c84bae67006cdc31e85, type: 2}
-  - controls:
-    - {fileID: 11400000, guid: 353cde1e640d27a45a2fbfdc2dac8f7f, type: 2}
+    array:
+    - controls:
+        array:
+        - {fileID: 11400000, guid: f6f07554f3e03c84bae67006cdc31e85, type: 2}
+    - controls:
+        array:
+        - {fileID: 11400000, guid: 353cde1e640d27a45a2fbfdc2dac8f7f, type: 2}

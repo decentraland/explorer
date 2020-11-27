@@ -1,9 +1,14 @@
 using DCL.SettingsPanelHUD.Widgets;
-using System.Collections.Generic;
+using ReorderableList;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
+    [System.Serializable]
+    public class SettingsWidgetList : ReorderableArray<SettingsWidgetModel>
+    {
+    }
+
     [CreateAssetMenu(menuName = "Settings/Configuration/Section")]
     public class SettingsSectionModel : ScriptableObject
     {
@@ -12,7 +17,9 @@ namespace DCL.SettingsPanelHUD.Sections
         public SettingsButtonEntry menuButtonPrefab;
         public SettingsSectionView sectionPrefab;
         public SettingsSectionController sectionController;
-        public List<SettingsWidgetModel> widgets;
+
+        [Reorderable]
+        public SettingsWidgetList widgets;
 
         public SettingsSectionModel(
             Sprite icon,
@@ -20,7 +27,7 @@ namespace DCL.SettingsPanelHUD.Sections
             SettingsButtonEntry menuButtonPrefab,
             SettingsSectionView sectionPrefab,
             SettingsSectionController sectionController,
-            List<SettingsWidgetModel> widgets)
+            SettingsWidgetList widgets)
         {
             this.icon = icon;
             this.text = text;
