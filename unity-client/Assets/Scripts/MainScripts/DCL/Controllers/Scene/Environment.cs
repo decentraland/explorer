@@ -22,6 +22,11 @@ namespace DCL
 
         public Clipboard clipboard { get; }
 
+        public PerformanceMetricsController performanceMetricsController { get; private set; }
+
+        public PhysicsSyncController physicsSyncController { get; private set; }
+
+
         private bool initialized;
 
         private Environment()
@@ -29,6 +34,8 @@ namespace DCL
             messagingControllersManager = new MessagingControllersManager();
             pointerEventsController = new PointerEventsController();
             memoryManager = new MemoryManager();
+            physicsSyncController = new PhysicsSyncController();
+            performanceMetricsController = new PerformanceMetricsController();
             clipboard = Clipboard.Create();
             parcelScenesCleaner = new ParcelScenesCleaner();
         }

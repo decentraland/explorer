@@ -496,7 +496,7 @@ namespace DCL.Controllers
                     // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
                     me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    Environment.i.physicsSyncController.MarkDirty();
                 }
                 else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
                 {
@@ -504,7 +504,7 @@ namespace DCL.Controllers
                     // It will simply rotate with the avatar, regardless of where the camera is pointing
                     me.SetParent(DCLCharacterController.i.avatarReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    Environment.i.physicsSyncController.MarkDirty();
                 }
                 else
                 {
@@ -518,7 +518,7 @@ namespace DCL.Controllers
                         // The entity will be child of the scene directly
                         me.SetParent(null);
                         me.gameObject.transform.SetParent(gameObject.transform, false);
-                        SceneController.i.physicsSyncController.MarkDirty();
+                        Environment.i.physicsSyncController.MarkDirty();
                     }
                     else
                     {
@@ -527,7 +527,7 @@ namespace DCL.Controllers
                         if (myParent != null)
                         {
                             me.SetParent(myParent);
-                            SceneController.i.physicsSyncController.MarkDirty();
+                            Environment.i.physicsSyncController.MarkDirty();
                         }
                     }
                 }
@@ -600,7 +600,7 @@ namespace DCL.Controllers
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
-                SceneController.i.physicsSyncController.MarkDirty();
+                Environment.i.physicsSyncController.MarkDirty();
 
                 return null;
             }
@@ -666,7 +666,7 @@ namespace DCL.Controllers
                 }
             }
 
-            SceneController.i.physicsSyncController.MarkDirty();
+            Environment.i.physicsSyncController.MarkDirty();
             return newComponent;
         }
 
@@ -707,7 +707,7 @@ namespace DCL.Controllers
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
-                SceneController.i.physicsSyncController.MarkDirty();
+                Environment.i.physicsSyncController.MarkDirty();
                 return null;
             }
 
@@ -773,7 +773,7 @@ namespace DCL.Controllers
                 if (!entity.components.ContainsKey(classId))
                 {
                     newComponent = factory.CreateItemFromId<BaseComponent>(classId);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    Environment.i.physicsSyncController.MarkDirty();
 
                     if (newComponent != null)
                     {
@@ -801,7 +801,7 @@ namespace DCL.Controllers
                     yieldInstruction = newComponent.yieldInstruction;
             }
 
-            SceneController.i.physicsSyncController.MarkDirty();
+            Environment.i.physicsSyncController.MarkDirty();
             return newComponent;
         }
 

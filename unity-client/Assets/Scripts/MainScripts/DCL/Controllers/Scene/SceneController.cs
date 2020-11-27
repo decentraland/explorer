@@ -24,8 +24,6 @@ namespace DCL
 
         //======================================================================
         private EntryPoint_World worldEntryPoint;
-        private PerformanceMetricsController performanceMetricsController;
-        public PhysicsSyncController physicsSyncController;
 
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
@@ -65,19 +63,16 @@ namespace DCL
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
-            physicsSyncController = new PhysicsSyncController();
-
             CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneIdChange;
 
             //TODO(Brian): Move those suscriptions elsewhere when we have the PoolManager in its own
             //             assembly. (already done in PR #1149, not merged yet)
-            PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
-            PoolManager.i.OnGet += physicsSyncController.MarkDirty;
+            PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
+            PoolManager.i.OnGet += Environment.i.physicsSyncController.MarkDirty;
 
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
 #endif
-            performanceMetricsController = new PerformanceMetricsController();
 
             // TODO(Brian): This should be fixed when we do the proper initialization layer
             if (!EnvironmentSettings.RUNNING_TESTS)
@@ -113,7 +108,7 @@ namespace DCL
 
         void OnDestroy()
         {
-            PoolManager.i.OnGet -= physicsSyncController.MarkDirty;
+            PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             Environment.i.parcelScenesCleaner.Stop();
             Environment.i.cullingController.Stop();
@@ -133,12 +128,12 @@ namespace DCL
                 SortScenesByDistance();
             }
 
-            performanceMetricsController?.Update();
+            Environment.i.performanceMetricsController?.Update();
         }
 
         private void LateUpdate()
         {
-            physicsSyncController.Sync();
+            Environment.i.physicsSyncController.Sync();
         }
 
         public void EnsureEntityPool() // TODO: Move to PoolManagerFactory
