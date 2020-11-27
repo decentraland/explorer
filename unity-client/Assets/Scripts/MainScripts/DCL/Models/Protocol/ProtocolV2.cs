@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuilderInWorldProtocol 
+public class ProtocolV2 
 {
     #region Class Declarations
 
@@ -28,13 +28,15 @@ public class BuilderInWorldProtocol
     #region Components
 
     [System.Serializable]
-    public abstract class GenericComponent
+    public class GenericComponent
     {
-
+        public int componentId;
+        public string sharedId;
+        public object data;
     }
 
     [System.Serializable]
-    public class TransformComponent : GenericComponent
+    public class TransformComponent
     {
         public Vector3 position;
 
@@ -42,18 +44,6 @@ public class BuilderInWorldProtocol
 
         public Vector3 scale;
 
-    }
-
-    [System.Serializable]
-    public class GLTFShapeComponent : GenericComponent
-    {
-        public string src;
-    }
-
-    [System.Serializable]
-    public class NameComponent : GenericComponent
-    {
-        public string value;
     }
 
     #endregion
@@ -69,7 +59,7 @@ public class BuilderInWorldProtocol
     public class ComponentPayload
     {
         public int componentId;
-        public GenericComponent data;
+        public object data;
     }
 
     [System.Serializable]
@@ -77,7 +67,7 @@ public class BuilderInWorldProtocol
     {
         public string entityId;
         public int componentId;
-        public GenericComponent data;
+        public object data;
     }
 
     [System.Serializable]

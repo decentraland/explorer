@@ -1,14 +1,16 @@
 using DCL.Models;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static ProtocolV2;
 
 [System.Serializable]
-public class BuilderInWorldEntityData 
+public class EntityData 
 {
     public string entityId;
     public TransformComponent transformComponent;
-    public GLTFShapeComponent gltfShapeComponent;
+
+    public List<GenericComponent> components = new List<GenericComponent>();
+    public List<GenericComponent> sharedComponents = new List<GenericComponent>();
 
 
     [System.Serializable]
@@ -20,11 +22,4 @@ public class BuilderInWorldEntityData
         public Vector3 scale;
     }
 
-    [System.Serializable]
-    public class GLTFShapeComponent
-    {
-        public int componentId => (int)CLASS_ID.GLTF_SHAPE;
-        public string src;
-        public string sharedId;
-    }
 }

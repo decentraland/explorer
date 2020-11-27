@@ -36,6 +36,10 @@ namespace DCL.Components
 
             lastDCLAudioClip = dclAudioClip;
         }
+        public override object GetModel()
+        {
+            return model;
+        }
 
         public override IEnumerator ApplyChanges(string newJson)
         {

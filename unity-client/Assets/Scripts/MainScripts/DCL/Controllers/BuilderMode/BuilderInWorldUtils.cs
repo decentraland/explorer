@@ -102,7 +102,7 @@ public static partial class BuilderInWorldUtils
 
     public static string ConvertEntityToJSON(DecentralandEntity entity)
     {
-        BuilderInWorldEntityData builderInWorldEntityData = new BuilderInWorldEntityData();
+        EntityData builderInWorldEntityData = new EntityData();
         builderInWorldEntityData.entityId = entity.entityId;
 
 
@@ -110,7 +110,7 @@ public static partial class BuilderInWorldUtils
         {
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
-                BuilderInWorldEntityData.TransformComponent entityComponentModel = new BuilderInWorldEntityData.TransformComponent();
+                EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
 
                 entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene); 
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
@@ -119,28 +119,33 @@ public static partial class BuilderInWorldUtils
                 builderInWorldEntityData.transformComponent = entityComponentModel;
 
             }
+            else
+            {
+                ProtocolV2.GenericComponent entityComponentModel = new ProtocolV2.GenericComponent();
+                entityComponentModel.componentId = (int) keyValuePair.Key;
+                entityComponentModel.data = keyValuePair.Value.GetModel();
+
+                builderInWorldEntityData.components.Add(entityComponentModel);
+            }
         }
 
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
         {
-            if (keyValuePair.Value is GLTFShape)
-            {
-                BuilderInWorldEntityData.GLTFShapeComponent entityComponentModel = new BuilderInWorldEntityData.GLTFShapeComponent();
-                GLTFShape gLTFShape = (GLTFShape)keyValuePair.Value;
-                entityComponentModel.src = gLTFShape.model.src;
-                entityComponentModel.sharedId = keyValuePair.Value.id;
+            ProtocolV2.GenericComponent entityComponentModel = new ProtocolV2.GenericComponent();
+            entityComponentModel.componentId = keyValuePair.Value.GetClassId();
+            entityComponentModel.data = keyValuePair.Value.GetModel();
+            entityComponentModel.sharedId = keyValuePair.Value.id;
 
-                builderInWorldEntityData.gltfShapeComponent = entityComponentModel;
-            }
+            builderInWorldEntityData.sharedComponents.Add(entityComponentModel);
         }
 
 
         return JsonConvert.SerializeObject(builderInWorldEntityData);
     }
 
-    public static BuilderInWorldEntityData ConvertJSONToEntityData(string json)
+    public static EntityData ConvertJSONToEntityData(string json)
     {
-        return JsonConvert.DeserializeObject<BuilderInWorldEntityData>(json);
+        return JsonConvert.DeserializeObject<EntityData>(json);
     }
 }
 

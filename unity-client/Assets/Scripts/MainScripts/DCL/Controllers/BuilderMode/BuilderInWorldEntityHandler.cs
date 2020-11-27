@@ -390,7 +390,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public DecentralandEntity CreateEntityFromJSON(string entityJson)
     {
-        BuilderInWorldEntityData data = BuilderInWorldUtils.ConvertJSONToEntityData(entityJson);
+        EntityData data = BuilderInWorldUtils.ConvertJSONToEntityData(entityJson);
 
         DecentralandEntity newEntity = sceneToEdit.CreateEntity(data.entityId);
 
@@ -403,11 +403,16 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
         }
 
-        if (data.gltfShapeComponent != null)
+        foreach(ProtocolV2.GenericComponent component in data.components)
         {
-            sceneToEdit.SharedComponentAttach(newEntity.entityId, data.gltfShapeComponent.sharedId);
+            sceneToEdit.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId,(CLASS_ID_COMPONENT) component.componentId, component.data);
         }
 
+
+        foreach (ProtocolV2.GenericComponent component in data.sharedComponents)
+        {
+            sceneToEdit.SharedComponentAttach(newEntity.entityId, component.sharedId);
+        }
 
         SetupEntityToEdit(newEntity, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();

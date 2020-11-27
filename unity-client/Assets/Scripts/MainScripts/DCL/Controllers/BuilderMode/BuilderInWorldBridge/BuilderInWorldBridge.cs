@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static BuilderInWorldProtocol;
+using static ProtocolV2;
 
 /// <summary>
 /// This class will handle all the messages that will be sent to kernel. 
@@ -29,10 +29,11 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.entityId = entity.rootEntity.entityId;
         entitySingleComponentPayload.componentId = (int) CLASS_ID.NAME;
 
-        NameComponent nameComponent = new NameComponent();
-        nameComponent.value = entity.descriptiveName;
+        //GenericComponent nameComponent = new GenericComponent();
+        //nameComponent.componentId = CLASS_ID.NAME.ToString();
+        //nameComponent.data = entity.descriptiveName;
 
-        entitySingleComponentPayload.data = nameComponent;
+        entitySingleComponentPayload.data = entity.descriptiveName;
 
         modifyEntityComponentEvent.payload = entitySingleComponentPayload;
 
@@ -56,40 +57,53 @@ public class BuilderInWorldBridge : MonoBehaviour
         List<ComponentPayload> list = new List<ComponentPayload>();
         foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
         {
-            if (keyValuePair.Key != CLASS_ID_COMPONENT.TRANSFORM) continue;
-
             ComponentPayload componentPayLoad = new ComponentPayload();
+            componentPayLoad.componentId = Convert.ToInt32(keyValuePair.Key);
 
-            componentPayLoad.componentId = (int)CLASS_ID_COMPONENT.TRANSFORM;
-            TransformComponent entityComponentModel = new TransformComponent();
+            if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
+            {             
+                TransformComponent entityComponentModel = new TransformComponent();
 
-            entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
-            entityComponentModel.rotation = new QuaternionRepresentation(entity.gameObject.transform.rotation);
-            entityComponentModel.scale = entity.gameObject.transform.localScale;
+                entityComponentModel.position = SceneController.i.ConvertUnityToScenePosition(entity.gameObject.transform.position, scene);
+                entityComponentModel.rotation = new QuaternionRepresentation(entity.gameObject.transform.rotation);
+                entityComponentModel.scale = entity.gameObject.transform.localScale;
 
-            componentPayLoad.data = entityComponentModel;
+                componentPayLoad.data = entityComponentModel;
+            }
+            else
+            {
+                componentPayLoad.data = keyValuePair.Value.GetModel();
+            }
 
             list.Add(componentPayLoad);
 
 
         }
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.GetSharedComponents())
         {
-            if (!(keyValuePair.Value is GLTFShape gtlfShape)) continue;
 
             ComponentPayload componentPayLoad = new ComponentPayload();
 
-            GLTFShapeComponent entityComponentModel = new GLTFShapeComponent();
-            componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
-            entityComponentModel.src = gtlfShape.model.src;
-            componentPayLoad.data = entityComponentModel;
+            //GenericComponent genericComponent = new GenericComponent();
+            //genericComponent.componentId = ((int)CLASS_ID.GLTF_SHAPE).ToString();
+            //genericComponent.data = keyValuePairBaseDisposable.Value.GetModel();
+
+
+            //GLTFShapeComponent entityComponentModel = new GLTFShapeComponent();
+            //componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
+            //entityComponentModel.src = gtlfShape.model.src;
+
+            componentPayLoad.componentId = keyValuePairBaseDisposable.Value.GetClassId();
+            componentPayLoad.data = keyValuePairBaseDisposable.Value.GetModel();
 
             list.Add(componentPayLoad);
 
         }
 
+        WebInterface.VERBOSE = true;
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
+        WebInterface.VERBOSE = false;
     }
 
     public void EntityTransformReport(DecentralandEntity entity, ParcelScene scene)
