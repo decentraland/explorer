@@ -28,6 +28,7 @@ let frameImageData: any = undefined
   }
 
   function EnqueuePayload(e: ProcessorMessage) {
+    // tslint:disable-next-line
     console.log(`GIF: W EnqueuePayload url: ${e.data.url} id: ${e.data.id}`)
     payloads.push(e)
     if (payloads.length === 1) {
@@ -39,11 +40,13 @@ let frameImageData: any = undefined
   function CancelPayload(e: ProcessorMessage) {
     const isDownloading = abortController && payloadInProcess && payloadInProcess.data.id === e.data.id
     if (isDownloading) {
+      // tslint:disable-next-line
       console.log(`GIF: W CancelPayload url: ${e.data.url} id: ${e.data.id} abort`)
       abortController!.abort()
       return
     }
 
+    // tslint:disable-next-line
     console.log(`GIF: W CancelPayload url: ${e.data.url} id: ${e.data.id} unqueue`)
     for (let i = 0; i < payloads.length; i++) {
       if (payloads[i].data.id === e.data.id) {
@@ -67,6 +70,7 @@ let frameImageData: any = undefined
     const signal = abortController.signal
 
     try {
+      // tslint:disable-next-line
       console.log(`GIF: W DownloadAndProcessGIF url: ${e.data.url} id: ${e.data.id}`)
       const imageFetch = fetch(e.data.url, { signal })
       const response = await imageFetch
