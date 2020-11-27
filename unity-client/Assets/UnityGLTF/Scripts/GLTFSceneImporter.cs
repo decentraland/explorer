@@ -2126,6 +2126,18 @@ namespace UnityGLTF
                 mesh.RecalculateNormals();
             }
 
+            if (ShouldYieldOnTimeout())
+            {
+                yield return YieldOnTimeout();
+            }
+
+            mesh.Optimize();
+
+            if (ShouldYieldOnTimeout())
+            {
+                yield return YieldOnTimeout();
+            }
+
             if (!KeepCPUCopyOfMesh)
             {
                 mesh.UploadMeshData(true);
