@@ -63,6 +63,7 @@ namespace DCL
             memoryManager.CleanupPoolsIfNeeded(true);
             pointerEventsController.Cleanup();
             worldBlockersController.Dispose();
+            parcelScenesCleaner.Dispose();
         }
 
         public void Restart(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)

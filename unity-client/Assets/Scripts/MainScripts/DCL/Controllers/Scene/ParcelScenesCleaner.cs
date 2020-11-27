@@ -1,12 +1,14 @@
+using System;
 using DCL.Controllers;
 using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace DCL
 {
-    public interface IParcelScenesCleaner
+    public interface IParcelScenesCleaner : IDisposable
     {
         void Start();
         void Stop();
@@ -192,6 +194,11 @@ namespace DCL
 
                 yield return null;
             }
+        }
+
+        public void Dispose()
+        {
+            ForceCleanup();
         }
     }
 }
