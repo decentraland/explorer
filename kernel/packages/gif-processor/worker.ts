@@ -28,6 +28,7 @@ let frameImageData: any = undefined
   }
 
   function EnqueuePayload(e: ProcessorMessage) {
+    console.log(`GIF: W EnqueuePayload url: ${e.data.url} id: ${e.data.id}`)
     payloads.push(e)
     if (payloads.length === 1) {
       const promise = ConsumePayload()
@@ -38,10 +39,12 @@ let frameImageData: any = undefined
   function CancelPayload(e: ProcessorMessage) {
     const isDownloading = abortController && payloadInProcess && payloadInProcess.data.id === e.data.id
     if (isDownloading) {
+      console.log(`GIF: W CancelPayload url: ${e.data.url} id: ${e.data.id} abort`)
       abortController!.abort()
       return
     }
 
+    console.log(`GIF: W CancelPayload url: ${e.data.url} id: ${e.data.id} unqueue`)
     for (let i = 0; i < payloads.length; i++) {
       if (payloads[i].data.id === e.data.id) {
         payloads.slice(i, 0)
@@ -64,6 +67,7 @@ let frameImageData: any = undefined
     const signal = abortController.signal
 
     try {
+      console.log(`GIF: W DownloadAndProcessGIF url: ${e.data.url} id: ${e.data.id}`)
       const imageFetch = fetch(e.data.url, { signal })
       const response = await imageFetch
       abortController = null
@@ -101,15 +105,18 @@ let frameImageData: any = undefined
         if (processedImageData) framesAsArrayBuffer.push(processedImageData.data.buffer)
       }
 
-      self.postMessage({
-        success: true,
-        arrayBufferFrames: framesAsArrayBuffer,
-        width: finalWidth,
-        height: finalHeight,
-        delays: frameDelays,
-        url: e.data.url,
-        id: e.data.id
-      } as WorkerMessageData, framesAsArrayBuffer)
+      self.postMessage(
+        {
+          success: true,
+          arrayBufferFrames: framesAsArrayBuffer,
+          width: finalWidth,
+          height: finalHeight,
+          delays: frameDelays,
+          url: e.data.url,
+          id: e.data.id
+        } as WorkerMessageData,
+        framesAsArrayBuffer
+      )
     } catch (err) {
       abortController = null
       self.postMessage({
