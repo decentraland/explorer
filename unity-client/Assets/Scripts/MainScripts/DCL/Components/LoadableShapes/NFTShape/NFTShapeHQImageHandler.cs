@@ -1,11 +1,9 @@
 ﻿using System;
-using DCL;
 using DCL.Helpers.NFT;
 using UnityEngine;
 
 internal class NFTShapeHQImageConfig
 {
-    public string contentType;
     public NFTInfo nftInfo;
     public NFTShapeConfig nftConfig;
     public NFTShapeLoaderController controller;
@@ -27,8 +25,10 @@ internal class NFTShapeHQImageHandler : IDisposable
 
     static public NFTShapeHQImageHandler Create(NFTShapeHQImageConfig config)
     {
-        if (config.contentType == "image/gif")
+        if (config.asset == null)
+        {
             return null;
+        }
 
         return new NFTShapeHQImageHandler(config);
     }
@@ -118,8 +118,18 @@ internal class NFTShapeHQImageHandler : IDisposable
         if (asset.isHQ)
             return;
 
-        string url = string.Format("{0}=s{1}", config.nftInfo.imageUrl, config.nftConfig.hqImgResolution);
-        asset.FetchAndSetHQAsset(url, null, null);
+        string url = string.Format("{0}=s{1}", config.nftInfo.imageUrl, asset.isGif ? config.nftConfig.hqGifResolution : config.nftConfig.hqImgResolution);
+
+        Action debugSuccess = null;
+        Action debugFail = null;
+
+        if (config.nftConfig.verbose)
+        {
+            debugSuccess = () => Debug.Log($"Success: Fetch {config.nftInfo.name} HQ image");
+            debugFail = () => Debug.Log($"Fail: Fetch {config.nftInfo.name} HQ image");
+        }
+
+        asset.FetchAndSetHQAsset(url, debugSuccess, debugFail);
 
         if (config.nftConfig.verbose)
         {
