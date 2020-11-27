@@ -9,4 +9,19 @@ public class NFTShapeConfig : ScriptableObject
     public int hqImgResolution = 1024;
     public int hqGifResolution = 512;
     public bool verbose = false;
+
+#if UNITY_EDITOR
+    private void OnEnable()
+    {
+        Application.quitting -= CleanUp;
+        Application.quitting += CleanUp;
+    }
+
+    private void CleanUp()
+    {
+        Application.quitting -= CleanUp;
+        if (UnityEditor.AssetDatabase.Contains(this))
+            Resources.UnloadAsset(this);
+    }
+#endif    
 }
