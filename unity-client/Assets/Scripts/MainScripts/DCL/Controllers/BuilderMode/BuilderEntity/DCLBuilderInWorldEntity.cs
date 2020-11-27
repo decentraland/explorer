@@ -7,11 +7,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DCL.Configuration;
+using System;
 
 public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
-    public string descriptiveName;
+
+    public string descriptiveName { get; private set; }
 
     public event System.Action<DCLBuilderInWorldEntity> onStatusUpdate;
     public event System.Action<DCLBuilderInWorldEntity> OnDelete;
@@ -94,7 +96,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
         IsVisible = rootEntity.gameObject.activeSelf;
 
-        SearchForName();
+        descriptiveName = GetDescriptiveName();
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
@@ -160,9 +162,38 @@ public class DCLBuilderInWorldEntity : EditableEntity
         collidersDictionary.Clear();
     }
 
-    void SearchForName()
+    public void SetDescriptiveName(string newName)
     {
-        //TODO: After the implementation of the NAME component in master this should be fully implmented
+        bool foundComponent = false;
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NAME)
+            {
+                ((DCLName)keyValuePairBaseDisposable.Value).SetNewName(newName);
+                foundComponent = true;
+            }
+        }
+
+        if(!foundComponent)
+        {
+            DCLName name = (DCLName)rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+            name.SetNewName(newName);
+            rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
+        }
+    }
+
+    public string GetDescriptiveName()
+    {
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        {
+            if(keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
+            {
+                return descriptiveName = ((DCLName.Model)keyValuePairBaseDisposable.Value.GetModel()).value;
+               
+            }
+        }
+        return "";
     }
 
     void SetOriginalMaterials()

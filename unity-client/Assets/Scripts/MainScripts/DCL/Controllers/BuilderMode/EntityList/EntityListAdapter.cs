@@ -90,7 +90,7 @@ public class EntityListAdapter : MonoBehaviour
 
     public void Rename(string newName)
     {
-        currentEntity.descriptiveName = newName;
+        currentEntity.SetDescriptiveName(newName);
         OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.RENAME, currentEntity, this);
     }
 

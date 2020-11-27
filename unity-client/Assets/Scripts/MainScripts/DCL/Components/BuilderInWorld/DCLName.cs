@@ -25,6 +25,24 @@ public class DCLName : BaseDisposable
         model = new Model();
     }
 
+    public override int GetClassId()
+    {
+        return (int)CLASS_ID.NAME;
+    }
+
+    public override object GetModel()
+    {
+        return model;
+    }
+
+    public void SetNewName(string value)
+    {
+        Model newModel = new Model();
+        newModel.value = value;
+
+        UpdateFromJSON(JsonUtility.ToJson(newModel));
+    }
+
     public override IEnumerator ApplyChanges(string newJson)
     {
         Model newModel = SceneController.i.SafeFromJson<Model>(newJson);

@@ -29,11 +29,15 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.entityId = entity.rootEntity.entityId;
         entitySingleComponentPayload.componentId = (int) CLASS_ID.NAME;
 
-        //GenericComponent nameComponent = new GenericComponent();
-        //nameComponent.componentId = CLASS_ID.NAME.ToString();
-        //nameComponent.data = entity.descriptiveName;
 
-        entitySingleComponentPayload.data = entity.descriptiveName;
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NAME)
+            {       
+                entitySingleComponentPayload.data = ((DCLName)keyValuePairBaseDisposable.Value).GetModel();
+            }
+        }
+       
 
         modifyEntityComponentEvent.payload = entitySingleComponentPayload;
 
@@ -82,23 +86,12 @@ public class BuilderInWorldBridge : MonoBehaviour
 
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.GetSharedComponents())
         {
-
             ComponentPayload componentPayLoad = new ComponentPayload();
-
-            //GenericComponent genericComponent = new GenericComponent();
-            //genericComponent.componentId = ((int)CLASS_ID.GLTF_SHAPE).ToString();
-            //genericComponent.data = keyValuePairBaseDisposable.Value.GetModel();
-
-
-            //GLTFShapeComponent entityComponentModel = new GLTFShapeComponent();
-            //componentPayLoad.componentId = (int)CLASS_ID.GLTF_SHAPE;
-            //entityComponentModel.src = gtlfShape.model.src;
 
             componentPayLoad.componentId = keyValuePairBaseDisposable.Value.GetClassId();
             componentPayLoad.data = keyValuePairBaseDisposable.Value.GetModel();
 
             list.Add(componentPayLoad);
-
         }
 
         WebInterface.VERBOSE = true;
