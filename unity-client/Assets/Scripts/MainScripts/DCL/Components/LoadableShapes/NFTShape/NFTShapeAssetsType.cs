@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using DCL;
 using DCL.Controllers.Gif;
 using UnityEngine;
@@ -95,6 +96,7 @@ internal class GifAsset : INFTAsset
 
     private Asset_Gif hqTexture;
     private Asset_Gif previewGif;
+    private Coroutine loadRoutine;
 
     public GifAsset(Asset_Gif previewGif)
     {
@@ -103,11 +105,13 @@ internal class GifAsset : INFTAsset
 
     public void Dispose()
     {
-        if (hqTexture == null)
-            return;
+        StopGifLoad();
 
-        hqTexture.Dispose();
-        hqTexture = null;
+        if (hqTexture != null)
+        {
+            hqTexture.Dispose();
+            hqTexture = null;
+        }
         UpdateTextureCallback = null;
     }
 
@@ -125,10 +129,13 @@ internal class GifAsset : INFTAsset
                 hqTexture = null;
                 onFail?.Invoke();
             });
+        loadRoutine = CoroutineStarter.Start(LoadGif(hqTexture));
     }
 
     public void RestorePreviewAsset()
     {
+        StopGifLoad();
+
         if (hqTexture != null)
         {
             hqTexture.Dispose();
@@ -154,5 +161,20 @@ internal class GifAsset : INFTAsset
             gif.OnFrameTextureChanged -= UpdateTextureCallback;
         }
         gif.Stop();
+    }
+
+    private IEnumerator LoadGif(Asset_Gif gif)
+    {
+        yield return gif.Load();
+        loadRoutine = null;
+    }
+
+    private void StopGifLoad()
+    {
+        if (loadRoutine != null)
+        {
+            CoroutineStarter.Stop(loadRoutine);
+            loadRoutine = null;
+        }
     }
 }
