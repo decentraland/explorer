@@ -99,16 +99,17 @@ export class SceneStateStorageController extends ExposableAPI {
       return
     }
 
+    const contentClient = this.getContentClient()
     try {
-      const contentClient = this.getContentClient()
       // Fetch the entity and find the definition's hash
-      const scene = await contentClient.fetchEntityById(EntityType.SCENE, this.parcelIdentity.cid, { attempts: 5 })
+      const scene = await contentClient.fetchEntityById(EntityType.SCENE, this.parcelIdentity.cid, { attempts: 3 })
       const definitionHash: ContentFileHash | undefined = scene.content?.find(
         ({ file }) => file === CONTENT_PATH.DEFINITION_FILE
       )?.hash
+
       if (definitionHash) {
         // Download the definition and return it
-        const definitionBuffer = await contentClient.downloadContent(definitionHash, { attempts: 5 })
+        const definitionBuffer = await contentClient.downloadContent(definitionHash, { attempts: 3 })
         const definitionFile = JSON.parse(definitionBuffer.toString())
         return fromStorableFormatToSerializedState(definitionFile)
       } else {
