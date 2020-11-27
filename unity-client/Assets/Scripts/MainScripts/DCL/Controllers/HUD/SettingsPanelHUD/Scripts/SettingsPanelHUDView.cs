@@ -49,6 +49,7 @@ namespace DCL.SettingsPanelHUD
             {
                 var newMenuButton = Instantiate(sectionConfig.menuButtonPrefab, menuButtonsContainer);
                 var newSection = Instantiate(sectionConfig.sectionPrefab, sectionsContainer);
+                newSection.gameObject.name = $"Section_{sectionConfig.text}";
                 var newSectionController = Instantiate(sectionConfig.sectionController);
                 settingsPanelController.AddSection(newMenuButton, newSection, newSectionController, sectionConfig);
             }

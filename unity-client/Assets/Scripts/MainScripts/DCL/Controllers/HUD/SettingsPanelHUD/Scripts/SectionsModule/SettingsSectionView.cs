@@ -34,6 +34,7 @@ namespace DCL.SettingsPanelHUD.Sections
             foreach (SettingsWidgetModel widgetConfig in widgetsConfig.widgets)
             {
                 var newWidget = Instantiate(widgetConfig.widgetPrefab, widgetsContainer);
+                newWidget.gameObject.name = $"Widget_{widgetConfig.title}";
                 var newWidgetController = Instantiate(widgetConfig.widgetController);
                 settingsSectionController.AddWidget(newWidget, newWidgetController, widgetConfig);
             }
