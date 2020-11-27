@@ -163,7 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f27ff56bbf7894194c841a7aa0b7c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sectionsConfig: {fileID: 11400000, guid: 51d63453390f1e543ad92d63947851cd, type: 2}
+  settingsPanelConfig: {fileID: 11400000, guid: 77afbe2ee614dd0409f741261246c6d1,
+    type: 2}
   menuButtonsContainer: {fileID: 3164546539369866496}
   sectionsContainer: {fileID: 7391549290767826622}
   closeButton: {fileID: 636651055379034414}

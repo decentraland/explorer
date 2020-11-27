@@ -1,4 +1,5 @@
 using DCL.SettingsPanelHUD.Sections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ namespace DCL.SettingsPanelHUD
     public class SettingsPanelHUDView : MonoBehaviour
     {
         [Header("Sections configuration")]
-        [SerializeField] private SettingsSectionsConfig sectionsConfig;
+        [SerializeField] private SettingsPanelModel settingsPanelConfig;
         [SerializeField] private Transform menuButtonsContainer;
         [SerializeField] private Transform sectionsContainer;
 
@@ -45,7 +46,7 @@ namespace DCL.SettingsPanelHUD
 
         private void CreateSections()
         {
-            foreach (SettingsSectionModel sectionConfig in sectionsConfig.sections)
+            foreach (SettingsSectionModel sectionConfig in settingsPanelConfig.sections)
             {
                 var newMenuButton = Instantiate(sectionConfig.menuButtonPrefab, menuButtonsContainer);
                 var newSection = Instantiate(sectionConfig.sectionPrefab, sectionsContainer);

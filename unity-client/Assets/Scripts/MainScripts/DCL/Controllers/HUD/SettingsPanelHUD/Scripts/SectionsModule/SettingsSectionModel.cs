@@ -1,35 +1,33 @@
 using DCL.SettingsPanelHUD.Widgets;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
-    [System.Serializable]
-    public class SettingsSectionModel
+    [CreateAssetMenu(menuName = "Settings/Configuration/Section")]
+    public class SettingsSectionModel : ScriptableObject
     {
-        [Header("Menu Button configuration")]
         public Sprite icon;
         public string text;
         public SettingsButtonEntry menuButtonPrefab;
-
-        [Header("Section configuration")]
         public SettingsSectionView sectionPrefab;
         public SettingsSectionController sectionController;
-
-        [Header("Widgets configuration")]
-        public SettingsWidgetsConfig widgets;
+        public List<SettingsWidgetModel> widgets;
 
         public SettingsSectionModel(
             Sprite icon,
             string text,
             SettingsButtonEntry menuButtonPrefab,
             SettingsSectionView sectionPrefab,
-            SettingsSectionController sectionController)
+            SettingsSectionController sectionController,
+            List<SettingsWidgetModel> widgets)
         {
             this.icon = icon;
             this.text = text;
             this.menuButtonPrefab = menuButtonPrefab;
             this.sectionPrefab = sectionPrefab;
             this.sectionController = sectionController;
+            this.widgets = widgets;
         }
     }
 }

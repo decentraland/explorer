@@ -1,29 +1,27 @@
 using DCL.SettingsPanelHUD.Controls;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Widgets
 {
-    [System.Serializable]
-    public class SettingsWidgetModel
+    [CreateAssetMenu(menuName = "Settings/Configuration/Widget")]
+    public class SettingsWidgetModel : ScriptableObject
     {
-        [Header("Widget configuration")]
         public string title;
         public SettingsWidgetView widgetPrefab;
         public SettingsWidgetController widgetController;
-
-        [Header("Controls configuration")]
-        public SettingsControlsConfig controls;
+        public List<SettingsControlGroup> controlColumns;
 
         public SettingsWidgetModel(
             string title,
             SettingsWidgetView widgetPrefab,
             SettingsWidgetController widgetController,
-            SettingsControlsConfig controls)
+            List<SettingsControlGroup> controlGroups)
         {
             this.title = title;
             this.widgetPrefab = widgetPrefab;
             this.widgetController = widgetController;
-            this.controls = controls;
+            this.controlColumns = controlGroups;
         }
     }
 }

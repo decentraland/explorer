@@ -1,11 +1,12 @@
 using DCL.SettingsPanelHUD.Widgets;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
     public interface ISettingsSectionView
     {
-        void Initialize(ISettingsSectionController settingsSectionController, SettingsWidgetsConfig widgetsConfig);
+        void Initialize(ISettingsSectionController settingsSectionController, List<SettingsWidgetModel> widgets);
         void SetActive(bool active);
     }
 
@@ -14,12 +15,12 @@ namespace DCL.SettingsPanelHUD.Sections
         [SerializeField] private Transform widgetsContainer;
 
         private ISettingsSectionController settingsSectionController;
-        private SettingsWidgetsConfig widgetsConfig;
+        private List<SettingsWidgetModel> widgets;
 
-        public void Initialize(ISettingsSectionController settingsSectionController, SettingsWidgetsConfig widgetsConfig)
+        public void Initialize(ISettingsSectionController settingsSectionController, List<SettingsWidgetModel> widgets)
         {
             this.settingsSectionController = settingsSectionController;
-            this.widgetsConfig = widgetsConfig;
+            this.widgets = widgets;
 
             CreateWidgets();
         }
@@ -31,7 +32,7 @@ namespace DCL.SettingsPanelHUD.Sections
 
         private void CreateWidgets()
         {
-            foreach (SettingsWidgetModel widgetConfig in widgetsConfig.widgets)
+            foreach (SettingsWidgetModel widgetConfig in widgets)
             {
                 var newWidget = Instantiate(widgetConfig.widgetPrefab, widgetsContainer);
                 newWidget.gameObject.name = $"Widget_{widgetConfig.title}";

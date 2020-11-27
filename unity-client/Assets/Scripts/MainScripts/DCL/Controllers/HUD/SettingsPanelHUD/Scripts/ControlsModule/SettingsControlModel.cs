@@ -4,15 +4,14 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [System.Serializable]
-    public class SettingsControlList
+    public class SettingsControlGroup
     {
         public List<SettingsControlModel> controls;
     }
 
-    [System.Serializable]
-    public class SettingsControlModel
+    [CreateAssetMenu(menuName = "Settings/Configuration/Control")]
+    public class SettingsControlModel : ScriptableObject
     {
-        [Header("Control configuration")]
         public string title;
         public SettingsControlView controlPrefab;
         public SettingsControlController controlController;

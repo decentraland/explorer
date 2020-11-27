@@ -21,7 +21,7 @@ namespace DCL.SettingsPanelHUD.Sections
             ISettingsWidgetController newWidgetController,
             SettingsWidgetModel widgetConfig)
         {
-            newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controls);
+            newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns);
             widgetList.Add(newWidget);
         }
     }

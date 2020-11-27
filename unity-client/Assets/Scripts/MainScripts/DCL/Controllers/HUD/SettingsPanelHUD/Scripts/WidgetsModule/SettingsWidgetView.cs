@@ -9,7 +9,7 @@ namespace DCL.SettingsPanelHUD.Widgets
 {
     public interface ISettingsWidgetView
     {
-        void Initialize(string title, ISettingsWidgetController settingsWidgetController, SettingsControlsConfig controlsConfig);
+        void Initialize(string title, ISettingsWidgetController settingsWidgetController, List<SettingsControlGroup> controlColumns);
     }
 
     public class SettingsWidgetView : MonoBehaviour, ISettingsWidgetView
@@ -18,12 +18,12 @@ namespace DCL.SettingsPanelHUD.Widgets
         [SerializeField] private List<Transform> controlsContainerColumns;
 
         private ISettingsWidgetController settingsWidgetController;
-        private SettingsControlsConfig controlsConfig;
+        private List<SettingsControlGroup> controlColumns;
 
-        public void Initialize(string title, ISettingsWidgetController settingsWidgetController, SettingsControlsConfig controlsConfig)
+        public void Initialize(string title, ISettingsWidgetController settingsWidgetController, List<SettingsControlGroup> controlColumns)
         {
             this.settingsWidgetController = settingsWidgetController;
-            this.controlsConfig = controlsConfig;
+            this.controlColumns = controlColumns;
 
             this.title.text = title;
             CreateControls();
@@ -31,12 +31,12 @@ namespace DCL.SettingsPanelHUD.Widgets
 
         private void CreateControls()
         {
-            Assert.IsTrue(controlsConfig.columns.Count == 0 || controlsConfig.columns.Count == controlsContainerColumns.Count,
-                $"[Settings Configuration exception: The number of columns set in the '{controlsConfig.name}' asset does not match with the number of columns set in the '{this.name}' view.");
+            //Assert.IsTrue(controlsConfig.Count == 0 || controlsConfig.Count == controlsContainerColumns.Count,
+            //    $"[Settings Configuration exception: The number of columns set in the '{controlsConfig.name}' asset does not match with the number of columns set in the '{this.name}' view.");
 
-            for (int columnIndex = 0; columnIndex < controlsConfig.columns.Count; columnIndex++)
+            for (int columnIndex = 0; columnIndex < controlColumns.Count; columnIndex++)
             {
-                foreach (SettingsControlModel controlConfig in controlsConfig.columns[columnIndex].controls)
+                foreach (SettingsControlModel controlConfig in controlColumns[columnIndex].controls)
                 {
                     var newControl = Instantiate(controlConfig.controlPrefab, controlsContainerColumns[columnIndex]);
                     newControl.gameObject.name = $"Control_{controlConfig.title}";
