@@ -30,6 +30,7 @@ namespace DCL
             pointerEventsController = new PointerEventsController();
             memoryManager = new MemoryManager();
             clipboard = Clipboard.Create();
+            parcelScenesCleaner = new ParcelScenesCleaner();
         }
 
         public void Initialize(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)
@@ -42,7 +43,7 @@ namespace DCL
             memoryManager.Initialize();
             cullingController = CullingController.Create();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(sceneHandler, DCLCharacterController.i.characterPosition);
-            parcelScenesCleaner = new ParcelScenesCleaner();
+            parcelScenesCleaner.Start();
 
             initialized = true;
         }

@@ -199,6 +199,7 @@ namespace DCL
         public void Dispose()
         {
             ForceCleanup();
+            Stop();
         }
     }
 }
