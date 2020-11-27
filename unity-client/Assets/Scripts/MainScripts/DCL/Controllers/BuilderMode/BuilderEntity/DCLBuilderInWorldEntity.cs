@@ -112,7 +112,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
         SaveOriginalMaterialAndSetEditMaterials();
-        SceneController.i.boundsChecker.AddPersistent(rootEntity);
+        DCL.Environment.i.sceneBoundsChecker.AddPersistent(rootEntity);
     }
 
     public void Deselect()
@@ -122,7 +122,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = false;
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
-        SceneController.i.boundsChecker.RemoveEntityToBeChecked(rootEntity);
+        DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
 
     }
@@ -172,16 +172,16 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NAME)
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
-                ((DCLName)keyValuePairBaseDisposable.Value).SetNewName(newName);
+                ((DCLName) keyValuePairBaseDisposable.Value).SetNewName(newName);
                 foundComponent = true;
             }
         }
 
-        if(!foundComponent)
+        if (!foundComponent)
         {
-            DCLName name = (DCLName)rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+            DCLName name = (DCLName) rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
             name.SetNewName(newName);
             rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
@@ -191,12 +191,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
         {
-            if(keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
-                return descriptiveName = ((DCLName.Model)keyValuePairBaseDisposable.Value.GetModel()).value;
-               
+                return descriptiveName = ((DCLName.Model) keyValuePairBaseDisposable.Value.GetModel()).value;
             }
         }
+
         return "";
     }
 

@@ -20,6 +20,8 @@ namespace DCL.Controllers
 
     public class SceneBoundsChecker
     {
+        public bool enabled => entitiesCheckRoutine != null;
+
         [System.NonSerialized] public float timeBetweenChecks = 1f;
 
         // We use Hashset instead of Queue to be able to have a unique representation of each entity when added.
@@ -117,7 +119,8 @@ namespace DCL.Controllers
 
         public void AddEntityToBeChecked(DecentralandEntity entity)
         {
-            if (!SceneController.i.useBoundariesChecker) return;
+            if (!enabled)
+                return;
 
             OnAddEntity(entity);
         }
@@ -127,7 +130,8 @@ namespace DCL.Controllers
         /// </summary>
         public void AddPersistent(DecentralandEntity entity)
         {
-            if (!SceneController.i.useBoundariesChecker) return;
+            if (!enabled)
+                return;
 
             entitiesToCheck.Add(entity);
             persistentEntities.Add(entity);
@@ -144,7 +148,7 @@ namespace DCL.Controllers
 
         public void RemoveEntityToBeChecked(DecentralandEntity entity)
         {
-            if (!SceneController.i.useBoundariesChecker) return;
+            if (!enabled) return;
 
             OnRemoveEntity(entity);
         }

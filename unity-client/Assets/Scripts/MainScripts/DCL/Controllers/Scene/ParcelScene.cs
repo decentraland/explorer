@@ -323,8 +323,8 @@ namespace DCL.Controllers
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 
-            if (SceneController.i.useBoundariesChecker)
-                newEntity.OnShapeUpdated += SceneController.i.boundsChecker.AddEntityToBeChecked;
+            if (Environment.i.sceneBoundsChecker.enabled)
+                newEntity.OnShapeUpdated += Environment.i.sceneBoundsChecker.AddEntityToBeChecked;
 
             entities.Add(id, newEntity);
 
@@ -411,7 +411,7 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
-            if (SceneController.i.useBoundariesChecker)
+            if (SceneController.i.boundsChecker.enabled)
             {
                 entity.OnShapeUpdated -= SceneController.i.boundsChecker.AddEntityToBeChecked;
                 SceneController.i.boundsChecker.RemoveEntityToBeChecked(entity);

@@ -15,6 +15,8 @@ namespace DCL
         public readonly MessagingControllersManager messagingControllersManager;
         public readonly PointerEventsController pointerEventsController;
         public readonly MemoryManager memoryManager;
+
+        public SceneBoundsChecker sceneBoundsChecker { get; private set; }
         public WorldBlockersController worldBlockersController { get; private set; }
         public ICullingController cullingController { get; private set; }
         public InteractionHoverCanvasController interactionHoverCanvasController { get; private set; }
@@ -54,8 +56,8 @@ namespace DCL
             pointerEventsController.Initialize();
             memoryManager.Initialize();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(worldState, DCLCharacterController.i.characterPosition);
+            sceneBoundsChecker = new SceneBoundsChecker();
             worldState.Initialize();
-            worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(worldState, DCLCharacterController.i.characterPosition);
             parcelScenesCleaner.Start();
             cullingController.Start();
             initialized = true;

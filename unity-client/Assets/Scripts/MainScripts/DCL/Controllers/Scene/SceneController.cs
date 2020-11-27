@@ -53,9 +53,6 @@ namespace DCL
             DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
-            boundsChecker = new SceneBoundsChecker();
-            boundsChecker.Start();
-
             RenderProfileManifest.i.Initialize();
             Environment.i.Initialize(this);
 
@@ -99,7 +96,7 @@ namespace DCL
             //             case. Calling Initialize multiple times in a row is safe.
             Environment.i.Initialize(this);
             Environment.i.worldBlockersController.SetEnabled(false);
-            InitializeSceneBoundariesChecker(true);
+            Environment.i.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
 
         void Start()
@@ -870,9 +867,6 @@ namespace DCL
 
         [System.NonSerialized]
         public bool prewarmSceneMessagesPool = true;
-
-        [System.NonSerialized]
-        public bool useBoundariesChecker = true;
 
         [System.NonSerialized]
         public bool prewarmEntitiesPool = true;
