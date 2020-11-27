@@ -41,6 +41,7 @@ namespace DCL
             physicsSyncController = new PhysicsSyncController();
             performanceMetricsController = new PerformanceMetricsController();
             clipboard = Clipboard.Create();
+            sceneBoundsChecker = new SceneBoundsChecker();
             parcelScenesCleaner = new ParcelScenesCleaner();
             cullingController = CullingController.Create();
             worldState = new WorldState();
@@ -60,6 +61,7 @@ namespace DCL
             worldState.Initialize();
             parcelScenesCleaner.Start();
             cullingController.Start();
+            sceneBoundsChecker.Start();
             initialized = true;
         }
 
@@ -78,6 +80,7 @@ namespace DCL
             messagingControllersManager.Cleanup();
             memoryManager.CleanupPoolsIfNeeded(true);
             pointerEventsController.Cleanup();
+            sceneBoundsChecker.Stop();
             worldBlockersController.Dispose();
             parcelScenesCleaner.Dispose();
             cullingController.Dispose();

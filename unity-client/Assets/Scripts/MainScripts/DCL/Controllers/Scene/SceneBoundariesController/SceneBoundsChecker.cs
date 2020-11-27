@@ -105,6 +105,7 @@ namespace DCL.Controllers
             if (entitiesCheckRoutine != null)
                 return;
 
+            Debug.Log("Start!");
             lastCheckTime = Time.realtimeSinceStartup;
             entitiesCheckRoutine = CoroutineStarter.Start(CheckEntities());
         }
@@ -114,7 +115,9 @@ namespace DCL.Controllers
             if (entitiesCheckRoutine == null)
                 return;
 
+            Debug.Log("Stop!");
             CoroutineStarter.Stop(entitiesCheckRoutine);
+            entitiesCheckRoutine = null;
         }
 
         public void AddEntityToBeChecked(DecentralandEntity entity)
@@ -122,6 +125,7 @@ namespace DCL.Controllers
             if (!enabled)
                 return;
 
+            Debug.Log("Adding entity!");
             OnAddEntity(entity);
         }
 
@@ -133,6 +137,7 @@ namespace DCL.Controllers
             if (!enabled)
                 return;
 
+            Debug.Log("Adding persistent entity!");
             entitiesToCheck.Add(entity);
             persistentEntities.Add(entity);
         }
@@ -150,6 +155,7 @@ namespace DCL.Controllers
         {
             if (!enabled) return;
 
+            Debug.Log("Removing entity!");
             OnRemoveEntity(entity);
         }
 

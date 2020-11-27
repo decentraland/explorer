@@ -156,7 +156,14 @@ namespace DCL.Controllers
                 return invalidMeshesInfo[meshesInfo.innerGameObject].originalMaterials.Values.ToList();
             }
 
-            return null;
+            List<Material> result = new List<Material>();
+
+            for (int i = 0; i < meshesInfo.renderers.Length; i++)
+            {
+                result.AddRange(meshesInfo.renderers[i].sharedMaterials);
+            }
+
+            return result;
         }
     }
 }
