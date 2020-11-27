@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b3ccae9e4d9011e4da0803905f169221, type: 3}
-  m_Name: Test01Widget
+  m_Name: MouseWidget
   m_EditorClassIdentifier: 
-  title: Test Widget 1
+  title: Mouse
   widgetPrefab: {fileID: 5794240731996032819, guid: cc8cedcaa38f2424b9f20b88b673f8a9,
     type: 3}
   widgetController: {fileID: 11400000, guid: 58b3a5282c16beb42a91390cf2ddfc85, type: 2}

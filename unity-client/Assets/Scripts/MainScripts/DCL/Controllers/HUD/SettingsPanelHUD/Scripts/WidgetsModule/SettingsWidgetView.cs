@@ -73,7 +73,7 @@ namespace DCL.SettingsPanelHUD.Widgets
             }
 
             // Calculate the total height of the widget
-            float totalHeight = 0f;
+            float totalHeight;
             if (highestColumn != null)
             {
                 VerticalLayoutGroup columnVerticalLayoutHroup = highestColumn.GetComponent<VerticalLayoutGroup>();

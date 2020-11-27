@@ -13,8 +13,7 @@ namespace DCL.SettingsPanelHUD.Widgets
     [CreateAssetMenu(menuName = "Settings/Controllers/Widget Controller", fileName = "SettingsWidgetController")]
     public class SettingsWidgetController : ScriptableObject, ISettingsWidgetController
     {
-        public List<ISettingsControlView> controls { get => controlList; }
-        private List<ISettingsControlView> controlList = new List<ISettingsControlView>();
+        public List<ISettingsControlView> controls { get; } = new List<ISettingsControlView>();
 
         public void AddControl(
             ISettingsControlView newControl,
@@ -22,7 +21,7 @@ namespace DCL.SettingsPanelHUD.Widgets
             SettingsControlModel controlConfig)
         {
             newControl.Initialize(controlConfig.title, newControlController);
-            controlList.Add(newControl);
+            controls.Add(newControl);
         }
     }
 }

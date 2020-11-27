@@ -13,8 +13,7 @@ namespace DCL.SettingsPanelHUD.Sections
     [CreateAssetMenu(menuName = "Settings/Controllers/Section Controller", fileName = "SettingsSectionController")]
     public class SettingsSectionController : ScriptableObject, ISettingsSectionController
     {
-        public List<ISettingsWidgetView> widgets { get => widgetList; }
-        private List<ISettingsWidgetView> widgetList = new List<ISettingsWidgetView>();
+        public List<ISettingsWidgetView> widgets { get; } = new List<ISettingsWidgetView>();
 
         public void AddWidget(
             ISettingsWidgetView newWidget,
@@ -22,7 +21,7 @@ namespace DCL.SettingsPanelHUD.Sections
             SettingsWidgetModel widgetConfig)
         {
             newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns);
-            widgetList.Add(newWidget);
+            widgets.Add(newWidget);
         }
     }
 }

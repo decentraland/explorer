@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07c5da5d312c4c44c8a1300c2e89ef74, type: 3}
-  m_Name: Test02Control
+  m_Name: SliderExampleControl
   m_EditorClassIdentifier: 
-  title: TEST CONTROL 2
-  controlPrefab: {fileID: 337097500535954107, guid: 57378e92be08f4d468077d6fc619db9b,
+  title: SLIDER CONTROL
+  controlPrefab: {fileID: 337097500535954107, guid: 9c69fdd3db1d73140bfff48c5a2f72dd,
     type: 3}
   controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8, type: 2}

@@ -19,5 +19,4 @@ MonoBehaviour:
   sectionPrefab: {fileID: 5813236629143711783, guid: eb979bec9ddc8d04291cbfd7ff64b626,
     type: 3}
   sectionController: {fileID: 11400000, guid: cac7ad54d7c04464a868e7768f9cb004, type: 2}
-  widgets:
-  - {fileID: 11400000, guid: 9852f11ccd30fb64b8647bc6078bfcc7, type: 2}
+  widgets: []

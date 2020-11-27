@@ -1,4 +1,5 @@
 using DCL.SettingsPanelHUD.Widgets;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
