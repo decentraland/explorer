@@ -148,14 +148,14 @@ export class SceneStateStorageController extends ExposableAPI {
     const allMappings: Map<string, string> = new Map()
 
     // Gather all mappings together
-    Object.values(assets).forEach((asset: Asset) =>
+    for (const asset of assets.values()) {
       asset.mappings.forEach(({ file, hash }) =>
         allMappings.set(`${CONTENT_PATH.MODELS_FOLDER}/${file}`, `${asset.baseUrl}/${hash}`)
       )
-    )
+    }
 
     // Download models
-    const promises: Promise<[string, Buffer]>[] = Object.entries(allMappings).map<Promise<[string, Buffer]>>(
+    const promises: Promise<[string, Buffer]>[] = Array.from(allMappings.entries()).map<Promise<[string, Buffer]>>(
       async ([path, url]) => {
         const response = await fetch(url)
         const blob = await response.blob()
