@@ -5,23 +5,20 @@ using DCL;
 
 public class AvatarAudioHandlerRemote : MonoBehaviour
 {
-    const float WALK_INTERVAL_SEC = 0.4f, RUN_INTERVAL_SEC = 0.27f;
-    float intervalTimer = 0f;
+    const float WALK_INTERVAL_SEC = 0.37f, RUN_INTERVAL_SEC = 0.25f;
+    float nextFootstepTime = 0f;
 
     bool isVisible = true;
     AudioEvent footstepJump, footstepLand, footstepWalk, footstepRun, clothesRustleShort;
-    CameraController cameraController;
+    GameObject rendererContainer;
+    Renderer rend;
+    AvatarAnimatorLegacy.BlackBoard blackBoard;
+    bool isGroundedPrevious = true;
+
+    public AvatarAnimatorLegacy avatarAnimatorLegacy;
 
     private void Start()
     {
-        DCLCharacterController dclCharacterController = transform.parent.GetComponent<DCLCharacterController>();
-        if (dclCharacterController != null)
-        {
-            dclCharacterController.OnJump += OnJump;
-            dclCharacterController.OnHitGround += OnLand;
-            dclCharacterController.OnMoved += OnWalk;
-        }
-
         AudioContainer ac = GetComponent<AudioContainer>();
         footstepJump = ac.GetEvent("FootstepJump");
         footstepLand = ac.GetEvent("FootstepLand");
@@ -29,68 +26,71 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         footstepRun = ac.GetEvent("FootstepRun");
         clothesRustleShort = ac.GetEvent("ClothesRustleShort");
 
-        AvatarMovementController avatarMovementController = GetComponentInParent<AvatarMovementController>();
-        if (avatarMovementController != null)
+        if (avatarAnimatorLegacy != null)
         {
-            avatarMovementController.OnMove += OnWalk;
+            blackBoard = avatarAnimatorLegacy.blackboard;
         }
-
-        AvatarVisibility avatarVisibility = GetComponentInParent<AvatarVisibility>();
-        if (avatarVisibility != null)
-        {
-            avatarVisibility.OnSetVisibility += OnSetVisibility;
-        }
-
-        Debug.Log(avatarMovementController);
-        Debug.Log(avatarVisibility);
     }
 
-    void OnSetVisibility(bool visible)
+    public void Init(GameObject rendererContainer)
     {
-        Debug.Log("OnSetVisibility = " + visible);
-        isVisible = visible;
+        this.rendererContainer = rendererContainer;
     }
 
-    void OnJump()
+    private void Update()
     {
-        if (footstepJump != null)
-            footstepJump.Play(true);
-    }
-
-    void OnLand()
-    {
-        if (footstepLand != null)
-            footstepLand.Play(true);
-    }
-
-    // Faking footsteps when avatar is out of sight, since animations won't play
-    void OnWalk(float distance)
-    {
-        Debug.Log("OnWalk - Distance = " + distance);
-
-        if (isVisible)
+        if (blackBoard == null)
             return;
 
-        if (intervalTimer < 0f)
+        // Jumped
+        if (!blackBoard.isGrounded && isGroundedPrevious)
         {
-            if (distance > 7.3f)
-            {
-                if (footstepRun != null)
-                    footstepRun.Play(true);
-                if (clothesRustleShort != null)
-                    clothesRustleShort.Play(true);
-                intervalTimer = RUN_INTERVAL_SEC;
-            }
-            else
-            {
-                if (footstepWalk != null)
-                    footstepWalk.Play(true);
-                if (clothesRustleShort != null)
-                    clothesRustleShort.PlayScheduled(Random.Range(0.05f, 0.1f));
-                intervalTimer = WALK_INTERVAL_SEC;
-            }
+            if (footstepJump != null)
+                footstepJump.Play(true);
         }
 
-        intervalTimer -= Time.deltaTime;
+        // Landed
+        if (blackBoard.isGrounded && !isGroundedPrevious)
+        {
+            if (footstepLand != null)
+                footstepLand.Play(true);
+        }
+
+        // Fake footsteps when avatar not visible
+        if (rend != null)
+        {
+            if (!rend.isVisible && blackBoard.movementSpeed > 0f && blackBoard.isGrounded)
+            {
+                if (Time.time >= nextFootstepTime)
+                {
+                    if (blackBoard.movementSpeed > 0.045f)
+                    {
+                        if (footstepRun != null)
+                            footstepRun.Play(true);
+                        if (clothesRustleShort != null)
+                            clothesRustleShort.Play(true);
+                        nextFootstepTime = Time.time + RUN_INTERVAL_SEC;
+                    }
+                    else
+                    {
+                        if (footstepWalk != null)
+                            footstepWalk.Play(true);
+                        if (clothesRustleShort != null)
+                            clothesRustleShort.PlayScheduled(Random.Range(0.05f, 0.1f));
+                        nextFootstepTime = Time.time + WALK_INTERVAL_SEC;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (rendererContainer != null)
+            {
+                //NOTE(Mordi): The renderer takes a while to get ready, so we need to check it continually until it can be fetched
+                rend = rendererContainer.GetComponent<Renderer>();
+            }
+        }
+        
+        isGroundedPrevious = blackBoard.isGrounded;
     }
 }

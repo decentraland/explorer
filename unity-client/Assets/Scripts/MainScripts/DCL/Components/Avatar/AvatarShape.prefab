@@ -292,6 +292,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AvatarAudioHandlerRemote
       objectReference: {fileID: 0}
+    - target: {fileID: 3728983229202958758, guid: 256ca49022c0ba84abc2a941931ee350,
+        type: 3}
+      propertyPath: avatarAnimatorLegacy
+      value: 
+      objectReference: {fileID: 6790643881566083082}
     - target: {fileID: 5851154196944813553, guid: 256ca49022c0ba84abc2a941931ee350,
         type: 3}
       propertyPath: m_LocalPosition.x

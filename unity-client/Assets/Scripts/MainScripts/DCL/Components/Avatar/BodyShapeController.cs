@@ -144,6 +144,13 @@ public class BodyShapeController : WearableController, IBodyShapeController
         if (audioContainer != null)
         {
             animationEventAudioHandler.Init(audioContainer);
+
+            //NOTE(Mordi): If this is a remote avatar, pass the animation component so we can keep track of whether it is culled (off-screen) or not
+            AvatarAudioHandlerRemote audioHandlerRemote = audioContainer.GetComponent<AvatarAudioHandlerRemote>();
+            if (audioHandlerRemote != null)
+            {
+                audioHandlerRemote.Init(createdAnimation.gameObject);
+            }
         }
 
         return createdAnimation;

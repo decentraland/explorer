@@ -13,8 +13,6 @@ namespace DCL
         const float ROTATION_SPEED = 6.25f;
         const float SPEED_EPSILON = 0.0001f;
 
-        public System.Action<float> OnMove;
-
         Transform avatarTransform
         {
             get
@@ -116,8 +114,6 @@ namespace DCL
             {
                 this.movementSpeed = SPEED_SLOW;
             }
-
-            OnMove?.Invoke(distance);
         }
 
 

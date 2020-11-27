@@ -1039,7 +1039,7 @@ MonoBehaviour:
   baseUrlMode: 0
   baseUrlCustom: http://localhost:8080/?
   environment: 4
-  startInCoords: {x: 0, y: 0}
+  startInCoords: {x: -3, y: 11}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
