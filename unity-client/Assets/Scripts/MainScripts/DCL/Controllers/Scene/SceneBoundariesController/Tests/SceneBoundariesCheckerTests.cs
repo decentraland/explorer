@@ -143,7 +143,7 @@ namespace SceneBoundariesCheckerTests
             Assert.IsTrue(dclAudioSource.enabled);
         }
 
-        public bool MeshIsInvalid(DecentralandEntity.MeshesInfo meshesInfo)
+        public bool MeshIsInvalid(MeshesInfo meshesInfo)
         {
             return SBC_Asserts.MeshIsInvalid(meshesInfo);
         }

@@ -251,7 +251,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void CreateCollidersForEntity(DecentralandEntity entity)
     {
-        DecentralandEntity.MeshesInfo meshInfo = entity.meshesInfo;
+        MeshesInfo meshInfo = entity.meshesInfo;
         if (meshInfo == null ||
             meshInfo.currentShape == null ||
             !meshInfo.currentShape.IsVisible())

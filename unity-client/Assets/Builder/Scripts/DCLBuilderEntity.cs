@@ -270,7 +270,7 @@ namespace Builder
             }
         }
 
-        private void CreateColliders(DecentralandEntity.MeshesInfo meshInfo)
+        private void CreateColliders(MeshesInfo meshInfo)
         {
             meshColliders = new DCLBuilderSelectionCollider[meshInfo.renderers.Length];
             for (int i = 0; i < meshInfo.renderers.Length; i++)

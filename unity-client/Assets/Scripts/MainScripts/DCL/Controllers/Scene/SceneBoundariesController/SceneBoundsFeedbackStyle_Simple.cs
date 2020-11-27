@@ -11,24 +11,32 @@ namespace DCL.Controllers
             renderer.enabled = false;
         }
 
-        public void ApplyFeedback(DecentralandEntity entity, bool isInsideBoundaries)
+        public void ApplyFeedback(MeshesInfo meshesInfo, bool isInsideBoundaries)
         {
-            if (entity.meshesInfo.renderers[0] == null)
+            if (meshesInfo.renderers[0] == null)
                 return;
 
-            if (isInsideBoundaries != entity.meshesInfo.renderers[0].enabled && entity.meshesInfo.currentShape.IsVisible())
+            if (isInsideBoundaries != meshesInfo.renderers[0].enabled && meshesInfo.currentShape.IsVisible())
             {
-                for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
+                for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
-                    if (entity.meshesInfo.renderers[i] != null)
-                        entity.meshesInfo.renderers[i].enabled = isInsideBoundaries;
+                    if (meshesInfo.renderers[i] != null)
+                        meshesInfo.renderers[i].enabled = isInsideBoundaries;
                 }
             }
         }
 
-        public Material[] GetOriginalMaterials(DecentralandEntity entity)
+
+        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo)
         {
-            return null;
+            List<Material> result = new List<Material>();
+
+            for (int i = 0; i < meshesInfo.renderers.Length; i++)
+            {
+                result.AddRange(meshesInfo.renderers[i].sharedMaterials);
+            }
+
+            return result;
         }
     }
 }

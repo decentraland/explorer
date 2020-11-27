@@ -308,7 +308,7 @@ namespace SceneBoundariesCheckerTests
             Assert.IsFalse(MeshIsInvalid(entity.meshesInfo));
         }
 
-        public static bool MeshIsInvalid(DecentralandEntity.MeshesInfo meshesInfo)
+        public static bool MeshIsInvalid(MeshesInfo meshesInfo)
         {
             if (meshesInfo.meshRootGameObject == null) return false; // It's not invalid if there's no mesh
 
