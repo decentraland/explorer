@@ -31,8 +31,8 @@ namespace DCL.SettingsPanelHUD.Widgets
 
         private void CreateControls()
         {
-            //Assert.IsTrue(controlsConfig.Count == 0 || controlsConfig.Count == controlsContainerColumns.Count,
-            //    $"[Settings Configuration exception: The number of columns set in the '{controlsConfig.name}' asset does not match with the number of columns set in the '{this.name}' view.");
+            Assert.IsTrue(controlColumns.Count == 0 || controlColumns.Count == controlsContainerColumns.Count,
+                $"Settings Configuration exception: The number of columns set in the '{this.name}' view does not match with the received configuration.");
 
             for (int columnIndex = 0; columnIndex < controlColumns.Count; columnIndex++)
             {
