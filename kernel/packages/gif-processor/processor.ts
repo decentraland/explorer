@@ -35,10 +35,6 @@ export class GIFProcessor {
    */
   ProcessGIF(data: { imageSource: string; id: string }) {
     const gifInMemory = this.assets[data.id]
-    // tslint:disable-next-line
-    console.log(
-      `GIF: P ProcessGIF src: ${data.imageSource} id: ${data.id} in memory? ${gifInMemory ? 'true' : 'false'}`
-    )
 
     if (gifInMemory) {
       if (!gifInMemory.pending) {
@@ -65,8 +61,6 @@ export class GIFProcessor {
 
   DeleteGIF(id: string) {
     const asset = this.assets[id]
-    // tslint:disable-next-line
-    console.log(`GIF: P DeleteGIF id: ${id} in memory? ${asset ? 'true' : 'false'}`)
     if (!asset) return
 
     if (!asset.pending) {
@@ -76,14 +70,10 @@ export class GIFProcessor {
         const texture = DCL.GL.textures[textureIdx]
         GLctx.deleteTexture(texture)
         DCL.GL.textures[textureIdx] = null
-        // tslint:disable-next-line
-        console.log(`GIF: P DeleteGIF id: ${id} delete textures`)
       }
     } else {
       const worker = asset.worker
       worker.postMessage({ id: asset.id, type: 'CANCEL' } as Partial<ProcessorMessageData>)
-      // tslint:disable-next-line
-      console.log(`GIF: P DeleteGIF id: ${id} cancel`)
     }
     delete this.assets[id]
   }
@@ -140,21 +130,17 @@ export class GIFProcessor {
 
       worker.onmessage = (e: WorkerMessage) => {
         const asset = this.assets[e.data.id]
-        // tslint:disable-next-line
-        console.log(`GIF: P Data received id: ${e.data.id} in memory? ${asset ? 'true' : 'false'}`)
         if (asset) {
           if (e.data.success) {
             if (this.setGifAsset(asset, e.data)) {
-              // tslint:disable-next-line
-              console.log(`GIF: P Data received id: ${e.data.id} report success`)
               this.reportToRenderer(asset)
             }
           } else {
-            // tslint:disable-next-line
-            console.log(`GIF: P Data received id: ${e.data.id} report failure`)
             this.reportFailureToRenderer(e.data.id)
             delete this.assets[e.data.id]
           }
+        } else {
+          this.reportFailureToRenderer(e.data.id)
         }
 
         if (multipleGIFWorkers) {
