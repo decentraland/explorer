@@ -361,15 +361,20 @@ public class BuilderInWorldController : MonoBehaviour
         }
         SceneController.i.UpdateParcelScenesExecute(data);
 
-        //
-
         GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
         mesh.model.src = sceneObject.model;
 
+        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+
+
 
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
+
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
+        name.SetNewName(sceneObject.name);
+
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
             entity.isVoxel = true;

@@ -88,6 +88,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         rootEntity = entity;
         rootEntity.OnShapeUpdated += OnShapeUpdate;
+        rootEntity.OnNameChange += OnNameUpdate;
 
         this.editMaterial = editMaterial;
         isVoxel = false;
@@ -140,6 +141,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public void Delete()
     {
+        rootEntity.OnShapeUpdated -= OnShapeUpdate;
+        rootEntity.OnNameChange -= OnNameUpdate;
+
         Deselect();
         DestroyColliders();
         OnDelete?.Invoke(this);
@@ -227,6 +231,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
                 cont++;
             }
         }
+    }
+
+    void OnNameUpdate(DCLName.Model model)
+    {
+        descriptiveName = model.value;
+        onStatusUpdate?.Invoke(this);
     }
 
     void OnShapeUpdate(DecentralandEntity decentralandEntity)

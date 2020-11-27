@@ -63,12 +63,16 @@ public class EntityListAdapter : MonoBehaviour
     {
         if (this != null)
         {
-            nameTxt.text = entityToEdit.rootEntity.entityId;
-
-            if(string.IsNullOrEmpty(entityToEdit.descriptiveName))
+            if (string.IsNullOrEmpty(entityToEdit.descriptiveName))
+            {
                 nameIF.text = entityToEdit.rootEntity.entityId;
+                nameTxt.text = entityToEdit.rootEntity.entityId;
+            }
             else
+            {
                 nameIF.text = entityToEdit.descriptiveName;
+                nameTxt.text = entityToEdit.descriptiveName;
+            }
 
             if (entityToEdit.IsVisible)
                 showImg.color = iconsSelectedColor;

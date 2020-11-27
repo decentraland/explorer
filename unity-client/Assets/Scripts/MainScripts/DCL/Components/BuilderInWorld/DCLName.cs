@@ -39,7 +39,7 @@ public class DCLName : BaseDisposable
     {
         Model newModel = new Model();
         newModel.value = value;
-
+      
         UpdateFromJSON(JsonUtility.ToJson(newModel));
     }
 
@@ -49,9 +49,12 @@ public class DCLName : BaseDisposable
         if(newModel.value != model.value)
         {
             string oldValue = model.value;
-
             model = newModel;
-            RaiseOnAppliedChanges();
+
+            foreach(DecentralandEntity entity in attachedEntities)
+            {
+                entity.OnNameChange?.Invoke(newModel);
+            }
 
 #if UNITY_EDITOR
             foreach (DecentralandEntity decentralandEntity in this.attachedEntities)

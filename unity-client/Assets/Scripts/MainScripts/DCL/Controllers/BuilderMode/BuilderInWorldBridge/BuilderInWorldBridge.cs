@@ -94,9 +94,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             list.Add(componentPayLoad);
         }
 
-        WebInterface.VERBOSE = true;
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
-        WebInterface.VERBOSE = false;
     }
 
     public void EntityTransformReport(DecentralandEntity entity, ParcelScene scene)
