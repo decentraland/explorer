@@ -109,7 +109,7 @@ let frameImageData: any = undefined
         delays: frameDelays,
         url: e.data.url,
         id: e.data.id
-      } as WorkerMessageData)
+      } as WorkerMessageData, framesAsArrayBuffer)
     } catch (err) {
       abortController = null
       self.postMessage({
