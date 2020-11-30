@@ -1,4 +1,5 @@
 using DCL.SettingsPanelHUD.Sections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,6 +42,12 @@ namespace DCL.SettingsPanelHUD
             isOpen = !settingsAnimator.hideOnEnable;
 
             closeButton.onClick.AddListener(() => CloseSettingsPanel());
+        }
+
+        public void Initialize(IHUD hudController, ISettingsPanelHUDController settingsPanelController, SettingsSectionList sections)
+        {
+            settingsPanelConfig.sections = sections;
+            Initialize(hudController, settingsPanelController);
         }
 
         private void CreateSections()

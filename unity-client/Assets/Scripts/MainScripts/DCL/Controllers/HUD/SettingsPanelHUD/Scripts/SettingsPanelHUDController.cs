@@ -46,11 +46,12 @@ namespace DCL.SettingsPanelHUD
             ISettingsSectionController newSectionController,
             SettingsSectionModel sectionConfig)
         {
-            newMenuButton.Initialize(sectionConfig.icon, sectionConfig.text);
+            newMenuButton?.Initialize(sectionConfig.icon, sectionConfig.text);
+
             newSection.Initialize(newSectionController, sectionConfig.widgets.ToList());
             newSection.SetActive(false);
             sections.Add(newSection);
-            newMenuButton.ConfigureAction(() => OpenSection(newSection));
+            newMenuButton?.ConfigureAction(() => OpenSection(newSection));
         }
 
         public void OpenSection(ISettingsSectionView sectionToOpen)
