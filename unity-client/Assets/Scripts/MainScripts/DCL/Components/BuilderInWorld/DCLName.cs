@@ -59,7 +59,9 @@ public class DCLName : BaseDisposable
 #if UNITY_EDITOR
             foreach (DecentralandEntity decentralandEntity in this.attachedEntities)
             {
-                decentralandEntity.gameObject.name.Replace(oldValue, "");
+                if(oldValue != null)
+                    decentralandEntity.gameObject.name.Replace(oldValue, "");
+
                 decentralandEntity.gameObject.name += "-"+model.value;
             }
 #endif
