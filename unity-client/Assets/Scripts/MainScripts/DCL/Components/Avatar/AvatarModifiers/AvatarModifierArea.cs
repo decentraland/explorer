@@ -34,6 +34,7 @@ public class AvatarModifierArea : BaseComponent
             { "DISABLE_PASSPORTS", new DisablePassportModifier() }
         };
     }
+
     public override object GetModel()
     {
         return model;

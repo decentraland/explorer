@@ -64,6 +64,7 @@ namespace DCL.Components
                 transform.forward = Camera.main.transform.forward;
             }
         }
+
         public override object GetModel()
         {
             return model;

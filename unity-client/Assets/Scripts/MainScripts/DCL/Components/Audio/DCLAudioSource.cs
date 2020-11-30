@@ -36,6 +36,7 @@ namespace DCL.Components
 
             lastDCLAudioClip = dclAudioClip;
         }
+
         public override object GetModel()
         {
             return model;

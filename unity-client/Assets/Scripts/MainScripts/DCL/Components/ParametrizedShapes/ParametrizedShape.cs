@@ -105,6 +105,7 @@ namespace DCL.Components
             Utils.SafeDestroy(entity.meshRootGameObject);
             entity.meshesInfo.CleanReferences();
         }
+
         public override object GetModel()
         {
             return model;
