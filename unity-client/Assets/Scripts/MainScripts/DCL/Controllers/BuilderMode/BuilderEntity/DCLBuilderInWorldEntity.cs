@@ -76,6 +76,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool isVoxel { get; set; } = false;
 
+    public bool isFloor { get; set; } = false;
+
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -101,9 +103,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
-            CreateCollidersForEntity(rootEntity);
-            if (IsEntityAFloor()) IsLocked = true;
-            if (IsEntityAVoxel()) SetEntityAsVoxel();
+            ShapeInit();
         }
     }
 
@@ -200,6 +200,14 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return "";
     }
 
+    void ShapeInit()
+    {
+        CreateCollidersForEntity(rootEntity);
+        isFloor = IsEntityAFloor();
+        if (isFloor) IsLocked = true;
+        if (IsEntityAVoxel()) SetEntityAsVoxel();
+    }
+
     void SetOriginalMaterials()
     {
         if (rootEntity.meshesInfo.renderers == null) return;
@@ -244,9 +252,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (IsSelected)
             SaveOriginalMaterialAndSetEditMaterials();
 
-        CreateCollidersForEntity(decentralandEntity);
-        if (IsEntityAFloor()) IsLocked = true;
-        if (IsEntityAVoxel()) SetEntityAsVoxel();
+        ShapeInit();
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
@@ -311,6 +317,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.05f)
             return false;
         if (rootEntity.gameObject.transform.position.y >= 0.05f)
+            return false;
+
+        if (Mathf.Abs(rootEntity.meshesInfo.mergedBounds.extents.x - 8) > 0.001f)
+            return false;
+        if (Mathf.Abs(rootEntity.meshesInfo.mergedBounds.extents.z - 8) > 0.001f)
             return false;
 
         return true;

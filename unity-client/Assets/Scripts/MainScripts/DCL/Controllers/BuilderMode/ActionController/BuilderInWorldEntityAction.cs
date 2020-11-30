@@ -10,6 +10,8 @@ public class BuilderInWorldEntityAction
     public object oldValue;
     public object newValue;
 
+   
+
     public BuilderInWorldEntityAction(string entityId)
     {
         this.entityId = entityId;
@@ -18,6 +20,12 @@ public class BuilderInWorldEntityAction
     public BuilderInWorldEntityAction(string entityId, object oldValue, object newValue)
     {
         this.entityId = entityId;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    public BuilderInWorldEntityAction(object oldValue, object newValue)
+    {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }

@@ -555,9 +555,27 @@ namespace DCL
 
             Vector3 worldPosition = DCLCharacterController.i.characterPosition.UnityToWorldPosition(pos);
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
+        }  
+
+        public Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene = null)
+        {
+            if (scene == null)
+            {
+                string sceneId = currentSceneId;
+
+                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
+                    scene = loadedScenes[currentSceneId];
+                else
+                    return Vector3.zero;
+            }
+
+            Vector3 posicionEscena = Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
+            Vector3 worldPosition = DCLCharacterController.i.characterPosition.WorldToUnityPosition(posicionEscena);
+
+            return worldPosition;
         }
 
-        public Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)
+        public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)
         {
             if (scene == null)
             {
@@ -569,11 +587,15 @@ namespace DCL
                     return pos;
             }
 
-            Vector3 sceneRealPosition = scene.gameObject.transform.position;
-            Vector3 sceneFictionPosition = new Vector3(scene.sceneData.basePosition.x, 0, scene.sceneData.basePosition.y);
-            Vector3 sceneOffset = sceneRealPosition - sceneFictionPosition;
-            Vector3 solvedPosition = pos + sceneOffset;
-            return solvedPosition;
+            return ConvertPointInSceneToUnityPosition(pos,new Vector2Int(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y));
+        }
+
+        public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint)
+        {
+            Vector3 posicionEscena = Utils.GridToWorldPosition(scenePoint.x, scenePoint.y) + pos;
+            Vector3 worldPosition = DCLCharacterController.i.characterPosition.WorldToUnityPosition(posicionEscena);
+
+            return worldPosition;
         }
 
         public void ActivateBuilderInWorldEditScene()

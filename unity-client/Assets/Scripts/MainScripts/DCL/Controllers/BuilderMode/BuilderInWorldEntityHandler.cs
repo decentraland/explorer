@@ -355,7 +355,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
 
         BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
-        buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATED;
+        buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATE;
 
         List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
 
@@ -371,7 +371,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
 
      
-        buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATED);
+        buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATE);
         actionController.AddAction(buildAction);       
     }
 
@@ -498,6 +498,21 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         {
             return convertedEntities[GetConvertedUniqueKeyForEntity(entity)];
         }
+    }
+
+    public void DeleteFloorEntities()
+    {
+        List<DCLBuilderInWorldEntity> entitiesToDelete = new List<DCLBuilderInWorldEntity>();
+
+        foreach(DCLBuilderInWorldEntity entity in convertedEntities.Values)
+        {
+            if(entity.isFloor)
+            {
+                entitiesToDelete.Add(entity);
+            }
+        }
+        foreach (DCLBuilderInWorldEntity entity in entitiesToDelete)
+            DeleteEntity(entity);
     }
 
     public void DeleteEntity(string entityId)

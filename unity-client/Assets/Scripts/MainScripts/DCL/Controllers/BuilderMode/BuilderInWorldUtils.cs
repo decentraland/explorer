@@ -7,9 +7,27 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using DCL.Configuration;
 
 public static partial class BuilderInWorldUtils
 {
+    public static SceneObject CreateFloorSceneObject()
+    {
+        SceneObject floorSceneObject = new SceneObject();
+        floorSceneObject.id = BuilderInWorldSettings.FLOOR_ID;
+
+        floorSceneObject.model = BuilderInWorldSettings.FLOOR_MODEL;
+        floorSceneObject.name  = BuilderInWorldSettings.FLOOR_NAME;
+
+        floorSceneObject.contents = new Dictionary<string, string>();
+
+        floorSceneObject.contents.Add(BuilderInWorldSettings.FLOOR_GLTF_KEY, BuilderInWorldSettings.FLOOR_GLTF_VALUE);
+        floorSceneObject.contents.Add(BuilderInWorldSettings.FLOOR_TEXTURE_KEY, BuilderInWorldSettings.FLOOR_TEXTURE_VALUE);
+
+        floorSceneObject.metrics = new SceneObject.ObjectMetrics();
+
+        return floorSceneObject;
+    }
 
     public static void DrawScreenRect(Rect rect, Color color)
     {

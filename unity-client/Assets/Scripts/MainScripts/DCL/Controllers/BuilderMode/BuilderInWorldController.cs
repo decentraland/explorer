@@ -106,6 +106,7 @@ public class BuilderInWorldController : MonoBehaviour
     string sceneToEditId;
 
     SceneObject lastSceneObjectCreated;
+    SceneObject lastFloorSceneObjectUsed;
 
     const float RAYCAST_MAX_DISTANCE = 10000f;
 
@@ -172,7 +173,7 @@ public class BuilderInWorldController : MonoBehaviour
         HUDController.i.buildModeHud.OnChangeModeAction += ChangeAdvanceMode;
         HUDController.i.buildModeHud.OnResetAction += ResetScaleAndRotation;
 
-        HUDController.i.buildModeHud.OnSceneObjectSelected += CreateSceneObjectSelected;
+        HUDController.i.buildModeHud.OnSceneObjectSelected += OnSceneObjectSelected;
         HUDController.i.buildModeHud.OnTutorialAction += StartTutorial;
         HUDController.i.buildModeHud.OnPublishAction += PublishScene;
 
@@ -205,7 +206,7 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.buildModeHud.OnChangeModeAction -= ChangeAdvanceMode;
             HUDController.i.buildModeHud.OnResetAction -= ResetScaleAndRotation;
 
-            HUDController.i.buildModeHud.OnSceneObjectSelected -= CreateSceneObjectSelected;
+            HUDController.i.buildModeHud.OnSceneObjectSelected -= OnSceneObjectSelected;
             HUDController.i.buildModeHud.OnTutorialAction -= StartTutorial;
             HUDController.i.buildModeHud.OnPublishAction -= PublishScene;
         }
@@ -333,9 +334,29 @@ public class BuilderInWorldController : MonoBehaviour
         return true;
     }
 
-    void CreateSceneObjectSelected(SceneObject sceneObject)
+    void OnSceneObjectSelected(SceneObject sceneObject)
     {
-        if (!IsInsideTheLimits(sceneObject)) return;
+        if (IsSceneObjectFloor(sceneObject))
+        {
+            builderInWorldEntityHandler.DeleteFloorEntities();
+            SceneObject lastFloor = lastFloorSceneObjectUsed;
+
+            CreateFloor(sceneObject);
+
+            BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
+
+            buildAction.CreateChangeFloorAction(lastFloor, sceneObject);
+            actionController.AddAction(buildAction);
+        }
+        else
+        {
+            CreateSceneObject(sceneObject);
+        }
+    }
+
+    DCLBuilderInWorldEntity CreateSceneObject(SceneObject sceneObject, bool autoSelect = true, bool isFloor = false)
+    {      
+        if (!IsInsideTheLimits(sceneObject)) return null;
 
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
 
@@ -365,11 +386,11 @@ public class BuilderInWorldController : MonoBehaviour
         mesh.model = new LoadableShape.Model();
         mesh.model.src = sceneObject.model;
 
-        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
-
+        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));     
 
 
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
+        entity.isFloor = isFloor;
 
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
@@ -378,8 +399,12 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
             entity.isVoxel = true;
-        builderInWorldEntityHandler.DeselectEntities();
-        builderInWorldEntityHandler.Select(entity.rootEntity);
+
+        if (autoSelect)
+        {
+            builderInWorldEntityHandler.DeselectEntities();
+            builderInWorldEntityHandler.Select(entity.rootEntity);
+        }
 
 
         entity.gameObject.transform.eulerAngles = Vector3.zero;
@@ -392,6 +417,8 @@ public class BuilderInWorldController : MonoBehaviour
         builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
         InputDone();
         OnSceneObjectPlaced?.Invoke();
+
+        return entity;
     }
 
     void CreateLastSceneObject()
@@ -400,7 +427,7 @@ public class BuilderInWorldController : MonoBehaviour
         {
             if (builderInWorldEntityHandler.IsAnyEntitySelected())
                 builderInWorldEntityHandler.DeselectEntities();
-            CreateSceneObjectSelected(lastSceneObjectCreated);
+            OnSceneObjectSelected(lastSceneObjectCreated);
             InputDone();
         }
     }
@@ -677,6 +704,7 @@ public class BuilderInWorldController : MonoBehaviour
         FindSceneToEdit();
 
 
+
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
         HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
@@ -693,6 +721,9 @@ public class BuilderInWorldController : MonoBehaviour
         SceneController.i.ActivateBuilderInWorldEditScene();
 
         ActivateBuilderInWorldCamera();
+
+        if (IsNewScene())
+            SetupNewScene();
     }
 
 
@@ -726,6 +757,39 @@ public class BuilderInWorldController : MonoBehaviour
         SceneController.i.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
+    }
+
+    public bool IsSceneObjectFloor(SceneObject floorSceneObject)
+    {
+        return string.Equals(floorSceneObject.category, BuilderInWorldSettings.FLOOR_CATEGORY);
+    }
+
+    public bool IsNewScene()
+    {
+        return sceneToEdit.entities.Count <= 0;
+    }
+
+    public void SetupNewScene()
+    {
+        SceneObject floorSceneObject = BuilderInWorldUtils.CreateFloorSceneObject();
+        CreateFloor(floorSceneObject);
+    }
+
+    public void CreateFloor(SceneObject floorSceneObject)
+    {
+        Vector3 initialPosition = new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
+        Vector2Int[] parcelsPoints = sceneToEdit.sceneData.parcels;
+
+        foreach (Vector2Int parcel in parcelsPoints)
+        {
+            DCLBuilderInWorldEntity decentralandEntity = CreateSceneObject(floorSceneObject,false,true);
+          
+            decentralandEntity.transform.position = SceneController.i.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+        }
+
+        builderInWorldEntityHandler.DeselectEntities();
+
+        lastFloorSceneObjectUsed = floorSceneObject;
     }
 
     public void ActivateBuilderInWorldCamera()

@@ -265,7 +265,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public override void CreatedEntity(DCLBuilderInWorldEntity createdEntity)
     {
         base.CreatedEntity(createdEntity);
-        isPlacingNewObject = true;
+
+        if(!createdEntity.isFloor)
+            isPlacingNewObject = true;
 
         gizmoManager.HideGizmo();
         if (createdEntity.isVoxel)
@@ -440,12 +442,12 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     void SetLookAtObject()
     {
-        Vector3 middlePoint = CalculateMiddlePoint(sceneToEdit.sceneData.parcels);
+        Vector3 middlePoint = CalculatePointToLookAt();
 
-        lookAtT.position = SceneController.i.ConvertSceneToUnityPosition(middlePoint);
+        lookAtT.position = middlePoint;
     }
 
-    Vector3 CalculateMiddlePoint(Vector2Int[] positions)
+    Vector3 CalculatePointToLookAt()
     {
         Vector3 position;
 
@@ -453,12 +455,12 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         float totalY = 0f;
         float totalZ = 0f;
 
-        int minX = 9999;
-        int minY = 9999;
-        int maxX = -9999;
-        int maxY = -9999;
+        int minX = int.MaxValue;
+        int minY = int.MaxValue;
+        int maxX = int.MinValue;
+        int maxY = int.MinValue;
 
-        foreach (Vector2Int vector in positions)
+        foreach (Vector2Int vector in sceneToEdit.sceneData.parcels)
         {
             totalX += vector.x;
             totalZ += vector.y;
@@ -467,18 +469,17 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             if (vector.x > maxX) maxX = vector.x;
             if (vector.y > maxY) maxY = vector.y;
         }
-        float centerX = totalX / positions.Length;
-        float centerZ = totalZ / positions.Length;
+        float centerX = totalX / sceneToEdit.sceneData.parcels.Length;
+        float centerZ = totalZ / sceneToEdit.sceneData.parcels.Length;
 
         position.x = centerX;
         position.y = totalY;
         position.z = centerZ;
 
-        int amountParcelsX = Mathf.Abs(maxX - minX) + 1;
-        int amountParcelsZ = Mathf.Abs(maxY - minY) + 1;
+        position = SceneController.i.ConvertScenePositionToUnityPosition(sceneToEdit);
 
-        position.x += ParcelSettings.PARCEL_SIZE / 2 * amountParcelsX;
-        position.z += ParcelSettings.PARCEL_SIZE / 2 * amountParcelsZ;
+        position.x += ParcelSettings.PARCEL_SIZE / 2 ;
+        position.z += ParcelSettings.PARCEL_SIZE / 2 ;
 
         return position;
     }
