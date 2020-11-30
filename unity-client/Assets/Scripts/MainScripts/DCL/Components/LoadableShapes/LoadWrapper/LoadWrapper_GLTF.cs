@@ -24,10 +24,12 @@ namespace DCL.Components
             alreadyLoaded = false;
             Assert.IsFalse(string.IsNullOrEmpty(targetUrl), "url is null!!");
 
-            if (customContentProvider == null)
-                customContentProvider = this.entity.scene.contentProvider;
 
-            loadHelper = new RendereableAssetLoadHelper(customContentProvider, entity.scene.sceneData.baseUrlBundles);
+            if (customContentProvider == null)
+                loadHelper = new RendereableAssetLoadHelper(this.entity.scene.contentProvider, entity.scene.sceneData.baseUrlBundles);
+            else
+                loadHelper = new RendereableAssetLoadHelper(customContentProvider, entity.scene.sceneData.baseUrlBundles);
+
 
             loadHelper.settings.parent = entity.meshRootGameObject.transform;
 
