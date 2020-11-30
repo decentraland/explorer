@@ -23,7 +23,7 @@ public class GLTFShape_Tests : TestsBase
         TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
             new
             {
-                src = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/Trunk/Trunk.glb"
             }));
 
         LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
@@ -44,7 +44,7 @@ public class GLTFShape_Tests : TestsBase
         var componentId = TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
             new
             {
-                src = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/Trunk/Trunk.glb"
             }));
 
         LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
@@ -54,13 +54,13 @@ public class GLTFShape_Tests : TestsBase
             var gltfObject = scene.entities[entityId].gameObject.GetComponentInChildren<InstantiatedGLTFObject>();
 
             Assert.IsTrue(gltfObject != null, "InstantiatedGLTFObject is null in first object!");
-            Assert.IsTrue(gltfObject.transform.Find("Lantern") != null, "Can't find \"Lantern!\"");
+            Assert.IsTrue(gltfObject.transform.Find("TreeStump_01") != null, "Can't find \"TreeStump_01!\"");
         }
 
         TestHelpers.UpdateShape(scene, componentId, JsonConvert.SerializeObject(
             new
             {
-                src = Utils.GetTestsAssetsPath() + "/GLB/DamagedHelmet/DamagedHelmet.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb"
             }));
 
         gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
@@ -70,8 +70,8 @@ public class GLTFShape_Tests : TestsBase
             var gltfObject = scene.entities[entityId].gameObject.GetComponentInChildren<InstantiatedGLTFObject>();
 
             Assert.IsTrue(gltfObject != null, "InstantiatedGLTFObject is null in second object!");
-            Assert.IsTrue(gltfObject.transform.Find("node_damagedHelmet_-6514") != null,
-                "Can't find \"node_damagedHelmet_-6514\"!");
+            Assert.IsTrue(gltfObject.transform.Find("PalmTree_01") != null,
+                "Can't find \"PalmTree_01\"!");
         }
     }
 
@@ -84,7 +84,7 @@ public class GLTFShape_Tests : TestsBase
         var componentId = TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
             new
             {
-                src = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/Trunk/Trunk.glb"
             }));
 
         LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
@@ -93,7 +93,7 @@ public class GLTFShape_Tests : TestsBase
         TestHelpers.UpdateShape(scene, componentId, JsonConvert.SerializeObject(
             new
             {
-                src = Utils.GetTestsAssetsPath() + "/GLB/DamagedHelmet/DamagedHelmet.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb"
             }));
 
         gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
@@ -126,7 +126,7 @@ public class GLTFShape_Tests : TestsBase
         string gltfId2 = TestHelpers.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
             JsonConvert.SerializeObject(new
             {
-                src = Utils.GetTestsAssetsPath() + "/GLB/Lantern/Lantern.glb"
+                src = Utils.GetTestsAssetsPath() + "/GLB/Trunk/Trunk.glb"
             }));
 
         gltfLoader = GLTFShape.GetLoaderForEntity(entity);
