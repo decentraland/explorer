@@ -31,6 +31,7 @@ export type HotSceneInfo = {
   creator: string
   thumbnail: string
   baseCoords: { x: number; y: number }
+  parcels: { x: number; y: number }[]
   usersTotalCount: number
   realms: RealmInfo[]
 }
@@ -40,7 +41,16 @@ export async function fetchHotScenes(): Promise<HotSceneInfo[]> {
     const url = getHotScenesService(globalThis.globalStore.getState())
     const response = await fetch(url)
     if (response.ok) {
-      return response.json()
+      const info = await response.json()
+      return info.map((scene: any) => {
+        return {
+          ...scene,
+          baseCoords: { x: scene.baseCoords[0], y: scene.baseCoords[1] },
+          parcels: scene.parcels.map((parcel: [number, number]) => {
+            return { x: parcel[0], y: parcel[1] }
+          })
+        } as HotSceneInfo
+      })
     }
   } catch (e) {
     defaultLogger.log(e)
@@ -136,6 +146,12 @@ function createHotSceneInfo(
     creator: getOwnerNameFromJsonData(sceneJsonData),
     thumbnail: getThumbnailUrlFromJsonData(sceneJsonData) ?? '',
     baseCoords: { x: baseCoords[0], y: baseCoords[1] },
+    parcels: sceneJsonData
+      ? sceneJsonData.scene.parcels.map((parcel) => {
+          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+          return { x: coord[0], y: coord[1] }
+        })
+      : [],
     realms: [createRealmInfo(candidate, 1)],
     usersTotalCount: 1
   }
@@ -169,6 +185,12 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
       creator: getOwnerNameFromJsonData(land.sceneJsonData),
       thumbnail: getThumbnailUrlFromJsonData(land.sceneJsonData) ?? '',
       baseCoords: { x: baseCoords[0], y: baseCoords[1] },
+      parcels: land.sceneJsonData
+        ? land.sceneJsonData.scene.parcels.map((parcel) => {
+            const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+            return { x: coord[0], y: coord[1] }
+          })
+        : [],
       realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0 }],
       usersTotalCount: 0
     }
