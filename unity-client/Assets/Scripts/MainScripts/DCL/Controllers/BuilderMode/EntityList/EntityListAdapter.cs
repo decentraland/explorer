@@ -10,7 +10,7 @@ public class EntityListAdapter : MonoBehaviour
     public Color entitySelectedColor, entityUnselectedColor;
     public Color iconsSelectedColor, iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
-    public TMP_InputField nameIF;
+    public TMP_InputField nameInputField;
     public Image selectedImg, lockImg, showImg;
     public System.Action<BuilderInWorldEntityListController.EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     DCLBuilderInWorldEntity currentEntity;
@@ -65,12 +65,12 @@ public class EntityListAdapter : MonoBehaviour
         {
             if (string.IsNullOrEmpty(entityToEdit.descriptiveName))
             {
-                nameIF.text = entityToEdit.rootEntity.entityId;
+                nameInputField.text = entityToEdit.rootEntity.entityId;
                 nameTxt.text = entityToEdit.rootEntity.entityId;
             }
             else
             {
-                nameIF.text = entityToEdit.descriptiveName;
+                nameInputField.text = entityToEdit.descriptiveName;
                 nameTxt.text = entityToEdit.descriptiveName;
             }
 

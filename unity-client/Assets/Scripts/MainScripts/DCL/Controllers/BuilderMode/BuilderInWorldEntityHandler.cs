@@ -411,7 +411,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         foreach (ProtocolV2.GenericComponent component in data.sharedComponents)
         {
-            sceneToEdit.SharedComponentAttach(newEntity.entityId, component.sharedId);
+            sceneToEdit.SharedComponentAttach(newEntity.entityId, component.classId);
         }
 
         SetupEntityToEdit(newEntity, true);

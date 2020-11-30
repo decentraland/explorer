@@ -46,7 +46,7 @@ namespace DCL.Components
 
         public override int GetClassId()
         {
-            return (int)CLASS_ID.GLTF_SHAPE;
+            return -1;
         }
 
         public override object GetModel()

@@ -11,10 +11,15 @@ public class BuilderInWorldInputWrapper : MonoBehaviour
     public float msClickThreshold = 200;
     public float movementClickThreshold = 50;
 
-    public Action<int,Vector3> OnMouseClick,OnMouseDown,OnMouseUp;
+    public event Action<int,Vector3> OnMouseClick;
+    public event Action<int,Vector3> OnMouseDown;
+    public event Action<int,Vector3> OnMouseUp;
+
+    public event Action<float> OnMouseWheel;
+
     public event OnMouseDragDelegate OnMouseDrag;
     public event OnMouseDragDelegateRaw OnMouseDragRaw;
-    public Action<float> OnMouseWheel;
+
 
     public delegate void OnMouseDragDelegate(int buttonId, Vector3 position, float axisX, float axisY);
     public delegate void OnMouseDragDelegateRaw(int buttonId, Vector3 position, float axisX, float axisY);

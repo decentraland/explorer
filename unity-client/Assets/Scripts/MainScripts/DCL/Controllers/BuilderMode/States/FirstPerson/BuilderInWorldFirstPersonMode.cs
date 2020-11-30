@@ -37,7 +37,7 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
         rotationHold.OnStarted += rotationHoldStartDelegate;
         rotationHold.OnFinished += rotationHoldFinishedDelegate;
 
-        builderInputWrapper.OnMouseClick += MouseClick;
+        builderInputWrapper.OnMouseClick += OnMouseClick;
     }
 
     private void OnDestroy()
@@ -90,7 +90,7 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
 
     }
 
-    public void MouseClick(int buttonId, Vector3 mouseposition)
+    public void OnMouseClick(int buttonId, Vector3 mouseposition)
     {
         if (!isModeActive) return;
         if (buttonId != 1) return;

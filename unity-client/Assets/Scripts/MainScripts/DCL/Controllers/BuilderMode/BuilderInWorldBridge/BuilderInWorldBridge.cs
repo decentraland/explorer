@@ -47,7 +47,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         sceneEvent.payload = modifyEntityComponentEvent;
 
 
-        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't enconde them
+        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
         string message = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -116,7 +116,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         sceneEvent.payload = modifyEntityComponentEvent;
 
 
-        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't enconde them
+        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
     
         string message = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
         {
@@ -166,7 +166,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         sceneEvent.payload = addEntityEvent;
 
 
-        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't enconde them
+        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
         string message = Newtonsoft.Json.JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore

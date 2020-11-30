@@ -31,7 +31,7 @@ public class ProtocolV2
     public class GenericComponent
     {
         public int componentId;
-        public string sharedId;
+        public string classId;
         public object data;
     }
 

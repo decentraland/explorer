@@ -134,7 +134,7 @@ public static partial class BuilderInWorldUtils
             ProtocolV2.GenericComponent entityComponentModel = new ProtocolV2.GenericComponent();
             entityComponentModel.componentId = keyValuePair.Value.GetClassId();
             entityComponentModel.data = keyValuePair.Value.GetModel();
-            entityComponentModel.sharedId = keyValuePair.Value.id;
+            entityComponentModel.classId = keyValuePair.Value.id;
 
             builderInWorldEntityData.sharedComponents.Add(entityComponentModel);
         }
