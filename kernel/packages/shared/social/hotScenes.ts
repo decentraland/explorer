@@ -148,9 +148,9 @@ function createHotSceneInfo(
     baseCoords: { x: baseCoords[0], y: baseCoords[1] },
     parcels: sceneJsonData
       ? sceneJsonData.scene.parcels.map((parcel) => {
-          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-          return { x: coord[0], y: coord[1] }
-        })
+        const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+        return { x: coord[0], y: coord[1] }
+      })
       : [],
     realms: [createRealmInfo(candidate, 1)],
     usersTotalCount: 1
@@ -187,9 +187,9 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
       baseCoords: { x: baseCoords[0], y: baseCoords[1] },
       parcels: land.sceneJsonData
         ? land.sceneJsonData.scene.parcels.map((parcel) => {
-            const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
-            return { x: coord[0], y: coord[1] }
-          })
+          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+          return { x: coord[0], y: coord[1] }
+        })
         : [],
       realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0 }],
       usersTotalCount: 0
