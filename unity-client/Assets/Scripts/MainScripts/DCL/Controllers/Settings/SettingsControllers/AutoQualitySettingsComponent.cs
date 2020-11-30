@@ -11,6 +11,7 @@ public class AutoQualitySettingsComponent : MonoBehaviour
 {
     private const float LOOP_TIME_SECONDS = 1f;
     private const string LAST_QUALITY_INDEX = "LAST_QUALITY_INDEX";
+    private const int TARGET_FPS = 30;
 
     [SerializeField] internal BooleanVariable autoQualityEnabled;
     [SerializeField] internal PerformanceMetricsDataVariable performanceMetricsData;
@@ -52,7 +53,7 @@ public class AutoQualitySettingsComponent : MonoBehaviour
 
         fpsCapped = settings.fpsCap;
         if (settings.fpsCap)
-            controller = new AutoQualityCappedFPSController(30, currentQualityIndex, qualitySettings);
+            controller = new AutoQualityCappedFPSController(TARGET_FPS, currentQualityIndex, qualitySettings);
         else
             controller = new AutoQualityUncappedFPSController(currentQualityIndex, qualitySettings);
     }
