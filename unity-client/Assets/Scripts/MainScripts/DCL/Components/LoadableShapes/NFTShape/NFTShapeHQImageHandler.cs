@@ -118,7 +118,7 @@ internal class NFTShapeHQImageHandler : IDisposable
         if (asset.isHQ)
             return;
 
-        string url = string.Format("{0}=s{1}", config.nftInfo.imageUrl, asset.isGif ? config.nftConfig.hqGifResolution : config.nftConfig.hqImgResolution);
+        string url = string.Format("{0}=s{1}", config.nftInfo.imageUrl, asset.hqResolution);
 
         Action debugSuccess = null;
         Action debugFail = null;

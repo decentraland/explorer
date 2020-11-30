@@ -186,7 +186,7 @@ public class NFTShapeLoaderController : MonoBehaviour
                     controller = this,
                     nftConfig = config,
                     nftInfo = nftInfo,
-                    asset = NFTAssetFactory.CreateAsset(downloadedTex)
+                    asset = NFTAssetFactory.CreateAsset(downloadedTex, config)
                 };
                 hqTextureHandler = NFTShapeHQImageHandler.Create(hqImageHandlerConfig);
             });

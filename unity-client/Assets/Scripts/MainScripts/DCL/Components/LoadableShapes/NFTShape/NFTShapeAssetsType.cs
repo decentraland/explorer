@@ -6,8 +6,8 @@ using UnityEngine;
 
 internal interface INFTAsset : IDisposable
 {
-    bool isGif { get; }
     bool isHQ { get; }
+    int hqResolution { get; }
     DCL.ITexture previewAsset { get; }
     DCL.ITexture hqAsset { get; }
     Action<Texture2D> UpdateTextureCallback { set; }
@@ -17,7 +17,7 @@ internal interface INFTAsset : IDisposable
 
 internal static class NFTAssetFactory
 {
-    public static INFTAsset CreateAsset(ITexture asset)
+    public static INFTAsset CreateAsset(ITexture asset, NFTShapeConfig shapeConfig)
     {
         if (asset == null)
         {
@@ -26,16 +26,16 @@ internal static class NFTAssetFactory
 
         if (asset is Asset_Gif gif)
         {
-            return new GifAsset(gif);
+            return new GifAsset(gif, shapeConfig.hqGifResolution);
         }
-        return new ImageAsset(asset);
+        return new ImageAsset(asset, shapeConfig.hqImgResolution);
     }
 }
 
 internal class ImageAsset : INFTAsset
 {
-    public bool isGif => false;
     public bool isHQ => hqAsset != null;
+    public int hqResolution { private set; get; }
     public Action<Texture2D> UpdateTextureCallback { set; get; }
     public ITexture previewAsset => previewTexture;
     public ITexture hqAsset => hqTexture != null ? hqTexture.asset : null;
@@ -43,9 +43,10 @@ internal class ImageAsset : INFTAsset
     private AssetPromise_Texture hqTexture;
     private ITexture previewTexture;
 
-    public ImageAsset(ITexture previewTexture)
+    public ImageAsset(ITexture previewTexture, int hqResolution)
     {
         this.previewTexture = previewTexture;
+        this.hqResolution = hqResolution;
     }
 
     public void Dispose()
@@ -88,8 +89,8 @@ internal class ImageAsset : INFTAsset
 
 internal class GifAsset : INFTAsset
 {
-    public bool isGif => true;
     public bool isHQ => hqAsset != null;
+    public int hqResolution { private set; get; }
     public Action<Texture2D> UpdateTextureCallback { set; get; }
     public ITexture previewAsset => previewGif;
     public ITexture hqAsset => hqTexture != null ? hqTexture : null;
@@ -98,9 +99,10 @@ internal class GifAsset : INFTAsset
     private Asset_Gif previewGif;
     private Coroutine loadRoutine;
 
-    public GifAsset(Asset_Gif previewGif)
+    public GifAsset(Asset_Gif previewGif, int hqResolution)
     {
         this.previewGif = previewGif;
+        this.hqResolution = hqResolution;
     }
 
     public void Dispose()
