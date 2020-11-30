@@ -37,7 +37,7 @@ namespace DCL.Tutorial
             FromBuilderInWorld
         }
 
-   
+
 
         public static TutorialController i { get; private set; }
 
@@ -91,7 +91,7 @@ namespace DCL.Tutorial
         internal TutorialPath currentPath;
         internal int currentStepNumber;
         internal TutorialType tutorialType = TutorialType.Initital;
-        
+
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
         private Coroutine eagleEyeRotationCoroutine;
@@ -110,7 +110,7 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.isTaskbarHUDInitialized.OnChange += IsTaskbarHUDInitialized_OnChange;
 
             if (debugRunTutorial)
-                SetTutorialEnabled(debugOpenedFromDeepLink.ToString(),TutorialType.Initital);
+                SetTutorialEnabled(debugOpenedFromDeepLink.ToString(), TutorialType.Initital);
         }
 
         private void OnDestroy()
@@ -128,11 +128,11 @@ namespace DCL.Tutorial
             NotificationsController.disableWelcomeNotification = false;
         }
 
-    
+
         /// <summary>
         /// Enables the tutorial controller and waits for the RenderingState is enabled to start to execute the corresponding tutorial steps.
         /// </summary>
-        public void SetTutorialEnabled(string fromDeepLink,TutorialType tutorialType)
+        public void SetTutorialEnabled(string fromDeepLink, TutorialType tutorialType = TutorialType.Initital)
         {
             if (isRunning)
                 return;
@@ -182,7 +182,7 @@ namespace DCL.Tutorial
 
             if (SceneController.i != null)
             {
-                WebInterface.SendSceneExternalActionEvent(SceneController.i.currentSceneId,"tutorial","end");
+                WebInterface.SendSceneExternalActionEvent(SceneController.i.currentSceneId, "tutorial", "end");
             }
 
             NotificationsController.disableWelcomeNotification = false;
@@ -239,11 +239,11 @@ namespace DCL.Tutorial
             }
         }
 
-    /// <summary>
-    /// Shows the teacher that will be guiding along the tutorial.
-    /// </summary>
-    /// <param name="active">True for show the teacher.</param>
-    public void ShowTeacher3DModel(bool active)
+        /// <summary>
+        /// Shows the teacher that will be guiding along the tutorial.
+        /// </summary>
+        /// <param name="active">True for show the teacher.</param>
+        public void ShowTeacher3DModel(bool active)
         {
             teacherCamera.enabled = active;
             teacherRawImage.gameObject.SetActive(active);
@@ -549,5 +549,5 @@ namespace DCL.Tutorial
                 hudController?.profileHud?.SetVisibility(true);
             }
         }
-}
+    }
 }
