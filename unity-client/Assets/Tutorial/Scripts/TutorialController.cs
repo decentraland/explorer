@@ -132,7 +132,7 @@ namespace DCL.Tutorial
         /// <summary>
         /// Enables the tutorial controller and waits for the RenderingState is enabled to start to execute the corresponding tutorial steps.
         /// </summary>
-        public void SetTutorialEnabled(string fromDeepLink, TutorialType tutorialType = TutorialType.Initital)
+        public void SetTutorialEnabled(string fromDeepLink, TutorialType tutorialType)
         {
             if (isRunning)
                 return;
@@ -154,6 +154,12 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
                 OnRenderingStateChanged(true, false);
+        }
+        
+        // We use an overload instead of a default TutorialType argument to avoid breaking communications with Kernel
+        public void SetTutorialEnabled(string fromDeepLink)
+        {
+            SetTutorialEnabled(fromDeepLink, TutorialType.Initital);
         }
 
         /// <summary>
