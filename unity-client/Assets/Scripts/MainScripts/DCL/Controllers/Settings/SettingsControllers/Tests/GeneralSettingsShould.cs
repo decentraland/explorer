@@ -197,12 +197,15 @@ namespace Tests
 
         private void CheckIfGeneralSettingsAreApplied()
         {
-            float sensitivityMultiplier = Mathf.LerpUnclamped(GeneralSettingsController.SENSITIVITY_MIN_MULTIPLIER, GeneralSettingsController.SENSITIVITY_MAX_MULTIPLIER, DCL.Settings.i.generalSettings.mouseSensitivity);
+            var povSpeed = Mathf.Lerp(GeneralSettingsController.FIRST_PERSON_MIN_SPEED, GeneralSettingsController.FIRST_PERSON_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, povSpeed, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, povSpeed, "pov (m_VerticalAxis) mouseSensitivity mismatch");
 
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, 250f*sensitivityMultiplier, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, 2f*sensitivityMultiplier, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, 200f*sensitivityMultiplier, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, 200f*sensitivityMultiplier, "pov (m_VerticalAxis) mouseSensitivity mismatch");
+            var freeLookXSpeed = Mathf.Lerp(GeneralSettingsController.THIRD_PERSON_X_MIN_SPEED, GeneralSettingsController.THIRD_PERSON_X_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
+            var freeLookYSpeed = Mathf.Lerp(GeneralSettingsController.THIRD_PERSON_Y_MIN_SPEED, GeneralSettingsController.THIRD_PERSON_Y_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, freeLookXSpeed, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, freeLookYSpeed, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
+
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
         }
     }
