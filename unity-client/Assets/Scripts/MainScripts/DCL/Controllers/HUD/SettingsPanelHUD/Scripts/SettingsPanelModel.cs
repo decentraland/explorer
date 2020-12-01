@@ -9,7 +9,7 @@ namespace DCL.SettingsPanelHUD
     {
     }
 
-    [CreateAssetMenu(menuName = "Settings/Configuration/MainPanel")]
+    [CreateAssetMenu(menuName = "Settings/Configuration/MainPanel", fileName = "MainPanelConfiguration")]
     public class SettingsPanelModel : ScriptableObject
     {
         [Reorderable]

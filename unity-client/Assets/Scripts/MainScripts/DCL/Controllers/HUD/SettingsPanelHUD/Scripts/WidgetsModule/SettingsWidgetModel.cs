@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Widgets
 {
-    [CreateAssetMenu(menuName = "Settings/Configuration/Widget")]
+    [CreateAssetMenu(menuName = "Settings/Configuration/Widget", fileName = "WidgetConfiguration")]
     public class SettingsWidgetModel : ScriptableObject
     {
         public string title;

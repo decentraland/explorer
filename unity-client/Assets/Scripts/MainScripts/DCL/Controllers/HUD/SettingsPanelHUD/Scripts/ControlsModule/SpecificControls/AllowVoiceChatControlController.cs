@@ -1,10 +1,11 @@
 using DCL.SettingsData;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
-    [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Mute Audio", fileName = "MuteAudioControlController")]
-    public class MuteAudioControlController : SettingsControlController
+    [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Allow Voice Chat", fileName = "AllowVoiceChatControlController")]
+    public class AllowVoiceChatControlController : SettingsControlController
     {
         private GeneralSettings currentGeneralSettings;
 
@@ -15,12 +16,12 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override object GetStoredValue()
         {
-            return currentGeneralSettings.sfxVolume > 0 ? true : false;
+            return (int)currentGeneralSettings.voiceChatAllow;
         }
 
         public override void OnControlChanged(object newValue)
         {
-            currentGeneralSettings.sfxVolume = (bool)newValue ? 1 : 0;
+            currentGeneralSettings.voiceChatAllow = (GeneralSettings.VoiceChatAllow)newValue;
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
             Settings.i.SaveSettings();
         }

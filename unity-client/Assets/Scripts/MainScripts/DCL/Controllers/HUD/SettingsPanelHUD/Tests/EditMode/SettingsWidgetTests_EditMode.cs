@@ -26,7 +26,7 @@ namespace Tests
 
             // Assert
             newControlView.Received(1).Initialize(
-                newControlConfig.title,
+                newControlConfig,
                 newControlController);
 
             Assert.Contains(newControlView, widgetController.controls, "The new control should be contained in the control list.");

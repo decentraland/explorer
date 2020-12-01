@@ -7,9 +7,9 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private Toggle toggle = null;
 
-        public override void Initialize(string title, SettingsControlController settingsControlController)
+        public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
-            base.Initialize(title, settingsControlController);
+            base.Initialize(controlConfig, settingsControlController);
 
             toggle.onValueChanged.AddListener(isOn =>
             {

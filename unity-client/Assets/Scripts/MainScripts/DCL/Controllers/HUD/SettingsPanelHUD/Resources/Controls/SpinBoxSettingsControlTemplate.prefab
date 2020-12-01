@@ -857,7 +857,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3731816843781449031}
   - component: {fileID: 1882231507603824778}
-  - component: {fileID: 337097500535954107}
+  - component: {fileID: 3856968550380144319}
   m_Layer: 5
   m_Name: SpinBoxSettingsControlTemplate
   m_TagString: Untagged
@@ -893,7 +893,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7951948174597467371}
   m_CullTransparentMesh: 0
---- !u!114 &337097500535954107
+--- !u!114 &3856968550380144319
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -902,10 +902,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 7951948174597467371}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fba895d842b9392458d2d3c87b72b033, type: 3}
+  m_Script: {fileID: 11500000, guid: f5ae1a5994b10c74d9be2279365836c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 946022103321159557}
+  spinBox: {fileID: 3837855004225010386}
 --- !u!1 &9137623970578278229
 GameObject:
   m_ObjectHideFlags: 0

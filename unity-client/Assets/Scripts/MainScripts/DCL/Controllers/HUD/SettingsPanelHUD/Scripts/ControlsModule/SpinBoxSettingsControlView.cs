@@ -6,9 +6,11 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private SpinBoxPresetted spinBox = null;
 
-        public override void Initialize(string title, SettingsControlController settingsControlController)
+        public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
-            base.Initialize(title, settingsControlController);
+            base.Initialize(controlConfig, settingsControlController);
+
+            spinBox.SetLabels(((SpinBoxControlModel)controlConfig).spinBoxLabels);
 
             spinBox.onValueChanged.AddListener(sliderValue =>
             {

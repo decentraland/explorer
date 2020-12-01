@@ -5,7 +5,7 @@ namespace DCL.SettingsPanelHUD.Controls
 {
     public interface ISettingsControlView
     {
-        void Initialize(string title, SettingsControlController settingsControlController);
+        void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
     }
 
     public class SettingsControlView : MonoBehaviour, ISettingsControlView
@@ -14,12 +14,12 @@ namespace DCL.SettingsPanelHUD.Controls
 
         protected SettingsControlController settingsControlController;
 
-        public virtual void Initialize(string title, SettingsControlController settingsControlController)
+        public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             this.settingsControlController = settingsControlController;
             this.settingsControlController.Initialize();
 
-            this.title.text = title;
+            this.title.text = controlConfig.title;
         }
     }
 }

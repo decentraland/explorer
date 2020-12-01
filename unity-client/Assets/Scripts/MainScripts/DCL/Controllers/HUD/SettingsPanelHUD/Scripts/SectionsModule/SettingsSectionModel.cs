@@ -9,7 +9,7 @@ namespace DCL.SettingsPanelHUD.Sections
     {
     }
 
-    [CreateAssetMenu(menuName = "Settings/Configuration/Section")]
+    [CreateAssetMenu(menuName = "Settings/Configuration/Section", fileName = "SectionConfiguration")]
     public class SettingsSectionModel : ScriptableObject
     {
         public Sprite icon;

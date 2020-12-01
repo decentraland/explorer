@@ -11,7 +11,7 @@ namespace DCL.SettingsPanelHUD.Sections
         void AddWidget(ISettingsWidgetView newWidget, ISettingsWidgetController newWidgetController, SettingsWidgetModel widgetConfig);
     }
 
-    [CreateAssetMenu(menuName = "Settings/Controllers/Section Controller", fileName = "SettingsSectionController")]
+    [CreateAssetMenu(menuName = "Settings/Controllers/Section", fileName = "SettingsSectionController")]
     public class SettingsSectionController : ScriptableObject, ISettingsSectionController
     {
         public List<ISettingsWidgetView> widgets { get; } = new List<ISettingsWidgetView>();
