@@ -30,7 +30,7 @@ public class AssetCatalogBridge : MonoBehaviour
     {
         get
         {
-            if (sceneAssetPackCatalogValue == null)
+            if (sceneObjectCatalogValue == null)
             {
                 sceneObjectCatalogValue = Resources.Load<SceneObjectDictionary>("SceneObjectCatalog");
             }
@@ -62,8 +62,8 @@ public class AssetCatalogBridge : MonoBehaviour
     public static ContentProvider GetContentProviderForAssetIdInSceneObjectCatalog(string assetId)
     {
         ContentProvider contentProvider = null;
-        if (sceneObjectCatalogValue.ContainsKey(assetId))        
-            contentProvider = CreateContentProviderForSceneObject(sceneObjectCatalogValue.Get(assetId));
+        if (sceneObjectCatalog.ContainsKey(assetId))        
+            contentProvider = CreateContentProviderForSceneObject(sceneObjectCatalog.Get(assetId));
         
         return contentProvider;
     }
@@ -86,7 +86,7 @@ public class AssetCatalogBridge : MonoBehaviour
 
     public static SceneObject GetSceneObjectById(string id)
     {
-        foreach (SceneObject sceneObject in sceneObjectCatalogValue.GetValues())
+        foreach (SceneObject sceneObject in sceneObjectCatalog.GetValues())
         {
             if (sceneObject.id == id) return sceneObject;
         }
@@ -111,7 +111,12 @@ public class AssetCatalogBridge : MonoBehaviour
 
     public static void AddSceneObjectToCatalog(SceneObject sceneObject)
     {
-        sceneObjectCatalogValue.Add(sceneObject.id, sceneObject);
+        sceneObjectCatalog.Add(sceneObject.id, sceneObject);
+    }
+
+    public static void AddSceneAssetPackToCatalog(SceneAssetPack sceneAssetPack)
+    {
+        sceneAssetPackCatalog.Add(sceneAssetPack.id, sceneAssetPack);
     }
 
     public void AddSceneAssetPackToCatalog(JObject payload)
