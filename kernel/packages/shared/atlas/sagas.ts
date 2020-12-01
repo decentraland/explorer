@@ -51,13 +51,13 @@ declare const window: {
 
 const districts = {
   id: 'districts',
-  url: 'https://api.decentraland.org/v1/districts',
+  url: 'https://atlas-api.decentraland.co/v1/districts',
   build: districtData
 }
 
 const tiles = {
   id: 'tiles',
-  url: 'https://api.decentraland.org/v1/tiles',
+  url: 'https://atlas-api.decentraland.co/v1/tiles',
   build: marketData
 }
 
