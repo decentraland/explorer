@@ -37,8 +37,6 @@ namespace DCL.Tutorial
             FromBuilderInWorld
         }
 
-
-
         public static TutorialController i { get; private set; }
 
         public HUDController hudController { get => HUDController.i; }
@@ -110,7 +108,7 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.isTaskbarHUDInitialized.OnChange += IsTaskbarHUDInitialized_OnChange;
 
             if (debugRunTutorial)
-                SetTutorialEnabled(debugOpenedFromDeepLink.ToString(), TutorialType.Initital);
+                SetTutorialEnabled(debugOpenedFromDeepLink.ToString());
         }
 
         private void OnDestroy()
@@ -128,11 +126,20 @@ namespace DCL.Tutorial
             NotificationsController.disableWelcomeNotification = false;
         }
 
+        public void SetTutorialEnabled(string fromDeepLink)
+        {
+            SetupTutorial(fromDeepLink, TutorialType.Initital);
+        }
+
+        public void SetBuilderInWorldTutorialEnabled()
+        {
+            SetupTutorial(false.ToString(), TutorialType.BuilderInWorld);
+        }
 
         /// <summary>
         /// Enables the tutorial controller and waits for the RenderingState is enabled to start to execute the corresponding tutorial steps.
         /// </summary>
-        public void SetTutorialEnabled(string fromDeepLink, TutorialType tutorialType)
+        void SetupTutorial(string fromDeepLink, TutorialType tutorialType)
         {
             if (isRunning)
                 return;
@@ -154,12 +161,6 @@ namespace DCL.Tutorial
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
                 OnRenderingStateChanged(true, false);
-        }
-        
-        // We use an overload instead of a default TutorialType argument to avoid breaking communications with Kernel
-        public void SetTutorialEnabled(string fromDeepLink)
-        {
-            SetTutorialEnabled(fromDeepLink, TutorialType.Initital);
         }
 
         /// <summary>
@@ -470,7 +471,7 @@ namespace DCL.Tutorial
         {
             SetTutorialDisabled();
             tutorialReset = true;
-            SetTutorialEnabled(false.ToString(), TutorialType.Initital);
+            SetTutorialEnabled(false.ToString());
         }
 
         private bool IsPlayerInsideGenesisPlaza()
