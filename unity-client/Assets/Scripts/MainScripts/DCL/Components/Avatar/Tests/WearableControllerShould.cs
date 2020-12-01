@@ -20,7 +20,7 @@ namespace AvatarShape_Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
 
             toCleanUp.Clear();
             wearableHolder = CreateTestGameObject("_Holder").transform;
