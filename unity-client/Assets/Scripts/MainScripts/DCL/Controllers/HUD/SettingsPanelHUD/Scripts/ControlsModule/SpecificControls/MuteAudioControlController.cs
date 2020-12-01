@@ -1,3 +1,4 @@
+using DCL.SettingsData;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -5,9 +6,11 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Controllers/Mute Audio Controller", fileName = "MuteAudioControlController")]
     public class MuteAudioControlController : SettingsControlController
     {
+        private GeneralSettings currentGeneralSettings;
+
         public override void Initialize()
         {
-            base.Initialize();
+            currentGeneralSettings = Settings.i.generalSettings;
         }
 
         public override object GetStoredValue()
