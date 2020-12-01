@@ -7,9 +7,7 @@ public static class AvatarAssetsTestHelpers
 {
     public static WearableDictionary CreateTestCatalogLocal()
     {
-        WearableItemDummyListVariable testCatalogArray = Object.Instantiate(Resources.Load<WearableItemDummyListVariable>("TestCatalogArrayLocalAssets"));
-        List<WearableItemDummy> wearables = testCatalogArray.GetList();
-
+        List<WearableItemDummy> wearables = Object.Instantiate(Resources.Load<WearableItemDummyListVariable>("TestCatalogArrayLocalAssets")).list;
         foreach (var wearableItem in wearables)
         {
             wearableItem.baseUrl = Utils.GetTestsAssetsPath() + "/Avatar/Assets/";
