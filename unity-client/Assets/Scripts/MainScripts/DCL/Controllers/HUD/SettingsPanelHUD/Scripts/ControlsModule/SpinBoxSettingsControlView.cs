@@ -6,7 +6,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private SpinBoxPresetted spinBox = null;
 
-        public override void Initialize(string title, ISettingsControlController settingsControlController)
+        public override void Initialize(string title, SettingsControlController settingsControlController)
         {
             base.Initialize(title, settingsControlController);
 

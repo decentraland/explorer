@@ -56,7 +56,7 @@ namespace Tests
             SettingsControlModel newControlConfig = new SettingsControlModel(
                 $"TestControl_Col{columnIndex}",
                 controlViewPrefab,
-                new SettingsControlController());
+                Substitute.For<SettingsControlController>());
 
 
             controlColumnsToCreate[columnIndex].controls.Add(newControlConfig);
@@ -68,7 +68,7 @@ namespace Tests
             // Assert
             widgetController.Received(1).AddControl(
                 Arg.Any<ISettingsControlView>(),
-                Arg.Any<ISettingsControlController>(),
+                Arg.Any<SettingsControlController>(),
                 Arg.Any<SettingsControlModel>());
         }
     }

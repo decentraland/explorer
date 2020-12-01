@@ -3,28 +3,17 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
-    public interface ISettingsControlController
-    {
-        object GetStoredValue();
-        void OnControlChanged(object newValue);
-    }
-
-    public class SettingsControlController : ScriptableObject, ISettingsControlController
+    public abstract class SettingsControlController : ScriptableObject
     {
         protected GeneralSettings currentGeneralSettings;
 
-        private void Awake()
+        public virtual void Initialize()
         {
             currentGeneralSettings = Settings.i.generalSettings;
         }
 
-        public virtual object GetStoredValue()
-        {
-            return null;
-        }
+        public abstract object GetStoredValue();
 
-        public virtual void OnControlChanged(object newValue)
-        {
-        }
+        public abstract void OnControlChanged(object newValue);
     }
 }

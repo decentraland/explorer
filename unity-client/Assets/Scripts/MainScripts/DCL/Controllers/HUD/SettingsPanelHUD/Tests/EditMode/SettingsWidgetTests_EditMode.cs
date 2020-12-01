@@ -13,11 +13,11 @@ namespace Tests
         {
             // Arrange
             var newControlView = Substitute.For<ISettingsControlView>();
-            var newControlController = Substitute.For<ISettingsControlController>();
+            var newControlController = Substitute.For<SettingsControlController>();
             var newControlConfig = new SettingsControlModel(
                 "TestControl",
                 new SettingsControlView(),
-                new SettingsControlController());
+                Substitute.For<SettingsControlController>());
 
             SettingsWidgetController widgetController = new SettingsWidgetController();
 
