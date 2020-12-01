@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07c5da5d312c4c44c8a1300c2e89ef74, type: 3}
-  m_Name: SliderExampleControl
+  m_Name: ToggleAudioControl
   m_EditorClassIdentifier: 
-  title: SLIDER CONTROL
-  controlPrefab: {fileID: 337097500535954107, guid: 9c69fdd3db1d73140bfff48c5a2f72dd,
+  title: SOUND
+  controlPrefab: {fileID: 202718616210799590, guid: aa5ca631e7cc4b543bf10102794f0eea,
     type: 3}
-  controlController: {fileID: 11400000, guid: 28efc32bc72c2be4dbbd87c98da841c8, type: 2}
+  controlController: {fileID: 11400000, guid: 1f6d31cc45f7d3444a6d513f558defff, type: 2}

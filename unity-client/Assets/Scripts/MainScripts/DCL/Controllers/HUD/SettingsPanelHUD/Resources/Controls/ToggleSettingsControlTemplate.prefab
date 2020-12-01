@@ -1123,7 +1123,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3731816843781449031}
   - component: {fileID: 1882231507603824778}
-  - component: {fileID: 337097500535954107}
+  - component: {fileID: 202718616210799590}
   m_Layer: 5
   m_Name: ToggleSettingsControlTemplate
   m_TagString: Untagged
@@ -1159,7 +1159,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7951948174597467371}
   m_CullTransparentMesh: 0
---- !u!114 &337097500535954107
+--- !u!114 &202718616210799590
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1168,7 +1168,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 7951948174597467371}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fba895d842b9392458d2d3c87b72b033, type: 3}
+  m_Script: {fileID: 11500000, guid: c134f74001ea027489dab817674b0402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 946022103321159557}
+  toggle: {fileID: 7847144896387343876}

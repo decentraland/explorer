@@ -12,9 +12,9 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private TextMeshProUGUI title;
 
-        private ISettingsControlController settingsControlController;
+        protected ISettingsControlController settingsControlController;
 
-        public void Initialize(string title, ISettingsControlController settingsControlController)
+        public virtual void Initialize(string title, ISettingsControlController settingsControlController)
         {
             this.settingsControlController = settingsControlController;
 
