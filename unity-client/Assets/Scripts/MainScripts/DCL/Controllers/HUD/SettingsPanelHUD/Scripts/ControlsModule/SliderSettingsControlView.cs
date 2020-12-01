@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,7 +6,8 @@ namespace DCL.SettingsPanelHUD.Controls
 {
     public class SliderSettingsControlView : SettingsControlView
     {
-        [SerializeField] private Slider slider = null;
+        [SerializeField] private Slider slider;
+        [SerializeField] private TextMeshProUGUI indicatorLabel;
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
@@ -14,6 +16,7 @@ namespace DCL.SettingsPanelHUD.Controls
             slider.onValueChanged.AddListener(sliderValue =>
             {
                 settingsControlController.OnControlChanged(sliderValue);
+                indicatorLabel.text = sliderValue.ToString("0.0");
             });
 
             slider.value = (float)settingsControlController.GetStoredValue();

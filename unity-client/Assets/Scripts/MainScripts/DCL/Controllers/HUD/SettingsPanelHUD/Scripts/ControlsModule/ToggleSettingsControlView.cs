@@ -5,7 +5,7 @@ namespace DCL.SettingsPanelHUD.Controls
 {
     public class ToggleSettingsControlView : SettingsControlView
     {
-        [SerializeField] private Toggle toggle = null;
+        [SerializeField] private Toggle toggle;
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {

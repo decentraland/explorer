@@ -775,7 +775,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3731816843781449031}
   - component: {fileID: 1882231507603824778}
-  - component: {fileID: 337097500535954107}
+  - component: {fileID: 3572563192424337713}
   m_Layer: 5
   m_Name: SliderSettingsControlTemplate
   m_TagString: Untagged
@@ -811,7 +811,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7951948174597467371}
   m_CullTransparentMesh: 0
---- !u!114 &337097500535954107
+--- !u!114 &3572563192424337713
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -820,10 +820,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7951948174597467371}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fba895d842b9392458d2d3c87b72b033, type: 3}
+  m_Script: {fileID: 11500000, guid: 69f6432f3a544fb4c897777a7872dda4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 946022103321159557}
+  slider: {fileID: 6766189024411584644}
+  indicatorLabel: {fileID: 49177162354486727}
 --- !u!1 &8547468104166466955
 GameObject:
   m_ObjectHideFlags: 0

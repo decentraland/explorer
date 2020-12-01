@@ -4,7 +4,7 @@ namespace DCL.SettingsPanelHUD.Controls
 {
     public class SpinBoxSettingsControlView : SettingsControlView
     {
-        [SerializeField] private SpinBoxPresetted spinBox = null;
+        [SerializeField] private SpinBoxPresetted spinBox;
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
