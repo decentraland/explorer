@@ -34,7 +34,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnCatalogOpen;
 
     internal BuildModeHUDView view;
-    BuildModeEntityListController buildModeEntityListController;
+    BuilderInWorldEntityListController buildModeEntityListController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
