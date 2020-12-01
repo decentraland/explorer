@@ -109,11 +109,15 @@ export function getSceneNameFromJsonData(jsonData?: SceneJsonData) {
 
 export function getThumbnailUrlFromJsonDataAndContent(
   jsonData: SceneJsonData | undefined,
-  contents: Array<ContentMapping>,
+  contents: Array<ContentMapping> | undefined,
   downloadUrl: string
 ): string | undefined {
-  if (!jsonData || !contents || !downloadUrl) {
+  if (!jsonData) {
     return undefined
+  }
+
+  if (!contents || !downloadUrl) {
+    return getThumbnailUrlFromJsonData(jsonData)
   }
 
   let thumbnail: string | undefined = jsonData.display?.navmapThumbnail
@@ -132,6 +136,14 @@ export function getThumbnailUrlFromJsonDataAndContent(
     thumbnail = getThumbnailUrlFromBuilderProjectId(jsonData.source?.projectId)
   }
   return thumbnail
+}
+
+export function getThumbnailUrlFromJsonData(jsonData?: SceneJsonData): string | undefined {
+  if (!jsonData) {
+    return undefined
+  }
+
+  return jsonData.display?.navmapThumbnail ?? getThumbnailUrlFromBuilderProjectId(jsonData.source?.projectId)
 }
 
 export function getThumbnailUrlFromBuilderProjectId(projectId: string | undefined): string | undefined {
