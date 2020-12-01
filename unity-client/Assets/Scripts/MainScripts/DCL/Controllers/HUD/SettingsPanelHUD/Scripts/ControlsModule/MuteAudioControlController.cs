@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
-    [CreateAssetMenu(menuName = "Settings/Controllers/Toggle Sound Controller", fileName = "ToggleSoundControlController")]
-    public class ToggleSoundControlController : SettingsControlController
+    [CreateAssetMenu(menuName = "Settings/Controllers/Mute Audio Controller", fileName = "MuteAudioControlController")]
+    public class MuteAudioControlController : SettingsControlController
     {
         public override void Initialize()
         {
