@@ -235,7 +235,6 @@ public class SceneObjectCatalogController : MonoBehaviour
             favoritesSceneObjects.Add(sceneObject);
 
             int index = FindEmptyShortcutSlot();
-            SetQuickBarShortcut(sceneObject,index,adapter.thumbnailImg.texture);
 
             sceneObject.isFavorite = true;
           
@@ -244,15 +243,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         {
             favoritesSceneObjects.Remove(sceneObject);
 
-            if (quickBarShortcutsSceneObjects.Contains(sceneObject))
-            {
-                int index = quickBarShortcutsSceneObjects.IndexOf(sceneObject);
-                if (index < shortcutsImgs.Length && index != -1)
-                {
-                    shortcutsImgs[index].enabled = false;
-                    quickBarShortcutsSceneObjects[index] = null;
-                }
-            }
+         
          
             sceneObject.isFavorite = false;
         }
