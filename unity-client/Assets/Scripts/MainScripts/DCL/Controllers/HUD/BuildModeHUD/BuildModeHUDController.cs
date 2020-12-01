@@ -29,16 +29,19 @@ public class BuildModeHUDController : IHUD
     public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
     public event Action<DCLBuilderInWorldEntity> OnEntityRename;
 
+    
     //Note(Adrian): This is used right now for tutorial purposes
     public event Action OnCatalogOpen;
 
     internal BuildModeHUDView view;
-    BuilderInWorldEntityListController buildModeEntityListController;
+    BuildModeEntityListController buildModeEntityListController;
+
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
     public BuildModeHUDController()
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("BuildModeHUD")).GetComponent<BuildModeHUDView>();
+
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
