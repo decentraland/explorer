@@ -8,7 +8,7 @@ import { reportScenesFromTiles } from 'shared/atlas/actions'
 import { getSceneNameFromAtlasState, postProcessSceneName, getPoiTiles } from 'shared/atlas/selectors'
 import { getHotScenesService } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
-import { getOwnerNameFromJsonData, getThumbnailUrlFromJsonData } from 'shared/selectors'
+import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData, getThumbnailUrlFromJsonData } from 'shared/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -29,6 +29,7 @@ export type HotSceneInfo = {
   id: string
   name: string
   creator: string
+  description: string
   thumbnail: string
   baseCoords: { x: number; y: number }
   parcels: { x: number; y: number }[]
@@ -144,6 +145,7 @@ function createHotSceneInfo(
     id: id,
     name: getSceneName(baseCoord, sceneJsonData),
     creator: getOwnerNameFromJsonData(sceneJsonData),
+    description: getSceneDescriptionFromJsonData(sceneJsonData),
     thumbnail: getThumbnailUrlFromJsonData(sceneJsonData) ?? '',
     baseCoords: { x: baseCoords[0], y: baseCoords[1] },
     parcels: sceneJsonData
@@ -183,6 +185,7 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
       id: land.sceneId,
       name: getSceneName(land.sceneJsonData.scene.base, land.sceneJsonData),
       creator: getOwnerNameFromJsonData(land.sceneJsonData),
+      description: getSceneDescriptionFromJsonData(land.sceneJsonData),
       thumbnail: getThumbnailUrlFromJsonData(land.sceneJsonData) ?? '',
       baseCoords: { x: baseCoords[0], y: baseCoords[1] },
       parcels: land.sceneJsonData
