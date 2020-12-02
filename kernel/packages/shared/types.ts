@@ -536,5 +536,5 @@ export type RealmsInfoForRenderer = {
     usersCount: number
     usersMax: number
     userParcels: [number, number][]
-  }
+  }[]
 }
