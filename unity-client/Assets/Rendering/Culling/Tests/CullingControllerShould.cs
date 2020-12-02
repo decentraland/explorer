@@ -22,8 +22,7 @@ namespace CullingControllerTests
             cullingController = Substitute.ForPartsOf<CullingController>();
             cullingController.objectsTracker = new CullingObjectsTracker();
             cullingController.urpAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
-            cullingController.SetSettings(new CullingControllerSettings());
-            cullingController.maxTimeBudget = float.MaxValue;
+            cullingController.SetSettings(new CullingControllerSettings() { maxTimeBudget = float.MaxValue });
         }
 
         [TearDown]

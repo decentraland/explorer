@@ -23,6 +23,8 @@ namespace DCL.Rendering
         void SetAnimationCulling(bool enabled);
         void SetShadowCulling(bool enabled);
         bool IsRunning();
+
+        bool IsDirty();
     }
 
     /// <summary>
@@ -33,8 +35,6 @@ namespace DCL.Rendering
     /// </summary>
     public class CullingController : ICullingController, IDisposable
     {
-        public float maxTimeBudget = 4 / 1000f;
-
         internal List<CullingControllerProfile> profiles = null;
 
         private CullingControllerSettings settings;
@@ -145,7 +145,7 @@ namespace DCL.Rendering
 
             for (var i = 0; i < renderers.Length; i++)
             {
-                if (timeBudgetCount > maxTimeBudget)
+                if (timeBudgetCount > settings.maxTimeBudget)
                 {
                     timeBudgetCount = 0;
                     yield return null;
@@ -283,7 +283,7 @@ namespace DCL.Rendering
 
             for (var i = 0; i < animsLength; i++)
             {
-                if (timeBudgetCount > maxTimeBudget)
+                if (timeBudgetCount > settings.maxTimeBudget)
                 {
                     timeBudgetCount = 0;
                     yield return null;
@@ -371,6 +371,14 @@ namespace DCL.Rendering
         public void MarkDirty()
         {
             objectsTracker.MarkDirty();
+        }
+
+        /// <summary>
+        /// Gets the scene objects dirtiness. if true, all the scene objects are going to be gathered the next frame.
+        /// </summary>
+        public bool IsDirty()
+        {
+            return objectsTracker.IsDirty();
         }
 
         /// <summary>
