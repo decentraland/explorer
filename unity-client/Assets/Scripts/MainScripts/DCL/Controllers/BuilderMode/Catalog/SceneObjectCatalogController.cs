@@ -15,8 +15,6 @@ using UnityEngine.UI;
 
 public class SceneObjectCatalogController : MonoBehaviour 
 {
-    public System.Action<SceneObject> OnSceneObjectSelected;
-    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
     public event System.Action<string> OnResultReceived;
     public event System.Action<SceneObject> OnSceneObjectSelected;
     public event System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
@@ -44,7 +42,6 @@ public class SceneObjectCatalogController : MonoBehaviour
         favoritesController = new FavoritesController(catalogGroupListView);
 
         quickBarView.OnQuickBarShortcutSelected += QuickBarInput;
-        OnResultReceived += AddFullSceneObjectCatalog;
         catalogAssetPackListView.OnSceneAssetPackClick += OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked += SceneObjectSelected;
         searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
@@ -59,11 +56,6 @@ public class SceneObjectCatalogController : MonoBehaviour
         quickBarView.OnQuickBarShortcutSelected -= QuickBarInput;
         catalogAssetPackListView.OnSceneAssetPackClick -= OnScenePackSelected;
         catalogGroupListView.OnSceneObjectClicked -= SceneObjectSelected;
-        catalogGroupListView.OnSceneObjectFavorite -= ToggleFavoriteState;
-        catalogGroupListView.OnAdapterStartDragging -= SceneObjectStartDragged;
-        catalogGroupListView.OnAdapterDrag -= OnDrag;
-        catalogGroupListView.OnAdapterEndDrag -= OnEndDrag;
-        OnResultReceived -= AddFullSceneObjectCatalog;
         quickBarController.OnSceneObjectSelected -= SceneObjectSelected;
     }
 
