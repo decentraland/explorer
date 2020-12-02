@@ -537,6 +537,12 @@ namespace DCL.Interface
             public bool isSignUpFlow;
         }
 
+        [System.Serializable]
+        public class StringPayload
+        {
+            public string value;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -615,6 +621,7 @@ namespace DCL.Interface
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
         private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
+        private static StringPayload stringPayload = new StringPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -1049,6 +1056,12 @@ namespace DCL.Interface
             gifSetupPayload.isWebGL1 = isWebGL1;
 
             SendMessage("RequestGIFProcessor", gifSetupPayload);
+        }
+
+        public static void DeleteGIF(string id)
+        {
+            stringPayload.value = id;
+            SendMessage("DeleteGIF", stringPayload);
         }
 
         public static void GoTo(int x, int y)
