@@ -13,6 +13,7 @@ import { SceneWorker } from './SceneWorker'
 import { SceneSystemWorker } from './SceneSystemWorker'
 import { renderStateObservable } from './worldState'
 import { ILandToLoadableParcelScene } from 'shared/selectors'
+import { PREVIEW } from 'config'
 
 export type EnableParcelSceneLoadingOptions = {
   parcelSceneClass: { new(x: EnvironmentData<LoadableParcelScene>): ParcelSceneAPI }
@@ -94,6 +95,7 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     if (!getSceneWorkerBySceneID(sceneId)) {
       const parcelScene = new options.parcelSceneClass(ILandToLoadableParcelScene(parcelSceneToStart))
       parcelScene.data.useFPSThrottling = true
+      parcelScene.data.isPreviewMode = PREVIEW
       loadParcelScene(parcelScene)
     }
 

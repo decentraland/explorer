@@ -139,6 +139,7 @@ export async function startGlobalScene(unityInterface: UnityInterface) {
     baseUrl: location.origin,
     main: hudWorkerUrl,
     useFPSThrottling: false,
+    isPreviewMode: false,
     data: {},
     mappings: []
   })
