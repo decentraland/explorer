@@ -166,11 +166,15 @@ export class RendererStatefulActor extends StatefulActor {
       case CLASS_ID.TRANSFORM:
         return { name: 'transform', disposability: ComponentDisposability.NON_DISPOSABLE }
       case CLASS_ID.NAME:
-        return { name: 'name', disposability: ComponentDisposability.NON_DISPOSABLE }
+        return { name: 'name', disposability: ComponentDisposability.DISPOSABLE }
       case CLASS_ID.GLTF_SHAPE:
         return { name: 'shape', disposability: ComponentDisposability.DISPOSABLE }
       case CLASS_ID.NFT_SHAPE:
         return { name: 'shape', disposability: ComponentDisposability.DISPOSABLE }
+      case CLASS_ID.LOCKED_ON_EDIT:
+        return { name: 'lockedOnEdit', disposability: ComponentDisposability.DISPOSABLE }
+      case CLASS_ID.VISIBLE_ON_EDIT:
+        return { name: 'visibleOnEdit', disposability: ComponentDisposability.DISPOSABLE }
     }
     throw new Error('Component not implemented yet')
   }
