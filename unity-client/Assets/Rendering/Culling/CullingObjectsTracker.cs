@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace DCL.Rendering
 {
-    public interface ICullingObjectsTracker
+    public interface ICullingObjectsTracker : IDisposable
     {
         void MarkDirty();
         bool IsDirty();
@@ -90,6 +92,14 @@ namespace DCL.Rendering
         public Animation[] GetAnimations()
         {
             return animations;
+        }
+
+        public void Dispose()
+        {
+            dirty = true;
+            renderers = null;
+            animations = null;
+            skinnedRenderers = null;
         }
     }
 }

@@ -73,7 +73,7 @@ namespace DCL
             pointerEventsController.Cleanup();
             worldBlockersController.Dispose();
             parcelScenesCleaner.Dispose();
-            cullingController.Stop();
+            cullingController.Dispose();
         }
 
         public void Restart(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)

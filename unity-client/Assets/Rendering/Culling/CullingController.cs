@@ -9,7 +9,7 @@ using static DCL.Rendering.CullingControllerUtils;
 
 namespace DCL.Rendering
 {
-    public interface ICullingController
+    public interface ICullingController : IDisposable
     {
         void Start();
         void Stop();
@@ -340,6 +340,7 @@ namespace DCL.Rendering
 
         public void Dispose()
         {
+            objectsTracker.Dispose();
             Stop();
         }
 
