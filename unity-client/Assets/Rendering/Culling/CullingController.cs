@@ -25,6 +25,8 @@ namespace DCL.Rendering
         bool IsRunning();
 
         bool IsDirty();
+
+        ICullingObjectsTracker objectsTracker { get; }
     }
 
     /// <summary>
@@ -44,11 +46,12 @@ namespace DCL.Rendering
 
         public UniversalRenderPipelineAsset urpAsset;
 
-        internal ICullingObjectsTracker objectsTracker;
+        public ICullingObjectsTracker objectsTracker { get; private set; }
         private Coroutine updateCoroutine;
         private float timeBudgetCount = 0;
         private bool resetObjectsNextFrame = false;
         private bool playerPositionDirty;
+        private bool objectPositionsDirty;
         private bool running = false;
 
         public delegate void DataReport(int rendererCount, int hiddenRendererCount, int hiddenShadowCount);
@@ -206,9 +209,10 @@ namespace DCL.Rendering
         {
             while (true)
             {
-                bool shouldCheck = objectsTracker.IsDirty() || playerPositionDirty;
+                bool shouldCheck = objectPositionsDirty || playerPositionDirty;
 
                 playerPositionDirty = false;
+                objectPositionsDirty = false;
 
                 if (!shouldCheck)
                 {
@@ -370,15 +374,15 @@ namespace DCL.Rendering
         /// </summary>
         public void MarkDirty()
         {
-            objectsTracker.MarkDirty();
+            objectPositionsDirty = true;
         }
 
         /// <summary>
-        /// Gets the scene objects dirtiness. if true, all the scene objects are going to be gathered the next frame.
+        /// Gets the scene objects dirtiness.
         /// </summary>
         public bool IsDirty()
         {
-            return objectsTracker.IsDirty();
+            return objectPositionsDirty;
         }
 
         /// <summary>

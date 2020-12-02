@@ -68,8 +68,8 @@ namespace DCL
             //TODO(Brian): Move those suscriptions elsewhere.
             PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet += Environment.i.physicsSyncController.MarkDirty;
-            PoolManager.i.OnGet -= Environment.i.cullingController.MarkDirty;
-            PoolManager.i.OnGet += Environment.i.cullingController.MarkDirty;
+            PoolManager.i.OnGet -= Environment.i.cullingController.objectsTracker.MarkDirty;
+            PoolManager.i.OnGet += Environment.i.cullingController.objectsTracker.MarkDirty;
 
 #if !UNITY_EDITOR
             worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
@@ -110,7 +110,7 @@ namespace DCL
         void OnDestroy()
         {
             PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
-            PoolManager.i.OnGet -= Environment.i.cullingController.MarkDirty;
+            PoolManager.i.OnGet -= Environment.i.cullingController.objectsTracker.MarkDirty;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             Environment.i.parcelScenesCleaner.Stop();
             Environment.i.cullingController.Stop();
