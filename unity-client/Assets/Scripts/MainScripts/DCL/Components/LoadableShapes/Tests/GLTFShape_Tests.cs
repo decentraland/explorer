@@ -41,10 +41,6 @@ public class GLTFShape_Tests : TestsBase
         string entityId = "1";
         TestHelpers.CreateSceneEntity(scene, entityId);
 
-        Assert.IsTrue(
-            scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
-            "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
-
         string mockupAssetId = "cdd5a4ea94388dd21babdecd26dd560f739dce2fbb8c99cc10a45bb8306b6076";
         string mockupKey = "key";
         string mockupValue = "Value";
@@ -70,20 +66,17 @@ public class GLTFShape_Tests : TestsBase
             }));
 
 
-        bool useTheSameContentProvider = false;
-
         LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
 
-        if(gltfShape is LoadWrapper_GLTF gltfWrapper)
-        {
-            ContentProvider customContentProvider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneAsetPackCatalog(mockupAssetId);
-            useTheSameContentProvider = gltfWrapper.customContentProvider.baseUrl == customContentProvider.baseUrl &&
-                                        gltfWrapper.customContentProvider.contents[0].file == mockupKey &&
-                                        gltfWrapper.customContentProvider.contents[0].hash == mockupValue;
-                                        
-        }
+        if (!(gltfShape is LoadWrapper_GLTF))
+            Assert.Fail();
 
-        Assert.IsTrue(useTheSameContentProvider);
+
+        LoadWrapper_GLTF gltfWrapper = (LoadWrapper_GLTF)gltfShape;
+        ContentProvider customContentProvider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneAsetPackCatalog(mockupAssetId);
+        Assert.AreEqual(customContentProvider.baseUrl, gltfWrapper.customContentProvider.baseUrl);
+        Assert.AreEqual(mockupKey, gltfWrapper.customContentProvider.contents[0].file);
+        Assert.AreEqual(mockupValue, gltfWrapper.customContentProvider.contents[0].hash);
     }
 
     [UnityTest]
