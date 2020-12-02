@@ -125,7 +125,7 @@ namespace DCL.SettingsHUD
             mouseSensitivitySlider.onValueChanged.AddListener(value =>
             {
                 tempGeneralSetting.mouseSensitivity = RemapMouseSensitivityTo01(value);
-                mouseSensitivityValueLabel.text = value.ToString("0.0");
+                mouseSensitivityValueLabel.text = value.ToString();
                 isDirty = true;
             });
 
