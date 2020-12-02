@@ -35,7 +35,10 @@ namespace DCL.SettingsPanelHUD
         public void SetVisibility(bool visible)
         {
             if (!visible && view.isOpen)
+            {
+                Settings.i.SaveSettings();
                 OnClose?.Invoke();
+            }
 
             view.SetVisibility(visible);
         }

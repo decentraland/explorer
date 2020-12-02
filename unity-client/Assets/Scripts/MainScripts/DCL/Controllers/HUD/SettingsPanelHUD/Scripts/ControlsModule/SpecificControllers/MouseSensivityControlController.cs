@@ -16,7 +16,6 @@ namespace DCL.SettingsPanelHUD.Controls
             ((SliderSettingsControlView)view).OverrideIndicatorLabel(((float)newValue).ToString("0.0"));
 
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.SaveSettings();
         }
     }
 }

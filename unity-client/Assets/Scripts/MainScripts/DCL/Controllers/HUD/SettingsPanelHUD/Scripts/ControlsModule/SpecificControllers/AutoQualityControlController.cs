@@ -26,7 +26,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             Settings.i.ApplyQualitySettings(currentQualitySetting);
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.SaveSettings();
         }
     }
 }

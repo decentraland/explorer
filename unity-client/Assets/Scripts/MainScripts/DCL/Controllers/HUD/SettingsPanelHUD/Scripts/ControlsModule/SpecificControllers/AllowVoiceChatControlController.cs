@@ -15,7 +15,6 @@ namespace DCL.SettingsPanelHUD.Controls
             currentGeneralSettings.voiceChatAllow = (SettingsData.GeneralSettings.VoiceChatAllow)newValue;
 
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.SaveSettings();
         }
     }
 }

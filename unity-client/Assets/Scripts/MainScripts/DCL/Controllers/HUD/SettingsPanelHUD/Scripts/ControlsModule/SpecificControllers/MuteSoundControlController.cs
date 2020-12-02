@@ -15,7 +15,6 @@ namespace DCL.SettingsPanelHUD.Controls
             currentGeneralSettings.sfxVolume = (bool)newValue ? 1 : 0;
 
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.SaveSettings();
         }
     }
 }

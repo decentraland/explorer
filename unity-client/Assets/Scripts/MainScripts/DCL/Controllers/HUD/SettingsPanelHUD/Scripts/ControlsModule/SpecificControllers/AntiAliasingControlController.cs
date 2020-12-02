@@ -32,7 +32,6 @@ namespace DCL.SettingsPanelHUD.Controls
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
 
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.SaveSettings();
         }
     }
 }

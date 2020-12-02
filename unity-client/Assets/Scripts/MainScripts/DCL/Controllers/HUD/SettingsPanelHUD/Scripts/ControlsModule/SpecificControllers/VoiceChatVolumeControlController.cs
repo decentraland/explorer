@@ -15,7 +15,6 @@ namespace DCL.SettingsPanelHUD.Controls
             currentGeneralSettings.voiceChatVolume = (float)newValue * 0.01f;
 
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.SaveSettings();
         }
     }
 }
