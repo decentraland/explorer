@@ -6,7 +6,7 @@ namespace DCL.Rendering
 {
     public interface ICullingObjectsTracker
     {
-        void SetDirty();
+        void MarkDirty();
         bool IsDirty();
         Renderer[] GetRenderers();
         SkinnedMeshRenderer[] GetSkinnedRenderers();
@@ -51,7 +51,7 @@ namespace DCL.Rendering
         /// <summary>
         /// Sets the dirty flag to true to make PopulateRenderersList retrieve all the scene objects on its next call.
         /// </summary>
-        public void SetDirty()
+        public void MarkDirty()
         {
             dirty = true;
         }

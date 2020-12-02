@@ -14,7 +14,7 @@ namespace DCL.Rendering
         void Start();
         void Stop();
         event CullingController.DataReport OnDataReport;
-        void SetDirty();
+        void MarkDirty();
 
         void SetSettings(CullingControllerSettings settings);
         CullingControllerSettings GetSettingsCopy();
@@ -347,7 +347,7 @@ namespace DCL.Rendering
             if (!running)
                 return;
 
-            SetDirty();
+            MarkDirty();
 
             if (rendererState)
                 StartInternal();
@@ -368,9 +368,9 @@ namespace DCL.Rendering
         /// In the next update iteration, all the scene objects are going to be gathered.
         /// This method has performance impact. 
         /// </summary>
-        public void SetDirty()
+        public void MarkDirty()
         {
-            objectsTracker.SetDirty();
+            objectsTracker.MarkDirty();
         }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace DCL.Rendering
         {
             this.settings = settings;
             profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
-            SetDirty();
+            MarkDirty();
         }
 
         /// <summary>
@@ -405,7 +405,7 @@ namespace DCL.Rendering
 
             settings.enableObjectCulling = enabled;
             resetObjectsNextFrame = true;
-            SetDirty();
+            MarkDirty();
         }
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace DCL.Rendering
 
             settings.enableAnimationCulling = enabled;
             resetObjectsNextFrame = true;
-            SetDirty();
+            MarkDirty();
         }
 
         /// <summary>
@@ -433,7 +433,7 @@ namespace DCL.Rendering
 
             settings.enableShadowCulling = enabled;
             resetObjectsNextFrame = true;
-            SetDirty();
+            MarkDirty();
         }
 
         /// <summary>

@@ -202,7 +202,7 @@ namespace CullingControllerTests
 
             cullingController.SetSettings(settings);
 
-            cullingController.objectsTracker.SetDirty();
+            cullingController.objectsTracker.MarkDirty();
             yield return cullingController.objectsTracker.PopulateRenderersList();
 
             // Test #1
@@ -314,7 +314,7 @@ namespace CullingControllerTests
             settings.enableObjectCulling = true;
 
             cullingController.SetSettings(settings);
-            cullingController.objectsTracker.SetDirty();
+            cullingController.objectsTracker.MarkDirty();
 
             yield return cullingController.objectsTracker.PopulateRenderersList();
 
