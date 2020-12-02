@@ -13,20 +13,17 @@ namespace DCL.Rendering
     {
         void Start();
         void Stop();
-        event CullingController.DataReport OnDataReport;
         void MarkDirty();
-
         void SetSettings(CullingControllerSettings settings);
         CullingControllerSettings GetSettingsCopy();
-
         void SetObjectCulling(bool enabled);
         void SetAnimationCulling(bool enabled);
         void SetShadowCulling(bool enabled);
         bool IsRunning();
 
         bool IsDirty();
-
         ICullingObjectsTracker objectsTracker { get; }
+        event CullingController.DataReport OnDataReport;
     }
 
     /// <summary>
@@ -35,7 +32,7 @@ namespace DCL.Rendering
     /// - Disable unneeded shadows.
     /// - Enable/disable animation culling for skinned renderers and animation components.
     /// </summary>
-    public class CullingController : ICullingController, IDisposable
+    public class CullingController : ICullingController
     {
         internal List<CullingControllerProfile> profiles = null;
 
@@ -57,7 +54,6 @@ namespace DCL.Rendering
         public delegate void DataReport(int rendererCount, int hiddenRendererCount, int hiddenShadowCount);
 
         public event DataReport OnDataReport;
-
 
         public static CullingController Create()
         {
@@ -264,6 +260,8 @@ namespace DCL.Rendering
             {
                 if (r.forceRenderingOff != !shouldBeVisible)
                     r.forceRenderingOff = !shouldBeVisible;
+
+                Debug.Log($"-- Asd: {r.name} ... {r.forceRenderingOff}");
             }
 
             if (settings.enableShadowCulling)
@@ -394,6 +392,7 @@ namespace DCL.Rendering
         {
             this.settings = settings;
             profiles = new List<CullingControllerProfile> {settings.rendererProfile, settings.skinnedRendererProfile};
+            objectsTracker?.MarkDirty();
             MarkDirty();
         }
 
@@ -419,6 +418,7 @@ namespace DCL.Rendering
             settings.enableObjectCulling = enabled;
             resetObjectsNextFrame = true;
             MarkDirty();
+            objectsTracker?.MarkDirty();
         }
 
         /// <summary>
@@ -433,6 +433,7 @@ namespace DCL.Rendering
             settings.enableAnimationCulling = enabled;
             resetObjectsNextFrame = true;
             MarkDirty();
+            objectsTracker?.MarkDirty();
         }
 
         /// <summary>
@@ -447,6 +448,7 @@ namespace DCL.Rendering
             settings.enableShadowCulling = enabled;
             resetObjectsNextFrame = true;
             MarkDirty();
+            objectsTracker?.MarkDirty();
         }
 
         /// <summary>
