@@ -20,7 +20,6 @@ namespace DCL.SettingsPanelHUD.Controls
         public SettingsControlList controls;
     }
 
-    [CreateAssetMenu(menuName = "Settings/Configuration/Controls/Default Control", fileName = "DefaultControlConfiguration")]
     public class SettingsControlModel : ScriptableObject
     {
         public string title;
