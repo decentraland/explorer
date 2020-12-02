@@ -45,6 +45,16 @@ namespace DCL.Components
         {
         }
 
+        public override int GetClassId()
+        {
+            return -1;
+        }
+
+        public override object GetModel()
+        {
+            return model;
+        }
+
         public override IEnumerator ApplyChanges(string newJson)
         {
             return null;

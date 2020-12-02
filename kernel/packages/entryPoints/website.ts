@@ -51,6 +51,18 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
 }
+/**
+ * Subscribe to uncaught errors
+ */
+window.addEventListener('error', (event: ErrorEvent) => {
+  ReportFatalError(event.message as any, {
+    type: event.type,
+    message: event.message,
+    stack: event.error.stack,
+    filename: event.filename
+  })
+  return false
+})
 
 namespace webApp {
   export function createStore(): RootStore {
@@ -127,7 +139,7 @@ namespace webApp {
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: false, visible: false })
+            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
             globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
             Html.switchGameContainer(true)
           })
@@ -193,7 +205,6 @@ namespace webApp {
       }
 
       console['error'](error)
-      ReportFatalError(error.message)
     }
     return true
   }
