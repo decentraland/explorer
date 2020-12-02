@@ -159,7 +159,7 @@ export abstract class SceneRuntime extends Script {
   async loadProject() {
     const { EnvironmentAPI } = (await this.loadAPIs(['EnvironmentAPI'])) as { EnvironmentAPI: EnvironmentAPI }
     const bootstrapData = await EnvironmentAPI.getBootstrapData()
-    this.isPreview = await EnvironmentAPI.isPreviewMode();
+    this.isPreview = await EnvironmentAPI.isPreviewMode()
 
     if (bootstrapData && bootstrapData.main) {
       const mappingName = bootstrapData.main
@@ -594,8 +594,8 @@ export abstract class SceneRuntime extends Script {
     try {
       if (this.events.length) {
         const batch = this.events.slice()
-        this.events.length = 0;
-        ((this.engine as any) as IEngineAPI).sendBatch(batch).catch((e: Error) => this.onError(e))
+        this.events.length = 0
+        ;((this.engine as any) as IEngineAPI).sendBatch(batch).catch((e: Error) => this.onError(e))
       }
     } catch (e) {
       this.onError(e)

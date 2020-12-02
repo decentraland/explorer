@@ -1,5 +1,4 @@
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
-import { PREVIEW } from 'config'
 import { ContentMapping, ILand, EnvironmentData, LoadableParcelScene, SceneJsonData } from './types'
 
 export function normalizeContentMappings(
@@ -33,7 +32,6 @@ export function ILandToLoadableParcelScene(land: ILand): EnvironmentData<Loadabl
     name: getSceneNameFromJsonData(land.sceneJsonData),
     main: land.sceneJsonData.main,
     useFPSThrottling: false,
-    isPreviewMode: PREVIEW,
     mappings,
     data: {
       id: land.sceneId,
@@ -64,7 +62,6 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
     name: getSceneNameFromJsonData(land.sceneJsonData),
     main: land.sceneJsonData.main,
     useFPSThrottling: false,
-    isPreviewMode: PREVIEW,
     mappings,
     data: {
       id: land.sceneId,

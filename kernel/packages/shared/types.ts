@@ -220,7 +220,6 @@ export type EnvironmentData<T> = {
   baseUrl: string
   mappings: Array<ContentMapping>
   useFPSThrottling: boolean
-  isPreviewMode: boolean
   data: T
 }
 
