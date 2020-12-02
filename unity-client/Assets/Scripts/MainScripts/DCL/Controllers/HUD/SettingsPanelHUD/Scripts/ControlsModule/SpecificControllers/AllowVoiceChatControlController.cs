@@ -1,5 +1,4 @@
 using DCL.SettingsData;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls

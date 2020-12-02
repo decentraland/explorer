@@ -22,3 +22,4 @@ MonoBehaviour:
   widgets:
     array:
     - {fileID: 11400000, guid: 4461cd11dc368714cae5cc5a4519a9ac, type: 2}
+    - {fileID: 11400000, guid: ff7af099b8cdfc54b8a48da32edda548, type: 2}
