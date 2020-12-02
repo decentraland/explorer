@@ -10,7 +10,7 @@ public class RealmsInfoTests
         const string SERVER_NAME = "temptation";
         const string LAYER = "red";
 
-        var realmInfo = new RealmsInfo();
+        var handler = new RealmsInfoHandler();
 
         var testModel = new RealmsInfoModel()
         {
@@ -24,32 +24,32 @@ public class RealmsInfoTests
         bool onChangeTriggered = false;
         CurrentRealmModel onChangeCurrentValue = null;
 
-        realmInfo.currentRealm.OnChange += (current, prev) =>
+        handler.playerRealm.OnChange += (current, prev) =>
         {
             onChangeTriggered = true;
             onChangeCurrentValue = current;
         };
 
-        realmInfo.Set(testModel);
+        handler.Set(testModel);
         Assert.IsTrue(onChangeTriggered, "OnChange not triggered");
         Assert.IsTrue(testModel.current.Equals(onChangeCurrentValue), "Values are not the same");
         Assert.IsTrue(testModel.current.serverName == SERVER_NAME, "Values are not the same");
         Assert.IsTrue(testModel.current.layer == LAYER, "Values are not the same");
 
         onChangeTriggered = false;
-        realmInfo.Set(JsonUtility.ToJson(testModel));
+        handler.Set(JsonUtility.ToJson(testModel));
         Assert.IsFalse(onChangeTriggered, "OnChange shouldn't be triggered");
 
         const string NEW_LAYER = "blue";
         testModel.current.layer = NEW_LAYER;
 
-        realmInfo.Set(JsonUtility.ToJson(testModel));
+        handler.Set(JsonUtility.ToJson(testModel));
         Assert.IsTrue(testModel.current.Equals(onChangeCurrentValue), "Values are not the same");
         Assert.IsTrue(testModel.current.serverName == SERVER_NAME, "Values are not the same");
         Assert.IsTrue(testModel.current.layer == NEW_LAYER, "Values are not the same");
 
         onChangeTriggered = false;
-        realmInfo.Set(testModel);
+        handler.Set(testModel);
         Assert.IsFalse(onChangeTriggered, "OnChange shouldn't be triggered");
     }
 
@@ -79,18 +79,18 @@ public class RealmsInfoTests
             realms = new RealmModel[] { realm1, realm2 }
         };
 
-        var realmInfo = new RealmsInfo();
+        var handler = new RealmsInfoHandler();
 
         bool onChangeTriggered = false;
         RealmModel[] onChangeCurrentValue = null;
 
-        realmInfo.realms.OnChange += (current, prev) =>
+        handler.realmsInfo.OnChange += (current, prev) =>
         {
             onChangeTriggered = true;
             onChangeCurrentValue = current;
         };
 
-        realmInfo.Set(testModel);
+        handler.Set(testModel);
         Assert.IsTrue(onChangeTriggered, "OnChange not triggered");
         Assert.IsTrue(testModel.realms.Length == 2, "Values are not the same");
         Assert.IsTrue(testModel.realms.Equals(onChangeCurrentValue), "Values are not the same");
@@ -100,7 +100,7 @@ public class RealmsInfoTests
         Assert.IsTrue(testModel.realms[1].layer == LAYER_2, "Values are not the same");
 
         onChangeTriggered = false;
-        realmInfo.Set(JsonUtility.ToJson(testModel));
+        handler.Set(JsonUtility.ToJson(testModel));
         Assert.IsFalse(onChangeTriggered, "OnChange shouldn't be triggered");
     }
 }
