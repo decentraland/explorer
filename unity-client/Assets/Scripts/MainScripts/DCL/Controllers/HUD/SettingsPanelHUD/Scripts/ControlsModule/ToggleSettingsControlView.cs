@@ -19,6 +19,7 @@ namespace DCL.SettingsPanelHUD.Controls
             });
 
             toggle.isOn = (bool)settingsControlController.GetInitialValue();
+            settingsControlController.OnControlChanged(toggle.isOn);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentGeneralSettings.mouseSensitivity = (float)newValue;
+            ((SliderSettingsControlView)view).OverrideIndicatorLabel(((float)newValue).ToString("0.0"));
 
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
             Settings.i.SaveSettings();

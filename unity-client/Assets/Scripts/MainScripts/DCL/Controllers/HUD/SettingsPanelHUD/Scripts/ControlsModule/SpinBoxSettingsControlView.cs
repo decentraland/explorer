@@ -20,6 +20,7 @@ namespace DCL.SettingsPanelHUD.Controls
             });
 
             spinBox.value = (int)settingsControlController.GetInitialValue();
+            settingsControlController.OnControlChanged(spinBox.value);
         }
 
         public void SetLabels(string[] labels)
