@@ -9,7 +9,7 @@ namespace DCL.SettingsPanelHUD.Controls
         [SerializeField] private Slider slider;
         [SerializeField] private TextMeshProUGUI indicatorLabel;
 
-        public Slider spinBoxControl { get => slider; }
+        public Slider sliderControl { get => slider; }
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
