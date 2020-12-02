@@ -1,9 +1,10 @@
 import { StoreContainer } from '../shared/store/rootTypes'
 import { getExploreRealmsService, getRealm } from '../shared/dao/selectors'
 import { RealmsInfoForRenderer } from '../shared/types'
-import { observeRealmChange } from 'shared/dao'
-import { Realm } from 'shared/dao/types'
+import { observeRealmChange } from '../shared/dao'
+import { Realm } from '../shared/dao/types'
 import { unityInterface } from './UnityInterface'
+import defaultLogger from '../shared/logger'
 
 const REPORT_INTERVAL = 2 * 60 * 1000
 
@@ -24,31 +25,25 @@ export function startRealmsReportToRenderer() {
       reportToRenderer({ current: convertRealmType(current) })
     })
 
-    fetchAndReportRealmsInfo()
+    fetchAndReportRealmsInfo().catch((e) => defaultLogger.log(e))
 
-    reportInterval()
+    setInterval(async () => {
+      await fetchAndReportRealmsInfo()
+    }, REPORT_INTERVAL)
   }
 }
 
-function reportInterval() {
-  setInterval(() => {
-    fetchAndReportRealmsInfo()
-    reportInterval()
-  }, REPORT_INTERVAL)
-}
-
-function fetchAndReportRealmsInfo() {
+async function fetchAndReportRealmsInfo() {
   const url = getExploreRealmsService(globalThis.globalStore.getState())
-  fetch(url)
-    .then((response) => {
-      if (response.ok) {
-        response
-          .json()
-          .then((value) => reportToRenderer({ realms: value }))
-          .catch()
-      }
-    })
-    .catch()
+  try {
+    const response = await fetch(url)
+    if (response.ok) {
+      const value = await response.json()
+      reportToRenderer({ realms: value })
+    }
+  } catch (e) {
+    defaultLogger.log(e)
+  }
 }
 
 function reportToRenderer(info: Partial<RealmsInfoForRenderer>) {
