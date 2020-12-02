@@ -199,6 +199,7 @@ namespace webApp {
       }
 
       console['error'](error)
+      ReportFatalError(error.message)
     }
     return true
   }
