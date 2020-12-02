@@ -16,8 +16,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override object GetStoredValue()
         {
-            //return currentGeneralSettings.autoqualityOn;
-            return false;
+            return currentGeneralSettings.autoqualityOn;
         }
 
         public override void OnControlChanged(object newValue)
@@ -36,6 +35,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             Settings.i.ApplyQualitySettings(currentQualitySetting);
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
+            Settings.i.SaveSettings();
         }
     }
 }
