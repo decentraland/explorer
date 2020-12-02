@@ -23,6 +23,7 @@ namespace Variables.RealmsInfo
 
         public bool Equals(CurrentRealmModel other)
         {
+            if (other == null) return false;
             return Equals(other.serverName, other.layer);
         }
 
