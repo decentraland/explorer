@@ -260,8 +260,6 @@ namespace DCL.Rendering
             {
                 if (r.forceRenderingOff != !shouldBeVisible)
                     r.forceRenderingOff = !shouldBeVisible;
-
-                Debug.Log($"-- Asd: {r.name} ... {r.forceRenderingOff}");
             }
 
             if (settings.enableShadowCulling)
