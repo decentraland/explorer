@@ -36,7 +36,6 @@ namespace DCL.Configuration
 
         public const string FLOOR_TEXTURE_KEY = "FloorBaseGrass_01/Floor_Grass01.png.png";
         public const string FLOOR_TEXTURE_VALUE = "QmT1WfQPMBVhgwyxV5SfcfWivZ6hqMCT74nxdKXwyZBiXb";
-
     }
 
     public static class ApplicationSettings
