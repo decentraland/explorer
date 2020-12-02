@@ -45,25 +45,19 @@ import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 const logger = createLogger('website.ts: ')
 
 function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
-  i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: voiceChatEnabled })
+  i.ConfigureHUDElement(
+    HUDElementID.TASKBAR,
+    { active: true, visible: true },
+    {
+      enableVoiceChat: voiceChatEnabled
+    }
+  )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
 
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
 }
-/**
- * Subscribe to uncaught errors
- */
-window.addEventListener('error', (event: ErrorEvent) => {
-  ReportFatalError(event.message as any, {
-    type: event.type,
-    message: event.message,
-    stack: event.error.stack,
-    filename: event.filename
-  })
-  return false
-})
 
 namespace webApp {
   export function createStore(): RootStore {
@@ -207,6 +201,7 @@ namespace webApp {
       }
 
       console['error'](error)
+      ReportFatalError(error.message)
     }
     return true
   }
