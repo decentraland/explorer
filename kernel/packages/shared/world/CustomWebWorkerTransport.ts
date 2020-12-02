@@ -15,7 +15,7 @@ export function CustomWebWorkerTransport(worker: Worker): ScriptingTransport {
           err.error['isSceneError'] = true
           handler(err.error)
         } else if (err.message) {
-          ;(err as any)['isSceneError'] = true
+          (err as any)['isSceneError'] = true
           handler(err as any)
         }
       })
