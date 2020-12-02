@@ -7,6 +7,8 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private Toggle toggle;
 
+        public Toggle spinBoxControl { get => toggle; }
+
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             base.Initialize(controlConfig, settingsControlController);
@@ -16,7 +18,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 settingsControlController.OnControlChanged(isOn);
             });
 
-            toggle.isOn = (bool)settingsControlController.GetStoredValue();
+            toggle.isOn = (bool)settingsControlController.GetInitialValue();
         }
     }
 }

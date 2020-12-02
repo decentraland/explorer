@@ -6,18 +6,25 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private SpinBoxPresetted spinBox;
 
+        public SpinBoxPresetted spinBoxControl { get => spinBox; }
+
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
-            base.Initialize(controlConfig, settingsControlController);
+            SetLabels(((SpinBoxControlModel)controlConfig).spinBoxLabels);
 
-            spinBox.SetLabels(((SpinBoxControlModel)controlConfig).spinBoxLabels);
+            base.Initialize(controlConfig, settingsControlController);
 
             spinBox.onValueChanged.AddListener(sliderValue =>
             {
                 settingsControlController.OnControlChanged(sliderValue);
             });
 
-            spinBox.value = (int)settingsControlController.GetStoredValue();
+            spinBox.value = (int)settingsControlController.GetInitialValue();
+        }
+
+        public void SetLabels(string[] labels)
+        {
+            spinBox.SetLabels(labels);
         }
     }
 }

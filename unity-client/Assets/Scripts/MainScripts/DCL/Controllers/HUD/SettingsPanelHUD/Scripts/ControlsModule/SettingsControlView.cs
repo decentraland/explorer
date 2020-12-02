@@ -17,7 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
         public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             this.settingsControlController = settingsControlController;
-            this.settingsControlController.Initialize();
+            this.settingsControlController.Initialize(this);
 
             this.title.text = controlConfig.title;
         }

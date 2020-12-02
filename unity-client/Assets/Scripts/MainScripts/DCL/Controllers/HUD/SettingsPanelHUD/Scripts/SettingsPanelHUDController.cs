@@ -7,6 +7,7 @@ namespace DCL.SettingsPanelHUD
     public interface ISettingsPanelHUDController
     {
         List<ISettingsSectionView> sections { get; }
+        void Initialize();
         void AddSection(SettingsButtonEntry newMenuButton, ISettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
         void OpenSection(ISettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
@@ -23,7 +24,6 @@ namespace DCL.SettingsPanelHUD
         public SettingsPanelHUDController()
         {
             view = SettingsPanelHUDView.Create();
-            view.Initialize(this, this);
         }
 
         public void Dispose()
@@ -38,6 +38,11 @@ namespace DCL.SettingsPanelHUD
                 OnClose?.Invoke();
 
             view.SetVisibility(visible);
+        }
+
+        public void Initialize()
+        {
+            view.Initialize(this, this);
         }
 
         public void AddSection(

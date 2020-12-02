@@ -5,16 +5,7 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Auto Quality", fileName = "AutoQualityControlController")]
     public class AutoQualityControlController : SettingsControlController
     {
-        private SettingsData.QualitySettings currentQualitySetting;
-        private SettingsData.GeneralSettings currentGeneralSettings;
-
-        public override void Initialize()
-        {
-            currentQualitySetting = Settings.i.qualitySettings;
-            currentGeneralSettings = Settings.i.generalSettings;
-        }
-
-        public override object GetStoredValue()
+        public override object GetInitialValue()
         {
             return currentGeneralSettings.autoqualityOn;
         }

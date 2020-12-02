@@ -1,7 +1,6 @@
 using DCL.SettingsPanelHUD;
 using DCL.SettingsPanelHUD.Sections;
 using NSubstitute;
-using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;

@@ -9,6 +9,8 @@ namespace DCL.SettingsPanelHUD.Controls
         [SerializeField] private Slider slider;
         [SerializeField] private TextMeshProUGUI indicatorLabel;
 
+        public Slider spinBoxControl { get => slider; }
+
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             base.Initialize(controlConfig, settingsControlController);
@@ -19,7 +21,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 indicatorLabel.text = sliderValue.ToString("0.0");
             });
 
-            slider.value = (float)settingsControlController.GetStoredValue();
+            slider.value = (float)settingsControlController.GetInitialValue();
         }
     }
 }
