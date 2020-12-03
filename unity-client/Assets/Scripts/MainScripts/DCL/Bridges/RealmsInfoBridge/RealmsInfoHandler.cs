@@ -18,7 +18,7 @@ public class RealmsInfoHandler
     public void Set(RealmsInfoModel newModel)
     {
         model = newModel;
-        DataStore.playerRealm.Set(model.current.Clone());
+        DataStore.playerRealm.Set(model.current?.Clone());
         DataStore.realmsInfo.Set(model.realms);
     }
 }
