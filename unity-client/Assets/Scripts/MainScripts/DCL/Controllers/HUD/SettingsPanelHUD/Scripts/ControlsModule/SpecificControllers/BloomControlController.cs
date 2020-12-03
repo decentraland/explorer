@@ -8,7 +8,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public override object GetInitialValue()
         {
-            return currentGeneralSettings.sfxVolume > 0 ? true : false;
+            return currentQualitySetting.bloom;
         }
 
         public override void OnControlChanged(object newValue)
