@@ -10,15 +10,15 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.Initialize(settingsControlView);
 
-            CommonSettingsVariables.shadowState.OnChange += ShadowState_OnChange;
+            CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange += ShouldSetSoftShadowsAsFalse_OnChange;
         }
 
         public override void OnDisable()
         {
             base.OnDisable();
 
-            if (CommonSettingsVariables.shadowState != null)
-                CommonSettingsVariables.shadowState.OnChange -= ShadowState_OnChange;
+            if (CommonSettingsVariables.shouldSetSoftShadowsAsFalse != null)
+                CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange -= ShouldSetSoftShadowsAsFalse_OnChange;
         }
 
         public override object GetInitialValue()
@@ -29,13 +29,22 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentQualitySetting.softShadows = (bool)newValue;
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
         }
 
-        private void ShadowState_OnChange(bool current, bool previous)
+        private void ShouldSetSoftShadowsAsFalse_OnChange(bool current, bool previous)
         {
-            if (!current)
+            if (current)
+            {
                 ((ToggleSettingsControlView)view).toggleControl.isOn = false;
+                CommonSettingsVariables.shouldSetSoftShadowsAsFalse.Set(false);
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ namespace DCL.SettingsPanelHUD.Controls
             {
                 settingsControlController.OnControlChanged(isOn);
                 settingsControlController.ApplySettings();
+                settingsControlController.PostApplySettings();
             });
         }
     }

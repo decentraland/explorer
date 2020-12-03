@@ -21,6 +21,7 @@ namespace DCL.SettingsPanelHUD.Controls
             {
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
+                settingsControlController.PostApplySettings();
             });
         }
 

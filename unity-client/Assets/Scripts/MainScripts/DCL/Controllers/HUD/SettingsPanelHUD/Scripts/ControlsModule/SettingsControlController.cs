@@ -38,6 +38,10 @@ namespace DCL.SettingsPanelHUD.Controls
                 Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
 
+        public virtual void PostApplySettings()
+        {
+        }
+
         private void OnGeneralSettingsChanged(SettingsData.GeneralSettings newGeneralSettings)
         {
             currentGeneralSettings = newGeneralSettings;

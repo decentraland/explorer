@@ -33,6 +33,11 @@ namespace DCL.SettingsPanelHUD.Controls
             {
                 ((SliderSettingsControlView)view).OverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
             }
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
 
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
         }

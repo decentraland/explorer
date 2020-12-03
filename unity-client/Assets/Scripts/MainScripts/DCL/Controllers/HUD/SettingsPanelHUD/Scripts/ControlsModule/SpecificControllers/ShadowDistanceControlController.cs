@@ -14,6 +14,12 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentQualitySetting.shadowDistance = (float)newValue;
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
         }
     }

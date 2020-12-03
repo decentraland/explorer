@@ -28,6 +28,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 indicatorLabel.text = sliderValue.ToString();
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
+                settingsControlController.PostApplySettings();
             });
         }
 
