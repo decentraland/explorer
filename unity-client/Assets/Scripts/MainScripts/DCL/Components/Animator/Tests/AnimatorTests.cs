@@ -102,7 +102,7 @@ namespace Tests
 
             animator.animComponent.cullingType = AnimationCullingType.AlwaysAnimate;
 
-            yield return new WaitForSeconds(1.5f);
+            yield return null;
 
             Animation animation = entity.gameObject.GetComponentInChildren<Animation>();
             foreach (AnimationState animState in animation)
@@ -170,7 +170,7 @@ namespace Tests
 
             animator.animComponent.cullingType = AnimationCullingType.AlwaysAnimate;
 
-            yield return new WaitForSeconds(1.5f);
+            yield return null;
 
             Animation animation = entity.gameObject.GetComponentInChildren<Animation>();
 
