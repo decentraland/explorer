@@ -25,7 +25,7 @@ namespace DCL.SettingsPanelHUD.Controls
             Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
         }
 
-        public abstract object GetInitialValue();
+        public abstract object GetStoredValue();
 
         public abstract void OnControlChanged(object newValue);
 

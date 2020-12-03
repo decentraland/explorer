@@ -6,7 +6,7 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Shadow Resolution", fileName = "ShadowResolutionControlController")]
     public class ShadowResolutionControlController : SettingsControlController
     {
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             return (int)Mathf.Log((int)currentQualitySetting.shadowResolution, 2) - 8;
         }

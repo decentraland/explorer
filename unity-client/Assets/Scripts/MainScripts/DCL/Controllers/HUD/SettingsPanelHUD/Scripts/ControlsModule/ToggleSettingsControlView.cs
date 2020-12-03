@@ -14,7 +14,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.Initialize(controlConfig, settingsControlController);
 
-            toggle.isOn = (bool)settingsControlController.GetInitialValue();
+            RefreshControl();
             settingsControlController.OnControlChanged(toggle.isOn);
 
             toggle.onValueChanged.AddListener(isOn =>
@@ -29,6 +29,11 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             canvasGroup.alpha = enabled ? 1 : 0.5f;
             canvasGroup.interactable = enabled;
+        }
+
+        public override void RefreshControl()
+        {
+            toggle.isOn = (bool)settingsControlController.GetStoredValue();
         }
     }
 }

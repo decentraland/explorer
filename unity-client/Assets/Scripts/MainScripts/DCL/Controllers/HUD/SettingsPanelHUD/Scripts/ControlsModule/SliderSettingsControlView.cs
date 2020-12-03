@@ -20,7 +20,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            slider.value = (float)settingsControlController.GetInitialValue();
+            RefreshControl();
             indicatorLabel.text = slider.value.ToString();
             settingsControlController.OnControlChanged(slider.value);
 
@@ -42,6 +42,11 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             canvasGroup.alpha = enabled ? 1 : 0.5f;
             canvasGroup.interactable = enabled;
+        }
+
+        public override void RefreshControl()
+        {
+            slider.value = (float)settingsControlController.GetStoredValue();
         }
     }
 }

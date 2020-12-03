@@ -5,7 +5,7 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Mute Sound", fileName = "MuteSoundControlController")]
     public class MuteSoundControlController : SettingsControlController
     {
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             return currentGeneralSettings.sfxVolume > 0 ? true : false;
         }

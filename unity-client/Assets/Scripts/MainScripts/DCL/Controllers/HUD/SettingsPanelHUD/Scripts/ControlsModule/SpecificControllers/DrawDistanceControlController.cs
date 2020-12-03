@@ -6,7 +6,7 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Draw Distance", fileName = "DrawDistanceControlController")]
     public class DrawDistanceControlController : SettingsControlController
     {
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             return currentQualitySetting.cameraDrawDistance;
         }

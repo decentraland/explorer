@@ -8,7 +8,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public const string TEXT_OFF = "OFF";
 
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             float antiAliasingValue =
                 currentQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled

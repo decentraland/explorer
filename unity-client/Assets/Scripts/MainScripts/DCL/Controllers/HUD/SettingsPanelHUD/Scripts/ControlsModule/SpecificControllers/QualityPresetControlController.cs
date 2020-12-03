@@ -28,7 +28,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 CommonSettingsVariables.shouldSetQualityPresetAsCustom.OnChange -= ShouldSetQualityPresetAsCustom_OnChange;
         }
 
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             return currentQualityPresetIndex;
         }
@@ -39,25 +39,22 @@ namespace DCL.SettingsPanelHUD.Controls
 
             SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[qualityPresetValue];
             currentQualitySetting = preset;
-            UpdateQualitySettings();
             currentQualityPresetIndex = qualityPresetValue;
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
+            UpdateQualitySettings();
         }
 
         private void UpdateQualitySettings()
         {
-        //    baseResSpinBox.value = (int)tempQualitySetting.baseResolution;
-        //    shadowResSpinBox.value = (int)Mathf.Log((int)tempQualitySetting.shadowResolution, 2) - 8;
-        //    colorGradingToggle.isOn = tempQualitySetting.colorGrading;
-        //    softShadowToggle.isOn = tempQualitySetting.softShadows;
-        //    shadowToggle.isOn = tempQualitySetting.shadows;
-        //    bloomToggle.isOn = tempQualitySetting.bloom;
-        //    fpsCapToggle.isOn = tempQualitySetting.fpsCap;
-        //    antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
-        //    renderingScaleSlider.value = tempQualitySetting.renderScale;
-        //    drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
-        //    shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
-        //    cullingSlider.value = tempQualitySetting.detailObjectCullingThreshold;
-        //    cullingToggle.isOn = tempQualitySetting.enableDetailObjectCulling;
+            if (!CommonSettingsVariables.refreshAllSettings.Get())
+                CommonSettingsVariables.refreshAllSettings.Set(true);
+            else
+                CommonSettingsVariables.refreshAllSettings.Set(false);
         }
 
         private void SetupQualityPreset()

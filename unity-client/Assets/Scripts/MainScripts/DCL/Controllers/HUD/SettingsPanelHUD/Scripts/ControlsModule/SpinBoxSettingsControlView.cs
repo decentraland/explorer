@@ -15,7 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            spinBox.value = (int)settingsControlController.GetInitialValue();
+            RefreshControl();
             settingsControlController.OnControlChanged(spinBox.value);
 
             spinBox.onValueChanged.AddListener(sliderValue =>
@@ -30,6 +30,11 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             canvasGroup.alpha = enabled ? 1 : 0.5f;
             canvasGroup.interactable = enabled;
+        }
+
+        public override void RefreshControl()
+        {
+            spinBox.value = (int)settingsControlController.GetStoredValue();
         }
 
         public void SetLabels(string[] labels)

@@ -21,7 +21,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange -= ShouldSetSoftShadowsAsFalse_OnChange;
         }
 
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             return currentQualitySetting.softShadows;
         }

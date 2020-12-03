@@ -1,3 +1,4 @@
+using DCL.SettingsPanelHUD.Common;
 using TMPro;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
         void SetEnabled(bool enabled);
+        void RefreshControl();
     }
 
     public abstract class SettingsControlView : MonoBehaviour, ISettingsControlView
@@ -19,20 +21,29 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             this.settingsControlController = settingsControlController;
             this.settingsControlController.Initialize(this);
-
             this.title.text = controlConfig.title;
 
             foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
             {
                 flag.OnChange += OnAnyDeactivationFlagChange;
             }
+
+            CommonSettingsVariables.refreshAllSettings.OnChange += RefreshAllSettings_OnChange;
         }
 
         public abstract void SetEnabled(bool enabled);
 
+        public abstract void RefreshControl();
+
         private void OnAnyDeactivationFlagChange(bool current, bool previous)
         {
             SetEnabled(!current);
+        }
+
+        private void RefreshAllSettings_OnChange(bool current, bool previous)
+        {
+            if (current)
+                RefreshControl();
         }
     }
 }

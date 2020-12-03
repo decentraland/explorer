@@ -15,7 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
             mouseSensitivitySlider = ((SliderSettingsControlView)view).sliderControl;
         }
 
-        public override object GetInitialValue()
+        public override object GetStoredValue()
         {
             return Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, currentGeneralSettings.mouseSensitivity);
         }
