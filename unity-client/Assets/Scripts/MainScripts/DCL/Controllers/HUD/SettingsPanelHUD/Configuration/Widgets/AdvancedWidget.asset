@@ -29,3 +29,4 @@ MonoBehaviour:
     - controls:
         array:
         - {fileID: 11400000, guid: 8ab8851cdbeca4d40b6714f79a476378, type: 2}
+        - {fileID: 11400000, guid: 9680f60857ae08843b00c143b1565270, type: 2}

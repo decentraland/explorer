@@ -35,10 +35,12 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[(int)newValue];
+            int qualityPresetValue = (int)newValue;
+
+            SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[qualityPresetValue];
             currentQualitySetting = preset;
             UpdateQualitySettings();
-            currentQualityPresetIndex = (int)newValue;
+            currentQualityPresetIndex = qualityPresetValue;
         }
 
         private void UpdateQualitySettings()
