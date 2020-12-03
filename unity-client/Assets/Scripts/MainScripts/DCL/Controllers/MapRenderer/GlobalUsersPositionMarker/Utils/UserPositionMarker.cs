@@ -28,6 +28,7 @@ internal class UserPositionMarker : IDisposable
         if (active)
         {
             OnRealmChanged(DataStore.playerRealm.Get(), null);
+            DataStore.playerRealm.OnChange -= OnRealmChanged;
             DataStore.playerRealm.OnChange += OnRealmChanged;
         }
         else
