@@ -40,6 +40,7 @@ namespace DCL
         public RawImage parcelHighlightImage;
         public TextMeshProUGUI highlightedParcelText;
         public Transform overlayContainer;
+        public Transform globalUserMarkerContainer;
 
         public Image playerPositionIcon;
 
@@ -111,7 +112,7 @@ namespace DCL
             parcelHoldCountdown = parcelHoldTimeInSeconds;
 
             usersPositionMarkerController = new MapGlobalUsersPositionMarkerController(globalUserMarkerPrefab,
-                overlayContainer.transform,
+                globalUserMarkerContainer,
                 MapUtils.GetTileToLocalPosition);
 
             usersPositionMarkerController.SetUpdateMode(MapGlobalUsersPositionMarkerController.UpdateMode.BACKGROUND);

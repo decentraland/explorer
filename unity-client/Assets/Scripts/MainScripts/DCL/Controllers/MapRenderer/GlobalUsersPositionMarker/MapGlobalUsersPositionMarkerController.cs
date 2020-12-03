@@ -17,6 +17,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
     FetchScenesHandler fetchScenesHandler;
     MarkersHandler markersHandler;
     UserPositionHandler userPositionHandler;
+    Transform markersContainer;
 
     int commsRadius = 4;
 
@@ -31,6 +32,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
         fetchScenesHandler = new FetchScenesHandler(UPDATE_INTERVAL_INITIAL, UPDATE_INTERVAL_FOREGROUND, UPDATE_INTERVAL_BACKGROUND);
         markersHandler = new MarkersHandler(markerPrefab, overlayContainer, MAX_MARKERS, coordToMapPosFunc);
         userPositionHandler = new UserPositionHandler();
+        markersContainer = overlayContainer;
 
         fetchScenesHandler.OnScenesFetched += OnScenesFetched;
         userPositionHandler.OnPlayerCoordsChanged += OnPlayerCoordsChanged;
@@ -51,6 +53,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
     public void SetUpdateMode(UpdateMode updateMode)
     {
         fetchScenesHandler.SetUpdateMode(updateMode);
+        markersContainer.gameObject.SetActive(updateMode == UpdateMode.FOREGROUND);
     }
 
     public void Dispose()
