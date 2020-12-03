@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
 using System;
@@ -41,6 +41,7 @@ namespace DCL.Models
             {
                 get
                 {
+                    
                     if (meshRootGameObject.transform.position != lastBoundsCalculationPosition)
                     {
                         mergedBoundsValue.center += meshRootGameObject.transform.position - lastBoundsCalculationPosition;
@@ -65,7 +66,7 @@ namespace DCL.Models
                     meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
 
                     RecalculateBounds();
-
+                    Environment.i.cullingController.SetDirty();
                     OnUpdated?.Invoke();
                 }
             }
@@ -124,6 +125,7 @@ namespace DCL.Models
 
         public System.Action<MonoBehaviour> OnComponentUpdated;
         public System.Action<DecentralandEntity> OnShapeUpdated;
+        public System.Action<DCLName.Model> OnNameChange;
         public System.Action<DecentralandEntity> OnRemoved;
         public System.Action<DCLTransform.Model> OnTransformChange;
         public System.Action<DecentralandEntity> OnMeshesInfoUpdated;
@@ -142,6 +144,11 @@ namespace DCL.Models
             OnShapeUpdated += (entity) => meshesInfo.UpdateRenderersCollection();
             meshesInfo.OnUpdated += () => OnMeshesInfoUpdated?.Invoke(this);
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
+        }
+
+        public Dictionary<System.Type, BaseDisposable> GetSharedComponents()
+        {
+            return sharedComponents;
         }
 
         private void AddChild(DecentralandEntity entity)
