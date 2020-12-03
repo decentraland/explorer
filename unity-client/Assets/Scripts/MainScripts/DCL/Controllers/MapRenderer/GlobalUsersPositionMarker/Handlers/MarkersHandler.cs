@@ -36,7 +36,7 @@ internal class MarkersHandler : IDisposable
         {
             var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
             availableMarkers.Add(marker);
-            marker.gameObject.SetActive(false);
+            marker.SetActive(false);
         }
     }
 
@@ -86,14 +86,14 @@ internal class MarkersHandler : IDisposable
     private void SetMarker(UserPositionMarker marker, Vector2Int coords)
     {
         SetMarkerAtCoord(marker, coords);
-        marker.gameObject.SetActive(!exclusionArea.Contains(coords));
+        marker.SetActive(!exclusionArea.Contains(coords));
     }
 
     private void SetMarkerAtCoord(UserPositionMarker marker, Vector2Int coords)
     {
-        marker.gameObject.name = $"UsersPositionMarker({coords.x},{coords.y})";
+        marker.name = $"UsersPositionMarker({coords.x},{coords.y})";
 
-        marker.gameObject.transform.localPosition = coordToMapPosition(
+        marker.localPosition = coordToMapPosition(
             coords.x + Random.Range(-0.5f, 0.5f),
             coords.y + Random.Range(-0.5f, 0.5f));
 
@@ -111,7 +111,7 @@ internal class MarkersHandler : IDisposable
         {
             while (iterator.MoveNext())
             {
-                iterator.Current.gameObject.SetActive(!exclusionArea.Contains(iterator.Current.coords));
+                iterator.Current.SetActive(!exclusionArea.Contains(iterator.Current.coords));
             }
         }
     }
@@ -135,7 +135,7 @@ internal class MarkersHandler : IDisposable
             {
                 var marker = usedMarkers[i];
                 usedMarkers.RemoveAt(i);
-                marker.gameObject.SetActive(false);
+                marker.SetActive(false);
                 availableMarkers.Add(marker);
             }
         }
