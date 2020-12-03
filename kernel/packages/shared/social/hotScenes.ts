@@ -125,7 +125,7 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
     const id = scenesId[i] ?? tiles[i]
     const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : undefined
 
-    let hotScene: HotSceneInfo | null = crowdedScenes[id] ?? createHotSceneInfo(land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+    let hotScene: HotSceneInfo = crowdedScenes[id] ?? createHotSceneInfo(land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
 
     if (hotScene) {
       const realmInfo = hotScene.realms.filter(
