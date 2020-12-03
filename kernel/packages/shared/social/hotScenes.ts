@@ -3,38 +3,78 @@ import { Candidate } from 'shared/dao/types'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
 import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
-import { SceneJsonData } from 'shared/types'
+import { ILand, SceneJsonData } from 'shared/types'
 import { reportScenesFromTiles } from 'shared/atlas/actions'
 import { getSceneNameFromAtlasState, postProcessSceneName, getPoiTiles } from 'shared/atlas/selectors'
-import { Vector2 } from 'decentraland-ecs/src'
-import { unityInterface } from 'unity-interface/UnityInterface'
+import { getHotScenesService, getUpdateProfileServer } from 'shared/dao/selectors'
+import defaultLogger from 'shared/logger'
+import { getOwnerNameFromJsonData, getThumbnailUrlFromJsonDataAndContent } from 'shared/selectors'
 
 declare const globalThis: StoreContainer
+
+declare const window: {
+  unityInterface: {
+    UpdateHotScenesList: (info: HotSceneInfo[]) => void
+  }
+}
 
 type RealmInfo = {
   serverName: string
   layer: string
   usersCount: number
   usersMax: number
-  crowdedParcels: Vector2[]
-}
-
-type HotSceneInfoRaw = {
-  name: string
-  baseCoord: string
-  realmsInfo: RealmInfo[]
 }
 
 export type HotSceneInfo = {
+  id: string
+  name: string
+  creator: string
+  thumbnail: string
   baseCoords: { x: number; y: number }
+  parcels: { x: number; y: number }[]
   usersTotalCount: number
   realms: RealmInfo[]
 }
 
-export async function fetchHotScenes(): Promise<HotSceneInfoRaw[]> {
+export async function fetchHotScenes(): Promise<HotSceneInfo[]> {
+  try {
+    const url = getHotScenesService(globalThis.globalStore.getState())
+    const response = await fetch(url)
+    if (response.ok) {
+      const info = await response.json()
+      return info.map((scene: any) => {
+        return {
+          ...scene,
+          baseCoords: { x: scene.baseCoords[0], y: scene.baseCoords[1] },
+          parcels: scene.parcels.map((parcel: [number, number]) => {
+            return { x: parcel[0], y: parcel[1] }
+          })
+        } as HotSceneInfo
+      })
+    }
+  } catch (e) {
+    defaultLogger.log(e)
+  }
+  return fetchHotScenesNoLambdaFallback()
+}
+
+export async function reportHotScenes() {
+  const hotScenes = await fetchHotScenes()
+
+  // NOTE: we report POI as hotscenes for now, approach should change in next iteration
+  const pois = await fetchPOIsAsHotSceneInfo()
+  const report = hotScenes.concat(pois.filter((poi) => hotScenes.filter((scene) => scene.id === poi.id).length === 0))
+
+  globalThis.globalStore.dispatch(
+    reportScenesFromTiles(report.map((scene) => `${scene.baseCoords.x},${scene.baseCoords.y}`))
+  )
+  window.unityInterface.UpdateHotScenesList(report)
+}
+
+async function fetchHotScenesNoLambdaFallback(): Promise<HotSceneInfo[]> {
   const candidates = await refreshCandidatesStatuses()
 
-  let crowdedScenes: Record<string, HotSceneInfoRaw> = {}
+  let crowdedScenes: Record<string, HotSceneInfo> = {}
 
   const filteredCandidates = candidates.filter(
     (candidate) => candidate.layer && candidate.layer.usersCount > 0 && candidate.layer.usersParcels
@@ -45,33 +85,24 @@ export async function fetchHotScenes(): Promise<HotSceneInfoRaw[]> {
   }
 
   const sceneValues = Object.values(crowdedScenes)
-  sceneValues.forEach((scene) => scene.realmsInfo.sort((a, b) => (a.usersCount > b.usersCount ? -1 : 1)))
+  sceneValues.forEach((scene) => scene.realms.sort((a, b) => (a.usersCount > b.usersCount ? -1 : 1)))
 
-  return sceneValues.sort((a, b) => (countUsers(a) > countUsers(b) ? -1 : 1))
+  return sceneValues
+    .filter((scene) => {
+      const strCoords = `${scene.baseCoords.x},${scene.baseCoords.y}`
+      return (
+        globalThis.globalStore.getState().atlas.tileToScene[strCoords] &&
+        globalThis.globalStore.getState().atlas.tileToScene[strCoords].type !== 7
+      ) // NOTE: filter roads
+    })
+    .sort((a, b) => (countUsers(a) > countUsers(b) ? -1 : 1))
 }
 
-export async function reportHotScenes() {
-  const hotScenes = (await fetchHotScenes()).filter(
-    (scene) =>
-      globalThis.globalStore.getState().atlas.tileToScene[scene.baseCoord] &&
-      globalThis.globalStore.getState().atlas.tileToScene[scene.baseCoord].type !== 7 // NOTE: filter roads
-  )
-
-  // NOTE: we report POI as hotscenes for now, approach should change in next iteration
-  const pois = await fetchPOIsAsHotSceneInfoRaw()
-  const report = hotScenes.concat(
-    pois.filter((poi) => hotScenes.filter((scene) => scene.baseCoord === poi.baseCoord).length === 0)
-  )
-
-  globalThis.globalStore.dispatch(reportScenesFromTiles(report.map((scene) => scene.baseCoord)))
-  unityInterface.UpdateHotScenesList(report.map((scene) => hotSceneInfoFromRaw(scene)))
+function countUsers(a: HotSceneInfo) {
+  return a.realms.reduce((total, realmInfo) => total + realmInfo.usersCount, 0)
 }
 
-function countUsers(a: HotSceneInfoRaw) {
-  return a.realmsInfo.reduce((total, realmInfo) => total + realmInfo.usersCount, 0)
-}
-
-async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<string, HotSceneInfoRaw>) {
+async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<string, HotSceneInfo>) {
   const tiles =
     candidate.layer.usersParcels
       // tslint:disable:strict-type-predicates
@@ -82,35 +113,52 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
 
   for (let i = 0; i < tiles.length; i++) {
     const id = scenesId[i] ?? tiles[i]
-    const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : null
+    const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : undefined
 
     if (crowdedScenes[id]) {
-      const realmInfo = crowdedScenes[id].realmsInfo.filter(
+      const realmInfo = crowdedScenes[id].realms.filter(
         (realm) => realm.serverName === candidate.catalystName && realm.layer === candidate.layer.name
       )
 
       if (realmInfo[0]) {
         realmInfo[0].usersCount += 1
-        realmInfo[0].crowdedParcels.push(stringToVector2(tiles[i]))
       } else {
-        const realmInfo = createRealmInfo(candidate, 1)
-        realmInfo.crowdedParcels.push(stringToVector2(tiles[i]))
-        crowdedScenes[id].realmsInfo.push(realmInfo)
+        crowdedScenes[id].realms.push(createRealmInfo(candidate, 1))
       }
+      crowdedScenes[id].usersTotalCount++
     } else {
-      crowdedScenes[id] = createHotSceneInfoRaw(land?.sceneJsonData?.scene.base ?? tiles[i], land?.sceneJsonData)
-      const realmInfo = createRealmInfo(candidate, 1)
-      realmInfo.crowdedParcels.push(stringToVector2(tiles[i]))
-      crowdedScenes[id].realmsInfo.push(realmInfo)
+      crowdedScenes[id] = createHotSceneInfo(candidate, land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
     }
   }
 }
 
-function createHotSceneInfoRaw(baseCoord: string, sceneJsonData: SceneJsonData | undefined): HotSceneInfoRaw {
+function createHotSceneInfo(
+  candidate: Candidate,
+  baseCoord: string,
+  id: string,
+  land: ILand | undefined
+): HotSceneInfo {
+  const sceneJsonData: SceneJsonData | undefined = land?.sceneJsonData
+  const baseCoords = baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
   return {
+    id: id,
     name: getSceneName(baseCoord, sceneJsonData),
-    baseCoord: baseCoord,
-    realmsInfo: []
+    creator: getOwnerNameFromJsonData(sceneJsonData),
+    thumbnail:
+      getThumbnailUrlFromJsonDataAndContent(
+        land?.sceneJsonData,
+        land?.mappingsResponse.contents,
+        getUpdateProfileServer(globalThis.globalStore.getState())
+      ) ?? '',
+    baseCoords: { x: baseCoords[0], y: baseCoords[1] },
+    parcels: sceneJsonData
+      ? sceneJsonData.scene.parcels.map((parcel) => {
+        const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+        return { x: coord[0], y: coord[1] }
+      })
+      : [],
+    realms: [createRealmInfo(candidate, 1)],
+    usersTotalCount: 1
   }
 }
 
@@ -119,8 +167,7 @@ function createRealmInfo(candidate: Candidate, usersCount: number): RealmInfo {
     serverName: candidate.catalystName,
     layer: candidate.layer.name,
     usersMax: candidate.layer.maxUsers,
-    usersCount: usersCount,
-    crowdedParcels: []
+    usersCount: usersCount
   }
 }
 
@@ -130,30 +177,32 @@ function getSceneName(baseCoord: string, sceneJsonData: SceneJsonData | undefine
   return postProcessSceneName(sceneName)
 }
 
-function hotSceneInfoFromRaw(hotSceneInfoRaw: HotSceneInfoRaw): HotSceneInfo {
-  const baseCoord = hotSceneInfoRaw.baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
-  return {
-    baseCoords: { x: baseCoord[0], y: baseCoord[1] },
-    usersTotalCount: countUsers(hotSceneInfoRaw),
-    realms: hotSceneInfoRaw.realmsInfo
-  }
-}
-
-async function fetchPOIsAsHotSceneInfoRaw(): Promise<HotSceneInfoRaw[]> {
+async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
   const tiles = getPoiTiles(globalThis.globalStore.getState())
   const scenesId = (await fetchSceneIds(tiles)).filter((id) => id !== null) as string[]
   const scenesLand = (await fetchSceneJson(scenesId)).filter((land) => land.sceneJsonData)
 
   return scenesLand.map((land) => {
+    const baseCoords = land.sceneJsonData.scene.base.split(',').map((str) => parseInt(str, 10)) as [number, number]
     return {
+      id: land.sceneId,
       name: getSceneName(land.sceneJsonData.scene.base, land.sceneJsonData),
-      baseCoord: land.sceneJsonData.scene.base,
-      realmsInfo: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0, crowdedParcels: [] }]
+      creator: getOwnerNameFromJsonData(land.sceneJsonData),
+      thumbnail:
+        getThumbnailUrlFromJsonDataAndContent(
+          land.sceneJsonData,
+          land.mappingsResponse.contents,
+          getUpdateProfileServer(globalThis.globalStore.getState())
+        ) ?? '',
+      baseCoords: { x: baseCoords[0], y: baseCoords[1] },
+      parcels: land.sceneJsonData
+        ? land.sceneJsonData.scene.parcels.map((parcel) => {
+          const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
+          return { x: coord[0], y: coord[1] }
+        })
+        : [],
+      realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0 }],
+      usersTotalCount: 0
     }
   })
-}
-
-function stringToVector2(coord: string): Vector2 {
-  let split = coord.split(',')
-  return new Vector2(parseInt(split[0], 10), parseInt(split[1], 10))
 }

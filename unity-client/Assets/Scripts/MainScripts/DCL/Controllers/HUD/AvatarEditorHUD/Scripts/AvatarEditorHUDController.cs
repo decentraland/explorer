@@ -29,11 +29,7 @@ public class AvatarEditorHUDController : IHUD
     public bool IsSignUpFlowValue
     {
         get => isSignUpFlow;
-        set
-        {
-            isSignUpFlow = value;
-            view.exitButton.gameObject.SetActive(!isSignUpFlow);
-        }
+        set => isSignUpFlow = value;
     }
 
     public event Action OnOpen;
@@ -432,6 +428,7 @@ public class AvatarEditorHUDController : IHUD
 
         if (!visible && view.isOpen)
         {
+            DCL.Environment.i.messagingControllersManager.paused = false;
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
             currentRenderProfile.avatarProfile.Apply();
             if (prevMouseLockState)
@@ -443,6 +440,7 @@ public class AvatarEditorHUDController : IHUD
         }
         else if (visible && !view.isOpen)
         {
+            DCL.Environment.i.messagingControllersManager.paused = IsSignUpFlowValue;
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
             currentRenderProfile.avatarProfile.Apply();
 
@@ -492,7 +490,11 @@ public class AvatarEditorHUDController : IHUD
 
     public void DiscardAndClose()
     {
-        LoadUserProfile(userProfile);
+        if (!IsSignUpFlowValue)
+            LoadUserProfile(userProfile);
+        else
+            WebInterface.SendCloseUserAvatar(true);
+
         SetVisibility(false);
     }
 

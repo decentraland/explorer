@@ -81,6 +81,8 @@ public class HUDController : MonoBehaviour
 
     public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
 
+    public BuildModeHUDController buildModeHud => GetHUDElement(HUDElementID.BUILD_MODE) as BuildModeHUDController;
+
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
@@ -147,7 +149,9 @@ public class HUDController : MonoBehaviour
         HELP_AND_SUPPORT_HUD = 20,
         EMAIL_PROMPT = 21,
         USERS_AROUND_LIST_HUD = 22,
-        COUNT = 23
+        GRAPHIC_CARD_WARNING = 23,
+        BUILD_MODE = 24,
+        COUNT = 25
     }
 
     [System.Serializable]
@@ -188,6 +192,10 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.PROFILE_HUD:
                 CreateHudElement<ProfileHUDController>(configuration, hudElementId);
+                if (profileHud != null)
+                {
+                    profileHud?.AddBackpackWindow(avatarEditorHud);
+                }
                 break;
             case HUDElementID.NOTIFICATION:
                 CreateHudElement<NotificationHUDController>(configuration, hudElementId);
@@ -198,7 +206,6 @@ public class HUDController : MonoBehaviour
                 if (avatarEditorHud != null)
                 {
                     avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
-                    profileHud?.AddBackpackWindow(avatarEditorHud);
                 }
                 break;
             case HUDElementID.SETTINGS:
@@ -347,6 +354,12 @@ public class HUDController : MonoBehaviour
                     minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
                 }
                 break;
+            case HUDElementID.GRAPHIC_CARD_WARNING:
+                CreateHudElement<GraphicCardWarningHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.BUILD_MODE:
+                CreateHudElement<BuildModeHUDController>(configuration, hudElementId);
+                break;
         }
 
         var hudElement = GetHUDElement(hudElementId);
@@ -402,7 +415,7 @@ public class HUDController : MonoBehaviour
 
     public void TriggerSelfUserExpression(string id)
     {
-        expressionsHud?.ExpressionCalled(id);
+        UserProfile.GetOwnUserProfile().SetAvatarExpression(id);
     }
 
     public void AirdroppingRequest(string payload)
@@ -487,6 +500,8 @@ public class HUDController : MonoBehaviour
 
         hudElements.Clear();
     }
+
+
 
     public IHUD GetHUDElement(HUDElementID id)
     {

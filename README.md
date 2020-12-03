@@ -16,13 +16,15 @@ If you are using Windows 10 we recommend you to enable the Linux subsystem and i
 ## Running the Explorer
 
 Make sure you have the following dependencies:
-- Node v10 or compatible installed via `sudo apt install nodejs`
-- yarn installed globally via `sudo npm install yarn -g`
+- Node v10 or compatible installed via `sudo apt install nodejs` or [nvm](https://github.com/nvm-sh/nvm)
+- yarn installed globally via `npm install yarn -g`
 
 IMPORTANT: If your path has spaces the build process will fail. Make sure to clone this repo in a properly named path.
 
 Build the project:
 
+    cd website
+    npm install
     cd kernel
     npm install
 
@@ -38,17 +40,15 @@ Once the kernel is running, to run the Unity interface you will have to:
 
 1. Download and install Unity 2019.4.0f1
 2. Open the Initial Scene
-3. Run the Initial Scene in the Unity editor!
-
-And that should be it!
+3. Run the Initial Scene in the Unity editor
 
 Optionally, if you want to run the client in `debug` mode, append the following query parameter to the URL:
 
-    http://localhost:8080/?DEBUG_MODE
+    http://localhost:3000/?DEBUG_MODE
 
 To spawn in a specific set of coordinates append the following query paramter:
 
-    http://localhost:8080/?DEBUG_MODE&position=10,10
+    http://localhost:3000/?DEBUG_MODE&position=10,10
 
 ### Troubleshooting
 
@@ -62,7 +62,7 @@ Json.NET or Google Protobuf), please execute the following command in the root f
 Then, on the Unity editor, click on `Assets > Reimport All`
 
 #### Missing xcrun (macOS)
-If you get the "missing xcrun" error when trying to run the `makw watch` command, you should download the latest command line tools for macOS, either by downloading them from https://developer.apple.com/download/more/?=command%20line%20tools or by re-installing XCode
+If you get the "missing xcrun" error when trying to run the `make watch` command, you should download the latest command line tools for macOS, either by downloading them from https://developer.apple.com/download/more/?=command%20line%20tools or by re-installing XCode
 
 
 ## Running tests
@@ -71,7 +71,7 @@ To see test logs/errors directly in the browser, run:
 
     make watch
 
-Now, navigate to [http://localhost:8080/test](http://localhost:8080/test)
+Now, navigate to [http://localhost:3000/test](http://localhost:3000/test)
 
 ### Kernel Visual tests
 
@@ -243,15 +243,15 @@ git checkout -- kernel/static/unity/Build/unity.json
 
 5. Testing how your new build performs:
 
-- Open **[http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&position=-100,100](http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&position=-100,100)** to go to an area with a high density of test parcels.
-- Open **[http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0](http://localhost:8080/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0)** to open an area with real-life deployments (but without communicating with other users).
-- Open **[http://localhost:8080/?ENV=org&position=0,90](http://localhost:8080/?ENV=org&position=0,90)** to open the explorer near the Decentraland Museum
+- Open **[http://localhost:3000/?DEBUG_MODE&LOCAL_COMMS&position=-100,100](http://localhost:3000/?DEBUG_MODE&LOCAL_COMMS&position=-100,100)** to go to an area with a high density of test parcels.
+- Open **[http://localhost:3000/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0](http://localhost:3000/?DEBUG_MODE&LOCAL_COMMS&ENV=org&position=10,0)** to open an area with real-life deployments (but without communicating with other users).
+- Open **[http://localhost:3000/?ENV=org&position=0,90](http://localhost:3000/?ENV=org&position=0,90)** to open the explorer near the Decentraland Museum
 
 ### Profiling a build with Unity Editor
 1. In Unity Editor open the profiler at window -> analysis -> profiler
 2. Open the build settings and toggle on "Development Build", "Autoconnect Profiler" and **make sure Deep Profiling is toggled off** before starting the build
 3. Follow the steps at this readme's "Making a manual build" section
-4. Open the new build (http://localhost:8080/?ENV=org) and after starting the explorer your Profiler window at Unity Editor should start receiving and displaying the data
+4. Open the new build (http://localhost:3000/?ENV=org) and after starting the explorer your Profiler window at Unity Editor should start receiving and displaying the data
 
 #### Important notes and recommendations
 * The same Unity Editor instance that made the build **shouldn't be closed**, as that will make the new build useless for profiling, at least at the time of writting this, **it only sends the data to the same Unity Editor instance that built it**.

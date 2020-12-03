@@ -95,7 +95,7 @@ import { voicePlayingUpdate, voiceRecordingUpdate } from './actions'
 import { getVoicePolicy, isVoiceChatRecording } from './selectors'
 import { VOICE_CHAT_SAMPLE_RATE } from 'voice-chat-codec/constants'
 import future, { IFuture } from 'fp-future'
-import { getProfileType } from 'shared/profiles/sagas'
+import { getProfileType } from 'shared/profiles/getProfileType'
 import { sleep } from 'atomicHelpers/sleep'
 import { localProfileReceived } from 'shared/profiles/actions'
 import { unityInterface } from 'unity-interface/UnityInterface'
@@ -103,6 +103,7 @@ import { isURL } from 'atomicHelpers/isURL'
 import { VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
 import { EncodedFrame } from 'voice-chat-codec/types'
+import Html from 'shared/Html'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -473,11 +474,9 @@ function processVoiceFragment(context: Context, fromAlias: string, message: Pack
       peerTrackingInfo.position &&
       shouldPlayVoice(profile, peerTrackingInfo.identity)
     ) {
-      voiceCommunicator?.playEncodedAudio(
-        peerTrackingInfo.identity,
-        getSpatialParamsFor(peerTrackingInfo.position),
-        message.data
-      )
+      voiceCommunicator
+        ?.playEncodedAudio(peerTrackingInfo.identity, getSpatialParamsFor(peerTrackingInfo.position), message.data)
+        .catch((e) => defaultLogger.error('Error playing encoded audio!', e))
     }
   }
 }
@@ -1159,7 +1158,7 @@ async function doStartCommunications(context: Context) {
         {
           initialListenerParams: context.currentPosition ? getSpatialParamsFor(context.currentPosition) : undefined,
           panningModel: commConfigurations.voiceChatUseHRTF ? 'HRTF' : 'equalpower',
-          loopbackAudioElement: document.getElementById('voice-chat-audio') as HTMLAudioElement | undefined
+          loopbackAudioElement: Html.loopbackAudioElement()
         }
       )
 

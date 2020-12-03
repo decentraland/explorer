@@ -24,8 +24,6 @@ namespace DCL.Controllers
             READY,
         }
 
-        public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
-
         public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
         public Dictionary<string, BaseDisposable> disposableComponents = new Dictionary<string, BaseDisposable>();
         public LoadParcelScenesMessage.UnityParcelScene sceneData { get; protected set; }
@@ -51,7 +49,7 @@ namespace DCL.Controllers
         public bool isReady => state == State.READY;
 
         readonly List<string> disposableNotReady = new List<string>();
-        bool isReleased = false;
+        bool isReleased = false, isEditModeActive = false;
 
         SceneDebugPlane sceneDebugPlane = null;
 
@@ -115,6 +113,16 @@ namespace DCL.Controllers
                     break;
             }
 #endif
+        }
+
+        public void SetEditMode(bool isActive)
+        {
+            isEditModeActive = isActive;
+        }
+
+        public bool IsEditModeActive()
+        {
+            return isEditModeActive;
         }
 
         public virtual void SetData(LoadParcelScenesMessage.UnityParcelScene data)
@@ -327,6 +335,49 @@ namespace DCL.Controllers
             return newEntity;
         }
 
+        public DecentralandEntity DuplicateEntity(DecentralandEntity decentralandEntity)
+        {
+            if (!entities.ContainsKey(decentralandEntity.entityId)) return null;
+
+            DecentralandEntity duplicatedEntity = CreateEntity(System.Guid.NewGuid().ToString());
+
+            if (decentralandEntity.children.Count > 0)
+            {
+                using (var iterator = decentralandEntity.children.GetEnumerator())
+                {
+                    while (iterator.MoveNext())
+                    {
+                        DecentralandEntity childDuplicate = DuplicateEntity(iterator.Current.Value);
+                        childDuplicate.SetParent(duplicatedEntity);
+                    }
+                }
+            }
+
+            if (decentralandEntity.parent != null) SetEntityParent(duplicatedEntity.entityId, decentralandEntity.parent.entityId);
+
+            DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
+            DCLTransform.model.rotation = decentralandEntity.gameObject.transform.rotation;
+            DCLTransform.model.scale = decentralandEntity.gameObject.transform.lossyScale;
+
+            foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> component in decentralandEntity.components)
+            {
+                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, component.Key, DCLTransform.model);
+            }
+
+            foreach (KeyValuePair<System.Type, BaseDisposable> component in decentralandEntity.GetSharedComponents())
+            {
+                SharedComponentAttach(duplicatedEntity.entityId, component.Value.id);
+            }
+
+            //TODO: (Adrian) Evaluate if all created components should be handle as equals instead of different
+            foreach (KeyValuePair<string, UUIDComponent> component in decentralandEntity.uuidComponents)
+            {
+                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.model);
+            }
+
+            return duplicatedEntity;
+        }
+
         public void RemoveEntity(string id, bool removeImmediatelyFromEntitiesList = true)
         {
             SceneController.i.OnMessageDecodeStart?.Invoke("RemoveEntity");
@@ -343,6 +394,7 @@ namespace DCL.Controllers
                 }
 
                 entities.Remove(id);
+                Environment.i.cullingController.SetDirty();
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -379,7 +431,7 @@ namespace DCL.Controllers
             }
             else
             {
-                parcelScenesCleaner.MarkForCleanup(entity);
+                Environment.i.parcelScenesCleaner.MarkForCleanup(entity);
             }
         }
 
@@ -399,7 +451,7 @@ namespace DCL.Controllers
                         if (instant)
                             rootEntities.Add(iterator.Current.Value);
                         else
-                            parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
+                            Environment.i.parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
                     }
                 }
             }
@@ -444,7 +496,7 @@ namespace DCL.Controllers
                     // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
                     me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    Environment.i.physicsSyncController.MarkDirty();
                 }
                 else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
                 {
@@ -452,7 +504,7 @@ namespace DCL.Controllers
                     // It will simply rotate with the avatar, regardless of where the camera is pointing
                     me.SetParent(DCLCharacterController.i.avatarReference);
                     SceneController.i.boundariesChecker.AddPersistent(me);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    Environment.i.physicsSyncController.MarkDirty();
                 }
                 else
                 {
@@ -466,7 +518,7 @@ namespace DCL.Controllers
                         // The entity will be child of the scene directly
                         me.SetParent(null);
                         me.gameObject.transform.SetParent(gameObject.transform, false);
-                        SceneController.i.physicsSyncController.MarkDirty();
+                        Environment.i.physicsSyncController.MarkDirty();
                     }
                     else
                     {
@@ -475,7 +527,7 @@ namespace DCL.Controllers
                         if (myParent != null)
                         {
                             me.SetParent(myParent);
-                            SceneController.i.physicsSyncController.MarkDirty();
+                            Environment.i.physicsSyncController.MarkDirty();
                         }
                     }
                 }
@@ -504,6 +556,118 @@ namespace DCL.Controllers
             {
                 disposableComponent.AttachTo(decentralandEntity);
             }
+        }
+
+
+        public BaseComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, object data)
+        {
+            SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
+            SceneController.i.OnMessageDecodeEnds?.Invoke("UpdateEntityComponent");
+
+            DecentralandEntity entity = GetEntityForUpdate(entityId);
+
+            if (entity == null)
+            {
+                Debug.LogError($"scene '{sceneData.id}': Can't create entity component if the entity {entityId} doesn't exist!");
+                return null;
+            }
+
+
+            if (classId == CLASS_ID_COMPONENT.TRANSFORM)
+            {
+                if (!(data is DCLTransform.Model))
+                {
+                    Debug.LogError("Data is not a DCLTransform.Model type!");
+                    return null;
+                }
+
+                DCLTransform.Model modelRecovered = (DCLTransform.Model) data;
+
+                if (!entity.components.ContainsKey(classId))
+                    entity.components.Add(classId, null);
+
+
+                if (entity.OnTransformChange != null)
+                {
+                    entity.OnTransformChange.Invoke(modelRecovered);
+                }
+                else
+                {
+                    entity.gameObject.transform.localPosition = modelRecovered.position;
+                    entity.gameObject.transform.localRotation = modelRecovered.rotation;
+                    entity.gameObject.transform.localScale = modelRecovered.scale;
+
+                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+                }
+
+                Environment.i.physicsSyncController.MarkDirty();
+
+                return null;
+            }
+
+            BaseComponent newComponent = null;
+            DCLComponentFactory factory = ownerController.componentFactory;
+            Assert.IsNotNull(factory, "Factory is null?");
+
+            if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
+            {
+                string type = "";
+                if (!(data is OnPointerEvent.Model))
+                {
+                    Debug.LogError("Data is not a DCLTransform.Model type!");
+                    return null;
+                }
+
+                OnPointerEvent.Model model = (OnPointerEvent.Model) data;
+
+                type = model.type;
+
+                if (!entity.uuidComponents.ContainsKey(type))
+                {
+                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
+                    var go = new GameObject("UUID Component");
+                    go.transform.SetParent(entity.gameObject.transform, false);
+
+                    switch (type)
+                    {
+                        case OnClick.NAME:
+                            newComponent = go.GetOrCreateComponent<OnClick>();
+                            break;
+                        case OnPointerDown.NAME:
+                            newComponent = go.GetOrCreateComponent<OnPointerDown>();
+                            break;
+                        case OnPointerUp.NAME:
+                            newComponent = go.GetOrCreateComponent<OnPointerUp>();
+                            break;
+                    }
+
+                    if (newComponent != null)
+                    {
+                        UUIDComponent uuidComponent = newComponent as UUIDComponent;
+
+                        if (uuidComponent != null)
+                        {
+                            uuidComponent.Setup(this, entity, model);
+                            entity.uuidComponents.Add(type, uuidComponent);
+                        }
+                        else
+                        {
+                            Debug.LogError("uuidComponent is not of UUIDComponent type!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("EntityComponentCreateOrUpdate: Invalid UUID type!");
+                    }
+                }
+                else
+                {
+                    newComponent = EntityUUIDComponentUpdate(entity, type, model);
+                }
+            }
+
+            Environment.i.physicsSyncController.MarkDirty();
+            return newComponent;
         }
 
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
@@ -543,7 +707,7 @@ namespace DCL.Controllers
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
-                SceneController.i.physicsSyncController.MarkDirty();
+                Environment.i.physicsSyncController.MarkDirty();
                 return null;
             }
 
@@ -609,7 +773,7 @@ namespace DCL.Controllers
                 if (!entity.components.ContainsKey(classId))
                 {
                     newComponent = factory.CreateItemFromId<BaseComponent>(classId);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    Environment.i.physicsSyncController.MarkDirty();
 
                     if (newComponent != null)
                     {
@@ -637,7 +801,7 @@ namespace DCL.Controllers
                     yieldInstruction = newComponent.yieldInstruction;
             }
 
-            SceneController.i.physicsSyncController.MarkDirty();
+            Environment.i.physicsSyncController.MarkDirty();
             return newComponent;
         }
 
@@ -699,145 +863,150 @@ namespace DCL.Controllers
 
             BaseDisposable newComponent = null;
 
-            switch ((CLASS_ID)classId)
+            switch ((CLASS_ID) classId)
             {
                 case CLASS_ID.BOX_SHAPE:
-                    {
-                        newComponent = new BoxShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new BoxShape(this);
+                    break;
+                }
 
                 case CLASS_ID.SPHERE_SHAPE:
-                    {
-                        newComponent = new SphereShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new SphereShape(this);
+                    break;
+                }
 
                 case CLASS_ID.CONE_SHAPE:
-                    {
-                        newComponent = new ConeShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new ConeShape(this);
+                    break;
+                }
 
                 case CLASS_ID.CYLINDER_SHAPE:
-                    {
-                        newComponent = new CylinderShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new CylinderShape(this);
+                    break;
+                }
 
                 case CLASS_ID.PLANE_SHAPE:
-                    {
-                        newComponent = new PlaneShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new PlaneShape(this);
+                    break;
+                }
 
                 case CLASS_ID.GLTF_SHAPE:
-                    {
-                        newComponent = new GLTFShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new GLTFShape(this);
+                    break;
+                }
 
                 case CLASS_ID.NFT_SHAPE:
-                    {
-                        newComponent = new NFTShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new NFTShape(this);
+                    break;
+                }
 
                 case CLASS_ID.OBJ_SHAPE:
-                    {
-                        newComponent = new OBJShape(this);
-                        break;
-                    }
+                {
+                    newComponent = new OBJShape(this);
+                    break;
+                }
 
                 case CLASS_ID.BASIC_MATERIAL:
-                    {
-                        newComponent = new BasicMaterial(this);
-                        break;
-                    }
+                {
+                    newComponent = new BasicMaterial(this);
+                    break;
+                }
 
                 case CLASS_ID.PBR_MATERIAL:
-                    {
-                        newComponent = new PBRMaterial(this);
-                        break;
-                    }
+                {
+                    newComponent = new PBRMaterial(this);
+                    break;
+                }
 
                 case CLASS_ID.AUDIO_CLIP:
-                    {
-                        newComponent = new DCLAudioClip(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLAudioClip(this);
+                    break;
+                }
 
                 case CLASS_ID.TEXTURE:
-                    {
-                        newComponent = new DCLTexture(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLTexture(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_INPUT_TEXT_SHAPE:
-                    {
-                        newComponent = new UIInputText(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIInputText(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_FULLSCREEN_SHAPE:
                 case CLASS_ID.UI_SCREEN_SPACE_SHAPE:
+                {
+                    if (uiScreenSpace == null)
                     {
-                        if (uiScreenSpace == null)
-                        {
-                            newComponent = new UIScreenSpace(this);
-                        }
-
-                        break;
+                        newComponent = new UIScreenSpace(this);
                     }
+
+                    break;
+                }
 
                 case CLASS_ID.UI_CONTAINER_RECT:
-                    {
-                        newComponent = new UIContainerRect(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIContainerRect(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_SLIDER_SHAPE:
-                    {
-                        newComponent = new UIScrollRect(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIScrollRect(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_CONTAINER_STACK:
-                    {
-                        newComponent = new UIContainerStack(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIContainerStack(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_IMAGE_SHAPE:
-                    {
-                        newComponent = new UIImage(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIImage(this);
+                    break;
+                }
 
                 case CLASS_ID.UI_TEXT_SHAPE:
-                    {
-                        newComponent = new UIText(this);
-                        break;
-                    }
+                {
+                    newComponent = new UIText(this);
+                    break;
+                }
 
                 case CLASS_ID.VIDEO_CLIP:
-                    {
-                        newComponent = new DCLVideoClip(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLVideoClip(this);
+                    break;
+                }
 
                 case CLASS_ID.VIDEO_TEXTURE:
-                    {
-                        newComponent = new DCLVideoTexture(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLVideoTexture(this);
+                    break;
+                }
 
                 case CLASS_ID.FONT:
-                    {
-                        newComponent = new DCLFont(this);
-                        break;
-                    }
+                {
+                    newComponent = new DCLFont(this);
+                    break;
+                }
 
+                case CLASS_ID.NAME:
+                {
+                    newComponent = new DCLName(this);
+                    break;
+                }
                 default:
                     Debug.LogError($"Unknown classId");
                     break;
@@ -1096,7 +1265,7 @@ namespace DCL.Controllers
             List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
             foreach (string id in allDisposableComponents)
             {
-                parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
+                Environment.i.parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 

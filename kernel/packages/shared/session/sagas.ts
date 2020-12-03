@@ -4,7 +4,7 @@ import { Personal } from 'web3x/personal/personal'
 import { Account } from 'web3x/account'
 import { Authenticator } from 'dcl-crypto'
 
-import { ENABLE_WEB3, ETHEREUM_NETWORK, getNetworkFromTLD, getTLD, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
+import { ENABLE_WEB3, ETHEREUM_NETWORK, PREVIEW, setNetwork, WORLD_EXPLORER } from 'config'
 
 import { createLogger } from 'shared/logger'
 import { initializeReferral, referUser } from 'shared/referral'
@@ -23,14 +23,11 @@ import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
   AWAITING_USER_SIGNATURE,
-  NETWORK_MISMATCH,
   setLoadingScreen,
-  setLoadingWaitTutorial,
-  setTLDError
+  setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { identifyEmail, identifyUser, queueTrackingEvent } from 'shared/analytics'
-import { getAppNetwork } from 'shared/web3'
-import { getNetwork } from 'shared/ethereum/EthereumService'
+import { checkTldVsWeb3Network, getAppNetwork } from 'shared/web3'
 
 import { getFromLocalStorage, saveToLocalStorage } from 'atomicHelpers/localStorage'
 
@@ -59,6 +56,7 @@ import {
   SIGNUP_COME_BACK_TO_AVATAR_EDITOR,
   signUpClearData,
   signUpSetIdentity,
+  signUpSetIsSignUp,
   signUpSetProfile,
   toggleWalletPrompt,
   UPDATE_TOS,
@@ -166,10 +164,12 @@ function isGuestWithProfile(session: StoredSession) {
 }
 
 function* startSignUp(userId: string, identity: ExplorerIdentity) {
+  yield put(signUpSetIsSignUp(true))
   let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
   profile.userId = identity.address.toString()
   profile.ethAddress = identity.address.toString()
+  profile.unclaimedName = '' // clean here to allow user complete in passport step
   profile.hasClaimedName = false
   profile.inventory = []
   profile.version = 0
@@ -200,11 +200,11 @@ function* showAvatarEditor() {
 function* requestProvider(providerType: ProviderType) {
   const provider = yield requestWeb3Provider(providerType)
   if (provider) {
-    if (WORLD_EXPLORER && (yield checkTldVsNetwork())) {
+    if (WORLD_EXPLORER && (yield checkTldVsWeb3Network())) {
       throw new Error('Network mismatch')
     }
 
-    if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getNetworkValue())) {
+    if (PREVIEW && ETHEREUM_NETWORK.MAINNET === (yield getAppNetwork())) {
       Html.showNetworkWarning()
     }
   }
@@ -306,6 +306,7 @@ function* signUp() {
 function* cancelSignUp() {
   yield put(signUpClearData())
   yield put(signInSigning(false))
+  yield put(signUpSetIsSignUp(false))
   yield put(changeLoginStage(LoginStage.SIGN_IN))
 }
 
@@ -319,32 +320,6 @@ function saveSession(userId: string, identity: ExplorerIdentity) {
     userId,
     identity
   })
-}
-
-function* checkTldVsNetwork() {
-  const web3Net = yield getNetworkValue()
-
-  const tld = getTLD()
-  const tldNet = getNetworkFromTLD()
-
-  if (tld === 'localhost') {
-    // localhost => allow any network
-    return false
-  }
-
-  if (tldNet !== web3Net) {
-    yield put(setTLDError({ tld, web3Net, tldNet }))
-    Html.updateTLDInfo(tld, web3Net, tldNet as string)
-    ReportFatalError(NETWORK_MISMATCH)
-    return true
-  }
-
-  return false
-}
-
-async function getNetworkValue() {
-  const web3Network = await getNetwork()
-  return web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
 }
 
 async function createAuthIdentity(): Promise<ExplorerIdentity> {

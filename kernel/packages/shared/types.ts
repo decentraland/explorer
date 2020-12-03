@@ -408,7 +408,8 @@ export enum HUDElementID {
   EXPLORE_HUD = 19,
   HELP_AND_SUPPORT_HUD = 20,
   EMAIL_PROMPT = 21,
-  USERS_AROUND_LIST_HUD = 22
+  USERS_AROUND_LIST_HUD = 22,
+  GRAPHIC_CARD_WARNING = 23
 }
 
 export type HUDConfiguration = {
@@ -519,4 +520,21 @@ export type KernelConfigForRenderer = {
     commRadius: number
     voiceChatEnabled: boolean
   }
+  profiles: {
+    nameValidRegex: string
+    nameValidCharacterRegex: string
+  }
+  gifSupported: boolean
+}
+
+export type RealmsInfoForRenderer = {
+  current: Realm
+  realms: {
+    layer: string
+    serverName: string
+    url: string
+    usersCount: number
+    usersMax: number
+    userParcels: [number, number][]
+  }[]
 }

@@ -7,8 +7,9 @@ import { Discord } from "./Icon.tsx/Discord";
 
 import "./BigFooter.css";
 
-const year = new Date().getFullYear();
-export const BigFooter: React.FC = () => (
+const year = Math.max(new Date().getFullYear(), 2020);
+
+export const BigFooter = () => (
   <footer className="big-footer">
     <Container>
       <div>
@@ -55,7 +56,7 @@ export const BigFooter: React.FC = () => (
       </div>
     </Container>
     <Container>
-      <p className="right">© {year} Decentraland</p>
+      <p className="copyright">© {year} Decentraland</p>
     </Container>
   </footer>
 );

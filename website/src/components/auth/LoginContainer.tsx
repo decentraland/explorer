@@ -1,16 +1,18 @@
 import React from "react";
 import { Navbar } from "../common/Navbar";
-import { Footer } from "../common/Footer";
 import { EthLogin } from "./EthLogin";
 import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
-import { InitialLoading } from "./InitialLoading";
 import { connect } from "react-redux";
 import SignUpContainer from "./SignUpContainer";
 import { Container } from "../common/Container";
 import { BeginnersGuide } from "./BeginnersGuide";
 import { BigFooter } from "../common/BigFooter";
 import "./LoginContainer.css";
+
+declare var window: Window & {
+  ethereum: any;
+};
 
 export enum LoginStage {
   LOADING = "loading",
@@ -21,13 +23,19 @@ export enum LoginStage {
   COMPLETED = "completed",
 }
 
-const mapStateToProps = (state: any) => ({
-  stage: state.session.loginStage,
-  signing: state.session.signing,
-  subStage: state.session.signup.stage,
-  provider: state.session.currentProvider,
-  showWallet: window.location.search.indexOf("show_wallet=1") !== -1,
-});
+const mapStateToProps = (state: any) => {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    stage: state.session.loginStage,
+    signing: state.session.signing,
+    subStage: state.session.signup.stage,
+    provider: state.session.currentProvider,
+    showWalletSelector: params.has("show_wallet"),
+    hasWallet: !!window.ethereum,
+    hasMetamask: !!(window.ethereum && window.ethereum.isMetaMask),
+    hasDapper: !!(window.ethereum && window.ethereum.isDapper),
+  };
+};
 
 const mapDispatchToProps = (dispatch: any) => ({
   onLogin: (provider: string) =>
@@ -42,29 +50,41 @@ export interface LoginContainerProps {
   subStage: string;
   provider?: string | null;
   showWallet?: boolean;
+  hasWallet?: boolean;
+  hasMetamask?: boolean;
+  hasDapper?: boolean;
   onLogin: (provider: string) => void;
   onGuest: () => void;
 }
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
+  const loading = props.stage === LoginStage.LOADING;
+  const full = loading || props.stage === LoginStage.SIGN_IN;
   const shouldShow =
     LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar";
+  const provider = props.hasMetamask
+    ? "Metamask"
+    : props.hasDapper
+    ? "Dapper"
+    : props.provider;
   return (
     <React.Fragment>
       {shouldShow && (
-        <div className="LoginContainer">
-          <Navbar />
+        <div className={"LoginContainer" + (full ? " FullPage" : "")}>
+          {/* Nabvar */}
+          <Navbar full={full} />
 
-          {/* Footer */}
+          {/* Main */}
           <main>
             <Container className="eth-login-popup">
-              {props.stage === LoginStage.LOADING && <InitialLoading />}
-              {props.stage === LoginStage.SIGN_IN && (
+              {full && (
                 <EthLogin
-                  loading={props.signing}
+                  hasWallet={props.hasWallet}
+                  hasMetamask={props.hasMetamask}
+                  loading={loading || props.signing}
                   onLogin={props.onLogin}
                   onGuest={props.onGuest}
-                  provider={props.provider}
+                  provider={provider}
                   showWallet={props.showWallet}
                 />
               )}
@@ -77,11 +97,10 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
           </main>
 
           {/* Beginner Guide */}
-          {props.stage === LoginStage.SIGN_IN && <BeginnersGuide />}
+          {full && <BeginnersGuide />}
 
           {/* Footer */}
-          {props.stage !== LoginStage.SIGN_IN && <Footer />}
-          {props.stage === LoginStage.SIGN_IN && <BigFooter />}
+          {full && <BigFooter />}
         </div>
       )}
     </React.Fragment>

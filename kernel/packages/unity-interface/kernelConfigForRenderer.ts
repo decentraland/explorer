@@ -1,6 +1,19 @@
 import { KernelConfigForRenderer } from 'shared/types'
-import { commConfigurations } from 'config'
+import { commConfigurations, WSS_ENABLED } from 'config'
+import { nameValidCharacterRegex, nameValidRegex } from 'shared/profiles/utils/names'
 
 export function kernelConfigForRenderer(): KernelConfigForRenderer {
-  return { comms: { commRadius: commConfigurations.commRadius, voiceChatEnabled: false } }
+  return {
+    comms: {
+      commRadius: commConfigurations.commRadius,
+      voiceChatEnabled: false
+    },
+    profiles: {
+      nameValidCharacterRegex: nameValidCharacterRegex.toString().replace(/[/]/g, ''),
+      nameValidRegex: nameValidRegex.toString().replace(/[/]/g, '')
+    },
+    gifSupported:
+      // tslint:disable-next-line
+      typeof OffscreenCanvas !== 'undefined' && typeof OffscreenCanvasRenderingContext2D === 'function' && !WSS_ENABLED
+  }
 }

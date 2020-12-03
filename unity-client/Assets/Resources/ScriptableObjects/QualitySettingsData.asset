@@ -23,8 +23,11 @@ MonoBehaviour:
     shadowResolution: 256
     cameraDrawDistance: 50
     bloom: 0
+    fpsCap: 1
     colorGrading: 0
     shadowDistance: 30
+    enableDetailObjectCulling: 1
+    detailObjectCullingThreshold: 100
   - displayName: Medium
     baseResolution: 1
     antiAliasing: 1
@@ -34,8 +37,11 @@ MonoBehaviour:
     shadowResolution: 256
     cameraDrawDistance: 80
     bloom: 1
+    fpsCap: 1
     colorGrading: 1
     shadowDistance: 45
+    enableDetailObjectCulling: 1
+    detailObjectCullingThreshold: 53.5
   - displayName: High
     baseResolution: 2
     antiAliasing: 2
@@ -45,5 +51,8 @@ MonoBehaviour:
     shadowResolution: 512
     cameraDrawDistance: 100
     bloom: 1
+    fpsCap: 0
     colorGrading: 1
     shadowDistance: 60
+    enableDetailObjectCulling: 1
+    detailObjectCullingThreshold: 0

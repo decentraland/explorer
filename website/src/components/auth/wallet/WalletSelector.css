@@ -1,13 +1,20 @@
+.popup-container .popup.walletSelectorPopup {
+  padding: 64px 45px;
+}
+
 .walletSelector {
   display: flex;
   flex-flow: column wrap;
   align-items: center;
+  color: #333;
 }
 
 h2.walletSelectorTitle {
-  font-size: 25px;
+  font-size: 24px;
+  font-weight: 400;
   line-height: 30px;
-  margin-bottom: 20px;
+  margin-top: 0;
+  margin-bottom: 45px;
 }
 
 .walletButtonContainer {
@@ -19,6 +26,11 @@ h2.walletSelectorTitle {
   min-height: 170px;
 }
 
+.walletButtonContainer .linkMetamask {
+  text-decoration: none;
+  color: black;
+}
+
 .walletButtonContainer .walletButton:first-child {
-  margin-right: 2em;
+  margin-right: 0;
 }

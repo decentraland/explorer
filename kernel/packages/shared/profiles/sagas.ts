@@ -66,6 +66,9 @@ import { getExclusiveCatalog } from 'shared/catalogs/selectors'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { Wearable } from 'shared/catalogs/types'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
+import { getProfileType } from './getProfileType'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { UNEXPECTED_ERROR } from 'shared/loading/types'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -121,7 +124,15 @@ function* initialProfileLoad() {
   // initialize profile
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
   const userId = identity.address
-  let profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
+
+  let profile = undefined
+
+  try {
+    profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
+  } catch (e) {
+    ReportFatalError(UNEXPECTED_ERROR)
+    throw e
+  }
 
   if (!PREVIEW) {
     let profileDirty: boolean = false
@@ -216,7 +227,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]
-          profile.hasClaimedName = !!profile.name // lambdas profiles don't have claimed names if they don't have the "name" property
+          profile.hasClaimedName = !!profile.name && profile.hasClaimedName // old lambdas profiles don't have claimed names if they don't have the "name" property
           hasConnectedWeb3 = true
         }
       }
@@ -563,8 +574,4 @@ export function makeContentFile(path: string, content: string | Blob): Promise<C
       reject(new Error('Unable to create ContentFile: content must be a string or a Blob'))
     }
   })
-}
-
-export function getProfileType(identity?: ExplorerIdentity): ProfileType {
-  return identity?.hasConnectedWeb3 ? ProfileType.DEPLOYED : ProfileType.LOCAL
 }
