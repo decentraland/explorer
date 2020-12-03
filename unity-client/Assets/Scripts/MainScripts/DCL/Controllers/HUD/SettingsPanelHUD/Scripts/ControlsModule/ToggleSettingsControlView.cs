@@ -6,6 +6,7 @@ namespace DCL.SettingsPanelHUD.Controls
     public class ToggleSettingsControlView : SettingsControlView
     {
         [SerializeField] private Toggle toggle;
+        [SerializeField] private CanvasGroup canvasGroup;
 
         public Toggle toggleControl { get => toggle; }
 
@@ -22,6 +23,12 @@ namespace DCL.SettingsPanelHUD.Controls
                 settingsControlController.ApplySettings();
                 settingsControlController.PostApplySettings();
             });
+        }
+
+        public override void SetEnabled(bool enabled)
+        {
+            canvasGroup.alpha = enabled ? 1 : 0.5f;
+            canvasGroup.interactable = enabled;
         }
     }
 }

@@ -6,9 +6,10 @@ namespace DCL.SettingsPanelHUD.Controls
     public interface ISettingsControlView
     {
         void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
+        void SetEnabled(bool enabled);
     }
 
-    public class SettingsControlView : MonoBehaviour, ISettingsControlView
+    public abstract class SettingsControlView : MonoBehaviour, ISettingsControlView
     {
         [SerializeField] private TextMeshProUGUI title;
 
@@ -20,6 +21,18 @@ namespace DCL.SettingsPanelHUD.Controls
             this.settingsControlController.Initialize(this);
 
             this.title.text = controlConfig.title;
+
+            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
+            {
+                flag.OnChange += OnAnyDeactivationFlagChange;
+            }
+        }
+
+        public abstract void SetEnabled(bool enabled);
+
+        private void OnAnyDeactivationFlagChange(bool current, bool previous)
+        {
+            SetEnabled(!current);
         }
     }
 }

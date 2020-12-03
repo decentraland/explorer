@@ -1,3 +1,4 @@
+using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -14,9 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             bool autoQualityValue = (bool)newValue;
 
-            //autoqualityBlockCanvasGroup.interactable = !autoQualityValue;
             currentGeneralSettings.autoqualityOn = autoQualityValue;
-            //autoqualityBlocker.SetActive(autoQualityValue);
 
             if (autoQualityValue)
             {

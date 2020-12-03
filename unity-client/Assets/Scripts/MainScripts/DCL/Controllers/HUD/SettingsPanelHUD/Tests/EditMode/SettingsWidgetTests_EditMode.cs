@@ -16,7 +16,7 @@ namespace Tests
             var newControlController = Substitute.For<SettingsControlController>();
             var newControlConfig = new SettingsControlModel(
                 "TestControl",
-                new SettingsControlView(),
+                Substitute.For<SettingsControlView>(),
                 Substitute.For<SettingsControlController>());
 
             SettingsWidgetController widgetController = new SettingsWidgetController();

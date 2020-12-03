@@ -776,6 +776,7 @@ GameObject:
   - component: {fileID: 3731816843781449031}
   - component: {fileID: 1882231507603824778}
   - component: {fileID: 3572563192424337713}
+  - component: {fileID: 4023700701583222159}
   m_Layer: 5
   m_Name: SliderSettingsControlTemplate
   m_TagString: Untagged
@@ -826,6 +827,19 @@ MonoBehaviour:
   title: {fileID: 946022103321159557}
   slider: {fileID: 6766189024411584644}
   indicatorLabel: {fileID: 49177162354486727}
+  canvasGroup: {fileID: 4023700701583222159}
+--- !u!225 &4023700701583222159
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7951948174597467371}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8547468104166466955
 GameObject:
   m_ObjectHideFlags: 0

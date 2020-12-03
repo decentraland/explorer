@@ -1,4 +1,5 @@
 using ReorderableList;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -22,9 +23,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
     public class SettingsControlModel : ScriptableObject
     {
+        [Header("CONTROL CONFIGURATION")]
         public string title;
         public SettingsControlView controlPrefab;
         public SettingsControlController controlController;
+        public List<BooleanVariable> flagsThatDeactivateMe;
 
         public SettingsControlModel(
             string title,
