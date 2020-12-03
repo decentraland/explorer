@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 internal class ExclusionArea
@@ -13,12 +12,26 @@ internal class ExclusionArea
     }
 }
 
+internal class ParcelData
+{
+    public Vector2Int coords { private set; get; }
+    public string realmServer { private set; get; }
+    public string realmLayer { private set; get; }
+
+    public ParcelData(Vector2Int coords, string realmServer, string realmLayer)
+    {
+        this.coords = coords;
+        this.realmServer = realmServer;
+        this.realmLayer = realmLayer;
+    }
+}
+
 internal class ScenesFilter
 {
-    public List<Vector2Int> Filter(List<HotScenesController.HotSceneInfo> hotScenesList, int maxMarkers)
+    public List<ParcelData> Filter(List<HotScenesController.HotSceneInfo> hotScenesList, int maxMarkers)
     {
-        List<Vector2Int> result = new List<Vector2Int>(maxMarkers);
-        List<Vector2Int> rawParcelCoords = GetRawParcelCoords(hotScenesList);
+        List<ParcelData> result = new List<ParcelData>(maxMarkers);
+        List<ParcelData> rawParcelCoords = GetRawParcelCoords(hotScenesList);
         float stepAmount = rawParcelCoords.Count / (float)maxMarkers;
         if (stepAmount < 1) stepAmount = 1;
 
@@ -38,12 +51,14 @@ internal class ScenesFilter
         return result;
     }
 
-    private List<Vector2Int> GetRawParcelCoords(List<HotScenesController.HotSceneInfo> hotScenesList)
+    private List<ParcelData> GetRawParcelCoords(List<HotScenesController.HotSceneInfo> hotScenesList)
     {
-        List<Vector2Int> result = new List<Vector2Int>();
+        List<ParcelData> result = new List<ParcelData>();
 
         HotScenesController.HotSceneInfo sceneInfo;
+        HotScenesController.HotSceneInfo.Realm realm;
         int scenesCount = hotScenesList.Count;
+
         for (int sceneIdx = 0; sceneIdx < scenesCount; sceneIdx++)
         {
             sceneInfo = hotScenesList[sceneIdx];
@@ -51,9 +66,10 @@ internal class ScenesFilter
 
             for (int realmIdx = 0; realmIdx < sceneInfo.realms.Length; realmIdx++)
             {
-                for (int parcelIdx = 0; parcelIdx < sceneInfo.realms[realmIdx].userParcels.Length; parcelIdx++)
+                realm = sceneInfo.realms[realmIdx];
+                for (int parcelIdx = 0; parcelIdx < realm.userParcels.Length; parcelIdx++)
                 {
-                    result.Add(sceneInfo.realms[realmIdx].userParcels[parcelIdx]);
+                    result.Add(new ParcelData(realm.userParcels[parcelIdx], realm.serverName, realm.layer));
                 }
             }
         }

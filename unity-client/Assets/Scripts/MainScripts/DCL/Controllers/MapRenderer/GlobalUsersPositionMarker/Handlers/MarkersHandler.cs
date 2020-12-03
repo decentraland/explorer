@@ -83,21 +83,19 @@ internal class MarkersHandler : IDisposable
         usedMarkers.Clear();
     }
 
-    private void SetMarker(UserPositionMarker marker, Vector2Int coords)
+    private void SetMarker(UserPositionMarker marker, ParcelData parcelData)
     {
-        SetMarkerAtCoord(marker, coords);
-        marker.SetActive(!exclusionArea.Contains(coords));
-    }
-
-    private void SetMarkerAtCoord(UserPositionMarker marker, Vector2Int coords)
-    {
-        marker.name = $"UsersPositionMarker({coords.x},{coords.y})";
+        marker.name = $"UsersPositionMarker({parcelData.coords.x},{parcelData.coords.y})";
 
         marker.localPosition = coordToMapPosition(
-            coords.x + Random.Range(-0.5f, 0.5f),
-            coords.y + Random.Range(-0.5f, 0.5f));
+            parcelData.coords.x + Random.Range(-0.5f, 0.5f),
+            parcelData.coords.y + Random.Range(-0.5f, 0.5f));
 
-        marker.coords = coords;
+        marker.coords = parcelData.coords;
+        marker.realmServer = parcelData.realmServer;
+        marker.realmLayer = parcelData.realmLayer;
+
+        marker.SetActive(!exclusionArea.Contains(parcelData.coords));
     }
 
     private void ApplyExclusionArea()
