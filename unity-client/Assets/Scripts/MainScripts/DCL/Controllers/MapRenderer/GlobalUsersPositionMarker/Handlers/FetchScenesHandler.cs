@@ -5,6 +5,10 @@ using DCL.Interface;
 using System.Collections;
 using UpdateMode = MapGlobalUsersPositionMarkerController.UpdateMode;
 
+/// <summary>
+/// Handle the fetch of hot scenes at intervals.
+/// Interval time may change accordingly if set to update in background or foregraound
+/// </summary>
 internal class FetchScenesHandler : IDisposable
 {
     public event Action<List<HotScenesController.HotSceneInfo>> OnScenesFetched;

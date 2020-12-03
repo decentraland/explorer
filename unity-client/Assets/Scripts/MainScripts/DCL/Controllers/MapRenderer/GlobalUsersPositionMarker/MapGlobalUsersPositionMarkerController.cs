@@ -60,6 +60,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
     {
         fetchScenesHandler.OnScenesFetched -= OnScenesFetched;
         userPositionHandler.OnPlayerCoordsChanged -= OnPlayerCoordsChanged;
+        CommonScriptableObjects.rendererState.OnChange -= OnRenderStateChanged;
 
         fetchScenesHandler.Dispose();
         markersHandler.Dispose();

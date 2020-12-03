@@ -2,12 +2,11 @@
 using System;
 using Variables.RealmsInfo;
 
-
+/// <summary>
+/// Wrapper class to handle user's marker GameObject
+/// </summary>
 internal class UserPositionMarker : IDisposable
 {
-    static readonly Color SAME_REALM_COLOR = new Color(1, 0.07f, 0.38f);
-    static readonly Color OTHER_REALM_COLOR = Color.blue;
-
     public Vector2Int coords { set; get; }
     public string realmServer { set; get; }
     public string realmLayer { set; get; }

@@ -1,6 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Handle user position changes to let other handler or controller to react appropriately
+/// </summary>
 internal class UserPositionHandler : IDisposable
 {
     public Vector2Int playerCoords { private set; get; }
