@@ -20,6 +20,8 @@ export class EmptyParcelController {
   ) {
     if (options.worldConfig.renderProfile === RenderProfile.HALLOWEEN) {
       this.baseUrl = `${options.rootUrl}loader/empty-scenes-halloween/`
+    } else if (options.worldConfig.renderProfile === RenderProfile.XMAS) {
+      this.baseUrl = `${options.rootUrl}loader/empty-scenes-xmas/`
     } else {
       this.baseUrl = `${options.rootUrl}loader/empty-scenes/`
     }
