@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DCL.Configuration;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
@@ -610,12 +609,6 @@ namespace DCL.Helpers
             }
 
             return value;
-        }
-
-        [MenuItem("Decentraland/Clear Player Prefs")]
-        public static void ClearAllPlayerPrefs()
-        {
-            PlayerPrefs.DeleteAll();
         }
     }
 }
