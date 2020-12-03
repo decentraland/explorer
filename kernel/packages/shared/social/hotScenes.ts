@@ -125,23 +125,27 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
     const id = scenesId[i] ?? tiles[i]
     const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : undefined
 
-    if (crowdedScenes[id]) {
-      const realmInfo = crowdedScenes[id].realms.filter(
+    let hotScene: HotSceneInfo | null = crowdedScenes[id] ?? createHotSceneInfo(land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+
+    if (hotScene) {
+      const realmInfo = hotScene.realms.filter(
         (realm) => realm.serverName === candidate.catalystName && realm.layer === candidate.layer.name
       )
 
-      if (!realmInfo[0]) {
-        crowdedScenes[id].realms.push(createRealmInfo(candidate))
+      let realm = realmInfo[0]
+      if (!realm) {
+        realm = createRealmInfo(candidate)
+        hotScene.realms.push(realm)
       }
-      crowdedScenes[id].usersTotalCount++
-    } else {
-      crowdedScenes[id] = createHotSceneInfo(candidate, land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+
+      hotScene.usersTotalCount++
+      realm.usersCount ++
+      realm.userParcels.push(TileStringToVector2(tiles[i]))
     }
   }
 }
 
 function createHotSceneInfo(
-  candidate: Candidate,
   baseCoord: string,
   id: string,
   land: ILand | undefined
@@ -165,8 +169,8 @@ function createHotSceneInfo(
         return { x: coord[0], y: coord[1] }
       })
       : [],
-    realms: [createRealmInfo(candidate)],
-    usersTotalCount: 1
+    realms: [],
+    usersTotalCount: 0
   }
 }
 
@@ -175,12 +179,8 @@ function createRealmInfo(candidate: Candidate): RealmInfo {
     serverName: candidate.catalystName,
     layer: candidate.layer.name,
     usersMax: candidate.layer.maxUsers,
-    usersCount: candidate.layer.usersCount,
-    userParcels: candidate.layer.usersParcels
-      ? candidate.layer.usersParcels.map((val) => {
-        return { x: val[0], y: val[1] }
-      })
-      : []
+    usersCount: 0,
+    userParcels: []
   }
 }
 
