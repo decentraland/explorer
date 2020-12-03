@@ -125,23 +125,26 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
     const id = scenesId[i] ?? tiles[i]
     const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : undefined
 
-    let hotScene: HotSceneInfo = crowdedScenes[id] ?? createHotSceneInfo(land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+    let hotScene: HotSceneInfo | undefined = crowdedScenes[id]
 
-    if (hotScene) {
-      const realmInfo = hotScene.realms.filter(
-        (realm) => realm.serverName === candidate.catalystName && realm.layer === candidate.layer.name
-      )
-
-      let realm = realmInfo[0]
-      if (!realm) {
-        realm = createRealmInfo(candidate)
-        hotScene.realms.push(realm)
-      }
-
-      hotScene.usersTotalCount++
-      realm.usersCount ++
-      realm.userParcels.push(TileStringToVector2(tiles[i]))
+    if (!hotScene) {
+      hotScene = createHotSceneInfo(land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+      crowdedScenes[id] = hotScene
     }
+
+    const realmInfo = hotScene.realms.filter(
+      (realm) => realm.serverName === candidate.catalystName && realm.layer === candidate.layer.name
+    )
+
+    let realm = realmInfo[0]
+    if (!realm) {
+      realm = createRealmInfo(candidate)
+      hotScene.realms.push(realm)
+    }
+
+    hotScene.usersTotalCount++
+    realm.usersCount ++
+    realm.userParcels.push(TileStringToVector2(tiles[i]))
   }
 }
 
