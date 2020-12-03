@@ -26,9 +26,6 @@ namespace DCL.SettingsPanelHUD.Controls
                 currentQualitySetting.baseResolution = currentBaseResolution;
                 currentQualitySetting.fpsCap = currentFpsCap;
             }
-
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
-            Settings.i.ApplyGeneralSettings(currentGeneralSettings);
         }
     }
 }

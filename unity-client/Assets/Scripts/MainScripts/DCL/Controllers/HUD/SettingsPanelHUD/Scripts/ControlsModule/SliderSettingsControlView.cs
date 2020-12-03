@@ -19,14 +19,16 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
+            slider.value = (float)settingsControlController.GetInitialValue();
+            indicatorLabel.text = slider.value.ToString();
+            settingsControlController.OnControlChanged(slider.value);
+
             slider.onValueChanged.AddListener(sliderValue =>
             {
                 indicatorLabel.text = sliderValue.ToString();
                 settingsControlController.OnControlChanged(sliderValue);
+                settingsControlController.ApplySettings();
             });
-
-            slider.value = (float)settingsControlController.GetInitialValue();
-            settingsControlController.OnControlChanged(slider.value);
         }
 
         public void OverrideIndicatorLabel(string text)

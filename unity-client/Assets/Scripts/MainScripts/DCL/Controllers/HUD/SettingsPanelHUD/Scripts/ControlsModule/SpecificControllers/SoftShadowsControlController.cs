@@ -30,7 +30,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             currentQualitySetting.softShadows = (bool)newValue;
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
 
         private void ShadowState_OnChange(bool current, bool previous)

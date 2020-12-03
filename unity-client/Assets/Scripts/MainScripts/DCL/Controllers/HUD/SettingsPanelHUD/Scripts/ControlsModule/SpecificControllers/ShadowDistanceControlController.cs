@@ -15,7 +15,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             currentQualitySetting.shadowDistance = (float)newValue;
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
     }
 }

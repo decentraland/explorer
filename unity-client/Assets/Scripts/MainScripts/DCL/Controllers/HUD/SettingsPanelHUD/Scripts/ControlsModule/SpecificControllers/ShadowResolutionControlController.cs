@@ -15,7 +15,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             currentQualitySetting.shadowResolution = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << (int)newValue);
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
     }
 }

@@ -13,7 +13,6 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentGeneralSettings.voiceChatVolume = (float)newValue * 0.01f;
-            Settings.i.ApplyGeneralSettings(currentGeneralSettings);
         }
     }
 }

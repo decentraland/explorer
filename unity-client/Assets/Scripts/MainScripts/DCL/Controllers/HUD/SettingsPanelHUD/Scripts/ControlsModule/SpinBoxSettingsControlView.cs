@@ -14,13 +14,14 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
+            spinBox.value = (int)settingsControlController.GetInitialValue();
+            settingsControlController.OnControlChanged(spinBox.value);
+
             spinBox.onValueChanged.AddListener(sliderValue =>
             {
                 settingsControlController.OnControlChanged(sliderValue);
+                settingsControlController.ApplySettings();
             });
-
-            spinBox.value = (int)settingsControlController.GetInitialValue();
-            settingsControlController.OnControlChanged(spinBox.value);
         }
 
         public void SetLabels(string[] labels)

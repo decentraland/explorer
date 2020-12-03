@@ -29,6 +29,15 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public abstract void OnControlChanged(object newValue);
 
+        public virtual void ApplySettings()
+        {
+            if (!currentGeneralSettings.Equals(Settings.i.generalSettings))
+                Settings.i.ApplyGeneralSettings(currentGeneralSettings);
+
+            if (!currentQualitySetting.Equals(Settings.i.qualitySettings))
+                Settings.i.ApplyQualitySettings(currentQualitySetting);
+        }
+
         private void OnGeneralSettingsChanged(SettingsData.GeneralSettings newGeneralSettings)
         {
             currentGeneralSettings = newGeneralSettings;

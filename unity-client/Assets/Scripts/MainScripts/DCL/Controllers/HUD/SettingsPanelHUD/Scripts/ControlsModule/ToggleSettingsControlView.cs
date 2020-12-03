@@ -13,13 +13,14 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.Initialize(controlConfig, settingsControlController);
 
+            toggle.isOn = (bool)settingsControlController.GetInitialValue();
+            settingsControlController.OnControlChanged(toggle.isOn);
+
             toggle.onValueChanged.AddListener(isOn =>
             {
                 settingsControlController.OnControlChanged(isOn);
+                settingsControlController.ApplySettings();
             });
-
-            toggle.isOn = (bool)settingsControlController.GetInitialValue();
-            settingsControlController.OnControlChanged(toggle.isOn);
         }
     }
 }

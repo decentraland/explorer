@@ -18,7 +18,6 @@ namespace DCL.SettingsPanelHUD.Controls
             currentQualitySetting.shadows = isOn;
             CommonSettingsVariables.shadowState.Set(isOn);
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
     }
 }

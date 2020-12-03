@@ -39,7 +39,6 @@ namespace DCL.SettingsPanelHUD.Controls
             currentQualitySetting = preset;
             UpdateQualitySettings();
             currentQualityPresetIndex = (int)newValue;
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
 
         private void UpdateQualitySettings()
