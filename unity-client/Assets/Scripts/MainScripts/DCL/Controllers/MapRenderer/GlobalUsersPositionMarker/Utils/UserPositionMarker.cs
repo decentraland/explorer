@@ -41,11 +41,14 @@ internal class UserPositionMarker : IDisposable
     public void Dispose()
     {
         DataStore.playerRealm.OnChange -= OnRealmChanged;
-        GameObject.Destroy(markerObject);
+        GameObject.Destroy(markerObject.gameObject);
     }
 
     private void OnRealmChanged(CurrentRealmModel current, CurrentRealmModel prev)
     {
+        if (current == null)
+            return;
+
         SetColor(current.Equals(realmServer, realmLayer) ? markerObject.sameRealmColor : markerObject.otherRealmColor);
     }
 
