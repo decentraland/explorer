@@ -51,9 +51,9 @@ internal class ScenesFilter
 
             for (int realmIdx = 0; realmIdx < sceneInfo.realms.Length; realmIdx++)
             {
-                for (int parcelIdx = 0; parcelIdx < sceneInfo.realms[realmIdx].crowdedParcels.Length; parcelIdx++)
+                for (int parcelIdx = 0; parcelIdx < sceneInfo.realms[realmIdx].userParcels.Length; parcelIdx++)
                 {
-                    result.Add(sceneInfo.realms[realmIdx].crowdedParcels[parcelIdx]);
+                    result.Add(sceneInfo.realms[realmIdx].userParcels[parcelIdx]);
                 }
             }
         }

@@ -130,7 +130,7 @@ public class GlobalUsersPositionMarkerTests
             baseCoords = coords,
             realms = new HotScenesController.HotSceneInfo.Realm[] {
                     new HotScenesController.HotSceneInfo.Realm(){
-                        crowdedParcels = new Vector2Int[]{coords},
+                        userParcels = new Vector2Int[]{coords},
                         usersCount = 1
                     }
                 },
