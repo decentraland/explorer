@@ -48,6 +48,7 @@ namespace DCL
 
         public MapSceneIcon scenesOfInterestIconPrefab;
         public MapSceneIcon userIconPrefab;
+        public UserMarkerObject globalUserMarkerPrefab;
 
         public MapGlobalUsersPositionMarkerController usersPositionMarkerController { private set; get; }
 
@@ -109,7 +110,7 @@ namespace DCL
 
             parcelHoldCountdown = parcelHoldTimeInSeconds;
 
-            usersPositionMarkerController = new MapGlobalUsersPositionMarkerController(userIconPrefab.gameObject,
+            usersPositionMarkerController = new MapGlobalUsersPositionMarkerController(globalUserMarkerPrefab,
                 overlayContainer.transform,
                 MapUtils.GetTileToLocalPosition);
 

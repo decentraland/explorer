@@ -26,7 +26,7 @@ public class MapGlobalUsersPositionMarkerController : IDisposable
     /// <param name="markerPrefab">prefab for markers</param>
     /// <param name="overlayContainer">parent for markers</param>
     /// <param name="coordToMapPosFunc">function to transform coords to map position</param>
-    public MapGlobalUsersPositionMarkerController(GameObject markerPrefab, Transform overlayContainer, Func<float, float, Vector3> coordToMapPosFunc)
+    public MapGlobalUsersPositionMarkerController(UserMarkerObject markerPrefab, Transform overlayContainer, Func<float, float, Vector3> coordToMapPosFunc)
     {
         fetchScenesHandler = new FetchScenesHandler(UPDATE_INTERVAL_INITIAL, UPDATE_INTERVAL_FOREGROUND, UPDATE_INTERVAL_BACKGROUND);
         markersHandler = new MarkersHandler(markerPrefab, overlayContainer, MAX_MARKERS, coordToMapPosFunc);

@@ -80,7 +80,7 @@ public class GlobalUsersPositionMarkerTests
         const int MAX_MARKERS = 5;
         const int EXCLUSION_AREA = 1;
 
-        var markerPrefab = new GameObject();
+        var markerPrefab = new GameObject().AddComponent<UserMarkerObject>();
         var overlay = new GameObject();
 
         Func<float, float, Vector3> coordToMapPosFunc = (x, y) =>

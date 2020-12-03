@@ -12,15 +12,15 @@ internal class UserPositionMarker : IDisposable
     public string realmServer { set; get; }
     public string realmLayer { set; get; }
 
-    public string name { set { gameObject.name = value; } }
-    public Vector3 localPosition { set { gameObject.transform.localPosition = value; } }
+    public string name { set { markerObject.name = value; } }
+    public Vector3 localPosition { set { markerObject.transform.localPosition = value; } }
 
-    private GameObject gameObject;
+    private UserMarkerObject markerObject;
 
-    public UserPositionMarker(GameObject gameObject)
+    public UserPositionMarker(UserMarkerObject markerObject)
     {
-        this.gameObject = gameObject;
-        gameObject.SetActive(false);
+        this.markerObject = markerObject;
+        markerObject.gameObject.SetActive(false);
     }
 
     public void SetActive(bool active)
@@ -34,13 +34,13 @@ internal class UserPositionMarker : IDisposable
         {
             DataStore.playerRealm.OnChange -= OnRealmChanged;
         }
-        gameObject.SetActive(active);
+        markerObject.gameObject.SetActive(active);
     }
 
     public void Dispose()
     {
         DataStore.playerRealm.OnChange -= OnRealmChanged;
-        GameObject.Destroy(gameObject);
+        GameObject.Destroy(markerObject);
     }
 
     private void OnRealmChanged(CurrentRealmModel current, CurrentRealmModel prev)
@@ -50,6 +50,6 @@ internal class UserPositionMarker : IDisposable
 
     private void SetColor(Color color)
     {
-
+        markerObject.color = color;
     }
 }

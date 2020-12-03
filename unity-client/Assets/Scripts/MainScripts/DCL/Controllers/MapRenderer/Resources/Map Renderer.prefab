@@ -262,6 +262,8 @@ MonoBehaviour:
     type: 3}
   userIconPrefab: {fileID: 3915973121112947369, guid: de55552ad87874a44aefe9d124170fe8,
     type: 3}
+  globalUserMarkerPrefab: {fileID: 5313837265398941890, guid: 6b6245a77381540da8f58d770d619b05,
+    type: 3}
 --- !u!1 &3620416516788639812
 GameObject:
   m_ObjectHideFlags: 0

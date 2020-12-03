@@ -21,7 +21,7 @@ internal class MarkersHandler : IDisposable
     /// <param name="overlayContainer">parent for markers</param>
     /// <param name="maxMarkers">max amount of markers (pool)</param>
     /// <param name="coordToMapPosFunc">function to transform coords to map position</param>
-    public MarkersHandler(GameObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
+    public MarkersHandler(UserMarkerObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
     {
         this.maxMarkers = maxMarkers;
         this.coordToMapPosition = coordToMapPosFunc;
