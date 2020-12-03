@@ -67,6 +67,7 @@ namespace DCL.SettingsPanelHUD
         private void CloseSettingsPanel()
         {
             hudController.SetVisibility(false);
+            settingsPanelController.SaveSettings();
         }
 
         public void SetVisibility(bool visible)
