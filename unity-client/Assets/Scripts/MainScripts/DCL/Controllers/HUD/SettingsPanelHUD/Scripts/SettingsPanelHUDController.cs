@@ -11,6 +11,7 @@ namespace DCL.SettingsPanelHUD
         void AddSection(SettingsButtonEntry newMenuButton, ISettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
         void OpenSection(ISettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
+        void SaveSettings();
     }
 
     public class SettingsPanelHUDController : IHUD, ISettingsPanelHUDController
@@ -36,7 +37,6 @@ namespace DCL.SettingsPanelHUD
         {
             if (!visible && view.isOpen)
             {
-                Settings.i.SaveSettings();
                 OnClose?.Invoke();
             }
 
@@ -80,6 +80,11 @@ namespace DCL.SettingsPanelHUD
             }
 
             sections[sectionIndex].SetActive(true);
+        }
+
+        public void SaveSettings()
+        {
+            Settings.i.SaveSettings();
         }
     }
 }
