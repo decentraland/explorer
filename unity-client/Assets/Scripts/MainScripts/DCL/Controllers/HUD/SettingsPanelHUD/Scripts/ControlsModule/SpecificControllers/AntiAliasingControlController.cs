@@ -10,17 +10,21 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override object GetInitialValue()
         {
-            float antiAliasingValue = currentQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
+            float antiAliasingValue =
+                currentQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled
+                    ? 0
+                    : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
+
             return antiAliasingValue;
         }
 
         public override void OnControlChanged(object newValue)
         {
-            float receivedValue = (float)newValue;
+            float newFloatValue = (float)newValue;
 
-            int antiAliasingValue = 1 << (int)receivedValue;
+            int antiAliasingValue = 1 << (int)newFloatValue;
             currentQualitySetting.antiAliasing = (UnityEngine.Rendering.Universal.MsaaQuality)antiAliasingValue;
-            if ((int)receivedValue == 0)
+            if (newFloatValue == 0)
             {
                 ((SliderSettingsControlView)view).OverrideIndicatorLabel(TEXT_OFF);
             }
@@ -30,8 +34,7 @@ namespace DCL.SettingsPanelHUD.Controls
             }
 
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
-
-            Settings.i.ApplyGeneralSettings(currentGeneralSettings);
+            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
     }
 }
