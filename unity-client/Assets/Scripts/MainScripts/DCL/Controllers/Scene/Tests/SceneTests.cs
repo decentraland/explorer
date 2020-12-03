@@ -223,7 +223,7 @@ namespace Tests
             sceneController.UnloadScene(loadedSceneID);
 
             yield return new WaitForAllMessagesProcessed();
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(0.1f);
 
             Assert.IsTrue(sceneController.loadedScenes.ContainsKey(loadedSceneID) == false);
 
