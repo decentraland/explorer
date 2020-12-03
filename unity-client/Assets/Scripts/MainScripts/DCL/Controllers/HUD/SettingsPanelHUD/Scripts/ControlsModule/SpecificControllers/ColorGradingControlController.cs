@@ -1,4 +1,4 @@
-﻿using DCL.SettingsPanelHUD.Common;
+using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -8,7 +8,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public override object GetInitialValue()
         {
-            return currentGeneralSettings.sfxVolume > 0 ? true : false;
+            return currentQualitySetting.colorGrading;
         }
 
         public override void OnControlChanged(object newValue)
