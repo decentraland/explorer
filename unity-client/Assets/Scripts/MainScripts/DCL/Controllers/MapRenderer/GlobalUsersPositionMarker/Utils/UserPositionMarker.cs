@@ -5,7 +5,7 @@ using Variables.RealmsInfo;
 
 internal class UserPositionMarker : IDisposable
 {
-    static readonly Color SAME_REALM_COLOR = new Color(255, 18, 98);
+    static readonly Color SAME_REALM_COLOR = new Color(1, 0.07f, 0.38f);
     static readonly Color OTHER_REALM_COLOR = Color.blue;
 
     public Vector2Int coords { set; get; }
@@ -45,7 +45,7 @@ internal class UserPositionMarker : IDisposable
 
     private void OnRealmChanged(CurrentRealmModel current, CurrentRealmModel prev)
     {
-        SetColor(current.Equals(realmServer, realmLayer) ? SAME_REALM_COLOR : OTHER_REALM_COLOR);
+        SetColor(current.Equals(realmServer, realmLayer) ? markerObject.sameRealmColor : markerObject.otherRealmColor);
     }
 
     private void SetColor(Color color)

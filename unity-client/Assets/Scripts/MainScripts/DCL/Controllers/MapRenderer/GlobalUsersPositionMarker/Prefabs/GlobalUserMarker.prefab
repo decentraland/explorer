@@ -160,7 +160,7 @@ GameObject:
   - component: {fileID: 8098144934014490349}
   - component: {fileID: 5313837265398941890}
   m_Layer: 5
-  m_Name: UserMarker
+  m_Name: GlobalUserMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -199,3 +199,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colorImage: {fileID: 6232952214765234628}
+  sameRealmColor: {r: 1, g: 0.07058824, b: 0.38431373, a: 1}
+  otherRealmColor: {r: 0, g: 0.6392157, b: 1, a: 1}
