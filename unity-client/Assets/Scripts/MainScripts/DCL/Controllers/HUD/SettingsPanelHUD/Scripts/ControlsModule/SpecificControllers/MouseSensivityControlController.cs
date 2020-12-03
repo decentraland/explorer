@@ -23,13 +23,14 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentGeneralSettings.mouseSensitivity = RemapMouseSensitivityTo01((float)newValue);
-
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
         }
 
         private float RemapMouseSensitivityTo01(float value)
         {
-            return (value - mouseSensitivitySlider.minValue) / (mouseSensitivitySlider.maxValue - mouseSensitivitySlider.minValue) * (1 - 0) + 0; //(value - from1) / (to1 - from1) * (to2 - from2) + from2
+            return (value - mouseSensitivitySlider.minValue)
+                / (mouseSensitivitySlider.maxValue - mouseSensitivitySlider.minValue)
+                * (1 - 0) + 0; //(value - from1) / (to1 - from1) * (to2 - from2) + from2
         }
     }
 }

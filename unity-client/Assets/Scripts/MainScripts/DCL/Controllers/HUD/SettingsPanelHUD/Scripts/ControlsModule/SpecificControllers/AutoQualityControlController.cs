@@ -12,10 +12,13 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            //autoqualityBlockCanvasGroup.interactable = !(bool)newValue;
-            currentGeneralSettings.autoqualityOn = (bool)newValue;
-            //autoqualityBlocker.SetActive((bool)newValue);
-            if ((bool)newValue)
+            bool autoQualityValue = (bool)newValue;
+
+            //autoqualityBlockCanvasGroup.interactable = !autoQualityValue;
+            currentGeneralSettings.autoqualityOn = autoQualityValue;
+            //autoqualityBlocker.SetActive(autoQualityValue);
+
+            if (autoQualityValue)
             {
                 SettingsData.QualitySettings.BaseResolution currentBaseResolution = currentQualitySetting.baseResolution;
                 bool currentFpsCap = currentQualitySetting.fpsCap;

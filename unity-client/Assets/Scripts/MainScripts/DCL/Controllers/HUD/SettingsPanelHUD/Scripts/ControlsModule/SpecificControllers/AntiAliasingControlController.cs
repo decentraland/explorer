@@ -24,6 +24,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             int antiAliasingValue = 1 << (int)newFloatValue;
             currentQualitySetting.antiAliasing = (UnityEngine.Rendering.Universal.MsaaQuality)antiAliasingValue;
+
             if (newFloatValue == 0)
             {
                 ((SliderSettingsControlView)view).OverrideIndicatorLabel(TEXT_OFF);

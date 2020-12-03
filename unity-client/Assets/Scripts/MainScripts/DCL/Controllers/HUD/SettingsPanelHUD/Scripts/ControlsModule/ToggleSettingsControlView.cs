@@ -7,7 +7,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private Toggle toggle;
 
-        public Toggle spinBoxControl { get => toggle; }
+        public Toggle toggleControl { get => toggle; }
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {

@@ -13,7 +13,6 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentGeneralSettings.sfxVolume = (bool)newValue ? 1 : 0;
-
             Settings.i.ApplyGeneralSettings(currentGeneralSettings);
         }
     }
