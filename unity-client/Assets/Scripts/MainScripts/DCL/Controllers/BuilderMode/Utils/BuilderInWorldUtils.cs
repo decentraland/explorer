@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using DCL.Configuration;
+using static ProtocolV2;
 
 public static partial class BuilderInWorldUtils
 {
@@ -27,6 +28,17 @@ public static partial class BuilderInWorldUtils
         floorSceneObject.metrics = new SceneObject.ObjectMetrics();
 
         return floorSceneObject;
+    }
+
+    public static Dictionary<string,string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
+    {
+        Dictionary<string, string> mappingDict = new Dictionary<string, string>();
+
+        foreach(ContentServerUtils.MappingPair mappingPair in contents)
+        {
+            mappingDict.Add(mappingPair.file, mappingPair.hash);
+        }
+        return mappingDict;
     }
 
     public static void DrawScreenRect(Rect rect, Color color)
@@ -149,12 +161,28 @@ public static partial class BuilderInWorldUtils
 
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
         {
-            ProtocolV2.GenericComponent entityComponentModel = new ProtocolV2.GenericComponent();
-            entityComponentModel.componentId = keyValuePair.Value.GetClassId();
-            entityComponentModel.data = keyValuePair.Value.GetModel();
-            entityComponentModel.classId = keyValuePair.Value.id;
+            if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
+            {
+                EntityData.NFTComponent nFTComponent = new EntityData.NFTComponent();
+                NFTShape.Model model = (NFTShape.Model)keyValuePair.Value.GetModel();
 
-            builderInWorldEntityData.sharedComponents.Add(entityComponentModel);
+                nFTComponent.id = keyValuePair.Value.id;
+                nFTComponent.color = new ColorRepresentation(model.color);
+                nFTComponent.assetId = model.assetId;
+                nFTComponent.src = model.src;
+                nFTComponent.style = model.style;
+
+                builderInWorldEntityData.nFTComponent = nFTComponent;
+            }
+            else
+            {
+                ProtocolV2.GenericComponent entityComponentModel = new ProtocolV2.GenericComponent();
+                entityComponentModel.componentId = keyValuePair.Value.GetClassId();
+                entityComponentModel.data = keyValuePair.Value.GetModel();
+                entityComponentModel.classId = keyValuePair.Value.id;
+
+                builderInWorldEntityData.sharedComponents.Add(entityComponentModel);
+            }
         }
 
 

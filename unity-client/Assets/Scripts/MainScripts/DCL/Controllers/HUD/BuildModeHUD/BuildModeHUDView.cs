@@ -104,6 +104,16 @@ public class BuildModeHUDView : MonoBehaviour
         toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
     }
 
+    public void RefreshCatalogAssetPack()
+    {
+        sceneObjectCatalogController.RefreshAssetPack();
+    }
+
+    public void RefreshCatalogContent()
+    {
+        sceneObjectCatalogController.RefreshCatalog();
+    }
+
     public void SetVisibilityOfCatalog(bool isVisible)
     {
         if (isVisible)

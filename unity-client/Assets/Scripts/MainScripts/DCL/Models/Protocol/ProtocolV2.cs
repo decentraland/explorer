@@ -3,9 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ProtocolV2 
+public class ProtocolV2
 {
     #region Class Declarations
+
+    [System.Serializable]
+    public class ColorRepresentation
+    {
+        public float r;
+        public float g;
+        public float b;
+        public float a;
+
+        public ColorRepresentation(Color color)
+        {
+
+            r = color.r;
+            g = color.g;
+            b = color.b;
+            a = color.a;
+        }
+
+        public Color ToColor()
+        {
+            return new Color(r,g,b,a);
+        }
+    }
+
 
     [System.Serializable]
     public class QuaternionRepresentation
@@ -36,7 +60,7 @@ public class ProtocolV2
     }
 
     [System.Serializable]
-    public class TransformComponent
+    public class TransformComponent 
     {
         public Vector3 position;
 
@@ -44,6 +68,15 @@ public class ProtocolV2
 
         public Vector3 scale;
 
+    }
+
+    [System.Serializable]
+    public class NFTComponent 
+    {
+        public string src;
+        public string assetId;
+        public ColorRepresentation color; 
+        public int style = 0;
     }
 
     #endregion

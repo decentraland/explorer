@@ -36,6 +36,12 @@ namespace DCL.Configuration
 
         public const string FLOOR_TEXTURE_KEY = "FloorBaseGrass_01/Floor_Grass01.png.png";
         public const string FLOOR_TEXTURE_VALUE = "QmT1WfQPMBVhgwyxV5SfcfWivZ6hqMCT74nxdKXwyZBiXb";
+
+
+        //Collectables
+        public const string ASSETS_COLLECTIBLES = "Collectibles";
+        public const string COLLECTIBE_MODEL_PROTOCOL = "ethereum://";
+    
     }
 
     public static class ApplicationSettings

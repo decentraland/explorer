@@ -88,6 +88,16 @@ public class BuildModeHUDController : IHUD
 
     #region Catalog
 
+    public void RefreshCatalogAssetPack()
+    {
+        view.RefreshCatalogAssetPack();
+    }
+
+
+    public void RefreshCatalogContent()
+    {
+        view.RefreshCatalogContent();
+    }
 
     void SceneObjectSelected(SceneObject sceneObject)
     {

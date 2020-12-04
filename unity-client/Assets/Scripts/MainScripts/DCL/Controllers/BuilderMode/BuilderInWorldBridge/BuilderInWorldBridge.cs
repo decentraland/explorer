@@ -89,7 +89,24 @@ public class BuilderInWorldBridge : MonoBehaviour
             ComponentPayload componentPayLoad = new ComponentPayload();
 
             componentPayLoad.componentId = keyValuePairBaseDisposable.Value.GetClassId();
-            componentPayLoad.data = keyValuePairBaseDisposable.Value.GetModel();
+
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
+            {
+                NFTComponent nFTComponent = new NFTComponent();
+                NFTShape.Model model = (NFTShape.Model) keyValuePairBaseDisposable.Value.GetModel();
+
+                nFTComponent.color = new ColorRepresentation(model.color);
+                nFTComponent.assetId = model.assetId;
+                nFTComponent.src = model.src;
+                nFTComponent.style = model.style;
+
+                componentPayLoad.data = nFTComponent;
+            }
+            else
+            {     
+                componentPayLoad.data = keyValuePairBaseDisposable.Value.GetModel();
+            }
+
 
             list.Add(componentPayLoad);
         }
@@ -117,12 +134,7 @@ public class BuilderInWorldBridge : MonoBehaviour
 
 
         //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
-    
-        string message = JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
-        {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        });
-
+        string message = JsonConvert.SerializeObject(sceneEvent);
 
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
@@ -166,11 +178,8 @@ public class BuilderInWorldBridge : MonoBehaviour
         sceneEvent.payload = addEntityEvent;
 
 
-        //Note (Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
-        string message = Newtonsoft.Json.JsonConvert.SerializeObject(sceneEvent, Formatting.None, new JsonSerializerSettings
-        {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        });
+        //Note(Adrian): We use Newtonsoft instead of JsonUtility because we need to deal with super classes, JsonUtility doesn't encode them
+        string message = JsonConvert.SerializeObject(sceneEvent);
 
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }

@@ -492,6 +492,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
         {
             editionGO.transform.position = hit.point;
+            if (selectedEntities[0].isNFT) editionGO.transform.position += Vector3.up * 2f;
         }
     }
 

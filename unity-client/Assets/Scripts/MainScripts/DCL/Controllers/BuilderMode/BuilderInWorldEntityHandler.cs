@@ -43,6 +43,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     float nextTimeToUpdateTransform = 0;
 
+    List<string> entityNameList = new List<string>();
+
     private void OnDestroy()
     {
         DestroyCollidersForAllEntities();
@@ -414,6 +416,18 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             sceneToEdit.SharedComponentAttach(newEntity.entityId, component.classId);
         }
 
+
+        if (data.nFTComponent != null)
+        {
+            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(data.nFTComponent.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
+            nftShape.model = new NFTShape.Model();
+            nftShape.model.color = data.nFTComponent.color.ToColor();
+            nftShape.model.src = data.nFTComponent.src;
+            nftShape.model.assetId = data.nFTComponent.assetId;
+
+            sceneToEdit.SharedComponentAttach(newEntity.entityId, nftShape.id);
+        }
+
         SetupEntityToEdit(newEntity, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
@@ -492,12 +506,38 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             convertedEntities.Add(entityToEdit.entityUniqueId, entityToEdit);
             entity.OnRemoved += RemoveConvertedEntity;
             entityToEdit.IsNew = hasBeenCreated;
+
+            string entityName = entityToEdit.GetDescriptiveName();
+            if (!string.IsNullOrEmpty(entityName))
+                entityNameList.Add(entityName);
+
             return entityToEdit;
         }
         else
         {
             return convertedEntities[GetConvertedUniqueKeyForEntity(entity)];
         }
+    }
+
+    public string GetNewNameForEntity(SceneObject sceneObject)
+    {
+        int i = 1;
+        string name = sceneObject.name;
+        if (!entityNameList.Contains(name))
+        {
+            entityNameList.Add(name);
+            return name;
+        }
+
+        string newName = name + " " + i;
+        while (entityNameList.Contains(newName))
+        {
+            i++;
+            newName = name + " " + i;
+        }
+
+        entityNameList.Add(newName);
+        return newName;
     }
 
     public void DeleteFloorEntities()
@@ -540,6 +580,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         Destroy(entityToDelete);
         sceneToEdit.RemoveEntity(idToRemove, true);
         HUDController.i.buildModeHud.UpdateSceneLimitInfo();
+        HUDController.i.buildModeHud.RefreshCatalogAssetPack();
         EntityListChanged();
         builderInWorldBridge.RemoveEntityOnKernel(idToRemove, sceneToEdit);
     }

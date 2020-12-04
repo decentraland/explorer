@@ -128,6 +128,6 @@ public class AssetCatalogBridge : MonoBehaviour
             Debug.Log("add sceneObject: " + payload);
 
 
-        sceneAssetPackCatalogValue.Add(sceneAssetPack.id, sceneAssetPack);
+        sceneAssetPackCatalog.Add(sceneAssetPack.id, sceneAssetPack);
     }
 }

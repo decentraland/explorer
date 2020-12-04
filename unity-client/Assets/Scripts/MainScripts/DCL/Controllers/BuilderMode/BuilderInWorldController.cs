@@ -5,6 +5,7 @@ using DCL.Components;
 using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Helpers.NFT;
 using DCL.Interface;
 using DCL.Models;
 using DCL.Tutorial;
@@ -121,6 +122,7 @@ public class BuilderInWorldController : MonoBehaviour
     EditModeState currentEditModeState = EditModeState.Inactive;
 
     bool catalogAdded = false;
+    bool sceneReady = false;
 
     void Start()
     {
@@ -178,6 +180,7 @@ public class BuilderInWorldController : MonoBehaviour
         HUDController.i.buildModeHud.OnSceneObjectSelected += OnSceneObjectSelected;
         HUDController.i.buildModeHud.OnTutorialAction += StartTutorial;
         HUDController.i.buildModeHud.OnPublishAction += PublishScene;
+        BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
 
         builderInputWrapper.OnMouseClick += MouseClick;
 
@@ -188,9 +191,9 @@ public class BuilderInWorldController : MonoBehaviour
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
 
-        AssetCatalogBridge.sceneAssetPackCatalog.GetValues();
-        ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
 
+        ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+        BuilderInWorldNFTController.i.Start();
     }
 
     private void OnDestroy()
@@ -226,6 +229,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         firstPersonMode.OnActionGenerated -= actionController.AddAction;
         editorMode.OnActionGenerated -= actionController.AddAction;
+        BuilderInWorldNFTController.i.OnNFTUsageChange -= OnNFTUsageChange;
 
     }
 
@@ -254,10 +258,18 @@ public class BuilderInWorldController : MonoBehaviour
 
     }
 
+    void OnNFTUsageChange()
+    {
+        HUDController.i.buildModeHud.RefreshCatalogAssetPack();
+        HUDController.i.buildModeHud.RefreshCatalogContent();
+    }
+
     void CatalogReceived(string catalogJson)
     {
         AssetCatalogBridge.i.AddFullSceneObjectCatalog(catalogJson);
         catalogAdded = true;
+        HUDController.i.buildModeHud.RefreshCatalogContent();
+        CheckEnterEditMode();
     }
 
     void StopInput()
@@ -370,7 +382,7 @@ public class BuilderInWorldController : MonoBehaviour
     DCLBuilderInWorldEntity CreateSceneObject(SceneObject sceneObject, bool autoSelect = true, bool isFloor = false)
     {      
         if (!IsInsideTheLimits(sceneObject)) return null;
-
+        if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES && BuilderInWorldNFTController.i.IsNFTInUse(sceneObject.id)) return null;
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
@@ -394,20 +406,35 @@ public class BuilderInWorldController : MonoBehaviour
                 data.contents.Add(mappingPair);
         }
         SceneController.i.UpdateParcelScenesExecute(data);
-
-        GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
-        mesh.model = new LoadableShape.Model();
-        mesh.model.src = sceneObject.model;
-
+   
         DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));     
 
 
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
         entity.isFloor = isFloor;
 
-        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
-        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
-        name.SetNewName(sceneObject.name);
+        if(sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES)
+        {
+            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
+            nftShape.model = new NFTShape.Model();
+            nftShape.model.color = new Color(0.6404918f, 0.611472f, 0.8584906f);
+            nftShape.model.src = sceneObject.model;
+            nftShape.model.assetId = sceneObject.id;
+
+            sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, nftShape.id);
+        }
+        else
+        {
+            GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
+            mesh.model = new LoadableShape.Model();
+            mesh.model.src = sceneObject.model;
+            mesh.model.assetId = sceneObject.id;
+            sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
+        }
+
+ 
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);      
+        name.SetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
 
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
@@ -688,7 +715,13 @@ public class BuilderInWorldController : MonoBehaviour
         if (sceneToEditId != id) return;
         SceneController.i.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
-        EnterEditMode();
+        sceneReady = true;
+        CheckEnterEditMode();
+    }
+
+    void CheckEnterEditMode()
+    {
+        if (catalogAdded && sceneReady) EnterEditMode();
     }
 
     public void StartEnterEditMode()
@@ -705,7 +738,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void EnterEditMode()
     {
-
+        BuilderInWorldNFTController.i.ClearNFTs();
         HUDController.i.buildModeHud.SetVisibility(true);
 
         isEditModeActivated = true;
@@ -714,8 +747,6 @@ public class BuilderInWorldController : MonoBehaviour
         inputController.isBuildModeActivate = true;
 
         FindSceneToEdit();
-
-
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
@@ -731,13 +762,13 @@ public class BuilderInWorldController : MonoBehaviour
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
         SceneController.i.ActivateBuilderInWorldEditScene();
+        HUDController.i.buildModeHud.RefreshCatalogContent();
+        HUDController.i.buildModeHud.RefreshCatalogAssetPack();
 
         ActivateBuilderInWorldCamera();
-
         if (IsNewScene())
             SetupNewScene();
     }
-
 
     public void ExitEditMode()
     {
@@ -763,7 +794,7 @@ public class BuilderInWorldController : MonoBehaviour
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
-
+  
         HUDController.i.buildModeHud.ClearEntityList();
 
         SceneController.i.DeactivateBuilderInWorldEditScene();
@@ -827,8 +858,11 @@ public class BuilderInWorldController : MonoBehaviour
     public void DeactivateBuilderInWorldCamera()
     {
         DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
-        outliner.enabled = false;
-        outliner.Deactivate();
+        if (outliner != null)
+        {
+            outliner.enabled = false;
+            outliner.Deactivate();
+        }
 
         UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(0);
@@ -852,6 +886,7 @@ public class BuilderInWorldController : MonoBehaviour
             }
         }
     }
+
     void PublishScene()
     {
         builderInWorldBridge.PublishScene(sceneToEdit);
