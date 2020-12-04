@@ -38,6 +38,9 @@ import { unityInterface } from 'unity-interface/UnityInterface'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { userAuthentified } from 'shared/session'
+import { sceneObservable } from 'shared/world/positionThings'
+import { SceneFeatureToggles } from 'shared/types'
+import { isFeatureToggleEnabled } from 'shared/selectors'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -57,7 +60,15 @@ export function* commsSaga() {
     yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
     yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
     yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
+    yield listenToWhetherSceneSupportsVoiceChat()
   }
+}
+
+function* listenToWhetherSceneSupportsVoiceChat() {
+  sceneObservable.add((land) => {
+    const enabled = isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, land.sceneJsonData)
+    unityInterface.SetVoiceChatEnabledByScene(enabled)
+  })
 }
 
 function* establishCommunications() {

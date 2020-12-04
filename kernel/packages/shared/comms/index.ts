@@ -8,7 +8,7 @@ import {
 } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
-import { ChatMessage as InternalChatMessage, ChatMessageType, FeatureToggles } from 'shared/types'
+import { ChatMessage as InternalChatMessage, ChatMessageType, SceneFeatureToggles } from 'shared/types'
 import { positionObservable, PositionReport, lastPlayerPosition, lastPlayerScene } from 'shared/world/positionThings'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
@@ -104,6 +104,7 @@ import { VoicePolicy } from './types'
 import { isFriend } from 'shared/friends/selectors'
 import { EncodedFrame } from 'voice-chat-codec/types'
 import Html from 'shared/Html'
+import { isFeatureToggleEnabled } from 'shared/selectors'
 
 export type CommsVersion = 'v1' | 'v2'
 export type CommsMode = CommsV1Mode | CommsV2Mode
@@ -279,6 +280,7 @@ export function updateVoiceRecordingStatus(recording: boolean) {
   }
 
   if (!isVoiceChatAllowedByCurrentScene()) {
+    voiceCommunicator.pause()
     return
   }
 
@@ -511,9 +513,7 @@ function isVoiceAllowedByPolicy(profile: Profile, voiceUserId: string): boolean 
 }
 
 function isVoiceChatAllowedByCurrentScene() {
-  const featureToggles = lastPlayerScene?.sceneJsonData?.featureToggles
-  const disabled = featureToggles && featureToggles[FeatureToggles.VOICE_CHAT] === 'disabled'
-  return !disabled
+  return isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, lastPlayerScene?.sceneJsonData)
 }
 
 const TIME_BETWEEN_PROFILE_RESPONSES = 1000
