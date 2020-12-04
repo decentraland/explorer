@@ -16,6 +16,7 @@ MonoBehaviour:
   controlPrefab: {fileID: 3856968550380144319, guid: 12ace77c1b449714b89d5793ef36f983,
     type: 3}
   controlController: {fileID: 11400000, guid: b5ed3d323bb00cf41855795cbedec5c0, type: 2}
+  flagsThatDeactivateMe: []
   spinBoxLabels:
   - Match 720p
   - Match 1080p
