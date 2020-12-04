@@ -94,6 +94,8 @@ namespace DCL.Tutorial
         private Coroutine teacherMovementCoroutine;
         private Coroutine eagleEyeRotationCoroutine;
 
+        private int tutorialLayerMask = LayerMask.GetMask("Tutorial");
+
         private void Awake()
         {
             i = this;
@@ -157,6 +159,8 @@ namespace DCL.Tutorial
 
             WebInterface.SetDelightedSurveyEnabled(false);
 
+            ModifyCullingSettings();
+
             if (!CommonScriptableObjects.rendererState.Get())
                 CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
             else
@@ -197,6 +201,8 @@ namespace DCL.Tutorial
             hudController?.taskbarHud?.ShowTutorialOption(true);
 
             CommonScriptableObjects.tutorialActive.Set(false);
+
+            RestoreCullingSettings();
 
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         }
@@ -555,6 +561,20 @@ namespace DCL.Tutorial
                 hudController?.minimapHud?.SetVisibility(true);
                 hudController?.profileHud?.SetVisibility(true);
             }
+        }
+
+        private void ModifyCullingSettings()
+        {
+            var cullingSettings = Environment.i.cullingController.GetSettingsCopy();
+            cullingSettings.ignoredLayersMask |= tutorialLayerMask;
+            Environment.i.cullingController.SetSettings(cullingSettings);
+        }
+
+        private void RestoreCullingSettings()
+        {
+            var cullingSettings = Environment.i.cullingController.GetSettingsCopy();
+            cullingSettings.ignoredLayersMask &= ~tutorialLayerMask;
+            Environment.i.cullingController.SetSettings(cullingSettings);
         }
     }
 }
