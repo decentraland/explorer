@@ -16,6 +16,7 @@ namespace DCL.SettingsPanelHUD.Controls
         [SerializeField] private TextMeshProUGUI title;
 
         protected SettingsControlController settingsControlController;
+        protected bool skipPostApplySettings = false;
 
         private SettingsControlModel controlConfig;
 
@@ -54,10 +55,13 @@ namespace DCL.SettingsPanelHUD.Controls
             SetEnabled(!current);
         }
 
-        private void RefreshAllSettings_OnChange(bool current, bool previous)
+        private void RefreshAllSettings_OnChange(SettingsControlController currentSender, SettingsControlController previousSender)
         {
-            if (current)
+            if (currentSender != settingsControlController)
+            {
+                skipPostApplySettings = true;
                 RefreshControl();
+            }
         }
     }
 }

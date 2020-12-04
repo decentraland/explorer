@@ -21,7 +21,10 @@ namespace DCL.SettingsPanelHUD.Controls
             {
                 settingsControlController.OnControlChanged(isOn);
                 settingsControlController.ApplySettings();
-                settingsControlController.PostApplySettings();
+
+                if (!skipPostApplySettings)
+                    settingsControlController.PostApplySettings();
+                skipPostApplySettings = false;
             });
         }
 
@@ -33,7 +36,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void RefreshControl()
         {
-            toggle.isOn = (bool)settingsControlController.GetStoredValue();
+            bool newValue = (bool)settingsControlController.GetStoredValue();
+            if (toggle.isOn != newValue)
+                toggle.isOn = newValue;
+            else
+                skipPostApplySettings = false;
         }
     }
 }

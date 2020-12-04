@@ -22,7 +22,9 @@ namespace DCL.SettingsPanelHUD.Controls
             {
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
-                settingsControlController.PostApplySettings();
+                if (!skipPostApplySettings)
+                    settingsControlController.PostApplySettings();
+                skipPostApplySettings = false;
             });
         }
 
@@ -34,7 +36,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void RefreshControl()
         {
-            spinBox.value = (int)settingsControlController.GetStoredValue();
+            int newValue = (int)settingsControlController.GetStoredValue();
+            if (spinBox.value != newValue)
+                spinBox.value = newValue;
+            else
+                skipPostApplySettings = false;
         }
 
         public void SetLabels(string[] labels)

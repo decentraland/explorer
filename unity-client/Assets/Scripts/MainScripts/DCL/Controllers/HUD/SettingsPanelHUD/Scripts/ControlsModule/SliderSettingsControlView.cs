@@ -29,7 +29,9 @@ namespace DCL.SettingsPanelHUD.Controls
                 indicatorLabel.text = sliderValue.ToString();
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
-                settingsControlController.PostApplySettings();
+                if (!skipPostApplySettings)
+                    settingsControlController.PostApplySettings();
+                skipPostApplySettings = false;
             });
         }
 
@@ -46,7 +48,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void RefreshControl()
         {
-            slider.value = (float)settingsControlController.GetStoredValue();
+            float newValue = (float)settingsControlController.GetStoredValue();
+            if (slider.value != newValue)
+                slider.value = newValue;
+            else
+                skipPostApplySettings = false;
         }
     }
 }
