@@ -7,6 +7,8 @@ namespace DCL.SettingsPanelHUD
 {
     public class SettingsPanelHUDView : MonoBehaviour
     {
+        [SerializeField] private GameObject mainWindow;
+
         [Header("Sections configuration")]
         [SerializeField] private SettingsPanelModel settingsPanelConfig;
         [SerializeField] private Transform menuButtonsContainer;
@@ -38,16 +40,26 @@ namespace DCL.SettingsPanelHUD
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
 
+            closeButton.onClick.AddListener(() => CloseSettingsPanel());
+            settingsAnimator.OnWillFinishHide += OnFinishHide;
+
             CreateSections();
             isOpen = !settingsAnimator.hideOnEnable;
-
-            closeButton.onClick.AddListener(() => CloseSettingsPanel());
+            settingsAnimator.Hide(true);
         }
 
         public void Initialize(IHUD hudController, ISettingsPanelHUDController settingsPanelController, SettingsSectionList sections)
         {
             settingsPanelConfig.sections = sections;
             Initialize(hudController, settingsPanelController);
+        }
+
+        private void OnDestroy()
+        {
+            if (settingsAnimator)
+            {
+                settingsAnimator.OnWillFinishHide -= OnFinishHide;
+            }
         }
 
         private void CreateSections()
@@ -82,6 +94,7 @@ namespace DCL.SettingsPanelHUD
             {
                 closeAction.OnTriggered += CloseAction_OnTriggered;
                 settingsAnimator.Show();
+                mainWindow.SetActive(true);
             }
             else
             {
@@ -94,6 +107,11 @@ namespace DCL.SettingsPanelHUD
         private void CloseAction_OnTriggered(DCLAction_Trigger action)
         {
             CloseSettingsPanel();
+        }
+
+        private void OnFinishHide(ShowHideAnimator animator)
+        {
+            mainWindow.SetActive(false);
         }
     }
 }

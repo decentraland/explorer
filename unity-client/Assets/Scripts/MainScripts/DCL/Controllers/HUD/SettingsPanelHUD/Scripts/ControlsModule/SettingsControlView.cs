@@ -20,6 +20,14 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private SettingsControlModel controlConfig;
 
+        private void OnEnable()
+        {
+            if (settingsControlController == null)
+                return;
+
+            RefreshControl();
+        }
+
         public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             this.controlConfig = controlConfig;

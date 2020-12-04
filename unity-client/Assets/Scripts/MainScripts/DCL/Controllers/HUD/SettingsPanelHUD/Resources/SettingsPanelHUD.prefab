@@ -163,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f27ff56bbf7894194c841a7aa0b7c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainWindow: {fileID: 6427667917139519006}
   settingsPanelConfig: {fileID: 11400000, guid: 77afbe2ee614dd0409f741261246c6d1,
     type: 2}
   menuButtonsContainer: {fileID: 3164546539369866496}
@@ -469,7 +470,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8625736755376044189}
   m_HandleRect: {fileID: 6429412650772352685}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
