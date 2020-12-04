@@ -8,8 +8,8 @@ import {
 } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
-import { ChatMessage as InternalChatMessage, ChatMessageType } from 'shared/types'
-import { positionObservable, PositionReport, lastPlayerPosition } from 'shared/world/positionThings'
+import { ChatMessage as InternalChatMessage, ChatMessageType, FeatureToggles } from 'shared/types'
+import { positionObservable, PositionReport, lastPlayerPosition, lastPlayerScene } from 'shared/world/positionThings'
 import { ProfileAsPromise } from '../profiles/ProfileAsPromise'
 import { notifyStatusThroughChat } from './chat'
 import { CliBrokerConnection } from './CliBrokerConnection'
@@ -278,6 +278,10 @@ export function updateVoiceRecordingStatus(recording: boolean) {
     return
   }
 
+  if (!isVoiceChatAllowedByCurrentScene()) {
+    return
+  }
+
   if (!recording) {
     voiceCommunicator.pause()
     return
@@ -487,7 +491,8 @@ function shouldPlayVoice(profile: Profile, voiceUserId: string) {
     isVoiceAllowedByPolicy(profile, voiceUserId) &&
     !isBlocked(profile, voiceUserId) &&
     !isMuted(profile, voiceUserId) &&
-    !hasBlockedMe(myAddress, voiceUserId)
+    !hasBlockedMe(myAddress, voiceUserId) &&
+    isVoiceChatAllowedByCurrentScene()
   )
 }
 
@@ -503,6 +508,12 @@ function isVoiceAllowedByPolicy(profile: Profile, voiceUserId: string): boolean 
     default:
       return true
   }
+}
+
+function isVoiceChatAllowedByCurrentScene() {
+  const featureToggles = lastPlayerScene?.sceneJsonData?.featureToggles
+  const disabled = featureToggles && featureToggles[FeatureToggles.VOICE_CHAT] === 'disabled'
+  return !disabled
 }
 
 const TIME_BETWEEN_PROFILE_RESPONSES = 1000

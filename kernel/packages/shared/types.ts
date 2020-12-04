@@ -211,6 +211,11 @@ export type SceneJsonData = {
   source?: SceneSource
   spawnPoints?: SceneSpawnPoint[]
   requiredPermissions?: string[] | undefined
+  featureToggles?: { [key: string]: 'enabled' | 'disabled' }
+}
+
+export enum FeatureToggles {
+  VOICE_CHAT = 'voice-chat'
 }
 
 export type EnvironmentData<T> = {

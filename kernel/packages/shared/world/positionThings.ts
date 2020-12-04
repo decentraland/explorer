@@ -8,6 +8,8 @@ import {
   ReadOnlyVector2
 } from 'decentraland-ecs/src/decentraland/math'
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
+import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
+import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
 
@@ -26,45 +28,74 @@ export type PositionReport = {
   /** Should this position be applied immediately */
   immediate: boolean
 }
+export type ParcelReport = {
+  /** Parcel where the user is */
+  parcel: ReadOnlyVector2
+  /** Should this position be applied immediately */
+  immediate: boolean
+}
 
+// Agregar un scene observable???
 export const positionObservable = new Observable<Readonly<PositionReport>>()
+// Called each time the user changes  parcel
+export const parcelObservable = new Observable<ParcelReport>()
+// Called each time the user changes scene
+export const sceneObservable = new Observable<ILand>()
 
 export const teleportObservable = new Observable<ReadOnlyVector2>()
 
 export const lastPlayerPosition = new Vector3()
+export const lastPlayerParcel = new Vector2()
+export let lastPlayerScene: ILand
 
-positionObservable.add(event => {
+positionObservable.add((event) => {
   lastPlayerPosition.copyFrom(event.position)
+})
+
+// Listen to position changes, and notify if the parcel changed
+positionObservable.add(({ position, immediate }) => {
+  const parcel = Vector2.Zero()
+  worldToGrid(position, parcel)
+  if (parcel.x !== lastPlayerParcel.x || parcel.y !== lastPlayerParcel.y) {
+    lastPlayerParcel.copyFrom(parcel)
+    parcelObservable.notifyObservers({ parcel, immediate })
+  }
+})
+
+// Listen to parcel changes, and notify if the scene changed
+parcelObservable.add(async ({ parcel }) => {
+  const parcelString = `${parcel.x},${parcel.x}`
+  if (!lastPlayerScene || !lastPlayerScene.sceneJsonData.scene.parcels.includes(parcelString)) {
+    const scenesId = await fetchSceneIds([parcelString])
+    const sceneId = scenesId[0]
+    if (sceneId) {
+      const land = (await fetchSceneJson([sceneId]))[0]
+      lastPlayerScene = land
+      sceneObservable.notifyObservers(land)
+    }
+  }
 })
 
 export function initializeUrlPositionObserver() {
   let lastTime: number = performance.now()
 
-  let previousPosition: string | null = null
-  const gridPosition = Vector2.Zero()
-
-  function updateUrlPosition(cameraVector: ReadOnlyVector3) {
+  function updateUrlPosition(newParcel: ReadOnlyVector2) {
     // Update position in URI every second
     if (performance.now() - lastTime > 1000) {
-      worldToGrid(cameraVector, gridPosition)
-      const currentPosition = `${gridPosition.x | 0},${gridPosition.y | 0}`
+      const currentPosition = `${newParcel.x | 0},${newParcel.y | 0}`
+      const stateObj = { position: currentPosition }
 
-      if (previousPosition !== currentPosition) {
-        const stateObj = { position: currentPosition }
-        previousPosition = currentPosition
+      const q = qs.parse(location.search)
+      q.position = currentPosition
 
-        const q = qs.parse(location.search)
-        q.position = currentPosition
-
-        history.replaceState(stateObj, 'position', `?${qs.stringify(q)}`)
-      }
+      history.replaceState(stateObj, 'position', `?${qs.stringify(q)}`)
 
       lastTime = performance.now()
     }
   }
 
-  positionObservable.add(event => {
-    updateUrlPosition(event.position)
+  parcelObservable.add(({ parcel }) => {
+    updateUrlPosition(parcel)
   })
 
   if (lastPlayerPosition.equalsToFloats(0, 0, 0)) {
@@ -114,7 +145,7 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   }
 
   // 1 - default spawn points
-  const defaults = land.sceneJsonData.spawnPoints.filter($ => $.default)
+  const defaults = land.sceneJsonData.spawnPoints.filter(($) => $.default)
 
   // 2 - if no default spawn points => all existing spawn points
   const eligiblePoints = defaults.length === 0 ? land.sceneJsonData.spawnPoints : defaults
