@@ -191,78 +191,7 @@ namespace DCL.Interface
         public class SendChatMessageEvent
         {
             public ChatMessage message;
-        }
-
-        [System.Serializable]
-        public class AddEntityEvent
-        {
-            public string type = "AddEntity";
-            public AddEntityPayLoad payload;
-
-
-        };
-        [System.Serializable]
-        public class AddEntityPayLoad
-        {
-            public string entityId;
-            public EntityComponentModel[] components;
-
-
-        };
-
-        [System.Serializable]
-        public class EntityComponentModel
-        {
-            public int id;
-            public string data;
-        };
-
-        [System.Serializable]
-        public class EntityModifyComponentModel
-        {
-            public int componentId;
-            public string componentData;
-        };
-
-        [System.Serializable]
-        public class RemoveEntityEvent
-        {
-            public string type = "RemoveEntity";
-            public RemoveEntityPayLoad payload;
-
-
-        };
-
-        [System.Serializable]
-        public class RemoveEntityPayLoad
-        {
-            public string entityId;
-        };
-
-        [System.Serializable]
-        public class ModifyEntityComponentsEvent
-        {
-            public string type = "SetComponent";
-            public ModifyEntityComponentsPayLoad payload;
-
-
-        };
-
-        [System.Serializable]
-        public class ModifyEntityComponentsPayLoad
-        {
-            public string entityId;
-            public Component[] components;
-        };
-
-        [System.Serializable]
-        public class RemoveEntityComponentsEvent
-        {
-            public string type = "RemoveComponent";
-            public RemoveEntityComponentsPayLoad payload;
-
-
-        };
+        }     
 
         [System.Serializable]
         public class RemoveEntityComponentsPayLoad
@@ -608,6 +537,12 @@ namespace DCL.Interface
             public bool isSignUpFlow;
         }
 
+        [System.Serializable]
+        public class StringPayload
+        {
+            public string value;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -686,6 +621,7 @@ namespace DCL.Interface
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
         private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
+        private static StringPayload stringPayload = new StringPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -711,34 +647,11 @@ namespace DCL.Interface
             SendMessage("ControlEvent", controlEvent);
         }
 
-        public static void AddEntity(string sceneId, string entityId, EntityComponentModel[] components)
+        public static void BuilderInWorldMessage(string type, string message)
         {
-            AddEntityEvent addEntityEvent = new AddEntityEvent();
-            AddEntityPayLoad addEntityPayLoad = new AddEntityPayLoad();
-            addEntityPayLoad.entityId = entityId;
-            addEntityPayLoad.components = components;
-
-            addEntityEvent.payload = addEntityPayLoad;
-            VERBOSE = true;
-            SendSceneEvent(sceneId, "stateEvent", addEntityEvent);
-            VERBOSE = false;
-        }
-        public static void RemoveEntity(string sceneId, string entityId)
-        {
-            RemoveEntityEvent removeEntityEvent = new RemoveEntityEvent();
-            RemoveEntityPayLoad removeEntityPayLoad = new RemoveEntityPayLoad();
-            removeEntityPayLoad.entityId = entityId;
-            removeEntityEvent.payload = removeEntityPayLoad;
-
-            VERBOSE = true;
-            SendSceneEvent(sceneId, "stateEvent", removeEntityEvent);
-            VERBOSE = false;
+            MessageFromEngine(type, message);
         }
 
-        public static void ReportStoreSceneState(string sceneId)
-        {
-            SendSceneEvent(sceneId, "stateEvent", storeSceneState);
-        }
         public static void ReportOnClickEvent(string sceneId, string uuid)
         {
             if (string.IsNullOrEmpty(uuid))
@@ -1143,6 +1056,12 @@ namespace DCL.Interface
             gifSetupPayload.isWebGL1 = isWebGL1;
 
             SendMessage("RequestGIFProcessor", gifSetupPayload);
+        }
+
+        public static void DeleteGIF(string id)
+        {
+            stringPayload.value = id;
+            SendMessage("DeleteGIF", stringPayload);
         }
 
         public static void GoTo(int x, int y)

@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class DCLCharacterController : MonoBehaviour
 {
-
     public static DCLCharacterController i { get; private set; }
 
     [Header("Movement")] public float minimumYPosition = 1f;
@@ -124,8 +123,9 @@ public class DCLCharacterController : MonoBehaviour
         {
             throw new System.Exception("Both the avatar and first person camera game objects must be set.");
         }
-        avatarReference = new DCL.Models.DecentralandEntity { gameObject = avatarGameObject };
-        firstPersonCameraReference = new DCL.Models.DecentralandEntity { gameObject = firstPersonCameraGameObject };
+
+        avatarReference = new DCL.Models.DecentralandEntity {gameObject = avatarGameObject};
+        firstPersonCameraReference = new DCL.Models.DecentralandEntity {gameObject = firstPersonCameraGameObject};
     }
 
     private void SuscribeToInput()
@@ -177,7 +177,7 @@ public class DCLCharacterController : MonoBehaviour
         lastPosition = characterPosition.worldPosition;
         characterPosition.worldPosition = newPosition;
         transform.position = characterPosition.unityPosition;
-        SceneController.i.physicsSyncController.MarkDirty();
+        Environment.i.physicsSyncController.MarkDirty();
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
         CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
@@ -197,7 +197,6 @@ public class DCLCharacterController : MonoBehaviour
 
         lastPosition = transform.position;
     }
-
 
 
     public void Teleport(string teleportPayload)
@@ -255,7 +254,6 @@ public class DCLCharacterController : MonoBehaviour
         }
         else
         {
-
             velocity.x = 0f;
             velocity.z = 0f;
             velocity.y += gravity * deltaTime;
@@ -335,7 +333,7 @@ public class DCLCharacterController : MonoBehaviour
         {
             //NOTE(Brian): Transform has to be in sync before the Move call, otherwise this call
             //             will reset the character controller to its previous position.
-            SceneController.i.physicsSyncController.Sync();
+            Environment.i.physicsSyncController.Sync();
             characterController.Move(velocity * deltaTime);
         }
 

@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace DCL.Controllers
 {
@@ -23,8 +21,6 @@ namespace DCL.Controllers
             WAITING_FOR_COMPONENTS,
             READY,
         }
-
-        public static ParcelScenesCleaner parcelScenesCleaner = new ParcelScenesCleaner();
 
         public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
         public Dictionary<string, BaseDisposable> disposableComponents = new Dictionary<string, BaseDisposable>();
@@ -354,12 +350,13 @@ namespace DCL.Controllers
                     }
                 }
             }
-            if(decentralandEntity.parent != null)SetEntityParent(duplicatedEntity.entityId, decentralandEntity.parent.entityId);
+
+            if (decentralandEntity.parent != null) SetEntityParent(duplicatedEntity.entityId, decentralandEntity.parent.entityId);
 
             DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
             DCLTransform.model.rotation = decentralandEntity.gameObject.transform.rotation;
             DCLTransform.model.scale = decentralandEntity.gameObject.transform.lossyScale;
-  
+
             foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> component in decentralandEntity.components)
             {
                 EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, component.Key, DCLTransform.model);
@@ -373,7 +370,7 @@ namespace DCL.Controllers
             //TODO: (Adrian) Evaluate if all created components should be handle as equals instead of different
             foreach (KeyValuePair<string, UUIDComponent> component in decentralandEntity.uuidComponents)
             {
-                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK,component.Value.model);
+                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.model);
             }
 
             return duplicatedEntity;
@@ -395,7 +392,6 @@ namespace DCL.Controllers
                 }
 
                 entities.Remove(id);
-                Environment.i.cullingController.SetDirty();
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -432,7 +428,7 @@ namespace DCL.Controllers
             }
             else
             {
-                parcelScenesCleaner.MarkForCleanup(entity);
+                Environment.i.parcelScenesCleaner.MarkForCleanup(entity);
             }
         }
 
@@ -452,7 +448,7 @@ namespace DCL.Controllers
                         if (instant)
                             rootEntities.Add(iterator.Current.Value);
                         else
-                            parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
+                            Environment.i.parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
                     }
                 }
             }
@@ -489,50 +485,49 @@ namespace DCL.Controllers
 
             DecentralandEntity me = GetEntityForUpdate(entityId);
 
-            if (me != null)
+            if (me == null)
+                return;
+
+            if (parentId == "FirstPersonCameraEntityReference" || parentId == "PlayerEntityReference") // PlayerEntityReference is for compatibility purposes
             {
-                if (parentId == "FirstPersonCameraEntityReference" || parentId == "PlayerEntityReference") // PlayerEntityReference is for compatibility purposes
+                // In this case, the entity will attached to the first person camera
+                // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
+                me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
+                SceneController.i.boundariesChecker.AddPersistent(me);
+            }
+            else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
+            {
+                // In this case, the entity will be attached to the avatar
+                // It will simply rotate with the avatar, regardless of where the camera is pointing
+                me.SetParent(DCLCharacterController.i.avatarReference);
+                SceneController.i.boundariesChecker.AddPersistent(me);
+            }
+            else
+            {
+                if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                 {
-                    // In this case, the entity will attached to the first person camera
-                    // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
-                    me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
-                    SceneController.i.boundariesChecker.AddPersistent(me);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
                 }
-                else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
+
+                if (parentId == "0")
                 {
-                    // In this case, the entity will be attached to the avatar
-                    // It will simply rotate with the avatar, regardless of where the camera is pointing
-                    me.SetParent(DCLCharacterController.i.avatarReference);
-                    SceneController.i.boundariesChecker.AddPersistent(me);
-                    SceneController.i.physicsSyncController.MarkDirty();
+                    // The entity will be child of the scene directly
+                    me.SetParent(null);
+                    me.gameObject.transform.SetParent(gameObject.transform, false);
                 }
                 else
                 {
-                    if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
-                    {
-                        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
-                    }
+                    DecentralandEntity myParent = GetEntityForUpdate(parentId);
 
-                    if (parentId == "0")
+                    if (myParent != null)
                     {
-                        // The entity will be child of the scene directly
-                        me.SetParent(null);
-                        me.gameObject.transform.SetParent(gameObject.transform, false);
-                        SceneController.i.physicsSyncController.MarkDirty();
-                    }
-                    else
-                    {
-                        DecentralandEntity myParent = GetEntityForUpdate(parentId);
-
-                        if (myParent != null)
-                        {
-                            me.SetParent(myParent);
-                            SceneController.i.physicsSyncController.MarkDirty();
-                        }
+                        me.SetParent(myParent);
                     }
                 }
             }
+
+            Environment.i.cullingController.MarkDirty();
+            Environment.i.physicsSyncController.MarkDirty();
         }
 
         /**
@@ -562,7 +557,6 @@ namespace DCL.Controllers
 
         public BaseComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, object data)
         {
-
             SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
             SceneController.i.OnMessageDecodeEnds?.Invoke("UpdateEntityComponent");
 
@@ -574,7 +568,7 @@ namespace DCL.Controllers
                 return null;
             }
 
-       
+
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 if (!(data is DCLTransform.Model))
@@ -582,7 +576,8 @@ namespace DCL.Controllers
                     Debug.LogError("Data is not a DCLTransform.Model type!");
                     return null;
                 }
-                DCLTransform.Model modelRecovered = (DCLTransform.Model)data;
+
+                DCLTransform.Model modelRecovered = (DCLTransform.Model) data;
 
                 if (!entity.components.ContainsKey(classId))
                     entity.components.Add(classId, null);
@@ -601,8 +596,8 @@ namespace DCL.Controllers
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
-                SceneController.i.physicsSyncController.MarkDirty();
-
+                Environment.i.physicsSyncController.MarkDirty();
+                Environment.i.cullingController.MarkDirty();
                 return null;
             }
 
@@ -618,7 +613,8 @@ namespace DCL.Controllers
                     Debug.LogError("Data is not a DCLTransform.Model type!");
                     return null;
                 }
-                OnPointerEvent.Model model = (OnPointerEvent.Model)data;
+
+                OnPointerEvent.Model model = (OnPointerEvent.Model) data;
 
                 type = model.type;
 
@@ -665,7 +661,9 @@ namespace DCL.Controllers
                     newComponent = EntityUUIDComponentUpdate(entity, type, model);
                 }
             }
-            SceneController.i.physicsSyncController.MarkDirty();
+
+            Environment.i.physicsSyncController.MarkDirty();
+            Environment.i.cullingController.MarkDirty();
             return newComponent;
         }
 
@@ -706,7 +704,8 @@ namespace DCL.Controllers
                     SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
-                SceneController.i.physicsSyncController.MarkDirty();
+                Environment.i.physicsSyncController.MarkDirty();
+                Environment.i.cullingController.MarkDirty();
                 return null;
             }
 
@@ -772,7 +771,6 @@ namespace DCL.Controllers
                 if (!entity.components.ContainsKey(classId))
                 {
                     newComponent = factory.CreateItemFromId<BaseComponent>(classId);
-                    SceneController.i.physicsSyncController.MarkDirty();
 
                     if (newComponent != null)
                     {
@@ -800,7 +798,8 @@ namespace DCL.Controllers
                     yieldInstruction = newComponent.yieldInstruction;
             }
 
-            SceneController.i.physicsSyncController.MarkDirty();
+            Environment.i.physicsSyncController.MarkDirty();
+            Environment.i.cullingController.MarkDirty();
             return newComponent;
         }
 
@@ -996,16 +995,16 @@ namespace DCL.Controllers
                 }
 
                 case CLASS_ID.FONT:
-                    {
-                        newComponent = new DCLFont(this);
-                        break;
-                    }
-               
+                {
+                    newComponent = new DCLFont(this);
+                    break;
+                }
+
                 case CLASS_ID.NAME:
-                    {
-                        newComponent = new DCLName(this);                      
-                        break;
-                    }
+                {
+                    newComponent = new DCLName(this);
+                    break;
+                }
                 default:
                     Debug.LogError($"Unknown classId");
                     break;
@@ -1264,7 +1263,7 @@ namespace DCL.Controllers
             List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
             foreach (string id in allDisposableComponents)
             {
-                parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
+                Environment.i.parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 

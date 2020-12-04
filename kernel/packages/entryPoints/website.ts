@@ -7,7 +7,7 @@ global.enableWeb3 = true
 
 import { initShared } from 'shared'
 import { createLogger } from 'shared/logger'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { ReportFatalError, ReportSceneError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
   experienceStarted,
@@ -40,29 +40,24 @@ import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
+import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 
 const logger = createLogger('website.ts: ')
 
 function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
-  i.ConfigureHUDElement(HUDElementID.TASKBAR, { active: true, visible: true }, { enableVoiceChat: voiceChatEnabled })
+  i.ConfigureHUDElement(
+    HUDElementID.TASKBAR,
+    { active: true, visible: true },
+    {
+      enableVoiceChat: voiceChatEnabled
+    }
+  )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
 
   i.ConfigureHUDElement(HUDElementID.CONTROLS_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.EXPLORE_HUD, { active: true, visible: false })
   i.ConfigureHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD, { active: true, visible: false })
 }
-/**
- * Subscribe to uncaught errors
- */
-window.addEventListener('error', (event: ErrorEvent) => {
-  ReportFatalError(event.message as any, {
-    type: event.type,
-    message: event.message,
-    stack: event.error.stack,
-    filename: event.filename
-  })
-  return false
-})
 
 namespace webApp {
   export function createStore(): RootStore {
@@ -155,6 +150,7 @@ namespace webApp {
     onNextRendererEnabled(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
+    startRealmsReportToRenderer()
 
     await startUnitySceneWorkers()
 
@@ -199,12 +195,14 @@ namespace webApp {
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {
       if (error.isSceneError) {
+        ReportSceneError((error.message || 'unknown') as string, error)
         // @see packages/shared/world/SceneWorker.ts#loadSystem
         debugger
         return
       }
 
       console['error'](error)
+      ReportFatalError(error.message)
     }
     return true
   }

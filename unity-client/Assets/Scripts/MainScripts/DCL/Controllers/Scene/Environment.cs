@@ -16,7 +16,16 @@ namespace DCL
         public WorldBlockersController worldBlockersController { get; private set; }
         public ICullingController cullingController { get; private set; }
         public InteractionHoverCanvasController interactionHoverCanvasController { get; private set; }
+
+        public IParcelScenesCleaner parcelScenesCleaner { get; private set; }
+
+
         public Clipboard clipboard { get; }
+
+        public PerformanceMetricsController performanceMetricsController { get; private set; }
+
+        public PhysicsSyncController physicsSyncController { get; private set; }
+
 
         private bool initialized;
 
@@ -25,7 +34,11 @@ namespace DCL
             messagingControllersManager = new MessagingControllersManager();
             pointerEventsController = new PointerEventsController();
             memoryManager = new MemoryManager();
+            physicsSyncController = new PhysicsSyncController();
+            performanceMetricsController = new PerformanceMetricsController();
             clipboard = Clipboard.Create();
+            parcelScenesCleaner = new ParcelScenesCleaner();
+            cullingController = CullingController.Create();
         }
 
         public void Initialize(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)
@@ -36,8 +49,9 @@ namespace DCL
             messagingControllersManager.Initialize(messageHandler);
             pointerEventsController.Initialize();
             memoryManager.Initialize();
-            cullingController = CullingController.Create();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(sceneHandler, DCLCharacterController.i.characterPosition);
+            parcelScenesCleaner.Start();
+            cullingController.Start();
 
             initialized = true;
         }
@@ -58,6 +72,8 @@ namespace DCL
             memoryManager.CleanupPoolsIfNeeded(true);
             pointerEventsController.Cleanup();
             worldBlockersController.Dispose();
+            parcelScenesCleaner.Dispose();
+            cullingController.Dispose();
         }
 
         public void Restart(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)

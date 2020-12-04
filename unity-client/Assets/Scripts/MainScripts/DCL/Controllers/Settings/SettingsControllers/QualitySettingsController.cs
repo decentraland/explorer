@@ -73,7 +73,7 @@ namespace DCL.SettingsController
 
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.msaaSampleCount = (int) qualitySettings.antiAliasing;
+                lightweightRenderPipelineAsset.msaaSampleCount = (int)qualitySettings.antiAliasing;
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
                 lightweightRenderPipelineAsset.shadowDistance = qualitySettings.shadowDistance;
 
@@ -110,7 +110,7 @@ namespace DCL.SettingsController
 
             Environment.i.cullingController.SetObjectCulling(qualitySettings.enableDetailObjectCulling);
             Environment.i.cullingController.SetShadowCulling(qualitySettings.enableDetailObjectCulling);
-            Environment.i.cullingController.SetDirty();
+            Environment.i.cullingController.MarkDirty();
 
             if (qualitySettings.enableDetailObjectCulling)
             {
@@ -138,6 +138,9 @@ namespace DCL.SettingsController
             {
                 firstPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
             }
+
+            RenderSettings.fogEndDistance = qualitySettings.cameraDrawDistance;
+            RenderSettings.fogStartDistance = qualitySettings.cameraDrawDistance * 0.8f;
 
             ToggleFPSCap(qualitySettings.fpsCap);
         }
