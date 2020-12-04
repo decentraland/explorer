@@ -88,7 +88,7 @@ jobs:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build:2019.4
+      - image: decentraland/renderer-build:2020.1.13
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -135,7 +135,7 @@ jobs:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build:2019.4
+      - image: decentraland/renderer-build:2020.1.13
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity

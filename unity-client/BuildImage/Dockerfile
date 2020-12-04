@@ -1,4 +1,4 @@
-FROM gableroux/unity3d:2019.1.14f1
+FROM gableroux/unity3d:2020.1.13f1-webgl
 
 RUN apt update && apt upgrade -y && apt install -y git curl unzip
 RUN mkdir -p ~/.ssh
