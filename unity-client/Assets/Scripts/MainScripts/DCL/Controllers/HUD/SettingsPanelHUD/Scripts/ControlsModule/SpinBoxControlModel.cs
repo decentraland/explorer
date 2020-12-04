@@ -14,7 +14,8 @@ namespace DCL.SettingsPanelHUD.Controls
             SettingsControlView controlPrefab,
             SettingsControlController controlController,
             List<BooleanVariable> flagsThatDeactivateMe,
-            string[] spinBoxLabels) : base(title, controlPrefab, controlController, flagsThatDeactivateMe)
+            bool isBeta,
+            string[] spinBoxLabels) : base(title, controlPrefab, controlController, flagsThatDeactivateMe, isBeta)
         {
             this.spinBoxLabels = spinBoxLabels;
         }

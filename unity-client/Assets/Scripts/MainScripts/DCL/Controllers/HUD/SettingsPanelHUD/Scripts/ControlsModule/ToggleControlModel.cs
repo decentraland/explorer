@@ -10,7 +10,8 @@ namespace DCL.SettingsPanelHUD.Controls
             string title,
             SettingsControlView controlPrefab,
             SettingsControlController controlController,
-            List<BooleanVariable> flagsThatDeactivateMe) : base(title, controlPrefab, controlController, flagsThatDeactivateMe)
+            List<BooleanVariable> flagsThatDeactivateMe,
+            bool isBeta) : base(title, controlPrefab, controlController, flagsThatDeactivateMe, isBeta)
         {
         }
     }

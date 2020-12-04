@@ -57,7 +57,8 @@ namespace Tests
                 $"TestControl_Col{columnIndex}",
                 controlViewPrefab,
                 Substitute.For<SettingsControlController>(),
-                new List<BooleanVariable>());
+                new List<BooleanVariable>(),
+                false);
 
 
             controlColumnsToCreate[columnIndex].controls.Add(newControlConfig);

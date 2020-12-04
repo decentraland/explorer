@@ -17,6 +17,7 @@ MonoBehaviour:
     type: 3}
   controlController: {fileID: 11400000, guid: 1aa2d3e247da06643827fc605979a733, type: 2}
   flagsThatDeactivateMe: []
+  isBeta: 0
   sliderMinValue: 0
   sliderMaxValue: 100
   sliderWholeNumbers: 1

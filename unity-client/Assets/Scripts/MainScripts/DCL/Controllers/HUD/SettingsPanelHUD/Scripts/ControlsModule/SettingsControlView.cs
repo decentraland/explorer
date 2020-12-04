@@ -14,6 +14,7 @@ namespace DCL.SettingsPanelHUD.Controls
     public abstract class SettingsControlView : MonoBehaviour, ISettingsControlView
     {
         [SerializeField] private TextMeshProUGUI title;
+        [SerializeField] private GameObject betaIndicator;
 
         protected SettingsControlController settingsControlController;
         protected bool skipPostApplySettings = false;
@@ -33,7 +34,8 @@ namespace DCL.SettingsPanelHUD.Controls
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
             this.settingsControlController.Initialize(this);
-            this.title.text = controlConfig.title;
+            title.text = controlConfig.title;
+            betaIndicator.SetActive(controlConfig.isBeta);
 
             foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
             {
@@ -45,9 +47,12 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private void OnDestroy()
         {
-            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
+            if (controlConfig != null)
             {
-                flag.OnChange -= OnAnyDeactivationFlagChange;
+                foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
+                {
+                    flag.OnChange -= OnAnyDeactivationFlagChange;
+                }
             }
 
             if (CommonSettingsVariables.refreshAllSettings != null)

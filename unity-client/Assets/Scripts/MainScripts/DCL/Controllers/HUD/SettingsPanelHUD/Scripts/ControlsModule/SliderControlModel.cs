@@ -16,9 +16,9 @@ namespace DCL.SettingsPanelHUD.Controls
             SettingsControlView controlPrefab,
             SettingsControlController controlController,
             List<BooleanVariable> flagsThatDeactivateMe,
-            bool refreshAllSettingsOnChange,
+            bool isBeta,
             float sliderMinValue,
-            float sliderMaxValue) : base(title, controlPrefab, controlController, flagsThatDeactivateMe)
+            float sliderMaxValue) : base(title, controlPrefab, controlController, flagsThatDeactivateMe, isBeta)
         {
             this.sliderMinValue = sliderMinValue;
             this.sliderMaxValue = sliderMaxValue;

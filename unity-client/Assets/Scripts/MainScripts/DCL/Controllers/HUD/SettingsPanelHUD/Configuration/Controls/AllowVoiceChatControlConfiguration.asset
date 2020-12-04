@@ -17,6 +17,7 @@ MonoBehaviour:
     type: 3}
   controlController: {fileID: 11400000, guid: ed9c1e48bd6951344a98119528b00590, type: 2}
   flagsThatDeactivateMe: []
+  isBeta: 1
   spinBoxLabels:
   - All users
   - Verified users

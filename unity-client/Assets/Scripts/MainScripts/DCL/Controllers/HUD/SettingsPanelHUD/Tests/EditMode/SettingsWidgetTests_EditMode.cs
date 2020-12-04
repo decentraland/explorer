@@ -19,7 +19,8 @@ namespace Tests
                 "TestControl",
                 Substitute.For<SettingsControlView>(),
                 Substitute.For<SettingsControlController>(),
-                new List<BooleanVariable>());
+                new List<BooleanVariable>(),
+                false);
 
             SettingsWidgetController widgetController = new SettingsWidgetController();
 
