@@ -8,8 +8,6 @@ import {
   ReadOnlyVector2
 } from 'decentraland-ecs/src/decentraland/math'
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
-import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
-import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
 
@@ -46,7 +44,6 @@ export const teleportObservable = new Observable<ReadOnlyVector2>()
 
 export const lastPlayerPosition = new Vector3()
 export const lastPlayerParcel = new Vector2()
-export let lastPlayerScene: ILand
 
 positionObservable.add((event) => {
   lastPlayerPosition.copyFrom(event.position)
@@ -59,20 +56,6 @@ positionObservable.add(({ position, immediate }) => {
   if (parcel.x !== lastPlayerParcel.x || parcel.y !== lastPlayerParcel.y) {
     lastPlayerParcel.copyFrom(parcel)
     parcelObservable.notifyObservers({ parcel, immediate })
-  }
-})
-
-// Listen to parcel changes, and notify if the scene changed
-parcelObservable.add(async ({ parcel }) => {
-  const parcelString = `${parcel.x},${parcel.x}`
-  if (!lastPlayerScene || !lastPlayerScene.sceneJsonData.scene.parcels.includes(parcelString)) {
-    const scenesId = await fetchSceneIds([parcelString])
-    const sceneId = scenesId[0]
-    if (sceneId) {
-      const land = (await fetchSceneJson([sceneId]))[0]
-      lastPlayerScene = land
-      sceneObservable.notifyObservers(land)
-    }
   }
 })
 
