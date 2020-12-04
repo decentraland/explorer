@@ -8,7 +8,6 @@ const gamekitWorkerBLOB = new Blob([gamekitWorkerRaw])
 const gamekitWorkerUrl = URL.createObjectURL(gamekitWorkerBLOB)
 
 export class StatefulWorker extends SceneWorker {
-
   constructor(parcelScene: ParcelSceneAPI) {
     super(parcelScene, StatefulWorker.buildWebWorkerTransport(parcelScene))
   }
@@ -36,5 +35,4 @@ export class StatefulWorker extends SceneWorker {
   protected childDispose() {
     return
   }
-
 }

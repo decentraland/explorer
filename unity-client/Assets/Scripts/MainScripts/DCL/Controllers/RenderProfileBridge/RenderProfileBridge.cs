@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DCL;
@@ -13,6 +13,7 @@ public class RenderProfileBridge : MonoBehaviour
     {
         DEFAULT,
         HALLOWEEN,
+        XMAS
     }
 
     [System.Serializable]
@@ -45,7 +46,6 @@ public class RenderProfileBridge : MonoBehaviour
     public void SetRenderProfile(ID id)
     {
         RenderProfileWorld newProfile;
-
         switch (id)
         {
             default:
@@ -53,6 +53,9 @@ public class RenderProfileBridge : MonoBehaviour
                 break;
             case ID.HALLOWEEN:
                 newProfile = RenderProfileManifest.i.halloweenProfile;
+                break;
+            case ID.XMAS:
+                newProfile = RenderProfileManifest.i.defaultProfile;
                 break;
         }
 

@@ -22,7 +22,7 @@ namespace DCL
 
         private readonly BooleanVariable autosettingsEnabled = null;
 
-        private SettingsData.QualitySettings currentQualitySettings;
+        public SettingsData.QualitySettings currentQualitySettings { private set; get; }
         private SettingsData.GeneralSettings currentGeneralSettings;
 
         public Settings()
@@ -71,7 +71,7 @@ namespace DCL
             currentGeneralSettings = new SettingsData.GeneralSettings()
             {
                 sfxVolume = 1,
-                mouseSensitivity = 0.2f,
+                mouseSensitivity = 0.6f,
                 voiceChatVolume = 1,
                 voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.ALL_USERS
             };
@@ -102,6 +102,7 @@ namespace DCL
 
             lastValidAutoqualitySet = autoqualitySettings[index];
             lastValidAutoqualitySet.baseResolution = currentQualitySettings.baseResolution;
+            lastValidAutoqualitySet.fpsCap = currentQualitySettings.fpsCap;
 
             if (currentQualitySettings.Equals(lastValidAutoqualitySet))
                 return;

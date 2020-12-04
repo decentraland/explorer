@@ -1,7 +1,7 @@
 
 public class GraphicCardWarningHUDController : IHUD
 {
-    private const string GRAPHIC_CARD_MESSAGE = "An integrated graphics card has been detected on your machine.\nYou may encounter performance issues as a result.";
+    private const string GRAPHIC_CARD_MESSAGE = "Your machine is not using a dedicated graphics card to run Decentraland. This might lead to performance issues. Check your browser and OS configuration.";
 
     public GraphicCardWarningHUDController() { }
 
@@ -46,7 +46,7 @@ public class GraphicCardWarningHUDController : IHUD
 
     private void TryShowNotification()
     {
-        if (IsIntegratedGraphicCard())
+        if (GraphicCardNotification.CanShowGraphicCardPopup() && IsIntegratedGraphicCard())
         {
             NotificationsController.i.ShowNotification(new Notification.Model
             {
