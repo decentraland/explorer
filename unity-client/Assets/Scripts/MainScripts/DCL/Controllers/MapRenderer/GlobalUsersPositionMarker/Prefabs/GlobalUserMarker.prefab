@@ -200,4 +200,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colorImage: {fileID: 6232952214765234628}
   sameRealmColor: {r: 1, g: 0.07058824, b: 0.38431373, a: 1}
-  otherRealmColor: {r: 0, g: 0.6392157, b: 1, a: 1}
+  otherRealmColor: {r: 0.69411767, g: 0.7254902, b: 0.80784315, a: 1}
