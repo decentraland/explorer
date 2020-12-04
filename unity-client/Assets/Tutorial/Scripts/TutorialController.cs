@@ -94,11 +94,12 @@ namespace DCL.Tutorial
         private Coroutine teacherMovementCoroutine;
         private Coroutine eagleEyeRotationCoroutine;
 
-        private int tutorialLayerMask = LayerMask.GetMask("Tutorial");
+        private int tutorialLayerMask;
 
         private void Awake()
         {
             i = this;
+            tutorialLayerMask = LayerMask.GetMask("Tutorial");
             ShowTeacher3DModel(false);
         }
 
