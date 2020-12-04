@@ -119,6 +119,9 @@ internal class MarkersHandler : IDisposable
 
     private void ResfreshMarkersPoolLists(int amountToBeUsed)
     {
+        if (amountToBeUsed == usedMarkers.Count)
+            return;
+    
         if (amountToBeUsed > usedMarkers.Count)
         {
             int addAmount = amountToBeUsed - usedMarkers.Count;
@@ -129,7 +132,7 @@ internal class MarkersHandler : IDisposable
                 usedMarkers.Add(marker);
             }
         }
-        else if (amountToBeUsed < usedMarkers.Count)
+        else
         {
             int removeAmount = usedMarkers.Count - amountToBeUsed;
             for (int i = 0; i < removeAmount && i < usedMarkers.Count; i++)
