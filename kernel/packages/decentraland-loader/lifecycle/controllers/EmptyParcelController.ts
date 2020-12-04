@@ -1,5 +1,4 @@
 import { jsonFetch } from 'atomicHelpers/jsonFetch'
-import defaultLogger from 'shared/logger'
 import { WorldConfig } from 'shared/meta/types'
 import { ILand, ContentMapping, RenderProfile } from 'shared/types'
 
@@ -19,6 +18,7 @@ export class EmptyParcelController {
       rootUrl: string
     }
   ) {
+    /* tslint:disable */
     if (options.worldConfig.renderProfile == RenderProfile.HALLOWEEN) {
       this.baseUrl = `${options.rootUrl}loader/empty-scenes-halloween/`
     } else if (options.worldConfig.renderProfile == RenderProfile.XMAS) {
@@ -26,6 +26,7 @@ export class EmptyParcelController {
     } else {
       this.baseUrl = `${options.rootUrl}loader/empty-scenes/`
     }
+    /* tslint:enable */
   }
 
   resolveEmptyParcels() {
