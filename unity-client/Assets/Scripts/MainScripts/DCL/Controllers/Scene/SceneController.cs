@@ -987,6 +987,18 @@ namespace DCL
             engineDebugPanel.SetActive(true);
         }
 
+        public void DumpScenesLoadInfo()
+        {
+            Debug.unityLogger.logEnabled = true;
+            foreach (var scene in loadedScenes)
+            {
+                Debug.Log("Dumping state for scene: " + scene.Value.sceneData.id);
+                scene.Value.GetWaitingComponentsDebugInfo();
+            }
+
+            Debug.unityLogger.logEnabled = false;
+        }
+
         //======================================================================
 
         #endregion
