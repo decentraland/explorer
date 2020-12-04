@@ -65,12 +65,17 @@ export function* commsSaga() {
 }
 
 function* listenToWhetherSceneSupportsVoiceChat() {
-  sceneObservable.add(({ newScene }) => {
-    const enabled = isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
-    unityInterface.SetVoiceChatEnabledByScene(enabled)
-    if (!enabled) {
-      // We want to stop any potential recordings when a user enters a new scene
-      updateVoiceRecordingStatus(false)
+  sceneObservable.add(({ previousScene, newScene }) => {
+    const previouslyEnabled = previousScene
+      ? isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, previousScene.sceneJsonData)
+      : undefined
+    const nowEnabled = isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
+    if (previouslyEnabled !== nowEnabled) {
+      unityInterface.SetVoiceChatEnabledByScene(nowEnabled)
+      if (!nowEnabled) {
+        // We want to stop any potential recordings when a user enters a new scene
+        updateVoiceRecordingStatus(false)
+      }
     }
   })
 }
