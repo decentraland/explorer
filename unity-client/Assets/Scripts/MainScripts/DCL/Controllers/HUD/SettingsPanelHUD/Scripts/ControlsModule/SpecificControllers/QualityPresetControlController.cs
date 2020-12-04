@@ -9,13 +9,11 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public const string TEXT_QUALITY_CUSTOM = "Custom";
 
-        private int currentQualityPresetIndex = 0;
-
         public override void Initialize(ISettingsControlView settingsControlView)
         {
             base.Initialize(settingsControlView);
 
-            SetupQualityPreset();
+            SetupQualityPresetLabels();
 
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.OnChange += ShouldSetQualityPresetAsCustom_OnChange;
         }
@@ -30,55 +28,56 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override object GetStoredValue()
         {
-            return currentQualityPresetIndex;
+            return GetCurrentStoredValue();
         }
 
         public override void OnControlChanged(object newValue)
         {
-            int qualityPresetValue = (int)newValue;
-
-            SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[qualityPresetValue];
+            SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[(int)newValue];
             currentQualitySetting = preset;
-            currentQualityPresetIndex = qualityPresetValue;
         }
 
         public override void PostApplySettings()
         {
             base.PostApplySettings();
 
-            UpdateQualitySettings();
+            RefreshAllSettings();
         }
 
-        private void UpdateQualitySettings()
+        private void SetupQualityPresetLabels()
+        {
+            List<string> presetNames = new List<string>();
+            SettingsData.QualitySettings preset;
+            for (int i = 0; i < Settings.i.qualitySettingsPresets.Length; i++)
+            {
+                preset = Settings.i.qualitySettingsPresets[i];
+                presetNames.Add(preset.displayName);
+            }
+
+            ((SpinBoxSettingsControlView)view).SetLabels(presetNames.ToArray());
+        }
+
+        private int GetCurrentStoredValue()
+        {
+            SettingsData.QualitySettings preset;
+            for (int i = 0; i < Settings.i.qualitySettingsPresets.Length; i++)
+            {
+                preset = Settings.i.qualitySettingsPresets[i];
+                if (preset.Equals(currentQualitySetting))
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
+
+        private void RefreshAllSettings()
         {
             if (!CommonSettingsVariables.refreshAllSettings.Get())
                 CommonSettingsVariables.refreshAllSettings.Set(true);
             else
                 CommonSettingsVariables.refreshAllSettings.Set(false);
-        }
-
-        private void SetupQualityPreset()
-        {
-            List<string> presetNames = new List<string>();
-            bool presetIndexFound = false;
-            SettingsData.QualitySettings preset;
-
-            for (int i = 0; i < Settings.i.qualitySettingsPresets.Length; i++)
-            {
-                preset = Settings.i.qualitySettingsPresets[i];
-                presetNames.Add(preset.displayName);
-
-                if (!presetIndexFound && preset.Equals(currentQualitySetting))
-                {
-                    presetIndexFound = true;
-                    currentQualityPresetIndex = i;
-                }
-            }
-
-            ((SpinBoxSettingsControlView)view).SetLabels(presetNames.ToArray());
-
-            if (!presetIndexFound)
-                UpdateQualitySettings();
         }
 
         private void ShouldSetQualityPresetAsCustom_OnChange(bool current, bool previous)

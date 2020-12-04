@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -12,7 +13,8 @@ namespace DCL.SettingsPanelHUD.Controls
             string title,
             SettingsControlView controlPrefab,
             SettingsControlController controlController,
-            string[] spinBoxLabels) : base(title, controlPrefab, controlController)
+            List<BooleanVariable> flagsThatDeactivateMe,
+            string[] spinBoxLabels) : base(title, controlPrefab, controlController, flagsThatDeactivateMe)
         {
             this.spinBoxLabels = spinBoxLabels;
         }

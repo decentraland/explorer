@@ -32,11 +32,13 @@ namespace DCL.SettingsPanelHUD.Controls
         public SettingsControlModel(
             string title,
             SettingsControlView controlPrefab,
-            SettingsControlController controlController)
+            SettingsControlController controlController,
+            List<BooleanVariable> flagsThatDeactivateMe)
         {
             this.title = title;
             this.controlPrefab = controlPrefab;
             this.controlController = controlController;
+            this.flagsThatDeactivateMe = flagsThatDeactivateMe;
         }
     }
 }

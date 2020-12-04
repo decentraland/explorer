@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -8,7 +9,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public ToggleControlModel(
             string title,
             SettingsControlView controlPrefab,
-            SettingsControlController controlController) : base(title, controlPrefab, controlController)
+            SettingsControlController controlController,
+            List<BooleanVariable> flagsThatDeactivateMe) : base(title, controlPrefab, controlController, flagsThatDeactivateMe)
         {
         }
     }

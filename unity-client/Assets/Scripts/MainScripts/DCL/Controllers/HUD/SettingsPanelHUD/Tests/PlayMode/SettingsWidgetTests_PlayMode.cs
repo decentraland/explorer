@@ -56,7 +56,8 @@ namespace Tests
             SettingsControlModel newControlConfig = new SettingsControlModel(
                 $"TestControl_Col{columnIndex}",
                 controlViewPrefab,
-                Substitute.For<SettingsControlController>());
+                Substitute.For<SettingsControlController>(),
+                new List<BooleanVariable>());
 
 
             controlColumnsToCreate[columnIndex].controls.Add(newControlConfig);

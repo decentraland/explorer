@@ -2,6 +2,7 @@ using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -17,7 +18,8 @@ namespace Tests
             var newControlConfig = new SettingsControlModel(
                 "TestControl",
                 Substitute.For<SettingsControlView>(),
-                Substitute.For<SettingsControlController>());
+                Substitute.For<SettingsControlController>(),
+                new List<BooleanVariable>());
 
             SettingsWidgetController widgetController = new SettingsWidgetController();
 

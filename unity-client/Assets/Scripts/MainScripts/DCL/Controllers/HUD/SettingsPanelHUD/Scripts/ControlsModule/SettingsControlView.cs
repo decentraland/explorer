@@ -17,8 +17,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         protected SettingsControlController settingsControlController;
 
+        private SettingsControlModel controlConfig;
+
         public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
+            this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
             this.settingsControlController.Initialize(this);
             this.title.text = controlConfig.title;
@@ -29,6 +32,17 @@ namespace DCL.SettingsPanelHUD.Controls
             }
 
             CommonSettingsVariables.refreshAllSettings.OnChange += RefreshAllSettings_OnChange;
+        }
+
+        private void OnDestroy()
+        {
+            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
+            {
+                flag.OnChange -= OnAnyDeactivationFlagChange;
+            }
+
+            if (CommonSettingsVariables.refreshAllSettings != null)
+                CommonSettingsVariables.refreshAllSettings.OnChange -= RefreshAllSettings_OnChange;
         }
 
         public abstract void SetEnabled(bool enabled);

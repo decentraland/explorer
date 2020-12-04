@@ -4,7 +4,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "TestHelpers",
-        "SettingsPanelHUD"
+        "SettingsPanelHUD",
+        "ScriptableObjects"
     ],
     "includePlatforms": [
         "Editor"
