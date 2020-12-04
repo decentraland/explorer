@@ -12,9 +12,9 @@ import {
   AUTH_ERROR_LOGGED_OUT,
   experienceStarted,
   FAILED_FETCHING_UNITY,
-  NOT_INVITED
-  // , setLoadingScreen
-  // , setLoadingWaitTutorial
+  NOT_INVITED,
+  setLoadingScreen,
+  setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
 import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
@@ -27,7 +27,6 @@ import { HUDElementID, RenderProfile } from 'shared/types'
 import {
   foregroundObservable,
   isForeground,
-  onNextRendererEnabled,
   renderStateObservable
 } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
@@ -39,7 +38,7 @@ import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
-// import Html from 'shared/Html'
+import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
 import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 
@@ -134,22 +133,17 @@ namespace webApp {
         const observer = renderStateObservable.add((isRendering) => {
           if (isRendering) {
             renderStateObservable.remove(observer)
+            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
 
-            // Hide loading screen
-            // globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-            // globalThis.globalStore.dispatch(setLoadingScreen(false))
-            // Html.switchGameContainer(true)
+            globalThis.globalStore.dispatch(experienceStarted())
+
+            globalThis.globalStore.dispatch(setLoadingScreen(false))
+
+            Html.switchGameContainer(true)
 
             i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
           }
         })
-
-        // const observer = renderStateObservable.add((isRunning) => {
-        //   if (isRunning) {
-        //     renderStateObservable.remove(observer)
-        //     callback()
-        //   }
-        // })
 
         EnsureProfile(identity.address)
           .then((profile) => {
@@ -164,8 +158,6 @@ namespace webApp {
       })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
-
-    onNextRendererEnabled(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
     startRealmsReportToRenderer()
