@@ -31,11 +31,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public virtual void ApplySettings()
         {
-            if (!currentGeneralSettings.Equals(Settings.i.generalSettings))
-                Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-
-            if (!currentQualitySetting.Equals(Settings.i.qualitySettings))
-                Settings.i.ApplyQualitySettings(currentQualitySetting);
+            Settings.i.ApplyGeneralSettings(currentGeneralSettings);
+            Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
 
         public virtual void PostApplySettings()

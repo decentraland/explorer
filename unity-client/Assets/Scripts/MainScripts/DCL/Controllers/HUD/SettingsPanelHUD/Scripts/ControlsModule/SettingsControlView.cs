@@ -7,7 +7,6 @@ namespace DCL.SettingsPanelHUD.Controls
     public interface ISettingsControlView
     {
         void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
-        void SetEnabled(bool enabled);
         void RefreshControl();
     }
 
@@ -15,6 +14,7 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private TextMeshProUGUI title;
         [SerializeField] private GameObject betaIndicator;
+        [SerializeField] private CanvasGroup canvasGroup;
 
         protected SettingsControlController settingsControlController;
         protected bool skipPostApplySettings = false;
@@ -40,9 +40,12 @@ namespace DCL.SettingsPanelHUD.Controls
             foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
             {
                 flag.OnChange += OnAnyDeactivationFlagChange;
+                OnAnyDeactivationFlagChange(flag.Get(), false);
             }
 
             CommonSettingsVariables.refreshAllSettings.OnChange += RefreshAllSettings_OnChange;
+
+            RefreshControl();
         }
 
         private void OnDestroy()
@@ -59,13 +62,17 @@ namespace DCL.SettingsPanelHUD.Controls
                 CommonSettingsVariables.refreshAllSettings.OnChange -= RefreshAllSettings_OnChange;
         }
 
-        public abstract void SetEnabled(bool enabled);
-
         public abstract void RefreshControl();
 
         private void OnAnyDeactivationFlagChange(bool current, bool previous)
         {
             SetEnabled(!current);
+        }
+
+        private void SetEnabled(bool enabled)
+        {
+            canvasGroup.alpha = enabled ? 1 : 0.5f;
+            canvasGroup.interactable = enabled;
         }
 
         private void RefreshAllSettings_OnChange(SettingsControlController currentSender, SettingsControlController previousSender)

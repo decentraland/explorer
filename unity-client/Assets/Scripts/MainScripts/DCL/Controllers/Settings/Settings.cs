@@ -73,7 +73,8 @@ namespace DCL
                 sfxVolume = 1,
                 mouseSensitivity = 0.6f,
                 voiceChatVolume = 1,
-                voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.ALL_USERS
+                voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.ALL_USERS,
+                autoqualityOn = false
             };
 
             if (PlayerPrefs.HasKey(GENERAL_SETTINGS_KEY))

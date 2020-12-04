@@ -8,7 +8,6 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [SerializeField] private Slider slider;
         [SerializeField] private TextMeshProUGUI indicatorLabel;
-        [SerializeField] private CanvasGroup canvasGroup;
 
         public Slider sliderControl { get => slider; }
 
@@ -20,15 +19,16 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            RefreshControl();
             indicatorLabel.text = slider.value.ToString();
             settingsControlController.OnControlChanged(slider.value);
+            settingsControlController.ApplySettings();
 
             slider.onValueChanged.AddListener(sliderValue =>
             {
                 indicatorLabel.text = sliderValue.ToString();
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
+
                 if (!skipPostApplySettings)
                     settingsControlController.PostApplySettings();
                 skipPostApplySettings = false;
@@ -38,12 +38,6 @@ namespace DCL.SettingsPanelHUD.Controls
         public void OverrideIndicatorLabel(string text)
         {
             indicatorLabel.text = text;
-        }
-
-        public override void SetEnabled(bool enabled)
-        {
-            canvasGroup.alpha = enabled ? 1 : 0.5f;
-            canvasGroup.interactable = enabled;
         }
 
         public override void RefreshControl()

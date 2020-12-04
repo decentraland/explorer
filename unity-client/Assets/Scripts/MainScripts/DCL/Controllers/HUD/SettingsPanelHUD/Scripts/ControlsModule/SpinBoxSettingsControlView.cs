@@ -5,7 +5,6 @@ namespace DCL.SettingsPanelHUD.Controls
     public class SpinBoxSettingsControlView : SettingsControlView
     {
         [SerializeField] private SpinBoxPresetted spinBox;
-        [SerializeField] private CanvasGroup canvasGroup;
 
         public SpinBoxPresetted spinBoxControl { get => spinBox; }
 
@@ -15,23 +14,18 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            RefreshControl();
             settingsControlController.OnControlChanged(spinBox.value);
+            settingsControlController.ApplySettings();
 
             spinBox.onValueChanged.AddListener(sliderValue =>
             {
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
+
                 if (!skipPostApplySettings)
                     settingsControlController.PostApplySettings();
                 skipPostApplySettings = false;
             });
-        }
-
-        public override void SetEnabled(bool enabled)
-        {
-            canvasGroup.alpha = enabled ? 1 : 0.5f;
-            canvasGroup.interactable = enabled;
         }
 
         public override void RefreshControl()
@@ -45,7 +39,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public void SetLabels(string[] labels)
         {
+            if (labels.Length == 0)
+                return;
+
             spinBox.SetLabels(labels);
+            spinBox.SetValue(0);
         }
     }
 }
