@@ -8,8 +8,8 @@ import {
   ReadOnlyVector2
 } from 'decentraland-ecs/src/decentraland/math'
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
-import { fetchSceneIds } from '../../decentraland-loader/lifecycle/utils/fetchSceneIds'
-import { fetchSceneJson } from '../../decentraland-loader/lifecycle/utils/fetchSceneJson'
+import { fetchSceneIds } from 'decentraland-loader/lifecycle/utils/fetchSceneIds'
+import { fetchSceneJson } from 'decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
 
