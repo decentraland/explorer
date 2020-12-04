@@ -142,6 +142,8 @@ namespace DCL.Rendering
             else
                 renderers = objectsTracker.GetSkinnedRenderers();
 
+
+
             for (var i = 0; i < renderers.Length; i++)
             {
                 if (timeBudgetCount > settings.maxTimeBudget)
@@ -155,8 +157,12 @@ namespace DCL.Rendering
                 if (r == null)
                     continue;
 
-                if (((1 << r.gameObject.layer) & settings.ignoredLayersMask) != 0)
+                bool rendererIsInIgnoreLayer = ((1 << r.gameObject.layer) & settings.ignoredLayersMask) != 0;
+                if (rendererIsInIgnoreLayer)
+                {
+                    SetCullingForRenderer(r, true, true);
                     continue;
+                }
 
 
                 float startTime = Time.realtimeSinceStartup;
