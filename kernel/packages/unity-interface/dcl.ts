@@ -1,7 +1,11 @@
 import { TeleportController } from 'shared/world/TeleportController'
 import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, NO_ASSET_BUNDLES, PREVIEW, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
+import {
+  loadingScenes,
+  setLoadingScreen,
+  teleportTriggered
+} from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
@@ -283,14 +287,14 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-if (PREVIEW) {
-  renderStateObservable.add(async (isRunning) => {
-    if (isRunning) {
+renderStateObservable.add(async (isRunning) => {
+  if (isRunning) {
+    if (PREVIEW) {
       await loginCompleted
-      setLoadingScreenVisible(false)
     }
-  })
-}
+    setLoadingScreenVisible(false)
+  }
+})
 
 document.addEventListener('pointerlockchange', pointerLockChange, false)
 

@@ -13,7 +13,6 @@ import {
   experienceStarted,
   FAILED_FETCHING_UNITY,
   NOT_INVITED,
-  setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
@@ -21,7 +20,7 @@ import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
-import { startUnitySceneWorkers } from '../unity-interface/dcl'
+import { setLoadingScreenVisible, startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
 import {
@@ -137,7 +136,7 @@ namespace webApp {
 
             globalThis.globalStore.dispatch(experienceStarted())
 
-            globalThis.globalStore.dispatch(setLoadingScreen(false))
+            setLoadingScreenVisible(false)
 
             Html.switchGameContainer(true)
 
