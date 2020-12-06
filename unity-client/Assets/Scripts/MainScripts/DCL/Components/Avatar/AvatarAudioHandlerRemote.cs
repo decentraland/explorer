@@ -14,6 +14,7 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
     Renderer rend;
     AvatarAnimatorLegacy.BlackBoard blackBoard;
     bool isGroundedPrevious = true;
+    float runLastPlayed = 0f, walkLastPlayed = 0f;
 
     public AvatarAnimatorLegacy avatarAnimatorLegacy;
 
@@ -25,6 +26,10 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         footstepWalk = ac.GetEvent("FootstepWalk");
         footstepRun = ac.GetEvent("FootstepRun");
         clothesRustleShort = ac.GetEvent("ClothesRustleShort");
+
+        // Lower volume of jump/land
+        footstepJump.source.volume = footstepJump.source.volume * 0.5f;
+        footstepLand.source.volume = footstepLand.source.volume * 0.5f;
 
         if (avatarAnimatorLegacy != null)
         {
@@ -56,14 +61,16 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
                 footstepLand.Play(true);
         }
 
+        Debug.Log(blackBoard.movementSpeed / Time.deltaTime);
+
         // Fake footsteps when avatar not visible
         if (rend != null)
         {
-            if (!rend.isVisible && blackBoard.movementSpeed > 0f && blackBoard.isGrounded)
+            if (!AvatarIsInView() && blackBoard.movementSpeed > 0f && blackBoard.isGrounded)
             {
                 if (Time.time >= nextFootstepTime)
                 {
-                    if (blackBoard.movementSpeed > 0.045f)
+                    if ((blackBoard.movementSpeed / Time.deltaTime) > 6f)
                     {
                         if (footstepRun != null)
                             footstepRun.Play(true);
@@ -92,5 +99,27 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         }
         
         isGroundedPrevious = blackBoard.isGrounded;
+    }
+
+    bool AvatarIsInView()
+    {
+        if (rend.isVisible)
+            return true;
+
+        // NOTE(Mordi): In some cases, the renderer will report false even if the avatar is visible.
+        // Therefore we must check whether or not the avatar is in the camera's view.
+        Vector3 point = Camera.main.WorldToViewportPoint(transform.position);
+        if (point.z > 0f)
+        {
+            if (point.x >= 0f && point.x <= 1f)
+            {
+                if (point.y >= 0f && point.y <= 1f)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
