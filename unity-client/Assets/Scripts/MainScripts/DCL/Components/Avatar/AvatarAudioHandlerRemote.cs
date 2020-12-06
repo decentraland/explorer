@@ -61,8 +61,6 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
                 footstepLand.Play(true);
         }
 
-        Debug.Log(blackBoard.movementSpeed / Time.deltaTime);
-
         // Fake footsteps when avatar not visible
         if (rend != null)
         {
