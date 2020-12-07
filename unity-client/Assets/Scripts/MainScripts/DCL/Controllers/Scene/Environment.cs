@@ -10,6 +10,7 @@ namespace DCL
     {
         public static readonly Environment i = new Environment();
 
+        public WorldState worldState = new WorldState();
         public readonly MessagingControllersManager messagingControllersManager;
         public readonly PointerEventsController pointerEventsController;
         public readonly MemoryManager memoryManager;
