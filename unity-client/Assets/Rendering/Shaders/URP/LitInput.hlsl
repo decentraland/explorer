@@ -3,6 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceData.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
@@ -112,6 +113,8 @@ inline void InitializeStandardLitSurfaceData(float2 uvAlbedo, float2 uvNormal, f
 
     outSurfaceData.occlusion = SampleOcclusion(uvAlbedo); //Uses Albedo UVs due to TEXCOORDS amount limit
     outSurfaceData.emission = SampleEmission(uvEmissive, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
+    outSurfaceData.clearCoatMask = 0;
+    outSurfaceData.clearCoatSmoothness = 0;
 }
 
 inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfaceData)

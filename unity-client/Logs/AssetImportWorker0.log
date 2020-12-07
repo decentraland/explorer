@@ -1,0 +1,747 @@
+Using pre-set license
+Built from '2020.2/staging' branch; Version is '2020.2.0b14 (dc0b50340a64) revision 14420816'; Using compiler version '192528614'; Build Type 'Release'
+OS: 'Windows 10  (10.0.0) 64bit' Language: 'en' Physical Memory: 49083 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1, IsPro: 0
+
+ COMMAND LINE ARGUMENTS:
+E:\Program Files\Unity\2020.2.0b14\Editor\Unity.exe
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker0
+-projectPath
+E:/Decentraland/ao_explorer/unity-client
+-logFile
+Logs/AssetImportWorker0.log
+-srvPort
+53598
+Successfully changed project path to: E:/Decentraland/ao_explorer/unity-client
+E:/Decentraland/ao_explorer/unity-client
+Using Asset Import Pipeline V2.
+Refreshing native plugins compatible for Editor in 61.74 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 2020.2.0b14 (dc0b50340a64)
+[Subsystems] Discovering subsystems at path E:/Program Files/Unity/2020.2.0b14/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path E:/Decentraland/ao_explorer/unity-client/Assets
+GfxDevice: creating device client; threaded=0
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce GTX 1070 (ID=0x1b81)
+    Vendor:   
+    VRAM:     8088 MB
+    Driver:   27.21.14.5751
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Initialize mono
+Mono path[0] = 'E:/Program Files/Unity/2020.2.0b14/Editor/Data/Managed'
+Mono path[1] = 'E:/Program Files/Unity/2020.2.0b14/Editor/Data/MonoBleedingEdge/lib/mono/unityjit'
+Mono config path = 'E:/Program Files/Unity/2020.2.0b14/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56488
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: E:/Program Files/Unity/2020.2.0b14/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: E:/Program Files/Unity/2020.2.0b14/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.000871 seconds.
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 77.29 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.664 seconds
+Platform modules already initialized, skipping
+Registering precompiled user dll's ...
+Registered in 0.001866 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 64.31 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.886 seconds
+Platform modules already initialized, skipping
+========================================================================
+Worker process is ready to serve import requests
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.03 seconds
+Refreshing native plugins compatible for Editor in 0.89 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3736 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 159.1 MB.
+System memory in use after: 159.2 MB.
+
+Unloading 30 unused Assets to reduce memory usage. Loaded Objects now: 4208.
+Total: 2.733100 ms (FindLiveObjects: 0.447900 ms CreateObjectMapping: 0.089900 ms MarkObjects: 2.102800 ms  DeleteObjects: 0.091600 ms)
+
+========================================================================
+Received Import Request.
+  path: Assets/Rendering/Shaders
+  artifactKey: Guid(a8f10379394667247a5f6e21dc6564c3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders using Guid(a8f10379394667247a5f6e21dc6564c3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '42224cca5643a6ef3b2032477ece352e') in 0.005995 seconds
+  Import took 0.011155 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000181 seconds.
+  path: Assets/Rendering/Shaders/URP/LitInput.hlsl
+  artifactKey: Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/LitInput.hlsl using Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'd466c8cdd337a3a2507b0100b6a61758') in 0.020815 seconds
+  Import took 0.025983 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000215 seconds.
+  path: Assets/Rendering/Shaders/URP
+  artifactKey: Guid(fddf195e7f999364ab6d6ce551069e5a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP using Guid(fddf195e7f999364ab6d6ce551069e5a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c871df57e4facdcf39a909782288744d') in 0.005389 seconds
+  Import took 0.010268 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 50.090562 seconds.
+  path: Assets/Rendering/Shaders/URP/LitInput.hlsl
+  artifactKey: Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/LitInput.hlsl using Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '73b244374b2ff8e94d65058233faafd2') in 0.002706 seconds
+  Import took 0.008077 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 94.994198 seconds.
+  path: Assets/Rendering/Shaders/URP/LitInput.hlsl
+  artifactKey: Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/LitInput.hlsl using Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '78178411810325b93f3c5cf5b78698f5') in 0.002263 seconds
+  Import took 0.007774 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 93.748570 seconds.
+  path: Assets/Rendering/Shaders/URP/LitInput.hlsl
+  artifactKey: Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/LitInput.hlsl using Guid(2a3592dcfe10f804c98bb2e06bbf6283) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '7d39f2f1b98c51db9d34fce31f96ecb5') in 0.002394 seconds
+  Import took 0.008150 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 19.042843 seconds.
+  path: Assets/Rendering/Shaders/URP/Lit.shader
+  artifactKey: Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/Lit.shader using Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c37a76d0843e583716d773be534b9bf3') in 0.009851 seconds
+  Import took 0.016050 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.105664 seconds.
+  path: Assets/Rendering/Shaders/URP/Lit.shader
+  artifactKey: Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/Lit.shader using Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c37a76d0843e583716d773be534b9bf3') in 0.002138 seconds
+  Import took 0.008181 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 347.047839 seconds.
+  path: Assets/Rendering/Shaders/URP/Lit.shader
+  artifactKey: Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/Lit.shader using Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'e19521f76ebf02665bc9529405e191be') in 0.002823 seconds
+  Import took 0.009369 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 53.835538 seconds.
+  path: Assets/Rendering/Shaders/URP/Lit.shader
+  artifactKey: Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/Lit.shader using Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'e239713711ca9862e96101c99f96c550') in 0.002365 seconds
+  Import took 0.007704 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 93.437575 seconds.
+  path: Assets/Rendering/Shaders/URP/Lit.shader
+  artifactKey: Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/URP/Lit.shader using Guid(7bc4dc8666ba3c94e80873a8e72e5b06) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'b28e1dff3d335eb25060f2d4b77379cc') in 0.002258 seconds
+  Import took 0.007326 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 11.528488 seconds.
+  path: Assets/Scenes/InitialScene.unity
+  artifactKey: Guid(99c9720ab356a0642a771bea13969a05) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scenes/InitialScene.unity using Guid(99c9720ab356a0642a771bea13969a05) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '58cb78f06d530b04db362a983f50f168') in 0.005573 seconds
+  Import took 0.011532 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002116 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 1.24 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.869 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.91 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 151.3 MB.
+System memory in use after: 151.4 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4244.
+Total: 2.709700 ms (FindLiveObjects: 0.419900 ms CreateObjectMapping: 0.086600 ms MarkObjects: 2.116400 ms  DeleteObjects: 0.085600 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.003486 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 1.57 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.113 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 1.30 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 152.5 MB.
+System memory in use after: 152.5 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4280.
+Total: 4.987700 ms (FindLiveObjects: 1.041000 ms CreateObjectMapping: 0.278500 ms MarkObjects: 3.577700 ms  DeleteObjects: 0.088400 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002145 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.95 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.910 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 1.05 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 152.4 MB.
+System memory in use after: 152.5 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4316.
+Total: 2.999700 ms (FindLiveObjects: 0.443100 ms CreateObjectMapping: 0.093600 ms MarkObjects: 2.363800 ms  DeleteObjects: 0.098000 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 317.075227 seconds.
+  path: Assets/Scripts/MainScripts/DCL/Components/Avatar/Shaders/ToonShader.shader
+  artifactKey: Guid(ffacb48709ca4ec4d8a1f587776d4a11) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/MainScripts/DCL/Components/Avatar/Shaders/ToonShader.shader using Guid(ffacb48709ca4ec4d8a1f587776d4a11) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '9e8ce395a3f3e41ceeac6aad0118ab82') in 0.018165 seconds
+  Import took 0.023434 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.026205 seconds.
+  path: Assets/Scripts/MainScripts/DCL/Components/Avatar/Shaders/ToonShader.shader
+  artifactKey: Guid(ffacb48709ca4ec4d8a1f587776d4a11) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/MainScripts/DCL/Components/Avatar/Shaders/ToonShader.shader using Guid(ffacb48709ca4ec4d8a1f587776d4a11) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '9e8ce395a3f3e41ceeac6aad0118ab82') in 0.001980 seconds
+  Import took 0.006923 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 3.026750 seconds.
+  path: Assets/Rendering/Shaders/Toon/Master_ToonShader.shadergraph
+  artifactKey: Guid(3e161281d34a14002915a75b71e426c3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/Toon/Master_ToonShader.shadergraph using Guid(3e161281d34a14002915a75b71e426c3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '622cc479a695c2053629d0245c8db4c2') in 0.008856 seconds
+  Import took 0.015474 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.267617 seconds.
+  path: Assets/Rendering/Shaders/Toon/Master_ToonShader.shadergraph
+  artifactKey: Guid(3e161281d34a14002915a75b71e426c3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/Toon/Master_ToonShader.shadergraph using Guid(3e161281d34a14002915a75b71e426c3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '622cc479a695c2053629d0245c8db4c2') in 0.003555 seconds
+  Import took 0.010373 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 16.662273 seconds.
+  path: Assets/Rendering/Shaders/Toon/ToonShader.shadersubgraph
+  artifactKey: Guid(4cadc1cb7cae444909bd6637f15fdf84) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/Toon/ToonShader.shadersubgraph using Guid(4cadc1cb7cae444909bd6637f15fdf84) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'e968a48a9b3588ae2d5b1f08b6e68368') in 0.005379 seconds
+  Import took 0.010930 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 19.412097 seconds.
+  path: Assets/Rendering/Shaders/Toon/Compiled/ToonShaderCompiled.shader
+  artifactKey: Guid(08f57eed8cd29db40bdfc5af4b40f41b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Shaders/Toon/Compiled/ToonShaderCompiled.shader using Guid(08f57eed8cd29db40bdfc5af4b40f41b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '1e481a05f1185e7816685e1b58d96a02') in 0.008569 seconds
+  Import took 0.013797 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002191 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.90 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.899 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.91 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 152.6 MB.
+System memory in use after: 152.7 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4352.
+Total: 2.776200 ms (FindLiveObjects: 0.417300 ms CreateObjectMapping: 0.089600 ms MarkObjects: 2.168400 ms  DeleteObjects: 0.100100 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002358 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.96 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.902 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.95 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 152.7 MB.
+System memory in use after: 152.8 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4388.
+Total: 2.771800 ms (FindLiveObjects: 0.451200 ms CreateObjectMapping: 0.086900 ms MarkObjects: 2.144300 ms  DeleteObjects: 0.088000 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002293 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.93 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.910 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.94 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 152.8 MB.
+System memory in use after: 152.9 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4424.
+Total: 3.700000 ms (FindLiveObjects: 0.818700 ms CreateObjectMapping: 0.333300 ms MarkObjects: 2.437300 ms  DeleteObjects: 0.109600 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002287 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.92 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.929 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.92 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 152.7 MB.
+System memory in use after: 152.8 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4460.
+Total: 2.835300 ms (FindLiveObjects: 0.456700 ms CreateObjectMapping: 0.089900 ms MarkObjects: 2.183700 ms  DeleteObjects: 0.104000 ms)
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002118 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.90 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.846 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.88 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 153.0 MB.
+System memory in use after: 153.1 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4496.
+Total: 3.351500 ms (FindLiveObjects: 0.436600 ms CreateObjectMapping: 0.089900 ms MarkObjects: 2.721600 ms  DeleteObjects: 0.102400 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 7400.520002 seconds.
+  path: Assets/Rendering/Common/ForwardRenderer.asset
+  artifactKey: Guid(099fc9c1332b008458c2081a697964bb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Common/ForwardRenderer.asset using Guid(099fc9c1332b008458c2081a697964bb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '14a3d88f081f9777cd88337806b28c86') in 0.017651 seconds
+  Import took 0.024063 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002255 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.90 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.833 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.91 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3594 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 153.1 MB.
+System memory in use after: 153.2 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4532.
+Total: 3.113000 ms (FindLiveObjects: 0.444700 ms CreateObjectMapping: 0.089600 ms MarkObjects: 2.484600 ms  DeleteObjects: 0.093000 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 264.264430 seconds.
+  path: Assets/Rendering/Common/UniversalRenderPipelineAsset.asset
+  artifactKey: Guid(4ef42bb6871b2e545b8c1a77a3bca1fb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Common/UniversalRenderPipelineAsset.asset using Guid(4ef42bb6871b2e545b8c1a77a3bca1fb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '2dbfd14c9883cc697f1e67a8fd1e1b6f') in 0.027252 seconds
+  Import took 0.034241 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.077421 seconds.
+  path: Assets/Rendering/Common/UniversalRenderPipelineAsset.asset
+  artifactKey: Guid(4ef42bb6871b2e545b8c1a77a3bca1fb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Common/UniversalRenderPipelineAsset.asset using Guid(4ef42bb6871b2e545b8c1a77a3bca1fb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '2dbfd14c9883cc697f1e67a8fd1e1b6f') in 0.003228 seconds
+  Import took 0.011744 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.002237 seconds.
+Begin MonoManager ReloadAssembly
+Error: Could not load signature of DCL.Helpers.TestHelpers:GetPBTransform due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of Tests.WelcomeHUDControllerShould+<>c__DisplayClass1_0:<ReactToViewOnButtonConfirm>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of CullingControllerTests.CullingControllerShould+<>c__DisplayClass9_0:<ResetObjects>b__0 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of DCL.Interface.EngineinterfaceReflection:get_Descriptor due to: Could not load file or assembly 'Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604' or one of its dependencies. assembly:Google.Protobuf, Version=3.9.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604 type:<unknown type> member:(null) signature:<none>
+
+Error: Could not load signature of NSubstitute.Example.ClientCatalogTest+<>c__DisplayClass0_0:<CatalogConnectsToDatabaseSuccessfully>b__1 due to: Could not load file or assembly 'NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca' or one of its dependencies. assembly:NSubstitute, Version=4.2.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca type:<unknown type> member:(null) signature:<none>
+
+Unloading broken assembly Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/TestHelpers.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/WelcomeHUDTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/CullingControllerTests.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/Protocol.dll, this assembly can cause crashes in the runtime
+
+Unloading broken assembly Library/ScriptAssemblies/NSubstituteExamples.dll, this assembly can cause crashes in the runtime
+
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.91 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  0.881 seconds
+Platform modules already initialized, skipping
+Shader 'Universal Render Pipeline/Particles/Lit': fallback shader 'Universal Render Pipeline/Particles/SimpleLit' not found
+Refreshing native plugins compatible for Editor in 0.93 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 3596 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 153.2 MB.
+System memory in use after: 153.3 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 4570.
+Total: 3.441100 ms (FindLiveObjects: 0.532300 ms CreateObjectMapping: 0.309000 ms MarkObjects: 2.495600 ms  DeleteObjects: 0.103300 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 146.258620 seconds.
+  path: Assets/Rendering/Common
+  artifactKey: Guid(928973a7064175c46abff602ed665917) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Rendering/Common using Guid(928973a7064175c46abff602ed665917) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c69ecd79261f6a107fb385bdd917f40e') in 0.010066 seconds
+  Import took 0.016331 seconds .
+
