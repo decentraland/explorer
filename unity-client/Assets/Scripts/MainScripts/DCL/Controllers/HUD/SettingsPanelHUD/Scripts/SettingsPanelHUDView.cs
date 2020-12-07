@@ -1,5 +1,5 @@
+using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Sections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +7,9 @@ namespace DCL.SettingsPanelHUD
 {
     public class SettingsPanelHUDView : MonoBehaviour
     {
+        [Header("General configuration")]
         [SerializeField] private GameObject mainWindow;
+        [SerializeField] private Button resetAllButton;
 
         [Header("Sections configuration")]
         [SerializeField] private SettingsPanelModel settingsPanelConfig;
@@ -39,6 +41,8 @@ namespace DCL.SettingsPanelHUD
         {
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
+
+            resetAllButton.onClick.AddListener(() => settingsPanelController.ResetAllSettings());
 
             closeButton.onClick.AddListener(() => CloseSettingsPanel());
             settingsAnimator.OnWillFinishHide += OnFinishHide;

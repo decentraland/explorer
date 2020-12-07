@@ -9,13 +9,13 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public const string TEXT_QUALITY_CUSTOM = "Custom";
 
-        private SpinBoxSettingsControlView view;
+        private SpinBoxSettingsControlView qualityPresetControlView;
 
         public override void Initialize(ISettingsControlView settingsControlView)
         {
             base.Initialize(settingsControlView);
 
-            view = (SpinBoxSettingsControlView)settingsControlView;
+            qualityPresetControlView = (SpinBoxSettingsControlView)settingsControlView;
 
             SetupQualityPresetLabels();
 
@@ -45,7 +45,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.PostApplySettings();
 
-            RefreshAllSettings();
+            CommonSettingsEvents.RaiseRefreshAllSettings(this);
         }
 
         private void SetupQualityPresetLabels()
@@ -58,7 +58,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 presetNames.Add(preset.displayName);
             }
 
-            view.SetLabels(presetNames.ToArray());
+            qualityPresetControlView.SetLabels(presetNames.ToArray());
         }
 
         private int GetCurrentStoredValue()
@@ -73,23 +73,15 @@ namespace DCL.SettingsPanelHUD.Controls
                 }
             }
 
-            view.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
-            return 0;
-        }
-
-        private void RefreshAllSettings()
-        {
-            if (CommonSettingsVariables.refreshAllSettings.Get() == null)
-                CommonSettingsVariables.refreshAllSettings.Set(this);
-            else
-                CommonSettingsVariables.refreshAllSettings.Set(null);
+            qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
+            return qualityPresetControlView.spinBoxControl.value;
         }
 
         private void ShouldSetQualityPresetAsCustom_OnChange(bool current, bool previous)
         {
             if (current)
             {
-                view.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
+                qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
                 CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(false);
             }
         }

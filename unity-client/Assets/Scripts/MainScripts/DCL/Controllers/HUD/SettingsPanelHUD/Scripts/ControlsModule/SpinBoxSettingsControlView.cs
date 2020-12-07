@@ -14,9 +14,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            settingsControlController.OnControlChanged(spinBox.value);
-            settingsControlController.ApplySettings();
-
             spinBox.onValueChanged.AddListener(sliderValue =>
             {
                 settingsControlController.OnControlChanged(sliderValue);

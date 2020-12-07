@@ -19,13 +19,9 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            indicatorLabel.text = slider.value.ToString();
-            settingsControlController.OnControlChanged(slider.value);
-            settingsControlController.ApplySettings();
-
             slider.onValueChanged.AddListener(sliderValue =>
             {
-                indicatorLabel.text = sliderValue.ToString();
+                OverrideIndicatorLabel(sliderValue.ToString());
                 settingsControlController.OnControlChanged(sliderValue);
                 settingsControlController.ApplySettings();
 

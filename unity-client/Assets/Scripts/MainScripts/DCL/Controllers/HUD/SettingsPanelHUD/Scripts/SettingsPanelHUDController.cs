@@ -1,3 +1,4 @@
+using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Sections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace DCL.SettingsPanelHUD
         void OpenSection(ISettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
         void SaveSettings();
+        void ResetAllSettings();
     }
 
     public class SettingsPanelHUDController : IHUD, ISettingsPanelHUDController
@@ -85,6 +87,13 @@ namespace DCL.SettingsPanelHUD
         public void SaveSettings()
         {
             Settings.i.SaveSettings();
+        }
+
+        public void ResetAllSettings()
+        {
+            Settings.i.LoadDefaultSettings();
+            Settings.i.SaveSettings();
+            CommonSettingsEvents.RaiseRefreshAllSettings(null);
         }
     }
 }

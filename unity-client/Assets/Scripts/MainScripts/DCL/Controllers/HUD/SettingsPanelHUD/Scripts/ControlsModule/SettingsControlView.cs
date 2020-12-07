@@ -26,6 +26,7 @@ namespace DCL.SettingsPanelHUD.Controls
             if (settingsControlController == null)
                 return;
 
+            skipPostApplySettings = true;
             RefreshControl();
         }
 
@@ -43,8 +44,9 @@ namespace DCL.SettingsPanelHUD.Controls
                 OnAnyDeactivationFlagChange(flag.Get(), false);
             }
 
-            CommonSettingsVariables.refreshAllSettings.OnChange += RefreshAllSettings_OnChange;
+            CommonSettingsEvents.OnRefreshAllSettings += OnRefreshAllSettings;
 
+            skipPostApplySettings = true;
             RefreshControl();
         }
 
@@ -58,8 +60,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 }
             }
 
-            if (CommonSettingsVariables.refreshAllSettings != null)
-                CommonSettingsVariables.refreshAllSettings.OnChange -= RefreshAllSettings_OnChange;
+            CommonSettingsEvents.OnRefreshAllSettings -= OnRefreshAllSettings;
         }
 
         public abstract void RefreshControl();
@@ -75,9 +76,9 @@ namespace DCL.SettingsPanelHUD.Controls
             canvasGroup.interactable = enabled;
         }
 
-        private void RefreshAllSettings_OnChange(SettingsControlController currentSender, SettingsControlController previousSender)
+        private void OnRefreshAllSettings(SettingsControlController sender)
         {
-            if (currentSender != settingsControlController)
+            if (sender != settingsControlController)
             {
                 skipPostApplySettings = true;
                 RefreshControl();
