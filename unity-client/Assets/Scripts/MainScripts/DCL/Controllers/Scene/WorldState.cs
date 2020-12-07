@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class WorldState
+    public class WorldState : ISceneHandler
     {
         public HashSet<string> readyScenes = new HashSet<string>();
         public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
@@ -75,6 +75,26 @@ namespace DCL
             Vector3 sceneOffset = sceneRealPosition - sceneFictionPosition;
             Vector3 solvedPosition = pos + sceneOffset;
             return solvedPosition;
+        }
+
+        public bool IsCharacterInsideScene(ParcelScene scene)
+        {
+            return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
+        }
+
+        public HashSet<Vector2Int> GetAllLoadedScenesCoords()
+        {
+            HashSet<Vector2Int> allLoadedParcelCoords = new HashSet<Vector2Int>();
+
+            // Create fast (hashset) collection of loaded parcels coords
+            foreach (var element in loadedScenes)
+            {
+                if (!element.Value.isReady) continue;
+
+                allLoadedParcelCoords.UnionWith(element.Value.parcels);
+            }
+
+            return allLoadedParcelCoords;
         }
     }
 }
