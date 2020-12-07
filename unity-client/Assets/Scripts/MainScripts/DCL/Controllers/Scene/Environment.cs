@@ -10,7 +10,7 @@ namespace DCL
     {
         public static readonly Environment i = new Environment();
 
-        public WorldState worldState;
+        public readonly WorldState worldState;
         public readonly MessagingControllersManager messagingControllersManager;
         public readonly PointerEventsController pointerEventsController;
         public readonly MemoryManager memoryManager;
@@ -51,10 +51,10 @@ namespace DCL
             messagingControllersManager.Initialize(messageHandler);
             pointerEventsController.Initialize();
             memoryManager.Initialize();
+            worldState.Initialize();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(sceneHandler, DCLCharacterController.i.characterPosition);
             parcelScenesCleaner.Start();
             cullingController.Start();
-            worldState = new WorldState();
 
             initialized = true;
         }

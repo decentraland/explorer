@@ -14,6 +14,15 @@ namespace DCL
         public string globalSceneId { get; set; }
         public string currentSceneId { get; set; }
 
+        public void Initialize()
+        {
+            globalSceneId = null;
+            currentSceneId = null;
+            readyScenes = new HashSet<string>();
+            loadedScenes = new Dictionary<string, ParcelScene>();
+            scenesSortedByDistance = new List<ParcelScene>();
+        }
+
         public string TryToGetSceneCoordsID(string id)
         {
             if (loadedScenes.ContainsKey(id))
