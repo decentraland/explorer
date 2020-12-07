@@ -40,7 +40,7 @@ public class ChatHUDShould : TestsBase
     public void TrimWhenTooMuchMessagesAreInView()
     {
         int cacheMaxEntries = ChatHUDController.MAX_CHAT_ENTRIES;
-        int newMaxEntries = 10;
+        const int newMaxEntries = 10;
         ChatHUDController.MAX_CHAT_ENTRIES = newMaxEntries;
         for (int i = 0; i < ChatHUDController.MAX_CHAT_ENTRIES + 5; i++)
         {
