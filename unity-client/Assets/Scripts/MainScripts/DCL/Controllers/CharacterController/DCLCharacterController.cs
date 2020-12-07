@@ -108,7 +108,7 @@ public class DCLCharacterController : MonoBehaviour
         collider = GetComponent<Collider>();
 
         characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
-        SceneController.OnDebugModeSet += () => supportsMovingPlatforms = true;
+        DebugBridge.OnDebugModeSet += () => supportsMovingPlatforms = true;
 
         lastPosition = transform.position;
         transform.parent = null;
