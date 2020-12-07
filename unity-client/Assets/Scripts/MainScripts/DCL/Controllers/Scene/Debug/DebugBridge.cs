@@ -15,7 +15,8 @@ namespace DCL
 
         public static Action OnDebugModeSet;
 
-        [FormerlySerializedAs("debugReferences")] public DebugView debugView;
+        [FormerlySerializedAs("debugReferences")]
+        public DebugView debugView;
 
         // Beware this SetDebug() may be called before Awake() somehow...
         [ContextMenu("Set Debug mode")]
@@ -34,7 +35,7 @@ namespace DCL
 
             //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
             //             case. Calling Initialize multiple times in a row is safe.
-            Environment.i.Initialize(SceneController.i, SceneController.i);
+            Environment.i.Initialize(SceneController.i);
             Environment.i.worldBlockersController.SetEnabled(false);
         }
 
