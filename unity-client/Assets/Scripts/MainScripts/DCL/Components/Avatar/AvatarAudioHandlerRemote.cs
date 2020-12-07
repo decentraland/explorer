@@ -27,9 +27,10 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         footstepRun = ac.GetEvent("FootstepRun");
         clothesRustleShort = ac.GetEvent("ClothesRustleShort");
 
-        // Lower volume of jump/land
+        // Lower volume of jump/land/clothes
         footstepJump.source.volume = footstepJump.source.volume * 0.5f;
         footstepLand.source.volume = footstepLand.source.volume * 0.5f;
+        clothesRustleShort.source.volume = clothesRustleShort.source.volume * 0.5f;
 
         if (avatarAnimatorLegacy != null)
         {
@@ -72,7 +73,7 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         // Fake footsteps when avatar not visible
         if (rend != null)
         {
-            if (!AvatarIsInView() && blackBoard.movementSpeed > 0f && blackBoard.isGrounded)
+            if (!AvatarIsInView() && (blackBoard.movementSpeed / Time.deltaTime) > 1f && blackBoard.isGrounded)
             {
                 if (Time.time >= nextFootstepTime)
                 {
