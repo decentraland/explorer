@@ -77,7 +77,7 @@ namespace DCL.Helpers
 
             if (scene != null)
                 hitInfo.isValid = info.scene == scene;
-            else if (scene == null && SceneController.i.IsCharacterInsideScene(info.scene))
+            else if (scene == null && Environment.i.worldState.IsCharacterInsideScene(info.scene))
                 hitInfo.isValid = true;
         }
     }

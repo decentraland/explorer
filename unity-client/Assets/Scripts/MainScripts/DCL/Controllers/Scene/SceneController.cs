@@ -14,7 +14,7 @@ using UnityEngine.Serialization;
 
 namespace DCL
 {
-    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler, ISceneHandler
+    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler
     {
         public static SceneController i { get; private set; }
 
@@ -50,7 +50,7 @@ namespace DCL
             InitializeSceneBoundariesChecker(Environment.i.debugConfig.isDebugMode);
 
             RenderProfileManifest.i.Initialize();
-            Environment.i.Initialize(this, this);
+            Environment.i.Initialize(this);
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
             if (startDecentralandAutomatically)
@@ -104,7 +104,7 @@ namespace DCL
 
         public void Restart()
         {
-            Environment.i.Restart(this, this);
+            Environment.i.Restart(this);
 
             Environment.i.parcelScenesCleaner.ForceCleanup();
         }
@@ -862,26 +862,6 @@ namespace DCL
             {
                 scene.gameObject.SetActive(true);
             }
-        }
-
-        public bool IsCharacterInsideScene(ParcelScene scene)
-        {
-            return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
-        }
-
-        public HashSet<Vector2Int> GetAllLoadedScenesCoords()
-        {
-            HashSet<Vector2Int> allLoadedParcelCoords = new HashSet<Vector2Int>();
-
-            // Create fast (hashset) collection of loaded parcels coords
-            foreach (var element in Environment.i.worldState.loadedScenes)
-            {
-                if (!element.Value.isReady) continue;
-
-                allLoadedParcelCoords.UnionWith(element.Value.parcels);
-            }
-
-            return allLoadedParcelCoords;
         }
 
         //======================================================================

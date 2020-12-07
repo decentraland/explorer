@@ -45,7 +45,7 @@ namespace DCL
             debugConfig = new DebugConfig();
         }
 
-        public void Initialize(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)
+        public void Initialize(IMessageProcessHandler messageHandler)
         {
             if (initialized)
                 return;
@@ -54,7 +54,7 @@ namespace DCL
             pointerEventsController.Initialize();
             memoryManager.Initialize();
             worldState.Initialize();
-            worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(sceneHandler, DCLCharacterController.i.characterPosition);
+            worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(worldState, DCLCharacterController.i.characterPosition);
             parcelScenesCleaner.Start();
             cullingController.Start();
             debugConfig = new DebugConfig();
@@ -81,10 +81,10 @@ namespace DCL
             cullingController.Dispose();
         }
 
-        public void Restart(IMessageProcessHandler messageHandler, ISceneHandler sceneHandler)
+        public void Restart(IMessageProcessHandler messageHandler)
         {
             Cleanup();
-            Initialize(messageHandler, sceneHandler);
+            Initialize(messageHandler);
         }
     }
 }
