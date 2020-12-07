@@ -14,9 +14,9 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
     Renderer rend;
     AvatarAnimatorLegacy.BlackBoard blackBoard;
     bool isGroundedPrevious = true;
-    float runLastPlayed = 0f, walkLastPlayed = 0f;
 
     public AvatarAnimatorLegacy avatarAnimatorLegacy;
+    bool globalRendererIsReady;
 
     private void Start()
     {
@@ -35,6 +35,14 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         {
             blackBoard = avatarAnimatorLegacy.blackboard;
         }
+
+        globalRendererIsReady = CommonScriptableObjects.rendererState.Get();
+        CommonScriptableObjects.rendererState.OnChange += OnGlobalRendererStateChange;
+    }
+
+    void OnGlobalRendererStateChange(bool current, bool previous)
+    {
+        globalRendererIsReady = current;
     }
 
     public void Init(GameObject rendererContainer)
@@ -44,7 +52,7 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
 
     private void Update()
     {
-        if (blackBoard == null)
+        if (blackBoard == null || !globalRendererIsReady)
             return;
 
         // Jumped
