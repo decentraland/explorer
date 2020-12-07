@@ -13,7 +13,7 @@ namespace DCL.Controllers
 
         public void ApplyFeedback(MeshesInfo meshesInfo, bool isInsideBoundaries)
         {
-            if (meshesInfo.renderers[0] == null)
+            if (meshesInfo?.renderers == null || meshesInfo.renderers.Length == 0)
                 return;
 
             if (isInsideBoundaries != meshesInfo.renderers[0].enabled && meshesInfo.currentShape.IsVisible())
