@@ -147,7 +147,7 @@ namespace DCL
             }
 
 #if UNITY_EDITOR
-            SceneController.i.isWssDebugMode = true;
+            DCL.Environment.i.debugConfig.isWssDebugMode = true;
 
             ws = new WebSocketServer("ws://localhost:5000");
             ws.AddWebSocketService<DCLWebSocketService>("/dcl");
@@ -255,19 +255,19 @@ namespace DCL
                         switch (msg.type)
                         {
                             case "SetDebug":
-                                sceneController.SetDebug();
+                                DebugBridge.i.SetDebug();
                                 break;
                             case "SetSceneDebugPanel":
-                                sceneController.SetSceneDebugPanel();
+                                DebugBridge.i.SetSceneDebugPanel();
                                 break;
                             case "ShowFPSPanel":
-                                sceneController.ShowFPSPanel();
+                                DebugBridge.i.ShowFPSPanel();
                                 break;
                             case "HideFPSPanel":
-                                sceneController.HideFPSPanel();
+                                DebugBridge.i.HideFPSPanel();
                                 break;
                             case "SetEngineDebugPanel":
-                                sceneController.SetEngineDebugPanel();
+                                DebugBridge.i.SetEngineDebugPanel();
                                 break;
                             case "SendSceneMessage":
                                 sceneController.SendSceneMessage(msg.payload);
