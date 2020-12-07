@@ -14,14 +14,9 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, settingsControlController);
 
-            spinBox.onValueChanged.AddListener(sliderValue =>
+            spinBox.onValueChanged.AddListener(spinBoxValue =>
             {
-                settingsControlController.OnControlChanged(sliderValue);
-                settingsControlController.ApplySettings();
-
-                if (!skipPostApplySettings)
-                    settingsControlController.PostApplySettings();
-                skipPostApplySettings = false;
+                OnControlChanged(spinBoxValue);
             });
         }
 

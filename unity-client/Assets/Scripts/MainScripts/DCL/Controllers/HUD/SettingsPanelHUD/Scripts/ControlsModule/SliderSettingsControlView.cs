@@ -22,12 +22,7 @@ namespace DCL.SettingsPanelHUD.Controls
             slider.onValueChanged.AddListener(sliderValue =>
             {
                 OverrideIndicatorLabel(sliderValue.ToString());
-                settingsControlController.OnControlChanged(sliderValue);
-                settingsControlController.ApplySettings();
-
-                if (!skipPostApplySettings)
-                    settingsControlController.PostApplySettings();
-                skipPostApplySettings = false;
+                OnControlChanged(sliderValue);
             });
         }
 

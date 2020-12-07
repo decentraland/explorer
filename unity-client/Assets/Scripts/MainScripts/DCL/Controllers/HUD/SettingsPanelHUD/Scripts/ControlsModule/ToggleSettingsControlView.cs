@@ -15,12 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             toggle.onValueChanged.AddListener(isOn =>
             {
-                settingsControlController.OnControlChanged(isOn);
-                settingsControlController.ApplySettings();
-
-                if (!skipPostApplySettings)
-                    settingsControlController.PostApplySettings();
-                skipPostApplySettings = false;
+                OnControlChanged(isOn);
             });
         }
 
