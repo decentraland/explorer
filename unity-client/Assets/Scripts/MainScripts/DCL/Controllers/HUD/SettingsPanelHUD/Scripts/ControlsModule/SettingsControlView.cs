@@ -8,7 +8,6 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
         void RefreshControl();
-        void OnControlChanged(object newValue);
     }
 
     public abstract class SettingsControlView : MonoBehaviour, ISettingsControlView
@@ -49,6 +48,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             skipPostApplySettings = true;
             RefreshControl();
+            settingsControlController.OnControlChanged(settingsControlController.GetStoredValue());
         }
 
         private void OnDestroy()
@@ -66,7 +66,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public abstract void RefreshControl();
 
-        public void OnControlChanged(object newValue)
+        protected void ApplySetting(object newValue)
         {
             settingsControlController.OnControlChanged(newValue);
             settingsControlController.ApplySettings();

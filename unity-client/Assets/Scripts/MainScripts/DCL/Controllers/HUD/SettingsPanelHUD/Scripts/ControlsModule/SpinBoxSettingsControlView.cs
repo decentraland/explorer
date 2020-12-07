@@ -16,7 +16,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             spinBox.onValueChanged.AddListener(spinBoxValue =>
             {
-                OnControlChanged(spinBoxValue);
+                ApplySetting(spinBoxValue);
             });
         }
 

@@ -15,7 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             toggle.onValueChanged.AddListener(isOn =>
             {
-                OnControlChanged(isOn);
+                ApplySetting(isOn);
             });
         }
 
