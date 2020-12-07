@@ -52,11 +52,11 @@ namespace DCL
             if (!string.IsNullOrEmpty(GLOBAL_MESSAGING_CONTROLLER))
                 messagingControllers.TryGetValue(GLOBAL_MESSAGING_CONTROLLER, out globalController);
 
-            SceneController.i.OnSortScenes += MarkBusesDirty;
+            Main.i.OnSortScenes += MarkBusesDirty;
 
             if (mainCoroutine == null)
             {
-                mainCoroutine = SceneController.i.StartCoroutine(ProcessMessages());
+                mainCoroutine = CoroutineStarter.Start(ProcessMessages());
             }
         }
 
@@ -152,7 +152,7 @@ namespace DCL
         {
             if (mainCoroutine != null)
             {
-                SceneController.i.StopCoroutine(mainCoroutine);
+                CoroutineStarter.Stop(mainCoroutine);
                 mainCoroutine = null;
             }
 
@@ -165,7 +165,7 @@ namespace DCL
                 }
             }
 
-            SceneController.i.OnSortScenes -= PopulateBusesToBeProcessed;
+            Main.i.OnSortScenes -= PopulateBusesToBeProcessed;
 
             messagingControllers.Clear();
         }

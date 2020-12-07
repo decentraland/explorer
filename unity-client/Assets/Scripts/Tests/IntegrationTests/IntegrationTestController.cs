@@ -15,7 +15,7 @@ public class IntegrationTestController : MonoBehaviour
 
     public IEnumerator Initialize()
     {
-        var sceneController = TestHelpers.InitializeSceneController();
+        var main = TestHelpers.InitializeMain();
         DCLCharacterController.i.gravity = 0;
         DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
         {
@@ -36,17 +36,17 @@ public class IntegrationTestController : MonoBehaviour
             baseUrl = "http://localhost:9991/local-ipfs/contents/"
         };
 
-        Assert.IsTrue(sceneController != null, "Cannot find SceneController");
+        Assert.IsTrue(main != null, "Cannot find SceneController");
 
-        sceneController.UnloadAllScenes();
-        sceneController.LoadParcelScenes(JsonConvert.SerializeObject(scenesToLoad));
+        Environment.i.sceneController.UnloadAllScenes();
+        Environment.i.sceneController.LoadParcelScenes(JsonConvert.SerializeObject(scenesToLoad));
 
         yield return new WaitForAllMessagesProcessed();
 
         var scene = Environment.i.worldState.loadedScenes[sceneName];
 
         //NOTE(Brian): This is making my eyes bleed.
-        sceneController.SendSceneMessage(
+        Environment.i.sceneController.SendSceneMessage(
             TestHelpers.CreateSceneMessage(
                 sceneName,
                 entityId,
@@ -59,7 +59,7 @@ public class IntegrationTestController : MonoBehaviour
         );
 
         //NOTE(Brian): This is making my eyes bleed. (Zak): Twice
-        sceneController.SendSceneMessage(
+        Environment.i.sceneController.SendSceneMessage(
             TestHelpers.CreateSceneMessage(
                 sceneName,
                 entityId,
@@ -105,7 +105,6 @@ public class IntegrationTestController : MonoBehaviour
 
     public IEnumerator Verify()
     {
-        var sceneController = FindObjectOfType<SceneController>();
         var scene = Environment.i.worldState.loadedScenes[sceneName];
         var cube = scene.entities[entityId];
 

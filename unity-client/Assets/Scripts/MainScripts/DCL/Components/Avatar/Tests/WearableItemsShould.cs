@@ -20,7 +20,7 @@ namespace AvatarShape_Tests
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            yield return SetUp_SceneController();
+            yield return SetUp_Main();
             yield return SetUp_CharacterController();
 
             if (avatarShape == null)

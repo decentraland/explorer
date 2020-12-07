@@ -13,7 +13,7 @@ public class BuilderMeshLoadingIndicator : TestsBase
     [UnityTest]
     public IEnumerator BuilderMeshLoadingIndicatorTest()
     {
-        yield return SetUp_SceneController();
+        yield return SetUp_Main();
 
         yield return SceneManager.LoadSceneAsync("BuilderScene", LoadSceneMode.Additive);
 

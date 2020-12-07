@@ -15,7 +15,7 @@ namespace Tests
     {
         protected override IEnumerator TearDown()
         {
-            sceneController.enabled = true;
+            main.enabled = true;
             return base.TearDown();
         }
 
@@ -166,7 +166,7 @@ namespace Tests
         public IEnumerator VolumeWhenAudioCreatedWithNoUserInScene()
         {
             // We disable SceneController monobehaviour to avoid its current scene id update
-            sceneController.enabled = false;
+            main.enabled = false;
 
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");
@@ -189,7 +189,7 @@ namespace Tests
         public IEnumerator VolumeWhenAudioCreatedWithUserInScene()
         {
             // We disable SceneController monobehaviour to avoid its current scene id update
-            sceneController.enabled = false;
+            main.enabled = false;
 
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
@@ -212,7 +212,7 @@ namespace Tests
         public IEnumerator VolumeIsMutedWhenUserLeavesScene()
         {
             // We disable SceneController monobehaviour to avoid its current scene id update
-            sceneController.enabled = false;
+            main.enabled = false;
 
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
@@ -238,7 +238,7 @@ namespace Tests
         public IEnumerator VolumeIsUnmutedWhenUserEntersScene()
         {
             // We disable SceneController monobehaviour to avoid its current scene id update
-            sceneController.enabled = false;
+            main.enabled = false;
 
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");

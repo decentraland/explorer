@@ -239,9 +239,9 @@ public class PhysicsCast_Tests : TestsBase
             {
                 // Note (Zak): we send several times the same message to ensure it's
                 // only processed once (lossy messages)
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
-                sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                Environment.i.sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                Environment.i.sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
+                Environment.i.sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
             },
             OnMessageReceived);
     }

@@ -33,7 +33,7 @@ namespace Tests
 
             string sceneGameObjectNamePrefix = "UI Scene - ";
             string sceneId = "Test UI Scene";
-            sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() {id = sceneId}));
+            Environment.i.sceneController.CreateUIScene(JsonUtility.ToJson(new CreateUISceneMessage() {id = sceneId}));
 
             GameObject sceneGo = GameObject.Find(sceneGameObjectNamePrefix + sceneId);
 
@@ -90,7 +90,7 @@ namespace Tests
             yield return new WaitForAllMessagesProcessed();
 
             var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
-            sceneController.LoadParcelScenes(scenesToLoad);
+            Environment.i.sceneController.LoadParcelScenes(scenesToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 
@@ -174,7 +174,7 @@ namespace Tests
                 bodies: 1,
                 textures: 0);
 
-            sceneController.UnloadAllScenes();
+            Environment.i.sceneController.UnloadAllScenes();
             yield return null;
         }
 
@@ -194,7 +194,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator SceneLoading()
         {
-            sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
+            Environment.i.sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
             yield return new WaitForAllMessagesProcessed();
 
             string loadedSceneID = "0,0";
@@ -206,7 +206,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator SceneUnloading()
         {
-            sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
+            Environment.i.sceneController.LoadParcelScenes((Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text);
 
             yield return new WaitForAllMessagesProcessed();
 
@@ -220,7 +220,7 @@ namespace Tests
             var sceneRootGameObject = Environment.i.worldState.loadedScenes[loadedSceneID];
             var sceneEntities = Environment.i.worldState.loadedScenes[loadedSceneID].entities;
 
-            sceneController.UnloadScene(loadedSceneID);
+            Environment.i.sceneController.UnloadScene(loadedSceneID);
 
             yield return new WaitForAllMessagesProcessed();
             yield return new WaitForSeconds(3f);
@@ -234,7 +234,7 @@ namespace Tests
                 Assert.IsFalse(entity.Value.gameObject.activeInHierarchy, "Every entity should be disabled after returning to the pool");
             }
 
-            TestHelpers.ForceUnloadAllScenes(sceneController);
+            TestHelpers.ForceUnloadAllScenes(Environment.i.sceneController);
 
             yield return null;
         }
@@ -253,7 +253,7 @@ namespace Tests
 
             foreach (string jsonScene in jsonScenes)
             {
-                sceneController.LoadParcelScenes(jsonScene);
+                Environment.i.sceneController.LoadParcelScenes(jsonScene);
             }
 
             yield return new WaitForAllMessagesProcessed();
@@ -269,7 +269,7 @@ namespace Tests
 
             foreach (var jsonScene in jsonScenes)
             {
-                sceneController.LoadParcelScenes(jsonScene);
+                Environment.i.sceneController.LoadParcelScenes(jsonScene);
             }
 
             Assert.AreEqual(12, Environment.i.worldState.loadedScenes.Count);
@@ -279,7 +279,7 @@ namespace Tests
                 Assert.IsTrue(Environment.i.worldState.loadedScenes.ContainsValue(reference), "References must be the same");
             }
 
-            TestHelpers.ForceUnloadAllScenes(sceneController);
+            TestHelpers.ForceUnloadAllScenes(Environment.i.sceneController);
             yield return null;
         }
 
@@ -289,7 +289,7 @@ namespace Tests
             Assert.AreEqual(1, Environment.i.worldState.loadedScenes.Count);
 
             var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":0,\"y\":0},\"parcels\":[{\"x\":-1,\"y\":0}, {\"x\":0,\"y\":0}, {\"x\":-1,\"y\":1}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
-            sceneController.LoadParcelScenes(jsonMessageToLoad);
+            Environment.i.sceneController.LoadParcelScenes(jsonMessageToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 
@@ -316,7 +316,7 @@ namespace Tests
             Assert.AreEqual(1, Environment.i.worldState.loadedScenes.Count);
 
             var jsonMessageToLoad = "{\"id\":\"xxx\",\"basePosition\":{\"x\":90,\"y\":90},\"parcels\":[{\"x\":89,\"y\":90}, {\"x\":90,\"y\":90}, {\"x\":89,\"y\":91}],\"baseUrl\":\"http://localhost:9991/local-ipfs/contents/\",\"contents\":[],\"owner\":\"0x0f5d2fb29fb7d3cfee444a200298f468908cc942\"}";
-            sceneController.LoadParcelScenes(jsonMessageToLoad);
+            Environment.i.sceneController.LoadParcelScenes(jsonMessageToLoad);
 
             yield return new WaitForAllMessagesProcessed();
 

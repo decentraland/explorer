@@ -98,7 +98,7 @@ namespace DCL.Helpers
             where K : new()
         {
             int componentClassId = classId == CLASS_ID_COMPONENT.NONE
-                ? (int) scene.ownerController.componentFactory.GetIdForType<T>()
+                ? (int) scene.componentFactory.GetIdForType<T>()
                 : (int) classId;
 
             string componentInstanceId = GetComponentUniqueId(scene, typeof(T).Name, componentClassId, entity.entityId);
@@ -131,7 +131,7 @@ namespace DCL.Helpers
                 model = new K();
             }
 
-            CLASS_ID_COMPONENT classId = component.scene.ownerController.componentFactory.GetIdForType<T>();
+            CLASS_ID_COMPONENT classId = component.scene.componentFactory.GetIdForType<T>();
 
             component.scene.EntityComponentUpdate(component.entity, classId, JsonUtility.ToJson(model));
 
@@ -697,7 +697,7 @@ namespace DCL.Helpers
                 yield return component.routine;
             }
 
-            int id = (int) scene.ownerController.componentFactory.GetIdForType<TComponent>();
+            int id = (int) scene.componentFactory.GetIdForType<TComponent>();
 
             scene.EntityComponentUpdate(e, (CLASS_ID_COMPONENT) id, "{}");
 
@@ -1096,30 +1096,30 @@ namespace DCL.Helpers
             }
         }
 
-        public static SceneController InitializeSceneController(bool usesWebServer = false)
+        public static Main InitializeMain(bool usesWebServer = false)
         {
-            var sceneController = UnityEngine.Object.FindObjectOfType<SceneController>();
+            var main = UnityEngine.Object.FindObjectOfType<Main>();
 
-            if (sceneController != null && sceneController.componentFactory == null)
+            if (main != null && main.componentFactory == null)
             {
-                ForceUnloadAllScenes(sceneController);
-                Utils.SafeDestroy(sceneController);
-                sceneController = null;
+                ForceUnloadAllScenes(Environment.i.sceneController);
+                Utils.SafeDestroy(main);
+                main = null;
             }
 
-            if (sceneController == null)
+            if (main == null)
             {
                 GameObject GO = GameObject.Instantiate(Resources.Load("Prefabs/SceneController") as GameObject);
-                sceneController = GO.GetComponent<SceneController>();
+                main = GO.GetComponent<Main>();
             }
             else
             {
-                sceneController.Restart();
+                Environment.i.Restart();
             }
 
             if (usesWebServer)
             {
-                var webServer = sceneController.GetComponent<WebServerComponent>();
+                var webServer = main.GetComponent<WebServerComponent>();
 
                 if (webServer != null)
                 {
@@ -1127,18 +1127,17 @@ namespace DCL.Helpers
                 }
                 else
                 {
-                    sceneController.gameObject.AddComponent<WebServerComponent>();
+                    main.gameObject.AddComponent<WebServerComponent>();
                 }
             }
 
             Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
-            sceneController.deferredMessagesDecoding = false;
-            sceneController.prewarmSceneMessagesPool = false;
+            Environment.i.sceneController.prewarmSceneMessagesPool = false;
 
-            ForceUnloadAllScenes(sceneController);
+            ForceUnloadAllScenes(Environment.i.sceneController);
 
-            return sceneController;
+            return main;
         }
 
         // static string lastMessageFromEngineType;

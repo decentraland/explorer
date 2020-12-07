@@ -34,7 +34,7 @@ namespace DCL
 
             //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
             //             case. Calling Initialize multiple times in a row is safe.
-            Environment.i.Initialize(SceneController.i);
+            Environment.i.Initialize();
             Environment.i.worldBlockersController.SetEnabled(false);
         }
 

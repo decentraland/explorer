@@ -8,11 +8,10 @@ public class EntityMaterialUpdateTestController : MonoBehaviour
 {
     void Start()
     {
-        var sceneController = FindObjectOfType<SceneController>();
         var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
 
-        sceneController.UnloadAllScenes();
-        sceneController.LoadParcelScenes(scenesToLoad);
+        Environment.i.sceneController.UnloadAllScenes();
+        Environment.i.sceneController.LoadParcelScenes(scenesToLoad);
 
         var scene = Environment.i.worldState.loadedScenes["0,0"];
 

@@ -30,6 +30,7 @@ namespace DCL.Controllers
         public SceneMetricsController metricsController;
         public UIScreenSpace uiScreenSpace;
 
+        public DCLComponentFactory componentFactory;
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
         public event System.Action<ParcelScene> OnSceneReady;
@@ -306,10 +307,10 @@ namespace DCL.Controllers
             var newEntity = new DecentralandEntity();
             newEntity.entityId = id;
 
-            SceneController.i.EnsureEntityPool();
+            Main.i.EnsureEntityPool();
 
             // As we know that the pool already exists, we just get one gameobject from it
-            PoolableObject po = PoolManager.i.Get(SceneController.EMPTY_GO_POOL_NAME);
+            PoolableObject po = PoolManager.i.Get(Main.EMPTY_GO_POOL_NAME);
             newEntity.gameObject = po.gameObject;
 
 #if UNITY_EDITOR
@@ -587,7 +588,9 @@ namespace DCL.Controllers
             }
 
             BaseComponent newComponent = null;
-            DCLComponentFactory factory = ownerController.componentFactory;
+            DCLComponentFactory factory = Main.i.componentFactory;
+            componentFactory = factory;
+
             Assert.IsNotNull(factory, "Factory is null?");
 
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
@@ -692,7 +695,7 @@ namespace DCL.Controllers
             }
 
             BaseComponent newComponent = null;
-            DCLComponentFactory factory = ownerController.componentFactory;
+            DCLComponentFactory factory = Main.i.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
             // HACK: (Zak) will be removed when we separate each

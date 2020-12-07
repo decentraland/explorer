@@ -22,7 +22,7 @@ public class TestsBase
 
     protected Component[] startingSceneComponents = null;
     protected bool sceneInitialized = false;
-    protected SceneController sceneController;
+    protected Main main;
     protected ParcelScene scene;
     protected CameraController cameraController;
 
@@ -51,7 +51,7 @@ public class TestsBase
         {
             yield return SetUp_SceneIntegrityChecker();
             SetUp_Renderer();
-            Environment.i.Initialize(new DummyMessageHandler());
+            Environment.i.Initialize();
             yield return null;
             //TODO(Brian): Remove when the init layer is ready
             Environment.i.cullingController.Stop();
@@ -60,13 +60,13 @@ public class TestsBase
 
         SetUp_Camera();
 
-        yield return SetUp_SceneController();
+        yield return SetUp_Main();
         yield return SetUp_CharacterController();
 
         yield return SetUp_SceneIntegrityChecker();
 
         SetUp_Renderer();
-        Environment.i.Initialize(new DummyMessageHandler());
+        Environment.i.Initialize();
         yield return null;
         //TODO(Brian): Remove when the init layer is ready
         Environment.i.cullingController.Stop();
@@ -146,7 +146,7 @@ public class TestsBase
 
     public void SetUp_TestScene()
     {
-        scene = sceneController.CreateTestScene();
+        scene = Environment.i.sceneController.CreateTestScene();
     }
 
     public virtual IEnumerator SetUp_CharacterController()
@@ -170,10 +170,10 @@ public class TestsBase
             cameraController = GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
     }
 
-    public virtual IEnumerator SetUp_SceneController(bool debugMode = false, bool usesWebServer = false, bool spawnTestScene = true)
+    public virtual IEnumerator SetUp_Main(bool debugMode = false, bool usesWebServer = false, bool spawnTestScene = true)
     {
         PoolManager.enablePrewarm = false;
-        sceneController = TestHelpers.InitializeSceneController(usesWebServer);
+        main = TestHelpers.InitializeMain(usesWebServer);
 
         if (debugMode)
             DebugBridge.i.SetDebug();
@@ -188,7 +188,7 @@ public class TestsBase
     {
         string globalSceneId = "global-scene";
 
-        sceneController.CreateUIScene(
+        Environment.i.sceneController.CreateUIScene(
             JsonConvert.SerializeObject(
                 new CreateUISceneMessage
                 {
@@ -207,7 +207,7 @@ public class TestsBase
     {
         yield return InitUnityScene("MainTest");
 
-        yield return SetUp_SceneController(debugMode, usesWebServer, spawnTestScene);
+        yield return SetUp_Main(debugMode, usesWebServer, spawnTestScene);
 
         if (spawnCharController)
         {

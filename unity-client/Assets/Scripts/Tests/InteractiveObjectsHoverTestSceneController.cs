@@ -51,7 +51,7 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
         DCL.Configuration.EnvironmentSettings.DEBUG = true;
         DebugBridge.i.SetDebug();
 
-        TestHelpers.InitializeSceneController(false);
+        TestHelpers.InitializeMain(false);
 
         yield return new WaitForSeconds(0.01f);
 

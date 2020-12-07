@@ -44,7 +44,7 @@ public class VisualTestsBase : TestsBase
         if (debugMode)
             DebugBridge.i.SetDebug();
 
-        sceneController = TestHelpers.InitializeSceneController(usesWebServer);
+        main = TestHelpers.InitializeMain(usesWebServer);
 
         AssetPromiseKeeper_GLTF.i.Cleanup();
 
@@ -52,7 +52,7 @@ public class VisualTestsBase : TestsBase
 
         if (spawnTestScene)
         {
-            scene = sceneController.CreateTestScene();
+            scene = Environment.i.sceneController.CreateTestScene();
             yield return null;
         }
 

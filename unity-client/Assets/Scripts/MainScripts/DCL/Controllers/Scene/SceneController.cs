@@ -14,7 +14,7 @@ using UnityEngine.Serialization;
 
 namespace DCL
 {
-    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler
+    public class SceneController : IMessageProcessHandler, IMessageQueueHandler
     {
         public static SceneController i { get; private set; }
 
@@ -27,64 +27,11 @@ namespace DCL
         //======================================================================
         private EntryPoint_World worldEntryPoint;
 
-        [FormerlySerializedAs("factoryManifest")]
-        public DCLComponentFactory componentFactory;
-
-        public bool startDecentralandAutomatically = true;
-
-        void Awake()
+        public void Initialize()
         {
-            if (i != null)
-            {
-                Utils.SafeDestroy(this);
-                return;
-            }
-
-            i = this;
-
-#if !UNITY_EDITOR
-            Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = false;
-#endif
-
-            InitializeSceneBoundariesChecker(Environment.i.debugConfig.isDebugMode);
-
-            RenderProfileManifest.i.Initialize();
-            Environment.i.Initialize(this);
-
-            // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
-            if (startDecentralandAutomatically)
-            {
-                WebInterface.StartDecentraland();
-            }
-
-            Environment.i.parcelScenesCleaner.Start();
-
-            if (deferredMessagesDecoding) // We should be able to delete this code
-                StartCoroutine(DeferredDecoding()); //
-
-            DCLCharacterController.OnCharacterMoved += SetPositionDirty;
-
-            CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneIdChange;
-
-            //TODO(Brian): Move those suscriptions elsewhere.
-            PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
-            PoolManager.i.OnGet += Environment.i.physicsSyncController.MarkDirty;
-            PoolManager.i.OnGet -= Environment.i.cullingController.objectsTracker.MarkDirty;
-            PoolManager.i.OnGet += Environment.i.cullingController.objectsTracker.MarkDirty;
-
-#if !UNITY_EDITOR
-            worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
-#endif
-
-            // TODO(Brian): This should be fixed when we do the proper initialization layer
-            if (!EnvironmentSettings.RUNNING_TESTS)
-            {
-                Environment.i.cullingController.Start();
-            }
         }
 
-        void Start()
+        public void PrewarmPools()
         {
             if (prewarmSceneMessagesPool)
             {
@@ -93,63 +40,6 @@ namespace DCL
                     sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
                 }
             }
-
-            if (prewarmEntitiesPool)
-            {
-                EnsureEntityPool();
-            }
-
-            componentFactory.PrewarmPools();
-        }
-
-        public void Restart()
-        {
-            Environment.i.Restart(this);
-
-            Environment.i.parcelScenesCleaner.ForceCleanup();
-        }
-
-        void OnDestroy()
-        {
-            PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
-            PoolManager.i.OnGet -= Environment.i.cullingController.objectsTracker.MarkDirty;
-            DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
-            Environment.i.parcelScenesCleaner.Stop();
-            Environment.i.cullingController.Stop();
-        }
-
-
-        private void Update()
-        {
-            InputController_Legacy.i.Update();
-
-            Environment.i.pointerEventsController.Update();
-
-            if (lastSortFrame != Time.frameCount && sceneSortDirty)
-            {
-                lastSortFrame = Time.frameCount;
-                sceneSortDirty = false;
-                SortScenesByDistance();
-            }
-
-            Environment.i.performanceMetricsController?.Update();
-        }
-
-        private void LateUpdate()
-        {
-            Environment.i.physicsSyncController.Sync();
-        }
-
-        public void EnsureEntityPool() // TODO: Move to PoolManagerFactory
-        {
-            if (PoolManager.i.ContainsPool(EMPTY_GO_POOL_NAME))
-                return;
-
-            GameObject go = new GameObject();
-            Pool pool = PoolManager.i.AddPool(EMPTY_GO_POOL_NAME, go, maxPrewarmCount: 2000, isPersistent: true);
-
-            if (prewarmEntitiesPool)
-                pool.ForcePrewarm();
         }
 
         //======================================================================
@@ -172,9 +62,6 @@ namespace DCL
         public event ProcessDelegate OnMessageProcessInfoStart;
         public event ProcessDelegate OnMessageProcessInfoEnds;
 #endif
-        [NonSerialized] public bool deferredMessagesDecoding = false;
-        Queue<string> payloadsToDecode = new Queue<string>();
-        const float MAX_TIME_FOR_DECODE = 0.005f;
         public bool msgStepByStep = false;
 
         public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
@@ -344,25 +231,13 @@ namespace DCL
 
         public string SendSceneMessage(string payload)
         {
-            return SendSceneMessage(payload, deferredMessagesDecoding);
-        }
-
-        private string SendSceneMessage(string payload, bool enqueue)
-        {
             string[] chunks = payload.Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
             string lastBusId = null;
 
             for (int i = 0; i < count; i++)
             {
-                if (CommonScriptableObjects.rendererState.Get() && enqueue)
-                {
-                    payloadsToDecode.Enqueue(chunks[i]);
-                }
-                else
-                {
-                    lastBusId = DecodeAndEnqueue(chunks[i]);
-                }
+                lastBusId = DecodeAndEnqueue(chunks[i]);
             }
 
             return lastBusId;
@@ -396,30 +271,6 @@ namespace DCL
             ProfilingEvents.OnMessageDecodeEnds?.Invoke("Misc");
 
             return "";
-        }
-
-        private IEnumerator DeferredDecoding()
-        {
-            float start = Time.realtimeSinceStartup;
-            float maxTimeForDecode;
-
-            while (true)
-            {
-                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
-
-                if (payloadsToDecode.Count > 0)
-                {
-                    string payload = payloadsToDecode.Dequeue();
-
-                    DecodeAndEnqueue(payload);
-
-                    if (Time.realtimeSinceStartup - start < maxTimeForDecode)
-                        continue;
-                }
-
-                yield return null;
-                start = Time.unscaledTime;
-            }
         }
 
         public void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene message)
@@ -530,96 +381,6 @@ namespace DCL
             }
         }
 
-        private void SetPositionDirty(DCLCharacterPosition character)
-        {
-            var currentX = (int) Math.Floor(character.worldPosition.x / ParcelSettings.PARCEL_SIZE);
-            var currentY = (int) Math.Floor(character.worldPosition.z / ParcelSettings.PARCEL_SIZE);
-
-            positionDirty = currentX != currentGridSceneCoordinate.x || currentY != currentGridSceneCoordinate.y;
-
-            if (positionDirty)
-            {
-                sceneSortDirty = true;
-                currentGridSceneCoordinate.x = currentX;
-                currentGridSceneCoordinate.y = currentY;
-
-                // Since the first position for the character is not sent from Kernel until just-before calling
-                // the rendering activation from Kernel, we need to sort the scenes to get the current scene id
-                // to lock the rendering accordingly...
-                if (!CommonScriptableObjects.rendererState.Get())
-                {
-                    SortScenesByDistance();
-                }
-            }
-        }
-
-        private void SortScenesByDistance()
-        {
-            if (DCLCharacterController.i == null) return;
-
-            WorldState worldState = Environment.i.worldState;
-
-            worldState.currentSceneId = null;
-            worldState.scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
-
-            using (var iterator = Environment.i.worldState.scenesSortedByDistance.GetEnumerator())
-            {
-                ParcelScene scene;
-                bool characterIsInsideScene;
-
-                while (iterator.MoveNext())
-                {
-                    scene = iterator.Current;
-
-                    if (scene == null) continue;
-
-                    characterIsInsideScene = scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
-
-                    if (scene.sceneData.id != worldState.globalSceneId && characterIsInsideScene)
-                    {
-                        worldState.currentSceneId = scene.sceneData.id;
-                        break;
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(worldState.currentSceneId))
-            {
-                // When we don't know the current scene yet, we must lock the rendering from enabling until it is set
-                CommonScriptableObjects.rendererState.AddLock(this);
-            }
-            else
-            {
-                // 1. Set current scene id
-                CommonScriptableObjects.sceneID.Set(worldState.currentSceneId);
-
-                // 2. Attempt to remove SceneController's lock on rendering
-                CommonScriptableObjects.rendererState.RemoveLock(this);
-            }
-
-            OnSortScenes?.Invoke();
-        }
-
-        private int SortScenesByDistanceMethod(ParcelScene sceneA, ParcelScene sceneB)
-        {
-            sortAuxiliaryVector = sceneA.sceneData.basePosition - currentGridSceneCoordinate;
-            int dist1 = sortAuxiliaryVector.sqrMagnitude;
-
-            sortAuxiliaryVector = sceneB.sceneData.basePosition - currentGridSceneCoordinate;
-            int dist2 = sortAuxiliaryVector.sqrMagnitude;
-
-            return dist1 - dist2;
-        }
-
-        private void OnCurrentSceneIdChange(string newSceneId, string prevSceneId)
-        {
-            if (Environment.i.worldState.TryGetScene(newSceneId, out ParcelScene newCurrentScene) && !newCurrentScene.isReady)
-            {
-                CommonScriptableObjects.rendererState.AddLock(newCurrentScene);
-
-                newCurrentScene.OnSceneReady += (readyScene) => { CommonScriptableObjects.rendererState.RemoveLock(readyScene); };
-            }
-        }
 
         public void LoadParcelScenesExecute(string decentralandSceneJSON)
         {
@@ -663,7 +424,7 @@ namespace DCL
                 worldState.loadedScenes.Add(sceneToLoad.id, newScene);
                 worldState.scenesSortedByDistance.Add(newScene);
 
-                sceneSortDirty = true;
+                Main.i.sceneSortDirty = true;
 
                 OnNewSceneAdded?.Invoke(newScene);
 
@@ -866,27 +627,15 @@ namespace DCL
         [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
         [System.NonSerialized] public bool useBoundariesChecker = true;
 
-        [System.NonSerialized] public bool prewarmEntitiesPool = true;
 
         public SceneBoundariesChecker boundariesChecker { get; private set; }
 
-        private bool sceneSortDirty = false;
-        private bool positionDirty = true;
-        private int lastSortFrame = 0;
-
-        public event Action OnSortScenes;
         public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
         public event Action<ParcelScene> OnNewSceneAdded;
 
         public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
 
         public event OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
-
-        private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
-        private Vector2Int sortAuxiliaryVector = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);
-
-
-        public const string EMPTY_GO_POOL_NAME = "Empty";
 
 
         public void SetDisableAssetBundles()
