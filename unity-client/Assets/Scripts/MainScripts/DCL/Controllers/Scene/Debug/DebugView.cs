@@ -2,7 +2,7 @@
 
 namespace DCL
 {
-    public class DebugReferences : MonoBehaviour
+    public class DebugView : MonoBehaviour
     {
         [Header("Debug Tools")] public GameObject fpsPanel;
         [Header("Debug Panel")] public GameObject engineDebugPanel;
