@@ -42,7 +42,7 @@ public class VisualTestsBase : TestsBase
         yield return InitUnityScene("MainVisualTest");
 
         if (debugMode)
-            SceneController.i.SetDebug();
+            DebugBridge.i.SetDebug();
 
         sceneController = TestHelpers.InitializeSceneController(usesWebServer);
 
