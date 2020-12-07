@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DCL
 {
@@ -14,7 +15,7 @@ namespace DCL
 
         public static Action OnDebugModeSet;
 
-        public DebugReferences debugReferences;
+        [FormerlySerializedAs("debugReferences")] public DebugView debugView;
 
         // Beware this SetDebug() may be called before Awake() somehow...
         [ContextMenu("Set Debug mode")]
@@ -25,7 +26,7 @@ namespace DCL
             DebugConfig debugConfig = Environment.i.debugConfig;
 
             debugConfig.isDebugMode = true;
-            debugReferences.fpsPanel.SetActive(true);
+            debugView.fpsPanel.SetActive(true);
 
             SceneController.i.InitializeSceneBoundariesChecker(true);
 
@@ -39,24 +40,24 @@ namespace DCL
 
         public void HideFPSPanel()
         {
-            debugReferences.fpsPanel.SetActive(false);
+            debugView.fpsPanel.SetActive(false);
         }
 
         public void ShowFPSPanel()
         {
-            debugReferences.fpsPanel.SetActive(true);
+            debugView.fpsPanel.SetActive(true);
         }
 
         public void SetSceneDebugPanel()
         {
-            debugReferences.engineDebugPanel.SetActive(false);
-            debugReferences.sceneDebugPanel.SetActive(true);
+            debugView.engineDebugPanel.SetActive(false);
+            debugView.sceneDebugPanel.SetActive(true);
         }
 
         public void SetEngineDebugPanel()
         {
-            debugReferences.sceneDebugPanel.SetActive(false);
-            debugReferences.engineDebugPanel.SetActive(true);
+            debugView.sceneDebugPanel.SetActive(false);
+            debugView.engineDebugPanel.SetActive(true);
         }
     }
 }
