@@ -15,7 +15,6 @@ namespace DCL
 
         public static Action OnDebugModeSet;
 
-        [FormerlySerializedAs("debugReferences")]
         public DebugView debugView;
 
         // Beware this SetDebug() may be called before Awake() somehow...
