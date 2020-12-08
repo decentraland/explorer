@@ -24,7 +24,12 @@ import { RootStore, StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
-import { foregroundObservable, isForeground, renderStateObservable } from 'shared/world/worldState'
+import {
+  ensureRendererEnabled,
+  foregroundObservable,
+  isForeground,
+  renderStateObservable
+} from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
@@ -126,19 +131,12 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
-        const observer = renderStateObservable.add((isRendering) => {
-          if (isRendering) {
-            renderStateObservable.remove(observer)
-            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-
-            globalThis.globalStore.dispatch(experienceStarted())
-
-            globalThis.globalStore.dispatch(setLoadingScreen(false))
-
-            Html.switchGameContainer(true)
-
-            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
-          }
+        ensureRendererEnabled().then(() => {
+          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+          globalThis.globalStore.dispatch(experienceStarted())
+          globalThis.globalStore.dispatch(setLoadingScreen(false))
+          Html.switchGameContainer(true)
+          i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
         })
 
         EnsureProfile(identity.address)
