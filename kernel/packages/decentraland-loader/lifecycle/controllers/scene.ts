@@ -46,7 +46,7 @@ export class SceneLifeCycleController extends EventEmitter {
   }
 
   diff<T>(a1: T[], a2: T[]): T[] {
-    return a1.filter(i => a2.indexOf(i) < 0)
+    return a1.filter((i) => a2.indexOf(i) < 0)
   }
 
   async reportSightedParcels(sightedParcels: string[], lostSightParcels: string[]) {
@@ -61,14 +61,20 @@ export class SceneLifeCycleController extends EventEmitter {
     return { sighted, lostSight: difference }
   }
 
-  async fetchSceneIds(positions: string[]): Promise<string[]> {
-    const sceneIds = await this.requestSceneIds(positions)
-
-    return sceneIds.filter($ => !!$).filter(this.distinct) as string[]
+  invalidateParcels(parcels: string[]) {
+    for (const parcel of parcels) {
+      this._positionToSceneId.delete(parcel)
+    }
   }
 
-  async onSight(sceneIds: string[]) {
-    sceneIds.forEach(async sceneId => {
+  private async fetchSceneIds(positions: string[]): Promise<string[]> {
+    const sceneIds = await this.requestSceneIds(positions)
+
+    return sceneIds.filter(($) => !!$).filter(this.distinct) as string[]
+  }
+
+  private async onSight(sceneIds: string[]) {
+    sceneIds.forEach(async (sceneId) => {
       try {
         if (!this.sceneStatus.has(sceneId)) {
           const data = await this.downloadManager.resolveLandData(sceneId)
@@ -87,8 +93,8 @@ export class SceneLifeCycleController extends EventEmitter {
     })
   }
 
-  lostSight(sceneIds: string[]) {
-    sceneIds.forEach(sceneId => {
+  private lostSight(sceneIds: string[]) {
+    sceneIds.forEach((sceneId) => {
       const sceneStatus = this.sceneStatus.get(sceneId)
       if (sceneStatus && sceneStatus.isAwake()) {
         sceneStatus.status = 'unloaded'
@@ -120,7 +126,7 @@ export class SceneLifeCycleController extends EventEmitter {
     this.emit('Scene status', { sceneId, status })
   }
 
-  async requestSceneIds(tiles: string[]): Promise<(string | undefined)[]> {
+  private async requestSceneIds(tiles: string[]): Promise<(string | undefined)[]> {
     const futures: Promise<string | undefined>[] = []
 
     const missingTiles: string[] = []
@@ -144,7 +150,8 @@ export class SceneLifeCycleController extends EventEmitter {
       const pairs = await this.downloadManager.resolveSceneSceneIds(missingTiles)
 
       for (const [tile, sceneId] of pairs) {
-        let result = sceneId ??
+        let result =
+          sceneId ??
           // empty scene!
           (this.enabledEmpty ? ('Qm' + tile + 'm').padEnd(46, '0') : undefined)
 

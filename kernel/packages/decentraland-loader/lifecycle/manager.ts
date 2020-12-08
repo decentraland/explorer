@@ -60,11 +60,11 @@ export class LifecycleManager extends TransportBasedServer {
     return theFuture
   }
 
-  getSceneIds(sceneIds: string[]): Promise<string | null>[] {
+  getSceneIds(parcels: string[]): Promise<string | null>[] {
     const futures: IFuture<string>[] = []
     const missing: string[] = []
 
-    for (let id of sceneIds) {
+    for (let id of parcels) {
       let theFuture = this.positionToRequest.get(id)
 
       if (!theFuture) {
@@ -79,6 +79,14 @@ export class LifecycleManager extends TransportBasedServer {
 
     this.notify('Scene.idRequest', { sceneIds: missing })
     return futures
+  }
+
+  invalidateParcels(parcels: string[]) {
+    for (let parcel of parcels) {
+      this.positionToRequest.delete(parcel)
+    }
+
+    this.notify('Scene.invalidate', { parcels })
   }
 }
 

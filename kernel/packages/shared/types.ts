@@ -65,6 +65,7 @@ export type EntityActionType =
   | 'InitMessagesFinished'
   | 'OpenExternalUrl'
   | 'OpenNFTDialog'
+  | 'ScenePublishResult'
 
 export type QueryPayload = { queryId: string; payload: RayQuery }
 

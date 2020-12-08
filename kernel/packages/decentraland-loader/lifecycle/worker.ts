@@ -108,6 +108,11 @@ let downloadManager: SceneDataDownloadManager
         }
       })
 
+      connector.on('Scene.invalidate', async (data: { parcels: string[] }) => {
+        downloadManager.invalidateParcels(data.parcels)
+        sceneController.invalidateParcels(data.parcels)
+      })
+
       connector.on('Scene.prefetchDone', (opt: { sceneId: string }) => {
         sceneController.reportDataLoaded(opt.sceneId)
       })
