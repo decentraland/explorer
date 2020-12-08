@@ -96,6 +96,10 @@ public class MinimapMetadata : ScriptableObject
         {
             usersInfo.Add(userInfo.userId, userInfo);
         }
+        else
+        {
+            usersInfo[userInfo.userId] = userInfo;
+        }
 
         OnUserInfoUpdated?.Invoke(userInfo);
     }
