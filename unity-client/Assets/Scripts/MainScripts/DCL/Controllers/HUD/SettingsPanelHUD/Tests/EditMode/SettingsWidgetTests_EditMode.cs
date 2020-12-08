@@ -3,6 +3,7 @@ using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
 using NUnit.Framework;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Tests
 {
@@ -15,12 +16,12 @@ namespace Tests
             // Arrange
             var newControlView = Substitute.For<ISettingsControlView>();
             var newControlController = Substitute.For<SettingsControlController>();
-            var newControlConfig = new SettingsControlModel(
-                "TestControl",
-                Substitute.For<SettingsControlView>(),
-                Substitute.For<SettingsControlController>(),
-                new List<BooleanVariable>(),
-                false);
+            var newControlConfig = ScriptableObject.CreateInstance<SettingsControlModel>();
+            newControlConfig.title = "TestControl";
+            newControlConfig.controlPrefab = Substitute.For<SettingsControlView>();
+            newControlConfig.controlController = Substitute.For<SettingsControlController>();
+            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.isBeta = false;
 
             SettingsWidgetController widgetController = new SettingsWidgetController();
 

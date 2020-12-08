@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -10,19 +9,5 @@ namespace DCL.SettingsPanelHUD.Controls
         public float sliderMinValue;
         public float sliderMaxValue;
         public bool sliderWholeNumbers;
-
-        public SliderControlModel(
-            string title,
-            SettingsControlView controlPrefab,
-            SettingsControlController controlController,
-            List<BooleanVariable> flagsThatDeactivateMe,
-            bool isBeta,
-            float sliderMinValue,
-            float sliderMaxValue) : base(title, controlPrefab, controlController, flagsThatDeactivateMe, isBeta)
-        {
-            this.sliderMinValue = sliderMinValue;
-            this.sliderMaxValue = sliderMaxValue;
-            this.sliderWholeNumbers = sliderWholeNumbers;
-        }
     }
 }

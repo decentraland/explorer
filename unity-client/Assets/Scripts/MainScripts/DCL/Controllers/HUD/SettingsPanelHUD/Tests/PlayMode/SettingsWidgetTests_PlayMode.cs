@@ -53,12 +53,12 @@ namespace Tests
             // Arrange
             SettingsControlView controlViewPrefab = ((GameObject)Resources.Load(CONTROL_VIEW_PREFAB_PATH.Replace("{controlType}", controlType))).GetComponent<SettingsControlView>();
 
-            SettingsControlModel newControlConfig = new SettingsControlModel(
-                $"TestControl_Col{columnIndex}",
-                controlViewPrefab,
-                Substitute.For<SettingsControlController>(),
-                new List<BooleanVariable>(),
-                false);
+            SettingsControlModel newControlConfig = ScriptableObject.CreateInstance<SettingsControlModel>();
+            newControlConfig.title = $"TestControl_Col{columnIndex}";
+            newControlConfig.controlPrefab = controlViewPrefab;
+            newControlConfig.controlController = Substitute.For<SettingsControlController>();
+            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.isBeta = false;
 
 
             controlColumnsToCreate[columnIndex].controls.Add(newControlConfig);

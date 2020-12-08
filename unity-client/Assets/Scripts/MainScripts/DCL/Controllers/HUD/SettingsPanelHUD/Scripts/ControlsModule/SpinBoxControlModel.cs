@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -8,16 +7,5 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         [Header("SPIN-BOX CONFIGURATION")]
         public string[] spinBoxLabels;
-
-        public SpinBoxControlModel(
-            string title,
-            SettingsControlView controlPrefab,
-            SettingsControlController controlController,
-            List<BooleanVariable> flagsThatDeactivateMe,
-            bool isBeta,
-            string[] spinBoxLabels) : base(title, controlPrefab, controlController, flagsThatDeactivateMe, isBeta)
-        {
-            this.spinBoxLabels = spinBoxLabels;
-        }
     }
 }
