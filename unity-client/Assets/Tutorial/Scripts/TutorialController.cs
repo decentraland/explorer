@@ -39,10 +39,7 @@ namespace DCL.Tutorial
 
         public static TutorialController i { get; private set; }
 
-        public HUDController hudController
-        {
-            get => HUDController.i;
-        }
+        public HUDController hudController { get => HUDController.i; }
 
         public int currentStepIndex { get; private set; }
 
