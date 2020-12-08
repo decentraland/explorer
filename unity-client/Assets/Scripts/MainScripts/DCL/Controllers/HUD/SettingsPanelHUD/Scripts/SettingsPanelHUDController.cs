@@ -12,6 +12,7 @@ namespace DCL.SettingsPanelHUD
         void AddSection(SettingsButtonEntry newMenuButton, ISettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
         void OpenSection(ISettingsSectionView sectionToOpen);
         void OpenSection(int sectionIndex);
+        void MarkMenuButtonAsSelected(int buttonIndex);
         void SaveSettings();
         void ResetAllSettings();
     }
@@ -96,6 +97,16 @@ namespace DCL.SettingsPanelHUD
             }
 
             sections[sectionIndex].SetActive(true);
+        }
+
+        public void MarkMenuButtonAsSelected(int buttonIndex)
+        {
+            foreach (var button in menuButtons)
+            {
+                button.MarkAsSelected(false);
+            }
+
+            menuButtons[buttonIndex].MarkAsSelected(true);
         }
 
         public void SaveSettings()
