@@ -92,6 +92,7 @@ namespace DCL.SettingsPanelHUD
             }
 
             settingsPanelController.OpenSection(0);
+            settingsPanelController.MarkMenuButtonAsSelected(0);
         }
 
         private void ShowResetAllConfirmation()
