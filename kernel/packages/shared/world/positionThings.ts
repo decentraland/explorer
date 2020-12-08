@@ -42,7 +42,7 @@ export const parcelObservable = new Observable<ParcelReport>()
 export const teleportObservable = new Observable<ReadOnlyVector2>()
 
 export const lastPlayerPosition = new Vector3()
-export const lastPlayerParcel = new Vector2()
+export let lastPlayerParcel: Vector2
 
 positionObservable.add((event) => {
   lastPlayerPosition.copyFrom(event.position)
@@ -52,9 +52,13 @@ positionObservable.add((event) => {
 positionObservable.add(({ position, immediate }) => {
   const parcel = Vector2.Zero()
   worldToGrid(position, parcel)
-  if (parcel.x !== lastPlayerParcel.x || parcel.y !== lastPlayerParcel.y) {
+  if (!lastPlayerParcel || parcel.x !== lastPlayerParcel.x || parcel.y !== lastPlayerParcel.y) {
     parcelObservable.notifyObservers({ previousParcel: lastPlayerParcel, newParcel: parcel, immediate })
-    lastPlayerParcel.copyFrom(parcel)
+    if (!lastPlayerParcel) {
+      lastPlayerParcel = parcel
+    } else {
+      lastPlayerParcel.copyFrom(parcel)
+    }
   }
 })
 
