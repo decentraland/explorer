@@ -116,7 +116,7 @@ namespace DCL
             this.type = type;
             this.owner = owner;
             this.pendingMessagesCount = 0;
-            sceneController = SceneController.i;
+            sceneController = Environment.i.sceneController;
         }
 
         public void Start()

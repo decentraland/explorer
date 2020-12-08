@@ -21,7 +21,7 @@ public class VisualTestsBase : TestsBase
         //             When the entry point is refactored.
         RenderProfileManifest.i.Initialize(RenderProfileManifest.i.testProfile);
 
-        SceneController.i.useBoundariesChecker = false;
+        Environment.i.sceneController.useBoundariesChecker = false;
 
         base.SetUp_Renderer();
 

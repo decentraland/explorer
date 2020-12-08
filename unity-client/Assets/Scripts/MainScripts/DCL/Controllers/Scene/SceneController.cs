@@ -16,16 +16,7 @@ namespace DCL
 {
     public class SceneController : IMessageProcessHandler, IMessageQueueHandler
     {
-        public static SceneController i { get; private set; }
-
         public static bool VERBOSE = false;
-
-        //======================================================================
-
-        #region PROJECT_ENTRYPOINT
-
-        //======================================================================
-        private EntryPoint_World worldEntryPoint;
 
         public void Initialize()
         {
@@ -41,19 +32,6 @@ namespace DCL
                 }
             }
         }
-
-        //======================================================================
-
-        #endregion
-
-        //======================================================================
-
-
-        //======================================================================
-
-        #region MESSAGES_HANDLING
-
-        //======================================================================
 
 
 #if UNITY_EDITOR
@@ -281,12 +259,6 @@ namespace DCL
 
             Environment.i.messagingControllersManager.Enqueue(scene, message);
         }
-
-        //======================================================================
-
-        #endregion
-
-        //======================================================================
 
 
         //======================================================================

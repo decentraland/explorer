@@ -363,7 +363,7 @@ public class BuilderInWorldController : MonoBehaviour
                 data.contents.Add(mappingPair);
         }
 
-        SceneController.i.UpdateParcelScenesExecute(data);
+        Environment.i.sceneController.UpdateParcelScenesExecute(data);
 
         GLTFShape mesh = (GLTFShape) sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
@@ -651,7 +651,7 @@ public class BuilderInWorldController : MonoBehaviour
     void NewSceneReady(string id)
     {
         if (sceneToEditId != id) return;
-        SceneController.i.OnReadyScene -= NewSceneReady;
+        Environment.i.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         EnterEditMode();
     }
@@ -662,7 +662,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         FindSceneToEdit();
         sceneToEditId = sceneToEdit.sceneData.id;
-        SceneController.i.OnReadyScene += NewSceneReady;
+        Environment.i.sceneController.OnReadyScene += NewSceneReady;
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
     }
@@ -692,7 +692,7 @@ public class BuilderInWorldController : MonoBehaviour
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
-        SceneController.i.ActivateBuilderInWorldEditScene();
+        Environment.i.sceneController.ActivateBuilderInWorldEditScene();
 
         ActivateBuilderInWorldCamera();
     }
@@ -724,7 +724,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         HUDController.i.buildModeHud.ClearEntityList();
 
-        SceneController.i.DeactivateBuilderInWorldEditScene();
+        Environment.i.sceneController.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
     }

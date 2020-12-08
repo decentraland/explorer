@@ -274,7 +274,7 @@ namespace Builder
         public void UnloadBuilderScene(string sceneKey)
         {
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: UnloadBuilderScene {sceneKey}");
-            SceneController.i?.UnloadScene(sceneKey);
+            Environment.i.sceneController?.UnloadScene(sceneKey);
         }
 
         public void SetSelectedEntities(string msj)
@@ -637,7 +637,7 @@ namespace Builder
                 outOfBoundariesEntitiesId.RemoveAt(entityIndexInList);
             }
 
-            DCL.SceneController.i.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
+            Environment.i.sceneController.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
         }
 
         private void SendOutOfBoundariesEntities()
@@ -651,7 +651,7 @@ namespace Builder
             {
                 for (int i = 0; i < selectedEntities.Count; i++)
                 {
-                    DCL.SceneController.i.boundariesChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
+                    Environment.i.sceneController.boundariesChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
                 }
             }
         }

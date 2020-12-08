@@ -224,7 +224,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE)
             gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
-        SceneController.i.IsolateScene(sceneToEdit);
+        Environment.i.sceneController.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
 
         RenderSettings.fog = false;
@@ -240,7 +240,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
 
 
-        SceneController.i.ReIntegrateIsolatedScene();
+        Environment.i.sceneController.ReIntegrateIsolatedScene();
 
         gizmoManager.HideGizmo();
         RenderSettings.fog = true;

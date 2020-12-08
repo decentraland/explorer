@@ -39,10 +39,7 @@ namespace DCL.Tutorial
                 tutorialController.hudController?.taskbarHud?.SetVisibility(false);
                 tutorialController.hudController?.profileHud?.SetBackpackButtonVisibility(false);
 
-                if (SceneController.i != null)
-                {
-                    WebInterface.SendSceneExternalActionEvent(Environment.i.worldState.currentSceneId, "tutorial", "begin");
-                }
+                WebInterface.SendSceneExternalActionEvent(Environment.i.worldState.currentSceneId, "tutorial", "begin");
             }
         }
 

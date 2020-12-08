@@ -165,13 +165,13 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (!selectedEntities.Contains(entity))
             return;
 
-        if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+        if (!Environment.i.sceneController.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
         {
             DestroyLastCreatedEntities();
         }
 
-        SceneController.i.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
-        SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity.rootEntity);
+        Environment.i.sceneController.boundariesChecker.EvaluateEntityPosition(entity.rootEntity);
+        Environment.i.sceneController.boundariesChecker.RemoveEntityToBeChecked(entity.rootEntity);
         entity.Deselect();
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
@@ -343,7 +343,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     {
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            if (!Environment.i.sceneController.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 return;
         }
 
@@ -549,7 +549,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         {
             if (entity.rootEntity.scene == sceneToEdit)
             {
-                if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+                if (!Environment.i.sceneController.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 {
                     entitiesToRemove.Add(entity);
                 }
@@ -614,7 +614,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         bool areAllIn = true;
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            if (!SceneController.i.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            if (!Environment.i.sceneController.boundariesChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 areAllIn = false;
                 break;

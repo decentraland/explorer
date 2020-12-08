@@ -83,7 +83,7 @@ namespace DCL.Controllers
 
         public void AddEntityToBeChecked(DecentralandEntity entity)
         {
-            if (!SceneController.i.useBoundariesChecker) return;
+            if (!Environment.i.sceneController.useBoundariesChecker) return;
 
             OnAddEntity(entity);
         }
@@ -93,7 +93,7 @@ namespace DCL.Controllers
         /// </summary>
         public void AddPersistent(DecentralandEntity entity)
         {
-            if (!SceneController.i.useBoundariesChecker) return;
+            if (!Environment.i.sceneController.useBoundariesChecker) return;
 
             entitiesToCheck.Add(entity);
             persistentEntities.Add(entity);
@@ -110,7 +110,7 @@ namespace DCL.Controllers
 
         public void RemoveEntityToBeChecked(DecentralandEntity entity)
         {
-            if (!SceneController.i.useBoundariesChecker) return;
+            if (!Environment.i.sceneController.useBoundariesChecker) return;
 
             OnRemoveEntity(entity);
         }

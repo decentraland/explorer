@@ -28,7 +28,7 @@ namespace DCL
             debugConfig.isDebugMode = true;
             debugView.fpsPanel.SetActive(true);
 
-            SceneController.i.InitializeSceneBoundariesChecker(true);
+            Environment.i.sceneController.InitializeSceneBoundariesChecker(true);
 
             OnDebugModeSet?.Invoke();
 

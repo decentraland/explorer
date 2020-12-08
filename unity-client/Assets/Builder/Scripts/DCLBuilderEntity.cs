@@ -75,8 +75,8 @@ namespace Builder
             DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
 
             //builder evaluate boundaries by itself
-            if (DCL.SceneController.i.useBoundariesChecker)
-                entity.OnShapeUpdated -= DCL.SceneController.i.boundariesChecker.EvaluateEntityPosition;
+            if (DCL.Environment.i.sceneController.useBoundariesChecker)
+                entity.OnShapeUpdated -= DCL.Environment.i.sceneController.boundariesChecker.EvaluateEntityPosition;
 
             gameObject.transform.localScale = Vector3.zero;
 
@@ -99,6 +99,7 @@ namespace Builder
             {
                 return rootEntity.scene.IsInsideSceneBoundaries(Utils.BuildMergedBounds(rootEntity.meshesInfo.renderers));
             }
+
             return true;
         }
 
@@ -297,6 +298,7 @@ namespace Builder
                 gameObject.transform.localScale = scale;
                 yield return null;
             }
+
             gameObject.transform.localScale = scaleTarget;
             isScalingAnimation = false;
             ProcessEntityShape(rootEntity);
@@ -314,6 +316,7 @@ namespace Builder
                         Destroy(meshColliders[i].gameObject);
                     }
                 }
+
                 meshColliders = null;
             }
         }

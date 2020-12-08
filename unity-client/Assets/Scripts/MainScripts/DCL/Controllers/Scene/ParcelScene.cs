@@ -322,8 +322,8 @@ namespace DCL.Controllers
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 
-            if (SceneController.i.useBoundariesChecker)
-                newEntity.OnShapeUpdated += SceneController.i.boundariesChecker.AddEntityToBeChecked;
+            if (Environment.i.sceneController.useBoundariesChecker)
+                newEntity.OnShapeUpdated += Environment.i.sceneController.boundariesChecker.AddEntityToBeChecked;
 
             entities.Add(id, newEntity);
 
@@ -410,10 +410,10 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
-            if (SceneController.i.useBoundariesChecker)
+            if (Environment.i.sceneController.useBoundariesChecker)
             {
-                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
-                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+                entity.OnShapeUpdated -= Environment.i.sceneController.boundariesChecker.AddEntityToBeChecked;
+                Environment.i.sceneController.boundariesChecker.RemoveEntityToBeChecked(entity);
             }
 
             if (removeImmediatelyFromEntitiesList)
@@ -486,20 +486,20 @@ namespace DCL.Controllers
                 // In this case, the entity will attached to the first person camera
                 // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
                 me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
-                SceneController.i.boundariesChecker.AddPersistent(me);
+                Environment.i.sceneController.boundariesChecker.AddPersistent(me);
             }
             else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
             {
                 // In this case, the entity will be attached to the avatar
                 // It will simply rotate with the avatar, regardless of where the camera is pointing
                 me.SetParent(DCLCharacterController.i.avatarReference);
-                SceneController.i.boundariesChecker.AddPersistent(me);
+                Environment.i.sceneController.boundariesChecker.AddPersistent(me);
             }
             else
             {
                 if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                 {
-                    SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
+                    Environment.i.sceneController.boundariesChecker.RemoveEntityToBeChecked(me);
                 }
 
                 if (parentId == "0")
@@ -579,7 +579,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = modelRecovered.rotation;
                     entity.gameObject.transform.localScale = modelRecovered.scale;
 
-                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.sceneController.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
                 Environment.i.physicsSyncController.MarkDirty();
@@ -686,7 +686,7 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.sceneController.boundariesChecker?.AddEntityToBeChecked(entity);
                 }
 
                 Environment.i.physicsSyncController.MarkDirty();
@@ -777,7 +777,7 @@ namespace DCL.Controllers
             if (newComponent != null)
             {
                 if (newComponent is IOutOfSceneBoundariesHandler)
-                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.sceneController.boundariesChecker?.AddEntityToBeChecked(entity);
 
                 if (newComponent.isRoutineRunning)
                     yieldInstruction = newComponent.yieldInstruction;
@@ -1224,7 +1224,7 @@ namespace DCL.Controllers
 
             state = State.READY;
 
-            SceneController.i.SendSceneReady(sceneData.id);
+            Environment.i.sceneController.SendSceneReady(sceneData.id);
             RefreshName();
 
             OnSceneReady?.Invoke(this);

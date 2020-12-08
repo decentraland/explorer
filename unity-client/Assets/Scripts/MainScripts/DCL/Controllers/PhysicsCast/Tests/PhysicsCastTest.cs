@@ -24,7 +24,7 @@ public class PhysicsCast_Tests : TestsBase
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        SceneController.i.useBoundariesChecker = false;
+        Environment.i.sceneController.useBoundariesChecker = false;
     }
 
     private void ConfigureRaycastQuery(string queryType)

@@ -19,7 +19,6 @@ namespace DCL
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
-        private SceneController sceneController;
         [System.NonSerialized] public bool prewarmEntitiesPool = true;
 
         public bool sceneSortDirty = false;
@@ -46,7 +45,7 @@ namespace DCL
             Debug.unityLogger.logEnabled = false;
 #endif
 
-            sceneController.InitializeSceneBoundariesChecker(Environment.i.debugConfig.isDebugMode);
+            Environment.i.sceneController.InitializeSceneBoundariesChecker(Environment.i.debugConfig.isDebugMode);
 
             RenderProfileManifest.i.Initialize();
             Environment.i.Initialize();
@@ -84,7 +83,7 @@ namespace DCL
                 EnsureEntityPool();
             }
 
-            sceneController.PrewarmPools();
+            Environment.i.sceneController.PrewarmPools();
             componentFactory.PrewarmPools();
         }
 

@@ -429,7 +429,7 @@ namespace DCL
                                 HUDController.i.RequestTeleport(msg.payload);
                                 break;
                             case "SetDisableAssetBundles":
-                                SceneController.i.SetDisableAssetBundles();
+                                DCL.Environment.i.sceneController.SetDisableAssetBundles();
                                 break;
                             case "UpdateHotScenesList":
                                 HotScenesController.i.UpdateHotScenesList(msg.payload);

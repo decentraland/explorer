@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DCL.Controllers;
 using Builder.Gizmos;
 using System.Collections.Generic;
@@ -215,7 +215,7 @@ namespace Builder
 
         private void OnSceneChanged(ParcelScene scene)
         {
-            boundariesChecker = DCL.SceneController.i.boundariesChecker;
+            boundariesChecker = DCL.Environment.i.sceneController.boundariesChecker;
             currentScene = scene;
         }
 
