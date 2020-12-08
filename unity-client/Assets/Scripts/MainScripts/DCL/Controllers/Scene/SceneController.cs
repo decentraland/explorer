@@ -47,7 +47,7 @@ namespace DCL
             Debug.unityLogger.logEnabled = false;
 #endif
 
-            InitializeSceneBoundariesChecker(Environment.i.debugConfig.isDebugMode);
+            InitializeSceneBoundariesChecker(DataStore.debugConfig.isDebugMode);
 
             RenderProfileManifest.i.Initialize();
             Environment.i.Initialize(this);
@@ -196,7 +196,7 @@ namespace DCL
             ParcelScene scene;
             bool res = false;
             WorldState worldState = Environment.i.worldState;
-            DebugConfig debugConfig = Environment.i.debugConfig;
+            DebugConfig debugConfig = DataStore.debugConfig;
 
             if (worldState.loadedScenes.TryGetValue(sceneId, out scene))
             {
@@ -643,7 +643,7 @@ namespace DCL
             var sceneToLoad = scene;
 
 
-            DebugConfig debugConfig = Environment.i.debugConfig;
+            DebugConfig debugConfig = DataStore.debugConfig;
 #if UNITY_EDITOR
             if (debugConfig.debugScenes && sceneToLoad.basePosition.ToString() != debugConfig.debugSceneCoords.ToString())
             {
@@ -805,7 +805,7 @@ namespace DCL
         public void CreateUIScene(string json)
         {
 #if UNITY_EDITOR
-            DebugConfig debugConfig = Environment.i.debugConfig;
+            DebugConfig debugConfig = DataStore.debugConfig;
 
             if (debugConfig.debugScenes && debugConfig.ignoreGlobalScenes)
                 return;

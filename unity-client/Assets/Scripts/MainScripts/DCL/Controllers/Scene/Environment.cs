@@ -10,7 +10,7 @@ namespace DCL
     {
         public static readonly Environment i = new Environment();
 
-        public DebugConfig debugConfig { get; private set; }
+        public DebugController debugController { get; private set; }
         public readonly WorldState worldState;
         public readonly MessagingControllersManager messagingControllersManager;
         public readonly PointerEventsController pointerEventsController;
@@ -42,7 +42,7 @@ namespace DCL
             parcelScenesCleaner = new ParcelScenesCleaner();
             cullingController = CullingController.Create();
             worldState = new WorldState();
-            debugConfig = new DebugConfig();
+            debugController = new DebugController();
         }
 
         public void Initialize(IMessageProcessHandler messageHandler)
@@ -57,7 +57,7 @@ namespace DCL
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(worldState, DCLCharacterController.i.characterPosition);
             parcelScenesCleaner.Start();
             cullingController.Start();
-            debugConfig = new DebugConfig();
+            debugController = new DebugController();
             initialized = true;
         }
 
@@ -79,6 +79,7 @@ namespace DCL
             worldBlockersController.Dispose();
             parcelScenesCleaner.Dispose();
             cullingController.Dispose();
+            debugController.Dispose();
         }
 
         public void Restart(IMessageProcessHandler messageHandler)

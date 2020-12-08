@@ -145,7 +145,7 @@ namespace DCL.Controllers
                 gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
 
 #if UNITY_EDITOR
-            DebugConfig debugConfig = Environment.i.debugConfig;
+            DebugConfig debugConfig = DataStore.debugConfig;
             //NOTE(Brian): Don't generate parcel blockers if debugScenes is active and is not the desired scene.
             if (debugConfig.debugScenes && debugConfig.debugSceneCoords != data.basePosition)
             {
