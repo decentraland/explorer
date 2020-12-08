@@ -92,10 +92,10 @@ public class MinimapMetadata : ScriptableObject
     /// <param name="userInfo">User info model</param>
     public void AddOrUpdateUserInfo(MinimapUserInfo userInfo)
     {
-        if (usersInfo.TryGetValue(userInfo.userId, out MinimapUserInfo existingUserInfo))
-            existingUserInfo = userInfo;
-        else
+        if (!usersInfo.ContainsKey(userInfo.userId))
+        {
             usersInfo.Add(userInfo.userId, userInfo);
+        }
 
         OnUserInfoUpdated?.Invoke(userInfo);
     }
