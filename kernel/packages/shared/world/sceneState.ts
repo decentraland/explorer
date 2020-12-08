@@ -16,8 +16,8 @@ export const sceneObservable = new Observable<SceneReport>()
 export let lastPlayerScene: ILand
 
 // Listen to parcel changes, and notify if the scene changed
-parcelObservable.add(async ({ parcel }) => {
-  const parcelString = `${parcel.x},${parcel.x}`
+parcelObservable.add(async ({ newParcel }) => {
+  const parcelString = `${newParcel.x},${newParcel.x}`
   if (!lastPlayerScene || !lastPlayerScene.sceneJsonData.scene.parcels.includes(parcelString)) {
     const scenesId = await fetchSceneIds([parcelString])
     const sceneId = scenesId[0]

@@ -162,6 +162,6 @@ export async function enableParcelSceneLoading(options: EnableParcelSceneLoading
     // immediate reposition should only be broadcasted to others, otherwise our scene reloads
     if (obj.immediate) return
 
-    ret.notify('User.setPosition', { position: obj.parcel, teleported: false })
+    ret.notify('User.setPosition', { position: obj.newParcel, teleported: false })
   })
 }

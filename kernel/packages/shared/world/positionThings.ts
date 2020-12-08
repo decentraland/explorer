@@ -27,13 +27,14 @@ export type PositionReport = {
   immediate: boolean
 }
 export type ParcelReport = {
-  /** Parcel where the user is */
-  parcel: ReadOnlyVector2
+  /** Parcel where the user was before */
+  previousParcel?: ReadOnlyVector2
+  /** Parcel where the user now is */
+  newParcel: ReadOnlyVector2
   /** Should this position be applied immediately */
   immediate: boolean
 }
 
-// Agregar un scene observable???
 export const positionObservable = new Observable<Readonly<PositionReport>>()
 // Called each time the user changes  parcel
 export const parcelObservable = new Observable<ParcelReport>()
@@ -55,7 +56,7 @@ positionObservable.add(({ position, immediate }) => {
   worldToGrid(position, parcel)
   if (parcel.x !== lastPlayerParcel.x || parcel.y !== lastPlayerParcel.y) {
     lastPlayerParcel.copyFrom(parcel)
-    parcelObservable.notifyObservers({ parcel, immediate })
+    parcelObservable.notifyObservers({ previousParcel: lastPlayerParcel, newParcel: parcel, immediate })
   }
 })
 
@@ -77,8 +78,8 @@ export function initializeUrlPositionObserver() {
     }
   }
 
-  parcelObservable.add(({ parcel }) => {
-    updateUrlPosition(parcel)
+  parcelObservable.add(({ newParcel }) => {
+    updateUrlPosition(newParcel)
   })
 
   if (lastPlayerPosition.equalsToFloats(0, 0, 0)) {
