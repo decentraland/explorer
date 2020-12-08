@@ -599,15 +599,23 @@ namespace DCL
         #region DEBUG_MANAGEMENT
 
         //======================================================================
-        [Header("Debug Tools")] public GameObject fpsPanel;
-        [Header("Debug Panel")] public GameObject engineDebugPanel;
+        [Header("Debug Tools")]
+        public GameObject fpsPanel;
+
+        [Header("Debug Panel")]
+        public GameObject engineDebugPanel;
+
         public GameObject sceneDebugPanel;
         public bool debugScenes;
         public Vector2Int debugSceneCoords;
         public static Action OnDebugModeSet;
-        [System.NonSerialized] public bool isDebugMode;
-        [System.NonSerialized] public bool isWssDebugMode;
-        public static bool VERBOSE = false;
+
+        [System.NonSerialized]
+        public bool isDebugMode;
+
+        [System.NonSerialized]
+        public bool isWssDebugMode;
+
         public bool ignoreGlobalScenes = false;
 
         // Beware this SetDebug() may be called before Awake() somehow...
@@ -625,7 +633,7 @@ namespace DCL
 
             //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
             //             case. Calling Initialize multiple times in a row is safe.
-            Environment.i.Initialize(this);
+            Environment.i.Initialize();
             Environment.i.worldBlockersController.SetEnabled(false);
         }
 
@@ -660,8 +668,11 @@ namespace DCL
 
         public Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool { get; } = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
 
-        [System.NonSerialized] public bool prewarmSceneMessagesPool = true;
-        [System.NonSerialized] public bool useBoundariesChecker = true;
+        [System.NonSerialized]
+        public bool prewarmSceneMessagesPool = true;
+
+        [System.NonSerialized]
+        public bool useBoundariesChecker = true;
 
 
         public SceneBoundariesChecker boundariesChecker { get; private set; }
