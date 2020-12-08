@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using DCL.SettingsPanelHUD.Sections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,9 +22,10 @@ namespace DCL.SettingsPanelHUD
         [SerializeField] private Button resetAllOkButton;
         [SerializeField] private Button resetAllCancelButton;
 
-        [Header("Close Settings")]
+        [Header("Open/Close Settings")]
         [SerializeField] private Button closeButton;
         [SerializeField] private InputAction_Trigger closeAction;
+        [SerializeField] private InputAction_Trigger openAction;
 
         [Header("Animations")]
         [SerializeField] private ShowHideAnimator settingsAnimator;
@@ -34,6 +36,11 @@ namespace DCL.SettingsPanelHUD
 
         private IHUD hudController;
         private ISettingsPanelHUDController settingsPanelController;
+
+        private void Awake()
+        {
+            openAction.OnTriggered += OpenAction_OnTriggered;
+        }
 
         public static SettingsPanelHUDView Create()
         {
@@ -67,10 +74,10 @@ namespace DCL.SettingsPanelHUD
 
         private void OnDestroy()
         {
+            openAction.OnTriggered -= OpenAction_OnTriggered;
+
             if (settingsAnimator)
-            {
                 settingsAnimator.OnWillFinishHide -= OnFinishHide;
-            }
         }
 
         private void CreateSections()
@@ -109,7 +116,6 @@ namespace DCL.SettingsPanelHUD
         private void CloseSettingsPanel()
         {
             hudController.SetVisibility(false);
-            settingsPanelController.SaveSettings();
         }
 
         public void SetVisibility(bool visible)
@@ -130,9 +136,16 @@ namespace DCL.SettingsPanelHUD
             else
             {
                 settingsAnimator.Hide();
+                settingsPanelController.SaveSettings();
             }
 
             isOpen = visible;
+        }
+
+        private void OpenAction_OnTriggered(DCLAction_Trigger action)
+        {
+            Utils.UnlockCursor();
+            hudController.SetVisibility(!isOpen);
         }
 
         private void CloseAction_OnTriggered(DCLAction_Trigger action)

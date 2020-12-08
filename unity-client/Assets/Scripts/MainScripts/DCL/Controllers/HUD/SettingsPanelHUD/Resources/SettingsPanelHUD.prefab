@@ -303,6 +303,7 @@ MonoBehaviour:
   resetAllCancelButton: {fileID: 7439851785821442718}
   closeButton: {fileID: 636651055379034414}
   closeAction: {fileID: 11400000, guid: 54539b42d809e284090ff4087d5c733b, type: 2}
+  openAction: {fileID: 11400000, guid: 6f31c2fc30264d64db048fa133946cfa, type: 2}
   settingsAnimator: {fileID: 8510801436436864719}
 --- !u!1 &412423897085255281
 GameObject:
@@ -316,7 +317,6 @@ GameObject:
   - component: {fileID: 781531584331734121}
   - component: {fileID: 283433818916010958}
   - component: {fileID: 3689218334276754076}
-  - component: {fileID: 3268019839724819604}
   - component: {fileID: 7478894174005072063}
   m_Layer: 5
   m_Name: ContinueButton
@@ -425,21 +425,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3268019839724819604
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 412423897085255281}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4aa57396ca49f84586c709595ec59c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  text: {fileID: 2013837135753886786}
-  button: {fileID: 3689218334276754076}
 --- !u!114 &7478894174005072063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -929,7 +914,6 @@ GameObject:
   - component: {fileID: 5280482302297933923}
   - component: {fileID: 5523485714695552758}
   - component: {fileID: 2543131305351571432}
-  - component: {fileID: 5625308945886770004}
   - component: {fileID: 7240552759431577503}
   m_Layer: 5
   m_Name: ResetAllButton
@@ -1038,21 +1022,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &5625308945886770004
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1825413437048598886}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4aa57396ca49f84586c709595ec59c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  text: {fileID: 2601642393798991090}
-  button: {fileID: 2543131305351571432}
 --- !u!114 &7240552759431577503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2206,7 +2175,6 @@ GameObject:
   - component: {fileID: 1135935705319407003}
   - component: {fileID: 3252286269439539027}
   - component: {fileID: 7439851785821442718}
-  - component: {fileID: 5000297033008844856}
   - component: {fileID: 4397031195004707855}
   m_Layer: 5
   m_Name: CancelButton
@@ -2315,21 +2283,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &5000297033008844856
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6688616750336492064}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4aa57396ca49f84586c709595ec59c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  icon: {fileID: 0}
-  text: {fileID: 7155139986497107615}
-  button: {fileID: 7439851785821442718}
 --- !u!114 &4397031195004707855
 MonoBehaviour:
   m_ObjectHideFlags: 0
