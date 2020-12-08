@@ -30,6 +30,11 @@ namespace Tests
         protected override IEnumerator TearDown()
         {
             Object.Destroy(panelView.gameObject);
+
+            foreach (var section in sectionsToCreate)
+            {
+                Object.Destroy(section.icon);
+            }
             sectionsToCreate.Clear();
 
             yield return base.TearDown();

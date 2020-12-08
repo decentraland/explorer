@@ -14,6 +14,7 @@ namespace Tests
         private ISettingsSectionView newSectionView;
         private ISettingsSectionController newSectionController;
         private SettingsSectionModel newSectionConfig;
+        private Sprite testSprite;
 
         [SetUp]
         public void SetUp()
@@ -21,8 +22,9 @@ namespace Tests
             panelController = new SettingsPanelHUDController();
             newSectionView = Substitute.For<ISettingsSectionView>();
             newSectionController = Substitute.For<ISettingsSectionController>();
+            testSprite = Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2());
             newSectionConfig = new SettingsSectionModel(
-                Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2()),
+                testSprite,
                 "TestSection",
                 new SettingsButtonEntry(),
                 new SettingsSectionView(),
@@ -33,6 +35,7 @@ namespace Tests
         [TearDown]
         public void TearDown()
         {
+            Object.DestroyImmediate(testSprite);
             panelController.sections.Clear();
         }
 
