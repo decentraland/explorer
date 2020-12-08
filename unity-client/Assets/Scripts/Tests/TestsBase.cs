@@ -176,7 +176,7 @@ public class TestsBase
         sceneController = TestHelpers.InitializeSceneController(usesWebServer);
 
         if (debugMode)
-            DebugBridge.i.SetDebug();
+            Environment.i.debugController.SetDebug();
 
         yield return null;
 

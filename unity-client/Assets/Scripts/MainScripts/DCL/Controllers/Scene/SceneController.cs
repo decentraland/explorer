@@ -94,12 +94,11 @@ namespace DCL
 
         private void OnDebugModeSet()
         {
-            InitializeSceneBoundariesChecker(true);
-
             //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
             //             case. Calling Initialize multiple times in a row is safe.
             Environment.i.Initialize(this);
             Environment.i.worldBlockersController.SetEnabled(false);
+            InitializeSceneBoundariesChecker(true);
         }
 
         void Start()

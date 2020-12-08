@@ -57,7 +57,6 @@ namespace DCL
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(worldState, DCLCharacterController.i.characterPosition);
             parcelScenesCleaner.Start();
             cullingController.Start();
-            debugController = new DebugController();
             initialized = true;
         }
 
