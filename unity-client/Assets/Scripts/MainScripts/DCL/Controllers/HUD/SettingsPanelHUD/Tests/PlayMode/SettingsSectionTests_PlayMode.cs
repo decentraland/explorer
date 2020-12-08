@@ -43,11 +43,11 @@ namespace SettingsSectionTests
             // Arrange
             SettingsWidgetView widgetViewPrefab = ((GameObject)Resources.Load(WIDGET_VIEW_PREFAB_PATH)).GetComponent<SettingsWidgetView>();
 
-            SettingsWidgetModel newWidgetConfig = new SettingsWidgetModel(
-                $"TestWidget",
-                widgetViewPrefab,
-                new SettingsWidgetController(),
-                new SettingsControlGroupList());
+            SettingsWidgetModel newWidgetConfig = ScriptableObject.CreateInstance<SettingsWidgetModel>();
+            newWidgetConfig.title = "TestWidget";
+            newWidgetConfig.widgetPrefab = widgetViewPrefab;
+            newWidgetConfig.widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
+            newWidgetConfig.controlColumns = new SettingsControlGroupList();
 
             widgetsToCreate.Add(newWidgetConfig);
 

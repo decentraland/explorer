@@ -13,17 +13,5 @@ namespace DCL.SettingsPanelHUD.Widgets
 
         [Reorderable]
         public SettingsControlGroupList controlColumns;
-
-        public SettingsWidgetModel(
-            string title,
-            SettingsWidgetView widgetPrefab,
-            SettingsWidgetController widgetController,
-            SettingsControlGroupList controlGroups)
-        {
-            this.title = title;
-            this.widgetPrefab = widgetPrefab;
-            this.widgetController = widgetController;
-            this.controlColumns = controlGroups;
-        }
     }
 }

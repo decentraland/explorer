@@ -4,6 +4,7 @@ using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
 using NUnit.Framework;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SettingsSectionTests
 {
@@ -15,11 +16,11 @@ namespace SettingsSectionTests
             // Arrange
             var newWidgetView = Substitute.For<ISettingsWidgetView>();
             var newWidgetController = Substitute.For<ISettingsWidgetController>();
-            var newWidgetConfig = new SettingsWidgetModel(
-                "TestWidget",
-                new SettingsWidgetView(),
-                new SettingsWidgetController(),
-                new SettingsControlGroupList());
+            var newWidgetConfig = ScriptableObject.CreateInstance<SettingsWidgetModel>();
+            newWidgetConfig.title = "TestWidget";
+            newWidgetConfig.widgetPrefab = new SettingsWidgetView();
+            newWidgetConfig.widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
+            newWidgetConfig.controlColumns = new SettingsControlGroupList();
 
             SettingsSectionController sectionController = new SettingsSectionController();
 

@@ -48,13 +48,13 @@ namespace SettingsPanelTests
             SettingsSectionView sectionViewPrefab = ((GameObject)Resources.Load(SECTION_VIEW_PREFAB_PATH)).GetComponent<SettingsSectionView>();
             SettingsButtonEntry menuButtonPrefab = ((GameObject)Resources.Load(MENU_BUTTON_PREFAB_PATH)).GetComponent<SettingsButtonEntry>();
 
-            SettingsSectionModel newSectionConfig = new SettingsSectionModel(
-                Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2()),
-                $"TestSection",
-                menuButtonPrefab,
-                sectionViewPrefab,
-                new SettingsSectionController(),
-                new SettingsWidgetList());
+            SettingsSectionModel newSectionConfig = ScriptableObject.CreateInstance<SettingsSectionModel>();
+            newSectionConfig.icon = Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2());
+            newSectionConfig.text = "TestSection";
+            newSectionConfig.menuButtonPrefab = menuButtonPrefab;
+            newSectionConfig.sectionPrefab = sectionViewPrefab;
+            newSectionConfig.sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
+            newSectionConfig.widgets = new SettingsWidgetList();
 
             sectionsToCreate.Add(newSectionConfig);
 

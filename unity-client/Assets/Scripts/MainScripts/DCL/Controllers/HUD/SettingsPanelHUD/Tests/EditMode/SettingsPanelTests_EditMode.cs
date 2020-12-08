@@ -23,13 +23,13 @@ namespace SettingsPanelTests
             newSectionView = Substitute.For<ISettingsSectionView>();
             newSectionController = Substitute.For<ISettingsSectionController>();
             testSprite = Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2());
-            newSectionConfig = new SettingsSectionModel(
-                testSprite,
-                "TestSection",
-                new SettingsButtonEntry(),
-                new SettingsSectionView(),
-                new SettingsSectionController(),
-                new SettingsWidgetList());
+            newSectionConfig = ScriptableObject.CreateInstance<SettingsSectionModel>();
+            newSectionConfig.icon = testSprite;
+            newSectionConfig.text = "TestSection";
+            newSectionConfig.menuButtonPrefab = new SettingsButtonEntry();
+            newSectionConfig.sectionPrefab = new SettingsSectionView();
+            newSectionConfig.sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
+            newSectionConfig.widgets = new SettingsWidgetList();
         }
 
         [TearDown]

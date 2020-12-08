@@ -20,21 +20,5 @@ namespace DCL.SettingsPanelHUD.Sections
 
         [Reorderable]
         public SettingsWidgetList widgets;
-
-        public SettingsSectionModel(
-            Sprite icon,
-            string text,
-            SettingsButtonEntry menuButtonPrefab,
-            SettingsSectionView sectionPrefab,
-            SettingsSectionController sectionController,
-            SettingsWidgetList widgets)
-        {
-            this.icon = icon;
-            this.text = text;
-            this.menuButtonPrefab = menuButtonPrefab;
-            this.sectionPrefab = sectionPrefab;
-            this.sectionController = sectionController;
-            this.widgets = widgets;
-        }
     }
 }
