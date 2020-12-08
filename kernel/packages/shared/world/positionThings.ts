@@ -29,7 +29,7 @@ export type PositionReport = {
 export type ParcelReport = {
   /** Parcel where the user was before */
   previousParcel?: ReadOnlyVector2
-  /** Parcel where the user now is */
+  /** Parcel where the user is now */
   newParcel: ReadOnlyVector2
   /** Should this position be applied immediately */
   immediate: boolean
@@ -38,8 +38,6 @@ export type ParcelReport = {
 export const positionObservable = new Observable<Readonly<PositionReport>>()
 // Called each time the user changes  parcel
 export const parcelObservable = new Observable<ParcelReport>()
-// Called each time the user changes scene
-export const sceneObservable = new Observable<ILand>()
 
 export const teleportObservable = new Observable<ReadOnlyVector2>()
 
@@ -55,8 +53,8 @@ positionObservable.add(({ position, immediate }) => {
   const parcel = Vector2.Zero()
   worldToGrid(position, parcel)
   if (parcel.x !== lastPlayerParcel.x || parcel.y !== lastPlayerParcel.y) {
-    lastPlayerParcel.copyFrom(parcel)
     parcelObservable.notifyObservers({ previousParcel: lastPlayerParcel, newParcel: parcel, immediate })
+    lastPlayerParcel.copyFrom(parcel)
   }
 })
 
