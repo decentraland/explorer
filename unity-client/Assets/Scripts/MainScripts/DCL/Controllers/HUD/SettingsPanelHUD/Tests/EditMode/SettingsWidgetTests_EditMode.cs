@@ -5,10 +5,10 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Tests
+namespace SettingsWidgetTests
 {
 
-    public class SettingsWidgetTests_EditMode
+    public class SettingsWidgetShould_EditMode
     {
 		[Test]
         public void AddControlCorrectly()

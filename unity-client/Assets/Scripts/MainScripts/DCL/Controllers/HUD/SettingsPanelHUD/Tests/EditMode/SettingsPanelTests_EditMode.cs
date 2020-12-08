@@ -6,9 +6,9 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Tests
+namespace SettingsPanelTests
 {
-    public class SettingsPanelTests_EditMode
+    public class SettingsPanelShould_EditMode
     {
         private SettingsPanelHUDController panelController;
         private ISettingsSectionView newSectionView;

@@ -5,9 +5,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace SettingsPanelTests
 {
-    public class SettingsPanelTests_PlayMode : TestsBase
+    public class SettingsPanelShould_PlayMode : TestsBase
     {
         private const string SECTION_VIEW_PREFAB_PATH = "Sections/DefaultSettingsSectionTemplate";
         private const string MENU_BUTTON_PREFAB_PATH = "Sections/DefaultSettingsMenuButtonTemplate";

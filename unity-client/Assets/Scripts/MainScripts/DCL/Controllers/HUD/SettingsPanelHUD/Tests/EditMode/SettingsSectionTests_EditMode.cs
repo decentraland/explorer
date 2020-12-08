@@ -5,9 +5,9 @@ using NSubstitute;
 using NUnit.Framework;
 using System.Collections.Generic;
 
-namespace Tests
+namespace SettingsSectionTests
 {
-    public class SettingsSectionTests_EditMode
+    public class SettingsSectionShould_EditMode
     {
 		[Test]
         public void AddWidgetCorrectly()

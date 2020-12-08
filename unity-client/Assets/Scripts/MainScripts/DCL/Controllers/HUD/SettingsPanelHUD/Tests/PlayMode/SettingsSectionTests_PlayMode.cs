@@ -2,16 +2,15 @@ using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Sections;
 using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace SettingsSectionTests
 {
 
-    public class SettingsSectionTests_PlayMode : TestsBase
+    public class SettingsSectionShould_PlayMode : TestsBase
     {
         private const string SECTION_VIEW_PREFAB_PATH = "Sections/DefaultSettingsSectionTemplate";
         private const string WIDGET_VIEW_PREFAB_PATH = "Widgets/DefaultSettingsWidgetTemplate";

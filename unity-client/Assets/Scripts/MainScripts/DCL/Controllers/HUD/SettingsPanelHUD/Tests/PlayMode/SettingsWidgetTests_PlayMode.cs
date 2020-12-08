@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace SettingsWidgetTests
 {
-    public class SettingsWidgetTests_PlayMode : TestsBase
+    public class SettingsWidgetShould_PlayMode : TestsBase
     {
         private const int NUMBER_OF_COLUMNS = 2;
         private const string WIDGET_VIEW_PREFAB_PATH = "Widgets/DefaultSettingsWidgetTemplate";
