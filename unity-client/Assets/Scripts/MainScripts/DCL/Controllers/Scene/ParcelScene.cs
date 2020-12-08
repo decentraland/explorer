@@ -147,7 +147,7 @@ namespace DCL.Controllers
 #if UNITY_EDITOR
             DebugConfig debugConfig = DataStore.debugConfig;
             //NOTE(Brian): Don't generate parcel blockers if debugScenes is active and is not the desired scene.
-            if (debugConfig.debugScenes && debugConfig.debugSceneCoords != data.basePosition)
+            if (debugConfig.soloScene && debugConfig.soloSceneCoords != data.basePosition)
             {
                 SetSceneReady();
                 return;

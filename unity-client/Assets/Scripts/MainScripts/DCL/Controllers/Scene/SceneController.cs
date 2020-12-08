@@ -32,6 +32,8 @@ namespace DCL
 
         public bool startDecentralandAutomatically = true;
 
+        public DebugConfig debugConfig;
+
         void Awake()
         {
             if (i != null)
@@ -46,6 +48,10 @@ namespace DCL
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = false;
 #endif
+            DataStore.debugConfig.soloScene = debugConfig.soloScene;
+            DataStore.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
+            DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
+            DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
             InitializeSceneBoundariesChecker(DataStore.debugConfig.isDebugMode);
 
@@ -191,7 +197,6 @@ namespace DCL
 
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.005f;
-        public bool msgStepByStep = false;
 
         public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
         {
@@ -208,7 +213,7 @@ namespace DCL
             if (worldState.loadedScenes.TryGetValue(sceneId, out scene))
             {
 #if UNITY_EDITOR
-                if (debugConfig.debugScenes && scene is GlobalScene && debugConfig.ignoreGlobalScenes)
+                if (debugConfig.soloScene && scene is GlobalScene && debugConfig.ignoreGlobalScenes)
                 {
                     return false;
                 }
@@ -652,7 +657,7 @@ namespace DCL
 
             DebugConfig debugConfig = DataStore.debugConfig;
 #if UNITY_EDITOR
-            if (debugConfig.debugScenes && sceneToLoad.basePosition.ToString() != debugConfig.debugSceneCoords.ToString())
+            if (debugConfig.soloScene && sceneToLoad.basePosition.ToString() != debugConfig.soloSceneCoords.ToString())
             {
                 SendSceneReady(sceneToLoad.id);
                 return;
@@ -814,7 +819,7 @@ namespace DCL
 #if UNITY_EDITOR
             DebugConfig debugConfig = DataStore.debugConfig;
 
-            if (debugConfig.debugScenes && debugConfig.ignoreGlobalScenes)
+            if (debugConfig.soloScene && debugConfig.ignoreGlobalScenes)
                 return;
 #endif
             CreateUISceneMessage uiScene = Utils.SafeFromJson<CreateUISceneMessage>(json);
