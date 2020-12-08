@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace SettingsPanelTests
 {
-    public class SettingsPanelShould_PlayMode : TestsBase
+    public class SettingsPanelShould_PlayMode
     {
         private const string SECTION_VIEW_PREFAB_PATH = "Sections/DefaultSettingsSectionTemplate";
         private const string MENU_BUTTON_PREFAB_PATH = "Sections/DefaultSettingsMenuButtonTemplate";
@@ -18,16 +18,17 @@ namespace SettingsPanelTests
         private SettingsSectionList sectionsToCreate = new SettingsSectionList();
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        private IEnumerator SetUp()
         {
-            yield return base.SetUp();
-
             panelView = SettingsPanelHUDView.Create();
             hudController = Substitute.For<IHUD>();
             panelController = Substitute.For<ISettingsPanelHUDController>();
+
+            yield return null;
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        private IEnumerator TearDown()
         {
             Object.Destroy(panelView.gameObject);
 
@@ -37,7 +38,7 @@ namespace SettingsPanelTests
             }
             sectionsToCreate.Clear();
 
-            yield return base.TearDown();
+            yield return null;
         }
 
         [UnityTest]

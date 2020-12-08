@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 
 namespace SettingsWidgetTests
 {
-    public class SettingsWidgetShould_PlayMode : TestsBase
+    public class SettingsWidgetShould_PlayMode
     {
         private const int NUMBER_OF_COLUMNS = 2;
         private const string WIDGET_VIEW_PREFAB_PATH = "Widgets/DefaultSettingsWidgetTemplate";
@@ -20,10 +20,8 @@ namespace SettingsWidgetTests
         private List<SettingsControlGroup> controlColumnsToCreate = new List<SettingsControlGroup>();
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        private IEnumerator SetUp()
         {
-            yield return base.SetUp();
-
             for (int i = 0; i < NUMBER_OF_COLUMNS; i++)
             {
                 controlColumnsToCreate.Add(new SettingsControlGroup()
@@ -34,14 +32,17 @@ namespace SettingsWidgetTests
 
             widgetView = Object.Instantiate((GameObject)Resources.Load(WIDGET_VIEW_PREFAB_PATH)).GetComponent<SettingsWidgetView>();
             widgetController = Substitute.For<ISettingsWidgetController>();
+
+            yield return null;
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        private IEnumerator TearDown()
         {
             Object.Destroy(widgetView.gameObject);
             controlColumnsToCreate.Clear();
 
-            yield return base.TearDown();
+            yield return null;
         }
 
         [UnityTest]

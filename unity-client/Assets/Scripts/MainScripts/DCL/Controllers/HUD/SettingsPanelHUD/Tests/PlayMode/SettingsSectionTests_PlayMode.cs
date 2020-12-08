@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 namespace SettingsSectionTests
 {
 
-    public class SettingsSectionShould_PlayMode : TestsBase
+    public class SettingsSectionShould_PlayMode
     {
         private const string SECTION_VIEW_PREFAB_PATH = "Sections/DefaultSettingsSectionTemplate";
         private const string WIDGET_VIEW_PREFAB_PATH = "Widgets/DefaultSettingsWidgetTemplate";
@@ -20,20 +20,21 @@ namespace SettingsSectionTests
         private List<SettingsWidgetModel> widgetsToCreate = new List<SettingsWidgetModel>();
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        private IEnumerator SetUp()
         {
-            yield return base.SetUp();
-
             sectionView = Object.Instantiate((GameObject)Resources.Load(SECTION_VIEW_PREFAB_PATH)).GetComponent<SettingsSectionView>();
             sectionController = Substitute.For<ISettingsSectionController>();
+
+            yield return null;
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        private IEnumerator TearDown()
         {
             Object.Destroy(sectionView.gameObject);
             widgetsToCreate.Clear();
 
-            yield return base.TearDown();
+            yield return null;
         }
 
         [UnityTest]
