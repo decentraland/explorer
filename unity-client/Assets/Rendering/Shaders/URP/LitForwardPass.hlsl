@@ -17,7 +17,7 @@ struct Attributes
 struct Varyings
 {
     float4 uvAlbedoNormal           : TEXCOORD0; //Albedo, Normal UVs
-    float4 uvMetallicEmissive       : TEXCOORD1; //Metallic, Emissive UVs
+    DECLARE_LIGHTMAP_OR_SH(lightmapUV, vertexSH, 1);
 
     float3 positionWS               : TEXCOORD2;
 
@@ -71,7 +71,8 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 #endif
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
-    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, half3(0,0,0), inputData.normalWS);
+    inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, inputData.normalWS);
+    inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,8 +96,8 @@ Varyings LitPassVertex(Attributes input)
     float2 uvs[] = { TRANSFORM_TEX(input.texcoord, _BaseMap), TRANSFORM_TEX(input.texcoord1, _BaseMap)};
     output.uvAlbedoNormal.xy = uvs[saturate(_BaseMapUVs)];
     output.uvAlbedoNormal.zw = uvs[saturate(_NormalMapUVs)];
-    output.uvMetallicEmissive.xy = uvs[saturate(_MetallicMapUVs)];
-    output.uvMetallicEmissive.zw = uvs[saturate(_EmissiveMapUVs)];
+    //output.uvMetallicEmissive.xy = uvs[saturate(_MetallicMapUVs)];
+    //output.uvMetallicEmissive.zw = uvs[saturate(_EmissiveMapUVs)];
 
 #ifdef _NORMALMAP
     output.normalWS = half4(normalInput.normalWS, viewDirWS.x);
@@ -106,6 +107,9 @@ Varyings LitPassVertex(Attributes input)
     output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
     output.viewDirWS = viewDirWS;
 #endif
+
+    OUTPUT_SH(output.normalWS.xyz, output.vertexSH);
+
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 
     output.positionWS = vertexInput.positionWS;
@@ -128,12 +132,13 @@ half4 LitPassFragment(Varyings input) : SV_Target
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
     SurfaceData surfaceData;
-    InitializeStandardLitSurfaceData(input.uvAlbedoNormal.xy, input.uvAlbedoNormal.zw, input.uvMetallicEmissive.xy, input.uvMetallicEmissive.zw, surfaceData);
+    InitializeStandardLitSurfaceData(input.uvAlbedoNormal.xy, input.uvAlbedoNormal.zw, input.uvAlbedoNormal.xy, input.uvAlbedoNormal.zw, surfaceData);
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
 
     half4 color = LightweightFragmentPBR(inputData, surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.occlusion, surfaceData.emission, surfaceData.alpha);
+    //half4 color = UniversalFragmentPBR(inputData, surfaceData);
 
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
 
