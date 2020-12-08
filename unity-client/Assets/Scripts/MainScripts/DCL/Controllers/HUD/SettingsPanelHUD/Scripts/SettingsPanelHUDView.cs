@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Sections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,12 +8,18 @@ namespace DCL.SettingsPanelHUD
     {
         [Header("General configuration")]
         [SerializeField] private GameObject mainWindow;
-        [SerializeField] private Button resetAllButton;
+        [SerializeField] private Transform blackOverlay;
 
         [Header("Sections configuration")]
         [SerializeField] private SettingsPanelModel settingsPanelConfig;
         [SerializeField] private Transform menuButtonsContainer;
         [SerializeField] private Transform sectionsContainer;
+
+        [Header("Reset All configuration")]
+        [SerializeField] private Button resetAllButton;
+        [SerializeField] private ShowHideAnimator resetAllConfirmation;
+        [SerializeField] private Button resetAllOkButton;
+        [SerializeField] private Button resetAllCancelButton;
 
         [Header("Close Settings")]
         [SerializeField] private Button closeButton;
@@ -42,9 +47,11 @@ namespace DCL.SettingsPanelHUD
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
 
-            resetAllButton.onClick.AddListener(() => settingsPanelController.ResetAllSettings());
+            resetAllButton.onClick.AddListener(ShowResetAllConfirmation);
+            resetAllCancelButton.onClick.AddListener(HideResetAllConfirmation);
+            resetAllOkButton.onClick.AddListener(ResetAllSettings);
 
-            closeButton.onClick.AddListener(() => CloseSettingsPanel());
+            closeButton.onClick.AddListener(CloseSettingsPanel);
             settingsAnimator.OnWillFinishHide += OnFinishHide;
 
             CreateSections();
@@ -80,6 +87,25 @@ namespace DCL.SettingsPanelHUD
             settingsPanelController.OpenSection(0);
         }
 
+        private void ShowResetAllConfirmation()
+        {
+            resetAllConfirmation.Show();
+            blackOverlay.SetSiblingIndex(resetAllConfirmation.transform.GetSiblingIndex() - 1);
+        }
+
+        private void HideResetAllConfirmation()
+        {
+            resetAllConfirmation.Hide();
+            blackOverlay.SetSiblingIndex(0);
+        }
+
+        private void ResetAllSettings()
+        {
+            settingsPanelController.ResetAllSettings();
+            resetAllConfirmation.Hide();
+            blackOverlay.SetSiblingIndex(0);
+        }
+
         private void CloseSettingsPanel()
         {
             hudController.SetVisibility(false);
@@ -99,6 +125,7 @@ namespace DCL.SettingsPanelHUD
                 closeAction.OnTriggered += CloseAction_OnTriggered;
                 settingsAnimator.Show();
                 mainWindow.SetActive(true);
+                HideResetAllConfirmation();
             }
             else
             {
