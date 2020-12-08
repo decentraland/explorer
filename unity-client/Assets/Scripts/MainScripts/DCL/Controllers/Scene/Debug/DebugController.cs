@@ -24,41 +24,40 @@ namespace DCL
             Debug.unityLogger.logEnabled = true;
 
             debugConfig.isDebugMode = true;
-            debugView.ShowFPSPanel();
 
-            SceneController.i.InitializeSceneBoundariesChecker(true);
+            ShowFPSPanel();
 
             OnDebugModeSet?.Invoke();
-
-            //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
-            //             case. Calling Initialize multiple times in a row is safe.
-            Environment.i.Initialize(SceneController.i);
-            Environment.i.worldBlockersController.SetEnabled(false);
         }
 
         public void HideFPSPanel()
         {
-            debugView.HideFPSPanel();
+            if (debugView != null)
+                debugView.HideFPSPanel();
         }
 
         public void ShowFPSPanel()
         {
-            debugView.ShowFPSPanel();
+            if (debugView != null)
+                debugView.ShowFPSPanel();
         }
 
         public void SetSceneDebugPanel()
         {
-            debugView.SetSceneDebugPanel();
+            if (debugView != null)
+                debugView.SetSceneDebugPanel();
         }
 
         public void SetEngineDebugPanel()
         {
-            debugView.SetEngineDebugPanel();
+            if (debugView != null)
+                debugView.SetEngineDebugPanel();
         }
 
         public void Dispose()
         {
-            Object.Destroy(debugView.gameObject);
+            if (debugView != null)
+                Object.Destroy(debugView.gameObject);
         }
     }
 }

@@ -313,7 +313,7 @@ namespace SceneBoundariesCheckerTests
             if (meshesInfo.meshRootGameObject == null) return false; // It's not invalid if there's no mesh
 
             //TODO(Brian): Check if SBC is in red flicker mode instead of this check.
-            if (Environment.i.debugConfig.isDebugMode)
+            if (DCL.DataStore.debugConfig.isDebugMode)
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
