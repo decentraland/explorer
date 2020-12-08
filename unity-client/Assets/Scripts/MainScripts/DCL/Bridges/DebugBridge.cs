@@ -6,13 +6,6 @@ namespace DCL
 {
     public class DebugBridge : MonoBehaviour
     {
-        public static DebugBridge i { get; private set; }
-
-        public void Awake()
-        {
-            i = this;
-        }
-
         // Beware this SetDebug() may be called before Awake() somehow...
         [ContextMenu("Set Debug mode")]
         public void SetDebug()

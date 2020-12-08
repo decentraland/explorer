@@ -264,19 +264,19 @@ namespace DCL
                         switch (msg.type)
                         {
                             case "SetDebug":
-                                DebugBridge.i.SetDebug();
+                                DCL.Environment.i.debugController.SetDebug();
                                 break;
                             case "SetSceneDebugPanel":
-                                DebugBridge.i.SetSceneDebugPanel();
+                                DCL.Environment.i.debugController.SetSceneDebugPanel();
                                 break;
                             case "ShowFPSPanel":
-                                DebugBridge.i.ShowFPSPanel();
+                                DCL.Environment.i.debugController.ShowFPSPanel();
                                 break;
                             case "HideFPSPanel":
-                                DebugBridge.i.HideFPSPanel();
+                                DCL.Environment.i.debugController.HideFPSPanel();
                                 break;
                             case "SetEngineDebugPanel":
-                                DebugBridge.i.SetEngineDebugPanel();
+                                DCL.Environment.i.debugController.SetEngineDebugPanel();
                                 break;
                             case "SendSceneMessage":
                                 sceneController.SendSceneMessage(msg.payload);
