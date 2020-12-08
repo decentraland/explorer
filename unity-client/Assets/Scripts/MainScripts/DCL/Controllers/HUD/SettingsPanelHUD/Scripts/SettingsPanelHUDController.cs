@@ -24,6 +24,8 @@ namespace DCL.SettingsPanelHUD
 
         public List<ISettingsSectionView> sections { get; } = new List<ISettingsSectionView>();
 
+        private List<SettingsButtonEntry> menuButtons = new List<SettingsButtonEntry>();
+
         public SettingsPanelHUDController()
         {
             view = SettingsPanelHUDView.Create();
@@ -61,7 +63,19 @@ namespace DCL.SettingsPanelHUD
             newSection.Initialize(newSectionController, sectionConfig.widgets.ToList());
             newSection.SetActive(false);
             sections.Add(newSection);
-            newMenuButton?.ConfigureAction(() => OpenSection(newSection));
+
+            newMenuButton?.ConfigureAction(() =>
+            {
+                foreach (var button in menuButtons)
+                {
+                    button.MarkAsSelected(false);
+                }
+                newMenuButton.MarkAsSelected(true);
+
+                OpenSection(newSection);
+            });
+
+            menuButtons.Add(newMenuButton);
         }
 
         public void OpenSection(ISettingsSectionView sectionToOpen)
