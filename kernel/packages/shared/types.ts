@@ -220,7 +220,7 @@ export type SceneFeatureToggle = {
 }
 
 export class SceneFeatureToggles {
-  static readonly VOICE_CHAT: SceneFeatureToggle = { name: 'voice_chat', default: 'enabled' }
+  static readonly VOICE_CHAT: SceneFeatureToggle = { name: 'voiceChat', default: 'enabled' }
 }
 
 export type EnvironmentData<T> = {
