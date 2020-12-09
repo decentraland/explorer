@@ -7,12 +7,13 @@ global.enableWeb3 = true
 
 import { initShared } from 'shared'
 import { createLogger } from 'shared/logger'
-import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { ReportFatalError, ReportSceneError } from 'shared/loading/ReportFatalError'
 import {
   AUTH_ERROR_LOGGED_OUT,
   experienceStarted,
   FAILED_FETCHING_UNITY,
   NOT_INVITED,
+  setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
@@ -24,9 +25,9 @@ import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
 import {
+  ensureRendererEnabled,
   foregroundObservable,
   isForeground,
-  onNextRendererEnabled,
   renderStateObservable
 } from 'shared/world/worldState'
 import { getCurrentIdentity } from 'shared/session/selectors'
@@ -130,13 +131,18 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
+        ensureRendererEnabled().then(() => {
+          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+          globalThis.globalStore.dispatch(experienceStarted())
+          globalThis.globalStore.dispatch(setLoadingScreen(false))
+          Html.switchGameContainer(true)
+          i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+        })
+
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
-            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
-            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-            Html.switchGameContainer(true)
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
@@ -146,8 +152,6 @@ namespace webApp {
       })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
-
-    onNextRendererEnabled(() => globalThis.globalStore.dispatch(experienceStarted()))
 
     await realmInitialized()
     startRealmsReportToRenderer()
@@ -195,6 +199,7 @@ namespace webApp {
     document.body.classList.remove('dcl-loading')
     globalThis.UnityLoader.Error.handler = (error: any) => {
       if (error.isSceneError) {
+        ReportSceneError((error.message || 'unknown') as string, error)
         // @see packages/shared/world/SceneWorker.ts#loadSystem
         debugger
         return

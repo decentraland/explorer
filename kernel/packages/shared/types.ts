@@ -211,6 +211,16 @@ export type SceneJsonData = {
   source?: SceneSource
   spawnPoints?: SceneSpawnPoint[]
   requiredPermissions?: string[] | undefined
+  featureToggles?: { [key: string]: string }
+}
+
+export type SceneFeatureToggle = {
+  name: string
+  default: 'enabled' | 'disabled'
+}
+
+export class SceneFeatureToggles {
+  static readonly VOICE_CHAT: SceneFeatureToggle = { name: 'voiceChat', default: 'enabled' }
 }
 
 export type EnvironmentData<T> = {
@@ -383,7 +393,8 @@ export type Notification = {
 
 export enum RenderProfile {
   DEFAULT = 0,
-  HALLOWEEN = 1
+  HALLOWEEN = 1,
+  XMAS = 2
 }
 
 export enum HUDElementID {
