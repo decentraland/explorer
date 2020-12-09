@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections;
+using DCL;
 using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
@@ -53,7 +54,7 @@ namespace SceneBoundariesCheckerTests
 
             TestHelpers.RemoveSceneEntity(scene, entity.entityId);
 
-            ParcelScene.parcelScenesCleaner.ForceCleanup();
+            Environment.i.parcelScenesCleaner.ForceCleanup();
 
             yield return null;
 

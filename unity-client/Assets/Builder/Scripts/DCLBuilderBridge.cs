@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Environment = DCL.Environment;
 using Object = UnityEngine.Object;
 
 namespace Builder
@@ -47,7 +48,7 @@ namespace Builder
         private bool isPreviewMode = false;
         private List<string> outOfBoundariesEntitiesId = new List<string>();
         private int lastEntitiesOutOfBoundariesCount = 0;
-        private List<DCLBuilderEntity> selectedEntities;
+        private List<EditableEntity> selectedEntities;
         private bool entitiesMoved = false;
 
         private bool isGameObjectActive = false;
@@ -106,7 +107,7 @@ namespace Builder
         public void GetMousePosition(string newJson)
         {
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: GetMousePosition {newJson}");
-            MousePayload m = SceneController.i.SafeFromJson<MousePayload>(newJson);
+            MousePayload m = Utils.SafeFromJson<MousePayload>(newJson);
 
             Vector3 mousePosition = new Vector3(m.x, Screen.height - m.y, 0);
             Vector3 hitPoint;
@@ -318,10 +319,11 @@ namespace Builder
         private static ParcelScene GetLoadedScene()
         {
             ParcelScene loadedScene = null;
+            WorldState worldState = Environment.i.worldState;
 
-            if (SceneController.i != null && SceneController.i.loadedScenes.Count > 0)
+            if (worldState != null && worldState.loadedScenes.Count > 0)
             {
-                using (var iterator = SceneController.i.loadedScenes.GetEnumerator())
+                using (var iterator = worldState.loadedScenes.GetEnumerator())
                 {
                     iterator.MoveNext();
                     loadedScene = iterator.Current.Value;
@@ -486,7 +488,7 @@ namespace Builder
             entitiesMoved = true;
         }
 
-        private void OnObjectSelected(DCLBuilderEntity entity, string gizmoType)
+        private void OnObjectSelected(EditableEntity entity, string gizmoType)
         {
             NotifyGizmosSelectedEvent(entity, gizmoType);
         }
@@ -496,17 +498,17 @@ namespace Builder
             NotifyGizmosSelectedEvent(null, DCLGizmos.Gizmo.NONE);
         }
 
-        private void OnSelectionChanged(Transform selectionParent, List<DCLBuilderEntity> selectedEntitiesList)
+        private void OnSelectionChanged(Transform selectionParent, List<EditableEntity> selectedEntitiesList)
         {
             selectedEntities = selectedEntitiesList;
         }
 
-        private void NotifyGizmosTransformEvent(List<DCLBuilderEntity> entities, string gizmoType)
+        private void NotifyGizmosTransformEvent(List<EditableEntity> entities, string gizmoType)
         {
             builderWebInterface.SendEntitiesTransform(entities, gizmoType, currentScene.sceneData.id);
         }
 
-        private void NotifyGizmosSelectedEvent(DCLBuilderEntity entity, string gizmoType)
+        private void NotifyGizmosSelectedEvent(EditableEntity entity, string gizmoType)
         {
             builderWebInterface.SendEntitySelected(entity, gizmoType, currentScene.sceneData.id);
         }
@@ -591,9 +593,9 @@ namespace Builder
         private void HideHUDs()
         {
             IHUD hud;
-            for (int i = 0; i < (int)HUDController.HUDElementID.COUNT; i++)
+            for (int i = 0; i < (int) HUDController.HUDElementID.COUNT; i++)
             {
-                hud = HUDController.i.GetHUDElement((HUDController.HUDElementID)i);
+                hud = HUDController.i.GetHUDElement((HUDController.HUDElementID) i);
                 if (hud != null)
                 {
                     hud.SetVisibility(false);

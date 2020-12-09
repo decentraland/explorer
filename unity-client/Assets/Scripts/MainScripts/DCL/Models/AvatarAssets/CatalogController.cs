@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 public class CatalogController : MonoBehaviour
@@ -39,7 +41,7 @@ public class CatalogController : MonoBehaviour
     {
         i = this;
     }
-
+ 
     public void AddWearableToCatalog(string payload)
     {
         Item item = JsonUtility.FromJson<Item>(payload);

@@ -19,6 +19,7 @@ namespace DCL.SettingsHUD
         public Toggle shadowToggle = null;
         public Toggle softShadowToggle = null;
         public Toggle bloomToggle = null;
+        public Toggle fpsCapToggle = null;
         public Slider mouseSensitivitySlider = null;
         public Slider antiAliasingSlider = null;
         public Slider renderingScaleSlider = null;
@@ -33,9 +34,14 @@ namespace DCL.SettingsHUD
         public TextMeshProUGUI voiceChatVolumeValueLabel = null;
         public SpinBoxPresetted voiceChatAllowSpinBox = null;
 
+        public Toggle cullingToggle = null;
+
+        public Slider cullingSlider = null;
+        public TextMeshProUGUI cullingSliderValueLabel = null;
+
         [SerializeField] private Toggle autosettingsToggle;
-        [SerializeField] private CanvasGroup advancedCanvasGroup;
-        [SerializeField] private GameObject advancedBlocker;
+        [SerializeField] private CanvasGroup autoqualityBlockCanvasGroup;
+        [SerializeField] private GameObject autoqualityBlocker;
 
         private DCL.SettingsData.QualitySettings currentQualitySetting;
         private DCL.SettingsData.GeneralSettings currentGeneralSetting;
@@ -58,14 +64,14 @@ namespace DCL.SettingsHUD
 
             baseResSpinBox.onValueChanged.AddListener(value =>
             {
-                tempQualitySetting.baseResolution = (DCL.SettingsData.QualitySettings.BaseResolution)value;
+                tempQualitySetting.baseResolution = (DCL.SettingsData.QualitySettings.BaseResolution) value;
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
 
             shadowResSpinBox.onValueChanged.AddListener(value =>
             {
-                tempQualitySetting.shadowResolution = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << value);
+                tempQualitySetting.shadowResolution = (UnityEngine.Rendering.Universal.ShadowResolution) (256 << value);
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
@@ -90,6 +96,7 @@ namespace DCL.SettingsHUD
                 {
                     softShadowToggle.isOn = false;
                 }
+
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
@@ -108,17 +115,24 @@ namespace DCL.SettingsHUD
                 isDirty = true;
             });
 
+            fpsCapToggle.onValueChanged.AddListener(isOn =>
+            {
+                tempQualitySetting.fpsCap = isOn;
+                shouldSetAsCustom = true;
+                isDirty = true;
+            });
+
             mouseSensitivitySlider.onValueChanged.AddListener(value =>
             {
-                tempGeneralSetting.mouseSensitivity = value;
-                mouseSensitivityValueLabel.text = value.ToString("0.0");
+                tempGeneralSetting.mouseSensitivity = RemapMouseSensitivityTo01(value);
+                mouseSensitivityValueLabel.text = value.ToString();
                 isDirty = true;
             });
 
             antiAliasingSlider.onValueChanged.AddListener(value =>
             {
-                int antiAliasingValue = 1 << (int)value;
-                tempQualitySetting.antiAliasing = (UnityEngine.Rendering.Universal.MsaaQuality)antiAliasingValue;
+                int antiAliasingValue = 1 << (int) value;
+                tempQualitySetting.antiAliasing = (UnityEngine.Rendering.Universal.MsaaQuality) antiAliasingValue;
                 if (value == 0)
                 {
                     antiAliasingValueLabel.text = TEXT_OFF;
@@ -127,6 +141,7 @@ namespace DCL.SettingsHUD
                 {
                     antiAliasingValueLabel.text = antiAliasingValue.ToString("0x");
                 }
+
                 shouldSetAsCustom = true;
                 isDirty = true;
             });
@@ -164,7 +179,21 @@ namespace DCL.SettingsHUD
 
             voiceChatAllowSpinBox.onValueChanged.AddListener(value =>
             {
-                tempGeneralSetting.voiceChatAllow = (DCL.SettingsData.GeneralSettings.VoiceChatAllow)value;
+                tempGeneralSetting.voiceChatAllow = (DCL.SettingsData.GeneralSettings.VoiceChatAllow) value;
+                isDirty = true;
+            });
+
+            cullingToggle.onValueChanged.AddListener(value =>
+                {
+                    tempQualitySetting.enableDetailObjectCulling = value;
+                    isDirty = true;
+                }
+            );
+
+            cullingSlider.onValueChanged.AddListener(value =>
+            {
+                tempQualitySetting.detailObjectCullingThreshold = value;
+                cullingSliderValueLabel.text = value.ToString();
                 isDirty = true;
             });
 
@@ -174,15 +203,16 @@ namespace DCL.SettingsHUD
 
         private void SetAutoQualityActive(bool active)
         {
-
-            advancedCanvasGroup.interactable = !active;
+            autoqualityBlockCanvasGroup.interactable = !active;
             tempGeneralSetting.autoqualityOn = active;
-            advancedBlocker.SetActive(active);
+            autoqualityBlocker.SetActive(active);
             if (active)
             {
                 QualitySettings.BaseResolution currentBaseResolution = tempQualitySetting.baseResolution;
+                bool currentFpsCap = tempQualitySetting.fpsCap;
                 tempQualitySetting = Settings.i.lastValidAutoqualitySet;
                 tempQualitySetting.baseResolution = currentBaseResolution;
+                tempQualitySetting.fpsCap = currentFpsCap;
                 isDirty = true;
             }
         }
@@ -206,6 +236,7 @@ namespace DCL.SettingsHUD
                 qualityPresetSpinBox.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
                 shouldSetAsCustom = false;
             }
+
             if (isDirty)
             {
                 Settings.i.ApplyQualitySettings(tempQualitySetting);
@@ -221,10 +252,12 @@ namespace DCL.SettingsHUD
             bool presetIndexFound = false;
 
             DCL.SettingsData.QualitySettings preset;
+
             for (int i = 0; i < Settings.i.qualitySettingsPresets.Length; i++)
             {
                 preset = Settings.i.qualitySettingsPresets[i];
                 presetNames.Add(preset.displayName);
+
                 if (!presetIndexFound && preset.Equals(savedSetting))
                 {
                     presetIndexFound = true;
@@ -247,24 +280,27 @@ namespace DCL.SettingsHUD
 
         void UpdateQualitySettings()
         {
-            baseResSpinBox.value = (int)tempQualitySetting.baseResolution;
-            shadowResSpinBox.value = (int)Mathf.Log((int)tempQualitySetting.shadowResolution, 2) - 8;
+            baseResSpinBox.value = (int) tempQualitySetting.baseResolution;
+            shadowResSpinBox.value = (int) Mathf.Log((int) tempQualitySetting.shadowResolution, 2) - 8;
             colorGradingToggle.isOn = tempQualitySetting.colorGrading;
             softShadowToggle.isOn = tempQualitySetting.softShadows;
             shadowToggle.isOn = tempQualitySetting.shadows;
             bloomToggle.isOn = tempQualitySetting.bloom;
-            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int)currentQualitySetting.antiAliasing >> 2) + 1;
+            fpsCapToggle.isOn = tempQualitySetting.fpsCap;
+            antiAliasingSlider.value = tempQualitySetting.antiAliasing == UnityEngine.Rendering.Universal.MsaaQuality.Disabled ? 0 : ((int) currentQualitySetting.antiAliasing >> 2) + 1;
             renderingScaleSlider.value = tempQualitySetting.renderScale;
             drawDistanceSlider.value = tempQualitySetting.cameraDrawDistance;
             shadowDistanceSlider.value = tempQualitySetting.shadowDistance;
+            cullingSlider.value = tempQualitySetting.detailObjectCullingThreshold;
+            cullingToggle.isOn = tempQualitySetting.enableDetailObjectCulling;
         }
 
         void UpdateGeneralSettings()
         {
             soundToggle.isOn = tempGeneralSetting.sfxVolume > 0 ? true : false;
-            mouseSensitivitySlider.value = tempGeneralSetting.mouseSensitivity;
+            mouseSensitivitySlider.value = Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, tempGeneralSetting.mouseSensitivity);
             voiceChatVolumeSlider.value = tempGeneralSetting.voiceChatVolume * 100;
-            voiceChatAllowSpinBox.value = (int)tempGeneralSetting.voiceChatAllow;
+            voiceChatAllowSpinBox.value = (int) tempGeneralSetting.voiceChatAllow;
             autosettingsToggle.isOn = tempGeneralSetting.autoqualityOn;
         }
 
@@ -279,6 +315,11 @@ namespace DCL.SettingsHUD
         {
             Settings.i.ApplyQualitySettings(currentQualitySetting);
             Settings.i.ApplyGeneralSettings(currentGeneralSetting);
+        }
+
+        private float RemapMouseSensitivityTo01(float value)
+        {
+            return (value - mouseSensitivitySlider.minValue) / (mouseSensitivitySlider.maxValue - mouseSensitivitySlider.minValue) * (1 - 0) + 0; //(value - from1) / (to1 - from1) * (to2 - from2) + from2
         }
     }
 }

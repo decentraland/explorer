@@ -16,12 +16,14 @@ import {
   RenderProfile,
   BuilderConfiguration,
   Wearable,
-  KernelConfigForRenderer
+  KernelConfigForRenderer,
+  RealmsInfoForRenderer
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
+import { renderStateObservable } from "../shared/world/worldState"
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -218,6 +220,7 @@ export class UnityInterface {
   }
 
   public DeactivateRendering() {
+    renderStateObservable.notifyObservers(false)
     this.gameInstance.SendMessage('SceneController', 'DeactivateRendering')
   }
 
@@ -347,8 +350,8 @@ export class UnityInterface {
     )
   }
 
-  public RejectGIFProcessingRequest() {
-    this.gameInstance.SendMessage('SceneController', 'RejectGIFProcessingRequest')
+  public SendGIFFetchFailure(id: string) {
+    this.gameInstance.SendMessage('SceneController', 'FailGIFFetch', id)
   }
 
   public ConfigureEmailPrompt(tutorialStep: number) {
@@ -396,8 +399,16 @@ export class UnityInterface {
     this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
   }
 
+  public SetVoiceChatEnabledByScene(enabled: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetVoiceChatEnabledByScene', enabled ? 1 : 0)
+  }
+
   public SetKernelConfiguration(config: KernelConfigForRenderer) {
     this.gameInstance.SendMessage('Bridges', 'SetKernelConfiguration', JSON.stringify(config))
+  }
+
+  public UpdateRealmsInfo(realmsInfo: Partial<RealmsInfoForRenderer>) {
+    this.gameInstance.SendMessage('Bridges', 'UpdateRealmsInfo', JSON.stringify(realmsInfo))
   }
 
   // *********************************************************************************

@@ -57,6 +57,34 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class StartStatefulMode : ControlEvent<StartStatefulMode.Payload>
+        {
+            [System.Serializable]
+            public class Payload
+            {
+                public string sceneId;
+            }
+
+            public StartStatefulMode(string sceneId) : base("StartStatefulMode", new Payload() { sceneId = sceneId })
+            {
+            }
+        }
+
+        [System.Serializable]
+        public class StopStatefulMode : ControlEvent<StopStatefulMode.Payload>
+        {
+            [System.Serializable]
+            public class Payload
+            {
+                public string sceneId;
+            }
+
+            public StopStatefulMode(string sceneId) : base("StopStatefulMode", new Payload() { sceneId = sceneId })
+            {
+            }
+        }
+
+        [System.Serializable]
         public class SceneReady : ControlEvent<SceneReady.Payload>
         {
             [System.Serializable]
@@ -163,8 +191,21 @@ namespace DCL.Interface
         public class SendChatMessageEvent
         {
             public ChatMessage message;
-        }
+        }     
 
+        [System.Serializable]
+        public class RemoveEntityComponentsPayLoad
+        {
+            public string entityId;
+            public string componentId;
+        };
+
+        [System.Serializable]
+        public class StoreSceneStateEvent
+        {
+            public string type = "StoreSceneState";
+            public string payload = "";
+        };
 
         [System.Serializable]
         public class OnPointerEventPayload
@@ -366,6 +407,13 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class PerformanceReportPayload
+        {
+            public string samples;
+            public bool fpsIsCapped;
+        }
+
+        [System.Serializable]
         public class PerformanceHiccupPayload
         {
             public int hiccupsInThousandFrames;
@@ -489,6 +537,12 @@ namespace DCL.Interface
             public bool isSignUpFlow;
         }
 
+        [System.Serializable]
+        public class StringPayload
+        {
+            public string value;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -565,7 +619,9 @@ namespace DCL.Interface
         private static DelightedSurveyEnabledPayload delightedSurveyEnabled = new DelightedSurveyEnabledPayload();
         private static ExternalActionSceneEventPayload sceneExternalActionEvent = new ExternalActionSceneEventPayload();
         private static MuteUserPayload muteUserEvent = new MuteUserPayload();
+        private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
+        private static StringPayload stringPayload = new StringPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -589,6 +645,11 @@ namespace DCL.Interface
         public static void ReportControlEvent<T>(T controlEvent) where T : ControlEvent
         {
             SendMessage("ControlEvent", controlEvent);
+        }
+
+        public static void BuilderInWorldMessage(string type, string message)
+        {
+            MessageFromEngine(type, message);
         }
 
         public static void ReportOnClickEvent(string sceneId, string uuid)
@@ -870,9 +931,13 @@ namespace DCL.Interface
             SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
         }
 
-        public static void SendPerformanceReport(string encodedFrameTimesInMS)
+        public static void SendPerformanceReport(string encodedFrameTimesInMS, bool usingFPSCap)
         {
-            MessageFromEngine("PerformanceReport", encodedFrameTimesInMS);
+            SendMessage("PerformanceReport", new PerformanceReportPayload()
+            {
+                samples = encodedFrameTimesInMS,
+                fpsIsCapped = usingFPSCap
+            });
         }
 
         public static void SendPerformanceHiccupReport(int hiccupsInThousandFrames, float hiccupsTime, float totalTime)
@@ -991,6 +1056,12 @@ namespace DCL.Interface
             gifSetupPayload.isWebGL1 = isWebGL1;
 
             SendMessage("RequestGIFProcessor", gifSetupPayload);
+        }
+
+        public static void DeleteGIF(string id)
+        {
+            stringPayload.value = id;
+            SendMessage("DeleteGIF", stringPayload);
         }
 
         public static void GoTo(int x, int y)

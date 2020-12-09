@@ -25,7 +25,7 @@ namespace Tests
         Light environmentLight;
 
         Volume postProcessVolume;
-        UniversalRenderPipelineAsset lwrpAsset;
+        UniversalRenderPipelineAsset urpAsset;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
@@ -42,7 +42,9 @@ namespace Tests
                 shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
                 cameraDrawDistance = 50.1f,
                 bloom = false,
-                colorGrading = true
+                colorGrading = true,
+                detailObjectCullingThreshold = 0,
+                enableDetailObjectCulling = true
             };
 
             testGeneralSettings = new GeneralSettings()
@@ -127,7 +129,7 @@ namespace Tests
 
         public void SetupReferences()
         {
-            lwrpAsset = GraphicsSettings.renderPipelineAsset as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+            urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
             GeneralSettingsController generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsController>();
             QualitySettingsController qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsController>();
 
@@ -165,11 +167,11 @@ namespace Tests
 
         private void CheckIfQualitySettingsAreApplied()
         {
-            Assert.IsTrue(lwrpAsset.msaaSampleCount == (int) DCL.Settings.i.qualitySettings.antiAliasing, "antiAliasing mismatch");
-            Assert.IsTrue(lwrpAsset.renderScale == DCL.Settings.i.qualitySettings.renderScale, "renderScale mismatch");
-            Assert.IsTrue(lwrpAsset.supportsMainLightShadows == DCL.Settings.i.qualitySettings.shadows, "shadows mismatch");
-            Assert.IsTrue(lwrpAsset.supportsSoftShadows == DCL.Settings.i.qualitySettings.softShadows, "softShadows mismatch");
-            Assert.IsTrue(lwrpAsset.mainLightShadowmapResolution == (int) DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
+            Assert.IsTrue(urpAsset.msaaSampleCount == (int) DCL.Settings.i.qualitySettings.antiAliasing, "antiAliasing mismatch");
+            Assert.IsTrue(urpAsset.renderScale == DCL.Settings.i.qualitySettings.renderScale, "renderScale mismatch");
+            Assert.IsTrue(urpAsset.supportsMainLightShadows == DCL.Settings.i.qualitySettings.shadows, "shadows mismatch");
+            Assert.IsTrue(urpAsset.supportsSoftShadows == DCL.Settings.i.qualitySettings.softShadows, "softShadows mismatch");
+            Assert.IsTrue(urpAsset.mainLightShadowmapResolution == (int) DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
 
             LightShadows shadowType = LightShadows.None;
             if (DCL.Settings.i.qualitySettings.shadows)
@@ -195,10 +197,15 @@ namespace Tests
 
         private void CheckIfGeneralSettingsAreApplied()
         {
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_HorizontalAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_AccelTime, DCL.Settings.i.generalSettings.mouseSensitivity, "freeLookCamera (m_VerticalAxis) mouseSensitivity mismatch");
+            var povSpeed = Mathf.Lerp(GeneralSettingsController.FIRST_PERSON_MIN_SPEED, GeneralSettingsController.FIRST_PERSON_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, povSpeed, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, povSpeed, "pov (m_VerticalAxis) mouseSensitivity mismatch");
+
+            var freeLookXSpeed = Mathf.Lerp(GeneralSettingsController.THIRD_PERSON_X_MIN_SPEED, GeneralSettingsController.THIRD_PERSON_X_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
+            var freeLookYSpeed = Mathf.Lerp(GeneralSettingsController.THIRD_PERSON_Y_MIN_SPEED, GeneralSettingsController.THIRD_PERSON_Y_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, freeLookXSpeed, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, freeLookYSpeed, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
+
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
         }
     }
