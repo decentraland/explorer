@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+    /// <summary>
+    /// MonoBehaviour that represents the view of a TOGGLE type CONTROL.
+    /// </summary>
     public class ToggleSettingsControlView : SettingsControlView
     {
         [SerializeField] private Toggle toggle;

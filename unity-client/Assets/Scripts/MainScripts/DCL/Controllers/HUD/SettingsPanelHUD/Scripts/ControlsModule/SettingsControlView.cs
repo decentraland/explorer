@@ -4,12 +4,27 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+    /// <summary>
+    /// Base interface to implement a view for a CONTROL.
+    /// </summary>
     public interface ISettingsControlView
     {
+        /// <summary>
+        /// All the needed base logic to initializes the CONTROL view.
+        /// </summary>
+        /// <param name="controlConfig">Model that will contain the configuration of the CONTROL.</param>
+        /// <param name="settingsControlController">Controller associated to the CONTROL view.</param>
         void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
+
+        /// <summary>
+        /// This logic should update the CONTROL view with the stored value.
+        /// </summary>
         void RefreshControl();
     }
 
+    /// <summary>
+    /// MonoBehaviour that represents the base of a CONTROL view.
+    /// </summary>
     public class SettingsControlView : MonoBehaviour, ISettingsControlView
     {
         [SerializeField] private TextMeshProUGUI title;
@@ -79,6 +94,10 @@ namespace DCL.SettingsPanelHUD.Controls
         {
         }
 
+        /// <summary>
+        /// It will be triggered when the CONTROL state changes and will execute the main flow of the CONTROL controller: OnControlChanged(), ApplySettings() and PostApplySettings().
+        /// </summary>
+        /// <param name="newValue">Value of the new state. It can be a bool (for toggle controls), a float (for slider controls) or an int (for spin-box controls).</param>
         protected void ApplySetting(object newValue)
         {
             settingsControlController.OnControlChanged(newValue);

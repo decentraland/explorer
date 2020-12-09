@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+    /// <summary>
+    /// MonoBehaviour that represents the view of a SLIDER type CONTROL.
+    /// </summary>
     public class SliderSettingsControlView : SettingsControlView
     {
         [SerializeField] private Slider slider;
@@ -26,6 +29,10 @@ namespace DCL.SettingsPanelHUD.Controls
             });
         }
 
+        /// <summary>
+        /// Overrides the text of the label associated to the slider.
+        /// </summary>
+        /// <param name="text">New label text.</param>
         public void OverrideIndicatorLabel(string text)
         {
             indicatorLabel.text = text;

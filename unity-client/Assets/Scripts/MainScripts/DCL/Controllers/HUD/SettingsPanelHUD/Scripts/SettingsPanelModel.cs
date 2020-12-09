@@ -9,6 +9,9 @@ namespace DCL.SettingsPanelHUD
     {
     }
 
+    /// <summary>
+    /// Model that represents the main settings panel. It contains a list of SECTIONS.
+    /// </summary>
     [CreateAssetMenu(menuName = "Settings/Configuration/MainPanel", fileName = "MainPanelConfiguration")]
     public class SettingsPanelModel : ScriptableObject
     {

@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD
 {
+    /// <summary>
+    /// MonoBehaviour that represents the main settings panel view and will act as a factory of SECTIONS.
+    /// </summary>
     public class SettingsPanelHUDView : MonoBehaviour
     {
         [Header("General configuration")]
