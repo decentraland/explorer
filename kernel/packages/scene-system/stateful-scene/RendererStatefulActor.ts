@@ -114,7 +114,7 @@ export class RendererStatefulActor extends StatefulActor {
   }
 
   informPublishResult(result: DeploymentResult) {
-    this.engine.sendBatch([{ type: 'ScenePublishResult', payload: result }])
+    this.engine.sendBatch([{ type: 'PublishSceneResult', payload: result }])
   }
 
   private mapComponentToActions(entityId: EntityId, componentId: ComponentId, data: ComponentData): EntityAction[] {

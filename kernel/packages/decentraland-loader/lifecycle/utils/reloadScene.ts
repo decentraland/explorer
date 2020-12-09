@@ -1,6 +1,6 @@
 import { LifecycleManager, getServer } from '../manager'
 
-export function invalidateParcels(tiles: string[]) {
+export function reloadScene(sceneId: string) {
   const server: LifecycleManager = getServer()
-  server.invalidateParcels(tiles)
+  return server.reloadScene(sceneId)
 }

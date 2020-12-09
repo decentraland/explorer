@@ -81,12 +81,16 @@ export class LifecycleManager extends TransportBasedServer {
     return futures
   }
 
-  invalidateParcels(parcels: string[]) {
-    for (let parcel of parcels) {
-      this.positionToRequest.delete(parcel)
+  async reloadScene(sceneId: string) {
+    const landFuture = this.sceneIdToRequest.get(sceneId)
+    if (landFuture) {
+      const land = await landFuture
+      const parcels = land.sceneJsonData.scene.parcels
+      for (let parcel of parcels) {
+        this.positionToRequest.delete(parcel)
+      }
+      this.notify('Scene.reload', { sceneId })
     }
-
-    this.notify('Scene.invalidate', { parcels })
   }
 }
 
@@ -102,7 +106,7 @@ export async function initParcelSceneWorker() {
   server.enable()
 
   const state = globalThis.globalStore.getState()
-  const localServer = resolveUrl(`${document.location.protocol}//${document.location.hostname}:${8080}`, '/local-ipfs')
+  const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
 
   // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
   //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.

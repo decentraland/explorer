@@ -20,7 +20,6 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
-import { invalidateParcels } from 'decentraland-loader/lifecycle/utils/invalidateParcels'
 
 declare const window: any
 
@@ -74,9 +73,6 @@ export class SceneStateStorageController extends ExposableAPI {
       // Deploy
       const contentClient = this.getContentClient()
       await contentClient.deployEntity({ files, entityId, authChain })
-
-      // Invalidate previous known state
-      invalidateParcels(parcels)
 
       return { ok: true }
     } catch (error) {
