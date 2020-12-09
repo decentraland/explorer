@@ -13,7 +13,6 @@ import {
   INITIALIZE_RENDERER,
   InitializeRenderer,
   engineStarted,
-  ENGINE_STARTED,
   messageFromEngine,
   MessageFromEngineAction,
   MESSAGE_FROM_ENGINE,
@@ -34,15 +33,14 @@ let _gameInstance: UnityGame | null = null
 
 export function* rendererSaga() {
   let _instancedJS: ReturnType<typeof initializeEngine> | null = null
+
+  const action: InitializeRenderer = yield take(INITIALIZE_RENDERER)
+  const _gameInstance = yield call(initializeRenderer, action)
+  _instancedJS = yield call(wrapEngineInstance, _gameInstance)
   yield takeEvery(MESSAGE_FROM_ENGINE, (action: MessageFromEngineAction) =>
     handleMessageFromEngine(_instancedJS, action)
   )
 
-  const action: InitializeRenderer = yield take(INITIALIZE_RENDERER)
-  const _gameInstance = yield call(initializeRenderer, action)
-
-  yield take(ENGINE_STARTED)
-  _instancedJS = yield call(wrapEngineInstance, _gameInstance)
 }
 
 export function* ensureRenderer() {
@@ -63,9 +61,12 @@ function* initializeRenderer(action: InitializeRenderer) {
   if (qs.ws) {
     _gameInstance = initializeUnityEditor(qs.ws, container)
   } else {
-    _gameInstance = UnityLoader.instantiate(container, buildConfigPath)
+    _gameInstance = yield UnityLoader.aoCreateUnityInstance(container)
   }
 
+  if(false){
+    console.log(buildConfigPath)
+  }
   yield put(waitingForRenderer())
 
   return _gameInstance

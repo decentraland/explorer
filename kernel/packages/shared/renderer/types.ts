@@ -14,6 +14,7 @@ export type UnityLoaderType = {
   // https://docs.unity3d.com/Manual/webgl-templates.html
   // instantiate(divId: string | HTMLElement, manifest: string): UnityGame
   instantiate(divId: string | any, manifest: string): UnityGame
+  aoCreateUnityInstance(divId: any): UnityGame
 }
 
 export type UnityGame = {
