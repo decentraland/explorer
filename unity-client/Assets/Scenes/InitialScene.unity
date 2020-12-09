@@ -1163,11 +1163,6 @@ PrefabInstance:
       propertyPath: activeFeature
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
-        type: 3}
-      propertyPath: outlinerMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4, type: 2}
     - target: {fileID: 1208871511546216253, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: builderInWorldBridge

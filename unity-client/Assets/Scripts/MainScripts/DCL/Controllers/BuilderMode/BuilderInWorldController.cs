@@ -1,5 +1,6 @@
 using Builder;
 using Builder.Gizmos;
+using Builder.MeshLoadIndicator;
 using DCL;
 using DCL.Components;
 using DCL.Configuration;
@@ -63,6 +64,9 @@ public class BuilderInWorldController : MonoBehaviour
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BuilderInWorldBridge builderInWorldBridge;
     public Material outlinerMaterial;
+    public DCLBuilderMeshLoadIndicatorController dCLBuilderMeshLoadIndicatorController;
+    public DCLBuilderMeshLoadIndicator meshLoadIndicator;
+    public GameObject floorPrefab;
 
     [Header("Build Modes")]
 
@@ -123,6 +127,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     bool catalogAdded = false;
     bool sceneReady = false;
+
+    Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
+
 
     void Start()
     {
@@ -194,6 +201,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
         BuilderInWorldNFTController.i.Start();
+
+        meshLoadIndicator.SetCamera(Camera.main);
     }
 
     private void OnDestroy()
@@ -826,14 +835,29 @@ public class BuilderInWorldController : MonoBehaviour
         foreach (Vector2Int parcel in parcelsPoints)
         {
             DCLBuilderInWorldEntity decentralandEntity = CreateSceneObject(floorSceneObject,false,true);
-          
+            decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
             decentralandEntity.transform.position = SceneController.i.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+            dCLBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
+
+            GameObject floorPlaceHolder =  Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
+            floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
         }
 
         builderInWorldEntityHandler.DeselectEntities();
 
         lastFloorSceneObjectUsed = floorSceneObject;
     }
+
+    void OnFloorLoaded(DecentralandEntity entity)
+    {
+        entity.OnShapeUpdated -= OnFloorLoaded;
+        dCLBuilderMeshLoadIndicatorController.HideIndicator(entity.entityId);
+
+        GameObject floorPlaceHolder = floorPlaceHolderDict[entity.entityId];
+        floorPlaceHolderDict.Remove(entity.entityId);
+        Destroy(floorPlaceHolder);
+    }
+
 
     public void ActivateBuilderInWorldCamera()
     {
