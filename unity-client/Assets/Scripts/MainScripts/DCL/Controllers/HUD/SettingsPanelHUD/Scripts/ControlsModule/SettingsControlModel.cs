@@ -27,7 +27,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public string title;
         public SettingsControlView controlPrefab;
         public SettingsControlController controlController;
-        public List<BooleanVariable> flagsThatDeactivateMe;
+        public List<BooleanVariable> flagsThatDisablesMe;
+        public List<BooleanVariable> flagsThatDeactivatesMe;
         public bool isBeta;
 
         public SettingsControlModel(
@@ -40,7 +41,7 @@ namespace DCL.SettingsPanelHUD.Controls
             this.title = title;
             this.controlPrefab = controlPrefab;
             this.controlController = controlController;
-            this.flagsThatDeactivateMe = flagsThatDeactivateMe;
+            this.flagsThatDisablesMe = flagsThatDeactivateMe;
             this.isBeta = isBeta;
         }
     }
