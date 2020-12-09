@@ -15,16 +15,16 @@ namespace SettingsWidgetTests
         {
             // Arrange
             var newControlView = Substitute.For<ISettingsControlView>();
-            var newControlController = Substitute.For<SettingsControlController>();
+            var newControlController = ScriptableObject.CreateInstance<SettingsControlController>();
             var newControlConfig = ScriptableObject.CreateInstance<SettingsControlModel>();
             newControlConfig.title = "TestControl";
-            newControlConfig.controlPrefab = Substitute.For<SettingsControlView>();
-            newControlConfig.controlController = Substitute.For<SettingsControlController>();
+            newControlConfig.controlPrefab = new GameObject().AddComponent<SettingsControlView>();
+            newControlConfig.controlController = ScriptableObject.CreateInstance<SettingsControlController>();
             newControlConfig.flagsThatDeactivatesMe = new List<BooleanVariable>();
             newControlConfig.flagsThatDisablesMe = new List<BooleanVariable>();
             newControlConfig.isBeta = false;
 
-            SettingsWidgetController widgetController = new SettingsWidgetController();
+            SettingsWidgetController widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
 
             // Act
             widgetController.AddControl(newControlView, newControlController, newControlConfig);

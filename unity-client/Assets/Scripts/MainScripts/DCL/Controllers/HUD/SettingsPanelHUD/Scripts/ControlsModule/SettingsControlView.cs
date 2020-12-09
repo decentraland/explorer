@@ -10,7 +10,7 @@ namespace DCL.SettingsPanelHUD.Controls
         void RefreshControl();
     }
 
-    public abstract class SettingsControlView : MonoBehaviour, ISettingsControlView
+    public class SettingsControlView : MonoBehaviour, ISettingsControlView
     {
         [SerializeField] private TextMeshProUGUI title;
         [SerializeField] private GameObject betaIndicator;
@@ -75,7 +75,9 @@ namespace DCL.SettingsPanelHUD.Controls
             CommonSettingsEvents.OnRefreshAllSettings -= OnRefreshAllSettings;
         }
 
-        public abstract void RefreshControl();
+        public virtual void RefreshControl()
+        {
+        }
 
         protected void ApplySetting(object newValue)
         {

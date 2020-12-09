@@ -18,11 +18,11 @@ namespace SettingsSectionTests
             var newWidgetController = Substitute.For<ISettingsWidgetController>();
             var newWidgetConfig = ScriptableObject.CreateInstance<SettingsWidgetModel>();
             newWidgetConfig.title = "TestWidget";
-            newWidgetConfig.widgetPrefab = new SettingsWidgetView();
+            newWidgetConfig.widgetPrefab = new GameObject().AddComponent<SettingsWidgetView>();
             newWidgetConfig.widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
             newWidgetConfig.controlColumns = new SettingsControlGroupList();
 
-            SettingsSectionController sectionController = new SettingsSectionController();
+            SettingsSectionController sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
 
             // Act
             sectionController.AddWidget(newWidgetView, newWidgetController, newWidgetConfig);

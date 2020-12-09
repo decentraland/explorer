@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
-    public abstract class SettingsControlController : ScriptableObject
+    public class SettingsControlController : ScriptableObject
     {
         protected SettingsData.GeneralSettings currentGeneralSettings;
         protected SettingsData.QualitySettings currentQualitySetting;
@@ -25,9 +25,14 @@ namespace DCL.SettingsPanelHUD.Controls
             Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
         }
 
-        public abstract object GetStoredValue();
+        public virtual object GetStoredValue()
+        {
+            return null;
+        }
 
-        public abstract void OnControlChanged(object newValue);
+        public virtual void OnControlChanged(object newValue)
+        {
+        }
 
         public virtual void ApplySettings()
         {

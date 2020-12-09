@@ -26,8 +26,8 @@ namespace SettingsPanelTests
             newSectionConfig = ScriptableObject.CreateInstance<SettingsSectionModel>();
             newSectionConfig.icon = testSprite;
             newSectionConfig.text = "TestSection";
-            newSectionConfig.menuButtonPrefab = new SettingsButtonEntry();
-            newSectionConfig.sectionPrefab = new SettingsSectionView();
+            newSectionConfig.menuButtonPrefab = new GameObject().AddComponent<SettingsButtonEntry>();
+            newSectionConfig.sectionPrefab = new GameObject().AddComponent<SettingsSectionView>();
             newSectionConfig.sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
             newSectionConfig.widgets = new SettingsWidgetList();
         }
