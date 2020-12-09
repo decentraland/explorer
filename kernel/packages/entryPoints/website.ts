@@ -132,11 +132,13 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
         ensureRendererEnabled().then(() => {
-          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-          globalThis.globalStore.dispatch(experienceStarted())
-          globalThis.globalStore.dispatch(setLoadingScreen(false))
-          Html.switchGameContainer(true)
-          i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+          setTimeout(() => {
+            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+            globalThis.globalStore.dispatch(experienceStarted())
+            globalThis.globalStore.dispatch(setLoadingScreen(false))
+            Html.switchGameContainer(true)
+            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
+          }, 1000)
         })
 
         EnsureProfile(identity.address)
