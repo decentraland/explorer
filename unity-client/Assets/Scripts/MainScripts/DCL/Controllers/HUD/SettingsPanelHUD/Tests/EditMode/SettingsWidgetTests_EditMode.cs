@@ -20,7 +20,8 @@ namespace SettingsWidgetTests
             newControlConfig.title = "TestControl";
             newControlConfig.controlPrefab = Substitute.For<SettingsControlView>();
             newControlConfig.controlController = Substitute.For<SettingsControlController>();
-            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDeactivatesMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDisablesMe = new List<BooleanVariable>();
             newControlConfig.isBeta = false;
 
             SettingsWidgetController widgetController = new SettingsWidgetController();
