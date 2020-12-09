@@ -16,8 +16,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     [Header("Design variables")]
     public float duplicateOffset = 2f;
-    public float msBetweenTransformUpdates = 2000;
-
 
     [Header("Prefab References")]
     public OutlinerController outlinerController;
@@ -40,8 +38,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     bool isMultiSelectionActive = false;
 
     float lastTransformReportTime;
-
-    float nextTimeToUpdateTransform = 0;
 
     List<string> entityNameList = new List<string>();
 
@@ -75,16 +71,12 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     void ReportTransform()
     {
-        if (DCLTime.realtimeSinceStartup >= nextTimeToUpdateTransform)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            foreach (DCLBuilderInWorldEntity entity in selectedEntities)
-            {
-                builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
-            }
-
-            nextTimeToUpdateTransform = DCLTime.realtimeSinceStartup + msBetweenTransformUpdates/1000f;
+            builderInWorldBridge.EntityTransformReport(entity.rootEntity, sceneToEdit);
         }
-        
+
+        lastTransformReportTime = DCLTime.realtimeSinceStartup;
     }
 
     public void Init()
@@ -145,6 +137,17 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (selectedEntities.Count > 0)        
             DuplicateSelectedEntities();
         
+    }
+
+    public void ExitFromEditMode()
+    {
+        DeselectEntities();
+
+        foreach(DCLBuilderInWorldEntity entity in convertedEntities.Values)
+        {
+            entity.Delete();
+        }
+        convertedEntities.Clear();
     }
 
     void ChangeEntitySelectionFromList(DCLBuilderInWorldEntity entityToEdit)

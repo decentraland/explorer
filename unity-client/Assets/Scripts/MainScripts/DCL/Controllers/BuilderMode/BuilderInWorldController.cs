@@ -785,7 +785,7 @@ public class BuilderInWorldController : MonoBehaviour
         outlinerController.CancelAllOutlines();
 
         cursorGO.SetActive(true);
-        builderInWorldEntityHandler.DeselectEntities();
+        builderInWorldEntityHandler.ExitFromEditMode();
         isEditModeActivated = false;
         sceneToEdit.SetEditMode(false);
         SetBuildMode(EditModeState.Inactive);

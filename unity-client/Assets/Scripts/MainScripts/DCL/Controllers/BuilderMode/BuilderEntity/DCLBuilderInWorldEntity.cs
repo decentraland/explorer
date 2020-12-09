@@ -341,10 +341,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
+        GameObject entityCollider = new GameObject(entity.entityId);
+        entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+
         for (int i = 0; i < meshInfo.renderers.Length; i++)
         {
-            GameObject entityCollider = new GameObject(entity.entityId);
-            entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+
 
             Transform t = entityCollider.transform;
             t.SetParent(meshInfo.renderers[i].transform);
@@ -365,11 +367,19 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
             meshCollider.enabled = meshInfo.renderers[i].enabled;
 
-            if (isNFT && collidersDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId))
-                collidersDictionary.Remove(entity.scene.sceneData.id + entity.entityId);
+            if (isNFT)
+            {
+                if (collidersDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId))
+                    collidersDictionary.Remove(entity.scene.sceneData.id + entity.entityId);
 
-            collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
+                collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
+
+                entityCollider = new GameObject(entity.entityId);
+                entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+            }
         }
+
+        if(!isNFT) collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
     }
 
     bool IsEntityNFT()

@@ -56,7 +56,7 @@ public class CatalogItem
         thumbnail = nFTInfo.thumbnailUrl;
         SetBaseURL(nFTInfo.originalImageUrl);
         name = nFTInfo.name;
-        category = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+        category = nFTInfo.assetContract.name;
         model = BuilderInWorldSettings.COLLECTIBE_MODEL_PROTOCOL+ nFTInfo.assetContract.address + "/" + nFTInfo.tokenId;
         tags = new List<string>();
         contents = new Dictionary<string, string>();

@@ -1,7 +1,10 @@
 using DCL.Configuration;
 using DCL.Helpers.NFT;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 public class BuilderInWorldNFTController 
@@ -98,6 +101,7 @@ public class BuilderInWorldNFTController
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
         string userId = "0xdEdD78D3fF1533979f7F5302C95cfA63d9e0D09a";
+        //userId = GetCorrectWalletAddress(userProfile.userId);
         yield return NFTHelper.FetchNFTsFromOwner(userId, (nFTOwner) =>
         {
             this.nFTOwner = nFTOwner;
@@ -108,6 +112,27 @@ public class BuilderInWorldNFTController
         });
     }
 
+    string GetCorrectWalletAddress(string addres)
+    {
+        HashAlgorithm sha = SHA384.Create();
+        byte[] result = sha.ComputeHash(Encoding.ASCII.GetBytes(addres));
+
+        string resultString = "";
+
+        int cont = 0;
+        foreach(char character in addres)
+        {
+            if ((Convert.ToString(result[cont], 2).PadLeft(8, '0')).StartsWith("1"))
+                resultString += character.ToString().ToUpper();
+            else
+                resultString += character.ToString().ToLower();
+
+            cont++;
+        }
+
+        return resultString;
+    }
+
     SceneObject NFTInfoToSceneObject(NFTInfo nFTInfo)
     {
         SceneObject sceneObject = new SceneObject();
@@ -116,7 +141,7 @@ public class BuilderInWorldNFTController
         sceneObject.thumbnail = nFTInfo.thumbnailUrl;
         sceneObject.SetBaseURL(nFTInfo.originalImageUrl);
         sceneObject.name = nFTInfo.name;
-        sceneObject.category = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+        sceneObject.category = nFTInfo.assetContract.name;
         sceneObject.model = BuilderInWorldSettings.COLLECTIBE_MODEL_PROTOCOL + nFTInfo.assetContract.address+"/"+ nFTInfo.tokenId;
         sceneObject.tags = new List<string>();
         sceneObject.contents = new Dictionary<string, string>();

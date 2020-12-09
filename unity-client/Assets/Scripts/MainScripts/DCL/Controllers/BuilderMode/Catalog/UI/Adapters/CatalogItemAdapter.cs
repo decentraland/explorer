@@ -56,7 +56,8 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         if (sceneObject == null || string.IsNullOrEmpty(url))
             return;
 
-        if (sceneObject.category == BuilderInWorldSettings.ASSETS_COLLECTIBLES) url = sceneObject.thumbnail;
+        if (string.Equals(sceneObject.asset_pack_id, BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+            url = sceneObject.thumbnail;
 
         string newLoadedThumbnailURL = url;
         var newLoadedThumbnailPromise =  new AssetPromise_Texture(url);
