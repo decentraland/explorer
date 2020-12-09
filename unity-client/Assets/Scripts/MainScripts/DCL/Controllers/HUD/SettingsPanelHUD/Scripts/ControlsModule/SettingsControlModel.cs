@@ -27,7 +27,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public string title;
         public SettingsControlView controlPrefab;
         public SettingsControlController controlController;
-        public List<BooleanVariable> flagsThatDeactivateMe;
+        public List<BooleanVariable> flagsThatDisablesMe;
+        public List<BooleanVariable> flagsThatDeactivatesMe;
         public bool isBeta;
     }
 }

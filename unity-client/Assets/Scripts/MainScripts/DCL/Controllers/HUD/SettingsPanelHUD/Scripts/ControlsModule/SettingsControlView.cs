@@ -38,7 +38,13 @@ namespace DCL.SettingsPanelHUD.Controls
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
 
-            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
+            foreach (BooleanVariable flag in controlConfig.flagsThatDisablesMe)
+            {
+                flag.OnChange += OnAnyDisableFlagChange;
+                OnAnyDisableFlagChange(flag.Get(), false);
+            }
+
+            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivatesMe)
             {
                 flag.OnChange += OnAnyDeactivationFlagChange;
                 OnAnyDeactivationFlagChange(flag.Get(), false);
@@ -55,7 +61,12 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             if (controlConfig != null)
             {
-                foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
+                foreach (BooleanVariable flag in controlConfig.flagsThatDisablesMe)
+                {
+                    flag.OnChange -= OnAnyDisableFlagChange;
+                }
+
+                foreach (BooleanVariable flag in controlConfig.flagsThatDeactivatesMe)
                 {
                     flag.OnChange -= OnAnyDeactivationFlagChange;
                 }
@@ -76,15 +87,26 @@ namespace DCL.SettingsPanelHUD.Controls
             skipPostApplySettings = false;
         }
 
-        private void OnAnyDeactivationFlagChange(bool current, bool previous)
+        private void OnAnyDisableFlagChange(bool current, bool previous)
         {
             SetEnabled(!current);
         }
 
+        private void OnAnyDeactivationFlagChange(bool current, bool previous)
+        {
+            SetControlActive(!current);
+        }
+
         private void SetEnabled(bool enabled)
         {
-            canvasGroup.alpha = enabled ? 1 : 0.5f;
+            canvasGroup.alpha = enabled ? 1f : 0.5f;
             canvasGroup.interactable = enabled;
+        }
+
+        private void SetControlActive(bool actived)
+        {
+            gameObject.SetActive(!actived);
+            CommonSettingsEvents.RaiseRefreshAllWidgetsSize();
         }
 
         private void OnRefreshAllSettings(SettingsControlController sender)
