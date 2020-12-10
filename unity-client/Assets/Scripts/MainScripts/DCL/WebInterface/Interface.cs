@@ -191,7 +191,7 @@ namespace DCL.Interface
         public class SendChatMessageEvent
         {
             public ChatMessage message;
-        }     
+        }
 
         [System.Serializable]
         public class RemoveEntityComponentsPayLoad
@@ -1115,7 +1115,7 @@ namespace DCL.Interface
 
         public static void SetBaseResolution(int resolution)
         {
-            baseResEvent.baseResolution = resolution;
+            baseResEvent.baseResolution = 9999;
             SendMessage("SetBaseResolution", baseResEvent);
         }
 

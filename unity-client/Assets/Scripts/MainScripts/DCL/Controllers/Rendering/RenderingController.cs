@@ -44,6 +44,7 @@ public class RenderingController : MonoBehaviour
     public void ActivateRendering()
     {
         ActivateRendering(forceActivate: false);
+        WebInterface.SetBaseResolution(9999);
     }
 
     public void ForceActivateRendering()
