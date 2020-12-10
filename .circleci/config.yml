@@ -238,7 +238,6 @@ jobs:
       - <<: *image_kernel
     steps:
       - <<: *attach_root
-      - run:
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
