@@ -84,6 +84,16 @@ jobs:
             - website
             - unity-client
 
+  run-unity-tests:
+    <<: *working_directory_unity
+    steps:
+      - <<: *attach_root
+
+  build-unity:
+    <<: *working_directory_unity
+    steps:
+      - <<: *attach_root
+
   build-kernel:
     <<: *base_kernel_env
     steps:
