@@ -10,13 +10,12 @@ using System.Linq;
 using DCL.Components;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace DCL
 {
-    public class SceneController : MonoBehaviour, IMessageProcessHandler, IMessageQueueHandler
+    public class SceneController : IMessageProcessHandler, IMessageQueueHandler
     {
-        public static SceneController i { get; private set; }
+        public static SceneController i => Main.i != null ? Main.i.sceneController : null;
 
         public static bool VERBOSE = false;
 
@@ -27,31 +26,20 @@ namespace DCL
         //======================================================================
         private EntryPoint_World worldEntryPoint;
 
-        [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
         public bool startDecentralandAutomatically = true;
 
-        public DebugConfig debugConfig;
+        public bool enabled = true;
 
-        void Awake()
+        public void Initialize(DCLComponentFactory componentFactory)
         {
-            if (i != null)
-            {
-                Utils.SafeDestroy(this);
-                return;
-            }
-
-            i = this;
-
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = false;
 #endif
-            DataStore.debugConfig.soloScene = debugConfig.soloScene;
-            DataStore.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
-            DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
-            DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
+
+            this.componentFactory = componentFactory;
 
             RenderProfileManifest.i.Initialize();
             Environment.i.Initialize(this);
@@ -67,7 +55,7 @@ namespace DCL
             Environment.i.parcelScenesCleaner.Start();
 
             if (deferredMessagesDecoding) // We should be able to delete this code
-                StartCoroutine(DeferredDecoding()); //
+                CoroutineStarter.Start(DeferredDecoding()); //
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
@@ -99,7 +87,7 @@ namespace DCL
             Environment.i.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
 
-        void Start()
+        public void Start()
         {
             if (prewarmSceneMessagesPool)
             {
@@ -124,7 +112,7 @@ namespace DCL
             Environment.i.parcelScenesCleaner.ForceCleanup();
         }
 
-        void OnDestroy()
+        public void OnDestroy()
         {
             PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet -= Environment.i.cullingController.objectsTracker.MarkDirty;
@@ -136,8 +124,11 @@ namespace DCL
         }
 
 
-        private void Update()
+        public void Update()
         {
+            if (!enabled)
+                return;
+
             InputController_Legacy.i.Update();
 
             Environment.i.pointerEventsController.Update();
@@ -152,8 +143,11 @@ namespace DCL
             Environment.i.performanceMetricsController?.Update();
         }
 
-        private void LateUpdate()
+        public void LateUpdate()
         {
+            if (!enabled)
+                return;
+
             Environment.i.physicsSyncController.Sync();
         }
 
@@ -886,7 +880,6 @@ namespace DCL
 
 
         public const string EMPTY_GO_POOL_NAME = "Empty";
-
 
         public void SetDisableAssetBundles()
         {
