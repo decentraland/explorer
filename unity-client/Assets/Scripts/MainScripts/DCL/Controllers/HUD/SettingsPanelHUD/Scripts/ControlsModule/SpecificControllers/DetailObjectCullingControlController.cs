@@ -1,3 +1,4 @@
+using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -12,7 +13,9 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            currentQualitySetting.enableDetailObjectCulling = (bool)newValue;
+            bool detailObjectCullingValue = (bool)newValue;
+            currentQualitySetting.enableDetailObjectCulling = detailObjectCullingValue;
+            CommonSettingsScriptableObjects.detailObjectCullingDisabled.Set(!detailObjectCullingValue);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using DCL.SettingsPanelHUD.Common;
+using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -20,7 +20,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.PostApplySettings();
 
-            CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

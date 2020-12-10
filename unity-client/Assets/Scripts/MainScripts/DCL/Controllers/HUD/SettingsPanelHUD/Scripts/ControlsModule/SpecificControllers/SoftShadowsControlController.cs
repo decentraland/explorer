@@ -6,21 +6,6 @@ namespace DCL.SettingsPanelHUD.Controls
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/SoftShadows", fileName = "SoftShadowsControlController")]
     public class SoftShadowsControlController : SettingsControlController
     {
-        public override void Initialize(ISettingsControlView settingsControlView)
-        {
-            base.Initialize(settingsControlView);
-
-            CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange += ShouldSetSoftShadowsAsFalse_OnChange;
-        }
-
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            if (CommonSettingsVariables.shouldSetSoftShadowsAsFalse != null)
-                CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange -= ShouldSetSoftShadowsAsFalse_OnChange;
-        }
-
         public override object GetStoredValue()
         {
             return currentQualitySetting.softShadows;
@@ -35,16 +20,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.PostApplySettings();
 
-            CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
-        }
-
-        private void ShouldSetSoftShadowsAsFalse_OnChange(bool current, bool previous)
-        {
-            if (current)
-            {
-                ((ToggleSettingsControlView)view).toggleControl.isOn = false;
-                CommonSettingsVariables.shouldSetSoftShadowsAsFalse.Set(false);
-            }
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

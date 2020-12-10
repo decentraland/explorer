@@ -89,12 +89,42 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private void OnAnyDisableFlagChange(bool current, bool previous)
         {
-            SetEnabled(!current);
+            bool canApplychange = true;
+            if (!current)
+            {
+                // Check if all the disable flags are false before enable the control
+                foreach (var flag in controlConfig.flagsThatDisablesMe)
+                {
+                    if (flag.Get() == true)
+                    {
+                        canApplychange = false;
+                        break;
+                    }
+                }
+            }
+
+            if (canApplychange)
+                SetEnabled(!current);
         }
 
         private void OnAnyDeactivationFlagChange(bool current, bool previous)
         {
-            SetControlActive(!current);
+            bool canApplychange = true;
+            if (!current)
+            {
+                // Check if all the deactivation flags are false before enable the control
+                foreach (var flag in controlConfig.flagsThatDeactivatesMe)
+                {
+                    if (flag.Get() == true)
+                    {
+                        canApplychange = false;
+                        break;
+                    }
+                }
+            }
+
+            if (canApplychange)
+                SetControlActive(!current);
         }
 
         private void SetEnabled(bool enabled)
@@ -105,7 +135,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private void SetControlActive(bool actived)
         {
-            gameObject.SetActive(!actived);
+            gameObject.SetActive(actived);
             CommonSettingsEvents.RaiseRefreshAllWidgetsSize();
         }
 

@@ -19,15 +19,14 @@ namespace DCL.SettingsPanelHUD.Controls
 
             SetupQualityPresetLabels();
 
-            CommonSettingsVariables.shouldSetQualityPresetAsCustom.OnChange += ShouldSetQualityPresetAsCustom_OnChange;
+            CommonSettingsEvents.OnSetQualityPresetAsCustom += CommonSettingsEvents_OnSetQualityPresetAsCustom;
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
 
-            if (CommonSettingsVariables.shouldSetQualityPresetAsCustom != null)
-                CommonSettingsVariables.shouldSetQualityPresetAsCustom.OnChange -= ShouldSetQualityPresetAsCustom_OnChange;
+            CommonSettingsEvents.OnSetQualityPresetAsCustom -= CommonSettingsEvents_OnSetQualityPresetAsCustom;
         }
 
         public override object GetStoredValue()
@@ -77,13 +76,9 @@ namespace DCL.SettingsPanelHUD.Controls
             return qualityPresetControlView.spinBoxControl.value;
         }
 
-        private void ShouldSetQualityPresetAsCustom_OnChange(bool current, bool previous)
+        private void CommonSettingsEvents_OnSetQualityPresetAsCustom()
         {
-            if (current)
-            {
-                qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
-                CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(false);
-            }
+            qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
         }
     }
 }
