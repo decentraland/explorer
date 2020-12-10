@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Components;
 using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -15,8 +16,6 @@ namespace DCL
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
-        public bool startDecentralandAutomatically = true;
-
         public DebugConfig debugConfig;
 
         void Awake()
@@ -28,6 +27,11 @@ namespace DCL
             }
 
             i = this;
+
+#if !UNITY_EDITOR
+            Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
+            Debug.unityLogger.logEnabled = false;
+#endif
 
             DataStore.debugConfig.soloScene = debugConfig.soloScene;
             DataStore.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
@@ -58,34 +62,38 @@ namespace DCL
             sceneController.OnDestroy();
         }
 
-        public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
+        #region RuntimeMessagingBridge
+
+        public void LoadParcelScenes(string payload)
         {
-            return sceneController.ProcessMessage(msgObject, out yieldInstruction);
+            sceneController.LoadParcelScenes(payload);
         }
 
-        public void LoadParcelScenesExecute(string decentralandSceneJSON)
+        public void SendSceneMessage(string payload)
         {
-            sceneController.LoadParcelScenesExecute(decentralandSceneJSON);
+            sceneController.SendSceneMessage(payload);
         }
 
-        public void UnloadParcelSceneExecute(string sceneKey)
+        public void UnloadScene(string sceneId)
         {
-            sceneController.UnloadParcelSceneExecute(sceneKey);
+            sceneController.UnloadScene(sceneId);
         }
 
-        public void UnloadAllScenes()
+        public void CreateUIScene(string payload)
         {
-            sceneController.UnloadAllScenes();
+            sceneController.CreateUIScene(payload);
         }
 
-        public void UpdateParcelScenesExecute(string sceneKey)
+        public void UpdateParcelScenes(string payload)
         {
-            sceneController.UpdateParcelScenesExecute(sceneKey);
+            sceneController.UpdateParcelScenes(payload);
         }
 
-        public void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene message)
+        #endregion
+
+        public void BuilderReady()
         {
-            sceneController.EnqueueSceneMessage(message);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("BuilderScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);
         }
     }
 }

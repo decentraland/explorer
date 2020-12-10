@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Components;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -31,6 +32,11 @@ namespace DCL
         public void SetEngineDebugPanel()
         {
             Environment.i.debugController.SetEngineDebugPanel();
+        }
+
+        public void SetDisableAssetBundles()
+        {
+            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
         }
     }
 }

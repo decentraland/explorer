@@ -287,17 +287,23 @@ namespace DCL
                             case "UnloadScene":
                                 sceneController.UnloadScene(msg.payload);
                                 break;
-                            case "Teleport":
-                                characterController.Teleport(msg.payload);
-                                break;
-                            case "SetRotation":
-                                cameraController.SetRotation(msg.payload);
-                                break;
                             case "Reset":
                                 sceneController.UnloadAllScenesQueued();
                                 break;
                             case "CreateUIScene":
                                 sceneController.CreateUIScene(msg.payload);
+                                break;
+                            case "BuilderReady":
+                                Main.i.BuilderReady();
+                                break;
+                            case "UpdateParcelScenes":
+                                sceneController.UpdateParcelScenes(msg.payload);
+                                break;
+                            case "Teleport":
+                                characterController.Teleport(msg.payload);
+                                break;
+                            case "SetRotation":
+                                cameraController.SetRotation(msg.payload);
                                 break;
                             case "LoadProfile":
                                 UserProfileController.i?.LoadProfile(msg.payload);
@@ -328,12 +334,6 @@ namespace DCL
                                 break;
                             case "ShowNotificationFromJson":
                                 NotificationsController.i.ShowNotificationFromJson(msg.payload);
-                                break;
-                            case "BuilderReady":
-                                sceneController.BuilderReady();
-                                break;
-                            case "UpdateParcelScenes":
-                                sceneController.UpdateParcelScenes(msg.payload);
                                 break;
                             case "GetMousePosition":
                                 GetBuilderBridge()?.GetMousePosition(msg.payload);
@@ -437,9 +437,6 @@ namespace DCL
                             case "RequestTeleport":
                                 HUDController.i.RequestTeleport(msg.payload);
                                 break;
-                            case "SetDisableAssetBundles":
-                                SceneController.i.SetDisableAssetBundles();
-                                break;
                             case "UpdateHotScenesList":
                                 HotScenesController.i.UpdateHotScenesList(msg.payload);
                                 break;
@@ -464,6 +461,10 @@ namespace DCL
                             case "SetKernelConfiguration":
                             case "UpdateRealmsInfo":
                                 bridgesGameObject.SendMessage(msg.type, msg.payload);
+                                break;
+                            case "SetDisableAssetBundles":
+                                //TODO(Brian): Move this to bridges
+                                Main.i.SendMessage(msg.type);
                                 break;
                             default:
                                 Debug.Log(

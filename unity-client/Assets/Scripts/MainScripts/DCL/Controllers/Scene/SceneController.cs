@@ -28,17 +28,10 @@ namespace DCL
 
         public DCLComponentFactory componentFactory;
 
-        public bool startDecentralandAutomatically = true;
-
         public bool enabled = true;
 
         public void Initialize(DCLComponentFactory componentFactory)
         {
-#if !UNITY_EDITOR
-            Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = false;
-#endif
-
             this.componentFactory = componentFactory;
 
             RenderProfileManifest.i.Initialize();
@@ -47,10 +40,7 @@ namespace DCL
             Environment.i.debugController.OnDebugModeSet += OnDebugModeSet;
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
-            if (startDecentralandAutomatically)
-            {
-                WebInterface.StartDecentraland();
-            }
+            WebInterface.StartDecentraland();
 
             Environment.i.parcelScenesCleaner.Start();
 
@@ -354,16 +344,15 @@ namespace DCL
             PhysicsCast.i.Query(raycastQuery);
         }
 
-        public string SendSceneMessage(string payload)
+        public void SendSceneMessage(string payload)
         {
-            return SendSceneMessage(payload, deferredMessagesDecoding);
+            SendSceneMessage(payload, deferredMessagesDecoding);
         }
 
-        private string SendSceneMessage(string payload, bool enqueue)
+        private void SendSceneMessage(string payload, bool enqueue)
         {
             string[] chunks = payload.Split(new char[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
             int count = chunks.Length;
-            string lastBusId = null;
 
             for (int i = 0; i < count; i++)
             {
@@ -373,14 +362,12 @@ namespace DCL
                 }
                 else
                 {
-                    lastBusId = DecodeAndEnqueue(chunks[i]);
+                    DecodeAndEnqueue(chunks[i]);
                 }
             }
-
-            return lastBusId;
         }
 
-        private string DecodeAndEnqueue(string payload)
+        private void DecodeAndEnqueue(string payload)
         {
             ProfilingEvents.OnMessageDecodeStart?.Invoke("Misc");
 
@@ -391,7 +378,7 @@ namespace DCL
 
             if (!MessageDecoder.DecodePayloadChunk(payload, out sceneId, out message, out messageTag, out sendSceneMessage))
             {
-                return null;
+                return;
             }
 
             MessagingBus.QueuedSceneMessage_Scene queuedMessage;
@@ -406,8 +393,6 @@ namespace DCL
             EnqueueSceneMessage(queuedMessage);
 
             ProfilingEvents.OnMessageDecodeEnds?.Invoke("Misc");
-
-            return "";
         }
 
         private IEnumerator DeferredDecoding()
@@ -880,15 +865,5 @@ namespace DCL
 
 
         public const string EMPTY_GO_POOL_NAME = "Empty";
-
-        public void SetDisableAssetBundles()
-        {
-            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
-        }
-
-        public void BuilderReady()
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene("BuilderScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);
-        }
     }
 }
