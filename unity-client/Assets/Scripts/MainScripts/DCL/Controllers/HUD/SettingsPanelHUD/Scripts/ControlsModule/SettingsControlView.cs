@@ -53,13 +53,13 @@ namespace DCL.SettingsPanelHUD.Controls
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
 
-            foreach (BooleanVariable flag in controlConfig.flagsThatDisablesMe)
+            foreach (BooleanVariable flag in controlConfig.flagsThatDisableMe)
             {
                 flag.OnChange += OnAnyDisableFlagChange;
                 OnAnyDisableFlagChange(flag.Get(), false);
             }
 
-            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivatesMe)
+            foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
             {
                 flag.OnChange += OnAnyDeactivationFlagChange;
                 OnAnyDeactivationFlagChange(flag.Get(), false);
@@ -76,12 +76,12 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             if (controlConfig != null)
             {
-                foreach (BooleanVariable flag in controlConfig.flagsThatDisablesMe)
+                foreach (BooleanVariable flag in controlConfig.flagsThatDisableMe)
                 {
                     flag.OnChange -= OnAnyDisableFlagChange;
                 }
 
-                foreach (BooleanVariable flag in controlConfig.flagsThatDeactivatesMe)
+                foreach (BooleanVariable flag in controlConfig.flagsThatDeactivateMe)
                 {
                     flag.OnChange -= OnAnyDeactivationFlagChange;
                 }
@@ -114,7 +114,7 @@ namespace DCL.SettingsPanelHUD.Controls
             if (!current)
             {
                 // Check if all the disable flags are false before enable the control
-                foreach (var flag in controlConfig.flagsThatDisablesMe)
+                foreach (var flag in controlConfig.flagsThatDisableMe)
                 {
                     if (flag.Get() == true)
                     {
@@ -134,7 +134,7 @@ namespace DCL.SettingsPanelHUD.Controls
             if (!current)
             {
                 // Check if all the deactivation flags are false before enable the control
-                foreach (var flag in controlConfig.flagsThatDeactivatesMe)
+                foreach (var flag in controlConfig.flagsThatDeactivateMe)
                 {
                     if (flag.Get() == true)
                     {

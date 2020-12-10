@@ -37,10 +37,10 @@ namespace DCL.SettingsPanelHUD.Controls
         public SettingsControlController controlController;
 
         [Tooltip("List of boolean flags that being true will disable the control.")]
-        public List<BooleanVariable> flagsThatDisablesMe;
+        public List<BooleanVariable> flagsThatDisableMe;
 
         [Tooltip("List of boolean flags that being true will deactivate the game object of the control.")]
-        public List<BooleanVariable> flagsThatDeactivatesMe;
+        public List<BooleanVariable> flagsThatDeactivateMe;
         public bool isBeta;
     }
 }

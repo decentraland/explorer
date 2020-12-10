@@ -58,8 +58,8 @@ namespace SettingsWidgetTests
             newControlConfig.title = $"TestControl_Col{columnIndex}";
             newControlConfig.controlPrefab = controlViewPrefab;
             newControlConfig.controlController = ScriptableObject.CreateInstance<SettingsControlController>();
-            newControlConfig.flagsThatDeactivatesMe = new List<BooleanVariable>();
-            newControlConfig.flagsThatDisablesMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDisableMe = new List<BooleanVariable>();
             newControlConfig.isBeta = false;
 
 

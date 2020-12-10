@@ -20,8 +20,8 @@ namespace SettingsWidgetTests
             newControlConfig.title = "TestControl";
             newControlConfig.controlPrefab = new GameObject().AddComponent<SettingsControlView>();
             newControlConfig.controlController = ScriptableObject.CreateInstance<SettingsControlController>();
-            newControlConfig.flagsThatDeactivatesMe = new List<BooleanVariable>();
-            newControlConfig.flagsThatDisablesMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDisableMe = new List<BooleanVariable>();
             newControlConfig.isBeta = false;
 
             SettingsWidgetController widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
