@@ -143,10 +143,5 @@ namespace SceneBoundariesCheckerTests
             AudioSource dclAudioSource = entity.gameObject.GetComponentInChildren<AudioSource>();
             Assert.IsTrue(dclAudioSource.enabled);
         }
-
-        public bool MeshIsInvalid(MeshesInfo meshesInfo)
-        {
-            return SBC_Asserts.MeshIsInvalid(meshesInfo);
-        }
     }
 }
