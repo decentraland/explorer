@@ -4,10 +4,11 @@ using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
 using NUnit.Framework;
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace Tests
+namespace SettingsSectionTests
 {
-    public class SettingsSectionTests_EditMode
+    public class SettingsSectionShould_EditMode
     {
 		[Test]
         public void AddWidgetCorrectly()
@@ -15,13 +16,13 @@ namespace Tests
             // Arrange
             var newWidgetView = Substitute.For<ISettingsWidgetView>();
             var newWidgetController = Substitute.For<ISettingsWidgetController>();
-            var newWidgetConfig = new SettingsWidgetModel(
-                "TestWidget",
-                new SettingsWidgetView(),
-                new SettingsWidgetController(),
-                new SettingsControlGroupList());
+            var newWidgetConfig = ScriptableObject.CreateInstance<SettingsWidgetModel>();
+            newWidgetConfig.title = "TestWidget";
+            newWidgetConfig.widgetPrefab = new GameObject().AddComponent<SettingsWidgetView>();
+            newWidgetConfig.widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
+            newWidgetConfig.controlColumns = new SettingsControlGroupList();
 
-            SettingsSectionController sectionController = new SettingsSectionController();
+            SettingsSectionController sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
 
             // Act
             sectionController.AddWidget(newWidgetView, newWidgetController, newWidgetConfig);

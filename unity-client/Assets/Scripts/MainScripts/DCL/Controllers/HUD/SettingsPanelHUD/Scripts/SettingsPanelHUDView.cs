@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD
 {
+    /// <summary>
+    /// MonoBehaviour that represents the main settings panel view and will act as a factory of SECTIONS.
+    /// </summary>
     public class SettingsPanelHUDView : MonoBehaviour
     {
         [Header("General configuration")]
@@ -37,11 +40,6 @@ namespace DCL.SettingsPanelHUD
         private IHUD hudController;
         private ISettingsPanelHUDController settingsPanelController;
 
-        private void Awake()
-        {
-            openAction.OnTriggered += OpenAction_OnTriggered;
-        }
-
         public static SettingsPanelHUDView Create()
         {
             SettingsPanelHUDView view = Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<SettingsPanelHUDView>();
@@ -53,6 +51,8 @@ namespace DCL.SettingsPanelHUD
         {
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
+
+            openAction.OnTriggered += OpenAction_OnTriggered;
 
             resetAllButton.onClick.AddListener(ShowResetAllConfirmation);
             resetAllCancelButton.onClick.AddListener(HideResetAllConfirmation);

@@ -3,26 +3,28 @@ using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
 using NUnit.Framework;
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace Tests
+namespace SettingsWidgetTests
 {
 
-    public class SettingsWidgetTests_EditMode
+    public class SettingsWidgetShould_EditMode
     {
 		[Test]
         public void AddControlCorrectly()
         {
             // Arrange
             var newControlView = Substitute.For<ISettingsControlView>();
-            var newControlController = Substitute.For<SettingsControlController>();
-            var newControlConfig = new SettingsControlModel(
-                "TestControl",
-                Substitute.For<SettingsControlView>(),
-                Substitute.For<SettingsControlController>(),
-                new List<BooleanVariable>(),
-                false);
+            var newControlController = ScriptableObject.CreateInstance<SettingsControlController>();
+            var newControlConfig = ScriptableObject.CreateInstance<SettingsControlModel>();
+            newControlConfig.title = "TestControl";
+            newControlConfig.controlPrefab = new GameObject().AddComponent<SettingsControlView>();
+            newControlConfig.controlController = ScriptableObject.CreateInstance<SettingsControlController>();
+            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDisableMe = new List<BooleanVariable>();
+            newControlConfig.isBeta = false;
 
-            SettingsWidgetController widgetController = new SettingsWidgetController();
+            SettingsWidgetController widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
 
             // Act
             widgetController.AddControl(newControlView, newControlController, newControlConfig);

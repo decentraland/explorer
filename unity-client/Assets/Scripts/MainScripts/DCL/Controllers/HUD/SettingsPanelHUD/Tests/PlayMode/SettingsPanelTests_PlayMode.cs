@@ -5,9 +5,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace SettingsPanelTests
 {
-    public class SettingsPanelTests_PlayMode : TestsBase
+    public class SettingsPanelShould_PlayMode
     {
         private const string SECTION_VIEW_PREFAB_PATH = "Sections/DefaultSettingsSectionTemplate";
         private const string MENU_BUTTON_PREFAB_PATH = "Sections/DefaultSettingsMenuButtonTemplate";
@@ -18,21 +18,27 @@ namespace Tests
         private SettingsSectionList sectionsToCreate = new SettingsSectionList();
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        private IEnumerator SetUp()
         {
-            yield return base.SetUp();
-
             panelView = SettingsPanelHUDView.Create();
             hudController = Substitute.For<IHUD>();
             panelController = Substitute.For<ISettingsPanelHUDController>();
+
+            yield return null;
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        private IEnumerator TearDown()
         {
             Object.Destroy(panelView.gameObject);
+
+            foreach (var section in sectionsToCreate)
+            {
+                Object.Destroy(section.icon);
+            }
             sectionsToCreate.Clear();
 
-            yield return base.TearDown();
+            yield return null;
         }
 
         [UnityTest]
@@ -42,13 +48,13 @@ namespace Tests
             SettingsSectionView sectionViewPrefab = ((GameObject)Resources.Load(SECTION_VIEW_PREFAB_PATH)).GetComponent<SettingsSectionView>();
             SettingsButtonEntry menuButtonPrefab = ((GameObject)Resources.Load(MENU_BUTTON_PREFAB_PATH)).GetComponent<SettingsButtonEntry>();
 
-            SettingsSectionModel newSectionConfig = new SettingsSectionModel(
-                Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2()),
-                $"TestSection",
-                menuButtonPrefab,
-                sectionViewPrefab,
-                new SettingsSectionController(),
-                new SettingsWidgetList());
+            SettingsSectionModel newSectionConfig = ScriptableObject.CreateInstance<SettingsSectionModel>();
+            newSectionConfig.icon = Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2());
+            newSectionConfig.text = "TestSection";
+            newSectionConfig.menuButtonPrefab = menuButtonPrefab;
+            newSectionConfig.sectionPrefab = sectionViewPrefab;
+            newSectionConfig.sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
+            newSectionConfig.widgets = new SettingsWidgetList();
 
             sectionsToCreate.Add(newSectionConfig);
 

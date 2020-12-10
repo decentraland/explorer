@@ -1,28 +1,21 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+    /// <summary>
+    /// Model that represents a SLIDER type CONTROL.
+    /// </summary>
     [CreateAssetMenu(menuName = "Settings/Configuration/Controls/Slider Control", fileName = "SliderControlConfiguration")]
     public class SliderControlModel : SettingsControlModel
     {
         [Header("SLIDER CONFIGURATION")]
+        [Tooltip("Min allowed value for the slider.")]
         public float sliderMinValue;
-        public float sliderMaxValue;
-        public bool sliderWholeNumbers;
 
-        public SliderControlModel(
-            string title,
-            SettingsControlView controlPrefab,
-            SettingsControlController controlController,
-            List<BooleanVariable> flagsThatDeactivateMe,
-            bool isBeta,
-            float sliderMinValue,
-            float sliderMaxValue) : base(title, controlPrefab, controlController, flagsThatDeactivateMe, isBeta)
-        {
-            this.sliderMinValue = sliderMinValue;
-            this.sliderMaxValue = sliderMaxValue;
-            this.sliderWholeNumbers = sliderWholeNumbers;
-        }
+        [Tooltip("Max allowed value for the slider.")]
+        public float sliderMaxValue;
+
+        [Tooltip("True if the slider values will be integers.")]
+        public bool sliderWholeNumbers;
     }
 }

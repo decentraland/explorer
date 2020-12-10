@@ -16,10 +16,10 @@ MonoBehaviour:
   controlPrefab: {fileID: 3572563192424337713, guid: 9c69fdd3db1d73140bfff48c5a2f72dd,
     type: 3}
   controlController: {fileID: 11400000, guid: 44a001676401ebb44828c2bbd3538c34, type: 2}
-  flagsThatDisablesMe:
+  flagsThatDisableMe:
   - {fileID: 11400000, guid: fdeb14ee220a14e40a71ecf4fc17b0c3, type: 2}
   - {fileID: 11400000, guid: 1e39f6d2504a10449895477e0118ad88, type: 2}
-  flagsThatDeactivatesMe: []
+  flagsThatDeactivateMe: []
   isBeta: 0
   sliderMinValue: 30
   sliderMaxValue: 100

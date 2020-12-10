@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace SettingsWidgetTests
 {
-    public class SettingsWidgetTests_PlayMode : TestsBase
+    public class SettingsWidgetShould_PlayMode
     {
         private const int NUMBER_OF_COLUMNS = 2;
         private const string WIDGET_VIEW_PREFAB_PATH = "Widgets/DefaultSettingsWidgetTemplate";
@@ -20,10 +20,8 @@ namespace Tests
         private List<SettingsControlGroup> controlColumnsToCreate = new List<SettingsControlGroup>();
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        private IEnumerator SetUp()
         {
-            yield return base.SetUp();
-
             for (int i = 0; i < NUMBER_OF_COLUMNS; i++)
             {
                 controlColumnsToCreate.Add(new SettingsControlGroup()
@@ -34,14 +32,17 @@ namespace Tests
 
             widgetView = Object.Instantiate((GameObject)Resources.Load(WIDGET_VIEW_PREFAB_PATH)).GetComponent<SettingsWidgetView>();
             widgetController = Substitute.For<ISettingsWidgetController>();
+
+            yield return null;
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        private IEnumerator TearDown()
         {
             Object.Destroy(widgetView.gameObject);
             controlColumnsToCreate.Clear();
 
-            yield return base.TearDown();
+            yield return null;
         }
 
         [UnityTest]
@@ -53,12 +54,13 @@ namespace Tests
             // Arrange
             SettingsControlView controlViewPrefab = ((GameObject)Resources.Load(CONTROL_VIEW_PREFAB_PATH.Replace("{controlType}", controlType))).GetComponent<SettingsControlView>();
 
-            SettingsControlModel newControlConfig = new SettingsControlModel(
-                $"TestControl_Col{columnIndex}",
-                controlViewPrefab,
-                Substitute.For<SettingsControlController>(),
-                new List<BooleanVariable>(),
-                false);
+            SettingsControlModel newControlConfig = ScriptableObject.CreateInstance<SettingsControlModel>();
+            newControlConfig.title = $"TestControl_Col{columnIndex}";
+            newControlConfig.controlPrefab = controlViewPrefab;
+            newControlConfig.controlController = ScriptableObject.CreateInstance<SettingsControlController>();
+            newControlConfig.flagsThatDeactivateMe = new List<BooleanVariable>();
+            newControlConfig.flagsThatDisableMe = new List<BooleanVariable>();
+            newControlConfig.isBeta = false;
 
 
             controlColumnsToCreate[columnIndex].controls.Add(newControlConfig);

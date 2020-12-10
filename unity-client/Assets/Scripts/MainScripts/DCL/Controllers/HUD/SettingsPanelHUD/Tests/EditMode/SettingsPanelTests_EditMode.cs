@@ -6,14 +6,15 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Tests
+namespace SettingsPanelTests
 {
-    public class SettingsPanelTests_EditMode
+    public class SettingsPanelShould_EditMode
     {
         private SettingsPanelHUDController panelController;
         private ISettingsSectionView newSectionView;
         private ISettingsSectionController newSectionController;
         private SettingsSectionModel newSectionConfig;
+        private Sprite testSprite;
 
         [SetUp]
         public void SetUp()
@@ -21,18 +22,20 @@ namespace Tests
             panelController = new SettingsPanelHUDController();
             newSectionView = Substitute.For<ISettingsSectionView>();
             newSectionController = Substitute.For<ISettingsSectionController>();
-            newSectionConfig = new SettingsSectionModel(
-                Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2()),
-                "TestSection",
-                new SettingsButtonEntry(),
-                new SettingsSectionView(),
-                new SettingsSectionController(),
-                new SettingsWidgetList());
+            testSprite = Sprite.Create(new Texture2D(10, 10), new Rect(), new Vector2());
+            newSectionConfig = ScriptableObject.CreateInstance<SettingsSectionModel>();
+            newSectionConfig.icon = testSprite;
+            newSectionConfig.text = "TestSection";
+            newSectionConfig.menuButtonPrefab = new GameObject().AddComponent<SettingsButtonEntry>();
+            newSectionConfig.sectionPrefab = new GameObject().AddComponent<SettingsSectionView>();
+            newSectionConfig.sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
+            newSectionConfig.widgets = new SettingsWidgetList();
         }
 
         [TearDown]
         public void TearDown()
         {
+            Object.DestroyImmediate(testSprite);
             panelController.sections.Clear();
         }
 
