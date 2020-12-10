@@ -19,7 +19,7 @@ namespace DCL.SettingsPanelHUD.Controls
             Settings.i.OnQualitySettingsChanged += OnQualitySettingsChanged;
         }
 
-        public virtual void OnDisable()
+        public virtual void OnDestroy()
         {
             Settings.i.OnGeneralSettingsChanged -= OnGeneralSettingsChanged;
             Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;

@@ -13,9 +13,9 @@ namespace DCL.SettingsPanelHUD.Controls
             CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange += ShouldSetSoftShadowsAsFalse_OnChange;
         }
 
-        public override void OnDisable()
+        public override void OnDestroy()
         {
-            base.OnDisable();
+            base.OnDestroy();
 
             if (CommonSettingsVariables.shouldSetSoftShadowsAsFalse != null)
                 CommonSettingsVariables.shouldSetSoftShadowsAsFalse.OnChange -= ShouldSetSoftShadowsAsFalse_OnChange;

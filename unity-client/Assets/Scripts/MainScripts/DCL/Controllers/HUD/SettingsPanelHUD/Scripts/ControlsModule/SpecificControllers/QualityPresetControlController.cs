@@ -22,9 +22,9 @@ namespace DCL.SettingsPanelHUD.Controls
             CommonSettingsVariables.shouldSetQualityPresetAsCustom.OnChange += ShouldSetQualityPresetAsCustom_OnChange;
         }
 
-        public override void OnDisable()
+        public override void OnDestroy()
         {
-            base.OnDisable();
+            base.OnDestroy();
 
             if (CommonSettingsVariables.shouldSetQualityPresetAsCustom != null)
                 CommonSettingsVariables.shouldSetQualityPresetAsCustom.OnChange -= ShouldSetQualityPresetAsCustom_OnChange;
