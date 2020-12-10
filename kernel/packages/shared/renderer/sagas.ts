@@ -59,7 +59,7 @@ function* initializeRenderer(action: InitializeRenderer) {
   setLoadingScreenVisible(true)
 
   let ignoreThis = buildConfigPath
-  if(ignoreThis == ''){
+  if (ignoreThis === '') {
     _gameInstance = null
   }
 
