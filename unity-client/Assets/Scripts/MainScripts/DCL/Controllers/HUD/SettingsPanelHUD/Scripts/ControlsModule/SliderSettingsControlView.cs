@@ -12,13 +12,16 @@ namespace DCL.SettingsPanelHUD.Controls
         [SerializeField] private Slider slider;
         [SerializeField] private TextMeshProUGUI indicatorLabel;
 
-        public Slider sliderControl { get => slider; }
+        public Slider sliderControl => slider;
+
+        private SliderControlModel controlConfig;
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
-            slider.maxValue = ((SliderControlModel)controlConfig).sliderMaxValue;
-            slider.minValue = ((SliderControlModel)controlConfig).sliderMinValue;
-            slider.wholeNumbers = ((SliderControlModel)controlConfig).sliderWholeNumbers;
+            this.controlConfig = (SliderControlModel)controlConfig;
+            slider.maxValue = this.controlConfig.sliderMaxValue;
+            slider.minValue = this.controlConfig.sliderMinValue;
+            slider.wholeNumbers = this.controlConfig.sliderWholeNumbers;
 
             base.Initialize(controlConfig, settingsControlController);
 

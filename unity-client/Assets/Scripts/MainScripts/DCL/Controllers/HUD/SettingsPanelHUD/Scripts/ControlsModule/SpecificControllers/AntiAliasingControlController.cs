@@ -8,6 +8,15 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public const string TEXT_OFF = "OFF";
 
+        private SliderSettingsControlView sliderView;
+
+        public override void Initialize(ISettingsControlView settingsControlView)
+        {
+            base.Initialize(settingsControlView);
+
+            sliderView = (SliderSettingsControlView)view;
+        }
+
         public override object GetStoredValue()
         {
             float antiAliasingValue =
@@ -26,13 +35,9 @@ namespace DCL.SettingsPanelHUD.Controls
             currentQualitySetting.antiAliasing = (UnityEngine.Rendering.Universal.MsaaQuality)antiAliasingValue;
 
             if (newFloatValue == 0)
-            {
-                ((SliderSettingsControlView)view).OverrideIndicatorLabel(TEXT_OFF);
-            }
+                sliderView.OverrideIndicatorLabel(TEXT_OFF);
             else
-            {
-                ((SliderSettingsControlView)view).OverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
-            }
+                sliderView.OverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
         }
 
         public override void PostApplySettings()
