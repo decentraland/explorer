@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4003445959218808808}
   - component: {fileID: 4003445959218808809}
   - component: {fileID: 4003445959218808814}
+  - component: {fileID: 809369978376791195}
   m_Layer: 5
   m_Name: MouseCatcher
   m_TagString: Untagged
@@ -99,6 +100,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &809369978376791195
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4003445959218808815}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8031997699125076490
 GameObject:
   m_ObjectHideFlags: 0
