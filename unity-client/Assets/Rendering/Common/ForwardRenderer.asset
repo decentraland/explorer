@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: ForwardRenderer
   m_EditorClassIdentifier: 
   m_RendererFeatures:
-  - {fileID: 5993424269083734368}
-  m_RendererFeatureMap: 60f1f0429eeb2c53
+  - {fileID: 2430926494106206046}
+  m_RendererFeatureMap: 5e3f494cc462bc21
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_AccurateGbufferNormals: 0
---- !u!114 &5993424269083734368
+--- !u!114 &2430926494106206046
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61,8 +61,8 @@ MonoBehaviour:
   m_Settings:
     Downsample: 0
     Source: 1
-    NormalSamples: 2
-    Intensity: 1.01
-    DirectLightingStrength: 0.265
-    Radius: 8.75
-    SampleCount: 13
+    NormalSamples: 1
+    Intensity: 2
+    DirectLightingStrength: 0.25
+    Radius: 1
+    SampleCount: 6
