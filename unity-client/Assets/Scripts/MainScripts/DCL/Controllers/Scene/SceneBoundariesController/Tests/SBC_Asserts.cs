@@ -310,14 +310,14 @@ namespace SceneBoundariesCheckerTests
 
         public static void AssertMeshIsInvalid(MeshesInfo meshesInfo)
         {
-            Assert.IsTrue(meshesInfo.meshRootGameObject != null); // It's not invalid if there's no mesh
+            Assert.IsTrue(meshesInfo.meshRootGameObject != null, "MeshRootGameObject is null. The object is valid when it shouldn't.");
 
             if (Environment.i.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker)
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
                     string matName = meshesInfo.renderers[i].sharedMaterial.name;
-                    Assert.IsTrue(matName.Contains("Invalid"), $"Wrong material name. Material is: {matName}");
+                    Assert.IsTrue(matName.Contains("Invalid"), $"Material should be Invalid. Material is: {matName}");
                 }
             }
             else
@@ -336,14 +336,15 @@ namespace SceneBoundariesCheckerTests
 
         public static void AssertMeshIsValid(MeshesInfo meshesInfo)
         {
-            Assert.IsTrue(meshesInfo.meshRootGameObject != null); // It's not invalid if there's no mesh
+            if (meshesInfo.meshRootGameObject == null)
+                return; // It's valid if there's no mesh
 
             if (Environment.i.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker)
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
                     string matName = meshesInfo.renderers[i].sharedMaterial.name;
-                    Assert.IsTrue(matName.Contains("Invalid"), $"Wrong material name. Material is: {matName}");
+                    Assert.IsFalse(matName.Contains("Invalid"), $"Material shouldn't be invalid. Material is: {matName}");
                 }
             }
             else
