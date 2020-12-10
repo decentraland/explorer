@@ -64,9 +64,7 @@ function* initializeRenderer(action: InitializeRenderer) {
     _gameInstance = yield UnityLoader.aoCreateUnityInstance(container)
   }
 
-  if(false){
-    console.log(buildConfigPath)
-  }
+  let ignoreThis = buildConfigPath
   yield put(waitingForRenderer())
 
   return _gameInstance
