@@ -58,13 +58,17 @@ function* initializeRenderer(action: InitializeRenderer) {
 
   setLoadingScreenVisible(true)
 
+  let ignoreThis = buildConfigPath
+  if(ignoreThis == ''){
+    _gameInstance = null
+  }
+
   if (qs.ws) {
     _gameInstance = initializeUnityEditor(qs.ws, container)
   } else {
     _gameInstance = yield UnityLoader.aoCreateUnityInstance(container)
   }
 
-  let ignoreThis = buildConfigPath
   yield put(waitingForRenderer())
 
   return _gameInstance
