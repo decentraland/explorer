@@ -283,6 +283,9 @@ jobs:
     steps:
       - <<: *attach_root
       - run:
+          name: Copy renderer to kernel
+          command: |
+            cp /tmp/explorer/unity-client/Builds/unity/Build/*.unityweb /tmp/explorer/kernel/static/unity/Build/
 
       # persist to workspace to use in downstream jobs
       - persist_to_workspace:
