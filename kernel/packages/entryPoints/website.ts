@@ -17,7 +17,7 @@ import {
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, ENABLE_NEW_SETTINGS } from '../config/index'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
@@ -50,7 +50,8 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
     HUDElementID.TASKBAR,
     { active: true, visible: true },
     {
-      enableVoiceChat: voiceChatEnabled
+      enableVoiceChat: voiceChatEnabled,
+      enableNewSettings: ENABLE_NEW_SETTINGS
     }
   )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
@@ -97,7 +98,8 @@ namespace webApp {
       active: true,
       visible: OPEN_AVATAR_EDITOR
     })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: !ENABLE_NEW_SETTINGS, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: ENABLE_NEW_SETTINGS, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
       active: true,
@@ -136,13 +138,13 @@ namespace webApp {
           globalThis.globalStore.dispatch(experienceStarted())
           globalThis.globalStore.dispatch(setLoadingScreen(false))
           Html.switchGameContainer(true)
-          i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
         })
 
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
