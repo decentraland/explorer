@@ -64,7 +64,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1867831d4dbb1354a9769cb39efca036, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4716bd3a235374a27bd75705f5b7a1af, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -205,6 +205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voiceChatAction: {fileID: 11400000, guid: 01f0b80c7a1c044868504467140ae590, type: 2}
   buttonAnimator: {fileID: 5322008490370893676}
+  disabledTooltipAnimator: {fileID: 0}
 --- !u!222 &8987887199975870383
 CanvasRenderer:
   m_ObjectHideFlags: 0
