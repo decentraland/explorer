@@ -14,16 +14,14 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentQualitySetting.shadows = (bool)newValue;
+            CommonSettingsScriptableObjects.shadowsDisabled.Set(!currentQualitySetting.shadows);
         }
 
         public override void PostApplySettings()
         {
             base.PostApplySettings();
 
-            if (!currentQualitySetting.shadows)
-                CommonSettingsVariables.shouldSetSoftShadowsAsFalse.Set(true);
-
-            CommonSettingsVariables.shouldSetQualityPresetAsCustom.Set(true);
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

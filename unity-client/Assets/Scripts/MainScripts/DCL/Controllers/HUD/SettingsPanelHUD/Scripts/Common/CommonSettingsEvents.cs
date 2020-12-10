@@ -16,5 +16,11 @@ namespace DCL.SettingsPanelHUD.Common
         {
             OnRefreshAllWidgetsSize?.Invoke();
         }
+
+        public static event Action OnSetQualityPresetAsCustom;
+        public static void RaiseSetQualityPresetAsCustom()
+        {
+            OnSetQualityPresetAsCustom?.Invoke();
+        }
     }
 }

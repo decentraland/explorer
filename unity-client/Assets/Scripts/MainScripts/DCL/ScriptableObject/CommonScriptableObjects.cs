@@ -162,10 +162,10 @@ public static class CommonScriptableObjects
     private static BooleanVariable emailPromptActiveValue;
     public static BooleanVariable emailPromptActive => GetOrLoad(ref emailPromptActiveValue, "ScriptableObjects/EmailPromptActive");
 
-    private static BooleanVariable voiceChatEnabledValue;
-    public static BooleanVariable voiceChatEnabled => GetOrLoad(ref voiceChatEnabledValue, "ScriptableObjects/VoiceChatEnabled");
+    private static BooleanVariable voiceChatDisabledValue;
+    public static BooleanVariable voiceChatDisabled => GetOrLoad(ref voiceChatDisabledValue, "ScriptableObjects/VoiceChatDisabled");
 
-    internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
+    public static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)
         {

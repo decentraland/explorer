@@ -38,7 +38,7 @@ namespace DCL
 
         void EnableVoiceChat(bool enable)
         {
-            CommonScriptableObjects.voiceChatEnabled.Set(enable);
+            CommonScriptableObjects.voiceChatDisabled.Set(!enable);
         }
     }
 }
