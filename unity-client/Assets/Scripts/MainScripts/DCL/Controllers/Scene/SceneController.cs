@@ -15,7 +15,7 @@ namespace DCL
 {
     public class SceneController : IMessageProcessHandler, IMessageQueueHandler
     {
-        public static SceneController i => Main.i != null ? Main.i.sceneController : null;
+        public static SceneController i => Environment.i != null ? Environment.i.sceneController : null;
 
         public static bool VERBOSE = false;
 
@@ -26,17 +26,12 @@ namespace DCL
         //======================================================================
         private EntryPoint_World worldEntryPoint;
 
-        public DCLComponentFactory componentFactory;
+        public DCLComponentFactory componentFactory => Main.i.componentFactory;
 
         public bool enabled = true;
 
-        public void Initialize(DCLComponentFactory componentFactory)
+        public void Initialize()
         {
-            this.componentFactory = componentFactory;
-
-            RenderProfileManifest.i.Initialize();
-            Environment.i.Initialize(this);
-
             Environment.i.debugController.OnDebugModeSet += OnDebugModeSet;
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
@@ -72,7 +67,7 @@ namespace DCL
         {
             //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
             //             case. Calling Initialize multiple times in a row is safe.
-            Environment.i.Initialize(this);
+            Environment.i.Initialize();
             Environment.i.worldBlockersController.SetEnabled(false);
             Environment.i.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
@@ -93,13 +88,6 @@ namespace DCL
             }
 
             componentFactory.PrewarmPools();
-        }
-
-        public void Restart()
-        {
-            Environment.i.Restart(this);
-
-            Environment.i.parcelScenesCleaner.ForceCleanup();
         }
 
         public void OnDestroy()

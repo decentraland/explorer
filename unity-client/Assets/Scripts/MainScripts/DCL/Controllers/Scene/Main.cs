@@ -10,9 +10,6 @@ namespace DCL
     {
         public static Main i { get; private set; }
 
-        [NonSerialized]
-        public SceneController sceneController;
-
         [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
@@ -38,55 +35,55 @@ namespace DCL
             DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
-            sceneController = new SceneController();
-            sceneController.Initialize(componentFactory);
+            RenderProfileManifest.i.Initialize();
+            Environment.i.Initialize();
         }
 
         private void Start()
         {
-            sceneController.Start();
+            Environment.i.sceneController.Start();
         }
 
         private void Update()
         {
-            sceneController.Update();
+            Environment.i.sceneController.Update();
         }
 
         private void LateUpdate()
         {
-            sceneController.LateUpdate();
+            Environment.i.sceneController.LateUpdate();
         }
 
         private void OnDestroy()
         {
-            sceneController.OnDestroy();
+            Environment.i.sceneController.OnDestroy();
         }
 
         #region RuntimeMessagingBridge
 
         public void LoadParcelScenes(string payload)
         {
-            sceneController.LoadParcelScenes(payload);
+            Environment.i.sceneController.LoadParcelScenes(payload);
         }
 
         public void SendSceneMessage(string payload)
         {
-            sceneController.SendSceneMessage(payload);
+            Environment.i.sceneController.SendSceneMessage(payload);
         }
 
         public void UnloadScene(string sceneId)
         {
-            sceneController.UnloadScene(sceneId);
+            Environment.i.sceneController.UnloadScene(sceneId);
         }
 
         public void CreateUIScene(string payload)
         {
-            sceneController.CreateUIScene(payload);
+            Environment.i.sceneController.CreateUIScene(payload);
         }
 
         public void UpdateParcelScenes(string payload)
         {
-            sceneController.UpdateParcelScenes(payload);
+            Environment.i.sceneController.UpdateParcelScenes(payload);
         }
 
         #endregion
