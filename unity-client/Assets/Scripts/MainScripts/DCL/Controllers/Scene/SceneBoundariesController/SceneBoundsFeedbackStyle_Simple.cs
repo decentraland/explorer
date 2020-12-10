@@ -16,13 +16,18 @@ namespace DCL.Controllers
             if (meshesInfo?.renderers == null || meshesInfo.renderers.Length == 0)
                 return;
 
-            if (isInsideBoundaries != meshesInfo.renderers[0].enabled && meshesInfo.currentShape.IsVisible())
+            if (!meshesInfo.currentShape.IsVisible())
+                return;
+
+            for (int i = 0; i < meshesInfo.renderers.Length; i++)
             {
-                for (int i = 0; i < meshesInfo.renderers.Length; i++)
-                {
-                    if (meshesInfo.renderers[i] != null)
-                        meshesInfo.renderers[i].enabled = isInsideBoundaries;
-                }
+                if (meshesInfo.renderers[i] == null)
+                    continue;
+
+                if (isInsideBoundaries == meshesInfo.renderers[i].enabled)
+                    continue;
+
+                meshesInfo.renderers[i].enabled = isInsideBoundaries;
             }
         }
 
