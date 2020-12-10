@@ -57,7 +57,6 @@ namespace DCL
             pointerEventsController.Initialize();
             memoryManager.Initialize();
             worldBlockersController = WorldBlockersController.CreateWithDefaultDependencies(worldState, DCLCharacterController.i.characterPosition);
-            sceneBoundsChecker = new SceneBoundsChecker();
             worldState.Initialize();
             parcelScenesCleaner.Start();
             cullingController.Start();
