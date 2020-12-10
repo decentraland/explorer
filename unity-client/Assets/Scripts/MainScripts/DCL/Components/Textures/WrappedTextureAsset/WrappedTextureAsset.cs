@@ -47,7 +47,7 @@ namespace DCL
                 yield break;
             }
 
-            var gif = new Asset_Gif(url, OnSuccess);
+            var gif = new Asset_Gif_old(url, OnSuccess);
 
             yield return gif.Load();
         }

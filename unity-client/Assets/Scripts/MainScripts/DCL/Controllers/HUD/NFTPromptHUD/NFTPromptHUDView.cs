@@ -218,7 +218,7 @@ public class NFTPromptHUDView : MonoBehaviour
             imageAsset = nftImageAsset;
             imageNft.texture = nftImageAsset.texture;
 
-            if (nftImageAsset is Asset_Gif gifAsset)
+            if (nftImageAsset is Asset_Gif_old gifAsset)
             {
                 gifAsset.OnFrameTextureChanged += (texture) => { imageNft.texture = texture; };
                 gifAsset.Play();

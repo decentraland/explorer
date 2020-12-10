@@ -42,7 +42,7 @@ namespace DCL
         /// Tells Kernel to start processing a desired GIF, waits for the data to come back from Kernel and passes it to the GIF through the onFinishCallback
         /// </summary>
         /// <param name="onSuccess">The callback that will be invoked with the generated textures list</param>
-        public IEnumerator RequestGIFProcessor(string url, System.Action<List<UniGif.GifTexture>> onSuccess, System.Action onFail)
+        public IEnumerator RequestGIFProcessor(string url, System.Action<GifFrameData[]> onSuccess, System.Action onFail)
         {
             if (!jsGIFProcessingEnabled)
             {
@@ -122,7 +122,7 @@ namespace DCL
             }
         }
 
-        public List<UniGif.GifTexture> GenerateTexturesList(int width, int height, int[] pointers, float[] frameDelays)
+        private GifFrameData[] GenerateTexturesList(int width, int height, int[] pointers, float[] frameDelays)
         {
             if (width == 0 || height == 0)
             {
@@ -130,10 +130,11 @@ namespace DCL
                 return null;
             }
 
-            List<UniGif.GifTexture> gifTexturesList = new List<UniGif.GifTexture>();
-            for (int i = 0; i < pointers.Length; i++)
+            GifFrameData[] gifTextures = new GifFrameData[pointers.Length];
+            for (int j = 0; j < pointers.Length; j++)
             {
-                Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32, false, false, (System.IntPtr)pointers[i]);
+                Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32,
+                    false, false, (System.IntPtr)pointers[j]);
 
                 if (newTex == null)
                 {
@@ -143,15 +144,10 @@ namespace DCL
 
                 newTex.wrapMode = TextureWrapMode.Clamp;
 
-                gifTexturesList.Add(new UniGif.GifTexture(newTex, frameDelays[i] / 1000));
+                gifTextures[j] = new GifFrameData() {texture = newTex, delay = frameDelays[j] / 1000};
             }
 
-            return gifTexturesList;
-        }
-
-        public void RejectGIFProcessingRequest()
-        {
-            jsGIFProcessingEnabled = false;
+            return gifTextures;
         }
     }
 }

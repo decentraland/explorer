@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 namespace DCL.Controllers.Gif
 {
-    public class Asset_Gif : IDisposable, ITexture
+    public class Asset_Gif_old : IDisposable, ITexture
     {
         public event Action<Texture2D> OnFrameTextureChanged;
 
@@ -24,7 +24,7 @@ namespace DCL.Controllers.Gif
             {
                 if (isLoaded)
                 {
-                    return gifTextures[currentTextureIdx].m_texture2d;
+                    return gifTextures[currentTextureIdx].texture;
                 }
 
                 return null;
@@ -34,7 +34,7 @@ namespace DCL.Controllers.Gif
         public int width => texture.width;
         public int height => texture.height;
 
-        private List<UniGif.GifTexture> gifTextures;
+        private GifFrameData[] gifTextures;
 
         private int currentLoopCount;
         private float currentTimeDelay;
@@ -50,7 +50,7 @@ namespace DCL.Controllers.Gif
 
         private bool processedGIFInJS = false;
 
-        public Asset_Gif(string url, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
+        public Asset_Gif_old(string url, Action<ITexture, AssetPromise_Texture> OnSuccess, Action OnFail = null)
         {
             this.url = url;
             this.OnSuccessEvent = OnSuccess;
@@ -68,11 +68,11 @@ namespace DCL.Controllers.Gif
             {
                 bool fetchFailed = false;
                 yield return DCL.GIFProcessingBridge.i.RequestGIFProcessor(url,
-                    (List<UniGif.GifTexture> newTextures) => // Override textures with JS processed ones
+                    (GifFrameData[] newTextures) => // Override textures with JS processed ones
                     {
-                        if (newTextures == null || newTextures.Count == 0) return;
+                        if (newTextures == null || newTextures.Length == 0) return;
                         processedGIFInJS = true;
-                        OnGifLoaded(newTextures, 0, newTextures[0].m_texture2d.width, newTextures[0].m_texture2d.height);
+                        OnGifLoaded(newTextures, 0, newTextures[0].texture.width, newTextures[0].texture.height);
                     }, () => fetchFailed = true);
 
                 if (fetchFailed)
@@ -139,7 +139,7 @@ namespace DCL.Controllers.Gif
             currentTextureIdx = 0;
 
             if (gifTextures != null)
-                currentTimeDelay = gifTextures[currentTextureIdx].m_delaySec;
+                currentTimeDelay = gifTextures[currentTextureIdx].delay;
 
             if (updateRoutine != null)
             {
@@ -157,7 +157,7 @@ namespace DCL.Controllers.Gif
 
                 currentTextureIdx++;
 
-                if (currentTextureIdx >= gifTextures.Count)
+                if (currentTextureIdx >= gifTextures.Length)
                 {
                     currentLoopCount++;
 
@@ -170,12 +170,12 @@ namespace DCL.Controllers.Gif
                     currentTextureIdx = 0;
                 }
 
-                currentTimeDelay = gifTextures[currentTextureIdx].m_delaySec;
+                currentTimeDelay = gifTextures[currentTextureIdx].delay;
                 OnFrameTextureChanged?.Invoke(texture);
             }
         }
 
-        private void OnGifLoaded(List<UniGif.GifTexture> gifTextureList, int loopCount, int width, int height)
+        private void OnGifLoaded(GifFrameData[] gifTextureList, int loopCount, int width, int height)
         {
             if (gifTextureList == null)
                 return;

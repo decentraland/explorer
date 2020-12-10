@@ -235,7 +235,7 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         nftAsset = newAsset;
 
-        if (nftAsset is Asset_Gif gifAsset)
+        if (nftAsset is Asset_Gif_old gifAsset)
         {
             gifAsset.OnFrameTextureChanged -= UpdateTexture;
             gifAsset.OnFrameTextureChanged += UpdateTexture;

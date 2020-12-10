@@ -5,18 +5,18 @@ public class GIFCacheData : IDisposable
 {
     public string url { get; internal set; }
     public string id { get; internal set; }
-    public List<UniGif.GifTexture> textures { get; internal set; }
+    public GifFrameData[] textures { get; internal set; }
 
     public void Dispose()
     {
         if (textures == null)
             return;
 
-        int count = textures.Count;
+        int count = textures.Length;
         for (int i = 0; i < count; i++)
         {
-            if (textures[i].m_texture2d)
-                UnityEngine.Object.Destroy(textures[i].m_texture2d);
+            if (textures[i].texture)
+                UnityEngine.Object.Destroy(textures[i].texture);
         }
         textures = null;
     }
