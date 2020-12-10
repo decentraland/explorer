@@ -3,9 +3,14 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+    /// <summary>
+    /// MonoBehaviour that represents the view of a TOGGLE type CONTROL.
+    /// </summary>
     public class ToggleSettingsControlView : SettingsControlView
     {
         [SerializeField] private Toggle toggle;
+
+        public Toggle toggleControl { get => toggle; }
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
@@ -13,10 +18,17 @@ namespace DCL.SettingsPanelHUD.Controls
 
             toggle.onValueChanged.AddListener(isOn =>
             {
-                settingsControlController.OnControlChanged(isOn);
+                ApplySetting(isOn);
             });
+        }
 
-            toggle.isOn = (bool)settingsControlController.GetStoredValue();
+        public override void RefreshControl()
+        {
+            bool newValue = (bool)settingsControlController.GetStoredValue();
+            if (toggle.isOn != newValue)
+                toggle.isOn = newValue;
+            else
+                skipPostApplySettings = false;
         }
     }
 }

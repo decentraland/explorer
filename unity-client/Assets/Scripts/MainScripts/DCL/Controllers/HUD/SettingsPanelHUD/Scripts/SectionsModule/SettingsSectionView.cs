@@ -1,16 +1,31 @@
 using DCL.SettingsPanelHUD.Widgets;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
+    /// <summary>
+    /// Interface to implement a view for a SECTION.
+    /// </summary>
     public interface ISettingsSectionView
     {
+        /// <summary>
+        /// All the needed logic to initializes the SECTION view and put its WIDGETS factory into operation.
+        /// </summary>
+        /// <param name="settingsSectionController">Controller that will be associated to this view.</param>
+        /// <param name="widgets">List of WIDGETS associated to this SECTION.</param>
         void Initialize(ISettingsSectionController settingsSectionController, List<SettingsWidgetModel> widgets);
+
+        /// <summary>
+        /// Activates/deactivates the SECTION.
+        /// </summary>
+        /// <param name="active">True for SECTION activation.</param>
         void SetActive(bool active);
     }
 
+    /// <summary>
+    /// MonoBehaviour that represents a SECTION view and will act as a factory of WIDGETS.
+    /// </summary>
     public class SettingsSectionView : MonoBehaviour, ISettingsSectionView
     {
         [SerializeField] private Transform widgetsContainer;

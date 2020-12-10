@@ -1,3 +1,5 @@
+using DCL.Helpers;
+using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Controls;
 using System.Collections.Generic;
 using TMPro;
@@ -7,11 +9,23 @@ using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD.Widgets
 {
+    /// <summary>
+    /// Interface to implement a view for a WIDGET.
+    /// </summary>
     public interface ISettingsWidgetView
     {
+        /// <summary>
+        /// All the needed logic to initializes the WIDGET view and put its CONTROLS factory into operation.
+        /// </summary>
+        /// <param name="title">Title of the WIDGET.</param>
+        /// <param name="settingsWidgetController">Controller that will be associated to this view.</param>
+        /// <param name="controlColumns">List of CONTROLS (grouped in columns) associated to this WIDGET.</param>
         void Initialize(string title, ISettingsWidgetController settingsWidgetController, List<SettingsControlGroup> controlColumns);
     }
 
+    /// <summary>
+    /// MonoBehaviour that represents a WIDGET view and will act as a factory of CONTROLS.
+    /// </summary>
     public class SettingsWidgetView : MonoBehaviour, ISettingsWidgetView
     {
         [SerializeField] private TextMeshProUGUI title;
@@ -25,8 +39,15 @@ namespace DCL.SettingsPanelHUD.Widgets
             this.settingsWidgetController = settingsWidgetController;
             this.controlColumns = controlColumns;
 
+            CommonSettingsEvents.OnRefreshAllWidgetsSize += AdjustWidgetHeight;
+
             this.title.text = title;
             CreateControls();
+        }
+
+        private void OnDestroy()
+        {
+            CommonSettingsEvents.OnRefreshAllWidgetsSize -= AdjustWidgetHeight;
         }
 
         private void CreateControls()
@@ -57,18 +78,26 @@ namespace DCL.SettingsPanelHUD.Widgets
             // Calculate the height of the highest column
             Transform highestColumn = null;
             float highestColumnHeight = 0f;
+            int highestColumnChildCount = 0;
             foreach (var columnTransform in controlsContainerColumns)
             {
                 float columnHeight = 0f;
+                int columnChildCount = 0;
                 for (int controlIndex = 0; controlIndex < columnTransform.childCount; controlIndex++)
                 {
-                    columnHeight += ((RectTransform)columnTransform.GetChild(controlIndex)).sizeDelta.y;
+                    var childControl = (RectTransform)columnTransform.GetChild(controlIndex);
+                    if (childControl.gameObject.activeSelf)
+                    {
+                        columnHeight += childControl.sizeDelta.y;
+                        columnChildCount++;
+                    }
                 }
 
                 if (columnHeight > highestColumnHeight)
                 {
                     highestColumn = columnTransform;
                     highestColumnHeight = columnHeight;
+                    highestColumnChildCount = columnChildCount;
                 }
             }
 
@@ -83,7 +112,7 @@ namespace DCL.SettingsPanelHUD.Widgets
                     highestColumnHeight +
                     columnVerticalLayoutHroup.padding.top +
                     columnVerticalLayoutHroup.padding.bottom +
-                    (highestColumn.childCount * columnVerticalLayoutHroup.spacing);
+                    (highestColumnChildCount * columnVerticalLayoutHroup.spacing);
             }
             else
             {
@@ -93,6 +122,8 @@ namespace DCL.SettingsPanelHUD.Widgets
             // Apply the new widget height
             RectTransform widgetTransform = (RectTransform)this.transform;
             widgetTransform.sizeDelta = new Vector2(widgetTransform.sizeDelta.x, totalHeight);
+
+            Utils.ForceRebuildLayoutImmediate((RectTransform)this.transform.parent);
         }
     }
 }

@@ -2,16 +2,15 @@ using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Sections;
 using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
+namespace SettingsSectionTests
 {
 
-    public class SettingsSectionTests_PlayMode : TestsBase
+    public class SettingsSectionShould_PlayMode
     {
         private const string SECTION_VIEW_PREFAB_PATH = "Sections/DefaultSettingsSectionTemplate";
         private const string WIDGET_VIEW_PREFAB_PATH = "Widgets/DefaultSettingsWidgetTemplate";
@@ -21,20 +20,21 @@ namespace Tests
         private List<SettingsWidgetModel> widgetsToCreate = new List<SettingsWidgetModel>();
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        private IEnumerator SetUp()
         {
-            yield return base.SetUp();
-
             sectionView = Object.Instantiate((GameObject)Resources.Load(SECTION_VIEW_PREFAB_PATH)).GetComponent<SettingsSectionView>();
             sectionController = Substitute.For<ISettingsSectionController>();
+
+            yield return null;
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        private IEnumerator TearDown()
         {
             Object.Destroy(sectionView.gameObject);
             widgetsToCreate.Clear();
 
-            yield return base.TearDown();
+            yield return null;
         }
 
         [UnityTest]
@@ -43,11 +43,11 @@ namespace Tests
             // Arrange
             SettingsWidgetView widgetViewPrefab = ((GameObject)Resources.Load(WIDGET_VIEW_PREFAB_PATH)).GetComponent<SettingsWidgetView>();
 
-            SettingsWidgetModel newWidgetConfig = new SettingsWidgetModel(
-                $"TestWidget",
-                widgetViewPrefab,
-                new SettingsWidgetController(),
-                new SettingsControlGroupList());
+            SettingsWidgetModel newWidgetConfig = ScriptableObject.CreateInstance<SettingsWidgetModel>();
+            newWidgetConfig.title = "TestWidget";
+            newWidgetConfig.widgetPrefab = widgetViewPrefab;
+            newWidgetConfig.widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
+            newWidgetConfig.controlColumns = new SettingsControlGroupList();
 
             widgetsToCreate.Add(newWidgetConfig);
 

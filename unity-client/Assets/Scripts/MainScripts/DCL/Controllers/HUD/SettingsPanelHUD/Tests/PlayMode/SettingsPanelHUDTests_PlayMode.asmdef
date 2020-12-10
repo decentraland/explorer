@@ -6,7 +6,8 @@
         "TestHelpers",
         "SettingsPanelHUD",
         "Utils",
-        "HUDCommon"
+        "HUDCommon",
+        "ScriptableObjects"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

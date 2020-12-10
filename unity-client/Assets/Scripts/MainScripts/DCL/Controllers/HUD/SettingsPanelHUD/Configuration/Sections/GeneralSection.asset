@@ -21,4 +21,4 @@ MonoBehaviour:
   sectionController: {fileID: 11400000, guid: cac7ad54d7c04464a868e7768f9cb004, type: 2}
   widgets:
     array:
-    - {fileID: 11400000, guid: 4461cd11dc368714cae5cc5a4519a9ac, type: 2}
+    - {fileID: 11400000, guid: 76c1992472ccc68438826fa40c484392, type: 2}

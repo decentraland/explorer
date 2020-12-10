@@ -1,20 +1,34 @@
+using DCL.Helpers;
 using DCL.SettingsPanelHUD.Sections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD
 {
+    /// <summary>
+    /// MonoBehaviour that represents the main settings panel view and will act as a factory of SECTIONS.
+    /// </summary>
     public class SettingsPanelHUDView : MonoBehaviour
     {
+        [Header("General configuration")]
+        [SerializeField] private GameObject mainWindow;
+        [SerializeField] private Transform blackOverlay;
+
         [Header("Sections configuration")]
         [SerializeField] private SettingsPanelModel settingsPanelConfig;
         [SerializeField] private Transform menuButtonsContainer;
         [SerializeField] private Transform sectionsContainer;
 
-        [Header("Close Settings")]
+        [Header("Reset All configuration")]
+        [SerializeField] private Button resetAllButton;
+        [SerializeField] private ShowHideAnimator resetAllConfirmation;
+        [SerializeField] private Button resetAllOkButton;
+        [SerializeField] private Button resetAllCancelButton;
+
+        [Header("Open/Close Settings")]
         [SerializeField] private Button closeButton;
         [SerializeField] private InputAction_Trigger closeAction;
+        [SerializeField] private InputAction_Trigger openAction;
 
         [Header("Animations")]
         [SerializeField] private ShowHideAnimator settingsAnimator;
@@ -38,16 +52,32 @@ namespace DCL.SettingsPanelHUD
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
 
+            openAction.OnTriggered += OpenAction_OnTriggered;
+
+            resetAllButton.onClick.AddListener(ShowResetAllConfirmation);
+            resetAllCancelButton.onClick.AddListener(HideResetAllConfirmation);
+            resetAllOkButton.onClick.AddListener(ResetAllSettings);
+
+            closeButton.onClick.AddListener(CloseSettingsPanel);
+            settingsAnimator.OnWillFinishHide += OnFinishHide;
+
             CreateSections();
             isOpen = !settingsAnimator.hideOnEnable;
-
-            closeButton.onClick.AddListener(() => CloseSettingsPanel());
+            settingsAnimator.Hide(true);
         }
 
         public void Initialize(IHUD hudController, ISettingsPanelHUDController settingsPanelController, SettingsSectionList sections)
         {
             settingsPanelConfig.sections = sections;
             Initialize(hudController, settingsPanelController);
+        }
+
+        private void OnDestroy()
+        {
+            openAction.OnTriggered -= OpenAction_OnTriggered;
+
+            if (settingsAnimator)
+                settingsAnimator.OnWillFinishHide -= OnFinishHide;
         }
 
         private void CreateSections()
@@ -62,6 +92,26 @@ namespace DCL.SettingsPanelHUD
             }
 
             settingsPanelController.OpenSection(0);
+            settingsPanelController.MarkMenuButtonAsSelected(0);
+        }
+
+        private void ShowResetAllConfirmation()
+        {
+            resetAllConfirmation.Show();
+            blackOverlay.SetSiblingIndex(resetAllConfirmation.transform.GetSiblingIndex() - 1);
+        }
+
+        private void HideResetAllConfirmation()
+        {
+            resetAllConfirmation.Hide();
+            blackOverlay.SetSiblingIndex(0);
+        }
+
+        private void ResetAllSettings()
+        {
+            settingsPanelController.ResetAllSettings();
+            resetAllConfirmation.Hide();
+            blackOverlay.SetSiblingIndex(0);
         }
 
         private void CloseSettingsPanel()
@@ -81,18 +131,32 @@ namespace DCL.SettingsPanelHUD
             {
                 closeAction.OnTriggered += CloseAction_OnTriggered;
                 settingsAnimator.Show();
+                mainWindow.SetActive(true);
+                HideResetAllConfirmation();
             }
             else
             {
                 settingsAnimator.Hide();
+                settingsPanelController.SaveSettings();
             }
 
             isOpen = visible;
         }
 
+        private void OpenAction_OnTriggered(DCLAction_Trigger action)
+        {
+            Utils.UnlockCursor();
+            hudController.SetVisibility(!isOpen);
+        }
+
         private void CloseAction_OnTriggered(DCLAction_Trigger action)
         {
             CloseSettingsPanel();
+        }
+
+        private void OnFinishHide(ShowHideAnimator animator)
+        {
+            mainWindow.SetActive(false);
         }
     }
 }
