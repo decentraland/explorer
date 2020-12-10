@@ -25,7 +25,7 @@ namespace SceneBoundariesCheckerTests
             Environment.i.sceneBoundsChecker.timeBetweenChecks = 0f;
 
             UnityEngine.Assertions.Assert.IsTrue(Environment.i.sceneBoundsChecker.enabled);
-            //UnityEngine.Assertions.Assert.IsTrue(sceneController.boundsChecker is SceneBoundsDebugModeChecker);
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker);
         }
 
         [UnityTest]
