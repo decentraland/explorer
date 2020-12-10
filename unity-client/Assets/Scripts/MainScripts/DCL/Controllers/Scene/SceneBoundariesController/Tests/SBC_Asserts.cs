@@ -317,7 +317,8 @@ namespace SceneBoundariesCheckerTests
             {
                 for (int i = 0; i < meshesInfo.renderers.Length; i++)
                 {
-                    if (meshesInfo.renderers[i].sharedMaterial.name != "InvalidSubMesh") return false;
+                    if (!meshesInfo.renderers[i].sharedMaterial.name.Contains("Invalid"))
+                        return false;
                 }
             }
             else
