@@ -9,13 +9,17 @@ const profileDefaults = {
   tutorialStep: 0
 }
 
+// TODO: Convert eth address to checksum format here ???
 export function profileToRendererFormat(profile: Profile, identity?: ExplorerIdentity): ProfileForRenderer {
   const { snapshots, ...rendererAvatar } = profile.avatar
+  // ;const ethAddress = (window as any).currentUserEthAddress
   return {
     ...profileDefaults,
     ...profile,
     snapshots: prepareSnapshots(snapshots ?? profile.snapshots),
     hasConnectedWeb3: identity ? identity.hasConnectedWeb3 : false,
+    // ethAddress: ethAddress,
+    ethAddress: identity ? identity.rawAddress : '',
     avatar: {
       ...rendererAvatar,
       wearables: profile.avatar.wearables.filter(dropDeprecatedWearables),

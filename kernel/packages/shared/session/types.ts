@@ -10,6 +10,7 @@ export type RootSessionState = {
 
 export type ExplorerIdentity = AuthIdentity & {
   address: string
+  rawAddress: string
   provider?: ProviderType
   hasConnectedWeb3: boolean
 }

@@ -83,7 +83,7 @@ export async function getUserAccount(): Promise<string | undefined> {
       return undefined
     }
 
-    return accounts[0].toJSON().toLocaleLowerCase()
+    return accounts[0].toJSON()
   } catch (error) {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
   }

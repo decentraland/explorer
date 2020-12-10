@@ -152,6 +152,9 @@ function* authenticate(action: AuthenticateAction) {
   }
   const session = yield authorize()
   let profile = yield getProfileByUserId(session.userId)
+
+  profile.ethAddress = session.rawAddress
+
   if (profile || isGuestWithProfile(session) || PREVIEW) {
     return yield signIn(session.userId, session.identity)
   }
@@ -215,12 +218,20 @@ function* authorize() {
   if (ENABLE_WEB3) {
     try {
       let userData
+
       if (isGuest()) {
         userData = getLastSessionByProvider(ProviderType.GUEST)
       } else {
-        const address = yield getUserEthAccountIfAvailable()
+        const ethAddress = yield getUserEthAccountIfAvailable()
+        // ;(window as any).currentUserEthAddress = ethAddress
+        const address = ethAddress.toLocaleLowerCase()
         userData = getStoredSession(address)
+
+        if (userData) {
+          userData.identity.rawAddress = ethAddress
+        }
       }
+
       // check that user data is stored & key is not expired
       if (!userData || isSessionExpired(userData)) {
         const identity = yield createAuthIdentity()
@@ -229,6 +240,7 @@ function* authorize() {
           identity
         }
       }
+
       return {
         userId: userData.identity.address,
         identity: userData.identity
@@ -286,7 +298,7 @@ function* signUp() {
 
   const profile = yield select(getSignUpProfile)
   profile.userId = session.userId.toString()
-  profile.ethAddress = session.userId.toString()
+  profile.ethAddress = session.rawAddress.toString()
   profile.version = 0
   profile.inventory = []
   profile.hasClaimedName = false
@@ -367,7 +379,8 @@ async function createAuthIdentity(): Promise<ExplorerIdentity> {
   }
 
   const auth = await Authenticator.initializeAuthChain(address, ephemeral, ephemeralLifespanMinutes, signer)
-  return { ...auth, address: address.toLocaleLowerCase(), hasConnectedWeb3, provider }
+
+  return { ...auth, rawAddress: address, address: address.toLocaleLowerCase(), hasConnectedWeb3, provider }
 }
 
 function* logout() {
