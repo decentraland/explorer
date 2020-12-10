@@ -97,7 +97,6 @@ namespace DCL
         public static WSSController i { get; private set; }
         static bool VERBOSE = false;
         WebSocketServer ws;
-        public SceneController sceneController;
         public RenderingController renderingController;
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
@@ -279,25 +278,25 @@ namespace DCL
                                 DCL.Environment.i.debugController.SetEngineDebugPanel();
                                 break;
                             case "SendSceneMessage":
-                                sceneController.SendSceneMessage(msg.payload);
+                                SceneController.i.SendSceneMessage(msg.payload);
                                 break;
                             case "LoadParcelScenes":
-                                sceneController.LoadParcelScenes(msg.payload);
+                                SceneController.i.LoadParcelScenes(msg.payload);
                                 break;
                             case "UnloadScene":
-                                sceneController.UnloadScene(msg.payload);
+                                SceneController.i.UnloadScene(msg.payload);
                                 break;
                             case "Reset":
-                                sceneController.UnloadAllScenesQueued();
+                                SceneController.i.UnloadAllScenesQueued();
                                 break;
                             case "CreateUIScene":
-                                sceneController.CreateUIScene(msg.payload);
+                                SceneController.i.CreateUIScene(msg.payload);
                                 break;
                             case "BuilderReady":
                                 Main.i.BuilderReady();
                                 break;
                             case "UpdateParcelScenes":
-                                sceneController.UpdateParcelScenes(msg.payload);
+                                SceneController.i.UpdateParcelScenes(msg.payload);
                                 break;
                             case "Teleport":
                                 characterController.Teleport(msg.payload);
