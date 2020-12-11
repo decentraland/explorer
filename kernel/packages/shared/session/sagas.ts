@@ -295,7 +295,7 @@ function* signUp() {
 
   const profile = yield select(getSignUpProfile)
   profile.userId = session.userId.toString()
-  profile.ethAddress = session.rawAddress ? session.rawAddress : profile.userId
+  profile.ethAddress = session.identity.rawAddress ? session.identity.rawAddress : profile.userId
   profile.version = 0
   profile.inventory = []
   profile.hasClaimedName = false
