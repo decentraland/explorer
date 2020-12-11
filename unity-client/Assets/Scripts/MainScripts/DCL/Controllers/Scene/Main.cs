@@ -17,7 +17,6 @@ namespace DCL
         [NonSerialized]
         public SceneController sceneController;
 
-        [FormerlySerializedAs("factoryManifest")]
         public DCLComponentFactory componentFactory;
 
         public DebugConfig debugConfig;
