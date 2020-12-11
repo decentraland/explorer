@@ -19,6 +19,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.XR;
+using Environment = DCL.Environment;
 
 public class BuilderInWorldController : MonoBehaviour
 {
@@ -29,35 +30,25 @@ public class BuilderInWorldController : MonoBehaviour
         Editor = 2
     }
 
-    [Header("Activation of Feature")]
+    [Header("Activation of Feature")] public bool activeFeature = false;
 
-    public bool activeFeature = false;
-
-    [Header("Design variables")]
-
-    public float scaleSpeed = 0.25f;
+    [Header("Design variables")] public float scaleSpeed = 0.25f;
     public float rotationSpeed = 0.5f;
     public float msBetweenInputInteraction = 200;
 
     public float distanceLimitToSelectObjects = 50;
 
-    [Header("Snap variables")]
-
-    public float snapFactor = 1f;
+    [Header("Snap variables")] public float snapFactor = 1f;
     public float snapRotationDegresFactor = 15f;
     public float snapScaleFactor = 0.5f;
 
     public float snapDistanceToActivateMovement = 10f;
 
-    [Header("Scene References")]
-
-    public GameObject cameraParentGO;
+    [Header("Scene References")] public GameObject cameraParentGO;
     public GameObject cursorGO;
     public InputController inputController;
 
-    [Header("Prefab References")]
-
-    public OutlinerController outlinerController;
+    [Header("Prefab References")] public OutlinerController outlinerController;
     public BuilderInWorldInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
@@ -68,18 +59,15 @@ public class BuilderInWorldController : MonoBehaviour
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
     public GameObject floorPrefab;
 
-    [Header("Build Modes")]
-
-    public BuilderInWorldFirstPersonMode firstPersonMode;
+    [Header("Build Modes")] public BuilderInWorldFirstPersonMode firstPersonMode;
     public BuilderInWorldGodMode editorMode;
 
-    [Header("Build References")]
-
-    public int builderRendererIndex = 1;
+    [Header("Build References")] public int builderRendererIndex = 1;
     public LayerMask layerToRaycast;
 
-    [Header("InputActions")]
-    [SerializeField] internal InputAction_Trigger editModeChangeInputAction;
+    [Header("InputActions")] [SerializeField]
+    internal InputAction_Trigger editModeChangeInputAction;
+
     [SerializeField] internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
     [SerializeField] internal InputAction_Trigger toggleRedoActionInputAction;
     [SerializeField] internal InputAction_Trigger toggleUndoActionInputAction;
@@ -95,10 +83,10 @@ public class BuilderInWorldController : MonoBehaviour
     ParcelScene sceneToEdit;
 
     bool isEditModeActivated = false,
-         isSnapActive = true,
-         isMultiSelectionActive = false,
-         isAdvancedModeActive = true,
-         isOutlineCheckActive = true;
+        isSnapActive = true,
+        isMultiSelectionActive = false,
+        isAdvancedModeActive = true,
+        isOutlineCheckActive = true;
 
 
     GameObject editionGO;
@@ -313,12 +301,11 @@ public class BuilderInWorldController : MonoBehaviour
 
         firstPersonMode.OnActionGenerated += actionController.AddAction;
         editorMode.OnActionGenerated += actionController.AddAction;
-
     }
 
     void StartTutorial()
     {
-        TutorialController.i.SetTutorialEnabled(false.ToString(), TutorialController.TutorialType.BuilderInWorld);
+        TutorialController.i.SetBuilderInWorldTutorialEnabled();
     }
 
     void MouseClick(int buttonID, Vector3 position)
@@ -335,10 +322,10 @@ public class BuilderInWorldController : MonoBehaviour
                     InputDone();
                     return;
                 }
+
                 CheckOutline();
             }
         }
-
     }
 
     bool IsInsideTheLimits(SceneObject sceneObject)
@@ -351,31 +338,37 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
+
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
+
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
+
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
+
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
+
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
+
         return true;
     }
 
@@ -424,9 +417,11 @@ public class BuilderInWorldController : MonoBehaviour
                     break;
                 }
             }
+
             if (!found)
                 data.contents.Add(mappingPair);
         }
+
         SceneController.i.UpdateParcelScenesExecute(data);
    
         DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));     
@@ -514,7 +509,6 @@ public class BuilderInWorldController : MonoBehaviour
             return;
 
         actionController.TryToUndoAction();
-
     }
 
     void CheckEditModeInput()
@@ -569,7 +563,6 @@ public class BuilderInWorldController : MonoBehaviour
             currentActiveMode.SetSnapActive(isSnapActive);
             builderInWorldEntityHandler.SetActiveMode(currentActiveMode);
         }
-
     }
 
     public void SetAdvanceMode(bool advanceModeActive)
@@ -614,8 +607,8 @@ public class BuilderInWorldController : MonoBehaviour
 
                 if (entity != null && !entity.IsSelected)
                     outlinerController.OutlineEntity(entity);
-
             }
+
             outlinerOptimizationCounter = 0;
         }
         else outlinerOptimizationCounter++;
@@ -629,12 +622,13 @@ public class BuilderInWorldController : MonoBehaviour
     public void ResetScaleAndRotation()
     {
         currentActiveMode.ResetScaleAndRotation();
-
     }
+
     public void SetOutlineCheckActive(bool isActive)
     {
         isOutlineCheckActive = isActive;
     }
+
     public void SetSnapActive(bool isActive)
     {
         isSnapActive = isActive;
@@ -662,7 +656,7 @@ public class BuilderInWorldController : MonoBehaviour
     }
 
     void MouseClickDetected()
-    {        
+    {
         DCLBuilderInWorldEntity entityToSelect = GetEntityOnPointer();
         if (entityToSelect != null)
         {
@@ -698,13 +692,15 @@ public class BuilderInWorldController : MonoBehaviour
                 return builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
             }
         }
+
         return null;
     }
 
     public VoxelEntityHit GetCloserUnselectedVoxelEntityOnPointer()
     {
         RaycastHit[] hits;
-        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); ;
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        ;
 
         float currentDistance = 9999;
         VoxelEntityHit voxelEntityHit = null;
@@ -729,6 +725,7 @@ public class BuilderInWorldController : MonoBehaviour
                 }
             }
         }
+
         return voxelEntityHit;
     }
 
@@ -798,7 +795,6 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void ExitEditMode()
     {
-
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
         HUDController.i.buildModeHud.SetVisibility(false);
@@ -916,7 +912,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     void FindSceneToEdit()
     {
-        foreach (ParcelScene scene in SceneController.i.scenesSortedByDistance)
+        foreach (ParcelScene scene in Environment.i.worldState.scenesSortedByDistance)
         {
             if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {

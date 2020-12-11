@@ -65,6 +65,7 @@ export type EntityActionType =
   | 'InitMessagesFinished'
   | 'OpenExternalUrl'
   | 'OpenNFTDialog'
+  | 'PublishSceneResult'
 
 export type QueryPayload = { queryId: string; payload: RayQuery }
 
@@ -211,6 +212,16 @@ export type SceneJsonData = {
   source?: SceneSource
   spawnPoints?: SceneSpawnPoint[]
   requiredPermissions?: string[] | undefined
+  featureToggles?: { [key: string]: string }
+}
+
+export type SceneFeatureToggle = {
+  name: string
+  default: 'enabled' | 'disabled'
+}
+
+export class SceneFeatureToggles {
+  static readonly VOICE_CHAT: SceneFeatureToggle = { name: 'voiceChat', default: 'enabled' }
 }
 
 export type EnvironmentData<T> = {
@@ -383,7 +394,8 @@ export type Notification = {
 
 export enum RenderProfile {
   DEFAULT = 0,
-  HALLOWEEN = 1
+  HALLOWEEN = 1,
+  XMAS = 2
 }
 
 export enum HUDElementID {
@@ -409,7 +421,9 @@ export enum HUDElementID {
   HELP_AND_SUPPORT_HUD = 20,
   EMAIL_PROMPT = 21,
   USERS_AROUND_LIST_HUD = 22,
-  GRAPHIC_CARD_WARNING = 23
+  GRAPHIC_CARD_WARNING = 23,
+  BUILD_MODE = 24,
+  SETTINGS_PANEL = 25
 }
 
 export type HUDConfiguration = {
@@ -525,4 +539,16 @@ export type KernelConfigForRenderer = {
     nameValidCharacterRegex: string
   }
   gifSupported: boolean
+}
+
+export type RealmsInfoForRenderer = {
+  current: Realm
+  realms: {
+    layer: string
+    serverName: string
+    url: string
+    usersCount: number
+    usersMax: number
+    userParcels: [number, number][]
+  }[]
 }

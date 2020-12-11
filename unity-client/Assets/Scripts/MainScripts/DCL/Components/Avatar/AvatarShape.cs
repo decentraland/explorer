@@ -4,6 +4,7 @@ using DCL.Interface;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ namespace DCL
 
             DisablePassport();
 
-            model = SceneController.i.SafeFromJson<AvatarModel>(newJson);
+            model = Utils.SafeFromJson<AvatarModel>(newJson);
 
             everythingIsLoaded = false;
 
@@ -108,7 +109,7 @@ namespace DCL
 
             avatarUserInfo.userId = model.id;
             avatarUserInfo.userName = model.name;
-            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.position;
+            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.localPosition;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
 
             avatarName.SetName(model.name);
