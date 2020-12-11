@@ -83,7 +83,7 @@ export async function getUserAccount(returnChecksum: boolean = false): Promise<s
       return undefined
     }
 
-    return accounts[0].toJSON()
+    return returnChecksum ? accounts[0].toJSON() : accounts[0].toJSON().toLowerCase()
   } catch (error) {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
   }
