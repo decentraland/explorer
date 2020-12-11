@@ -114,8 +114,8 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
   const { address: ethAddress } = identity
   let timestamp: number
 
-  // Try to fetch time from the catalyst server
-  timestamp = yield fetchTimeFromCatalystServer()
+  // Try to fetch time from the synapse server
+  timestamp = yield fetchTimeFromSynapseServer(synapseUrl)
 
   // If that fails, use the global time API
   timestamp = timestamp ?? (yield fetchTimeFromClockService())
@@ -708,13 +708,14 @@ function toSocialData(socialIds: string[]) {
     .filter(({ userId }) => !!userId) as SocialData[]
 }
 
-function* fetchTimeFromCatalystServer() {
+function* fetchTimeFromSynapseServer(synapseUrl: string) {
   try {
-    const contentServer = getUpdateProfileServer(globalThis.globalStore.getState())
-    const response = yield fetch(`${contentServer}/status`)
+    const response: Response = yield fetch(`${synapseUrl}/.well-known/matrix/client`)
     if (response.ok) {
-      const { currentTime } = yield response.json()
-      return currentTime
+      const date = response.headers.get('Date')
+      if (date) {
+        return new Date(date).getTime()
+      }
     }
   } catch (e) {
     logger.warn(`Failed to fetch time from catalyst server`, e)
