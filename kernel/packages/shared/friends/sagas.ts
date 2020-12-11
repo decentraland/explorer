@@ -29,7 +29,7 @@ import {
   HUDElementID
 } from 'shared/types'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { getRealm, getUpdateProfileServer } from 'shared/dao/selectors'
+import { getRealm } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
 import { lastPlayerPosition, positionObservable } from 'shared/world/positionThings'
 import { ensureRenderer } from 'shared/renderer/sagas'
