@@ -29,9 +29,19 @@ namespace DCL
         public DCLComponentFactory componentFactory => Main.i.componentFactory;
 
         public bool enabled = true;
+        public bool initialized = false;
 
         public void Initialize()
         {
+            if (initialized)
+                return;
+
+            sceneSortDirty = true;
+            positionDirty = true;
+            lastSortFrame = 0;
+            enabled = true;
+            initialized = true;
+
             Environment.i.debugController.OnDebugModeSet += OnDebugModeSet;
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
@@ -92,6 +102,7 @@ namespace DCL
 
         public void OnDestroy()
         {
+            initialized = false;
             PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet -= Environment.i.cullingController.objectsTracker.MarkDirty;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
@@ -520,7 +531,7 @@ namespace DCL
             }
         }
 
-        private void SortScenesByDistance()
+        public void SortScenesByDistance()
         {
             if (DCLCharacterController.i == null) return;
 
@@ -528,6 +539,7 @@ namespace DCL
 
             worldState.currentSceneId = null;
             worldState.scenesSortedByDistance.Sort(SortScenesByDistanceMethod);
+            Debug.Log("SortScenesByDistance()");
 
             using (var iterator = Environment.i.worldState.scenesSortedByDistance.GetEnumerator())
             {
