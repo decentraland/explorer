@@ -169,7 +169,7 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
   let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
   profile.userId = identity.address.toString()
-  profile.ethAddress = identity.rawAddress ? identity.rawAddress.toString() : profile.userId
+  profile.ethAddress = identity.rawAddress ? identity.rawAddress : profile.userId
   profile.unclaimedName = '' // clean here to allow user complete in passport step
   profile.hasClaimedName = false
   profile.inventory = []
@@ -295,7 +295,7 @@ function* signUp() {
 
   const profile = yield select(getSignUpProfile)
   profile.userId = session.userId.toString()
-  profile.ethAddress = session.rawAddress ? session.rawAddress.toString() : profile.userId
+  profile.ethAddress = session.rawAddress ? session.rawAddress : profile.userId
   profile.version = 0
   profile.inventory = []
   profile.hasClaimedName = false

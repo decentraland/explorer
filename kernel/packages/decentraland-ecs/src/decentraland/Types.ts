@@ -420,7 +420,6 @@ export type ProfileForRenderer = {
   name: string
   description: string
   email: string
-  ethAddress: string
   avatar: AvatarForRenderer
   inventory: WearableId[]
   snapshots: {
