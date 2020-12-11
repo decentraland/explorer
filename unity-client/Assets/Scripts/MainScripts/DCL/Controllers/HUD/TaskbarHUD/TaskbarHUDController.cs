@@ -323,6 +323,16 @@ public class TaskbarHUDController : IHUD
 
         settingsHud = controller;
         view.OnAddSettingsWindow();
+        settingsHud.OnOpen += () =>
+        {
+            view.settingsButton.SetToggleState(true, false);
+            view.exploreButton.SetToggleState(false);
+        };
+        settingsHud.OnClose += () =>
+        {
+            view.settingsButton.SetToggleState(false, false);
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
+        };
         settingsHud.OnClose += () =>
         {
             view.settingsButton.SetToggleState(false, false);
@@ -345,6 +355,7 @@ public class TaskbarHUDController : IHUD
         settingsPanelHud.OnOpen += () =>
         {
             view.settingsButton.SetToggleState(true, false);
+            view.exploreButton.SetToggleState(false);
         };
         settingsPanelHud.OnClose += () =>
         {
@@ -368,6 +379,7 @@ public class TaskbarHUDController : IHUD
         exploreHud.OnOpen += () =>
         {
             view.exploreButton.SetToggleState(true, false);
+            view.settingsButton.SetToggleState(false);
         };
         exploreHud.OnClose += () =>
         {
