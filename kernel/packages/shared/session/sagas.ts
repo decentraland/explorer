@@ -153,8 +153,6 @@ function* authenticate(action: AuthenticateAction) {
   const session = yield authorize()
   let profile = yield getProfileByUserId(session.userId)
 
-  profile.ethAddress = session.rawAddress
-
   if (profile || isGuestWithProfile(session) || PREVIEW) {
     return yield signIn(session.userId, session.identity)
   }
@@ -171,7 +169,7 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
   let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
   profile.userId = identity.address.toString()
-  profile.ethAddress = identity.address.toString()
+  profile.ethAddress = identity.rawAddress.toString()
   profile.unclaimedName = '' // clean here to allow user complete in passport step
   profile.hasClaimedName = false
   profile.inventory = []
@@ -223,7 +221,6 @@ function* authorize() {
         userData = getLastSessionByProvider(ProviderType.GUEST)
       } else {
         const ethAddress = yield getUserEthAccountIfAvailable()
-        // ;(window as any).currentUserEthAddress = ethAddress
         const address = ethAddress.toLocaleLowerCase()
         userData = getStoredSession(address)
 
