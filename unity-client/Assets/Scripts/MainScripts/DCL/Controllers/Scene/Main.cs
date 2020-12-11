@@ -6,6 +6,10 @@ using UnityEngine.Serialization;
 
 namespace DCL
 {
+    /// <summary>
+    /// This is the InitialScene entry point.
+    /// Most of the application subsystems should be initialized from this class Awake() event.
+    /// </summary>
     public class Main : MonoBehaviour
     {
         public static Main i { get; private set; }
