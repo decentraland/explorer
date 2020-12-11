@@ -74,7 +74,7 @@ export function isSessionExpired(userData: any) {
   return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
 }
 
-export async function getUserAccount(): Promise<string | undefined> {
+export async function getUserAccount(returnChecksum: boolean = false): Promise<string | undefined> {
   try {
     const eth = createEth()
     const accounts = await eth.getAccounts()
@@ -89,8 +89,8 @@ export async function getUserAccount(): Promise<string | undefined> {
   }
 }
 
-export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
+export async function getUserEthAccountIfAvailable(returnChecksum: boolean = false): Promise<string | undefined> {
   if (!isGuest()) {
-    return getUserAccount()
+    return getUserAccount(returnChecksum)
   }
 }

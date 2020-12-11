@@ -220,7 +220,7 @@ function* authorize() {
       if (isGuest()) {
         userData = getLastSessionByProvider(ProviderType.GUEST)
       } else {
-        const ethAddress = yield getUserEthAccountIfAvailable()
+        const ethAddress = yield getUserEthAccountIfAvailable(true)
         const address = ethAddress.toLocaleLowerCase()
         userData = getStoredSession(address)
 
