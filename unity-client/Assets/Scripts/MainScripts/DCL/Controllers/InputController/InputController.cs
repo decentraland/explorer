@@ -248,9 +248,11 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.BuildEditModeRedoAction:
                     InputProcessor.FromKey(action, KeyCode.Z, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl,KeyCode.LeftShift });
+                    InputProcessor.FromKey(action, KeyCode.Z, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftCommand,KeyCode.LeftShift });
                     break;
                 case DCLAction_Trigger.BuildEditModeUndoAction:
                     InputProcessor.FromKey(action, KeyCode.Z, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl });
+                    InputProcessor.FromKey(action, KeyCode.Z, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftCommand });
                     break;
                 case DCLAction_Trigger.BuildEditModeQuickBar1:
                     InputProcessor.FromKey(action, KeyCode.Alpha1, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -285,6 +287,7 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.BuildEditModeDuplicate:
                     InputProcessor.FromKey(action, KeyCode.D, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl });
+                    InputProcessor.FromKey(action, KeyCode.D, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftCommand });
                     break;
                 case DCLAction_Trigger.BuildEditModeTranslate:
                     InputProcessor.FromKey(action, KeyCode.M, modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -406,7 +409,7 @@ public class InputController : MonoBehaviour
 /// </summary>
 public static class InputProcessor
 {
-    private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift };
+    private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift, KeyCode.LeftCommand };
 
     [Flags]
     public enum Modifier
