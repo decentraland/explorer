@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.7700043, y: 7.290001}
-  m_SizeDelta: {x: 284.4107, y: 75.32319}
+  m_AnchoredPosition: {x: 0, y: 4}
+  m_SizeDelta: {x: 225.43878, y: 48.517868}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8923856968184534439
 CanvasRenderer:
@@ -64,18 +64,17 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Voice chat is blocked by the scene admin.
+  m_text: Voice chat is blocked by the scene owner.
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
-  m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
-    type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4282725152
+  m_fontColor: {r: 0.1254902, g: 0.2, b: 0.27058825, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -93,8 +92,8 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 17.81
-  m_fontSizeBase: 17.81
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -194,8 +193,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.29849243, y: 18.696014}
-  m_SizeDelta: {x: 323.3046, y: 100}
+  m_AnchoredPosition: {x: -5.18, y: 18.696014}
+  m_SizeDelta: {x: 266.3434, y: 81.90643}
   m_Pivot: {x: 0.09619653, y: 0.000000014901161}
 --- !u!222 &912920642111057583
 CanvasRenderer:
@@ -224,7 +223,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7b4468575e3ab49e1aec3edd88298137, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b529921fedbcd44e4ba4d0ad88690b3e, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -233,7 +232,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!95 &7650068128631371758
 Animator:
   serializedVersion: 3

@@ -6563,10 +6563,51 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 333980675853177096}
     m_Modifications:
+    - target: {fileID: 620169264429650825, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 256.30902
+      objectReference: {fileID: 0}
+    - target: {fileID: 620169264429650825, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 58.41014
+      objectReference: {fileID: 0}
+    - target: {fileID: 620169264429650825, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2299067041567238675, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
       propertyPath: m_Name
       value: VoiceChatDisabledTooltip
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690138342887100814, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61,
+        type: 2}
+    - target: {fileID: 2690138342887100814, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
+    - target: {fileID: 2690138342887100814, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690138342887100814, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690138342887100814, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 18
       objectReference: {fileID: 0}
     - target: {fileID: 7249710612070496870, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
@@ -6626,22 +6667,22 @@ PrefabInstance:
     - target: {fileID: 7249710612070496870, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 130.85
+      value: 125.7
       objectReference: {fileID: 0}
     - target: {fileID: 7249710612070496870, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 68.696
+      value: 86.5
       objectReference: {fileID: 0}
     - target: {fileID: 7249710612070496870, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 323.3046
+      value: 285.17697
       objectReference: {fileID: 0}
     - target: {fileID: 7249710612070496870, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 78.959595
       objectReference: {fileID: 0}
     - target: {fileID: 7249710612070496870, guid: 5e437fc79ac984296a7b8c4339b3e0a4,
         type: 3}
