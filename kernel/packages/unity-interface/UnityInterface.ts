@@ -23,6 +23,7 @@ import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
+import { renderStateObservable } from '../shared/world/worldState'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -144,6 +145,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', JSON.stringify({ id: id }))
   }
 
+  public DumpScenesLoadInfo() {
+    this.gameInstance.SendMessage('SceneController', 'DumpScenesLoadInfo')
+  }
+
   public CreateUIScene(data: { id: string; baseUrl: string }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
@@ -219,6 +224,7 @@ export class UnityInterface {
   }
 
   public DeactivateRendering() {
+    renderStateObservable.notifyObservers(false)
     this.gameInstance.SendMessage('SceneController', 'DeactivateRendering')
   }
 
@@ -235,7 +241,7 @@ export class UnityInterface {
   }
 
   public SetCursorState(locked: boolean) {
-    this.gameInstance.SendMessage('MouseCatcher', 'UnlockCursorBrowser', locked ? 1 : 0)
+    this.gameInstance.SendMessage('Bridges', 'UnlockCursorBrowser', locked ? 1 : 0)
   }
 
   public SetBuilderReady() {
@@ -395,6 +401,10 @@ export class UnityInterface {
 
   public SetUsersMuted(usersId: string[], muted: boolean) {
     this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
+  }
+
+  public SetVoiceChatEnabledByScene(enabled: boolean) {
+    this.gameInstance.SendMessage('HUDController', 'SetVoiceChatEnabledByScene', enabled ? 1 : 0)
   }
 
   public SetKernelConfiguration(config: KernelConfigForRenderer) {
