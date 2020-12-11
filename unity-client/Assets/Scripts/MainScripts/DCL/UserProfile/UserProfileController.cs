@@ -37,9 +37,6 @@ public class UserProfileController : MonoBehaviour
         var model = JsonUtility.FromJson<UserProfileModel>(payload);
         ownUserProfile.UpdateData(model);
         userProfilesCatalog.Add(model.userId, ownUserProfile);
-
-        Debug.Log("pravs - User ID: " + ownUserProfile.userId);
-        Debug.Log("pravs - User eth address: " + ownUserProfile.ethAddress);
     }
 
     public void AddUserProfileToCatalog(string payload)
