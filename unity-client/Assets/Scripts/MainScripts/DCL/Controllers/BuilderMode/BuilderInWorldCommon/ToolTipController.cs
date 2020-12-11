@@ -16,8 +16,8 @@ public class ToolTipController : MonoBehaviour
     public void Desactivate()
     {
         if (changeAlphaCor != null)
-            StopCoroutine(changeAlphaCor);
-        changeAlphaCor = StartCoroutine(ChangeAlpha(1, 0));
+            CoroutineStarter.Stop(changeAlphaCor);
+        changeAlphaCor = CoroutineStarter.Start(ChangeAlpha(1, 0));
     }
 
     public void OnHoverEnter(BaseEventData data)

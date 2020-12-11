@@ -151,6 +151,16 @@ public class TaskbarHUDController : IHUD
 
         OpenPrivateChatWindow(head.profile.userId);
     }
+    private void View_OnBuilderInWorldToggleOn()
+    {
+        exploreHud.SetVisibility(true);
+        OnAnyTaskbarButtonClicked?.Invoke();
+    }
+
+    private void View_OnBuilderInWorldToggleOff()
+    {
+        exploreHud.SetVisibility(false);
+    }
 
     private void View_OnExploreToggleOn()
     {
@@ -370,6 +380,8 @@ public class TaskbarHUDController : IHUD
             view.OnChatToggleOn -= View_OnChatToggleOn;
             view.OnFriendsToggleOff -= View_OnFriendsToggleOff;
             view.OnFriendsToggleOn -= View_OnFriendsToggleOn;
+            view.OnBuilderInWorldToggleOff -= View_OnBuilderInWorldToggleOff;
+            view.OnBuilderInWorldToggleOn -= View_OnBuilderInWorldToggleOn;
             view.OnExploreToggleOff -= View_OnExploreToggleOff;
             view.OnExploreToggleOn -= View_OnExploreToggleOn;
 

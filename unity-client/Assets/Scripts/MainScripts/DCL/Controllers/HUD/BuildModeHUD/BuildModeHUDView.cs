@@ -104,6 +104,11 @@ public class BuildModeHUDView : MonoBehaviour
         toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
     }
 
+    public void SetPublishBtnAvailability(bool isAvailable)
+    {
+        publishBtn.interactable = isAvailable;
+    }
+
     public void RefreshCatalogAssetPack()
     {
         sceneObjectCatalogController.RefreshAssetPack();

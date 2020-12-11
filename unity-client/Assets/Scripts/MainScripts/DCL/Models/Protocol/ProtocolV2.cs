@@ -81,6 +81,18 @@ public class ProtocolV2
 
     #endregion
 
+    //[System.Serializable]
+    //public class DeploymentResultPayload
+    //{
+    //    public bool ok;
+    //    public string error;
+
+    //    public static OpenExternalUrl FromPB(PB_OpenExternalUrl pbPayload)
+    //    {
+    //        return new OpenExternalUrl() { url = pbPayload.Url };
+    //    }
+    //}
+
     [System.Serializable]
     public class EntityPayload
     {

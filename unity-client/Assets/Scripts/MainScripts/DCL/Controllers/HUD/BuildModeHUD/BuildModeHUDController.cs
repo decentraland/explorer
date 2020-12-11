@@ -86,6 +86,11 @@ public class BuildModeHUDController : IHUD
         view.sceneLimitInfoController.SetParcelScene(parcelScene);
     }
 
+    public void SetPublishBtnAvailability(bool isAvailable)
+    {
+        view.SetPublishBtnAvailability(isAvailable);
+    }
+
     #region Catalog
 
     public void RefreshCatalogAssetPack()

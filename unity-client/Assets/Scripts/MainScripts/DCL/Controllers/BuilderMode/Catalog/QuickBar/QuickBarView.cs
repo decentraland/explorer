@@ -99,6 +99,7 @@ public class QuickBarView : MonoBehaviour
 
     public void SceneObjectDropped(BaseEventData data)
     {
+        if (draggedObject == null) return;
 
         CatalogItemAdapter adapter = draggedObject.GetComponent<CatalogItemAdapter>();
         SceneObject sceneObject = adapter.GetContent();
@@ -121,7 +122,7 @@ public class QuickBarView : MonoBehaviour
         shortcutsImgs[index].SetTexture(texture);
     }
 
-    void QuickBarInput(int quickBarSlot)
+    public void QuickBarInput(int quickBarSlot)
     {
         OnQuickBarShortcutSelected?.Invoke(quickBarSlot);
     }

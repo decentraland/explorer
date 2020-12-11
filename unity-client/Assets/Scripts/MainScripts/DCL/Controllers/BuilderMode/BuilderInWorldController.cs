@@ -107,6 +107,7 @@ public class BuilderInWorldController : MonoBehaviour
     float nexTimeToReceiveInput;
 
     int outlinerOptimizationCounter = 0, checkerInsideSceneOptimizationCounter = 0;
+    int checkerSceneLimitsOptimizationCounter = 0;
 
     string sceneToEditId;
 
@@ -256,6 +257,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (checkerInsideSceneOptimizationCounter >= 60)
         {
+            
             if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
                 ExitEditMode();
             checkerInsideSceneOptimizationCounter = 0;
@@ -265,6 +267,16 @@ public class BuilderInWorldController : MonoBehaviour
             checkerInsideSceneOptimizationCounter++;
         }
 
+        if(checkerSceneLimitsOptimizationCounter >= 10)
+        {
+            checkerSceneLimitsOptimizationCounter = 0;
+            bool isInsideLimits = sceneToEdit.metricsController.IsInsideTheLimits();
+            HUDController.i.buildModeHud.SetPublishBtnAvailability(isInsideLimits);
+        }
+        else
+        {
+            checkerSceneLimitsOptimizationCounter++;
+        }
     }
 
     void OnNFTUsageChange()
@@ -336,7 +348,6 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
         {
-
             HUDController.i.buildModeHud.ShowSceneLimitsPassed();
             return false;
         }
@@ -389,9 +400,11 @@ public class BuilderInWorldController : MonoBehaviour
     }
 
     DCLBuilderInWorldEntity CreateSceneObject(SceneObject sceneObject, bool autoSelect = true, bool isFloor = false)
-    {      
-        if (!IsInsideTheLimits(sceneObject)) return null;
+    {       
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES && BuilderInWorldNFTController.i.IsNFTInUse(sceneObject.id)) return null;
+
+        IsInsideTheLimits(sceneObject);
+
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
@@ -738,11 +751,13 @@ public class BuilderInWorldController : MonoBehaviour
         if (sceneToEditId != null) return;
 
         FindSceneToEdit();
+        editorMode.ActivateCamera(sceneToEdit);
         sceneToEditId = sceneToEdit.sceneData.id;
         SceneController.i.OnReadyScene += NewSceneReady;
+        inputController.isInputActive = false;
 
-        builderInWorldBridge.StartKernelEditMode(sceneToEdit);
-    
+
+        builderInWorldBridge.StartKernelEditMode(sceneToEdit);    
     }
 
     public void EnterEditMode()
@@ -753,6 +768,8 @@ public class BuilderInWorldController : MonoBehaviour
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
+
+        inputController.isInputActive = true;
         inputController.isBuildModeActivate = true;
 
         FindSceneToEdit();

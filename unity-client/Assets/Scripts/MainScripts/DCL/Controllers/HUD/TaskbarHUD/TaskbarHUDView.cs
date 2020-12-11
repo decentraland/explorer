@@ -22,6 +22,7 @@ public class TaskbarHUDView : MonoBehaviour
     [Header("Right Side Config")]
     [SerializeField] internal HorizontalLayoutGroup rightButtonsHorizontalLayout;
     [SerializeField] internal TaskbarButton exploreButton;
+    [SerializeField] internal TaskbarButton builderInWorldButton;
 
     [Header("More Button Config")]
     [SerializeField] internal TaskbarButton moreButton;
@@ -43,6 +44,8 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnChatToggleOff;
     public event System.Action OnFriendsToggleOn;
     public event System.Action OnFriendsToggleOff;
+    public event System.Action OnBuilderInWorldToggleOn;
+    public event System.Action OnBuilderInWorldToggleOff;
     public event System.Action OnExploreToggleOn;
     public event System.Action OnExploreToggleOff;
     public event System.Action OnMoreToggleOn;
@@ -54,6 +57,7 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(chatButton);
         taskbarButtonList.Add(friendsButton);
         taskbarButtonList.AddRange(chatHeadsGroup.chatHeads);
+        taskbarButtonList.Add(builderInWorldButton);
         taskbarButtonList.Add(exploreButton);
         taskbarButtonList.Add(moreButton);
         return taskbarButtonList;
@@ -86,6 +90,7 @@ public class TaskbarHUDView : MonoBehaviour
         chatHeadsGroup.Initialize(chatController, friendsController);
         chatButton.Initialize();
         friendsButton.Initialize();
+        builderInWorldButton.Initialize();
         exploreButton.Initialize();
         moreButton.Initialize();
 
@@ -97,6 +102,9 @@ public class TaskbarHUDView : MonoBehaviour
 
         friendsButton.OnToggleOn += OnWindowToggleOn;
         friendsButton.OnToggleOff += OnWindowToggleOff;
+
+        builderInWorldButton.OnToggleOn += OnWindowToggleOn;
+        builderInWorldButton.OnToggleOff += OnWindowToggleOff;       
 
         exploreButton.OnToggleOn += OnWindowToggleOn;
         exploreButton.OnToggleOff += OnWindowToggleOff;
@@ -111,6 +119,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnFriendsToggleOff?.Invoke();
         else if (obj == chatButton)
             OnChatToggleOff?.Invoke();
+        else if (obj == builderInWorldButton)
+            OnBuilderInWorldToggleOff?.Invoke();
         else if (obj == exploreButton)
             OnExploreToggleOff?.Invoke();
         else if (obj == moreButton)
@@ -144,6 +154,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnFriendsToggleOn?.Invoke();
         else if (obj == chatButton)
             OnChatToggleOn?.Invoke();
+        else if (obj == builderInWorldButton)
+            OnBuilderInWorldToggleOn?.Invoke();
         else if (obj == exploreButton)
             OnExploreToggleOn?.Invoke();
         else if (obj == moreButton)
@@ -252,6 +264,12 @@ public class TaskbarHUDView : MonoBehaviour
         {
             friendsButton.OnToggleOn -= OnWindowToggleOn;
             friendsButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (builderInWorldButton != null)
+        {
+            builderInWorldButton.OnToggleOn -= OnWindowToggleOn;
+            builderInWorldButton.OnToggleOff -= OnWindowToggleOff;
         }
 
         if (exploreButton != null)
