@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 3161635728164559255}
   - component: {fileID: 9097300800983212255}
   m_Layer: 0
-  m_Name: SceneController
+  m_Name: Main
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -124,7 +124,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   componentFactory: {fileID: 11400000, guid: 6710053fa2d5d5446b6a599e0e003053, type: 2}
-  startDecentralandAutomatically: 1
   debugConfig:
     soloScene: 0
     soloSceneCoords: {x: 0, y: 0}
