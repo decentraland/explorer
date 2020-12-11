@@ -1115,7 +1115,7 @@ namespace DCL.Interface
 
         public static void SetBaseResolution(int resolution)
         {
-            baseResEvent.baseResolution = 9999;
+            baseResEvent.baseResolution = resolution;
             SendMessage("SetBaseResolution", baseResEvent);
         }
 

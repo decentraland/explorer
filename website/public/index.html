@@ -145,7 +145,6 @@
     <div id="root"></div>
     <div id="root-loading"><div></div></div>
     <div id="gameContainer">
-		<canvas id="unity-canvas" style="width: 960px; height: 600px; background: #FFFFFF"></canvas>
 	</div>
     <audio autoplay id="voice-chat-audio"></audio>
     <!-- span.progress is to avoid a error on DCLUnityLoader  -->
@@ -210,39 +209,40 @@
       // End Rollbar Snippet
     </script>
     <script src="%PUBLIC_URL%/unity/Build/hls.min.js?%REACT_APP_HLS_VERSION%"></script>
-	
+
     <script id="unityLoader" src="%PUBLIC_URL%/unity/Build/DCLUnityLoader.js?%REACT_APP_LOADER_VERSION%"></script>
 	<script>
 		console.log("UnityLoader initialized")
 		var script = document.getElementById("unityLoader");
 		script.onload = () => {
 						console.log("post on load")
-						
-					};
-		var UnityLoader = UnityLoader || {			
-			aoCreateUnityInstance: function (dclCanvas)
-			{	
-				console.log("aoCreateUnityInstance")
-				return new Promise((resolve) => {		
-					
-					var buildUrl = "unity/Build";				
-					var loaderUrl = buildUrl + "/unity.loader.js";
-					var config = {
-						 dataUrl: "unity/Build/unity.data",
-						frameworkUrl: "unity/Build/unity.framework.js",
-						codeUrl: "unity/Build/unity.wasm",
-						streamingAssetsUrl: "StreamingAssets",
-						companyName: "Decentraland",
-						productName: "DecentralandUnityClient",
-						productVersion: "0.1",
-					};					
-					console.log("pre on load")		
 
-					var canvas = document.querySelector("#unity-canvas")
+					};
+		var UnityLoader = UnityLoader || {
+			aoCreateUnityInstance: function (dclCanvas)
+			{
+          var canvas = document.createElement('canvas')
+          canvas.addEventListener('contextmenu', function (e) { e.preventDefault() }),
+          canvas.id = '#canvas'
+          dclCanvas.appendChild(canvas)
+
+				  return new Promise((resolve) => {
+
+          var buildUrl = "unity/Build";
+          var loaderUrl = buildUrl + "/unity.loader.js";
+          var config = {
+            dataUrl: "unity/Build/unity.data",
+            frameworkUrl: "unity/Build/unity.framework.js",
+            codeUrl: "unity/Build/unity.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "Decentraland",
+            productName: "DecentralandUnityClient",
+            productVersion: "0.1",
+					};
+
 					createUnityInstance(canvas, config, (progress) => {console.log(progress)})
 							.then(resolve)
 							.catch((message) => {alert(message);});
-									
 				})
 			}
 		}
