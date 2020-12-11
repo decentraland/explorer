@@ -519,18 +519,14 @@ namespace DCL
             OnReadyScene?.Invoke(sceneId);
         }
 
-
-            return id;
-        }
-
         public bool TryGetScene(string id, out ParcelScene scene)
         {
             scene = null;
-
-            if (!loadedScenes.ContainsKey(id))
+            WorldState worldState = Environment.i.worldState;
+            if (!worldState.loadedScenes.ContainsKey(id))
                 return false;
 
-            scene = loadedScenes[id];
+            scene = worldState.loadedScenes[id];
             return true;
         }
 
@@ -538,10 +534,12 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = currentSceneId;
+                WorldState worldState = Environment.i.worldState;
+                
+                string sceneId = worldState.currentSceneId;
 
-                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[currentSceneId];
+                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
+                    scene = worldState.loadedScenes[worldState.currentSceneId];
                 else
                     return pos;
             }
@@ -554,10 +552,12 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = currentSceneId;
+                WorldState worldState = Environment.i.worldState;
+                string sceneId = worldState.currentSceneId;
+              
 
-                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[currentSceneId];
+                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
+                    scene = worldState.loadedScenes[worldState.currentSceneId];
                 else
                     return Vector3.zero;
             }
@@ -572,10 +572,11 @@ namespace DCL
         {
             if (scene == null)
             {
-                string sceneId = currentSceneId;
-
-                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[currentSceneId];
+                WorldState worldState = Environment.i.worldState;
+                string sceneId = worldState.currentSceneId;
+                
+                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
+                    scene = worldState.loadedScenes[worldState.currentSceneId];
                 else
                     return pos;
             }

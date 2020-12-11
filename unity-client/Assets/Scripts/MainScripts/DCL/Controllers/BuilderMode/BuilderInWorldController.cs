@@ -47,6 +47,7 @@ public class BuilderInWorldController : MonoBehaviour
     [Header("Scene References")] public GameObject cameraParentGO;
     public GameObject cursorGO;
     public InputController inputController;
+    public PlayerAvatarController avatarRenderer;
 
     [Header("Prefab References")] public OutlinerController outlinerController;
     public BuilderInWorldInputWrapper builderInputWrapper;
@@ -146,7 +147,8 @@ public class BuilderInWorldController : MonoBehaviour
         HUDConfiguration hudConfig = new HUDConfiguration();
         hudConfig.active = true;
         hudConfig.visible = false;
-        HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILD_MODE);
+        HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_MAIN);
+        HUDController.i.CreateHudElement<BuilderInWorldInititalHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_INITIAL);
 
         editModeChangeInputAction.OnTriggered += OnEditModeChangeAction;
 
@@ -166,16 +168,17 @@ public class BuilderInWorldController : MonoBehaviour
         multiSelectionInputAction.OnStarted += multiSelectionStartDelegate;
         multiSelectionInputAction.OnFinished += multiSelectionFinishedDelegate;
 
-        HUDController.i.buildModeHud.OnStopInput += StopInput;
-        HUDController.i.buildModeHud.OnResumeInput += ResumeInput;
+        HUDController.i.builderInWorldInititalHud.OnEnterEditMode += StartEnterEditMode;
+        HUDController.i.builderInWorldMainHud.OnStopInput += StopInput;
+        HUDController.i.builderInWorldMainHud.OnResumeInput += ResumeInput;
 
 
-        HUDController.i.buildModeHud.OnChangeModeAction += ChangeAdvanceMode;
-        HUDController.i.buildModeHud.OnResetAction += ResetScaleAndRotation;
+        HUDController.i.builderInWorldMainHud.OnChangeModeAction += ChangeAdvanceMode;
+        HUDController.i.builderInWorldMainHud.OnResetAction += ResetScaleAndRotation;
 
-        HUDController.i.buildModeHud.OnSceneObjectSelected += OnSceneObjectSelected;
-        HUDController.i.buildModeHud.OnTutorialAction += StartTutorial;
-        HUDController.i.buildModeHud.OnPublishAction += PublishScene;
+        HUDController.i.builderInWorldMainHud.OnSceneObjectSelected += OnSceneObjectSelected;
+        HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
+        HUDController.i.builderInWorldMainHud.OnPublishAction += PublishScene;
         BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
 
         builderInputWrapper.OnMouseClick += MouseClick;
@@ -206,17 +209,20 @@ public class BuilderInWorldController : MonoBehaviour
         multiSelectionInputAction.OnStarted -= multiSelectionStartDelegate;
         multiSelectionInputAction.OnFinished -= multiSelectionFinishedDelegate;
 
-        if (HUDController.i.buildModeHud != null)
+        if(HUDController.i.builderInWorldInititalHud != null)
+            HUDController.i.builderInWorldInititalHud.OnEnterEditMode -= StartEnterEditMode;
+
+        if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.buildModeHud.OnStopInput -= StopInput;
-            HUDController.i.buildModeHud.OnResumeInput -= ResumeInput;
+            HUDController.i.builderInWorldMainHud.OnStopInput -= StopInput;
+            HUDController.i.builderInWorldMainHud.OnResumeInput -= ResumeInput;
 
-            HUDController.i.buildModeHud.OnChangeModeAction -= ChangeAdvanceMode;
-            HUDController.i.buildModeHud.OnResetAction -= ResetScaleAndRotation;
+            HUDController.i.builderInWorldMainHud.OnChangeModeAction -= ChangeAdvanceMode;
+            HUDController.i.builderInWorldMainHud.OnResetAction -= ResetScaleAndRotation;
 
-            HUDController.i.buildModeHud.OnSceneObjectSelected -= OnSceneObjectSelected;
-            HUDController.i.buildModeHud.OnTutorialAction -= StartTutorial;
-            HUDController.i.buildModeHud.OnPublishAction -= PublishScene;
+            HUDController.i.builderInWorldMainHud.OnSceneObjectSelected -= OnSceneObjectSelected;
+            HUDController.i.builderInWorldMainHud.OnTutorialAction -= StartTutorial;
+            HUDController.i.builderInWorldMainHud.OnPublishAction -= PublishScene;
         }
 
 
@@ -259,7 +265,7 @@ public class BuilderInWorldController : MonoBehaviour
         {
             checkerSceneLimitsOptimizationCounter = 0;
             bool isInsideLimits = sceneToEdit.metricsController.IsInsideTheLimits();
-            HUDController.i.buildModeHud.SetPublishBtnAvailability(isInsideLimits);
+            HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(isInsideLimits);
         }
         else
         {
@@ -269,15 +275,15 @@ public class BuilderInWorldController : MonoBehaviour
 
     void OnNFTUsageChange()
     {
-        HUDController.i.buildModeHud.RefreshCatalogAssetPack();
-        HUDController.i.buildModeHud.RefreshCatalogContent();
+        HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
+        HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
     }
 
     void CatalogReceived(string catalogJson)
     {
         AssetCatalogBridge.i.AddFullSceneObjectCatalog(catalogJson);
         catalogAdded = true;
-        HUDController.i.buildModeHud.RefreshCatalogContent();
+        HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
         CheckEnterEditMode();
     }
 
@@ -335,37 +341,37 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
         {
-            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
-            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
-            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
-            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
-            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
-            HUDController.i.buildModeHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
@@ -543,15 +549,15 @@ public class BuilderInWorldController : MonoBehaviour
                 break;
             case EditModeState.FirstPerson:
                 currentActiveMode = firstPersonMode;
-                HUDController.i.buildModeHud.ActivateFirstPersonModeUI();
-                HUDController.i.buildModeHud.SetVisibilityOfCatalog(false);
+                HUDController.i.builderInWorldMainHud.ActivateFirstPersonModeUI();
+                HUDController.i.builderInWorldMainHud.SetVisibilityOfCatalog(false);
                 cursorGO.SetActive(true);
                 break;
             case EditModeState.Editor:
                 cursorGO.SetActive(false);
                 currentActiveMode = editorMode;
                 isAdvancedModeActive = true;
-                HUDController.i.buildModeHud.ActivateGodModeUI();
+                HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
                 break;
         }
 
@@ -760,7 +766,7 @@ public class BuilderInWorldController : MonoBehaviour
     public void EnterEditMode()
     {
         BuilderInWorldNFTController.i.ClearNFTs();
-        HUDController.i.buildModeHud.SetVisibility(true);
+        HUDController.i.builderInWorldMainHud.SetVisibility(true);
 
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
@@ -773,7 +779,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
-        HUDController.i.buildModeHud.SetParcelScene(sceneToEdit);
+        HUDController.i.builderInWorldMainHud.SetParcelScene(sceneToEdit);
 
         if (currentActiveMode == null)
             SetBuildMode(EditModeState.Editor);
@@ -785,8 +791,10 @@ public class BuilderInWorldController : MonoBehaviour
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
         SceneController.i.ActivateBuilderInWorldEditScene();
-        HUDController.i.buildModeHud.RefreshCatalogContent();
-        HUDController.i.buildModeHud.RefreshCatalogAssetPack();
+        HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
+        HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
+
+        avatarRenderer.SetAvatarVisibility(false);
 
         ActivateBuilderInWorldCamera();
         if (IsNewScene())
@@ -797,7 +805,7 @@ public class BuilderInWorldController : MonoBehaviour
     {
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
-        HUDController.i.buildModeHud.SetVisibility(false);
+        HUDController.i.builderInWorldMainHud.SetVisibility(false);
 
         inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
@@ -816,8 +824,10 @@ public class BuilderInWorldController : MonoBehaviour
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
         builderInputWrapper.gameObject.SetActive(false);
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
-  
-        HUDController.i.buildModeHud.ClearEntityList();
+
+        avatarRenderer.SetAvatarVisibility(true);
+
+        HUDController.i.builderInWorldMainHud.ClearEntityList();
 
         SceneController.i.DeactivateBuilderInWorldEditScene();
 

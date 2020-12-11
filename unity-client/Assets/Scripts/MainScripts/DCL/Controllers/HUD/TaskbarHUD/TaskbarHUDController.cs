@@ -26,6 +26,7 @@ public class TaskbarHUDController : IHUD
     public SettingsPanelHUDController settingsPanelHud;
     public ExploreHUDController exploreHud;
     public HelpAndSupportHUDController helpAndSupportHud;
+    public BuilderInWorldInititalHUDController builderInWorldInitialHUDController;
 
     IMouseCatcher mouseCatcher;
     IChatController chatController;
@@ -67,6 +68,8 @@ public class TaskbarHUDController : IHUD
         view.OnChatToggleOn += View_OnChatToggleOn;
         view.OnFriendsToggleOff += View_OnFriendsToggleOff;
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
+        view.OnBuilderInWorldToggleOff += View_OnBuilderInWorldToggleOff;
+        view.OnBuilderInWorldToggleOn += View_OnBuilderInWorldToggleOn;
         view.OnExploreToggleOff += View_OnExploreToggleOff;
         view.OnExploreToggleOn += View_OnExploreToggleOn;
 
@@ -157,15 +160,16 @@ public class TaskbarHUDController : IHUD
 
         OpenPrivateChatWindow(head.profile.userId);
     }
+
     private void View_OnBuilderInWorldToggleOn()
     {
-        exploreHud.SetVisibility(true);
+        builderInWorldInitialHUDController.OpenBuilderInWorldInitialView();
         OnAnyTaskbarButtonClicked?.Invoke();
     }
 
     private void View_OnBuilderInWorldToggleOff()
     {
-        exploreHud.SetVisibility(false);
+        builderInWorldInitialHUDController.CloseBuilderInWorldInitialView();
     }
 
     private void View_OnExploreToggleOn()
@@ -220,6 +224,19 @@ public class TaskbarHUDController : IHUD
 
         view.chatButton.SetToggleState(true);
         view.chatButton.SetToggleState(false);
+    }
+
+    public void AddBuilderInWorldWindow(BuilderInWorldInititalHUDController controller)
+    {
+        if (controller == null)
+        {
+            Debug.LogWarning("AddBuilderInWorldWindow >>> Controller doesn't exit yet!");
+            return;
+        }
+
+        builderInWorldInitialHUDController = controller;
+
+        builderInWorldInitialHUDController.OnClose += () => { view.builderInWorldButton.SetToggleState(false, false); };
     }
 
     public void OpenFriendsWindow()

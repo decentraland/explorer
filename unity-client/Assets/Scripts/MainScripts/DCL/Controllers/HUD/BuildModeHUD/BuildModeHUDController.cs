@@ -192,10 +192,12 @@ public class BuildModeHUDController : IHUD
         isControlsVisible = !isControlsVisible;
         view.SetVisibilityOfControls(isControlsVisible);
     }
+
     public void ChangeVisibilityOfUI()
     {
         SetVisibility(!IsVisible());
     }
+
     public void ChangeVisibilityOfExtraBtns()
     {
         areExtraButtonsVisible = !areExtraButtonsVisible;

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using DCL;
 using UnityEngine;
 
@@ -49,6 +49,11 @@ public class PlayerAvatarController : MonoBehaviour
 
         bool shouldBeVisible = Vector3.Distance(mainCamera.transform.position, transform.position) > cameraDistanceToDeactivate;
         avatarVisibility.SetVisibility("PLAYER_AVATAR_CONTROLLER", shouldBeVisible);
+    }
+
+    public void SetAvatarVisibility(bool isVisible)
+    {
+        avatarRenderer.gameObject.SetActive(isVisible);
     }
 
     private void OnEnable()

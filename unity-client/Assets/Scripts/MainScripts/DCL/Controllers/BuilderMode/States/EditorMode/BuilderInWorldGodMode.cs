@@ -127,9 +127,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         base.Init(goToEdit, undoGo, snapGO, freeMovementGO, selectedEntities);
         voxelController.SetEditionGO(goToEdit);
 
-        HUDController.i.buildModeHud.OnTranslateSelectedAction += TranslateMode;
-        HUDController.i.buildModeHud.OnRotateSelectedAction += RotateMode;
-        HUDController.i.buildModeHud.OnScaleSelectedAction += ScaleMode;
+        HUDController.i.builderInWorldMainHud.OnTranslateSelectedAction += TranslateMode;
+        HUDController.i.builderInWorldMainHud.OnRotateSelectedAction += RotateMode;
+        HUDController.i.builderInWorldMainHud.OnScaleSelectedAction += ScaleMode;
     }
 
     private void MouseUp(int buttonID, Vector3 position)

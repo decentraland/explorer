@@ -244,7 +244,8 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.N, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.BuildEditModeCreateLastSceneObject:
-                    InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftControl });
+                    InputProcessor.FromKey(action, KeyCode.T, modifiers: InputProcessor.Modifier.FocusNotInInput, modifierKeys: new KeyCode[] { KeyCode.LeftCommand });
                     break;
                 case DCLAction_Trigger.BuildEditModeToggleSnapMode:
                     InputProcessor.FromKey(action, KeyCode.O, modifiers: InputProcessor.Modifier.FocusNotInInput);
