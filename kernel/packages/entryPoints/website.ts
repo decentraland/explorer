@@ -45,12 +45,7 @@ import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 
 const logger = createLogger('website.ts: ')
 
-function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
-  const useOldSettings =
-    globalThis.globalStore.getState().meta.config.world
-      ? (globalThis.globalStore.getState().meta.config.world!.enableOldSettings ?? ENABLE_OLD_SETTINGS)
-      : ENABLE_OLD_SETTINGS
-  
+function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean, useOldSettings: boolean) {
   i.ConfigureHUDElement(
     HUDElementID.TASKBAR,
     { active: true, visible: true },
@@ -135,7 +130,7 @@ namespace webApp {
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
         i.SetKernelConfiguration(configForRenderer)
 
-        configureTaskbarDependentHUD(i, voiceChatEnabled)
+        configureTaskbarDependentHUD(i, voiceChatEnabled, useOldSettings)
 
         i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
@@ -158,7 +153,7 @@ namespace webApp {
       })
       .catch((e) => {
         logger.error('error on configuring taskbar & friends hud / tutorial. Trying to default to simple taskbar', e)
-        configureTaskbarDependentHUD(i, false)
+        configureTaskbarDependentHUD(i, false, useOldSettings)
       })
 
     globalThis.globalStore.dispatch(signalRendererInitialized())
