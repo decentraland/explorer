@@ -180,7 +180,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
             {
-                return ((DCLLockedOnEdit.Model)keyValuePairBaseDisposable.Value.GetModel()).isLocked;
+                return ((DCLLockedOnEdit.Model) keyValuePairBaseDisposable.Value.GetModel()).isLocked;
             }
         }
         return isFloor ? true : false;
@@ -194,7 +194,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
             {
-                ((DCLLockedOnEdit)keyValuePairBaseDisposable.Value).SetIsLocked(isLocked);
+                ((DCLLockedOnEdit) keyValuePairBaseDisposable.Value).SetIsLocked(isLocked);
                 foundComponent = true;
             }
         }
@@ -234,7 +234,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
-                return descriptiveName = ((DCLName.Model)keyValuePairBaseDisposable.Value.GetModel()).value;               
+                return descriptiveName = ((DCLName.Model) keyValuePairBaseDisposable.Value.GetModel()).value;               
             }
         }
         return "";
@@ -257,7 +257,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             {
                 if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NFT_SHAPE)
                 {
-                    BuilderInWorldNFTController.i.UseNFT(((NFTShape.Model)keyValuePairBaseDisposable.Value.GetModel()).assetId);
+                    BuilderInWorldNFTController.i.UseNFT(((NFTShape.Model) keyValuePairBaseDisposable.Value.GetModel()).assetId);
                     break;
                 }
             }

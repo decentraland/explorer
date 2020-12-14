@@ -10,7 +10,6 @@ public class BuilderInWorldEntityAction
     public object oldValue;
     public object newValue;
 
-   
 
     public BuilderInWorldEntityAction(string entityId)
     {

@@ -100,8 +100,9 @@ public class BuilderInWorldNFTController
     IEnumerator FetchNFTs()
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
-        string userId = "0xdEdD78D3fF1533979f7F5302C95cfA63d9e0D09a";
-        //userId = GetCorrectWalletAddress(userProfile.userId);
+
+        //Note (Adrian): This won't work, we need to get the correct addres from the kernel
+        string userId =  GetCorrectWalletAddress(userProfile.userId);
         yield return NFTHelper.FetchNFTsFromOwner(userId, (nFTOwner) =>
         {
             this.nFTOwner = nFTOwner;
