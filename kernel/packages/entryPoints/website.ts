@@ -97,7 +97,7 @@ namespace webApp {
   export async function loadUnity({ instancedJS }: InitializeUnityResult) {
     const i = (await instancedJS).unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
-    const useOldSettings = worldConfig ? (globalThis.globalStore.getState().meta.config.world!.enableOldSettings ?? ENABLE_OLD_SETTINGS) : ENABLE_OLD_SETTINGS
+    const useOldSettings = worldConfig ? (worldConfig.enableOldSettings ?? ENABLE_OLD_SETTINGS) : ENABLE_OLD_SETTINGS
     const renderProfile = worldConfig ? (worldConfig.renderProfile ?? RenderProfile.DEFAULT) : RenderProfile.DEFAULT
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
