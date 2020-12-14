@@ -1,4 +1,5 @@
 ﻿using System;
+using DCL.Components;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -31,6 +32,25 @@ namespace DCL
         public void SetEngineDebugPanel()
         {
             Environment.i.debugController.SetEngineDebugPanel();
+        }
+
+        public void DumpScenesLoadInfo()
+        {
+            bool prevLogValue = Debug.unityLogger.logEnabled;
+            Debug.unityLogger.logEnabled = true;
+
+            foreach (var scene in DCL.Environment.i.worldState.loadedScenes)
+            {
+                Debug.Log("Dumping state for scene: " + scene.Value.sceneData.id);
+                scene.Value.GetWaitingComponentsDebugInfo();
+            }
+
+            Debug.unityLogger.logEnabled = prevLogValue;
+        }
+
+        public void SetDisableAssetBundles()
+        {
+            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
         }
     }
 }
