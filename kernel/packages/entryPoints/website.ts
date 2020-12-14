@@ -46,12 +46,14 @@ import { startRealmsReportToRenderer } from 'unity-interface/realmsForRenderer'
 const logger = createLogger('website.ts: ')
 
 function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boolean) {
+  let worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world!
+  
   i.ConfigureHUDElement(
     HUDElementID.TASKBAR,
     { active: true, visible: true },
     {
       enableVoiceChat: voiceChatEnabled,
-      enableOldSettings: ENABLE_OLD_SETTINGS
+      enableOldSettings: worldConfig.enableOldSettings
     }
   )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
@@ -91,6 +93,11 @@ namespace webApp {
 
   export async function loadUnity({ instancedJS }: InitializeUnityResult) {
     const i = (await instancedJS).unityInterface
+    let worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world!
+
+    if (ENABLE_OLD_SETTINGS) {
+      worldConfig.enableOldSettings = ENABLE_OLD_SETTINGS
+    }
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -98,8 +105,8 @@ namespace webApp {
       active: true,
       visible: OPEN_AVATAR_EDITOR
     })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: ENABLE_OLD_SETTINGS, visible: false })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: !ENABLE_OLD_SETTINGS, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: worldConfig.enableOldSettings!, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: !worldConfig.enableOldSettings, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
       active: true,
@@ -163,8 +170,6 @@ namespace webApp {
     globalThis.globalStore.dispatch(signalParcelLoadingStarted())
 
     await ensureMetaConfigurationInitialized()
-
-    let worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world!
 
     if (worldConfig.renderProfile) {
       i.SetRenderProfile(worldConfig.renderProfile)
