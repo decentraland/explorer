@@ -130,9 +130,11 @@ public class BuilderInWorldController : MonoBehaviour
     EditModeState currentEditModeState = EditModeState.Inactive;
 
     bool catalogAdded = false;
-
+    
     void Start()
     {
+        KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
+
         if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
 

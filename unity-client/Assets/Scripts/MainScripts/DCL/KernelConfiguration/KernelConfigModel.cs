@@ -4,6 +4,7 @@ using System;
 [Serializable]
 public class KernelConfigModel
 {
+    public Features features = new Features();
     public Comms comms = new Comms();
     public Profiles profiles = new Profiles();
     public bool gifSupported = false;
