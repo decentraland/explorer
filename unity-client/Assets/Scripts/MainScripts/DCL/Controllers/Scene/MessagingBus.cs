@@ -106,8 +106,6 @@ namespace DCL
             set => timeBudgetValue = value;
         }
 
-        private SceneController sceneController;
-
         public MessagingBus(MessagingBusType type, IMessageProcessHandler handler, MessagingController owner)
         {
             Assert.IsNotNull(handler, "IMessageHandler can't be null!");
@@ -116,7 +114,6 @@ namespace DCL
             this.type = type;
             this.owner = owner;
             this.pendingMessagesCount = 0;
-            sceneController = SceneController.i;
         }
 
         public void Start()
@@ -249,7 +246,7 @@ namespace DCL
                         if (handler.ProcessMessage(sceneMessage, out msgYieldInstruction))
                         {
 #if UNITY_EDITOR
-                            if (sceneController.msgStepByStep)
+                            if (DataStore.debugConfig.msgStepByStep)
                             {
                                 if (VERBOSE)
                                 {

@@ -38,7 +38,7 @@ namespace NFTShape_Internal
 
             hqTexture.OnSuccessEvent += (asset) =>
             {
-                UpdateTextureCallback?.Invoke(hqTexture.asset.texture);
+                UpdateTextureCallback?.Invoke(asset.texture);
                 onSuccess?.Invoke();
             };
             hqTexture.OnFailEvent += (asset) =>
