@@ -9,8 +9,8 @@ export type RootSessionState = {
 }
 
 export type ExplorerIdentity = AuthIdentity & {
-  address: string
-  rawAddress: string
+  address: string // contains the lowercased address that will be used for the userId
+  rawAddress: string // contains the real ethereum address of the current user
   provider?: ProviderType
   hasConnectedWeb3: boolean
 }

@@ -168,8 +168,8 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
   yield put(signUpSetIsSignUp(true))
   let prevGuest = fetchProfileLocally(userId)
   let profile: Profile = prevGuest ? prevGuest : yield generateRandomUserProfile(userId)
-  profile.userId = identity.address.toString()
-  profile.ethAddress = identity.rawAddress ? identity.rawAddress : profile.userId
+  profile.userId = identity.address
+  profile.ethAddress = identity.rawAddress
   profile.unclaimedName = '' // clean here to allow user complete in passport step
   profile.hasClaimedName = false
   profile.inventory = []
@@ -222,9 +222,11 @@ function* authorize() {
       } else {
         const ethAddress = yield getUserEthAccountIfAvailable(true)
         const address = ethAddress.toLocaleLowerCase()
+
         userData = getStoredSession(address)
 
         if (userData) {
+          // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
           userData.identity.rawAddress = ethAddress
         }
       }
@@ -294,8 +296,8 @@ function* signUp() {
   logger.log(`User ${session.userId} signed up`)
 
   const profile = yield select(getSignUpProfile)
-  profile.userId = session.userId.toString()
-  profile.ethAddress = session.identity.rawAddress ? session.identity.rawAddress : profile.userId
+  profile.userId = session.userId
+  profile.ethAddress = session.identity.rawAddress
   profile.version = 0
   profile.inventory = []
   profile.hasClaimedName = false

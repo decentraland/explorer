@@ -35,7 +35,7 @@ function delightedSurvey() {
           email: profile.userId + '@dcl.gg',
           name: profile.name || 'Guest',
           properties: {
-            ethAddress: profile.userId,
+            userId: profile.userId,
             anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
           }
         }
