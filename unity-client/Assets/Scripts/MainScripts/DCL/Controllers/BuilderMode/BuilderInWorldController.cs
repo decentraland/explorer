@@ -179,6 +179,8 @@ public class BuilderInWorldController : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnSceneObjectSelected += OnSceneObjectSelected;
         HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
         HUDController.i.builderInWorldMainHud.OnPublishAction += PublishScene;
+        HUDController.i.builderInWorldMainHud.OnLogoutAction += ExitEditMode;
+
         BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
 
         builderInputWrapper.OnMouseClick += MouseClick;
@@ -223,6 +225,7 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.OnSceneObjectSelected -= OnSceneObjectSelected;
             HUDController.i.builderInWorldMainHud.OnTutorialAction -= StartTutorial;
             HUDController.i.builderInWorldMainHud.OnPublishAction -= PublishScene;
+            HUDController.i.builderInWorldMainHud.OnLogoutAction -= ExitEditMode;
         }
 
 
@@ -430,13 +433,18 @@ public class BuilderInWorldController : MonoBehaviour
 
         SceneController.i.UpdateParcelScenesExecute(data);
    
-        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));     
-
+        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+        DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
 
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
         entity.isFloor = isFloor;
 
-        if(sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES)
+        if (entity.isFloor)
+            entityLocked.SetIsLocked(true);
+        else
+            entityLocked.SetIsLocked(false);
+
+        if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES)
         {
             NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
             nftShape.model = new NFTShape.Model();
@@ -455,8 +463,9 @@ public class BuilderInWorldController : MonoBehaviour
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         }
 
- 
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);      
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
+        
         name.SetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
 
 

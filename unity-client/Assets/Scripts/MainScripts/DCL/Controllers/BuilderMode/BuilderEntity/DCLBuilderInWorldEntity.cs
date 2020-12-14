@@ -22,10 +22,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool IsLocked
     {
-        get { return isLockedValue; }
+        get { return GetIsLockedValue(); }
         set
         {
-            isLockedValue = value;
+            SetIsLockedValue(value);
             onStatusUpdate?.Invoke(this);
         }
     }
@@ -172,6 +172,41 @@ public class DCLBuilderInWorldEntity : EditableEntity
         collidersDictionary.Clear();
     }
 
+    #region Components
+
+    public bool GetIsLockedValue()
+    {
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
+            {
+                return ((DCLLockedOnEdit.Model)keyValuePairBaseDisposable.Value.GetModel()).isLocked;
+            }
+        }
+        return isFloor ? true : false;
+    }
+
+    public void SetIsLockedValue(bool isLocked)
+    {
+        bool foundComponent = false;
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
+            {
+                ((DCLLockedOnEdit)keyValuePairBaseDisposable.Value).SetIsLocked(isLocked);
+                foundComponent = true;
+            }
+        }
+
+        if (!foundComponent)
+        {
+            DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
+            entityLocked.SetIsLocked(isLocked);
+            rootEntity.scene.SharedComponentAttach(rootEntity.entityId, entityLocked.id);
+        }
+    }
+
     public void SetDescriptiveName(string newName)
     {
         bool foundComponent = false;
@@ -204,6 +239,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
         return "";
     }
+
+    #endregion
 
     void ShapeInit()
     {

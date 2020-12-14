@@ -20,6 +20,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnResumeInput;
     public event Action OnTutorialAction;
     public event Action OnPublishAction;
+    public event Action OnLogoutAction;
 
     public event Action<SceneObject> OnSceneObjectSelected;
 
@@ -79,6 +80,7 @@ public class BuildModeHUDController : IHUD
 
         view.OnTutorialAction += () => OnTutorialAction?.Invoke();
         view.OnPublishAction += () => OnPublishAction?.Invoke();
+        view.OnLogoutAction += () => OnLogoutAction?.Invoke();
     }
 
     public void SetParcelScene(ParcelScene parcelScene)

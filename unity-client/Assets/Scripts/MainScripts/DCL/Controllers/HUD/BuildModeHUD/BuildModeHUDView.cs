@@ -17,6 +17,8 @@ public class BuildModeHUDView : MonoBehaviour
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
 
     public Button tutorialBtn;
+    public Button logOutBtn;
+
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
     [SerializeField] internal InputAction_Trigger toggleControlsVisibilityInputAction;
@@ -38,6 +40,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public event Action<SceneObject> OnSceneObjectSelected;
     public event Action OnStopInput, OnResumeInput,OnTutorialAction,OnPublishAction;
+    public event Action OnLogoutAction;
 
     private void Awake()
     {
@@ -83,7 +86,8 @@ public class BuildModeHUDView : MonoBehaviour
         quickBarView.OnStopInput += () => OnStopInput?.Invoke();
 
         tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
-        publishBtn.onClick.AddListener(() => OnPublishAction?.Invoke()); 
+        publishBtn.onClick.AddListener(() => OnPublishAction?.Invoke());
+        logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke()); 
     }
 
     private void OnDestroy()

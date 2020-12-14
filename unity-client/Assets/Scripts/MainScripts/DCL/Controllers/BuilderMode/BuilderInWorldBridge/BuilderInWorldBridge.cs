@@ -24,6 +24,23 @@ public class BuilderInWorldBridge : MonoBehaviour
     EntityPayload entityPayload = new EntityPayload();
     EntitySingleComponentPayload entitySingleComponentPayload = new EntitySingleComponentPayload();
 
+    public void ChangeEntityLockStatus(DCLBuilderInWorldEntity entity, ParcelScene scene)
+    {
+        entitySingleComponentPayload.entityId = entity.rootEntity.entityId;
+        entitySingleComponentPayload.componentId = (int)CLASS_ID.LOCKED_ON_EDIT;
+
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
+            {
+                entitySingleComponentPayload.data = ((DCLLockedOnEdit)keyValuePairBaseDisposable.Value).GetModel();
+            }
+        }
+
+        ChangeEntityComponent(entitySingleComponentPayload, scene);
+    }
+
     public void ChangedEntityName(DCLBuilderInWorldEntity entity, ParcelScene scene)
     {
         entitySingleComponentPayload.entityId = entity.rootEntity.entityId;
@@ -38,8 +55,12 @@ public class BuilderInWorldBridge : MonoBehaviour
             }
         }
 
+        ChangeEntityComponent(entitySingleComponentPayload, scene);
+    }
 
-        modifyEntityComponentEvent.payload = entitySingleComponentPayload;
+    void ChangeEntityComponent(EntitySingleComponentPayload payload, ParcelScene scene)
+    {
+        modifyEntityComponentEvent.payload = payload;
 
         WebInterface.SceneEvent<ModifyEntityComponentEvent> sceneEvent = new WebInterface.SceneEvent<ModifyEntityComponentEvent>();
         sceneEvent.sceneId = scene.sceneData.id;

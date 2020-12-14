@@ -662,6 +662,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         entityToApply.ToggleLockStatus();
         if (entityToApply.IsLocked && selectedEntities.Contains(entityToApply))
             DeselectEntity(entityToApply);
+
+        builderInWorldBridge.ChangeEntityLockStatus(entityToApply, sceneToEdit);
     }
 
     string GetConvertedUniqueKeyForEntity(string entityID)

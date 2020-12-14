@@ -33,7 +33,6 @@ public class BuilderInWorldInititalHUDController : IHUD
         OnClose?.Invoke();
     }
 
-
     public void SetVisibility(bool visible)
     {
         if (!view)
