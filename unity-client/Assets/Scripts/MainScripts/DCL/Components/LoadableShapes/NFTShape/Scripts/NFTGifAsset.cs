@@ -14,11 +14,11 @@ namespace NFTShape_Internal
         public ITexture previewAsset => previewGif;
         public ITexture hqAsset => hqTexture != null ? hqTexture : null;
 
-        private Asset_Gif hqTexture;
-        private Asset_Gif previewGif;
+        private Asset_Gif_old hqTexture;
+        private Asset_Gif_old previewGif;
         private Coroutine loadRoutine;
 
-        public NFTGifAsset(Asset_Gif previewGif, int hqResolution)
+        public NFTGifAsset(Asset_Gif_old previewGif, int hqResolution)
         {
             this.previewGif = previewGif;
             this.hqResolution = hqResolution;
@@ -39,7 +39,7 @@ namespace NFTShape_Internal
 
         public void FetchAndSetHQAsset(string url, Action onSuccess, Action onFail)
         {
-            hqTexture = new Asset_Gif(url,
+            hqTexture = new Asset_Gif_old(url,
                 (downloadedTex, texturePromise) =>
                 {
                     StopGif(previewGif);
@@ -67,7 +67,7 @@ namespace NFTShape_Internal
             StartGif(previewGif);
         }
 
-        private void StartGif(Asset_Gif gif)
+        private void StartGif(Asset_Gif_old gif)
         {
             if (UpdateTextureCallback != null)
             {
@@ -78,7 +78,7 @@ namespace NFTShape_Internal
             gif.Play(false);
         }
 
-        private void StopGif(Asset_Gif gif)
+        private void StopGif(Asset_Gif_old gif)
         {
             if (UpdateTextureCallback != null)
             {
@@ -88,7 +88,7 @@ namespace NFTShape_Internal
             gif.Stop();
         }
 
-        private IEnumerator LoadGif(Asset_Gif gif)
+        private IEnumerator LoadGif(Asset_Gif_old gif)
         {
             yield return gif.Load();
             loadRoutine = null;

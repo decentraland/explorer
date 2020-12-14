@@ -12,7 +12,7 @@ namespace NFTShape_Internal
                 return null;
             }
 
-            if (asset is Asset_Gif gif)
+            if (asset is Asset_Gif_old gif)
             {
                 return new NFTGifAsset(gif, shapeConfig.hqGifResolution);
             }
