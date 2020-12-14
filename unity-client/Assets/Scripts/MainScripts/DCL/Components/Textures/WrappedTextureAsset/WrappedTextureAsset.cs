@@ -51,5 +51,29 @@ namespace DCL
 
             yield return gif.Load();
         }
+
+        public static IEnumerator Fetch(string contentType, string url, Action<IPromiseLike_TextureAsset> OnSuccess, Action OnFail = null)
+        {
+            if (contentType == "image/gif")
+            {
+                AssetPromise_Gif gifPromise = new AssetPromise_Gif(url);
+                gifPromise.OnSuccessEvent += texture => { OnSuccess?.Invoke(new PromiseLike_Gif(gifPromise)); };
+                gifPromise.OnFailEvent += (x) => OnFail?.Invoke();
+
+                AssetPromiseKeeper_Gif.i.Keep(gifPromise);
+
+                yield return gifPromise;
+            }
+            else
+            {
+                AssetPromise_Texture texturePromise = new AssetPromise_Texture(url, storeTexAsNonReadable: false);
+                texturePromise.OnSuccessEvent += texture => { OnSuccess?.Invoke(new PromiseLike_Texture(texturePromise)); };
+                texturePromise.OnFailEvent += (x) => OnFail?.Invoke();
+
+                AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+
+                yield return texturePromise;
+            }
+        }
     }
 }
