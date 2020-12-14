@@ -96,8 +96,9 @@ namespace webApp {
 
   export async function loadUnity({ instancedJS }: InitializeUnityResult) {
     const i = (await instancedJS).unityInterface
-    const worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world ?? {} as WorldConfig
+    const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const useOldSettings = worldConfig ? (globalThis.globalStore.getState().meta.config.world!.enableOldSettings ?? ENABLE_OLD_SETTINGS) : ENABLE_OLD_SETTINGS
+    const renderProfile = worldConfig ? (worldConfig.renderProfile ?? RenderProfile.DEFAULT) : RenderProfile.DEFAULT
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -171,11 +172,7 @@ namespace webApp {
 
     await ensureMetaConfigurationInitialized()
 
-    if (worldConfig.renderProfile) {
-      i.SetRenderProfile(worldConfig.renderProfile)
-    } else {
-      i.SetRenderProfile(RenderProfile.DEFAULT)
-    }
+    i.SetRenderProfile(renderProfile)
 
     if (isForeground()) {
       i.ReportFocusOn()
