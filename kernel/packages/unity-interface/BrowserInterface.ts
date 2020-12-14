@@ -260,7 +260,7 @@ export class BrowserInterface {
       }
       case 'StopStatefulMode': {
         const { sceneId } = payload
-        reloadScene(sceneId)
+        reloadScene(sceneId).catch((error) => defaultLogger.warn(`Failed to stop stateful mode`, error))
         break
       }
       default: {

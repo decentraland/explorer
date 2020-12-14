@@ -56,16 +56,16 @@ class StatefulWebWorkerScene extends Script {
         this.sceneStateStorage
           .storeState(sceneId, serializeSceneState(this.sceneState))
           .then((result) => this.renderer.informPublishResult(result))
-          .catch((error) => this.error(error))
+          .catch((error) => this.error(`Failed to store the scene's state`, error))
       }
     })
   }
 
-  private error(error: Error) {
+  private error(context: string, error: Error) {
     if (this.devToolsAdapter) {
       this.devToolsAdapter.error(error)
     } else {
-      defaultLogger.error('', error)
+      defaultLogger.error(context, error)
     }
   }
 
