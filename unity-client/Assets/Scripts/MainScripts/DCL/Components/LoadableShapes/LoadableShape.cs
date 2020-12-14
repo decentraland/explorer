@@ -25,7 +25,11 @@ namespace DCL.Components
 
         public static LoadWrapper GetLoaderForEntity(DecentralandEntity entity)
         {
-            if(entity.meshRootGameObject == null) return null;
+            if (entity.meshRootGameObject == null)
+            {
+                Debug.LogWarning("NULL meshRootGameObject at GetLoaderForEntity()");
+                return null;
+            }
 
             attachedLoaders.TryGetValue(entity.meshRootGameObject, out LoadWrapper result);
             return result;
