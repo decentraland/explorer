@@ -46,9 +46,6 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         availableElements.Enqueue(listElementView);
 
         Settings.i.OnGeneralSettingsChanged += OnSettingsChanged;
-
-        if (FriendsController.i)
-            FriendsController.i.OnUpdateFriendship += OnUpdateFriendship;
     }
 
     void OnDestroy()
@@ -68,13 +65,6 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
         if (profile == null)
             return;
-
-        bool isFriend = false;
-
-        if (FriendsController.i && FriendsController.i.friends.TryGetValue(userInfo.userId, out FriendsController.UserStatus status))
-        {
-            isFriend = status.friendshipStatus == FriendshipStatus.FRIEND;
-        }
 
         UsersAroundListHUDListElementView view = null;
         if (availableElements.Count > 0)
@@ -161,9 +151,6 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
     void IUsersAroundListHUDListView.Dispose()
     {
-        if (FriendsController.i)
-            FriendsController.i.OnUpdateFriendship -= OnUpdateFriendship;
-
         userElementDictionary.Clear();
         availableElements.Clear();
 
@@ -198,29 +185,6 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     void OnModifyListCount()
     {
         textPlayersTitle.text = string.Format(playersTextPattern, userElementDictionary.Count);
-    }
-
-    bool IsInFriendsList(UsersAroundListHUDListElementView element)
-    {
-        return element.transform.parent == contentPlayers;
-    }
-
-    void OnUpdateFriendship(string userId, FriendshipAction status)
-    {
-        if (!userElementDictionary.TryGetValue(userId, out UsersAroundListHUDListElementView elementView))
-        {
-            return;
-        }
-
-        bool isFriend = IsFriend(status);
-        bool isInFriendsList = IsInFriendsList(elementView);
-
-        // TODO: friend label
-    }
-
-    bool IsFriend(FriendshipAction status)
-    {
-        return status == FriendshipAction.APPROVED;
     }
 
     void CheckListEmptyState()

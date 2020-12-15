@@ -14,6 +14,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     public event Action<Vector3, string> OnShowUserContexMenu;
 
     [SerializeField] internal TextMeshProUGUI userName;
+    [SerializeField] internal GameObject friendLabel;
     [SerializeField] internal RawImage avatarPreview;
     [SerializeField] internal GameObject blockedGO;
     [SerializeField] internal Button soundButton;
@@ -58,6 +59,21 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         {
             profile.OnFaceSnapshotReadyEvent += SetAvatarPreviewImage;
         }
+
+        if (FriendsController.i)
+        {
+            if (FriendsController.i.friends.TryGetValue(profile.userId, out FriendsController.UserStatus status))
+            {
+                SetupFriendship(status.friendshipStatus);
+            }
+            else
+            {
+                SetupFriendship(FriendshipStatus.NONE);
+            }
+
+            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+            FriendsController.i.OnUpdateFriendship += OnFriendActionUpdate;
+        }
     }
 
     public void SetMuted(bool isMuted)
@@ -89,6 +105,12 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             profile.OnFaceSnapshotReadyEvent -= SetAvatarPreviewImage;
             profile = null;
         }
+
+        if (FriendsController.i)
+        {
+            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+        }
+
         gameObject.SetActive(false);
     }
 
@@ -128,5 +150,20 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     {
         backgroundHover.SetActive(false);
         menuButton.gameObject.SetActive(false);
+    }
+
+    void OnFriendActionUpdate(string userId, FriendshipAction action)
+    {
+        if (profile.userId != userId)
+        {
+            return;
+        }
+
+        friendLabel.SetActive(action == FriendshipAction.APPROVED);
+    }
+
+    void SetupFriendship(FriendshipStatus friendshipStatus)
+    {
+        friendLabel.SetActive(friendshipStatus == FriendshipStatus.FRIEND);
     }
 }

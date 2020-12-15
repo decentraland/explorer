@@ -926,7 +926,6 @@ MonoBehaviour:
   muteAllToggle: {fileID: 8127302986235340493}
   contextMenu: {fileID: 5982296756742802019}
   confirmationDialog: {fileID: 5673285788275393845}
-  listGameObject: {fileID: 6094055690743740254}
   emptyListGameObject: {fileID: 6350976748315781347}
   gotoCrowdButton: {fileID: 5741810867883838706}
   voiceChatSpinBox: {fileID: 3598224504690490722}
@@ -1732,8 +1731,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7919318306925970869}
-  - component: {fileID: 8281344423001581550}
-  - component: {fileID: 471146037408811546}
   m_Layer: 5
   m_Name: EmptyList
   m_TagString: Untagged
@@ -1763,43 +1760,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 308.0078, y: 275.8028}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8281344423001581550
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6350976748315781347}
-  m_CullTransparentMesh: 0
---- !u!114 &471146037408811546
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6350976748315781347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.96470594, g: 0.96470594, b: 0.96470594, a: 1}
-  m_RaycastTarget: 1
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a3858430b23c149488cbba79c79b511f, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 2
 --- !u!1 &7747766763999261654
 GameObject:
   m_ObjectHideFlags: 0
@@ -2829,6 +2789,26 @@ PrefabInstance:
       propertyPath: m_isTextTruncated
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5652249184453126303, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5652249184453126303, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5652249184453126303, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5652249184453126303, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5750925742049168255, guid: 0d23c770788204379bc453d5a8270653,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -2873,6 +2853,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8787606036367362250, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8787606036367362250, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8787606036367362250, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8787606036367362250, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8787606036367362250, guid: 0d23c770788204379bc453d5a8270653,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 202.97455
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d23c770788204379bc453d5a8270653, type: 3}
