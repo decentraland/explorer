@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -6,15 +5,25 @@ public class VoiceChatButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 {
     [SerializeField] InputAction_Hold voiceChatAction;
     [SerializeField] Animator buttonAnimator;
-    [SerializeField] private Animator disabledTooltipAnimator;
+    [SerializeField] private VoiceChatDisabledTooltip tooltip;
 
     private static readonly int talkingAnimation = Animator.StringToHash("Talking");
     private static readonly int disabledAnimation = Animator.StringToHash("Disabled");
-    private static readonly int showDisabledTooltipAnimation = Animator.StringToHash("ShowDisabledTooltip");
-    private static readonly int hideDisabledTooltipAnimation = Animator.StringToHash("HideDisabledTooltip");
 
     private bool isRecording = false;
     private bool isEnabledByScene = true;
+    private bool isFeatureLocked = true;
+
+    private void Awake()
+    {
+        KernelConfig.i.OnChange += OnKernelConfigChanged;
+        OnKernelConfigChanged(KernelConfig.i.Get(), null);
+    }
+
+    private void OnDestroy()
+    {
+        KernelConfig.i.OnChange -= OnKernelConfigChanged;
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -38,29 +47,14 @@ public class VoiceChatButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void SetEnabledByScene(bool enabledByScene)
     {
-        bool hasChangedToDisable = !enabledByScene && isEnabledByScene;
-        if (hasChangedToDisable)
-        {
-            if (isRecording)
-            {
-                ShowDisabledTooltip();
-            }
-            voiceChatAction.OnStarted -= OnVoiceChatInput;
-            voiceChatAction.OnStarted += OnVoiceChatInput;
-        }
-        else
-        {
-            voiceChatAction.OnStarted -= OnVoiceChatInput;
-            disabledTooltipAnimator.SetTrigger(hideDisabledTooltipAnimation);
-        }
-
+        SetLockedByScene(!enabledByScene);
         isEnabledByScene = enabledByScene;
         buttonAnimator.SetBool(disabledAnimation, !isEnabledByScene);
     }
 
     private void OnVoiceChatInput(DCLAction_Hold action)
     {
-        if (!isEnabledByScene)
+        if (!isEnabledByScene || isFeatureLocked)
         {
             ShowDisabledTooltip();
         }
@@ -68,10 +62,56 @@ public class VoiceChatButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     private void ShowDisabledTooltip()
     {
-        if (disabledTooltipAnimator is null)
-            return;
+        tooltip.ShowTooltip();
+    }
 
-        disabledTooltipAnimator.SetTrigger(hideDisabledTooltipAnimation);
-        disabledTooltipAnimator.SetTrigger(showDisabledTooltipAnimation);
+    private void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        isFeatureLocked = !current.comms.voiceChatEnabled;
+
+        if (isFeatureLocked)
+        {
+            tooltip.SetLockedByFeatureMode();
+            SubscribeToVoiceChatInput();
+        }
+        else
+        {
+            tooltip.SetLockedBySceneMode();
+            SetLockedByScene(!isEnabledByScene);
+        }
+    }
+
+    private void SetLockedByScene(bool locked)
+    {
+        if (isFeatureLocked)
+        {
+            return;
+        }
+
+        if (locked)
+        {
+            if (isRecording)
+            {
+                ShowDisabledTooltip();
+            }
+
+            SubscribeToVoiceChatInput();
+        }
+        else
+        {
+            UnsubscribeFromVoiceChatInput();
+            tooltip.HideTooltip();
+        }
+    }
+
+    private void SubscribeToVoiceChatInput()
+    {
+        voiceChatAction.OnStarted -= OnVoiceChatInput;
+        voiceChatAction.OnStarted += OnVoiceChatInput;
+    }
+
+    private void UnsubscribeFromVoiceChatInput()
+    {
+        voiceChatAction.OnStarted -= OnVoiceChatInput;
     }
 }

@@ -81,8 +81,8 @@ public class TaskbarHUDView : MonoBehaviour
         friendsButton.transform.parent.gameObject.SetActive(false);
         settingsButton.transform.parent.gameObject.SetActive(false);
         exploreButton.transform.parent.gameObject.SetActive(false);
-        voiceChatButtonPlaceholder.SetActive(false);
-        voiceChatButton.gameObject.SetActive(false);
+        voiceChatButtonPlaceholder.SetActive(true);
+        voiceChatButton.gameObject.SetActive(true);
 
         moreButton.gameObject.SetActive(true);
         moreMenu.Initialize(this);

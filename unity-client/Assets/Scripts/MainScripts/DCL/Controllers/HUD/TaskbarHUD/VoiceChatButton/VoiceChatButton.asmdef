@@ -1,7 +1,9 @@
 {
     "name": "VoiceChatButton",
     "references": [
-        "GUID:98bf3bf29030cbf4092d89a7cc28b7fb"
+        "GUID:98bf3bf29030cbf4092d89a7cc28b7fb",
+        "GUID:c44f6fd10d3d94432a107d581e0096b5",
+        "GUID:4973650d2444c4561a15d50f24d91cd9"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
