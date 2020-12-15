@@ -714,6 +714,7 @@ GameObject:
   - component: {fileID: 7319752919325572531}
   - component: {fileID: 1042511896303968480}
   - component: {fileID: 1685552636221019275}
+  - component: {fileID: 5876730201811706177}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -777,6 +778,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &5876730201811706177
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4943351020373103430}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5884397133996633093
 GameObject:
   m_ObjectHideFlags: 0
@@ -864,6 +877,7 @@ GameObject:
   - component: {fileID: 2176003390713149032}
   - component: {fileID: 8980050401053270120}
   - component: {fileID: 6946578528177286607}
+  - component: {fileID: 2572643574321883610}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -927,6 +941,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &2572643574321883610
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6090183151121045792}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6417552060205858152
 GameObject:
   m_ObjectHideFlags: 0
@@ -1213,13 +1239,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 946022103321159557}
+  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
   betaIndicator: {fileID: 5884397133996633093}
   canvasGroup: {fileID: 7426026435316743473}
+  valueLabels:
+  - {fileID: 5533378053873845403}
+  valueLabelDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
   handleImages:
   - {fileID: 8760731597316476144}
   - {fileID: 1994506718636682904}
-  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
   handlerDeactivationColor: {r: 0.95686275, g: 0.95686275, b: 0.95686275, a: 1}
+  controlBackgroundCanvasGroups:
+  - {fileID: 2572643574321883610}
+  - {fileID: 5876730201811706177}
+  controlBackgroundDeactivationAlpha: 0.5
   spinBox: {fileID: 3837855004225010386}
 --- !u!225 &7426026435316743473
 CanvasGroup:

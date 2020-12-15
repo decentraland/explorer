@@ -30,18 +30,24 @@ namespace DCL.SettingsPanelHUD.Controls
     public class SettingsControlView : MonoBehaviour, ISettingsControlView
     {
         [SerializeField] private TextMeshProUGUI title;
+        [SerializeField] private Color titleDeactivationColor;
         [SerializeField] private GameObject betaIndicator;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private List<TextMeshProUGUI> valueLabels;
+        [SerializeField] private Color valueLabelDeactivationColor;
         [SerializeField] private List<Image> handleImages;
-        [SerializeField] private Color titleDeactivationColor;
         [SerializeField] private Color handlerDeactivationColor;
+        [SerializeField] private List<CanvasGroup> controlBackgroundCanvasGroups;
+        [SerializeField] private float controlBackgroundDeactivationAlpha = 0.5f;
 
         protected SettingsControlController settingsControlController;
         protected bool skipPostApplySettings = false;
 
         private SettingsControlModel controlConfig;
         private Color originalTitleColor;
+        private Color originalLabelColor;
         private Color originalHandlerColor;
+        private float originalControlBackgroundAlpha;
 
         private void OnEnable()
         {
@@ -60,7 +66,9 @@ namespace DCL.SettingsPanelHUD.Controls
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;
+            originalLabelColor = valueLabels.Count > 0 ? valueLabels[0].color : Color.white;
             originalHandlerColor = handleImages.Count > 0 ? handleImages[0].color : Color.white;
+            originalControlBackgroundAlpha = controlBackgroundCanvasGroups.Count > 0 ? controlBackgroundCanvasGroups[0].alpha : 1f;
 
             foreach (BooleanVariable flag in controlConfig.flagsThatDisableMe)
             {
@@ -160,9 +168,17 @@ namespace DCL.SettingsPanelHUD.Controls
         private void SetEnabled(bool enabled)
         {
             title.color = enabled ? originalTitleColor : titleDeactivationColor;
+            foreach (var text in valueLabels)
+            {
+                text.color = enabled ? originalLabelColor : valueLabelDeactivationColor;
+            }
             foreach (var image in handleImages)
             {
                 image.color = enabled ? originalHandlerColor : handlerDeactivationColor;
+            }
+            foreach (var canvasGroup in controlBackgroundCanvasGroups)
+            {
+                canvasGroup.alpha = enabled ? originalControlBackgroundAlpha : controlBackgroundDeactivationAlpha;
             }
             canvasGroup.interactable = enabled;
             canvasGroup.blocksRaycasts = enabled;

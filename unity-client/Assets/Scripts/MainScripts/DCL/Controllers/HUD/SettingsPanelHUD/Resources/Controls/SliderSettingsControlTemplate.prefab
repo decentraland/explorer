@@ -114,6 +114,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 351563252846459896}
+  - component: {fileID: 7924857614336737219}
   m_Layer: 5
   m_Name: Fill Area
   m_TagString: Untagged
@@ -141,6 +142,18 @@ RectTransform:
   m_AnchoredPosition: {x: -7.5, y: 0}
   m_SizeDelta: {x: -15, y: 4}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &7924857614336737219
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 431206066903134666}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &890200276010382320
 GameObject:
   m_ObjectHideFlags: 0
@@ -1131,12 +1144,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 946022103321159557}
+  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
   betaIndicator: {fileID: 3681824983046223196}
   canvasGroup: {fileID: 4023700701583222159}
+  valueLabels:
+  - {fileID: 49177162354486727}
+  valueLabelDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
   handleImages:
   - {fileID: 6438843672082443669}
-  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
   handlerDeactivationColor: {r: 0.95686275, g: 0.95686275, b: 0.95686275, a: 1}
+  controlBackgroundCanvasGroups:
+  - {fileID: 7924857614336737219}
+  controlBackgroundDeactivationAlpha: 0.5
   slider: {fileID: 6766189024411584644}
   indicatorLabel: {fileID: 49177162354486727}
 --- !u!225 &4023700701583222159
