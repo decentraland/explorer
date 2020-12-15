@@ -2,7 +2,6 @@ import { parcelLimits } from 'config'
 
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { POIs } from 'shared/comms/POIs'
-import { store } from 'shared/store/store'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
 import { ensureUnityInterface } from 'shared/renderer'
@@ -170,8 +169,8 @@ export class TeleportController {
 }
 
 async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
-  const realm = getRealm(store.getState())
-  const commsUrl = getCommsServer(store.getState())
+  const realm = getRealm(globalThis.globalStore.getState())
+  const commsUrl = getCommsServer(globalThis.globalStore.getState())
 
   if (realm && realm.layer && commsUrl) {
     const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)

@@ -1,3 +1,4 @@
+import { setInterval } from 'timers'
 import {
   commConfigurations,
   parcelLimits,
