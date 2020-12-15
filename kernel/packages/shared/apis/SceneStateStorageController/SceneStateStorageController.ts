@@ -20,7 +20,6 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
-import { unityInterface } from 'unity-interface/UnityInterface'
 
 declare const window: any
 
@@ -88,7 +87,7 @@ export class SceneStateStorageController extends ExposableAPI {
       }
     }
 
-    unityInterface.SendPublishSceneResult(result)
+    window.unityInterface.SendPublishSceneResult(result)
     return result
   }
 
