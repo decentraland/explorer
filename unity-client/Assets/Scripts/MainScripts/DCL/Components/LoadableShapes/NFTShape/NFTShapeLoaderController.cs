@@ -173,25 +173,6 @@ public class NFTShapeLoaderController : MonoBehaviour
 
         // We download the "preview" 256px image
         bool foundDCLImage = false;
-        // if (!string.IsNullOrEmpty(nftInfo.previewImageUrl))
-        // {
-        //     yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl, (downloadedTex, texturePromise) =>
-        //     {
-        //         foundDCLImage = true;
-        //         this.texturePromise = texturePromise;
-        //         SetFrameImage(downloadedTex, resizeFrameMesh: true);
-        //
-        //         var hqImageHandlerConfig = new NFTShapeHQImageConfig()
-        //         {
-        //             controller = this,
-        //             nftConfig = config,
-        //             nftInfo = nftInfo,
-        //             asset = NFTAssetFactory.CreateAsset(downloadedTex, config)
-        //         };
-        //         //hqTextureHandler = NFTShapeHQImageHandler.Create(hqImageHandlerConfig);
-        //     });
-        // }
-
         if (!string.IsNullOrEmpty(nftInfo.previewImageUrl))
         {
             yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl, (promise) =>
@@ -200,6 +181,15 @@ public class NFTShapeLoaderController : MonoBehaviour
                 this.assetPromise = promise;
                 SetFrameImage(promise.asset, resizeFrameMesh: true);
                 SetupGifPlayer(promise.asset);
+
+                var hqImageHandlerConfig = new NFTShapeHQImageConfig()
+                {
+                    controller = this,
+                    nftConfig = config,
+                    nftInfo = nftInfo,
+                    asset = NFTAssetFactory.CreateAsset(promise.asset, config, UpdateTexture, gifPlayer)
+                };
+                hqTextureHandler = NFTShapeHQImageHandler.Create(hqImageHandlerConfig);
             });
         }
 

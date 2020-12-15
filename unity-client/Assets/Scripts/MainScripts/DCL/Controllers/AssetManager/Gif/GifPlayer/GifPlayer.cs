@@ -37,6 +37,7 @@ namespace DCL
         {
             bool wasPlaying = isPlaying;
 
+            Debug.Log($"GifPlayer: SetGif {asset.width} playing {wasPlaying} has prev asset? {(gifAsset != null)}");
             if (gifAsset != null)
             {
                 Stop();
@@ -91,6 +92,7 @@ namespace DCL
 
         private void OnGifAssetDisposed()
         {
+            Debug.Log($"GifPlayer: OnGifAssetDisposed {gifAsset?.width}");
             Stop();
             gifAsset = null;
         }

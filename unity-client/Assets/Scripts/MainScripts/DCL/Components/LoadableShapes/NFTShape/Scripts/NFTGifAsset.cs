@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using DCL;
-using DCL.Controllers.Gif;
 using UnityEngine;
 
 namespace NFTShape_Internal
@@ -9,97 +7,58 @@ namespace NFTShape_Internal
     public class NFTGifAsset : INFTAsset
     {
         public bool isHQ => hqAsset != null;
-        public int hqResolution { private set; get; }
-        public Action<Texture2D> UpdateTextureCallback { set; get; }
+        public int hqResolution { get; }
         public ITexture previewAsset => previewGif;
-        public ITexture hqAsset => hqTexture != null ? hqTexture : null;
+        public ITexture hqAsset => hqGifPromise?.asset;
 
-        private Asset_Gif_old hqTexture;
-        private Asset_Gif_old previewGif;
-        private Coroutine loadRoutine;
+        private AssetPromise_Gif hqGifPromise;
 
-        public NFTGifAsset(Asset_Gif_old previewGif, int hqResolution)
+        private readonly GifPlayer gifPlayer;
+        private readonly Asset_Gif previewGif;
+
+        public NFTGifAsset(Asset_Gif previewGif, int hqResolution, GifPlayer gifPlayer)
         {
             this.previewGif = previewGif;
             this.hqResolution = hqResolution;
+            this.gifPlayer = gifPlayer;
         }
 
         public void Dispose()
         {
-            StopGifLoad();
-
-            if (hqTexture != null)
+            if (hqGifPromise != null)
             {
-                hqTexture.Dispose();
-                hqTexture = null;
+                AssetPromiseKeeper_Gif.i.Forget(hqGifPromise);
+                hqGifPromise = null;
             }
-
-            UpdateTextureCallback = null;
         }
 
         public void FetchAndSetHQAsset(string url, Action onSuccess, Action onFail)
         {
-            hqTexture = new Asset_Gif_old(url,
-                (downloadedTex, texturePromise) =>
-                {
-                    StopGif(previewGif);
-                    StartGif(hqTexture);
-                    onSuccess?.Invoke();
-                },
-                () =>
-                {
-                    hqTexture = null;
-                    onFail?.Invoke();
-                });
-            loadRoutine = CoroutineStarter.Start(LoadGif(hqTexture));
+            hqGifPromise = new AssetPromise_Gif(url);
+            AssetPromiseKeeper_Gif.i.Keep(hqGifPromise);
+
+            hqGifPromise.OnSuccessEvent += (asset) =>
+            {
+                Debug.Log($"NFTGifAsset: FetchAndSetHQAsset Set {asset.width}");
+                gifPlayer?.SetGif(asset);
+                onSuccess?.Invoke();
+            };
+            hqGifPromise.OnFailEvent += (asset) =>
+            {
+                hqGifPromise = null;
+                onFail?.Invoke();
+            };
         }
 
         public void RestorePreviewAsset()
         {
-            StopGifLoad();
+            Debug.Log($"NFTGifAsset: RestorePreviewAsset Set {previewGif.width}");
+            gifPlayer?.SetGif(previewGif);
 
-            if (hqTexture != null)
+            if (hqGifPromise != null)
             {
-                hqTexture.Dispose();
-                hqTexture = null;
-            }
-
-            StartGif(previewGif);
-        }
-
-        private void StartGif(Asset_Gif_old gif)
-        {
-            if (UpdateTextureCallback != null)
-            {
-                gif.OnFrameTextureChanged -= UpdateTextureCallback;
-                gif.OnFrameTextureChanged += UpdateTextureCallback;
-            }
-
-            gif.Play(false);
-        }
-
-        private void StopGif(Asset_Gif_old gif)
-        {
-            if (UpdateTextureCallback != null)
-            {
-                gif.OnFrameTextureChanged -= UpdateTextureCallback;
-            }
-
-            gif.Stop();
-        }
-
-        private IEnumerator LoadGif(Asset_Gif_old gif)
-        {
-            yield return gif.Load();
-            loadRoutine = null;
-        }
-
-        private void StopGifLoad()
-        {
-            if (loadRoutine != null)
-            {
-                CoroutineStarter.Stop(loadRoutine);
-                loadRoutine = null;
+                AssetPromiseKeeper_Gif.i.Forget(hqGifPromise);
+                hqGifPromise = null;
             }
         }
     }

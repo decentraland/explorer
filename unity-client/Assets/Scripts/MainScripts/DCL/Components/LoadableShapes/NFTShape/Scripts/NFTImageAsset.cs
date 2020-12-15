@@ -8,17 +8,18 @@ namespace NFTShape_Internal
     {
         public bool isHQ => hqAsset != null;
         public int hqResolution { private set; get; }
-        public Action<Texture2D> UpdateTextureCallback { set; get; }
-        public ITexture previewAsset => previewTexture;
-        public ITexture hqAsset => hqTexture != null ? hqTexture.asset : null;
+        public ITexture previewAsset { get; }
+
+        public ITexture hqAsset => hqTexture?.asset;
 
         private AssetPromise_Texture hqTexture;
-        private ITexture previewTexture;
+        private Action<Texture2D> textureUpdateCallback;
 
-        public NFTImageAsset(ITexture previewTexture, int hqResolution)
+        public NFTImageAsset(ITexture previewTexture, int hqResolution, Action<Texture2D> textureUpdateCallback)
         {
-            this.previewTexture = previewTexture;
+            this.previewAsset = previewTexture;
             this.hqResolution = hqResolution;
+            this.textureUpdateCallback = textureUpdateCallback;
         }
 
         public void Dispose()
@@ -28,7 +29,7 @@ namespace NFTShape_Internal
 
             AssetPromiseKeeper_Texture.i.Forget(hqTexture);
             hqTexture = null;
-            UpdateTextureCallback = null;
+            textureUpdateCallback = null;
         }
 
         public void FetchAndSetHQAsset(string url, Action onSuccess, Action onFail)
@@ -38,7 +39,7 @@ namespace NFTShape_Internal
 
             hqTexture.OnSuccessEvent += (asset) =>
             {
-                UpdateTextureCallback?.Invoke(asset.texture);
+                textureUpdateCallback?.Invoke(asset.texture);
                 onSuccess?.Invoke();
             };
             hqTexture.OnFailEvent += (asset) =>
@@ -56,7 +57,7 @@ namespace NFTShape_Internal
                 hqTexture = null;
             }
 
-            UpdateTextureCallback?.Invoke(previewAsset.texture);
+            textureUpdateCallback?.Invoke(previewAsset.texture);
         }
     }
 }

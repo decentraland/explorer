@@ -84,7 +84,6 @@ namespace NFTShape_Internal
         {
             this.config = config;
             this.asset = config.asset;
-            this.asset.UpdateTextureCallback = config.controller.UpdateTexture;
 
             camera = Camera.main;
             nftControllerT = config.controller.transform;
