@@ -18,6 +18,8 @@ public class BuilderInWorldNFTController
 
     List<NFTInfo> nFTsAlreadyInUse = new List<NFTInfo>();
 
+    bool desactivateNFT = false;
+
     public static BuilderInWorldNFTController i
     {
         get
@@ -44,6 +46,9 @@ public class BuilderInWorldNFTController
 
     public bool IsNFTInUse(string id)
     {
+        if (desactivateNFT)
+            return false;
+
         foreach(NFTInfo info in nFTsAlreadyInUse)
         {
             if (info.assetContract.address == id)
@@ -54,6 +59,9 @@ public class BuilderInWorldNFTController
 
     public void StopUsingNFT(string id)
     {
+        if (desactivateNFT)
+            return;
+
         foreach (NFTInfo info in nFTOwner.assets)
         {
             if (info.assetContract.address != id) continue;
@@ -66,6 +74,9 @@ public class BuilderInWorldNFTController
 
     public void UseNFT(string id)
     {
+        if (desactivateNFT)
+            return;
+
         foreach (NFTInfo info in nFTOwner.assets)
         {
             if (info.assetContract.address != id) continue;
@@ -81,7 +92,8 @@ public class BuilderInWorldNFTController
     {
         List<SceneObject> sceneObjects = new List<SceneObject>();
 
-        if (nFTOwner.assets == null)
+        if (desactivateNFT ||
+            nFTOwner.assets == null)
             return sceneObjects;
 
         foreach(NFTInfo nFTInfo in nFTOwner.assets)
@@ -103,12 +115,15 @@ public class BuilderInWorldNFTController
 
         //Note (Adrian): This won't work, we need to get the correct addres from the kernel
         string userId =  GetCorrectWalletAddress(userProfile.userId);
+
         yield return NFTHelper.FetchNFTsFromOwner(userId, (nFTOwner) =>
         {
             this.nFTOwner = nFTOwner;
+            desactivateNFT = false;
         },
         (error) =>
         {
+            desactivateNFT = true;
             Debug.Log($"error getting NFT from owner:  {error}");
         });
     }

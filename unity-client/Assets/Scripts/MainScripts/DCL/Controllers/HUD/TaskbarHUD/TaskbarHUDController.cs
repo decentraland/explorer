@@ -204,6 +204,11 @@ public class TaskbarHUDController : IHUD
         MarkWorldChatAsReadIfOtherWindowIsOpen();
     }
 
+    public void SetBuilderInWorldStatus(bool isActive)
+    {
+        view.SetBuilderInWorldStatus(isActive);
+    }
+
     public void AddWorldChatWindow(WorldChatWindowHUDController controller)
     {
         if (controller == null || controller.view == null)

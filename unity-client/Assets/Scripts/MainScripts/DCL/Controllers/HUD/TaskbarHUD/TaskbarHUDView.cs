@@ -113,6 +113,11 @@ public class TaskbarHUDView : MonoBehaviour
         moreButton.OnToggleOff += OnWindowToggleOff;
     }
 
+    public void SetBuilderInWorldStatus(bool isActive)
+    {
+        builderInWorldButton.gameObject.SetActive(isActive);
+    }
+
     private void OnWindowToggleOff(TaskbarButton obj)
     {
         if (obj == friendsButton)

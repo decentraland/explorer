@@ -689,6 +689,13 @@ public class BuilderInWorldController : MonoBehaviour
         nexTimeToReceiveInput = Time.timeSinceLevelLoad + msBetweenInputInteraction / 1000;
     }
 
+    [ContextMenu("Activate feature")]
+    public void ActivateFeature()
+    {
+        activeFeature = true;
+        HUDController.i.taskbarHud.SetBuilderInWorldStatus(activeFeature);
+    }
+
     private void OnEditModeChangeAction(DCLAction_Trigger action)
     {
         if (activeFeature)
