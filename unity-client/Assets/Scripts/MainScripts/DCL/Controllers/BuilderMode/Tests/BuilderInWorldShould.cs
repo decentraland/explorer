@@ -131,6 +131,8 @@ public class BuilderInWorldShould : TestsBase
 
         BuilderInWorldController  builderInWorldController = InstantiateTestGameObject(builderInWorldControllerPrefab.gameObject).GetComponent<BuilderInWorldController>();
         builderInWorldController.gameObject.SetActive(true);
+
+        //Note (Adrian): Wait 1 frame to call the Start method on the BuilderInWorldController
         yield return null;
         builderInWorldController.activeFeature = true;
         builderInWorldController.StartEnterEditMode();
