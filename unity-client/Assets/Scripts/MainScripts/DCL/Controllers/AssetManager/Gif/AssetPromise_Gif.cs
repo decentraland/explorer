@@ -27,6 +27,7 @@ namespace DCL
                     frames =>
                     {
                         asset.frames = frames;
+                        OnSuccess?.Invoke();
                     }, OnFail));
         }
 

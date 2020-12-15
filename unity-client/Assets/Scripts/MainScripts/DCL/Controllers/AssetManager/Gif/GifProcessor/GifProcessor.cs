@@ -77,15 +77,24 @@ public class GifProcessor
     private IEnumerator UniGifProcessorLoad(string url, Action<GifFrameData[]> OnSuccess, Action OnFail)
     {
         webRequest = UnityWebRequest.Get(url);
-        webRequest.SendWebRequest();
-        yield return webRequest;
+        yield return webRequest.SendWebRequest();;
 
         bool success = webRequest != null && webRequest.WebRequestSucceded();
         if (success)
         {
             var bytes = webRequest.downloadHandler.data;
             yield return UniGif.GetTextureListCoroutine(bytes,
-                (frames,loopCount, width, height) => OnSuccess?.Invoke(frames));
+                (frames,loopCount, width, height) =>
+                {
+                    if (frames != null)
+                    {
+                        OnSuccess?.Invoke(frames);
+                    }
+                    else
+                    {
+                        OnFail?.Invoke();
+                    }
+                });
         }
         else
         {
