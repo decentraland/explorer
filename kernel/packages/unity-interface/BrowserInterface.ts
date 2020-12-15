@@ -5,7 +5,7 @@ import { avatarMessageObservable } from 'shared/comms/peers'
 import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { decentralandConfigurations, ethereumConfigurations, playerConfigurations } from 'config'
+import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
 import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
@@ -234,7 +234,7 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(saveProfileRequest(update))
   }
 
-  public async ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
+  public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
     switch (eventType) {
       case 'SceneReady': {
         const { sceneId } = payload
@@ -260,7 +260,7 @@ export class BrowserInterface {
       }
       case 'StopStatefulMode': {
         const { sceneId } = payload
-        await reloadScene(sceneId)
+        reloadScene(sceneId).catch((error) => defaultLogger.warn(`Failed to stop stateful mode`, error))
         break
       }
       default: {
@@ -409,9 +409,11 @@ export class BrowserInterface {
   }
 
   public FetchHotScenes() {
-    reportHotScenes().catch((e: any) => {
-      return defaultLogger.error('FetchHotScenes error', e)
-    })
+    if (WORLD_EXPLORER) {
+      reportHotScenes().catch((e: any) => {
+        return defaultLogger.error('FetchHotScenes error', e)
+      })
+    }
   }
 
   public SetBaseResolution(data: { baseResolution: number }) {
