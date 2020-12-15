@@ -1146,7 +1146,7 @@ namespace DCL.Controllers
         public void RefreshName()
         {
 #if UNITY_EDITOR
-            Debug.Log(GetStateString());
+            gameObject.name = GetStateString();
 #endif
         }
 
