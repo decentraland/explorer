@@ -60,7 +60,7 @@ namespace DCL.SettingsPanelHUD.Controls
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;
-            originalHandlerColor = handleImages[0].color;
+            originalHandlerColor = handleImages.Count > 0 ? handleImages[0].color : Color.white;
 
             foreach (BooleanVariable flag in controlConfig.flagsThatDisableMe)
             {
