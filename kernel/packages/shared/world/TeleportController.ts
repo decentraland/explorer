@@ -2,7 +2,7 @@ import { parcelLimits } from 'config'
 
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { POIs } from 'shared/comms/POIs'
-import { fetchLayerUsersParcels } from 'shared/comms'
+import { store } from 'shared/store/store'
 import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
 import { ensureUnityInterface } from 'shared/renderer'
@@ -15,6 +15,8 @@ import { WORLD_EXPLORER } from '../../config/index'
 import { isInitialLoading, isWaitingTutorial } from '../loading/selectors'
 import Html from '../Html'
 import { isLoginStageCompleted, isSignUp } from '../session/selectors'
+import { getCommsServer, getRealm } from 'shared/dao/selectors'
+import { LayerUserInfo } from 'shared/dao/types'
 
 declare const globalThis: StoreContainer
 
@@ -165,6 +167,21 @@ export class TeleportController {
       return { message: errorMessage, success: false }
     }
   }
+}
+
+async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
+  const realm = getRealm(store.getState())
+  const commsUrl = getCommsServer(store.getState())
+
+  if (realm && realm.layer && commsUrl) {
+    const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
+    if (layerUsersResponse.ok) {
+      const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
+      return layerUsers.filter((it) => it.parcel).map((it) => it.parcel!)
+    }
+  }
+
+  return []
 }
 
 function isInsideParcelLimits(x: number, y: number) {
