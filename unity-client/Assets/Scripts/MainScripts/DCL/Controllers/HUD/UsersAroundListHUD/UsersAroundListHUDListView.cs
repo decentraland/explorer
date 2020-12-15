@@ -18,7 +18,6 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     [SerializeField] internal Toggle muteAllToggle;
     [SerializeField] internal UserContextMenu contextMenu;
     [SerializeField] internal UserContextConfirmationDialog confirmationDialog;
-    [SerializeField] internal GameObject listGameObject;
     [SerializeField] internal GameObject emptyListGameObject;
     [SerializeField] internal Button gotoCrowdButton;
     [SerializeField] internal SpinBoxPresetted voiceChatSpinBox;
@@ -227,7 +226,6 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     void CheckListEmptyState()
     {
         bool isEmpty = userElementDictionary.Count == 0;
-        listGameObject.SetActive(!isEmpty);
         emptyListGameObject.SetActive(isEmpty);
     }
 
