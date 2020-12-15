@@ -120,13 +120,18 @@ public static partial class BuilderInWorldUtils
         return Physics.Raycast(mouseRay, out hitInfo, 5555, mask);
     }
 
-    public static bool IsPointerOverUIElement()
+    public static bool IsPointerOverUIElement(Vector3 mousePosition)
     {
         var eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
+        eventData.position = mousePosition;
         var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 1;
+    }
+
+    public static bool IsPointerOverUIElement()
+    {
+        return IsPointerOverUIElement(Input.mousePosition);
     }
 
     public static string ConvertEntityToJSON(DecentralandEntity entity)

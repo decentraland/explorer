@@ -81,9 +81,11 @@ public class BuilderInWorldController : MonoBehaviour
 
     BuilderInWorldMode currentActiveMode;
 
-    ParcelScene sceneToEdit;
+    [HideInInspector]
+    public ParcelScene sceneToEdit;
 
-    bool isEditModeActivated = false,
+    [HideInInspector]
+    public bool isEditModeActivated = false,
         isSnapActive = true,
         isMultiSelectionActive = false,
         isAdvancedModeActive = true,
@@ -238,6 +240,8 @@ public class BuilderInWorldController : MonoBehaviour
         editorMode.OnActionGenerated -= actionController.AddAction;
         BuilderInWorldNFTController.i.OnNFTUsageChange -= OnNFTUsageChange;
 
+        CleanItems();
+
     }
 
     private void Update()
@@ -285,8 +289,14 @@ public class BuilderInWorldController : MonoBehaviour
     void CatalogReceived(string catalogJson)
     {
         AssetCatalogBridge.i.AddFullSceneObjectCatalog(catalogJson);
+        CatalogLoaded();
+    }
+
+    public void CatalogLoaded()
+    {
         catalogAdded = true;
-        HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
+        if(HUDController.i.builderInWorldMainHud != null)
+           HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
         CheckEnterEditMode();
     }
 
@@ -558,15 +568,19 @@ public class BuilderInWorldController : MonoBehaviour
                 break;
             case EditModeState.FirstPerson:
                 currentActiveMode = firstPersonMode;
-                HUDController.i.builderInWorldMainHud.ActivateFirstPersonModeUI();
-                HUDController.i.builderInWorldMainHud.SetVisibilityOfCatalog(false);
+                if (HUDController.i.builderInWorldMainHud != null)
+                {
+                    HUDController.i.builderInWorldMainHud.ActivateFirstPersonModeUI();
+                    HUDController.i.builderInWorldMainHud.SetVisibilityOfCatalog(false);
+                }
                 cursorGO.SetActive(true);
                 break;
             case EditModeState.Editor:
                 cursorGO.SetActive(false);
                 currentActiveMode = editorMode;
                 isAdvancedModeActive = true;
-                HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
+                if(HUDController.i.builderInWorldMainHud != null)
+                   HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
                 break;
         }
 
@@ -648,6 +662,26 @@ public class BuilderInWorldController : MonoBehaviour
     {
         isSnapActive = isActive;
         currentActiveMode.SetSnapActive(isActive);
+    }
+
+    public void CleanItems()
+    {
+        Destroy(undoGO);
+        Destroy(snapGO);
+        Destroy(editionGO);
+        Destroy(freeMovementGO);
+
+        if (HUDController.i.builderInWorldMainHud != null)
+            HUDController.i.builderInWorldMainHud.Dispose();
+
+        if (HUDController.i.builderInWorldInititalHud != null)
+            HUDController.i.builderInWorldInititalHud.Dispose();
+
+        if (Camera.main != null)
+        {
+            DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+            Destroy(outliner);
+        }
     }
 
     void InputDone()
@@ -744,7 +778,7 @@ public class BuilderInWorldController : MonoBehaviour
         return voxelEntityHit;
     }
 
-    void NewSceneReady(string id)
+    public void NewSceneReady(string id)
     {
         if (sceneToEditId != id) return;
         SceneController.i.OnReadyScene -= NewSceneReady;
@@ -775,7 +809,7 @@ public class BuilderInWorldController : MonoBehaviour
     public void EnterEditMode()
     {
         BuilderInWorldNFTController.i.ClearNFTs();
-        HUDController.i.builderInWorldMainHud.SetVisibility(true);
+    
 
         isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
@@ -788,7 +822,14 @@ public class BuilderInWorldController : MonoBehaviour
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
-        HUDController.i.builderInWorldMainHud.SetParcelScene(sceneToEdit);
+
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.SetVisibility(true);
+            HUDController.i.builderInWorldMainHud.SetParcelScene(sceneToEdit);
+            HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
+            HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
+        }
 
         if (currentActiveMode == null)
             SetBuildMode(EditModeState.Editor);
@@ -800,8 +841,7 @@ public class BuilderInWorldController : MonoBehaviour
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
         SceneController.i.ActivateBuilderInWorldEditScene();
-        HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
-        HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
+   
 
         avatarRenderer.SetAvatarVisibility(false);
 
@@ -813,9 +853,7 @@ public class BuilderInWorldController : MonoBehaviour
     public void ExitEditMode()
     {
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
-
-        HUDController.i.builderInWorldMainHud.SetVisibility(false);
-
+       
         inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
 
@@ -836,7 +874,11 @@ public class BuilderInWorldController : MonoBehaviour
 
         avatarRenderer.SetAvatarVisibility(true);
 
-        HUDController.i.builderInWorldMainHud.ClearEntityList();
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.ClearEntityList();
+            HUDController.i.builderInWorldMainHud.SetVisibility(false);
+        }
 
         SceneController.i.DeactivateBuilderInWorldEditScene();
 

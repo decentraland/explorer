@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce9f3e99bfa1950438d79c75c333a17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeFeature: 0
+  activeFeature: 1
   scaleSpeed: 0.05
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
@@ -220,6 +220,7 @@ MonoBehaviour:
   cameraParentGO: {fileID: 0}
   cursorGO: {fileID: 0}
   inputController: {fileID: 0}
+  avatarRenderer: {fileID: 0}
   outlinerController: {fileID: 1208871511725701524}
   builderInputWrapper: {fileID: 1208871511405416592}
   gizmoManager: {fileID: 1208871511615770936}
@@ -249,6 +250,12 @@ MonoBehaviour:
     type: 2}
   multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
     type: 2}
+  sceneToEdit: {fileID: 0}
+  isEditModeActivated: 0
+  isSnapActive: 1
+  isMultiSelectionActive: 0
+  isAdvancedModeActive: 1
+  isOutlineCheckActive: 1
 --- !u!1 &1208871511283293828
 GameObject:
   m_ObjectHideFlags: 0

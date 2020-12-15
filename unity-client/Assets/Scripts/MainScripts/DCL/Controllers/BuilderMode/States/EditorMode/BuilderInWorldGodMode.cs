@@ -44,7 +44,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     Vector3 lastMousePosition;
 
-    const float RAYCAST_MAX_DISTANCE = 10000f;
+    public const float RAYCAST_MAX_DISTANCE = 10000f;
 
     private void Start()
     {
@@ -127,9 +127,12 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         base.Init(goToEdit, undoGo, snapGO, freeMovementGO, selectedEntities);
         voxelController.SetEditionGO(goToEdit);
 
-        HUDController.i.builderInWorldMainHud.OnTranslateSelectedAction += TranslateMode;
-        HUDController.i.builderInWorldMainHud.OnRotateSelectedAction += RotateMode;
-        HUDController.i.builderInWorldMainHud.OnScaleSelectedAction += ScaleMode;
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.OnTranslateSelectedAction += TranslateMode;
+            HUDController.i.builderInWorldMainHud.OnRotateSelectedAction += RotateMode;
+            HUDController.i.builderInWorldMainHud.OnScaleSelectedAction += ScaleMode;
+        }
     }
 
     private void MouseUp(int buttonID, Vector3 position)
@@ -497,7 +500,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         RaycastHit hit;
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
+      
         if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
         {
             editionGO.transform.position = hit.point;

@@ -13,6 +13,14 @@ public class ToolTipController : MonoBehaviour
 
     Coroutine changeAlphaCor;
 
+
+    private void OnDestroy()
+    {
+        if (changeAlphaCor != null)
+            CoroutineStarter.Stop(changeAlphaCor);
+    }
+
+
     public void Desactivate()
     {
         if (changeAlphaCor != null)

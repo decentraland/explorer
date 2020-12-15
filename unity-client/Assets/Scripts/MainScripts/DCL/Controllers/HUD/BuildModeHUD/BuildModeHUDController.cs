@@ -157,12 +157,14 @@ public class BuildModeHUDController : IHUD
 
     public void ActivateFirstPersonModeUI()
     {
-        view.SetFirstPersonView();
+        if (view != null)
+            view.SetFirstPersonView();
     }
 
     public void ActivateGodModeUI()
     {
-        view.SetGodModeView();
+        if(view !=null)
+            view.SetGodModeView();
     }
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)

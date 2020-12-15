@@ -1,0 +1,201 @@
+using Builder;
+using Cinemachine;
+using DCL;
+using DCL.Components;
+using DCL.Configuration;
+using DCL.Helpers;
+using DCL.Models;
+using Newtonsoft.Json;
+using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.TestTools;
+
+public class BuilderInWorldShould : TestsBase
+{
+
+    protected override IEnumerator SetUp()
+    {
+        yield return base.SetUp();
+        string entityId = "mockUpEntity";
+        TestHelpers.CreateSceneEntity(scene, entityId);
+    }
+
+    [Test]
+    public void GroundRaycast()
+    {
+        RaycastHit hit;
+        BuilderInWorldController builderInWorldController = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
+        BuilderInWorldGodMode godMode = builderInWorldController.GetComponentInChildren<BuilderInWorldGodMode>(true);
+
+        Vector3 fromPosition = new Vector3(0,10,0);
+        Vector3 toPosition = Vector3.zero;
+        Vector3 direction = toPosition - fromPosition;
+
+
+        if (Physics.Raycast(fromPosition,direction, out hit, BuilderInWorldGodMode.RAYCAST_MAX_DISTANCE, godMode.groundLayer))
+        {
+            Assert.Pass();
+            return;
+        }
+
+   
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+
+        if (Physics.Raycast(ray, out hit, BuilderInWorldGodMode.RAYCAST_MAX_DISTANCE, godMode.groundLayer))
+        {
+            Assert.Pass();
+            return;
+        }
+
+
+        Assert.Fail();
+    }
+
+    [Test]
+    public void SceneReferences()
+    {
+        BuilderInWorldController builderInWorldController = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
+
+        Assert.IsNotNull(builderInWorldController.avatarRenderer,"References on the builder-in-world prefab are null, check them all!");
+        Assert.IsNotNull(builderInWorldController.cursorGO, "References on the builder-in-world prefab are null, check them all!");
+        Assert.IsNotNull(builderInWorldController.inputController, "References on the builder-in-world prefab are null, check them all!");
+        Assert.IsNotNull(builderInWorldController.cameraParentGO, "References on the builder-in-world prefab are null, check them all!");
+
+
+        BuilderInWorldGodMode godMode = builderInWorldController.GetComponentInChildren<BuilderInWorldGodMode>();
+
+
+        Assert.IsNotNull(godMode.mouseCatcher, "References on the builder-in-world god mode are null, check them all!");
+        Assert.IsNotNull(godMode.cameraController, "References on the builder-in-world god mode are null, check them all!");
+        Assert.IsNotNull(godMode.freeCameraController, "References on the builder-in-world god mode are null, check them all!");
+
+        DCLBuilderRaycast dCLBuilderRaycast =  godMode.GetComponentInChildren<DCLBuilderRaycast>();
+
+        Assert.IsNotNull(dCLBuilderRaycast.builderCamera, "Camera reference on the builder-in-world god mode children are null, check them all!");
+    }
+
+    [UnityTest]
+    public IEnumerator SceneObjectFloorObject()
+    {
+        SceneObject sceneObject = BuilderInWorldUtils.CreateFloorSceneObject();
+        LoadParcelScenesMessage.UnityParcelScene data = scene.sceneData;
+        data.contents = new List<ContentServerUtils.MappingPair>();
+        data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
+
+        foreach (KeyValuePair<string, string> content in sceneObject.contents)
+        {
+            ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
+            mappingPair.file = content.Key;
+            mappingPair.hash = content.Value;
+            bool found = false;
+            foreach (ContentServerUtils.MappingPair mappingPairToCheck in data.contents)
+            {
+                if (mappingPairToCheck.file == mappingPair.file)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                data.contents.Add(mappingPair);
+        }
+
+        SceneController.i.UpdateParcelScenesExecute(data);
+
+
+        string entityId = "1";
+        TestHelpers.CreateSceneEntity(scene, entityId);
+
+        TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+            new
+            {
+                assetId = BuilderInWorldSettings.FLOOR_TEXTURE_VALUE,
+                src = BuilderInWorldSettings.FLOOR_MODEL
+            })); ;
+
+        LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
+        yield return new WaitUntil(() => gltfShape.alreadyLoaded);
+
+        Assert.IsTrue(
+         scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+        "'Floor should be load");
+    }
+
+    [UnityTest]
+    public IEnumerator EnterExitInEditMode()
+    {
+        BuilderInWorldController builderInWorldControllerPrefab = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
+
+        BuilderInWorldController  builderInWorldController = InstantiateTestGameObject(builderInWorldControllerPrefab.gameObject).GetComponent<BuilderInWorldController>();
+        builderInWorldController.gameObject.SetActive(true);
+        yield return null;
+        builderInWorldController.activeFeature = true;
+        builderInWorldController.StartEnterEditMode();
+        builderInWorldController.NewSceneReady(scene.sceneData.id);
+        builderInWorldController.sceneToEdit = scene;
+
+        BuilderInWorldTestHelper.CreateTestCatalogLocal();
+        builderInWorldController.CatalogLoaded();
+        CinemachineBrain cinemachineBrain = Resources.FindObjectsOfTypeAll<CinemachineBrain>()[0];
+
+        //Note (Adrian): Cinemachine brain needs 2 frames to setup the IsBlending flag
+        yield return null;
+        yield return null;
+
+        yield return new WaitUntil(() => !cinemachineBrain.IsBlending);
+
+        Assert.IsTrue(builderInWorldController.isEditModeActivated, "Unable to enter in Builder In World");
+
+        builderInWorldController.ExitEditMode();
+        yield return null;
+        yield return null;
+        yield return new WaitUntil(() => !cinemachineBrain.IsBlending);
+
+        Assert.IsFalse(builderInWorldController.isEditModeActivated, "Unable to exit  Builder In World");
+        GameObject.DestroyImmediate(builderInWorldController.gameObject);
+        yield return null;
+    }
+
+    //[UnityTest]
+    //    public IEnumerator TestPointerOverUIElement()
+    //{
+    //    BuilderInWorldController builderInWorldControllerPrefab = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
+
+    //    builderInWorldController = InstantiateTestGameObject(builderInWorldControllerPrefab.gameObject).GetComponent<BuilderInWorldController>();
+    //    builderInWorldController.gameObject.SetActive(true);
+    //    yield return null;
+
+    //    builderInWorldController.activeFeature = true;
+    //    builderInWorldController.StartEnterEditMode();
+    //    builderInWorldController.NewSceneReady(scene.sceneData.id);
+    //    builderInWorldController.sceneToEdit = scene;
+
+    //    BuilderInWorldTestHelper.CreateTestCatalogLocal();
+    //    builderInWorldController.CatalogLoaded();
+    //    yield return new WaitUntil(() => builderInWorldController.isEditModeActivated == true);
+    //    yield return new WaitForSeconds(4f);
+    //    Vector3 mousePosition = new Vector3(1820, 540, 0);
+
+    //    bool isPointerOverUi = BuilderInWorldUtils.IsPointerOverUIElement(mousePosition);
+    //    Assert.IsFalse(isPointerOverUi, "Pointer over UI is not detected correctly");
+
+
+    //    mousePosition = new Vector3(980, 1036, 0);
+    //    isPointerOverUi = BuilderInWorldUtils.IsPointerOverUIElement(mousePosition);
+    //    Assert.IsTrue(isPointerOverUi, "Pointer over UI is not detected correctly");
+
+    //    builderInWorldController.ExitEditMode();
+    //    yield return new WaitForSeconds(4f);
+    //    GameObject.DestroyImmediate(builderInWorldController.gameObject);
+    //    yield return null;
+    //}
+
+    protected override IEnumerator TearDown()
+    {
+        AssetCatalogBridge.ClearCatalog();
+        yield return base.TearDown();
+    }
+}

@@ -22,6 +22,7 @@ namespace CameraController_Test
         [Test]
         [TestCase(CameraMode.ModeId.FirstPerson)]
         [TestCase(CameraMode.ModeId.ThirdPerson)]
+        [TestCase(CameraMode.ModeId.BuildingToolGodMode)]
         public void LiveCameraIsOn(CameraMode.ModeId cameraMode)
         {
             cameraController.SetCameraMode(cameraMode);
