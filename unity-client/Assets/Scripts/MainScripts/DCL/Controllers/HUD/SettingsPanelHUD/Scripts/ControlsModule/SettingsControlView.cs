@@ -165,6 +165,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 image.color = enabled ? originalHandlerColor : handlerDeactivationColor;
             }
             canvasGroup.interactable = enabled;
+            canvasGroup.blocksRaycasts = enabled;
         }
 
         private void SetControlActive(bool actived)
