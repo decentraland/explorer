@@ -1215,6 +1215,11 @@ MonoBehaviour:
   title: {fileID: 946022103321159557}
   betaIndicator: {fileID: 5884397133996633093}
   canvasGroup: {fileID: 7426026435316743473}
+  handleImages:
+  - {fileID: 8760731597316476144}
+  - {fileID: 1994506718636682904}
+  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
+  handlerDeactivationColor: {r: 0.95686275, g: 0.95686275, b: 0.95686275, a: 1}
   spinBox: {fileID: 3837855004225010386}
 --- !u!225 &7426026435316743473
 CanvasGroup:

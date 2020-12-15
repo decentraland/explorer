@@ -1,6 +1,8 @@
 using DCL.SettingsPanelHUD.Common;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
@@ -30,11 +32,16 @@ namespace DCL.SettingsPanelHUD.Controls
         [SerializeField] private TextMeshProUGUI title;
         [SerializeField] private GameObject betaIndicator;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private List<Image> handleImages;
+        [SerializeField] private Color titleDeactivationColor;
+        [SerializeField] private Color handlerDeactivationColor;
 
         protected SettingsControlController settingsControlController;
         protected bool skipPostApplySettings = false;
 
         private SettingsControlModel controlConfig;
+        private Color originalTitleColor;
+        private Color originalHandlerColor;
 
         private void OnEnable()
         {
@@ -52,6 +59,8 @@ namespace DCL.SettingsPanelHUD.Controls
             this.settingsControlController.Initialize(this);
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
+            originalTitleColor = title.color;
+            originalHandlerColor = handleImages[0].color;
 
             foreach (BooleanVariable flag in controlConfig.flagsThatDisableMe)
             {
@@ -150,7 +159,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private void SetEnabled(bool enabled)
         {
-            canvasGroup.alpha = enabled ? 1f : 0.5f;
+            title.color = enabled ? originalTitleColor : titleDeactivationColor;
+            foreach (var image in handleImages)
+            {
+                image.color = enabled ? originalHandlerColor : handlerDeactivationColor;
+            }
             canvasGroup.interactable = enabled;
         }
 

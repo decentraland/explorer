@@ -1405,6 +1405,11 @@ MonoBehaviour:
   title: {fileID: 946022103321159557}
   betaIndicator: {fileID: 8254397142236738776}
   canvasGroup: {fileID: 6297083727263229740}
+  handleImages:
+  - {fileID: 4140681904440877326}
+  - {fileID: 7617286910469934105}
+  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
+  handlerDeactivationColor: {r: 0.95686275, g: 0.95686275, b: 0.95686275, a: 1}
   toggle: {fileID: 7847144896387343876}
 --- !u!225 &6297083727263229740
 CanvasGroup:

@@ -1133,6 +1133,10 @@ MonoBehaviour:
   title: {fileID: 946022103321159557}
   betaIndicator: {fileID: 3681824983046223196}
   canvasGroup: {fileID: 4023700701583222159}
+  handleImages:
+  - {fileID: 6438843672082443669}
+  titleDeactivationColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
+  handlerDeactivationColor: {r: 0.95686275, g: 0.95686275, b: 0.95686275, a: 1}
   slider: {fileID: 6766189024411584644}
   indicatorLabel: {fileID: 49177162354486727}
 --- !u!225 &4023700701583222159
