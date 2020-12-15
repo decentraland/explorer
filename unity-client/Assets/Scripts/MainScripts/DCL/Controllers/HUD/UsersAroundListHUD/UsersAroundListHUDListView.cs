@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using DCL;
+using DCL.SettingsData;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDListView
@@ -20,6 +21,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     [SerializeField] internal GameObject listGameObject;
     [SerializeField] internal GameObject emptyListGameObject;
     [SerializeField] internal Button gotoCrowdButton;
+    [SerializeField] internal SpinBoxPresetted voiceChatSpinBox;
 
     internal Queue<UsersAroundListHUDListElementView> availableElements;
     internal Dictionary<string, UsersAroundListHUDListElementView> userElementDictionary;
@@ -37,11 +39,14 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
         muteAllToggle.onValueChanged.AddListener(OnMuteGlobal);
         gotoCrowdButton.onClick.AddListener(() => OnGoToCrowdPressed?.Invoke());
+        voiceChatSpinBox.onValueChanged.AddListener(OnVoiceChatSettingChanged);
 
         listElementView.OnMuteUser += OnMuteUser;
         listElementView.OnShowUserContexMenu += OnUserContextMenu;
         listElementView.OnPoolRelease();
         availableElements.Enqueue(listElementView);
+
+        Settings.i.OnGeneralSettingsChanged += OnSettingsChanged;
 
         if (FriendsController.i)
             FriendsController.i.OnUpdateFriendship += OnUpdateFriendship;
@@ -50,6 +55,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     void OnDestroy()
     {
         isGameObjectDestroyed = true;
+        Settings.i.OnGeneralSettingsChanged -= OnSettingsChanged;
     }
 
     void IUsersAroundListHUDListView.AddOrUpdateUser(MinimapMetadata.MinimapUserInfo userInfo)
@@ -223,5 +229,17 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
         bool isEmpty = userElementDictionary.Count == 0;
         listGameObject.SetActive(!isEmpty);
         emptyListGameObject.SetActive(isEmpty);
+    }
+
+    void OnVoiceChatSettingChanged(int index)
+    {
+        var newSettings = Settings.i.generalSettings;
+        newSettings.voiceChatAllow = (GeneralSettings.VoiceChatAllow)index;
+        Settings.i.ApplyGeneralSettings(newSettings);
+    }
+
+    void OnSettingsChanged(GeneralSettings settings)
+    {
+        voiceChatSpinBox.SetValue((int)settings.voiceChatAllow, false);
     }
 }
