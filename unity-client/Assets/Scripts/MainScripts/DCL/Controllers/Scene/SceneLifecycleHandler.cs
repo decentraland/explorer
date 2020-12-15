@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace DCL.Controllers
 {
+    /// <summary>
+    /// This handler is in charge of handling the scene lifecycle events
+    /// and upkeep the scene lifecycle state.
+    /// </summary>
     public class SceneLifecycleHandler
     {
         public static bool VERBOSE = false;
