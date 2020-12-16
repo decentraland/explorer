@@ -43,17 +43,23 @@ namespace DCL
 
             //TODO(Brian): We can move to a RAII scheme + promises later to make this
             //             more scalable.
+
+            // World context systems
             model.world.sceneController.Initialize();
-            model.messaging.messagingControllersManager.Initialize(i.world.sceneController);
             model.world.pointerEventsController.Initialize();
-            model.platform.memoryManager.Initialize();
             model.world.worldState.Initialize();
             model.world.worldBlockersController.InitializeWithDefaultDependencies(
                 model.world.worldState,
                 DCLCharacterController.i.characterPosition);
+            model.world.sceneBoundsChecker.Start();
+
+            // Platform systems
+            model.platform.memoryManager.Initialize();
             model.platform.parcelScenesCleaner.Start();
             model.platform.cullingController.Start();
-            model.world.sceneBoundsChecker.Start();
+
+            // Messaging systems
+            model.messaging.messagingControllersManager.Initialize(i.world.sceneController);
         }
 
         public static void Reset()

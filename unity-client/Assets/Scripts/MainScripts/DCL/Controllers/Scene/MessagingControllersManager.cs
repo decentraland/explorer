@@ -1,3 +1,4 @@
+using System;
 using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,7 +6,7 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class MessagingControllersManager
+    public class MessagingControllersManager : IDisposable
     {
         public static bool VERBOSE = false;
 
@@ -148,7 +149,7 @@ namespace DCL
             busesToProcessCount = busesToProcess.Count;
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
             if (mainCoroutine != null)
             {

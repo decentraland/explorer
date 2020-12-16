@@ -51,9 +51,13 @@ namespace DCL
 
         private void OnDebugModeSet()
         {
-            //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
-            //             case. Calling Initialize multiple times in a row is safe.
-            Environment.SetupWithDefaults();
+            if (Environment.i.world == null)
+            {
+                //NOTE(Brian): Added this here to prevent the SetDebug() before Awake()
+                //             case. Calling Initialize multiple times in a row is safe.
+                Environment.SetupWithDefaults();
+            }
+
             Environment.i.world.worldBlockersController.SetEnabled(false);
             Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
@@ -666,6 +670,7 @@ namespace DCL
 
         public void UnloadParcelSceneExecute(string sceneId)
         {
+            Debug.Log("Removing scene " + sceneId);
             ProfilingEvents.OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_DESTROY);
 
             WorldState worldState = Environment.i.world.worldState;

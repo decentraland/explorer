@@ -11,8 +11,7 @@
 
         public void Dispose()
         {
-            messagingControllersManager.Cleanup();
-            //messageQueueHandler.Dispose();
+            messagingControllersManager.Dispose();
         }
     }
 }

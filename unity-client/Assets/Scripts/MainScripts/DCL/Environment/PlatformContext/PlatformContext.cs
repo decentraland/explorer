@@ -6,9 +6,9 @@ namespace DCL
     {
         public readonly MemoryManager memoryManager;
         public readonly ICullingController cullingController;
+        public readonly IParcelScenesCleaner parcelScenesCleaner;
         public readonly Clipboard clipboard;
         public readonly PhysicsSyncController physicsSyncController;
-        public readonly IParcelScenesCleaner parcelScenesCleaner;
         public readonly DebugController debugController;
 
         public PlatformContext(MemoryManager memoryManager,
@@ -28,7 +28,7 @@ namespace DCL
 
         public void Dispose()
         {
-            memoryManager.CleanupPoolsIfNeeded(true);
+            memoryManager.Dispose();
             parcelScenesCleaner.Dispose();
             cullingController.Dispose();
             debugController.Dispose();
