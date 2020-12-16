@@ -138,7 +138,7 @@ namespace DCL.Tutorial
 
         private int tutorialLayerMask;
 
-        internal bool userAlreadyDidTheTutorial { get; private set; }
+        internal bool userAlreadyDidTheTutorial { get; set; }
 
         private void Awake()
         {
