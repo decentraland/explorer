@@ -17,58 +17,36 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        //======================================================================
-
-        #region PROJECT_ENTRYPOINT
-
-        //======================================================================
-        private EntryPoint_World worldEntryPoint;
-
         public DCLComponentFactory componentFactory => Main.i.componentFactory;
 
         public bool enabled = true;
-        public bool initialized = false;
+
+        private Coroutine deferredDecodingCoroutine;
 
         public void Initialize()
         {
-            if (initialized)
-                return;
-
             sceneSortDirty = true;
             positionDirty = true;
             lastSortFrame = 0;
             enabled = true;
-            initialized = true;
 
             Environment.i.platform.debugController.OnDebugModeSet += OnDebugModeSet;
 
             // We trigger the Decentraland logic once SceneController has been instanced and is ready to act.
             WebInterface.StartDecentraland();
 
-            Environment.i.platform.parcelScenesCleaner.Start();
-
             if (deferredMessagesDecoding) // We should be able to delete this code
-                CoroutineStarter.Start(DeferredDecoding()); //
+                deferredDecodingCoroutine = CoroutineStarter.Start(DeferredDecoding()); //
 
             DCLCharacterController.OnCharacterMoved += SetPositionDirty;
 
             CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneIdChange;
 
-            //TODO(Brian): Move those suscriptions elsewhere.
+            //TODO(Brian): Move those subscriptions elsewhere.
             PoolManager.i.OnGet -= Environment.i.platform.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet += Environment.i.platform.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet -= Environment.i.platform.cullingController.objectsTracker.MarkDirty;
             PoolManager.i.OnGet += Environment.i.platform.cullingController.objectsTracker.MarkDirty;
-
-#if !UNITY_EDITOR
-            worldEntryPoint = new EntryPoint_World(this); // independent subsystem => put at entrypoint but not at environment
-#endif
-
-            // TODO(Brian): This should be fixed when we do the proper initialization layer
-            if (!EnvironmentSettings.RUNNING_TESTS)
-            {
-                Environment.i.platform.cullingController.Start();
-            }
         }
 
         private void OnDebugModeSet()
@@ -84,6 +62,7 @@ namespace DCL
         {
             if (prewarmSceneMessagesPool)
             {
+                Debug.Log("Prewarming... 1");
                 for (int i = 0; i < 100000; i++)
                 {
                     sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
@@ -92,6 +71,7 @@ namespace DCL
 
             if (prewarmEntitiesPool)
             {
+                Debug.Log("Prewarming... 2");
                 EnsureEntityPool();
             }
 
@@ -100,14 +80,13 @@ namespace DCL
 
         public void Dispose()
         {
-            initialized = false;
             PoolManager.i.OnGet -= Environment.i.platform.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet -= Environment.i.platform.cullingController.objectsTracker.MarkDirty;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             Environment.i.platform.debugController.OnDebugModeSet -= OnDebugModeSet;
 
-            Environment.i.platform.parcelScenesCleaner.Stop();
-            Environment.i.platform.cullingController.Stop();
+            if (deferredDecodingCoroutine != null)
+                CoroutineStarter.Stop(deferredDecodingCoroutine);
         }
 
 
@@ -147,12 +126,6 @@ namespace DCL
             if (prewarmEntitiesPool)
                 pool.ForcePrewarm();
         }
-
-        //======================================================================
-
-        #endregion
-
-        //======================================================================
 
 
         //======================================================================

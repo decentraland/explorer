@@ -58,15 +58,14 @@ public class TestsBase
             yield break;
         }
 
-        SetUp_Camera();
+        Environment.SetupWithDefaults();
 
+        SetUp_Camera();
         yield return SetUp_SceneController();
         yield return SetUp_CharacterController();
-
         yield return SetUp_SceneIntegrityChecker();
-
         SetUp_Renderer();
-        Environment.SetupWithDefaults();
+
         yield return null;
         //TODO(Brian): Remove when the init layer is ready
         Environment.i.platform.cullingController.Stop();
@@ -78,12 +77,12 @@ public class TestsBase
     {
         yield return null;
 
+        Environment.Dispose();
+
         if (runtimeGameObjectsRoot != null)
             Object.Destroy(runtimeGameObjectsRoot.gameObject);
 
         TestHelpers.ForceUnloadAllScenes(Environment.i.world.sceneController);
-
-        Environment.Dispose();
 
         if (DCLCharacterController.i != null)
         {

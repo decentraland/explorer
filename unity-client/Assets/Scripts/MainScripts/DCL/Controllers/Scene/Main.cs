@@ -19,6 +19,7 @@ namespace DCL
         public DebugConfig debugConfig;
 
         private PerformanceMetricsController performanceMetricsController;
+        private EntryPoint_World worldEntryPoint;
 
         void Awake()
         {
@@ -30,11 +31,6 @@ namespace DCL
 
             i = this;
 
-#if !UNITY_EDITOR
-            Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = false;
-#endif
-
             DataStore.debugConfig.soloScene = debugConfig.soloScene;
             DataStore.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
             DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
@@ -43,7 +39,16 @@ namespace DCL
             performanceMetricsController = new PerformanceMetricsController();
 
             RenderProfileManifest.i.Initialize();
-            Environment.SetupWithDefaults();
+
+            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+                Environment.SetupWithDefaults();
+
+#if !UNITY_EDITOR
+            Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
+            Debug.unityLogger.logEnabled = false;
+
+            worldEntryPoint = new EntryPoint_World(Environment.i.world.sceneController);
+#endif
         }
 
         private void Start()
