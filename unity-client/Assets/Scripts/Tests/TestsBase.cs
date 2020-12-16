@@ -48,6 +48,7 @@ public class TestsBase
         }
 
         runtimeGameObjectsRoot = new GameObject("_RuntimeGameObjectsRoot");
+
         if (justSceneSetUp)
         {
             Environment.SetupWithDefaults();
@@ -63,10 +64,11 @@ public class TestsBase
         }
 
         Environment.SetupWithDefaults();
+
         SetUp_SceneController();
+        SetUp_TestScene();
 
         SetUp_Camera();
-        SetUp_TestScene();
         yield return SetUp_CharacterController();
         SetUp_Renderer();
         yield return SetUp_SceneIntegrityChecker();
@@ -149,6 +151,7 @@ public class TestsBase
     public void SetUp_TestScene()
     {
         scene = sceneController.CreateTestScene();
+        Debug.Log("Creating test scene...");
     }
 
     public virtual IEnumerator SetUp_CharacterController()

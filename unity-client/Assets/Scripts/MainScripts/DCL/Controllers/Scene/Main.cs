@@ -69,7 +69,8 @@ namespace DCL
 
         private void OnDestroy()
         {
-            Environment.i.world.sceneController.Dispose();
+            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+                Environment.Dispose();
         }
 
         #region RuntimeMessagingBridge
