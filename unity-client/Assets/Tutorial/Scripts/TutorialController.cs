@@ -25,7 +25,7 @@ namespace DCL.Tutorial
 
         public enum TutorialType
         {
-            Initital,
+            Initial,
             BuilderInWorld
         }
 
@@ -130,7 +130,7 @@ namespace DCL.Tutorial
         internal float elapsedTimeInCurrentStep = 0f;
         internal TutorialPath currentPath;
         internal int currentStepNumber;
-        internal TutorialType tutorialType = TutorialType.Initital;
+        internal TutorialType tutorialType = TutorialType.Initial;
 
         private Coroutine executeStepsCoroutine;
         private Coroutine teacherMovementCoroutine;
@@ -175,12 +175,12 @@ namespace DCL.Tutorial
 
         public void SetTutorialEnabled(string fromDeepLink)
         {
-            SetupTutorial(fromDeepLink, TutorialType.Initital);
+            SetupTutorial(fromDeepLink, TutorialType.Initial);
         }
 
         public void SetTutorialEnabledForUsersThatAlreadyDidTheTutorial()
         {
-            SetupTutorial(false.ToString(), TutorialType.Initital, true);
+            SetupTutorial(false.ToString(), TutorialType.Initial, true);
         }
 
         public void SetBuilderInWorldTutorialEnabled()
@@ -276,7 +276,7 @@ namespace DCL.Tutorial
 
             switch (tutorialType)
             {
-                case TutorialType.Initital:
+                case TutorialType.Initial:
                     if (userAlreadyDidTheTutorial)
                     {
                         yield return ExecuteSteps(TutorialPath.FromUserThatAlreadyDidTheTutorial, stepIndex);
