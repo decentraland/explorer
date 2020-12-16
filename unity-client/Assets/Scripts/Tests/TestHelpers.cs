@@ -1099,39 +1099,6 @@ namespace DCL.Helpers
 
         public static SceneController InitializeSceneController(bool usesWebServer = false)
         {
-            var main = UnityEngine.Object.FindObjectOfType<Main>();
-
-            if (main != null && main.componentFactory == null)
-            {
-                ForceUnloadAllScenes(Environment.i.world.sceneController);
-                Utils.SafeDestroy(main);
-                main = null;
-            }
-
-            if (main == null)
-            {
-                GameObject GO = GameObject.Instantiate(Resources.Load("Prefabs/SceneController") as GameObject);
-                main = GO.GetComponent<Main>();
-            }
-            else
-            {
-                Environment.Reset();
-            }
-
-            if (usesWebServer)
-            {
-                var webServer = main.GetComponent<WebServerComponent>();
-
-                if (webServer != null)
-                {
-                    webServer.Restart(); // We restart the server to avoid issues with consecutive tests using it
-                }
-                else
-                {
-                    main.gameObject.AddComponent<WebServerComponent>();
-                }
-            }
-
             Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
             Environment.i.world.sceneController.deferredMessagesDecoding = false;
@@ -1141,9 +1108,6 @@ namespace DCL.Helpers
 
             return Environment.i.world.sceneController;
         }
-
-        // static string lastMessageFromEngineType;
-        // static string lastMessageFromEnginePayload;
 
         public static IEnumerator WaitForMessageFromEngine(string targetMessageType, string targetMessageJSONPayload,
             System.Action OnIterationStart, System.Action OnSuccess)
