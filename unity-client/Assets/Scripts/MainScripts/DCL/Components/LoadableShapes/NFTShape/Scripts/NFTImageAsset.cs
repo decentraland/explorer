@@ -35,7 +35,6 @@ namespace NFTShape_Internal
         public void FetchAndSetHQAsset(string url, Action onSuccess, Action onFail)
         {
             hqTexture = new AssetPromise_Texture(url);
-            AssetPromiseKeeper_Texture.i.Keep(hqTexture);
 
             hqTexture.OnSuccessEvent += (asset) =>
             {
@@ -47,6 +46,8 @@ namespace NFTShape_Internal
                 hqTexture = null;
                 onFail?.Invoke();
             };
+
+            AssetPromiseKeeper_Texture.i.Keep(hqTexture);
         }
 
         public void RestorePreviewAsset()

@@ -35,11 +35,9 @@ namespace NFTShape_Internal
         public void FetchAndSetHQAsset(string url, Action onSuccess, Action onFail)
         {
             hqGifPromise = new AssetPromise_Gif(url);
-            AssetPromiseKeeper_Gif.i.Keep(hqGifPromise);
 
             hqGifPromise.OnSuccessEvent += (asset) =>
             {
-                Debug.Log($"NFTGifAsset: FetchAndSetHQAsset Set {asset.width}");
                 gifPlayer?.SetGif(asset);
                 onSuccess?.Invoke();
             };
@@ -48,11 +46,12 @@ namespace NFTShape_Internal
                 hqGifPromise = null;
                 onFail?.Invoke();
             };
+
+            AssetPromiseKeeper_Gif.i.Keep(hqGifPromise);
         }
 
         public void RestorePreviewAsset()
         {
-            Debug.Log($"NFTGifAsset: RestorePreviewAsset Set {previewGif.width}");
             gifPlayer?.SetGif(previewGif);
 
             if (hqGifPromise != null)
