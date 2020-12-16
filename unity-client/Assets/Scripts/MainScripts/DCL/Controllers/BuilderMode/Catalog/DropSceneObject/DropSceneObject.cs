@@ -10,15 +10,7 @@ public class DropSceneObject : MonoBehaviour
 
     public void SceneObjectDropped(BaseEventData data)
     {
-        Debug.Log("Droped on scene");
-        //CatalogItemAdapter adapter = draggedObject.GetComponent<CatalogItemAdapter>();
-        //SceneObject sceneObject = adapter.GetContent();
-        //Texture texture = null;
-        //if (adapter.thumbnailImg.enabled)
-        //{
-        //    texture = adapter.thumbnailImg.texture;
-        //}
-        //Destroy(draggedObject);
+       //TODO: Implement logic if the scene object is dropped in the scene
     }
 
 }
