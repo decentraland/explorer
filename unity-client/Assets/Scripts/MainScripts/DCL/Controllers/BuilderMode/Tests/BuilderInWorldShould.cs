@@ -73,7 +73,7 @@ public class BuilderInWorldShould : TestsBase
 
         Assert.IsNotNull(dCLBuilderRaycast.builderCamera, "Camera reference on the builder-in-world god mode children are null, check them all!");
 
-        VoxelController voxelController = builderInWorldController.GetComponent<VoxelController>();
+        VoxelController voxelController = godMode.GetComponent<VoxelController>();
 
         Assert.IsNotNull(voxelController.freeCameraMovement, "Camera reference on the builder-in-world voxel controller are null, check them all!");
     }
