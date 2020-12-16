@@ -40,12 +40,14 @@ namespace DCL.Controllers
         private IBlockerAnimationHandler animationHandler;
         private Transform parent;
 
-
-        public BlockerInstanceHandler(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
+        public void Initialize(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
         {
             this.characterPosition = characterPosition;
             this.animationHandler = animationHandler;
+        }
 
+        public BlockerInstanceHandler()
+        {
             RenderProfileManifest.i.OnChangeProfile += OnChangeProfile;
             OnChangeProfile(RenderProfileManifest.i.currentProfile);
         }
@@ -92,7 +94,7 @@ namespace DCL.Controllers
             if (!instant)
                 animationHandler.FadeIn(blockerGo);
 
-            Environment.i.cullingController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
         }
 
         private void EnsureBlockerPool()

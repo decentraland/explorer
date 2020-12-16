@@ -18,6 +18,8 @@ namespace DCL
 
         public DebugConfig debugConfig;
 
+        private PerformanceMetricsController performanceMetricsController;
+
         void Awake()
         {
             if (i != null)
@@ -38,55 +40,58 @@ namespace DCL
             DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
+            performanceMetricsController = new PerformanceMetricsController();
+
             RenderProfileManifest.i.Initialize();
-            Environment.i.Initialize();
+            Environment.SetupWithDefaults();
         }
 
         private void Start()
         {
-            Environment.i.sceneController.Start();
+            Environment.i.world.sceneController.Start();
         }
 
         private void Update()
         {
-            Environment.i.sceneController.Update();
+            Environment.i.world.sceneController.Update();
+            performanceMetricsController?.Update();
         }
 
         private void LateUpdate()
         {
-            Environment.i.sceneController.LateUpdate();
+            Environment.i.world.sceneController.LateUpdate();
         }
 
         private void OnDestroy()
         {
-            Environment.i.sceneController.Dispose();
+            Environment.i.world.sceneController.Dispose();
         }
 
         #region RuntimeMessagingBridge
 
         public void LoadParcelScenes(string payload)
         {
-            Environment.i.sceneController.LoadParcelScenes(payload);
+            Environment.i.world.sceneController.LoadParcelScenes(payload);
         }
 
         public void SendSceneMessage(string payload)
         {
-            Environment.i.sceneController.SendSceneMessage(payload);
+            Environment.i.world.sceneController.SendSceneMessage(payload);
         }
 
         public void UnloadScene(string sceneId)
         {
-            Environment.i.sceneController.UnloadScene(sceneId);
+            Environment.i.world.sceneController.UnloadScene(sceneId);
         }
 
         public void CreateUIScene(string payload)
         {
-            Environment.i.sceneController.CreateUIScene(payload);
+            Environment.i.world.sceneController.CreateUIScene(payload);
         }
 
         public void UpdateParcelScenes(string payload)
         {
-            Environment.i.sceneController.UpdateParcelScenes(payload);
+            Environment.i.world.sceneController.UpdateParcelScenes(payload);
         }
 
         #endregion

@@ -35,7 +35,10 @@ namespace DCL
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.PRIMARY, OnButtonEvent);
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.SECONDARY, OnButtonEvent);
 
-            hoverController = Environment.i.interactionHoverCanvasController;
+            hoverController = InteractionHoverCanvasController.i;
+
+            OnPointerHoverStarts += CursorController.i.SetHoverCursor;
+            OnPointerHoverEnds += CursorController.i.SetNormalCursor;
 
             RetrieveCamera();
         }
@@ -46,7 +49,7 @@ namespace DCL
         {
             if (!CommonScriptableObjects.rendererState.Get() || charCamera == null) return;
 
-            WorldState worldState = Environment.i.worldState;
+            WorldState worldState = Environment.i.world.worldState;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
             bool didHit = Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
@@ -197,6 +200,9 @@ namespace DCL
             newHoveredObject = null;
             newHoveredEvent = null;
             lastHoveredEventList = null;
+
+            OnPointerHoverStarts -= CursorController.i.SetHoverCursor;
+            OnPointerHoverEnds -= CursorController.i.SetNormalCursor;
         }
 
         void RetrieveCamera()
@@ -271,7 +277,7 @@ namespace DCL
                 pointerUpEvent = null;
             }
 
-            string sceneId = Environment.i.worldState.currentSceneId;
+            string sceneId = Environment.i.world.worldState.currentSceneId;
 
             if (useRaycast && raycastGlobalLayerHitInfo.isValid)
             {
@@ -333,7 +339,7 @@ namespace DCL
                 lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
             }
 
-            string sceneId = Environment.i.worldState.currentSceneId;
+            string sceneId = Environment.i.world.worldState.currentSceneId;
 
             if (useRaycast && raycastGlobalLayerHitInfo.isValid)
             {

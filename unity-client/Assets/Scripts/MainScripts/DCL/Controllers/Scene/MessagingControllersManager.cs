@@ -52,7 +52,7 @@ namespace DCL
             if (!string.IsNullOrEmpty(GLOBAL_MESSAGING_CONTROLLER))
                 messagingControllers.TryGetValue(GLOBAL_MESSAGING_CONTROLLER, out globalController);
 
-            Environment.i.sceneController.OnSortScenes += MarkBusesDirty;
+            Environment.i.world.sceneController.OnSortScenes += MarkBusesDirty;
 
             if (mainCoroutine == null)
             {
@@ -69,7 +69,7 @@ namespace DCL
 
         public void PopulateBusesToBeProcessed()
         {
-            WorldState worldState = Environment.i.worldState;
+            WorldState worldState = Environment.i.world.worldState;
             string currentSceneId = worldState.currentSceneId;
             List<ParcelScene> scenesSortedByDistance = worldState.scenesSortedByDistance;
 
@@ -165,7 +165,7 @@ namespace DCL
                 }
             }
 
-            Environment.i.sceneController.OnSortScenes -= PopulateBusesToBeProcessed;
+            Environment.i.world.sceneController.OnSortScenes -= PopulateBusesToBeProcessed;
 
             messagingControllers.Clear();
         }

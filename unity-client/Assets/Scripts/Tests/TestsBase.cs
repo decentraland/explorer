@@ -51,10 +51,10 @@ public class TestsBase
         {
             yield return SetUp_SceneIntegrityChecker();
             SetUp_Renderer();
-            Environment.i.Initialize();
+            Environment.SetupWithDefaults();
             yield return null;
             //TODO(Brian): Remove when the init layer is ready
-            Environment.i.cullingController.Stop();
+            Environment.i.platform.cullingController.Stop();
             yield break;
         }
 
@@ -66,10 +66,10 @@ public class TestsBase
         yield return SetUp_SceneIntegrityChecker();
 
         SetUp_Renderer();
-        Environment.i.Initialize();
+        Environment.SetupWithDefaults();
         yield return null;
         //TODO(Brian): Remove when the init layer is ready
-        Environment.i.cullingController.Stop();
+        Environment.i.platform.cullingController.Stop();
     }
 
 
@@ -81,9 +81,9 @@ public class TestsBase
         if (runtimeGameObjectsRoot != null)
             Object.Destroy(runtimeGameObjectsRoot.gameObject);
 
-        TestHelpers.ForceUnloadAllScenes(Environment.i.sceneController);
+        TestHelpers.ForceUnloadAllScenes(Environment.i.world.sceneController);
 
-        Environment.i.Cleanup();
+        Environment.Dispose();
 
         if (DCLCharacterController.i != null)
         {
@@ -113,8 +113,8 @@ public class TestsBase
     {
         TearDown_PromiseKeepers();
 
-        if (Environment.i.memoryManager != null)
-            yield return Environment.i.memoryManager.CleanupPoolsIfNeeded(true);
+        if (Environment.i.platform.memoryManager != null)
+            yield return Environment.i.platform.memoryManager.CleanupPoolsIfNeeded(true);
 
         if (PoolManager.i != null)
             PoolManager.i.Cleanup();
@@ -176,7 +176,7 @@ public class TestsBase
         sceneController = TestHelpers.InitializeSceneController(usesWebServer);
 
         if (debugMode)
-            Environment.i.debugController.SetDebug();
+            Environment.i.platform.debugController.SetDebug();
 
         yield return null;
 

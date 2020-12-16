@@ -385,7 +385,7 @@ public class BuilderInWorldController : MonoBehaviour
                 data.contents.Add(mappingPair);
         }
 
-        Environment.i.sceneController.UpdateParcelScenesExecute(data);
+        Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
 
         GLTFShape mesh = (GLTFShape) sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
@@ -677,7 +677,7 @@ public class BuilderInWorldController : MonoBehaviour
     void NewSceneReady(string id)
     {
         if (sceneToEditId != id) return;
-        Environment.i.sceneController.OnReadyScene -= NewSceneReady;
+        Environment.i.world.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         EnterEditMode();
     }
@@ -688,7 +688,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         FindSceneToEdit();
         sceneToEditId = sceneToEdit.sceneData.id;
-        Environment.i.sceneController.OnReadyScene += NewSceneReady;
+        Environment.i.world.sceneController.OnReadyScene += NewSceneReady;
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
     }
@@ -718,7 +718,7 @@ public class BuilderInWorldController : MonoBehaviour
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
-        Environment.i.sceneController.ActivateBuilderInWorldEditScene();
+        Environment.i.world.sceneController.ActivateBuilderInWorldEditScene();
 
         ActivateBuilderInWorldCamera();
     }
@@ -750,7 +750,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         HUDController.i.buildModeHud.ClearEntityList();
 
-        Environment.i.sceneController.DeactivateBuilderInWorldEditScene();
+        Environment.i.world.sceneController.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
     }
@@ -794,7 +794,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     void FindSceneToEdit()
     {
-        foreach (ParcelScene scene in Environment.i.worldState.scenesSortedByDistance)
+        foreach (ParcelScene scene in Environment.i.world.worldState.scenesSortedByDistance)
         {
             if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {

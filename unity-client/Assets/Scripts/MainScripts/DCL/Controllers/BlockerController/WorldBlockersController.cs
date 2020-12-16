@@ -17,9 +17,9 @@ namespace DCL.Controllers
 
         Transform blockersParent;
 
-        readonly ISceneHandler sceneHandler;
-        readonly IBlockerInstanceHandler blockerInstanceHandler;
-        readonly DCLCharacterPosition characterPosition;
+        ISceneHandler sceneHandler;
+        IBlockerInstanceHandler blockerInstanceHandler;
+        DCLCharacterPosition characterPosition;
 
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
@@ -36,35 +36,43 @@ namespace DCL.Controllers
             new Vector2Int(-1, 1)
         };
 
-        public WorldBlockersController(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler, DCLCharacterPosition characterPosition)
+        public void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler, DCLCharacterPosition characterPosition)
         {
             this.blockerInstanceHandler = blockerInstanceHandler;
             this.sceneHandler = sceneHandler;
             this.characterPosition = characterPosition;
 
+            blockerInstanceHandler.SetParent(blockersParent);
+            characterPosition.OnPrecisionAdjust += OnWorldReposition;
+        }
+
+        public WorldBlockersController()
+        {
             blockersParent = new GameObject("WorldBlockers").transform;
             blockersParent.position = Vector3.zero;
-
-            blockerInstanceHandler.SetParent(blockersParent);
-
-            characterPosition.OnPrecisionAdjust += OnWorldReposition;
         }
 
         public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler, DCLCharacterPosition characterPosition)
         {
-            var blockerAnimationHandler = new BlockerAnimationHandler();
+            var worldBlockersController = new WorldBlockersController();
+            worldBlockersController.InitializeWithDefaultDependencies(sceneHandler, characterPosition);
+            return worldBlockersController;
+        }
 
-            var blockerInstanceHandler = new BlockerInstanceHandler(
+        public void InitializeWithDefaultDependencies(ISceneHandler sceneHandler, DCLCharacterPosition characterPosition)
+        {
+            var blockerAnimationHandler = new BlockerAnimationHandler();
+            var blockerInstanceHandler = new BlockerInstanceHandler();
+
+            blockerInstanceHandler.Initialize(
                 characterPosition,
                 blockerAnimationHandler
             );
 
-            var worldBlockersController = new WorldBlockersController(
+            Initialize(
                 sceneHandler,
                 blockerInstanceHandler,
                 characterPosition);
-
-            return worldBlockersController;
         }
 
         public void SetupWorldBlockers()
