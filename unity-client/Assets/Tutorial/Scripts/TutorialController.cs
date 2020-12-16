@@ -47,6 +47,8 @@ namespace DCL.Tutorial
 
         public int currentStepIndex { get; private set; }
 
+        private const string PLAYER_PREFS_VOICE_CHAT_FEATURE_SHOWED = "VoiceChatFeatureShowed";
+
         [Header("General Configuration")]
         [SerializeField]
         internal int tutorialVersion = 1;
@@ -180,6 +182,10 @@ namespace DCL.Tutorial
 
         public void SetTutorialEnabledForUsersThatAlreadyDidTheTutorial()
         {
+            // TODO (Santi): This a TEMPORAL fix. It will be removed when we refactorize the tutorial system in order to make it compatible with incremental features.
+            if (PlayerPrefs.GetInt(PLAYER_PREFS_VOICE_CHAT_FEATURE_SHOWED) == 1)
+                return;
+
             SetupTutorial(false.ToString(), TutorialType.Initial, true);
         }
 
@@ -508,6 +514,10 @@ namespace DCL.Tutorial
             {
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
             }
+
+            // TODO (Santi): This a TEMPORAL fix. It will be removed when we refactorize the tutorial system in order to make it compatible with incremental features.
+            if (tutorialPath == TutorialPath.FromUserThatAlreadyDidTheTutorial)
+                PlayerPrefs.SetInt(PLAYER_PREFS_VOICE_CHAT_FEATURE_SHOWED, 1);
 
             runningStep = null;
 
