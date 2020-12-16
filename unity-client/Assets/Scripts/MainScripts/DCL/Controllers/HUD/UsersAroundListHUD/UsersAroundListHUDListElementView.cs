@@ -60,20 +60,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             profile.OnFaceSnapshotReadyEvent += SetAvatarPreviewImage;
         }
 
-        if (FriendsController.i)
-        {
-            if (FriendsController.i.friends.TryGetValue(profile.userId, out FriendsController.UserStatus status))
-            {
-                SetupFriendship(status.friendshipStatus);
-            }
-            else
-            {
-                SetupFriendship(FriendshipStatus.NONE);
-            }
-
-            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
-            FriendsController.i.OnUpdateFriendship += OnFriendActionUpdate;
-        }
+        SetupFriends(profile.userId);
     }
 
     public void SetMuted(bool isMuted)
@@ -106,7 +93,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             profile = null;
         }
 
-        if (FriendsController.i)
+        if (FriendsController.i != null)
         {
             FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
         }
@@ -124,6 +111,26 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         menuButton.gameObject.SetActive(false);
         blockedGO.SetActive(false);
         gameObject.SetActive(true);
+    }
+    
+    void SetupFriends(string userId)
+    {
+        if (FriendsController.i == null)
+        {
+            return;
+        }
+        
+        if (FriendsController.i.friends.TryGetValue(userId, out FriendsController.UserStatus status))
+        {
+            SetupFriendship(status.friendshipStatus);
+        }
+        else
+        {
+            SetupFriendship(FriendshipStatus.NONE);
+        }
+
+        FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+        FriendsController.i.OnUpdateFriendship += OnFriendActionUpdate;
     }
 
     void SetAvatarPreviewImage(Texture texture)
