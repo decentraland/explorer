@@ -27,18 +27,22 @@ namespace DCL
 
             if (autoCleanupCoroutine != null)
                 CoroutineStarter.Stop(autoCleanupCoroutine);
+
+            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
         }
 
         public MemoryManager()
         {
-            CommonScriptableObjects.rendererState.OnChange += (isEnable, prevState) =>
+            CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
+        }
+
+        private void OnRendererStateChange(bool isEnable, bool prevState)
+        {
+            if (isEnable)
             {
-                if (isEnable)
-                {
-                    Environment.i.platform.parcelScenesCleaner.ForceCleanup();
-                    Resources.UnloadUnusedAssets();
-                }
-            };
+                Environment.i.platform.parcelScenesCleaner.ForceCleanup();
+                Resources.UnloadUnusedAssets();
+            }
         }
 
         bool NeedsMemoryCleanup()
