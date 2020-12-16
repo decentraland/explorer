@@ -234,7 +234,7 @@ namespace Tests
                 Assert.IsFalse(entity.Value.gameObject.activeInHierarchy, "Every entity should be disabled after returning to the pool");
             }
 
-            TestHelpers.ForceUnloadAllScenes(sceneController);
+            sceneController.UnloadAllScenes(includePersistent: true);
 
             yield return null;
         }
@@ -279,7 +279,7 @@ namespace Tests
                 Assert.IsTrue(Environment.i.world.worldState.loadedScenes.ContainsValue(reference), "References must be the same");
             }
 
-            TestHelpers.ForceUnloadAllScenes(sceneController);
+            sceneController.UnloadAllScenes(includePersistent: true);
             yield return null;
         }
 

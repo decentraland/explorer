@@ -85,6 +85,8 @@ namespace DCL
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             Environment.i.platform.debugController.OnDebugModeSet -= OnDebugModeSet;
 
+            UnloadAllScenes(includePersistent: true);
+
             if (deferredDecodingCoroutine != null)
                 CoroutineStarter.Stop(deferredDecodingCoroutine);
         }
@@ -568,12 +570,12 @@ namespace DCL
             }
         }
 
-        public void LoadParcelScenesExecute(string decentralandSceneJSON)
+        public void LoadParcelScenesExecute(string scenePayload)
         {
             LoadParcelScenesMessage.UnityParcelScene scene;
 
             ProfilingEvents.OnMessageDecodeStart?.Invoke(MessagingTypes.SCENE_LOAD);
-            scene = Utils.SafeFromJson<LoadParcelScenesMessage.UnityParcelScene>(decentralandSceneJSON);
+            scene = Utils.SafeFromJson<LoadParcelScenesMessage.UnityParcelScene>(scenePayload);
             ProfilingEvents.OnMessageDecodeEnds?.Invoke(MessagingTypes.SCENE_LOAD);
 
             if (scene == null || scene.id == null) return;
@@ -624,18 +626,18 @@ namespace DCL
         }
 
 
-        public void UpdateParcelScenesExecute(string decentralandSceneJSON)
+        public void UpdateParcelScenesExecute(string sceneId)
         {
             LoadParcelScenesMessage.UnityParcelScene scene;
 
             ProfilingEvents.OnMessageDecodeStart?.Invoke(MessagingTypes.SCENE_UPDATE);
-            scene = Utils.SafeFromJson<LoadParcelScenesMessage.UnityParcelScene>(decentralandSceneJSON);
+            scene = Utils.SafeFromJson<LoadParcelScenesMessage.UnityParcelScene>(sceneId);
             ProfilingEvents.OnMessageDecodeEnds?.Invoke(MessagingTypes.SCENE_UPDATE);
 
             if (Environment.i.world.worldState.loadedScenes.ContainsKey(scene.id))
                 Environment.i.world.worldState.loadedScenes[scene.id].SetUpdateData(scene);
             else
-                LoadParcelScenesExecute(decentralandSceneJSON);
+                LoadParcelScenesExecute(sceneId);
         }
 
         public void UpdateParcelScenesExecute(LoadParcelScenesMessage.UnityParcelScene scene)
@@ -662,20 +664,20 @@ namespace DCL
             Environment.i.messaging.messagingControllersManager.RemoveController(sceneKey);
         }
 
-        public void UnloadParcelSceneExecute(string sceneKey)
+        public void UnloadParcelSceneExecute(string sceneId)
         {
             ProfilingEvents.OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_DESTROY);
 
             WorldState worldState = Environment.i.world.worldState;
 
-            if (!worldState.loadedScenes.ContainsKey(sceneKey) || worldState.loadedScenes[sceneKey].isPersistent)
+            if (!worldState.loadedScenes.ContainsKey(sceneId) || worldState.loadedScenes[sceneId].isPersistent)
             {
                 return;
             }
 
-            var scene = worldState.loadedScenes[sceneKey];
+            var scene = worldState.loadedScenes[sceneId];
 
-            worldState.loadedScenes.Remove(sceneKey);
+            worldState.loadedScenes.Remove(sceneId);
 
             // Remove the scene id from the msg. priorities list
             worldState.scenesSortedByDistance.Remove(scene);
@@ -696,8 +698,16 @@ namespace DCL
             ProfilingEvents.OnMessageProcessEnds?.Invoke(MessagingTypes.SCENE_DESTROY);
         }
 
-        public void UnloadAllScenes()
+        public void UnloadAllScenes(bool includePersistent = false)
         {
+            if (includePersistent)
+            {
+                foreach (var keyValuePair in Environment.i.world.worldState.loadedScenes.Where(x => x.Value.isPersistent))
+                {
+                    keyValuePair.Value.isPersistent = false;
+                }
+            }
+
             var list = Environment.i.world.worldState.loadedScenes.ToArray();
             for (int i = 0; i < list.Length; i++)
             {
