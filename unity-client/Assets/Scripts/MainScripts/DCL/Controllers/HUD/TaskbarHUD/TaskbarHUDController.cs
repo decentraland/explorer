@@ -15,7 +15,7 @@ public class TaskbarHUDController : IHUD
     public struct Configuration
     {
         public bool enableVoiceChat;
-        public bool enableNewSettings; // TODO (Santi): Remove once the new Settings HUD is implemented
+        public bool enableOldSettings; // TODO (Santi): Remove once the new Settings HUD is implemented
     }
 
     public TaskbarHUDView view;
@@ -68,6 +68,8 @@ public class TaskbarHUDController : IHUD
         view.OnChatToggleOn += View_OnChatToggleOn;
         view.OnFriendsToggleOff += View_OnFriendsToggleOff;
         view.OnFriendsToggleOn += View_OnFriendsToggleOn;
+        view.OnSettingsToggleOff += View_OnSettingsToggleOff;
+        view.OnSettingsToggleOn += View_OnSettingsToggleOn;
         view.OnBuilderInWorldToggleOff += View_OnBuilderInWorldToggleOff;
         view.OnBuilderInWorldToggleOn += View_OnBuilderInWorldToggleOn;
         view.OnExploreToggleOff += View_OnExploreToggleOff;
@@ -159,6 +161,24 @@ public class TaskbarHUDController : IHUD
             return;
 
         OpenPrivateChatWindow(head.profile.userId);
+    }
+
+    private void View_OnSettingsToggleOn()
+    {
+        if (useNewSettings)
+            settingsPanelHud.SetVisibility(true);
+        else
+            settingsHud.SetVisibility(true);
+
+        OnAnyTaskbarButtonClicked?.Invoke();
+    }
+
+    private void View_OnSettingsToggleOff()
+    {
+        if (useNewSettings)
+            settingsPanelHud.SetVisibility(false);
+        else
+            settingsHud.SetVisibility(false);
     }
 
     private void View_OnBuilderInWorldToggleOn()
@@ -335,8 +355,19 @@ public class TaskbarHUDController : IHUD
 
         settingsHud = controller;
         view.OnAddSettingsWindow();
+        settingsHud.OnOpen += () =>
+        {
+            view.settingsButton.SetToggleState(true, false);
+            view.exploreButton.SetToggleState(false);
+        };
         settingsHud.OnClose += () =>
         {
+            view.settingsButton.SetToggleState(false, false);
+            MarkWorldChatAsReadIfOtherWindowIsOpen();
+        };
+        settingsHud.OnClose += () =>
+        {
+            view.settingsButton.SetToggleState(false, false);
             MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
 
@@ -353,8 +384,14 @@ public class TaskbarHUDController : IHUD
 
         settingsPanelHud = controller;
         view.OnAddSettingsWindow();
+        settingsPanelHud.OnOpen += () =>
+        {
+            view.settingsButton.SetToggleState(true, false);
+            view.exploreButton.SetToggleState(false);
+        };
         settingsPanelHud.OnClose += () =>
         {
+            view.settingsButton.SetToggleState(false, false);
             MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
 
@@ -371,6 +408,11 @@ public class TaskbarHUDController : IHUD
 
         exploreHud = controller;
         view.OnAddExploreWindow();
+        exploreHud.OnOpen += () =>
+        {
+            view.exploreButton.SetToggleState(true, false);
+            view.settingsButton.SetToggleState(false);
+        };
         exploreHud.OnClose += () =>
         {
             view.exploreButton.SetToggleState(false, false);
@@ -429,6 +471,8 @@ public class TaskbarHUDController : IHUD
             view.OnChatToggleOn -= View_OnChatToggleOn;
             view.OnFriendsToggleOff -= View_OnFriendsToggleOff;
             view.OnFriendsToggleOn -= View_OnFriendsToggleOn;
+            view.OnSettingsToggleOff -= View_OnSettingsToggleOff;
+            view.OnSettingsToggleOn -= View_OnSettingsToggleOn;
             view.OnBuilderInWorldToggleOff -= View_OnBuilderInWorldToggleOff;
             view.OnBuilderInWorldToggleOn -= View_OnBuilderInWorldToggleOn;
             view.OnExploreToggleOff -= View_OnExploreToggleOff;
@@ -495,6 +539,11 @@ public class TaskbarHUDController : IHUD
     public void SetVoiceChatRecording(bool recording)
     {
         view?.voiceChatButton.SetOnRecording(recording);
+    }
+
+    public void SetVoiceChatEnabledByScene(bool enabled)
+    {
+        view?.voiceChatButton.SetEnabledByScene(enabled);
     }
 
     private void OnFriendsToggleInputPress()

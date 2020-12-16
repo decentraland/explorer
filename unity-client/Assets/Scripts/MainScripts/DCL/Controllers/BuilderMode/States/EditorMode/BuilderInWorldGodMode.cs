@@ -13,9 +13,12 @@ using Environment = DCL.Environment;
 
 public class BuilderInWorldGodMode : BuilderInWorldMode
 {
-    [Header("Editor Design")] public float distanceEagleCamera = 20f;
+    [Header("Editor Design")]
+    public float distanceEagleCamera = 20f;
 
-    [Header("Scenes References")] public FreeCameraMovement freeCameraController;
+    [Header("Scenes References")]
+    public FreeCameraMovement freeCameraController;
+
     public DCLBuilderGizmoManager gizmoManager;
     public VoxelController voxelController;
     public BuilderInWorldInputWrapper builderInputWrapper;
@@ -25,10 +28,12 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public Transform lookAtT;
     public MouseCatcher mouseCatcher;
 
-    [Header("InputActions")] [SerializeField]
+    [Header("InputActions")]
+    [SerializeField]
     internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
 
-    [SerializeField] internal InputAction_Hold squareMultiSelectionInputAction;
+    [SerializeField]
+    internal InputAction_Hold squareMultiSelectionInputAction;
 
 
     ParcelScene sceneToEdit;
@@ -250,7 +255,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
 
 
-        SceneController.i.ReIntegrateIsolatedScene();
+        Environment.i.sceneController.ReIntegrateIsolatedScene();
 
         gizmoManager.HideGizmo();
         RenderSettings.fog = true;

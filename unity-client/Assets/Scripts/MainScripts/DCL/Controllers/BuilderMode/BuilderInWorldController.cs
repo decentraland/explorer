@@ -30,26 +30,35 @@ public class BuilderInWorldController : MonoBehaviour
         Editor = 2
     }
 
-    [Header("Activation of Feature")] public bool activeFeature = false;
+    [Header("Activation of Feature")]
+    public bool activeFeature = false;
 
-    [Header("Design variables")] public float scaleSpeed = 0.25f;
+    [Header("Design variables")]
+    public float scaleSpeed = 0.25f;
+
     public float rotationSpeed = 0.5f;
     public float msBetweenInputInteraction = 200;
 
     public float distanceLimitToSelectObjects = 50;
 
-    [Header("Snap variables")] public float snapFactor = 1f;
+    [Header("Snap variables")]
+    public float snapFactor = 1f;
+
     public float snapRotationDegresFactor = 15f;
     public float snapScaleFactor = 0.5f;
 
     public float snapDistanceToActivateMovement = 10f;
 
-    [Header("Scene References")] public GameObject cameraParentGO;
+    [Header("Scene References")]
+    public GameObject cameraParentGO;
+
     public GameObject cursorGO;
     public InputController inputController;
     public PlayerAvatarController avatarRenderer;
 
-    [Header("Prefab References")] public OutlinerController outlinerController;
+    [Header("Prefab References")]
+    public OutlinerController outlinerController;
+
     public BuilderInWorldInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
@@ -60,21 +69,34 @@ public class BuilderInWorldController : MonoBehaviour
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
     public GameObject floorPrefab;
 
-    [Header("Build Modes")] public BuilderInWorldFirstPersonMode firstPersonMode;
+    [Header("Build Modes")]
+    public BuilderInWorldFirstPersonMode firstPersonMode;
+
     public BuilderInWorldGodMode editorMode;
 
-    [Header("Build References")] public int builderRendererIndex = 1;
+    [Header("Build References")]
+    public int builderRendererIndex = 1;
+
     public LayerMask layerToRaycast;
 
-    [Header("InputActions")] [SerializeField]
+    [Header("InputActions")]
+    [SerializeField]
     internal InputAction_Trigger editModeChangeInputAction;
 
-    [SerializeField] internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
-    [SerializeField] internal InputAction_Trigger toggleRedoActionInputAction;
-    [SerializeField] internal InputAction_Trigger toggleUndoActionInputAction;
-    [SerializeField] internal InputAction_Trigger toggleSnapModeInputAction;
+    [SerializeField]
+    internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
 
-    [SerializeField] internal InputAction_Hold multiSelectionInputAction;
+    [SerializeField]
+    internal InputAction_Trigger toggleRedoActionInputAction;
+
+    [SerializeField]
+    internal InputAction_Trigger toggleUndoActionInputAction;
+
+    [SerializeField]
+    internal InputAction_Trigger toggleSnapModeInputAction;
+
+    [SerializeField]
+    internal InputAction_Hold multiSelectionInputAction;
 
     //Note(Adrian): This is for tutorial purposes
     public Action OnSceneObjectPlaced;
@@ -441,7 +463,8 @@ public class BuilderInWorldController : MonoBehaviour
                 data.contents.Add(mappingPair);
         }
 
-        SceneController.i.UpdateParcelScenesExecute(data);
+        Environment.i.sceneController.UpdateParcelScenesExecute(data);
+
    
         DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
         DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
@@ -762,6 +785,7 @@ public class BuilderInWorldController : MonoBehaviour
         VoxelEntityHit voxelEntityHit = null;
 
         hits = Physics.RaycastAll(ray, RAYCAST_MAX_DISTANCE, layerToRaycast);
+
         foreach (RaycastHit hit in hits)
         {
             string entityID = hit.collider.gameObject.name;
@@ -769,14 +793,17 @@ public class BuilderInWorldController : MonoBehaviour
             if (sceneToEdit.entities.ContainsKey(entityID))
             {
                 DCLBuilderInWorldEntity entityToCheck = builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
+
                 if (entityToCheck == null) continue;
+
+                Camera camera = Camera.main;
 
                 if (!entityToCheck.IsSelected && entityToCheck.tag == BuilderInWorldSettings.VOXEL_TAG)
                 {
-                    if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
+                    if (Vector3.Distance(camera.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
                     {
                         voxelEntityHit = new VoxelEntityHit(entityToCheck, hit);
-                        currentDistance = Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
+                        currentDistance = Vector3.Distance(camera.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
                     }
                 }
             }
@@ -788,7 +815,7 @@ public class BuilderInWorldController : MonoBehaviour
     public void NewSceneReady(string id)
     {
         if (sceneToEditId != id) return;
-        SceneController.i.OnReadyScene -= NewSceneReady;
+        Environment.i.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         sceneReady = true;
         CheckEnterEditMode();
@@ -806,9 +833,9 @@ public class BuilderInWorldController : MonoBehaviour
         FindSceneToEdit();
         editorMode.ActivateCamera(sceneToEdit);
         sceneToEditId = sceneToEdit.sceneData.id;
-        SceneController.i.OnReadyScene += NewSceneReady;
         inputController.isInputActive = false;
 
+        Environment.i.sceneController.OnReadyScene += NewSceneReady;
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);    
     }
@@ -847,9 +874,8 @@ public class BuilderInWorldController : MonoBehaviour
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
-        SceneController.i.ActivateBuilderInWorldEditScene();
-   
-
+        Environment.i.sceneController.ActivateBuilderInWorldEditScene();
+  
         avatarRenderer.SetAvatarVisibility(false);
 
         ActivateBuilderInWorldCamera();
@@ -887,7 +913,7 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.SetVisibility(false);
         }
 
-        SceneController.i.DeactivateBuilderInWorldEditScene();
+        Environment.i.sceneController.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
     }
@@ -942,11 +968,12 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void ActivateBuilderInWorldCamera()
     {
-        DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+        Camera camera = Camera.main;
+        DCLBuilderOutline outliner = camera.GetComponent<DCLBuilderOutline>();
 
         if (outliner == null)
         {
-            outliner = Camera.main.gameObject.AddComponent(typeof(DCLBuilderOutline)) as DCLBuilderOutline;
+            outliner = camera.gameObject.AddComponent(typeof(DCLBuilderOutline)) as DCLBuilderOutline;
             outliner.SetOutlineMaterial(outlinerMaterial);
         }
         else
@@ -956,20 +983,25 @@ public class BuilderInWorldController : MonoBehaviour
 
         outliner.Activate();
 
-        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+        UniversalAdditionalCameraData additionalCameraData = camera.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(builderRendererIndex);
     }
 
     public void DeactivateBuilderInWorldCamera()
     {
-        DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+        Camera camera = Camera.main;
+        DCLBuilderOutline outliner = camera.GetComponent<DCLBuilderOutline>();
         if (outliner != null)
         {
             outliner.enabled = false;
             outliner.Deactivate();
         }
 
-        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+       
+        outliner.enabled = false;
+        outliner.Deactivate();
+
+        UniversalAdditionalCameraData additionalCameraData = camera.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(0);
     }
 
