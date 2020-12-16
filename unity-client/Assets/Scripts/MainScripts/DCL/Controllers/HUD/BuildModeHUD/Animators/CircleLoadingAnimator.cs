@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+//Note (Adrian): This class is temporary and will dissapear when the new UI is implemented
 public class CircleLoadingAnimator : MonoBehaviour
 {
     public float animSpeed = 6f;

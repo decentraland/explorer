@@ -39,8 +39,7 @@ public class BuilderInWorldShould : TestsBase
             Assert.Pass();
             return;
         }
-
-   
+ 
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
 
         if (Physics.Raycast(ray, out hit, BuilderInWorldGodMode.RAYCAST_MAX_DISTANCE, godMode.groundLayer))
@@ -48,7 +47,6 @@ public class BuilderInWorldShould : TestsBase
             Assert.Pass();
             return;
         }
-
 
         Assert.Fail();
     }
@@ -159,41 +157,7 @@ public class BuilderInWorldShould : TestsBase
         Assert.IsFalse(builderInWorldController.isEditModeActivated, "Unable to exit  Builder In World");
         GameObject.DestroyImmediate(builderInWorldController.gameObject);
         yield return null;
-    }
-
-    //[UnityTest]
-    //    public IEnumerator TestPointerOverUIElement()
-    //{
-    //    BuilderInWorldController builderInWorldControllerPrefab = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
-
-    //    builderInWorldController = InstantiateTestGameObject(builderInWorldControllerPrefab.gameObject).GetComponent<BuilderInWorldController>();
-    //    builderInWorldController.gameObject.SetActive(true);
-    //    yield return null;
-
-    //    builderInWorldController.activeFeature = true;
-    //    builderInWorldController.StartEnterEditMode();
-    //    builderInWorldController.NewSceneReady(scene.sceneData.id);
-    //    builderInWorldController.sceneToEdit = scene;
-
-    //    BuilderInWorldTestHelper.CreateTestCatalogLocal();
-    //    builderInWorldController.CatalogLoaded();
-    //    yield return new WaitUntil(() => builderInWorldController.isEditModeActivated == true);
-    //    yield return new WaitForSeconds(4f);
-    //    Vector3 mousePosition = new Vector3(1820, 540, 0);
-
-    //    bool isPointerOverUi = BuilderInWorldUtils.IsPointerOverUIElement(mousePosition);
-    //    Assert.IsFalse(isPointerOverUi, "Pointer over UI is not detected correctly");
-
-
-    //    mousePosition = new Vector3(980, 1036, 0);
-    //    isPointerOverUi = BuilderInWorldUtils.IsPointerOverUIElement(mousePosition);
-    //    Assert.IsTrue(isPointerOverUi, "Pointer over UI is not detected correctly");
-
-    //    builderInWorldController.ExitEditMode();
-    //    yield return new WaitForSeconds(4f);
-    //    GameObject.DestroyImmediate(builderInWorldController.gameObject);
-    //    yield return null;
-    //}
+    }  
 
     protected override IEnumerator TearDown()
     {

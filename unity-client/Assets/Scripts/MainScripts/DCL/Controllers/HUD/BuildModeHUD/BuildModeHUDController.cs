@@ -110,7 +110,6 @@ public class BuildModeHUDController : IHUD
         view.RefreshCatalogAssetPack();
     }
 
-
     public void RefreshCatalogContent()
     {
         view.RefreshCatalogContent();
