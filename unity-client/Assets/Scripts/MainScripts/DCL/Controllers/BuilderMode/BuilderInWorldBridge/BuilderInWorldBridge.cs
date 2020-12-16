@@ -16,6 +16,9 @@ using Environment = DCL.Environment;
 /// </summary>
 public class BuilderInWorldBridge : MonoBehaviour
 {
+    public event Action OnPublishOK;
+    public event Action<string> OnPublishKO;
+
     //This is done for optimization purposes, recreating new objects can increase garbage collection
     TransformComponent entityTransformComponentModel = new TransformComponent();
 
@@ -23,6 +26,26 @@ public class BuilderInWorldBridge : MonoBehaviour
     ModifyEntityComponentEvent modifyEntityComponentEvent = new ModifyEntityComponentEvent();
     EntityPayload entityPayload = new EntityPayload();
     EntitySingleComponentPayload entitySingleComponentPayload = new EntitySingleComponentPayload();
+
+
+    public void PublishSceneResult(string payload)
+    {
+        Debug.Log("Scene published " +payload);
+        PublishSceneResultPayload publishSceneResultPayload = JsonUtility.FromJson<PublishSceneResultPayload>(payload);
+        string message;
+        if (publishSceneResultPayload.ok)
+        {
+            message = "Done!\nThe scene has been published";
+            OnPublishOK?.Invoke();
+        }
+        else
+        {
+            message = publishSceneResultPayload.error;
+            OnPublishKO?.Invoke(publishSceneResultPayload.error);
+        }
+
+        HUDController.i.builderInWorldMainHud.PublishEnd(message);
+    }
 
     public void ChangeEntityLockStatus(DCLBuilderInWorldEntity entity, ParcelScene scene)
     {

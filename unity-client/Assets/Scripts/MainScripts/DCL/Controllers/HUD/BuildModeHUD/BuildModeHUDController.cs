@@ -83,6 +83,16 @@ public class BuildModeHUDController : IHUD
         view.OnLogoutAction += () => OnLogoutAction?.Invoke();
     }
 
+    public void StartPublishing()
+    {
+        view.StartPublishing();
+    }
+
+    public void PublishEnd(string message)
+    {
+        view.PublishEnd(message);
+    }
+
     public void SetParcelScene(ParcelScene parcelScene)
     {
         view.sceneLimitInfoController.SetParcelScene(parcelScene);

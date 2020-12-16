@@ -113,8 +113,7 @@ public class BuilderInWorldNFTController
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
 
-        //Note (Adrian): This won't work, we need to get the correct addres from the kernel
-        string userId =  GetCorrectWalletAddress(userProfile.userId);
+        string userId = userProfile.ethAddress;
 
         yield return NFTHelper.FetchNFTsFromOwner(userId, (nFTOwner) =>
         {
@@ -126,27 +125,6 @@ public class BuilderInWorldNFTController
             desactivateNFT = true;
             Debug.Log($"error getting NFT from owner:  {error}");
         });
-    }
-
-    string GetCorrectWalletAddress(string addres)
-    {
-        HashAlgorithm sha = SHA384.Create();
-        byte[] result = sha.ComputeHash(Encoding.ASCII.GetBytes(addres));
-
-        string resultString = "";
-
-        int cont = 0;
-        foreach(char character in addres)
-        {
-            if ((Convert.ToString(result[cont], 2).PadLeft(8, '0')).StartsWith("1"))
-                resultString += character.ToString().ToUpper();
-            else
-                resultString += character.ToString().ToLower();
-
-            cont++;
-        }
-
-        return resultString;
     }
 
     SceneObject NFTInfoToSceneObject(NFTInfo nFTInfo)

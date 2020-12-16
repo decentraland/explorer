@@ -844,8 +844,6 @@ public class BuilderInWorldController : MonoBehaviour
     {
         BuilderInWorldNFTController.i.ClearNFTs();
     
-
-        isEditModeActivated = true;
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
 
@@ -881,6 +879,8 @@ public class BuilderInWorldController : MonoBehaviour
         ActivateBuilderInWorldCamera();
         if (IsNewScene())
             SetupNewScene();
+
+        isEditModeActivated = true;
     }
 
     public void ExitEditMode()
@@ -896,7 +896,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         cursorGO.SetActive(true);
         builderInWorldEntityHandler.ExitFromEditMode();
-        isEditModeActivated = false;
+
         sceneToEdit.SetEditMode(false);
         SetBuildMode(EditModeState.Inactive);
 
@@ -916,6 +916,7 @@ public class BuilderInWorldController : MonoBehaviour
         Environment.i.sceneController.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
+        isEditModeActivated = false;
     }
 
     public bool IsSceneObjectFloor(SceneObject floorSceneObject)
@@ -943,7 +944,7 @@ public class BuilderInWorldController : MonoBehaviour
         {
             DCLBuilderInWorldEntity decentralandEntity = CreateSceneObject(floorSceneObject,false,true);
             decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
-            decentralandEntity.transform.position = SceneController.i.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+            decentralandEntity.transform.position = Environment.i.sceneController.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
             dCLBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
 
             GameObject floorPlaceHolder =  Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
@@ -1027,5 +1028,6 @@ public class BuilderInWorldController : MonoBehaviour
     void PublishScene()
     {
         builderInWorldBridge.PublishScene(sceneToEdit);
+        HUDController.i.builderInWorldMainHud.StartPublishing();
     }
 }

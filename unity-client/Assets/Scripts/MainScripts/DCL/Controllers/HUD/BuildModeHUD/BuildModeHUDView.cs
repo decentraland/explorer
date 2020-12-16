@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,10 @@ public class BuildModeHUDView : MonoBehaviour
 
     public Button tutorialBtn;
     public Button logOutBtn;
+
+    public GameObject publishGO, publishingGO, publishedGO;
+
+    public TextMeshProUGUI publishStatusTxt;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
@@ -106,6 +111,20 @@ public class BuildModeHUDView : MonoBehaviour
         toggleOpenEntityListInputAction.OnTriggered -= OnEntityListActionTriggered;
         toggleSceneInfoInputAction.OnTriggered -= OnSceneLimitInfoControllerChangeVisibilityTriggered;
         toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
+    }
+
+    public void StartPublishing()
+    {
+        publishGO.SetActive(true);
+        publishingGO.SetActive(true);
+        publishedGO.SetActive(false);
+    }
+
+    public void PublishEnd(string message)
+    {
+        publishingGO.SetActive(false);
+        publishedGO.SetActive(true);
+        publishStatusTxt.text = message;
     }
 
     public void SetPublishBtnAvailability(bool isAvailable)

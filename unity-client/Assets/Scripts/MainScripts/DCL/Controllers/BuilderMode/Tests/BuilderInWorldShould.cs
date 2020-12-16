@@ -103,7 +103,7 @@ public class BuilderInWorldShould : TestsBase
                 data.contents.Add(mappingPair);
         }
 
-        SceneController.i.UpdateParcelScenesExecute(data);
+        Environment.i.sceneController.UpdateParcelScenesExecute(data);
 
 
         string entityId = "1";

@@ -219,7 +219,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE)
             gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
-        SceneController.i.IsolateScene(sceneToEdit);
+        Environment.i.sceneController.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
 
         RenderSettings.fog = false;
@@ -493,7 +493,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         position.y = totalY;
         position.z = centerZ;
 
-        position = SceneController.i.ConvertScenePositionToUnityPosition(parcelScene);
+        position = Environment.i.sceneController.ConvertScenePositionToUnityPosition(parcelScene);
 
         position.x += ParcelSettings.PARCEL_SIZE / 2 ;
         position.z += ParcelSettings.PARCEL_SIZE / 2 ;
