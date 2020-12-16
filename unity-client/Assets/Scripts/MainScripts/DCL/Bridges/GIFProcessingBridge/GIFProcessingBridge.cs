@@ -20,7 +20,17 @@ namespace DCL
             public float[] frameDelays;
         }
 
+        public class PendingGifs
+        {
+            public enum Status { PENDING, OK, ERROR }
+
+            public GifFrameData[] textures;
+            public Status status;
+        }
+
         public static GIFProcessingBridge i { get; private set; }
+
+        private readonly Dictionary<string, PendingGifs> pendingGifs = new Dictionary<string, PendingGifs>();
 
         void Awake()
         {
@@ -36,7 +46,6 @@ namespace DCL
         }
 
         bool jsGIFProcessingEnabled = false;
-        Dictionary<string, GIFCache> cachedGIFs = new Dictionary<string, GIFCache>();
 
         /// <summary>
         /// Tells Kernel to start processing a desired GIF, waits for the data to come back from Kernel and passes it to the GIF through the onFinishCallback
@@ -50,38 +59,26 @@ namespace DCL
                 yield break;
             }
 
-            string gifId = url;
-
-            if (!cachedGIFs.TryGetValue(gifId, out GIFCache gif))
+            if (!pendingGifs.TryGetValue(url, out PendingGifs gif))
             {
-                gif = new GIFCache()
+                gif = new PendingGifs()
                 {
-                    refCount = 0,
-                    status = GIFCache.Status.PENDING,
-                    data = new GIFCacheData()
-                    {
-                        id = gifId,
-                        url = url,
-                        textures = null
-                    }
+                    status = PendingGifs.Status.PENDING
                 };
-                cachedGIFs.Add(gifId, gif);
+                pendingGifs.Add(url, gif);
                 DCL.Interface.WebInterface.RequestGIFProcessor(
-                       gif.data.url,
-                       gif.data.id,
-                       SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
+                       url, url, SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.OpenGLES2);
             }
 
-            yield return new WaitUntil(() => gif.status != GIFCache.Status.PENDING);
+            yield return new WaitUntil(() => gif.status != PendingGifs.Status.PENDING);
 
-            if (gif.status == GIFCache.Status.ERROR)
+            if (gif.status == PendingGifs.Status.ERROR)
             {
                 onFail?.Invoke();
                 yield break;
             }
 
-            gif.refCount++;
-            onSuccess?.Invoke(gif.data.textures);
+            onSuccess?.Invoke(gif.textures);
         }
 
         /// <summary>
@@ -91,35 +88,25 @@ namespace DCL
         {
             var parsedPayload = Utils.SafeFromJson<UpdateGIFPointersPayload>(payload);
 
-            if (cachedGIFs.TryGetValue(parsedPayload.id, out GIFCache gif))
+            if (pendingGifs.TryGetValue(parsedPayload.id, out PendingGifs gif))
             {
-                gif.data.textures = GenerateTexturesList(parsedPayload.width, parsedPayload.height, parsedPayload.pointers, parsedPayload.frameDelays);
-                gif.status = GIFCache.Status.OK;
+                gif.textures = GenerateTexturesList(parsedPayload.width, parsedPayload.height, parsedPayload.pointers, parsedPayload.frameDelays);
+                gif.status = PendingGifs.Status.OK;
             }
         }
 
         public void FailGIFFetch(string id)
         {
-            if (cachedGIFs.TryGetValue(id, out GIFCache gif))
+            if (pendingGifs.TryGetValue(id, out PendingGifs gif))
             {
-                gif.status = GIFCache.Status.ERROR;
-                cachedGIFs.Remove(id);
+                gif.status = PendingGifs.Status.ERROR;
+                pendingGifs.Remove(id);
             }
         }
 
         public void DeleteGIF(string id)
         {
-            if (cachedGIFs.TryGetValue(id, out GIFCache gif))
-            {
-                gif.refCount = Mathf.Max(0, gif.refCount - 1);
-                if (gif.refCount == 0)
-                {
-                    gif.status = GIFCache.Status.ERROR;
-                    gif.Dispose();
-                    cachedGIFs.Remove(id);
-                    DCL.Interface.WebInterface.DeleteGIF(id);
-                }
-            }
+            DCL.Interface.WebInterface.DeleteGIF(id);
         }
 
         private GifFrameData[] GenerateTexturesList(int width, int height, int[] pointers, float[] frameDelays)
