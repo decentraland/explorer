@@ -59,7 +59,7 @@ namespace DCL
 
         private void OnDestroy()
         {
-            Environment.i.sceneController.OnDestroy();
+            Environment.i.sceneController.Dispose();
         }
 
         #region RuntimeMessagingBridge
