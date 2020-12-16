@@ -36,12 +36,12 @@ namespace DCL
             DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
-            performanceMetricsController = new PerformanceMetricsController();
-
-            RenderProfileManifest.i.Initialize();
-
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+            {
+                performanceMetricsController = new PerformanceMetricsController();
+                RenderProfileManifest.i.Initialize();
                 Environment.SetupWithDefaults();
+            }
 
 #if !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
