@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +8,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
     public event Action<string, bool> OnRequestMuteUser;
     public event Action<bool> OnRequestMuteGlobal;
     public event Action OnGoToCrowdPressed;
+    public event Action OnOpen;
 
     [SerializeField] private UsersAroundListHUDListElementView listElementView;
     [SerializeField] private ShowHideAnimator showHideAnimator;
@@ -153,6 +154,7 @@ internal class UsersAroundListHUDListView : MonoBehaviour, IUsersAroundListHUDLi
 
             showHideAnimator.Show();
             CheckListEmptyState();
+            OnOpen?.Invoke();
         }
         else
         {
