@@ -949,6 +949,7 @@ public class BuilderInWorldController : MonoBehaviour
 
             GameObject floorPlaceHolder =  Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
             floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
+            builderInWorldBridge.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
         }
 
         builderInWorldEntityHandler.DeselectEntities();
