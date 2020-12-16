@@ -33,8 +33,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 14.1, y: 8.4}
-  m_SizeDelta: {x: -106.798706, y: -16.862938}
+  m_AnchoredPosition: {x: 12.499998, y: 8.4}
+  m_SizeDelta: {x: -95, y: -16.862938}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &961069750720000318
 GameObject:
@@ -108,7 +108,7 @@ MonoBehaviour:
   yesSkipInputAction: {fileID: 0}
   noSkipInputAction: {fileID: 0}
   tooltipTransform: {fileID: 770479781646097019}
-  setMaxTimeToHide: 1
+  setMaxTimeToHide: 0
   maxTimeToHide: 5
 --- !u!1 &2355559710696278039
 GameObject:
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Use the chat to talk to other players and make new friends.
+  m_text: Use voice and text chat to talk to other players and make new friends.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
   m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
@@ -244,12 +244,12 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 3947925781027475414}
-    characterCount: 59
+    characterCount: 70
     spriteCount: 0
-    spaceCount: 11
-    wordCount: 12
+    spaceCount: 13
+    wordCount: 14
     linkCount: 0
-    lineCount: 2
+    lineCount: 3
     pageCount: 1
     materialCount: 1
   m_isUsingLegacyAnimationComponent: 0
@@ -304,7 +304,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -450.83997, y: 0}
-  m_SizeDelta: {x: 380, y: 100}
+  m_SizeDelta: {x: 390, y: 100}
   m_Pivot: {x: 0, y: 0}
 --- !u!222 &7491104538370866601
 CanvasRenderer:
