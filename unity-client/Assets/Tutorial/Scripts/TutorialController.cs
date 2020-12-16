@@ -184,7 +184,7 @@ namespace DCL.Tutorial
         {
             // TODO (Santi): This a TEMPORAL fix. It will be removed when we refactorize the tutorial system in order to make it compatible with incremental features.
             if (PlayerPrefs.GetInt(PLAYER_PREFS_VOICE_CHAT_FEATURE_SHOWED) == 1 ||
-                !CommonScriptableObjects.voiceChatDisabled.Get())
+                CommonScriptableObjects.voiceChatDisabled.Get())
                 return;
 
             SetupTutorial(false.ToString(), TutorialType.Initial, true);
