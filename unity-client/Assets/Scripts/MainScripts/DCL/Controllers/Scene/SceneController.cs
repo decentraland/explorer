@@ -98,7 +98,7 @@ namespace DCL
             componentFactory.PrewarmPools();
         }
 
-        public void OnDestroy()
+        public void Dispose()
         {
             initialized = false;
             PoolManager.i.OnGet -= Environment.i.physicsSyncController.MarkDirty;
