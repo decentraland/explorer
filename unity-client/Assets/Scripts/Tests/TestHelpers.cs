@@ -21,7 +21,7 @@ namespace DCL.Helpers
 {
     public class WaitForAllMessagesProcessed : CustomYieldInstruction
     {
-        public override bool keepWaiting => Environment.i.messagingControllersManager.hasPendingMessages;
+        public override bool keepWaiting => Environment.i.messaging.messagingControllersManager.hasPendingMessages;
     }
 
     // NOTE(Brian): Attribute used to determine if tests are visual. Those tests will be run to generate the baseline images.
@@ -1103,7 +1103,7 @@ namespace DCL.Helpers
 
             if (main != null && main.componentFactory == null)
             {
-                ForceUnloadAllScenes(Environment.i.sceneController);
+                ForceUnloadAllScenes(Environment.i.world.sceneController);
                 Utils.SafeDestroy(main);
                 main = null;
             }
@@ -1115,7 +1115,7 @@ namespace DCL.Helpers
             }
             else
             {
-                Environment.i.Restart();
+                Environment.Reset();
             }
 
             if (usesWebServer)
@@ -1134,12 +1134,12 @@ namespace DCL.Helpers
 
             Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
-            Environment.i.sceneController.deferredMessagesDecoding = false;
-            Environment.i.sceneController.prewarmSceneMessagesPool = false;
+            Environment.i.world.sceneController.deferredMessagesDecoding = false;
+            Environment.i.world.sceneController.prewarmSceneMessagesPool = false;
 
-            ForceUnloadAllScenes(Environment.i.sceneController);
+            ForceUnloadAllScenes(Environment.i.world.sceneController);
 
-            return Environment.i.sceneController;
+            return Environment.i.world.sceneController;
         }
 
         // static string lastMessageFromEngineType;
@@ -1261,7 +1261,7 @@ namespace DCL.Helpers
                 return;
             }
 
-            foreach (var keyValuePair in Environment.i.worldState.loadedScenes.Where(x => x.Value.isPersistent))
+            foreach (var keyValuePair in Environment.i.world.worldState.loadedScenes.Where(x => x.Value.isPersistent))
             {
                 keyValuePair.Value.isPersistent = false;
             }

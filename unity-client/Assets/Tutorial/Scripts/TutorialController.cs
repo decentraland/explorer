@@ -250,7 +250,7 @@ namespace DCL.Tutorial
 
             if (Environment.i != null)
             {
-                WebInterface.SendSceneExternalActionEvent(Environment.i.worldState.currentSceneId, "tutorial", "end");
+                WebInterface.SendSceneExternalActionEvent(Environment.i.world.worldState.currentSceneId, "tutorial", "end");
             }
 
             NotificationsController.disableWelcomeNotification = false;
@@ -566,7 +566,7 @@ namespace DCL.Tutorial
 
         private bool IsPlayerInsideGenesisPlaza()
         {
-            WorldState worldState = Environment.i.worldState;
+            WorldState worldState = Environment.i.world.worldState;
             if (worldState == null || worldState.currentSceneId == null)
                 return false;
 
@@ -650,16 +650,16 @@ namespace DCL.Tutorial
 
         private void ModifyCullingSettings()
         {
-            var cullingSettings = Environment.i.cullingController.GetSettingsCopy();
+            var cullingSettings = Environment.i.platform.cullingController.GetSettingsCopy();
             cullingSettings.ignoredLayersMask |= tutorialLayerMask;
-            Environment.i.cullingController.SetSettings(cullingSettings);
+            Environment.i.platform.cullingController.SetSettings(cullingSettings);
         }
 
         private void RestoreCullingSettings()
         {
-            var cullingSettings = Environment.i.cullingController.GetSettingsCopy();
+            var cullingSettings = Environment.i.platform.cullingController.GetSettingsCopy();
             cullingSettings.ignoredLayersMask &= ~tutorialLayerMask;
-            Environment.i.cullingController.SetSettings(cullingSettings);
+            Environment.i.platform.cullingController.SetSettings(cullingSettings);
         }
     }
 }

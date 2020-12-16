@@ -21,7 +21,7 @@ public class VisualTestsBase : TestsBase
         //             When the entry point is refactored.
         RenderProfileManifest.i.Initialize(RenderProfileManifest.i.testProfile);
 
-        Environment.i.sceneBoundsChecker.Stop();
+        Environment.i.world.sceneBoundsChecker.Stop();
 
         base.SetUp_Renderer();
 
@@ -42,7 +42,7 @@ public class VisualTestsBase : TestsBase
         yield return InitUnityScene("MainVisualTest");
 
         if (debugMode)
-            Environment.i.debugController.SetDebug();
+            Environment.i.platform.debugController.SetDebug();
 
         sceneController = TestHelpers.InitializeSceneController(usesWebServer);
 

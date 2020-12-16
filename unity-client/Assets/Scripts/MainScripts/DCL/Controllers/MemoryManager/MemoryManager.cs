@@ -24,7 +24,7 @@ namespace DCL
             {
                 if (isEnable)
                 {
-                    Environment.i.parcelScenesCleaner.ForceCleanup();
+                    Environment.i.platform.parcelScenesCleaner.ForceCleanup();
                     Resources.UnloadUnusedAssets();
                 }
             };
