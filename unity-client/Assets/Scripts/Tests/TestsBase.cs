@@ -19,6 +19,7 @@ using NSubstitute;
 public class TestsBase
 {
     private const bool DEBUG_PAUSE_ON_INTEGRITY_FAIL = false;
+    protected virtual string TEST_SCENE_NAME => "MainTest";
 
     protected Component[] startingSceneComponents = null;
     protected bool sceneInitialized = false;
@@ -42,16 +43,19 @@ public class TestsBase
 
         if (!sceneInitialized)
         {
-            yield return InitUnityScene("MainTest");
+            yield return InitUnityScene(TEST_SCENE_NAME);
             sceneInitialized = true;
         }
 
         runtimeGameObjectsRoot = new GameObject("_RuntimeGameObjectsRoot");
         if (justSceneSetUp)
         {
-            yield return SetUp_SceneIntegrityChecker();
-            SetUp_Renderer();
             Environment.SetupWithDefaults();
+            SetUp_SceneController();
+
+            SetUp_TestScene();
+            SetUp_Renderer();
+            yield return SetUp_SceneIntegrityChecker();
             yield return null;
             //TODO(Brian): Remove when the init layer is ready
             Environment.i.platform.cullingController.Stop();
@@ -59,12 +63,13 @@ public class TestsBase
         }
 
         Environment.SetupWithDefaults();
+        SetUp_SceneController();
 
         SetUp_Camera();
-        yield return SetUp_SceneController();
+        SetUp_TestScene();
         yield return SetUp_CharacterController();
-        yield return SetUp_SceneIntegrityChecker();
         SetUp_Renderer();
+        yield return SetUp_SceneIntegrityChecker();
 
         yield return null;
         //TODO(Brian): Remove when the init layer is ready
@@ -81,8 +86,6 @@ public class TestsBase
 
         if (runtimeGameObjectsRoot != null)
             Object.Destroy(runtimeGameObjectsRoot.gameObject);
-
-        TestHelpers.ForceUnloadAllScenes(Environment.i.world.sceneController);
 
         if (DCLCharacterController.i != null)
         {
@@ -169,18 +172,14 @@ public class TestsBase
             cameraController = GameObject.Instantiate(Resources.Load<GameObject>("CameraController")).GetComponent<CameraController>();
     }
 
-    public virtual IEnumerator SetUp_SceneController(bool debugMode = false, bool usesWebServer = false, bool spawnTestScene = true)
+    public void SetUp_SceneController()
     {
         PoolManager.enablePrewarm = false;
-        sceneController = TestHelpers.InitializeSceneController(usesWebServer);
-
-        if (debugMode)
-            Environment.i.platform.debugController.SetDebug();
-
-        yield return null;
-
-        if (spawnTestScene)
-            SetUp_TestScene();
+        DCL.Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
+        sceneController = Environment.i.world.sceneController;
+        sceneController.deferredMessagesDecoding = false;
+        sceneController.prewarmSceneMessagesPool = false;
+        sceneController.prewarmEntitiesPool = false;
     }
 
     private void SetUp_UIScene()
@@ -202,16 +201,20 @@ public class TestsBase
         CommonScriptableObjects.rendererState.Set(true);
     }
 
-    protected virtual IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
+    protected virtual IEnumerator InitScene(bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
     {
-        yield return InitUnityScene("MainTest");
+        yield return InitUnityScene(TEST_SCENE_NAME);
 
-        yield return SetUp_SceneController(debugMode, usesWebServer, spawnTestScene);
+        if (debugMode)
+            Environment.i.platform.debugController.SetDebug();
+
+        SetUp_SceneController();
+
+        if (spawnTestScene)
+            SetUp_TestScene();
 
         if (spawnCharController)
-        {
             yield return SetUp_CharacterController();
-        }
 
         var newPos = new Vector3(10, 0, 10);
         DCLCharacterController.i.SetPosition(newPos);
@@ -222,7 +225,6 @@ public class TestsBase
             SetUp_UIScene();
         }
     }
-
 
     protected IEnumerator WaitForUICanvasUpdate()
     {

@@ -51,8 +51,6 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
         DCL.Configuration.EnvironmentSettings.DEBUG = true;
         Environment.i.platform.debugController.SetDebug();
 
-        TestHelpers.InitializeSceneController(false);
-
         yield return new WaitForSeconds(0.01f);
 
         scene = Environment.i.world.sceneController.CreateTestScene();

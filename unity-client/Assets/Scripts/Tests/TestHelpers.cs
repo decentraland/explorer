@@ -1097,18 +1097,6 @@ namespace DCL.Helpers
             }
         }
 
-        public static SceneController InitializeSceneController(bool usesWebServer = false)
-        {
-            Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
-
-            Environment.i.world.sceneController.deferredMessagesDecoding = false;
-            Environment.i.world.sceneController.prewarmSceneMessagesPool = false;
-
-            ForceUnloadAllScenes(Environment.i.world.sceneController);
-
-            return Environment.i.world.sceneController;
-        }
-
         public static IEnumerator WaitForMessageFromEngine(string targetMessageType, string targetMessageJSONPayload,
             System.Action OnIterationStart, System.Action OnSuccess)
         {
@@ -1216,21 +1204,6 @@ namespace DCL.Helpers
                 $"Rect transform {rt.name} isn't stretched out!. unexpected offsetMax value.");
             Assert.AreEqual(Vector2.zero, rt.sizeDelta,
                 $"Rect transform {rt.name} isn't stretched out!. unexpected sizeDelta value.");
-        }
-
-        public static void ForceUnloadAllScenes(SceneController sceneController)
-        {
-            if (sceneController == null)
-            {
-                return;
-            }
-
-            foreach (var keyValuePair in Environment.i.world.worldState.loadedScenes.Where(x => x.Value.isPersistent))
-            {
-                keyValuePair.Value.isPersistent = false;
-            }
-
-            sceneController.UnloadAllScenes();
         }
 
         public static void SetCharacterPosition(Vector3 newPosition)

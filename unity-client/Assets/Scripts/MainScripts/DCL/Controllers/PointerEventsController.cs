@@ -37,8 +37,11 @@ namespace DCL
 
             hoverController = InteractionHoverCanvasController.i;
 
-            OnPointerHoverStarts += CursorController.i.SetHoverCursor;
-            OnPointerHoverEnds += CursorController.i.SetNormalCursor;
+            if (CursorController.i != null)
+            {
+                OnPointerHoverStarts += CursorController.i.SetHoverCursor;
+                OnPointerHoverEnds += CursorController.i.SetNormalCursor;
+            }
 
             RetrieveCamera();
         }
@@ -201,8 +204,11 @@ namespace DCL
             newHoveredEvent = null;
             lastHoveredEventList = null;
 
-            OnPointerHoverStarts -= CursorController.i.SetHoverCursor;
-            OnPointerHoverEnds -= CursorController.i.SetNormalCursor;
+            if (CursorController.i != null)
+            {
+                OnPointerHoverStarts -= CursorController.i.SetHoverCursor;
+                OnPointerHoverEnds -= CursorController.i.SetNormalCursor;
+            }
         }
 
         void RetrieveCamera()

@@ -15,7 +15,7 @@ public class IntegrationTestController : MonoBehaviour
 
     public IEnumerator Initialize()
     {
-        var sceneController = TestHelpers.InitializeSceneController();
+        var sceneController = Environment.i.world.sceneController;
         DCLCharacterController.i.gravity = 0;
         DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
         {

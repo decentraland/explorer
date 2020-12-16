@@ -19,9 +19,9 @@ namespace SceneBoundariesCheckerTests
         {
             yield return base.SetUp();
 
-            yield return SetUp_SceneController(debugMode: true);
             yield return SetUp_CharacterController();
 
+            Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
             Environment.i.world.sceneBoundsChecker.timeBetweenChecks = 0f;
 
             UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.enabled);
