@@ -48,7 +48,7 @@ public class BuilderInWorldShould : TestsBase
             return;
         }
 
-        Assert.Fail();
+        Assert.Fail("The ground layer is not set to Ground");
     }
 
     [Test]
@@ -72,6 +72,10 @@ public class BuilderInWorldShould : TestsBase
         DCLBuilderRaycast dCLBuilderRaycast =  godMode.GetComponentInChildren<DCLBuilderRaycast>();
 
         Assert.IsNotNull(dCLBuilderRaycast.builderCamera, "Camera reference on the builder-in-world god mode children are null, check them all!");
+
+        VoxelController voxelController = builderInWorldController.GetComponent<VoxelController>();
+
+        Assert.IsNotNull(voxelController.freeCameraMovement, "Camera reference on the builder-in-world voxel controller are null, check them all!");
     }
 
     [UnityTest]
@@ -119,7 +123,7 @@ public class BuilderInWorldShould : TestsBase
 
         Assert.IsTrue(
          scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
-        "'Floor should be load");
+        "Floor should be loaded, is the SceneObject not working anymore?");
     }
 
     [UnityTest]

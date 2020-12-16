@@ -28,6 +28,12 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     [Header("Build References")] public Material editMaterial;
     public Texture2D duplicateCursorTexture;
 
+    [Header("InputActions")]
+    [SerializeField]
+    internal InputAction_Trigger hideSelectedEntitiesAction;
+    [SerializeField]
+    internal InputAction_Trigger showAllEntitiesAction;
+
     public event Action<DCLBuilderInWorldEntity> onSelectedEntity;
     ParcelScene sceneToEdit;
 
@@ -40,6 +46,18 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     float lastTransformReportTime;
 
     List<string> entityNameList = new List<string>();
+
+    InputAction_Trigger.Triggered hideSelectedEntitiesDelegate;
+    InputAction_Trigger.Triggered showAllEntitiesDelegate;
+
+    private void Start()
+    {
+        hideSelectedEntitiesDelegate = (action) => ChangeShowStateSelectedEntities();
+        showAllEntitiesDelegate = (action) => ShowAllEntities();
+
+        hideSelectedEntitiesAction.OnTriggered += hideSelectedEntitiesDelegate;
+        showAllEntitiesAction.OnTriggered += showAllEntitiesDelegate;
+    }
 
     private void OnDestroy()
     {
@@ -58,6 +76,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityRename -= ChangeEntityName;
+
+        hideSelectedEntitiesAction.OnTriggered -= hideSelectedEntitiesDelegate;
+        showAllEntitiesAction.OnTriggered -= showAllEntitiesDelegate;
     }
 
     private void Update()
@@ -266,6 +287,15 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
 
         DeselectEntities();
+    }
+
+    public void ShowAllEntities()
+    {
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
+        {
+           if (!entity.IsVisible)
+                entity.ToggleShowStatus();
+        }
     }
 
     public void ChangeShowStateSelectedEntities()

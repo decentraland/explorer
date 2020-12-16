@@ -1153,6 +1153,11 @@ PrefabInstance:
       propertyPath: builderCamera
       value: 
       objectReference: {fileID: 689415111}
+    - target: {fileID: 1208871512657624392, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: freeCameraMovement
+      value: 
+      objectReference: {fileID: 689415110}
     - target: {fileID: 1208871512657624393, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: cameraController

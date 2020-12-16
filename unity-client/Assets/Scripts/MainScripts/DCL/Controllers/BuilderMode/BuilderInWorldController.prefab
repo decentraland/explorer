@@ -2187,6 +2187,10 @@ MonoBehaviour:
   editMaterial: {fileID: 2100000, guid: 92b0ce4a86423dd48b66212090fc7e34, type: 2}
   duplicateCursorTexture: {fileID: 2800000, guid: 422889cd6c61279459cc3c6bfa00ed20,
     type: 3}
+  hideSelectedEntitiesAction: {fileID: 11400000, guid: a9f9f5fb4f1639d4b8461c2838cfae56,
+    type: 2}
+  showAllEntitiesAction: {fileID: 11400000, guid: f0a0f94cc4fd01c4e82210e0de670a65,
+    type: 2}
 --- !u!1 &7515311309793266013
 GameObject:
   m_ObjectHideFlags: 0

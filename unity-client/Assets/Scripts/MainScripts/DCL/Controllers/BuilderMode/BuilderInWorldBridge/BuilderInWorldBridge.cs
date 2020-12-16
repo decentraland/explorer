@@ -30,11 +30,11 @@ public class BuilderInWorldBridge : MonoBehaviour
 
     public void PublishSceneResult(string payload)
     {
-        Debug.Log("Scene published " +payload);
         PublishSceneResultPayload publishSceneResultPayload = JsonUtility.FromJson<PublishSceneResultPayload>(payload);
         string message;
         if (publishSceneResultPayload.ok)
         {
+            //Note (Adrian): This is temporary until implement the UI
             message = "Done!\nThe scene has been published";
             OnPublishOK?.Invoke();
         }
