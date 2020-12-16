@@ -6,7 +6,7 @@ namespace NFTShape_Internal
 {
     public class NFTGifAsset : INFTAsset
     {
-        public bool isHQ => hqAsset != null;
+        public bool isHQ => hqGifPromise != null;
         public int hqResolution { get; }
         public ITexture previewAsset => previewGif;
         public ITexture hqAsset => hqGifPromise?.asset;

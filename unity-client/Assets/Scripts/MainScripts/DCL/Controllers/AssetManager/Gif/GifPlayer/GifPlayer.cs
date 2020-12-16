@@ -35,20 +35,15 @@ namespace DCL
         /// <param name="asset">gif asset</param>
         public void SetGif(Asset_Gif asset)
         {
-            bool wasPlaying = isPlaying;
-
-            if (gifAsset != null)
-            {
-                Stop();
-                gifAsset.OnCleanup -= OnGifAssetDisposed;
-            }
-
             gifAsset = asset;
 
-            if (asset != null)
+            if (isPlaying && IsValidAsset())
             {
-                asset.OnCleanup += OnGifAssetDisposed;
-                if (wasPlaying) Play();
+                if (currentFrameIdx >= asset.frames.Length)
+                {
+                    currentFrameIdx = 0;
+                }
+                SetFrame(currentFrameIdx);
             }
         }
 
@@ -57,6 +52,7 @@ namespace DCL
             if (reset)
             {
                 currentFrameIdx = 0;
+                currentTimeDelay = 0;
                 Stop();
             }
 
@@ -82,37 +78,43 @@ namespace DCL
         public void Dispose()
         {
             Stop();
-
-            if (gifAsset != null)
-            {
-                gifAsset.OnCleanup -= OnGifAssetDisposed;
-            }
-        }
-
-        private void OnGifAssetDisposed()
-        {
-            Stop();
-            gifAsset = null;
         }
 
         private IEnumerator UpdateRoutine()
         {
-            currentTimeDelay = 0;
-
             while (isPlaying)
             {
                 yield return WaitForSecondsCache.Get(currentTimeDelay);
-
-                currentFrameIdx++;
-
-                if (currentFrameIdx >= gifAsset.frames.Length)
-                {
-                    currentFrameIdx = 0;
-                }
-
-                currentTimeDelay = gifAsset.frames[currentFrameIdx].delay;
-                OnFrameTextureChanged?.Invoke(gifAsset.frames[currentFrameIdx].texture);
+                UpdateFrame();
             }
+        }
+
+        private bool IsValidAsset()
+        {
+            return gifAsset?.frames != null && gifAsset.frames.Length > 0;
+        }
+
+        private void UpdateFrame()
+        {
+            if (!IsValidAsset())
+            {
+                return;
+            }
+
+            currentFrameIdx++;
+
+            if (currentFrameIdx >= gifAsset.frames.Length)
+            {
+                currentFrameIdx = 0;
+            }
+
+            SetFrame(currentFrameIdx);
+        }
+
+        private void SetFrame(int frameIdx)
+        {
+            currentTimeDelay = gifAsset.frames[frameIdx].delay;
+            OnFrameTextureChanged?.Invoke(gifAsset.frames[frameIdx].texture);
         }
     }
 }
