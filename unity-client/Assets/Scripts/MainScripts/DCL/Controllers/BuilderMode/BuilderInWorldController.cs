@@ -134,6 +134,7 @@ public class BuilderInWorldController : MonoBehaviour
     void Start()
     {
         KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
+        KernelConfig.i.OnChange += OnKernelConfigChanged; 
 
         if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
@@ -205,6 +206,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void OnDestroy()
     {
+        KernelConfig.i.OnChange -= OnKernelConfigChanged;
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
 
         toggleCreateLastSceneObjectInputAction.OnTriggered -= createLastSceneObjectDelegate;
@@ -260,6 +262,16 @@ public class BuilderInWorldController : MonoBehaviour
         {
             checkerInsideSceneOptimizationCounter++;
         }
+    }
+
+    void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        EnableFeature(current.features.enableBuilderInWorld);
+    }
+
+    void EnableFeature(bool enable)
+    {
+        activeFeature = enable;
     }
 
     void CatalogReceived(string catalogJson)

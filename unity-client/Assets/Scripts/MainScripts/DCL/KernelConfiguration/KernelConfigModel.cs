@@ -15,6 +15,7 @@ public class KernelConfigModel
 
         return this.comms.Equals(other.comms) &&
                this.profiles.Equals(other.profiles) &&
+               this.features.Equals(other.features) &&
                this.gifSupported == other.gifSupported;
     }
 
@@ -24,6 +25,7 @@ public class KernelConfigModel
         KernelConfigModel clone = new KernelConfigModel();
         clone.comms = comms.Clone();
         clone.profiles = profiles.Clone();
+        clone.features = features.Clone();
         return clone;
     }
 }
