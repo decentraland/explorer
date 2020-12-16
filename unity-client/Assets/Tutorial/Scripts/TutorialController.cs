@@ -34,7 +34,8 @@ namespace DCL.Tutorial
             FromGenesisPlaza,
             FromDeepLink,
             FromResetTutorial,
-            FromBuilderInWorld
+            FromBuilderInWorld,
+            FromUserThatAlreadyDidTheTutorial
         }
 
         public static TutorialController i { get; private set; }
@@ -71,6 +72,10 @@ namespace DCL.Tutorial
         [Header("Tutorial Steps from Builder In World")]
         [SerializeField]
         internal List<TutorialStep> stepsFromBuilderInWorld = new List<TutorialStep>();
+
+        [Header("Tutorial Steps from User That Already Did The Tutorial")]
+        [SerializeField]
+        internal List<TutorialStep> stepsFromUserThatAlreadyDidTheTutorial = new List<TutorialStep>();
 
         [Header("3D Model Teacher")]
         [SerializeField]
@@ -133,6 +138,8 @@ namespace DCL.Tutorial
 
         private int tutorialLayerMask;
 
+        internal bool userAlreadyDidTheTutorial { get; private set; }
+
         private void Awake()
         {
             i = this;
@@ -171,6 +178,11 @@ namespace DCL.Tutorial
             SetupTutorial(fromDeepLink, TutorialType.Initital);
         }
 
+        public void SetTutorialEnabledForUsersThatAlreadyDidTheTutorial()
+        {
+            SetupTutorial(false.ToString(), TutorialType.Initital, true);
+        }
+
         public void SetBuilderInWorldTutorialEnabled()
         {
             SetupTutorial(false.ToString(), TutorialType.BuilderInWorld);
@@ -179,12 +191,13 @@ namespace DCL.Tutorial
         /// <summary>
         /// Enables the tutorial controller and waits for the RenderingState is enabled to start to execute the corresponding tutorial steps.
         /// </summary>
-        void SetupTutorial(string fromDeepLink, TutorialType tutorialType)
+        void SetupTutorial(string fromDeepLink, TutorialType tutorialType, bool userAlreadyDidTheTutorial = false)
         {
             if (isRunning)
                 return;
 
             isRunning = true;
+            this.userAlreadyDidTheTutorial = userAlreadyDidTheTutorial;
             CommonScriptableObjects.allUIHidden.Set(false);
             CommonScriptableObjects.tutorialActive.Set(true);
             openedFromDeepLink = Convert.ToBoolean(fromDeepLink);
@@ -264,14 +277,20 @@ namespace DCL.Tutorial
             switch (tutorialType)
             {
                 case TutorialType.Initital:
-                    if (playerIsInGenesisPlaza || tutorialReset)
+                    if (userAlreadyDidTheTutorial)
+                    {
+                        yield return ExecuteSteps(TutorialPath.FromUserThatAlreadyDidTheTutorial, stepIndex);
+                    }
+                    else if (playerIsInGenesisPlaza || tutorialReset)
                     {
                         if (tutorialReset)
                         {
                             yield return ExecuteSteps(TutorialPath.FromResetTutorial, stepIndex);
                         }
                         else
+                        {
                             yield return ExecuteSteps(TutorialPath.FromGenesisPlaza, stepIndex);
+                        }
                     }
                     else if (openedFromDeepLink)
                     {
@@ -349,7 +368,8 @@ namespace DCL.Tutorial
             int skipIndex = stepsOnGenesisPlaza.Count +
                             stepsFromDeepLink.Count +
                             stepsFromReset.Count +
-                            stepsFromBuilderInWorld.Count;
+                            stepsFromBuilderInWorld.Count +
+                            stepsFromUserThatAlreadyDidTheTutorial.Count;
 
             StartCoroutine(StartTutorialFromStep(skipIndex));
 
@@ -416,6 +436,9 @@ namespace DCL.Tutorial
                 case TutorialPath.FromBuilderInWorld:
                     steps = stepsFromBuilderInWorld;
                     break;
+                case TutorialPath.FromUserThatAlreadyDidTheTutorial:
+                    steps = stepsFromUserThatAlreadyDidTheTutorial;
+                    break;
             }
 
             currentPath = tutorialPath;
@@ -444,6 +467,12 @@ namespace DCL.Tutorial
                         runningStep.name.Replace("(Clone)", "").Replace("TutorialStep_", ""));
                 }
 
+                if (tutorialPath == TutorialPath.FromUserThatAlreadyDidTheTutorial &&
+                    runningStep is TutorialStep_Tooltip)
+                {
+                    ((TutorialStep_Tooltip)runningStep).OverrideSetMaxTimeToHide(true);
+                }
+
                 runningStep.OnStepStart();
                 yield return runningStep.OnStepExecute();
                 if (i < steps.Count - 1)
@@ -455,7 +484,9 @@ namespace DCL.Tutorial
                 runningStep.OnStepFinished();
                 elapsedTimeInCurrentStep = Time.realtimeSinceStartup - elapsedTimeInCurrentStep;
 
-                if (!debugRunTutorial && sendStats)
+                if (!debugRunTutorial &&
+                    sendStats &&
+                    tutorialPath != TutorialPath.FromUserThatAlreadyDidTheTutorial)
                 {
                     SendStepCompletedSegmentStats(
                         tutorialVersion,
@@ -471,8 +502,12 @@ namespace DCL.Tutorial
                     yield return new WaitForSeconds(timeBetweenSteps);
             }
 
-            if (!debugRunTutorial && tutorialPath != TutorialPath.FromBuilderInWorld)
+            if (!debugRunTutorial &&
+                tutorialPath != TutorialPath.FromBuilderInWorld &&
+                tutorialPath != TutorialPath.FromUserThatAlreadyDidTheTutorial)
+            {
                 SetUserTutorialStepAsCompleted(TutorialFinishStep.NewTutorialFinished);
+            }
 
             runningStep = null;
 
