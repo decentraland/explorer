@@ -55,7 +55,7 @@ SpriteAtlas:
     variantMultiplier: 1
     packables:
     - {fileID: 102900000, guid: 1eee3b038d846456b84c415627892c52, type: 3}
-    totalSpriteSurfaceArea: 2663717
+    totalSpriteSurfaceArea: 2683144
     bindAsDefault: 1
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
@@ -122,6 +122,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 4bb84435c63fb4e1f9276314c9e47125, type: 3}
   - {fileID: 21300000, guid: 914d7e458aea54023ade17e08c509416, type: 3}
   - {fileID: 21300000, guid: 3e026055304a14525a6f24ebe12e875f, type: 3}
+  - {fileID: 21300000, guid: 47acd065431664e80a9a8cdedf8acb31, type: 3}
   - {fileID: 21300000, guid: 1a32f285ef84d8e44856f0e495cffd4d, type: 3}
   - {fileID: 21300000, guid: 5c569e851fe024c7e8e4b57c07575226, type: 3}
   - {fileID: 21300000, guid: aafb5ac5e24714df99ac5bc757bbbecb, type: 3}
@@ -293,6 +294,7 @@ SpriteAtlas:
   - StokeRectRadius12
   - SettingsIconNew
   - MagicSpark
+  - BubblePeak
   - RectRadius12Shadow
   - RectRadius12Bottom
   - ProfileStrokeShadow
