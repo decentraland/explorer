@@ -24,6 +24,7 @@ import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
+import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -305,6 +306,10 @@ export class UnityInterface {
     this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
   }
 
+  public SetTutorialEnabledForUsersThatAlreadyDidTheTutorial() {
+    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial')
+  }
+
   public TriggerAirdropDisplay(data: AirdropInfo) {
     // Disabled for security reasons
   }
@@ -373,6 +378,7 @@ export class UnityInterface {
       if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
         this.SetTutorialEnabled(fromDeepLink)
       } else {
+        this.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial()
         setDelightedSurveyEnabled(true)
       }
     }
@@ -413,6 +419,10 @@ export class UnityInterface {
 
   public UpdateRealmsInfo(realmsInfo: Partial<RealmsInfoForRenderer>) {
     this.gameInstance.SendMessage('Bridges', 'UpdateRealmsInfo', JSON.stringify(realmsInfo))
+  }
+
+  public SendPublishSceneResult(result: DeploymentResult) {
+    this.gameInstance.SendMessage('Main', 'PublishSceneResult', JSON.stringify(result))
   }
 
   // *********************************************************************************

@@ -421,6 +421,9 @@ namespace DCL
                             case "SetTutorialEnabled":
                                 DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
                                 break;
+                            case "SetTutorialEnabledForUsersThatAlreadyDidTheTutorial":
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial();
+                                break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
                                 break;
@@ -444,6 +447,12 @@ namespace DCL
                                 break;
                             case "SetPlayerTalking":
                                 HUDController.i.SetPlayerTalking(msg.payload);
+                                break;
+                            case "SetVoiceChatEnabledByScene":
+                                if (int.TryParse(msg.payload, out int value))
+                                {
+                                    HUDController.i.SetVoiceChatEnabledByScene(value);
+                                }
                                 break;
                             case "SetRenderProfile":
                                 RenderProfileBridge.i.SetRenderProfile(msg.payload);
