@@ -20,7 +20,6 @@ namespace DCL
         bool prewarmSceneMessagesPool { get; set; }
         bool prewarmEntitiesPool { get; set; }
         DCLComponentFactory componentFactory { get; }
-        Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool { get; }
         void Initialize();
         void Start();
         void Dispose();
@@ -29,24 +28,20 @@ namespace DCL
 
         void EnsureEntityPool(); // TODO: Move to PoolManagerFactory
 
+#if UNITY_EDITOR
         event SceneController.ProcessDelegate OnMessageProcessInfoStart;
         event SceneController.ProcessDelegate OnMessageProcessInfoEnds;
-        bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction);
+#endif
         void ParseQuery(object payload, string sceneId);
         void SendSceneMessage(string payload);
-        void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene message);
         event Action<string> OnReadyScene;
         ParcelScene CreateTestScene(LoadParcelScenesMessage.UnityParcelScene data = null);
         void SendSceneReady(string sceneId);
         void ActivateBuilderInWorldEditScene();
         void DeactivateBuilderInWorldEditScene();
         void SortScenesByDistance();
-        void LoadParcelScenesExecute(string scenePayload);
-        void UpdateParcelScenesExecute(string sceneId);
         void UpdateParcelScenesExecute(LoadParcelScenesMessage.UnityParcelScene scene);
         void UnloadScene(string sceneKey);
-        void UnloadParcelSceneExecute(string sceneId);
-        void UnloadAllScenes(bool includePersistent = false);
         void LoadParcelScenes(string decentralandSceneJSON);
         void UpdateParcelScenes(string decentralandSceneJSON);
         void UnloadAllScenesQueued();
