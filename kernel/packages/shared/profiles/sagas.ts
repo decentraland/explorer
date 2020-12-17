@@ -404,7 +404,7 @@ function* sendLoadProfile(profile: Profile) {
   yield call(ensureBaseCatalogs)
 
   const identity = yield select(getCurrentIdentity)
-  const parcels: ParcelsWithAccess = identity.hasConnectedWeb3 ? yield fetchParcelsWithAccess(identity.address) : []
+  const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
