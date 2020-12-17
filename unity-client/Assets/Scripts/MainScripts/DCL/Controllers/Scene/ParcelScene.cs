@@ -356,7 +356,7 @@ namespace DCL.Controllers
 
             if (decentralandEntity.parent != null) SetEntityParent(duplicatedEntity.entityId, decentralandEntity.parent.entityId);
 
-            DCLTransform.model.position = Environment.i.world.worldState.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
+            DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
             DCLTransform.model.rotation = decentralandEntity.gameObject.transform.rotation;
             DCLTransform.model.scale = decentralandEntity.gameObject.transform.lossyScale;
 

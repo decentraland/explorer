@@ -52,7 +52,7 @@ namespace DCL
         {
             if (!CommonScriptableObjects.rendererState.Get() || charCamera == null) return;
 
-            WorldState worldState = Environment.i.world.worldState;
+            WorldState worldState = Environment.i.world.state;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
             bool didHit = Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
@@ -283,7 +283,7 @@ namespace DCL
                 pointerUpEvent = null;
             }
 
-            string sceneId = Environment.i.world.worldState.currentSceneId;
+            string sceneId = Environment.i.world.state.currentSceneId;
 
             if (useRaycast && raycastGlobalLayerHitInfo.isValid)
             {
@@ -345,7 +345,7 @@ namespace DCL
                 lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
             }
 
-            string sceneId = Environment.i.world.worldState.currentSceneId;
+            string sceneId = Environment.i.world.state.currentSceneId;
 
             if (useRaycast && raycastGlobalLayerHitInfo.isValid)
             {

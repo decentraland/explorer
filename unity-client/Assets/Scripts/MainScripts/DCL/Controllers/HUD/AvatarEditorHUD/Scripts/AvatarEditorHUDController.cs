@@ -431,7 +431,7 @@ public class AvatarEditorHUDController : IHUD
 
         if (!visible && view.isOpen)
         {
-            DCL.Environment.i.messaging.messagingControllersManager.paused = false;
+            DCL.Environment.i.messaging.manager.paused = false;
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
             currentRenderProfile.avatarProfile.Apply();
             if (prevMouseLockState)
@@ -443,7 +443,7 @@ public class AvatarEditorHUDController : IHUD
         }
         else if (visible && !view.isOpen)
         {
-            DCL.Environment.i.messaging.messagingControllersManager.paused = IsSignUpFlowValue;
+            DCL.Environment.i.messaging.manager.paused = IsSignUpFlowValue;
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
             currentRenderProfile.avatarProfile.Apply();
 

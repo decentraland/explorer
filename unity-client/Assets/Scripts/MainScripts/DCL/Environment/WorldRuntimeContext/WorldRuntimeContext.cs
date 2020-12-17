@@ -5,30 +5,30 @@ namespace DCL
 {
     public class WorldRuntimeContext : System.IDisposable
     {
-        public readonly WorldState worldState;
+        public readonly WorldState state;
         public readonly SceneController sceneController;
         public readonly PointerEventsController pointerEventsController;
         public readonly SceneBoundsChecker sceneBoundsChecker;
-        public readonly WorldBlockersController worldBlockersController;
+        public readonly WorldBlockersController blockersController;
 
-        public WorldRuntimeContext(WorldState worldState,
+        public WorldRuntimeContext(WorldState state,
             SceneController sceneController,
             PointerEventsController pointerEventsController,
             SceneBoundsChecker sceneBoundsChecker,
-            WorldBlockersController worldBlockersController)
+            WorldBlockersController blockersController)
         {
-            this.worldState = worldState;
+            this.state = state;
             this.sceneController = sceneController;
             this.pointerEventsController = pointerEventsController;
             this.sceneBoundsChecker = sceneBoundsChecker;
-            this.worldBlockersController = worldBlockersController;
+            this.blockersController = blockersController;
         }
 
         public void Dispose()
         {
             pointerEventsController.Cleanup();
             sceneBoundsChecker.Stop();
-            worldBlockersController.Dispose();
+            blockersController.Dispose();
             sceneController.Dispose();
         }
     }

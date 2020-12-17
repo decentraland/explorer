@@ -231,7 +231,7 @@ namespace DCL.Tutorial
 
             if (Environment.i != null)
             {
-                WebInterface.SendSceneExternalActionEvent(Environment.i.world.worldState.currentSceneId, "tutorial", "end");
+                WebInterface.SendSceneExternalActionEvent(Environment.i.world.state.currentSceneId, "tutorial", "end");
             }
 
             NotificationsController.disableWelcomeNotification = false;
@@ -520,7 +520,7 @@ namespace DCL.Tutorial
 
         private bool IsPlayerInsideGenesisPlaza()
         {
-            WorldState worldState = Environment.i.world.worldState;
+            WorldState worldState = Environment.i.world.state;
             if (worldState == null || worldState.currentSceneId == null)
                 return false;
 

@@ -39,7 +39,7 @@ namespace DCL
             bool prevLogValue = Debug.unityLogger.logEnabled;
             Debug.unityLogger.logEnabled = true;
 
-            foreach (var scene in DCL.Environment.i.world.worldState.loadedScenes)
+            foreach (var scene in DCL.Environment.i.world.state.loadedScenes)
             {
                 Debug.Log("Dumping state for scene: " + scene.Value.sceneData.id);
                 scene.Value.GetWaitingComponentsDebugInfo();
