@@ -330,6 +330,10 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         base.EntityDeselected(entityDeselected);
         if (selectedEntities.Count <= 0)
             gizmoManager.HideGizmo();
+
+        if (isPlacingNewObject && !entityDeselected.HasShape())
+            builderInWorldEntityHandler.DeleteEntity(entityDeselected);
+
         isPlacingNewObject = false;
         DesactivateVoxelMode();
     }

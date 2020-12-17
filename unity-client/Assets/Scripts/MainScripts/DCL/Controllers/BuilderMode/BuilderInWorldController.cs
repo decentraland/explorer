@@ -293,13 +293,33 @@ public class BuilderInWorldController : MonoBehaviour
         if(checkerSceneLimitsOptimizationCounter >= 10)
         {
             checkerSceneLimitsOptimizationCounter = 0;
-            bool isInsideLimits = sceneToEdit.metricsController.IsInsideTheLimits();
-            HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(isInsideLimits);
+            CheckPublishConditions();
         }
         else
         {
             checkerSceneLimitsOptimizationCounter++;
         }
+    }
+
+
+    void CheckPublishConditions()
+    {
+        bool canPublishScene = true;
+
+        if(!sceneToEdit.metricsController.IsInsideTheLimits())
+        {
+            HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(false);
+            return;
+        }
+
+        if(!builderInWorldEntityHandler.AreAllEntitiesInsideBoundaries())
+        {
+            HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(false);
+            return;
+        }
+
+
+        HUDController.i.builderInWorldMainHud.SetPublishBtnAvailability(canPublishScene);
     }
 
     void OnNFTUsageChange()

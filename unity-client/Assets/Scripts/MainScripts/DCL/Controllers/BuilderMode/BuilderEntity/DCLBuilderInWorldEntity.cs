@@ -71,6 +71,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
     public bool isFloor { get; set; } = false;
     public bool isNFT { get; set; } = false;
 
+    private bool isShapeComponentSet = false;
+
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -93,6 +95,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsVisible = rootEntity.gameObject.activeSelf;
 
         descriptiveName = GetDescriptiveName();
+        isShapeComponentSet = false;
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
@@ -100,12 +103,16 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
+    public bool HasShape()
+    {
+        return isShapeComponentSet;
+    }
+
     public void Select()
     {
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
         SaveOriginalMaterialAndSetEditMaterials();
-        DCL.Environment.i.sceneBoundsChecker.AddPersistent(rootEntity);
     }
 
     public void Deselect()
@@ -115,7 +122,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = false;
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
-        DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
     }
 
@@ -151,6 +157,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
+        DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         OnDelete?.Invoke(this);
     }
 
@@ -244,6 +251,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void ShapeInit()
     {
+        isShapeComponentSet = true;
+
         isFloor = IsEntityAFloor();
         isNFT = IsEntityNFT();
 
@@ -262,6 +271,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
                 }
             }
         }
+        DCL.Environment.i.sceneBoundsChecker.AddPersistent(rootEntity);
     }
 
     void SetOriginalMaterials()

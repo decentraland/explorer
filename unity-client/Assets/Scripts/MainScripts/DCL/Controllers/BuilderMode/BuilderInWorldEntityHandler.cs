@@ -195,14 +195,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (!selectedEntities.Contains(entity))
             return;
 
-        if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-        {
-            DestroyLastCreatedEntities();
-        }
-
-        DCL.Environment.i.sceneBoundsChecker.EvaluateEntityPosition(entity.rootEntity);
-        DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(entity.rootEntity);
-
         entity.Deselect();
 
         outlinerController.CancelEntityOutline(entity);
@@ -215,8 +207,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     public void DeselectEntities()
     {
         if (selectedEntities.Count <= 0) return;
-
-        if (!AreAllSelectedEntitiesInsideBoundaries()) DestroyLastCreatedEntities();
 
         int amountToDeselect = selectedEntities.Count;
         for (int i = 0; i < amountToDeselect; i++)
@@ -382,11 +372,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void DuplicateSelectedEntities()
     {
-        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
-        {
-            if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-                return;
-        }
 
         BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
         buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATE;
@@ -713,8 +698,21 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         {
             if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
-                areAllIn = false;
-                break;
+                return false;
+            }
+        }
+
+        return areAllIn;
+    }
+
+    public bool AreAllEntitiesInsideBoundaries()
+    {
+        bool areAllIn = true;
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
+        {
+            if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            {
+                return false;
             }
         }
 
