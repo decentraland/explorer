@@ -3,7 +3,6 @@ using DCL.Helpers.NFT;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using DCL.Controllers.Gif;
 using DCL;
 using NFTShape_Internal;
 
