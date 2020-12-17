@@ -28,25 +28,34 @@ public class BuilderInWorldController : MonoBehaviour
         Editor = 2
     }
 
-    [Header("Activation of Feature")] public bool activeFeature = false;
+    [Header("Activation of Feature")]
+    public bool activeFeature = false;
 
-    [Header("Design variables")] public float scaleSpeed = 0.25f;
+    [Header("Design variables")]
+    public float scaleSpeed = 0.25f;
+
     public float rotationSpeed = 0.5f;
     public float msBetweenInputInteraction = 200;
 
     public float distanceLimitToSelectObjects = 50;
 
-    [Header("Snap variables")] public float snapFactor = 1f;
+    [Header("Snap variables")]
+    public float snapFactor = 1f;
+
     public float snapRotationDegresFactor = 15f;
     public float snapScaleFactor = 0.5f;
 
     public float snapDistanceToActivateMovement = 10f;
 
-    [Header("Scene References")] public GameObject cameraParentGO;
+    [Header("Scene References")]
+    public GameObject cameraParentGO;
+
     public GameObject cursorGO;
     public InputController inputController;
 
-    [Header("Prefab References")] public OutlinerController outlinerController;
+    [Header("Prefab References")]
+    public OutlinerController outlinerController;
+
     public BuilderInWorldInputWrapper builderInputWrapper;
     public DCLBuilderGizmoManager gizmoManager;
     public ActionController actionController;
@@ -54,21 +63,34 @@ public class BuilderInWorldController : MonoBehaviour
     public BuilderInWorldBridge builderInWorldBridge;
     public Material outlinerMaterial;
 
-    [Header("Build Modes")] public BuilderInWorldFirstPersonMode firstPersonMode;
+    [Header("Build Modes")]
+    public BuilderInWorldFirstPersonMode firstPersonMode;
+
     public BuilderInWorldGodMode editorMode;
 
-    [Header("Build References")] public int builderRendererIndex = 1;
+    [Header("Build References")]
+    public int builderRendererIndex = 1;
+
     public LayerMask layerToRaycast;
 
-    [Header("InputActions")] [SerializeField]
+    [Header("InputActions")]
+    [SerializeField]
     internal InputAction_Trigger editModeChangeInputAction;
 
-    [SerializeField] internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
-    [SerializeField] internal InputAction_Trigger toggleRedoActionInputAction;
-    [SerializeField] internal InputAction_Trigger toggleUndoActionInputAction;
-    [SerializeField] internal InputAction_Trigger toggleSnapModeInputAction;
+    [SerializeField]
+    internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
 
-    [SerializeField] internal InputAction_Hold multiSelectionInputAction;
+    [SerializeField]
+    internal InputAction_Trigger toggleRedoActionInputAction;
+
+    [SerializeField]
+    internal InputAction_Trigger toggleUndoActionInputAction;
+
+    [SerializeField]
+    internal InputAction_Trigger toggleSnapModeInputAction;
+
+    [SerializeField]
+    internal InputAction_Hold multiSelectionInputAction;
 
     //Note(Adrian): This is for tutorial purposes
     public Action OnSceneObjectPlaced;
@@ -108,9 +130,12 @@ public class BuilderInWorldController : MonoBehaviour
     EditModeState currentEditModeState = EditModeState.Inactive;
 
     bool catalogAdded = false;
-
+    
     void Start()
     {
+        KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
+        KernelConfig.i.OnChange += OnKernelConfigChanged; 
+
         if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
 
@@ -181,6 +206,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void OnDestroy()
     {
+        KernelConfig.i.OnChange -= OnKernelConfigChanged;
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
 
         toggleCreateLastSceneObjectInputAction.OnTriggered -= createLastSceneObjectDelegate;
@@ -236,6 +262,16 @@ public class BuilderInWorldController : MonoBehaviour
         {
             checkerInsideSceneOptimizationCounter++;
         }
+    }
+
+    void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        EnableFeature(current.features.enableBuilderInWorld);
+    }
+
+    void EnableFeature(bool enable)
+    {
+        activeFeature = enable;
     }
 
     void CatalogReceived(string catalogJson)
@@ -363,7 +399,7 @@ public class BuilderInWorldController : MonoBehaviour
                 data.contents.Add(mappingPair);
         }
 
-        SceneController.i.UpdateParcelScenesExecute(data);
+        Environment.i.sceneController.UpdateParcelScenesExecute(data);
 
         GLTFShape mesh = (GLTFShape) sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
@@ -625,6 +661,7 @@ public class BuilderInWorldController : MonoBehaviour
         VoxelEntityHit voxelEntityHit = null;
 
         hits = Physics.RaycastAll(ray, RAYCAST_MAX_DISTANCE, layerToRaycast);
+
         foreach (RaycastHit hit in hits)
         {
             string entityID = hit.collider.gameObject.name;
@@ -632,14 +669,17 @@ public class BuilderInWorldController : MonoBehaviour
             if (sceneToEdit.entities.ContainsKey(entityID))
             {
                 DCLBuilderInWorldEntity entityToCheck = builderInWorldEntityHandler.GetConvertedEntity(sceneToEdit.entities[entityID]);
+
                 if (entityToCheck == null) continue;
+
+                Camera camera = Camera.main;
 
                 if (!entityToCheck.IsSelected && entityToCheck.tag == BuilderInWorldSettings.VOXEL_TAG)
                 {
-                    if (Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
+                    if (Vector3.Distance(camera.transform.position, entityToCheck.rootEntity.gameObject.transform.position) < currentDistance)
                     {
                         voxelEntityHit = new VoxelEntityHit(entityToCheck, hit);
-                        currentDistance = Vector3.Distance(Camera.main.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
+                        currentDistance = Vector3.Distance(camera.transform.position, entityToCheck.rootEntity.gameObject.transform.position);
                     }
                 }
             }
@@ -651,7 +691,7 @@ public class BuilderInWorldController : MonoBehaviour
     void NewSceneReady(string id)
     {
         if (sceneToEditId != id) return;
-        SceneController.i.OnReadyScene -= NewSceneReady;
+        Environment.i.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         EnterEditMode();
     }
@@ -662,7 +702,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         FindSceneToEdit();
         sceneToEditId = sceneToEdit.sceneData.id;
-        SceneController.i.OnReadyScene += NewSceneReady;
+        Environment.i.sceneController.OnReadyScene += NewSceneReady;
 
         builderInWorldBridge.StartKernelEditMode(sceneToEdit);
     }
@@ -692,7 +732,7 @@ public class BuilderInWorldController : MonoBehaviour
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
-        SceneController.i.ActivateBuilderInWorldEditScene();
+        Environment.i.sceneController.ActivateBuilderInWorldEditScene();
 
         ActivateBuilderInWorldCamera();
     }
@@ -724,18 +764,19 @@ public class BuilderInWorldController : MonoBehaviour
 
         HUDController.i.buildModeHud.ClearEntityList();
 
-        SceneController.i.DeactivateBuilderInWorldEditScene();
+        Environment.i.sceneController.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
     }
 
     public void ActivateBuilderInWorldCamera()
     {
-        DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+        Camera camera = Camera.main;
+        DCLBuilderOutline outliner = camera.GetComponent<DCLBuilderOutline>();
 
         if (outliner == null)
         {
-            outliner = Camera.main.gameObject.AddComponent(typeof(DCLBuilderOutline)) as DCLBuilderOutline;
+            outliner = camera.gameObject.AddComponent(typeof(DCLBuilderOutline)) as DCLBuilderOutline;
             outliner.SetOutlineMaterial(outlinerMaterial);
         }
         else
@@ -745,17 +786,18 @@ public class BuilderInWorldController : MonoBehaviour
 
         outliner.Activate();
 
-        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+        UniversalAdditionalCameraData additionalCameraData = camera.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(builderRendererIndex);
     }
 
     public void DeactivateBuilderInWorldCamera()
     {
-        DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
+        Camera camera = Camera.main;
+        DCLBuilderOutline outliner = camera.GetComponent<DCLBuilderOutline>();
         outliner.enabled = false;
         outliner.Deactivate();
 
-        UniversalAdditionalCameraData additionalCameraData = Camera.main.transform.GetComponent<UniversalAdditionalCameraData>();
+        UniversalAdditionalCameraData additionalCameraData = camera.transform.GetComponent<UniversalAdditionalCameraData>();
         additionalCameraData.SetRenderer(0);
     }
 
