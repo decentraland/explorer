@@ -1,27 +1,17 @@
 using DCL.Configuration;
 using System;
 using DCL;
+using DCL.Helpers;
 using UnityEngine;
 
 public class DCLCharacterPosition
 {
-    public Action<DCLCharacterPosition> OnPrecisionAdjust;
 
     private Vector3 worldPositionValue;
     private Vector3 unityPositionValue;
     private Vector3 offset;
 
     private int lastRepositionFrame = 0;
-
-    public Vector3 UnityToWorldPosition(Vector3 pos)
-    {
-        return pos + offset;
-    }
-
-    public Vector3 WorldToUnityPosition(Vector3 pos)
-    {
-        return pos - offset;
-    }
 
     public Vector3 worldPosition
     {
@@ -30,7 +20,7 @@ public class DCLCharacterPosition
         set
         {
             worldPositionValue = value;
-            unityPositionValue = WorldToUnityPosition(worldPositionValue);
+            unityPositionValue = PositionUtils.WorldToUnityPosition(worldPositionValue);
             CheckAndRepositionWorld();
         }
     }
@@ -42,14 +32,14 @@ public class DCLCharacterPosition
         set
         {
             unityPositionValue = value;
-            worldPositionValue = UnityToWorldPosition(unityPositionValue);
+            worldPositionValue = PositionUtils.UnityToWorldPosition(unityPositionValue);
             CheckAndRepositionWorld();
         }
     }
 
     public DCLCharacterPosition()
     {
-        CommonScriptableObjects.playerUnityToWorldOffset.Set(Vector3.zero);
+        CommonScriptableObjects.worldOffset.Set(Vector3.zero);
         CommonScriptableObjects.playerWorldPosition.Set(Vector3.zero);
     }
 
@@ -80,10 +70,9 @@ public class DCLCharacterPosition
 
             lastRepositionFrame = Time.frameCount;
 
-            OnPrecisionAdjust?.Invoke(this);
-
+            //OnPrecisionAdjust?.Invoke(this);
             CommonScriptableObjects.playerWorldPosition.Set(worldPositionValue);
-            CommonScriptableObjects.playerUnityToWorldOffset.Set(offset);
+            CommonScriptableObjects.worldOffset.Set(offset);
             DCL.Environment.i.physicsSyncController.MarkDirty();
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DCL.Helpers;
 using UnityEngine;
 
 namespace DCL.Controllers
@@ -47,7 +48,7 @@ namespace DCL.Controllers
 
             blockerInstanceHandler.SetParent(blockersParent);
 
-            characterPosition.OnPrecisionAdjust += OnWorldReposition;
+            CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
         }
 
         public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler, DCLCharacterPosition characterPosition)
@@ -82,15 +83,15 @@ namespace DCL.Controllers
                 blockerInstanceHandler.DestroyAllBlockers();
         }
 
-        void OnWorldReposition(DCLCharacterPosition charPos)
+        void OnWorldReposition(Vector3 current, Vector3 previous)
         {
-            var newPosition = charPos.WorldToUnityPosition(Vector3.zero); // Blockers parent original position
+            var newPosition = PositionUtils.WorldToUnityPosition(Vector3.zero); // Blockers parent original position
             blockersParent.position = newPosition;
         }
 
         public void Dispose()
         {
-            characterPosition.OnPrecisionAdjust -= OnWorldReposition;
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
             blockerInstanceHandler.DestroyAllBlockers();
 
             if (blockersParent != null)

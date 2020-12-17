@@ -124,7 +124,7 @@ public class DCLCharacterController : MonoBehaviour
         freeMovementController = GetComponent<FreeMovementController>();
         collider = GetComponent<Collider>();
 
-        characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
+        CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
         Environment.i.debugController.OnDebugModeSet += () => supportsMovingPlatforms = true;
 
         lastPosition = transform.position;
@@ -161,7 +161,7 @@ public class DCLCharacterController : MonoBehaviour
 
     void OnDestroy()
     {
-        characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
+        //characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
         jumpAction.OnStarted -= jumpStartedDelegate;
         jumpAction.OnFinished -= jumpFinishedDelegate;
         sprintAction.OnStarted -= sprintStartedDelegate;
@@ -169,10 +169,10 @@ public class DCLCharacterController : MonoBehaviour
         CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
     }
 
-    void OnPrecisionAdjust(DCLCharacterPosition charPos)
+    void OnWorldReposition(Vector3 current, Vector3 previous)
     {
         Vector3 oldPos = this.transform.position;
-        this.transform.position = charPos.unityPosition;
+        this.transform.position = CommonScriptableObjects.playerUnityPosition;
 
         if (CinemachineCore.Instance.BrainCount > 0)
         {
@@ -342,7 +342,7 @@ public class DCLCharacterController : MonoBehaviour
             characterController.Move(velocity * deltaTime);
         }
 
-        SetPosition(characterPosition.UnityToWorldPosition(transform.position));
+        SetPosition(PositionUtils.UnityToWorldPosition(transform.position));
 
         if ((DCLTime.realtimeSinceStartup - lastMovementReportTime) > PlayerSettings.POSITION_REPORTING_DELAY)
         {
