@@ -111,6 +111,9 @@ internal class ProfileHUDView : MonoBehaviour
     private UserProfile profile = null;
     private Regex nameRegex = null;
 
+    internal event Action OnOpen;
+    internal event Action OnClose;
+
     private void Awake()
     {
         closeActionDelegate = (x) => HideMenu();
@@ -151,6 +154,7 @@ internal class ProfileHUDView : MonoBehaviour
         {
             menuShowHideAnimator.Show();
             CommonScriptableObjects.isProfileHUDOpen.Set(true);
+            OnOpen?.Invoke();
         }
     }
 
@@ -160,6 +164,7 @@ internal class ProfileHUDView : MonoBehaviour
         {
             menuShowHideAnimator.Hide();
             CommonScriptableObjects.isProfileHUDOpen.Set(false);
+            OnClose?.Invoke();
         }
     }
 
