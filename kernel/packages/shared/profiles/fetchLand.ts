@@ -185,7 +185,7 @@ type EstateFields = {
  * This function returns all Lands (parcel or estates) that the address has access to.
  * If the address has access to 2 parcels and 2 estates (which each if composed of 3 parcels), 4 Land will be returned.
  *
- * IMPORTANT: based on a the graph restriction, estates that will only return 1000 parcels they are composed of. This might become a problem in the future.
+ * IMPORTANT: based on a restriction in the graph, estates that will only return 1000 parcels they are composed of. This might become a problem in the future.
  */
 async function fetchLand(_address: string): Promise<Land[]> {
   const address = _address.toLowerCase()
