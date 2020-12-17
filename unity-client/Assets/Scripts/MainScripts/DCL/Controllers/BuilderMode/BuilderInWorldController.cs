@@ -828,10 +828,18 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void StartEnterEditMode()
     {
+        StartEnterEditMode(true);
+    }
+
+    public void StartEnterEditMode(bool activateCamera)
+    {
         if (sceneToEditId != null) return;
 
         FindSceneToEdit();
-        editorMode.ActivateCamera(sceneToEdit);
+
+        if(activateCamera)
+            editorMode.ActivateCamera(sceneToEdit);
+
         sceneToEditId = sceneToEdit.sceneData.id;
         inputController.isInputActive = false;
 
@@ -998,8 +1006,7 @@ public class BuilderInWorldController : MonoBehaviour
             outliner.enabled = false;
             outliner.Deactivate();
         }
-
-       
+      
         outliner.enabled = false;
         outliner.Deactivate();
 

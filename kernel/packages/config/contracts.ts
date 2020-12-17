@@ -110,7 +110,9 @@ export const contracts = {
     'Halloween2020Collection': '0xfeb52cbf71b9adac957c6f948a6cf9980ac8c907',
     'Xmas2020Collection': '0xecf073f91101ce5628669c487aee8f5822a101b1',
     'MemeDontBuyThis': '0x1a57f6afc902d25792c53b8f19b7e17ef84222d5',
-    'ReleaseTheKraken': '0xffc5043d9a00865d089d5eefa5b3d1625aec6763'
+    'ReleaseTheKraken': '0xffc5043d9a00865d089d5eefa5b3d1625aec6763',
+    '3LAUBasics': '0xe1ecb4e5130f493551c7d6df96ad19e5b431a0a9',
+    'XmashUp2020': '0xdd9c7bc159dacb19c9f6b9d7e23948c87aa2397f'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',

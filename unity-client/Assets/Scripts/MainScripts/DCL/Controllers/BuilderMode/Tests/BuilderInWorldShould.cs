@@ -136,8 +136,10 @@ public class BuilderInWorldShould : TestsBase
 
         //Note (Adrian): Wait 1 frame to call the Start method on the BuilderInWorldController
         yield return null;
+
+        builderInWorldController.GetComponentInChildren<BuilderInWorldGodMode>(true).SetActivateCamera(false);
         builderInWorldController.activeFeature = true;
-        builderInWorldController.StartEnterEditMode();
+        builderInWorldController.StartEnterEditMode(false);
         builderInWorldController.NewSceneReady(scene.sceneData.id);
         builderInWorldController.sceneToEdit = scene;
 

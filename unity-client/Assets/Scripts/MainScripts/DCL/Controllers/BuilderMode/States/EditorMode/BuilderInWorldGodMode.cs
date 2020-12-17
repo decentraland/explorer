@@ -47,6 +47,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         isVoxelBoundMultiSelection = false,
         squareMultiSelectionButtonPressed = false;
 
+    bool activateCamera = true;
+
     Vector3 lastMousePosition;
 
     public const float RAYCAST_MAX_DISTANCE = 10000f;
@@ -140,6 +142,11 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
+    public void SetActivateCamera(bool shouldActivate)
+    {
+        activateCamera = shouldActivate;
+    }
+
     private void MouseUp(int buttonID, Vector3 position)
     {
         if (mousePressed && buttonID == 0)
@@ -214,7 +221,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         sceneToEdit = scene;
         voxelController.SetSceneToEdit(scene);
 
-        ActivateCamera(scene);
+        if(activateCamera)ActivateCamera(scene);
 
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE)
             gizmoManager.SetGizmoType("MOVE");
