@@ -80,6 +80,13 @@ type LandQueryResult = {
   }[]
 }
 
+const coordsToId = (x: string | number, y: string | number) => x + ',' + y
+
+enum LandType {
+  PARCEL = 'parcel',
+  ESTATE = 'estate'
+}
+
 const fromParcel = (parcel: ParcelFields, role: LandRole) => {
   const id = coordsToId(parcel.x, parcel.y)
 
@@ -128,17 +135,50 @@ const fromEstate = (estate: EstateFields, role: LandRole) => {
   return result
 }
 
-export async function fetchParcelsWithAccess(_address: string): Promise<ParcelsWithAccess> {
-  const result: ParcelsWithAccess = []
-  const lands = await fetchLand(_address)
-  lands.forEach((land) => {
-    if (land.type === LandType.PARCEL) {
-      result.push({ x: land.x!, y: land.y!, role: land.role })
-    } else {
-      result.push(...land.parcels!.map(({ x, y }) => ({ x, y, role: land.role })))
-    }
-  })
-  return result
+const isZero = (addr: string) => {
+  return /^0x(0)+$/.test(addr)
+}
+
+type Land = {
+  id: string
+  type: LandType
+  role: LandRole
+  x?: number
+  y?: number
+  parcels?: { x: number; y: number; id: string }[]
+  size?: number
+  name: string
+  description: string | null
+  owner: string
+  operators: string[]
+}
+
+type ParcelFields = {
+  x: string
+  y: string
+  tokenId: string
+  owner: {
+    address: string
+  }
+  updateOperator: string | null
+  data: {
+    name: string | null
+    description: string | null
+  } | null
+}
+
+type EstateFields = {
+  id: string
+  owner: {
+    address: string
+  }
+  updateOperator: string | null
+  size: number
+  parcels: Pick<ParcelFields, 'x' | 'y' | 'tokenId'>[]
+  data: {
+    name: string | null
+    description: string | null
+  } | null
 }
 
 /**
@@ -236,55 +276,15 @@ async function fetchLand(_address: string): Promise<Land[]> {
   )
 }
 
-const coordsToId = (x: string | number, y: string | number) => x + ',' + y
-
-const isZero = (addr: string) => {
-  return /^0x(0)+$/.test(addr)
-}
-
-enum LandType {
-  PARCEL = 'parcel',
-  ESTATE = 'estate'
-}
-
-type Land = {
-  id: string
-  type: LandType
-  role: LandRole
-  x?: number
-  y?: number
-  parcels?: { x: number; y: number; id: string }[]
-  size?: number
-  name: string
-  description: string | null
-  owner: string
-  operators: string[]
-}
-
-type ParcelFields = {
-  x: string
-  y: string
-  tokenId: string
-  owner: {
-    address: string
-  }
-  updateOperator: string | null
-  data: {
-    name: string | null
-    description: string | null
-  } | null
-}
-
-type EstateFields = {
-  id: string
-  owner: {
-    address: string
-  }
-  updateOperator: string | null
-  size: number
-  parcels: Pick<ParcelFields, 'x' | 'y' | 'tokenId'>[]
-  data: {
-    name: string | null
-    description: string | null
-  } | null
+export async function fetchParcelsWithAccess(_address: string): Promise<ParcelsWithAccess> {
+  const result: ParcelsWithAccess = []
+  const lands = await fetchLand(_address)
+  lands.forEach((land) => {
+    if (land.type === LandType.PARCEL) {
+      result.push({ x: land.x!, y: land.y!, role: land.role })
+    } else {
+      result.push(...land.parcels!.map(({ x, y }) => ({ x, y, role: land.role })))
+    }
+  })
+  return result
 }
