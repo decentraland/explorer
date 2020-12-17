@@ -161,7 +161,7 @@ public class DCLCharacterController : MonoBehaviour
 
     void OnDestroy()
     {
-        //characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
+        CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
         jumpAction.OnStarted -= jumpStartedDelegate;
         jumpAction.OnFinished -= jumpFinishedDelegate;
         sprintAction.OnStarted -= sprintStartedDelegate;
