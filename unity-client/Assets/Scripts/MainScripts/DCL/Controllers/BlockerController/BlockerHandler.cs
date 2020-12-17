@@ -54,6 +54,9 @@ namespace DCL.Controllers
 
         private void OnChangeProfile(RenderProfileWorld profile)
         {
+            if (profile == null)
+                return;
+
             blockerPrefabDirty = true;
             blockerPrefab = profile.loadingBlockerPrefab;
         }

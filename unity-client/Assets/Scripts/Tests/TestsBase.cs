@@ -51,6 +51,7 @@ public class TestsBase
 
         if (justSceneSetUp)
         {
+            RenderProfileManifest.i.Initialize();
             Environment.SetupWithDefaults();
             SetUp_SceneController();
 
@@ -63,6 +64,7 @@ public class TestsBase
             yield break;
         }
 
+        RenderProfileManifest.i.Initialize();
         Environment.SetupWithDefaults();
 
         SetUp_SceneController();
