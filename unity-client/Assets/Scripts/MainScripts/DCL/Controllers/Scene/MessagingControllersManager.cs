@@ -15,7 +15,6 @@ namespace DCL
         void Initialize(IMessageProcessHandler messageHandler);
         void MarkBusesDirty();
         void PopulateBusesToBeProcessed();
-        void Dispose();
         bool ContainsController(string sceneId);
         void AddController(IMessageProcessHandler messageHandler, string sceneId, bool isGlobal = false);
         void AddControllerIfNotExists(IMessageProcessHandler messageHandler, string sceneId, bool isGlobal = false);

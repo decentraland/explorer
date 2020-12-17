@@ -10,7 +10,6 @@ namespace DCL
     public interface IMemoryManager : IDisposable
     {
         void Initialize();
-        void Dispose();
         IEnumerator CleanupPoolsIfNeeded(bool forceCleanup = false, bool immediate = false);
     }
 

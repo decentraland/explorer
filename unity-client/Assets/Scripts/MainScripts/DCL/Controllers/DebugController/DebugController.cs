@@ -13,7 +13,6 @@ namespace DCL
         void ShowFPSPanel();
         void SetSceneDebugPanel();
         void SetEngineDebugPanel();
-        void Dispose();
     }
 
     public class DebugController : IDebugController
