@@ -91,6 +91,7 @@ namespace DCL
             //TODO(Brian): Move those subscriptions elsewhere.
             PoolManager.i.OnGet -= Environment.i.platform.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet += Environment.i.platform.physicsSyncController.MarkDirty;
+
             PoolManager.i.OnGet -= Environment.i.platform.cullingController.objectsTracker.MarkDirty;
             PoolManager.i.OnGet += Environment.i.platform.cullingController.objectsTracker.MarkDirty;
         }
