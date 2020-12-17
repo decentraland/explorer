@@ -70,6 +70,7 @@ import { getProfileType } from './getProfileType'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
+import { ParcelsWithAccess } from 'decentraland-ecs/src'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -403,7 +404,7 @@ function* sendLoadProfile(profile: Profile) {
   yield call(ensureBaseCatalogs)
 
   const identity = yield select(getCurrentIdentity)
-  const parcels = yield fetchParcelsWithAccess(identity.address)
+  const parcels: ParcelsWithAccess = identity.hasConnectedWeb3 ? yield fetchParcelsWithAccess(identity.address) : []
   const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
