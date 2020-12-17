@@ -12,6 +12,9 @@ namespace DCL
         private static System.Func<PlatformContext> platformBuilder;
         private static System.Func<WorldRuntimeContext> worldRuntimeBuilder;
 
+        /// <summary>
+        /// Setup the environment with the default implementations of each context.
+        /// </summary>
         public static void SetupWithDefaults()
         {
             Setup(
@@ -21,6 +24,14 @@ namespace DCL
             );
         }
 
+        /// <summary>
+        /// Configure and setup the environment with custom implementations given by each func passed as parameter.
+        ///
+        /// The funcs are stored. So the same environment can be replicated by just calling Setup() later.
+        /// </summary>
+        /// <param name="messagingBuilder">A func returning a MessagingContext to be used by the environment.</param>
+        /// <param name="platformBuilder">A func returning a PlatformContext to be used by the environment.</param>
+        /// <param name="worldRuntimeBuilder">A func returning a WorldRuntimeContext to be used by the environment.</param>
         public static void Setup(System.Func<MessagingContext> messagingBuilder,
             System.Func<PlatformContext> platformBuilder,
             System.Func<WorldRuntimeContext> worldRuntimeBuilder)
@@ -31,13 +42,19 @@ namespace DCL
             Setup();
         }
 
+        /// <summary>
+        /// Setup the environment with the configured builder funcs.
+        /// </summary>
         public static void Setup()
         {
             i = new Model(messagingBuilder, platformBuilder, worldRuntimeBuilder);
             Initialize();
         }
 
-        public static void Initialize()
+        /// <summary>
+        /// Wire the system dependencies. We should improve this approach later. 
+        /// </summary>
+        private static void Initialize()
         {
             Model model = i;
 
@@ -62,12 +79,18 @@ namespace DCL
             model.messaging.manager.Initialize(i.world.sceneController);
         }
 
+        /// <summary>
+        /// Dispose() and Setup() using the current environment configuration. 
+        /// </summary>
         public static void Reset()
         {
             Dispose();
             Setup();
         }
 
+        /// <summary>
+        /// Dispose() all the current environment systems. 
+        /// </summary>
         public static void Dispose()
         {
             i.Dispose();
