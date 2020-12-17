@@ -16,7 +16,7 @@ namespace AssetPromiseKeeper_GLTF_Tests
         protected ContentProvider contentProvider;
 
         [UnitySetUp]
-        protected IEnumerator SetUp()
+        protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
             contentProvider = new ContentProvider();

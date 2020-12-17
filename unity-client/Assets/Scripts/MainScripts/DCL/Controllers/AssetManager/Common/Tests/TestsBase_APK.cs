@@ -14,14 +14,14 @@ namespace AssetPromiseKeeper_Tests
         protected APKType keeper;
 
         [UnitySetUp]
-        protected IEnumerator SetUp()
+        protected virtual IEnumerator SetUp()
         {
             keeper = new APKType();
             yield break;
         }
 
         [UnityTearDown]
-        protected IEnumerator TearDown()
+        protected virtual IEnumerator TearDown()
         {
             keeper.Cleanup();
             yield break;
