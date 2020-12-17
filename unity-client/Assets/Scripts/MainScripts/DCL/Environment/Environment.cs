@@ -47,9 +47,9 @@ namespace DCL
             // World context systems
             model.world.sceneController.Initialize();
             model.world.pointerEventsController.Initialize();
-            model.world.worldState.Initialize();
-            model.world.worldBlockersController.InitializeWithDefaultDependencies(
-                model.world.worldState,
+            model.world.state.Initialize();
+            model.world.blockersController.InitializeWithDefaultDependencies(
+                model.world.state,
                 DCLCharacterController.i.characterPosition);
             model.world.sceneBoundsChecker.Start();
 
@@ -59,7 +59,7 @@ namespace DCL
             model.platform.cullingController.Start();
 
             // Messaging systems
-            model.messaging.messagingControllersManager.Initialize(i.world.sceneController);
+            model.messaging.manager.Initialize(i.world.sceneController);
         }
 
         public static void Reset()

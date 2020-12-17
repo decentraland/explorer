@@ -449,7 +449,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         Vector3 middlePoint = CalculateMiddlePoint(sceneToEdit.sceneData.parcels);
 
-        lookAtT.position = Environment.i.world.worldState.ConvertSceneToUnityPosition(middlePoint);
+        lookAtT.position = Environment.i.world.state.ConvertSceneToUnityPosition(middlePoint);
     }
 
     Vector3 CalculateMiddlePoint(Vector2Int[] positions)

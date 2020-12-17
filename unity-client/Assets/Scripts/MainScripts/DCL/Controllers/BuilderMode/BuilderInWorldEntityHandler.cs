@@ -425,7 +425,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     {
         DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
-        DCLTransform.model.position = Environment.i.world.worldState.ConvertUnityToScenePosition(entryPoint, parcelScene);
+        DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entryPoint, parcelScene);
 
         Vector3 pointToLookAt = Camera.main.transform.position;
         pointToLookAt.y = editionGOPosition.y;

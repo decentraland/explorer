@@ -2,16 +2,16 @@
 {
     public class MessagingContext : System.IDisposable
     {
-        public readonly MessagingControllersManager messagingControllersManager;
+        public readonly MessagingControllersManager manager;
 
-        public MessagingContext(MessagingControllersManager messagingControllersManager)
+        public MessagingContext(MessagingControllersManager manager)
         {
-            this.messagingControllersManager = messagingControllersManager;
+            this.manager = manager;
         }
 
         public void Dispose()
         {
-            messagingControllersManager.Dispose();
+            manager.Dispose();
         }
     }
 }

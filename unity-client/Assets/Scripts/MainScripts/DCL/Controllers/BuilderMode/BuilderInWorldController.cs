@@ -808,7 +808,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     void FindSceneToEdit()
     {
-        foreach (ParcelScene scene in Environment.i.world.worldState.scenesSortedByDistance)
+        foreach (ParcelScene scene in Environment.i.world.state.scenesSortedByDistance)
         {
             if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {

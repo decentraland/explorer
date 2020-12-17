@@ -300,7 +300,7 @@ namespace DCL.Controllers
 
             if (entity.parent != null) SetEntityParent(newEntity.entityId, entity.parent.entityId);
 
-            DCLTransform.model.position = Environment.i.world.worldState.ConvertUnityToScenePosition(entity.gameObject.transform.position);
+            DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position);
             DCLTransform.model.rotation = entity.gameObject.transform.rotation;
             DCLTransform.model.scale = entity.gameObject.transform.lossyScale;
 

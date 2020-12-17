@@ -62,7 +62,7 @@ public class EntityInformationController : MonoBehaviour
     {
         if (currentEntity.gameObject != null)
         {
-            Vector3 positionConverted = Environment.i.world.worldState.ConvertUnityToScenePosition(currentEntity.gameObject.transform.position, parcelScene);
+            Vector3 positionConverted = Environment.i.world.state.ConvertUnityToScenePosition(currentEntity.gameObject.transform.position, parcelScene);
             Vector3 currentRotation = currentEntity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = currentEntity.gameObject.transform.localScale;
 

@@ -70,7 +70,7 @@ namespace DCL
 
         public void PopulateBusesToBeProcessed()
         {
-            WorldState worldState = Environment.i.world.worldState;
+            WorldState worldState = Environment.i.world.state;
             string currentSceneId = worldState.currentSceneId;
             List<ParcelScene> scenesSortedByDistance = worldState.scenesSortedByDistance;
 

@@ -21,7 +21,7 @@ namespace DCL.Helpers
 {
     public class WaitForAllMessagesProcessed : CustomYieldInstruction
     {
-        public override bool keepWaiting => Environment.i.messaging.messagingControllersManager.hasPendingMessages;
+        public override bool keepWaiting => Environment.i.messaging.manager.hasPendingMessages;
     }
 
     // NOTE(Brian): Attribute used to determine if tests are visual. Those tests will be run to generate the baseline images.
