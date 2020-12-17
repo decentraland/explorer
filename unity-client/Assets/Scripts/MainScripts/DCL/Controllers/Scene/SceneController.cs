@@ -66,7 +66,6 @@ namespace DCL
         {
             if (prewarmSceneMessagesPool)
             {
-                Debug.Log("Prewarming... 1");
                 for (int i = 0; i < 100000; i++)
                 {
                     sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
@@ -75,7 +74,6 @@ namespace DCL
 
             if (prewarmEntitiesPool)
             {
-                Debug.Log("Prewarming... 2");
                 EnsureEntityPool();
             }
 
