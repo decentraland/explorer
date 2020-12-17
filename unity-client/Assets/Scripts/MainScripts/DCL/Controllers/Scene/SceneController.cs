@@ -670,7 +670,6 @@ namespace DCL
 
         public void UnloadParcelSceneExecute(string sceneId)
         {
-            Debug.Log("Removing scene " + sceneId);
             ProfilingEvents.OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_DESTROY);
 
             WorldState worldState = Environment.i.world.worldState;

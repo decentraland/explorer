@@ -151,7 +151,6 @@ public class TestsBase
     public void SetUp_TestScene()
     {
         scene = sceneController.CreateTestScene();
-        Debug.Log("Creating test scene...");
     }
 
     public virtual IEnumerator SetUp_CharacterController()
