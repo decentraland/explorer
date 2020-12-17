@@ -2,6 +2,10 @@
 
 namespace DCL
 {
+    /// <summary>
+    /// Context related to specific platform handling.
+    /// Memory, rendering, input, IO and debug systems belong here.
+    /// </summary>
     public class PlatformContext : System.IDisposable
     {
         public readonly MemoryManager memoryManager;
