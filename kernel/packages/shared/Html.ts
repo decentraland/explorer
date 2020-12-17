@@ -33,7 +33,7 @@ export default class Html {
   }
 
   static showErrorModal(targetError: string) {
-    if (isReact) return
+    if (isReact || PREVIEW) return
     document.getElementById('error-' + targetError)!.setAttribute('style', 'display: block !important')
   }
 
