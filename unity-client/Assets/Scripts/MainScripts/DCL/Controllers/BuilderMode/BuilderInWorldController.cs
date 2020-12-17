@@ -141,6 +141,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     bool catalogAdded = false;
     bool sceneReady = false;
+    bool isTestMode = false;
 
     Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
 
@@ -216,9 +217,11 @@ public class BuilderInWorldController : MonoBehaviour
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
 
-
-        ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
-        BuilderInWorldNFTController.i.Start();
+        if (!isTestMode)
+        {
+            ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+            BuilderInWorldNFTController.i.Start();
+        }
 
         meshLoadIndicator.SetCamera(Camera.main);
     }
@@ -301,6 +304,10 @@ public class BuilderInWorldController : MonoBehaviour
         }
     }
 
+    public void SetTestMode()
+    {
+        isTestMode = true;
+    }
 
     void CheckPublishConditions()
     {
@@ -396,37 +403,37 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
         {
-            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
-            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
-            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
-            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
-            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
-            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
             return false;
         }
 

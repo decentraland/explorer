@@ -133,6 +133,7 @@ public class BuilderInWorldShould : TestsBase
 
         BuilderInWorldController  builderInWorldController = InstantiateTestGameObject(builderInWorldControllerPrefab.gameObject).GetComponent<BuilderInWorldController>();
         builderInWorldController.gameObject.SetActive(true);
+        builderInWorldController.SetTestMode();
 
         //Note (Adrian): Wait 1 frame to call the Start method on the BuilderInWorldController
         yield return null;

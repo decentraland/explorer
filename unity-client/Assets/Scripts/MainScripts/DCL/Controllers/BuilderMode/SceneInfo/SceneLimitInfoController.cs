@@ -90,6 +90,8 @@ public class SceneLimitInfoController : MonoBehaviour
             colorToUse = highFillColor; 
         foreach(Image img in fillsImgs)
         {
+            if (img == null)
+                continue;
             img.fillAmount = percentAmount/100f;
             img.color = colorToUse;
         }
