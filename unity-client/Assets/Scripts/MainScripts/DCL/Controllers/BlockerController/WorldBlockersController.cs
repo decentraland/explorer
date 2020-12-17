@@ -101,8 +101,8 @@ namespace DCL.Controllers
 
         void OnWorldReposition(DCLCharacterPosition charPos)
         {
-            var newPosition = charPos.WorldToUnityPosition(Vector3.zero); // Blockers parent original position
-            blockersParent.position = newPosition;
+            // Blockers parent original position
+            blockersParent.position = charPos.WorldToUnityPosition(Vector3.zero);
         }
 
         public void Dispose()
