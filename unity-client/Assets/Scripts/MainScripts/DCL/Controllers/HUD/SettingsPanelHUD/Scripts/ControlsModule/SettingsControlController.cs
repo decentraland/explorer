@@ -48,10 +48,10 @@ namespace DCL.SettingsPanelHUD.Controls
         /// <summary>
         /// Applies the current control state into the Settings class.
         /// </summary>
-        public virtual void ApplySettings()
+        public virtual void ApplySettings() // TODO (Santi): Remove...
         {
-            Settings.i.ApplyGeneralSettings(currentGeneralSettings);
-            Settings.i.ApplyQualitySettings(currentQualitySetting);
+            //Settings.i.ApplyGeneralSettings(currentGeneralSettings);
+            //Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
 
         /// <summary>

@@ -1,19 +1,40 @@
 using DCL.SettingsPanelHUD.Common;
+using System;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Bloom", fileName = "BloomControlController")]
     public class BloomControlController : SettingsControlController
     {
+        const string BLOOM_SETTINGS_KEY = "Settings.Bloom";
+
+        private Volume postProcessVolume = null;
+
+        public override void Initialize(ISettingsControlView settingsControlView)
+        {
+            base.Initialize(settingsControlView);
+
+            postProcessVolume = GameObject.FindObjectOfType<Volume>();
+            SetBloomValue((bool)GetStoredValue());
+        }
+
         public override object GetStoredValue()
         {
-            return currentQualitySetting.bloom;
+            string storedValue = PlayerPrefs.GetString(BLOOM_SETTINGS_KEY);
+            if (!String.IsNullOrEmpty(storedValue))
+                return Convert.ToBoolean(storedValue);
+            else
+                return Settings.i.qualitySettingsPresets.defaultPreset.bloom;
         }
 
         public override void OnControlChanged(object newValue)
         {
-            currentQualitySetting.bloom = (bool)newValue;
+            bool newBloomValue = (bool)newValue;
+            SetBloomValue(newBloomValue);
+            PlayerPrefs.SetString(BLOOM_SETTINGS_KEY, newBloomValue.ToString());
         }
 
         public override void PostApplySettings()
@@ -21,6 +42,18 @@ namespace DCL.SettingsPanelHUD.Controls
             base.PostApplySettings();
 
             CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
+        }
+
+        private void SetBloomValue(bool value)
+        {
+            if (postProcessVolume)
+            {
+                Bloom bloom;
+                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
+                {
+                    bloom.active = value;
+                }
+            }
         }
     }
 }
