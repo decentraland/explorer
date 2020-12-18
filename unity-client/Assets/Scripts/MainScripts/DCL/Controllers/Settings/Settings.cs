@@ -95,7 +95,7 @@ namespace DCL
             ApplyGeneralSettings(currentGeneralSettings);
         }
 
-        private SettingsData.GeneralSettings GetDefaultGeneralSettings()
+        public SettingsData.GeneralSettings GetDefaultGeneralSettings()
         {
             return new SettingsData.GeneralSettings()
             {
