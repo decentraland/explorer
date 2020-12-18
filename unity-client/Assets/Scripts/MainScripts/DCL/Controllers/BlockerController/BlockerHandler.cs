@@ -36,14 +36,12 @@ namespace DCL.Controllers
 
         Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
 
-        private DCLCharacterPosition characterPosition;
         private IBlockerAnimationHandler animationHandler;
         private Transform parent;
 
 
-        public BlockerInstanceHandler(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
+        public BlockerInstanceHandler(IBlockerAnimationHandler animationHandler)
         {
-            this.characterPosition = characterPosition;
             this.animationHandler = animationHandler;
 
             RenderProfileManifest.i.OnChangeProfile += OnChangeProfile;

@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class DCLCharacterPosition
 {
-
     private Vector3 worldPositionValue;
     private Vector3 unityPositionValue;
     private Vector3 offset;
@@ -70,7 +69,6 @@ public class DCLCharacterPosition
 
             lastRepositionFrame = Time.frameCount;
 
-            //OnPrecisionAdjust?.Invoke(this);
             CommonScriptableObjects.playerWorldPosition.Set(worldPositionValue);
             CommonScriptableObjects.worldOffset.Set(offset);
             DCL.Environment.i.physicsSyncController.MarkDirty();

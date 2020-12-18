@@ -113,7 +113,7 @@ public class DCLCharacterController : MonoBehaviour
         i = this;
         originalGravity = gravity;
 
-        SuscribeToInput();
+        SubscribeToInput();
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerWorldPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerCoords.Set(Vector2Int.zero);
@@ -142,7 +142,7 @@ public class DCLCharacterController : MonoBehaviour
         firstPersonCameraReference = new DCL.Models.DecentralandEntity {gameObject = firstPersonCameraGameObject};
     }
 
-    private void SuscribeToInput()
+    private void SubscribeToInput()
     {
         jumpStartedDelegate = (action) =>
         {

@@ -20,7 +20,6 @@ namespace DCL.Controllers
 
         readonly ISceneHandler sceneHandler;
         readonly IBlockerInstanceHandler blockerInstanceHandler;
-        readonly DCLCharacterPosition characterPosition;
 
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
@@ -37,11 +36,10 @@ namespace DCL.Controllers
             new Vector2Int(-1, 1)
         };
 
-        public WorldBlockersController(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler, DCLCharacterPosition characterPosition)
+        public WorldBlockersController(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler)
         {
             this.blockerInstanceHandler = blockerInstanceHandler;
             this.sceneHandler = sceneHandler;
-            this.characterPosition = characterPosition;
 
             blockersParent = new GameObject("WorldBlockers").transform;
             blockersParent.position = Vector3.zero;
@@ -51,19 +49,17 @@ namespace DCL.Controllers
             CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
         }
 
-        public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler, DCLCharacterPosition characterPosition)
+        public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler)
         {
             var blockerAnimationHandler = new BlockerAnimationHandler();
 
             var blockerInstanceHandler = new BlockerInstanceHandler(
-                characterPosition,
                 blockerAnimationHandler
             );
 
             var worldBlockersController = new WorldBlockersController(
                 sceneHandler,
-                blockerInstanceHandler,
-                characterPosition);
+                blockerInstanceHandler);
 
             return worldBlockersController;
         }
