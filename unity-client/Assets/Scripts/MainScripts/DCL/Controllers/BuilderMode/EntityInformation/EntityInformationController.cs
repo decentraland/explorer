@@ -50,9 +50,11 @@ public class EntityInformationController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!isEnable) return;
+        if (!isEnable)
+            return;
 
-        if (currentEntity == null) return;
+        if (currentEntity == null)
+            return;
 
         if (framesCount >= framesBetweenUpdate)
         {
@@ -132,7 +134,9 @@ public class EntityInformationController : MonoBehaviour
     {
         string currentName = entity.GetDescriptiveName();
         titleTxt.text = currentName;
-        if (!isChangingName) nameIF.SetTextWithoutNotify(currentName);
+
+        if (!isChangingName)
+            nameIF.SetTextWithoutNotify(currentName);
     }
 
     public void UpdateInfo(DCLBuilderInWorldEntity entity)
