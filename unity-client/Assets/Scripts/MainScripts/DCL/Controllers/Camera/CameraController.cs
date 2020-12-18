@@ -138,7 +138,7 @@ public class CameraController : MonoBehaviour
 
     private void OnDestroy()
     {
-        CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
+        worldOffset.OnChange -= OnWorldReposition;
         cameraChangeAction.OnTriggered -= OnCameraChangeAction;
         CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
         CommonScriptableObjects.cameraBlocked.OnChange -= CameraBlocked_OnChange;
