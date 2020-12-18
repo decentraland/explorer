@@ -93,7 +93,7 @@ namespace DCL
         /// </summary>
         public static void Dispose()
         {
-            i.Dispose();
+            i?.Dispose();
         }
 
         public class Model

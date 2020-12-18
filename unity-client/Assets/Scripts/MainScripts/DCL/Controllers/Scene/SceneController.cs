@@ -702,15 +702,20 @@ namespace DCL
 
         public void UnloadAllScenes(bool includePersistent = false)
         {
+            var worldState = Environment.i.world.state;
+
             if (includePersistent)
             {
-                foreach (var keyValuePair in Environment.i.world.state.loadedScenes.Where(x => x.Value.isPersistent))
+                var persistentScenes = worldState.loadedScenes.Where(x => x.Value.isPersistent);
+
+                foreach (var kvp in persistentScenes)
                 {
-                    keyValuePair.Value.isPersistent = false;
+                    kvp.Value.isPersistent = false;
                 }
             }
 
-            var list = Environment.i.world.state.loadedScenes.ToArray();
+            var list = worldState.loadedScenes.ToArray();
+
             for (int i = 0; i < list.Length; i++)
             {
                 UnloadParcelSceneExecute(list[i].Key);

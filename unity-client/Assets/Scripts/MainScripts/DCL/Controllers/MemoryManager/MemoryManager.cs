@@ -28,6 +28,8 @@ namespace DCL
             if (autoCleanupCoroutine != null)
                 CoroutineStarter.Stop(autoCleanupCoroutine);
 
+            autoCleanupCoroutine = null;
+
             CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
         }
 
