@@ -194,7 +194,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
                 ((DCLName) keyValuePairBaseDisposable.Value).SetNewName(newName);
-                foundComponent = true;
+                foundComponent = true;          
             }
         }
 
@@ -204,6 +204,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             name.SetNewName(newName);
             rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
+        onStatusUpdate?.Invoke(this);
     }
 
     public string GetDescriptiveName()

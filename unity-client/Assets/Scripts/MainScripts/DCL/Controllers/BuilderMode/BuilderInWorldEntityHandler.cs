@@ -41,6 +41,24 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     float nextTimeToUpdateTransform = 0;
 
+    public void Init()
+    {
+        HUDController.i.buildModeHud.OnEntityDelete += DeleteEntity;
+        HUDController.i.buildModeHud.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
+        HUDController.i.buildModeHud.OnDeleteSelectedAction += DeleteSelectedEntitiesInput;
+        HUDController.i.buildModeHud.OnEntityClick += ChangeEntitySelectionFromList;
+        HUDController.i.buildModeHud.OnEntityLock += ChangeEntityLockStatus;
+        HUDController.i.buildModeHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
+        HUDController.i.buildModeHud.OnEntityRename += ChangeEntityName;
+
+        HUDController.i.buildModeHud.OnSelectedObjectPositionChange += UpdateEntityPosition;
+        HUDController.i.buildModeHud.OnSelectedObjectRotationChange += UpdateEntityRotation;
+        HUDController.i.buildModeHud.OnSelectedObjectScaleChange += UpdateEntityScale;
+
+        actionController.OnRedo += ReSelectEntities;
+        actionController.OnUndo += ReSelectEntities;
+    }
+
     private void OnDestroy()
     {
         DestroyCollidersForAllEntities();
@@ -58,6 +76,10 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.buildModeHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.buildModeHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.buildModeHud.OnEntityRename -= ChangeEntityName;
+
+        HUDController.i.buildModeHud.OnSelectedObjectPositionChange -= UpdateEntityPosition;
+        HUDController.i.buildModeHud.OnSelectedObjectRotationChange -= UpdateEntityRotation;
+        HUDController.i.buildModeHud.OnSelectedObjectScaleChange -= UpdateEntityScale;
     }
 
     private void Update()
@@ -66,6 +88,30 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY) return;
 
         ReportTransform();
+    }
+
+    void UpdateEntityPosition(Vector3 position)
+    {
+        if (selectedEntities.Count <= 0)
+            return;
+
+        selectedEntities[0].transform.position = DCL.Environment.i.worldState.ConvertSceneToUnityPosition(position, sceneToEdit); 
+    }
+
+    void UpdateEntityRotation(Vector3 rotation)
+    {
+        if (selectedEntities.Count <= 0)
+            return;
+
+        selectedEntities[0].transform.rotation = Quaternion.Euler(rotation); 
+    }
+
+    void UpdateEntityScale(Vector3 scale)
+    {
+        if (selectedEntities.Count <= 0)
+            return;
+
+        selectedEntities[0].transform.localScale = scale; 
     }
 
     void ReportTransform()
@@ -79,20 +125,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
             nextTimeToUpdateTransform = DCLTime.realtimeSinceStartup + msBetweenTransformUpdates / 1000f;
         }
-    }
-
-    public void Init()
-    {
-        HUDController.i.buildModeHud.OnEntityDelete += DeleteEntity;
-        HUDController.i.buildModeHud.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
-        HUDController.i.buildModeHud.OnDeleteSelectedAction += DeleteSelectedEntitiesInput;
-        HUDController.i.buildModeHud.OnEntityClick += ChangeEntitySelectionFromList;
-        HUDController.i.buildModeHud.OnEntityLock += ChangeEntityLockStatus;
-        HUDController.i.buildModeHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
-        HUDController.i.buildModeHud.OnEntityRename += ChangeEntityName;
-
-        actionController.OnRedo += ReSelectEntities;
-        actionController.OnUndo += ReSelectEntities;
     }
 
     public ParcelScene GetParcelSceneToEdit()

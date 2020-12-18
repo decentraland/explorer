@@ -29,6 +29,10 @@ public class BuildModeHUDController : IHUD
     public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
     public event Action<DCLBuilderInWorldEntity> OnEntityRename;
 
+    public event Action<Vector3> OnSelectedObjectPositionChange;
+    public event Action<Vector3> OnSelectedObjectRotationChange;
+    public event Action<Vector3> OnSelectedObjectScaleChange;
+
     
     //Note(Adrian): This is used right now for tutorial purposes
     public event Action OnCatalogOpen;
@@ -49,6 +53,12 @@ public class BuildModeHUDController : IHUD
 
         buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
         entityInformationController = view.entityInformationController;
+
+        entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
+        entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
+        entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
+        entityInformationController.OnNameChange += (x) => OnEntityRename?.Invoke(x);
+
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);

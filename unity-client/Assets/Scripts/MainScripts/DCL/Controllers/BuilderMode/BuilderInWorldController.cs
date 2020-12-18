@@ -390,6 +390,7 @@ public class BuilderInWorldController : MonoBehaviour
         GLTFShape mesh = (GLTFShape) sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
         mesh.model = new LoadableShape.Model();
         mesh.model.src = sceneObject.model;
+        mesh.model.assetId = sceneObject.id;
 
         DCLName name = (DCLName) sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
 
