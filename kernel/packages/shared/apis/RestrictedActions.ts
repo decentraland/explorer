@@ -31,7 +31,7 @@ export class RestrictedActions extends ExposableAPI {
 
     const position = basePosition.add(newPosition)
 
-    // validate new position is inside of the scene's parcels
+    // validate new position is inside one of the scene's parcels
     if (!this.isPositionValid(position)) {
       defaultLogger.error('Error: Position is out of scene', position)
       return
