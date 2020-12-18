@@ -66,8 +66,7 @@ namespace DCL
             model.world.pointerEventsController.Initialize();
             model.world.state.Initialize();
             model.world.blockersController.InitializeWithDefaultDependencies(
-                model.world.state,
-                DCLCharacterController.i.characterPosition);
+                model.world.state);
             model.world.sceneBoundsChecker.Start();
 
             // Platform systems
@@ -76,7 +75,7 @@ namespace DCL
             model.platform.cullingController.Start();
 
             // Messaging systems
-            model.messaging.manager.Initialize(i.world.sceneController);
+            model.messaging.manager.Initialize(model.world.sceneController);
         }
 
         /// <summary>
