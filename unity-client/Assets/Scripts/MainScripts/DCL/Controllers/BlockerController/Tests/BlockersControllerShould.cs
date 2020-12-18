@@ -52,6 +52,10 @@ public class BlockersControllerShould
         // Arrange
         blockerInstanceHandler = Substitute.For<IBlockerInstanceHandler>();
         blockerInstanceHandler.GetBlockers().Returns(new Dictionary<Vector2Int, PoolableObject>());
+
+        if (blockerController != null)
+            blockerController.Dispose();
+
         blockerController = new WorldBlockersController(sceneHandler, blockerInstanceHandler);
 
         // Act-assert #1: first blockers added should be shown  
@@ -77,6 +81,8 @@ public class BlockersControllerShould
         blockerController.SetEnabled(true);
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.ReceivedWithAnyArgs().ShowBlocker(default);
+
+        blockerController.Dispose();
     }
 
     [Test]

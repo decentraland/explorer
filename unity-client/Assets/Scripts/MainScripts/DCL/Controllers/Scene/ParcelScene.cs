@@ -56,6 +56,11 @@ namespace DCL.Controllers
             sceneLifecycleHandler = new SceneLifecycleHandler(this);
         }
 
+        private void OnDestroy()
+        {
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
+        }
+
         void OnDisable()
         {
             metricsController.Disable();
@@ -147,8 +152,6 @@ namespace DCL.Controllers
             }
 
             DisposeAllSceneComponents();
-
-            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
 
             if (immediate) //!CommonScriptableObjects.rendererState.Get())
             {
