@@ -157,6 +157,7 @@ export function pickCatalystRealm(candidates: Candidate[]): Realm {
   })
 
   const sorted = candidates
+    .filter((it) => it)
     .filter((it) => it.status === ServerConnectionStatus.OK && it.layer.usersCount < it.layer.maxUsers)
     .sort((c1, c2) => {
       const elapsedDiff = c1.elapsed - c2.elapsed
