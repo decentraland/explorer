@@ -172,7 +172,7 @@ public class DCLCharacterController : MonoBehaviour
     void OnWorldReposition(Vector3 current, Vector3 previous)
     {
         Vector3 oldPos = this.transform.position;
-        this.transform.position = CommonScriptableObjects.playerUnityPosition;
+        this.transform.position = characterPosition.unityPosition; //CommonScriptableObjects.playerUnityPosition;
 
         if (CinemachineCore.Instance.BrainCount > 0)
         {
