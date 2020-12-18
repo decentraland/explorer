@@ -18,7 +18,6 @@ namespace DCL.SettingsPanelHUD.Controls
             base.Initialize(settingsControlView);
 
             postProcessVolume = GameObject.FindObjectOfType<Volume>();
-            SetBloomValue((bool)GetStoredValue());
         }
 
         public override object GetStoredValue()
@@ -33,7 +32,16 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             bool newBloomValue = (bool)newValue;
-            SetBloomValue(newBloomValue);
+
+            if (postProcessVolume)
+            {
+                Bloom bloom;
+                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
+                {
+                    bloom.active = newBloomValue;
+                }
+            }
+
             PlayerPrefs.SetString(BLOOM_SETTINGS_KEY, newBloomValue.ToString());
         }
 
@@ -42,18 +50,6 @@ namespace DCL.SettingsPanelHUD.Controls
             base.PostApplySettings();
 
             CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
-        }
-
-        private void SetBloomValue(bool value)
-        {
-            if (postProcessVolume)
-            {
-                Bloom bloom;
-                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
-                {
-                    bloom.active = value;
-                }
-            }
         }
     }
 }

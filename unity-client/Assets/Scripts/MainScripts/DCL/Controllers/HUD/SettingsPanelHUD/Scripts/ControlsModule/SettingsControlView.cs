@@ -63,6 +63,7 @@ namespace DCL.SettingsPanelHUD.Controls
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
             this.settingsControlController.Initialize(this);
+            this.settingsControlController.OnControlChanged(this.settingsControlController.GetStoredValue());
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;
