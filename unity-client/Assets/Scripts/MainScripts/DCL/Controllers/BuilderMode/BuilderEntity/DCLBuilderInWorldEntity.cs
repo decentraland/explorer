@@ -68,6 +68,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool isVoxel { get; set; } = false;
 
+    SceneObject associatedSceneObject;
+
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -97,6 +99,31 @@ public class DCLBuilderInWorldEntity : EditableEntity
             if (IsEntityAFloor()) IsLocked = true;
             if (IsEntityAVoxel()) SetEntityAsVoxel();
         }
+    }
+
+    public SceneObject GetSceneObjectAssociated()
+    {
+        if (associatedSceneObject != null)
+            return associatedSceneObject;
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.GLTF_SHAPE)
+            {
+                string assetId = ((GLTFShape)keyValuePairBaseDisposable.Value).model.assetId;
+                associatedSceneObject = AssetCatalogBridge.GetSceneObjectById(assetId);
+                return associatedSceneObject;
+            }
+        }
+
+        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        {
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NFT_SHAPE)
+            {
+                //TODO: Implement NFT SceneObject and return them
+            }
+        }
+        return null;
     }
 
     public void Select()

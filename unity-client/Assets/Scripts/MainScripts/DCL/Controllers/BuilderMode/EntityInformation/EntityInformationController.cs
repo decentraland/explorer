@@ -5,19 +5,25 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EntityInformationController : MonoBehaviour
 {
-    [Header("Scene references")] public TextMeshProUGUI titleTxt;
-    public TextMeshProUGUI descTxt;
+    [Header("Prefab references")]
+    public TextMeshProUGUI titleTxt;
+    public RawImage entitytTumbailImg; 
+    public AttributeXYZ positionAttribute;
 
-    DecentralandEntity currentEntity;
+    DCLBuilderInWorldEntity currentEntity;
     ParcelScene parcelScene;
 
     bool isEnable = false;
 
     int framesBetweenUpdate = 5;
     int framesCount = 0;
+
+    string loadedThumbnailURL;
+    AssetPromise_Texture loadedThumbnailPromise;
 
     private void LateUpdate()
     {
@@ -36,11 +42,14 @@ public class EntityInformationController : MonoBehaviour
         }
     }
 
-    public void SetEntity(DecentralandEntity entity, ParcelScene currentScene)
+    public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)
     {
         this.currentEntity = entity;
         parcelScene = currentScene;
-        titleTxt.text = currentEntity.entityId;
+        titleTxt.text = entity.GetDescriptiveName();
+
+        GetThumbnail(entity.GetSceneObjectAssociated());
+
         UpdateInfo();
     }
 
@@ -64,16 +73,51 @@ public class EntityInformationController : MonoBehaviour
             Vector3 currentRotation = currentEntity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = currentEntity.gameObject.transform.localScale;
 
+            positionAttribute.SetValues(positionConverted);
+
             string desc = AppendUsageAndLimit("POSITION:   ", positionConverted, "0.#");
             desc += "\n\n" + AppendUsageAndLimit("ROTATION:  ", currentRotation, "0");
             desc += "\n\n" + AppendUsageAndLimit("SCALE:        ", currentScale, "0.##");
 
-            descTxt.text = desc;
         }
     }
 
     string AppendUsageAndLimit(string name, Vector3 currentVector, string format)
     {
         return $"{name}X: {currentVector.x.ToString(format)}  Y: {currentVector.y.ToString(format)}  Z:{currentVector.z.ToString(format)}";
+    }
+
+    private void GetThumbnail(SceneObject sceneObject)
+    {
+        var url = sceneObject?.GetComposedThumbnailUrl();
+
+        if (url == loadedThumbnailURL)
+            return;
+
+        if (sceneObject == null || string.IsNullOrEmpty(url))
+            return;
+
+        string newLoadedThumbnailURL = url;
+        var newLoadedThumbnailPromise = new AssetPromise_Texture(url);
+
+
+        newLoadedThumbnailPromise.OnSuccessEvent += SetThumbnail;
+        newLoadedThumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading: {url}"); };
+
+        AssetPromiseKeeper_Texture.i.Keep(newLoadedThumbnailPromise);
+
+
+        AssetPromiseKeeper_Texture.i.Forget(loadedThumbnailPromise);
+        loadedThumbnailPromise = newLoadedThumbnailPromise;
+        loadedThumbnailURL = newLoadedThumbnailURL;
+    }
+
+    public void SetThumbnail(Asset_Texture texture)
+    {
+        if (entitytTumbailImg != null)
+        {
+            entitytTumbailImg.enabled = true;
+            entitytTumbailImg.texture = texture.texture;
+        }
     }
 }

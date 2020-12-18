@@ -1098,8 +1098,8 @@ MonoBehaviour:
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
   baseUrlCustom: https://play.decentraland.zone/?
-  environment: 4
-  startInCoords: {x: 0, y: 0}
+  environment: 2
+  startInCoords: {x: 140, y: 140}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
@@ -1221,7 +1221,7 @@ PrefabInstance:
     - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: activeFeature
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
@@ -1257,7 +1257,7 @@ PrefabInstance:
         type: 3}
       propertyPath: mouseCatcher
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1107221834}
     - target: {fileID: 1208871512657624393, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: builderInWorldBridge

@@ -142,7 +142,9 @@ public class BuilderInWorldBridge : MonoBehaviour
 
     public void ExitKernelEditMode(ParcelScene scene)
     {
+        WebInterface.VERBOSE = true;
         WebInterface.ReportControlEvent(new WebInterface.StopStatefulMode(scene.sceneData.id));
+        WebInterface.VERBOSE = false;
     }
 
     public void PublishScene(ParcelScene scene)

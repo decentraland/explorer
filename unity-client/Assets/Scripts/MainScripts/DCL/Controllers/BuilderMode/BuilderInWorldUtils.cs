@@ -11,6 +11,7 @@ using Environment = DCL.Environment;
 
 public static partial class BuilderInWorldUtils
 {
+
     public static void DrawScreenRect(Rect rect, Color color)
     {
         GUI.color = color;

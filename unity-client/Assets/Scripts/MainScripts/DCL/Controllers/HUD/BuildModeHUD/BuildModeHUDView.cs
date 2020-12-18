@@ -9,6 +9,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public SceneLimitInfoController sceneLimitInfoController;
     public SceneObjectCatalogController sceneObjectCatalogController;
+    public EntityInformationController entityInformationController;
     public ToolTipController toolTipController;
     public QuickBarView quickBarView;
 

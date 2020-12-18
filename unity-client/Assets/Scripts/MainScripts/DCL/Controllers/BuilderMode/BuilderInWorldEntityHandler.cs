@@ -14,12 +14,13 @@ using Environment = DCL.Environment;
 
 public class BuilderInWorldEntityHandler : MonoBehaviour
 {
-    [Header("Design variables")] public float duplicateOffset = 2f;
+    [Header("Design variables")]
+    public float duplicateOffset = 2f;
     public float msBetweenTransformUpdates = 2000;
 
 
-    [Header("Prefab References")] public OutlinerController outlinerController;
-    public EntityInformationController entityInformationController;
+    [Header("Prefab References")]
+    public OutlinerController outlinerController;
     public BuilderInWorldController buildModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
@@ -178,8 +179,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
         currentActiveMode.EntityDeselected(entity);
-        if (selectedEntities.Count <= 0 && entityInformationController != null)
-            entityInformationController.Disable();
+        if (selectedEntities.Count <= 0 &&
+            HUDController.i.buildModeHud != null)
+            HUDController.i.buildModeHud.HideEntityInformation();
     }
 
     public void DeselectEntities()
@@ -289,14 +291,15 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         currentActiveMode.SelectedEntity(entityEditable);
 
 
-        if (entityInformationController != null)
+        if (HUDController.i.buildModeHud != null)
         {
-            entityInformationController.Enable();
-            entityInformationController.SetEntity(entityEditable.rootEntity, sceneToEdit);
+            HUDController.i.buildModeHud.ShowEntityInformation();
+            HUDController.i.buildModeHud.EntityInformationSetEntity(entityEditable, sceneToEdit);
+            HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         }
 
 
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
+  
         outlinerController.CancelAllOutlines();
         return true;
     }

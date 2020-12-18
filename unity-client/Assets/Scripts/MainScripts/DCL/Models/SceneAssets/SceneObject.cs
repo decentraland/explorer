@@ -37,7 +37,7 @@ public class SceneObject
     public bool isFavorite = false;
 
     string baseUrl = "https://builder-api.decentraland.org/v1/storage/contents/";
-    public string ComposeThumbnailUrl()
+    public string GetComposedThumbnailUrl()
     {
         return baseUrl + thumbnail;
     }

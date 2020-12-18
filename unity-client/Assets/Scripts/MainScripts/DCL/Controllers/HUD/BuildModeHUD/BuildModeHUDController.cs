@@ -34,7 +34,9 @@ public class BuildModeHUDController : IHUD
     public event Action OnCatalogOpen;
 
     internal BuildModeHUDView view;
+
     BuilderInWorldEntityListController buildModeEntityListController;
+    EntityInformationController entityInformationController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
@@ -46,6 +48,7 @@ public class BuildModeHUDController : IHUD
         view.gameObject.SetActive(false);
 
         buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
+        entityInformationController = view.entityInformationController;
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -148,6 +151,25 @@ public class BuildModeHUDController : IHUD
     {
         view.SetGodModeView();
     }
+
+    #region EntityInformation
+
+    public void EntityInformationSetEntity(DCLBuilderInWorldEntity entity,ParcelScene scene)
+    {
+        entityInformationController.SetEntity(entity, scene);
+    }
+
+    public void ShowEntityInformation()
+    {
+        entityInformationController.Enable();
+    }
+
+    public void HideEntityInformation()
+    {
+        entityInformationController.Disable();
+    }
+
+    #endregion
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
