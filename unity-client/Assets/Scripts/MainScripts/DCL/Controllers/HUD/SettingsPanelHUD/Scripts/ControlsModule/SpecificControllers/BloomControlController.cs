@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using System;
 using UnityEngine;
@@ -11,13 +12,13 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         const string BLOOM_SETTINGS_KEY = "Settings.Bloom";
 
-        private Volume postProcessVolume = null;
+        private QualitySettingsController qualitySettings; // TODO (Santi): Refactorize!
 
         public override void Initialize(ISettingsControlView settingsControlView)
         {
             base.Initialize(settingsControlView);
 
-            postProcessVolume = GameObject.FindObjectOfType<Volume>();
+            qualitySettings = GameObject.FindObjectOfType<QualitySettingsController>();
         }
 
         public override object GetStoredValue()
@@ -33,10 +34,10 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             bool newBloomValue = (bool)newValue;
 
-            if (postProcessVolume)
+            if (qualitySettings.postProcessVolume)
             {
                 Bloom bloom;
-                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
+                if (qualitySettings.postProcessVolume.profile.TryGet<Bloom>(out bloom))
                 {
                     bloom.active = newBloomValue;
                 }
