@@ -67,6 +67,7 @@ namespace DCL
             }
 
             Debug.Log($"Renderer is locked? {!renderingController.renderingActivatedAckLock.isUnlocked}");
+            Debug.Log($"Renderer is active? {CommonScriptableObjects.rendererState.Get()}");
 
             System.Collections.Generic.HashSet<object> lockIds =
                 renderingController.renderingActivatedAckLock.GetLockIdsCopy();
