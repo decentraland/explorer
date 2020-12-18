@@ -25,7 +25,7 @@ namespace NFTShape_Internal
 
         public static NFTShapeHQImageHandler Create(NFTShapeHQImageConfig config)
         {
-            if (config.asset == null)
+            if (config.asset == null || config.controller == null)
             {
                 return null;
             }
@@ -96,7 +96,7 @@ namespace NFTShape_Internal
         {
             isPlayerNear = false;
 
-            if (config.controller.collider == null)
+            if (config.controller == null || config.controller.collider == null)
                 return;
 
             isPlayerNear = ((current - config.controller.collider.ClosestPoint(current)).sqrMagnitude

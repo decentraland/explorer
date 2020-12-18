@@ -36,6 +36,17 @@ namespace DCL
             CoroutineStarter.Stop(loadingRoutine);
         }
 
+        protected override bool AddToLibrary()
+        {
+            if (!library.Add(asset))
+            {
+                Debug.Log("add to library fail?");
+                return false;
+            }
+            asset = library.Get(asset.id);
+            return true;
+        }
+
         protected override void OnBeforeLoadOrReuse()
         {
         }

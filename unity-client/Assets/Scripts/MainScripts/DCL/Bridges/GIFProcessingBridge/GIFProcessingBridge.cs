@@ -75,10 +75,12 @@ namespace DCL
             if (gif.status == PendingGifs.Status.ERROR)
             {
                 onFail?.Invoke();
+                RemovePending(url);
                 yield break;
             }
 
             onSuccess?.Invoke(gif.textures);
+            RemovePending(url);
         }
 
         /// <summary>
@@ -97,11 +99,7 @@ namespace DCL
 
         public void FailGIFFetch(string id)
         {
-            if (pendingGifs.TryGetValue(id, out PendingGifs gif))
-            {
-                gif.status = PendingGifs.Status.ERROR;
-                pendingGifs.Remove(id);
-            }
+            RemovePending(id);
         }
 
         public void DeleteGIF(string id)
@@ -135,6 +133,15 @@ namespace DCL
             }
 
             return gifTextures;
+        }
+
+        private void RemovePending(string id)
+        {
+            if (pendingGifs.TryGetValue(id, out PendingGifs gif))
+            {
+                gif.status = PendingGifs.Status.ERROR;
+                pendingGifs.Remove(id);
+            }
         }
     }
 }
