@@ -242,7 +242,7 @@ function candidateToRealm(candidate: Candidate) {
 }
 
 function realmFor(name: string, layer: string, candidates: Candidate[]): Realm | undefined {
-  const candidate = candidates.find((it) => it.catalystName === name && it.layer.name === layer)
+  const candidate = candidates.find((it) => it && it.catalystName === name && it.layer.name === layer)
   return candidate ? candidateToRealm(candidate) : undefined
 }
 
