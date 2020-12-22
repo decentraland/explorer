@@ -40,6 +40,9 @@ namespace DCL
 
             RenderProfileManifest.i.Initialize();
             Environment.i.Initialize();
+
+            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+                Environment.i.cullingController.SetAnimationCulling(false);
         }
 
         private void Start()
