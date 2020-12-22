@@ -12,4 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11564254e7094996ac111360e5980383, type: 3}
   m_Name: QuestStepFactory
   m_EditorClassIdentifier: 
-  entries: []
+  entries:
+  - type: single
+    prefab: {fileID: 1110967426515645459, guid: 612c7c4083e24e841a8af7a5ff7272f2,
+      type: 3}
+  - type: count
+    prefab: {fileID: 4080155017753360023, guid: 07732aefe3d85304b8270c2d4aefb6b6,
+      type: 3}
+  - type: arbitrary
+    prefab: {fileID: 4080155017753360023, guid: 07732aefe3d85304b8270c2d4aefb6b6,
+      type: 3}

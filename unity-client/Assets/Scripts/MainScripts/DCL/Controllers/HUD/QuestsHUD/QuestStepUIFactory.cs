@@ -2,20 +2,23 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Variables/QuestStepFactory", fileName = "QuestStepFactory", order = 0)]
-public class QuestStepUIFactory : ScriptableObject
+namespace DCL.Huds
 {
-    [Serializable]
-    public class Entry
+    [CreateAssetMenu(menuName = "Variables/QuestStepFactory", fileName = "QuestStepFactory", order = 0)]
+    public class QuestStepUIFactory : ScriptableObject
     {
-        public string type;
-        public GameObject prefab;
-    }
+        [Serializable]
+        public class Entry
+        {
+            public string type;
+            public GameObject prefab;
+        }
 
-    [SerializeField] private Entry[] entries;
+        [SerializeField] private Entry[] entries;
 
-    public GameObject GetPrefab(string type)
-    {
-        return entries.FirstOrDefault(x => x.type == type)?.prefab;
+        public GameObject GetPrefab(string type)
+        {
+            return entries.FirstOrDefault(x => x.type == type)?.prefab;
+        }
     }
 }

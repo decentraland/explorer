@@ -1,4 +1,7 @@
-public interface IQuestStepUIEntry
+namespace DCL.Huds
 {
-    void Populate(string payload);
+    public interface IQuestStepUIEntry
+    {
+        void Populate(string payload);
+    }
 }

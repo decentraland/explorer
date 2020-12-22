@@ -494,7 +494,7 @@ MonoBehaviour:
   start: {fileID: 4516093964726229735}
   current: {fileID: 320248101611310856}
   target: {fileID: 2469739529683574781}
-  onGoingProgress: {fileID: 1710005427181869504}
+  ongoingProgress: {fileID: 1710005427181869504}
 --- !u!1 &5017057038514336408
 GameObject:
   m_ObjectHideFlags: 0
@@ -738,7 +738,7 @@ GameObject:
   - component: {fileID: 4460778432650285591}
   - component: {fileID: 1710005427181869504}
   m_Layer: 5
-  m_Name: OnGoing
+  m_Name: Ongoing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

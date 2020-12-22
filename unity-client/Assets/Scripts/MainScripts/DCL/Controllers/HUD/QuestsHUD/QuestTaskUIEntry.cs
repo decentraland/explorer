@@ -1,41 +1,43 @@
-using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 
-public class QuestTaskUIEntry : MonoBehaviour
+namespace DCL.Huds
 {
-    [SerializeField] private TextMeshProUGUI description;
-    [SerializeField] private RectTransform stepsContainer;
-    [SerializeField] private QuestStepUIFactory factory;
-
-    public void Populate(QuestTask task)
+    public class QuestTaskUIEntry : MonoBehaviour
     {
-        CleanUpStepsList(); //TODO: Reuse already instantiated steps
-        description.text = task.description;
-        foreach (QuestStep step in task.steps)
-        {
-            CreateStep(step);
-        }
-    }
+        [SerializeField] private TextMeshProUGUI description;
+        [SerializeField] private RectTransform stepsContainer;
+        [SerializeField] private QuestStepUIFactory factory;
 
-    internal void CreateStep(QuestStep step)
-    {
-        GameObject prefab = factory.GetPrefab(step.type);
-        if (prefab == null)
+        public void Populate(QuestTask task)
         {
-            Debug.LogError($"Type: {step.type} was not found in QuestStepFactory");
-            return;
+            CleanUpStepsList(); //TODO: Reuse already instantiated steps
+            description.text = task.description;
+            foreach (QuestStep step in task.steps)
+            {
+                CreateStep(step);
+            }
         }
 
-        var stepUIEntry = Instantiate(prefab, stepsContainer).GetComponent<IQuestStepUIEntry>();
-        stepUIEntry.Populate(step.payload);
-    }
-
-    internal void CleanUpStepsList()
-    {
-        while (stepsContainer.childCount > 0)
+        internal void CreateStep(QuestStep step)
         {
-            Destroy(stepsContainer.GetChild(0).gameObject);
+            GameObject prefab = factory.GetPrefab(step.type);
+            if (prefab == null)
+            {
+                Debug.LogError($"Type: {step.type} was not found in QuestStepFactory");
+                return;
+            }
+
+            var stepUIEntry = Instantiate(prefab, stepsContainer).GetComponent<IQuestStepUIEntry>();
+            stepUIEntry.Populate(step.payload);
+        }
+
+        internal void CleanUpStepsList()
+        {
+            while (stepsContainer.childCount > 0)
+            {
+                Destroy(stepsContainer.GetChild(0).gameObject);
+            }
         }
     }
 }

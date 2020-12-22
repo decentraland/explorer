@@ -1,36 +1,39 @@
 using TMPro;
 using UnityEngine;
 
-public class QuestUIEntry : MonoBehaviour
+namespace DCL.Huds
 {
-    [SerializeField] private TextMeshProUGUI questName;
-    [SerializeField] private TextMeshProUGUI description;
-    [SerializeField] private RectTransform taskContainer;
-    [SerializeField] private GameObject taskPrefab;
-
-    public void Populate(QuestModel quest)
+    public class QuestUIEntry : MonoBehaviour
     {
-        CleanUpQuestsList(); //TODO Reuse already instantiated quests
+        [SerializeField] private TextMeshProUGUI questName;
+        [SerializeField] private TextMeshProUGUI description;
+        [SerializeField] private RectTransform taskContainer;
+        [SerializeField] private GameObject taskPrefab;
 
-        questName.text = quest.name;
-        description.text = quest.description;
-        for (int i = 0; i < quest.tasks.Length; i++)
+        public void Populate(QuestModel quest)
         {
-            CreateTask(quest.tasks[i]);
+            CleanUpQuestsList(); //TODO Reuse already instantiated quests
+
+            questName.text = quest.name;
+            description.text = quest.description;
+            for (int i = 0; i < quest.tasks.Length; i++)
+            {
+                CreateTask(quest.tasks[i]);
+            }
         }
-    }
 
-    internal void CreateTask(QuestTask task)
-    {
-        var taskEntry = Instantiate(taskPrefab, taskContainer).GetComponent<QuestTaskUIEntry>();
-        taskEntry.Populate(task);
-    }
-
-    internal void CleanUpQuestsList()
-    {
-        while (taskContainer.childCount > 0)
+        internal void CreateTask(QuestTask task)
         {
-            Destroy(taskContainer.GetChild(0).gameObject);
+            var taskEntry = Instantiate(taskPrefab, taskContainer).GetComponent<QuestTaskUIEntry>();
+            taskEntry.Populate(task);
+        }
+
+        internal void CleanUpQuestsList()
+        {
+            while (taskContainer.childCount > 0)
+            {
+                Destroy(taskContainer.GetChild(0).gameObject);
+            }
         }
     }
 }

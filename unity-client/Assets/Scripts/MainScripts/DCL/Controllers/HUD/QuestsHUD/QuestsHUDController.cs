@@ -1,19 +1,22 @@
-﻿public class QuestsHUDController : IHUD
+﻿namespace DCL.Huds
 {
-    private QuestsHUDView view;
-
-    public void Dispose()
+    public class QuestsHUDController : IHUD
     {
-        throw new System.NotImplementedException();
-    }
+        private QuestsHUDView view;
 
-    public void Initialize()
-    {
-        view = QuestsHUDView.Create();
-    }
+        public void Dispose()
+        {
+            throw new System.NotImplementedException();
+        }
 
-    public void SetVisibility(bool visible)
-    {
-        view?.gameObject.SetActive(visible);
+        public void Initialize()
+        {
+            view = QuestsHUDView.Create();
+        }
+
+        public void SetVisibility(bool visible)
+        {
+            view?.gameObject.SetActive(visible);
+        }
     }
 }
