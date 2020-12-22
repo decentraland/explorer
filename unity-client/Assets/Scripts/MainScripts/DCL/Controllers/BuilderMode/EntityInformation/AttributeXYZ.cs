@@ -15,16 +15,33 @@ public class AttributeXYZ : MonoBehaviour
     Vector3 currentValue;
 
     bool isSelected = false;
-    
+
+    private void Awake()
+    {
+        xField.onValueChanged.AddListener(ChangeXValue);
+        xField.onSelect.AddListener(InputSelected);
+        xField.onDeselect.AddListener(InputDeselected);
+
+
+        yField.onValueChanged.AddListener(ChangeYValue);
+        yField.onSelect.AddListener(InputSelected);
+        yField.onDeselect.AddListener(InputDeselected);
+
+        zField.onValueChanged.AddListener(ChangeZValue);
+        zField.onSelect.AddListener(InputSelected);
+        zField.onDeselect.AddListener(InputDeselected);
+    }
+
     public void SetValues(Vector3 value)
     {
-        if (!isSelected)
-        {
-            currentValue = value;
-            xField.SetTextWithoutNotify(value.x.ToString("0.##"));
-            yField.SetTextWithoutNotify(value.y.ToString("0.##"));
-            zField.SetTextWithoutNotify(value.z.ToString("0.##"));
-        }
+        if (isSelected)
+            return;
+
+        currentValue = value;
+        xField.SetTextWithoutNotify(value.x.ToString("0.##"));
+        yField.SetTextWithoutNotify(value.y.ToString("0.##"));
+        zField.SetTextWithoutNotify(value.z.ToString("0.##"));
+
     }
 
     public void ChangeXValue(string value)
@@ -55,12 +72,12 @@ public class AttributeXYZ : MonoBehaviour
     }
 
 
-    public void InputSelected()
+    public void InputSelected(string text)
     {
         isSelected = true;
     }
 
-    public void InputDeselected()
+    public void InputDeselected(string text)
     {
         isSelected = false;
     }

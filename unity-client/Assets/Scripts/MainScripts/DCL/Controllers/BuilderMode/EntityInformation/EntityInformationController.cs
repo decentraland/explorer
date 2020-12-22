@@ -10,6 +10,10 @@ using UnityEngine.UI;
 
 public class EntityInformationController : MonoBehaviour
 {
+    [Header("Sprites")]
+    public Sprite openMenuSprite;
+    public Sprite closeMenuSprite;
+
     [Header("Prefab references")]
     public TextMeshProUGUI titleTxt;
     public TMP_InputField nameIF;
@@ -19,8 +23,9 @@ public class EntityInformationController : MonoBehaviour
     public AttributeXYZ scaleAttribute;
     public GameObject detailsGO;
     public GameObject basicsGO;
-    public RectTransform detailsBtn;
-    public RectTransform basicBtn;
+    public Image detailsToggleBtn;
+    public Image basicToggleBtn;
+
 
     public event Action<Vector3> OnPositionChange;
     public event Action<Vector3> OnRotationChange;
@@ -70,17 +75,15 @@ public class EntityInformationController : MonoBehaviour
     public void ToggleDetailsInfo()
     {
         detailsGO.SetActive(!detailsGO.activeSelf);
-        Vector3 angle = detailsBtn.rotation.eulerAngles;
-        angle.z += 180;
-        detailsBtn.rotation = Quaternion.Euler(angle);
+
+        detailsToggleBtn.sprite = detailsGO.activeSelf ? openMenuSprite : closeMenuSprite;
     }
 
     public void ToggleBasicInfo()
     {
         basicsGO.SetActive(!basicsGO.activeSelf);
-        Vector3 angle = basicBtn.rotation.eulerAngles;
-        angle.z += 180;
-        basicBtn.rotation = Quaternion.Euler(angle);
+
+        basicToggleBtn.sprite = basicsGO.activeSelf ? openMenuSprite : closeMenuSprite;
     }
 
     public void StartChangingName()
