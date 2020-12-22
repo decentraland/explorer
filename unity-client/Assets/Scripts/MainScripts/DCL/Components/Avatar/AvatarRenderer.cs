@@ -28,13 +28,12 @@ namespace DCL
         internal FacialFeatureController mouthController;
         internal AvatarAnimatorLegacy animator;
 
-        public bool isLoading { get; private set; }
+        internal bool isLoading = false;
 
         private Coroutine loadCoroutine;
 
         private void Awake()
         {
-            isLoading = false;
             animator = GetComponent<AvatarAnimatorLegacy>();
         }
 
@@ -181,6 +180,7 @@ namespace DCL
                 yield break;
             }
 
+            
             bool bodyIsDirty = false;
             if (bodyShapeController != null && bodyShapeController.id != model?.bodyShape)
             {
