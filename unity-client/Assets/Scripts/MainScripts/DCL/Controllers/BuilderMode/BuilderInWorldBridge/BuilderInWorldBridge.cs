@@ -16,8 +16,8 @@ using Environment = DCL.Environment;
 /// </summary>
 public class BuilderInWorldBridge : MonoBehaviour
 {
-    public event Action OnPublishOK;
-    public event Action<string> OnPublishKO;
+    public event Action OnPublishOk;
+    public event Action<string> OnPublishKo;
 
     //This is done for optimization purposes, recreating new objects can increase garbage collection
     TransformComponent entityTransformComponentModel = new TransformComponent();
@@ -36,12 +36,12 @@ public class BuilderInWorldBridge : MonoBehaviour
         {
             //Note (Adrian): This is temporary until implement the UI
             message = "Done!\nThe scene has been published";
-            OnPublishOK?.Invoke();
+            OnPublishOk?.Invoke();
         }
         else
         {
             message = publishSceneResultPayload.error;
-            OnPublishKO?.Invoke(publishSceneResultPayload.error);
+            OnPublishKo?.Invoke(publishSceneResultPayload.error);
         }
 
         HUDController.i.builderInWorldMainHud.PublishEnd(message);
@@ -134,15 +134,15 @@ public class BuilderInWorldBridge : MonoBehaviour
 
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {
-                NFTComponent nFTComponent = new NFTComponent();
+                NFTComponent nftComponent = new NFTComponent();
                 NFTShape.Model model = (NFTShape.Model) keyValuePairBaseDisposable.Value.GetModel();
 
-                nFTComponent.color = new ColorRepresentation(model.color);
-                nFTComponent.assetId = model.assetId;
-                nFTComponent.src = model.src;
-                nFTComponent.style = model.style;
+                nftComponent.color = new ColorRepresentation(model.color);
+                nftComponent.assetId = model.assetId;
+                nftComponent.src = model.src;
+                nftComponent.style = model.style;
 
-                componentPayLoad.data = nFTComponent;
+                componentPayLoad.data = nftComponent;
             }
             else
             {     

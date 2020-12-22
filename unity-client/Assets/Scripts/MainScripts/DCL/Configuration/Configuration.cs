@@ -40,7 +40,7 @@ namespace DCL.Configuration
 
         //Collectables
         public const string ASSETS_COLLECTIBLES = "Collectibles";
-        public const string COLLECTIBE_MODEL_PROTOCOL = "ethereum://";
+        public const string COLLECTIBLE_MODEL_PROTOCOL = "ethereum://";
     
     }
 

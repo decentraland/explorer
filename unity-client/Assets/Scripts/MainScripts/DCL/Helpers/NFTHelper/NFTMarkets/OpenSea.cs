@@ -16,7 +16,7 @@ namespace DCL.Helpers.NFT.Markets
 
         IEnumerator INFTMarket.FetchNFTsFromOwner(string assetContractAddress, Action<NFTOwner> onSuccess, Action<string> onError)
         {
-            string ownerId = $"{assetContractAddress}";
+            string ownerId = assetContractAddress;
             if (cachedResponses.ContainsKey(ownerId))
             {
                 onSuccess?.Invoke(ownerCachedResponses[ownerId]);

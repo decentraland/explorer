@@ -18,7 +18,7 @@ public class CircleLoadingAnimator : MonoBehaviour
         if (fillImage == null)
             fillImage = GetComponent<Image>();
 
-        coroutine = StartCoroutine(LoadinAnim());
+        coroutine = StartCoroutine(LoadinAnimation());
     }
 
     private void OnDisable()
@@ -27,7 +27,7 @@ public class CircleLoadingAnimator : MonoBehaviour
     }
 
 
-    IEnumerator LoadinAnim()
+    IEnumerator LoadinAnimation()
     {
         fillImage.fillAmount = 0;
         float currentSpeed = animSpeed * Time.deltaTime;

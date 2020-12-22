@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
-
     public SceneLimitInfoController sceneLimitInfoController;
     public SceneObjectCatalogController sceneObjectCatalogController;
     public ToolTipController toolTipController;
@@ -20,7 +19,9 @@ public class BuildModeHUDView : MonoBehaviour
     public Button tutorialBtn;
     public Button logOutBtn;
 
-    public GameObject publishGO, publishingGO, publishedGO;
+    public GameObject publishGO;
+    public GameObject publishingGO;
+    public GameObject publishedGO;
 
     public TextMeshProUGUI publishStatusTxt;
 
@@ -113,7 +114,7 @@ public class BuildModeHUDView : MonoBehaviour
         toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
     }
 
-    public void StartPublishing()
+    public void PublishStart()
     {
         publishGO.SetActive(true);
         publishingGO.SetActive(true);
@@ -193,7 +194,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void HideToolTip()
     {
-        toolTipController.Desactivate();
+        toolTipController.Stop();
     }
 
     #region Triggers

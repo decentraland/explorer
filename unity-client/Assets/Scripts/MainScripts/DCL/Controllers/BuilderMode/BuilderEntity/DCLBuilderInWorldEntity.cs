@@ -190,7 +190,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
                 return ((DCLLockedOnEdit.Model) keyValuePairBaseDisposable.Value.GetModel()).isLocked;
             }
         }
-        return isFloor ? true : false;
+        return isFloor;
     }
 
     public void SetIsLockedValue(bool isLocked)

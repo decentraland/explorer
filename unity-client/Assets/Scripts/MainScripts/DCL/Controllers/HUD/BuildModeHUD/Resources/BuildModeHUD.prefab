@@ -8227,7 +8227,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000061035156}
+  m_AnchoredPosition: {x: 0, y: 0.00007148605}
   m_SizeDelta: {x: 0.000091552734, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &851071764306684488
@@ -17675,7 +17675,7 @@ MonoBehaviour:
   - {fileID: 851071764363355319}
   leftDescTxt: {fileID: 851071765381081292}
   rightDescTxt: {fileID: 851071765599889367}
-  fillsImgs:
+  limitUsageFillsImgs:
   - {fileID: 851071764522330801}
   - {fileID: 851071764875447839}
 --- !u!1 &851071765511369653
@@ -28373,18 +28373,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2478481587887307697}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6159676432718092696}
-        m_MethodName: ChangeVisibilityOfExtraBtns
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &2183440311200071918
 MonoBehaviour:
   m_ObjectHideFlags: 0

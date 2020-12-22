@@ -10,9 +10,9 @@ using UnityEngine;
 public class BuilderInWorldNFTController 
 {
     public event System.Action OnNFTUsageChange;
-    NFTOwner nFTOwner;
+    NFTOwner nftOwner;
 
-    Coroutine fechNFTsCor;
+    Coroutine fechNftsCoroutine;
 
     static BuilderInWorldNFTController instance;
 
@@ -33,10 +33,10 @@ public class BuilderInWorldNFTController
         }
     }
  
-    public void Start()
+    public void Initialize()
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
-        userProfile.OnUpdate += (x) => GetNFTsFromOwner();
+        userProfile.OnUpdate += (x) => FetchNftsFromOwner();
     }
 
     public void ClearNFTs()
@@ -62,7 +62,7 @@ public class BuilderInWorldNFTController
         if (desactivateNFT)
             return;
 
-        foreach (NFTInfo info in nFTOwner.assets)
+        foreach (NFTInfo info in nftOwner.assets)
         {
             if (info.assetContract.address != id) continue;
             if (!nFTsAlreadyInUse.Contains(info)) continue;
@@ -77,7 +77,7 @@ public class BuilderInWorldNFTController
         if (desactivateNFT)
             return;
 
-        foreach (NFTInfo info in nFTOwner.assets)
+        foreach (NFTInfo info in nftOwner.assets)
         {
             if (info.assetContract.address != id) continue;
             if (nFTsAlreadyInUse.Contains(info)) continue;
@@ -93,31 +93,31 @@ public class BuilderInWorldNFTController
         List<SceneObject> sceneObjects = new List<SceneObject>();
 
         if (desactivateNFT ||
-            nFTOwner.assets == null)
+            nftOwner.assets == null)
             return sceneObjects;
 
-        foreach(NFTInfo nFTInfo in nFTOwner.assets)
+        foreach(NFTInfo nFTInfo in nftOwner.assets)
         {
             sceneObjects.Add(NFTInfoToSceneObject(nFTInfo));
         }
         return sceneObjects;
     }
 
-    void GetNFTsFromOwner()
+    void FetchNftsFromOwner()
     {
-        if (fechNFTsCor != null) CoroutineStarter.Stop(fechNFTsCor);
-        fechNFTsCor = CoroutineStarter.Start(FetchNFTs());
+        if (fechNftsCoroutine != null) CoroutineStarter.Stop(fechNftsCoroutine);
+        fechNftsCoroutine = CoroutineStarter.Start(FetchNfts());
     }
 
-    IEnumerator FetchNFTs()
+    IEnumerator FetchNfts()
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
 
         string userId = userProfile.ethAddress;
 
-        yield return NFTHelper.FetchNFTsFromOwner(userId, (nFTOwner) =>
+        yield return NFTHelper.FetchNFTsFromOwner(userId, (nftOwner) =>
         {
-            this.nFTOwner = nFTOwner;
+            this.nftOwner = nftOwner;
             desactivateNFT = false;
         },
         (error) =>
@@ -127,16 +127,16 @@ public class BuilderInWorldNFTController
         });
     }
 
-    SceneObject NFTInfoToSceneObject(NFTInfo nFTInfo)
+    SceneObject NFTInfoToSceneObject(NFTInfo nftInfo)
     {
         SceneObject sceneObject = new SceneObject();
         sceneObject.asset_pack_id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
-        sceneObject.id = nFTInfo.assetContract.address;
-        sceneObject.thumbnail = nFTInfo.thumbnailUrl;
-        sceneObject.SetBaseURL(nFTInfo.originalImageUrl);
-        sceneObject.name = nFTInfo.name;
-        sceneObject.category = nFTInfo.assetContract.name;
-        sceneObject.model = BuilderInWorldSettings.COLLECTIBE_MODEL_PROTOCOL + nFTInfo.assetContract.address+"/"+ nFTInfo.tokenId;
+        sceneObject.id = nftInfo.assetContract.address;
+        sceneObject.thumbnail = nftInfo.thumbnailUrl;
+        sceneObject.SetBaseURL(nftInfo.originalImageUrl);
+        sceneObject.name = nftInfo.name;
+        sceneObject.category = nftInfo.assetContract.name;
+        sceneObject.model = BuilderInWorldSettings.COLLECTIBLE_MODEL_PROTOCOL + nftInfo.assetContract.address+"/"+ nftInfo.tokenId;
         sceneObject.tags = new List<string>();
         sceneObject.contents = new Dictionary<string, string>();
         sceneObject.metrics = new SceneObject.ObjectMetrics();

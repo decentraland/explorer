@@ -8,7 +8,7 @@ public class EntityData
 {
     public string entityId;
     public TransformComponent transformComponent;
-    public NFTComponent nFTComponent;
+    public NFTComponent nftComponent;
 
     public List<GenericComponent> components = new List<GenericComponent>();
     public List<GenericComponent> sharedComponents = new List<GenericComponent>();

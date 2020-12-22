@@ -197,7 +197,7 @@ public class FreeCameraMovement : CameraStateBase
 
     private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
-        if (buttonId == 2 ||buttonId == 1)
+        if (buttonId == 2 || buttonId == 1)
             CameraDrag(axisX, axisY);
     }
  

@@ -11,21 +11,21 @@ public class ToolTipController : MonoBehaviour
     public CanvasGroup tooltipCG;
     public TextMeshProUGUI tooltipTxt;
 
-    Coroutine changeAlphaCor;
+    Coroutine changeAlphaCoroutine;
 
 
     private void OnDestroy()
     {
-        if (changeAlphaCor != null)
-            CoroutineStarter.Stop(changeAlphaCor);
+        if (changeAlphaCoroutine != null)
+            CoroutineStarter.Stop(changeAlphaCoroutine);
     }
 
 
-    public void Desactivate()
+    public void Stop()
     {
-        if (changeAlphaCor != null)
-            CoroutineStarter.Stop(changeAlphaCor);
-        changeAlphaCor = CoroutineStarter.Start(ChangeAlpha(1, 0));
+        if (changeAlphaCoroutine != null)
+            CoroutineStarter.Stop(changeAlphaCoroutine);
+        changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(1, 0));
     }
 
     public void OnHoverEnter(BaseEventData data)
@@ -35,9 +35,9 @@ public class ToolTipController : MonoBehaviour
         RectTransform selectedRT = dataConverted.pointerEnter.GetComponent<RectTransform>();
         
         tooltipRT.position = selectedRT.position-Vector3.up*selectedRT.rect.height;
-        if (changeAlphaCor != null)
-            CoroutineStarter.Stop(changeAlphaCor);
-        changeAlphaCor = CoroutineStarter.Start(ChangeAlpha(0, 1));
+        if (changeAlphaCoroutine != null)
+            CoroutineStarter.Stop(changeAlphaCoroutine);
+        changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(0, 1));
 
     }
 
@@ -48,7 +48,7 @@ public class ToolTipController : MonoBehaviour
 
     public void OnHoverExit()
     {
-        Desactivate();
+        Stop();
     }
 
     IEnumerator ChangeAlpha(float from, float to)
@@ -67,6 +67,6 @@ public class ToolTipController : MonoBehaviour
             tooltipCG.alpha = lerpedAlpha;
             yield return null;
         }
-        changeAlphaCor = null;
+        changeAlphaCoroutine = null;
     }
 }

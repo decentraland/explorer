@@ -228,7 +228,7 @@ MonoBehaviour:
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   builderInWorldBridge: {fileID: 3917703040089432743}
   outlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4, type: 2}
-  dCLBuilderMeshLoadIndicatorController: {fileID: 4453536760248188691}
+  dclBuilderMeshLoadIndicatorController: {fileID: 4453536760248188691}
   meshLoadIndicator: {fileID: 4025507285860166352}
   floorPrefab: {fileID: 3848538323447533592, guid: ea1dee13f58202f409bb86c92a202112,
     type: 3}

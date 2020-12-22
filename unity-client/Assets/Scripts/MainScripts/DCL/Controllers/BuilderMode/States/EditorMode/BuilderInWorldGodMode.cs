@@ -504,7 +504,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         position.y = totalY;
         position.z = centerZ;
 
-        position = Environment.i.sceneController.ConvertScenePositionToUnityPosition(parcelScene);
+        position = Environment.i.worldState.ConvertScenePositionToUnityPosition(parcelScene);
 
         position.x += ParcelSettings.PARCEL_SIZE / 2 ;
         position.z += ParcelSettings.PARCEL_SIZE / 2 ;

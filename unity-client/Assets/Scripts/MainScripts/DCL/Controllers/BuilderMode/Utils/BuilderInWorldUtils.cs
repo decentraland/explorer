@@ -145,8 +145,8 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
-
-                entityComponentModel.position = DCL.Environment.i.sceneController.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+               
+                entityComponentModel.position = DCL.Environment.i.worldState.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 
@@ -175,7 +175,7 @@ public static partial class BuilderInWorldUtils
                 nFTComponent.src = model.src;
                 nFTComponent.style = model.style;
 
-                builderInWorldEntityData.nFTComponent = nFTComponent;
+                builderInWorldEntityData.nftComponent = nFTComponent;
             }
             else
             {

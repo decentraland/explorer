@@ -57,7 +57,7 @@ public class CatalogItem
         SetBaseURL(nFTInfo.originalImageUrl);
         name = nFTInfo.name;
         category = nFTInfo.assetContract.name;
-        model = BuilderInWorldSettings.COLLECTIBE_MODEL_PROTOCOL+ nFTInfo.assetContract.address + "/" + nFTInfo.tokenId;
+        model = BuilderInWorldSettings.COLLECTIBLE_MODEL_PROTOCOL+ nFTInfo.assetContract.address + "/" + nFTInfo.tokenId;
         tags = new List<string>();
         contents = new Dictionary<string, string>();
         metrics = new SceneObject.ObjectMetrics();

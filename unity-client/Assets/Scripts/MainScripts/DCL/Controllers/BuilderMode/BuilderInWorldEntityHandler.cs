@@ -434,13 +434,13 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
 
 
-        if (data.nFTComponent != null)
+        if (data.nftComponent != null)
         {
-            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(data.nFTComponent.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
+            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(data.nftComponent.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
             nftShape.model = new NFTShape.Model();
-            nftShape.model.color = data.nFTComponent.color.ToColor();
-            nftShape.model.src = data.nFTComponent.src;
-            nftShape.model.assetId = data.nFTComponent.assetId;
+            nftShape.model.color = data.nftComponent.color.ToColor();
+            nftShape.model.src = data.nftComponent.src;
+            nftShape.model.assetId = data.nftComponent.assetId;
 
             sceneToEdit.SharedComponentAttach(newEntity.entityId, nftShape.id);
         }

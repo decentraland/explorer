@@ -65,7 +65,7 @@ public class BuilderInWorldController : MonoBehaviour
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public BuilderInWorldBridge builderInWorldBridge;
     public Material outlinerMaterial;
-    public DCLBuilderMeshLoadIndicatorController dCLBuilderMeshLoadIndicatorController;
+    public DCLBuilderMeshLoadIndicatorController dclBuilderMeshLoadIndicatorController;
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
     public GameObject floorPrefab;
 
@@ -220,7 +220,7 @@ public class BuilderInWorldController : MonoBehaviour
         if (!isTestMode)
         {
             ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
-            BuilderInWorldNFTController.i.Start();
+            BuilderInWorldNFTController.i.Initialize();
         }
 
         meshLoadIndicator.SetCamera(Camera.main);
@@ -398,42 +398,45 @@ public class BuilderInWorldController : MonoBehaviour
 
     bool IsInsideTheLimits(SceneObject sceneObject)
     {
+        if (HUDController.i.builderInWorldMainHud == null)
+            return false;
+
         SceneMetricsController.Model limits = sceneToEdit.metricsController.GetLimits();
         SceneMetricsController.Model usage = sceneToEdit.metricsController.GetModel();
 
         if (limits.bodies < usage.bodies + sceneObject.metrics.bodies)
         {
-            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.entities < usage.entities + sceneObject.metrics.entities)
         {
-            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.materials < usage.materials + sceneObject.metrics.materials)
         {
-            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.meshes < usage.meshes + sceneObject.metrics.meshes)
         {
-            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.textures < usage.textures + sceneObject.metrics.textures)
         {
-            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
         if (limits.triangles < usage.triangles + sceneObject.metrics.triangles)
         {
-            HUDController.i.builderInWorldMainHud?.ShowSceneLimitsPassed();
+            HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
 
@@ -979,8 +982,8 @@ public class BuilderInWorldController : MonoBehaviour
         {
             DCLBuilderInWorldEntity decentralandEntity = CreateSceneObject(floorSceneObject,false,true);
             decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
-            decentralandEntity.transform.position = Environment.i.sceneController.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
-            dCLBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
+            decentralandEntity.transform.position = Environment.i.worldState.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+            dclBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
 
             GameObject floorPlaceHolder =  Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
             floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
@@ -995,7 +998,7 @@ public class BuilderInWorldController : MonoBehaviour
     void OnFloorLoaded(DecentralandEntity entity)
     {
         entity.OnShapeUpdated -= OnFloorLoaded;
-        dCLBuilderMeshLoadIndicatorController.HideIndicator(entity.entityId);
+        dclBuilderMeshLoadIndicatorController.HideIndicator(entity.entityId);
 
         GameObject floorPlaceHolder = floorPlaceHolderDict[entity.entityId];
         floorPlaceHolderDict.Remove(entity.entityId);
@@ -1063,6 +1066,6 @@ public class BuilderInWorldController : MonoBehaviour
     void PublishScene()
     {
         builderInWorldBridge.PublishScene(sceneToEdit);
-        HUDController.i.builderInWorldMainHud.StartPublishing();
+        HUDController.i.builderInWorldMainHud.PublishStart();
     }
 }

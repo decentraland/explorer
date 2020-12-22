@@ -83,9 +83,9 @@ public class BuildModeHUDController : IHUD
         view.OnLogoutAction += () => OnLogoutAction?.Invoke();
     }
 
-    public void StartPublishing()
+    public void PublishStart()
     {
-        view.StartPublishing();
+        view.PublishStart();
     }
 
     public void PublishEnd(string message)
@@ -172,7 +172,7 @@ public class BuildModeHUDController : IHUD
 
     public void ActivateGodModeUI()
     {
-        if(view !=null)
+        if(view != null)
             view.SetGodModeView();
     }
 

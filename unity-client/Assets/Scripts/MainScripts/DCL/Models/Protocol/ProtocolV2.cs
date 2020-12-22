@@ -17,7 +17,6 @@ public class ProtocolV2
 
         public ColorRepresentation(Color color)
         {
-
             r = color.r;
             g = color.g;
             b = color.b;
@@ -29,7 +28,6 @@ public class ProtocolV2
             return new Color(r,g,b,a);
         }
     }
-
 
     [System.Serializable]
     public class QuaternionRepresentation

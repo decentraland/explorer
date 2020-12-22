@@ -18,7 +18,7 @@ public class SceneLimitInfoController : MonoBehaviour
     public GameObject landHoverBtn;
     public TextMeshProUGUI[] titleTxt;
     public TextMeshProUGUI leftDescTxt, rightDescTxt;
-    public Image[] fillsImgs;
+    public Image[] limitUsageFillsImgs;
 
     ParcelScene currentParcelScene;
 
@@ -88,7 +88,7 @@ public class SceneLimitInfoController : MonoBehaviour
             colorToUse = mediumFillColor; 
         if (percentAmount > 85)
             colorToUse = highFillColor; 
-        foreach(Image img in fillsImgs)
+        foreach(Image img in limitUsageFillsImgs)
         {
             if (img == null)
                 continue;
