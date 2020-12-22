@@ -130,9 +130,12 @@ public class BuilderInWorldController : MonoBehaviour
     EditModeState currentEditModeState = EditModeState.Inactive;
 
     bool catalogAdded = false;
-
+    
     void Start()
     {
+        KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
+        KernelConfig.i.OnChange += OnKernelConfigChanged; 
+
         if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
 
@@ -203,6 +206,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void OnDestroy()
     {
+        KernelConfig.i.OnChange -= OnKernelConfigChanged;
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
 
         toggleCreateLastSceneObjectInputAction.OnTriggered -= createLastSceneObjectDelegate;
@@ -258,6 +262,16 @@ public class BuilderInWorldController : MonoBehaviour
         {
             checkerInsideSceneOptimizationCounter++;
         }
+    }
+
+    void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        EnableFeature(current.features.enableBuilderInWorld);
+    }
+
+    void EnableFeature(bool enable)
+    {
+        activeFeature = enable;
     }
 
     void CatalogReceived(string catalogJson)
@@ -684,13 +698,38 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void StartEnterEditMode()
     {
+        UserProfile userProfile = UserProfile.GetOwnUserProfile();
+
         if (sceneToEditId != null) return;
 
         FindSceneToEdit();
-        sceneToEditId = sceneToEdit.sceneData.id;
-        Environment.i.sceneController.OnReadyScene += NewSceneReady;
 
-        builderInWorldBridge.StartKernelEditMode(sceneToEdit);
+        bool canOperateInLand = false;
+
+        foreach(UserProfileModel.ParcelsWithAccess parcel in userProfile.parcelsWithAccess)
+        {
+            foreach(Vector2Int pos in sceneToEdit.sceneData.parcels)
+            {
+                if (parcel.x == pos.x && parcel.y == pos.y)
+                {
+                    canOperateInLand = true;
+                    break;
+                }
+            }
+         
+        }
+        if (canOperateInLand)
+        {
+            sceneToEditId = sceneToEdit.sceneData.id;
+            Environment.i.sceneController.OnReadyScene += NewSceneReady;
+
+            builderInWorldBridge.StartKernelEditMode(sceneToEdit);
+        }
+        else
+        {
+            sceneToEdit = null;
+            //TODO: Implement feedback to the user that he don't have permissions
+        }
     }
 
     public void EnterEditMode()
