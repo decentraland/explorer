@@ -25,9 +25,6 @@ public class BoxTriggerArea : TriggerArea
         HashSet<GameObject> result = new HashSet<GameObject>();
         foreach (Collider collider in colliders)
         {
-            var renderer = collider.transform.parent.GetComponentInChildren<AvatarRenderer>(true);
-            if (renderer != null && renderer.isLoading) continue;
-
             result.Add(collider.transform.parent.gameObject);
         }
         return result;
