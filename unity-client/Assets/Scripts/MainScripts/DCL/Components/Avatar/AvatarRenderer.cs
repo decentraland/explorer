@@ -180,7 +180,7 @@ namespace DCL
                 yield break;
             }
 
-            
+
             bool bodyIsDirty = false;
             if (bodyShapeController != null && bodyShapeController.id != model?.bodyShape)
             {
