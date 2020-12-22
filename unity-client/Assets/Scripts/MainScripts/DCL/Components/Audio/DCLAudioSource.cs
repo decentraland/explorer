@@ -107,7 +107,8 @@ namespace DCL.Components
 
         private void OnCurrentSceneChanged(string currentSceneId, string previousSceneId)
         {
-            audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
+            if(audioSource != null)
+                audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
         }
 
         private void OnDestroy()
