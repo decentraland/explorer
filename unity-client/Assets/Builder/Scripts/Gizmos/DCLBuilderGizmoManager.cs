@@ -73,7 +73,7 @@ namespace Builder.Gizmos
             isTransformingObject = false;
         }
 
-        public bool IsAxisHover()
+        public bool HasAxisHover()
         {
             return hoveredAxis != null;
         }

@@ -42,7 +42,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     bool isPlacingNewObject = false,
         mousePressed = false,
-        isMakingSquareMultiSelection = false,
+        isDoingSquareMultiSelection = false,
         isTypeOfBoundSelectionSelected = false,
         isVoxelBoundMultiSelection = false,
         squareMultiSelectionButtonPressed = false;
@@ -63,9 +63,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
 
-        builderInputWrapper.OnMouseDown += MouseDown;
-        builderInputWrapper.OnMouseUp += MouseUp;
-        builderInputWrapper.OnMouseDrag += MouseDrag;
+        builderInputWrapper.OnMouseDown += OnMouseDown;
+        builderInputWrapper.OnMouseUp += OnMouseUp;
+        builderInputWrapper.OnMouseDrag += OnMouseDrag;
 
 
         focusOnSelectedEntitiesInputAction.OnTriggered += (o) => FocusOnSelectedEntitiesInput();
@@ -79,9 +79,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart -= OnGizmosTransformStart;
 
-        builderInputWrapper.OnMouseDown -= MouseDown;
-        builderInputWrapper.OnMouseUp -= MouseUp;
-        builderInputWrapper.OnMouseDrag -= MouseDrag;
+        builderInputWrapper.OnMouseDown -= OnMouseDown;
+        builderInputWrapper.OnMouseUp -= OnMouseUp;
+        builderInputWrapper.OnMouseDrag -= OnMouseDrag;
     }
 
     private void Update()
@@ -93,7 +93,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             else
                 voxelController.SetEditObjectLikeVoxel();
         }
-        else if (isMakingSquareMultiSelection)
+        else if (isDoingSquareMultiSelection)
         {
             if (!squareMultiSelectionButtonPressed)
             {
@@ -137,7 +137,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     private void OnGUI()
     {
-        if (mousePressed && isMakingSquareMultiSelection)
+        if (mousePressed && isDoingSquareMultiSelection)
         {
             var rect = BuilderInWorldUtils.GetScreenRect(lastMousePosition, Input.mousePosition);
             BuilderInWorldUtils.DrawScreenRect(rect, new Color(1f, 1f, 1f, 0.5f));
@@ -155,7 +155,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         HUDController.i.buildModeHud.OnScaleSelectedAction += ScaleMode;
     }
 
-    private void MouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
+    private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
     {
         if (buttonId != 0 ||
             selectedEntities.Count <= 0)
@@ -175,20 +175,20 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     }
 
-    private void MouseUp(int buttonID, Vector3 position)
+    private void OnMouseUp(int buttonID, Vector3 position)
     {
         if (buttonID != 0)
             return;
 
         EndDraggingSelectedEntities();
 
-        if (isMakingSquareMultiSelection && mousePressed)
+        if (isDoingSquareMultiSelection && mousePressed)
         {
             EndBoundMultiSelection();
         }
     }
 
-    void MouseDown(int buttonID, Vector3 position)
+    void OnMouseDown(int buttonID, Vector3 position)
     {
         if (buttonID != 0)
             return;
@@ -197,7 +197,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         if (squareMultiSelectionButtonPressed)
         {
-            isMakingSquareMultiSelection = true;
+            isDoingSquareMultiSelection = true;
             isTypeOfBoundSelectionSelected = false;
             isVoxelBoundMultiSelection = false;
             lastMousePosition = position;
@@ -210,8 +210,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     void StarDraggingSelectedEntities()
     {
-        if (!builderInWorldEntityHandler.IsPoinerInSelectedEntity() ||
-            gizmoManager.IsAxisHover())
+        if (!builderInWorldEntityHandler.IsPointerInSelectedEntity() ||
+            gizmoManager.HasAxisHover())
             return;
 
         if (gizmoManager.isActiveAndEnabled)
@@ -242,7 +242,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     public void EndBoundMultiSelection()
     {
-        isMakingSquareMultiSelection = false;
+        isDoingSquareMultiSelection = false;
         mousePressed = false;
         freeCameraController.SetCameraCanMove(true);
         List<DCLBuilderInWorldEntity> allEntities = null;

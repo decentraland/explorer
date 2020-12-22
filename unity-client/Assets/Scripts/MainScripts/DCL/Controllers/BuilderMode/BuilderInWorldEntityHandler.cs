@@ -127,7 +127,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         EntityListChanged();
     }
 
-    public bool IsPoinerInSelectedEntity()
+    public bool IsPointerInSelectedEntity()
     {
         DCLBuilderInWorldEntity entityInPointer = buildModeController.GetEntityOnPointer();
         if (entityInPointer == null)
