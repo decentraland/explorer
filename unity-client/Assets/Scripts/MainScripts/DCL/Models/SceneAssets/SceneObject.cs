@@ -6,6 +6,32 @@ using UnityEngine;
 [System.Serializable]
 public class SceneObject 
 {
+    [System.Serializable]
+    public class Action
+    {
+        public string id;
+        public string label;
+        public Parameter[] parameters;
+    }
+    [System.Serializable]
+    public class Parameter
+    {
+        public string id;
+        public string label;
+        public string type;
+        public string defaultValue;
+        public string min;
+        public string max;
+        public string step;
+        public OptionsParameter[] options;
+
+        [System.Serializable]
+        public class OptionsParameter
+        {
+            public string label;
+            public string value;
+        }
+    }
 
     [System.Serializable]
     public class ObjectMetrics
@@ -33,6 +59,8 @@ public class SceneObject
     public string updated_at;
 
     public ObjectMetrics metrics;
+    public Parameter[] parameters;
+    public Action[] actions;
     public string script;
     public bool isFavorite = false;
 
