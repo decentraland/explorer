@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Components;
 using DCL.Controllers;
 using DCL.Models;
 using System;
@@ -25,6 +26,7 @@ public class EntityInformationController : MonoBehaviour
     public GameObject basicsGO;
     public Image detailsToggleBtn;
     public Image basicToggleBtn;
+    public SmartItemListView smartItemListView;
 
 
     public event Action<Vector3> OnPositionChange;
@@ -112,7 +114,11 @@ public class EntityInformationController : MonoBehaviour
         currentEntity.onStatusUpdate += UpdateEntityName;
 
         parcelScene = currentScene;
-     
+
+        if (entity.HasSmartItem())
+            smartItemListView.SetSmartItem((SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM));
+        else
+            smartItemListView.gameObject.SetActive(false);
 
         entitytTumbailImg.enabled = false;
         GetThumbnail(entity.GetSceneObjectAssociated());

@@ -1,4 +1,4 @@
-﻿using DCL.Components;
+using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
 using System;
@@ -178,6 +178,26 @@ namespace DCL.Models
                 if (triggerDettaching)
                     component.DetachFrom(this, targetType);
             }
+        }
+
+        public BaseComponent GetBaseComponent(CLASS_ID_COMPONENT componentId)
+        {
+            BaseComponent component;
+            components.TryGetValue(componentId, out component);
+
+            return component;
+        }
+
+        public BaseDisposable GetSharedComponent(CLASS_ID componentId)
+        {
+            foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in GetSharedComponents())
+            {
+                if (keyValuePairBaseDisposable.Value.GetClassId() == (int) componentId)
+                {
+                    return keyValuePairBaseDisposable.Value;
+                }
+            }
+            return null;
         }
 
         public BaseDisposable GetSharedComponent(System.Type targetType)

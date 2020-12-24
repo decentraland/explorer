@@ -101,28 +101,32 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
+    public bool HasSmartItem()
+    {
+        return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
+    }
+
     public SceneObject GetSceneObjectAssociated()
     {
         if (associatedSceneObject != null)
             return associatedSceneObject;
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        BaseDisposable gltfShapeComponent = rootEntity.GetSharedComponent(CLASS_ID.GLTF_SHAPE);
+
+        if(gltfShapeComponent != null)
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.GLTF_SHAPE)
-            {
-                string assetId = ((GLTFShape)keyValuePairBaseDisposable.Value).model.assetId;
-                associatedSceneObject = AssetCatalogBridge.GetSceneObjectById(assetId);
-                return associatedSceneObject;
-            }
+            string assetId = ((GLTFShape)gltfShapeComponent).model.assetId;
+            associatedSceneObject = AssetCatalogBridge.GetSceneObjectById(assetId);
+            return associatedSceneObject;
         }
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        BaseDisposable nftShapeComponent = rootEntity.GetSharedComponent(CLASS_ID.NFT_SHAPE);
+
+        if (nftShapeComponent != null)
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NFT_SHAPE)
-            {
-                //TODO: Implement NFT SceneObject and return them
-            }
+            //TODO: Implement NFT SceneObject and return them          
         }
+
         return null;
     }
 
@@ -187,18 +191,13 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public void SetDescriptiveName(string newName)
     {
-        bool foundComponent = false;
+        BaseDisposable nameComponent = rootEntity.GetSharedComponent(CLASS_ID.NAME);
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        if (nameComponent != null)
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
-            {
-                ((DCLName) keyValuePairBaseDisposable.Value).SetNewName(newName);
-                foundComponent = true;          
-            }
+           ((DCLName) nameComponent).SetNewName(newName);
         }
-
-        if (!foundComponent)
+        else
         {
             DCLName name = (DCLName) rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
             name.SetNewName(newName);
@@ -209,12 +208,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public string GetDescriptiveName()
     {
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        BaseDisposable nameComponent = rootEntity.GetSharedComponent(CLASS_ID.NAME);
+
+        if (nameComponent != null)
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
-            {
-                return descriptiveName = ((DCLName.Model) keyValuePairBaseDisposable.Value.GetModel()).value;
-            }
+            return descriptiveName = ((DCLName.Model)nameComponent.GetModel()).value;
         }
 
         return "";

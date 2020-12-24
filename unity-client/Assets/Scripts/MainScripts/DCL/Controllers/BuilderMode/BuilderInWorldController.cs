@@ -415,6 +415,23 @@ public class BuilderInWorldController : MonoBehaviour
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         name.SetNewName(sceneObject.name);
 
+        if(sceneObject.IsSmartItem())
+        {
+            SmartItemComponent.Model model = new SmartItemComponent.Model();
+            model.actions = sceneObject.actions;
+            model.parameters = sceneObject.parameters;
+
+            string jsonModel = JsonUtility.ToJson(model);
+
+
+            sceneToEdit.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+
+            //Note (Adrian): This shouldn't work this way, we can't wait a frame to set the data of the component so we force it to update
+
+            SmartItemComponent component = (SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM);
+            component.ForceUpdate(jsonModel);
+        }
+
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
             entity.isVoxel = true;

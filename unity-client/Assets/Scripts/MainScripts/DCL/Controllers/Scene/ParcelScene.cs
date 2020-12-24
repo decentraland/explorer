@@ -597,6 +597,28 @@ namespace DCL.Controllers
                     newComponent = EntityUUIDComponentUpdate(entity, type, model);
                 }
             }
+            else
+            {
+                if (!entity.components.ContainsKey(classId))
+                {
+                    newComponent = factory.CreateItemFromId<BaseComponent>(classId);
+
+                    if (newComponent != null)
+                    {
+                        newComponent.scene = this;
+                        newComponent.entity = entity;
+
+                        entity.components.Add(classId, newComponent);
+
+                        newComponent.transform.SetParent(entity.gameObject.transform, false);
+                        newComponent.UpdateFromJSON((string) data);
+                    }
+                }
+                else
+                {
+                    newComponent = EntityComponentUpdate(entity, classId, (string) data);
+                }
+            }
 
             Environment.i.physicsSyncController.MarkDirty();
             Environment.i.cullingController.MarkDirty();

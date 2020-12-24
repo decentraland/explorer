@@ -1,18 +1,39 @@
 using System.Collections;
 using DCL.Controllers;
+using DCL.Helpers;
 
 namespace DCL.Components
 {
     public class SmartItemComponent : BaseComponent
     {
+ 
+
+        public class Model
+        {
+            public SmartItemAction[] actions;
+            public SmartItemParameter[] parameters;
+        }
+
+        public Model model;
+
         public override object GetModel()
         {
-            return null;
+            return model;
         }
 
         public override IEnumerator ApplyChanges(string newJson)
         {
+            Model newModel = Utils.SafeFromJson<Model>(newJson);
+
+            model = newModel;
             yield return null;
+        }
+
+        public void ForceUpdate(string json)
+        {
+            Model newModel = Utils.SafeFromJson<Model>(json);
+
+            model = newModel;
         }
     }
 }
