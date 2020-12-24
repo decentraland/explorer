@@ -28,23 +28,24 @@ public class BlockersControllerShould
         sceneHandler.GetAllLoadedScenesCoords().Returns(allLoadedParcelCoords);
 
         var animationHandler = Substitute.For<IBlockerAnimationHandler>();
-        //NOTE(Brian): Call OnFinish() when blockerAnimationHandler.FadeOut is called. 
+        //NOTE(Brian): Call OnFinish() when blockerAnimationHandler.FadeOut is called.
         animationHandler.FadeOut(Arg.Any<GameObject>(), Arg.Invoke());
 
         var newBlockerInstanceHandler = new BlockerInstanceHandler();
-        newBlockerInstanceHandler.Initialize(new DCLCharacterPosition(), animationHandler);
+        newBlockerInstanceHandler.Initialize(animationHandler);
 
         blockerInstanceHandler = newBlockerInstanceHandler;
         blockersParent = new GameObject();
         blockerInstanceHandler.SetParent(blockersParent.transform);
 
         blockerController = new WorldBlockersController();
-        blockerController.Initialize(sceneHandler, blockerInstanceHandler, new DCLCharacterPosition());
+        blockerController.Initialize(sceneHandler, blockerInstanceHandler);
     }
 
     [TearDown]
     protected void TearDown()
     {
+        blockerController.Dispose();
         Object.Destroy(blockersParent);
     }
 
@@ -55,32 +56,37 @@ public class BlockersControllerShould
         blockerInstanceHandler = Substitute.For<IBlockerInstanceHandler>();
         blockerInstanceHandler.GetBlockers().Returns(new Dictionary<Vector2Int, PoolableObject>());
 
-        blockerController = new WorldBlockersController();
-        blockerController.Initialize(sceneHandler, blockerInstanceHandler, new DCLCharacterPosition());
+        if (blockerController != null)
+            blockerController.Dispose();
 
-        // Act-assert #1: first blockers added should be shown  
+        blockerController = new WorldBlockersController();
+        blockerController.Initialize(sceneHandler, blockerInstanceHandler);
+
+        // Act-assert #1: first blockers added should be shown
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.ReceivedWithAnyArgs().ShowBlocker(default);
 
         blockerInstanceHandler.ClearReceivedCalls();
 
-        // Act-assert #2: if disabled, blockers should be removed  
+        // Act-assert #2: if disabled, blockers should be removed
         blockerController.SetEnabled(false);
         blockerInstanceHandler.Received(1).DestroyAllBlockers();
 
         blockerInstanceHandler.ClearReceivedCalls();
 
-        // Act-assert #3: if disabled, no blockers should be added nor removed  
+        // Act-assert #3: if disabled, no blockers should be added nor removed
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.DidNotReceiveWithAnyArgs().ShowBlocker(default);
         blockerInstanceHandler.DidNotReceiveWithAnyArgs().HideBlocker(default, default);
 
         blockerInstanceHandler.ClearReceivedCalls();
 
-        // Act-assert #4: If enabled again, blockers should be added or removed as needed  
+        // Act-assert #4: If enabled again, blockers should be added or removed as needed
         blockerController.SetEnabled(true);
         blockerController.SetupWorldBlockers();
         blockerInstanceHandler.ReceivedWithAnyArgs().ShowBlocker(default);
+
+        blockerController.Dispose();
     }
 
     [Test]

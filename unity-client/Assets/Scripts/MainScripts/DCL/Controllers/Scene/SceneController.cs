@@ -86,9 +86,9 @@ namespace DCL
             //TODO(Brian): Move those subscriptions elsewhere.
             PoolManager.i.OnGet -= Environment.i.platform.physicsSyncController.MarkDirty;
             PoolManager.i.OnGet += Environment.i.platform.physicsSyncController.MarkDirty;
-
             PoolManager.i.OnGet -= Environment.i.platform.cullingController.objectsTracker.MarkDirty;
             PoolManager.i.OnGet += Environment.i.platform.cullingController.objectsTracker.MarkDirty;
+
         }
 
         private void OnDebugModeSet()
@@ -352,7 +352,7 @@ namespace DCL
 
             Vector3 worldOrigin = raycastQuery.ray.origin + Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
 
-            raycastQuery.ray.unityOrigin = DCLCharacterController.i.characterPosition.WorldToUnityPosition(worldOrigin);
+            raycastQuery.ray.unityOrigin = PositionUtils.WorldToUnityPosition(worldOrigin);
             raycastQuery.sceneId = sceneId;
             PhysicsCast.i.Query(raycastQuery);
         }
@@ -743,15 +743,20 @@ namespace DCL
 
         public void UnloadAllScenes(bool includePersistent = false)
         {
+            var worldState = Environment.i.world.state;
+
             if (includePersistent)
             {
-                foreach (var keyValuePair in Environment.i.world.state.loadedScenes.Where(x => x.Value.isPersistent))
+                var persistentScenes = worldState.loadedScenes.Where(x => x.Value.isPersistent);
+
+                foreach (var kvp in persistentScenes)
                 {
-                    keyValuePair.Value.isPersistent = false;
+                    kvp.Value.isPersistent = false;
                 }
             }
 
-            var list = Environment.i.world.state.loadedScenes.ToArray();
+            var list = worldState.loadedScenes.ToArray();
+
             for (int i = 0; i < list.Length; i++)
             {
                 UnloadParcelSceneExecute(list[i].Key);
