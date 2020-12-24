@@ -36,13 +36,11 @@ namespace DCL.Controllers
 
         Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
 
-        private DCLCharacterPosition characterPosition;
         private IBlockerAnimationHandler animationHandler;
         private Transform parent;
 
-        public void Initialize(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
+        public void Initialize(IBlockerAnimationHandler animationHandler)
         {
-            this.characterPosition = characterPosition;
             this.animationHandler = animationHandler;
         }
 
@@ -74,7 +72,7 @@ namespace DCL.Controllers
             GameObject blockerGo = blockerPoolable.gameObject;
             BoxCollider blockerCollider = blockerGo.GetComponent<BoxCollider>();
 
-            Vector3 blockerPos = this.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+            Vector3 blockerPos = PositionUtils.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
 
             auxPosVec.x = blockerPos.x + centerOffset;
             auxPosVec.z = blockerPos.z + centerOffset;
