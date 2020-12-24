@@ -49,6 +49,11 @@ namespace DCL
 
             worldEntryPoint = new EntryPoint_World(Environment.i.world.sceneController);
 #endif
+
+            // TODO(Brian): This is a temporary fix to address elevators issue in the xmas event.
+            // We should re-enable this later as produces a performance regression.
+            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+                Environment.i.cullingController.SetAnimationCulling(false);
         }
 
         private void Start()
