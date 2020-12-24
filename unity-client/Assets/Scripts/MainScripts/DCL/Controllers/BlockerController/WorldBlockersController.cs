@@ -6,8 +6,8 @@ namespace DCL.Controllers
 {
     public interface IWorldBlockersController
     {
-        void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler, DCLCharacterPosition characterPosition);
-        void InitializeWithDefaultDependencies(ISceneHandler sceneHandler, DCLCharacterPosition characterPosition);
+        void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler);
+        void InitializeWithDefaultDependencies(ISceneHandler sceneHandler);
         void SetupWorldBlockers();
         void SetEnabled(bool targetValue);
         void Dispose();
