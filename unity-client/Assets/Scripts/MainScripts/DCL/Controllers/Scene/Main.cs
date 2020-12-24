@@ -53,7 +53,7 @@ namespace DCL
             // TODO(Brian): This is a temporary fix to address elevators issue in the xmas event.
             // We should re-enable this later as produces a performance regression.
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
-                Environment.i.cullingController.SetAnimationCulling(false);
+                Environment.i.platform.cullingController.SetAnimationCulling(false);
         }
 
         private void Start()
