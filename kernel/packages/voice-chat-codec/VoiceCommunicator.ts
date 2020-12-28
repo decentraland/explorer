@@ -326,7 +326,6 @@ export class VoiceCommunicator {
           dst.setLocalDescription(answer)
           src.setRemoteDescription(answer)
         })
-        .catch((e) => console.error(e))
     })().catch((e) => {
       defaultLogger.error('Error creating loopback connection', e)
     })
