@@ -184,6 +184,7 @@ public class BuildModeHUDController : IHUD
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
         buildModeEntityListController.SetEntityList(entityList);
+        view.smartItemListView.SetEntityList(entityList);
     }
 
     public void ChangeVisibilityOfEntityList()

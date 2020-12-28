@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
-
+    public SmartItemListView smartItemListView;
     public SceneLimitInfoController sceneLimitInfoController;
     public SceneObjectCatalogController sceneObjectCatalogController;
     public EntityInformationController entityInformationController;

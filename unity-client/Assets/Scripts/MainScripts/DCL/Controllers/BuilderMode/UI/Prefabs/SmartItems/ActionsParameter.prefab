@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5160121798059143914}
   - component: {fileID: -1140205356428777120}
   m_Layer: 5
-  m_Name: SmartItemParameter
+  m_Name: ActionsParameter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,7 +41,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 240.5, y: 25.230865}
+  m_SizeDelta: {x: 240.5, y: 35}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8787156832616992001
 CanvasRenderer:
@@ -93,10 +93,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   labelTxt: {fileID: 8458807588795654721}
-  boolParameterToggle: {fileID: 1466465026365433443}
-  textParameterInputField: {fileID: 6862050945633951014}
-  sliderParameter: {fileID: 3884905722434867844}
-  dropdownParameter: {fileID: 2311658390367300126}
 --- !u!1 &720349933169600107
 GameObject:
   m_ObjectHideFlags: 0
@@ -167,8 +163,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 65.93, y: -12.615407}
-  m_SizeDelta: {x: 104.125595, y: 17.532978}
+  m_AnchoredPosition: {x: 90.72, y: -12.616}
+  m_SizeDelta: {x: 148.63739, y: 17.521759}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8734063068472766958
 CanvasRenderer:
@@ -229,9 +225,9 @@ MonoBehaviour:
   m_fontSize: 12
   m_fontSizeBase: 12
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 12
-  m_fontSizeMax: 14
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 9
+  m_fontSizeMax: 12
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -397,7 +393,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -932,10 +928,10 @@ RectTransform:
   m_Father: {fileID: 3066083109821364477}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.405316, y: 0}
-  m_AnchorMax: {x: 0.9583161, y: 1}
-  m_AnchoredPosition: {x: -0.20903015, y: -0.00037765503}
-  m_SizeDelta: {x: -21.817673, y: -4.205181}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 120.25, y: -25.230865}
+  m_SizeDelta: {x: 240.5, y: -4.205181}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1613906500401312618
 CanvasRenderer:
@@ -1253,7 +1249,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7652592266653543989
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1271,10 +1267,10 @@ RectTransform:
   m_Father: {fileID: 3066083109821364477}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.94, y: -26.8}
-  m_SizeDelta: {x: 223.47083, y: 20}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 120.25, y: -35.230865}
+  m_SizeDelta: {x: 240.5, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3884905722434867844
 MonoBehaviour:
@@ -1583,7 +1579,7 @@ MonoBehaviour:
   m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: -1
+  m_firstOverflowCharacterIndex: 0
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -2046,7 +2042,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

@@ -1097,7 +1097,7 @@ MonoBehaviour:
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
-  baseUrlCustom: https://play.decentraland.zone/?
+  baseUrlCustom: https://play.decentraland.zone/?ENABLE_BUILDER_IN_WORLD
   environment: 2
   startInCoords: {x: 140, y: 140}
   forceLocalComms: 0

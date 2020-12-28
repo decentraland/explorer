@@ -325,7 +325,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             return false;
         if (rootEntity.meshesInfo.renderers?.Length <= 0)
             return false;
-        if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.05f)
+        if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.02f)
             return false;
         if (rootEntity.gameObject.transform.position.y >= 0.05f)
             return false;
