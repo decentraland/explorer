@@ -289,6 +289,12 @@ export class VoiceCommunicator {
     const src = new RTCPeerConnection()
     const dst = new RTCPeerConnection()
 
+    // Apparently the RTCPeerConnection can be 'undefined' until the user accepts/blocks the microphone usage in the browser (https://github.com/webRTC-io/webrtc.io-client/issues/30#issuecomment-15991572)
+    // @ts-ignore
+    if (dst === 'undefined' || src === 'undefined') {
+      return this.createRTCLoopbackConnection()
+    }
+
     let retryNumber = currentRetryNumber
 
     ;(async () => {
