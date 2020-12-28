@@ -293,7 +293,7 @@ export class VoiceCommunicator {
       return this.createRTCLoopbackConnection(retryNumber + 1)
     }
 
-    (async () => {
+    ;(async () => {
       // When having an error, we retry in a couple of seconds. Up to 10 retries.
       src.onconnectionstatechange = (e) => {
         if (
@@ -320,17 +320,20 @@ export class VoiceCommunicator {
         return Promise.reject(err)
       })
 
-      const answer: RTCSessionDescriptionInit = await dst
-        .setRemoteDescription(offer)
-        .then(() => dst.createAnswer())
-        .catch((err) => {
-          return Promise.reject(err)
-        })
-      const answerSdp = this.writeAnswer(answer)
-      await dst.setLocalDescription(answerSdp).catch((err) => {
+      await dst.setRemoteDescription(offer).catch((err) => {
         return Promise.reject(err)
       })
-      await src.setRemoteDescription(answerSdp).catch((err) => {
+      const answer = await dst.createAnswer()
+
+      const answerSdp = parse(answer.sdp!)
+      answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
+      answer.sdp = write(answerSdp)
+
+      await dst.setLocalDescription(answer).catch((err) => {
+        return Promise.reject(err)
+      })
+
+      await src.setRemoteDescription(answer).catch((err) => {
         return Promise.reject(err)
       })
     })().catch((e) => {
@@ -338,16 +341,6 @@ export class VoiceCommunicator {
     })
 
     return { src, dst }
-  }
-
-  private writeAnswer(answer: RTCSessionDescriptionInit): any {
-    const answerSdp = parse(answer.sdp!)
-
-    answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
-
-    answer.sdp = write(answerSdp)
-
-    return answerSdp
   }
 
   private closeLoopbackConnections() {
