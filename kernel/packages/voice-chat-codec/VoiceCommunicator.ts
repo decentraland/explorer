@@ -293,7 +293,7 @@ export class VoiceCommunicator {
       return this.createRTCLoopbackConnection(retryNumber + 1)
     }
 
-    ;(async () => {
+    (async () => {
       // When having an error, we retry in a couple of seconds. Up to 10 retries.
       src.onconnectionstatechange = (e) => {
         if (
