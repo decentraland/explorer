@@ -283,19 +283,15 @@ export class VoiceCommunicator {
     this.input?.workletNode.port.postMessage({ topic: topic })
   }
 
-  private createRTCLoopbackConnection(
-    currentRetryNumber: number = 0
-  ): { src: RTCPeerConnection; dst: RTCPeerConnection } {
+  private createRTCLoopbackConnection(retryNumber: number = 0): { src: RTCPeerConnection; dst: RTCPeerConnection } {
     const src = new RTCPeerConnection()
     const dst = new RTCPeerConnection()
 
     // Apparently the RTCPeerConnection can be 'undefined' until the user accepts/blocks the microphone usage in the browser (https://github.com/webRTC-io/webrtc.io-client/issues/30#issuecomment-15991572)
     // @ts-ignore
-    if (dst === 'undefined' || src === 'undefined') {
-      return this.createRTCLoopbackConnection()
+    if (dst === undefined || src === undefined) {
+      return this.createRTCLoopbackConnection(retryNumber + 1)
     }
-
-    let retryNumber = currentRetryNumber
 
     ;(async () => {
       // When having an error, we retry in a couple of seconds. Up to 10 retries.
@@ -303,14 +299,11 @@ export class VoiceCommunicator {
         if (
           src.connectionState === 'closed' ||
           src.connectionState === 'disconnected' ||
-          (src.connectionState === 'failed' && currentRetryNumber < 10)
+          (src.connectionState === 'failed' && retryNumber < 10)
         ) {
           // Just in case, we close connections to free resources
           this.closeLoopbackConnections()
-          this.loopbackConnections = this.createRTCLoopbackConnection(retryNumber)
-        } else if (src.connectionState === 'connected') {
-          // We reset retry number when the connection succeeds
-          retryNumber = 0
+          this.loopbackConnections = this.createRTCLoopbackConnection(retryNumber + 1)
         }
       }
 
@@ -325,23 +318,30 @@ export class VoiceCommunicator {
 
       await src.setLocalDescription(offer)
 
-      await dst.setRemoteDescription(offer)
-      const answer = await dst.createAnswer()
-
-      const answerSdp = parse(answer.sdp!)
-
-      answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
-
-      answer.sdp = write(answerSdp)
-
-      await dst.setLocalDescription(answer)
-
-      await src.setRemoteDescription(answer)
+      await dst
+        .setRemoteDescription(offer)
+        .then(() => dst.createAnswer())
+        .then((answer) => this.writeAnswer(answer))
+        .then((answer) => {
+          dst.setLocalDescription(answer)
+          src.setRemoteDescription(answer)
+        })
+        .catch((e) => console.error(e))
     })().catch((e) => {
       defaultLogger.error('Error creating loopback connection', e)
     })
 
     return { src, dst }
+  }
+
+  writeAnswer(answer: RTCSessionDescriptionInit): any {
+    const answerSdp = parse(answer.sdp!)
+
+    answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
+
+    answer.sdp = write(answerSdp)
+
+    return answerSdp
   }
 
   private closeLoopbackConnections() {
