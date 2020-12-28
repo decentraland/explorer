@@ -289,11 +289,11 @@ export class VoiceCommunicator {
 
     // Apparently the RTCPeerConnection can be 'undefined' until the user accepts/blocks the microphone usage in the browser (https://github.com/webRTC-io/webrtc.io-client/issues/30#issuecomment-15991572)
     // @ts-ignore
-    if (dst === undefined || src === undefined) {
+    if (!dst || !src) {
       return this.createRTCLoopbackConnection(retryNumber + 1)
     }
 
-    ;(async () => {
+    (async () => {
       // When having an error, we retry in a couple of seconds. Up to 10 retries.
       src.onconnectionstatechange = (e) => {
         if (
@@ -316,16 +316,23 @@ export class VoiceCommunicator {
 
       const offer = await src.createOffer()
 
-      await src.setLocalDescription(offer)
+      await src.setLocalDescription(offer).catch((err) => {
+        return Promise.reject(err)
+      })
 
-      await dst
+      const answer: RTCSessionDescriptionInit = await dst
         .setRemoteDescription(offer)
         .then(() => dst.createAnswer())
-        .then((answer) => this.writeAnswer(answer))
-        .then((answer) => {
-          dst.setLocalDescription(answer)
-          src.setRemoteDescription(answer)
+        .catch((err) => {
+          return Promise.reject(err)
         })
+      const answerSdp = this.writeAnswer(answer)
+      await dst.setLocalDescription(answerSdp).catch((err) => {
+        return Promise.reject(err)
+      })
+      await src.setRemoteDescription(answerSdp).catch((err) => {
+        return Promise.reject(err)
+      })
     })().catch((e) => {
       defaultLogger.error('Error creating loopback connection', e)
     })
@@ -333,7 +340,7 @@ export class VoiceCommunicator {
     return { src, dst }
   }
 
-  writeAnswer(answer: RTCSessionDescriptionInit): any {
+  private writeAnswer(answer: RTCSessionDescriptionInit): any {
     const answerSdp = parse(answer.sdp!)
 
     answerSdp.media[0].fmtp[0].config = 'ptime=5;stereo=1;sprop-stereo=1;maxaveragebitrate=256000'
