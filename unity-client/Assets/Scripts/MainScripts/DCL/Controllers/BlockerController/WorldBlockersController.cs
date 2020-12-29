@@ -4,6 +4,15 @@ using UnityEngine;
 
 namespace DCL.Controllers
 {
+    public interface IWorldBlockersController
+    {
+        void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler);
+        void InitializeWithDefaultDependencies(ISceneHandler sceneHandler);
+        void SetupWorldBlockers();
+        void SetEnabled(bool targetValue);
+        void Dispose();
+    }
+
     /// <summary>
     /// This class is the domain-specific glue for BlockerInstanceHandler.
     /// <br/><br/>
@@ -12,14 +21,14 @@ namespace DCL.Controllers
     /// - Moving blockers when the world is repositioned<br/>
     /// - Handling lifecycle of BlockerInstanceHandler<br/>
     /// </summary>
-    public class WorldBlockersController
+    public class WorldBlockersController : IWorldBlockersController
     {
         public bool enabled = true;
 
         Transform blockersParent;
 
-        readonly ISceneHandler sceneHandler;
-        readonly IBlockerInstanceHandler blockerInstanceHandler;
+        ISceneHandler sceneHandler;
+        IBlockerInstanceHandler blockerInstanceHandler;
 
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
@@ -36,32 +45,41 @@ namespace DCL.Controllers
             new Vector2Int(-1, 1)
         };
 
-        public WorldBlockersController(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler)
+        public void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler)
         {
             this.blockerInstanceHandler = blockerInstanceHandler;
             this.sceneHandler = sceneHandler;
-
-            blockersParent = new GameObject("WorldBlockers").transform;
-            blockersParent.position = Vector3.zero;
 
             blockerInstanceHandler.SetParent(blockersParent);
 
             CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
         }
 
+        public WorldBlockersController()
+        {
+            blockersParent = new GameObject("WorldBlockers").transform;
+            blockersParent.position = Vector3.zero;
+        }
+
         public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler)
         {
-            var blockerAnimationHandler = new BlockerAnimationHandler();
+            var worldBlockersController = new WorldBlockersController();
+            worldBlockersController.InitializeWithDefaultDependencies(sceneHandler);
+            return worldBlockersController;
+        }
 
-            var blockerInstanceHandler = new BlockerInstanceHandler(
+        public void InitializeWithDefaultDependencies(ISceneHandler sceneHandler)
+        {
+            var blockerAnimationHandler = new BlockerAnimationHandler();
+            var blockerInstanceHandler = new BlockerInstanceHandler();
+
+            blockerInstanceHandler.Initialize(
                 blockerAnimationHandler
             );
 
-            var worldBlockersController = new WorldBlockersController(
+            Initialize(
                 sceneHandler,
                 blockerInstanceHandler);
-
-            return worldBlockersController;
         }
 
         public void SetupWorldBlockers()
