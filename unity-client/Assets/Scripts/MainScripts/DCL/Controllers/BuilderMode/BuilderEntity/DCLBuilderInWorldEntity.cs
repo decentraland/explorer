@@ -101,10 +101,21 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
-    public bool HasSmartItem()
+    public bool HasSmartItemComponent()
     {
         return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
     }
+
+    public bool HasSmartItemActions()
+    {
+        SmartItemComponent component = (SmartItemComponent)rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM);
+
+        if (component == null)
+            return false;
+
+        return component.HasActions();
+    }
+
 
     public SceneObject GetSceneObjectAssociated()
     {
@@ -169,6 +180,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
         Deselect();
         DestroyColliders();
         OnDelete?.Invoke(this);
+    }
+
+    public bool HaveSmartItemComponent()
+    {
+        return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
     }
 
     public void CreateColliders()

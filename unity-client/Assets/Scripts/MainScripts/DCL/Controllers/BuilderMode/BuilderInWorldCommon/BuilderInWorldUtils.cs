@@ -146,4 +146,19 @@ public static partial class BuilderInWorldUtils
     {
         return JsonConvert.DeserializeObject<EntityData>(json);
     }
+
+    public static List<DCLBuilderInWorldEntity> FilterEntitiesBySmartItemComponentAndActions(List<DCLBuilderInWorldEntity> entityList)
+    {
+        List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();
+
+        foreach (DCLBuilderInWorldEntity entity in entityList)
+        {
+            if (!entity.HasSmartItemComponent() || !entity.HasSmartItemActions())
+                continue;
+
+            newList.Add(entity);
+        }
+
+        return newList;
+    }
 }

@@ -115,8 +115,8 @@ public class EntityInformationController : MonoBehaviour
 
         parcelScene = currentScene;
 
-        if (entity.HasSmartItem())
-            smartItemListView.SetSmartItem((SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM));
+        if (entity.HasSmartItemComponent())
+            smartItemListView.SetSmartItemParameters((SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM));
         else
             smartItemListView.gameObject.SetActive(false);
 

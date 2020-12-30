@@ -17,15 +17,18 @@ public class SmartItemListView : MonoBehaviour
     public SmartItemUIParameterAdapter entityParameterPrefab;
     public SmartItemUIParameterAdapter actionParameterPrefab;
 
-    [Header("Actions")]
-    public SmartItemUIAdapter actionAdapter;
-
 
     List<DCLBuilderInWorldEntity> entitiesList = new List<DCLBuilderInWorldEntity>();
 
     List<GameObject> childrenList = new List<GameObject>();
 
-    public void SetSmartItem(SmartItemComponent smartItemComponent)
+
+    public void SetSmartItemParameters(SmartItemComponent smartItemComponent)
+    {
+        SetSmartItemParameters(smartItemComponent.model.parameters);
+    }
+
+    public void SetSmartItemParameters(SmartItemParameter[] parameters)
     {
         for(int i = 0; i <childrenList.Count;i++)
         {
@@ -34,7 +37,7 @@ public class SmartItemListView : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        foreach (SmartItemParameter parameter in smartItemComponent.model.parameters)
+        foreach (SmartItemParameter parameter in parameters)
         {
             SmartItemUIParameterAdapter prefabToInstantiate = null;
 
@@ -76,10 +79,6 @@ public class SmartItemListView : MonoBehaviour
             InstantiateParameter(parameter, prefabToInstantiate);
         }
 
-        foreach (SmartItemAction action in smartItemComponent.model.actions)
-        {
-
-        }
     }
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> entitiesList)
