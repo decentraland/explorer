@@ -25,6 +25,7 @@ import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
+import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -127,14 +128,6 @@ export class UnityInterface {
       DCL.JSEvents.fillMouseEventData = fillMouseEventDataWrapper
     } else {
       setTimeout(this.waitForFillMouseEventData, 100)
-    }
-  }
-
-  private SendMessageToUnity(object: string, method: string, payload: any = undefined) {
-    try {
-      this.gameInstance.SendMessage(object, method, payload)
-    } catch (error) {
-        throw Error(`Error while sending Message to Unity. Object: ${object}. Method: ${method}. Payload: ${payload}. Error: ${error.message}`)
     }
   }
 
@@ -517,6 +510,36 @@ export class UnityInterface {
     window.setTimeout(() => {
       resizeCanvas(_gameInstance.Module)
     }, 100)
+  }
+
+  private SendMessageToUnity(object: string, method: string, payload: any = undefined) {
+    const originalSetThrew = this.Module["setThrew"]
+    const unityModule = this.Module
+    let isError = false
+
+    function overrideSetThrew() {
+      unityModule["setThrew"] = function() {
+        isError = true
+        return originalSetThrew.apply(this, arguments)
+      }
+    }
+
+    function restoreSetThrew() {
+      unityModule["setThrew"] = originalSetThrew
+    }
+
+    overrideSetThrew()
+    try {
+      this.gameInstance.SendMessage(object, method, payload)
+    } finally {
+      restoreSetThrew()
+    }
+
+    if (isError) {
+      const error = `Error while sending Message to Unity. Object: ${object}. Method: ${method}. Payload: ${payload}.`
+      defaultLogger.error(error)
+      ReportRendererInterfaceError(error, error)
+    }
   }
 }
 
