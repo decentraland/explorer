@@ -513,6 +513,11 @@ export class UnityInterface {
   }
 
   private SendMessageToUnity(object: string, method: string, payload: any = undefined) {
+    if (!this.Module) {
+      this.gameInstance.SendMessage(object, method, payload)
+      return
+    }
+
     const originalSetThrew = this.Module["setThrew"]
     const unityModule = this.Module
     let isError = false
