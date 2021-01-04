@@ -1,3 +1,5 @@
+import {DEBUG} from "../../config";
+
 const qs: any = require('query-string')
 import { worldToGrid, gridToWorld, parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 import {
@@ -147,22 +149,24 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   }
 
   // 5 - If the final position is outside the scene limits, we zero it
-  let isInside = false
-  const flooredFinalPosX = Math.floor(finalPosition.x).toString()
-  const flooredFinalPosY = Math.floor(finalPosition.y).toString()
+  if (!DEBUG) {
+    let isInside = false
+    const flooredFinalPosX = Math.floor(finalPosition.x).toString()
+    const flooredFinalPosY = Math.floor(finalPosition.y).toString()
 
-  for (const parcel of land.sceneJsonData.scene.parcels) {
-    const parcelCoords = parcel.split(',')
+    for (const parcel of land.sceneJsonData.scene.parcels) {
+      const parcelCoords = parcel.split(',')
 
-    if (flooredFinalPosX === parcelCoords[0] && flooredFinalPosY === parcelCoords[1]) {
-      isInside = true
-      break
+      if (flooredFinalPosX === parcelCoords[0] && flooredFinalPosY === parcelCoords[1]) {
+        isInside = true
+        break
+      }
     }
-  }
 
-  if (!isInside) {
-    finalPosition.x = 0
-    finalPosition.y = 0
+    if (!isInside) {
+      finalPosition.x = 0
+      finalPosition.y = 0
+    }
   }
 
   return {
