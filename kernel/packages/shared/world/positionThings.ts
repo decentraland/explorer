@@ -140,12 +140,33 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   const { position, cameraTarget } = eligiblePoints[Math.floor(Math.random() * eligiblePoints.length)]
 
   // 4 - generate random x, y, z components when in arrays
+  let finalPosition = {
+    x: computeComponentValue(position.x),
+    y: computeComponentValue(position.y),
+    z: computeComponentValue(position.z)
+  }
+
+  // 5 - If the final position is outside the scene limits, we zero it
+  let isInside = false
+  const flooredFinalPosX = Math.floor(finalPosition.x).toString()
+  const flooredFinalPosY = Math.floor(finalPosition.y).toString()
+
+  for (const parcel of land.sceneJsonData.scene.parcels) {
+    const parcelCoords = parcel.split(',')
+
+    if (flooredFinalPosX === parcelCoords[0] && flooredFinalPosY === parcelCoords[1]) {
+      isInside = true
+      break
+    }
+  }
+
+  if (!isInside) {
+    finalPosition.x = 0
+    finalPosition.y = 0
+  }
+
   return {
-    position: {
-      x: computeComponentValue(position.x),
-      y: computeComponentValue(position.y),
-      z: computeComponentValue(position.z)
-    },
+    position: finalPosition,
     cameraTarget
   }
 }
