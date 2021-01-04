@@ -512,6 +512,9 @@ export class UnityInterface {
     }, 100)
   }
 
+  // NOTE: we override wasm's setThrew function before sending message to unity and restore it to it's
+  // original function after message is sent. If an exception is thrown during SendMessage we assume that it's related
+  // to the code executed by the SendMessage on unity's side.
   private SendMessageToUnity(object: string, method: string, payload: any = undefined) {
     if (!this.Module) {
       this.gameInstance.SendMessage(object, method, payload)
