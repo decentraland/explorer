@@ -1,4 +1,4 @@
-import {DEBUG} from "../../config";
+import { DEBUG } from "../../config"
 
 const qs: any = require('query-string')
 import { worldToGrid, gridToWorld, parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
