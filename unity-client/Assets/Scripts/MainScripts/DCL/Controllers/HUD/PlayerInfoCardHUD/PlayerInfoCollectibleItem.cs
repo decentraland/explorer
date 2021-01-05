@@ -49,7 +49,7 @@ public class PlayerInfoCollectibleItem : MonoBehaviour
     private void OnThumbnailReady(Asset_Texture texture)
     {
         // we override the previously stored placeholder image (a referenced asset), we don't destroy it as it
-        // references the asset and it will provoke a "Destroying assets it not permitted to avoid data loss" error
+        // references the asset and it will provoke a "Destroying assets is not permitted to avoid data loss" error
         thumbnail.sprite = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
     }
 }
