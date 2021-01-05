@@ -27,8 +27,8 @@ namespace DCL.Components
             [Header("Text box properties")] public string hTextAlign = "bottom";
 
             public string vTextAlign = "left";
-            public float width = 0; // NOTE: for backwards compatibility default width and height should be 0
-            public float height = 0;
+            public float width = 1f;
+            public float height = 0.2f;
             public bool adaptWidth = false;
             public bool adaptHeight = false;
             public float paddingTop = 0f;
@@ -78,7 +78,18 @@ namespace DCL.Components
             rectTransform.offsetMin = Vector2.zero;
             rectTransform.offsetMax = Vector2.zero;
 
-            rectTransform.sizeDelta = new Vector2(model.width, model.height);
+            // NOTE: previously width and height weren't working (setting sizeDelta before anchors and offset result in
+            // sizeDelta being reset to 0,0)
+            // to fix textWrapping and avoid backwards compatibility issues as result of the size being properly set (like text alignment)
+            // we only set it if textWrapping is enabled.
+            if (model.textWrapping)
+            {
+                rectTransform.sizeDelta = new Vector2(model.width, model.height);
+            }
+            else
+            {
+                rectTransform.sizeDelta = Vector2.zero;
+            }
 
             yield return ApplyModelChanges(scene, text, model);
         }
