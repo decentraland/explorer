@@ -8,7 +8,6 @@ import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData, getThumbnail
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
-  districtData,
   fetchDataFromSceneJsonFailure,
   fetchDataFromSceneJsonSuccess,
   marketData,
