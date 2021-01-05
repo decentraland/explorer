@@ -15,6 +15,7 @@ namespace DCL.Components
         public new class Model : BaseShape.Model
         {
             public string src;
+            public string assetId;
         }
 
         public Model model = new Model();
@@ -24,6 +25,12 @@ namespace DCL.Components
 
         public static LoadWrapper GetLoaderForEntity(DecentralandEntity entity)
         {
+            if (entity.meshRootGameObject == null)
+            {
+                Debug.LogWarning("NULL meshRootGameObject at GetLoaderForEntity()");
+                return null;
+            }
+
             attachedLoaders.TryGetValue(entity.meshRootGameObject, out LoadWrapper result);
             return result;
         }
@@ -42,6 +49,16 @@ namespace DCL.Components
 
         public LoadableShape(ParcelScene scene) : base(scene)
         {
+        }
+
+        public override int GetClassId()
+        {
+            return -1;
+        }
+
+        public override object GetModel()
+        {
+            return model;
         }
 
         public override IEnumerator ApplyChanges(string newJson)
@@ -102,11 +119,12 @@ namespace DCL.Components
         public override IEnumerator ApplyChanges(string newJson)
         {
             previousModel = model;
-            model = SceneController.i.SafeFromJson<LoadWrapperModelType>(newJson);
+            model = Utils.SafeFromJson<LoadWrapperModelType>(newJson);
 
             bool updateVisibility = previousModel.visible != model.visible;
             bool updateCollisions = previousModel.withCollisions != model.withCollisions || previousModel.isPointerBlocker != model.isPointerBlocker;
-            bool triggerAttachment = !string.IsNullOrEmpty(model.src) && previousModel.src != model.src;
+            bool triggerAttachment = (!string.IsNullOrEmpty(model.src) && previousModel.src != model.src) ||
+                                     (!string.IsNullOrEmpty(model.assetId) && previousModel.assetId != model.assetId);
 
             foreach (var entity in attachedEntities)
             {
@@ -127,12 +145,23 @@ namespace DCL.Components
 
         protected virtual void AttachShape(DecentralandEntity entity)
         {
-            if (scene.contentProvider.HasContentsUrl(model.src))
+            ContentProvider provider = null;
+
+            if (!string.IsNullOrEmpty(model.assetId))
+                provider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneAsetPackCatalog(model.assetId);
+
+            if (provider == null)
+                provider = scene.contentProvider;
+
+            if (provider.HasContentsUrl(model.src))
             {
                 isLoaded = false;
                 entity.EnsureMeshGameObject(componentName + " mesh");
 
                 LoadWrapperType loadableShape = GetOrAddLoaderForEntity<LoadWrapperType>(entity);
+
+                if (loadableShape is LoadWrapper_GLTF gltfLoadWrapper)
+                    gltfLoadWrapper.customContentProvider = provider;
 
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
@@ -147,7 +176,6 @@ namespace DCL.Components
                 Debug.LogWarning($"LoadableShape '{model.src}' not found in scene '{scene.sceneData.id}' mappings");
 #endif
                 failed = true;
-
             }
         }
 
@@ -168,42 +196,49 @@ namespace DCL.Components
 
         protected void OnLoadFailed(LoadWrapper loadWrapper)
         {
-            if (loadWrapper != null)
-            {
-                if (loadWrapper.entity.gameObject != null)
-                    loadWrapper.entity.gameObject.name += " - Failed loading";
-
-                MaterialTransitionController[] transitionController =
-                    loadWrapper.entity.gameObject.GetComponentsInChildren<MaterialTransitionController>(true);
-
-                for (int i = 0; i < transitionController.Length; i++)
-                {
-                    MaterialTransitionController material = transitionController[i];
-                    Object.Destroy(material);
-                }
-            }
+            CleanFailedWrapper(loadWrapper);
 
             failed = true;
             OnReadyCallbacks?.Invoke(this);
             OnReadyCallbacks = null;
         }
 
+        void CleanFailedWrapper(LoadWrapper loadWrapper)
+        {
+            if (loadWrapper == null) return;
+            if (loadWrapper.entity == null) return;
+            if (loadWrapper.entity.gameObject == null) return;
+
+            GameObject go = loadWrapper.entity.gameObject;
+
+            go.name += " - Failed loading";
+
+            MaterialTransitionController[] transitionController =
+                go.GetComponentsInChildren<MaterialTransitionController>(true);
+
+            for (int i = 0; i < transitionController.Length; i++)
+            {
+                MaterialTransitionController material = transitionController[i];
+                Object.Destroy(material);
+            }
+        }
+
         protected void OnLoadCompleted(LoadWrapper loadWrapper)
         {
-            isLoaded = true;
             DecentralandEntity entity = loadWrapper.entity;
 
-            if (entity.meshesInfo.currentShape != null)
+            if (entity.meshesInfo.currentShape == null)
             {
-                entity.meshesInfo.renderers = entity.meshRootGameObject.GetComponentsInChildren<Renderer>();
+                OnLoadFailed(loadWrapper);
+                return;
+            }
 
-                var model = (entity.meshesInfo.currentShape as LoadableShape).model;
-                ConfigureVisibility(entity.meshRootGameObject, model.visible, loadWrapper.entity.meshesInfo.renderers);
-            }
-            else
-            {
-                Debug.LogWarning("WARNING: entity.currentShape == null! this can lead to errors!");
-            }
+            isLoaded = true;
+
+            entity.meshesInfo.renderers = entity.meshRootGameObject.GetComponentsInChildren<Renderer>();
+
+            var model = (entity.meshesInfo.currentShape as LoadableShape).model;
+            ConfigureVisibility(entity.meshRootGameObject, model.visible, loadWrapper.entity.meshesInfo.renderers);
 
             ConfigureColliders(entity);
 

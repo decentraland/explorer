@@ -6,7 +6,7 @@ import { Eth } from 'web3x/eth'
 import { Web3Connector } from './Web3Connector'
 import { ProviderType } from './ProviderType'
 import { LegacyProviderAdapter } from 'web3x/providers'
-import { WORLD_EXPLORER } from 'config'
+import { EDITOR } from 'config'
 
 let web3Connector: Web3Connector
 export const providerFuture = future()
@@ -15,8 +15,8 @@ export const requestManager = new RequestManager((window as any).ethereum ?? nul
 export const loginCompleted = future<void>()
 ;(window as any).loginCompleted = loginCompleted
 
-export function createEth(provider: any = null): Eth {
-  return web3Connector.createEth(provider)!
+export function createEth(provider: any = null) {
+  return web3Connector.createEth(provider)
 }
 
 // This function creates a Web3x eth object without the need of having initiated sign in / sign up. Used when requesting the catalysts
@@ -64,7 +64,7 @@ export function getProviderType() {
 }
 
 export async function awaitWeb3Approval(): Promise<void> {
-  if (!WORLD_EXPLORER) {
+  if (EDITOR) {
     await requestWeb3Provider(ProviderType.GUEST)
   }
   return providerFuture
@@ -74,23 +74,26 @@ export function isSessionExpired(userData: any) {
   return !userData || !userData.identity || new Date(userData.identity.expiration) < new Date()
 }
 
-export async function getUserAccount(): Promise<string | undefined> {
+export async function getUserAccount(returnChecksum: boolean = false): Promise<string | undefined> {
   try {
     const eth = createEth()
+
+    if (!eth) return undefined
+
     const accounts = await eth.getAccounts()
 
     if (!accounts || accounts.length === 0) {
       return undefined
     }
 
-    return accounts[0].toJSON().toLocaleLowerCase()
+    return returnChecksum ? accounts[0].toJSON() : accounts[0].toJSON().toLowerCase()
   } catch (error) {
     throw new Error(`Could not access eth_accounts: "${error.message}"`)
   }
 }
 
-export async function getUserEthAccountIfAvailable(): Promise<string | undefined> {
+export async function getUserEthAccountIfAvailable(returnChecksum: boolean = false): Promise<string | undefined> {
   if (!isGuest()) {
-    return getUserAccount()
+    return getUserAccount(returnChecksum)
   }
 }

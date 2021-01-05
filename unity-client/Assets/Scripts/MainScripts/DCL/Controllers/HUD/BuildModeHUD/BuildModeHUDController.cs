@@ -7,33 +7,35 @@ using DCL.Controllers;
 
 public class BuildModeHUDController : IHUD
 {
-    public event Action OnChangeModeAction,
-                        OnTranslateSelectedAction,
-                        OnRotateSelectedAction,
-                        OnScaleSelectedAction,
-                        OnResetAction,
-                        OnDuplicateSelectedAction,
-                        OnDeleteSelectedAction;
+    public event Action OnChangeModeAction;
+    public event Action OnTranslateSelectedAction;
+    public event Action OnRotateSelectedAction;
+    public event Action OnScaleSelectedAction;
+    public event Action OnResetAction;
+    public event Action OnDuplicateSelectedAction;
+    public event Action OnDeleteSelectedAction;
 
-    public event Action OnEntityListVisible,
-                        OnStopInput,
-                        OnResumeInput,
-                        OnTutorialAction,
-                        OnPublishAction;
+    public event Action OnEntityListVisible;
+    public event Action OnStopInput;
+    public event Action OnResumeInput;
+    public event Action OnTutorialAction;
+    public event Action OnPublishAction;
 
     public event Action<SceneObject> OnSceneObjectSelected;
 
-    public event Action<DecentralandEntityToEdit> OnEntityClick,
-                                                  OnEntityDelete,
-                                                  OnEntityLock,
-                                                  OnEntityChangeVisibility;
+    public event Action<DCLBuilderInWorldEntity> OnEntityClick;
+    public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
+    public event Action<DCLBuilderInWorldEntity> OnEntityLock;
+    public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
+    public event Action<DCLBuilderInWorldEntity> OnEntityRename;
 
     
     //Note(Adrian): This is used right now for tutorial purposes
     public event Action OnCatalogOpen;
 
     internal BuildModeHUDView view;
-    BuildModeEntityListController buildModeEntityListController;
+    BuilderInWorldEntityListController buildModeEntityListController;
+    SceneObjectDropController sceneObjectDropController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
@@ -44,15 +46,22 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
-        buildModeEntityListController = view.GetComponentInChildren<BuildModeEntityListController>();
+        sceneObjectDropController = new SceneObjectDropController();
+
+        buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
+        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
+
+
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
         buildModeEntityListController.OnEntityLock += (x) => OnEntityLock(x);
         buildModeEntityListController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
+        buildModeEntityListController.OnEntityRename += (x) => OnEntityRename(x);
 
         buildModeEntityListController.CloseList();
 
+        view.OnSceneObjectDrop += () => sceneObjectDropController.SceneObjectDropped();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
         view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
         view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
@@ -69,6 +78,7 @@ public class BuildModeHUDController : IHUD
         view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
         view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
 
+        sceneObjectDropController.OnSceneObjectDropped += SceneObjectSelected;
         view.OnSceneObjectSelected += SceneObjectSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();
@@ -147,7 +157,7 @@ public class BuildModeHUDController : IHUD
         view.SetGodModeView();
     }
 
-    public void SetEntityList(List<DecentralandEntityToEdit> entityList)
+    public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
         buildModeEntityListController.SetEntityList(entityList);
     }
@@ -164,6 +174,11 @@ public class BuildModeHUDController : IHUD
         {
             buildModeEntityListController.CloseList();
         }
+    }
+
+    public void ClearEntityList()
+    {
+        buildModeEntityListController.ClearList();
     }
 
     public void ChangeVisibilityOfControls()

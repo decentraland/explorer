@@ -1,7 +1,9 @@
 using DCL.Components;
 using DCL.Controllers;
+using DCL.Models;
 using System;
 using System.Collections;
+using DCL.Helpers;
 using UnityEngine;
 
 namespace DCL
@@ -30,6 +32,12 @@ namespace DCL
         public TextureWrapMode unityWrap;
         public FilterMode unitySamplingMode;
         public Texture2D texture;
+        protected bool isDisposed;
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.TEXTURE;
+        }
 
         public DCLTexture(DCL.Controllers.ParcelScene scene) : base(scene)
         {
@@ -63,11 +71,21 @@ namespace DCL
             OnFinish.Invoke(textureComponent);
         }
 
+        public override object GetModel()
+        {
+            return model;
+        }
+
         public override IEnumerator ApplyChanges(string newJson)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
+            //TODO: Analyze if we can catch this upstream and stop the IEnumerator
+            if(isDisposed)
+                yield break;
+
+            model = Utils.SafeFromJson<Model>(newJson);
 
             unitySamplingMode = model.samplingMode;
 
@@ -182,6 +200,7 @@ namespace DCL
 
         public override void Dispose()
         {
+            isDisposed = true;
             if (texturePromise != null)
             {
                 AssetPromiseKeeper_Texture.i.Forget(texturePromise);

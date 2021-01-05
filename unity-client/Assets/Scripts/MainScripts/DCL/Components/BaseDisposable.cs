@@ -11,6 +11,9 @@ namespace DCL.Components
         public virtual string componentName => GetType().Name;
         public string id;
 
+        public abstract int GetClassId();
+
+
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public Coroutine routine => updateHandler.routine;
@@ -96,6 +99,8 @@ namespace DCL.Components
             DetachFromEveryEntity();
         }
 
+        public abstract object GetModel();
+
         public abstract IEnumerator ApplyChanges(string newJson);
 
         public MonoBehaviour GetCoroutineOwner()
@@ -106,6 +111,11 @@ namespace DCL.Components
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {
             return new ComponentUpdateHandler(this);
+        }
+
+        public bool IsValid()
+        {
+            return true;
         }
 
         public void Cleanup()

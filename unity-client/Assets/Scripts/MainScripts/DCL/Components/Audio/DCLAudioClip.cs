@@ -1,5 +1,6 @@
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Models;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace DCL.Components
 
         public Model model;
         public AudioClip audioClip;
+        private bool isDisposed = false;
 
         public enum LoadState
         {
@@ -38,6 +40,11 @@ namespace DCL.Components
             model = new Model();
 
             loadingState = LoadState.IDLE;
+        }
+
+        public override int GetClassId()
+        {
+            return (int)CLASS_ID.AUDIO_CLIP;
         }
 
         void OnComplete(AudioClip clip)
@@ -93,11 +100,21 @@ namespace DCL.Components
             }
         }
 
+        public override object GetModel()
+        {
+            return model;
+        }
+
         public override IEnumerator ApplyChanges(string newJson)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
+            //TODO: Analyze if we can catch this upstream and stop the IEnumerator
+            if(isDisposed)
+                yield break;
+
+            model = Utils.SafeFromJson<Model>(newJson);
 
             if (!string.IsNullOrEmpty(model.url))
             {
@@ -116,6 +133,7 @@ namespace DCL.Components
 
         public override void Dispose()
         {
+            isDisposed = true;
             Utils.SafeDestroy(audioClip);
             base.Dispose();
         }

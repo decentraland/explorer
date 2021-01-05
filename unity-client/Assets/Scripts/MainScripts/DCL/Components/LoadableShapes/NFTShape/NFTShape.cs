@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
@@ -15,10 +15,14 @@ namespace DCL.Components
         }
 
         public override string componentName => "NFT Shape";
-        LoadWrapper_NFT loadableShape;
 
         public NFTShape(ParcelScene scene) : base(scene)
         {
+        }
+
+        public override int GetClassId()
+        {
+            return (int)CLASS_ID.NFT_SHAPE;
         }
 
         protected override void AttachShape(DecentralandEntity entity)
@@ -40,7 +44,7 @@ namespace DCL.Components
 
             entity.OnShapeUpdated += UpdateBackgroundColor;
 
-            LoadWrapper_NFT loadableShape = GetOrAddLoaderForEntity<LoadWrapper_NFT>(entity);
+            var loadableShape = GetOrAddLoaderForEntity<LoadWrapper_NFT>(entity);
 
             loadableShape.entity = entity;
             loadableShape.component = this;
@@ -70,8 +74,8 @@ namespace DCL.Components
         {
             if (model.color == previousModel.color) return;
 
-            loadableShape = GetLoaderForEntity(entity) as LoadWrapper_NFT;
-            loadableShape.loaderController.UpdateBackgroundColor(model.color);
+            var loadableShape = GetLoaderForEntity(entity) as LoadWrapper_NFT;
+            loadableShape?.loaderController.UpdateBackgroundColor(model.color);
         }
 
         public override string ToString()

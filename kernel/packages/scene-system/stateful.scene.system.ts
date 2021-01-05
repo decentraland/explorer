@@ -53,18 +53,20 @@ class StatefulWebWorkerScene extends Script {
     // Listen to storage requests
     this.eventSubscriber.on('stateEvent', ({ data }) => {
       if (data.type === 'StoreSceneState') {
-        this.sceneStateStorage.storeState(sceneId, serializeSceneState(this.sceneState))
+        this.sceneStateStorage
+          .storeState(sceneId, serializeSceneState(this.sceneState))
+          .catch((error) => this.error(`Failed to store the scene's state`, error))
       }
     })
   }
 
-  // private error(error: Error) {
-  //   if (this.devToolsAdapter) {
-  //     this.devToolsAdapter.error(error)
-  //   } else {
-  //     defaultLogger.error('', error)
-  //   }
-  // }
+  private error(context: string, error: Error) {
+    if (this.devToolsAdapter) {
+      this.devToolsAdapter.error(error)
+    } else {
+      defaultLogger.error(context, error)
+    }
+  }
 
   private log(...messages: any[]) {
     if (this.devToolsAdapter) {

@@ -4,6 +4,7 @@ using DCL.Interface;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 
@@ -17,8 +18,12 @@ namespace DCL
 
         public AvatarName avatarName;
         public AvatarRenderer avatarRenderer;
+        public Collider avatarCollider;
         public AvatarMovementController avatarMovementController;
-        [SerializeField] private AvatarOnPointerDown onPointerDown;
+
+        [SerializeField]
+        private AvatarOnPointerDown onPointerDown;
+
         private StringVariable currentPlayerInfoCardId;
 
         private string currentSerialization = "";
@@ -48,6 +53,11 @@ namespace DCL
                 poolableObject.pool.RemoveFromPool(poolableObject);
         }
 
+        public override object GetModel()
+        {
+            return model;
+        }
+
         public override IEnumerator ApplyChanges(string newJson)
         {
             //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
@@ -59,7 +69,7 @@ namespace DCL
 
             DisablePassport();
 
-            model = SceneController.i.SafeFromJson<AvatarModel>(newJson);
+            model = Utils.SafeFromJson<AvatarModel>(newJson);
 
             everythingIsLoaded = false;
 
@@ -79,8 +89,8 @@ namespace DCL
                 hoverText = "view profile"
             });
 
-            DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= PrecisionAdjust;
-            DCLCharacterController.i.characterPosition.OnPrecisionAdjust += PrecisionAdjust;
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
+            CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
 
             entity.OnTransformChange -= avatarMovementController.OnTransformChanged;
             entity.OnTransformChange += avatarMovementController.OnTransformChanged;
@@ -103,11 +113,13 @@ namespace DCL
 
             avatarUserInfo.userId = model.id;
             avatarUserInfo.userName = model.name;
-            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.position;
+            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.localPosition;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
 
             avatarName.SetName(model.name);
             avatarName.SetTalking(model.talking);
+
+            avatarCollider.gameObject.SetActive(true);
 
             everythingIsLoaded = true;
             OnAvatarShapeUpdated?.Invoke(entity, this);
@@ -125,7 +137,7 @@ namespace DCL
             onPointerDown.collider.enabled = true;
         }
 
-        private void PrecisionAdjust(DCLCharacterPosition obj)
+        private void OnWorldReposition(Vector3 current, Vector3 previous)
         {
             avatarUserInfo.worldPosition = entity.gameObject.transform.position;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
@@ -166,7 +178,7 @@ namespace DCL
             }
 
             onPointerDown.OnPointerDownReport -= PlayerClicked;
-            DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= PrecisionAdjust;
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
 
             if (entity != null)
             {

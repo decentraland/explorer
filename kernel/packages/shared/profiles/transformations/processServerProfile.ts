@@ -30,11 +30,11 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
 }
 
 export function calculateDisplayName(userId: string, profile: any): string {
-  if (profile.name && profile.hasClaimedName) {
+  if (profile && profile.name && profile.hasClaimedName) {
     return profile.name
   }
 
-  if (profile.unclaimedName) {
+  if (profile && profile.unclaimedName) {
     return `${filterInvalidNameCharacters(profile.unclaimedName)}#${userId.slice(-4)}`
   }
 
@@ -57,7 +57,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     hasClaimedName:
       typeof receivedProfile.hasClaimedName === 'undefined' ? !!receivedProfile.name : receivedProfile.hasClaimedName,
     description: receivedProfile.description || '',
-    ethAddress: userId || 'noeth',
+    ethAddress: receivedProfile.ethAddress || 'noeth',
     version: receivedProfile.version ?? receivedProfile.avatar.version ?? 1,
     avatar: {
       eyeColor: colorString(eyeColor),

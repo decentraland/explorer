@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DCL.Controllers;
 using Builder.Gizmos;
 using System.Collections.Generic;
@@ -38,7 +38,6 @@ namespace Builder
 
         private bool isGameObjectActive = false;
 
-        private SceneBoundariesChecker boundariesChecker;
         private ParcelScene currentScene;
 
         private void Awake()
@@ -215,7 +214,6 @@ namespace Builder
 
         private void OnSceneChanged(ParcelScene scene)
         {
-            boundariesChecker = DCL.SceneController.i.boundariesChecker;
             currentScene = scene;
         }
 
