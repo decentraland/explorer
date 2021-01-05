@@ -8,7 +8,11 @@ import { reportScenesFromTiles } from 'shared/atlas/actions'
 import { getSceneNameFromAtlasState, postProcessSceneName, getPoiTiles } from 'shared/atlas/selectors'
 import { getHotScenesService, getUpdateProfileServer } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
-import { getOwnerNameFromJsonData, getThumbnailUrlFromJsonDataAndContent } from 'shared/selectors'
+import {
+  getOwnerNameFromJsonData,
+  getThumbnailUrlFromJsonDataAndContent,
+  getSceneDescriptionFromJsonData
+} from 'shared/selectors'
 
 declare const globalThis: StoreContainer
 
@@ -23,12 +27,14 @@ type RealmInfo = {
   layer: string
   usersCount: number
   usersMax: number
+  userParcels: { x: number; y: number }[]
 }
 
 export type HotSceneInfo = {
   id: string
   name: string
   creator: string
+  description: string
   thumbnail: string
   baseCoords: { x: number; y: number }
   parcels: { x: number; y: number }[]
@@ -48,6 +54,14 @@ export async function fetchHotScenes(): Promise<HotSceneInfo[]> {
           baseCoords: { x: scene.baseCoords[0], y: scene.baseCoords[1] },
           parcels: scene.parcels.map((parcel: [number, number]) => {
             return { x: parcel[0], y: parcel[1] }
+          }),
+          realms: scene.realms.map((realm: any) => {
+            return {
+              ...realm,
+              userParcels: realm.userParcels.map((parcel: [number, number]) => {
+                return { x: parcel[0], y: parcel[1] }
+              })
+            } as RealmInfo
           })
         } as HotSceneInfo
       })
@@ -95,11 +109,7 @@ async function fetchHotScenesNoLambdaFallback(): Promise<HotSceneInfo[]> {
         globalThis.globalStore.getState().atlas.tileToScene[strCoords].type !== 7
       ) // NOTE: filter roads
     })
-    .sort((a, b) => (countUsers(a) > countUsers(b) ? -1 : 1))
-}
-
-function countUsers(a: HotSceneInfo) {
-  return a.realms.reduce((total, realmInfo) => total + realmInfo.usersCount, 0)
+    .sort((a, b) => (a.usersTotalCount > b.usersTotalCount ? -1 : 1))
 }
 
 async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<string, HotSceneInfo>) {
@@ -115,59 +125,65 @@ async function fillHotScenesRecord(candidate: Candidate, crowdedScenes: Record<s
     const id = scenesId[i] ?? tiles[i]
     const land = scenesId[i] ? (await fetchSceneJson([scenesId[i]!]))[0] : undefined
 
-    if (crowdedScenes[id]) {
-      const realmInfo = crowdedScenes[id].realms.filter(
-        (realm) => realm.serverName === candidate.catalystName && realm.layer === candidate.layer.name
-      )
+    let hotScene: HotSceneInfo | undefined = crowdedScenes[id]
 
-      if (realmInfo[0]) {
-        realmInfo[0].usersCount += 1
-      } else {
-        crowdedScenes[id].realms.push(createRealmInfo(candidate, 1))
-      }
-      crowdedScenes[id].usersTotalCount++
-    } else {
-      crowdedScenes[id] = createHotSceneInfo(candidate, land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+    if (!hotScene) {
+      hotScene = createHotSceneInfo(land?.sceneJsonData?.scene.base ?? tiles[i], id, land)
+      crowdedScenes[id] = hotScene
     }
+
+    const realmInfo = hotScene.realms.filter(
+      (realm) => realm.serverName === candidate.catalystName && realm.layer === candidate.layer.name
+    )
+
+    let realm = realmInfo[0]
+    if (!realm) {
+      realm = createRealmInfo(candidate)
+      hotScene.realms.push(realm)
+    }
+
+    hotScene.usersTotalCount++
+    realm.usersCount ++
+    realm.userParcels.push(TileStringToVector2(tiles[i]))
   }
 }
 
 function createHotSceneInfo(
-  candidate: Candidate,
   baseCoord: string,
   id: string,
   land: ILand | undefined
 ): HotSceneInfo {
   const sceneJsonData: SceneJsonData | undefined = land?.sceneJsonData
-  const baseCoords = baseCoord.split(',').map((str) => parseInt(str, 10)) as [number, number]
   return {
     id: id,
     name: getSceneName(baseCoord, sceneJsonData),
     creator: getOwnerNameFromJsonData(sceneJsonData),
+    description: getSceneDescriptionFromJsonData(sceneJsonData),
     thumbnail:
       getThumbnailUrlFromJsonDataAndContent(
         land?.sceneJsonData,
         land?.mappingsResponse.contents,
         getUpdateProfileServer(globalThis.globalStore.getState())
       ) ?? '',
-    baseCoords: { x: baseCoords[0], y: baseCoords[1] },
+    baseCoords: TileStringToVector2(baseCoord),
     parcels: sceneJsonData
       ? sceneJsonData.scene.parcels.map((parcel) => {
         const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
         return { x: coord[0], y: coord[1] }
       })
       : [],
-    realms: [createRealmInfo(candidate, 1)],
-    usersTotalCount: 1
+    realms: [],
+    usersTotalCount: 0
   }
 }
 
-function createRealmInfo(candidate: Candidate, usersCount: number): RealmInfo {
+function createRealmInfo(candidate: Candidate): RealmInfo {
   return {
     serverName: candidate.catalystName,
     layer: candidate.layer.name,
     usersMax: candidate.layer.maxUsers,
-    usersCount: usersCount
+    usersCount: 0,
+    userParcels: []
   }
 }
 
@@ -183,26 +199,31 @@ async function fetchPOIsAsHotSceneInfo(): Promise<HotSceneInfo[]> {
   const scenesLand = (await fetchSceneJson(scenesId)).filter((land) => land.sceneJsonData)
 
   return scenesLand.map((land) => {
-    const baseCoords = land.sceneJsonData.scene.base.split(',').map((str) => parseInt(str, 10)) as [number, number]
     return {
       id: land.sceneId,
       name: getSceneName(land.sceneJsonData.scene.base, land.sceneJsonData),
       creator: getOwnerNameFromJsonData(land.sceneJsonData),
+      description: getSceneDescriptionFromJsonData(land.sceneJsonData),
       thumbnail:
         getThumbnailUrlFromJsonDataAndContent(
           land.sceneJsonData,
           land.mappingsResponse.contents,
           getUpdateProfileServer(globalThis.globalStore.getState())
         ) ?? '',
-      baseCoords: { x: baseCoords[0], y: baseCoords[1] },
+      baseCoords: TileStringToVector2(land.sceneJsonData.scene.base),
       parcels: land.sceneJsonData
         ? land.sceneJsonData.scene.parcels.map((parcel) => {
           const coord = parcel.split(',').map((str) => parseInt(str, 10)) as [number, number]
           return { x: coord[0], y: coord[1] }
         })
         : [],
-      realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0 }],
+      realms: [{ serverName: '', layer: '', usersMax: 0, usersCount: 0, userParcels: [] }],
       usersTotalCount: 0
     }
   })
+}
+
+function TileStringToVector2(tileValue: string): { x: number; y: number } {
+  const tile = tileValue.split(',').map((str) => parseInt(str, 10)) as [number, number]
+  return { x: tile[0], y: tile[1] }
 }

@@ -1,3 +1,4 @@
+using DCL;
 using System;
 using System.Linq;
 using TMPro;
@@ -130,7 +131,7 @@ public class InputController : MonoBehaviour
         {
             Update_Trigger(triggerTimeActions);
             Update_Hold(holdActions);
-           
+
         }
         Update_Measurable(measurableActions);
     }
@@ -174,7 +175,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.CloseWindow:
-                    if (allUIHidden) break;
+                    if (allUIHidden || DataStore.isSignUpFlow.Get()) break;
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:
@@ -184,6 +185,9 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Trigger.ToggleControlsHud:
                     InputProcessor.FromKey(action, KeyCode.C, modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+                case DCLAction_Trigger.ToggleSettings:
+                    InputProcessor.FromKey(action, KeyCode.P, modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.ToggleExploreHud:
                     if (allUIHidden) break;
@@ -336,31 +340,31 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.F, InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Hold.BuildEditModeMultiSelection:
-                    InputProcessor.FromKey(action, KeyCode.LeftControl, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.LeftControl, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeSquareMultiSelection:
-                    InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.LeftShift, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeFirstPersonRotation:
-                    InputProcessor.FromKey(action, KeyCode.R, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.R, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceFoward:
-                    InputProcessor.FromKey(action, KeyCode.UpArrow, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.UpArrow, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceBack:
-                    InputProcessor.FromKey(action, KeyCode.DownArrow, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.DownArrow, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceLeft:
-                    InputProcessor.FromKey(action, KeyCode.LeftArrow, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.LeftArrow, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceRight:
-                    InputProcessor.FromKey(action, KeyCode.RightArrow, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.RightArrow, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceUp:
-                    InputProcessor.FromKey(action, KeyCode.Space, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.Space, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Hold.BuildEditModeCameraAdvanceDown:
-                    InputProcessor.FromKey(action, KeyCode.X, InputProcessor.Modifier.None);
+                    InputProcessor.FromKey(action, KeyCode.X, InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

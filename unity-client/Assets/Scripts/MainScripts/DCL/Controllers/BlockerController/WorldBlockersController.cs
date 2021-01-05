@@ -1,8 +1,18 @@
 ﻿using System.Collections.Generic;
+using DCL.Helpers;
 using UnityEngine;
 
 namespace DCL.Controllers
 {
+    public interface IWorldBlockersController
+    {
+        void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler);
+        void InitializeWithDefaultDependencies(ISceneHandler sceneHandler);
+        void SetupWorldBlockers();
+        void SetEnabled(bool targetValue);
+        void Dispose();
+    }
+
     /// <summary>
     /// This class is the domain-specific glue for BlockerInstanceHandler.
     /// <br/><br/>
@@ -11,15 +21,14 @@ namespace DCL.Controllers
     /// - Moving blockers when the world is repositioned<br/>
     /// - Handling lifecycle of BlockerInstanceHandler<br/>
     /// </summary>
-    public class WorldBlockersController
+    public class WorldBlockersController : IWorldBlockersController
     {
         public bool enabled = true;
 
         Transform blockersParent;
 
-        readonly ISceneHandler sceneHandler;
-        readonly IBlockerInstanceHandler blockerInstanceHandler;
-        readonly DCLCharacterPosition characterPosition;
+        ISceneHandler sceneHandler;
+        IBlockerInstanceHandler blockerInstanceHandler;
 
         HashSet<Vector2Int> blockersToRemove = new HashSet<Vector2Int>();
         HashSet<Vector2Int> blockersToAdd = new HashSet<Vector2Int>();
@@ -36,35 +45,41 @@ namespace DCL.Controllers
             new Vector2Int(-1, 1)
         };
 
-        public WorldBlockersController(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler, DCLCharacterPosition characterPosition)
+        public void Initialize(ISceneHandler sceneHandler, IBlockerInstanceHandler blockerInstanceHandler)
         {
             this.blockerInstanceHandler = blockerInstanceHandler;
             this.sceneHandler = sceneHandler;
-            this.characterPosition = characterPosition;
-
-            blockersParent = new GameObject("WorldBlockers").transform;
-            blockersParent.position = Vector3.zero;
 
             blockerInstanceHandler.SetParent(blockersParent);
 
-            characterPosition.OnPrecisionAdjust += OnWorldReposition;
+            CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
         }
 
-        public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler, DCLCharacterPosition characterPosition)
+        public WorldBlockersController()
+        {
+            blockersParent = new GameObject("WorldBlockers").transform;
+            blockersParent.position = Vector3.zero;
+        }
+
+        public static WorldBlockersController CreateWithDefaultDependencies(ISceneHandler sceneHandler)
+        {
+            var worldBlockersController = new WorldBlockersController();
+            worldBlockersController.InitializeWithDefaultDependencies(sceneHandler);
+            return worldBlockersController;
+        }
+
+        public void InitializeWithDefaultDependencies(ISceneHandler sceneHandler)
         {
             var blockerAnimationHandler = new BlockerAnimationHandler();
+            var blockerInstanceHandler = new BlockerInstanceHandler();
 
-            var blockerInstanceHandler = new BlockerInstanceHandler(
-                characterPosition,
+            blockerInstanceHandler.Initialize(
                 blockerAnimationHandler
             );
 
-            var worldBlockersController = new WorldBlockersController(
+            Initialize(
                 sceneHandler,
-                blockerInstanceHandler,
-                characterPosition);
-
-            return worldBlockersController;
+                blockerInstanceHandler);
         }
 
         public void SetupWorldBlockers()
@@ -82,15 +97,15 @@ namespace DCL.Controllers
                 blockerInstanceHandler.DestroyAllBlockers();
         }
 
-        void OnWorldReposition(DCLCharacterPosition charPos)
+        void OnWorldReposition(Vector3 current, Vector3 previous)
         {
-            var newPosition = charPos.WorldToUnityPosition(Vector3.zero); // Blockers parent original position
+            var newPosition = PositionUtils.WorldToUnityPosition(Vector3.zero); // Blockers parent original position
             blockersParent.position = newPosition;
         }
 
         public void Dispose()
         {
-            characterPosition.OnPrecisionAdjust -= OnWorldReposition;
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
             blockerInstanceHandler.DestroyAllBlockers();
 
             if (blockersParent != null)

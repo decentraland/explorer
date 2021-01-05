@@ -49,7 +49,12 @@ namespace DCL.Components
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
+            //TODO: Analyze if we can catch this upstream and stop the IEnumerator
+            if(isDisposed)
+                yield break;
+
+            model = Utils.SafeFromJson<Model>(newJson);
 
             unitySamplingMode = model.samplingMode;
 
@@ -118,16 +123,15 @@ namespace DCL.Components
                 {
                     texturePlayer.SetTime(model.seek);
                     model.seek = -1;
+
+                    // Applying seek is not immediate
+                    yield return null;
                 }
 
                 if (model.playing)
-                {
                     texturePlayer.Play();
-                }
-                else if (texturePlayer.playing)
-                {
+                else
                     texturePlayer.Pause();
-                }
 
                 if (baseVolume != model.volume)
                 {

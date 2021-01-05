@@ -19,13 +19,13 @@ namespace SceneBoundariesCheckerTests
         {
             yield return base.SetUp();
 
-            yield return SetUp_SceneController(debugMode: true);
             yield return SetUp_CharacterController();
 
-            sceneController.boundariesChecker.timeBetweenChecks = 0f;
+            Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
+            Environment.i.world.sceneBoundsChecker.timeBetweenChecks = 0f;
 
-            UnityEngine.Assertions.Assert.IsTrue(sceneController.useBoundariesChecker);
-            UnityEngine.Assertions.Assert.IsTrue(sceneController.boundariesChecker is SceneBoundariesDebugModeChecker);
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.enabled);
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker);
         }
 
         [UnityTest]
@@ -44,17 +44,17 @@ namespace SceneBoundariesCheckerTests
 
             yield return null;
 
-            Assert.IsFalse(SBC_Asserts.MeshIsInvalid(entity.meshesInfo));
+            SBC_Asserts.AssertMeshIsValid(entity.meshesInfo);
             // Move object to surpass the scene boundaries
             TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model {position = new Vector3(18, 1, 18)});
 
             yield return null;
 
-            Assert.IsTrue(SBC_Asserts.MeshIsInvalid(entity.meshesInfo));
+            SBC_Asserts.AssertMeshIsInvalid(entity.meshesInfo);
 
             TestHelpers.RemoveSceneEntity(scene, entity.entityId);
 
-            Environment.i.parcelScenesCleaner.ForceCleanup();
+            Environment.i.platform.parcelScenesCleaner.ForceCleanup();
 
             yield return null;
 
@@ -72,7 +72,7 @@ namespace SceneBoundariesCheckerTests
             yield return new WaitUntil(() => gltfShape2.alreadyLoaded);
             yield return null;
 
-            Assert.IsFalse(SBC_Asserts.MeshIsInvalid(entity2.meshesInfo));
+            SBC_Asserts.AssertMeshIsValid(entity2.meshesInfo);
         }
 
         [UnityTest]

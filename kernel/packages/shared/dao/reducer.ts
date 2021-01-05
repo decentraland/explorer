@@ -33,6 +33,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       commsServer: '',
       resizeService: '',
       hotScenesService: '',
+      exploreRealmsService: '',
       realm: undefined,
       candidates: [],
       addedCandidates: [],
@@ -90,7 +91,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         candidates: state.candidates.map((it) => {
-          if (it.catalystName === action.payload.catalystName && it.layer.name === action.payload.layer) {
+          if (it && it.catalystName === action.payload.catalystName && it.layer.name === action.payload.layer) {
             return { ...it, layer: { ...it.layer, usersCount: it.layer.maxUsers } }
           } else {
             return it
@@ -101,7 +102,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         candidates: state.candidates.map((it) => {
-          if (it.catalystName === action.payload.catalystName) {
+          if (it && it.catalystName === action.payload.catalystName) {
             return {
               ...it,
               status: ServerConnectionStatus.UNREACHABLE,
@@ -126,6 +127,7 @@ function realmProperties(realm: Realm, configOverride: boolean = true): Partial<
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     resizeService: RESIZE_SERVICE && configOverride ? RESIZE_SERVICE : domain + '/lambdas/images',
     hotScenesService: HOTSCENES_SERVICE && configOverride ? HOTSCENES_SERVICE : domain + '/lambdas/explore/hot-scenes',
+    exploreRealmsService: domain + '/lambdas/explore/realms',
     realm
   }
 }

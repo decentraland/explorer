@@ -1,5 +1,6 @@
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Models;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -41,6 +42,10 @@ namespace DCL.Components
         {
             if (type == Unit.PIXELS) return value;
 
+            // Prevent division by zero
+            if (parentSize <= Mathf.Epsilon)
+                parentSize = 1;
+
             return value / 100 * parentSize;
         }
     }
@@ -78,7 +83,7 @@ namespace DCL.Components
         /// </summary>
         public void PreApplyChanges(string newJson)
         {
-            model = SceneController.i.SafeFromJson<ModelType>(newJson);
+            model = Utils.SafeFromJson<ModelType>(newJson);
 
             raiseOnAttached = false;
             firstApplyChangesCall = false;
@@ -162,6 +167,11 @@ namespace DCL.Components
         {
         }
 
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.UI_IMAGE_SHAPE;
+        }
+
         public string GetDebugName()
         {
             if (string.IsNullOrEmpty(model.name))
@@ -172,6 +182,11 @@ namespace DCL.Components
             {
                 return GetType().Name + " - " + model.name;
             }
+        }
+
+        public override object GetModel()
+        {
+            return model;
         }
 
         public override IEnumerator ApplyChanges(string newJson)
@@ -269,6 +284,7 @@ namespace DCL.Components
             position.x = model.positionX.GetScaledValue(parentTransform.rect.width);
             position.y = model.positionY.GetScaledValue(parentTransform.rect.height);
 
+            position = Utils.Sanitize(position);
             referencesContainer.layoutElementRT.localPosition += position;
         }
 
@@ -436,7 +452,12 @@ namespace DCL.Components
             base.Dispose();
         }
 
-        public virtual void OnChildAttached(UIShape parentComponent, UIShape childComponent) { }
-        public virtual void OnChildDetached(UIShape parentComponent, UIShape childComponent) { }
+        public virtual void OnChildAttached(UIShape parentComponent, UIShape childComponent)
+        {
+        }
+
+        public virtual void OnChildDetached(UIShape parentComponent, UIShape childComponent)
+        {
+        }
     }
 }

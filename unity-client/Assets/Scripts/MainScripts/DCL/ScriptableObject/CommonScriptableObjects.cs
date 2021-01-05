@@ -83,8 +83,8 @@ public static class CommonScriptableObjects
     private static Vector3Variable playerUnityEulerAnglesValue;
     public static Vector3Variable playerUnityEulerAngles => GetOrLoad(ref playerUnityEulerAnglesValue, "ScriptableObjects/PlayerUnityEulerAngles");
 
-    private static Vector3Variable playerUnityToWorldOffsetValue;
-    public static Vector3Variable playerUnityToWorldOffset => GetOrLoad(ref playerUnityToWorldOffsetValue, "ScriptableObjects/PlayerUnityToWorldOffset");
+    private static Vector3Variable worldOffsetValue;
+    public static Vector3Variable worldOffset => GetOrLoad(ref worldOffsetValue, "ScriptableObjects/WorldOffset");
 
     private static Vector2IntVariable playerCoordsValue;
     public static Vector2IntVariable playerCoords => GetOrLoad(ref playerCoordsValue, "ScriptableObjects/PlayerCoords");
@@ -162,7 +162,10 @@ public static class CommonScriptableObjects
     private static BooleanVariable emailPromptActiveValue;
     public static BooleanVariable emailPromptActive => GetOrLoad(ref emailPromptActiveValue, "ScriptableObjects/EmailPromptActive");
 
-    internal static T GetOrLoad<T>(ref T variable, string path) where T : Object
+    private static BooleanVariable voiceChatDisabledValue;
+    public static BooleanVariable voiceChatDisabled => GetOrLoad(ref voiceChatDisabledValue, "ScriptableObjects/VoiceChatDisabled");
+
+    public static T GetOrLoad<T>(ref T variable, string path) where T : Object
     {
         if (variable == null)
         {
