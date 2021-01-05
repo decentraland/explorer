@@ -27,8 +27,8 @@ namespace DCL.Components
             [Header("Text box properties")] public string hTextAlign = "bottom";
 
             public string vTextAlign = "left";
-            public float width = 1f;
-            public float height = 0.2f;
+            public float width = 0; // NOTE: for backwards compatibility default width and height should be 0
+            public float height = 0;
             public bool adaptWidth = false;
             public bool adaptHeight = false;
             public float paddingTop = 0f;
