@@ -12,7 +12,7 @@ public class ProfileHUDController : IHUD
         public bool connectedWallet;
     }
 
-    private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
+    private const string URL_CLAIM_NAME = "https://builder.decentraland.org/claim-name";
     private const string URL_MANA_INFO = "https://docs.decentraland.org/examples/get-a-wallet";
     private const string URL_MANA_PURCHASE = "https://market.decentraland.org/settings";
     private const string URL_TERMS_OF_USE = "https://decentraland.org/terms";
@@ -36,7 +36,7 @@ public class ProfileHUDController : IHUD
     {
         mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
 
-     
+
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
 
