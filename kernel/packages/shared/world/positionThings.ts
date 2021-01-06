@@ -1,5 +1,4 @@
 const qs: any = require('query-string')
-import { worldToGrid, gridToWorld, parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 import {
   Vector3,
   ReadOnlyVector3,
@@ -10,8 +9,13 @@ import {
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
-import { DEBUG, parcelLimits } from "../../config"
-import parcelSize = parcelLimits.parcelSize
+import {
+  worldToGrid,
+  gridToWorld,
+  parseParcelPosition,
+  isWorldPositionInsideParcels
+} from 'atomicHelpers/parcelScenePositions'
+import { DEBUG } from "../../config"
 
 declare var location: any
 declare var history: any
@@ -150,22 +154,15 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
 
   // 5 - If the final position is outside the scene limits, we zero it
   if (!DEBUG) {
-    let isInside = false
-
     const sceneBaseParcelCoords = land.sceneJsonData.scene.base.split(',')
-    const flooredFinalPosX = Math.floor(parseInt(sceneBaseParcelCoords[0], 10) + (finalPosition.x / parcelSize)).toString()
-    const flooredFinalPosZ = Math.floor(parseInt(sceneBaseParcelCoords[1], 10) + (finalPosition.z / parcelSize)).toString()
-
-    for (const parcel of land.sceneJsonData.scene.parcels) {
-      const parcelCoords = parcel.split(',')
-
-      if (flooredFinalPosX === parcelCoords[0] && flooredFinalPosZ === parcelCoords[1]) {
-        isInside = true
-        break
-      }
+    const sceneBaseParcelWorldPos = gridToWorld(parseInt(sceneBaseParcelCoords[0], 10), parseInt(sceneBaseParcelCoords[1], 10))
+    let finalWorldPosition = {
+      x: sceneBaseParcelWorldPos.x + finalPosition.x,
+      y: finalPosition.y,
+      z: sceneBaseParcelWorldPos.z + finalPosition.z
     }
 
-    if (!isInside) {
+    if (!isWorldPositionInsideParcels(land.sceneJsonData.scene.parcels, finalWorldPosition)) {
       finalPosition.x = 0
       finalPosition.z = 0
     }
