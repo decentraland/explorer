@@ -105,7 +105,7 @@ export class TeleportController {
       const currentParcel = worldToGrid(lastPlayerPosition)
 
       usersParcels = usersParcels.filter(
-        (it) => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+        (it) => isInsideWorldLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
       )
 
       if (usersParcels.length > 0) {
@@ -151,7 +151,7 @@ export class TeleportController {
   public static goTo(x: number, y: number, teleportMessage?: string): { message: string; success: boolean } {
     const tpMessage: string = teleportMessage ? teleportMessage : `Teleporting to ${x}, ${y}...`
 
-    if (isInsideParcelLimits(x, y)) {
+    if (isInsideWorldLimits(x, y)) {
       teleportObservable.notifyObservers({
         x: x,
         y: y,
@@ -183,7 +183,7 @@ async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
   return []
 }
 
-function isInsideParcelLimits(x: number, y: number) {
+function isInsideWorldLimits(x: number, y: number) {
   return (
     x > parcelLimits.minLandCoordinateX &&
     x <= parcelLimits.maxLandCoordinateX &&

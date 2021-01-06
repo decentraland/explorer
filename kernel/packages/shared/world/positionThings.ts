@@ -1,5 +1,3 @@
-import { DEBUG, parcelLimits } from "../../config"
-
 const qs: any = require('query-string')
 import { worldToGrid, gridToWorld, parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 import {
@@ -12,6 +10,7 @@ import {
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
+import { DEBUG, parcelLimits } from "../../config"
 import parcelSize = parcelLimits.parcelSize
 
 declare var location: any
@@ -152,8 +151,10 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   // 5 - If the final position is outside the scene limits, we zero it
   if (!DEBUG) {
     let isInside = false
-    const flooredFinalPosX = Math.floor(finalPosition.x / parcelSize).toString()
-    const flooredFinalPosZ = Math.floor(finalPosition.z / parcelSize).toString()
+
+    const sceneBaseParcelCoords = land.sceneJsonData.scene.base.split(',')
+    const flooredFinalPosX = Math.floor(parseInt(sceneBaseParcelCoords[0], 10) + (finalPosition.x / parcelSize)).toString()
+    const flooredFinalPosZ = Math.floor(parseInt(sceneBaseParcelCoords[1], 10) + (finalPosition.z / parcelSize)).toString()
 
     for (const parcel of land.sceneJsonData.scene.parcels) {
       const parcelCoords = parcel.split(',')
