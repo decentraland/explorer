@@ -12,7 +12,7 @@ import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/contr
 import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
-import { saveProfileRequest } from 'shared/profiles/actions'
+import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
 import { Avatar } from 'shared/profiles/types'
 import {
   ChatMessage,
@@ -49,6 +49,7 @@ import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
+import { isGuest } from '../shared/ethereum/provider'
 
 declare const DCL: any
 
@@ -219,7 +220,10 @@ export class BrowserInterface {
   }
 
   public RequestOwnProfileUpdate() {
-    // TODO: Fetch last profile version, check its version number and if it is newer, send it again to the unity client via 'globalThis.unityInterface.LoadProfile(rendererFormat)'
+    const userId = getCurrentUserId(globalThis.globalStore.getState())
+    if (!isGuest() && userId) {
+      globalThis.globalStore.dispatch(profileRequest(userId))
+    }
   }
 
   public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
