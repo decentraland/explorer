@@ -218,6 +218,10 @@ export class BrowserInterface {
     }
   }
 
+  public RequestOwnProfileUpdate() {
+    // TODO: Fetch last profile version, check its version number and if it is newer, send it again to the unity client via 'globalThis.unityInterface.LoadProfile(rendererFormat)'
+  }
+
   public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
     globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
   }
