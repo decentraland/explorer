@@ -33,9 +33,14 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             float storedValue = PlayerPrefs.GetFloat(MOUSE_SENSIVITY_SETTINGS_KEY, -1);
             if (storedValue != -1)
-                return Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, storedValue);
+                return MouseSensivityToSliderValue(storedValue);
             else
-                return Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, Settings.i.GetDefaultGeneralSettings().mouseSensitivity);
+                return MouseSensivityToSliderValue(Settings.i.GetDefaultGeneralSettings().mouseSensitivity);
+        }
+
+        private float MouseSensivityToSliderValue(float mouseSensivityValue)
+        {
+            return Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, mouseSensivityValue);
         }
 
         public override void OnControlChanged(object newValue)

@@ -12,9 +12,14 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             float storedValue = PlayerPrefs.GetFloat(VOICE_CHAT_VOLUME_SETTINGS_KEY, -1);
             if (storedValue != -1)
-                return storedValue * 100;
+                return VoiceChatVolumeToSliderValue(storedValue);
             else
-                return Settings.i.GetDefaultGeneralSettings().voiceChatVolume * 100;
+                return VoiceChatVolumeToSliderValue(Settings.i.GetDefaultGeneralSettings().voiceChatVolume);
+        }
+
+        private float VoiceChatVolumeToSliderValue(float voiceChatVolumeValue)
+        {
+            return voiceChatVolumeValue * 100;
         }
 
         public override void OnControlChanged(object newValue)

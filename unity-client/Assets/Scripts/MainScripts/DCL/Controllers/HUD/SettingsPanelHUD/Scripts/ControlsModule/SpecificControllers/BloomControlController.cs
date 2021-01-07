@@ -2,7 +2,6 @@ using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using System;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -36,14 +35,12 @@ namespace DCL.SettingsPanelHUD.Controls
 
             if (qualitySettings.postProcessVolume)
             {
-                Bloom bloom;
-                if (qualitySettings.postProcessVolume.profile.TryGet<Bloom>(out bloom))
+                if (qualitySettings.postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
                 {
                     bloom.active = newBloomValue;
+                    PlayerPrefs.SetString(BLOOM_SETTINGS_KEY, newBloomValue.ToString());
                 }
             }
-
-            PlayerPrefs.SetString(BLOOM_SETTINGS_KEY, newBloomValue.ToString());
         }
 
         public override void PostApplySettings()

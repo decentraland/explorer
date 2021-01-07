@@ -14,7 +14,7 @@ namespace DCL.SettingsPanelHUD.Controls
             if (!String.IsNullOrEmpty(storedValue))
                 return Convert.ToBoolean(storedValue);
             else
-                return Settings.i.GetDefaultGeneralSettings().sfxVolume > 0 ? true : false;
+                return Settings.i.GetDefaultGeneralSettings().sfxVolume > 0;
         }
 
         public override void OnControlChanged(object newValue)
