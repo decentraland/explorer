@@ -8,13 +8,13 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
-public class PBRMaterialShould : TestsBase
+public class PBRMaterialShould : IntegrationTestSuite_Legacy
 {
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        Environment.i.sceneBoundsChecker.Stop();
+        Environment.i.world.sceneBoundsChecker.Stop();
     }
 
     [UnityTest]

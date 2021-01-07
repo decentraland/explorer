@@ -9,14 +9,13 @@ using UnityEngine.TestTools;
 
 namespace SceneBoundariesCheckerTests
 {
-    public class SceneBoundariesCheckerTests : TestsBase
+    public class SceneBoundariesCheckerTests : IntegrationTestSuite_Legacy
     {
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-
-            Environment.i.sceneBoundsChecker.timeBetweenChecks = 0f;
+            Environment.i.world.sceneBoundsChecker.timeBetweenChecks = 0f;
         }
 
         [UnityTest]
