@@ -32,11 +32,11 @@ public class BlockerHandlerCan
 
         blockerAnimationHandler = Substitute.For<IBlockerAnimationHandler>();
 
-        //NOTE(Brian): Call OnFinish() when blockerAnimationHandler.FadeOut is called. 
+        //NOTE(Brian): Call OnFinish() when blockerAnimationHandler.FadeOut is called.
         blockerAnimationHandler.FadeOut(Arg.Any<GameObject>(), Arg.Invoke());
 
         var newBlockerInstanceHandler = new BlockerInstanceHandler();
-        newBlockerInstanceHandler.Initialize(new DCLCharacterPosition(), blockerAnimationHandler);
+        newBlockerInstanceHandler.Initialize(blockerAnimationHandler);
 
         blockerInstanceHandler = newBlockerInstanceHandler;
         blockersParent = new GameObject();
