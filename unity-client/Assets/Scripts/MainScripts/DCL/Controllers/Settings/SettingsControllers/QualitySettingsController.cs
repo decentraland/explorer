@@ -88,19 +88,6 @@ namespace DCL.SettingsController
                 environmentLight.shadows = shadowType;
             }
 
-            if (thirdPersonCamera)
-            {
-                thirdPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
-            }
-
-            if (firstPersonCamera)
-            {
-                firstPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;
-            }
-
-            RenderSettings.fogEndDistance = qualitySettings.cameraDrawDistance;
-            RenderSettings.fogStartDistance = qualitySettings.cameraDrawDistance * 0.8f;
-
             ToggleFPSCap(qualitySettings.fpsCap);
         }
 
