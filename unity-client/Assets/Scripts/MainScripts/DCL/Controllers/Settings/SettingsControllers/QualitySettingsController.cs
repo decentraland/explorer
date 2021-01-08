@@ -82,7 +82,6 @@ namespace DCL.SettingsController
 
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.msaaSampleCount = (int) qualitySettings.antiAliasing;
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
                 lightweightRenderPipelineAsset.shadowDistance = qualitySettings.shadowDistance;
 
