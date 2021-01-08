@@ -33,14 +33,13 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             float newFloatValue = (float)newValue;
 
-            currentQualitySetting.renderScale = newFloatValue;
-            ((SliderSettingsControlView)view).OverrideIndicatorLabel(newFloatValue.ToString("0.0"));
-
             if (lightweightRenderPipelineAsset != null)
             {
                 lightweightRenderPipelineAsset.renderScale = newFloatValue;
                 PlayerPrefs.SetFloat(RENDERING_SCALE_SETTINGS_KEY, newFloatValue);
             }
+
+            ((SliderSettingsControlView)view).OverrideIndicatorLabel(newFloatValue.ToString("0.0"));
         }
 
         public override void PostApplySettings()
