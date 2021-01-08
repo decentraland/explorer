@@ -31,6 +31,13 @@ namespace DCL.SettingsController
 
         public CullingControllerSettingsData cullingControllerSettingsData = null;
 
+        public static QualitySettingsController i { get; private set; }
+
+        private void Awake()
+        {
+            i = this;
+        }
+
         void Start()
         {
             if (lightweightRenderPipelineAsset == null)
@@ -97,12 +104,6 @@ namespace DCL.SettingsController
 
             if (postProcessVolume)
             {
-                Bloom bloom;
-                if (postProcessVolume.profile.TryGet<Bloom>(out bloom))
-                {
-                    bloom.active = qualitySettings.bloom;
-                }
-
                 Tonemapping toneMapping;
                 if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
                 {
