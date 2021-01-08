@@ -86,7 +86,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             skipPostApplySettings = true;
             RefreshControl();
-            settingsControlController.OnControlChanged(settingsControlController.GetStoredValue());
         }
 
         private void OnDestroy()

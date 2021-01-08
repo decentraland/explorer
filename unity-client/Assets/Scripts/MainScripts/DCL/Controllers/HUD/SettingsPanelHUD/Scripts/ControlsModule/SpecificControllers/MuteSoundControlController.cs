@@ -12,7 +12,9 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            currentGeneralSettings.sfxVolume = (bool)newValue ? 1 : 0;
+            bool newBoolValue = (bool)newValue;
+            currentGeneralSettings.sfxVolume = newBoolValue ? 1 : 0;
+            AudioListener.volume = currentGeneralSettings.sfxVolume;
         }
     }
 }

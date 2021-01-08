@@ -1,3 +1,4 @@
+using DCL.Interface;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -13,6 +14,7 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentGeneralSettings.voiceChatVolume = (float)newValue * 0.01f;
+            WebInterface.ApplySettings(currentGeneralSettings.voiceChatVolume, (int)currentGeneralSettings.voiceChatAllow);
         }
     }
 }
