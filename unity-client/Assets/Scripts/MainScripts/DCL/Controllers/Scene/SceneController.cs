@@ -100,7 +100,6 @@ namespace DCL
                 Environment.SetupWithDefaults();
             }
 
-            Environment.i.world.blockersController.SetEnabled(false);
             Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
         }
 
@@ -578,7 +577,7 @@ namespace DCL
                 }
             }
 
-            if (string.IsNullOrEmpty(worldState.currentSceneId))
+            if (!DataStore.debugConfig.isDebugMode && string.IsNullOrEmpty(worldState.currentSceneId))
             {
                 // When we don't know the current scene yet, we must lock the rendering from enabling until it is set
                 CommonScriptableObjects.rendererState.AddLock(this);
