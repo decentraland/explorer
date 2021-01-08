@@ -1,5 +1,7 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
@@ -14,6 +16,12 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentQualitySetting.colorGrading = (bool)newValue;
+
+            Tonemapping toneMapping;
+            if (QualitySettingsController.i.postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
+            {
+                toneMapping.active = currentQualitySetting.colorGrading;
+            }
         }
 
         public override void PostApplySettings()

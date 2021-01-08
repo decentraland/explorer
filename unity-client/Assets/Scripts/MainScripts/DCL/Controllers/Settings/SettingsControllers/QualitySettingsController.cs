@@ -88,15 +88,6 @@ namespace DCL.SettingsController
                 environmentLight.shadows = shadowType;
             }
 
-            if (postProcessVolume)
-            {
-                Tonemapping toneMapping;
-                if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
-                {
-                    toneMapping.active = qualitySettings.colorGrading;
-                }
-            }
-
             Environment.i.platform.cullingController.SetObjectCulling(qualitySettings.enableDetailObjectCulling);
             Environment.i.platform.cullingController.SetShadowCulling(qualitySettings.enableDetailObjectCulling);
             Environment.i.platform.cullingController.MarkDirty();
