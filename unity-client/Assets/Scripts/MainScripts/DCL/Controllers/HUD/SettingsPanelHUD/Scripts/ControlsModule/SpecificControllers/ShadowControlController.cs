@@ -45,7 +45,7 @@ namespace DCL.SettingsPanelHUD.Controls
             if (lightweightRenderPipelineAsset != null)
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, newBoolValue);
 
-            CommonSettingsScriptableObjects.shadowsDisabled.Set(!currentQualitySetting.shadows);
+            CommonSettingsScriptableObjects.shadowsDisabled.Set(!newBoolValue);
             PlayerPrefs.SetString(SHADOWS_SETTINGS_KEY, newBoolValue.ToString());
         }
 
