@@ -18,7 +18,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 return (int)Settings.i.qualitySettingsPresets.defaultPreset.baseResolution;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             int newIntValue = (int)newValue;
 

@@ -42,7 +42,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return (int)Mathf.Log(shadowResolutionValue, 2) - 8;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             int newIntValue = 256 << (int)newValue;
 

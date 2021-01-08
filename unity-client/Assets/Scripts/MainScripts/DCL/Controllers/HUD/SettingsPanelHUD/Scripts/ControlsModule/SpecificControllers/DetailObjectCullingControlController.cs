@@ -17,7 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 return Settings.i.qualitySettingsPresets.defaultPreset.enableDetailObjectCulling;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             bool newBoolValue = (bool)newValue;
 
@@ -27,6 +27,13 @@ namespace DCL.SettingsPanelHUD.Controls
 
             CommonSettingsScriptableObjects.detailObjectCullingDisabled.Set(!newBoolValue);
             PlayerPrefs.SetString(DETAIL_OBJECT_CULLING_SETTINGS_KEY, newBoolValue.ToString());
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

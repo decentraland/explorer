@@ -43,7 +43,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, mouseSensivityValue);
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             float newMouseSensivityValue = RemapMouseSensitivityTo01((float)newValue);
 

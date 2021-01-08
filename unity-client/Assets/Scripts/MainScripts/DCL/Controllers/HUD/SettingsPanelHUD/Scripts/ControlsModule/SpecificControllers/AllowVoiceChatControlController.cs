@@ -17,7 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 return (int)Settings.i.GetDefaultGeneralSettings().voiceChatAllow;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             int newAllowVoiceChatValue = (int)newValue;
             PlayerPrefs.SetInt(ALLOW_VOICE_CHAT_SETTINGS_KEY, newAllowVoiceChatValue);

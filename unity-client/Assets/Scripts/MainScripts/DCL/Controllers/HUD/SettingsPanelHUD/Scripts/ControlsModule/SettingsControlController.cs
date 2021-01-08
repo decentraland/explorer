@@ -41,7 +41,8 @@ namespace DCL.SettingsPanelHUD.Controls
         /// It should contain the specific logic that will be triggered when the control state changes.
         /// </summary>
         /// <param name="newValue">Value of the new state. It can be a bool (for toggle controls), a float (for slider controls) or an int (for spin-box controls).</param>
-        public virtual void OnControlChanged(object newValue)
+        /// <param name="fromInitialize">True if the change event has been called from the control initialization.</param>
+        public virtual void OnControlChanged(object newValue, bool fromInitialize = false)
         {
         }
 

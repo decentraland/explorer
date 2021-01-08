@@ -29,7 +29,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 return Settings.i.qualitySettingsPresets.defaultPreset.renderScale;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             float newFloatValue = (float)newValue;
 

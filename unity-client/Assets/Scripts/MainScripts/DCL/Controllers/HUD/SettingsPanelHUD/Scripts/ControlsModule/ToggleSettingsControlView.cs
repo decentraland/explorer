@@ -15,7 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             base.Initialize(controlConfig, settingsControlController);
-            settingsControlController.OnControlChanged(toggle.isOn);
+            settingsControlController.OnControlChanged(toggle.isOn, true);
 
             toggle.onValueChanged.AddListener(isOn =>
             {

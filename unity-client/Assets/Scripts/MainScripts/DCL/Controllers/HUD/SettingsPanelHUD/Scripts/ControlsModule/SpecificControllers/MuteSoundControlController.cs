@@ -17,7 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 return Settings.i.GetDefaultGeneralSettings().sfxVolume > 0;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             bool newMuteSoundValue = (bool)newValue;
             AudioListener.volume = newMuteSoundValue ? 1 : 0;

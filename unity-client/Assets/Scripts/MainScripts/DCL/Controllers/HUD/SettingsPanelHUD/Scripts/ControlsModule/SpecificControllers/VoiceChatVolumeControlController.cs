@@ -22,7 +22,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return voiceChatVolumeValue * 100;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             float newVoiceChatVolumeValue = (float)newValue * 0.01f;
             PlayerPrefs.SetFloat(VOICE_CHAT_VOLUME_SETTINGS_KEY, newVoiceChatVolumeValue);

@@ -1,5 +1,6 @@
 using DCL.Rendering;
 using DCL.SettingsController;
+using DCL.SettingsPanelHUD.Common;
 using System;
 using UnityEngine;
 
@@ -29,7 +30,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 return Settings.i.qualitySettingsPresets.defaultPreset.detailObjectCullingThreshold;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             float newFloatValue = (float)newValue;
 
@@ -57,6 +58,13 @@ namespace DCL.SettingsPanelHUD.Controls
                 Environment.i.platform.cullingController.SetSettings(settings);
                 PlayerPrefs.SetFloat(DETAIL_OBJECT_CULLING_SIZE_SETTINGS_KEY, newFloatValue);
             }
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

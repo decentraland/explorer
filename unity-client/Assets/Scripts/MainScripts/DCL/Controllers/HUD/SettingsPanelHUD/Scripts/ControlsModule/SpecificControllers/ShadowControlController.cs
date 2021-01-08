@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using System;
 using System.Reflection;
@@ -12,12 +13,15 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         const string SHADOWS_SETTINGS_KEY = "Settings.Shadows";
 
+        private QualitySettingsController qualitySettings; // TODO (Santi): Refactorize!
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
         private FieldInfo lwrpaShadowField = null;
 
         public override void Initialize(ISettingsControlView settingsControlView)
         {
             base.Initialize(settingsControlView);
+
+            qualitySettings = GameObject.FindObjectOfType<QualitySettingsController>();
 
             if (lightweightRenderPipelineAsset == null)
             {
@@ -38,12 +42,22 @@ namespace DCL.SettingsPanelHUD.Controls
                 return Settings.i.qualitySettingsPresets.defaultPreset.shadows;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void OnControlChanged(object newValue, bool fromInitialize)
         {
             bool newBoolValue = (bool)newValue;
 
             if (lightweightRenderPipelineAsset != null)
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, newBoolValue);
+
+            if (qualitySettings.environmentLight)
+            {
+                LightShadows shadowType = LightShadows.None;
+
+                if (newBoolValue)
+                    shadowType = newBoolValue ? LightShadows.Soft : LightShadows.Hard;
+
+                qualitySettings.environmentLight.shadows = shadowType;
+            }
 
             CommonSettingsScriptableObjects.shadowsDisabled.Set(!newBoolValue);
             PlayerPrefs.SetString(SHADOWS_SETTINGS_KEY, newBoolValue.ToString());
