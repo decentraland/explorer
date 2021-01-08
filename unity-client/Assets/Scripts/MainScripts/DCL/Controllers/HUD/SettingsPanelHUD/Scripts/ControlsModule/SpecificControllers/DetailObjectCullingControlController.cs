@@ -13,9 +13,21 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            bool detailObjectCullingValue = (bool)newValue;
-            currentQualitySetting.enableDetailObjectCulling = detailObjectCullingValue;
-            CommonSettingsScriptableObjects.detailObjectCullingDisabled.Set(!detailObjectCullingValue);
+            bool newBoolValue = (bool)newValue;
+            currentQualitySetting.enableDetailObjectCulling = newBoolValue;
+
+            Environment.i.platform.cullingController.SetObjectCulling(newBoolValue);
+            Environment.i.platform.cullingController.SetShadowCulling(newBoolValue);
+            Environment.i.platform.cullingController.MarkDirty();
+
+            CommonSettingsScriptableObjects.detailObjectCullingDisabled.Set(!newBoolValue);
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

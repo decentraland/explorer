@@ -88,27 +88,6 @@ namespace DCL.SettingsController
                 environmentLight.shadows = shadowType;
             }
 
-            Environment.i.platform.cullingController.SetObjectCulling(qualitySettings.enableDetailObjectCulling);
-            Environment.i.platform.cullingController.SetShadowCulling(qualitySettings.enableDetailObjectCulling);
-            Environment.i.platform.cullingController.MarkDirty();
-
-            if (qualitySettings.enableDetailObjectCulling)
-            {
-                var settings = Environment.i.platform.cullingController.GetSettingsCopy();
-
-                settings.rendererProfile = CullingControllerProfile.Lerp(
-                    cullingControllerSettingsData.rendererProfileMin,
-                    cullingControllerSettingsData.rendererProfileMax,
-                    qualitySettings.detailObjectCullingThreshold / 100.0f);
-
-                settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
-                    cullingControllerSettingsData.skinnedRendererProfileMin,
-                    cullingControllerSettingsData.skinnedRendererProfileMax,
-                    qualitySettings.detailObjectCullingThreshold / 100.0f);
-
-                Environment.i.platform.cullingController.SetSettings(settings);
-            }
-
             if (thirdPersonCamera)
             {
                 thirdPersonCamera.m_Lens.FarClipPlane = qualitySettings.cameraDrawDistance;

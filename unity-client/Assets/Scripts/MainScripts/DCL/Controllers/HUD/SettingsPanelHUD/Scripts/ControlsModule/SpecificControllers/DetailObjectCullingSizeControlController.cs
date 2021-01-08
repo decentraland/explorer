@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+using DCL.Rendering;
+using DCL.SettingsController;
+using DCL.SettingsPanelHUD.Common;
+using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
@@ -13,6 +16,30 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             currentQualitySetting.detailObjectCullingThreshold = (float)newValue;
+
+            if (currentQualitySetting.enableDetailObjectCulling)
+            {
+                var settings = Environment.i.platform.cullingController.GetSettingsCopy();
+
+                settings.rendererProfile = CullingControllerProfile.Lerp(
+                    QualitySettingsController.i.cullingControllerSettingsData.rendererProfileMin,
+                    QualitySettingsController.i.cullingControllerSettingsData.rendererProfileMax,
+                    currentQualitySetting.detailObjectCullingThreshold / 100.0f);
+
+                settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
+                    QualitySettingsController.i.cullingControllerSettingsData.skinnedRendererProfileMin,
+                    QualitySettingsController.i.cullingControllerSettingsData.skinnedRendererProfileMax,
+                    currentQualitySetting.detailObjectCullingThreshold / 100.0f);
+
+                Environment.i.platform.cullingController.SetSettings(settings);
+            }
+        }
+
+        public override void PostApplySettings()
+        {
+            base.PostApplySettings();
+
+            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }
