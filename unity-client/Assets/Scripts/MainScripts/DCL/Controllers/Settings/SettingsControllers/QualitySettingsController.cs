@@ -1,24 +1,13 @@
-using System;
 using Cinemachine;
-using System.Reflection;
-using DCL.Interface;
 using DCL.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using QualitySettings = DCL.SettingsData.QualitySettings;
-using UnitySettings = UnityEngine.QualitySettings;
 
 namespace DCL.SettingsController
 {
     public class QualitySettingsController : MonoBehaviour
     {
-        private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
-
-        private FieldInfo lwrpaShadowField = null;
-        private FieldInfo lwrpaSoftShadowField = null;
-        private FieldInfo lwrpaShadowResolutionField = null;
-
         public Light environmentLight = null;
 
         public Volume postProcessVolume = null;
@@ -36,18 +25,6 @@ namespace DCL.SettingsController
 
         void Start()
         {
-            if (lightweightRenderPipelineAsset == null)
-            {
-                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-
-                if (lightweightRenderPipelineAsset == null) return;
-
-                // NOTE: LightweightRenderPipelineAsset doesn't expose properties to set any of the following fields
-                lwrpaShadowField = lightweightRenderPipelineAsset.GetType().GetField("m_MainLightShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
-                lwrpaSoftShadowField = lightweightRenderPipelineAsset.GetType().GetField("m_SoftShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
-                lwrpaShadowResolutionField = lightweightRenderPipelineAsset.GetType().GetField("m_MainLightShadowmapResolution", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
-
             ApplyQualitySettings(Settings.i.qualitySettings);
         }
 
@@ -63,25 +40,7 @@ namespace DCL.SettingsController
 
         void ApplyQualitySettings(QualitySettings qualitySettings)
         {
-            if (lightweightRenderPipelineAsset)
-            {
-                lightweightRenderPipelineAsset.shadowDistance = qualitySettings.shadowDistance;
 
-                lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, qualitySettings.shadows);
-                lwrpaSoftShadowField?.SetValue(lightweightRenderPipelineAsset, qualitySettings.softShadows);
-                lwrpaShadowResolutionField?.SetValue(lightweightRenderPipelineAsset, qualitySettings.shadowResolution);
-            }
-
-            if (environmentLight)
-            {
-                LightShadows shadowType = LightShadows.None;
-                if (qualitySettings.shadows)
-                {
-                    shadowType = qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
-                }
-
-                environmentLight.shadows = shadowType;
-            }
         }
     }
 }
