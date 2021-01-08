@@ -67,19 +67,6 @@ namespace DCL.SettingsController
 
         void ApplyQualitySettings(QualitySettings qualitySettings)
         {
-            switch (qualitySettings.baseResolution)
-            {
-                case QualitySettings.BaseResolution.BaseRes_720:
-                    WebInterface.SetBaseResolution(720);
-                    break;
-                case QualitySettings.BaseResolution.BaseRes_1080:
-                    WebInterface.SetBaseResolution(1080);
-                    break;
-                case QualitySettings.BaseResolution.BaseRes_Unlimited:
-                    WebInterface.SetBaseResolution(9999);
-                    break;
-            }
-
             if (lightweightRenderPipelineAsset)
             {
                 lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
