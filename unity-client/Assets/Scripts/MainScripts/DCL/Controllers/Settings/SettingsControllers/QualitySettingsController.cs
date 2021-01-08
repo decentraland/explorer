@@ -65,7 +65,6 @@ namespace DCL.SettingsController
         {
             if (lightweightRenderPipelineAsset)
             {
-                lightweightRenderPipelineAsset.renderScale = qualitySettings.renderScale;
                 lightweightRenderPipelineAsset.shadowDistance = qualitySettings.shadowDistance;
 
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, qualitySettings.shadows);
