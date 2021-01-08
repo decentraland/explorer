@@ -9,10 +9,6 @@ using UnityEngine.Rendering.Universal;
 using QualitySettings = DCL.SettingsData.QualitySettings;
 using UnitySettings = UnityEngine.QualitySettings;
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-using System.Runtime.InteropServices;
-#endif
-
 namespace DCL.SettingsController
 {
     public class QualitySettingsController : MonoBehaviour
@@ -87,16 +83,6 @@ namespace DCL.SettingsController
 
                 environmentLight.shadows = shadowType;
             }
-
-            ToggleFPSCap(qualitySettings.fpsCap);
         }
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")] public static extern void ToggleFPSCap(bool useFPSCap);
-#else
-        public static void ToggleFPSCap(bool useFPSCap)
-        {
-        }
-#endif
     }
 }
