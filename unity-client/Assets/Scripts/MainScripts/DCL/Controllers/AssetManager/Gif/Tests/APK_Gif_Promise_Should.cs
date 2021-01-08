@@ -22,52 +22,25 @@ namespace AssetPromiseKeeper_Gif_Tests
         [UnityTest]
         public IEnumerator ShareGifAmongPromises()
         {
-            Asset_Gif loadedAsset = null;
-            var prom = CreatePromise();
+            Asset_Gif[] assets = new Asset_Gif [] {null, null};
+            AssetPromise_Gif[] promises = new AssetPromise_Gif [] {CreatePromise(), CreatePromise()};
 
-            prom.OnSuccessEvent += (x) => loadedAsset = x;
+            promises[0].OnSuccessEvent += (x) => assets[0] = x;
+            promises[1].OnSuccessEvent += (x) => assets[1] = x;
 
-            keeper.Keep(prom);
-            yield return prom;
+            for (int i = 0; i < promises.Length; i++)
+            {
+                keeper.Keep(promises[i]);
+                yield return promises[i];
+            }
 
-            Asset_Gif loadedAsset2 = null;
-            var prom2 = CreatePromise();
+            for (int i = 0; i < assets.Length; i++)
+            {
+                Assert.IsNotNull(assets[i]);
+                Assert.IsNotNull(assets[i].texture);
+            }
 
-            prom2.OnSuccessEvent += (x) => loadedAsset2 = x;
-
-            keeper.Keep(prom2);
-            yield return prom2;
-
-            Assert.IsNotNull(loadedAsset);
-            Assert.IsNotNull(loadedAsset.texture);
-            Assert.IsNotNull(loadedAsset2);
-            Assert.IsNotNull(loadedAsset2.texture);
-
-            Assert.IsTrue(loadedAsset.texture == loadedAsset2.texture);
-
-            // 2 default textures
-            Asset_Gif loadedAsset3 = null;
-            var prom3 = CreatePromise();
-
-            prom3.OnSuccessEvent += (x) => loadedAsset3 = x;
-
-            keeper.Keep(prom3);
-            yield return prom3;
-
-            Asset_Gif loadedAsset4 = null;
-            var prom4 = CreatePromise();
-
-            prom4.OnSuccessEvent += (x) => loadedAsset4 = x;
-
-            keeper.Keep(prom4);
-            yield return prom4;
-
-            Assert.IsNotNull(loadedAsset3);
-            Assert.IsNotNull(loadedAsset3.texture);
-            Assert.IsNotNull(loadedAsset4);
-            Assert.IsNotNull(loadedAsset4.texture);
-
-            Assert.IsTrue(loadedAsset3.texture == loadedAsset4.texture);
+            Assert.IsTrue(assets[0].texture == assets[1].texture);
         }
     }
 }
