@@ -7,22 +7,6 @@ on:
     types: [opened]
 
 jobs:
-  checkout:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout with LFS
-        uses: actions/checkout@master
-        with:
-          lfs: true
-
-      - name: Archive code
-        uses: actions/upload-artifact@v2
-        with:
-          name: checkout
-          path: |
-            kernel
-            website
-            unity-client
   test-unity:
     runs-on: ubuntu-latest
     container:
@@ -31,7 +15,7 @@ jobs:
         BUILD_TARGET: WebGL
         BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
         BUILD_NAME: unity
-    needs: []
+    # needs: []
     steps:
       - name: checkout with LFS
         uses: actions/checkout@master
@@ -48,16 +32,22 @@ jobs:
       #     name: Restore library if exists
       #     keys:
       #       - library-{{ .Branch }}
-      - name: run tests
+      - name: before-ci
+        timeout-minutes: 30
+        run: bash before-ci.sh
+
+      - name: build decentraland-renderer
         timeout-minutes: 30
         run: |
-          if [[ -e ${{ github.workspace }}/unity-client/testlog/log.txt ]]; then
-              exit 0
-          else
-              bash before-ci.sh
-              bash test-ci.sh
-              exit $?
+          if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
+              mkdir -p ${BUILD_PATH}
+              ./build-ci.sh
           fi;
+      - name: test unity
+        timeout-minutes: 30
+        run: |
+          bash test-ci.sh
+          exit $?
       # - save_cache:
       #     name: Store test results
       #     key: unity-tests-{{ checksum "../.unitysources-checksum" }}
@@ -78,7 +68,7 @@ jobs:
         BUILD_TARGET: WebGL
         BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
         BUILD_NAME: unity
-    needs: []
+    # needs: []
     steps:
       - name: checkout with LFS
         uses: actions/checkout@master
