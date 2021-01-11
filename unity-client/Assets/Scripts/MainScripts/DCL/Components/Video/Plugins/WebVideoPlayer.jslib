@@ -136,7 +136,7 @@ var WebVideoPlayer = {
     }
   },
 
-  WebVideoPlayerPlay: function (videoId) {
+  WebVideoPlayerPlay: function (videoId, startTime) {
     try {
       const videoData = videos[Pointer_stringify(videoId)];
       if (videoData.hlsInstance !== undefined) {
@@ -147,6 +147,9 @@ var WebVideoPlayer = {
       if (playPromise !== undefined) {
           playPromise.then(function () {
             // Playback starts with no problem
+            if (startTime !== -1) {
+              videoData.video.currentTime = startTime
+            }
           })
           .catch(function (error) {
             // Playback cancelled before the video finished loading (e.g. when teleporting)
