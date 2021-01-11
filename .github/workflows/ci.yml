@@ -14,30 +14,13 @@ jobs:
         uses: actions/checkout@master
         with:
           lfs: true
-      # - name: Checkout code
-      #   uses: actions/checkout@v2
 
-      # - name: Install Git LFS
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-      #     curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-      #     sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-      #     ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-      #     git lfs install
-
-      # - name: Create LFS file list
-      #   run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-
-      # - name: Restore LFS cache
-      #   uses: actions/cache@v2
-      #   id: lfs-cache
-      #   with:
-      #     path: .git/lfs
-      #     key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
-
-      # - name: Git LFS Pull
-      #   run: git lfs pull
+      - name: Archive code
+        uses: actions/upload-artifact@v2
+        with:
+          name: checkout
+          path: |
+            ${{ github.workspace }}
   test-unity:
     runs-on: ubuntu-latest
     container:
@@ -48,6 +31,11 @@ jobs:
         BUILD_NAME: unity
     needs: [checkout]
     steps:
+      - name: Download code
+        uses: actions/download-artifact@v2
+        with:
+          name: checkout
+
       - name: Get the hash of source files
         run: find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       # - restore_cache:
@@ -90,8 +78,10 @@ jobs:
         BUILD_NAME: unity
     needs: [checkout]
     steps:
-      - name: Get the hash of source files
-        run: find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
+      - name: Download code
+        uses: actions/download-artifact@v2
+        with:
+          name: checkout
       # - restore_cache:
       #     name: Restore test results if they exist
       #     keys:
