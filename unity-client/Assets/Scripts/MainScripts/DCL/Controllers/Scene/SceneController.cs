@@ -352,7 +352,8 @@ namespace DCL
                     }
 
                     default:
-                        throw new Exception($"Unknown method.");
+                        Debug.LogError($"Unknown method {method}");
+                        break;
                 }
             }
             catch (Exception e)
