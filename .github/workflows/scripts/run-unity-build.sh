@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 
-set -e
 set -x
 
 echo "Building for $BUILD_TARGET"
 
-export BUILD_PATH=./Builds/$BUILD_NAME/
+export BUILD_PATH="$PROJECT_PATH/Builds/$BUILD_NAME/"
 mkdir -p $BUILD_PATH
-
-pushd $BUILD_PATH
-export BUILD_PATH=$PWD
-popd
 
 ${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity} \
   -projectPath "$PROJECT_PATH" \
@@ -22,7 +17,7 @@ ${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x2
   -customBuildPath "$BUILD_PATH" \
   -customBuildOptions AcceptExternalModificationsToPlayer \
   -executeMethod BuildCommand.PerformBuild \
-  -logFile /tmp/buildlog.txt
+  -logfile -
 
 UNITY_EXIT_CODE=$?
 
