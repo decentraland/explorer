@@ -4,7 +4,7 @@ set -x
 
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
         -batchmode \
-        -logFile - \
+        -logFile /dev/stdout \
         -projectPath "$PROJECT_PATH" \
         -runTests \
         -testPlatform EditMode \

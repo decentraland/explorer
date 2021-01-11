@@ -17,7 +17,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor
   -customBuildPath "$BUILD_PATH" \
   -customBuildOptions AcceptExternalModificationsToPlayer \
   -executeMethod BuildCommand.PerformBuild \
-  -logfile -
+  -logfile /dev/stdout
 
 UNITY_EXIT_CODE=$?
 
