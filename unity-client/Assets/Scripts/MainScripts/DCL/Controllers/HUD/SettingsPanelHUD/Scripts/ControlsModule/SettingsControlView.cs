@@ -48,14 +48,6 @@ namespace DCL.SettingsPanelHUD.Controls
         private Color originalHandlerColor;
         private float originalControlBackgroundAlpha;
 
-        private void OnEnable()
-        {
-            if (settingsControlController == null)
-                return;
-
-            RefreshControl();
-        }
-
         public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             this.controlConfig = controlConfig;
