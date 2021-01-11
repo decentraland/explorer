@@ -15,11 +15,11 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             currentQualitySetting.cameraDrawDistance = (float)newValue;
 
-            if (QualitySettingsController.i.thirdPersonCamera)
-                QualitySettingsController.i.thirdPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;
+            if (QualitySettingsReferences.i.thirdPersonCamera)
+                QualitySettingsReferences.i.thirdPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;
 
-            if (QualitySettingsController.i.firstPersonCamera)
-                QualitySettingsController.i.firstPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;
+            if (QualitySettingsReferences.i.firstPersonCamera)
+                QualitySettingsReferences.i.firstPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;
 
             RenderSettings.fogEndDistance = currentQualitySetting.cameraDrawDistance;
             RenderSettings.fogStartDistance = currentQualitySetting.cameraDrawDistance * 0.8f;

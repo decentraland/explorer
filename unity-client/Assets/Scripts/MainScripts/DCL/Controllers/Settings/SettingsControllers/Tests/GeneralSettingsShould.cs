@@ -6,9 +6,9 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.TestTools;
 using GeneralSettings = DCL.SettingsData.GeneralSettings;
-using GeneralSettingsController = DCL.SettingsController.GeneralSettingsController;
+using GeneralSettingsReferences = DCL.SettingsController.GeneralSettingsReferences;
 using QualitySettings = DCL.SettingsData.QualitySettings;
-using QualitySettingsController = DCL.SettingsController.QualitySettingsController;
+using QualitySettingsReferences = DCL.SettingsController.QualitySettingsReferences;
 
 namespace Tests
 {
@@ -67,8 +67,8 @@ namespace Tests
         [Test]
         public void HaveItControllersSetupCorrectly()
         {
-            GeneralSettingsController generalSettingsController = Object.FindObjectOfType<GeneralSettingsController>();
-            QualitySettingsController qualitySettingsController = Object.FindObjectOfType<QualitySettingsController>();
+            GeneralSettingsReferences generalSettingsController = Object.FindObjectOfType<GeneralSettingsReferences>();
+            QualitySettingsReferences qualitySettingsController = Object.FindObjectOfType<QualitySettingsReferences>();
 
             Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
             Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
@@ -130,8 +130,8 @@ namespace Tests
         public void SetupReferences()
         {
             urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-            GeneralSettingsController generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsController>();
-            QualitySettingsController qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsController>();
+            GeneralSettingsReferences generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsReferences>();
+            QualitySettingsReferences qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsReferences>();
 
             Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
             Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");

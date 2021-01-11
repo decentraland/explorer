@@ -21,13 +21,13 @@ namespace DCL.SettingsPanelHUD.Controls
                 var settings = Environment.i.platform.cullingController.GetSettingsCopy();
 
                 settings.rendererProfile = CullingControllerProfile.Lerp(
-                    QualitySettingsController.i.cullingControllerSettingsData.rendererProfileMin,
-                    QualitySettingsController.i.cullingControllerSettingsData.rendererProfileMax,
+                    QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMin,
+                    QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMax,
                     currentQualitySetting.detailObjectCullingThreshold / 100.0f);
 
                 settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
-                    QualitySettingsController.i.cullingControllerSettingsData.skinnedRendererProfileMin,
-                    QualitySettingsController.i.cullingControllerSettingsData.skinnedRendererProfileMax,
+                    QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMin,
+                    QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMax,
                     currentQualitySetting.detailObjectCullingThreshold / 100.0f);
 
                 Environment.i.platform.cullingController.SetSettings(settings);

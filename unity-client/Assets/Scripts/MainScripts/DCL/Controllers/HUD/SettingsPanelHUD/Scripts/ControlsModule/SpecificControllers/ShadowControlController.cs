@@ -36,14 +36,14 @@ namespace DCL.SettingsPanelHUD.Controls
             if (lightweightRenderPipelineAsset != null)
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, currentQualitySetting.shadows);
 
-            if (QualitySettingsController.i.environmentLight)
+            if (QualitySettingsReferences.i.environmentLight)
             {
                 LightShadows shadowType = LightShadows.None;
 
                 if (currentQualitySetting.shadows)
                     shadowType = currentQualitySetting.shadows ? LightShadows.Soft : LightShadows.Hard;
 
-                QualitySettingsController.i.environmentLight.shadows = shadowType;
+                QualitySettingsReferences.i.environmentLight.shadows = shadowType;
             }
 
             CommonSettingsScriptableObjects.shadowsDisabled.Set(!currentQualitySetting.shadows);

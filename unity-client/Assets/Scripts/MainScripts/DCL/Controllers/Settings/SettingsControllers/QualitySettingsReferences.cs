@@ -5,7 +5,10 @@ using UnityEngine.Rendering;
 
 namespace DCL.SettingsController
 {
-    public class QualitySettingsController : MonoBehaviour
+    /// <summary>
+    /// This MonoBehaviour will only contain the external references needed for the quality settings.
+    /// </summary>
+    public class QualitySettingsReferences : MonoBehaviour
     {
         public Light environmentLight = null;
         public Volume postProcessVolume = null;
@@ -13,7 +16,7 @@ namespace DCL.SettingsController
         public CinemachineVirtualCamera firstPersonCamera = null;
         public CullingControllerSettingsData cullingControllerSettingsData = null;
 
-        public static QualitySettingsController i { get; private set; }
+        public static QualitySettingsReferences i { get; private set; }
 
         private void Awake()
         {

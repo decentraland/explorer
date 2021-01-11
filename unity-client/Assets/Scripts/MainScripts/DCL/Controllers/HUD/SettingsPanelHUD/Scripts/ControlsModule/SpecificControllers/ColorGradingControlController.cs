@@ -17,7 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
             currentQualitySetting.colorGrading = (bool)newValue;
 
             Tonemapping toneMapping;
-            if (QualitySettingsController.i.postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
+            if (QualitySettingsReferences.i.postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
             {
                 toneMapping.active = currentQualitySetting.colorGrading;
             }

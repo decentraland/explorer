@@ -16,9 +16,9 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             currentQualitySetting.bloom = (bool)newValue;
 
-            if (QualitySettingsController.i.postProcessVolume)
+            if (QualitySettingsReferences.i.postProcessVolume)
             {
-                if (QualitySettingsController.i.postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
+                if (QualitySettingsReferences.i.postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
                 {
                     bloom.active = currentQualitySetting.bloom;
                 }
