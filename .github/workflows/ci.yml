@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: update git
         run: |
-          sudo apt-get update && sudo apt-get install -y git git-lfs
+          apt-get update && apt-get install -y git git-lfs
           git lfs install
 
       - name: checkout with LFS
@@ -65,62 +65,3 @@ jobs:
       # - store_artifacts:
       #     name: Store visual tests result as artifacts
       #     path: ${{ github.workspace }}/unity-client/TestResources/VisualTests/CurrentTestImages
-  build-unity:
-    runs-on: ubuntu-latest
-    container:
-      image: decentraland/renderer-build:2019.4
-      env:
-        BUILD_TARGET: WebGL
-        BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
-        BUILD_NAME: unity
-    # needs: []
-    steps:
-      - name: checkout with LFS
-        uses: actions/checkout@master
-        with:
-          lfs: true
-
-      # - name: Download code
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: checkout
-      # - restore_cache:
-      #     name: Restore test results if they exist
-      #     keys:
-      #       - unity-tests-{{ checksum "../.unitysources-checksum" }}
-      # - restore_cache:
-      #     name: Restore library if exists
-      #     keys:
-      #       - library-{{ .Branch }}
-      - name: build decentraland-renderer
-        timeout-minutes: 30
-        run: |
-          if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-              mkdir -p ${BUILD_PATH}
-              bash before-ci.sh
-              (./build-ci.sh & echo $! > ${{ github.workspace }}/build.pid &)
-              pid=`cat ${{ github.workspace }}/build.pid`
-              while [ -e /proc/$pid -a /proc/$pid/exe ]; do
-                  echo "Running Unity Build..."
-                  sleep 60
-              done
-          fi;
-      # - save_cache:
-      #     name: Store decentraland-renderer build
-      #     key: unity-build-{{ checksum "../.unitysources-checksum" }}
-      #     paths:
-      #       - ${{ github.workspace }}/unity-client/Builds/
-      # - save_cache:
-      #     name: Store library
-      #     key: library-{{ .Branch }}-{{ epoch }}
-      #     paths:
-      #       - ${{ github.workspace }}/unity-client/Library
-      # - store_artifacts:
-      #     name: Store logs
-      #     path: /tmp/buildlog.txt
-
-      # # persist to workspace to use in downstream jobs
-      # - persist_to_workspace:
-      #     root: *workspace_root
-      #     paths:
-      #       - unity-client/Builds/unity/Build
