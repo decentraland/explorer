@@ -48,13 +48,17 @@ namespace DCL.Controllers
 
         public void Awake()
         {
-            if (DCLCharacterController.i)
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
+            CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
 
             sceneLifecycleHandler = new SceneLifecycleHandler(this);
+        }
+
+        private void OnDestroy()
+        {
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
         }
 
         void OnDisable()
@@ -100,14 +104,15 @@ namespace DCL.Controllers
             }
 
             if (DCLCharacterController.i != null)
-                gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
+                gameObject.transform.position = PositionUtils.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
 
             OnSetData?.Invoke(data);
         }
 
-        void OnPrecisionAdjust(DCLCharacterPosition position)
+        void OnWorldReposition(Vector3 current, Vector3 previous)
         {
-            gameObject.transform.position = position.WorldToUnityPosition(Utils.GridToWorldPosition(sceneData.basePosition.x, sceneData.basePosition.y));
+            Vector3 sceneWorldPos = Utils.GridToWorldPosition(sceneData.basePosition.x, sceneData.basePosition.y);
+            gameObject.transform.position = PositionUtils.WorldToUnityPosition(sceneWorldPos);
         }
 
         public virtual void SetUpdateData(LoadParcelScenesMessage.UnityParcelScene data)
@@ -148,9 +153,6 @@ namespace DCL.Controllers
 
             DisposeAllSceneComponents();
 
-            if (DCLCharacterController.i)
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
-
             if (immediate) //!CommonScriptableObjects.rendererState.Get())
             {
                 RemoveAllEntitiesImmediate();
@@ -185,8 +187,8 @@ namespace DCL.Controllers
 
         public bool IsInsideSceneBoundaries(Bounds objectBounds)
         {
-            if (!IsInsideSceneBoundaries(objectBounds.min + CommonScriptableObjects.playerUnityToWorldOffset, objectBounds.max.y)) return false;
-            if (!IsInsideSceneBoundaries(objectBounds.max + CommonScriptableObjects.playerUnityToWorldOffset, objectBounds.max.y)) return false;
+            if (!IsInsideSceneBoundaries(objectBounds.min + CommonScriptableObjects.worldOffset, objectBounds.max.y)) return false;
+            if (!IsInsideSceneBoundaries(objectBounds.max + CommonScriptableObjects.worldOffset, objectBounds.max.y)) return false;
 
             return true;
         }
@@ -253,7 +255,7 @@ namespace DCL.Controllers
             var newEntity = new DecentralandEntity();
             newEntity.entityId = id;
 
-            Environment.i.sceneController.EnsureEntityPool();
+            Environment.i.world.sceneController.EnsureEntityPool();
 
             // As we know that the pool already exists, we just get one gameobject from it
             PoolableObject po = PoolManager.i.Get(SceneController.EMPTY_GO_POOL_NAME);
@@ -270,8 +272,8 @@ namespace DCL.Controllers
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 
-            if (Environment.i.sceneBoundsChecker.enabled)
-                newEntity.OnShapeUpdated += Environment.i.sceneBoundsChecker.AddEntityToBeChecked;
+            if (Environment.i.world.sceneBoundsChecker.enabled)
+                newEntity.OnShapeUpdated += Environment.i.world.sceneBoundsChecker.AddEntityToBeChecked;
 
             entities.Add(id, newEntity);
 
@@ -300,7 +302,7 @@ namespace DCL.Controllers
 
             if (entity.parent != null) SetEntityParent(newEntity.entityId, entity.parent.entityId);
 
-            DCLTransform.model.position = Environment.i.worldState.ConvertUnityToScenePosition(entity.gameObject.transform.position);
+            DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position);
             DCLTransform.model.rotation = entity.gameObject.transform.rotation;
             DCLTransform.model.scale = entity.gameObject.transform.lossyScale;
 
@@ -358,10 +360,10 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
-            if (Environment.i.sceneBoundsChecker.enabled)
+            if (Environment.i.world.sceneBoundsChecker.enabled)
             {
-                entity.OnShapeUpdated -= Environment.i.sceneBoundsChecker.AddEntityToBeChecked;
-                Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(entity);
+                entity.OnShapeUpdated -= Environment.i.world.sceneBoundsChecker.AddEntityToBeChecked;
+                Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(entity);
             }
 
             if (removeImmediatelyFromEntitiesList)
@@ -372,7 +374,7 @@ namespace DCL.Controllers
             }
             else
             {
-                Environment.i.parcelScenesCleaner.MarkForCleanup(entity);
+                Environment.i.platform.parcelScenesCleaner.MarkForCleanup(entity);
             }
         }
 
@@ -392,7 +394,7 @@ namespace DCL.Controllers
                         if (instant)
                             rootEntities.Add(iterator.Current.Value);
                         else
-                            Environment.i.parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
+                            Environment.i.platform.parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
                     }
                 }
             }
@@ -434,20 +436,20 @@ namespace DCL.Controllers
                 // In this case, the entity will attached to the first person camera
                 // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
                 me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
-                Environment.i.sceneBoundsChecker.AddPersistent(me);
+                Environment.i.world.sceneBoundsChecker.AddPersistent(me);
             }
             else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
             {
                 // In this case, the entity will be attached to the avatar
                 // It will simply rotate with the avatar, regardless of where the camera is pointing
                 me.SetParent(DCLCharacterController.i.avatarReference);
-                Environment.i.sceneBoundsChecker.AddPersistent(me);
+                Environment.i.world.sceneBoundsChecker.AddPersistent(me);
             }
             else
             {
                 if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                 {
-                    Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(me);
+                    Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(me);
                 }
 
                 if (parentId == "0")
@@ -467,8 +469,8 @@ namespace DCL.Controllers
                 }
             }
 
-            Environment.i.cullingController.MarkDirty();
-            Environment.i.physicsSyncController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
+            Environment.i.platform.physicsSyncController.MarkDirty();
         }
 
         /**
@@ -527,11 +529,11 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = modelRecovered.rotation;
                     entity.gameObject.transform.localScale = modelRecovered.scale;
 
-                    Environment.i.sceneBoundsChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
                 }
 
-                Environment.i.physicsSyncController.MarkDirty();
-                Environment.i.cullingController.MarkDirty();
+                Environment.i.platform.physicsSyncController.MarkDirty();
+                Environment.i.platform.cullingController.MarkDirty();
                 return null;
             }
 
@@ -596,8 +598,8 @@ namespace DCL.Controllers
                 }
             }
 
-            Environment.i.physicsSyncController.MarkDirty();
-            Environment.i.cullingController.MarkDirty();
+            Environment.i.platform.physicsSyncController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
             return newComponent;
         }
 
@@ -632,11 +634,11 @@ namespace DCL.Controllers
                     entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
                     entity.gameObject.transform.localScale = DCLTransform.model.scale;
 
-                    Environment.i.sceneBoundsChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
                 }
 
-                Environment.i.physicsSyncController.MarkDirty();
-                Environment.i.cullingController.MarkDirty();
+                Environment.i.platform.physicsSyncController.MarkDirty();
+                Environment.i.platform.cullingController.MarkDirty();
                 return null;
             }
 
@@ -723,14 +725,14 @@ namespace DCL.Controllers
             if (newComponent != null)
             {
                 if (newComponent is IOutOfSceneBoundariesHandler)
-                    Environment.i.sceneBoundsChecker?.AddEntityToBeChecked(entity);
+                    Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
 
                 if (newComponent.isRoutineRunning)
                     yieldInstruction = newComponent.yieldInstruction;
             }
 
-            Environment.i.physicsSyncController.MarkDirty();
-            Environment.i.cullingController.MarkDirty();
+            Environment.i.platform.physicsSyncController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
             return newComponent;
         }
 
@@ -1119,7 +1121,7 @@ namespace DCL.Controllers
             List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
             foreach (string id in allDisposableComponents)
             {
-                Environment.i.parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
+                Environment.i.platform.parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 

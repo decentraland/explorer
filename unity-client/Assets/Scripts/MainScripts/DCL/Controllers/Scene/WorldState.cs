@@ -5,11 +5,26 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class WorldState : ISceneHandler
+    public interface IWorldState : ISceneHandler
     {
-        public HashSet<string> readyScenes = new HashSet<string>();
-        public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
-        public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+        HashSet<string> readyScenes { get; set; }
+        Dictionary<string, ParcelScene> loadedScenes { get; set; }
+        List<ParcelScene> scenesSortedByDistance { get; set; }
+        string globalSceneId { get; set; }
+        string currentSceneId { get; set; }
+        void Initialize();
+        string TryToGetSceneCoordsID(string id);
+        bool TryGetScene(string id, out ParcelScene scene);
+        Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null);
+        Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null);
+        bool IsCharacterInsideScene(ParcelScene scene);
+    }
+
+    public class WorldState : IWorldState
+    {
+        public HashSet<string> readyScenes { get; set; } = new HashSet<string>();
+        public Dictionary<string, ParcelScene> loadedScenes { get; set; } = new Dictionary<string, ParcelScene>();
+        public List<ParcelScene> scenesSortedByDistance { get; set; } = new List<ParcelScene>();
 
         public string globalSceneId { get; set; }
         public string currentSceneId { get; set; }
@@ -35,7 +50,7 @@ namespace DCL
         {
             scene = null;
 
-            if (!loadedScenes.ContainsKey(id))
+            if (string.IsNullOrEmpty(id) || !loadedScenes.ContainsKey(id))
                 return false;
 
             scene = loadedScenes[id];
@@ -54,7 +69,7 @@ namespace DCL
                     return pos;
             }
 
-            Vector3 worldPosition = DCLCharacterController.i.characterPosition.UnityToWorldPosition(pos);
+            Vector3 worldPosition = PositionUtils.UnityToWorldPosition(pos);
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
