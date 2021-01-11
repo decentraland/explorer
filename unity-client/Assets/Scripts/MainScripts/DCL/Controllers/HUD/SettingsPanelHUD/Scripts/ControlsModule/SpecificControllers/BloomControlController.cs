@@ -1,5 +1,4 @@
 using DCL.SettingsController;
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
