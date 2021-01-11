@@ -20,7 +20,9 @@ jobs:
         with:
           name: checkout
           path: |
-            ${{ github.workspace }}
+            kernel
+            website
+            unity-client
   test-unity:
     runs-on: ubuntu-latest
     container:
@@ -29,12 +31,12 @@ jobs:
         BUILD_TARGET: WebGL
         BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
         BUILD_NAME: unity
-    needs: [checkout]
+    needs: []
     steps:
-      - name: Download code
-        uses: actions/download-artifact@v2
+      - name: checkout with LFS
+        uses: actions/checkout@master
         with:
-          name: checkout
+          lfs: true
 
       - name: Get the hash of source files
         run: find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
@@ -76,12 +78,17 @@ jobs:
         BUILD_TARGET: WebGL
         BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
         BUILD_NAME: unity
-    needs: [checkout]
+    needs: []
     steps:
-      - name: Download code
-        uses: actions/download-artifact@v2
+      - name: checkout with LFS
+        uses: actions/checkout@master
         with:
-          name: checkout
+          lfs: true
+
+      # - name: Download code
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: checkout
       # - restore_cache:
       #     name: Restore test results if they exist
       #     keys:
