@@ -10,7 +10,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
@@ -70,7 +69,7 @@ namespace DCL.Helpers
             return pbTranf;
         }
 
-        public static DecentralandEntity CreateSceneEntity([NotNull] ParcelScene scene)
+        public static DecentralandEntity CreateSceneEntity(ParcelScene scene)
         {
             Assert.IsNotNull(scene, "Can't create entity for null scene!");
 
