@@ -29,9 +29,9 @@ jobs:
         with:
           lfs: true
 
-      - name: print unity last commit
-        run: |
-          git log --pretty=tformat:"%h" -n1 . ${PROJECT_PATH}
+      # - name: print unity last commit
+      #   run: |
+      #     git log --pretty=tformat:"%h" -n1 . ${PROJECT_PATH}
 
       # Setup license
       - name: Setup uniy license
