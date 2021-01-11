@@ -164,18 +164,18 @@ namespace SettingsControlsTests
             }
         }
 
-        [UnityTest]
-        public IEnumerator ApplyMuteSoundCorrectly()
-        {
-            // Arrange
-            yield return CreateToggleSettingsControl<MuteSoundControlController>();
+        //[UnityTest]
+        //public IEnumerator ApplyMuteSoundCorrectly()
+        //{
+        //    // Arrange
+        //    yield return CreateToggleSettingsControl<MuteSoundControlController>();
 
-            // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+        //    // Act
+        //    ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
 
-            // Assert
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
-        }
+        //    // Assert
+        //    UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
+        //}
 
         [UnityTest]
         public IEnumerator ApplyMouseSensivityCorrectly()
