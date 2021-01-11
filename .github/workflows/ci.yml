@@ -7,15 +7,15 @@ on:
     types: [opened]
 
 jobs:
-  test-unity:
+  unity-pipeline:
     runs-on: ubuntu-latest
     container:
       image: decentraland/renderer-build:2019.4
       env:
         BUILD_TARGET: WebGL
+        PROJECT_PATH: ${{ github.workspace }}/unity-client
         BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
         BUILD_NAME: unity
-    # needs: []
     steps:
       - name: update git
         run: |
@@ -23,49 +23,24 @@ jobs:
           apt-get update
           apt-get install -y git git-lfs
           git lfs install
-          pwd
-          ls -la
 
       - name: checkout with LFS
         uses: actions/checkout@v2
         with:
           lfs: true
 
-      - name: Get the hash of source files
-        run: find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
-      # - restore_cache:
-      #     name: Restore test results if they exist
-      #     keys:
-      #       - unity-tests-{{ checksum "../.unitysources-checksum" }}
-      # - restore_cache:
-      #     name: Restore library if exists
-      #     keys:
-      #       - library-{{ .Branch }}
-      - name: before-ci
-        timeout-minutes: 30
-        run: bash before-ci.sh
+      # Setup license
+      - name: Run Editor tests
+        run: sh .github/workflows/scripts/run-unity-edit-mode-tests.sh
 
-      - name: build decentraland-renderer
-        timeout-minutes: 30
-        run: |
-          if [[ ! -e ${BUILD_PATH} ]] || [[ ! -n "$(ls -A ${BUILD_PATH})" ]]; then
-              mkdir -p ${BUILD_PATH}
-              ./build-ci.sh
-          fi;
-      - name: test unity
-        timeout-minutes: 30
-        run: |
-          bash test-ci.sh
-          exit $?
-      # - save_cache:
-      #     name: Store test results
-      #     key: unity-tests-{{ checksum "../.unitysources-checksum" }}
-      #     paths:
-      #       - ${{ github.workspace }}/unity-client/testlog/log.txt
-      #       - ${{ github.workspace }}/unity-client/TestResources/VisualTests/CurrentTestImages/*.png
-      # - store_artifacts:
-      #     name: Store tests result as artifacts
-      #     path: ${{ github.workspace }}/unity-client/testlog
-      # - store_artifacts:
-      #     name: Store visual tests result as artifacts
-      #     path: ${{ github.workspace }}/unity-client/TestResources/VisualTests/CurrentTestImages
+      # Run Editor tests
+      - name: Run Editor tests
+        run: sh .github/workflows/scripts/run-unity-edit-mode-tests.sh
+
+      # Run PlayMode tests
+      - name: Run PlayMode tests
+        run: sh .github/workflows/scripts/run-unity-play-mode-tests.sh
+
+      # Build
+      - name: Build
+        run: sh .github/workflows/scripts/run-unity-build.sh
