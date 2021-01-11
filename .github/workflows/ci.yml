@@ -29,9 +29,15 @@ jobs:
         with:
           lfs: true
 
+      - name: print unity last commit
+        run: |
+          git log --pretty=tformat:"%h" -n1 . ${PROJECT_PATH}
+
       # Setup license
       - name: Setup uniy license
         run: sh .github/workflows/scripts/setup-unity.sh
+        env:
+          UNITY_LICENSE_CONTENT_BASE64: ${{ secrets.UNITY_LICENSE_CONTENT_BASE64 }}
 
       # Run Editor tests
       - name: Run Editor tests
