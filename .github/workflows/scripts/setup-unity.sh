@@ -6,7 +6,7 @@ mkdir -p /root/.cache/unity3d
 mkdir -p /root/.local/share/unity3d/Unity/
 set +x
 
-UPPERCASE_BUILD_TARGET=${BUILD_TARGET^^};
+UPPERCASE_BUILD_TARGET=${BUILD_TARGET};
 
 if [ $UPPERCASE_BUILD_TARGET = "ANDROID" ]
 then
@@ -23,10 +23,10 @@ LICENSE="UNITY_LICENSE_CONTENT_"$UPPERCASE_BUILD_TARGET
 
 if [ -z "${!LICENSE}" ]
 then
-    echo "$LICENSE env var not found, trying UNITY_LICENSE_CONTENT_BASE64 env var"
+    echo'$LICENSE env var not found, trying UNITY_LICENSE_CONTENT_BASE64 env var'
     LICENSE=$(echo $UNITY_LICENSE_CONTENT_BASE64 | base64 -d)
 else
-    echo "Using $LICENSE env var"
+    echo 'Using $LICENSE env var'
 fi
 
 echo "Writing LICENSE to license file /root/.local/share/unity3d/Unity/Unity_lic.ulf"
