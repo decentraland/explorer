@@ -30,8 +30,8 @@ jobs:
           lfs: true
 
       # Setup license
-      - name: Run Editor tests
-        run: sh .github/workflows/scripts/run-unity-edit-mode-tests.sh
+      - name: Setup uniy license
+        run: sh .github/workflows/scripts/setup-unity.sh
 
       # Run Editor tests
       - name: Run Editor tests
