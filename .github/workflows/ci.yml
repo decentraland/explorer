@@ -40,7 +40,7 @@ jobs:
       #   run: git lfs pull
   test-unity:
     runs-on: ubuntu-latest
-    container: &UNITY_IMAGE
+    container:
       image: decentraland/renderer-build:2019.4
       env:
         BUILD_TARGET: WebGL
@@ -82,7 +82,12 @@ jobs:
       #     path: ${{ github.workspace }}/unity-client/TestResources/VisualTests/CurrentTestImages
   build-unity:
     runs-on: ubuntu-latest
-    container: *UNITY_IMAGE
+    container:
+      image: decentraland/renderer-build:2019.4
+      env:
+        BUILD_TARGET: WebGL
+        BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
+        BUILD_NAME: unity
     needs: [checkout]
     steps:
       - name: Get the hash of source files
