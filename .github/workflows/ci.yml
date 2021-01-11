@@ -17,6 +17,11 @@ jobs:
         BUILD_NAME: unity
     # needs: []
     steps:
+      - name: update git
+        run: |
+          sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+          git lfs install
+
       - name: checkout with LFS
         uses: actions/checkout@master
         with:
