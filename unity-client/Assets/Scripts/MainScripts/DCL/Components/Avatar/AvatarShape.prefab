@@ -52,6 +52,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avatarName: {fileID: 7565885611704955074}
   avatarRenderer: {fileID: 7373291436495039860}
+  avatarCollider: {fileID: 7755590202629118220}
   avatarMovementController: {fileID: 122622683908687435}
   onPointerDown: {fileID: 3865137627712764486}
   model:
@@ -252,7 +253,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6301578636949877838
 Transform:
   m_ObjectHideFlags: 0

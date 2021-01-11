@@ -10,13 +10,14 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class CursorControllerTests : TestsBase
+    public class CursorControllerTests : IntegrationTestSuite_Legacy
     {
         protected override bool enableSceneIntegrityChecker => false;
 
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+            Environment.i.world.sceneController.SortScenesByDistance();
             sceneInitialized = false;
         }
 
@@ -256,7 +257,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvasController = Environment.i.interactionHoverCanvasController;
+            var hoverCanvasController = InteractionHoverCanvasController.i;
             Assert.IsNotNull(hoverCanvasController);
 
             // Check hover feedback is enabled

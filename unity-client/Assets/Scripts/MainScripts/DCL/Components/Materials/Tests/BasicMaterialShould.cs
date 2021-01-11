@@ -8,13 +8,13 @@ using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
 
-public class BasicMaterialShould : TestsBase
+public class BasicMaterialShould : IntegrationTestSuite_Legacy
 {
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        SceneController.i.useBoundariesChecker = false;
+        Environment.i.world.sceneBoundsChecker.Stop();
     }
 
     [UnityTest]

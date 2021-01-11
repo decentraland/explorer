@@ -14,6 +14,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     public event Action<Vector3, string> OnShowUserContexMenu;
 
     [SerializeField] internal TextMeshProUGUI userName;
+    [SerializeField] internal GameObject friendLabel;
     [SerializeField] internal RawImage avatarPreview;
     [SerializeField] internal GameObject blockedGO;
     [SerializeField] internal Button soundButton;
@@ -58,6 +59,8 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         {
             profile.OnFaceSnapshotReadyEvent += SetAvatarPreviewImage;
         }
+
+        SetupFriends(profile.userId);
     }
 
     public void SetMuted(bool isMuted)
@@ -89,19 +92,48 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             profile.OnFaceSnapshotReadyEvent -= SetAvatarPreviewImage;
             profile = null;
         }
+
+        if (FriendsController.i != null)
+        {
+            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+        }
+
         gameObject.SetActive(false);
     }
 
     public void OnPoolGet()
     {
         muteGO.SetActive(false);
-        talkingAnimator.SetBool(talkingAnimation, false);
+
+        if (talkingAnimator.isActiveAndEnabled)
+            talkingAnimator.SetBool(talkingAnimation, false);
+
         avatarPreview.texture = null;
         userName.text = string.Empty;
         backgroundHover.SetActive(false);
         menuButton.gameObject.SetActive(false);
         blockedGO.SetActive(false);
         gameObject.SetActive(true);
+    }
+
+    void SetupFriends(string userId)
+    {
+        if (FriendsController.i == null)
+        {
+            return;
+        }
+
+        if (FriendsController.i.friends.TryGetValue(userId, out FriendsController.UserStatus status))
+        {
+            SetupFriendship(status.friendshipStatus);
+        }
+        else
+        {
+            SetupFriendship(FriendshipStatus.NONE);
+        }
+
+        FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+        FriendsController.i.OnUpdateFriendship += OnFriendActionUpdate;
     }
 
     void SetAvatarPreviewImage(Texture texture)
@@ -115,6 +147,7 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
         {
             return;
         }
+
         OnMuteUser?.Invoke(profile.userId, !isMuted);
     }
 
@@ -128,5 +161,20 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
     {
         backgroundHover.SetActive(false);
         menuButton.gameObject.SetActive(false);
+    }
+
+    void OnFriendActionUpdate(string userId, FriendshipAction action)
+    {
+        if (profile.userId != userId)
+        {
+            return;
+        }
+
+        friendLabel.SetActive(action == FriendshipAction.APPROVED);
+    }
+
+    void SetupFriendship(FriendshipStatus friendshipStatus)
+    {
+        friendLabel.SetActive(friendshipStatus == FriendshipStatus.FRIEND);
     }
 }

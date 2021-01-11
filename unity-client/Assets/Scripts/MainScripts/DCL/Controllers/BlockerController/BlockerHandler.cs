@@ -36,22 +36,25 @@ namespace DCL.Controllers
 
         Dictionary<Vector2Int, PoolableObject> blockers = new Dictionary<Vector2Int, PoolableObject>();
 
-        private DCLCharacterPosition characterPosition;
         private IBlockerAnimationHandler animationHandler;
         private Transform parent;
 
-
-        public BlockerInstanceHandler(DCLCharacterPosition characterPosition, IBlockerAnimationHandler animationHandler)
+        public void Initialize(IBlockerAnimationHandler animationHandler)
         {
-            this.characterPosition = characterPosition;
             this.animationHandler = animationHandler;
+        }
 
+        public BlockerInstanceHandler()
+        {
             RenderProfileManifest.i.OnChangeProfile += OnChangeProfile;
             OnChangeProfile(RenderProfileManifest.i.currentProfile);
         }
 
         private void OnChangeProfile(RenderProfileWorld profile)
         {
+            if (profile == null)
+                return;
+
             blockerPrefabDirty = true;
             blockerPrefab = profile.loadingBlockerPrefab;
         }
@@ -69,7 +72,7 @@ namespace DCL.Controllers
             GameObject blockerGo = blockerPoolable.gameObject;
             BoxCollider blockerCollider = blockerGo.GetComponent<BoxCollider>();
 
-            Vector3 blockerPos = this.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
+            Vector3 blockerPos = PositionUtils.WorldToUnityPosition(Utils.GridToWorldPosition(pos.x, pos.y));
 
             auxPosVec.x = blockerPos.x + centerOffset;
             auxPosVec.z = blockerPos.z + centerOffset;
@@ -92,7 +95,7 @@ namespace DCL.Controllers
             if (!instant)
                 animationHandler.FadeIn(blockerGo);
 
-            Environment.i.cullingController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
         }
 
         private void EnsureBlockerPool()

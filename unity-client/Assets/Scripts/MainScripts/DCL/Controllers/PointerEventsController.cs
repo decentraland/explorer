@@ -9,7 +9,15 @@ using System.Collections.Generic;
 
 namespace DCL
 {
-    public class PointerEventsController
+    public interface IPointerEventsController
+    {
+        void Initialize();
+        void Update();
+        void Cleanup();
+        Ray GetRayFromCamera();
+    }
+
+    public class PointerEventsController : IPointerEventsController
     {
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
         public System.Action OnPointerHoverStarts;
@@ -35,7 +43,13 @@ namespace DCL
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.PRIMARY, OnButtonEvent);
             InputController_Legacy.i.AddListener(WebInterface.ACTION_BUTTON.SECONDARY, OnButtonEvent);
 
-            hoverController = Environment.i.interactionHoverCanvasController;
+            hoverController = InteractionHoverCanvasController.i;
+
+            if (CursorController.i != null)
+            {
+                OnPointerHoverStarts += CursorController.i.SetHoverCursor;
+                OnPointerHoverEnds += CursorController.i.SetNormalCursor;
+            }
 
             RetrieveCamera();
         }
@@ -46,15 +60,18 @@ namespace DCL
         {
             if (!CommonScriptableObjects.rendererState.Get() || charCamera == null) return;
 
-            WorldState worldState = Environment.i.worldState;
+            IWorldState worldState = Environment.i.world.state;
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
             bool didHit = Physics.Raycast(GetRayFromCamera(), out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
             bool uiIsBlocking = false;
             string currentSceneId = worldState.currentSceneId;
 
+            bool validCurrentSceneId = !string.IsNullOrEmpty(currentSceneId);
+            bool validCurrentScene = validCurrentSceneId && worldState.loadedScenes.ContainsKey(currentSceneId);
+
             // NOTE: in case of a single scene loaded (preview or builder) sceneId is set to null when stepping outside
-            if (!string.IsNullOrEmpty(currentSceneId) && didHit && worldState.loadedScenes.ContainsKey(currentSceneId))
+            if (didHit && validCurrentSceneId && validCurrentScene)
             {
                 GraphicRaycaster raycaster = worldState.loadedScenes[currentSceneId].uiScreenSpace?.graphicRaycaster;
                 if (raycaster)
@@ -62,7 +79,6 @@ namespace DCL
                     uiGraphicRaycastPointerEventData.position = new Vector2(Screen.width / 2, Screen.height / 2);
                     uiGraphicRaycastResults.Clear();
                     raycaster.Raycast(uiGraphicRaycastPointerEventData, uiGraphicRaycastResults);
-
                     uiIsBlocking = uiGraphicRaycastResults.Count > 0;
                 }
             }
@@ -195,6 +211,12 @@ namespace DCL
             newHoveredObject = null;
             newHoveredEvent = null;
             lastHoveredEventList = null;
+
+            if (CursorController.i != null)
+            {
+                OnPointerHoverStarts -= CursorController.i.SetHoverCursor;
+                OnPointerHoverEnds -= CursorController.i.SetNormalCursor;
+            }
         }
 
         void RetrieveCamera()
@@ -269,7 +291,7 @@ namespace DCL
                 pointerUpEvent = null;
             }
 
-            string sceneId = Environment.i.worldState.currentSceneId;
+            string sceneId = Environment.i.world.state.currentSceneId;
 
             if (useRaycast && raycastGlobalLayerHitInfo.isValid)
             {
@@ -331,7 +353,7 @@ namespace DCL
                 lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
             }
 
-            string sceneId = Environment.i.worldState.currentSceneId;
+            string sceneId = Environment.i.world.state.currentSceneId;
 
             if (useRaycast && raycastGlobalLayerHitInfo.isValid)
             {

@@ -207,7 +207,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4710899382381041556
 Transform:
   m_ObjectHideFlags: 0
@@ -380,6 +380,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   avatarRenderer: {fileID: 8727652042400483852}
+  avatarCollider: {fileID: 7115442889188564318}
   avatarVisibility: {fileID: 8920001334808305060}
   cameraDistanceToDeactivate: 1
 --- !u!114 &8920001334808305060

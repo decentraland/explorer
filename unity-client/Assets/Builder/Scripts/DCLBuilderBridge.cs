@@ -274,7 +274,7 @@ namespace Builder
         public void UnloadBuilderScene(string sceneKey)
         {
             if (LOG_MESSAGES) Debug.Log($"RECEIVE: UnloadBuilderScene {sceneKey}");
-            SceneController.i?.UnloadScene(sceneKey);
+            Environment.i.world.sceneController.UnloadScene(sceneKey);
         }
 
         public void SetSelectedEntities(string msj)
@@ -319,7 +319,7 @@ namespace Builder
         private static ParcelScene GetLoadedScene()
         {
             ParcelScene loadedScene = null;
-            WorldState worldState = Environment.i.worldState;
+            IWorldState worldState = Environment.i.world.state;
 
             if (worldState != null && worldState.loadedScenes.Count > 0)
             {
@@ -373,7 +373,7 @@ namespace Builder
                 CommonScriptableObjects.rendererState.RemoveLock(playerAvatarController);
             }
 
-            SceneController.i?.fpsPanel.SetActive(false);
+            Environment.i.platform.debugController.HideFPSPanel();
             SetCaptureKeyboardInputEnabled(false);
         }
 
@@ -637,7 +637,7 @@ namespace Builder
                 outOfBoundariesEntitiesId.RemoveAt(entityIndexInList);
             }
 
-            DCL.SceneController.i.boundariesChecker?.EvaluateEntityPosition(entity.rootEntity);
+            Environment.i.world.sceneBoundsChecker?.EvaluateEntityPosition(entity.rootEntity);
         }
 
         private void SendOutOfBoundariesEntities()
@@ -651,7 +651,7 @@ namespace Builder
             {
                 for (int i = 0; i < selectedEntities.Count; i++)
                 {
-                    DCL.SceneController.i.boundariesChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
+                    Environment.i.world.sceneBoundsChecker?.EvaluateEntityPosition(selectedEntities[i].rootEntity);
                 }
             }
         }

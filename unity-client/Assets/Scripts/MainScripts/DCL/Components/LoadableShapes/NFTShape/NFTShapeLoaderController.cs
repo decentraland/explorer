@@ -1,12 +1,10 @@
 ﻿using DCL.Components;
-using DCL.Configuration;
 using DCL.Helpers.NFT;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using System.Collections.Generic;
-using DCL.Controllers.Gif;
 using DCL;
+using NFTShape_Internal;
 
 public class NFTShapeLoaderController : MonoBehaviour
 {
@@ -54,9 +52,11 @@ public class NFTShapeLoaderController : MonoBehaviour
     int BASEMAP_SHADER_PROPERTY = Shader.PropertyToID("_BaseMap");
     int COLOR_SHADER_PROPERTY = Shader.PropertyToID("_BaseColor");
 
-    DCL.ITexture nftAsset;
-    AssetPromise_Texture texturePromise = null;
+    IPromiseLike_TextureAsset assetPromise = null;
+    GifPlayer gifPlayer = null;
     NFTShapeHQImageHandler hqTextureHandler = null;
+
+    bool isDestroyed = false;
 
     void Awake()
     {
@@ -175,18 +175,19 @@ public class NFTShapeLoaderController : MonoBehaviour
         bool foundDCLImage = false;
         if (!string.IsNullOrEmpty(nftInfo.previewImageUrl))
         {
-            yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl, (downloadedTex, texturePromise) =>
+            yield return WrappedTextureUtils.Fetch(nftInfo.previewImageUrl, (promise) =>
             {
                 foundDCLImage = true;
-                this.texturePromise = texturePromise;
-                SetFrameImage(downloadedTex, resizeFrameMesh: true);
+                this.assetPromise = promise;
+                SetFrameImage(promise.asset, resizeFrameMesh: true);
+                SetupGifPlayer(promise.asset);
 
                 var hqImageHandlerConfig = new NFTShapeHQImageConfig()
                 {
                     controller = this,
                     nftConfig = config,
                     nftInfo = nftInfo,
-                    asset = NFTAssetFactory.CreateAsset(downloadedTex, config)
+                    asset = NFTAssetFactory.CreateAsset(promise.asset, config, UpdateTexture, gifPlayer)
                 };
                 hqTextureHandler = NFTShapeHQImageHandler.Create(hqImageHandlerConfig);
             });
@@ -196,11 +197,12 @@ public class NFTShapeLoaderController : MonoBehaviour
         if (!foundDCLImage && !string.IsNullOrEmpty(nftInfo.originalImageUrl))
         {
             yield return WrappedTextureUtils.Fetch(nftInfo.originalImageUrl,
-                (downloadedTex, texturePromise) =>
+                (promise) =>
                 {
                     foundDCLImage = true;
-                    this.texturePromise = texturePromise;
-                    SetFrameImage(downloadedTex, resizeFrameMesh: true);
+                    this.assetPromise = promise;
+                    SetFrameImage(promise.asset, resizeFrameMesh: true);
+                    SetupGifPlayer(promise.asset);
                 }, () => isError = true);
         }
 
@@ -229,22 +231,13 @@ public class NFTShapeLoaderController : MonoBehaviour
         }
     }
 
-    void SetFrameImage(DCL.ITexture newAsset, bool resizeFrameMesh = false)
+    void SetFrameImage(ITexture newAsset, bool resizeFrameMesh = false)
     {
         if (newAsset == null) return;
 
-        nftAsset = newAsset;
+        UpdateTexture(newAsset.texture);
 
-        if (nftAsset is Asset_Gif gifAsset)
-        {
-            gifAsset.OnFrameTextureChanged -= UpdateTexture;
-            gifAsset.OnFrameTextureChanged += UpdateTexture;
-            gifAsset.Play(false);
-        }
-
-        UpdateTexture(nftAsset.texture);
-
-        if (resizeFrameMesh)
+        if (resizeFrameMesh && !isDestroyed && meshRenderer != null)
         {
             float w, h;
             w = h = 0.5f;
@@ -303,20 +296,24 @@ public class NFTShapeLoaderController : MonoBehaviour
 
     void OnDestroy()
     {
-        if (texturePromise != null)
-        {
-            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
-            texturePromise = null;
-        }
-        else
-        {
-            nftAsset?.Dispose();
-        }
+        isDestroyed = true;
 
         if (hqTextureHandler != null)
         {
             hqTextureHandler.Dispose();
             hqTextureHandler = null;
+        }
+
+        if (gifPlayer != null)
+        {
+            gifPlayer.OnFrameTextureChanged -= UpdateTexture;
+            gifPlayer.Dispose();
+        }
+
+        if (assetPromise != null)
+        {
+            assetPromise.Forget();
+            assetPromise = null;
         }
 
         if (backgroundMaterial != null)
@@ -327,5 +324,17 @@ public class NFTShapeLoaderController : MonoBehaviour
         {
             Object.Destroy(imageMaterial);
         }
+    }
+
+    private void SetupGifPlayer(ITexture asset)
+    {
+        if (!(asset is Asset_Gif gifAsset))
+        {
+            return;
+        }
+
+        gifPlayer = new GifPlayer(gifAsset);
+        gifPlayer.Play();
+        gifPlayer.OnFrameTextureChanged += UpdateTexture;
     }
 }

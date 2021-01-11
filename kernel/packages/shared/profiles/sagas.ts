@@ -69,6 +69,8 @@ import { LocalProfilesRepository } from './LocalProfilesRepository'
 import { getProfileType } from './getProfileType'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { UNEXPECTED_ERROR } from 'shared/loading/types'
+import { fetchParcelsWithAccess } from './fetchLand'
+import { ParcelsWithAccess } from 'decentraland-ecs/src'
 
 const CID = require('cids')
 const multihashing = require('multihashing-async')
@@ -237,9 +239,16 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
     if (currentId === userId) {
       const localProfile = fetchProfileLocally(userId)
+      // checks if profile name was changed on builder
+      if (profile && localProfile && localProfile.name !== profile.name) {
+        localProfile.name = profile.name
+      }
       if (!profile || (localProfile && profile.version < localProfile.version)) {
         profile = localProfile
       }
+
+      const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+      profile.ethAddress = identity.rawAddress
     }
 
     if (!profile) {
@@ -399,17 +408,17 @@ function* sendLoadProfile(profile: Profile) {
   yield call(ensureBaseCatalogs)
 
   const identity = yield select(getCurrentIdentity)
-  const rendererFormat = profileToRendererFormat(profile, identity)
+  const parcels: ParcelsWithAccess = !identity.hasConnectedWeb3 ? [] : yield fetchParcelsWithAccess(identity.address)
+  const rendererFormat = profileToRendererFormat(profile, { identity, parcels })
   globalThis.unityInterface.LoadProfile(rendererFormat)
 }
 
 function* handleFetchInventory(action: InventoryRequest) {
-  const { userId, ethAddress } = action.payload
   try {
-    const inventoryItems = yield call(fetchInventoryItemsByAddress, ethAddress)
-    yield put(inventorySuccess(userId, inventoryItems))
+    const inventoryItems = yield call(fetchInventoryItemsByAddress, action.payload.userId)
+    yield put(inventorySuccess(action.payload.userId, inventoryItems))
   } catch (error) {
-    yield put(inventoryFailure(userId, error))
+    yield put(inventoryFailure(action.payload.userId, error))
   }
 }
 

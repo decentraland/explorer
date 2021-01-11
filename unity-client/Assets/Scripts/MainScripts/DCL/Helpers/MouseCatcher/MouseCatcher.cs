@@ -41,10 +41,10 @@ namespace DCL
 
         public void LockCursor()
         {
-            if (!renderingEnabled) return;
+            if (!renderingEnabled || DataStore.isSignUpFlow.Get()) return;
 
             Utils.LockCursor();
-#if !WEB_PLATFORM            
+#if !WEB_PLATFORM
             OnMouseLock?.Invoke();
 #endif
         }
@@ -52,7 +52,7 @@ namespace DCL
         public void UnlockCursor()
         {
             Utils.UnlockCursor();
-#if !WEB_PLATFORM            
+#if !WEB_PLATFORM
             OnMouseUnlock?.Invoke();
 #endif
         }
@@ -63,8 +63,15 @@ namespace DCL
             LockCursor();
         }
 
-#if WEB_PLATFORM
-        //Externally -ONLY- called by the browser
+        #region BROWSER_ONLY
+
+        //TODO(Brian): Move all this mechanism to a new MouseLockController and branch
+        //             behaviour using strategy pattern instead of this.
+
+        /// <summary>
+        /// Externally -ONLY- called by the browser
+        /// </summary>
+        /// <param name="val">1 is locked, 0 is unlocked</param>
         public void UnlockCursorBrowser(int val)
         {
             bool lockPointer = val != 0;
@@ -78,7 +85,7 @@ namespace DCL
                 OnMouseUnlock?.Invoke();
             }
         }
-#endif
 
+        #endregion
     }
 }

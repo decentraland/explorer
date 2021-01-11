@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
+using DCL.Helpers;
 
 namespace DCL
 {
@@ -48,11 +49,11 @@ namespace DCL
         private void LoadQualitySettings()
         {
             bool isQualitySettingsSet = false;
-            if (PlayerPrefs.HasKey(QUALITY_SETTINGS_KEY))
+            if (PlayerPrefsUtils.HasKey(QUALITY_SETTINGS_KEY))
             {
                 try
                 {
-                    currentQualitySettings = JsonUtility.FromJson<SettingsData.QualitySettings>(PlayerPrefs.GetString(QUALITY_SETTINGS_KEY));
+                    currentQualitySettings = JsonUtility.FromJson<SettingsData.QualitySettings>(PlayerPrefsUtils.GetString(QUALITY_SETTINGS_KEY));
                     isQualitySettingsSet = true;
                 }
                 catch (Exception e)
@@ -68,20 +69,14 @@ namespace DCL
 
         private void LoadGeneralSettings()
         {
-            currentGeneralSettings = new SettingsData.GeneralSettings()
-            {
-                sfxVolume = 1,
-                mouseSensitivity = 0.6f,
-                voiceChatVolume = 1,
-                voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.ALL_USERS
-            };
+            currentGeneralSettings = GetDefaultGeneralSettings();
 
-            if (PlayerPrefs.HasKey(GENERAL_SETTINGS_KEY))
+            if (PlayerPrefsUtils.HasKey(GENERAL_SETTINGS_KEY))
             {
                 try
                 {
                     object currentSetting = currentGeneralSettings;
-                    JsonUtility.FromJsonOverwrite(PlayerPrefs.GetString(GENERAL_SETTINGS_KEY), currentSetting);
+                    JsonUtility.FromJsonOverwrite(PlayerPrefsUtils.GetString(GENERAL_SETTINGS_KEY), currentSetting);
                     currentGeneralSettings = (SettingsData.GeneralSettings)currentSetting;
                 }
                 catch (Exception e)
@@ -89,6 +84,28 @@ namespace DCL
                     Debug.Log(e.Message);
                 }
             }
+        }
+
+        public void LoadDefaultSettings()
+        {
+            autosettingsEnabled.Set(false);
+            currentQualitySettings = qualitySettingsPreset.defaultPreset;
+            currentGeneralSettings = GetDefaultGeneralSettings();
+
+            ApplyQualitySettings(currentQualitySettings);
+            ApplyGeneralSettings(currentGeneralSettings);
+        }
+
+        private SettingsData.GeneralSettings GetDefaultGeneralSettings()
+        {
+            return new SettingsData.GeneralSettings()
+            {
+                sfxVolume = 1,
+                mouseSensitivity = 0.6f,
+                voiceChatVolume = 1,
+                voiceChatAllow = SettingsData.GeneralSettings.VoiceChatAllow.ALL_USERS,
+                autoqualityOn = false
+            };
         }
 
         /// <summary>
@@ -125,9 +142,9 @@ namespace DCL
 
         public void SaveSettings()
         {
-            PlayerPrefs.SetString(GENERAL_SETTINGS_KEY, JsonUtility.ToJson(currentGeneralSettings));
-            PlayerPrefs.SetString(QUALITY_SETTINGS_KEY, JsonUtility.ToJson(currentQualitySettings));
-            PlayerPrefs.Save();
+            PlayerPrefsUtils.SetString(GENERAL_SETTINGS_KEY, JsonUtility.ToJson(currentGeneralSettings));
+            PlayerPrefsUtils.SetString(QUALITY_SETTINGS_KEY, JsonUtility.ToJson(currentQualitySettings));
+            PlayerPrefsUtils.Save();
         }
     }
 }

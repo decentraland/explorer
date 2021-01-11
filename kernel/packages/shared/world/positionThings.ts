@@ -1,5 +1,4 @@
 const qs: any = require('query-string')
-import { worldToGrid, gridToWorld, parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 import {
   Vector3,
   ReadOnlyVector3,
@@ -10,6 +9,13 @@ import {
 import { Observable } from 'decentraland-ecs/src/ecs/Observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
+import {
+  worldToGrid,
+  gridToWorld,
+  parseParcelPosition,
+  isWorldPositionInsideParcels
+} from 'atomicHelpers/parcelScenePositions'
+import { DEBUG, parcelLimits } from "../../config"
 
 declare var location: any
 declare var history: any
@@ -68,14 +74,7 @@ export function initializeUrlPositionObserver() {
   function updateUrlPosition(newParcel: ReadOnlyVector2) {
     // Update position in URI every second
     if (performance.now() - lastTime > 1000) {
-      const currentPosition = `${newParcel.x | 0},${newParcel.y | 0}`
-      const stateObj = { position: currentPosition }
-
-      const q = qs.parse(location.search)
-      q.position = currentPosition
-
-      history.replaceState(stateObj, 'position', `?${qs.stringify(q)}`)
-
+      replaceQueryStringPosition(newParcel.x, newParcel.y)
       lastTime = performance.now()
     }
   }
@@ -89,13 +88,29 @@ export function initializeUrlPositionObserver() {
     const query = qs.parse(location.search)
 
     if (query.position) {
-      const parcelCoords = query.position.split(',')
-      gridToWorld(parseFloat(parcelCoords[0]), parseFloat(parcelCoords[1]), lastPlayerPosition)
+      let [x, y] = query.position.split(',')
+      x = parseFloat(x)
+      y = parseFloat(y)
+
+      if (!isInsideWorldLimits(x, y)) {
+        x = 0
+        y = 0
+        replaceQueryStringPosition(x, y)
+      }
+      gridToWorld(x, y, lastPlayerPosition)
     } else {
       lastPlayerPosition.x = Math.round(Math.random() * 10) - 5
       lastPlayerPosition.z = 0
     }
   }
+}
+
+function replaceQueryStringPosition(x: any, y: any) {
+  const currentPosition = `${x | 0},${y | 0}`
+  const q = qs.parse(location.search)
+  q.position = currentPosition
+
+  history.replaceState({ position: currentPosition }, 'position', `?${qs.stringify(q)}`)
 }
 
 /**
@@ -140,12 +155,30 @@ function pickSpawnpoint(land: ILand): InstancedSpawnPoint | undefined {
   const { position, cameraTarget } = eligiblePoints[Math.floor(Math.random() * eligiblePoints.length)]
 
   // 4 - generate random x, y, z components when in arrays
+  let finalPosition = {
+    x: computeComponentValue(position.x),
+    y: computeComponentValue(position.y),
+    z: computeComponentValue(position.z)
+  }
+
+  // 5 - If the final position is outside the scene limits, we zero it
+  if (!DEBUG) {
+    const sceneBaseParcelCoords = land.sceneJsonData.scene.base.split(',')
+    const sceneBaseParcelWorldPos = gridToWorld(parseInt(sceneBaseParcelCoords[0], 10), parseInt(sceneBaseParcelCoords[1], 10))
+    let finalWorldPosition = {
+      x: sceneBaseParcelWorldPos.x + finalPosition.x,
+      y: finalPosition.y,
+      z: sceneBaseParcelWorldPos.z + finalPosition.z
+    }
+
+    if (!isWorldPositionInsideParcels(land.sceneJsonData.scene.parcels, finalWorldPosition)) {
+      finalPosition.x = 0
+      finalPosition.z = 0
+    }
+  }
+
   return {
-    position: {
-      x: computeComponentValue(position.x),
-      y: computeComponentValue(position.y),
-      z: computeComponentValue(position.z)
-    },
+    position: finalPosition,
     cameraTarget
   }
 }
@@ -154,13 +187,21 @@ function computeComponentValue(x: number | number[]) {
   if (typeof x === 'number') {
     return x
   }
+
   if (x.length !== 2) {
     throw new Error(`array must have two values ${JSON.stringify(x)}`)
   }
-  const [min, max] = x
-  if (max <= min) {
-    throw new Error(`max value (${max}) must be greater than min value (${min})`)
+
+  let [min, max] = x
+
+  if (min === max) return max
+
+  if (min > max) {
+    const aux = min
+    min = max
+    max = aux
   }
+
   return Math.random() * (max - min) + min
 }
 
@@ -175,4 +216,13 @@ export function getLandBase(land: ILand): { x: number; y: number } {
   } else {
     return parseParcelPosition(land.mappingsResponse.parcel_id)
   }
+}
+
+export function isInsideWorldLimits(x: number, y: number) {
+  return (
+    x > parcelLimits.minLandCoordinateX &&
+    x <= parcelLimits.maxLandCoordinateX &&
+    y > parcelLimits.minLandCoordinateY &&
+    y <= parcelLimits.maxLandCoordinateY
+  )
 }

@@ -106,6 +106,8 @@ export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DIS
 
 export const VOICE_CHAT_ENABLED_FLAG = location.search.includes('VOICE_CHAT_ENABLED')
 
+export const ENABLE_BUILDER_IN_WORLD = location.search.includes('ENABLE_BUILDER_IN_WORLD')
+
 export const AUTO_CHANGE_REALM = location.search.includes('AUTO_CHANGE_REALM')
 
 export const LOS = qs.LOS
@@ -125,6 +127,7 @@ export const INIT_PRE_LOAD = location.search.includes('INIT_PRE_LOAD')
 
 export const NO_MOTD = location.search.includes('NO_MOTD')
 export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
+export const ENABLE_OLD_SETTINGS = location.search.indexOf('ENABLE_OLD_SETTINGS') !== -1
 
 export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
 export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
