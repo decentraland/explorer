@@ -9,31 +9,31 @@ jobs:
   checkout:
     runs-on: ubuntu-latest
     steps:
-      # - name: checkout with LFS
-      #   uses: actions/checkout@master
-      #   with:
-      #     lfs: true
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Git LFS
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-          sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
-          ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
-          git lfs install
-
-      - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-
-      - name: Restore LFS cache
-        uses: actions/cache@v2
-        id: lfs-cache
+      - name: checkout with LFS
+        uses: actions/checkout@master
         with:
-          path: .git/lfs
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
+          lfs: true
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
 
-      - name: Git LFS Pull
-        run: git lfs pull
+      # - name: Install Git LFS
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      #     curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+      #     sudo apt-get update && sudo apt-get install -y git-lfs=2.7.2
+      #     ssh git@github.com git-lfs-authenticate decentraland/explorer.git download
+      #     git lfs install
+
+      # - name: Create LFS file list
+      #   run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      # - name: Restore LFS cache
+      #   uses: actions/cache@v2
+      #   id: lfs-cache
+      #   with:
+      #     path: .git/lfs
+      #     key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
+
+      # - name: Git LFS Pull
+      #   run: git lfs pull
