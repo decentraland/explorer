@@ -4,7 +4,16 @@ using UnityEngine;
 
 public class AvatarAnimationEventAudioHandler : MonoBehaviour
 {
-    AudioEvent footstepLight, footstepSlide, footstepWalk, footstepRun, footstepJump, footstepLand, clothesRustleShort, clap, throwMoney, blowKiss;
+    AudioEvent footstepLight;
+    AudioEvent footstepSlide;
+    AudioEvent footstepWalk;
+    AudioEvent footstepRun;
+    AudioEvent footstepJump;
+    AudioEvent footstepLand;
+    AudioEvent clothesRustleShort;
+    AudioEvent clap;
+    AudioEvent throwMoney;
+    AudioEvent blowKiss;
 
     public void Init(AudioContainer audioContainer)
     {

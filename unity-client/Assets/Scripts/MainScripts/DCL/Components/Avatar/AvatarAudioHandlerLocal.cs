@@ -4,10 +4,17 @@ using UnityEngine;
 
 public class AvatarAudioHandlerLocal : MonoBehaviour
 {
-    const float WALK_INTERVAL_SEC = 0.4f, RUN_INTERVAL_SEC = 0.27f;
+    const float WALK_INTERVAL_SEC = 0.4f;
+    const float RUN_INTERVAL_SEC = 0.27f;
+
     float intervalTimer = 0f;
 
-    AudioEvent footstepJump, footstepLand, footstepWalk, footstepRun, clothesRustleShort;
+    AudioEvent footstepJump;
+    AudioEvent footstepLand;
+    AudioEvent footstepWalk;
+    AudioEvent footstepRun;
+    AudioEvent clothesRustleShort;
+
     CameraController cameraController;
 
     private void Start()
