@@ -41,7 +41,6 @@ namespace DCL.SettingsPanelHUD.Controls
         [SerializeField] private float controlBackgroundDeactivationAlpha = 0.5f;
 
         protected SettingsControlController settingsControlController;
-        protected bool skipPostApplySettings = false;
 
         private SettingsControlModel controlConfig;
         private Color originalTitleColor;
@@ -102,7 +101,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public virtual void RefreshControl()
         {
-            skipPostApplySettings = true;
         }
 
         /// <summary>
@@ -113,10 +111,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             settingsControlController.OnControlChanged(newValue);
             settingsControlController.ApplySettings();
-
-            if (!skipPostApplySettings)
-                settingsControlController.PostApplySettings();
-            skipPostApplySettings = false;
         }
 
         private void OnAnyDisableFlagChange(bool current, bool previous)

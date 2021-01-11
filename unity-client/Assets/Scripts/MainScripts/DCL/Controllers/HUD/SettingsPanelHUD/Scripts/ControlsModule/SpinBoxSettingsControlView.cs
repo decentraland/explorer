@@ -31,8 +31,6 @@ namespace DCL.SettingsPanelHUD.Controls
             int newValue = (int)settingsControlController.GetStoredValue();
             if (spinBox.value != newValue)
                 spinBox.value = newValue;
-            else
-                skipPostApplySettings = false;
         }
 
         /// <summary>

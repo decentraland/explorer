@@ -57,13 +57,6 @@ namespace DCL.SettingsPanelHUD.Controls
             Settings.i.ApplyQualitySettings(currentQualitySetting);
         }
 
-        /// <summary>
-        /// The logic put here will be triggered AFTER ApplySettings().
-        /// </summary>
-        public virtual void PostApplySettings()
-        {
-        }
-
         private void OnGeneralSettingsChanged(SettingsData.GeneralSettings newGeneralSettings)
         {
             currentGeneralSettings = newGeneralSettings;

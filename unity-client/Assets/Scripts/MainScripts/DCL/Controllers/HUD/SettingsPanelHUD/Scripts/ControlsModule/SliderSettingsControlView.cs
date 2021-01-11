@@ -50,8 +50,6 @@ namespace DCL.SettingsPanelHUD.Controls
             float newValue = (float)settingsControlController.GetStoredValue();
             if (slider.value != newValue)
                 slider.value = newValue;
-            else
-                skipPostApplySettings = false;
         }
     }
 }
