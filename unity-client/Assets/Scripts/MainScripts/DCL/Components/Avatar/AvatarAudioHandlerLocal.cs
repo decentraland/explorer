@@ -55,32 +55,32 @@ public class AvatarAudioHandlerLocal : MonoBehaviour
             GameObject camObj = GameObject.Find("CameraController");
             if (camObj != null)
                 cameraController =  camObj.GetComponent<CameraController>();
-        } else
-        {
-            if (cameraController.currentCameraState.name != "FirstPerson")
-                return;
-
-            if (intervalTimer < 0f)
-            {
-                if (distance > 7.3f)
-                {
-                    if (footstepRun != null)
-                        footstepRun.Play(true);
-                    if (clothesRustleShort != null)
-                        clothesRustleShort.Play(true);
-                    intervalTimer = RUN_INTERVAL_SEC;
-                }
-                else
-                {
-                    if (footstepWalk != null)
-                        footstepWalk.Play(true);
-                    if (clothesRustleShort != null)
-                        clothesRustleShort.PlayScheduled(Random.Range(0.05f, 0.1f));
-                    intervalTimer = WALK_INTERVAL_SEC;
-                }
-            }
-
-            intervalTimer -= Time.deltaTime;
+            return;
         }
+
+        if (cameraController.currentCameraState.name != "FirstPerson")
+            return;
+
+        if (intervalTimer < 0f)
+        {
+            if (distance > 7.3f)
+            {
+                if (footstepRun != null)
+                    footstepRun.Play(true);
+                if (clothesRustleShort != null)
+                    clothesRustleShort.Play(true);
+                intervalTimer = RUN_INTERVAL_SEC;
+            }
+            else
+            {
+                if (footstepWalk != null)
+                    footstepWalk.Play(true);
+                if (clothesRustleShort != null)
+                    clothesRustleShort.PlayScheduled(Random.Range(0.05f, 0.1f));
+                intervalTimer = WALK_INTERVAL_SEC;
+            }
+        }
+
+        intervalTimer -= Time.deltaTime;
     }
 }

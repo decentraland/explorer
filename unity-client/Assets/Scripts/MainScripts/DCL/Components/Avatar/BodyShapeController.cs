@@ -138,6 +138,13 @@ public class BodyShapeController : WearableController, IBodyShapeController
 
         createdAnimation.cullingType = AnimationCullingType.BasedOnRenderers;
 
+        InitializeAvatarAudioHandlers(container, createdAnimation);
+
+        return createdAnimation;
+    }
+
+    private void InitializeAvatarAudioHandlers(GameObject container, Animation createdAnimation)
+    {
         //NOTE(Mordi): Adds audio handler for animation events, and passes in the audioContainer for the avatar
         AvatarAnimationEventAudioHandler animationEventAudioHandler = createdAnimation.gameObject.AddComponent<AvatarAnimationEventAudioHandler>();
         AudioContainer audioContainer = container.transform.parent.parent.GetComponentInChildren<AudioContainer>();
@@ -152,8 +159,6 @@ public class BodyShapeController : WearableController, IBodyShapeController
                 audioHandlerRemote.Init(createdAnimation.gameObject);
             }
         }
-
-        return createdAnimation;
     }
 
     protected override void PrepareWearable(GameObject assetContainer)

@@ -102,7 +102,8 @@ public class DCLCharacterController : MonoBehaviour
     [System.NonSerialized]
     public float movingPlatformSpeed;
 
-    [HideInInspector] public System.Action OnJump, OnHitGround;
+    [HideInInspector] public System.Action OnJump;
+    [HideInInspector] public System.Action OnHitGround;
     [HideInInspector] public System.Action<float> OnMoved;
 
     void Awake()

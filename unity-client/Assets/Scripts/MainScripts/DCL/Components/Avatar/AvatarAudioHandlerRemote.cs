@@ -9,7 +9,13 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
     float nextFootstepTime = 0f;
 
     bool isVisible = true;
-    AudioEvent footstepJump, footstepLand, footstepWalk, footstepRun, clothesRustleShort;
+
+    AudioEvent footstepJump;
+    AudioEvent footstepLand;
+    AudioEvent footstepWalk;
+    AudioEvent footstepRun;
+    AudioEvent clothesRustleShort;
+
     GameObject rendererContainer;
     Renderer rend;
     AvatarAnimatorLegacy.BlackBoard blackBoard;
@@ -70,31 +76,10 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
                 footstepLand.Play(true);
         }
 
-        // Fake footsteps when avatar not visible
+        // Simulate footsteps when avatar is not visible
         if (rend != null)
         {
-            if (!AvatarIsInView() && (blackBoard.movementSpeed / Time.deltaTime) > 1f && blackBoard.isGrounded)
-            {
-                if (Time.time >= nextFootstepTime)
-                {
-                    if ((blackBoard.movementSpeed / Time.deltaTime) > 6f)
-                    {
-                        if (footstepRun != null)
-                            footstepRun.Play(true);
-                        if (clothesRustleShort != null)
-                            clothesRustleShort.Play(true);
-                        nextFootstepTime = Time.time + RUN_INTERVAL_SEC;
-                    }
-                    else
-                    {
-                        if (footstepWalk != null)
-                            footstepWalk.Play(true);
-                        if (clothesRustleShort != null)
-                            clothesRustleShort.PlayScheduled(Random.Range(0.05f, 0.1f));
-                        nextFootstepTime = Time.time + WALK_INTERVAL_SEC;
-                    }
-                }
-            }
+            SimulateFootsteps();
         }
         else
         {
@@ -128,5 +113,31 @@ public class AvatarAudioHandlerRemote : MonoBehaviour
         }
 
         return false;
+    }
+
+    void SimulateFootsteps()
+    {
+        if (!AvatarIsInView() && (blackBoard.movementSpeed / Time.deltaTime) > 1f && blackBoard.isGrounded)
+        {
+            if (Time.time >= nextFootstepTime)
+            {
+                if ((blackBoard.movementSpeed / Time.deltaTime) > 6f)
+                {
+                    if (footstepRun != null)
+                        footstepRun.Play(true);
+                    if (clothesRustleShort != null)
+                        clothesRustleShort.Play(true);
+                    nextFootstepTime = Time.time + RUN_INTERVAL_SEC;
+                }
+                else
+                {
+                    if (footstepWalk != null)
+                        footstepWalk.Play(true);
+                    if (clothesRustleShort != null)
+                        clothesRustleShort.PlayScheduled(Random.Range(0.05f, 0.1f));
+                    nextFootstepTime = Time.time + WALK_INTERVAL_SEC;
+                }
+            }
+        }
     }
 }
