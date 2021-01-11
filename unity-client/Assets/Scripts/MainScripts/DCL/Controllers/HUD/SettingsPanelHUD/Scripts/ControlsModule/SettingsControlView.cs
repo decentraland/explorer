@@ -54,7 +54,6 @@ namespace DCL.SettingsPanelHUD.Controls
             if (settingsControlController == null)
                 return;
 
-            skipPostApplySettings = true;
             RefreshControl();
         }
 
@@ -82,9 +81,6 @@ namespace DCL.SettingsPanelHUD.Controls
                 OnAnyDeactivationFlagChange(flag.Get(), false);
             }
 
-            CommonSettingsEvents.OnRefreshAllSettings += OnRefreshAllSettings;
-
-            skipPostApplySettings = true;
             RefreshControl();
         }
 
@@ -102,12 +98,11 @@ namespace DCL.SettingsPanelHUD.Controls
                     flag.OnChange -= OnAnyDeactivationFlagChange;
                 }
             }
-
-            CommonSettingsEvents.OnRefreshAllSettings -= OnRefreshAllSettings;
         }
 
         public virtual void RefreshControl()
         {
+            skipPostApplySettings = true;
         }
 
         /// <summary>
@@ -187,15 +182,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             gameObject.SetActive(actived);
             CommonSettingsEvents.RaiseRefreshAllWidgetsSize();
-        }
-
-        private void OnRefreshAllSettings(SettingsControlController sender)
-        {
-            if (sender != settingsControlController)
-            {
-                skipPostApplySettings = true;
-                RefreshControl();
-            }
         }
     }
 }

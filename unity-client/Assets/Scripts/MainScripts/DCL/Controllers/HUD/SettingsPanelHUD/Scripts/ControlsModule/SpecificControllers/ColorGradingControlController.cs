@@ -1,5 +1,4 @@
 using DCL.SettingsController;
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -22,13 +21,6 @@ namespace DCL.SettingsPanelHUD.Controls
             {
                 toneMapping.active = currentQualitySetting.colorGrading;
             }
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -34,13 +33,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             if (lightweightRenderPipelineAsset != null)
                 lwrpaShadowResolutionField?.SetValue(lightweightRenderPipelineAsset, currentQualitySetting.shadowResolution);
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -19,13 +18,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             currentQualitySetting.fpsCap = (bool)newValue;
             ToggleFPSCap(currentQualitySetting.fpsCap);
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
 
 #if UNITY_WEBGL && !UNITY_EDITOR

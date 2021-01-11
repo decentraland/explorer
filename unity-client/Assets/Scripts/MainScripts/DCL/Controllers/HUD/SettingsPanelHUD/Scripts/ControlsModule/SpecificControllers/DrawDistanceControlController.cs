@@ -1,5 +1,4 @@
 using DCL.SettingsController;
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -24,13 +23,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             RenderSettings.fogEndDistance = currentQualitySetting.cameraDrawDistance;
             RenderSettings.fogStartDistance = currentQualitySetting.cameraDrawDistance * 0.8f;
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

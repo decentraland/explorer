@@ -46,12 +46,5 @@ namespace DCL.SettingsPanelHUD.Controls
                 QualitySettingsController.i.environmentLight.shadows = shadowType;
             }
         }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
-        }
     }
 }

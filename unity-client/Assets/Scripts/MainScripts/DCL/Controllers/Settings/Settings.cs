@@ -129,12 +129,18 @@ namespace DCL
 
         public void ApplyQualitySettings(SettingsData.QualitySettings settings)
         {
+            if (settings.Equals(currentQualitySettings))
+                return;
+
             currentQualitySettings = settings;
             OnQualitySettingsChanged?.Invoke(settings);
         }
 
         public void ApplyGeneralSettings(SettingsData.GeneralSettings settings)
         {
+            if (settings.Equals(currentGeneralSettings))
+                return;
+
             currentGeneralSettings = settings;
             OnGeneralSettingsChanged?.Invoke(settings);
             autosettingsEnabled.Set(settings.autoqualityOn);

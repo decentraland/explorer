@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -28,13 +27,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             if (lightweightRenderPipelineAsset)
                 lightweightRenderPipelineAsset.shadowDistance = currentQualitySetting.shadowDistance;
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

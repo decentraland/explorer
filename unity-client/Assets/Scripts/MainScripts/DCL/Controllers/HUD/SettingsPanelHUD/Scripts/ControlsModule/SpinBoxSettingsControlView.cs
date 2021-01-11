@@ -26,6 +26,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void RefreshControl()
         {
+            base.RefreshControl();
+
             int newValue = (int)settingsControlController.GetStoredValue();
             if (spinBox.value != newValue)
                 spinBox.value = newValue;

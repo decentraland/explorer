@@ -1,6 +1,5 @@
 using DCL.Rendering;
 using DCL.SettingsController;
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -33,13 +32,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
                 Environment.i.platform.cullingController.SetSettings(settings);
             }
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

@@ -48,12 +48,5 @@ namespace DCL.SettingsPanelHUD.Controls
 
             CommonSettingsScriptableObjects.shadowsDisabled.Set(!currentQualitySetting.shadows);
         }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
-        }
     }
 }

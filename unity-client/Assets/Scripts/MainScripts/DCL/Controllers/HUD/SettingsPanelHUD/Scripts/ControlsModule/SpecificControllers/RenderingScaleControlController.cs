@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -33,13 +32,6 @@ namespace DCL.SettingsPanelHUD.Controls
             }
 
             ((SliderSettingsControlView)view).OverrideIndicatorLabel(currentQualitySetting.renderScale.ToString("0.0"));
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

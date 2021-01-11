@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,15 +17,6 @@ namespace DCL.SettingsPanelHUD.Controls
             qualityPresetControlView = (SpinBoxSettingsControlView)settingsControlView;
 
             SetupQualityPresetLabels();
-
-            CommonSettingsEvents.OnSetQualityPresetAsCustom += CommonSettingsEvents_OnSetQualityPresetAsCustom;
-        }
-
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            CommonSettingsEvents.OnSetQualityPresetAsCustom -= CommonSettingsEvents_OnSetQualityPresetAsCustom;
         }
 
         public override object GetStoredValue()
@@ -38,13 +28,6 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[(int)newValue];
             currentQualitySetting = preset;
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseRefreshAllSettings(this);
         }
 
         private void SetupQualityPresetLabels()
@@ -75,11 +58,6 @@ namespace DCL.SettingsPanelHUD.Controls
 
             qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
             return qualityPresetControlView.spinBoxControl.value;
-        }
-
-        private void CommonSettingsEvents_OnSetQualityPresetAsCustom()
-        {
-            qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
         }
     }
 }

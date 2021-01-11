@@ -173,7 +173,7 @@ namespace DCL.SettingsPanelHUD
         {
             Settings.i.LoadDefaultSettings();
             Settings.i.SaveSettings();
-            CommonSettingsEvents.RaiseRefreshAllSettings(null);
+            CommonSettingsEvents.RaiseResetAllSettings();
         }
     }
 }

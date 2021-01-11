@@ -1,4 +1,3 @@
-using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -47,13 +46,6 @@ namespace DCL.SettingsPanelHUD.Controls
                 sliderView.OverrideIndicatorLabel(TEXT_OFF);
             else
                 sliderView.OverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
-        }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
         }
     }
 }

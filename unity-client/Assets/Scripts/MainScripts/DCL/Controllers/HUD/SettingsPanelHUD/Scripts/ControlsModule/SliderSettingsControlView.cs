@@ -45,6 +45,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void RefreshControl()
         {
+            base.RefreshControl();
+
             float newValue = (float)settingsControlController.GetStoredValue();
             if (slider.value != newValue)
                 slider.value = newValue;

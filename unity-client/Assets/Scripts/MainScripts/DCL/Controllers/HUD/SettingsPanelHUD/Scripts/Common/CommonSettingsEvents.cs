@@ -1,26 +1,19 @@
-using DCL.SettingsPanelHUD.Controls;
 using System;
 
 namespace DCL.SettingsPanelHUD.Common
 {
     public static class CommonSettingsEvents
     {
-        public static event Action<SettingsControlController> OnRefreshAllSettings;
-        public static void RaiseRefreshAllSettings(SettingsControlController sender)
+        public static event Action OnResetAllSettings;
+        public static void RaiseResetAllSettings()
         {
-            OnRefreshAllSettings?.Invoke(sender);
+            OnResetAllSettings?.Invoke();
         }
 
         public static event Action OnRefreshAllWidgetsSize;
         public static void RaiseRefreshAllWidgetsSize()
         {
             OnRefreshAllWidgetsSize?.Invoke();
-        }
-
-        public static event Action OnSetQualityPresetAsCustom;
-        public static void RaiseSetQualityPresetAsCustom()
-        {
-            OnSetQualityPresetAsCustom?.Invoke();
         }
     }
 }

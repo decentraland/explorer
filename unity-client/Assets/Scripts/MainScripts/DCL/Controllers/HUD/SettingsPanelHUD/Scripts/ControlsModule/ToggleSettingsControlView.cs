@@ -25,6 +25,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void RefreshControl()
         {
+            base.RefreshControl();
+
             bool newValue = (bool)settingsControlController.GetStoredValue();
             if (toggle.isOn != newValue)
                 toggle.isOn = newValue;

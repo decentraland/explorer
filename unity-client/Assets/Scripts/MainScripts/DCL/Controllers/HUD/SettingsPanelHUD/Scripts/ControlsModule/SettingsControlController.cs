@@ -1,3 +1,4 @@
+using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -20,12 +21,14 @@ namespace DCL.SettingsPanelHUD.Controls
 
             Settings.i.OnGeneralSettingsChanged += OnGeneralSettingsChanged;
             Settings.i.OnQualitySettingsChanged += OnQualitySettingsChanged;
+            CommonSettingsEvents.OnResetAllSettings += OnResetSettingsControl;
         }
 
         public virtual void OnDestroy()
         {
             Settings.i.OnGeneralSettingsChanged -= OnGeneralSettingsChanged;
             Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
+            CommonSettingsEvents.OnResetAllSettings -= OnResetSettingsControl;
         }
 
         /// <summary>
@@ -64,11 +67,20 @@ namespace DCL.SettingsPanelHUD.Controls
         private void OnGeneralSettingsChanged(SettingsData.GeneralSettings newGeneralSettings)
         {
             currentGeneralSettings = newGeneralSettings;
+            view.RefreshControl();
         }
 
         private void OnQualitySettingsChanged(SettingsData.QualitySettings newQualitySettings)
         {
             currentQualitySetting = newQualitySettings;
+            view.RefreshControl();
+        }
+
+        private void OnResetSettingsControl()
+        {
+            currentGeneralSettings = Settings.i.generalSettings;
+            currentQualitySetting = Settings.i.qualitySettings;
+            view.RefreshControl();
         }
     }
 }

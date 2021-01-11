@@ -25,12 +25,5 @@ namespace DCL.SettingsPanelHUD.Controls
                 }
             }
         }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
-        }
     }
 }

@@ -22,12 +22,5 @@ namespace DCL.SettingsPanelHUD.Controls
 
             CommonSettingsScriptableObjects.detailObjectCullingDisabled.Set(!newBoolValue);
         }
-
-        public override void PostApplySettings()
-        {
-            base.PostApplySettings();
-
-            CommonSettingsEvents.RaiseSetQualityPresetAsCustom();
-        }
     }
 }
