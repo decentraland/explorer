@@ -1,8 +1,6 @@
 using Cinemachine;
 using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Controls;
-using DCL.SettingsPanelHUD.Widgets;
-using NSubstitute;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,9 +21,10 @@ namespace SettingsControlsTests
 
         private const string CONTROL_VIEW_PREFAB_PATH = "Controls/{controlType}SettingsControlTemplate";
 
+        private GeneralSettings initGeneralSettings;
+        private GeneralSettings testGeneralSettings;
         private QualitySettings initQualitySettings;
         private QualitySettings testQualitySettings;
-        private GeneralSettings testGeneralSettings;
 
         private CinemachineFreeLook freeLookCamera;
         private CinemachineVirtualCamera firstPersonCamera;
@@ -54,6 +53,7 @@ namespace SettingsControlsTests
                 sfxVolume = 0
             };
 
+            initGeneralSettings = DCL.Settings.i.generalSettings;
             DCL.Settings.i.ApplyGeneralSettings(testGeneralSettings);
             Assert.IsTrue(DCL.Settings.i.generalSettings.Equals(testGeneralSettings), "General Settings mismatch");
         }
@@ -116,6 +116,7 @@ namespace SettingsControlsTests
             if (newControlView != null)
                 Object.Destroy(newControlView.gameObject);
 
+            DCL.Settings.i.ApplyGeneralSettings(initGeneralSettings);
             DCL.Settings.i.ApplyQualitySettings(initQualitySettings);
             yield return base.TearDown();
         }
@@ -164,18 +165,18 @@ namespace SettingsControlsTests
             }
         }
 
-        //[UnityTest]
-        //public IEnumerator ApplyMuteSoundCorrectly()
-        //{
-        //    // Arrange
-        //    yield return CreateToggleSettingsControl<MuteSoundControlController>();
+        [UnityTest]
+        public IEnumerator ApplyMuteSoundCorrectly()
+        {
+            // Arrange
+            yield return CreateToggleSettingsControl<MuteSoundControlController>();
 
-        //    // Act
-        //    ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+            // Act
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
 
-        //    // Assert
-        //    UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
-        //}
+            // Assert
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
+        }
 
         [UnityTest]
         public IEnumerator ApplyMouseSensivityCorrectly()
