@@ -21,7 +21,7 @@ fi
 
 LICENSE="UNITY_LICENSE_CONTENT_"$UPPERCASE_BUILD_TARGET
 
-if [ -z "${!LICENSE}" ]
+if [ -z "${LICENSE}" ]
 then
     echo'$LICENSE env var not found, trying UNITY_LICENSE_CONTENT_BASE64 env var'
     LICENSE=$(echo $UNITY_LICENSE_CONTENT_BASE64 | base64 -d)
