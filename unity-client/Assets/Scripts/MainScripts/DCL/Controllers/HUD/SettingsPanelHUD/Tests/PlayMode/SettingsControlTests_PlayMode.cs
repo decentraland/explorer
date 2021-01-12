@@ -83,29 +83,29 @@ namespace SettingsControlsTests
         private void SetupReferences()
         {
             urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-            GeneralSettingsReferences generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsReferences>();
-            QualitySettingsReferences qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsReferences>();
+            GeneralSettingsReferences generalSettingsReferences = GameObject.FindObjectOfType<GeneralSettingsReferences>();
+            QualitySettingsReferences qualitySettingsReferences = GameObject.FindObjectOfType<QualitySettingsReferences>();
 
-            Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
-            Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
+            Assert.IsNotNull(generalSettingsReferences, "GeneralSettingsController not found in scene");
+            Assert.IsNotNull(qualitySettingsReferences, "QualitySettingsController not found in scene");
 
-            freeLookCamera = generalSettingsController.thirdPersonCamera;
+            freeLookCamera = generalSettingsReferences.thirdPersonCamera;
             Assert.IsNotNull(freeLookCamera, "GeneralSettingsController: thirdPersonCamera reference missing");
 
-            CinemachineVirtualCamera virtualCamera = generalSettingsController.firstPersonCamera;
+            CinemachineVirtualCamera virtualCamera = generalSettingsReferences.firstPersonCamera;
             Assert.IsNotNull(virtualCamera, "GeneralSettingsController: firstPersonCamera reference missing");
             povCamera = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
             Assert.IsNotNull(povCamera, "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
 
-            environmentLight = qualitySettingsController.environmentLight;
+            environmentLight = qualitySettingsReferences.environmentLight;
             Assert.IsNotNull(environmentLight, "QualitySettingsController: environmentLight reference missing");
 
-            postProcessVolume = qualitySettingsController.postProcessVolume;
+            postProcessVolume = qualitySettingsReferences.postProcessVolume;
             Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
 
-            firstPersonCamera = qualitySettingsController.firstPersonCamera;
+            firstPersonCamera = qualitySettingsReferences.firstPersonCamera;
             Assert.IsNotNull(firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
+            Assert.IsNotNull(qualitySettingsReferences.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
         }
 
         protected override IEnumerator TearDown()
