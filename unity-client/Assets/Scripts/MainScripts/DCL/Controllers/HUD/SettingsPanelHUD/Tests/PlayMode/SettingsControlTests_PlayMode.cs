@@ -68,6 +68,7 @@ namespace SettingsControlsTests
                 shadows = false,
                 softShadows = true,
                 shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
+                shadowDistance = 80f,
                 cameraDrawDistance = 50.1f,
                 bloom = false,
                 colorGrading = true,
@@ -241,7 +242,7 @@ namespace SettingsControlsTests
         }
 
         [UnityTest]
-        public IEnumerator RenderingScaleCorrectly()
+        public IEnumerator ApplyRenderingScaleCorrectly()
         {
             // Arrange
             yield return CreateSliderSettingsControl<RenderingScaleControlController>(0f, 1f, false);
@@ -307,6 +308,19 @@ namespace SettingsControlsTests
 
             // Assert
             Assert.IsTrue(urpAsset.mainLightShadowmapResolution == (int)DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
+        }
+
+        [UnityTest]
+        public IEnumerator ApplyShadowDistanceCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<ShadowDistanceControlController>(30f, 100f, true);
+
+            // Act
+            ((SliderSettingsControlView)newControlView).sliderControl.value = 90f;
+
+            // Assert
+            Assert.IsTrue(urpAsset.shadowDistance == (int)DCL.Settings.i.qualitySettings.shadowDistance, "shadowDistance mismatch");
         }
 
         private IEnumerator CreateToggleSettingsControl<T>() where T : SettingsControlController
