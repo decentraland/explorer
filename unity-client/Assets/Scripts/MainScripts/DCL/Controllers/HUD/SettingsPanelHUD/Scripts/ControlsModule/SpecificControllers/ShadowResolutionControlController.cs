@@ -1,27 +1,10 @@
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Shadow Resolution", fileName = "ShadowResolutionControlController")]
     public class ShadowResolutionControlController : SettingsControlController
     {
-        private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
-        private FieldInfo lwrpaShadowResolutionField = null;
-
-        public override void Initialize(ISettingsControlView settingsControlView)
-        {
-            base.Initialize(settingsControlView);
-
-            lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-
-            if (lightweightRenderPipelineAsset == null) return;
-
-            lwrpaShadowResolutionField = lightweightRenderPipelineAsset.GetType().GetField("m_MainLightShadowmapResolution", BindingFlags.NonPublic | BindingFlags.Instance);
-        }
-
         public override object GetStoredValue()
         {
             return (int)Mathf.Log((int)currentQualitySetting.shadowResolution, 2) - 8;
@@ -29,10 +12,10 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            currentQualitySetting.shadowResolution = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << (int)newValue);
+            UnityEngine.Rendering.Universal.ShadowResolution newShadowResValue = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << (int)newValue);
 
-            if (lightweightRenderPipelineAsset != null)
-                lwrpaShadowResolutionField?.SetValue(lightweightRenderPipelineAsset, currentQualitySetting.shadowResolution);
+            currentQualitySetting.shadowResolution = newShadowResValue;
+            qualitySettingsController.UpdateShadowResolution(newShadowResValue);
         }
     }
 }

@@ -1,6 +1,4 @@
-using DCL.SettingsController;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
@@ -14,15 +12,10 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            currentQualitySetting.bloom = (bool)newValue;
+            bool newBoolValue = (bool)newValue;
 
-            if (QualitySettingsReferences.i.postProcessVolume)
-            {
-                if (QualitySettingsReferences.i.postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
-                {
-                    bloom.active = currentQualitySetting.bloom;
-                }
-            }
+            currentQualitySetting.bloom = newBoolValue;
+            qualitySettingsController.UpdateBloom(newBoolValue);
         }
     }
 }
