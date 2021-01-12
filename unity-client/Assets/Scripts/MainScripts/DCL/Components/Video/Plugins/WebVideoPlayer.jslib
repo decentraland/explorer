@@ -216,10 +216,8 @@ var WebVideoPlayer = {
     const videoData = videos[Pointer_stringify(videoId)];
     const vid = videoData.video;
 
-    if (second == 0) {
-      const playbackRate = vid.playbackRate;
-      vid.pause();
-      vid.load();
+    if (second === 0) {
+      vid.currentTime = 0;
     } else if (vid.seekable && vid.seekable.length > 0) {
       vid.currentTime = second;
     }
