@@ -140,7 +140,7 @@ public class HUDController : MonoBehaviour
         PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
-        SETTINGS = 5,
+        SETTINGS_PANEL = 5,
         EXPRESSIONS = 6,
         PLAYER_INFO_CARD = 7,
         AIRDROPPING = 8,
@@ -160,8 +160,7 @@ public class HUDController : MonoBehaviour
         USERS_AROUND_LIST_HUD = 22,
         GRAPHIC_CARD_WARNING = 23,
         BUILD_MODE = 24,
-        SETTINGS_PANEL = 25,
-        COUNT = 26
+        COUNT = 25
     }
 
     [System.Serializable]
