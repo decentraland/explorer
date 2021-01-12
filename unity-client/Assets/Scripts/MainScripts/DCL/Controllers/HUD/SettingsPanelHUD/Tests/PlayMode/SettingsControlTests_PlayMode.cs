@@ -4,22 +4,26 @@ using DCL.SettingsPanelHUD.Controls;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using GeneralSettings = DCL.SettingsData.GeneralSettings;
 using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace SettingsControlsTests
 {
-    public class SettingsControlTests_PlayMode : IntegrationTestSuite_Legacy
+    public class SettingsControlTests_PlayMode
     {
+        private const string TEST_SCENE_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SettingsPanelHUD/Tests/TestScenes";
+        private const string TEST_SCENE_NAME = "SettingsTestScene";
+        private const string CONTROL_VIEW_PREFAB_PATH = "Controls/{controlType}SettingsControlTemplate";
+
         private SettingsControlView newControlView;
         private SettingsControlModel newControlModel;
         private SettingsControlController newControlController;
-
-        private const string CONTROL_VIEW_PREFAB_PATH = "Controls/{controlType}SettingsControlTemplate";
 
         private GeneralSettings initGeneralSettings;
         private GeneralSettings testGeneralSettings;
@@ -29,16 +33,14 @@ namespace SettingsControlsTests
         private CinemachineFreeLook freeLookCamera;
         private CinemachineVirtualCamera firstPersonCamera;
         private CinemachinePOV povCamera;
-
         private Light environmentLight;
-
         private Volume postProcessVolume;
         private UniversalRenderPipelineAsset urpAsset;
 
         [UnitySetUp]
-        protected override IEnumerator SetUp()
+        public IEnumerator SetUp()
         {
-            yield return base.SetUp();
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode($"{TEST_SCENE_PATH}/{TEST_SCENE_NAME}.unity", new LoadSceneParameters(LoadSceneMode.Additive));
 
             SetInitialGeneralSettings();
             SetInitialQualitySettings();
@@ -68,6 +70,7 @@ namespace SettingsControlsTests
                 shadows = false,
                 softShadows = true,
                 shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
+                shadowDistance = 80f,
                 cameraDrawDistance = 50.1f,
                 bloom = false,
                 colorGrading = true,
@@ -86,8 +89,8 @@ namespace SettingsControlsTests
             GeneralSettingsReferences generalSettingsReferences = GameObject.FindObjectOfType<GeneralSettingsReferences>();
             QualitySettingsReferences qualitySettingsReferences = GameObject.FindObjectOfType<QualitySettingsReferences>();
 
-            Assert.IsNotNull(generalSettingsReferences, "GeneralSettingsController not found in scene");
-            Assert.IsNotNull(qualitySettingsReferences, "QualitySettingsController not found in scene");
+            Assert.IsNotNull(generalSettingsReferences, "GeneralSettingsReferences not found in scene");
+            Assert.IsNotNull(qualitySettingsReferences, "QualitySettingsReferences not found in scene");
 
             freeLookCamera = generalSettingsReferences.thirdPersonCamera;
             Assert.IsNotNull(freeLookCamera, "GeneralSettingsController: thirdPersonCamera reference missing");
@@ -108,7 +111,8 @@ namespace SettingsControlsTests
             Assert.IsNotNull(qualitySettingsReferences.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
         }
 
-        protected override IEnumerator TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             Object.Destroy(newControlController);
             Object.Destroy(newControlModel);
@@ -118,7 +122,8 @@ namespace SettingsControlsTests
 
             DCL.Settings.i.ApplyGeneralSettings(initGeneralSettings);
             DCL.Settings.i.ApplyQualitySettings(initQualitySettings);
-            yield return base.TearDown();
+
+            yield return EditorSceneManager.UnloadSceneAsync(TEST_SCENE_NAME);
         }
 
         [Test]
@@ -241,7 +246,7 @@ namespace SettingsControlsTests
         }
 
         [UnityTest]
-        public IEnumerator RenderingScaleCorrectly()
+        public IEnumerator ApplyRenderingScaleCorrectly()
         {
             // Arrange
             yield return CreateSliderSettingsControl<RenderingScaleControlController>(0f, 1f, false);
@@ -307,6 +312,19 @@ namespace SettingsControlsTests
 
             // Assert
             Assert.IsTrue(urpAsset.mainLightShadowmapResolution == (int)DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
+        }
+
+        [UnityTest]
+        public IEnumerator ApplyShadowDistanceCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<ShadowDistanceControlController>(30f, 100f, true);
+
+            // Act
+            ((SliderSettingsControlView)newControlView).sliderControl.value = 90f;
+
+            // Assert
+            Assert.IsTrue(urpAsset.shadowDistance == (int)DCL.Settings.i.qualitySettings.shadowDistance, "shadowDistance mismatch");
         }
 
         private IEnumerator CreateToggleSettingsControl<T>() where T : SettingsControlController
