@@ -1,6 +1,5 @@
 using DCL;
 using DCL.HelpAndSupportHUD;
-using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -43,9 +42,6 @@ public class HUDController : MonoBehaviour
 
     public AvatarEditorHUDController avatarEditorHud =>
         GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
-
-    // TODO (Santi): Remove once the new Settings HUD is implemented
-    public SettingsHUDController settingsHud => GetHUDElement(HUDElementID.SETTINGS) as SettingsHUDController;
 
     public SettingsPanelHUDController settingsPanelHud => GetHUDElement(HUDElementID.SETTINGS_PANEL) as SettingsPanelHUDController;
 
@@ -116,7 +112,6 @@ public class HUDController : MonoBehaviour
                                        (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
 
         if (anyInputFieldIsSelected ||
-            settingsHud.view.isOpen || // TODO (Santi): Remove once the new Settings HUD is implemented
             settingsPanelHud.view.isOpen ||
             avatarEditorHud.view.isOpen ||
             DCL.NavmapView.isOpen ||
@@ -223,10 +218,6 @@ public class HUDController : MonoBehaviour
                     avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
                 }
                 break;
-            case HUDElementID.SETTINGS:
-                // TODO (Santi): Remove once the new Settings HUD is implemented
-                CreateHudElement<SettingsHUDController>(configuration, hudElementId);
-                break;
             case HUDElementID.SETTINGS_PANEL:
                 CreateHudElement<SettingsPanelHUDController>(configuration, hudElementId);
                 if (settingsPanelHud != null)
@@ -314,7 +305,6 @@ public class HUDController : MonoBehaviour
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
 
-                        bool addOldSettingsHUD = false;
                         if (!string.IsNullOrEmpty(extraPayload))
                         {
                             var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
@@ -322,15 +312,9 @@ public class HUDController : MonoBehaviour
                             {
                                 taskbarHud.OnAddVoiceChat();
                             }
-
-                            // TODO (Santi): Remove once the new Settings HUD is implemented
-                            addOldSettingsHUD = config.enableOldSettings;
                         }
 
-                        if (addOldSettingsHUD)
-                            taskbarHud.AddSettingsWindow(settingsHud);
-                        else
-                            taskbarHud.AddSettingsWindow(settingsPanelHud);
+                        taskbarHud.AddSettingsWindow(settingsPanelHud);
                     }
                 }
                 else

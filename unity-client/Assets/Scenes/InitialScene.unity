@@ -15,18 +15,18 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.8443396, g: 0.93445873, b: 1, a: 1}
+  m_FogColor: {r: 0.20091766, g: 0.12156862, b: 0.29411766, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.0001
   m_LinearFogStart: 60
   m_LinearFogEnd: 95
-  m_AmbientSkyColor: {r: 0.60784316, g: 0.92941177, b: 1, a: 1}
-  m_AmbientEquatorColor: {r: 0.98039216, g: 0.8352941, b: 0.74509805, a: 1}
-  m_AmbientGroundColor: {r: 1, g: 1, b: 1, a: 1}
+  m_AmbientSkyColor: {r: 0.7882353, g: 0.6745098, b: 1, a: 1}
+  m_AmbientEquatorColor: {r: 0.6313726, g: 0.49411765, b: 0.7529412, a: 1}
+  m_AmbientGroundColor: {r: 0.7019608, g: 0.6156863, b: 0.81960785, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: 7e1a5fec7e194e246a9d32f2f1a1498a, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 729329a05b53d4eee955bf1e5e1eaea7, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -36,9 +36,9 @@ RenderSettings:
   m_DefaultReflectionResolution: 512
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
-  m_CustomReflection: {fileID: 8900000, guid: b4f78c510a8526547ab9c9946449480e, type: 3}
+  m_CustomReflection: {fileID: 8900000, guid: 7529afcac85c84886af2e8998f5a86a8, type: 3}
   m_Sun: {fileID: 943100645024490816}
-  m_IndirectSpecularColor: {r: 0.10252202, g: 0.24458984, b: 0.36489132, a: 1}
+  m_IndirectSpecularColor: {r: 0.99999905, g: 0, b: 0.99999905, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1093,10 +1093,10 @@ MonoBehaviour:
   characterController: {fileID: 1989862556}
   cameraController: {fileID: 1608366483}
   bridgesGameObject: {fileID: 287244851}
-  openBrowserWhenStart: 1
+  openBrowserWhenStart: 0
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 1
+  baseUrlMode: 0
   baseUrlCustom: https://play.decentraland.zone/?
   environment: 4
   startInCoords: {x: 0, y: 0}
@@ -1104,7 +1104,7 @@ MonoBehaviour:
   allWearables: 0
   testWearables: 0
   enableTutorial: 0
-  soloScene: 1
+  soloScene: 0
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
@@ -1643,37 +1643,37 @@ PrefabInstance:
     - target: {fileID: 5619040623964129536, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.4619398
+      value: 0.4957225
       objectReference: {fileID: 0}
     - target: {fileID: 5619040623964129536, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.19134171
+      value: 0.40342644
       objectReference: {fileID: 0}
     - target: {fileID: 5619040623964129536, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.1913417
+      value: 0.06526307
       objectReference: {fileID: 0}
     - target: {fileID: 5619040623964129536, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.8446232
+      value: 0.76632047
       objectReference: {fileID: 0}
     - target: {fileID: 7045450462895841985, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.85882354
+      value: 0.77580774
       objectReference: {fileID: 0}
     - target: {fileID: 7045450462895841985, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.90795577
+      value: 0.7549395
       objectReference: {fileID: 0}
     - target: {fileID: 7045450462895841985, guid: fc76969801e8f44598a72147673a6c17,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.9137255
+      value: 0.8207547
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fc76969801e8f44598a72147673a6c17, type: 3}

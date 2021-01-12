@@ -15,14 +15,12 @@ public class TaskbarHUDController : IHUD
     public struct Configuration
     {
         public bool enableVoiceChat;
-        public bool enableOldSettings; // TODO (Santi): Remove once the new Settings HUD is implemented
     }
 
     public TaskbarHUDView view;
     public WorldChatWindowHUDController worldChatWindowHud;
     public PrivateChatWindowHUDController privateChatWindowHud;
     public FriendsHUDController friendsHud;
-    public SettingsHUDController settingsHud; // TODO (Santi): Remove once the new Settings HUD is implemented
     public SettingsPanelHUDController settingsPanelHud;
     public ExploreHUDController exploreHud;
     public HelpAndSupportHUDController helpAndSupportHud;
@@ -40,9 +38,6 @@ public class TaskbarHUDController : IHUD
     public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
     public RectTransform socialTooltipReference { get => view.socialTooltipReference; }
     public TaskbarMoreMenu moreMenu { get => view.moreMenu; }
-
-    // TODO (Santi): Remove once the new Settings HUD is implemented
-    public bool useNewSettings { get; private set; }
 
     public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController, IFriendsController friendsController)
     {
@@ -163,20 +158,13 @@ public class TaskbarHUDController : IHUD
 
     private void View_OnSettingsToggleOn()
     {
-        if (useNewSettings)
-            settingsPanelHud.SetVisibility(true);
-        else
-            settingsHud.SetVisibility(true);
-
+        settingsPanelHud.SetVisibility(true);
         OnAnyTaskbarButtonClicked?.Invoke();
     }
 
     private void View_OnSettingsToggleOff()
     {
-        if (useNewSettings)
-            settingsPanelHud.SetVisibility(false);
-        else
-            settingsHud.SetVisibility(false);
+        settingsPanelHud.SetVisibility(false);
     }
 
     private void View_OnExploreToggleOn()
@@ -313,36 +301,6 @@ public class TaskbarHUDController : IHUD
         friendsHud.view.friendsList.OnDeleteConfirmation += (userIdToRemove) => { view.chatHeadsGroup.RemoveChatHead(userIdToRemove); };
     }
 
-    // TODO (Santi): Remove once the new Settings HUD is implemented
-    public void AddSettingsWindow(SettingsHUDController controller)
-    {
-        if (controller == null)
-        {
-            Debug.LogWarning("AddSettingsWindow >>> Settings window doesn't exist yet!");
-            return;
-        }
-
-        settingsHud = controller;
-        view.OnAddSettingsWindow();
-        settingsHud.OnOpen += () =>
-        {
-            view.settingsButton.SetToggleState(true, false);
-            view.exploreButton.SetToggleState(false);
-        };
-        settingsHud.OnClose += () =>
-        {
-            view.settingsButton.SetToggleState(false, false);
-            MarkWorldChatAsReadIfOtherWindowIsOpen();
-        };
-        settingsHud.OnClose += () =>
-        {
-            view.settingsButton.SetToggleState(false, false);
-            MarkWorldChatAsReadIfOtherWindowIsOpen();
-        };
-
-        useNewSettings = false;
-    }
-
     public void AddSettingsWindow(SettingsPanelHUDController controller)
     {
         if (controller == null)
@@ -363,8 +321,6 @@ public class TaskbarHUDController : IHUD
             view.settingsButton.SetToggleState(false, false);
             MarkWorldChatAsReadIfOtherWindowIsOpen();
         };
-
-        useNewSettings = true;
     }
 
     public void AddExploreWindow(ExploreHUDController controller)
