@@ -1,5 +1,4 @@
 using DCL.HelpAndSupportHUD;
-using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
 using NUnit.Framework;
 using System.Collections;

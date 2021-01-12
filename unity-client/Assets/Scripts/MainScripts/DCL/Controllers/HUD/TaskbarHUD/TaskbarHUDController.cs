@@ -3,7 +3,6 @@ using DCL;
 using DCL.HelpAndSupportHUD;
 using DCL.Helpers;
 using DCL.Interface;
-using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
 using System.Linq;
 using UnityEngine;
