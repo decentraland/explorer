@@ -6,9 +6,21 @@ mkdir -p /root/.cache/unity3d
 mkdir -p /root/.local/share/unity3d/Unity/
 set +x
 
-LICENSE=$(echo "${UNITY_LICENSE_CONTENT_BASE64}" | base64 -d | tr -d '\r')
+if [ -z "$UNITY_LICENSE_CONTENT_BASE64" ]; then
+  echo 'UNITY_LICENSE_CONTENT_BASE64 not present. License won''t be configured'
+else
+  LICENSE=$(echo "${UNITY_LICENSE_CONTENT_BASE64}" | base64 -d | tr -d '\r')
 
-echo "Writing LICENSE to license file /root/.local/share/unity3d/Unity/Unity_lic.ulf"
-echo "$LICENSE" > /root/.local/share/unity3d/Unity/Unity_lic.ulf
+  echo "Writing LICENSE to license file /root/.local/share/unity3d/Unity/Unity_lic.ulf"
+  echo "$LICENSE" > /root/.local/share/unity3d/Unity/Unity_lic.ulf
+
+
+  xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
+    -quit \
+    -nographics \
+    -logFile /dev/stdout \
+    -batchmode \
+    -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf || exit 0
+fi
 
 set -x

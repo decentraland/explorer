@@ -7,81 +7,46 @@ on:
     types: [opened]
 
 jobs:
-  unity-pipeline-game-ci:
+  unity-pipeline:
     runs-on: ubuntu-latest
+    container:
+      image: decentraland/renderer-build:2019.4
+      env:
+        BUILD_TARGET: WebGL
+        PROJECT_PATH: ${{ github.workspace }}/unity-client
+        BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
+        BUILD_NAME: unity
     steps:
-      # Checkout
-      - name: Checkout repository
+      - name: update git
+        run: |
+          add-apt-repository ppa:git-core/ppa
+          apt-get update
+          apt-get install -y git git-lfs
+          git lfs install
+
+      - name: checkout with LFS
         uses: actions/checkout@v2
         with:
           lfs: true
 
-      # Cache
-      - uses: actions/cache@v1.1.0
-        with:
-          path: unity-client/Library
-          key: unity-client/Library
+      # - name: print unity last commit
+      #   run: |
+      #     git log --pretty=tformat:"%h" -n1 . ${PROJECT_PATH}
 
-      # Test
-      - name: Run tests
-        uses: webbertakken/unity-test-runner@v1.3
-        with:
-          unityVersion: 2019.4.2f1
-          projectPath: ./unity-client
+      # Setup license
+      - name: Setup uniy license
+        run: sh .github/workflows/scripts/setup-unity.sh
+        env:
+          UNITY_LICENSE_CONTENT_BASE64: ${{ secrets.UNITY_LICENSE_CONTENT_BASE64 }}
+
+      # Run Editor tests
+      - name: Run Editor tests
+        run: sh .github/workflows/scripts/run-unity-edit-mode-tests.sh
+
+      # Run PlayMode tests
+      - name: Run PlayMode tests
+        run: sh .github/workflows/scripts/run-unity-play-mode-tests.sh
 
       # Build
-      - name: Build project
-        uses: webbertakken/unity-builder@v0.10
-        with:
-          unityVersion: 2019.4.2f1
-          targetPlatform: WebGL
-          projectPath: ./unity-client
-
-      # Output
-      - uses: actions/upload-artifact@v1
-        with:
-          name: Build
-          path: build
-  # unity-pipeline:
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: decentraland/renderer-build:2019.4
-  #     env:
-  #       BUILD_TARGET: WebGL
-  #       PROJECT_PATH: ${{ github.workspace }}/unity-client
-  #       BUILD_PATH: ${{ github.workspace }}/unity-client/Builds/unity
-  #       BUILD_NAME: unity
-  #   steps:
-  #     - name: update git
-  #       run: |
-  #         add-apt-repository ppa:git-core/ppa
-  #         apt-get update
-  #         apt-get install -y git git-lfs
-  #         git lfs install
-
-  #     - name: checkout with LFS
-  #       uses: actions/checkout@v2
-  #       with:
-  #         lfs: true
-
-  #     # - name: print unity last commit
-  #     #   run: |
-  #     #     git log --pretty=tformat:"%h" -n1 . ${PROJECT_PATH}
-
-  #     # Setup license
-  #     - name: Setup uniy license
-  #       run: sh .github/workflows/scripts/setup-unity.sh
-  #       env:
-  #         UNITY_LICENSE_CONTENT_BASE64: ${{ secrets.UNITY_LICENSE_CONTENT_BASE64 }}
-
-  #     # Run Editor tests
-  #     - name: Run Editor tests
-  #       run: sh .github/workflows/scripts/run-unity-edit-mode-tests.sh
-
-  #     # Run PlayMode tests
-  #     - name: Run PlayMode tests
-  #       run: sh .github/workflows/scripts/run-unity-play-mode-tests.sh
-
-  #     # Build
-  #     - name: Build
-  #       run: sh .github/workflows/scripts/run-unity-build.sh
+      - name: Build
+        run: sh .github/workflows/scripts/run-unity-build.sh
