@@ -1,3 +1,4 @@
+using System;
 using DCL.Controllers;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,7 +6,26 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class MessagingControllersManager
+    public interface IMessagingControllersManager : IDisposable
+    {
+        Dictionary<string, MessagingController> messagingControllers { get; set; }
+        bool hasPendingMessages { get; }
+        bool isRunning { get; }
+        bool paused { get; set; }
+        void Initialize(IMessageProcessHandler messageHandler);
+        void MarkBusesDirty();
+        void PopulateBusesToBeProcessed();
+        bool ContainsController(string sceneId);
+        void AddController(IMessageProcessHandler messageHandler, string sceneId, bool isGlobal = false);
+        void AddControllerIfNotExists(IMessageProcessHandler messageHandler, string sceneId, bool isGlobal = false);
+        void RemoveController(string sceneId);
+        void Enqueue(ParcelScene scene, MessagingBus.QueuedSceneMessage_Scene queuedMessage);
+        void ForceEnqueueToGlobal(MessagingBusType busId, MessagingBus.QueuedSceneMessage queuedMessage);
+        void SetSceneReady(string sceneId);
+        void RefreshControllerEnabledState(MessagingController controller);
+    }
+
+    public class MessagingControllersManager : IMessagingControllersManager
     {
         public static bool VERBOSE = false;
 
@@ -17,7 +37,7 @@ namespace DCL
 
         public const string GLOBAL_MESSAGING_CONTROLLER = "global_messaging_controller";
 
-        public Dictionary<string, MessagingController> messagingControllers = new Dictionary<string, MessagingController>();
+        public Dictionary<string, MessagingController> messagingControllers { get; set; } = new Dictionary<string, MessagingController>();
         private string globalSceneId = null;
 
         private Coroutine mainCoroutine;
@@ -52,7 +72,7 @@ namespace DCL
             if (!string.IsNullOrEmpty(GLOBAL_MESSAGING_CONTROLLER))
                 messagingControllers.TryGetValue(GLOBAL_MESSAGING_CONTROLLER, out globalController);
 
-            Environment.i.sceneController.OnSortScenes += MarkBusesDirty;
+            Environment.i.world.sceneController.OnSortScenes += MarkBusesDirty;
 
             if (mainCoroutine == null)
             {
@@ -69,7 +89,7 @@ namespace DCL
 
         public void PopulateBusesToBeProcessed()
         {
-            WorldState worldState = Environment.i.worldState;
+            IWorldState worldState = Environment.i.world.state;
             string currentSceneId = worldState.currentSceneId;
             List<ParcelScene> scenesSortedByDistance = worldState.scenesSortedByDistance;
 
@@ -148,7 +168,7 @@ namespace DCL
             busesToProcessCount = busesToProcess.Count;
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
             if (mainCoroutine != null)
             {
@@ -165,7 +185,7 @@ namespace DCL
                 }
             }
 
-            Environment.i.sceneController.OnSortScenes -= PopulateBusesToBeProcessed;
+            Environment.i.world.sceneController.OnSortScenes -= PopulateBusesToBeProcessed;
 
             messagingControllers.Clear();
         }
