@@ -28,6 +28,17 @@ jobs:
         with:
           lfs: true
 
+      - name: cwd find
+        run: |
+          pwd
+          find .
+
+      - name: workspace find
+        working-directory: ${{ github.workspace }}
+        run: |
+          pwd
+          find .
+
       # - name: print unity last commit
       #   run: |
       #     git log --pretty=tformat:"%h" -n1 . ${PROJECT_PATH}
