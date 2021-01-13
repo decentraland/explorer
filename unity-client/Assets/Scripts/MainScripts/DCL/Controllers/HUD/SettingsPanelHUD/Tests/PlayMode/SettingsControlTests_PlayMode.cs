@@ -79,7 +79,7 @@ namespace SettingsControlsTests
 
             // Assert
             Assert.AreEqual(newControlModel.controlController.currentQualitySetting.baseResolution, newValue, "baseResolution mismatch");
-            qualitySettingsRefMock.Received(1).UpdateBaseResolution(newValue);
+            qualitySettingsRefMock.Received().UpdateBaseResolution(newValue);
         }
 
         [UnityTest]
