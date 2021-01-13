@@ -85,7 +85,7 @@ namespace DCL
             {
                 //For Base64 protocols we just take the bytes and create the texture
                 //to avoid Unity's web request issue with large URLs
-                byte[] decodedTexture = Convert.FromBase64String(url.Replace(PLAIN_BASE64_PROTOCOL, ""));
+                byte[] decodedTexture = Convert.FromBase64String(url.Substring(PLAIN_BASE64_PROTOCOL.Length));
                 asset.texture = new Texture2D(1,1);
                 asset.texture.LoadImage(decodedTexture);
                 OnSuccess?.Invoke();
