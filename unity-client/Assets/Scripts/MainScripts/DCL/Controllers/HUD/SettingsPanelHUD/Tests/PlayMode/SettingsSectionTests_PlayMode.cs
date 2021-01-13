@@ -56,8 +56,8 @@ namespace SettingsSectionTests
             sectionView.Initialize(
                 sectionController,
                 widgetsToCreate,
-                Substitute.For<IGeneralSettingsReferences>(),
-                Substitute.For<IQualitySettingsReferences>());
+                Substitute.For<IGeneralSettingsController>(),
+                Substitute.For<IQualitySettingsController>());
 
             yield return null;
 
@@ -66,8 +66,8 @@ namespace SettingsSectionTests
                 Arg.Any<ISettingsWidgetView>(),
                 Arg.Any<ISettingsWidgetController>(),
                 Arg.Any<SettingsWidgetModel>(),
-                Arg.Any<IGeneralSettingsReferences>(),
-                Arg.Any<IQualitySettingsReferences>());
+                Arg.Any<IGeneralSettingsController>(),
+                Arg.Any<IQualitySettingsController>());
         }
     }
 }

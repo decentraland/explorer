@@ -13,8 +13,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void Initialize(
             ISettingsControlView settingsControlView,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             base.Initialize(settingsControlView, generalSettingsController, qualitySettingsController);
 

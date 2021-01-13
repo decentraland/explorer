@@ -51,8 +51,8 @@ namespace DCL.SettingsPanelHUD
         public void Initialize(
             IHUD hudController,
             ISettingsPanelHUDController settingsPanelController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
@@ -75,8 +75,8 @@ namespace DCL.SettingsPanelHUD
             IHUD hudController,
             ISettingsPanelHUDController settingsPanelController,
             SettingsSectionList sections,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             settingsPanelConfig.sections = sections;
             Initialize(hudController, settingsPanelController, generalSettingsController, qualitySettingsController);
@@ -90,7 +90,7 @@ namespace DCL.SettingsPanelHUD
                 settingsAnimator.OnWillFinishHide -= OnFinishHide;
         }
 
-        private void CreateSections(IGeneralSettingsReferences generalSettingsController, IQualitySettingsReferences qualitySettingsController)
+        private void CreateSections(IGeneralSettingsController generalSettingsController, IQualitySettingsController qualitySettingsController)
         {
             foreach (SettingsSectionModel sectionConfig in settingsPanelConfig.sections)
             {

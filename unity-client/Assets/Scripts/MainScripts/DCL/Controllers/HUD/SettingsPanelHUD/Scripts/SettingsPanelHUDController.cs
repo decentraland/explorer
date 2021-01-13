@@ -20,8 +20,8 @@ namespace DCL.SettingsPanelHUD
         /// All the needed logic to initializes the controller and its associated view, and make them works.
         /// </summary>
         void Initialize(
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController);
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController);
 
         /// <summary>
         /// Adds a SECTION into the main settings panel.
@@ -35,8 +35,8 @@ namespace DCL.SettingsPanelHUD
             ISettingsSectionView newSection,
             ISettingsSectionController newSectionController,
             SettingsSectionModel sectionConfig,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController);
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController);
 
         /// <summary>
         /// Opens a specific SECTION of the main settings panel.
@@ -107,8 +107,8 @@ namespace DCL.SettingsPanelHUD
         }
 
         public void Initialize(
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             view.Initialize(this, this, generalSettingsController, qualitySettingsController);
         }
@@ -118,8 +118,8 @@ namespace DCL.SettingsPanelHUD
             ISettingsSectionView newSection,
             ISettingsSectionController newSectionController,
             SettingsSectionModel sectionConfig,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             newMenuButton?.Initialize(sectionConfig.icon, sectionConfig.text);
 

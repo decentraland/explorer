@@ -21,8 +21,8 @@ namespace SettingsControllerTests
 
         private GeneralSettings initGeneralSettings;
         private QualitySettings initQualitySettings;
-        private GeneralSettingsReferences generalSettingsReferences;
-        private QualitySettingsReferences qualitySettingsReferences;
+        private GeneralSettingsController generalSettingsController;
+        private QualitySettingsController qualitySettingsController;
 
         private CinemachineFreeLook freeLookCamera;
         private CinemachineVirtualCamera firstPersonCamera;
@@ -79,28 +79,28 @@ namespace SettingsControllerTests
             lwrpaSoftShadowField = urpAsset.GetType().GetField("m_SoftShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
             lwrpaShadowResolutionField = urpAsset.GetType().GetField("m_MainLightShadowmapResolution", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            generalSettingsReferences = GameObject.FindObjectOfType<GeneralSettingsReferences>();
-            qualitySettingsReferences = GameObject.FindObjectOfType<QualitySettingsReferences>();
-            Assert.IsNotNull(generalSettingsReferences, "GeneralSettingsReferences not found in scene");
-            Assert.IsNotNull(qualitySettingsReferences, "QualitySettingsReferences not found in scene");
+            generalSettingsController = GameObject.FindObjectOfType<GeneralSettingsController>();
+            qualitySettingsController = GameObject.FindObjectOfType<QualitySettingsController>();
+            Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
+            Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
 
-            freeLookCamera = generalSettingsReferences.thirdPersonCamera;
+            freeLookCamera = generalSettingsController.thirdPersonCamera;
             Assert.IsNotNull(freeLookCamera, "GeneralSettingsController: thirdPersonCamera reference missing");
 
-            CinemachineVirtualCamera virtualCamera = generalSettingsReferences.firstPersonCamera;
+            CinemachineVirtualCamera virtualCamera = generalSettingsController.firstPersonCamera;
             Assert.IsNotNull(virtualCamera, "GeneralSettingsController: firstPersonCamera reference missing");
             povCamera = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
             Assert.IsNotNull(povCamera, "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
 
-            environmentLight = qualitySettingsReferences.environmentLight;
+            environmentLight = qualitySettingsController.environmentLight;
             Assert.IsNotNull(environmentLight, "QualitySettingsController: environmentLight reference missing");
 
-            postProcessVolume = qualitySettingsReferences.postProcessVolume;
+            postProcessVolume = qualitySettingsController.postProcessVolume;
             Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
 
-            firstPersonCamera = qualitySettingsReferences.firstPersonCamera;
+            firstPersonCamera = qualitySettingsController.firstPersonCamera;
             Assert.IsNotNull(firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(qualitySettingsReferences.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
+            Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
         }
 
         [UnityTearDown]
@@ -115,8 +115,8 @@ namespace SettingsControllerTests
         [Test]
         public void HaveItSettingsReferencesSetupCorrectly()
         {
-            GeneralSettingsReferences generalSettingsController = Object.FindObjectOfType<GeneralSettingsReferences>();
-            QualitySettingsReferences qualitySettingsController = Object.FindObjectOfType<QualitySettingsReferences>();
+            GeneralSettingsController generalSettingsController = Object.FindObjectOfType<GeneralSettingsController>();
+            QualitySettingsController qualitySettingsController = Object.FindObjectOfType<QualitySettingsController>();
 
             Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
             Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
@@ -139,7 +139,7 @@ namespace SettingsControllerTests
             AudioListener.volume = initGeneralSettings.sfxVolume;
 
             // Act
-            generalSettingsReferences.UpdateSfxVolume(1f);
+            generalSettingsController.UpdateSfxVolume(1f);
 
             // Assert
             UnityEngine.Assertions.Assert.AreEqual(AudioListener.volume, 1f, "audioListener sfxVolume mismatch");
@@ -149,19 +149,19 @@ namespace SettingsControllerTests
         public void ApplyMouseSensivityCorrectly()
         {
             // Arrange
-            var povSpeed = Mathf.Lerp(GeneralSettingsReferences.FIRST_PERSON_MIN_SPEED, GeneralSettingsReferences.FIRST_PERSON_MAX_SPEED, initGeneralSettings.mouseSensitivity);
+            var povSpeed = Mathf.Lerp(GeneralSettingsController.FIRST_PERSON_MIN_SPEED, GeneralSettingsController.FIRST_PERSON_MAX_SPEED, initGeneralSettings.mouseSensitivity);
             povCamera.m_HorizontalAxis.m_MaxSpeed = povSpeed;
             povCamera.m_VerticalAxis.m_MaxSpeed = povSpeed;
 
             // Act
-            generalSettingsReferences.UpdateMouseSensivity(0f);
+            generalSettingsController.UpdateMouseSensivity(0f);
 
             // Assert
-            povSpeed = Mathf.Lerp(GeneralSettingsReferences.FIRST_PERSON_MIN_SPEED, GeneralSettingsReferences.FIRST_PERSON_MAX_SPEED, 0f);
+            povSpeed = Mathf.Lerp(GeneralSettingsController.FIRST_PERSON_MIN_SPEED, GeneralSettingsController.FIRST_PERSON_MAX_SPEED, 0f);
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, povSpeed, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, povSpeed, "pov (m_VerticalAxis) mouseSensitivity mismatch");
-            var freeLookXSpeed = Mathf.Lerp(GeneralSettingsReferences.THIRD_PERSON_X_MIN_SPEED, GeneralSettingsReferences.THIRD_PERSON_X_MAX_SPEED, 0f);
-            var freeLookYSpeed = Mathf.Lerp(GeneralSettingsReferences.THIRD_PERSON_Y_MIN_SPEED, GeneralSettingsReferences.THIRD_PERSON_Y_MAX_SPEED, 0f);
+            var freeLookXSpeed = Mathf.Lerp(GeneralSettingsController.THIRD_PERSON_X_MIN_SPEED, GeneralSettingsController.THIRD_PERSON_X_MAX_SPEED, 0f);
+            var freeLookYSpeed = Mathf.Lerp(GeneralSettingsController.THIRD_PERSON_Y_MIN_SPEED, GeneralSettingsController.THIRD_PERSON_Y_MAX_SPEED, 0f);
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, freeLookXSpeed, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
             UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, freeLookYSpeed, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
         }
@@ -176,7 +176,7 @@ namespace SettingsControllerTests
             bloom.active = initQualitySettings.bloom;
 
             // Act
-            qualitySettingsReferences.UpdateBloom(true);
+            qualitySettingsController.UpdateBloom(true);
 
             // Assert
             Assert.AreEqual(bloom.active, true, "bloom mismatch");
@@ -192,7 +192,7 @@ namespace SettingsControllerTests
             urpAsset.msaaSampleCount = (int)initQualitySettings.antiAliasing;
 
             // Act
-            qualitySettingsReferences.UpdateAntiAliasing((int)MsaaQuality._8x);
+            qualitySettingsController.UpdateAntiAliasing((int)MsaaQuality._8x);
 
             // Assert
             Assert.AreEqual(urpAsset.msaaSampleCount, (int)MsaaQuality._8x, "antiAliasing mismatch");
@@ -208,7 +208,7 @@ namespace SettingsControllerTests
             toneMapping.active = initQualitySettings.colorGrading;
 
             // Act
-            qualitySettingsReferences.UpdateColorGrading(false);
+            qualitySettingsController.UpdateColorGrading(false);
 
             // Assert
             Assert.AreEqual(toneMapping.active, false, "colorGrading mismatch");
@@ -225,7 +225,7 @@ namespace SettingsControllerTests
             firstPersonCamera.m_Lens.FarClipPlane = initQualitySettings.cameraDrawDistance;
 
             // Act
-            qualitySettingsReferences.UpdateDrawDistance(5f);
+            qualitySettingsController.UpdateDrawDistance(5f);
 
             // Assert
             Assert.AreEqual(firstPersonCamera.m_Lens.FarClipPlane, 5f, "cameraDrawDistance (firstPersonCamera) mismatch");
@@ -242,7 +242,7 @@ namespace SettingsControllerTests
             urpAsset.renderScale = initQualitySettings.renderScale;
 
             // Act
-            qualitySettingsReferences.UpdateRenderingScale(0.3f);
+            qualitySettingsController.UpdateRenderingScale(0.3f);
 
             // Assert
             Assert.AreEqual(urpAsset.renderScale, 0.3f, "renderScale mismatch");
@@ -258,7 +258,7 @@ namespace SettingsControllerTests
             lwrpaShadowField?.SetValue(urpAsset, initQualitySettings.shadows);
 
             // Act
-            qualitySettingsReferences.UpdateShadows(true);
+            qualitySettingsController.UpdateShadows(true);
 
             // Assert
             Assert.AreEqual(urpAsset.supportsMainLightShadows, true, "shadows mismatch");
@@ -274,7 +274,7 @@ namespace SettingsControllerTests
             lwrpaSoftShadowField?.SetValue(urpAsset, initQualitySettings.softShadows);
 
             // Act
-            qualitySettingsReferences.UpdateSoftShadows(false);
+            qualitySettingsController.UpdateSoftShadows(false);
 
             // Assert
             Assert.AreEqual(urpAsset.supportsSoftShadows, false, "softShadows mismatch");
@@ -290,7 +290,7 @@ namespace SettingsControllerTests
             lwrpaShadowResolutionField?.SetValue(urpAsset, initQualitySettings.shadowResolution);
 
             // Act
-            qualitySettingsReferences.UpdateShadowResolution(UnityEngine.Rendering.Universal.ShadowResolution._2048);
+            qualitySettingsController.UpdateShadowResolution(UnityEngine.Rendering.Universal.ShadowResolution._2048);
 
             // Assert
             Assert.AreEqual(urpAsset.mainLightShadowmapResolution, (int)UnityEngine.Rendering.Universal.ShadowResolution._2048, "shadowResolution mismatch");
@@ -306,7 +306,7 @@ namespace SettingsControllerTests
             urpAsset.shadowDistance = initQualitySettings.shadowDistance;
 
             // Act
-            qualitySettingsReferences.UpdateShadowDistance(90f);
+            qualitySettingsController.UpdateShadowDistance(90f);
 
             // Assert
             Assert.AreEqual(urpAsset.shadowDistance, 90f, "shadowDistance mismatch");

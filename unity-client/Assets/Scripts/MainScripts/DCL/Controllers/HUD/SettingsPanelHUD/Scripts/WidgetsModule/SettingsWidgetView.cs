@@ -25,8 +25,8 @@ namespace DCL.SettingsPanelHUD.Widgets
             string title,
             ISettingsWidgetController settingsWidgetController,
             List<SettingsControlGroup> controlColumns,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController);
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController);
     }
 
     /// <summary>
@@ -44,8 +44,8 @@ namespace DCL.SettingsPanelHUD.Widgets
             string title,
             ISettingsWidgetController settingsWidgetController,
             List<SettingsControlGroup> controlColumns,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             this.settingsWidgetController = settingsWidgetController;
             this.controlColumns = controlColumns;
@@ -61,7 +61,7 @@ namespace DCL.SettingsPanelHUD.Widgets
             CommonSettingsEvents.OnRefreshAllWidgetsSize -= AdjustWidgetHeight;
         }
 
-        private void CreateControls(IGeneralSettingsReferences generalSettingsController, IQualitySettingsReferences qualitySettingsController)
+        private void CreateControls(IGeneralSettingsController generalSettingsController, IQualitySettingsController qualitySettingsController)
         {
             Assert.IsTrue(controlColumns.Count == 0 || controlColumns.Count == controlsContainerColumns.Count,
                 $"Settings Configuration exception: The number of columns set in the '{this.name}' view does not match with the received configuration.");

@@ -231,7 +231,7 @@ public class HUDController : MonoBehaviour
             case HUDElementID.SETTINGS_PANEL:
                 CreateHudElement<SettingsPanelHUDController>(configuration, hudElementId);
                 if (settingsPanelHud != null)
-                    settingsPanelHud.Initialize(GeneralSettingsReferences.i, QualitySettingsReferences.i);
+                    settingsPanelHud.Initialize(GeneralSettingsController.i, QualitySettingsController.i);
                 break;
             case HUDElementID.EXPRESSIONS:
                 CreateHudElement<ExpressionsHUDController>(configuration, hudElementId);

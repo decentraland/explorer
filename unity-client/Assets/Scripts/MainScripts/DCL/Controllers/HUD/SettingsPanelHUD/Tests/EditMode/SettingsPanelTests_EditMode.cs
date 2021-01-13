@@ -49,15 +49,15 @@ namespace SettingsPanelTests
                 newSectionView,
                 newSectionController,
                 newSectionConfig,
-                Substitute.For<IGeneralSettingsReferences>(),
-                Substitute.For<IQualitySettingsReferences>());
+                Substitute.For<IGeneralSettingsController>(),
+                Substitute.For<IQualitySettingsController>());
 
             // Assert
             newSectionView.Received(1).Initialize(
                 newSectionController,
                 Arg.Any<List<SettingsWidgetModel>>(),
-                Arg.Any<IGeneralSettingsReferences>(),
-                Arg.Any<IQualitySettingsReferences>());
+                Arg.Any<IGeneralSettingsController>(),
+                Arg.Any<IQualitySettingsController>());
 
             newSectionView.Received(1).SetActive(false);
             Assert.Contains(newSectionView, panelController.sections, "The new section should be contained in the section list.");
@@ -72,8 +72,8 @@ namespace SettingsPanelTests
                 newSectionView,
                 newSectionController,
                 newSectionConfig,
-                Substitute.For<IGeneralSettingsReferences>(),
-                Substitute.For<IQualitySettingsReferences>());
+                Substitute.For<IGeneralSettingsController>(),
+                Substitute.For<IQualitySettingsController>());
 
             // Act
             panelController.OpenSection(newSectionView);
@@ -91,8 +91,8 @@ namespace SettingsPanelTests
                 newSectionView,
                 newSectionController,
                 newSectionConfig,
-                Substitute.For<IGeneralSettingsReferences>(),
-                Substitute.For<IQualitySettingsReferences>());
+                Substitute.For<IGeneralSettingsController>(),
+                Substitute.For<IQualitySettingsController>());
 
             // Act
             panelController.OpenSection(panelController.sections.Count - 1);

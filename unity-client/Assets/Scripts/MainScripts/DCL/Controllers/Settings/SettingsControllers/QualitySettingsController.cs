@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 namespace DCL.SettingsController
 {
-    public interface IQualitySettingsReferences
+    public interface IQualitySettingsController
     {
         void UpdateBloom(bool isActive);
         void UpdateAntiAliasing(int newValue);
@@ -29,7 +29,7 @@ namespace DCL.SettingsController
         void UpdateSoftShadows(bool isActive);
     }
 
-    public class QualitySettingsReferences : MonoBehaviour, IQualitySettingsReferences
+    public class QualitySettingsController : MonoBehaviour, IQualitySettingsController
     {
         public Light environmentLight = null;
         public Volume postProcessVolume = null;
@@ -37,7 +37,7 @@ namespace DCL.SettingsController
         public CinemachineVirtualCamera firstPersonCamera = null;
         public CullingControllerSettingsData cullingControllerSettingsData = null;
 
-        public static QualitySettingsReferences i { get; private set; }
+        public static QualitySettingsController i { get; private set; }
 
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
         private FieldInfo lwrpaShadowField = null;

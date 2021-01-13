@@ -12,13 +12,13 @@ namespace DCL.SettingsPanelHUD.Controls
         internal SettingsData.GeneralSettings currentGeneralSettings;
         internal SettingsData.QualitySettings currentQualitySetting;
         protected ISettingsControlView view;
-        protected IGeneralSettingsReferences generalSettingsController;
-        protected IQualitySettingsReferences qualitySettingsController;
+        protected IGeneralSettingsController generalSettingsController;
+        protected IQualitySettingsController qualitySettingsController;
 
         public virtual void Initialize(
             ISettingsControlView settingsControlView,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             view = settingsControlView;
             this.generalSettingsController = generalSettingsController;

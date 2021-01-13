@@ -16,8 +16,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void Initialize(
             SettingsControlModel controlConfig,
             SettingsControlController settingsControlController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             base.Initialize(controlConfig, settingsControlController, generalSettingsController, qualitySettingsController);
             settingsControlController.OnControlChanged(toggle.isOn);

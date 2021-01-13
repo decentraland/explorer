@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DCL.SettingsController
 {
-    public interface IGeneralSettingsReferences
+    public interface IGeneralSettingsController
     {
         void UpdateAllowVoiceChat(int isActive);
         void UpdateVoiceChatVolume(float newValue);
@@ -12,7 +12,7 @@ namespace DCL.SettingsController
         void UpdateSfxVolume(float newValue);
     }
 
-    public class GeneralSettingsReferences : MonoBehaviour, IGeneralSettingsReferences
+    public class GeneralSettingsController : MonoBehaviour, IGeneralSettingsController
     {
         internal const float FIRST_PERSON_MIN_SPEED = 25f;
         internal const float FIRST_PERSON_MAX_SPEED = 350f;
@@ -25,7 +25,7 @@ namespace DCL.SettingsController
         public CinemachineVirtualCamera firstPersonCamera;
         private CinemachinePOV povCamera;
 
-        public static GeneralSettingsReferences i { get; private set; }
+        public static GeneralSettingsController i { get; private set; }
 
         private void Awake()
         {

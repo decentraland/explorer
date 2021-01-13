@@ -20,8 +20,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void Initialize(
             SettingsControlModel controlConfig,
             SettingsControlController settingsControlController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             this.sliderControlConfig = (SliderControlModel)controlConfig;
             slider.maxValue = this.sliderControlConfig.sliderMaxValue;
