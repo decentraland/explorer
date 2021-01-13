@@ -12,6 +12,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor
         -enableCodeCoverage \
         -coverageResultsPath "$PROJECT_PATH/CodeCoverage/" \
         -coverageOptions "assemblyFilters:-*unity*" \
+        -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf \
         -burst-disable-compilation
 
 # Catch exit code
