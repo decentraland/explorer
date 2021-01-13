@@ -2,10 +2,14 @@
 
 set -x
 
-      # -projectPath "$PROJECT_PATH" \
+find ${PROJECT_PATH}
+echo '-----------------------'
+find .
+
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
         -batchmode \
         -logFile /dev/stdout \
+        -projectPath "$PROJECT_PATH" \
         -buildTarget "$BUILD_TARGET" \
         -runTests \
         -testPlatform EditMode \
