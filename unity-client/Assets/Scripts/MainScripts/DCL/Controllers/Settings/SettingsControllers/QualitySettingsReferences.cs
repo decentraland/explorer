@@ -97,7 +97,7 @@ namespace DCL.SettingsController
         public void UpdateColorGrading(bool isActive)
         {
             Tonemapping toneMapping;
-            if (QualitySettingsReferences.i.postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
+            if (postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
             {
                 toneMapping.active = isActive;
             }
@@ -117,13 +117,13 @@ namespace DCL.SettingsController
                 var settings = Environment.i.platform.cullingController.GetSettingsCopy();
 
                 settings.rendererProfile = CullingControllerProfile.Lerp(
-                    QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMin,
-                    QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMax,
+                    cullingControllerSettingsData.rendererProfileMin,
+                    cullingControllerSettingsData.rendererProfileMax,
                     newValue / 100.0f);
 
                 settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
-                    QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMin,
-                    QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMax,
+                    cullingControllerSettingsData.skinnedRendererProfileMin,
+                    cullingControllerSettingsData.skinnedRendererProfileMax,
                     newValue / 100.0f);
 
                 Environment.i.platform.cullingController.SetSettings(settings);
@@ -132,11 +132,11 @@ namespace DCL.SettingsController
 
         public void UpdateDrawDistance(float newValue)
         {
-            if (QualitySettingsReferences.i.thirdPersonCamera)
-                QualitySettingsReferences.i.thirdPersonCamera.m_Lens.FarClipPlane = newValue;
+            if (thirdPersonCamera)
+                thirdPersonCamera.m_Lens.FarClipPlane = newValue;
 
-            if (QualitySettingsReferences.i.firstPersonCamera)
-                QualitySettingsReferences.i.firstPersonCamera.m_Lens.FarClipPlane = newValue;
+            if (firstPersonCamera)
+                firstPersonCamera.m_Lens.FarClipPlane = newValue;
 
             RenderSettings.fogEndDistance = newValue;
             RenderSettings.fogStartDistance = newValue * 0.8f;
@@ -158,14 +158,14 @@ namespace DCL.SettingsController
             if (lightweightRenderPipelineAsset != null)
                 lwrpaShadowField?.SetValue(lightweightRenderPipelineAsset, isActive);
 
-            if (QualitySettingsReferences.i.environmentLight)
+            if (environmentLight)
             {
                 LightShadows shadowType = LightShadows.None;
 
                 if (isActive)
                     shadowType = isActive ? LightShadows.Soft : LightShadows.Hard;
 
-                QualitySettingsReferences.i.environmentLight.shadows = shadowType;
+                environmentLight.shadows = shadowType;
             }
         }
 
@@ -186,14 +186,14 @@ namespace DCL.SettingsController
             if (lightweightRenderPipelineAsset != null)
                 lwrpaSoftShadowField?.SetValue(lightweightRenderPipelineAsset, isActive);
 
-            if (QualitySettingsReferences.i.environmentLight)
+            if (environmentLight)
             {
                 LightShadows shadowType = LightShadows.None;
 
                 if (Settings.i.qualitySettings.shadows)
                     shadowType = isActive ? LightShadows.Soft : LightShadows.Hard;
 
-                QualitySettingsReferences.i.environmentLight.shadows = shadowType;
+                environmentLight.shadows = shadowType;
             }
         }
 
