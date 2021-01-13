@@ -6,14 +6,14 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor
         -batchmode \
         -logFile /dev/stdout \
         -projectPath "$PROJECT_PATH" \
+        -buildTarget "$BUILD_TARGET" \
         -runTests \
         -testPlatform EditMode \
         -testResults "$PROJECT_PATH/editmode-results.xml" \
         -enableCodeCoverage \
         -coverageResultsPath "$PROJECT_PATH/CodeCoverage/" \
         -coverageOptions "assemblyFilters:-*unity*" \
-        -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf \
-        -burst-disable-compilation
+        -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf
 
 # Catch exit code
 UNITY_EXIT_CODE=$?

@@ -41,12 +41,18 @@ jobs:
 
       # Run Editor tests
       - name: Run Editor tests
+        working-directory: ${{ github.workspace }}/unity-client
+        if: ${{ always() }}
         run: sh .github/workflows/scripts/run-unity-edit-mode-tests.sh
 
       # Run PlayMode tests
       - name: Run PlayMode tests
+        working-directory: ${{ github.workspace }}/unity-client
+        if: ${{ always() }}
         run: sh .github/workflows/scripts/run-unity-play-mode-tests.sh
 
       # Build
       - name: Build
+        working-directory: ${{ github.workspace }}/unity-client
+        if: ${{ always() }}
         run: sh .github/workflows/scripts/run-unity-build.sh
