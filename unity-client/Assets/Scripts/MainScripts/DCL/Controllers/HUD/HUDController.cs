@@ -1,5 +1,6 @@
 using DCL;
 using DCL.HelpAndSupportHUD;
+using DCL.SettingsController;
 using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
 using System.Collections.Generic;
@@ -230,7 +231,7 @@ public class HUDController : MonoBehaviour
             case HUDElementID.SETTINGS_PANEL:
                 CreateHudElement<SettingsPanelHUDController>(configuration, hudElementId);
                 if (settingsPanelHud != null)
-                    settingsPanelHud.Initialize();
+                    settingsPanelHud.Initialize(GeneralSettingsReferences.i, QualitySettingsReferences.i);
                 break;
             case HUDElementID.EXPRESSIONS:
                 CreateHudElement<ExpressionsHUDController>(configuration, hudElementId);

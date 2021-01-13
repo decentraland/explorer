@@ -9,8 +9,8 @@ namespace DCL.SettingsPanelHUD.Controls
     /// </summary>
     public class SettingsControlController : ScriptableObject
     {
-        protected SettingsData.GeneralSettings currentGeneralSettings;
-        protected SettingsData.QualitySettings currentQualitySetting;
+        internal SettingsData.GeneralSettings currentGeneralSettings;
+        internal SettingsData.QualitySettings currentQualitySetting;
         protected ISettingsControlView view;
         protected IGeneralSettingsReferences generalSettingsController;
         protected IQualitySettingsReferences qualitySettingsController;

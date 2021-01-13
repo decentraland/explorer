@@ -1,330 +1,303 @@
-using Cinemachine;
 using DCL.SettingsController;
+using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Controls;
+using NSubstitute;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using GeneralSettings = DCL.SettingsData.GeneralSettings;
-using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace SettingsControlsTests
 {
     public class SettingsControlTests_PlayMode
     {
-        private const string TEST_SCENE_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SettingsPanelHUD/Tests/TestScenes";
-        private const string TEST_SCENE_NAME = "SettingsTestScene";
         private const string CONTROL_VIEW_PREFAB_PATH = "Controls/{controlType}SettingsControlTemplate";
 
         private SettingsControlView newControlView;
         private SettingsControlModel newControlModel;
-        private SettingsControlController newControlController;
+        private IGeneralSettingsReferences generalSettingsRefMock;
+        private IQualitySettingsReferences qualitySettingsRefMock;
 
-        private GeneralSettings initGeneralSettings;
-        private GeneralSettings testGeneralSettings;
-        private QualitySettings initQualitySettings;
-        private QualitySettings testQualitySettings;
-
-        private CinemachineFreeLook freeLookCamera;
-        private CinemachineVirtualCamera firstPersonCamera;
-        private CinemachinePOV povCamera;
-        private Light environmentLight;
-        private Volume postProcessVolume;
-        private UniversalRenderPipelineAsset urpAsset;
-
-        [UnitySetUp]
-        public IEnumerator SetUp()
+        [SetUp]
+        public void SetUp()
         {
-            yield return EditorSceneManager.LoadSceneAsyncInPlayMode($"{TEST_SCENE_PATH}/{TEST_SCENE_NAME}.unity", new LoadSceneParameters(LoadSceneMode.Additive));
-
-            SetInitialGeneralSettings();
-            SetInitialQualitySettings();
-            SetupReferences();
+            generalSettingsRefMock = Substitute.For<IGeneralSettingsReferences>();
+            qualitySettingsRefMock = Substitute.For<IQualitySettingsReferences>();
         }
 
-        private void SetInitialGeneralSettings()
+        [TearDown]
+        public void TearDown()
         {
-            testGeneralSettings = new GeneralSettings()
-            {
-                mouseSensitivity = 1,
-                sfxVolume = 0
-            };
-
-            initGeneralSettings = DCL.Settings.i.generalSettings;
-            DCL.Settings.i.ApplyGeneralSettings(testGeneralSettings);
-            Assert.IsTrue(DCL.Settings.i.generalSettings.Equals(testGeneralSettings), "General Settings mismatch");
-        }
-
-        private void SetInitialQualitySettings()
-        {
-            testQualitySettings = new QualitySettings()
-            {
-                baseResolution = QualitySettings.BaseResolution.BaseRes_720,
-                antiAliasing = MsaaQuality._4x,
-                renderScale = 0.1f,
-                shadows = false,
-                softShadows = true,
-                shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
-                shadowDistance = 80f,
-                cameraDrawDistance = 50.1f,
-                bloom = false,
-                colorGrading = true,
-                detailObjectCullingThreshold = 0,
-                enableDetailObjectCulling = true
-            };
-
-            initQualitySettings = DCL.Settings.i.qualitySettings;
-            DCL.Settings.i.ApplyQualitySettings(testQualitySettings);
-            Assert.IsTrue(DCL.Settings.i.qualitySettings.Equals(testQualitySettings), "Quality Setting mismatch");
-        }
-
-        private void SetupReferences()
-        {
-            urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-            GeneralSettingsReferences generalSettingsReferences = GameObject.FindObjectOfType<GeneralSettingsReferences>();
-            QualitySettingsReferences qualitySettingsReferences = GameObject.FindObjectOfType<QualitySettingsReferences>();
-
-            Assert.IsNotNull(generalSettingsReferences, "GeneralSettingsReferences not found in scene");
-            Assert.IsNotNull(qualitySettingsReferences, "QualitySettingsReferences not found in scene");
-
-            freeLookCamera = generalSettingsReferences.thirdPersonCamera;
-            Assert.IsNotNull(freeLookCamera, "GeneralSettingsController: thirdPersonCamera reference missing");
-
-            CinemachineVirtualCamera virtualCamera = generalSettingsReferences.firstPersonCamera;
-            Assert.IsNotNull(virtualCamera, "GeneralSettingsController: firstPersonCamera reference missing");
-            povCamera = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
-            Assert.IsNotNull(povCamera, "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
-
-            environmentLight = qualitySettingsReferences.environmentLight;
-            Assert.IsNotNull(environmentLight, "QualitySettingsController: environmentLight reference missing");
-
-            postProcessVolume = qualitySettingsReferences.postProcessVolume;
-            Assert.IsNotNull(postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
-
-            firstPersonCamera = qualitySettingsReferences.firstPersonCamera;
-            Assert.IsNotNull(firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(qualitySettingsReferences.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
-        }
-
-        [UnityTearDown]
-        public IEnumerator TearDown()
-        {
-            Object.Destroy(newControlController);
             Object.Destroy(newControlModel);
 
             if (newControlView != null)
                 Object.Destroy(newControlView.gameObject);
-
-            DCL.Settings.i.ApplyGeneralSettings(initGeneralSettings);
-            DCL.Settings.i.ApplyQualitySettings(initQualitySettings);
-
-            yield return EditorSceneManager.UnloadSceneAsync(TEST_SCENE_NAME);
-        }
-
-        [Test]
-        public void HaveItSettingsReferencesSetupCorrectly()
-        {
-            GeneralSettingsReferences generalSettingsController = Object.FindObjectOfType<GeneralSettingsReferences>();
-            QualitySettingsReferences qualitySettingsController = Object.FindObjectOfType<QualitySettingsReferences>();
-
-            Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
-            Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
-            Assert.IsNotNull(generalSettingsController.thirdPersonCamera, "GeneralSettingsController: thirdPersonCamera reference missing");
-
-            CinemachineVirtualCamera virtualCamera = generalSettingsController.firstPersonCamera;
-            Assert.IsNotNull(virtualCamera, "GeneralSettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(virtualCamera.GetCinemachineComponent<CinemachinePOV>(), "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
-
-            Assert.IsNotNull(qualitySettingsController.environmentLight, "QualitySettingsController: environmentLight reference missing");
-            Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
-            Assert.IsNotNull(qualitySettingsController.firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
-        }
-
-        [Test]
-        public void HaveQualityPresetSetCorrectly()
-        {
-            Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.Length > 0, "QualitySettingsData: No presets created");
-            Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.defaultIndex > 0
-                          && DCL.Settings.i.qualitySettingsPresets.defaultIndex < DCL.Settings.i.qualitySettingsPresets.Length, "QualitySettingsData: Wrong default preset index");
         }
 
         [UnityTest]
-        public IEnumerator ApplyBloomCorrectly()
+        public IEnumerator ChangeAllowVoiceChatCorrectly()
+        {
+            // Arrange
+            string[] labels = { "All users", "Verified users", "Friends" };
+            yield return CreateSpinBoxSettingsControl<AllowVoiceChatControlController>(labels);
+
+            // Act
+            DCL.SettingsData.GeneralSettings.VoiceChatAllow newValue = DCL.SettingsData.GeneralSettings.VoiceChatAllow.FRIENDS_ONLY;
+            ((SpinBoxSettingsControlView)newControlView).spinBoxControl.value = (int)newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentGeneralSettings.voiceChatAllow, newValue, "voiceChatAllow mismatch");
+            generalSettingsRefMock.Received(1).UpdateAllowVoiceChat((int)newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeAntialiasingChatCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<AntiAliasingControlController>(0, 3, true);
+
+            // Act
+            UnityEngine.Rendering.Universal.MsaaQuality newValue = UnityEngine.Rendering.Universal.MsaaQuality._8x;
+            ((SliderSettingsControlView)newControlView).sliderControl.value = (int)newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.antiAliasing, newValue, "antiAliasing mismatch");
+            qualitySettingsRefMock.Received(1).UpdateAntiAliasing((int)newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeBaseResolutionCorrectly()
+        {
+            // Arrange
+            string[] labels = { "Match 720p", "Match 1080p", "Unlimited" };
+            yield return CreateSpinBoxSettingsControl<BaseResolutionControlController>(labels);
+
+            // Act
+            DCL.SettingsData.QualitySettings.BaseResolution newValue = DCL.SettingsData.QualitySettings.BaseResolution.BaseRes_1080;
+            ((SpinBoxSettingsControlView)newControlView).spinBoxControl.value = (int)newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.baseResolution, newValue, "baseResolution mismatch");
+            qualitySettingsRefMock.Received(1).UpdateBaseResolution(newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeBloomCorrectly()
         {
             // Arrange
             yield return CreateToggleSettingsControl<BloomControlController>();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
 
             // Assert
-            if (postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
-            {
-                Assert.IsTrue(bloom.active == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
-            }
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.bloom, newValue, "bloom mismatch");
+            qualitySettingsRefMock.Received(1).UpdateBloom(newValue);
         }
 
         [UnityTest]
-        public IEnumerator ApplyMuteSoundCorrectly()
-        {
-            // Arrange
-            yield return CreateToggleSettingsControl<MuteSoundControlController>();
-
-            // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
-
-            // Assert
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
-        }
-
-        //[UnityTest]
-        //public IEnumerator ApplyMouseSensivityCorrectly()
-        //{
-        //    // Arrange
-        //    yield return CreateSliderSettingsControl<MouseSensivityControlController>(1f, 100f, true);
-
-        //    // Act
-        //    ((SliderSettingsControlView)newControlView).sliderControl.value = 0f;
-
-        //    // Assert
-        //    var povSpeed = Mathf.Lerp(GeneralSettingsReferences.FIRST_PERSON_MIN_SPEED, MouseSensivityControlController.FIRST_PERSON_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
-        //    UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, povSpeed, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
-        //    UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, povSpeed, "pov (m_VerticalAxis) mouseSensitivity mismatch");
-        //    var freeLookXSpeed = Mathf.Lerp(GeneralSettingsReferences.THIRD_PERSON_X_MIN_SPEED, GeneralSettingsReferences.THIRD_PERSON_X_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
-        //    var freeLookYSpeed = Mathf.Lerp(GeneralSettingsReferences.THIRD_PERSON_Y_MIN_SPEED, GeneralSettingsReferences.THIRD_PERSON_Y_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
-        //    UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, freeLookXSpeed, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
-        //    UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, freeLookYSpeed, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
-        //}
-
-        [UnityTest]
-        public IEnumerator ApplyAntialiasingCorrectly()
-        {
-            // Arrange
-            yield return CreateSliderSettingsControl<AntiAliasingControlController>(0f, 1f, true);
-
-            // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 0f;
-
-            // Assert
-            Assert.IsTrue(urpAsset.msaaSampleCount == (int)DCL.Settings.i.qualitySettings.antiAliasing, "antiAliasing mismatch");
-        }
-
-        [UnityTest]
-        public IEnumerator ApplyColorGradingCorrectly()
+        public IEnumerator ChangeColorGradingCorrectly()
         {
             // Arrange
             yield return CreateToggleSettingsControl<ColorGradingControlController>();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = false;
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
 
             // Assert
-            if (postProcessVolume.profile.TryGet<Tonemapping>(out Tonemapping toneMapping))
-            {
-                Assert.IsTrue(toneMapping.active == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
-            }
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.colorGrading, newValue, "colorGrading mismatch");
+            qualitySettingsRefMock.Received(1).UpdateColorGrading(newValue);
         }
 
         [UnityTest]
-        public IEnumerator ApplyDrawDistanceCorrectly()
+        public IEnumerator ChangeDetailObjectCullingCorrectly()
         {
             // Arrange
-            yield return CreateSliderSettingsControl<DrawDistanceControlController>(40f, 100f, true);
+            yield return CreateToggleSettingsControl<DetailObjectCullingControlController>();
 
             // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 5f;
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
 
             // Assert
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(firstPersonCamera.m_Lens.FarClipPlane, DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (firstPersonCamera) mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_Lens.FarClipPlane, DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (freeLookCamera) mismatch");
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.enableDetailObjectCulling, newValue, "enableDetailObjectCulling mismatch");
+            qualitySettingsRefMock.Received(1).UpdateDetailObjectCulling(newValue);
         }
 
         [UnityTest]
-        public IEnumerator ApplyRenderingScaleCorrectly()
+        public IEnumerator ChangeDetailObjectCullingSizeCorrectly()
         {
             // Arrange
-            yield return CreateSliderSettingsControl<RenderingScaleControlController>(0f, 1f, false);
+            yield return CreateSliderSettingsControl<DetailObjectCullingSizeControlController>(0, 100, true);
 
             // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 0.3f;
+            float newValue = 20f;
+            ((SliderSettingsControlView)newControlView).sliderControl.value = newValue;
 
             // Assert
-            Assert.IsTrue(urpAsset.renderScale == DCL.Settings.i.qualitySettings.renderScale, "renderScale mismatch");
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.detailObjectCullingThreshold, newValue, "detailObjectCullingThreshold mismatch");
+            qualitySettingsRefMock.Received(1).UpdateDetailObjectCullingSize(newValue);
         }
 
         [UnityTest]
-        public IEnumerator ApplyShadowCorrectly()
+        public IEnumerator ChangeDrawDistanceCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<DrawDistanceControlController>(40, 100, true);
+
+            // Act
+            float newValue = 50f;
+            ((SliderSettingsControlView)newControlView).sliderControl.value = newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.cameraDrawDistance, newValue, "cameraDrawDistance mismatch");
+            qualitySettingsRefMock.Received(1).UpdateDrawDistance(newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeFPSLimitCorrectly()
+        {
+            // Arrange
+            yield return CreateToggleSettingsControl<FPSLimitControlController>();
+
+            // Act
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.fpsCap, newValue, "currentQualitySetting mismatch");
+            qualitySettingsRefMock.Received(1).UpdateFPSLimit(newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeMouseSensivityCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<MouseSensivityControlController>(1, 100, true);
+
+            // Act
+            float newValue = 80f;
+            float remapedNewValue = ((MouseSensivityControlController)newControlModel.controlController).RemapMouseSensitivityTo01(newValue);
+            ((SliderSettingsControlView)newControlView).sliderControl.value = newValue;
+
+            // Assert
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(
+                newControlModel.controlController.currentGeneralSettings.mouseSensitivity,
+                remapedNewValue,
+                "mouseSensitivity mismatch");
+
+            generalSettingsRefMock.Received(1).UpdateMouseSensivity(remapedNewValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeMuteSoundCorrectly()
+        {
+            // Arrange
+            yield return CreateToggleSettingsControl<MuteSoundControlController>();
+
+            // Act
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentGeneralSettings.sfxVolume, newValue ? 1f : 0f, "sfxVolume mismatch");
+            generalSettingsRefMock.Received(1).UpdateSfxVolume(newValue ? 1f : 0f);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeRenderingScaleCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<RenderingScaleControlController>(0, 1, false);
+
+            // Act
+            float newValue = 0.5f;
+            ((SliderSettingsControlView)newControlView).sliderControl.value = newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.renderScale, newValue, "renderScale mismatch");
+            qualitySettingsRefMock.Received(1).UpdateRenderingScale(newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeShadowsCorrectly()
         {
             // Arrange
             yield return CreateToggleSettingsControl<ShadowControlController>();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
 
             // Assert
-            Assert.IsTrue(urpAsset.supportsMainLightShadows == DCL.Settings.i.qualitySettings.shadows, "shadows mismatch");
-
-            LightShadows shadowType = LightShadows.None;
-            if (DCL.Settings.i.qualitySettings.shadows)
-            {
-                shadowType = DCL.Settings.i.qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
-            }
-
-            Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.shadows, newValue, "shadows mismatch");
+            qualitySettingsRefMock.Received(1).UpdateShadows(newValue);
+            Assert.AreEqual(CommonSettingsScriptableObjects.shadowsDisabled.Get(), !newValue);
         }
 
         [UnityTest]
-        public IEnumerator ApplySoftShadowsCorrectly()
+        public IEnumerator ChangeShadowDistanceCorrectly()
         {
             // Arrange
-            yield return CreateToggleSettingsControl<SoftShadowsControlController>();
+            yield return CreateSliderSettingsControl<ShadowDistanceControlController>(30, 100, true);
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = false;
+            float newValue = 50f;
+            ((SliderSettingsControlView)newControlView).sliderControl.value = newValue;
 
             // Assert
-            Assert.IsTrue(urpAsset.supportsSoftShadows == DCL.Settings.i.qualitySettings.softShadows, "softShadows mismatch");
-
-            LightShadows shadowType = LightShadows.None;
-            if (DCL.Settings.i.qualitySettings.shadows)
-            {
-                shadowType = DCL.Settings.i.qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
-            }
-
-            Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.shadowDistance, newValue, "shadowDistance mismatch");
+            qualitySettingsRefMock.Received(1).UpdateShadowDistance(newValue);
         }
 
         [UnityTest]
-        public IEnumerator ApplyShadowResolutionCorrectly()
+        public IEnumerator ChangeShadowresolutionCorrectly()
         {
             // Arrange
             string[] labels = { "256", "512", "1024", "2048", "4096" };
             yield return CreateSpinBoxSettingsControl<ShadowResolutionControlController>(labels);
 
             // Act
-            ((SpinBoxSettingsControlView)newControlView).spinBoxControl.value = (int)UnityEngine.Rendering.Universal.ShadowResolution._2048;
+            int newValue = 4;
+            UnityEngine.Rendering.Universal.ShadowResolution newValueFormatted = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << newValue);
+            ((SpinBoxSettingsControlView)newControlView).spinBoxControl.value = newValue;
 
             // Assert
-            Assert.IsTrue(urpAsset.mainLightShadowmapResolution == (int)DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.shadowResolution, newValueFormatted, "shadowResolution mismatch");
+            qualitySettingsRefMock.Received(1).UpdateShadowResolution(newValueFormatted);
         }
 
         [UnityTest]
-        public IEnumerator ApplyShadowDistanceCorrectly()
+        public IEnumerator ChangeSoftShadowsCorrectly()
         {
             // Arrange
-            yield return CreateSliderSettingsControl<ShadowDistanceControlController>(30f, 100f, true);
+            yield return CreateToggleSettingsControl<SoftShadowsControlController>();
 
             // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 90f;
+            bool newValue = true;
+            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = newValue;
 
             // Assert
-            Assert.IsTrue(urpAsset.shadowDistance == (int)DCL.Settings.i.qualitySettings.shadowDistance, "shadowDistance mismatch");
+            Assert.AreEqual(newControlModel.controlController.currentQualitySetting.softShadows, newValue, "softShadows mismatch");
+            qualitySettingsRefMock.Received(1).UpdateSoftShadows(newValue);
+        }
+
+        [UnityTest]
+        public IEnumerator ChangeVoiceChatVolumeCorrectly()
+        {
+            // Arrange
+            yield return CreateSliderSettingsControl<VoiceChatVolumeControlController>(0, 100, true);
+
+            // Act
+            float newValue = 90f;
+            ((SliderSettingsControlView)newControlView).sliderControl.value = newValue;
+
+            // Assert
+            Assert.AreEqual(newControlModel.controlController.currentGeneralSettings.voiceChatVolume, newValue * 0.01f, "voiceChatVolume mismatch");
+            generalSettingsRefMock.Received(1).UpdateVoiceChatVolume(newValue * 0.01f);
         }
 
         private IEnumerator CreateToggleSettingsControl<T>() where T : SettingsControlController
@@ -338,7 +311,12 @@ namespace SettingsControlsTests
             newControlModel.flagsThatDisableMe = new List<BooleanVariable>();
             newControlModel.isBeta = false;
 
-            newControlView.Initialize(newControlModel, newControlModel.controlController);
+            newControlView.Initialize(
+                newControlModel,
+                newControlModel.controlController,
+                generalSettingsRefMock,
+                qualitySettingsRefMock);
+
             yield return null;
         }
 
@@ -359,7 +337,12 @@ namespace SettingsControlsTests
             ((SliderControlModel)newControlModel).sliderMaxValue = sliderMaxValue;
             ((SliderControlModel)newControlModel).sliderWholeNumbers = sliderWholeNumbers;
 
-            newControlView.Initialize(newControlModel, newControlModel.controlController);
+            newControlView.Initialize(
+                newControlModel,
+                newControlModel.controlController,
+                generalSettingsRefMock,
+                qualitySettingsRefMock);
+
             yield return null;
         }
 
@@ -375,7 +358,12 @@ namespace SettingsControlsTests
             newControlModel.isBeta = false;
             ((SpinBoxControlModel)newControlModel).spinBoxLabels = spinBoxLabels;
 
-            newControlView.Initialize(newControlModel, newControlModel.controlController);
+            newControlView.Initialize(
+                newControlModel,
+                newControlModel.controlController,
+                generalSettingsRefMock,
+                qualitySettingsRefMock);
+
             yield return null;
         }
     }

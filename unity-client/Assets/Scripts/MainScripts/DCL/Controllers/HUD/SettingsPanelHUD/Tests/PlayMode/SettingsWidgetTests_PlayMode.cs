@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
@@ -66,14 +67,22 @@ namespace SettingsWidgetTests
             controlColumnsToCreate[columnIndex].controls.Add(newControlConfig);
 
             // Act
-            widgetView.Initialize("TestWidget", widgetController, controlColumnsToCreate);
+            widgetView.Initialize(
+                "TestWidget",
+                widgetController,
+                controlColumnsToCreate,
+                Substitute.For<IGeneralSettingsReferences>(),
+                Substitute.For<IQualitySettingsReferences>());
+
             yield return null;
 
             // Assert
             widgetController.Received(1).AddControl(
                 Arg.Any<ISettingsControlView>(),
                 Arg.Any<SettingsControlController>(),
-                Arg.Any<SettingsControlModel>());
+                Arg.Any<SettingsControlModel>(),
+                Arg.Any<IGeneralSettingsReferences>(),
+                Arg.Any<IQualitySettingsReferences>());
         }
     }
 }

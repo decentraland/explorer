@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Sections;
 using System.Collections.Generic;
@@ -18,7 +19,9 @@ namespace DCL.SettingsPanelHUD
         /// <summary>
         /// All the needed logic to initializes the controller and its associated view, and make them works.
         /// </summary>
-        void Initialize();
+        void Initialize(
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController);
 
         /// <summary>
         /// Adds a SECTION into the main settings panel.
@@ -27,7 +30,13 @@ namespace DCL.SettingsPanelHUD
         /// <param name="newSection">New SECTION that will be added.</param>
         /// <param name="newSectionController">Controller belonging to the new SECTION.</param>
         /// <param name="sectionConfig">Model that will contain the configuration of the new SECTION.</param>
-        void AddSection(SettingsButtonEntry newMenuButton, ISettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
+        void AddSection(
+            SettingsButtonEntry newMenuButton,
+            ISettingsSectionView newSection,
+            ISettingsSectionController newSectionController,
+            SettingsSectionModel sectionConfig,
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController);
 
         /// <summary>
         /// Opens a specific SECTION of the main settings panel.
@@ -97,20 +106,24 @@ namespace DCL.SettingsPanelHUD
             view.SetVisibility(visible);
         }
 
-        public void Initialize()
+        public void Initialize(
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
-            view.Initialize(this, this);
+            view.Initialize(this, this, generalSettingsController, qualitySettingsController);
         }
 
         public void AddSection(
             SettingsButtonEntry newMenuButton,
             ISettingsSectionView newSection,
             ISettingsSectionController newSectionController,
-            SettingsSectionModel sectionConfig)
+            SettingsSectionModel sectionConfig,
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             newMenuButton?.Initialize(sectionConfig.icon, sectionConfig.text);
 
-            newSection.Initialize(newSectionController, sectionConfig.widgets.ToList());
+            newSection.Initialize(newSectionController, sectionConfig.widgets.ToList(), generalSettingsController, qualitySettingsController);
             newSection.SetActive(false);
             sections.Add(newSection);
 

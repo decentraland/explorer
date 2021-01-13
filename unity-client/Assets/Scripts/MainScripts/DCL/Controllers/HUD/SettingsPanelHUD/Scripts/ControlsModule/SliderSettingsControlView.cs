@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,14 +17,18 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private SliderControlModel sliderControlConfig;
 
-        public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
+        public override void Initialize(
+            SettingsControlModel controlConfig,
+            SettingsControlController settingsControlController,
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             this.sliderControlConfig = (SliderControlModel)controlConfig;
             slider.maxValue = this.sliderControlConfig.sliderMaxValue;
             slider.minValue = this.sliderControlConfig.sliderMinValue;
             slider.wholeNumbers = this.sliderControlConfig.sliderWholeNumbers;
 
-            base.Initialize(controlConfig, settingsControlController);
+            base.Initialize(controlConfig, settingsControlController, generalSettingsController, qualitySettingsController);
             OverrideIndicatorLabel(slider.value.ToString());
             settingsControlController.OnControlChanged(slider.value);
 
