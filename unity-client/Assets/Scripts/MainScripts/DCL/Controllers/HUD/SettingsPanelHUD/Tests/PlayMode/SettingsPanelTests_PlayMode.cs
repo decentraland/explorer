@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD;
 using DCL.SettingsPanelHUD.Sections;
 using NSubstitute;
@@ -59,7 +60,13 @@ namespace SettingsPanelTests
             sectionsToCreate.Add(newSectionConfig);
 
             // Act
-            panelView.Initialize(hudController, panelController, sectionsToCreate);
+            panelView.Initialize(
+                hudController,
+                panelController,
+                sectionsToCreate,
+                Substitute.For<IGeneralSettingsController>(),
+                Substitute.For<IQualitySettingsController>());
+
             yield return null;
 
             // Assert
@@ -67,7 +74,9 @@ namespace SettingsPanelTests
                 Arg.Any<SettingsButtonEntry>(),
                 Arg.Any<ISettingsSectionView>(),
                 Arg.Any<ISettingsSectionController>(),
-                Arg.Any<SettingsSectionModel>());
+                Arg.Any<SettingsSectionModel>(),
+                Arg.Any<IGeneralSettingsController>(),
+                Arg.Any<IQualitySettingsController>());
 
             panelController.Received(1).OpenSection(0);
             panelController.Received(1).MarkMenuButtonAsSelected(0);

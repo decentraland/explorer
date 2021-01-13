@@ -1,5 +1,3 @@
-using DCL.Rendering;
-using DCL.SettingsController;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -14,24 +12,10 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            currentQualitySetting.detailObjectCullingThreshold = (float)newValue;
+            float newFloatValue = (float)newValue;
 
-            if (currentQualitySetting.enableDetailObjectCulling)
-            {
-                var settings = Environment.i.platform.cullingController.GetSettingsCopy();
-
-                settings.rendererProfile = CullingControllerProfile.Lerp(
-                    QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMin,
-                    QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMax,
-                    currentQualitySetting.detailObjectCullingThreshold / 100.0f);
-
-                settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
-                    QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMin,
-                    QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMax,
-                    currentQualitySetting.detailObjectCullingThreshold / 100.0f);
-
-                Environment.i.platform.cullingController.SetSettings(settings);
-            }
+            currentQualitySetting.detailObjectCullingThreshold = newFloatValue;
+            qualitySettingsController.UpdateDetailObjectCullingSize(newFloatValue);
         }
     }
 }

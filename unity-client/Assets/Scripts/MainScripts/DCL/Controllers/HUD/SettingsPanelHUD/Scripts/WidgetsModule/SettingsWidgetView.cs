@@ -1,4 +1,5 @@
 using DCL.Helpers;
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Controls;
 using System.Collections.Generic;
@@ -20,7 +21,12 @@ namespace DCL.SettingsPanelHUD.Widgets
         /// <param name="title">Title of the WIDGET.</param>
         /// <param name="settingsWidgetController">Controller that will be associated to this view.</param>
         /// <param name="controlColumns">List of CONTROLS (grouped in columns) associated to this WIDGET.</param>
-        void Initialize(string title, ISettingsWidgetController settingsWidgetController, List<SettingsControlGroup> controlColumns);
+        void Initialize(
+            string title,
+            ISettingsWidgetController settingsWidgetController,
+            List<SettingsControlGroup> controlColumns,
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController);
     }
 
     /// <summary>
@@ -34,7 +40,12 @@ namespace DCL.SettingsPanelHUD.Widgets
         private ISettingsWidgetController settingsWidgetController;
         private List<SettingsControlGroup> controlColumns;
 
-        public void Initialize(string title, ISettingsWidgetController settingsWidgetController, List<SettingsControlGroup> controlColumns)
+        public void Initialize(
+            string title,
+            ISettingsWidgetController settingsWidgetController,
+            List<SettingsControlGroup> controlColumns,
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             this.settingsWidgetController = settingsWidgetController;
             this.controlColumns = controlColumns;
@@ -42,7 +53,7 @@ namespace DCL.SettingsPanelHUD.Widgets
             CommonSettingsEvents.OnRefreshAllWidgetsSize += AdjustWidgetHeight;
 
             this.title.text = title;
-            CreateControls();
+            CreateControls(generalSettingsController, qualitySettingsController);
         }
 
         private void OnDestroy()
@@ -50,7 +61,7 @@ namespace DCL.SettingsPanelHUD.Widgets
             CommonSettingsEvents.OnRefreshAllWidgetsSize -= AdjustWidgetHeight;
         }
 
-        private void CreateControls()
+        private void CreateControls(IGeneralSettingsController generalSettingsController, IQualitySettingsController qualitySettingsController)
         {
             Assert.IsTrue(controlColumns.Count == 0 || controlColumns.Count == controlsContainerColumns.Count,
                 $"Settings Configuration exception: The number of columns set in the '{this.name}' view does not match with the received configuration.");
@@ -62,7 +73,7 @@ namespace DCL.SettingsPanelHUD.Widgets
                     var newControl = Instantiate(controlConfig.controlPrefab, controlsContainerColumns[columnIndex]);
                     newControl.gameObject.name = $"Control_{controlConfig.title}";
                     var newWidgetController = Instantiate(controlConfig.controlController);
-                    settingsWidgetController.AddControl(newControl, newWidgetController, controlConfig);
+                    settingsWidgetController.AddControl(newControl, newWidgetController, controlConfig, generalSettingsController, qualitySettingsController);
                 }
             }
 

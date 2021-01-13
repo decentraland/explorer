@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,9 +11,12 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private SpinBoxSettingsControlView qualityPresetControlView;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(
+            ISettingsControlView settingsControlView,
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(settingsControlView, generalSettingsController, qualitySettingsController);
 
             qualityPresetControlView = (SpinBoxSettingsControlView)settingsControlView;
 

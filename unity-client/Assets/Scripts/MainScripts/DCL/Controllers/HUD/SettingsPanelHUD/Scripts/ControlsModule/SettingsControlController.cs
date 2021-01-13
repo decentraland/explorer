@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
@@ -8,13 +9,20 @@ namespace DCL.SettingsPanelHUD.Controls
     /// </summary>
     public class SettingsControlController : ScriptableObject
     {
-        protected SettingsData.GeneralSettings currentGeneralSettings;
-        protected SettingsData.QualitySettings currentQualitySetting;
+        internal SettingsData.GeneralSettings currentGeneralSettings;
+        internal SettingsData.QualitySettings currentQualitySetting;
         protected ISettingsControlView view;
+        protected IGeneralSettingsController generalSettingsController;
+        protected IQualitySettingsController qualitySettingsController;
 
-        public virtual void Initialize(ISettingsControlView settingsControlView)
+        public virtual void Initialize(
+            ISettingsControlView settingsControlView,
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
             view = settingsControlView;
+            this.generalSettingsController = generalSettingsController;
+            this.qualitySettingsController = qualitySettingsController;
 
             currentGeneralSettings = Settings.i.generalSettings;
             currentQualitySetting = Settings.i.qualitySettings;

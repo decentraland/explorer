@@ -1,5 +1,5 @@
+using DCL.SettingsController;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -10,16 +10,15 @@ namespace DCL.SettingsPanelHUD.Controls
         public const string TEXT_OFF = "OFF";
 
         private SliderSettingsControlView sliderView;
-        private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(
+            ISettingsControlView settingsControlView,
+            IGeneralSettingsController generalSettingsController,
+            IQualitySettingsController qualitySettingsController)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(settingsControlView, generalSettingsController, qualitySettingsController);
 
             sliderView = (SliderSettingsControlView)view;
-
-            if (lightweightRenderPipelineAsset == null)
-                lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
         }
 
         public override object GetStoredValue()
@@ -35,12 +34,10 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void OnControlChanged(object newValue)
         {
             float newFloatValue = (float)newValue;
-
             int antiAliasingValue = 1 << (int)newFloatValue;
-            currentQualitySetting.antiAliasing = (MsaaQuality)antiAliasingValue;
 
-            if (lightweightRenderPipelineAsset != null)
-                lightweightRenderPipelineAsset.msaaSampleCount = antiAliasingValue;
+            currentQualitySetting.antiAliasing = (MsaaQuality)antiAliasingValue;
+            qualitySettingsController.UpdateAntiAliasing(antiAliasingValue);
 
             if (newFloatValue == 0)
                 sliderView.OverrideIndicatorLabel(TEXT_OFF);
