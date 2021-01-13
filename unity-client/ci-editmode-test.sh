@@ -2,20 +2,16 @@
 
 set -x
 
-find ${PROJECT_PATH}
-echo '-----------------------'
-find .
-
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
         -batchmode \
         -logFile /dev/stdout \
-        -projectPath "$PROJECT_PATH" \
+        -projectPath "$(pwd)" \
         -buildTarget "$BUILD_TARGET" \
         -runTests \
         -testPlatform EditMode \
-        -testResults "editmode-results.xml" \
+        -testResults "$(pwd)/editmode-results.xml" \
         -enableCodeCoverage \
-        -coverageResultsPath "CodeCoverage/" \
+        -coverageResultsPath "$(pwd)/CodeCoverage/" \
         -coverageOptions "assemblyFilters:-*unity*" \
         -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf
 

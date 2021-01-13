@@ -4,11 +4,15 @@ set -x
 
 echo "Building for $BUILD_TARGET"
 
-export BUILD_PATH="$PROJECT_PATH/Builds/$BUILD_NAME/"
-mkdir -p $BUILD_PATH
+export BUILD_PATH="Builds/$BUILD_NAME/"
+mkdir -p "$BUILD_PATH"
+
+pushd "$BUILD_PATH"
+BUILD_PATH=$(pwd)
+popd
+
 
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
-  -projectPath "$PROJECT_PATH" \
   -quit \
   -batchmode \
   -buildTarget "$BUILD_TARGET" \
