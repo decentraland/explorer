@@ -1,7 +1,6 @@
 using DCL;
 using DCL.HelpAndSupportHUD;
 using DCL.SettingsController;
-using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
 using System.Collections.Generic;
 using UnityEngine;
