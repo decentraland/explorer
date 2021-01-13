@@ -2,16 +2,16 @@
 
 set -x
 
+      # -projectPath "$PROJECT_PATH" \
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
         -batchmode \
         -logFile /dev/stdout \
-        -projectPath "$PROJECT_PATH" \
         -buildTarget "$BUILD_TARGET" \
         -runTests \
         -testPlatform EditMode \
-        -testResults "$PROJECT_PATH/editmode-results.xml" \
+        -testResults "editmode-results.xml" \
         -enableCodeCoverage \
-        -coverageResultsPath "$PROJECT_PATH/CodeCoverage/" \
+        -coverageResultsPath "CodeCoverage/" \
         -coverageOptions "assemblyFilters:-*unity*" \
         -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf
 
@@ -19,7 +19,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor
 UNITY_EXIT_CODE=$?
 
 # Print unity log output
-cat "$PROJECT_PATH/editmode-results.xml"
+cat "editmode-results.xml"
 
 # Display results
 if [ $UNITY_EXIT_CODE -eq 0 ]; then
