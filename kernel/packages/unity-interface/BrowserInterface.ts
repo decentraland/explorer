@@ -89,26 +89,6 @@ export class BrowserInterface {
     positionEvent.rotation.copyFrom(positionEvent.quaternion.eulerAngles)
     positionEvent.playerHeight = data.playerHeight || playerConfigurations.height
 
-    console.log('pravs - pos event quat rotation: ' + positionEvent.quaternion)
-    // console.log('pravs - pos event euler rotation: ' + positionEvent.quaternion.eulerAngles)
-
-    console.log('pravs - pos event euler rotation: ' + this.eulerAngles(positionEvent.quaternion))
-
-    /*let currentEulerAngles = this.eulerAngles(positionEvent.quaternion)
-    if (currentEulerAngles.y >= 89
-      // && currentEulerAngles.y <= 91
-      // || (currentEulerAngles.x >= 89 && currentEulerAngles.x <= 91)
-      // || (currentEulerAngles.z >= 89 && currentEulerAngles.z <= 91)
-      )
-    {
-      // positionEvent.quaternion.w = 0 // to avoid gimbal lock problem with quaternion-euler conversion ???
-
-      let euler = positionEvent.quaternion.eulerAngles.clone()
-      euler.z = 0
-      positionEvent.quaternion.eulerAngles = euler
-    }
-    console.log('pravs - pos event euler rotation (fixed?): ' + this.eulerAngles(positionEvent.quaternion))*/
-
     // By default the renderer lerps avatars position
     positionEvent.immediate = false
 
@@ -119,80 +99,19 @@ export class BrowserInterface {
     positionObservable.notifyObservers(positionEvent)
   }
 
+  // Implemented calculations from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+  // Standards used: http://www.euclideanspace.com/maths/standards/index.htm
   public eulerAngles(quat: Quaternion): Vector3 {
     const out = new Vector3()
 
-    // Testing and comparing live euler values with unity editor, our previous solution often
-    // got desynchronized and showed wrong values
-    /*const mat = new Matrix()
-    quat.toRotationMatrix(mat)
-    const m = Matrix.GetAsMatrix3x3(mat)
-
-    out.y = RAD2DEG * Math.asin(Math.max(-1, Math.min(1, m[6])))
-
-    if (Math.abs(m[6]) < 0.99999) {
-      out.x = RAD2DEG * Math.atan2(-m[7], m[8])
-      out.z = RAD2DEG * Math.atan2(-m[3], m[0])
-    } else {
-      out.x = RAD2DEG * Math.atan2(m[5], m[4])
-      out.z = 0
-    }*/
-
     // roll / bank / x-axis rotation
-    // const sinr_cosp = 2 * (quat.w * quat.x + quat.y * quat.z)
-    // const cosr_cosp = 1 - 2 * (quat.x * quat.x + quat.y * quat.y)
-    // out.x = Math.atan2(sinr_cosp, cosr_cosp) * RAD2DEG
-    out.x = RAD2DEG * Math.atan2(2 * (quat.x * quat.w - quat.y * quat.z) , 1 - 2 * (quat.x * quat.x - quat.z * quat.z)) // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+    out.x = RAD2DEG * Math.atan2(2 * (quat.x * quat.w - quat.y * quat.z) , 1 - 2 * (quat.x * quat.x - quat.z * quat.z))
 
     // pitch / heading / y-axis rotation
-    const sinp = 2 * (quat.w * quat.y - quat.z * quat.x)
-    if (Math.abs(sinp) >= 1) {
-      console.log('pravs - euler conversion 1')
-      out.y = Math.abs(Math.PI / 2) * Math.sign(sinp) * RAD2DEG// use 90 degrees if out of range
-    } else {
-      console.log('pravs - euler conversion 2')
-      // out.y = Math.asin(sinp) * RAD2DEG
-      out.y = RAD2DEG * Math.atan2(2 * (quat.y * quat.w - quat.x * quat.z) , 1 - 2 * (quat.y * quat.y - quat.z * quat.z)) // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-    }
-
-    // SINGULARITY DETECTION (http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/)
-    // const singularityCheck = quat.x * quat.y + quat.z * quat.w
-    // const sign = Math.sign(singularityCheck)
-    // if (Math.abs(singularityCheck) === 0.5) {
-    //   console.log('pravs - singularity detected: ' + singularityCheck)
-    //   quat.z = (2 * sign) * Math.atan2(quat.x, quat.w) // heading
-    //   quat.x = 0 // bank
-    //   return this.eulerAngles(quat)
-    // }
+    out.y = RAD2DEG * Math.atan2(2 * (quat.y * quat.w - quat.x * quat.z) , 1 - 2 * (quat.y * quat.y - quat.z * quat.z))
 
     // yaw / attitude / z-axis rotation
-    // const siny_cosp = 2 * (quat.w * quat.z + quat.x * quat.y)
-    // const cosy_cosp = 1 - 2 * (quat.y * quat.y + quat.z * quat.z)
-    // out.z = Math.atan2(siny_cosp, cosy_cosp) * RAD2DEG
-    out.z = RAD2DEG * Math.asin(2 * (quat.x * quat.y + quat.z * quat.w)) // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-
-
-    // Unity's "Internal_MakePositive" -> instead of negative values we get 360 + the negative value
-    /*const num1 = -9 / (500 * Math.PI)
-    const num2 = 360 + num1
-    if (out.x < num1) {
-      out.x += 360
-    } else if (out.x > num2) {
-      out.x -= 360
-    }
-
-    if (out.y < num1) {
-      out.y += 360
-    } else if (out.y > num2) {
-      out.y -= 360
-    }
-
-    if (out.z < num1) {
-      out.z += 360
-    } else if (out.z > num2) {
-      out.z -= 360
-    }*/
-    // --------------------
+    out.z = RAD2DEG * Math.asin(2 * (quat.x * quat.y + quat.z * quat.w))
 
     return out
   }
