@@ -61,7 +61,7 @@ export const DEG2RAD = Math.PI / 180
  * Constant used to convert from radians to Euler degrees
  * @public
  */
-export const RAD2DEG = 360 / (Math.PI * 2)
+export const RAD2DEG = 360 / (Math.PI * 2) // this value could be hardcoded as 57.29578
 
 /**
  * Interface for the size containing width and height
