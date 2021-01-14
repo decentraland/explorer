@@ -5,14 +5,14 @@ namespace DCL.Huds
 {
     public class QuestTaskUIEntry : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI description;
+        [SerializeField] private TextMeshProUGUI taskName;
         [SerializeField] private RectTransform stepsContainer;
         [SerializeField] private QuestStepUIFactory factory;
 
         public void Populate(QuestTask task)
         {
             CleanUpStepsList(); //TODO: Reuse already instantiated steps
-            description.text = task.description;
+            taskName.text = task.name;
             foreach (QuestStep step in task.steps)
             {
                 CreateStep(step);

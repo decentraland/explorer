@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 8689377351441992024}
   - component: {fileID: 5734062855732675467}
   m_Layer: 5
-  m_Name: Step_single
+  m_Name: QuestStep_single
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0432b80b38824a269afb71e3cd59348a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: {fileID: 2160389509011029812}
+  stepName: {fileID: 2160389509011029812}
   status: {fileID: 4875384208487158608}
 --- !u!1 &5195081402885426723
 GameObject:
@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 5514757687772478694}
   - component: {fileID: 2160389509011029812}
   m_Layer: 5
-  m_Name: Description
+  m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

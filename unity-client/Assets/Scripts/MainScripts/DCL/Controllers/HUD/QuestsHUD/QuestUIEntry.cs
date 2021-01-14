@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -16,10 +17,16 @@ namespace DCL.Huds
 
             questName.text = quest.name;
             description.text = quest.description;
+            SetThumbnail(quest.thumbnail);
             for (int i = 0; i < quest.tasks.Length; i++)
             {
                 CreateTask(quest.tasks[i]);
             }
+        }
+
+        internal void SetThumbnail(string thumbnailURL)
+        {
+            throw new NotImplementedException();
         }
 
         internal void CreateTask(QuestTask task)

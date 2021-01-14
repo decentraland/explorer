@@ -6,21 +6,16 @@ namespace DCL.Huds
         public string id;
         public string name;
         public string description;
-        public string[] requirements;
-        public bool active;
-        public string visibility;
+        public string thumbnail;
+        public string jumpAction;
         public QuestTask[] tasks;
-        public string progressStatus;
     }
 
     [System.Serializable]
     public class QuestTask
     {
         public string id;
-        public string description;
-        public string coordinates;
-        public bool required;
-        public string[] requirements;
+        public string name;
         public QuestStep[] steps;
     }
 

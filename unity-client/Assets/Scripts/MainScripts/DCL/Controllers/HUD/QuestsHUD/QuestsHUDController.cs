@@ -14,6 +14,11 @@
             view = QuestsHUDView.Create();
         }
 
+        public void Populate(QuestModel[] quests)
+        {
+            view.Populate(quests);
+        }
+
         public void SetVisibility(bool visible)
         {
             view?.gameObject.SetActive(visible);

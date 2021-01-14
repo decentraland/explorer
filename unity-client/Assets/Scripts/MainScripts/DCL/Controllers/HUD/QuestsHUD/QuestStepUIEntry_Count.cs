@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,20 +7,19 @@ namespace DCL.Huds
 {
     public class QuestStepUIEntry_Count : MonoBehaviour, IQuestStepUIEntry
     {
+        [Serializable]
         public class Model
         {
-            public string status;
-            public string description;
+            public string name;
             public int start;
+            public int end;
             public int current;
-            public int target;
         }
 
-        [SerializeField] private TextMeshProUGUI description;
-        [SerializeField] private Toggle status;
+        [SerializeField] private TextMeshProUGUI stepName;
         [SerializeField] private TextMeshProUGUI start;
+        [SerializeField] private TextMeshProUGUI end;
         [SerializeField] private TextMeshProUGUI current;
-        [SerializeField] private TextMeshProUGUI target;
         [SerializeField] private Image ongoingProgress;
 
         internal Model model;
@@ -27,13 +27,12 @@ namespace DCL.Huds
         public void Populate(string payload)
         {
             model = JsonUtility.FromJson<Model>(payload);
-            description.text = model.description;
-            status.isOn = model.status == "completed";
+            stepName.text = model.name;
             start.text = model.start.ToString();
             current.text = model.current.ToString();
-            target.text = model.target.ToString();
+            end.text = model.end.ToString();
 
-            ongoingProgress.fillAmount = (float)model.current / model.target;
+            ongoingProgress.fillAmount = (float)model.current / model.end;
         }
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7586080914220189594}
   - component: {fileID: 4623932853760759310}
   m_Layer: 5
-  m_Name: Description
+  m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -401,6 +401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41268709b4e945d9af7ce696ee7b394b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: {fileID: 4623932853760759310}
+  taskName: {fileID: 4623932853760759310}
   stepsContainer: {fileID: 1556173030700315913}
   factory: {fileID: 11400000, guid: f484d7b000135dc479537f5796f4d714, type: 2}
