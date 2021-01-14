@@ -1,7 +1,4 @@
-import {
-  // Matrix,
-  RAD2DEG,
-  uuid} from 'decentraland-ecs/src'
+import { uuid } from 'decentraland-ecs/src'
 import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
 import { avatarMessageObservable } from 'shared/comms/peers'
@@ -97,23 +94,6 @@ export class BrowserInterface {
     }
 
     positionObservable.notifyObservers(positionEvent)
-  }
-
-  // Implemented calculations from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-  // Standards used: http://www.euclideanspace.com/maths/standards/index.htm
-  public eulerAngles(quat: Quaternion): Vector3 {
-    const out = new Vector3()
-
-    // roll / bank / x-axis rotation
-    out.x = RAD2DEG * Math.atan2(2 * (quat.x * quat.w - quat.y * quat.z) , 1 - 2 * (quat.x * quat.x - quat.z * quat.z))
-
-    // pitch / heading / y-axis rotation
-    out.y = RAD2DEG * Math.atan2(2 * (quat.y * quat.w - quat.x * quat.z) , 1 - 2 * (quat.y * quat.y - quat.z * quat.z))
-
-    // yaw / attitude / z-axis rotation
-    out.z = RAD2DEG * Math.asin(2 * (quat.x * quat.y + quat.z * quat.w))
-
-    return out
   }
 
   public ReportMousePosition(data: { id: string; mousePosition: ReadOnlyVector3 }) {

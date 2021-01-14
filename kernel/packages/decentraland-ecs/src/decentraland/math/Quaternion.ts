@@ -533,30 +533,28 @@ export class Quaternion {
   }
 
   /**
-   * Gets the euler angle representation of the rotation.
+   * Sets the euler angle representation of the rotation.
    */
   public set eulerAngles(euler: Vector3) {
     this.setEuler(euler.x, euler.y, euler.z)
   }
 
   /**
-   * Sets the euler angle representation of the rotation.
+   * Gets the euler angle representation of the rotation.
+   * Implemented calculations from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+   * Standards used: http://www.euclideanspace.com/maths/standards/index.htm
    */
   public get eulerAngles() {
     const out = new Vector3()
-    const mat = new Matrix()
-    this.toRotationMatrix(mat)
-    const m = Matrix.GetAsMatrix3x3(mat)
 
-    out.y = RAD2DEG * Math.asin(Math.max(-1, Math.min(1, m[6])))
+    // roll / bank / x-axis rotation
+    out.x = RAD2DEG * Math.atan2(2 * (this.x * this.w - this.y * this.z) , 1 - 2 * (this.x * this.x - this.z * this.z))
 
-    if (Math.abs(m[6]) < 0.99999) {
-      out.x = RAD2DEG * Math.atan2(-m[7], m[8])
-      out.z = RAD2DEG * Math.atan2(-m[3], m[0])
-    } else {
-      out.x = RAD2DEG * Math.atan2(m[5], m[4])
-      out.z = 0
-    }
+    // pitch / heading / y-axis rotation
+    out.y = RAD2DEG * Math.atan2(2 * (this.y * this.w - this.x * this.z) , 1 - 2 * (this.y * this.y - this.z * this.z))
+
+    // yaw / attitude / z-axis rotation
+    out.z = RAD2DEG * Math.asin(2 * (this.x * this.y + this.z * this.w))
 
     return out
   }
