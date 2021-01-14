@@ -9,7 +9,7 @@ export BUILD_PATH="$UNITY_DIR/Builds/$BUILD_NAME/"
 mkdir -p "$BUILD_PATH"
 
 
-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
+${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity } \
   -quit \
   -batchmode \
   -projectPath "$UNITY_DIR" \

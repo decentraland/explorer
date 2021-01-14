@@ -6,6 +6,8 @@ mkdir -p /root/.cache/unity3d
 mkdir -p /root/.local/share/unity3d/Unity/
 set +x
 
+ls -lah /root/.cache/unity3d
+
 if [ -z "$UNITY_LICENSE_CONTENT_BASE64" ]; then
   echo 'UNITY_LICENSE_CONTENT_BASE64 not present. License won''t be configured'
 else
@@ -20,7 +22,7 @@ else
     -nographics \
     -logFile /dev/stdout \
     -batchmode \
-    -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf || exit 0
+    -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf
 fi
 
 set -x

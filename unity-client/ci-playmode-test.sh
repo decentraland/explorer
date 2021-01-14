@@ -4,7 +4,7 @@ set -x
 
 export UNITY_DIR="$(pwd)"
 
-${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' unity-editor} \
+${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity } \
         -batchmode \
         -logFile /dev/stdout \
         -projectPath "$UNITY_DIR" \
