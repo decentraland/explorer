@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace DCL.Huds
+namespace DCL.Huds.QuestPanel
 {
     public class QuestsHUDView : MonoBehaviour
     {
@@ -19,7 +19,7 @@ namespace DCL.Huds
             return view;
         }
 
-        public void Populate(QuestModel[] quests)
+        public void Populate(QuestPanelModel[] quests)
         {
             CleanUpQuestsList(); //TODO Reuse already instantiated quests
             for (int i = 0; i < quests.Length; i++)
@@ -28,7 +28,7 @@ namespace DCL.Huds
             }
         }
 
-        internal void CreateQuest(QuestModel quest)
+        internal void CreateQuest(QuestPanelModel quest)
         {
             var questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestUIEntry>();
             questEntry.Populate(quest);

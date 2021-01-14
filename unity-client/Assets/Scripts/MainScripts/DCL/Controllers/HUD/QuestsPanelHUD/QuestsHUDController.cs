@@ -1,4 +1,4 @@
-﻿namespace DCL.Huds
+﻿namespace DCL.Huds.QuestPanel
 {
     public class QuestsHUDController : IHUD
     {
@@ -14,7 +14,7 @@
             view = QuestsHUDView.Create();
         }
 
-        public void Populate(QuestModel[] quests)
+        public void Populate(QuestPanelModel[] quests)
         {
             view.Populate(quests);
         }

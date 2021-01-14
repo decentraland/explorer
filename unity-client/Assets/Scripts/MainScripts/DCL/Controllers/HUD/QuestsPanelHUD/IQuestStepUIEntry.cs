@@ -1,4 +1,4 @@
-namespace DCL.Huds
+namespace DCL.Huds.QuestPanel
 {
     public interface IQuestStepUIEntry
     {

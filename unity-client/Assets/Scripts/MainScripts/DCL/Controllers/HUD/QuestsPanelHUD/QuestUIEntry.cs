@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace DCL.Huds
+namespace DCL.Huds.QuestPanel
 {
     public class QuestUIEntry : MonoBehaviour
     {
@@ -11,7 +11,7 @@ namespace DCL.Huds
         [SerializeField] private RectTransform taskContainer;
         [SerializeField] private GameObject taskPrefab;
 
-        public void Populate(QuestModel quest)
+        public void Populate(QuestPanelModel quest)
         {
             CleanUpQuestsList(); //TODO Reuse already instantiated quests
 
@@ -29,7 +29,7 @@ namespace DCL.Huds
             throw new NotImplementedException();
         }
 
-        internal void CreateTask(QuestTask task)
+        internal void CreateTask(QuestPanelTask task)
         {
             var taskEntry = Instantiate(taskPrefab, taskContainer).GetComponent<QuestTaskUIEntry>();
             taskEntry.Populate(task);

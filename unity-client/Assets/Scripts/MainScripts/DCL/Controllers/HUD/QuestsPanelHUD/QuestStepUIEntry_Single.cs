@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace DCL.Huds
+namespace DCL.Huds.QuestPanel
 {
     public class QuestStepUIEntry_Single : MonoBehaviour, IQuestStepUIEntry
     {

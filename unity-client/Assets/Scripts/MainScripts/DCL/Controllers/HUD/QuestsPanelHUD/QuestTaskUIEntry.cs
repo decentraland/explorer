@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace DCL.Huds
+namespace DCL.Huds.QuestPanel
 {
     public class QuestTaskUIEntry : MonoBehaviour
     {
@@ -9,17 +9,17 @@ namespace DCL.Huds
         [SerializeField] private RectTransform stepsContainer;
         [SerializeField] private QuestStepUIFactory factory;
 
-        public void Populate(QuestTask task)
+        public void Populate(QuestPanelTask task)
         {
             CleanUpStepsList(); //TODO: Reuse already instantiated steps
             taskName.text = task.name;
-            foreach (QuestStep step in task.steps)
+            foreach (QuestPanelStep step in task.steps)
             {
                 CreateStep(step);
             }
         }
 
-        internal void CreateStep(QuestStep step)
+        internal void CreateStep(QuestPanelStep step)
         {
             GameObject prefab = factory.GetPrefab(step.type);
             if (prefab == null)

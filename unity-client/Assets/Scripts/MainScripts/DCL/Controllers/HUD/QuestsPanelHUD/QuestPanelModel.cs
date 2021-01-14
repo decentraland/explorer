@@ -1,26 +1,26 @@
-namespace DCL.Huds
+namespace DCL.Huds.QuestPanel
 {
     [System.Serializable]
-    public class QuestModel
+    public class QuestPanelModel
     {
         public string id;
         public string name;
         public string description;
         public string thumbnail;
         public string jumpAction;
-        public QuestTask[] tasks;
+        public QuestPanelTask[] tasks;
     }
 
     [System.Serializable]
-    public class QuestTask
+    public class QuestPanelTask
     {
         public string id;
         public string name;
-        public QuestStep[] steps;
+        public QuestPanelStep[] steps;
     }
 
     [System.Serializable]
-    public class QuestStep
+    public class QuestPanelStep
     {
         public string id;
         public string type;
