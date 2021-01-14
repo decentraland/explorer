@@ -4,17 +4,15 @@ set -x
 
 echo "Building for $BUILD_TARGET"
 
-export BUILD_PATH="Builds/$BUILD_NAME/"
+export UNITY_DIR="$(pwd)"
+export BUILD_PATH="$UNITY_DIR/Builds/$BUILD_NAME/"
 mkdir -p "$BUILD_PATH"
-
-pushd "$BUILD_PATH"
-BUILD_PATH=$(pwd)
-popd
 
 
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
   -quit \
   -batchmode \
+  -projectPath "$UNITY_DIR" \
   -buildTarget "$BUILD_TARGET" \
   -customBuildTarget "$BUILD_TARGET" \
   -customBuildName "$BUILD_NAME" \
@@ -22,7 +20,9 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor
   -customBuildOptions AcceptExternalModificationsToPlayer \
   -executeMethod BuildCommand.PerformBuild \
   -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf \
-  -logfile /dev/stdout
+  -logFile /dev/stdout
+
+find "$BUILD_PATH"
 
 UNITY_EXIT_CODE=$?
 
@@ -34,6 +34,12 @@ elif [ $UNITY_EXIT_CODE -eq 3 ]; then
   echo "Run failure (other failure)";
 else
   echo "Unexpected exit code $UNITY_EXIT_CODE";
+fi
+
+ls -la "$BUILD_PATH"
+
+if [ -n "$(ls -A "$BUILD_PATH")" ]; then
+  echo "directory BUILD_PATH $BUILD_PATH is empty"
 fi
 
 exit $UNITY_EXIT_CODE;

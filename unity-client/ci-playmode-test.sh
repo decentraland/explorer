@@ -2,18 +2,20 @@
 
 set -x
 
-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity \
+export UNITY_DIR="$(pwd)"
+
+${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' unity-editor} \
         -batchmode \
         -logFile /dev/stdout \
-        -projectPath "$(pwd)" \
+        -projectPath "$UNITY_DIR" \
         -runTests \
         -testPlatform PlayMode \
-        -testResults "$(pwd)/playmode-results.xml" \
+        -testResults "$UNITY_DIR/playmode-results.xml" \
         -enableCodeCoverage \
-        -coverageResultsPath "$(pwd)/CodeCoverage/" \
-        -coverageOptions "assemblyFilters:-*unity*" \
+        -coverageResultsPath "$UNITY_DIR/CodeCoverage" \
+        -coverageOptions "generateAdditionalMetrics;generateHtmlReport;generateHtmlReportHistory;generateBadgeReport;assemblyFilters:+Assembly-CSharp" \
         -manualLicenseFile /root/.local/share/unity3d/Unity/Unity_lic.ulf \
-        -burst-disable-compilation
+        -debugCodeOptimization
 
 # Catch exit code
 UNITY_EXIT_CODE=$?
