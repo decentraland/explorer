@@ -17,7 +17,7 @@ else
   echo "$LICENSE" > /root/.local/share/unity3d/Unity/Unity_lic.ulf
 
 
-  ${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' unity-editor} \
+  ${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity } \
     -quit \
     -nographics \
     -logFile /dev/stdout \
