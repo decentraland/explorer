@@ -110,7 +110,7 @@ namespace DCL
             {
                 for (int i = 0; i < 100000; i++)
                 {
-                    sceneMessagesPool.Enqueue(new MessagingBus.QueuedSceneMessage_Scene());
+                    sceneMessagesPool.Enqueue(new QueuedSceneMessage_Scene());
                 }
             }
 
@@ -195,7 +195,7 @@ namespace DCL
         Queue<string> payloadsToDecode = new Queue<string>();
         const float MAX_TIME_FOR_DECODE = 0.005f;
 
-        public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
+        public bool ProcessMessage(QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
         {
             string sceneId = msgObject.sceneId;
             string method = msgObject.method;
@@ -274,7 +274,7 @@ namespace DCL
                     {
                         if (msgPayload is Protocol.EntityComponentCreateOrUpdate payload)
                             scene.EntityComponentCreateOrUpdate(payload.entityId,
-                                (CLASS_ID_COMPONENT)payload.classId, payload.json, out yieldInstruction);
+                                (CLASS_ID_COMPONENT) payload.classId, payload.json, out yieldInstruction);
 
                         break;
                     }
@@ -415,12 +415,12 @@ namespace DCL
                 return;
             }
 
-            MessagingBus.QueuedSceneMessage_Scene queuedMessage;
+            QueuedSceneMessage_Scene queuedMessage;
 
             if (sceneMessagesPool.Count > 0)
                 queuedMessage = sceneMessagesPool.Dequeue();
             else
-                queuedMessage = new MessagingBus.QueuedSceneMessage_Scene();
+                queuedMessage = new QueuedSceneMessage_Scene();
 
             MessageDecoder.DecodeSceneMessage(sceneId, message, messageTag, sendSceneMessage, ref queuedMessage);
 
@@ -453,13 +453,13 @@ namespace DCL
             }
         }
 
-        public void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene message)
+        public void EnqueueSceneMessage(QueuedSceneMessage_Scene message)
         {
             Environment.i.world.state.TryGetScene(message.sceneId, out ParcelScene scene);
 
             Environment.i.messaging.manager.AddControllerIfNotExists(this, message.sceneId);
 
-            Environment.i.messaging.manager.Enqueue(scene, message);
+            Environment.i.messaging.manager.Enqueue(scene is GlobalScene, message);
         }
 
         //======================================================================
@@ -718,8 +718,8 @@ namespace DCL
 
         public void UnloadScene(string sceneKey)
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage()
-                {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey};
+            var queuedMessage = new QueuedSceneMessage()
+                {type = QueuedSceneMessage.Type.UNLOAD_PARCEL, message = sceneKey};
 
             ProfilingEvents.OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -786,9 +786,9 @@ namespace DCL
 
         public void LoadParcelScenes(string decentralandSceneJSON)
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage()
+            var queuedMessage = new QueuedSceneMessage()
             {
-                type = MessagingBus.QueuedSceneMessage.Type.LOAD_PARCEL,
+                type = QueuedSceneMessage.Type.LOAD_PARCEL,
                 message = decentralandSceneJSON
             };
 
@@ -802,8 +802,8 @@ namespace DCL
 
         public void UpdateParcelScenes(string decentralandSceneJSON)
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage()
-                {type = MessagingBus.QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON};
+            var queuedMessage = new QueuedSceneMessage()
+                {type = QueuedSceneMessage.Type.UPDATE_PARCEL, message = decentralandSceneJSON};
 
             ProfilingEvents.OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_UPDATE);
 
@@ -812,7 +812,7 @@ namespace DCL
 
         public void UnloadAllScenesQueued()
         {
-            var queuedMessage = new MessagingBus.QueuedSceneMessage() {type = MessagingBus.QueuedSceneMessage.Type.UNLOAD_SCENES};
+            var queuedMessage = new QueuedSceneMessage() {type = QueuedSceneMessage.Type.UNLOAD_SCENES};
 
             ProfilingEvents.OnMessageWillQueue?.Invoke(MessagingTypes.SCENE_DESTROY);
 
@@ -887,7 +887,7 @@ namespace DCL
 
         //======================================================================
 
-        public Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool { get; } = new Queue<MessagingBus.QueuedSceneMessage_Scene>();
+        public Queue<QueuedSceneMessage_Scene> sceneMessagesPool { get; } = new Queue<QueuedSceneMessage_Scene>();
 
         public bool prewarmSceneMessagesPool { get; set; } = true;
         public bool prewarmEntitiesPool { get; set; } = true;
