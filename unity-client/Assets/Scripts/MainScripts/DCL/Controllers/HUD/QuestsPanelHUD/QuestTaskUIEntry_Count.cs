@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace DCL.Huds.QuestPanel
 {
-    public class QuestStepUIEntry_Count : MonoBehaviour, IQuestStepUIEntry
+    public class QuestTaskUIEntry_Count : MonoBehaviour, IQuestTaskUIEntry
     {
         [Serializable]
         public class Model

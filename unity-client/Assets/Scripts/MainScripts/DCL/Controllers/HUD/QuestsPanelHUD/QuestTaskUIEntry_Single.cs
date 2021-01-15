@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace DCL.Huds.QuestPanel
 {
-    public class QuestStepUIEntry_Single : MonoBehaviour, IQuestStepUIEntry
+    public class QuestTaskUIEntry_Single : MonoBehaviour, IQuestTaskUIEntry
     {
         [Serializable]
         public class Model
@@ -14,7 +14,7 @@ namespace DCL.Huds.QuestPanel
             public bool isDone;
         }
 
-        [SerializeField] private TextMeshProUGUI stepName;
+        [SerializeField] private TextMeshProUGUI taskName;
         [SerializeField] private Toggle status;
 
         internal Model model;
@@ -22,7 +22,7 @@ namespace DCL.Huds.QuestPanel
         public void Populate(string payload)
         {
             model = JsonUtility.FromJson<Model>(payload);
-            stepName.text = model.name;
+            taskName.text = model.name;
             status.isOn = model.isDone;
         }
     }

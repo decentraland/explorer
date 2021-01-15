@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11564254e7094996ac111360e5980383, type: 3}
-  m_Name: QuestStepFactory
+  m_Name: QuestTaskFactory
   m_EditorClassIdentifier: 
   entries:
   - type: single

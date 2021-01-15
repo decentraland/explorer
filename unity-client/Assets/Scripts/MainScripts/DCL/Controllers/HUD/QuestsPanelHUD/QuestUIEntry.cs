@@ -18,9 +18,9 @@ namespace DCL.Huds.QuestPanel
             questName.text = quest.name;
             description.text = quest.description;
             SetThumbnail(quest.thumbnail);
-            for (int i = 0; i < quest.tasks.Length; i++)
+            for (int i = 0; i < quest.sections.Length; i++)
             {
-                CreateTask(quest.tasks[i]);
+                CreateTask(quest.sections[i]);
             }
         }
 
@@ -29,9 +29,9 @@ namespace DCL.Huds.QuestPanel
             throw new NotImplementedException();
         }
 
-        internal void CreateTask(QuestPanelTask task)
+        internal void CreateTask(QuestPanelSection task)
         {
-            var taskEntry = Instantiate(taskPrefab, taskContainer).GetComponent<QuestTaskUIEntry>();
+            var taskEntry = Instantiate(taskPrefab, taskContainer).GetComponent<QuestSectionUIEntry>();
             taskEntry.Populate(task);
         }
 

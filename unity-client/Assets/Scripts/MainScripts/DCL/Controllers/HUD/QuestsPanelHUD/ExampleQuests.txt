@@ -4,12 +4,12 @@
     "name": "Halloween",
     "description": "Solve a mystery",
     "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
-    "tasks":
+    "sections":
     [
       {
         "id": "task0",
         "name": "Day 1",
-        "steps":
+        "tasks":
         [
           {
             "id": "step0",
@@ -27,7 +27,7 @@
         "id": "task1",
         "name": "Day 2",
         "description": "Talk to the old lady",
-        "steps":
+        "tasks":
         [
           {
             "id": "step2",

@@ -170,7 +170,7 @@ GameObject:
   - component: {fileID: 4887567611207895262}
   - component: {fileID: 8669082240347354692}
   m_Layer: 5
-  m_Name: StepsContainer
+  m_Name: TasksContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -286,7 +286,7 @@ GameObject:
   - component: {fileID: 4450042007734081477}
   - component: {fileID: 2030804071847737403}
   m_Layer: 5
-  m_Name: QuestTask
+  m_Name: QuestSection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -402,5 +402,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   taskName: {fileID: 4623932853760759310}
-  stepsContainer: {fileID: 1556173030700315913}
+  tasksContainer: {fileID: 1556173030700315913}
   factory: {fileID: 11400000, guid: f484d7b000135dc479537f5796f4d714, type: 2}
