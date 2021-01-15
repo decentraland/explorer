@@ -1,0 +1,43 @@
+[
+   {
+      "id":"quest0",
+      "name":"Halloween",
+      "description":"Solve a mystery",
+      "thumbnail":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+      "sections":[
+         {
+            "id":"task0",
+            "name":"Day 1",
+            "tasks":[
+               {
+                  "id":"step0",
+                  "type":"single",
+                  "payload":"{ \"name\": \"Find Kiki\", \"isDone\": true }"
+               },
+               {
+                  "id":"step1",
+                  "type":"count",
+                  "payload":"{ \"name\": \"Collect pumpkins\", \"start\": 0, \"end\": 10, \"current\": 5 }"
+               }
+            ]
+         },
+         {
+            "id":"task1",
+            "name":"Day 2",
+            "description":"Talk to the old lady",
+            "tasks":[
+               {
+                  "id":"step2",
+                  "type":"single",
+                  "payload":"{ \"name\": \"Find the old lady\", \"isDone\": true }"
+               },
+               {
+                  "id":"step3",
+                  "type":"single",
+                  "payload":"{ \"name\": \"Enter the house\", \"isDone\": false }"
+               }
+            ]
+         }
+      ]
+   }
+]

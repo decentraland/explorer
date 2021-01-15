@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using System;
 using TMPro;
 using UnityEngine;
@@ -22,11 +23,12 @@ namespace DCL.Huds.QuestPanel
             {
                 CreateTask(quest.sections[i]);
             }
+            Utils.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
         }
 
         internal void SetThumbnail(string thumbnailURL)
         {
-            throw new NotImplementedException();
+
         }
 
         internal void CreateTask(QuestPanelSection task)
