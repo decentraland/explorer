@@ -11,7 +11,7 @@ namespace DCL.SettingsPanelHUD.Controls
         protected SettingsData.GeneralSettings currentGeneralSettings;
         protected SettingsData.QualitySettings currentQualitySetting;
 
-        public virtual void Initialize(SettingsControlModel controlConfig)
+        public virtual void Initialize()
         {
             currentGeneralSettings = Settings.i.generalSettings;
             currentQualitySetting = Settings.i.qualitySettings;

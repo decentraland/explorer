@@ -52,7 +52,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
-            this.settingsControlController.Initialize(controlConfig);
+            this.settingsControlController.Initialize();
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;

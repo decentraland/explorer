@@ -8,9 +8,9 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         public const string TEXT_QUALITY_CUSTOM = "Custom";
 
-        public override void Initialize(SettingsControlModel controlConfig)
+        public override void Initialize()
         {
-            base.Initialize(controlConfig);
+            base.Initialize();
 
             SetupQualityPresetLabels();
         }

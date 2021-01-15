@@ -12,9 +12,9 @@ namespace DCL.SettingsPanelHUD.Controls
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
         private FieldInfo lwrpaSoftShadowField = null;
 
-        public override void Initialize(SettingsControlModel controlConfig)
+        public override void Initialize()
         {
-            base.Initialize(controlConfig);
+            base.Initialize();
 
             lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
 
