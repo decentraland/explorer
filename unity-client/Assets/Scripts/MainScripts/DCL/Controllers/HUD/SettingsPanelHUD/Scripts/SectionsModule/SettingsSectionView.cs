@@ -19,8 +19,8 @@ namespace DCL.SettingsPanelHUD.Sections
         void Initialize(
             ISettingsSectionController settingsSectionController,
             List<SettingsWidgetModel> widgets,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController);
 
         /// <summary>
         /// Activates/deactivates the SECTION.
@@ -44,8 +44,8 @@ namespace DCL.SettingsPanelHUD.Sections
         public void Initialize(
             ISettingsSectionController settingsSectionController,
             List<SettingsWidgetModel> widgets,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             this.settingsSectionController = settingsSectionController;
             this.widgets = widgets;
@@ -63,7 +63,7 @@ namespace DCL.SettingsPanelHUD.Sections
             isOpen = active;
         }
 
-        private void CreateWidgets(IGeneralSettingsController generalSettingsController, IQualitySettingsController qualitySettingsController)
+        private void CreateWidgets(IGeneralSettingsReferences generalSettingsController, IQualitySettingsReferences qualitySettingsController)
         {
             foreach (SettingsWidgetModel widgetConfig in widgets)
             {

@@ -32,15 +32,15 @@ namespace SettingsWidgetTests
                 newControlView,
                 newControlController,
                 newControlConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+                Substitute.For<IGeneralSettingsReferences>(),
+                Substitute.For<IQualitySettingsReferences>());
 
             // Assert
             newControlView.Received(1).Initialize(
                 newControlConfig,
                 newControlController,
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
+                Arg.Any<IGeneralSettingsReferences>(),
+                Arg.Any<IQualitySettingsReferences>());
 
             Assert.Contains(newControlView, widgetController.controls, "The new control should be contained in the control list.");
         }

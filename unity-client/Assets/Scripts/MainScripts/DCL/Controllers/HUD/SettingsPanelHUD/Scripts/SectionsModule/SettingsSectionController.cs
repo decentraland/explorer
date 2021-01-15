@@ -26,8 +26,8 @@ namespace DCL.SettingsPanelHUD.Sections
             ISettingsWidgetView newWidget,
             ISettingsWidgetController newWidgetController,
             SettingsWidgetModel widgetConfig,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController);
     }
 
     /// <summary>
@@ -42,8 +42,8 @@ namespace DCL.SettingsPanelHUD.Sections
             ISettingsWidgetView newWidget,
             ISettingsWidgetController newWidgetController,
             SettingsWidgetModel widgetConfig,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns.ToList(), generalSettingsController, qualitySettingsController);
             widgets.Add(newWidget);

@@ -30,16 +30,16 @@ namespace SettingsSectionTests
                 newWidgetView,
                 newWidgetController,
                 newWidgetConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+                Substitute.For<IGeneralSettingsReferences>(),
+                Substitute.For<IQualitySettingsReferences>());
 
             // Assert
             newWidgetView.Received(1).Initialize(
                 newWidgetConfig.title,
                 newWidgetController,
                 Arg.Any<List<SettingsControlGroup>>(),
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
+                Arg.Any<IGeneralSettingsReferences>(),
+                Arg.Any<IQualitySettingsReferences>());
 
             Assert.Contains(newWidgetView, sectionController.widgets, "The new widget should be contained in the widget list.");
         }

@@ -71,8 +71,8 @@ namespace SettingsWidgetTests
                 "TestWidget",
                 widgetController,
                 controlColumnsToCreate,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+                Substitute.For<IGeneralSettingsReferences>(),
+                Substitute.For<IQualitySettingsReferences>());
 
             yield return null;
 
@@ -81,8 +81,8 @@ namespace SettingsWidgetTests
                 Arg.Any<ISettingsControlView>(),
                 Arg.Any<SettingsControlController>(),
                 Arg.Any<SettingsControlModel>(),
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
+                Arg.Any<IGeneralSettingsReferences>(),
+                Arg.Any<IQualitySettingsReferences>());
         }
     }
 }

@@ -16,14 +16,14 @@ namespace SettingsControlsTests
 
         private SettingsControlView newControlView;
         private SettingsControlModel newControlModel;
-        private IGeneralSettingsController generalSettingsRefMock;
-        private IQualitySettingsController qualitySettingsRefMock;
+        private IGeneralSettingsReferences generalSettingsRefMock;
+        private IQualitySettingsReferences qualitySettingsRefMock;
 
         [SetUp]
         public void SetUp()
         {
-            generalSettingsRefMock = Substitute.For<IGeneralSettingsController>();
-            qualitySettingsRefMock = Substitute.For<IQualitySettingsController>();
+            generalSettingsRefMock = Substitute.For<IGeneralSettingsReferences>();
+            qualitySettingsRefMock = Substitute.For<IQualitySettingsReferences>();
         }
 
         [TearDown]

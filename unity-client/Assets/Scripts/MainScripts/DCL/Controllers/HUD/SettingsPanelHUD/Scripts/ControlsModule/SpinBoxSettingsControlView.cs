@@ -15,8 +15,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public override void Initialize(
             SettingsControlModel controlConfig,
             SettingsControlController settingsControlController,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             SetLabels(((SpinBoxControlModel)controlConfig).spinBoxLabels);
 

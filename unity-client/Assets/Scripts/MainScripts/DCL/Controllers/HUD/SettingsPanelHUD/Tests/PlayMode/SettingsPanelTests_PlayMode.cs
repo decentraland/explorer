@@ -64,8 +64,8 @@ namespace SettingsPanelTests
                 hudController,
                 panelController,
                 sectionsToCreate,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+                Substitute.For<IGeneralSettingsReferences>(),
+                Substitute.For<IQualitySettingsReferences>());
 
             yield return null;
 
@@ -75,8 +75,8 @@ namespace SettingsPanelTests
                 Arg.Any<ISettingsSectionView>(),
                 Arg.Any<ISettingsSectionController>(),
                 Arg.Any<SettingsSectionModel>(),
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
+                Arg.Any<IGeneralSettingsReferences>(),
+                Arg.Any<IQualitySettingsReferences>());
 
             panelController.Received(1).OpenSection(0);
             panelController.Received(1).MarkMenuButtonAsSelected(0);

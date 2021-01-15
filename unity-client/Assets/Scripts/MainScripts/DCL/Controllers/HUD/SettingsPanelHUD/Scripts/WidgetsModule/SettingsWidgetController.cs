@@ -25,8 +25,8 @@ namespace DCL.SettingsPanelHUD.Widgets
             ISettingsControlView newControl,
             SettingsControlController newControlController,
             SettingsControlModel controlConfig,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController);
     }
 
     /// <summary>
@@ -41,8 +41,8 @@ namespace DCL.SettingsPanelHUD.Widgets
             ISettingsControlView newControl,
             SettingsControlController newControlController,
             SettingsControlModel controlConfig,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             newControl.Initialize(controlConfig, newControlController, generalSettingsController, qualitySettingsController);
             controls.Add(newControl);

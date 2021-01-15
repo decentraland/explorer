@@ -20,8 +20,8 @@ namespace DCL.SettingsPanelHUD.Controls
         void Initialize(
             SettingsControlModel controlConfig,
             SettingsControlController settingsControlController,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController);
 
         /// <summary>
         /// This logic should update the CONTROL view with the stored value.
@@ -56,8 +56,8 @@ namespace DCL.SettingsPanelHUD.Controls
         public virtual void Initialize(
             SettingsControlModel controlConfig,
             SettingsControlController settingsControlController,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+            IGeneralSettingsReferences generalSettingsController,
+            IQualitySettingsReferences qualitySettingsController)
         {
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
