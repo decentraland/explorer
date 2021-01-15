@@ -191,7 +191,7 @@ namespace DCL.SettingsPanelHUD.Controls
         private void SetControlActive(bool actived)
         {
             gameObject.SetActive(actived);
-            CommonSettingsEvents.RaiseRefreshAllWidgetsSize();
+            CommonSettingsPanelEvents.RaiseRefreshAllWidgetsSize();
         }
     }
 }
