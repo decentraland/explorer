@@ -1,17 +1,16 @@
 using Cinemachine;
 using DCL.SettingsController;
+using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Controls;
 using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using GeneralSettings = DCL.SettingsData.GeneralSettings;
-using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace SettingsControlsTests
 {
@@ -19,16 +18,8 @@ namespace SettingsControlsTests
     {
         private const string TEST_SCENE_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SettingsPanelHUD/Tests/TestScenes";
         private const string TEST_SCENE_NAME = "SettingsTestScene";
-        private const string CONTROL_VIEW_PREFAB_PATH = "Controls/{controlType}SettingsControlTemplate";
 
-        private SettingsControlView newControlView;
-        private SettingsControlModel newControlModel;
-        private SettingsControlController newControlController;
-
-        private GeneralSettings initGeneralSettings;
-        private GeneralSettings testGeneralSettings;
-        private QualitySettings initQualitySettings;
-        private QualitySettings testQualitySettings;
+        private SettingsControlController settingController;
 
         private CinemachineFreeLook freeLookCamera;
         private CinemachineVirtualCamera firstPersonCamera;
@@ -36,56 +27,40 @@ namespace SettingsControlsTests
         private Light environmentLight;
         private Volume postProcessVolume;
         private UniversalRenderPipelineAsset urpAsset;
+        private FieldInfo lwrpaShadowField = null;
+        private FieldInfo lwrpaShadowResolutionField = null;
+        private FieldInfo lwrpaSoftShadowField = null;
 
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode($"{TEST_SCENE_PATH}/{TEST_SCENE_NAME}.unity", new LoadSceneParameters(LoadSceneMode.Additive));
 
-            SetInitialGeneralSettings();
-            SetInitialQualitySettings();
             SetupReferences();
         }
 
-        private void SetInitialGeneralSettings()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
-            testGeneralSettings = new GeneralSettings()
-            {
-                mouseSensitivity = 1,
-                sfxVolume = 0
-            };
+            ScriptableObject.Destroy(settingController);
 
-            initGeneralSettings = DCL.Settings.i.generalSettings;
-            DCL.Settings.i.ApplyGeneralSettings(testGeneralSettings);
-            Assert.IsTrue(DCL.Settings.i.generalSettings.Equals(testGeneralSettings), "General Settings mismatch");
-        }
-
-        private void SetInitialQualitySettings()
-        {
-            testQualitySettings = new QualitySettings()
-            {
-                baseResolution = QualitySettings.BaseResolution.BaseRes_720,
-                antiAliasing = MsaaQuality._4x,
-                renderScale = 0.1f,
-                shadows = false,
-                softShadows = true,
-                shadowResolution = UnityEngine.Rendering.Universal.ShadowResolution._512,
-                shadowDistance = 80f,
-                cameraDrawDistance = 50.1f,
-                bloom = false,
-                colorGrading = true,
-                detailObjectCullingThreshold = 0,
-                enableDetailObjectCulling = true
-            };
-
-            initQualitySettings = DCL.Settings.i.qualitySettings;
-            DCL.Settings.i.ApplyQualitySettings(testQualitySettings);
-            Assert.IsTrue(DCL.Settings.i.qualitySettings.Equals(testQualitySettings), "Quality Setting mismatch");
+            yield return EditorSceneManager.UnloadSceneAsync(TEST_SCENE_NAME);
         }
 
         private void SetupReferences()
         {
             urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
+            Assert.IsNotNull(urpAsset, "urpAsset is null!");
+
+            lwrpaShadowField = urpAsset.GetType().GetField("m_MainLightShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(lwrpaShadowField, "lwrpaShadowField is null!");
+
+            lwrpaShadowResolutionField = urpAsset.GetType().GetField("m_MainLightShadowmapResolution", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(lwrpaShadowResolutionField, "lwrpaShadowResolutionField is null!");
+
+            lwrpaSoftShadowField = urpAsset.GetType().GetField("m_SoftShadowsSupported", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(lwrpaSoftShadowField, "lwrpaSoftShadowField is null!");
+
             GeneralSettingsReferences generalSettingsReferences = GameObject.FindObjectOfType<GeneralSettingsReferences>();
             QualitySettingsReferences qualitySettingsReferences = GameObject.FindObjectOfType<QualitySettingsReferences>();
 
@@ -111,272 +86,297 @@ namespace SettingsControlsTests
             Assert.IsNotNull(qualitySettingsReferences.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
         }
 
-        [UnityTearDown]
-        public IEnumerator TearDown()
-        {
-            Object.Destroy(newControlController);
-            Object.Destroy(newControlModel);
-
-            if (newControlView != null)
-                Object.Destroy(newControlView.gameObject);
-
-            DCL.Settings.i.ApplyGeneralSettings(initGeneralSettings);
-            DCL.Settings.i.ApplyQualitySettings(initQualitySettings);
-
-            yield return EditorSceneManager.UnloadSceneAsync(TEST_SCENE_NAME);
-        }
-
         [Test]
-        public void HaveItSettingsReferencesSetupCorrectly()
-        {
-            GeneralSettingsReferences generalSettingsController = Object.FindObjectOfType<GeneralSettingsReferences>();
-            QualitySettingsReferences qualitySettingsController = Object.FindObjectOfType<QualitySettingsReferences>();
-
-            Assert.IsNotNull(generalSettingsController, "GeneralSettingsController not found in scene");
-            Assert.IsNotNull(qualitySettingsController, "QualitySettingsController not found in scene");
-            Assert.IsNotNull(generalSettingsController.thirdPersonCamera, "GeneralSettingsController: thirdPersonCamera reference missing");
-
-            CinemachineVirtualCamera virtualCamera = generalSettingsController.firstPersonCamera;
-            Assert.IsNotNull(virtualCamera, "GeneralSettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(virtualCamera.GetCinemachineComponent<CinemachinePOV>(), "GeneralSettingsController: firstPersonCamera doesn't have CinemachinePOV component");
-
-            Assert.IsNotNull(qualitySettingsController.environmentLight, "QualitySettingsController: environmentLight reference missing");
-            Assert.IsNotNull(qualitySettingsController.postProcessVolume, "QualitySettingsController: postProcessVolume reference missing");
-            Assert.IsNotNull(qualitySettingsController.firstPersonCamera, "QualitySettingsController: firstPersonCamera reference missing");
-            Assert.IsNotNull(qualitySettingsController.thirdPersonCamera, "QualitySettingsController: thirdPersonCamera reference missing");
-        }
-
-        [Test]
-        public void HaveQualityPresetSetCorrectly()
-        {
-            Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.Length > 0, "QualitySettingsData: No presets created");
-            Assert.IsTrue(DCL.Settings.i.qualitySettingsPresets.defaultIndex > 0
-                          && DCL.Settings.i.qualitySettingsPresets.defaultIndex < DCL.Settings.i.qualitySettingsPresets.Length, "QualitySettingsData: Wrong default preset index");
-        }
-
-        [UnityTest]
-        public IEnumerator ApplyBloomCorrectly()
+        public void ChangeAllowVoiceChatCorrectly()
         {
             // Arrange
-            yield return CreateToggleSettingsControl<BloomControlController>();
+            settingController = ScriptableObject.CreateInstance<AllowVoiceChatControlController>();
+            settingController.Initialize();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+            int newValue = (int)DCL.SettingsData.GeneralSettings.VoiceChatAllow.FRIENDS_ONLY;
+            settingController.UpdateSetting(newValue);
 
             // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "voiceChatAllow stored value mismatch");
+        }
+
+        [Test]
+        public void ChangeAntialiasingChatCorrectly()
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<AntiAliasingControlController>();
+            settingController.Initialize();
+
+            // Act
+            float newValue = (float)MsaaQuality._8x;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            int antiAliasingValue = 1 << (int)newValue;
+            Assert.AreEqual((antiAliasingValue >> 2) + 1, settingController.GetStoredValue(), "antiAliasing stored value mismatch");
+            Assert.AreEqual(antiAliasingValue, urpAsset.msaaSampleCount, "antiAliasing mismatch");
+        }
+
+        [Test]
+        public void ChangeBaseResolutionCorrectly()
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<BaseResolutionControlController>();
+            settingController.Initialize();
+
+            // Act
+            DCL.SettingsData.QualitySettings.BaseResolution newValue = DCL.SettingsData.QualitySettings.BaseResolution.BaseRes_1080;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual((int)newValue, settingController.GetStoredValue(), "baseResolution stored value mismatch");
+        }
+
+        [Test]
+        public void ChangeBloomCorrectly()
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<BloomControlController>();
+            settingController.Initialize();
+
+            // Act
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "bloom stored value mismatch");
             if (postProcessVolume.profile.TryGet<Bloom>(out Bloom bloom))
             {
-                Assert.IsTrue(bloom.active == DCL.Settings.i.qualitySettings.bloom, "bloom mismatch");
+                Assert.AreEqual(newValue, bloom.active, "bloom mismatch");
             }
         }
 
-        [UnityTest]
-        public IEnumerator ApplyMuteSoundCorrectly()
+        [Test]
+        public void ChangeColorGradingCorrectly()
         {
             // Arrange
-            yield return CreateToggleSettingsControl<MuteSoundControlController>();
+            settingController = ScriptableObject.CreateInstance<ColorGradingControlController>();
+            settingController.Initialize();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(AudioListener.volume, DCL.Settings.i.generalSettings.sfxVolume, "audioListener sfxVolume mismatch");
-        }
-
-        [UnityTest]
-        public IEnumerator ApplyMouseSensivityCorrectly()
-        {
-            // Arrange
-            yield return CreateSliderSettingsControl<MouseSensivityControlController>(1f, 100f, true);
-
-            // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 0f;
-
-            // Assert
-            var povSpeed = Mathf.Lerp(MouseSensivityControlController.FIRST_PERSON_MIN_SPEED, MouseSensivityControlController.FIRST_PERSON_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_HorizontalAxis.m_MaxSpeed, povSpeed, "pov (m_HorizontalAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povCamera.m_VerticalAxis.m_MaxSpeed, povSpeed, "pov (m_VerticalAxis) mouseSensitivity mismatch");
-            var freeLookXSpeed = Mathf.Lerp(MouseSensivityControlController.THIRD_PERSON_X_MIN_SPEED, MouseSensivityControlController.THIRD_PERSON_X_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
-            var freeLookYSpeed = Mathf.Lerp(MouseSensivityControlController.THIRD_PERSON_Y_MIN_SPEED, MouseSensivityControlController.THIRD_PERSON_Y_MAX_SPEED, DCL.Settings.i.generalSettings.mouseSensitivity);
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_XAxis.m_MaxSpeed, freeLookXSpeed, "freeLookCamera (m_XAxis) mouseSensitivity mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_YAxis.m_MaxSpeed, freeLookYSpeed, "freeLookCamera (m_YAxis) mouseSensitivity mismatch");
-        }
-
-        [UnityTest]
-        public IEnumerator ApplyAntialiasingCorrectly()
-        {
-            // Arrange
-            yield return CreateSliderSettingsControl<AntiAliasingControlController>(0f, 1f, true);
-
-            // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 0f;
-
-            // Assert
-            Assert.IsTrue(urpAsset.msaaSampleCount == (int)DCL.Settings.i.qualitySettings.antiAliasing, "antiAliasing mismatch");
-        }
-
-        [UnityTest]
-        public IEnumerator ApplyColorGradingCorrectly()
-        {
-            // Arrange
-            yield return CreateToggleSettingsControl<ColorGradingControlController>();
-
-            // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = false;
-
-            // Assert
-            if (postProcessVolume.profile.TryGet<Tonemapping>(out Tonemapping toneMapping))
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "colorGrading stored value mismatch");
+            Tonemapping toneMapping;
+            if (QualitySettingsReferences.i.postProcessVolume.profile.TryGet<Tonemapping>(out toneMapping))
             {
-                Assert.IsTrue(toneMapping.active == DCL.Settings.i.qualitySettings.colorGrading, "colorGrading mismatch");
+                Assert.AreEqual(newValue, toneMapping.active, "bloom mismatch");
             }
         }
 
-        [UnityTest]
-        public IEnumerator ApplyDrawDistanceCorrectly()
+        [Test]
+        public void ChangeDetailObjectCullingCorrectly()
         {
             // Arrange
-            yield return CreateSliderSettingsControl<DrawDistanceControlController>(40f, 100f, true);
+            settingController = ScriptableObject.CreateInstance<DetailObjectCullingControlController>();
+            settingController.Initialize();
 
             // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 5f;
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(firstPersonCamera.m_Lens.FarClipPlane, DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (firstPersonCamera) mismatch");
-            UnityEngine.Assertions.Assert.AreApproximatelyEqual(freeLookCamera.m_Lens.FarClipPlane, DCL.Settings.i.qualitySettings.cameraDrawDistance, "cameraDrawDistance (freeLookCamera) mismatch");
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "enableDetailObjectCulling stored value mismatch");
+            Assert.AreNotEqual(newValue, CommonSettingsScriptableObjects.detailObjectCullingDisabled.Get());
         }
 
-        [UnityTest]
-        public IEnumerator ApplyRenderingScaleCorrectly()
+        [Test]
+        public void ChangeDetailObjectCullingSizeCorrectly()
         {
             // Arrange
-            yield return CreateSliderSettingsControl<RenderingScaleControlController>(0f, 1f, false);
+            settingController = ScriptableObject.CreateInstance<DetailObjectCullingSizeControlController>();
+            settingController.Initialize();
 
             // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 0.3f;
+            float newValue = 20f;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            Assert.IsTrue(urpAsset.renderScale == DCL.Settings.i.qualitySettings.renderScale, "renderScale mismatch");
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "detailObjectCullingThreshold stored value mismatch");
         }
 
-        [UnityTest]
-        public IEnumerator ApplyShadowCorrectly()
+        [Test]
+        public void ChangeDrawDistanceCorrectly()
         {
             // Arrange
-            yield return CreateToggleSettingsControl<ShadowControlController>();
+            settingController = ScriptableObject.CreateInstance<DrawDistanceControlController>();
+            settingController.Initialize();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = true;
+            float newValue = 50f;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            Assert.IsTrue(urpAsset.supportsMainLightShadows == DCL.Settings.i.qualitySettings.shadows, "shadows mismatch");
-
-            LightShadows shadowType = LightShadows.None;
-            if (DCL.Settings.i.qualitySettings.shadows)
-            {
-                shadowType = DCL.Settings.i.qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
-            }
-
-            Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "cameraDrawDistance stored value mismatch");
+            Assert.AreEqual(freeLookCamera.m_Lens.FarClipPlane, newValue, "3rd person camera FarClipPlane value mismatch");
+            Assert.AreEqual(firstPersonCamera.m_Lens.FarClipPlane, newValue, "1st person camera FarClipPlane value mismatch");
+            Assert.AreEqual(RenderSettings.fogEndDistance, newValue, "fogEndDistance value mismatch");
+            Assert.AreEqual(RenderSettings.fogStartDistance, newValue * 0.8f, "fogStartDistance value mismatch");
         }
 
-        [UnityTest]
-        public IEnumerator ApplySoftShadowsCorrectly()
+        [Test]
+        public void ChangeFPSLimitCorrectly()
         {
             // Arrange
-            yield return CreateToggleSettingsControl<SoftShadowsControlController>();
+            settingController = ScriptableObject.CreateInstance<FPSLimitControlController>();
+            settingController.Initialize();
 
             // Act
-            ((ToggleSettingsControlView)newControlView).toggleControl.isOn = false;
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            Assert.IsTrue(urpAsset.supportsSoftShadows == DCL.Settings.i.qualitySettings.softShadows, "softShadows mismatch");
-
-            LightShadows shadowType = LightShadows.None;
-            if (DCL.Settings.i.qualitySettings.shadows)
-            {
-                shadowType = DCL.Settings.i.qualitySettings.softShadows ? LightShadows.Soft : LightShadows.Hard;
-            }
-
-            Assert.IsTrue(environmentLight.shadows == shadowType, "shadows (environmentLight) mismatch");
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "fpsCap stored value mismatch");
         }
 
-        [UnityTest]
-        public IEnumerator ApplyShadowResolutionCorrectly()
+        [Test]
+        public void ChangeMouseSensivityCorrectly()
         {
             // Arrange
-            string[] labels = { "256", "512", "1024", "2048", "4096" };
-            yield return CreateSpinBoxSettingsControl<ShadowResolutionControlController>(labels);
+            settingController = ScriptableObject.CreateInstance<MouseSensivityControlController>();
+            settingController.Initialize();
 
             // Act
-            ((SpinBoxSettingsControlView)newControlView).spinBoxControl.value = (int)UnityEngine.Rendering.Universal.ShadowResolution._2048;
+            float newValue = 80f;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            Assert.IsTrue(urpAsset.mainLightShadowmapResolution == (int)DCL.Settings.i.qualitySettings.shadowResolution, "shadowResolution mismatch");
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "mouseSensitivity stored value mismatch");
+            var povSpeed = Mathf.Lerp(MouseSensivityControlController.FIRST_PERSON_MIN_SPEED, MouseSensivityControlController.FIRST_PERSON_MAX_SPEED, newValue);
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povSpeed, povCamera.m_HorizontalAxis.m_MaxSpeed, "povCamera.m_HorizontalAxis.m_MaxSpeed value mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(povSpeed, povCamera.m_VerticalAxis.m_MaxSpeed, "povCamera.m_VerticalAxis.m_MaxSpeed value mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(
+                Mathf.Lerp(MouseSensivityControlController.THIRD_PERSON_X_MIN_SPEED, MouseSensivityControlController.THIRD_PERSON_X_MAX_SPEED, newValue),
+                freeLookCamera.m_XAxis.m_MaxSpeed,
+                "freeLookCamera.m_XAxis.m_MaxSpeed value mismatch");
+            UnityEngine.Assertions.Assert.AreApproximatelyEqual(
+                Mathf.Lerp(MouseSensivityControlController.THIRD_PERSON_Y_MIN_SPEED, MouseSensivityControlController.THIRD_PERSON_Y_MAX_SPEED, newValue),
+                freeLookCamera.m_YAxis.m_MaxSpeed,
+                "freeLookCamera.m_YAxis.m_MaxSpeed value mismatch");
         }
 
-        [UnityTest]
-        public IEnumerator ApplyShadowDistanceCorrectly()
+        [Test]
+        public void ChangeMuteSoundCorrectly()
         {
             // Arrange
-            yield return CreateSliderSettingsControl<ShadowDistanceControlController>(30f, 100f, true);
+            settingController = ScriptableObject.CreateInstance<MuteSoundControlController>();
+            settingController.Initialize();
 
             // Act
-            ((SliderSettingsControlView)newControlView).sliderControl.value = 90f;
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
 
             // Assert
-            Assert.IsTrue(urpAsset.shadowDistance == (int)DCL.Settings.i.qualitySettings.shadowDistance, "shadowDistance mismatch");
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "muteSound stored value mismatch");
+            Assert.AreEqual(newValue ? 1f : 0f, AudioListener.volume, "sfxVolume value mismatch");
         }
 
-        private IEnumerator CreateToggleSettingsControl<T>() where T : SettingsControlController
+        [Test]
+        public void ChangeRenderingScaleCorrectly()
         {
-            newControlView = Object.Instantiate((GameObject)Resources.Load(CONTROL_VIEW_PREFAB_PATH.Replace("{controlType}", "Toggle"))).GetComponent<ToggleSettingsControlView>();
-            newControlModel = ScriptableObject.CreateInstance<ToggleControlModel>();
-            newControlModel.title = "TestToggleControl";
-            newControlModel.controlPrefab = newControlView;
-            newControlModel.controlController = ScriptableObject.CreateInstance<T>();
-            newControlModel.flagsThatDeactivateMe = new List<BooleanVariable>();
-            newControlModel.flagsThatDisableMe = new List<BooleanVariable>();
-            newControlModel.isBeta = false;
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<RenderingScaleControlController>();
+            settingController.Initialize();
 
-            newControlView.Initialize(newControlModel, newControlModel.controlController);
-            yield return null;
+            // Act
+            float newValue = 0.5f;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "renderScale stored value mismatch");
+            Assert.AreEqual(newValue, urpAsset.renderScale, "renderScale value mismatch");
         }
 
-        private IEnumerator CreateSliderSettingsControl<T>(
-            float sliderMinValue,
-            float sliderMaxValue,
-            bool sliderWholeNumbers) where T : SettingsControlController
+        [Test]
+        public void ChangeShadowsCorrectly()
         {
-            newControlView = Object.Instantiate((GameObject)Resources.Load(CONTROL_VIEW_PREFAB_PATH.Replace("{controlType}", "Slider"))).GetComponent<SliderSettingsControlView>();
-            newControlModel = ScriptableObject.CreateInstance<SliderControlModel>();
-            newControlModel.title = "TestSliderControl";
-            newControlModel.controlPrefab = newControlView;
-            newControlModel.controlController = ScriptableObject.CreateInstance<T>();
-            newControlModel.flagsThatDeactivateMe = new List<BooleanVariable>();
-            newControlModel.flagsThatDisableMe = new List<BooleanVariable>();
-            newControlModel.isBeta = false;
-            ((SliderControlModel)newControlModel).sliderMinValue = sliderMinValue;
-            ((SliderControlModel)newControlModel).sliderMaxValue = sliderMaxValue;
-            ((SliderControlModel)newControlModel).sliderWholeNumbers = sliderWholeNumbers;
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<ShadowControlController>();
+            settingController.Initialize();
 
-            newControlView.Initialize(newControlModel, newControlModel.controlController);
-            yield return null;
+            // Act
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "shadows stored value mismatch");
+            Assert.AreEqual(newValue, lwrpaShadowField.GetValue(urpAsset), "lwrpaShadowField value mismatch");
+            Assert.AreNotEqual(newValue, CommonSettingsScriptableObjects.shadowsDisabled.Get());
         }
 
-        private IEnumerator CreateSpinBoxSettingsControl<T>(string[] spinBoxLabels) where T : SettingsControlController
+        [Test]
+        public void ChangeShadowDistanceCorrectly()
         {
-            newControlView = Object.Instantiate((GameObject)Resources.Load(CONTROL_VIEW_PREFAB_PATH.Replace("{controlType}", "SpinBox"))).GetComponent<SpinBoxSettingsControlView>();
-            newControlModel = ScriptableObject.CreateInstance<SpinBoxControlModel>();
-            newControlModel.title = "TestSpinBoxControl";
-            newControlModel.controlPrefab = newControlView;
-            newControlModel.controlController = ScriptableObject.CreateInstance<T>();
-            newControlModel.flagsThatDeactivateMe = new List<BooleanVariable>();
-            newControlModel.flagsThatDisableMe = new List<BooleanVariable>();
-            newControlModel.isBeta = false;
-            ((SpinBoxControlModel)newControlModel).spinBoxLabels = spinBoxLabels;
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<ShadowDistanceControlController>();
+            settingController.Initialize();
 
-            newControlView.Initialize(newControlModel, newControlModel.controlController);
-            yield return null;
+            // Act
+            float newValue = 50f;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "shadowDistance stored value mismatch");
+            Assert.AreEqual(newValue, urpAsset.shadowDistance, "shadowDistance value mismatch");
+        }
+
+        [Test]
+        public void ChangeShadowresolutionCorrectly()
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<ShadowResolutionControlController>();
+            settingController.Initialize();
+
+            // Act
+            int newValue = 4;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            UnityEngine.Rendering.Universal.ShadowResolution newValueFormatted = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << newValue);
+            Assert.AreEqual(
+                (int)Mathf.Log((int)newValueFormatted, 2) - 8,
+                settingController.GetStoredValue(),
+                "shadowResolution stored value mismatch");
+            Assert.AreEqual(newValueFormatted, lwrpaShadowResolutionField.GetValue(urpAsset), "lwrpaShadowResolutionField value mismatch");
+        }
+
+        [Test]
+        public void ChangeSoftShadowsCorrectly()
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<SoftShadowsControlController>();
+            settingController.Initialize();
+
+            // Act
+            bool newValue = true;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "softShadows stored value mismatch");
+            Assert.AreEqual(newValue, lwrpaSoftShadowField.GetValue(urpAsset), "lwrpaShadowResolutionField value mismatch");
+        }
+
+        [Test]
+        public void ChangeVoiceChatVolumeCorrectly()
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<VoiceChatVolumeControlController>();
+            settingController.Initialize();
+
+            // Act
+            float newValue = 90f;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "voiceChatVolume stored value mismatch");
         }
     }
 }
