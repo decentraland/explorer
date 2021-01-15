@@ -36,6 +36,8 @@ public class BuildModeHUDController : IHUD
 
     internal BuildModeHUDView view;
     BuilderInWorldEntityListController buildModeEntityListController;
+    SceneObjectDropController sceneObjectDropController;
+
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
     public BuildModeHUDController()
@@ -45,7 +47,12 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
+        sceneObjectDropController = new SceneObjectDropController();
+
         buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
+        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
+
+
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -55,6 +62,7 @@ public class BuildModeHUDController : IHUD
 
         buildModeEntityListController.CloseList();
 
+        view.OnSceneObjectDrop += () => sceneObjectDropController.SceneObjectDropped();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
         view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
         view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
@@ -71,6 +79,7 @@ public class BuildModeHUDController : IHUD
         view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
         view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
 
+        sceneObjectDropController.OnSceneObjectDropped += SceneObjectSelected;
         view.OnSceneObjectSelected += SceneObjectSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();

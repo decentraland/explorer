@@ -6,15 +6,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-public class BuilderMeshLoadingIndicator : TestsBase
+public class BuilderMeshLoadingIndicator : IntegrationTestSuite_Legacy
 {
     protected override bool justSceneSetUp => true;
 
     [UnityTest]
     public IEnumerator BuilderMeshLoadingIndicatorTest()
     {
-        yield return SetUp_SceneController();
-
+        SetUp_SceneController();
         yield return SceneManager.LoadSceneAsync("BuilderScene", LoadSceneMode.Additive);
 
         var builderBridge = Object.FindObjectOfType<Builder.DCLBuilderBridge>();

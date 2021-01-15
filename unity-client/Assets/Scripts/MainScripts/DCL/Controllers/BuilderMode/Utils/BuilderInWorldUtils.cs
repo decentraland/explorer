@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using DCL.Configuration;
 using static ProtocolV2;
+using Environment = DCL.Environment;
 
 public static partial class BuilderInWorldUtils
 {
@@ -126,7 +127,7 @@ public static partial class BuilderInWorldUtils
         eventData.position = mousePosition;
         var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
-        return results.Count > 1;
+        return results.Count > 2;
     }
 
     public static bool IsPointerOverUIElement()
@@ -145,8 +146,8 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
                 EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
-               
-                entityComponentModel.position = DCL.Environment.i.worldState.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+
+                entityComponentModel.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 

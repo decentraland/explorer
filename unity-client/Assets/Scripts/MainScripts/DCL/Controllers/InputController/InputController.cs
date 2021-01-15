@@ -1,3 +1,4 @@
+using DCL;
 using System;
 using System.Linq;
 using TMPro;
@@ -135,7 +136,7 @@ public class InputController : MonoBehaviour
         {
             Update_Trigger(triggerTimeActions);
             Update_Hold(holdActions);
-           
+
         }
         Update_Measurable(measurableActions);
     }
@@ -179,7 +180,7 @@ public class InputController : MonoBehaviour
                     InputProcessor.FromKey(action, KeyCode.U, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.CloseWindow:
-                    if (allUIHidden) break;
+                    if (allUIHidden || DataStore.isSignUpFlow.Get()) break;
                     InputProcessor.FromKey(action, KeyCode.Escape, modifiers: InputProcessor.Modifier.None);
                     break;
                 case DCLAction_Trigger.OpenExpressions:

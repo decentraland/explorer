@@ -148,6 +148,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     void Start()
     {
+        KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
+        KernelConfig.i.OnChange += OnKernelConfigChanged;
+
         if (snapGO == null)
             snapGO = new GameObject("SnapGameObject");
 
@@ -228,6 +231,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private void OnDestroy()
     {
+        KernelConfig.i.OnChange -= OnKernelConfigChanged;
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
 
         toggleCreateLastSceneObjectInputAction.OnTriggered -= createLastSceneObjectDelegate;
@@ -283,7 +287,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (checkerInsideSceneOptimizationCounter >= 60)
         {
-            
+
             if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
                 ExitEditMode();
             checkerInsideSceneOptimizationCounter = 0;
@@ -333,6 +337,16 @@ public class BuilderInWorldController : MonoBehaviour
     {
         HUDController.i.builderInWorldMainHud.RefreshCatalogAssetPack();
         HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
+    }
+
+    void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        EnableFeature(current.features.enableBuilderInWorld);
+    }
+
+    void EnableFeature(bool enable)
+    {
+        activeFeature = enable;
     }
 
     void CatalogReceived(string catalogJson)
@@ -464,7 +478,7 @@ public class BuilderInWorldController : MonoBehaviour
     }
 
     DCLBuilderInWorldEntity CreateSceneObject(SceneObject sceneObject, bool autoSelect = true, bool isFloor = false)
-    {       
+    {
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES && BuilderInWorldNFTController.i.IsNFTInUse(sceneObject.id)) return null;
 
         IsInsideTheLimits(sceneObject);
@@ -493,9 +507,9 @@ public class BuilderInWorldController : MonoBehaviour
                 data.contents.Add(mappingPair);
         }
 
-        Environment.i.sceneController.UpdateParcelScenesExecute(data);
+        Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
 
-   
+
         DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
         DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
 
@@ -526,9 +540,9 @@ public class BuilderInWorldController : MonoBehaviour
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         }
 
-        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);      
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
-        
+
         name.SetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
 
 
@@ -845,7 +859,7 @@ public class BuilderInWorldController : MonoBehaviour
     public void NewSceneReady(string id)
     {
         if (sceneToEditId != id) return;
-        Environment.i.sceneController.OnReadyScene -= NewSceneReady;
+        Environment.i.world.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         sceneReady = true;
         CheckEnterEditMode();
@@ -873,15 +887,15 @@ public class BuilderInWorldController : MonoBehaviour
         sceneToEditId = sceneToEdit.sceneData.id;
         inputController.isInputActive = false;
 
-        Environment.i.sceneController.OnReadyScene += NewSceneReady;
+        Environment.i.world.sceneController.OnReadyScene += NewSceneReady;
 
-        builderInWorldBridge.StartKernelEditMode(sceneToEdit);    
+        builderInWorldBridge.StartKernelEditMode(sceneToEdit);
     }
 
     public void EnterEditMode()
     {
         BuilderInWorldNFTController.i.ClearNFTs();
-    
+
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
 
@@ -910,8 +924,8 @@ public class BuilderInWorldController : MonoBehaviour
         builderInputWrapper.gameObject.SetActive(true);
         builderInWorldEntityHandler.EnterEditMode(sceneToEdit);
 
-        Environment.i.sceneController.ActivateBuilderInWorldEditScene();
-  
+        Environment.i.world.sceneController.ActivateBuilderInWorldEditScene();
+
         avatarRenderer.SetAvatarVisibility(false);
 
         ActivateBuilderInWorldCamera();
@@ -924,7 +938,7 @@ public class BuilderInWorldController : MonoBehaviour
     public void ExitEditMode()
     {
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
-       
+
         inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
 
@@ -951,7 +965,7 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.SetVisibility(false);
         }
 
-        Environment.i.sceneController.DeactivateBuilderInWorldEditScene();
+        Environment.i.world.sceneController.DeactivateBuilderInWorldEditScene();
 
         DeactivateBuilderInWorldCamera();
         isEditModeActivated = false;
@@ -982,7 +996,7 @@ public class BuilderInWorldController : MonoBehaviour
         {
             DCLBuilderInWorldEntity decentralandEntity = CreateSceneObject(floorSceneObject,false,true);
             decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
-            decentralandEntity.transform.position = Environment.i.worldState.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+            decentralandEntity.transform.position = Environment.i.world.state.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
             dclBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
 
             GameObject floorPlaceHolder =  Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
@@ -1036,7 +1050,7 @@ public class BuilderInWorldController : MonoBehaviour
             outliner.enabled = false;
             outliner.Deactivate();
         }
-      
+
         outliner.enabled = false;
         outliner.Deactivate();
 
@@ -1051,7 +1065,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     void FindSceneToEdit()
     {
-        foreach (ParcelScene scene in Environment.i.worldState.scenesSortedByDistance)
+        foreach (ParcelScene scene in Environment.i.world.state.scenesSortedByDistance)
         {
             if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {

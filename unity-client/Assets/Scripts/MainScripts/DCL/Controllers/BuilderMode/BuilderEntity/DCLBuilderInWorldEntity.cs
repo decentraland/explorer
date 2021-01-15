@@ -157,7 +157,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
-        DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
+        DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         OnDelete?.Invoke(this);
     }
 
@@ -241,7 +241,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
-                return descriptiveName = ((DCLName.Model) keyValuePairBaseDisposable.Value.GetModel()).value;               
+                return descriptiveName = ((DCLName.Model) keyValuePairBaseDisposable.Value.GetModel()).value;
             }
         }
         return "";
@@ -271,7 +271,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
                 }
             }
         }
-        DCL.Environment.i.sceneBoundsChecker.AddPersistent(rootEntity);
+
+        DCL.Environment.i.world.sceneBoundsChecker.AddPersistent(rootEntity);
     }
 
     void SetOriginalMaterials()
@@ -336,7 +337,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
                 if (renderer.materials[i] != editMaterial)
                     originalMaterials[matCont] = renderer.materials[i];
-                                                   
+
                 materials[i] = editMaterial;
                 matCont++;
             }

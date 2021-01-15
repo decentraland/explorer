@@ -264,40 +264,40 @@ namespace DCL
                         switch (msg.type)
                         {
                             case "SetDebug":
-                                DCL.Environment.i.debugController.SetDebug();
+                                DCL.Environment.i.platform.debugController.SetDebug();
                                 break;
                             case "SetSceneDebugPanel":
-                                DCL.Environment.i.debugController.SetSceneDebugPanel();
+                                DCL.Environment.i.platform.debugController.SetSceneDebugPanel();
                                 break;
                             case "ShowFPSPanel":
-                                DCL.Environment.i.debugController.ShowFPSPanel();
+                                DCL.Environment.i.platform.debugController.ShowFPSPanel();
                                 break;
                             case "HideFPSPanel":
-                                DCL.Environment.i.debugController.HideFPSPanel();
+                                DCL.Environment.i.platform.debugController.HideFPSPanel();
                                 break;
                             case "SetEngineDebugPanel":
-                                DCL.Environment.i.debugController.SetEngineDebugPanel();
+                                DCL.Environment.i.platform.debugController.SetEngineDebugPanel();
                                 break;
                             case "SendSceneMessage":
-                                DCL.Environment.i.sceneController.SendSceneMessage(msg.payload);
+                                DCL.Environment.i.world.sceneController.SendSceneMessage(msg.payload);
                                 break;
                             case "LoadParcelScenes":
-                                DCL.Environment.i.sceneController.LoadParcelScenes(msg.payload);
+                                DCL.Environment.i.world.sceneController.LoadParcelScenes(msg.payload);
                                 break;
                             case "UnloadScene":
-                                DCL.Environment.i.sceneController.UnloadScene(msg.payload);
+                                DCL.Environment.i.world.sceneController.UnloadScene(msg.payload);
                                 break;
                             case "Reset":
-                                DCL.Environment.i.sceneController.UnloadAllScenesQueued();
+                                DCL.Environment.i.world.sceneController.UnloadAllScenesQueued();
                                 break;
                             case "CreateUIScene":
-                                DCL.Environment.i.sceneController.CreateUIScene(msg.payload);
+                                DCL.Environment.i.world.sceneController.CreateUIScene(msg.payload);
                                 break;
                             case "BuilderReady":
                                 Main.i.BuilderReady();
                                 break;
                             case "UpdateParcelScenes":
-                                DCL.Environment.i.sceneController.UpdateParcelScenes(msg.payload);
+                                DCL.Environment.i.world.sceneController.UpdateParcelScenes(msg.payload);
                                 break;
                             case "Teleport":
                                 characterController.Teleport(msg.payload);
@@ -422,6 +422,9 @@ namespace DCL
                             case "SetTutorialEnabled":
                                 DCL.Tutorial.TutorialController.i?.SetTutorialEnabled(msg.payload);
                                 break;
+                            case "SetTutorialEnabledForUsersThatAlreadyDidTheTutorial":
+                                DCL.Tutorial.TutorialController.i?.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial();
+                                break;
                             case "TriggerSelfUserExpression":
                                 HUDController.i.TriggerSelfUserExpression(msg.payload);
                                 break;
@@ -451,6 +454,7 @@ namespace DCL
                                 {
                                     HUDController.i.SetVoiceChatEnabledByScene(value);
                                 }
+
                                 break;
                             case "SetRenderProfile":
                                 RenderProfileBridge.i.SetRenderProfile(msg.payload);

@@ -1,15 +1,32 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
 using UnityEngine;
 
 namespace DCL
 {
-    public class WorldState : ISceneHandler
+    public interface IWorldState : ISceneHandler
     {
-        public HashSet<string> readyScenes = new HashSet<string>();
-        public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
-        public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+        HashSet<string> readyScenes { get; set; }
+        Dictionary<string, ParcelScene> loadedScenes { get; set; }
+        List<ParcelScene> scenesSortedByDistance { get; set; }
+        string globalSceneId { get; set; }
+        string currentSceneId { get; set; }
+        void Initialize();
+        string TryToGetSceneCoordsID(string id);
+        bool TryGetScene(string id, out ParcelScene scene);
+        Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null);
+        Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null);
+        bool IsCharacterInsideScene(ParcelScene scene);
+        Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
+        Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
+    }
+
+    public class WorldState : IWorldState
+    {
+        public HashSet<string> readyScenes { get; set; } = new HashSet<string>();
+        public Dictionary<string, ParcelScene> loadedScenes { get; set; } = new Dictionary<string, ParcelScene>();
+        public List<ParcelScene> scenesSortedByDistance { get; set; } = new List<ParcelScene>();
 
         public string globalSceneId { get; set; }
         public string currentSceneId { get; set; }
@@ -35,7 +52,7 @@ namespace DCL
         {
             scene = null;
 
-            if (!loadedScenes.ContainsKey(id))
+            if (string.IsNullOrEmpty(id) || !loadedScenes.ContainsKey(id))
                 return false;
 
             scene = loadedScenes[id];
@@ -54,7 +71,7 @@ namespace DCL
                     return pos;
             }
 
-            Vector3 worldPosition = DCLCharacterController.i.characterPosition.UnityToWorldPosition(pos);
+            Vector3 worldPosition = PositionUtils.UnityToWorldPosition(pos);
             return worldPosition - Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
         }
 
@@ -81,7 +98,7 @@ namespace DCL
         {
             if (scene == null)
             {
-                WorldState worldState = Environment.i.worldState;
+                IWorldState worldState = Environment.i.world.state;
                 string sceneId = worldState.currentSceneId;
 
 
@@ -92,7 +109,7 @@ namespace DCL
             }
 
             Vector3 scenePosition = Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
-            Vector3 worldPosition = DCLCharacterController.i.characterPosition.WorldToUnityPosition(scenePosition);
+            Vector3 worldPosition = PositionUtils.WorldToUnityPosition(scenePosition);
 
             return worldPosition;
         }
@@ -101,7 +118,7 @@ namespace DCL
         {
             if (scene == null)
             {
-                WorldState worldState = Environment.i.worldState;
+                IWorldState worldState = Environment.i.world.state;
                 string sceneId = worldState.currentSceneId;
 
                 if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
@@ -116,7 +133,7 @@ namespace DCL
         public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint)
         {
             Vector3 scenePosition = Utils.GridToWorldPosition(scenePoint.x, scenePoint.y) + pos;
-            Vector3 worldPosition = DCLCharacterController.i.characterPosition.WorldToUnityPosition(scenePosition);
+            Vector3 worldPosition = PositionUtils.WorldToUnityPosition(scenePosition);
 
             return worldPosition;
         }
@@ -133,7 +150,7 @@ namespace DCL
             // Create fast (hashset) collection of loaded parcels coords
             foreach (var element in loadedScenes)
             {
-                if (!element.Value.isReady) continue;
+                if (!element.Value.sceneLifecycleHandler.isReady) continue;
 
                 allLoadedParcelCoords.UnionWith(element.Value.parcels);
             }

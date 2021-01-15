@@ -226,7 +226,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE)
             gizmoManager.SetGizmoType("MOVE");
         mouseCatcher.enabled = false;
-        Environment.i.sceneController.IsolateScene(sceneToEdit);
+        Environment.i.world.sceneController.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
 
         RenderSettings.fog = false;
@@ -262,7 +262,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
 
 
-        Environment.i.sceneController.ReIntegrateIsolatedScene();
+        Environment.i.world.sceneController.ReIntegrateIsolatedScene();
 
         gizmoManager.HideGizmo();
         RenderSettings.fog = true;
@@ -504,7 +504,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         position.y = totalY;
         position.z = centerZ;
 
-        position = Environment.i.worldState.ConvertScenePositionToUnityPosition(parcelScene);
+        position = Environment.i.world.state.ConvertScenePositionToUnityPosition(parcelScene);
 
         position.x += ParcelSettings.PARCEL_SIZE / 2 ;
         position.z += ParcelSettings.PARCEL_SIZE / 2 ;
@@ -516,7 +516,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         RaycastHit hit;
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-      
+
         if (Physics.Raycast(ray, out hit, RAYCAST_MAX_DISTANCE, groundLayer))
         {
             editionGO.transform.position = hit.point;

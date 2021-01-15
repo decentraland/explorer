@@ -6,7 +6,7 @@ import { IEvents } from './Types'
 import { ActionButton } from './Input'
 
 /** @public */
-export type TranformConstructorArgs = {
+export type TransformConstructorArgs = {
   position?: Vector3
   rotation?: Quaternion
   scale?: Vector3
@@ -112,7 +112,7 @@ export class Transform extends ObservableComponent {
   @ObservableComponent.field
   scale!: Vector3
 
-  constructor(args: TranformConstructorArgs = {}) {
+  constructor(args: TransformConstructorArgs = {}) {
     super()
     this.position = args.position || Vector3.Zero()
     this.rotation = args.rotation || Quaternion.Identity
@@ -1030,6 +1030,7 @@ export class VideoTexture extends ObservableComponent {
 
   constructor(videoClip: VideoClip, opts?: Partial<Pick<VideoTexture, 'samplingMode' | 'wrap'>>) {
     super()
+
     if (!(videoClip instanceof VideoClip)) {
       throw new Error(`Trying to create VideoTexture(VideoClip) with an invalid VideoClip`)
     }
@@ -1053,6 +1054,7 @@ export class VideoTexture extends ObservableComponent {
 
   reset() {
     this.seekTime(0)
+    this.pause()
   }
 
   seekTime(seconds: number) {
@@ -1064,8 +1066,6 @@ export class VideoTexture extends ObservableComponent {
   toJSON() {
     if (this.seek >= 0) {
       // the seek value was changed/used
-      this.pause()
-
       const ret = JSON.parse(JSON.stringify(super.toJSON()))
       this.seek = -1
       return ret

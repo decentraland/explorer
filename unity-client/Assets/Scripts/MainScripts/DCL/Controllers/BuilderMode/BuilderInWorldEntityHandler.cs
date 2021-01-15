@@ -14,9 +14,10 @@ using Environment = DCL.Environment;
 
 public class BuilderInWorldEntityHandler : MonoBehaviour
 {
-
     [Header("Design variables")]
     public float duplicateOffset = 2f;
+
+    public float msBetweenTransformUpdates = 2000;
 
     [Header("Prefab References")]
     public OutlinerController outlinerController;
@@ -25,7 +26,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
 
-    [Header("Build References")] public Material editMaterial;
+    [Header("Build References")]
+    public Material editMaterial;
+
     public Texture2D duplicateCursorTexture;
 
     [Header("InputActions")]
@@ -372,7 +375,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void DuplicateSelectedEntities()
     {
-
         BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
         buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATE;
 
@@ -389,9 +391,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         currentActiveMode.SetDuplicationOffset(duplicateOffset);
         Cursor.SetCursor(duplicateCursorTexture, Vector2.zero, CursorMode.Auto);
 
-     
+
         buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATE);
-        actionController.AddAction(buildAction);       
+        actionController.AddAction(buildAction);
     }
 
     public DecentralandEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
@@ -455,7 +457,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     {
         DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
-        DCLTransform.model.position = Environment.i.worldState.ConvertUnityToScenePosition(entryPoint, parcelScene);
+        DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entryPoint, parcelScene);
 
         Vector3 pointToLookAt = Camera.main.transform.position;
         pointToLookAt.y = editionGOPosition.y;
@@ -629,7 +631,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         {
             if (entity.rootEntity.scene == sceneToEdit)
             {
-                if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+                if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 {
                     entitiesToRemove.Add(entity);
                 }
@@ -696,7 +698,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         bool areAllIn = true;
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 return false;
             }
@@ -710,7 +712,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         bool areAllIn = true;
         foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-            if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 return false;
             }

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class BuilderInWorldShould : TestsBase
+public class BuilderInWorldShould : IntegrationTestSuite_Legacy
 {
 
     protected override IEnumerator SetUp()
@@ -39,7 +39,7 @@ public class BuilderInWorldShould : TestsBase
             Assert.Pass();
             return;
         }
- 
+
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
 
         if (Physics.Raycast(ray, out hit, BuilderInWorldGodMode.RAYCAST_MAX_DISTANCE, godMode.groundLayer))
@@ -105,7 +105,7 @@ public class BuilderInWorldShould : TestsBase
                 data.contents.Add(mappingPair);
         }
 
-        Environment.i.sceneController.UpdateParcelScenesExecute(data);
+        Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
 
 
         string entityId = "1";
@@ -164,7 +164,7 @@ public class BuilderInWorldShould : TestsBase
         Assert.IsFalse(builderInWorldController.isEditModeActivated, "Unable to exit  Builder In World");
         GameObject.DestroyImmediate(builderInWorldController.gameObject);
         yield return null;
-    }  
+    }
 
     protected override IEnumerator TearDown()
     {

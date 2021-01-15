@@ -1,3 +1,4 @@
+using DCL;
 using DCL.HelpAndSupportHUD;
 using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
@@ -502,7 +503,7 @@ public class HUDController : MonoBehaviour
     {
         if (avatarEditorHud != null)
         {
-            avatarEditorHud.IsSignUpFlowValue = true;
+            DataStore.isSignUpFlow.Set(true);
             ShowAvatarEditor();
         }
     }
