@@ -31,7 +31,7 @@ namespace DCL.SettingsController
         {
             i = this;
 
-            povCamera = firstPersonCamera.GetCinemachineComponent<CinemachinePOV>();
+            povCamera = GeneralSettingsReferences.i.firstPersonCamera.GetCinemachineComponent<CinemachinePOV>();
         }
 
         public void UpdateAllowVoiceChat(int isActive)
@@ -49,8 +49,8 @@ namespace DCL.SettingsController
             var povSpeed = Mathf.Lerp(FIRST_PERSON_MIN_SPEED, FIRST_PERSON_MAX_SPEED, newValue);
             povCamera.m_HorizontalAxis.m_MaxSpeed = povSpeed;
             povCamera.m_VerticalAxis.m_MaxSpeed = povSpeed;
-            thirdPersonCamera.m_XAxis.m_MaxSpeed = Mathf.Lerp(THIRD_PERSON_X_MIN_SPEED, THIRD_PERSON_X_MAX_SPEED, newValue);
-            thirdPersonCamera.m_YAxis.m_MaxSpeed = Mathf.Lerp(THIRD_PERSON_Y_MIN_SPEED, THIRD_PERSON_Y_MAX_SPEED, newValue);
+            GeneralSettingsReferences.i.thirdPersonCamera.m_XAxis.m_MaxSpeed = Mathf.Lerp(THIRD_PERSON_X_MIN_SPEED, THIRD_PERSON_X_MAX_SPEED, newValue);
+            GeneralSettingsReferences.i.thirdPersonCamera.m_YAxis.m_MaxSpeed = Mathf.Lerp(THIRD_PERSON_Y_MIN_SPEED, THIRD_PERSON_Y_MAX_SPEED, newValue);
         }
 
         public void UpdateSfxVolume(float newValue)
