@@ -11,7 +11,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentGeneralSettings.voiceChatVolume * 100;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentGeneralSettings.voiceChatVolume = (float)newValue * 0.01f;
             WebInterface.ApplySettings(currentGeneralSettings.voiceChatVolume, (int)currentGeneralSettings.voiceChatAllow);

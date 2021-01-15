@@ -30,7 +30,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return antiAliasingValue;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             float newFloatValue = (float)newValue;
 

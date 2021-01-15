@@ -22,7 +22,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentQualitySetting.renderScale;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.renderScale = (float)newValue;
 

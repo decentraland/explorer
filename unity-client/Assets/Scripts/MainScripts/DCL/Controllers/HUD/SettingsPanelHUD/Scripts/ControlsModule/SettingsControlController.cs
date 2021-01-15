@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     /// <summary>
-    /// This controller is in charge of manage all the base logic related to a CONTROL.
+    /// This controller is in charge of manage all the logic related to a SETTING CONTROL.
     /// </summary>
     public class SettingsControlController : ScriptableObject
     {
@@ -38,10 +38,10 @@ namespace DCL.SettingsPanelHUD.Controls
         }
 
         /// <summary>
-        /// It should contain the specific logic that will be triggered when the control state changes.
+        /// All the needed logic to applying the setting and storing the current value.
         /// </summary>
         /// <param name="newValue">Value of the new state. It can be a bool (for toggle controls), a float (for slider controls) or an int (for spin-box controls).</param>
-        public virtual void OnControlChanged(object newValue)
+        public virtual void UpdateSetting(object newValue)
         {
         }
 

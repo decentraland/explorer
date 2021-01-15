@@ -14,7 +14,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentQualitySetting.fpsCap;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.fpsCap = (bool)newValue;
             ToggleFPSCap(currentQualitySetting.fpsCap);

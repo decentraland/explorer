@@ -27,7 +27,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return (int)Mathf.Log((int)currentQualitySetting.shadowResolution, 2) - 8;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.shadowResolution = (UnityEngine.Rendering.Universal.ShadowResolution)(256 << (int)newValue);
 

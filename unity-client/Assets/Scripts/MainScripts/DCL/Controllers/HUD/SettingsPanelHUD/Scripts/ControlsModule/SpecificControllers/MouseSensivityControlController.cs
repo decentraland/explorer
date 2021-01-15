@@ -28,7 +28,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentGeneralSettings.mouseSensitivity;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentGeneralSettings.mouseSensitivity = (float)newValue;
 

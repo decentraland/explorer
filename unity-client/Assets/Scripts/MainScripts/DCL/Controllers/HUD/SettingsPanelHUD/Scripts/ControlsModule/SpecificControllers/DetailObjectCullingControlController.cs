@@ -11,7 +11,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentQualitySetting.enableDetailObjectCulling;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             bool newBoolValue = (bool)newValue;
             currentQualitySetting.enableDetailObjectCulling = newBoolValue;

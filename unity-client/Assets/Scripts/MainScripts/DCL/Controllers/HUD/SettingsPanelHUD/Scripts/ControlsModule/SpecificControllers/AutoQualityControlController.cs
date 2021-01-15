@@ -10,7 +10,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentGeneralSettings.autoqualityOn;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             bool autoQualityValue = (bool)newValue;
 

@@ -29,7 +29,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             base.Initialize(controlConfig, sliderController);
             OverrideIndicatorLabel(slider.value.ToString());
-            sliderController.OnControlChanged(this.sliderControlConfig.storeValueAsNormalized ? RemapSliderValueTo01(slider.value) : slider.value);
+            sliderController.UpdateSetting(this.sliderControlConfig.storeValueAsNormalized ? RemapSliderValueTo01(slider.value) : slider.value);
 
             slider.onValueChanged.AddListener(sliderValue =>
             {

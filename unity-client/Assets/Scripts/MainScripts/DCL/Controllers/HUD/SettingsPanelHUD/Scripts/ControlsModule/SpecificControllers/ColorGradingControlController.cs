@@ -12,7 +12,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentQualitySetting.colorGrading;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.colorGrading = (bool)newValue;
 

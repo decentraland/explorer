@@ -11,7 +11,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return (int)currentGeneralSettings.voiceChatAllow;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             int newIntValue = (int)newValue;
             currentGeneralSettings.voiceChatAllow = (SettingsData.GeneralSettings.VoiceChatAllow)newIntValue;

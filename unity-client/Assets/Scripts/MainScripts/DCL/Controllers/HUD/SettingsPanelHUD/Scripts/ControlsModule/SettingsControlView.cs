@@ -109,7 +109,7 @@ namespace DCL.SettingsPanelHUD.Controls
         /// <param name="newValue">Value of the new state. It can be a bool (for toggle controls), a float (for slider controls) or an int (for spin-box controls).</param>
         protected void ApplySetting(object newValue)
         {
-            settingsControlController.OnControlChanged(newValue);
+            settingsControlController.UpdateSetting(newValue);
             settingsControlController.ApplySettings();
         }
 

@@ -20,7 +20,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return GetCurrentStoredValue();
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             SettingsData.QualitySettings preset = Settings.i.qualitySettingsPresets[(int)newValue];
             currentQualitySetting = preset;

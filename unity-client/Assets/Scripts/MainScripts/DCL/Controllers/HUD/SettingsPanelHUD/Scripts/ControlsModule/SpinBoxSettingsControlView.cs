@@ -22,7 +22,7 @@ namespace DCL.SettingsPanelHUD.Controls
             spinBoxController.OnCurrentLabelChange += spinBox.OverrideCurrentLabel;
 
             base.Initialize(controlConfig, spinBoxController);
-            spinBoxController.OnControlChanged(spinBox.value);
+            spinBoxController.UpdateSetting(spinBox.value);
 
             spinBox.onValueChanged.AddListener(spinBoxValue =>
             {

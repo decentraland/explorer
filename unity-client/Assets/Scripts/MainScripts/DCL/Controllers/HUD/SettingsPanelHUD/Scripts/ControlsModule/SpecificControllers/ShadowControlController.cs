@@ -29,7 +29,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentQualitySetting.shadows;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.shadows = (bool)newValue;
 

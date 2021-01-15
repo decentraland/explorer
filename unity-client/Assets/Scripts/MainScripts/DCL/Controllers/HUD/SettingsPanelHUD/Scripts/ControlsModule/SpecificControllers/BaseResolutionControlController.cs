@@ -11,7 +11,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return (int)currentQualitySetting.baseResolution;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.baseResolution = (SettingsData.QualitySettings.BaseResolution)newValue;
 

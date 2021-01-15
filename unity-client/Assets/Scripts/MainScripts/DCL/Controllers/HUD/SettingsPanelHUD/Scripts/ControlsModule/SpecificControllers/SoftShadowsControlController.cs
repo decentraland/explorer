@@ -28,7 +28,7 @@ namespace DCL.SettingsPanelHUD.Controls
             return currentQualitySetting.softShadows;
         }
 
-        public override void OnControlChanged(object newValue)
+        public override void UpdateSetting(object newValue)
         {
             currentQualitySetting.softShadows = (bool)newValue;
 
