@@ -41,9 +41,9 @@ namespace DCL.SettingsPanelHUD.Controls
                 lightweightRenderPipelineAsset.msaaSampleCount = antiAliasingValue;
 
             if (newFloatValue == 0)
-                RaiseOnOverrideIndicatorLabel(TEXT_OFF);
+                RaiseOnIndicatorLabelChange(TEXT_OFF);
             else
-                RaiseOnOverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
+                RaiseOnIndicatorLabelChange(antiAliasingValue.ToString("0x"));
         }
     }
 }

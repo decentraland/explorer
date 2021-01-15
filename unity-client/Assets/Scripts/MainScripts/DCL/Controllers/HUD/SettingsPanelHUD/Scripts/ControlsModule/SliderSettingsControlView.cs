@@ -25,7 +25,7 @@ namespace DCL.SettingsPanelHUD.Controls
             slider.wholeNumbers = this.sliderControlConfig.sliderWholeNumbers;
 
             sliderController = (SliderSettingsControlController)settingsControlController;
-            sliderController.OnOverrideIndicatorLabel += OverrideIndicatorLabel;
+            sliderController.OnIndicatorLabelChange += OverrideIndicatorLabel;
 
             base.Initialize(controlConfig, sliderController);
             OverrideIndicatorLabel(slider.value.ToString());
@@ -43,7 +43,7 @@ namespace DCL.SettingsPanelHUD.Controls
             base.OnDestroy();
 
             if (sliderController != null)
-                sliderController.OnOverrideIndicatorLabel -= OverrideIndicatorLabel;
+                sliderController.OnIndicatorLabelChange -= OverrideIndicatorLabel;
         }
 
         /// <summary>

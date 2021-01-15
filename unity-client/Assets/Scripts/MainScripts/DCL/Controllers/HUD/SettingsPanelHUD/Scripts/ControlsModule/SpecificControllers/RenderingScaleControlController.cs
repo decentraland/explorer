@@ -31,7 +31,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 lightweightRenderPipelineAsset.renderScale = currentQualitySetting.renderScale;
             }
 
-            RaiseOnOverrideIndicatorLabel(currentQualitySetting.renderScale.ToString("0.0"));
+            RaiseOnIndicatorLabelChange(currentQualitySetting.renderScale.ToString("0.0"));
         }
     }
 }

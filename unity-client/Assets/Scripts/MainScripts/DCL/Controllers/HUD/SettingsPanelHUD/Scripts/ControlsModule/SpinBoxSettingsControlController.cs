@@ -13,10 +13,10 @@ namespace DCL.SettingsPanelHUD.Controls
             OnSetLabels?.Invoke(labels);
         }
 
-        public event Action<string> OnOverrideCurrentLabel;
-        protected void RaiseOnOverrideCurrentLabel(string newCurrentLabel)
+        public event Action<string> OnCurrentLabelChange;
+        protected void RaiseOnCurrentLabelChange(string newCurrentLabel)
         {
-            OnOverrideCurrentLabel?.Invoke(newCurrentLabel);
+            OnCurrentLabelChange?.Invoke(newCurrentLabel);
         }
     }
 }

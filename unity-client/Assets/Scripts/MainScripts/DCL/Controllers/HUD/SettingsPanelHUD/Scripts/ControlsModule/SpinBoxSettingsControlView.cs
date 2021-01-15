@@ -19,7 +19,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             spinBoxController = (SpinBoxSettingsControlController)settingsControlController;
             spinBoxController.OnSetLabels += SetLabels;
-            spinBoxController.OnOverrideCurrentLabel += spinBox.OverrideCurrentLabel;
+            spinBoxController.OnCurrentLabelChange += spinBox.OverrideCurrentLabel;
 
             base.Initialize(controlConfig, spinBoxController);
             spinBoxController.OnControlChanged(spinBox.value);
@@ -37,7 +37,7 @@ namespace DCL.SettingsPanelHUD.Controls
             if (spinBoxController != null)
             {
                 spinBoxController.OnSetLabels -= SetLabels;
-                spinBoxController.OnOverrideCurrentLabel -= spinBox.OverrideCurrentLabel;
+                spinBoxController.OnCurrentLabelChange -= spinBox.OverrideCurrentLabel;
             }
         }
 

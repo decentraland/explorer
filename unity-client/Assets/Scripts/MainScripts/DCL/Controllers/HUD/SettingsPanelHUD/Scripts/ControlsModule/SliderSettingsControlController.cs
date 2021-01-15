@@ -7,11 +7,11 @@ namespace DCL.SettingsPanelHUD.Controls
     /// </summary>
     public class SliderSettingsControlController : SettingsControlController
     {
-        public event Action<string> OnOverrideIndicatorLabel;
+        public event Action<string> OnIndicatorLabelChange;
 
-        protected void RaiseOnOverrideIndicatorLabel(string newIndicatorLabel)
+        protected void RaiseOnIndicatorLabelChange(string newIndicatorLabel)
         {
-            OnOverrideIndicatorLabel?.Invoke(newIndicatorLabel);
+            OnIndicatorLabelChange?.Invoke(newIndicatorLabel);
         }
     }
 }

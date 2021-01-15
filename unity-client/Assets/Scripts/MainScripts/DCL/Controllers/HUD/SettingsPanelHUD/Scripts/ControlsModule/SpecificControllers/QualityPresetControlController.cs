@@ -47,12 +47,12 @@ namespace DCL.SettingsPanelHUD.Controls
                 preset = Settings.i.qualitySettingsPresets[i];
                 if (preset.Equals(currentQualitySetting))
                 {
-                    RaiseOnOverrideCurrentLabel(preset.displayName);
+                    RaiseOnCurrentLabelChange(preset.displayName);
                     return i;
                 }
             }
 
-            RaiseOnOverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
+            RaiseOnCurrentLabelChange(TEXT_QUALITY_CUSTOM);
             return 0;
         }
     }
