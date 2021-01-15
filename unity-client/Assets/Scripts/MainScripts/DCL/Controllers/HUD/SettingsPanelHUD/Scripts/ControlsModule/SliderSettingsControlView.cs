@@ -15,6 +15,7 @@ namespace DCL.SettingsPanelHUD.Controls
         public Slider sliderControl => slider;
 
         private SliderControlModel sliderControlConfig;
+        private SliderSettingsControlController sliderController;
 
         public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
@@ -23,15 +24,26 @@ namespace DCL.SettingsPanelHUD.Controls
             slider.minValue = this.sliderControlConfig.sliderMinValue;
             slider.wholeNumbers = this.sliderControlConfig.sliderWholeNumbers;
 
-            base.Initialize(controlConfig, settingsControlController);
+            sliderController = (SliderSettingsControlController)settingsControlController;
+            sliderController.OnOverrideIndicatorLabel += OverrideIndicatorLabel;
+
+            base.Initialize(controlConfig, sliderController);
             OverrideIndicatorLabel(slider.value.ToString());
-            settingsControlController.OnControlChanged(slider.value);
+            sliderController.OnControlChanged(slider.value);
 
             slider.onValueChanged.AddListener(sliderValue =>
             {
                 OverrideIndicatorLabel(sliderValue.ToString());
                 ApplySetting(sliderValue);
             });
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (sliderController != null)
+                sliderController.OnOverrideIndicatorLabel -= OverrideIndicatorLabel;
         }
 
         /// <summary>
@@ -47,7 +59,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             base.RefreshControl();
 
-            float newValue = (float)settingsControlController.GetStoredValue();
+            float newValue = (float)sliderController.GetStoredValue();
             if (slider.value != newValue)
                 slider.value = newValue;
         }

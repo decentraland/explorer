@@ -3,7 +3,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Auto Quality", fileName = "AutoQualityControlController")]
-    public class AutoQualityControlController : SettingsControlController
+    public class AutoQualityControlController : ToggleSettingsControlController
     {
         public override object GetStoredValue()
         {

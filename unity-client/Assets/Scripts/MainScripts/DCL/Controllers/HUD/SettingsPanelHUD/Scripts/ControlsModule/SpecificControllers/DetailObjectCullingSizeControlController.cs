@@ -5,7 +5,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Detail Object Culling Size", fileName = "DetailObjectCullingSizeControlController")]
-    public class DetailObjectCullingSizeControlController : SettingsControlController
+    public class DetailObjectCullingSizeControlController : SliderSettingsControlController
     {
         public override object GetStoredValue()
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Base Resolution", fileName = "BaseResolutionControlController")]
-    public class BaseResolutionControlController : SettingsControlController
+    public class BaseResolutionControlController : SpinBoxSettingsControlController
     {
         public override object GetStoredValue()
         {

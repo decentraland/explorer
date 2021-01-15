@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Allow Voice Chat", fileName = "AllowVoiceChatControlController")]
-    public class AllowVoiceChatControlController : SettingsControlController
+    public class AllowVoiceChatControlController : SpinBoxSettingsControlController
     {
         public override object GetStoredValue()
         {

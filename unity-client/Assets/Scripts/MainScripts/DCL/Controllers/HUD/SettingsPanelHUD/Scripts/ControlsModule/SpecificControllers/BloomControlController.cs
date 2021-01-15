@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Bloom", fileName = "BloomControlController")]
-    public class BloomControlController : SettingsControlController
+    public class BloomControlController : ToggleSettingsControlController
     {
         public override object GetStoredValue()
         {

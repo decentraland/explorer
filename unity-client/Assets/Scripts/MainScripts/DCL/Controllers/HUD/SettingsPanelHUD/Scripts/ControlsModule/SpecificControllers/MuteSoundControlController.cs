@@ -3,7 +3,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Mute Sound", fileName = "MuteSoundControlController")]
-    public class MuteSoundControlController : SettingsControlController
+    public class MuteSoundControlController : ToggleSettingsControlController
     {
         public override object GetStoredValue()
         {

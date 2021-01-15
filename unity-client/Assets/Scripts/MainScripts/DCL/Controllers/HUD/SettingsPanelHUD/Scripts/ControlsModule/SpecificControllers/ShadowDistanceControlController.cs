@@ -5,13 +5,13 @@ using UnityEngine.Rendering.Universal;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Shadow Distance", fileName = "ShadowDistanceControlController")]
-    public class ShadowDistanceControlController : SettingsControlController
+    public class ShadowDistanceControlController : SliderSettingsControlController
     {
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(controlConfig);
 
             lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
         }

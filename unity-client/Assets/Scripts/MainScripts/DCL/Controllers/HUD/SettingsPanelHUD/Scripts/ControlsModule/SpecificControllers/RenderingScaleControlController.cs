@@ -5,13 +5,13 @@ using UnityEngine.Rendering.Universal;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Rendering Scale", fileName = "RenderingScaleControlController")]
-    public class RenderingScaleControlController : SettingsControlController
+    public class RenderingScaleControlController : SliderSettingsControlController
     {
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(controlConfig);
 
             if (lightweightRenderPipelineAsset == null)
                 lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
@@ -31,7 +31,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 lightweightRenderPipelineAsset.renderScale = currentQualitySetting.renderScale;
             }
 
-            ((SliderSettingsControlView)view).OverrideIndicatorLabel(currentQualitySetting.renderScale.ToString("0.0"));
+            RaiseOnOverrideIndicatorLabel(currentQualitySetting.renderScale.ToString("0.0"));
         }
     }
 }

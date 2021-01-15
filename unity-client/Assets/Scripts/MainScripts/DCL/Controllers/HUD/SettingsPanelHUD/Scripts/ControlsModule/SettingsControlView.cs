@@ -52,7 +52,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
-            this.settingsControlController.Initialize(this);
+            this.settingsControlController.Initialize(controlConfig);
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;
@@ -73,9 +73,13 @@ namespace DCL.SettingsPanelHUD.Controls
             }
 
             RefreshControl();
+
+            Settings.i.OnGeneralSettingsChanged += OnGeneralSettingsChanged;
+            Settings.i.OnQualitySettingsChanged += OnQualitySettingsChanged;
+            CommonSettingsEvents.OnResetAllSettings += OnResetSettingsControl;
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (controlConfig != null)
             {
@@ -89,6 +93,10 @@ namespace DCL.SettingsPanelHUD.Controls
                     flag.OnChange -= OnAnyDeactivationFlagChange;
                 }
             }
+
+            Settings.i.OnGeneralSettingsChanged -= OnGeneralSettingsChanged;
+            Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
+            CommonSettingsEvents.OnResetAllSettings -= OnResetSettingsControl;
         }
 
         public virtual void RefreshControl()
@@ -143,6 +151,21 @@ namespace DCL.SettingsPanelHUD.Controls
 
             if (canApplychange)
                 SetControlActive(!current);
+        }
+
+        private void OnGeneralSettingsChanged(SettingsData.GeneralSettings obj)
+        {
+            RefreshControl();
+        }
+
+        private void OnQualitySettingsChanged(SettingsData.QualitySettings obj)
+        {
+            RefreshControl();
+        }
+
+        private void OnResetSettingsControl()
+        {
+            RefreshControl();
         }
 
         private void SetEnabled(bool enabled)

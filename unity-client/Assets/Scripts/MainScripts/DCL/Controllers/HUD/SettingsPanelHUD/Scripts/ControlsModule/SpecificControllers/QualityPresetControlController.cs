@@ -4,17 +4,13 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Quality Preset", fileName = "QualityPresetControlController")]
-    public class QualityPresetControlController : SettingsControlController
+    public class QualityPresetControlController : SpinBoxSettingsControlController
     {
         public const string TEXT_QUALITY_CUSTOM = "Custom";
 
-        private SpinBoxSettingsControlView qualityPresetControlView;
-
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
-
-            qualityPresetControlView = (SpinBoxSettingsControlView)settingsControlView;
+            base.Initialize(controlConfig);
 
             SetupQualityPresetLabels();
         }
@@ -40,7 +36,7 @@ namespace DCL.SettingsPanelHUD.Controls
                 presetNames.Add(preset.displayName);
             }
 
-            qualityPresetControlView.SetLabels(presetNames.ToArray());
+            RaiseOnOverrideIndicatorLabel(presetNames.ToArray());
         }
 
         private int GetCurrentStoredValue()
@@ -51,13 +47,13 @@ namespace DCL.SettingsPanelHUD.Controls
                 preset = Settings.i.qualitySettingsPresets[i];
                 if (preset.Equals(currentQualitySetting))
                 {
-                    qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(preset.displayName);
+                    RaiseOnOverrideCurrentLabel(preset.displayName);
                     return i;
                 }
             }
 
-            qualityPresetControlView.spinBoxControl.OverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
-            return qualityPresetControlView.spinBoxControl.value;
+            RaiseOnOverrideCurrentLabel(TEXT_QUALITY_CUSTOM);
+            return 0;
         }
     }
 }

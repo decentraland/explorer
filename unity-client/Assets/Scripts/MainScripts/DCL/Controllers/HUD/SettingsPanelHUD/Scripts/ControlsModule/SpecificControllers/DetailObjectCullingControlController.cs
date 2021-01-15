@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Detail Object Culling", fileName = "DetailObjectCullingControlController")]
-    public class DetailObjectCullingControlController : SettingsControlController
+    public class DetailObjectCullingControlController : ToggleSettingsControlController
     {
         public override object GetStoredValue()
         {

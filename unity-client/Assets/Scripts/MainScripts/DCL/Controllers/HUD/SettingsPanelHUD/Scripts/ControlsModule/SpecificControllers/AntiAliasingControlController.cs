@@ -4,19 +4,17 @@ using UnityEngine.Rendering.Universal;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
+
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/AntiAliasing", fileName = "AntiAliasingControlController")]
-    public class AntiAliasingControlController : SettingsControlController
+    public class AntiAliasingControlController : SliderSettingsControlController
     {
         public const string TEXT_OFF = "OFF";
 
-        private SliderSettingsControlView sliderView;
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
-
-            sliderView = (SliderSettingsControlView)view;
+            base.Initialize(controlConfig);
 
             if (lightweightRenderPipelineAsset == null)
                 lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
@@ -43,9 +41,9 @@ namespace DCL.SettingsPanelHUD.Controls
                 lightweightRenderPipelineAsset.msaaSampleCount = antiAliasingValue;
 
             if (newFloatValue == 0)
-                sliderView.OverrideIndicatorLabel(TEXT_OFF);
+                RaiseOnOverrideIndicatorLabel(TEXT_OFF);
             else
-                sliderView.OverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
+                RaiseOnOverrideIndicatorLabel(antiAliasingValue.ToString("0x"));
         }
     }
 }

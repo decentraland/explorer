@@ -1,12 +1,11 @@
 using Cinemachine;
 using DCL.SettingsController;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Mouse Sensivity", fileName = "MouseSensivityControlController")]
-    public class MouseSensivityControlController : SettingsControlController
+    public class MouseSensivityControlController : SliderSettingsControlController
     {
         internal const float FIRST_PERSON_MIN_SPEED = 25f;
         internal const float FIRST_PERSON_MAX_SPEED = 350f;
@@ -15,20 +14,20 @@ namespace DCL.SettingsPanelHUD.Controls
         internal const float THIRD_PERSON_Y_MIN_SPEED = 0.5f;
         internal const float THIRD_PERSON_Y_MAX_SPEED = 3f;
 
+        private SliderControlModel controlConfig;
         private CinemachinePOV povCamera;
-        private Slider mouseSensitivitySlider;        
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(controlConfig);
 
+            this.controlConfig = (SliderControlModel)controlConfig;
             povCamera = GeneralSettingsReferences.i.firstPersonCamera.GetCinemachineComponent<CinemachinePOV>();
-            mouseSensitivitySlider = ((SliderSettingsControlView)view).sliderControl;
         }
 
         public override object GetStoredValue()
         {
-            return Mathf.Lerp(mouseSensitivitySlider.minValue, mouseSensitivitySlider.maxValue, currentGeneralSettings.mouseSensitivity);
+            return Mathf.Lerp(controlConfig.sliderMinValue, controlConfig.sliderMaxValue, currentGeneralSettings.mouseSensitivity);
         }
 
         public override void OnControlChanged(object newValue)
@@ -44,8 +43,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         private float RemapMouseSensitivityTo01(float value)
         {
-            return (value - mouseSensitivitySlider.minValue)
-                / (mouseSensitivitySlider.maxValue - mouseSensitivitySlider.minValue)
+            return (value - controlConfig.sliderMinValue)
+                / (controlConfig.sliderMaxValue - controlConfig.sliderMinValue)
                 * (1 - 0) + 0; //(value - from1) / (to1 - from1) * (to2 - from2) + from2
         }
     }

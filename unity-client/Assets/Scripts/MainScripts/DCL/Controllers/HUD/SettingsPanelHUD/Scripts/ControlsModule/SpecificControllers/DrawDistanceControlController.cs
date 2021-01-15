@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Draw Distance", fileName = "DrawDistanceControlController")]
-    public class DrawDistanceControlController : SettingsControlController
+    public class DrawDistanceControlController : SliderSettingsControlController
     {
         public override object GetStoredValue()
         {

@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Color Grading", fileName = "ColorGradingControlController")]
-    public class ColorGradingControlController : SettingsControlController
+    public class ColorGradingControlController : ToggleSettingsControlController
     {
         public override object GetStoredValue()
         {

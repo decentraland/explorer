@@ -10,12 +10,9 @@ namespace DCL.SettingsPanelHUD.Controls
     {
         protected SettingsData.GeneralSettings currentGeneralSettings;
         protected SettingsData.QualitySettings currentQualitySetting;
-        protected ISettingsControlView view;
 
-        public virtual void Initialize(ISettingsControlView settingsControlView)
+        public virtual void Initialize(SettingsControlModel controlConfig)
         {
-            view = settingsControlView;
-
             currentGeneralSettings = Settings.i.generalSettings;
             currentQualitySetting = Settings.i.qualitySettings;
 
@@ -60,20 +57,17 @@ namespace DCL.SettingsPanelHUD.Controls
         private void OnGeneralSettingsChanged(SettingsData.GeneralSettings newGeneralSettings)
         {
             currentGeneralSettings = newGeneralSettings;
-            view.RefreshControl();
         }
 
         private void OnQualitySettingsChanged(SettingsData.QualitySettings newQualitySettings)
         {
             currentQualitySetting = newQualitySettings;
-            view.RefreshControl();
         }
 
         private void OnResetSettingsControl()
         {
             currentGeneralSettings = Settings.i.generalSettings;
             currentQualitySetting = Settings.i.qualitySettings;
-            view.RefreshControl();
         }
     }
 }

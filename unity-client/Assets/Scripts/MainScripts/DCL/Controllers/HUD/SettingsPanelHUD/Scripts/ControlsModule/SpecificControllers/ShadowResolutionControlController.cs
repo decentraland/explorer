@@ -6,14 +6,14 @@ using UnityEngine.Rendering.Universal;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Shadow Resolution", fileName = "ShadowResolutionControlController")]
-    public class ShadowResolutionControlController : SettingsControlController
+    public class ShadowResolutionControlController : SpinBoxSettingsControlController
     {
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
         private FieldInfo lwrpaShadowResolutionField = null;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(controlConfig);
 
             lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
 

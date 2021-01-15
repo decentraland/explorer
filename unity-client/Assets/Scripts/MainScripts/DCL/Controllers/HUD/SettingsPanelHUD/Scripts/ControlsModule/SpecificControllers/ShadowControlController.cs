@@ -8,14 +8,14 @@ using UnityEngine.Rendering.Universal;
 namespace DCL.SettingsPanelHUD.Controls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Shadow", fileName = "ShadowControlController")]
-    public class ShadowControlController : SettingsControlController
+    public class ShadowControlController : ToggleSettingsControlController
     {
         private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
         private FieldInfo lwrpaShadowField = null;
 
-        public override void Initialize(ISettingsControlView settingsControlView)
+        public override void Initialize(SettingsControlModel controlConfig)
         {
-            base.Initialize(settingsControlView);
+            base.Initialize(controlConfig);
 
             lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
 
