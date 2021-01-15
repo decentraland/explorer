@@ -171,9 +171,7 @@ namespace DCL.SettingsPanelHUD
 
         public void ResetAllSettings()
         {
-            Settings.i.LoadDefaultSettings();
-            Settings.i.SaveSettings();
-            CommonSettingsEvents.RaiseResetAllSettings();
+            Settings.i.ResetAllSettings();
         }
     }
 }

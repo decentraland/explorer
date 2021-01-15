@@ -76,7 +76,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             Settings.i.OnGeneralSettingsChanged += OnGeneralSettingsChanged;
             Settings.i.OnQualitySettingsChanged += OnQualitySettingsChanged;
-            CommonSettingsEvents.OnResetAllSettings += OnResetSettingsControl;
+            Settings.i.OnResetAllSettings += OnResetSettingsControl;
         }
 
         protected virtual void OnDestroy()
@@ -96,7 +96,7 @@ namespace DCL.SettingsPanelHUD.Controls
 
             Settings.i.OnGeneralSettingsChanged -= OnGeneralSettingsChanged;
             Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
-            CommonSettingsEvents.OnResetAllSettings -= OnResetSettingsControl;
+            Settings.i.OnResetAllSettings -= OnResetSettingsControl;
         }
 
         public virtual void RefreshControl()
