@@ -1,3 +1,4 @@
+using DCL.SettingsController;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -12,10 +13,16 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            float newFloatValue = (float)newValue;
+            currentQualitySetting.cameraDrawDistance = (float)newValue;
 
-            currentQualitySetting.cameraDrawDistance = newFloatValue;
-            qualitySettingsController.UpdateDrawDistance(newFloatValue);
+            if (QualitySettingsReferences.i.thirdPersonCamera)
+                QualitySettingsReferences.i.thirdPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;
+
+            if (QualitySettingsReferences.i.firstPersonCamera)
+                QualitySettingsReferences.i.firstPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;
+
+            RenderSettings.fogEndDistance = currentQualitySetting.cameraDrawDistance;
+            RenderSettings.fogStartDistance = currentQualitySetting.cameraDrawDistance * 0.8f;
         }
     }
 }

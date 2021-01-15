@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using System.Collections.Generic;
 using TMPro;
@@ -53,7 +52,7 @@ namespace DCL.SettingsPanelHUD.Controls
         {
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
-            this.settingsControlController.Initialize(this, GeneralSettingsReferences.i, QualitySettingsReferences.i);
+            this.settingsControlController.Initialize(this);
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;

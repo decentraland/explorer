@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using UnityEngine;
 
@@ -12,17 +11,10 @@ namespace DCL.SettingsPanelHUD.Controls
         protected SettingsData.GeneralSettings currentGeneralSettings;
         protected SettingsData.QualitySettings currentQualitySetting;
         protected ISettingsControlView view;
-        protected IGeneralSettingsReferences generalSettingsController;
-        protected IQualitySettingsReferences qualitySettingsController;
 
-        public virtual void Initialize(
-            ISettingsControlView settingsControlView,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+        public virtual void Initialize(ISettingsControlView settingsControlView)
         {
             view = settingsControlView;
-            this.generalSettingsController = generalSettingsController;
-            this.qualitySettingsController = qualitySettingsController;
 
             currentGeneralSettings = Settings.i.generalSettings;
             currentQualitySetting = Settings.i.qualitySettings;

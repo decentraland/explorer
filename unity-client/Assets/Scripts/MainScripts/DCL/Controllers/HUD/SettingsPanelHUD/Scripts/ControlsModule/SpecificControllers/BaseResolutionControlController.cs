@@ -1,3 +1,4 @@
+using DCL.Interface;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -12,10 +13,20 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public override void OnControlChanged(object newValue)
         {
-            SettingsData.QualitySettings.BaseResolution newBaseResValue = (SettingsData.QualitySettings.BaseResolution)newValue;
+            currentQualitySetting.baseResolution = (SettingsData.QualitySettings.BaseResolution)newValue;
 
-            currentQualitySetting.baseResolution = newBaseResValue;
-            qualitySettingsController.UpdateBaseResolution(newBaseResValue);
+            switch (currentQualitySetting.baseResolution)
+            {
+                case SettingsData.QualitySettings.BaseResolution.BaseRes_720:
+                    WebInterface.SetBaseResolution(720);
+                    break;
+                case SettingsData.QualitySettings.BaseResolution.BaseRes_1080:
+                    WebInterface.SetBaseResolution(1080);
+                    break;
+                case SettingsData.QualitySettings.BaseResolution.BaseRes_Unlimited:
+                    WebInterface.SetBaseResolution(9999);
+                    break;
+            }
         }
     }
 }
