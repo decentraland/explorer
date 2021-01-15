@@ -32,7 +32,7 @@ namespace DCL.SettingsPanelHUD.Controls
             generalSettingsController.UpdateMouseSensivity(currentGeneralSettings.mouseSensitivity);
         }
 
-        internal float RemapMouseSensitivityTo01(float value)
+        private float RemapMouseSensitivityTo01(float value)
         {
             return (value - mouseSensitivitySlider.minValue)
                 / (mouseSensitivitySlider.maxValue - mouseSensitivitySlider.minValue)

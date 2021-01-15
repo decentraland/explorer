@@ -2,7 +2,6 @@ using DCL.SettingsPanelHUD.Widgets;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using DCL.SettingsController;
 
 namespace DCL.SettingsPanelHUD.Sections
 {
@@ -22,12 +21,7 @@ namespace DCL.SettingsPanelHUD.Sections
         /// <param name="newWidget">New WIDGET that will be added.</param>
         /// <param name="newWidgetController">Controller belonging to the new WIDGET.</param>
         /// <param name="widgetConfig">Model that will contain the configuration of the new WIDGET.</param>
-        void AddWidget(
-            ISettingsWidgetView newWidget,
-            ISettingsWidgetController newWidgetController,
-            SettingsWidgetModel widgetConfig,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController);
+        void AddWidget(ISettingsWidgetView newWidget, ISettingsWidgetController newWidgetController, SettingsWidgetModel widgetConfig);
     }
 
     /// <summary>
@@ -41,11 +35,9 @@ namespace DCL.SettingsPanelHUD.Sections
         public void AddWidget(
             ISettingsWidgetView newWidget,
             ISettingsWidgetController newWidgetController,
-            SettingsWidgetModel widgetConfig,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            SettingsWidgetModel widgetConfig)
         {
-            newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns.ToList(), generalSettingsController, qualitySettingsController);
+            newWidget.Initialize(widgetConfig.title, newWidgetController, widgetConfig.controlColumns.ToList());
             widgets.Add(newWidget);
         }
     }

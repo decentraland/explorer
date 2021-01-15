@@ -17,11 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
         /// </summary>
         /// <param name="controlConfig">Model that will contain the configuration of the CONTROL.</param>
         /// <param name="settingsControlController">Controller associated to the CONTROL view.</param>
-        void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController);
+        void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
 
         /// <summary>
         /// This logic should update the CONTROL view with the stored value.
@@ -53,15 +49,11 @@ namespace DCL.SettingsPanelHUD.Controls
         private Color originalHandlerColor;
         private float originalControlBackgroundAlpha;
 
-        public virtual void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+        public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
-            this.settingsControlController.Initialize(this, generalSettingsController, qualitySettingsController);
+            this.settingsControlController.Initialize(this, GeneralSettingsReferences.i, QualitySettingsReferences.i);
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;

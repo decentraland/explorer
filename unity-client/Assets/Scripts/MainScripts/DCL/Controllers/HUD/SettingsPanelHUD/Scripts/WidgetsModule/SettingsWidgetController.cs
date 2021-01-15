@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Controls;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,12 +20,7 @@ namespace DCL.SettingsPanelHUD.Widgets
         /// <param name="newControl">New CONTROL that will be added.</param>
         /// <param name="newControlController">Controller belonging to the new CONTROL.</param>
         /// <param name="controlConfig">Model that will contain the configuration of the new CONTROL.</param>
-        void AddControl(
-            ISettingsControlView newControl,
-            SettingsControlController newControlController,
-            SettingsControlModel controlConfig,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController);
+        void AddControl(ISettingsControlView newControl, SettingsControlController newControlController, SettingsControlModel controlConfig);
     }
 
     /// <summary>
@@ -40,11 +34,9 @@ namespace DCL.SettingsPanelHUD.Widgets
         public void AddControl(
             ISettingsControlView newControl,
             SettingsControlController newControlController,
-            SettingsControlModel controlConfig,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+            SettingsControlModel controlConfig)
         {
-            newControl.Initialize(controlConfig, newControlController, generalSettingsController, qualitySettingsController);
+            newControl.Initialize(controlConfig, newControlController);
             controls.Add(newControl);
         }
     }

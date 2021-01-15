@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -12,15 +11,11 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public SpinBoxPresetted spinBoxControl { get => spinBox; }
 
-        public override void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+        public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             SetLabels(((SpinBoxControlModel)controlConfig).spinBoxLabels);
 
-            base.Initialize(controlConfig, settingsControlController, generalSettingsController, qualitySettingsController);
+            base.Initialize(controlConfig, settingsControlController);
             settingsControlController.OnControlChanged(spinBox.value);
 
             spinBox.onValueChanged.AddListener(spinBoxValue =>

@@ -47,7 +47,10 @@ namespace DCL.SettingsController
         private void Awake()
         {
             i = this;
+        }
 
+        private void Start()
+        {
             if (lightweightRenderPipelineAsset == null)
             {
                 lightweightRenderPipelineAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;

@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Sections;
 using DCL.SettingsPanelHUD.Widgets;
@@ -53,21 +52,14 @@ namespace SettingsSectionTests
             widgetsToCreate.Add(newWidgetConfig);
 
             // Act
-            sectionView.Initialize(
-                sectionController,
-                widgetsToCreate,
-                Substitute.For<IGeneralSettingsReferences>(),
-                Substitute.For<IQualitySettingsReferences>());
-
+            sectionView.Initialize(sectionController, widgetsToCreate);
             yield return null;
 
             // Assert
             sectionController.Received(1).AddWidget(
                 Arg.Any<ISettingsWidgetView>(),
                 Arg.Any<ISettingsWidgetController>(),
-                Arg.Any<SettingsWidgetModel>(),
-                Arg.Any<IGeneralSettingsReferences>(),
-                Arg.Any<IQualitySettingsReferences>());
+                Arg.Any<SettingsWidgetModel>());
         }
     }
 }

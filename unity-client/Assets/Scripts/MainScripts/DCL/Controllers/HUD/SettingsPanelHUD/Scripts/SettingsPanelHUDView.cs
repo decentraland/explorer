@@ -1,5 +1,4 @@
 using DCL.Helpers;
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Sections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,11 +47,7 @@ namespace DCL.SettingsPanelHUD
             return view;
         }
 
-        public void Initialize(
-            IHUD hudController,
-            ISettingsPanelHUDController settingsPanelController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+        public void Initialize(IHUD hudController, ISettingsPanelHUDController settingsPanelController)
         {
             this.hudController = hudController;
             this.settingsPanelController = settingsPanelController;
@@ -66,20 +61,15 @@ namespace DCL.SettingsPanelHUD
             closeButton.onClick.AddListener(CloseSettingsPanel);
             settingsAnimator.OnWillFinishHide += OnFinishHide;
 
-            CreateSections(generalSettingsController, qualitySettingsController);
+            CreateSections();
             isOpen = !settingsAnimator.hideOnEnable;
             settingsAnimator.Hide(true);
         }
 
-        public void Initialize(
-            IHUD hudController,
-            ISettingsPanelHUDController settingsPanelController,
-            SettingsSectionList sections,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+        public void Initialize(IHUD hudController, ISettingsPanelHUDController settingsPanelController, SettingsSectionList sections)
         {
             settingsPanelConfig.sections = sections;
-            Initialize(hudController, settingsPanelController, generalSettingsController, qualitySettingsController);
+            Initialize(hudController, settingsPanelController);
         }
 
         private void OnDestroy()
@@ -90,7 +80,7 @@ namespace DCL.SettingsPanelHUD
                 settingsAnimator.OnWillFinishHide -= OnFinishHide;
         }
 
-        private void CreateSections(IGeneralSettingsReferences generalSettingsController, IQualitySettingsReferences qualitySettingsController)
+        private void CreateSections()
         {
             foreach (SettingsSectionModel sectionConfig in settingsPanelConfig.sections)
             {
@@ -98,7 +88,7 @@ namespace DCL.SettingsPanelHUD
                 var newSection = Instantiate(sectionConfig.sectionPrefab, sectionsContainer);
                 newSection.gameObject.name = $"Section_{sectionConfig.text}";
                 var newSectionController = Instantiate(sectionConfig.sectionController);
-                settingsPanelController.AddSection(newMenuButton, newSection, newSectionController, sectionConfig, generalSettingsController, qualitySettingsController);
+                settingsPanelController.AddSection(newMenuButton, newSection, newSectionController, sectionConfig);
             }
 
             settingsPanelController.OpenSection(0);

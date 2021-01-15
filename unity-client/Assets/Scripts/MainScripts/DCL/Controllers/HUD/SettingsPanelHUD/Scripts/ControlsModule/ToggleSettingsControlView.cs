@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,13 +12,9 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public Toggle toggleControl { get => toggle; }
 
-        public override void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsReferences generalSettingsController,
-            IQualitySettingsReferences qualitySettingsController)
+        public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
-            base.Initialize(controlConfig, settingsControlController, generalSettingsController, qualitySettingsController);
+            base.Initialize(controlConfig, settingsControlController);
             settingsControlController.OnControlChanged(toggle.isOn);
 
             toggle.onValueChanged.AddListener(isOn =>
