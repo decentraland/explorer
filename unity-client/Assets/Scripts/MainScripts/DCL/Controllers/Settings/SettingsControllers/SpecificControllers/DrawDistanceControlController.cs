@@ -1,7 +1,7 @@
 using DCL.SettingsController;
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Draw Distance", fileName = "DrawDistanceControlController")]
     public class DrawDistanceControlController : SliderSettingsControlController

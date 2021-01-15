@@ -2,7 +2,7 @@ using Cinemachine;
 using DCL.SettingsController;
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Mouse Sensivity", fileName = "MouseSensivityControlController")]
     public class MouseSensivityControlController : SliderSettingsControlController

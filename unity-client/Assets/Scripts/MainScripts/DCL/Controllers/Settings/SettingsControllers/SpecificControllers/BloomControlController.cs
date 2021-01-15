@@ -2,7 +2,7 @@ using DCL.SettingsController;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Bloom", fileName = "BloomControlController")]
     public class BloomControlController : ToggleSettingsControlController

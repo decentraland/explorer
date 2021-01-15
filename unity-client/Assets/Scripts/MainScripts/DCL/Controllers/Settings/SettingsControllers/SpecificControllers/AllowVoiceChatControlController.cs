@@ -1,7 +1,7 @@
 using DCL.Interface;
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Allow Voice Chat", fileName = "AllowVoiceChatControlController")]
     public class AllowVoiceChatControlController : SpinBoxSettingsControlController

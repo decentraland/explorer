@@ -1,4 +1,4 @@
-namespace DCL.SettingsPanelHUD.Common
+namespace DCL.SettingsCommon
 {
     public static class CommonSettingsScriptableObjects
     {

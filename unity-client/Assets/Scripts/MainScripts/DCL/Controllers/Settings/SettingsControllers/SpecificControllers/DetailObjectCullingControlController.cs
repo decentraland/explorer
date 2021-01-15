@@ -1,7 +1,7 @@
-using DCL.SettingsPanelHUD.Common;
+using DCL.SettingsCommon;
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Detail Object Culling", fileName = "DetailObjectCullingControlController")]
     public class DetailObjectCullingControlController : ToggleSettingsControlController

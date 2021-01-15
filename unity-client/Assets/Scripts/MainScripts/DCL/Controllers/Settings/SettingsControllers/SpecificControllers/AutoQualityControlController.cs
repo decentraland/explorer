@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Auto Quality", fileName = "AutoQualityControlController")]
     public class AutoQualityControlController : ToggleSettingsControlController

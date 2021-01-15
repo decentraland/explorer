@@ -2,7 +2,7 @@ using DCL.SettingsController;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Color Grading", fileName = "ColorGradingControlController")]
     public class ColorGradingControlController : ToggleSettingsControlController

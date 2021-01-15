@@ -1,7 +1,7 @@
 using DCL.Interface;
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Voice Chat Volume", fileName = "VoiceChatVolumeControlController")]
     public class VoiceChatVolumeControlController : SliderSettingsControlController

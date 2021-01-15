@@ -1,7 +1,7 @@
 using Cinemachine;
+using DCL.SettingsCommon;
 using DCL.SettingsController;
-using DCL.SettingsPanelHUD.Common;
-using DCL.SettingsPanelHUD.Controls;
+using DCL.SettingsControls;
 using NUnit.Framework;
 using System.Collections;
 using System.Reflection;
@@ -12,11 +12,11 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace SettingsControlsTests
+namespace Tests
 {
-    public class SettingsControlTests_PlayMode
+    public class SettingsControlsShould
     {
-        private const string TEST_SCENE_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SettingsPanelHUD/Tests/TestScenes";
+        private const string TEST_SCENE_PATH = "Assets/Scripts/MainScripts/DCL/Controllers/Settings/SettingsControllers/Tests/TestScenes";
         private const string TEST_SCENE_NAME = "SettingsTestScene";
 
         private SettingsControlController settingController;

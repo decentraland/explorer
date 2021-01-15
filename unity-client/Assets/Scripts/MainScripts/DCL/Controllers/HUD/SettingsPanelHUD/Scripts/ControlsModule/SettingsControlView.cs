@@ -1,3 +1,4 @@
+using DCL.SettingsControls;
 using DCL.SettingsPanelHUD.Common;
 using System.Collections.Generic;
 using TMPro;

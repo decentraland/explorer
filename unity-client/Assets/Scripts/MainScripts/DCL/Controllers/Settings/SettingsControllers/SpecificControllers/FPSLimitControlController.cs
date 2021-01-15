@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 #endif
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/FPS Limit", fileName = "FPSLimitControlController")]
     public class FPSLimitControlController : ToggleSettingsControlController

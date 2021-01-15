@@ -1,6 +1,6 @@
 using System;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     /// <summary>
     /// This controller is in charge of manage all the base logic related to a SLIDER CONTROL.

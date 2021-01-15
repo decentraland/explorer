@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     /// <summary>
     /// This controller is in charge of manage all the logic related to a SETTING CONTROL.

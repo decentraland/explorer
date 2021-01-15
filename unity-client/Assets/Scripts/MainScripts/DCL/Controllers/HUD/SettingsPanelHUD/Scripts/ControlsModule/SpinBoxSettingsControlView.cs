@@ -1,3 +1,4 @@
+using DCL.SettingsControls;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls

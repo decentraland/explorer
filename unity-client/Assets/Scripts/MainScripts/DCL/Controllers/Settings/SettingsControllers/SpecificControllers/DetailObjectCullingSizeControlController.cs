@@ -2,7 +2,7 @@ using DCL.Rendering;
 using DCL.SettingsController;
 using UnityEngine;
 
-namespace DCL.SettingsPanelHUD.Controls
+namespace DCL.SettingsControls
 {
     [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Detail Object Culling Size", fileName = "DetailObjectCullingSizeControlController")]
     public class DetailObjectCullingSizeControlController : SliderSettingsControlController
