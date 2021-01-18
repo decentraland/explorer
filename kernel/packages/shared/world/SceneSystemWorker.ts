@@ -18,6 +18,10 @@ const hudWorkerRaw = require('raw-loader!../../../static/systems/decentraland-ui
 const hudWorkerBLOB = new Blob([hudWorkerRaw])
 export const hudWorkerUrl = URL.createObjectURL(hudWorkerBLOB)
 
+const portableExperienceWorkerRaw = require('raw-loader!../../../static/systems/decentraland-ui.scene.js')
+const portableExperienceWorkerBLOB = new Blob([portableExperienceWorkerRaw])
+export const portableExperienceWorkerUrl = URL.createObjectURL(portableExperienceWorkerBLOB)
+
 export class SceneSystemWorker extends SceneWorker {
   private sceneStarted: boolean = false
 

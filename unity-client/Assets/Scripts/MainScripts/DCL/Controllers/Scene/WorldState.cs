@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
 using UnityEngine;
@@ -10,7 +10,7 @@ namespace DCL
         HashSet<string> readyScenes { get; set; }
         Dictionary<string, ParcelScene> loadedScenes { get; set; }
         List<ParcelScene> scenesSortedByDistance { get; set; }
-        string globalSceneId { get; set; }
+        List<string> globalSceneIds { get; set; }
         string currentSceneId { get; set; }
         void Initialize();
         string TryToGetSceneCoordsID(string id);
@@ -26,12 +26,12 @@ namespace DCL
         public Dictionary<string, ParcelScene> loadedScenes { get; set; } = new Dictionary<string, ParcelScene>();
         public List<ParcelScene> scenesSortedByDistance { get; set; } = new List<ParcelScene>();
 
-        public string globalSceneId { get; set; }
+        public List<string> globalSceneIds { get; set; }
         public string currentSceneId { get; set; }
 
         public void Initialize()
         {
-            globalSceneId = null;
+            globalSceneIds = new List<string>();
             currentSceneId = null;
             readyScenes = new HashSet<string>();
             loadedScenes = new Dictionary<string, ParcelScene>();

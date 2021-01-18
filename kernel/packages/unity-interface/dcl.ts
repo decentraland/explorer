@@ -16,7 +16,7 @@ import {
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
-import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
+import { hudWorkerUrl, portableExperienceWorkerUrl } from 'shared/world/SceneSystemWorker'
 import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
@@ -118,7 +118,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 
   if (!EDITOR) {
-    await startGlobalScene(unityInterface)
+    await startGlobalScene(unityInterface, "avatars")
+    await startPortableExperienceScene(unityInterface, "testPE")
   }
 
   return {
@@ -134,14 +135,34 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface) {
-  const sceneId = 'dcl-ui-scene'
+export async function startGlobalScene(unityInterface: UnityInterface, sceneName: string) {
+  const sceneId = 'dcl-global-scene-' + sceneName
 
   const scene = new UnityScene({
     sceneId,
-    name: 'ui',
+    name: sceneName,
     baseUrl: location.origin,
     main: hudWorkerUrl,
+    useFPSThrottling: false,
+    data: {},
+    mappings: []
+  })
+
+  const worker = loadParcelScene(scene, undefined, true)
+
+  await ensureUiApis(worker)
+
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+}
+
+export async function startPortableExperienceScene(unityInterface: UnityInterface, sceneName: string) {
+  const sceneId = 'dcl-portable-experience-' + sceneName
+
+  const scene = new UnityScene({
+    sceneId,
+    name: sceneName,
+    baseUrl: location.origin,
+    main: portableExperienceWorkerUrl,
     useFPSThrottling: false,
     data: {},
     mappings: []
