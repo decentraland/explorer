@@ -2,10 +2,10 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-namespace DCL.Huds.QuestPanel
+namespace DCL.Huds.QuestsPanel
 {
-    [CreateAssetMenu(menuName = "Variables/QuestTaskFactory", fileName = "QuestTaskFactory", order = 0)]
-    public class QuestTaskUIFactory : ScriptableObject
+    [CreateAssetMenu(menuName = "Variables/QuestPanelTaskFactory", fileName = "QuestPanelTaskFactory", order = 0)]
+    public class TaskUIFactory : ScriptableObject
     {
         [Serializable]
         public class Entry

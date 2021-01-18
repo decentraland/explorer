@@ -1,13 +1,13 @@
 using TMPro;
 using UnityEngine;
 
-namespace DCL.Huds.QuestPanel
+namespace DCL.Huds.QuestsPanel
 {
-    public class QuestSectionUIEntry : MonoBehaviour
+    public class SectionUIEntry : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI taskName;
         [SerializeField] private RectTransform tasksContainer;
-        [SerializeField] private QuestTaskUIFactory factory;
+        [SerializeField] private TaskUIFactory factory;
 
         public void Populate(QuestSection section)
         {
@@ -28,7 +28,7 @@ namespace DCL.Huds.QuestPanel
                 return;
             }
 
-            var taskUIEntry = Instantiate(prefab, tasksContainer).GetComponent<IQuestTaskUIEntry>();
+            var taskUIEntry = Instantiate(prefab, tasksContainer).GetComponent<ITaskUIEntry>();
             taskUIEntry.Populate(task.payload);
         }
 

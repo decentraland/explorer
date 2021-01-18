@@ -5,6 +5,7 @@
       "description":"Solve a mystery",
       "thumbnail_entry":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
       "thumbnail_banner":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+      "icon":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
       "sections":[
          {
             "id":"task0",

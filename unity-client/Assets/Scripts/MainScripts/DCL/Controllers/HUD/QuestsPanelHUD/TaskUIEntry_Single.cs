@@ -3,9 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace DCL.Huds.QuestPanel
+namespace DCL.Huds.QuestsPanel
 {
-    public class QuestTaskUIEntry_Single : MonoBehaviour, IQuestTaskUIEntry
+    public class TaskUIEntry_Single : MonoBehaviour, ITaskUIEntry
     {
         [Serializable]
         public class Model

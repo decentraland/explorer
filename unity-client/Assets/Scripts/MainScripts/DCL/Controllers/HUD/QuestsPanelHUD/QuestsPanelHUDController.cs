@@ -1,8 +1,8 @@
-﻿namespace DCL.Huds.QuestPanel
+﻿namespace DCL.Huds.QuestsPanel
 {
-    public class QuestsHUDController : IHUD
+    public class QuestsPanelHUDController : IHUD
     {
-        private QuestsHUDView view;
+        private QuestsPanelHUDView view;
 
         public void Dispose()
         {
@@ -11,7 +11,7 @@
 
         public void Initialize()
         {
-            view = QuestsHUDView.Create();
+            view = QuestsPanelHUDView.Create();
         }
 
         public void Populate(QuestModel[] quests)

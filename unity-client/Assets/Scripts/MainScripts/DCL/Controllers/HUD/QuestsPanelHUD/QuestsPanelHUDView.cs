@@ -1,9 +1,9 @@
 using DCL.Helpers;
 using UnityEngine;
 
-namespace DCL.Huds.QuestPanel
+namespace DCL.Huds.QuestsPanel
 {
-    public class QuestsHUDView : MonoBehaviour
+    public class QuestsPanelHUDView : MonoBehaviour
     {
         private const string VIEW_PATH = "QuestsHUD";
 
@@ -11,9 +11,9 @@ namespace DCL.Huds.QuestPanel
         [SerializeField] private GameObject questPrefab;
         [SerializeField] private QuestUIPopup questPopup;
 
-        internal static QuestsHUDView Create()
+        internal static QuestsPanelHUDView Create()
         {
-            var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<QuestsHUDView>();
+            var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<QuestsPanelHUDView>();
 #if UNITY_EDITOR
             view.gameObject.name = "_QuestHUDView";
 #endif

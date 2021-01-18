@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace DCL.Huds.QuestPanel
+namespace DCL.Huds.QuestsPanel
 {
     public class QuestUIPopup : MonoBehaviour
     {
@@ -39,7 +39,7 @@ namespace DCL.Huds.QuestPanel
 
         internal void CreateTask(QuestSection section)
         {
-            var taskEntry = Instantiate(sectionPrefab, sectionsContainer).GetComponent<QuestSectionUIEntry>();
+            var taskEntry = Instantiate(sectionPrefab, sectionsContainer).GetComponent<SectionUIEntry>();
             taskEntry.Populate(section);
         }
 

@@ -1,10 +1,7 @@
-namespace DCL.Huds.QuestPanel
+[System.Serializable]
+public class QuestTask
 {
-    [System.Serializable]
-    public class QuestTask
-    {
-        public string id;
-        public string type;
-        public string payload;
-    }
+    public string id;
+    public string type;
+    public string payload;
 }
