@@ -6,7 +6,8 @@ namespace DCL.Huds.QuestPanel
         public string id;
         public string name;
         public string description;
-        public string thumbnail;
+        public string thumbnail_entry;
+        public string thumbnail_banner;
         public string jumpAction;
         public QuestPanelSection[] sections;
     }

@@ -34,10 +34,8 @@ namespace DCL.Huds.QuestPanel
 
         internal void CleanUpTasksList()
         {
-            while (tasksContainer.childCount > 0)
-            {
-                Destroy(tasksContainer.GetChild(0).gameObject);
-            }
+            for(int i = tasksContainer.childCount - 1; i >= 0; i--)
+                Destroy(tasksContainer.GetChild(i).gameObject);
         }
     }
 }
