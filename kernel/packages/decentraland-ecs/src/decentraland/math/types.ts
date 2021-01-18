@@ -55,12 +55,14 @@ export const Epsilon = 0.000001
  * Constant used to convert from Euler degrees to radians
  * @public
  */
+// @ts-ignore
 export const DEG2RAD = 0.01745 // Math.PI / 180
 
 /**
  * Constant used to convert from radians to Euler degrees
  * @public
  */
+// @ts-ignore
 export const RAD2DEG = 57.29578 // 360 / (Math.PI * 2)
 
 /**
