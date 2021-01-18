@@ -64,7 +64,7 @@ function vector3ToString(vec: Vector3) {
   return `(${x}, ${y}, ${z})`
 }
 
-describe.skip('ECS Quaternion tests', () => {
+describe('ECS Quaternion tests', () => {
   it('Quaternion.Angle', () => {
     expect(
       Quaternion.Angle(Quaternion.Euler(0, 0, 0), Quaternion.Euler(90, 90, 90))
@@ -143,7 +143,7 @@ describe.skip('ECS Quaternion tests', () => {
     )
   })
 
-  it.skip('Quaternion.FromToRotation', () => {
+  it('Quaternion.FromToRotation', () => {
     expect(quaternionToString(Quaternion.FromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100)))).to.eq(
       results.staticFromToRotation01,
       'staticFromToRotation01'
@@ -204,7 +204,7 @@ describe.skip('ECS Quaternion tests', () => {
     expect(quaternionToString(Quaternion.Euler(360, 10, 0).normalized)).to.eq(results.normalized04, 'normalized04')
   })
 
-  it.skip('quaternion.setFromToRotation', () => {
+  it('quaternion.setFromToRotation', () => {
     const q1 = Quaternion.Euler(10, 10, 10)
     q1.setFromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100))
     expect(quaternionToString(q1)).to.eq(results.setFromToRotation01, 'setFromToRotation01')
