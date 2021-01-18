@@ -6102,7 +6102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneLimitInfoController: {fileID: 851071765511007212}
   sceneObjectCatalogController: {fileID: 6818990461646912356}
-  toolTipController: {fileID: 4730837589599637360}
+  tooltipController: {fileID: 4730837589599637360}
   quickBarView: {fileID: 2858140822079303849}
   catalogGroupListView: {fileID: 851071763915059372}
   firstPersonCanvasGO: {fileID: 851071763679374503}
@@ -6130,7 +6130,7 @@ MonoBehaviour:
   logOutBtn: {fileID: 8291210251671223417}
   publishGO: {fileID: 3747049084045667228}
   publishingGO: {fileID: 2815872002176017129}
-  publishedGO: {fileID: 3407400156175471636}
+  publishingFinishedGO: {fileID: 3407400156175471636}
   publishStatusTxt: {fileID: 2297708277189281908}
   showHideAnimator: {fileID: -7688998270734876550}
   toggleUIVisibilityInputAction: {fileID: 11400000, guid: 406d4343cf8bb7a4c9abde62ea95895c,

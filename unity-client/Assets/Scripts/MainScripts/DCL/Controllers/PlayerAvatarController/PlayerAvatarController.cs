@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using DCL;
 using UnityEngine;
 
@@ -55,7 +55,7 @@ public class PlayerAvatarController : MonoBehaviour
 
     public void SetAvatarVisibility(bool isVisible)
     {
-        avatarRenderer.gameObject.SetActive(isVisible);
+        avatarRenderer.SetVisibility(isVisible);
     }
 
     private void OnEnable()

@@ -12,12 +12,12 @@ using static ProtocolV2;
 using Environment = DCL.Environment;
 
 /// <summary>
-/// This class will handle all the messages that will be sent to kernel. 
+/// This class will handle all the messages that will be sent to kernel.
 /// </summary>
 public class BuilderInWorldBridge : MonoBehaviour
 {
-    public event Action OnPublishOk;
-    public event Action<string> OnPublishKo;
+    public event Action OnPublishSuccess;
+    public event Action<string> OnPublishError;
 
     //This is done for optimization purposes, recreating new objects can increase garbage collection
     TransformComponent entityTransformComponentModel = new TransformComponent();
@@ -36,12 +36,12 @@ public class BuilderInWorldBridge : MonoBehaviour
         {
             //Note (Adrian): This is temporary until implement the UI
             message = "Done!\nThe scene has been published";
-            OnPublishOk?.Invoke();
+            OnPublishSuccess?.Invoke();
         }
         else
         {
             message = publishSceneResultPayload.error;
-            OnPublishKo?.Invoke(publishSceneResultPayload.error);
+            OnPublishError?.Invoke(publishSceneResultPayload.error);
         }
 
         HUDController.i.builderInWorldMainHud.PublishEnd(message);
@@ -145,7 +145,7 @@ public class BuilderInWorldBridge : MonoBehaviour
                 componentPayLoad.data = nftComponent;
             }
             else
-            {     
+            {
                 componentPayLoad.data = keyValuePairBaseDisposable.Value.GetModel();
             }
 

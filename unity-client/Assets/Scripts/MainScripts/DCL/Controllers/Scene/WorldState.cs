@@ -96,22 +96,7 @@ namespace DCL
 
         public Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene = null)
         {
-            if (scene == null)
-            {
-                IWorldState worldState = Environment.i.world.state;
-                string sceneId = worldState.currentSceneId;
-
-
-                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
-                    scene = worldState.loadedScenes[worldState.currentSceneId];
-                else
-                    return Vector3.zero;
-            }
-
-            Vector3 scenePosition = Utils.GridToWorldPosition(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y);
-            Vector3 worldPosition = PositionUtils.WorldToUnityPosition(scenePosition);
-
-            return worldPosition;
+            return ConvertPointInSceneToUnityPosition(Vector3.zero, scene);
         }
 
         public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)

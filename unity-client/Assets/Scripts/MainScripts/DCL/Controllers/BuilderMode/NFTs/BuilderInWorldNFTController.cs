@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 
-public class BuilderInWorldNFTController 
+public class BuilderInWorldNFTController
 {
     public event System.Action OnNFTUsageChange;
     NFTOwner nftOwner;
@@ -16,7 +16,7 @@ public class BuilderInWorldNFTController
 
     static BuilderInWorldNFTController instance;
 
-    List<NFTInfo> nFTsAlreadyInUse = new List<NFTInfo>();
+    List<NFTInfo> nftsAlreadyInUse = new List<NFTInfo>();
 
     bool desactivateNFT = false;
 
@@ -32,7 +32,7 @@ public class BuilderInWorldNFTController
             return instance;
         }
     }
- 
+
     public void Initialize()
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
@@ -41,7 +41,7 @@ public class BuilderInWorldNFTController
 
     public void ClearNFTs()
     {
-        nFTsAlreadyInUse.Clear();
+        nftsAlreadyInUse.Clear();
     }
 
     public bool IsNFTInUse(string id)
@@ -49,7 +49,7 @@ public class BuilderInWorldNFTController
         if (desactivateNFT)
             return false;
 
-        foreach(NFTInfo info in nFTsAlreadyInUse)
+        foreach(NFTInfo info in nftsAlreadyInUse)
         {
             if (info.assetContract.address == id)
                 return true;
@@ -65,9 +65,9 @@ public class BuilderInWorldNFTController
         foreach (NFTInfo info in nftOwner.assets)
         {
             if (info.assetContract.address != id) continue;
-            if (!nFTsAlreadyInUse.Contains(info)) continue;
+            if (!nftsAlreadyInUse.Contains(info)) continue;
 
-            nFTsAlreadyInUse.Remove(info);
+            nftsAlreadyInUse.Remove(info);
             OnNFTUsageChange?.Invoke();
         }
     }
@@ -80,14 +80,14 @@ public class BuilderInWorldNFTController
         foreach (NFTInfo info in nftOwner.assets)
         {
             if (info.assetContract.address != id) continue;
-            if (nFTsAlreadyInUse.Contains(info)) continue;
+            if (nftsAlreadyInUse.Contains(info)) continue;
 
-            nFTsAlreadyInUse.Add(info);
+            nftsAlreadyInUse.Add(info);
             OnNFTUsageChange?.Invoke();
 
         }
     }
-   
+
     public List<SceneObject> GetNFTsAsSceneObjects()
     {
         List<SceneObject> sceneObjects = new List<SceneObject>();

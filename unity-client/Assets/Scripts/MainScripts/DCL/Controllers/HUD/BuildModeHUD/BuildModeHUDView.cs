@@ -9,7 +9,7 @@ public class BuildModeHUDView : MonoBehaviour
 {
     public SceneLimitInfoController sceneLimitInfoController;
     public SceneObjectCatalogController sceneObjectCatalogController;
-    public ToolTipController toolTipController;
+    public ToolTipController tooltipController;
     public QuickBarView quickBarView;
     public CatalogGroupListView catalogGroupListView;
 
@@ -22,7 +22,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public GameObject publishGO;
     public GameObject publishingGO;
-    public GameObject publishedGO;
+    public GameObject publishingFinishedGO;
 
     public TextMeshProUGUI publishStatusTxt;
 
@@ -66,10 +66,10 @@ public class BuildModeHUDView : MonoBehaviour
         toggleSceneInfoInputAction.OnTriggered += OnSceneLimitInfoControllerChangeVisibilityTriggered;
         toggleCatalogInputAction.OnTriggered += OnSceneCatalogControllerChangeVisibilityTriggered;
 
-    
+
         entityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
         closeEntityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
-        
+
 
         catalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
         closeCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
@@ -95,7 +95,7 @@ public class BuildModeHUDView : MonoBehaviour
 
         tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
         publishBtn.onClick.AddListener(() => OnPublishAction?.Invoke());
-        logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke()); 
+        logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke());
     }
 
     private void OnDestroy()
@@ -120,13 +120,13 @@ public class BuildModeHUDView : MonoBehaviour
     {
         publishGO.SetActive(true);
         publishingGO.SetActive(true);
-        publishedGO.SetActive(false);
+        publishingFinishedGO.SetActive(false);
     }
 
     public void PublishEnd(string message)
     {
         publishingGO.SetActive(false);
-        publishedGO.SetActive(true);
+        publishingFinishedGO.SetActive(true);
         publishStatusTxt.text = message;
     }
 
@@ -144,7 +144,7 @@ public class BuildModeHUDView : MonoBehaviour
     {
         sceneObjectCatalogController.RefreshCatalog();
     }
-    
+
     public void SceneObjectDroppedInView()
     {
         OnSceneObjectDrop?.Invoke();
@@ -201,7 +201,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void HideToolTip()
     {
-        toolTipController.Stop();
+        tooltipController.Stop();
     }
 
     #region Triggers
