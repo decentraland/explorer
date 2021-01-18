@@ -8,7 +8,7 @@ namespace DCL.Huds.QuestPanel
 {
     public class QuestUIEntry : MonoBehaviour
     {
-        public event Action<QuestPanelModel> OnReadMoreClicked;
+        public event Action<QuestModel> OnReadMoreClicked;
 
         [SerializeField] private TextMeshProUGUI questName;
         [SerializeField] private TextMeshProUGUI description;
@@ -21,7 +21,7 @@ namespace DCL.Huds.QuestPanel
             readMoreButton.onClick.AddListener(() => readMoreDelegate?.Invoke());
         }
 
-        public void Populate(QuestPanelModel quest)
+        public void Populate(QuestModel quest)
         {
             readMoreDelegate = () => OnReadMoreClicked?.Invoke(quest);
             questName.text = quest.name;

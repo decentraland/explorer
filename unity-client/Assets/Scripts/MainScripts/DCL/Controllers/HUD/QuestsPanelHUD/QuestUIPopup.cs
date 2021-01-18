@@ -18,7 +18,7 @@ namespace DCL.Huds.QuestPanel
             closeButton.onClick.AddListener(ClosePopup);
         }
 
-        public void Populate(QuestPanelModel quest)
+        public void Populate(QuestModel quest)
         {
             CleanUpQuestsList(); //TODO Reuse already instantiated quests
 
@@ -37,7 +37,7 @@ namespace DCL.Huds.QuestPanel
 
         }
 
-        internal void CreateTask(QuestPanelSection section)
+        internal void CreateTask(QuestSection section)
         {
             var taskEntry = Instantiate(sectionPrefab, sectionsContainer).GetComponent<QuestSectionUIEntry>();
             taskEntry.Populate(section);

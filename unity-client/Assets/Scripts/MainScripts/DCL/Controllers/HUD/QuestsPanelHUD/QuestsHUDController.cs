@@ -14,7 +14,7 @@
             view = QuestsHUDView.Create();
         }
 
-        public void Populate(QuestPanelModel[] quests)
+        public void Populate(QuestModel[] quests)
         {
             view.Populate(quests);
         }

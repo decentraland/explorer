@@ -9,17 +9,17 @@ namespace DCL.Huds.QuestPanel
         [SerializeField] private RectTransform tasksContainer;
         [SerializeField] private QuestTaskUIFactory factory;
 
-        public void Populate(QuestPanelSection section)
+        public void Populate(QuestSection section)
         {
             CleanUpTasksList(); //TODO: Reuse already instantiated steps
             taskName.text = section.name;
-            foreach (QuestPanelTask task in section.tasks)
+            foreach (QuestTask task in section.tasks)
             {
                 CreateTask(task);
             }
         }
 
-        internal void CreateTask(QuestPanelTask task)
+        internal void CreateTask(QuestTask task)
         {
             GameObject prefab = factory.GetPrefab(task.type);
             if (prefab == null)

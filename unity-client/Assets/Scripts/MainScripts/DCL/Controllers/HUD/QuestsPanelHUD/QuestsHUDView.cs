@@ -25,7 +25,7 @@ namespace DCL.Huds.QuestPanel
             questPopup.gameObject.SetActive(false);
         }
 
-        public void Populate(QuestPanelModel[] quests)
+        public void Populate(QuestModel[] quests)
         {
             CleanUpQuestsList(); //TODO Reuse already instantiated quests
             for (int i = 0; i < quests.Length; i++)
@@ -34,14 +34,14 @@ namespace DCL.Huds.QuestPanel
             }
         }
 
-        internal void CreateQuestEntry(QuestPanelModel quest)
+        internal void CreateQuestEntry(QuestModel quest)
         {
             var questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestUIEntry>();
             questEntry.OnReadMoreClicked += ShowQuestPopup;
             questEntry.Populate(quest);
         }
 
-        internal void ShowQuestPopup(QuestPanelModel quest)
+        internal void ShowQuestPopup(QuestModel quest)
         {
             questPopup.Populate(quest);
             questPopup.gameObject.SetActive(true);
