@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Widgets;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,11 +15,7 @@ namespace DCL.SettingsPanelHUD.Sections
         /// </summary>
         /// <param name="settingsSectionController">Controller that will be associated to this view.</param>
         /// <param name="widgets">List of WIDGETS associated to this SECTION.</param>
-        void Initialize(
-            ISettingsSectionController settingsSectionController,
-            List<SettingsWidgetModel> widgets,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+        void Initialize(ISettingsSectionController settingsSectionController, List<SettingsWidgetModel> widgets);
 
         /// <summary>
         /// Activates/deactivates the SECTION.
@@ -41,16 +36,12 @@ namespace DCL.SettingsPanelHUD.Sections
         private List<SettingsWidgetModel> widgets;
         private bool isOpen = false;
 
-        public void Initialize(
-            ISettingsSectionController settingsSectionController,
-            List<SettingsWidgetModel> widgets,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+        public void Initialize(ISettingsSectionController settingsSectionController, List<SettingsWidgetModel> widgets)
         {
             this.settingsSectionController = settingsSectionController;
             this.widgets = widgets;
 
-            CreateWidgets(generalSettingsController, qualitySettingsController);
+            CreateWidgets();
         }
 
         public void SetActive(bool active)
@@ -63,14 +54,14 @@ namespace DCL.SettingsPanelHUD.Sections
             isOpen = active;
         }
 
-        private void CreateWidgets(IGeneralSettingsController generalSettingsController, IQualitySettingsController qualitySettingsController)
+        private void CreateWidgets()
         {
             foreach (SettingsWidgetModel widgetConfig in widgets)
             {
                 var newWidget = Instantiate(widgetConfig.widgetPrefab, widgetsContainer);
                 newWidget.gameObject.name = $"Widget_{widgetConfig.title}";
                 var newWidgetController = Instantiate(widgetConfig.widgetController);
-                settingsSectionController.AddWidget(newWidget, newWidgetController, widgetConfig, generalSettingsController, qualitySettingsController);
+                settingsSectionController.AddWidget(newWidget, newWidgetController, widgetConfig);
             }
         }
     }

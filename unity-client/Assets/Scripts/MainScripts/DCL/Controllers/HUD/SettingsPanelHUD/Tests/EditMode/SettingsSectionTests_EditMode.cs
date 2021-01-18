@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Sections;
 using DCL.SettingsPanelHUD.Widgets;
@@ -26,20 +25,13 @@ namespace SettingsSectionTests
             SettingsSectionController sectionController = ScriptableObject.CreateInstance<SettingsSectionController>();
 
             // Act
-            sectionController.AddWidget(
-                newWidgetView,
-                newWidgetController,
-                newWidgetConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+            sectionController.AddWidget(newWidgetView, newWidgetController, newWidgetConfig);
 
             // Assert
             newWidgetView.Received(1).Initialize(
                 newWidgetConfig.title,
                 newWidgetController,
-                Arg.Any<List<SettingsControlGroup>>(),
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
+                Arg.Any<List<SettingsControlGroup>>());
 
             Assert.Contains(newWidgetView, sectionController.widgets, "The new widget should be contained in the widget list.");
         }

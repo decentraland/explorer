@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD;
 using DCL.SettingsPanelHUD.Sections;
 using DCL.SettingsPanelHUD.Widgets;
@@ -44,21 +43,10 @@ namespace SettingsPanelTests
         public void AddSectionCorrectly()
         {
             // Act
-            panelController.AddSection(
-                null,
-                newSectionView,
-                newSectionController,
-                newSectionConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+            panelController.AddSection(null, newSectionView, newSectionController, newSectionConfig);
 
             // Assert
-            newSectionView.Received(1).Initialize(
-                newSectionController,
-                Arg.Any<List<SettingsWidgetModel>>(),
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
-
+            newSectionView.Received(1).Initialize(newSectionController, Arg.Any<List<SettingsWidgetModel>>());
             newSectionView.Received(1).SetActive(false);
             Assert.Contains(newSectionView, panelController.sections, "The new section should be contained in the section list.");
         }
@@ -67,13 +55,7 @@ namespace SettingsPanelTests
         public void OpenSectionCorrectly()
         {
             //Arrange
-            panelController.AddSection(
-                null,
-                newSectionView,
-                newSectionController,
-                newSectionConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+            panelController.AddSection(null, newSectionView, newSectionController, newSectionConfig);
 
             // Act
             panelController.OpenSection(newSectionView);
@@ -86,13 +68,7 @@ namespace SettingsPanelTests
         public void OpenSectionByIndexCorrectly()
         {
             //Arrange
-            panelController.AddSection(
-                null,
-                newSectionView,
-                newSectionController,
-                newSectionConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+            panelController.AddSection(null, newSectionView, newSectionController, newSectionConfig);
 
             // Act
             panelController.OpenSection(panelController.sections.Count - 1);

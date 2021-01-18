@@ -1,4 +1,3 @@
-using DCL.SettingsController;
 using DCL.SettingsPanelHUD.Common;
 using DCL.SettingsPanelHUD.Sections;
 using System.Collections.Generic;
@@ -19,9 +18,7 @@ namespace DCL.SettingsPanelHUD
         /// <summary>
         /// All the needed logic to initializes the controller and its associated view, and make them works.
         /// </summary>
-        void Initialize(
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+        void Initialize();
 
         /// <summary>
         /// Adds a SECTION into the main settings panel.
@@ -30,13 +27,7 @@ namespace DCL.SettingsPanelHUD
         /// <param name="newSection">New SECTION that will be added.</param>
         /// <param name="newSectionController">Controller belonging to the new SECTION.</param>
         /// <param name="sectionConfig">Model that will contain the configuration of the new SECTION.</param>
-        void AddSection(
-            SettingsButtonEntry newMenuButton,
-            ISettingsSectionView newSection,
-            ISettingsSectionController newSectionController,
-            SettingsSectionModel sectionConfig,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+        void AddSection(SettingsButtonEntry newMenuButton, ISettingsSectionView newSection, ISettingsSectionController newSectionController, SettingsSectionModel sectionConfig);
 
         /// <summary>
         /// Opens a specific SECTION of the main settings panel.
@@ -106,24 +97,20 @@ namespace DCL.SettingsPanelHUD
             view.SetVisibility(visible);
         }
 
-        public void Initialize(
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+        public void Initialize()
         {
-            view.Initialize(this, this, generalSettingsController, qualitySettingsController);
+            view.Initialize(this, this);
         }
 
         public void AddSection(
             SettingsButtonEntry newMenuButton,
             ISettingsSectionView newSection,
             ISettingsSectionController newSectionController,
-            SettingsSectionModel sectionConfig,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+            SettingsSectionModel sectionConfig)
         {
             newMenuButton?.Initialize(sectionConfig.icon, sectionConfig.text);
 
-            newSection.Initialize(newSectionController, sectionConfig.widgets.ToList(), generalSettingsController, qualitySettingsController);
+            newSection.Initialize(newSectionController, sectionConfig.widgets.ToList());
             newSection.SetActive(false);
             sections.Add(newSection);
 
@@ -184,9 +171,7 @@ namespace DCL.SettingsPanelHUD
 
         public void ResetAllSettings()
         {
-            Settings.i.LoadDefaultSettings();
-            Settings.i.SaveSettings();
-            CommonSettingsEvents.RaiseResetAllSettings();
+            Settings.i.ResetAllSettings();
         }
     }
 }

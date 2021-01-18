@@ -1,4 +1,4 @@
-using DCL.SettingsController;
+using DCL.SettingsControls;
 using DCL.SettingsPanelHUD.Common;
 using System.Collections.Generic;
 using TMPro;
@@ -17,11 +17,7 @@ namespace DCL.SettingsPanelHUD.Controls
         /// </summary>
         /// <param name="controlConfig">Model that will contain the configuration of the CONTROL.</param>
         /// <param name="settingsControlController">Controller associated to the CONTROL view.</param>
-        void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController);
+        void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController);
 
         /// <summary>
         /// This logic should update the CONTROL view with the stored value.
@@ -53,15 +49,11 @@ namespace DCL.SettingsPanelHUD.Controls
         private Color originalHandlerColor;
         private float originalControlBackgroundAlpha;
 
-        public virtual void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+        public virtual void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             this.controlConfig = controlConfig;
             this.settingsControlController = settingsControlController;
-            this.settingsControlController.Initialize(this, generalSettingsController, qualitySettingsController);
+            this.settingsControlController.Initialize();
             title.text = controlConfig.title;
             betaIndicator.SetActive(controlConfig.isBeta);
             originalTitleColor = title.color;
@@ -82,9 +74,13 @@ namespace DCL.SettingsPanelHUD.Controls
             }
 
             RefreshControl();
+
+            Settings.i.OnGeneralSettingsChanged += OnGeneralSettingsChanged;
+            Settings.i.OnQualitySettingsChanged += OnQualitySettingsChanged;
+            Settings.i.OnResetAllSettings += OnResetSettingsControl;
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (controlConfig != null)
             {
@@ -98,6 +94,10 @@ namespace DCL.SettingsPanelHUD.Controls
                     flag.OnChange -= OnAnyDeactivationFlagChange;
                 }
             }
+
+            Settings.i.OnGeneralSettingsChanged -= OnGeneralSettingsChanged;
+            Settings.i.OnQualitySettingsChanged -= OnQualitySettingsChanged;
+            Settings.i.OnResetAllSettings -= OnResetSettingsControl;
         }
 
         public virtual void RefreshControl()
@@ -110,7 +110,7 @@ namespace DCL.SettingsPanelHUD.Controls
         /// <param name="newValue">Value of the new state. It can be a bool (for toggle controls), a float (for slider controls) or an int (for spin-box controls).</param>
         protected void ApplySetting(object newValue)
         {
-            settingsControlController.OnControlChanged(newValue);
+            settingsControlController.UpdateSetting(newValue);
             settingsControlController.ApplySettings();
         }
 
@@ -154,6 +154,21 @@ namespace DCL.SettingsPanelHUD.Controls
                 SetControlActive(!current);
         }
 
+        private void OnGeneralSettingsChanged(SettingsData.GeneralSettings obj)
+        {
+            RefreshControl();
+        }
+
+        private void OnQualitySettingsChanged(SettingsData.QualitySettings obj)
+        {
+            RefreshControl();
+        }
+
+        private void OnResetSettingsControl()
+        {
+            RefreshControl();
+        }
+
         private void SetEnabled(bool enabled)
         {
             title.color = enabled ? originalTitleColor : titleDeactivationColor;
@@ -176,7 +191,7 @@ namespace DCL.SettingsPanelHUD.Controls
         private void SetControlActive(bool actived)
         {
             gameObject.SetActive(actived);
-            CommonSettingsEvents.RaiseRefreshAllWidgetsSize();
+            CommonSettingsPanelEvents.RaiseRefreshAllWidgetsSize();
         }
     }
 }

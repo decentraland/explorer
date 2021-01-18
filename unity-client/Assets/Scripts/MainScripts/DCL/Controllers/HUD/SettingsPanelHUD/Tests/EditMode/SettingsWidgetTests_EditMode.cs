@@ -1,4 +1,4 @@
-using DCL.SettingsController;
+using DCL.SettingsControls;
 using DCL.SettingsPanelHUD.Controls;
 using DCL.SettingsPanelHUD.Widgets;
 using NSubstitute;
@@ -28,19 +28,12 @@ namespace SettingsWidgetTests
             SettingsWidgetController widgetController = ScriptableObject.CreateInstance<SettingsWidgetController>();
 
             // Act
-            widgetController.AddControl(
-                newControlView,
-                newControlController,
-                newControlConfig,
-                Substitute.For<IGeneralSettingsController>(),
-                Substitute.For<IQualitySettingsController>());
+            widgetController.AddControl(newControlView, newControlController, newControlConfig);
 
             // Assert
             newControlView.Received(1).Initialize(
                 newControlConfig,
-                newControlController,
-                Arg.Any<IGeneralSettingsController>(),
-                Arg.Any<IQualitySettingsController>());
+                newControlController);
 
             Assert.Contains(newControlView, widgetController.controls, "The new control should be contained in the control list.");
         }

@@ -1,4 +1,4 @@
-using DCL.SettingsController;
+using DCL.SettingsControls;
 using UnityEngine;
 
 namespace DCL.SettingsPanelHUD.Controls
@@ -12,16 +12,18 @@ namespace DCL.SettingsPanelHUD.Controls
 
         public SpinBoxPresetted spinBoxControl { get => spinBox; }
 
-        public override void Initialize(
-            SettingsControlModel controlConfig,
-            SettingsControlController settingsControlController,
-            IGeneralSettingsController generalSettingsController,
-            IQualitySettingsController qualitySettingsController)
+        private SpinBoxSettingsControlController spinBoxController;
+
+        public override void Initialize(SettingsControlModel controlConfig, SettingsControlController settingsControlController)
         {
             SetLabels(((SpinBoxControlModel)controlConfig).spinBoxLabels);
 
-            base.Initialize(controlConfig, settingsControlController, generalSettingsController, qualitySettingsController);
-            settingsControlController.OnControlChanged(spinBox.value);
+            spinBoxController = (SpinBoxSettingsControlController)settingsControlController;
+            spinBoxController.OnSetLabels += SetLabels;
+            spinBoxController.OnCurrentLabelChange += spinBox.OverrideCurrentLabel;
+
+            base.Initialize(controlConfig, spinBoxController);
+            spinBoxController.UpdateSetting(spinBox.value);
 
             spinBox.onValueChanged.AddListener(spinBoxValue =>
             {
@@ -29,11 +31,22 @@ namespace DCL.SettingsPanelHUD.Controls
             });
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (spinBoxController != null)
+            {
+                spinBoxController.OnSetLabels -= SetLabels;
+                spinBoxController.OnCurrentLabelChange -= spinBox.OverrideCurrentLabel;
+            }
+        }
+
         public override void RefreshControl()
         {
             base.RefreshControl();
 
-            int newValue = (int)settingsControlController.GetStoredValue();
+            int newValue = (int)spinBoxController.GetStoredValue();
             if (spinBox.value != newValue)
                 spinBox.value = newValue;
         }
