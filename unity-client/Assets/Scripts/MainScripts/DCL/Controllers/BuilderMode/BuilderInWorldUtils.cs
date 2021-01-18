@@ -97,7 +97,7 @@ public static partial class BuilderInWorldUtils
         eventData.position = Input.mousePosition;
         var results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
-        return results.Count > 1;
+        return results.Count > 2;
     }
 
     public static string ConvertEntityToJSON(DecentralandEntity entity)
@@ -112,7 +112,7 @@ public static partial class BuilderInWorldUtils
             {
                 EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
 
-                entityComponentModel.position = Environment.i.worldState.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+                entityComponentModel.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 

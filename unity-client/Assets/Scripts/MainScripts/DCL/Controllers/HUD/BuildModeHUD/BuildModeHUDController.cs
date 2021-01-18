@@ -33,7 +33,7 @@ public class BuildModeHUDController : IHUD
     public event Action<Vector3> OnSelectedObjectRotationChange;
     public event Action<Vector3> OnSelectedObjectScaleChange;
 
-    
+
     //Note(Adrian): This is used right now for tutorial purposes
     public event Action OnCatalogOpen;
 
@@ -41,6 +41,7 @@ public class BuildModeHUDController : IHUD
 
     BuilderInWorldEntityListController buildModeEntityListController;
     EntityInformationController entityInformationController;
+    SceneObjectDropController sceneObjectDropController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
@@ -51,6 +52,8 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
+        sceneObjectDropController = new SceneObjectDropController();
+
         buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
         entityInformationController = view.entityInformationController;
 
@@ -58,6 +61,7 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
         entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
         entityInformationController.OnNameChange += (x) => OnEntityRename?.Invoke(x);
+        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
 
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
@@ -68,6 +72,7 @@ public class BuildModeHUDController : IHUD
 
         buildModeEntityListController.CloseList();
 
+        view.OnSceneObjectDrop += () => sceneObjectDropController.SceneObjectDropped();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
         view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
         view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
@@ -84,6 +89,7 @@ public class BuildModeHUDController : IHUD
         view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
         view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
 
+        sceneObjectDropController.OnSceneObjectDropped += SceneObjectSelected;
         view.OnSceneObjectSelected += SceneObjectSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();

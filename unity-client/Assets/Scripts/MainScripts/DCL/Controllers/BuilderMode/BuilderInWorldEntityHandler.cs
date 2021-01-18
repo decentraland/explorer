@@ -18,14 +18,16 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     public float duplicateOffset = 2f;
     public float msBetweenTransformUpdates = 2000;
 
-
     [Header("Prefab References")]
     public OutlinerController outlinerController;
+    public EntityInformationController entityInformationController;
     public BuilderInWorldController buildModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
 
-    [Header("Build References")] public Material editMaterial;
+    [Header("Build References")]
+    public Material editMaterial;
+
     public Texture2D duplicateCursorTexture;
 
     public event Action<DCLBuilderInWorldEntity> onSelectedEntity;
@@ -95,7 +97,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (selectedEntities.Count <= 0)
             return;
 
-        selectedEntities[0].transform.position = DCL.Environment.i.worldState.ConvertSceneToUnityPosition(position, sceneToEdit); 
+        selectedEntities[0].transform.position = DCL.Environment.i.world.state.ConvertSceneToUnityPosition(position, sceneToEdit);
     }
 
     void UpdateEntityRotation(Vector3 rotation)
@@ -103,7 +105,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (selectedEntities.Count <= 0)
             return;
 
-        selectedEntities[0].transform.rotation = Quaternion.Euler(rotation); 
+        selectedEntities[0].transform.rotation = Quaternion.Euler(rotation);
     }
 
     void UpdateEntityScale(Vector3 scale)
@@ -111,7 +113,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (selectedEntities.Count <= 0)
             return;
 
-        selectedEntities[0].transform.localScale = scale; 
+        selectedEntities[0].transform.localScale = scale;
     }
 
     void ReportTransform()
@@ -198,13 +200,13 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (!selectedEntities.Contains(entity))
             return;
 
-        if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+        if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
         {
             DestroyLastCreatedEntities();
         }
 
-        DCL.Environment.i.sceneBoundsChecker.EvaluateEntityPosition(entity.rootEntity);
-        DCL.Environment.i.sceneBoundsChecker.RemoveEntityToBeChecked(entity.rootEntity);
+        DCL.Environment.i.world.sceneBoundsChecker.EvaluateEntityPosition(entity.rootEntity);
+        DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(entity.rootEntity);
 
         entity.Deselect();
 
@@ -331,7 +333,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
 
 
-  
+
         outlinerController.CancelAllOutlines();
         return true;
     }
@@ -380,7 +382,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     {
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 return;
         }
 
@@ -454,7 +456,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     {
         DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
-        DCLTransform.model.position = Environment.i.worldState.ConvertUnityToScenePosition(entryPoint, parcelScene);
+        DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entryPoint, parcelScene);
 
         Vector3 pointToLookAt = Camera.main.transform.position;
         pointToLookAt.y = editionGOPosition.y;
@@ -586,7 +588,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         {
             if (entity.rootEntity.scene == sceneToEdit)
             {
-                if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+                if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 {
                     entitiesToRemove.Add(entity);
                 }
@@ -651,7 +653,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         bool areAllIn = true;
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            if (!DCL.Environment.i.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+            if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 areAllIn = false;
                 break;

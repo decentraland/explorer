@@ -11,7 +11,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class PhysicsCast_Tests : TestsBase
+public class PhysicsCast_Tests : IntegrationTestSuite_Legacy
 {
     const int ENTITIES_COUNT = 3;
     PB_RayQuery raycastQuery;
@@ -24,7 +24,7 @@ public class PhysicsCast_Tests : TestsBase
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        Environment.i.sceneBoundsChecker.Stop();
+        Environment.i.world.sceneBoundsChecker.Stop();
     }
 
     private void ConfigureRaycastQuery(string queryType)

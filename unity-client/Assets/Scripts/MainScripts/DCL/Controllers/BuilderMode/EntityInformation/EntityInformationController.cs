@@ -17,7 +17,7 @@ public class EntityInformationController : MonoBehaviour
     [Header("Prefab references")]
     public TextMeshProUGUI titleTxt;
     public TMP_InputField nameIF;
-    public RawImage entitytTumbailImg; 
+    public RawImage entitytTumbailImg;
     public AttributeXYZ positionAttribute;
     public AttributeXYZ rotationAttribute;
     public AttributeXYZ scaleAttribute;
@@ -112,7 +112,7 @@ public class EntityInformationController : MonoBehaviour
         currentEntity.onStatusUpdate += UpdateEntityName;
 
         parcelScene = currentScene;
-     
+
 
         entitytTumbailImg.enabled = false;
         GetThumbnail(entity.GetSceneObjectAssociated());
@@ -146,7 +146,7 @@ public class EntityInformationController : MonoBehaviour
     {
         if (entity.gameObject != null)
         {
-            Vector3 positionConverted = DCL.Environment.i.worldState.ConvertUnityToScenePosition(entity.gameObject.transform.position, parcelScene);
+            Vector3 positionConverted = DCL.Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, parcelScene);
             Vector3 currentRotation = entity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = entity.gameObject.transform.localScale;
 
@@ -161,7 +161,7 @@ public class EntityInformationController : MonoBehaviour
             positionAttribute.SetValues(positionConverted);
             rotationAttribute.SetValues(currentRotation);
             scaleAttribute.SetValues(currentScale);
-            
+
         }
     }
 

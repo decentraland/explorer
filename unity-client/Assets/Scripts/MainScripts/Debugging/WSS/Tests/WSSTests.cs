@@ -9,7 +9,7 @@ using WebSocketSharp;
 namespace Tests
 {
     [Explicit]
-    public class WSSTests : TestsBase
+    public class WSSTests : IntegrationTestSuite_Legacy
     {
         protected override IEnumerator SetUp()
         {
@@ -96,9 +96,9 @@ namespace Tests
 
                 yield return null;
 
-                Assert.IsTrue(DCL.Environment.i.worldState.loadedScenes.ContainsKey(loadedSceneID),
+                Assert.IsTrue(DCL.Environment.i.world.state.loadedScenes.ContainsKey(loadedSceneID),
                     "Expected loadedScene not found!");
-                Assert.IsTrue(DCL.Environment.i.worldState.loadedScenes[loadedSceneID] != null,
+                Assert.IsTrue(DCL.Environment.i.world.state.loadedScenes[loadedSceneID] != null,
                     "Expected loadedScene found but was null!!!");
             }
 
