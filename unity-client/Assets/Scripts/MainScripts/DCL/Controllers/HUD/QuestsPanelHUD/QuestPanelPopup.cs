@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace DCL.Huds.QuestsPanel
 {
-    public class QuestUIPopup : MonoBehaviour
+    public class QuestPanelPopup : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI questName;
         [SerializeField] private TextMeshProUGUI description;
@@ -39,7 +39,7 @@ namespace DCL.Huds.QuestsPanel
 
         internal void CreateTask(QuestSection section)
         {
-            var taskEntry = Instantiate(sectionPrefab, sectionsContainer).GetComponent<SectionUIEntry>();
+            var taskEntry = Instantiate(sectionPrefab, sectionsContainer).GetComponent<QuestPanelSection>();
             taskEntry.Populate(section);
         }
 

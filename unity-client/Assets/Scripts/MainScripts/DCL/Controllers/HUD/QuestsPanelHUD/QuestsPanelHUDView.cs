@@ -9,7 +9,7 @@ namespace DCL.Huds.QuestsPanel
 
         [SerializeField] private RectTransform questsContainer;
         [SerializeField] private GameObject questPrefab;
-        [SerializeField] private QuestUIPopup questPopup;
+        [SerializeField] private QuestPanelPopup questPopup;
 
         internal static QuestsPanelHUDView Create()
         {
@@ -36,7 +36,7 @@ namespace DCL.Huds.QuestsPanel
 
         internal void CreateQuestEntry(QuestModel quest)
         {
-            var questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestUIEntry>();
+            var questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestPanelEntry>();
             questEntry.OnReadMoreClicked += ShowQuestPopup;
             questEntry.Populate(quest);
         }

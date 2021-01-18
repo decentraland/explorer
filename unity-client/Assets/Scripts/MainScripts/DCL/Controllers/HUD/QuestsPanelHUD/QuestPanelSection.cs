@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DCL.Huds.QuestsPanel
 {
-    public class SectionUIEntry : MonoBehaviour
+    public class QuestPanelSection : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI taskName;
         [SerializeField] private RectTransform tasksContainer;
@@ -28,7 +28,7 @@ namespace DCL.Huds.QuestsPanel
                 return;
             }
 
-            var taskUIEntry = Instantiate(prefab, tasksContainer).GetComponent<ITaskUIEntry>();
+            var taskUIEntry = Instantiate(prefab, tasksContainer).GetComponent<IQuestPanelTask>();
             taskUIEntry.Populate(task.payload);
         }
 

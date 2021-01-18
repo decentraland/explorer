@@ -10,6 +10,7 @@
          {
             "id":"task0",
             "name":"Day 1",
+            "completed":true,
             "tasks":[
                {
                   "id":"step0",
@@ -26,6 +27,7 @@
          {
             "id":"task1",
             "name":"Day 2",
+            "completed":false,
             "tasks":[
                {
                   "id":"step2",
@@ -51,6 +53,7 @@
       {
         "id":"task0",
         "name":"Week 1",
+        "completed":false,
         "tasks":[
           {
             "id":"step0",
@@ -62,6 +65,7 @@
       {
         "id":"task1",
         "name":"week 2",
+        "completed":false,
         "tasks":[
           {
             "id":"step2",

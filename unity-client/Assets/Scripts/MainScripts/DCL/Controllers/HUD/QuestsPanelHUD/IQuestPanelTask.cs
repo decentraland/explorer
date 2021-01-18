@@ -1,6 +1,6 @@
 namespace DCL.Huds.QuestsPanel
 {
-    public interface ITaskUIEntry
+    public interface IQuestPanelTask
     {
         void Populate(string payload);
     }

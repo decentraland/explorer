@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace DCL.Huds.QuestsPanel
 {
-    public class QuestUIEntry : MonoBehaviour
+    public class QuestPanelEntry : MonoBehaviour
     {
         public event Action<QuestModel> OnReadMoreClicked;
 
