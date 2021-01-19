@@ -118,8 +118,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 
   if (!EDITOR) {
-    await startGlobalScene(unityInterface, "avatars")
-    await startPortableExperienceScene(unityInterface, "testPE")
+    await startGlobalScene(unityInterface, "dcl-global-scene-avatars", hudWorkerUrl)
+    
+    // Temporal: Try to create several global scenes
+    await startGlobalScene(unityInterface, "dcl-portable-experience-testPE1", portableExperienceWorkerUrl)
+    await startGlobalScene(unityInterface, "dcl-portable-experience-testPE2", portableExperienceWorkerUrl)
+    await startGlobalScene(unityInterface, "dcl-portable-experience-testPE3", portableExperienceWorkerUrl)
   }
 
   return {
@@ -135,34 +139,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface, sceneName: string) {
-  const sceneId = 'dcl-global-scene-' + sceneName
-
+export async function startGlobalScene(unityInterface: UnityInterface, sceneId: string, workerUrl: string) {
   const scene = new UnityScene({
-    sceneId,
-    name: sceneName,
+    sceneId: sceneId,
+    name: sceneId,
     baseUrl: location.origin,
-    main: hudWorkerUrl,
-    useFPSThrottling: false,
-    data: {},
-    mappings: []
-  })
-
-  const worker = loadParcelScene(scene, undefined, true)
-
-  await ensureUiApis(worker)
-
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
-}
-
-export async function startPortableExperienceScene(unityInterface: UnityInterface, sceneName: string) {
-  const sceneId = 'dcl-portable-experience-' + sceneName
-
-  const scene = new UnityScene({
-    sceneId,
-    name: sceneName,
-    baseUrl: location.origin,
-    main: portableExperienceWorkerUrl,
+    main: workerUrl,
     useFPSThrottling: false,
     data: {},
     mappings: []
