@@ -55,12 +55,12 @@ namespace DCL
 
         public bool paused { get; set; }
 
+        private Dictionary<string, MessagingController> globalSceneControllers = new Dictionary<string, MessagingController>();
         private List<MessagingController> sortedControllers = new List<MessagingController>();
         private List<MessagingBus> busesToProcess = new List<MessagingBus>();
         private int busesToProcessCount = 0;
         private int sortedControllersCount = 0;
 
-        private Dictionary<string, MessagingController> globalSceneControllers = new Dictionary<string, MessagingController>();
         private MessagingController globalController = null;
         private MessagingController currentSceneController = null;
 
