@@ -51,6 +51,7 @@ namespace DCL
         public bool isRunning
         {
             get { return mainCoroutine != null; }
+
         }
 
         public bool paused { get; set; }
