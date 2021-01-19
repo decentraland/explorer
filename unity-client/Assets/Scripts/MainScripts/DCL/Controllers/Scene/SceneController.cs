@@ -131,9 +131,7 @@ namespace DCL
             PoolManager.i.OnGet -= Environment.i.platform.cullingController.objectsTracker.MarkDirty;
             DCLCharacterController.OnCharacterMoved -= SetPositionDirty;
             Environment.i.platform.debugController.OnDebugModeSet -= OnDebugModeSet;
-
             UnloadAllScenes(includePersistent: true);
-
             if (deferredDecodingCoroutine != null)
                 CoroutineStarter.Stop(deferredDecodingCoroutine);
         }
@@ -531,7 +529,6 @@ namespace DCL
 
             OnReadyScene?.Invoke(sceneId);
         }
-
 
         public void ActivateBuilderInWorldEditScene()
         {
