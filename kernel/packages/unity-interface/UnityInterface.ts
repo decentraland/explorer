@@ -26,6 +26,7 @@ import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
+import { setFilteredConsoleError } from './setFilteredConsoleError'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -116,6 +117,7 @@ export class UnityInterface {
 
         this.resizeCanvasDelayed(null)
         this.waitForFillMouseEventData()
+        setFilteredConsoleError()
       }
     }
   }
