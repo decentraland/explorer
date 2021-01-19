@@ -86,11 +86,16 @@ public class AssetCatalogBridge : MonoBehaviour
 
     public static SceneObject GetSceneObjectById(string id)
     {
-        foreach (SceneObject sceneObject in sceneObjectCatalog.GetValues())
+        foreach (SceneAssetPack assetPack in sceneAssetPackCatalog.GetValues())
         {
-            if (sceneObject.id == id) return sceneObject;
+            foreach (SceneObject sceneObject in assetPack.assets)
+            {
+                if (sceneObject.id == id)
+                {
+                    return sceneObject;
+                }
+            }
         }
-
         return null;
     }
 
@@ -107,6 +112,11 @@ public class AssetCatalogBridge : MonoBehaviour
                 i.AddSceneAssetPackToCatalog(item);
             }
         }
+    }
+
+    public static void ClearCatalog()
+    {
+        sceneObjectCatalog.Clear();
     }
 
     public static void AddSceneObjectToCatalog(SceneObject sceneObject)
@@ -128,6 +138,6 @@ public class AssetCatalogBridge : MonoBehaviour
             Debug.Log("add sceneObject: " + payload);
 
 
-        sceneAssetPackCatalogValue.Add(sceneAssetPack.id, sceneAssetPack);
+        sceneAssetPackCatalog.Add(sceneAssetPack.id, sceneAssetPack);
     }
 }
