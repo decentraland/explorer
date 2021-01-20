@@ -20,6 +20,8 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
     {
         base.AddAdapters();
 
+        if (contentList == null) return;
+
         foreach (Dictionary<string, List<SceneObject>> assetPackGroups in contentList)
         {
             foreach (KeyValuePair<string, List<SceneObject>> assetPackGroup in assetPackGroups)
@@ -32,7 +34,7 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject
                 adapter.OnAdapterDrag += OnDrag;
                 adapter.OnAdapterEndDrag += OnEndDrag;
             }
-        }         
+        }
     }
 
     void OnDrag(PointerEventData data)
