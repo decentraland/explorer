@@ -34,7 +34,7 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import {
   getSceneNameFromJsonData,
   ILandToLoadableParcelScene,
-  ILandToLoadableParcelSceneUpdate,
+  ILandToLoadableParcelSceneUpdate
 } from 'shared/selectors'
 import { UnityParcelScene, UnityPortableExperienceScene } from './UnityParcelScene'
 
@@ -84,13 +84,13 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   }
 }
 
-const game1 = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
-const game1Blob = new Blob([game1])
-const game1Url = URL.createObjectURL(game1Blob)
+const pe1SourceRaw = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
+const pe1SourceBlob = new Blob([pe1SourceRaw])
+const pe1SourceUrl = URL.createObjectURL(pe1SourceBlob)
 
-const game2 = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
-const game2Blob = new Blob([game2])
-const game2Url = URL.createObjectURL(game2Blob)
+const pe2SourceRaw = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
+const pe2SourceBlob = new Blob([pe2SourceRaw])
+const pe2SourceUrl = URL.createObjectURL(pe2SourceBlob)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -145,8 +145,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-global-scene-avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
-    await startPortableExperinceScene(unityInterface, 'dcl-portable-experience-testPE1', game1Url)
-    await startPortableExperinceScene(unityInterface, 'dcl-portable-experience-testPE2', game2Url)
+    await startPortableExperinceScene(unityInterface, 'dcl-portable-experience-testPE1', pe1SourceUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-portable-experience-testPE2', pe2SourceUrl)
   }
 
   return {
@@ -162,12 +162,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface, sceneId: string, workerUrl: string) {
+export async function startGlobalScene(unityInterface: UnityInterface, cid: string, fileContent: string) {
   const scene = new UnityScene({
-    sceneId: sceneId,
-    name: sceneId,
+    sceneId: cid,
+    name: cid,
     baseUrl: location.origin,
-    main: workerUrl,
+    main: fileContent,
     useFPSThrottling: false,
     data: {},
     mappings: []
@@ -178,6 +178,34 @@ export async function startGlobalScene(unityInterface: UnityInterface, sceneId: 
   await ensureUiApis(worker)
 
   unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+}
+
+export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, fileContent: string) {
+  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, fileContent))
+  loadParcelScene(scene, undefined, true)
+  
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+}
+
+export function getMockedExperience(cid: string, fileContent: string) {
+  // this is the mock
+  return getLoadablePortableExperience({
+    cid,
+    baseUrl: 'http://localhost/portable-experiences/content',
+    baseUrlBundles: 'MOCK',
+    mappings: [{ file: 'scene.json', hash: 'MOCK' }],
+
+    sceneJsonData: {
+      display: { title: 'Empty parcel' },
+      contact: { name: 'Decentraland' },
+      owner: '',
+      main: fileContent,
+      tags: [],
+      scene: { base: '0,0', parcels: [] },
+      policy: {},
+      communications: { commServerUrl: '' }
+    }
+  })
 }
 
 // TODO: move to a proper PE file
@@ -217,38 +245,6 @@ export function getLoadablePortableExperience(data: {
       contents: mappings
     }
   }
-}
-
-export function getMockedExperience(cid: string, fileContent: string) {
-  // this is the mock
-  return getLoadablePortableExperience({
-    cid,
-    baseUrl: 'http://localhost/portable-experiences/content',
-    baseUrlBundles: 'MOCK',
-    mappings: [{ file: 'scene.json', hash: 'MOCK' }],
-
-    sceneJsonData: {
-      display: { title: 'Empty parcel' },
-      contact: { name: 'Decentraland' },
-      owner: '',
-      main: fileContent,
-      tags: [],
-      scene: { base: '0,0', parcels: [] },
-      policy: {},
-      communications: { commServerUrl: '' }
-    }
-  })
-}
-
-export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, fileContent: string) {
-  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, fileContent))
-
-  const worker = loadParcelScene(scene, undefined, true)
-  worker['system'].then((system) => system.setLogging({ logConsole: true }))
-
-  //await ensureUiApis(worker)
-
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
 }
 
 export async function startUnitySceneWorkers() {
