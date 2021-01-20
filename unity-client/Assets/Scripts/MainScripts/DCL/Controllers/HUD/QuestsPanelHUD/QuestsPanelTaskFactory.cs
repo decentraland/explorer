@@ -5,7 +5,7 @@ using UnityEngine;
 namespace DCL.Huds.QuestsPanel
 {
     [CreateAssetMenu(menuName = "Variables/QuestPanelTaskFactory", fileName = "QuestPanelTaskFactory", order = 0)]
-    public class TaskUIFactory : ScriptableObject
+    public class QuestsPanelTaskFactory : ScriptableObject
     {
         [Serializable]
         public class Entry

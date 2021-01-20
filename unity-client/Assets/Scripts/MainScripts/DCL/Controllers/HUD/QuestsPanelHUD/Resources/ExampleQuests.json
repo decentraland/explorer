@@ -1,76 +1,81 @@
 [
-   {
-      "id":"quest0",
-      "name":"Halloween",
-      "description":"Solve a mystery",
-      "thumbnail_entry":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
-      "thumbnail_banner":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
-      "icon":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
-      "sections":[
-         {
-            "id":"task0",
-            "name":"Day 1",
-            "completed":true,
-            "tasks":[
-               {
-                  "id":"step0",
-                  "type":"single",
-                  "payload":"{ \"name\": \"Find Kiki\", \"isDone\": true }"
-               },
-               {
-                  "id":"step1",
-                  "type":"count",
-                  "payload":"{ \"name\": \"Collect pumpkins\", \"start\": 0, \"end\": 10, \"current\": 5 }"
-               }
-            ]
-         },
-         {
-            "id":"task1",
-            "name":"Day 2",
-            "completed":false,
-            "tasks":[
-               {
-                  "id":"step2",
-                  "type":"single",
-                  "payload":"{ \"name\": \"Find the old lady\", \"isDone\": true }"
-               },
-               {
-                  "id":"step3",
-                  "type":"single",
-                  "payload":"{ \"name\": \"Enter the house\", \"isDone\": false }"
-               }
-            ]
-         }
-      ]
-   },
   {
-    "id":"quest1",
-    "name":"Spring",
-    "description":"Do something silly",
-    "thumbnail_entry":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
-    "thumbnail_banner":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
-    "sections":[
+    "id": "quest0",
+    "name": "Halloween",
+    "description": "Solve a mystery",
+    "thumbnail_entry": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "thumbnail_banner": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "sections": [
       {
-        "id":"task0",
-        "name":"Week 1",
-        "completed":false,
-        "tasks":[
+        "id": "task0",
+        "name": "Day 1",
+        "progress": 1,
+        "tasks": [
           {
-            "id":"step0",
-            "type":"single",
-            "payload":"{ \"name\": \"Jump High\", \"isDone\": true }"
+            "id": "step0",
+            "type": "single",
+            "payload": "{ \"name\": \"Find Kiki\", \"isDone\": true }"
+          },
+          {
+            "id": "step1",
+            "type": "count",
+            "payload": "{ \"name\": \"Collect pumpkins\", \"start\": 0, \"end\": 10, \"current\": 10 }"
           }
         ]
       },
       {
-        "id":"task1",
-        "name":"week 2",
-        "completed":false,
-        "tasks":[
+        "id": "task1",
+        "name": "Day 2",
+        "progress": 0.25,
+        "tasks": [
           {
-            "id":"step2",
-            "type":"single",
-            "payload":"{ \"name\": \"Sneeze\", \"isDone\": true }"
+            "id": "step2",
+            "type": "single",
+            "payload": "{ \"name\": \"Find the old lady\", \"isDone\": true }"
+          },
+          {
+            "id": "step3",
+            "type": "single",
+            "payload": "{ \"name\": \"Enter the house\", \"isDone\": false }"
+          },
+          {
+            "id": "step4",
+            "type": "count",
+            "payload": "{ \"name\": \"Collect something fishy\", \"start\": 0, \"end\": 10, \"current\": 2 }"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "quest1",
+    "name": "Spring",
+    "description": "Do something silly",
+    "thumbnail_entry": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "thumbnail_banner": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "sections": [
+      {
+        "id": "task0",
+        "name": "Week 1",
+        "progress": 1,
+        "tasks": [
+          {
+            "id": "step0",
+            "type": "single",
+            "payload": "{ \"name\": \"Jump High\", \"isDone\": true }"
+          }
+        ]
+      },
+      {
+        "id": "task1",
+        "name": "week 2",
+        "progress": 0.8,
+        "tasks": [
+          {
+            "id": "step2",
+            "type": "single",
+            "payload": "{ \"name\": \"Sneeze\", \"isDone\": false }"
           }
         ]
       }

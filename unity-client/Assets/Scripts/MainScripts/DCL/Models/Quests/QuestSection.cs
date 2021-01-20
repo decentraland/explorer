@@ -3,6 +3,6 @@ public class QuestSection
 {
     public string id;
     public string name;
-    public bool completed;
+    public float progress;
     public QuestTask[] tasks;
 }
