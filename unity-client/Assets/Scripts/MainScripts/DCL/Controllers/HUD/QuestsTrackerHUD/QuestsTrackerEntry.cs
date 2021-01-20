@@ -1,3 +1,5 @@
+using DCL.Helpers;
+using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -7,12 +9,26 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerEntry : MonoBehaviour
     {
+        public event Action OnLayoutRebuildRequested;
+
         [SerializeField] private TextMeshProUGUI questTitle;
         [SerializeField] private RawImage questIcon;
         [SerializeField] private TextMeshProUGUI sectionTitle;
         [SerializeField] private Image progress;
         [SerializeField] private RectTransform tasksContainer;
         [SerializeField] private GameObject taskPrefab;
+        [SerializeField] private Button expandCollapseButton;
+        [SerializeField] private GameObject expandIcon;
+        [SerializeField] private GameObject collapseIcon;
+
+        private bool isExpanded;
+
+        public void Awake()
+        {
+            expandCollapseButton.gameObject.SetActive(false);
+            SetExpandCollapseState(true);
+            expandCollapseButton.onClick.AddListener(() => SetExpandCollapseState(!isExpanded));
+        }
 
         public void Populate(QuestModel quest)
         {
@@ -25,6 +41,8 @@ namespace DCL.Huds.QuestsTracker
             {
                 CreateTask(task);
             }
+            expandCollapseButton.gameObject.SetActive(currentSection.tasks.Length > 0);
+            SetExpandCollapseState(true);
         }
 
         internal void CreateTask(QuestTask task)
@@ -36,6 +54,15 @@ namespace DCL.Huds.QuestsTracker
         internal void SetThumbnail(string url)
         {
 
+        }
+
+        internal void SetExpandCollapseState(bool newIsExpanded)
+        {
+            isExpanded = newIsExpanded;
+            expandIcon.SetActive(isExpanded);
+            collapseIcon.SetActive(!isExpanded);
+            tasksContainer.gameObject.SetActive(isExpanded);
+            OnLayoutRebuildRequested?.Invoke();
         }
     }
 }

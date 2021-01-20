@@ -9,6 +9,8 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] private RectTransform questsContainer;
         [SerializeField] private GameObject questPrefab;
 
+        private bool layoutRebuildRequested;
+
         public static QuestsTrackerHUDView Create()
         {
             throw new NotImplementedException();
@@ -20,13 +22,22 @@ namespace DCL.Huds.QuestsTracker
             {
                 CreateQuestEntry(quest);
             }
-            Utils.ForceRebuildLayoutImmediate(questsContainer);
         }
 
         internal void CreateQuestEntry(QuestModel quest)
         {
             var taskUIEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsTrackerEntry>();
+            taskUIEntry.OnLayoutRebuildRequested += () => layoutRebuildRequested = true;
             taskUIEntry.Populate(quest);
+        }
+
+        private void Update()
+        {
+            if (layoutRebuildRequested)
+            {
+                layoutRebuildRequested = false;
+                Utils.ForceRebuildLayoutImmediate(questsContainer);
+            }
         }
     }
 }
