@@ -131,6 +131,19 @@ export type LoadableParcelScene = {
   land?: ILand
 }
 
+// TODO: review this works in unity global scene
+/** THIS INTERFACE CANNOT CHANGE, IT IS USED IN THE UNITY BUILD */
+export type LoadablePortableExperienceScene = {
+  id: string
+  name: string
+  basePosition: { x: number; y: number }
+  parcels: Array<{ x: number; y: number }>
+  contents: Array<ContentMapping>
+  baseUrl: string
+  baseUrlBundles: string
+  land?: IPortableExperience
+}
+
 export const BillboardModes = {
   BILLBOARDMODE_NONE: 0,
   BILLBOARDMODE_X: 1,
@@ -242,6 +255,18 @@ export interface ILand {
   sceneJsonData: SceneJsonData
   baseUrl: string
   baseUrlBundles: string
+  mappingsResponse: MappingsResponse
+}
+
+export interface IPortableExperience {
+  /**
+   * sceneId: Now it is either an internal identifier or the rootCID.
+   * In the future will change to the sceneCID
+   */
+  cid: string
+  baseUrl: string
+  baseUrlBundles: string
+  sceneJsonData: SceneJsonData
   mappingsResponse: MappingsResponse
 }
 
