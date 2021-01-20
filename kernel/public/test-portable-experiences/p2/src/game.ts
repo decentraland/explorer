@@ -39,7 +39,7 @@ function spawnCube(x: number, y: number, z: number) {
 
 /// --- Spawn a cube ---
 
-const cube = spawnCube(8, 1, 8)
+const cube = spawnCube(4, 3, 8)
 
 cube.addComponent(
   new OnClick(() => {
