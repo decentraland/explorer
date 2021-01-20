@@ -59,7 +59,6 @@ export class UnityPortableExperienceScene extends UnityScene<LoadablePortableExp
     this.worker
       .getAPIInstance(ParcelIdentity)
       .then((parcelIdentity) => {
-        // parcelIdentity.land = null
         parcelIdentity.cid = worker.getSceneId()
       })
       .catch((e) => this.logger.error('Error initializing system ParcelIdentity', e))

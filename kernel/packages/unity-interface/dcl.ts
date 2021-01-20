@@ -35,7 +35,6 @@ import {
   getSceneNameFromJsonData,
   ILandToLoadableParcelScene,
   ILandToLoadableParcelSceneUpdate,
-  normalizeContentMappings
 } from 'shared/selectors'
 import { UnityParcelScene, UnityPortableExperienceScene } from './UnityParcelScene'
 
@@ -85,11 +84,11 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   }
 }
 
-const game1 = require('raw-loader!../../../public/test-portable-experiences/p1/bin/game.js')
+const game1 = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
 const game1Blob = new Blob([game1])
 const game1Url = URL.createObjectURL(game1Blob)
 
-const game2 = require('raw-loader!../../../public/test-portable-experiences/p2/bin/game.js')
+const game2 = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
 const game2Blob = new Blob([game2])
 const game2Url = URL.createObjectURL(game2Blob)
 
@@ -245,8 +244,9 @@ export async function startPortableExperinceScene(unityInterface: UnityInterface
   const scene = new UnityPortableExperienceScene(getMockedExperience(cid, fileContent))
 
   const worker = loadParcelScene(scene, undefined, true)
+  worker['system'].then((system) => system.setLogging({ logConsole: true }))
 
-  await ensureUiApis(worker)
+  //await ensureUiApis(worker)
 
   unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
 }
