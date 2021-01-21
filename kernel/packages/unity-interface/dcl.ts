@@ -24,7 +24,8 @@ import {
   enableParcelSceneLoading,
   getParcelSceneID,
   loadParcelScene,
-  stopParcelSceneWorker
+  stopParcelSceneWorker,
+  stopPortableExperienceWorker
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
@@ -184,6 +185,11 @@ export async function startPortableExperinceScene(unityInterface: UnityInterface
   const scene = new UnityPortableExperienceScene(getMockedExperience(cid, fileContent))
   loadParcelScene(scene, undefined, true)
   unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+}
+
+export function stopPortableExperinceScene(cid: string) {
+  stopPortableExperienceWorker(cid)
+  unityInterface.UnloadScene(cid)
 }
 
 export function getMockedExperience(cid: string, fileContent: string) {

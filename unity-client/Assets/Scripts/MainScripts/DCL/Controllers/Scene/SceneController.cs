@@ -723,6 +723,12 @@ namespace DCL
             Environment.i.messaging.manager.ForceEnqueueToGlobal(MessagingBusType.INIT, queuedMessage);
 
             Environment.i.messaging.manager.RemoveController(sceneKey);
+
+            IWorldState worldState = Environment.i.world.state;
+            if (worldState.loadedScenes.ContainsKey(sceneKey))
+            {
+                worldState.loadedScenes[sceneKey].isPersistent = false;
+            }
         }
 
         public void UnloadParcelSceneExecute(string sceneId)
