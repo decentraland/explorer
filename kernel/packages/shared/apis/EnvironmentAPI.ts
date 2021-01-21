@@ -18,6 +18,7 @@ declare const window: any
 @registerAPI('EnvironmentAPI')
 export class EnvironmentAPI extends ExposableAPI {
   data!: EnvironmentData<any>
+
   /**
    * Returns the coordinates and the definition of a parcel
    */
