@@ -452,7 +452,7 @@ export abstract class SceneRuntime extends Script {
               methods: methods.map((name) => ({ name }))
             }
           } finally {
-            loadingModules[_moduleName].resolve()
+            loadingModules[_moduleName]?.resolve()
           }
         },
         callRpc: async (rpcHandle: string, methodName: string, args: any[]) => {
