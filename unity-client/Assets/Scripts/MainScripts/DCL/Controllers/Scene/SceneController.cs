@@ -729,10 +729,10 @@ namespace DCL
             IWorldState worldState = Environment.i.world.state;
             if (worldState.loadedScenes.ContainsKey(sceneKey))
             {
-                GlobalScene sceneToUnload = worldState.loadedScenes[sceneKey] as GlobalScene;
+                ParcelScene sceneToUnload = worldState.loadedScenes[sceneKey];
                 sceneToUnload.isPersistent = false;
 
-                if (sceneToUnload.isPortableExperience)
+                if (sceneToUnload is GlobalScene && ((GlobalScene)sceneToUnload).isPortableExperience)
                     OnNewPortableExperienceSceneRemoved?.Invoke(sceneKey);
             }
         }
