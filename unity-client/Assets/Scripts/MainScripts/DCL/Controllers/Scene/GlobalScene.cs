@@ -1,11 +1,14 @@
-﻿using DCL.Models;
+using DCL.Models;
 using UnityEngine;
 
 namespace DCL.Controllers
 {
     public class GlobalScene : ParcelScene
     {
-        protected override string prettyName => "ui-scene";
+        [System.NonSerialized]
+        public bool isPortableExperience = false;
+
+        protected override string prettyName => $"{sceneData.id}{ (isPortableExperience ? " (PE)" : "") }";
 
         public override bool IsInsideSceneBoundaries(Vector3 worldPosition, float height = 0f)
         {

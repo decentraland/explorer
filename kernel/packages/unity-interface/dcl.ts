@@ -1,26 +1,43 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, NO_ASSET_BUNDLES, PREVIEW, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER } from 'config'
-import { aborted } from 'shared/loading/ReportFatalError'
 import {
-  loadingScenes,
-  setLoadingScreen,
-  teleportTriggered
-} from 'shared/loading/types'
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  NO_ASSET_BUNDLES,
+  PREVIEW,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER
+} from 'config'
+import { aborted } from 'shared/loading/ReportFatalError'
+import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
+import {
+  ContentMapping,
+  EnvironmentData,
+  ILand,
+  LoadableParcelScene,
+  LoadablePortableExperienceScene,
+  MappingsResponse,
+  SceneJsonData
+} from 'shared/types'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
   loadParcelScene,
-  stopParcelSceneWorker
+  stopParcelSceneWorker,
+  stopPortableExperienceWorker
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
 import { SceneWorker } from 'shared/world/SceneWorker'
 import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
 import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { UnityParcelScene } from './UnityParcelScene'
+import {
+  getSceneNameFromJsonData,
+  ILandToLoadableParcelScene,
+  ILandToLoadableParcelSceneUpdate
+} from 'shared/selectors'
+import { UnityParcelScene, UnityPortableExperienceScene } from './UnityParcelScene'
 
 import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
@@ -31,6 +48,7 @@ import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
+import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -66,6 +84,14 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
     TeleportController.stopTeleportAnimation()
   }
 }
+
+const pe1SourceRaw = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
+const pe1SourceBlob = new Blob([pe1SourceRaw])
+const pe1SourceUrl = URL.createObjectURL(pe1SourceBlob)
+
+const pe2SourceRaw = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
+const pe2SourceBlob = new Blob([pe2SourceRaw])
+const pe2SourceUrl = URL.createObjectURL(pe2SourceBlob)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -118,7 +144,10 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 
   if (!EDITOR) {
-    await startGlobalScene(unityInterface)
+    await startGlobalScene(unityInterface, 'dcl-gs-avatars', hudWorkerUrl)
+    // Temporal: Try to create several global scenes
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', pe1SourceUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', pe2SourceUrl)
   }
 
   return {
@@ -134,14 +163,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface) {
-  const sceneId = 'dcl-ui-scene'
-
+export async function startGlobalScene(unityInterface: UnityInterface, cid: string, fileContent: string) {
   const scene = new UnityScene({
-    sceneId,
-    name: 'ui',
+    sceneId: cid,
+    name: cid,
     baseUrl: location.origin,
-    main: hudWorkerUrl,
+    main: fileContent,
     useFPSThrottling: false,
     data: {},
     mappings: []
@@ -151,7 +178,78 @@ export async function startGlobalScene(unityInterface: UnityInterface) {
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl, isPortableExperience: false })
+}
+
+export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, fileContent: string) {
+  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, fileContent))
+  loadParcelScene(scene, undefined, true)
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl, isPortableExperience: true })
+}
+
+export function stopPortableExperinceScene(cid: string) {
+  stopPortableExperienceWorker(cid)
+  unityInterface.UnloadScene(cid)
+}
+
+export function getMockedExperience(cid: string, fileContent: string) {
+  // this is the mock
+  return getLoadablePortableExperience({
+    cid,
+    baseUrl: 'http://localhost/portable-experiences/content',
+    baseUrlBundles: 'MOCK',
+    mappings: [{ file: 'scene.json', hash: 'MOCK' }],
+
+    sceneJsonData: {
+      display: { title: 'Empty parcel' },
+      contact: { name: 'Decentraland' },
+      owner: '',
+      main: fileContent,
+      tags: [],
+      scene: { base: '0,0', parcels: [] },
+      policy: {},
+      communications: { commServerUrl: '' }
+    }
+  })
+}
+
+// TODO: move to a proper PE file
+export function getLoadablePortableExperience(data: {
+  cid: string
+  mappings: ContentMapping[]
+  sceneJsonData: SceneJsonData
+  baseUrl: string
+  baseUrlBundles: string
+}): EnvironmentData<LoadablePortableExperienceScene> {
+  const { cid, mappings, sceneJsonData, baseUrl, baseUrlBundles } = data
+
+  const sceneJsons = mappings.filter((land) => land.file === 'scene.json')
+  if (!sceneJsons.length) {
+    throw new Error('Invalid scene mapping: no scene.json')
+  }
+
+  return {
+    sceneId: cid,
+    baseUrl: baseUrl,
+    name: getSceneNameFromJsonData(sceneJsonData),
+    main: sceneJsonData.main,
+    useFPSThrottling: false,
+    mappings,
+    data: {
+      id: cid,
+      basePosition: parseParcelPosition(sceneJsonData.scene.base),
+      name: getSceneNameFromJsonData(sceneJsonData),
+      parcels:
+        (sceneJsonData &&
+          sceneJsonData.scene &&
+          sceneJsonData.scene.parcels &&
+          sceneJsonData.scene.parcels.map(parseParcelPosition)) ||
+        [],
+      baseUrl: baseUrl,
+      baseUrlBundles: baseUrlBundles,
+      contents: mappings
+    }
+  }
 }
 
 export async function startUnitySceneWorkers() {
