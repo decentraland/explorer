@@ -20,6 +20,7 @@ namespace DCL
         bool IsCharacterInsideScene(ParcelScene scene);
         Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
         Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
+        List<GlobalScene> GetActivePortableExperienceScenes();
     }
 
     public class WorldState : IWorldState
@@ -141,6 +142,25 @@ namespace DCL
             }
 
             return allLoadedParcelCoords;
+        }
+
+        public List<GlobalScene> GetActivePortableExperienceScenes()
+        {
+            List<GlobalScene> activePortableExperienceScenes = new List<GlobalScene>();
+
+            foreach (var globalSceneId in globalSceneIds)
+            {
+                if (loadedScenes.ContainsKey(globalSceneId))
+                {
+                    GlobalScene peScene = loadedScenes[globalSceneId] as GlobalScene;
+                    if (peScene.isPortableExperience)
+                    {
+                        activePortableExperienceScenes.Add(peScene);
+                    }
+                }
+            }
+
+            return activePortableExperienceScenes;
         }
     }
 }

@@ -39,7 +39,7 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
         userProfile = userProfileGO.AddComponent<UserProfileController>().ownUserProfile;
 
         controller = new TaskbarHUDController();
-        controller.Initialize(null, chatController, null);
+        controller.Initialize(null, chatController, null, null, null);
         view = controller.view;
 
         Assert.IsTrue(view != null, "Taskbar view is null?");

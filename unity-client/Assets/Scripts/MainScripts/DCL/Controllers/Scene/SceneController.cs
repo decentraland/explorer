@@ -51,6 +51,8 @@ namespace DCL
         event Action OnSortScenes;
         event Action<ParcelScene, string> OnOpenExternalUrlRequest;
         event Action<ParcelScene> OnNewSceneAdded;
+        event Action<GlobalScene> OnNewPortableExperienceSceneAdded;
+        event Action<string> OnNewPortableExperienceSceneRemoved;
         event SceneController.OnOpenNFTDialogDelegate OnOpenNFTDialogRequest;
     }
 
@@ -727,7 +729,11 @@ namespace DCL
             IWorldState worldState = Environment.i.world.state;
             if (worldState.loadedScenes.ContainsKey(sceneKey))
             {
-                worldState.loadedScenes[sceneKey].isPersistent = false;
+                GlobalScene sceneToUnload = worldState.loadedScenes[sceneKey] as GlobalScene;
+                sceneToUnload.isPersistent = false;
+
+                if (sceneToUnload.isPortableExperience)
+                    OnNewPortableExperienceSceneRemoved?.Invoke(sceneKey);
             }
         }
 
@@ -845,6 +851,7 @@ namespace DCL
             newScene.ownerController = this;
             newScene.unloadWithDistance = false;
             newScene.isPersistent = true;
+            newScene.isPortableExperience = globalScene.isPortableExperience;
 
             LoadParcelScenesMessage.UnityParcelScene data = new LoadParcelScenesMessage.UnityParcelScene
             {
@@ -857,6 +864,9 @@ namespace DCL
 
             worldState.loadedScenes.Add(newGlobalSceneId, newScene);
             OnNewSceneAdded?.Invoke(newScene);
+
+            if (newScene.isPortableExperience)
+                OnNewPortableExperienceSceneAdded?.Invoke(newScene);
 
             worldState.globalSceneIds.Add(newGlobalSceneId);
 
@@ -902,6 +912,8 @@ namespace DCL
         public event Action OnSortScenes;
         public event Action<ParcelScene, string> OnOpenExternalUrlRequest;
         public event Action<ParcelScene> OnNewSceneAdded;
+        public event Action<GlobalScene> OnNewPortableExperienceSceneAdded;
+        public event Action<string> OnNewPortableExperienceSceneRemoved;
 
         public delegate void OnOpenNFTDialogDelegate(string assetContractAddress, string tokenId, string comment);
 

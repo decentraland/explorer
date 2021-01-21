@@ -24,6 +24,7 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton settingsButton;
     [SerializeField] internal TaskbarButton exploreButton;
     [SerializeField] internal TaskbarButton builderInWorldButton;
+    [SerializeField] internal PortableExperienceTaskbarItem portableExperienceItem;
 
     [Header("More Button Config")]
     [SerializeField] internal TaskbarButton moreButton;
@@ -41,6 +42,8 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal TaskbarHUDController controller;
     internal bool isBarVisible = true;
+
+    private Dictionary<string, PortableExperienceTaskbarItem> activePortableExperiences = new Dictionary<string, PortableExperienceTaskbarItem>();
 
     public event System.Action OnChatToggleOn;
     public event System.Action OnChatToggleOff;
@@ -65,6 +68,12 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(settingsButton);
         taskbarButtonList.Add(exploreButton);
         taskbarButtonList.Add(moreButton);
+
+        foreach (var portableExperience in activePortableExperiences)
+        {
+            taskbarButtonList.Add(portableExperience.Value.mainButton);
+        }
+
         return taskbarButtonList;
     }
 
@@ -142,6 +151,17 @@ public class TaskbarHUDView : MonoBehaviour
             OnExploreToggleOff?.Invoke();
         else if (obj == moreButton)
             moreMenu.ShowMoreMenu(false);
+        else
+        {
+            foreach (var portableExperience in activePortableExperiences)
+            {
+                if (portableExperience.Value.mainButton == obj)
+                {
+                    portableExperience.Value.ShowPortableExperienceMenu(false);
+                    break;
+                }
+            }
+        }
 
         if (AllButtonsToggledOff())
         {
@@ -179,6 +199,17 @@ public class TaskbarHUDView : MonoBehaviour
             OnExploreToggleOn?.Invoke();
         else if (obj == moreButton)
             moreMenu.ShowMoreMenu(true);
+        else
+        {
+            foreach (var portableExperience in activePortableExperiences)
+            {
+                if (portableExperience.Value.mainButton == obj)
+                {
+                    portableExperience.Value.ShowPortableExperienceMenu(true);
+                    break;
+                }
+            }
+        }
 
         SelectButton(obj);
     }
@@ -252,19 +283,6 @@ public class TaskbarHUDView : MonoBehaviour
         gameObject.SetActive(visible);
     }
 
-    //private void Update()
-    //{
-    //    if (Input.GetKeyDown(KeyCode.Return))
-    //    {
-    //        controller.OnPressReturn();
-    //    }
-
-    //    if (Input.GetKeyDown(KeyCode.Escape))
-    //    {
-    //        controller.OnPressEsc();
-    //    }
-    //}
-
     private void OnDestroy()
     {
         if (chatHeadsGroup != null)
@@ -307,6 +325,33 @@ public class TaskbarHUDView : MonoBehaviour
         {
             moreButton.OnToggleOn -= OnWindowToggleOn;
             moreButton.OnToggleOff -= OnWindowToggleOff;
+        }
+    }
+
+    internal void AddPortableExperienceElement(string id, string name)
+    {
+        PortableExperienceTaskbarItem newPEItem = Instantiate(portableExperienceItem.gameObject, rightButtonsContainer.transform).GetComponent<PortableExperienceTaskbarItem>();
+        newPEItem.gameObject.name = $"PortableExperienceItem ({id})";
+        newPEItem.gameObject.transform.SetAsFirstSibling();
+        newPEItem.ConfigureItem(name);
+
+        newPEItem.mainButton.OnToggleOn += OnWindowToggleOn;
+        newPEItem.mainButton.OnToggleOff += OnWindowToggleOff;
+
+        activePortableExperiences.Add(id, newPEItem);
+    }
+
+    internal void RemovePortableExperienceElement(string id)
+    {
+        if (activePortableExperiences.ContainsKey(id))
+        {
+            PortableExperienceTaskbarItem peToRemove = activePortableExperiences[id];
+
+            peToRemove.mainButton.OnToggleOn -= OnWindowToggleOn;
+            peToRemove.mainButton.OnToggleOff -= OnWindowToggleOff;
+
+            activePortableExperiences.Remove(id);
+            Destroy(peToRemove.gameObject);
         }
     }
 }

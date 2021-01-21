@@ -7,6 +7,7 @@ using DCL.SettingsPanelHUD;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DCL.Controllers;
 
 public class TaskbarHUDController : IHUD
 {
@@ -31,6 +32,8 @@ public class TaskbarHUDController : IHUD
     private InputAction_Trigger toggleFriendsTrigger;
     private InputAction_Trigger closeWindowTrigger;
     private InputAction_Trigger toggleWorldChatTrigger;
+    private ISceneController sceneController;
+    private IWorldState worldState;
 
     public event System.Action OnAnyTaskbarButtonClicked;
 
@@ -39,12 +42,20 @@ public class TaskbarHUDController : IHUD
     public RectTransform socialTooltipReference { get => view.socialTooltipReference; }
     public TaskbarMoreMenu moreMenu { get => view.moreMenu; }
 
-    public void Initialize(IMouseCatcher mouseCatcher, IChatController chatController, IFriendsController friendsController)
+    public void Initialize(
+        IMouseCatcher mouseCatcher,
+        IChatController chatController,
+        IFriendsController friendsController,
+        ISceneController sceneController,
+        IWorldState worldState)
     {
         this.mouseCatcher = mouseCatcher;
         this.chatController = chatController;
 
         view = TaskbarHUDView.Create(this, chatController, friendsController);
+
+        this.sceneController = sceneController;
+        this.worldState = worldState;
 
         if (mouseCatcher != null)
         {
@@ -86,6 +97,13 @@ public class TaskbarHUDController : IHUD
         {
             chatController.OnAddMessage -= OnAddMessage;
             chatController.OnAddMessage += OnAddMessage;
+        }
+
+        this.sceneController.OnNewPortableExperienceSceneAdded += SceneController_OnNewPortableExperienceSceneAdded;
+        this.sceneController.OnNewPortableExperienceSceneRemoved += SceneController_OnNewPortableExperienceSceneRemoved;
+        foreach (GlobalScene portableExperienceToAdd in worldState.GetActivePortableExperienceScenes())
+        {
+            SceneController_OnNewPortableExperienceSceneAdded(portableExperienceToAdd);
         }
 
         view.leftWindowContainerAnimator.Show();
@@ -454,6 +472,12 @@ public class TaskbarHUDController : IHUD
 
         if (chatController != null)
             chatController.OnAddMessage -= OnAddMessage;
+
+        if (sceneController != null)
+        {
+            sceneController.OnNewPortableExperienceSceneAdded -= SceneController_OnNewPortableExperienceSceneAdded;
+            sceneController.OnNewPortableExperienceSceneRemoved -= SceneController_OnNewPortableExperienceSceneRemoved;
+        }
     }
 
     public void SetVisibility(bool visible)
@@ -544,5 +568,17 @@ public class TaskbarHUDController : IHUD
     {
         if (view != null && view.moreMenu != null)
             view.moreMenu.ShowTutorialButton(isActive);
+    }
+
+    private void SceneController_OnNewPortableExperienceSceneAdded(GlobalScene newPortableExperienceScene)
+    {
+        view.AddPortableExperienceElement(
+            newPortableExperienceScene.sceneData.id,
+            newPortableExperienceScene.sceneData.id);
+    }
+
+    private void SceneController_OnNewPortableExperienceSceneRemoved(string portableExperienceSceneIdToRemove)
+    {
+        view.RemovePortableExperienceElement(portableExperienceSceneIdToRemove);
     }
 }

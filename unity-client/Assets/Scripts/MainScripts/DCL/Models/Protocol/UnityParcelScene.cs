@@ -9,6 +9,7 @@ namespace DCL.Models
     {
         public string id;
         public string baseUrl;
+        public bool isPortableExperience;
     }
 
     [Serializable]

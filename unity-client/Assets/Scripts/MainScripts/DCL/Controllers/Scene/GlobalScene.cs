@@ -5,7 +5,10 @@ namespace DCL.Controllers
 {
     public class GlobalScene : ParcelScene
     {
-        protected override string prettyName => sceneData.id;
+        [System.NonSerialized]
+        public bool isPortableExperience = false;
+
+        protected override string prettyName => $"{sceneData.id}{ (isPortableExperience ? " (PE)" : "") }";
 
         public override bool IsInsideSceneBoundaries(Vector3 worldPosition, float height = 0f)
         {
