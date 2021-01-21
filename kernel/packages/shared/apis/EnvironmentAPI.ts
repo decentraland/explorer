@@ -34,7 +34,6 @@ export class EnvironmentAPI extends ExposableAPI {
   async isPreviewMode(): Promise<boolean> {
     return PREVIEW
   }
-
   /**
    * Returns the current connected realm
    */
