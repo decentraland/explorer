@@ -134,11 +134,14 @@ public class TaskbarHUDView : MonoBehaviour
         moreButton.OnToggleOff += OnWindowToggleOff;
 
         portableExperiencesDiv.SetActive(false);
+
+        AdjustRightButtonsLayoutWidth();
     }
 
     public void SetBuilderInWorldStatus(bool isActive)
     {
         builderInWorldButton.transform.parent.gameObject.SetActive(isActive);
+        AdjustRightButtonsLayoutWidth();
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -249,11 +252,13 @@ public class TaskbarHUDView : MonoBehaviour
     internal void OnAddSettingsWindow()
     {
         settingsButton.transform.parent.gameObject.SetActive(true);
+        AdjustRightButtonsLayoutWidth();
     }
 
     internal void OnAddExploreWindow()
     {
         exploreButton.transform.parent.gameObject.SetActive(true);
+        AdjustRightButtonsLayoutWidth();
     }
 
     internal void OnAddHelpAndSupportWindow()
@@ -345,6 +350,8 @@ public class TaskbarHUDView : MonoBehaviour
         newPEItem.mainButton.OnToggleOff += OnWindowToggleOff;
 
         activePortableExperiences.Add(id, newPEItem);
+
+        AdjustRightButtonsLayoutWidth();
     }
 
     internal void RemovePortableExperienceElement(string id)
@@ -362,5 +369,33 @@ public class TaskbarHUDView : MonoBehaviour
 
         if (activePortableExperiences.Count == 0)
             portableExperiencesDiv.SetActive(false);
+
+        AdjustRightButtonsLayoutWidth();
+    }
+
+    [ContextMenu("AdjustRightButtonsLayoutWidth")]
+    private void AdjustRightButtonsLayoutWidth()
+    {
+        float totalWidth = 0f;
+        int numActiveChild = 0;
+        RectTransform rightButtonsContainerRT = (RectTransform)rightButtonsContainer.transform;
+
+        for (int i = 0; i < rightButtonsContainerRT.childCount; i++)
+        {
+            RectTransform child = (RectTransform)rightButtonsContainerRT.GetChild(i);
+
+            if (!child.gameObject.activeSelf)
+                continue;
+
+            totalWidth += child.sizeDelta.x;
+            numActiveChild++;
+        }
+
+        totalWidth +=
+            ((numActiveChild - 1) * rightButtonsHorizontalLayout.spacing) +
+            rightButtonsHorizontalLayout.padding.left +
+            rightButtonsHorizontalLayout.padding.right;
+
+        ((RectTransform)rightButtonsContainer.transform).sizeDelta = new Vector2(totalWidth, ((RectTransform)rightButtonsContainer.transform).sizeDelta.y);
     }
 }
