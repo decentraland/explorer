@@ -94,6 +94,7 @@ public class TaskbarHUDView : MonoBehaviour
         ShowBar(true, true);
         chatButton.transform.parent.gameObject.SetActive(false);
         friendsButton.transform.parent.gameObject.SetActive(false);
+        builderInWorldButton.transform.parent.gameObject.SetActive(false);
         settingsButton.transform.parent.gameObject.SetActive(false);
         exploreButton.transform.parent.gameObject.SetActive(false);
         voiceChatButtonPlaceholder.SetActive(false);
@@ -137,7 +138,7 @@ public class TaskbarHUDView : MonoBehaviour
 
     public void SetBuilderInWorldStatus(bool isActive)
     {
-        builderInWorldButton.gameObject.SetActive(isActive);
+        builderInWorldButton.transform.parent.gameObject.SetActive(isActive);
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
