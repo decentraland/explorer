@@ -24,6 +24,7 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton settingsButton;
     [SerializeField] internal TaskbarButton exploreButton;
     [SerializeField] internal TaskbarButton builderInWorldButton;
+    [SerializeField] internal GameObject portableExperiencesDiv;
     [SerializeField] internal PortableExperienceTaskbarItem portableExperienceItem;
 
     [Header("More Button Config")]
@@ -130,6 +131,8 @@ public class TaskbarHUDView : MonoBehaviour
 
         moreButton.OnToggleOn += OnWindowToggleOn;
         moreButton.OnToggleOff += OnWindowToggleOff;
+
+        portableExperiencesDiv.SetActive(false);
     }
 
     public void SetBuilderInWorldStatus(bool isActive)
@@ -330,6 +333,8 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal void AddPortableExperienceElement(string id, string name)
     {
+        portableExperiencesDiv.SetActive(true);
+
         PortableExperienceTaskbarItem newPEItem = Instantiate(portableExperienceItem.gameObject, rightButtonsContainer.transform).GetComponent<PortableExperienceTaskbarItem>();
         newPEItem.gameObject.name = $"PortableExperienceItem ({id})";
         newPEItem.gameObject.transform.SetAsFirstSibling();
@@ -353,5 +358,8 @@ public class TaskbarHUDView : MonoBehaviour
             activePortableExperiences.Remove(id);
             Destroy(peToRemove.gameObject);
         }
+
+        if (activePortableExperiences.Count == 0)
+            portableExperiencesDiv.SetActive(false);
     }
 }

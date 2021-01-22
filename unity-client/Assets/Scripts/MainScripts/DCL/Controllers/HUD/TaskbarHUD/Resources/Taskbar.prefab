@@ -1408,6 +1408,7 @@ MonoBehaviour:
   settingsButton: {fileID: 4865086671617019908}
   exploreButton: {fileID: 5044388401507377088}
   builderInWorldButton: {fileID: 1673153149211633687}
+  portableExperiencesDiv: {fileID: 4243578044551497735}
   portableExperienceItem: {fileID: 7008230418994466216, guid: 5e5c6fb3a6d05c6449ad00f42ca5036b,
     type: 3}
   moreButton: {fileID: 2780953233977255692}
@@ -1928,7 +1929,7 @@ RectTransform:
   - {fileID: 3898283456663702060}
   - {fileID: 8976016362018339215}
   m_Father: {fileID: 1160326602607001640}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2748,6 +2749,80 @@ MonoBehaviour:
   animSpeedFactor: 1
   disableAfterFadeOut: 0
   visibleParam: visible
+--- !u!1 &4243578044551497735
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7082281845733648273}
+  - component: {fileID: 3847310092489302334}
+  - component: {fileID: 249582871452698588}
+  m_Layer: 5
+  m_Name: PortableExperiencesDiv
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &7082281845733648273
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4243578044551497735}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1160326602607001640}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 125, y: -28}
+  m_SizeDelta: {x: 2, y: 52}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &3847310092489302334
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4243578044551497735}
+  m_CullTransparentMesh: 0
+--- !u!114 &249582871452698588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4243578044551497735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: def84f78307ef4b6c9864416f7d1f3df, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4256099511228412579
 GameObject:
   m_ObjectHideFlags: 0
@@ -5460,7 +5535,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1160326602607001640}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6651,7 +6726,7 @@ RectTransform:
   - {fileID: 4753928800872772318}
   - {fileID: 1827413567902848586}
   m_Father: {fileID: 1160326602607001640}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6687,7 +6762,7 @@ RectTransform:
   m_Children:
   - {fileID: 5909646989787746867}
   m_Father: {fileID: 1160326602607001640}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6833,6 +6908,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 7082281845733648273}
   - {fileID: 4809378515812608438}
   - {fileID: 3096134100126568981}
   - {fileID: 7631413277329663433}
