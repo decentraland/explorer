@@ -214,24 +214,29 @@ export class Quaternion {
    * @param pitch - defines the rotation around X axis
    * @param roll - defines the rotation around Z axis
    * @param result - defines the target quaternion
+   *
+   * Implemented unity-based calculations from: https://stackoverflow.com/a/56055813
    */
   public static RotationYawPitchRollToRef(yaw: number, pitch: number, roll: number, result: Quaternion): void {
-    let halfRoll = roll * 0.5
-    let halfPitch = pitch * 0.5
-    let halfYaw = yaw * 0.5
+    // console.log('pravs - RotationYawPitchRollToRef - from euler ' + (pitch * RAD2DEG) + ', ' + (yaw * RAD2DEG) + ', ' + (roll * RAD2DEG))
 
-    let c1 = Math.cos(halfPitch)
-    let c2 = Math.cos(halfYaw)
-    let c3 = Math.cos(halfRoll)
+    let halfPitch = pitch * 0.5 // BANK / X
+    let halfYaw = yaw * 0.5 // HEADING / Y
+    let halfRoll = roll * 0.5 // ATTITUDE / Z
 
-    let s1 = Math.sin(halfPitch)
-    let s2 = Math.sin(halfYaw)
-    let s3 = Math.sin(halfRoll)
+    const sinXOver2 = Math.sin(halfPitch)
+    const cosXOver2 = Math.cos(halfPitch)
+    const sinYOver2 = Math.sin(halfYaw)
+    const cosYOver2 = Math.cos(halfYaw)
+    const sinZOver2 = Math.sin(halfRoll)
+    const cosZOver2 = Math.cos(halfRoll)
 
-    result.x = s1 * c2 * c3 + c1 * s2 * s3
-    result.y = c1 * s2 * c3 - s1 * c2 * s3
-    result.z = c1 * c2 * s3 + s1 * s2 * c3
-    result.w = c1 * c2 * c3 - s1 * s2 * s3
+    result.x = cosYOver2 * sinXOver2 * cosZOver2 + sinYOver2 * cosXOver2 * sinZOver2
+    result.y = sinYOver2 * cosXOver2 * cosZOver2 - cosYOver2 * sinXOver2 * sinZOver2
+    result.z = cosYOver2 * cosXOver2 * sinZOver2 - sinYOver2 * sinXOver2 * cosZOver2
+    result.w = cosYOver2 * cosXOver2 * cosZOver2 + sinYOver2 * sinXOver2 * sinZOver2
+
+    // console.log('pravs - RotationYawPitchRollToRef - to quaternion euler x:' + result.x + ', y:' + result.y + ', z:' + result.z + ', w:' + result.w)
   }
 
   /**
@@ -541,20 +546,38 @@ export class Quaternion {
 
   /**
    * Gets the euler angle representation of the rotation.
-   * Implemented calculations from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-   * Standards used: http://www.euclideanspace.com/maths/standards/index.htm
+   * Implemented unity-based calculations from: https://stackoverflow.com/a/56055813
    */
   public get eulerAngles() {
     const out = new Vector3()
 
-    // roll / bank / x-axis rotation
-    out.x = RAD2DEG * Math.atan2(2 * (this.x * this.w - this.y * this.z) , 1 - 2 * (this.x * this.x - this.z * this.z))
+    // if the input quaternion is normalized, this is exactly one. Otherwise, this acts as a correction factor for the quaternion's not-normalizedness
+    const unit = (this.x * this.x) + (this.y * this.y) + (this.z * this.z) + (this.w * this.w)
 
-    // pitch / heading / y-axis rotation
-    out.y = RAD2DEG * Math.atan2(2 * (this.y * this.w - this.x * this.z) , 1 - 2 * (this.y * this.y - this.z * this.z))
+    // this will have a magnitude of 0.5 or greater if and only if this is a singularity case
+    const test = this.x * this.w - this.y * this.z
 
-    // yaw / attitude / z-axis rotation
-    out.z = RAD2DEG * Math.asin(2 * (this.x * this.y + this.z * this.w))
+    if (test > 0.4995 * unit) { // singularity at north pole
+      out.x = Math.PI / 2
+      out.y = 2 * Math.atan2(this.y, this.x)
+      out.z = 0
+    } else if (test < -0.4995 * unit) { // singularity at south pole
+      out.x = -Math.PI / 2
+      out.y = -2 * Math.atan2(this.y, this.x)
+      out.z = 0
+    } else { // no singularity - this is the majority of cases
+      out.x = Math.asin(2 * (this.w * this.x - this.y * this.z))
+      out.y = Math.atan2(2 * this.w * this.y + 2 * this.z * this.x, 1 - 2 * (this.x * this.x + this.y * this.y))
+      out.z = Math.atan2(2 * this.w * this.z + 2 * this.x * this.y, 1 - 2 * (this.z * this.z + this.x * this.x))
+    }
+    out.x *= RAD2DEG
+    out.y *= RAD2DEG
+    out.z *= RAD2DEG
+
+    // ensure the degree values are between 0 and 360
+    out.x %= 360
+    out.y %= 360
+    out.z %= 360
 
     return out
   }
