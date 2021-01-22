@@ -49,7 +49,9 @@ public class BaseCollection<T> : IBaseCollection<T>, IEquatable<IEnumerable<T>>
 
     public void RemoveAt(int index)
     {
+        T value = list[index];
         list.RemoveAt(index);
+        OnRemoved?.Invoke(value);
     }
 
     public T ElementAt(int index) => list[index];
