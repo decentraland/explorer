@@ -1,0 +1,21 @@
+{
+    "name": "DataStoreTests",
+    "references": [
+        "GUID:28f74c468a54948bfa9f625c5d428f56",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:27f7085cd8e2f924f9d97e882d032fed"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "NSubstitute.dll",
+        "System.Threading.Tasks.Extensions.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
