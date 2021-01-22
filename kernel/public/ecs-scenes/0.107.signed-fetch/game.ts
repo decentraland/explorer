@@ -1,4 +1,4 @@
-import { getQuests } from '@decentraland/QuestsController'
+import { signedFetch } from '@decentraland/SignedFetch'
 
 const cube = new Entity()
 
@@ -16,10 +16,10 @@ cube.addComponentOrReplace(text)
 engine.addEntity(cube)
 
 executeTask(async () => {
-  const questsResponse = (await getQuests())!
+  const questsResponse = await signedFetch('https://quests-api.decentraland.io/quests', { responseBodyType: 'json' })
   if (questsResponse.ok) {
-    text.value = `Found ${questsResponse.body.length} quests.${
-      questsResponse.body.length ? ' The first one is called: ' + questsResponse.body[0].name : ''
+    text.value = `Found ${questsResponse.json.length} quests.${
+      questsResponse.json.length ? ' The first one is called: ' + questsResponse.json[0].name : ''
     }`
   } else {
     text.value = 'Oops. Response was not OK!. It was: ' + JSON.stringify(questsResponse)

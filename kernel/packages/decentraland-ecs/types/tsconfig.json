@@ -26,7 +26,7 @@
       "@decentraland/EnvironmentAPI",
       "@decentraland/ParcelIdentity",
       "@decentraland/RestrictedActions",
-      "@decentraland/QuestsController"
+      "@decentraland/SignedFetch"
     ],
     "typeRoots": [
       "."
