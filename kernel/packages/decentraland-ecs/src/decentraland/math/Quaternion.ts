@@ -220,23 +220,23 @@ export class Quaternion {
   public static RotationYawPitchRollToRef(yaw: number, pitch: number, roll: number, result: Quaternion): void {
     // console.log('pravs - RotationYawPitchRollToRef - from euler ' + (pitch * RAD2DEG) + ', ' + (yaw * RAD2DEG) + ', ' + (roll * RAD2DEG))
 
-    let halfPitch = pitch * 0.5 // BANK / X
-    let halfYaw = yaw * 0.5 // HEADING / Y
-    let halfRoll = roll * 0.5 // ATTITUDE / Z
+    let halfPitch = pitch * 0.5
+    let halfYaw = yaw * 0.5
+    let halfRoll = roll * 0.5
 
-    const sinXOver2 = Math.sin(halfPitch)
-    const cosXOver2 = Math.cos(halfPitch)
-    const sinYOver2 = Math.sin(halfYaw)
-    const cosYOver2 = Math.cos(halfYaw)
-    const sinZOver2 = Math.sin(halfRoll)
-    const cosZOver2 = Math.cos(halfRoll)
+    const c1 = Math.cos(halfPitch)
+    const c2 = Math.cos(halfYaw)
+    const c3 = Math.cos(halfRoll)
+    const s1 = Math.sin(halfPitch)
+    const s2 = Math.sin(halfYaw)
+    const s3 = Math.sin(halfRoll)
 
-    result.x = cosYOver2 * sinXOver2 * cosZOver2 + sinYOver2 * cosXOver2 * sinZOver2
-    result.y = sinYOver2 * cosXOver2 * cosZOver2 - cosYOver2 * sinXOver2 * sinZOver2
-    result.z = cosYOver2 * cosXOver2 * sinZOver2 - sinYOver2 * sinXOver2 * cosZOver2
-    result.w = cosYOver2 * cosXOver2 * cosZOver2 + sinYOver2 * sinXOver2 * sinZOver2
+    result.x = c2 * s1 * c3 + s2 * c1 * s3
+    result.y = s2 * c1 * c3 - c2 * s1 * s3
+    result.z = c2 * c1 * s3 - s2 * s1 * c3
+    result.w = c2 * c1 * c3 + s2 * s1 * s3
 
-    // console.log('pravs - RotationYawPitchRollToRef - to quaternion euler x:' + result.x + ', y:' + result.y + ', z:' + result.z + ', w:' + result.w)
+    // console.log('pravs - RotationYawPitchRollToRef - to quaternion x:' + result.x + ', y:' + result.y + ', z:' + result.z + ', w:' + result.w)
   }
 
   /**
