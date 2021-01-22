@@ -543,6 +543,12 @@ namespace DCL.Interface
             public string value;
         }
 
+        [System.Serializable]
+        public class KillPortableExperiencePayload
+        {
+            public string portableExperienceId;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -622,6 +628,7 @@ namespace DCL.Interface
         private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
         private static StringPayload stringPayload = new StringPayload();
+        private static KillPortableExperiencePayload killPortableExperiencePayload = new KillPortableExperiencePayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -1159,6 +1166,12 @@ namespace DCL.Interface
         {
             closeUserAvatarPayload.isSignUpFlow = isSignUpFlow;
             SendMessage("CloseUserAvatar", closeUserAvatarPayload);
+        }
+
+        public static void KillPortableExperience(string portableExperienceId)
+        {
+            killPortableExperiencePayload.portableExperienceId = portableExperienceId;
+            SendMessage("KillPortableExperience", killPortableExperiencePayload);
         }
     }
 }

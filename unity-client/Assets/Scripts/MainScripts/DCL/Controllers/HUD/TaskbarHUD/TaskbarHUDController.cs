@@ -584,4 +584,9 @@ public class TaskbarHUDController : IHUD
     {
         view.RemovePortableExperienceElement(portableExperienceSceneIdToRemove);
     }
+
+    public void KillPortableExperience(string portableExperienceSceneIdToKill)
+    {
+        WebInterface.KillPortableExperience(portableExperienceSceneIdToKill);
+    }
 }

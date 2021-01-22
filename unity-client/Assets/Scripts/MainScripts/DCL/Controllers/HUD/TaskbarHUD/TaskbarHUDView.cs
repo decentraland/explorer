@@ -164,7 +164,7 @@ public class TaskbarHUDView : MonoBehaviour
             {
                 if (portableExperience.Value.mainButton == obj)
                 {
-                    portableExperience.Value.ShowPortableExperienceMenu(false);
+                    portableExperience.Value.ShowContextMenu(false);
                     break;
                 }
             }
@@ -212,7 +212,7 @@ public class TaskbarHUDView : MonoBehaviour
             {
                 if (portableExperience.Value.mainButton == obj)
                 {
-                    portableExperience.Value.ShowPortableExperienceMenu(true);
+                    portableExperience.Value.ShowContextMenu(true);
                     break;
                 }
             }
@@ -344,7 +344,7 @@ public class TaskbarHUDView : MonoBehaviour
         PortableExperienceTaskbarItem newPEItem = Instantiate(portableExperienceItem.gameObject, rightButtonsContainer.transform).GetComponent<PortableExperienceTaskbarItem>();
         newPEItem.gameObject.name = $"PortableExperienceItem ({id})";
         newPEItem.gameObject.transform.SetAsFirstSibling();
-        newPEItem.ConfigureItem(name);
+        newPEItem.ConfigureItem(id, name, controller);
 
         newPEItem.mainButton.OnToggleOn += OnWindowToggleOn;
         newPEItem.mainButton.OnToggleOff += OnWindowToggleOff;
