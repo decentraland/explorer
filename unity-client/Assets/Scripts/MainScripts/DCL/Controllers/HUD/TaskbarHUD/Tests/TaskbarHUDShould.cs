@@ -9,11 +9,10 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
     private TaskbarHUDController controller;
     private TaskbarHUDView view;
 
-    private FriendsController_Mock friendsController = new FriendsController_Mock();
-    private ChatController_Mock chatController = new ChatController_Mock();
+    private readonly FriendsController_Mock friendsController = new FriendsController_Mock();
+    private readonly ChatController_Mock chatController = new ChatController_Mock();
 
     private GameObject userProfileGO;
-    private UserProfile userProfile;
     private PrivateChatWindowHUDController privateChatController;
     private FriendsHUDController friendsHudController;
     private WorldChatWindowHUDController worldChatWindowController;
@@ -27,16 +26,9 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
     {
         yield return base.SetUp();
 
-        UserProfile ownProfile = UserProfile.GetOwnUserProfile();
         CommonScriptableObjects.rendererState.Set(true);
 
-        var ownProfileModel = new UserProfileModel();
-        ownProfileModel.userId = "my-user-id";
-        ownProfileModel.name = "NO_USER";
-        ownProfile.UpdateData(ownProfileModel, false);
-
         userProfileGO = new GameObject();
-        userProfile = userProfileGO.AddComponent<UserProfileController>().ownUserProfile;
 
         controller = new TaskbarHUDController();
         controller.Initialize(null, chatController, null, null, null);
