@@ -206,7 +206,6 @@ export function* doesProfileExist(userId: string): any {
 
 export function* handleFetchProfile(action: ProfileRequestAction): any {
   const userId = action.payload.userId
-  const email = ''
 
   const currentId = yield select(getCurrentUserId)
   let profile: any
@@ -214,7 +213,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   if (WORLD_EXPLORER) {
     try {
       if (action.payload.profileType === ProfileType.LOCAL && currentId !== userId) {
-        const peerProfile: Profile = yield requestLocalProfileToPeers(action.payload.userId)
+        const peerProfile: Profile = yield requestLocalProfileToPeers(userId)
         if (peerProfile) {
           profile = ensureServerFormat(peerProfile)
           profile.hasClaimedName = false // for now, comms profiles can't have claimed names
@@ -257,7 +256,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   if (currentId === userId) {
-    profile.email = email
+    profile.email = ''
   }
 
   yield populateFaceIfNecessary(profile, '256')
