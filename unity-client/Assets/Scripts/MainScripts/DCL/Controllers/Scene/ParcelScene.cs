@@ -35,6 +35,9 @@ namespace DCL.Controllers
         public bool isPersistent = false;
 
         [System.NonSerialized]
+        public string sceneName;
+
+        [System.NonSerialized]
         public bool unloadWithDistance = true;
 
         bool isEditModeActive = false;

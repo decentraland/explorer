@@ -8,6 +8,7 @@ namespace DCL.Models
     public struct CreateGlobalSceneMessage
     {
         public string id;
+        public string name;
         public string baseUrl;
         public bool isPortableExperience;
     }

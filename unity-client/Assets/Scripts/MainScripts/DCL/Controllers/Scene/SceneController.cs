@@ -851,6 +851,7 @@ namespace DCL
             newScene.ownerController = this;
             newScene.unloadWithDistance = false;
             newScene.isPersistent = true;
+            newScene.sceneName = globalScene.name;
             newScene.isPortableExperience = globalScene.isPortableExperience;
 
             LoadParcelScenesMessage.UnityParcelScene data = new LoadParcelScenesMessage.UnityParcelScene
