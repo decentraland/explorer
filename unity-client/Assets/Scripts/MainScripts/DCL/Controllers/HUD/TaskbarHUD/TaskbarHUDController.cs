@@ -99,11 +99,14 @@ public class TaskbarHUDController : IHUD
             chatController.OnAddMessage += OnAddMessage;
         }
 
-        this.sceneController.OnNewPortableExperienceSceneAdded += SceneController_OnNewPortableExperienceSceneAdded;
-        this.sceneController.OnNewPortableExperienceSceneRemoved += SceneController_OnNewPortableExperienceSceneRemoved;
-        foreach (GlobalScene portableExperienceToAdd in worldState.GetActivePortableExperienceScenes())
+        if (this.sceneController != null && this.worldState != null)
         {
-            SceneController_OnNewPortableExperienceSceneAdded(portableExperienceToAdd);
+            this.sceneController.OnNewPortableExperienceSceneAdded += SceneController_OnNewPortableExperienceSceneAdded;
+            this.sceneController.OnNewPortableExperienceSceneRemoved += SceneController_OnNewPortableExperienceSceneRemoved;
+            foreach (GlobalScene portableExperienceToAdd in worldState.GetActivePortableExperienceScenes())
+            {
+                SceneController_OnNewPortableExperienceSceneAdded(portableExperienceToAdd);
+            }
         }
 
         view.leftWindowContainerAnimator.Show();
