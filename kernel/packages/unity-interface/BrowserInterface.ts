@@ -21,7 +21,7 @@ import {
   WorldPosition,
   LoadableParcelScene
 } from 'shared/types'
-import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker, stopPortableExperienceWorker } from 'shared/world/parcelSceneManager'
 import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
 import { renderStateObservable } from 'shared/world/worldState'
@@ -50,7 +50,6 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
-import { stopPortableExperinceScene } from './dcl'
 
 declare const DCL: any
 
@@ -466,7 +465,8 @@ export class BrowserInterface {
   }
 
   public KillPortableExperience(data: { portableExperienceId: string }) {
-    stopPortableExperinceScene(data.portableExperienceId)
+    stopPortableExperienceWorker(data.portableExperienceId)
+    unityInterface.UnloadScene(data.portableExperienceId)
   }
 }
 
