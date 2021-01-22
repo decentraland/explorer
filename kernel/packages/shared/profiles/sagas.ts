@@ -192,7 +192,7 @@ function scheduleProfileUpdate(profile: Profile) {
 
 export function* doesProfileExist(userId: string): any {
   try {
-    const profiles: { avatars: object[] } = yield call(profileServerRequest, userId)
+    const profiles: { avatars: object[] } = yield profileServerRequest(userId)
 
     return profiles.avatars.length > 0
   } catch (error) {
@@ -204,21 +204,21 @@ export function* doesProfileExist(userId: string): any {
 }
 
 export function* handleFetchProfile(action: ProfileRequestAction): any {
-  const userId = action.payload.userId
+  const { userId, profileType } = action.payload
 
   const currentId = yield select(getCurrentUserId)
   let profile: any
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
-      if (action.payload.profileType === ProfileType.LOCAL && currentId !== userId) {
+      if (profileType === ProfileType.LOCAL && currentId !== userId) {
         const peerProfile: Profile = yield requestLocalProfileToPeers(userId)
         if (peerProfile) {
           profile = ensureServerFormat(peerProfile)
           profile.hasClaimedName = false // for now, comms profiles can't have claimed names
         }
       } else {
-        const profiles: { avatars: object[] } = yield call(profileServerRequest, userId)
+        const profiles: { avatars: object[] } = yield profileServerRequest(userId)
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]
@@ -323,8 +323,8 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
   }
 }
 
-export function* profileServerRequest(userId: string) {
-  const catalystUrl = yield select(getCatalystServer)
+export async function profileServerRequest(userId: string) {
+  const catalystUrl = getCatalystServer(globalThis.globalStore.getState())
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
   return client.fetchProfile(userId)
 }
