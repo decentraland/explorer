@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class BaseCollection<T> : IBaseCollection<T>, IEquatable<IEnumerable<T>>
 {
-    public event Action<IEnumerable<T>> OnChange;
+    public event Action<IEnumerable<T>> OnSet;
     public event Action<T> OnAdded;
     public event Action<T> OnRemoved;
 
@@ -29,7 +29,7 @@ public class BaseCollection<T> : IBaseCollection<T>, IEquatable<IEnumerable<T>>
         list.Clear();
         list.AddRange(elements);
 
-        OnChange?.Invoke(list);
+        OnSet?.Invoke(list);
     }
 
     public void Add(T element)

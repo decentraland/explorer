@@ -71,20 +71,22 @@ public class BaseCollectionShould
     public void CallEvents()
     {
         BaseCollection<int> collection = new BaseCollection<int>();
-        var changeSubscriber = Substitute.For<IDummyEventSubscriber<IEnumerable<int>>>();
+        var setSubscriber = Substitute.For<IDummyEventSubscriber<IEnumerable<int>>>();
         var addedSubscriber = Substitute.For<IDummyEventSubscriber<int>>();
         var removedSubscriber = Substitute.For<IDummyEventSubscriber<int>>();
 
-        collection.OnChange += changeSubscriber.React;
+        collection.OnSet += setSubscriber.React;
         collection.OnAdded += addedSubscriber.React;
         collection.OnRemoved += removedSubscriber.React;
 
-        collection.Set(new [] { 1, 2, 3 });
+        collection.Set(new [] { 1, 2, 3, 4 });
         collection.Add(4);
-        collection.Remove(1);
+        collection.Remove(2);
+        collection.RemoveAt(0);
 
-        changeSubscriber.Received().React(collection.list);
+        setSubscriber.Received().React(collection.list);
         addedSubscriber.Received().React(4);
+        removedSubscriber.Received().React(2);
         removedSubscriber.Received().React(1);
     }
 }
@@ -148,11 +150,11 @@ public class BaseDictionaryShould
     public void CallEvents()
     {
         BaseDictionary<int, string> dictionary = new BaseDictionary<int, string>();
-        var changeSubscriber = Substitute.For<IDummyEventSubscriber<IEnumerable<KeyValuePair<int, string>>>>();
+        var setSubscriber = Substitute.For<IDummyEventSubscriber<IEnumerable<KeyValuePair<int, string>>>>();
         var addedSubscriber = Substitute.For<IDummyEventSubscriber<int, string>>();
         var removedSubscriber = Substitute.For<IDummyEventSubscriber<int, string>>();
 
-        dictionary.OnChange += changeSubscriber.React;
+        dictionary.OnSet += setSubscriber.React;
         dictionary.OnAdded += addedSubscriber.React;
         dictionary.OnRemoved += removedSubscriber.React;
 
@@ -160,7 +162,7 @@ public class BaseDictionaryShould
         dictionary.Add(4, "4");
         dictionary.Remove(1);
 
-        changeSubscriber.Received().React(dictionary.dictionary);
+        setSubscriber.Received().React(dictionary.dictionary);
         addedSubscriber.Received().React(4, "4");
         removedSubscriber.Received().React(1, "1");
     }

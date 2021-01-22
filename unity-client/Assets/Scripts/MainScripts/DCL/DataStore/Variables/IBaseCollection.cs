@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public interface IBaseCollection<T>
 {
-    event Action<IEnumerable<T>> OnChange;
+    event Action<IEnumerable<T>> OnSet;
     event Action<T> OnAdded;
     event Action<T> OnRemoved;
 

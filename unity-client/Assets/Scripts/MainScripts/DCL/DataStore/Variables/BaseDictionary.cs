@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class BaseDictionary<TKey, TValue> : IBaseDictionary<TKey, TValue>
 {
-    public event Action<IEnumerable<KeyValuePair<TKey, TValue>>> OnChange;
+    public event Action<IEnumerable<KeyValuePair<TKey, TValue>>> OnSet;
     public event Action<TKey, TValue> OnAdded;
     public event Action<TKey, TValue> OnRemoved;
 
@@ -38,7 +38,7 @@ public class BaseDictionary<TKey, TValue> : IBaseDictionary<TKey, TValue>
         {
             dictionary.Add(key, value);
         }
-        OnChange?.Invoke(dictionary);
+        OnSet?.Invoke(dictionary);
     }
 
     public void Add(TKey key, TValue value)

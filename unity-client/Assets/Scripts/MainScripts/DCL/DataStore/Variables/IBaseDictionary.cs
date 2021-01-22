@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public interface IBaseDictionary<TKey, TValue>
 {
-    event Action<IEnumerable<KeyValuePair<TKey, TValue>>> OnChange;
+    event Action<IEnumerable<KeyValuePair<TKey, TValue>>> OnSet;
     event Action<TKey, TValue> OnAdded;
     event Action<TKey, TValue> OnRemoved;
 
