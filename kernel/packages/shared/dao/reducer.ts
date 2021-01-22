@@ -15,7 +15,6 @@ import {
   FETCH_CONTENT_SERVICE,
   UPDATE_CONTENT_SERVICE,
   COMMS_SERVICE,
-  FETCH_META_CONTENT_SERVICE,
   RESIZE_SERVICE,
   PIN_CATALYST,
   HOTSCENES_SERVICE
@@ -28,7 +27,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       candidatesFetched: false,
       profileServer: '',
       fetchContentServer: '',
-      fetchMetaContentServer: '',
+      catalystServer: '',
       updateContentServer: '',
       commsServer: '',
       resizeService: '',
@@ -122,7 +121,7 @@ function realmProperties(realm: Realm, configOverride: boolean = true): Partial<
   return {
     profileServer: FETCH_PROFILE_SERVICE && configOverride ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2',
-    fetchMetaContentServer: FETCH_META_CONTENT_SERVICE && configOverride ? FETCH_META_CONTENT_SERVICE : domain,
+    catalystServer: domain,
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     resizeService: RESIZE_SERVICE && configOverride ? RESIZE_SERVICE : domain + '/lambdas/images',

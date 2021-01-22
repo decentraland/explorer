@@ -45,7 +45,7 @@ export type DaoState = {
   candidatesFetched: boolean
   profileServer: string
   fetchContentServer: string
-  fetchMetaContentServer: string
+  catalystServer: string
   updateContentServer: string
   commsServer: string
   resizeService: string
