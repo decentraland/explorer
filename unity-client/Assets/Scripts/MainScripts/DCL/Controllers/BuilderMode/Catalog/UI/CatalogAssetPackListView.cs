@@ -35,6 +35,9 @@ public class CatalogAssetPackListView : ListView<SceneAssetPack>
             assetPackListView.SetActive(true);
         }
 
+        if (contentPanelTransform == null)
+            return;
+
         foreach (SceneAssetPack sceneAssetPack in contentList)
         {
             CatalogAssetPackAdapter adapter = Instantiate(prefabToUse, transformToUse).GetComponent<CatalogAssetPackAdapter>();

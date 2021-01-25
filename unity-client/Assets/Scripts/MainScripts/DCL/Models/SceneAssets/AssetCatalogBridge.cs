@@ -114,6 +114,11 @@ public class AssetCatalogBridge : MonoBehaviour
         }
     }
 
+    public static void ClearCatalog()
+    {
+        sceneObjectCatalog.Clear();
+    }
+
     public static void AddSceneObjectToCatalog(SceneObject sceneObject)
     {
         sceneObjectCatalog.Add(sceneObject.id, sceneObject);
@@ -133,6 +138,6 @@ public class AssetCatalogBridge : MonoBehaviour
             Debug.Log("add sceneObject: " + payload);
 
 
-        sceneAssetPackCatalogValue.Add(sceneAssetPack.id, sceneAssetPack);
+        sceneAssetPackCatalog.Add(sceneAssetPack.id, sceneAssetPack);
     }
 }

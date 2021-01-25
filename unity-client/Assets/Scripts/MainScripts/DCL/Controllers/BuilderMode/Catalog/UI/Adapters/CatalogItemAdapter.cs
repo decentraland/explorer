@@ -6,6 +6,7 @@ using DCL.Helpers;
 using System;
 using DCL;
 using UnityEngine.EventSystems;
+using DCL.Configuration;
 
 public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandler,IDragHandler
 {
@@ -14,6 +15,7 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
     public GameObject smartItemGO;
     public CanvasGroup canvasGroup;
     public Color offFavoriteColor, onFavoriteColor;
+    public GameObject lockedGO;
 
     public System.Action<SceneObject> OnSceneObjectClicked;
     public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
@@ -46,6 +48,11 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
             smartItemGO.SetActive(true);
 
         GetThumbnail();
+
+        lockedGO.gameObject.SetActive(false);
+
+        if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES && BuilderInWorldNFTController.i.IsNFTInUse(sceneObject.id))
+            lockedGO.gameObject.SetActive(true);
     }
 
     private void GetThumbnail()
@@ -57,6 +64,9 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
 
         if (sceneObject == null || string.IsNullOrEmpty(url))
             return;
+
+        if (string.Equals(sceneObject.asset_pack_id, BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+            url = sceneObject.thumbnail;
 
         string newLoadedThumbnailURL = url;
         var newLoadedThumbnailPromise =  new AssetPromise_Texture(url);
@@ -101,7 +111,8 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
 
     public void SceneObjectClicked()
     {
-        OnSceneObjectClicked?.Invoke(sceneObject);
+       if (!lockedGO.gameObject.activeSelf)
+            OnSceneObjectClicked?.Invoke(sceneObject);
     }
 
     public void SetThumbnail(Asset_Texture texture)

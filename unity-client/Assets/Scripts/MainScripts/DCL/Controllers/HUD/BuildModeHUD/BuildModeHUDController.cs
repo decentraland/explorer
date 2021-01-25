@@ -20,6 +20,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnResumeInput;
     public event Action OnTutorialAction;
     public event Action OnPublishAction;
+    public event Action OnLogoutAction;
 
     public event Action<SceneObject> OnSceneObjectSelected;
 
@@ -41,6 +42,7 @@ public class BuildModeHUDController : IHUD
 
     BuilderInWorldEntityListController buildModeEntityListController;
     EntityInformationController entityInformationController;
+    SceneObjectDropController sceneObjectDropController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
@@ -51,6 +53,9 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
+        sceneObjectDropController = new SceneObjectDropController();
+
+        buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
         buildModeEntityListController = view.entityListController;
         entityInformationController = view.entityInformationController;
 
@@ -58,7 +63,8 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
         entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
         entityInformationController.OnNameChange += (x) => OnEntityRename?.Invoke(x);
-
+        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
+        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -68,6 +74,7 @@ public class BuildModeHUDController : IHUD
 
         buildModeEntityListController.CloseList();
 
+        view.OnSceneObjectDrop += () => sceneObjectDropController.SceneObjectDropped();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
         view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
         view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
@@ -84,6 +91,7 @@ public class BuildModeHUDController : IHUD
         view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
         view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
 
+        sceneObjectDropController.OnSceneObjectDropped += SceneObjectSelected;
         view.OnSceneObjectSelected += SceneObjectSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();
@@ -93,6 +101,17 @@ public class BuildModeHUDController : IHUD
 
         view.OnTutorialAction += () => OnTutorialAction?.Invoke();
         view.OnPublishAction += () => OnPublishAction?.Invoke();
+        view.OnLogoutAction += () => OnLogoutAction?.Invoke();
+    }
+
+    public void PublishStart()
+    {
+        view.PublishStart();
+    }
+
+    public void PublishEnd(string message)
+    {
+        view.PublishEnd(message);
     }
 
     public void SetParcelScene(ParcelScene parcelScene)
@@ -100,8 +119,22 @@ public class BuildModeHUDController : IHUD
         view.sceneLimitInfoController.SetParcelScene(parcelScene);
     }
 
+    public void SetPublishBtnAvailability(bool isAvailable)
+    {
+        view.SetPublishBtnAvailability(isAvailable);
+    }
+
     #region Catalog
 
+    public void RefreshCatalogAssetPack()
+    {
+        view.RefreshCatalogAssetPack();
+    }
+
+    public void RefreshCatalogContent()
+    {
+        view.RefreshCatalogContent();
+    }
 
     void SceneObjectSelected(SceneObject sceneObject)
     {
@@ -154,12 +187,14 @@ public class BuildModeHUDController : IHUD
 
     public void ActivateFirstPersonModeUI()
     {
-        view.SetFirstPersonView();
+        if (view != null)
+            view.SetFirstPersonView();
     }
 
     public void ActivateGodModeUI()
     {
-        view.SetGodModeView();
+        if(view != null)
+            view.SetGodModeView();
     }
 
     #region EntityInformation
@@ -211,10 +246,12 @@ public class BuildModeHUDController : IHUD
         isControlsVisible = !isControlsVisible;
         view.SetVisibilityOfControls(isControlsVisible);
     }
+
     public void ChangeVisibilityOfUI()
     {
         SetVisibility(!IsVisible());
     }
+
     public void ChangeVisibilityOfExtraBtns()
     {
         areExtraButtonsVisible = !areExtraButtonsVisible;

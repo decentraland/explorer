@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [System.Serializable]
-public class SceneObject 
+public class SceneObject
 {
 
     [System.Serializable]
@@ -45,6 +45,16 @@ public class SceneObject
     public string GetComposedThumbnailUrl()
     {
         return baseUrl + thumbnail;
+    }
+
+    public void SetBaseURL(string newUrl)
+    {
+        baseUrl = newUrl;
+    }
+
+    public string GetBaseURL()
+    {
+        return baseUrl;
     }
 
     public bool IsSmartItem()
