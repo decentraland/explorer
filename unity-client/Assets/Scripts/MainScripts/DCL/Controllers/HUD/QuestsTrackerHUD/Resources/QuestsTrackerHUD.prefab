@@ -280,7 +280,8 @@ MonoBehaviour:
   questsContainer: {fileID: 2310616025352548241}
   questPrefab: {fileID: 4628898101681368935, guid: 15dc6d35c2943a148b64f5809a6f769f,
     type: 3}
-  quests: {fileID: 0}
+  pinnedQuests: {fileID: 11400000, guid: eb1364d57273eac4b89ab8f723f25703, type: 2}
+  questsJson: {fileID: 0}
 --- !u!1 &2310616025352548240
 GameObject:
   m_ObjectHideFlags: 0
