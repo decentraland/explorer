@@ -15,7 +15,7 @@ const results = {
   staticFromToRotation02: '(0.0, 0.7, 0.0, 0.7)',
   staticFromToRotation03: '(0.0, 0.0, 0.4, 0.9)',
   staticFromToRotation04: '(0.4, 0.0, 0.0, 0.9)',
-  staticFromToRotation05: '(0.7, 0.0, -0.7, -0.3)',
+  staticFromToRotation05: '(-0.7, 0.0, 0.7, 0.3)', // In Unity we get (0.7, 0.0, -0.7, -0.3), but both represent the same euler rotation (336.9, 275.2, 154.7)
   staticFromToRotation06: '(0.3, -0.2, 0.0, 0.9)',
   staticFromToRotation07: '(0.1, 0.4, -0.1, 0.9)',
   staticFromToRotation08: '(0.3, 0.0, -0.3, 0.9)',
