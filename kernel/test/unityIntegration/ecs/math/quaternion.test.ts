@@ -39,10 +39,7 @@ const results = {
   normalized02: '(0.0, 0.7, 0.0, 0.7)',
   normalized03: '(-0.7, 0.2, -0.2, -0.6)',
   normalized04: '(0.0, -0.1, 0.0, -1.0)',
-  setFromToRotation01: '(0.0, 0.0, 0.0, 1.0)',
-  setFromToRotation02: '(0.0, 0.7, 0.0, 0.7)',
-  setFromToRotation03: '(0.0, 0.0, 0.4, 0.9)',
-  setFromToRotation04: '(0.4, 0.0, 0.0, 0.9)'
+  setFromToRotation01: '(0.0, 0.0, 0.0, 1.0)'
 }
 
 const normalize = (v: string) => (v === '-0.0' ? '0.0' : v)

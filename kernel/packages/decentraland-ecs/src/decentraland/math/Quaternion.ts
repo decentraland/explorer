@@ -527,10 +527,11 @@ export class Quaternion {
    * @param up - defines the direction
    */
   public setFromToRotation(from: Vector3, to: Vector3, up: Vector3 = MathTmp.staticUp) {
-    MathTmp.tmpMatrix = Matrix.Zero() // clean up preallocated matrix
-    Matrix.LookAtLHToRef(from, to, up, MathTmp.tmpMatrix)
-    MathTmp.tmpMatrix.invert()
-    Quaternion.FromRotationMatrixToRef(MathTmp.tmpMatrix, this)
+    const result = Quaternion.FromToRotation(from, to)
+    this.x = result.x
+    this.y = result.y
+    this.z = result.z
+    this.w = result.w
   }
 
   /**
