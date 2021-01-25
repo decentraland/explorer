@@ -853,6 +853,7 @@ namespace DCL
             newScene.isPersistent = true;
             newScene.sceneName = globalScene.name;
             newScene.isPortableExperience = globalScene.isPortableExperience;
+            newScene.iconUrl = globalScene.icon;
 
             LoadParcelScenesMessage.UnityParcelScene data = new LoadParcelScenesMessage.UnityParcelScene
             {

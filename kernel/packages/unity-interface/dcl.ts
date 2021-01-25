@@ -87,10 +87,12 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
 const pe1SourceRaw = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
 const pe1SourceBlob = new Blob([pe1SourceRaw])
 const pe1SourceUrl = URL.createObjectURL(pe1SourceBlob)
+const pe1IconUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Video-Game-Controller-Icon-IDV-green.svg/768px-Video-Game-Controller-Icon-IDV-green.svg.png'
 
 const pe2SourceRaw = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
 const pe2SourceBlob = new Blob([pe2SourceRaw])
 const pe2SourceUrl = URL.createObjectURL(pe2SourceBlob)
+const pe2IconUrl = 'https://image.flaticon.com/icons/png/512/779/779227.png'
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -145,8 +147,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'PE Example 1', pe1SourceUrl)
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'PE Example 2', pe2SourceUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'PE Example 1', pe1SourceUrl, pe1IconUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'PE Example 2', pe2SourceUrl, pe2IconUrl)
   }
 
   return {
@@ -180,13 +182,19 @@ export async function startGlobalScene(unityInterface: UnityInterface, cid: stri
   unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: false })
 }
 
-export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string) {
-  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent))
+export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string, iconContent: string) {
+  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent, iconContent))
   loadParcelScene(scene, undefined, true)
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: true })
+  unityInterface.CreateUIScene({
+    id: getParcelSceneID(scene),
+    name: scene.data.name,
+    baseUrl: scene.data.baseUrl,
+    isPortableExperience: true,
+    icon: scene.data.data.icon
+  })
 }
 
-export function getMockedExperience(cid: string, title: string, fileContent: string) {
+export function getMockedExperience(cid: string, title: string, fileContent: string, iconContent: string) {
   // this is the mock
   return getLoadablePortableExperience({
     cid,
@@ -195,7 +203,7 @@ export function getMockedExperience(cid: string, title: string, fileContent: str
     mappings: [{ file: 'scene.json', hash: 'MOCK' }],
 
     sceneJsonData: {
-      display: { title: title },
+      display: { title: title, favicon: iconContent },
       contact: { name: 'Decentraland' },
       owner: '',
       main: fileContent,
@@ -241,7 +249,8 @@ export function getLoadablePortableExperience(data: {
         [],
       baseUrl: baseUrl,
       baseUrlBundles: baseUrlBundles,
-      contents: mappings
+      contents: mappings,
+      icon: sceneJsonData.display?.favicon
     }
   }
 }

@@ -577,7 +577,8 @@ public class TaskbarHUDController : IHUD
     {
         view.AddPortableExperienceElement(
             newPortableExperienceScene.sceneData.id,
-            newPortableExperienceScene.sceneName);
+            newPortableExperienceScene.sceneName,
+            newPortableExperienceScene.iconUrl);
     }
 
     private void SceneController_OnNewPortableExperienceSceneRemoved(string portableExperienceSceneIdToRemove)

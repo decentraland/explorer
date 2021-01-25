@@ -155,7 +155,7 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
   }
 
-  public CreateUIScene(data: { id: string; name: string; baseUrl: string, isPortableExperience: boolean }) {
+  public CreateUIScene(data: { id: string; name: string; baseUrl: string, isPortableExperience: boolean, icon?: string }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
      * position is fixed at 0,0 and they are universe-wide. An example of this

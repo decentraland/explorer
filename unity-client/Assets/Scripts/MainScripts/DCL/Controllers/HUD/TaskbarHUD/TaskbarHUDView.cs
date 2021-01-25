@@ -337,14 +337,14 @@ public class TaskbarHUDView : MonoBehaviour
         }
     }
 
-    internal void AddPortableExperienceElement(string id, string name)
+    internal void AddPortableExperienceElement(string id, string name, string iconUrl)
     {
         portableExperiencesDiv.SetActive(true);
 
         PortableExperienceTaskbarItem newPEItem = Instantiate(portableExperienceItem.gameObject, rightButtonsContainer.transform).GetComponent<PortableExperienceTaskbarItem>();
         newPEItem.gameObject.name = $"PortableExperienceItem ({id})";
         newPEItem.gameObject.transform.SetAsFirstSibling();
-        newPEItem.ConfigureItem(id, name, controller);
+        newPEItem.ConfigureItem(id, name, iconUrl, controller);
 
         newPEItem.mainButton.OnToggleOn += OnWindowToggleOn;
         newPEItem.mainButton.OnToggleOff += OnWindowToggleOff;

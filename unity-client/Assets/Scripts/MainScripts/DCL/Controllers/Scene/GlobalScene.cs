@@ -8,6 +8,9 @@ namespace DCL.Controllers
         [System.NonSerialized]
         public bool isPortableExperience = false;
 
+        [System.NonSerialized]
+        public string iconUrl;
+
         protected override string prettyName => $"{sceneData.id}{ (isPortableExperience ? " (PE)" : "") }";
 
         public override bool IsInsideSceneBoundaries(Vector3 worldPosition, float height = 0f)
