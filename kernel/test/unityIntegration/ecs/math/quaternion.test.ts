@@ -2,10 +2,10 @@ import { expect } from 'chai'
 import { Quaternion, Vector3 } from 'decentraland-ecs/src'
 
 const results = {
-  staticAngle01: '90',
-  staticAngle02: '14.8557',
+  staticAngle01: '89.99',
+  staticAngle02: '14.89',
   staticAngle03: '4.99997',
-  staticAngle04: '180',
+  staticAngle04: '179.9',
   staticEuler01: '(0.0, 0.0, 0.0, 1.0)',
   staticEuler02: '(0.5, -0.5, 0.5, 0.5)',
   staticEuler03: '(0.0, 0.9, -0.4, 0.0)',
