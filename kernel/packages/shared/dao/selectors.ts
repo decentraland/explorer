@@ -1,7 +1,6 @@
 import { RootDaoState } from './types'
 import { getServerConfigurations } from 'config'
 
-export const getFetchProfileServer = (store: RootDaoState) => store.dao.profileServer
 export const getUpdateProfileServer = (store: RootDaoState) => store.dao.updateContentServer
 
 export const getFetchContentServer = (store: RootDaoState) => store.dao.fetchContentServer

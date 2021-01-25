@@ -43,7 +43,6 @@ export type Realm = {
 export type DaoState = {
   initialized: boolean
   candidatesFetched: boolean
-  profileServer: string
   fetchContentServer: string
   catalystServer: string
   updateContentServer: string

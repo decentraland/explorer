@@ -11,7 +11,6 @@ import {
 } from './actions'
 import { DaoState, Candidate, Realm, ServerConnectionStatus } from './types'
 import {
-  FETCH_PROFILE_SERVICE,
   FETCH_CONTENT_SERVICE,
   UPDATE_CONTENT_SERVICE,
   COMMS_SERVICE,
@@ -25,7 +24,6 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
     return {
       initialized: false,
       candidatesFetched: false,
-      profileServer: '',
       fetchContentServer: '',
       catalystServer: '',
       updateContentServer: '',
@@ -119,7 +117,6 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
 function realmProperties(realm: Realm, configOverride: boolean = true): Partial<DaoState> {
   const domain = realm.domain
   return {
-    profileServer: FETCH_PROFILE_SERVICE && configOverride ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2',
     catalystServer: domain,
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
@@ -182,7 +179,6 @@ function ensureProfileDao(state: Partial<DaoState>, daoCandidates: Candidate[]) 
 
   return {
     ...state,
-    profileServer: FETCH_PROFILE_SERVICE ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     updateContentServer: UPDATE_CONTENT_SERVICE ? UPDATE_CONTENT_SERVICE : domain + '/content'
   }
 }

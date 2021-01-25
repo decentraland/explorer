@@ -93,7 +93,6 @@ export const USE_LOCAL_COMMS = location.search.includes('LOCAL_COMMS') || PREVIE
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
 export const COMMS_PROFILE_TIMEOUT = 10000
 
-export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
 export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
