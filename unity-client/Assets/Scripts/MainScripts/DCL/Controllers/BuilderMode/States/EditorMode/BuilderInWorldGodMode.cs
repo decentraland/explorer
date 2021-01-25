@@ -40,12 +40,12 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     public LayerMask groundLayer;
 
-    bool isPlacingNewObject = false,
-        mousePressed = false,
-        isDoingSquareMultiSelection = false,
-        isTypeOfBoundSelectionSelected = false,
-        isVoxelBoundMultiSelection = false,
-        squareMultiSelectionButtonPressed = false;
+    bool isPlacingNewObject = false;
+    bool mousePressed = false;
+    bool isDoingSquareMultiSelection = false;
+    bool isTypeOfBoundSelectionSelected = false;
+    bool isVoxelBoundMultiSelection = false;
+    bool squareMultiSelectionButtonPressed = false;
 
     bool wasGizmosActive = false;
     bool isDraggingStarted = false;
@@ -55,8 +55,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     Vector3 dragStartedPoint;
 
     const float RAYCAST_MAX_DISTANCE = 10000f;
-
-
 
     private void Start()
     {
@@ -195,17 +193,16 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         dragStartedPoint = GetFloorPointAtMouse(position);
 
-        if (squareMultiSelectionButtonPressed)
-        {
-            isDoingSquareMultiSelection = true;
-            isTypeOfBoundSelectionSelected = false;
-            isVoxelBoundMultiSelection = false;
-            lastMousePosition = position;
-            mousePressed = true;
-            freeCameraController.SetCameraCanMove(false);
-            buildModeController.SetOutlineCheckActive(false);
-        }
+        if (!squareMultiSelectionButtonPressed)
+            return;
 
+        isDoingSquareMultiSelection = true;
+        isTypeOfBoundSelectionSelected = false;
+        isVoxelBoundMultiSelection = false;
+        lastMousePosition = position;
+        mousePressed = true;
+        freeCameraController.SetCameraCanMove(false);
+        buildModeController.SetOutlineCheckActive(false);
     }
 
     void StarDraggingSelectedEntities()
