@@ -218,7 +218,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
           profile.hasClaimedName = false // for now, comms profiles can't have claimed names
         }
       } else {
-        const profiles: { avatars: object[] } = yield profileServerRequest(userId)
+        const profiles: { avatars: object[] } = yield call(profileServerRequest, userId)
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]

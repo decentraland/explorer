@@ -4,7 +4,6 @@ import * as matchers from 'redux-saga-test-plan/matchers'
 import { profileRequest, profileSuccess } from 'shared/profiles/actions'
 import { handleFetchProfile, profileServerRequest, fetchInventoryItemsByAddress } from 'shared/profiles/sagas'
 import { getCurrentUserId } from 'shared/session/selectors'
-import { getProfileDownloadServer } from 'shared/profiles/selectors'
 import { profileSaga } from '../../packages/shared/profiles/sagas'
 import { processServerProfile } from '../../packages/shared/profiles/transformations/processServerProfile'
 import { dynamic } from 'redux-saga-test-plan/providers'
@@ -25,7 +24,7 @@ const delayed = (result: any) =>
 const delayedProfile = delayed({ avatars: [profile] })
 
 describe('fetchProfile behavior', () => {
-  it('completes once for more than one request of same user', () => {
+  it.only('completes once for more than one request of same user', () => {
     return expectSaga(profileSaga)
       .put(profileSuccess('user|1', 'passport' as any, true))
       .not.put(profileSuccess('user|1', 'passport' as any, true))
@@ -34,7 +33,6 @@ describe('fetchProfile behavior', () => {
       .dispatch(profileRequest('user|1'))
       .provide([
         [select(isRealmInitialized), true],
-        [select(getProfileDownloadServer), 'server'],
         [call(profileServerRequest, 'user|1'), delayedProfile],
         [call(fetchInventoryItemsByAddress, 'user|1'), []],
         [select(getCurrentUserId), 'myid'],
@@ -55,7 +53,6 @@ describe('fetchProfile behavior', () => {
       .dispatch(profileRequest('user|2'))
       .provide([
         [select(isRealmInitialized), true],
-        [select(getProfileDownloadServer), 'server'],
         [call(profileServerRequest, 'user|1'), delayedProfile],
         [select(getCurrentUserId), 'myid'],
         [call(processServerProfile, 'user|1', profile), 'passport1'],
@@ -78,7 +75,6 @@ describe('fetchProfile behavior', () => {
       .provide([
         [select(isRealmInitialized), true],
         [select(getCurrentUserId), 'myid'],
-        [select(getProfileDownloadServer), 'server'],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
         [call(profileServerRequest, 'user|2'), delayed({ avatars: [profile2] })],
         [call(fetchInventoryItemsByAddress, 'user|1'), ['dcl://base-exclusive/wearable1/1']],
@@ -106,7 +102,6 @@ describe('fetchProfile behavior', () => {
       .dispatch(inventorySuccess('user|1', ['dcl://base-exclusive/wearable1/1']))
       .provide([
         [select(getCurrentUserId), 'myid'],
-        [select(getProfileDownloadServer), 'server'],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
         [call(processServerProfile, 'user|1', profile1), 'passport1']
       ])
@@ -125,7 +120,6 @@ describe('fetchProfile behavior', () => {
       .dispatch(inventorySuccess('user|1', []))
       .provide([
         [select(getCurrentUserId), 'myid'],
-        [select(getProfileDownloadServer), 'server'],
         [select(getResizeService), 'http://fake/resizeurl'],
         [matchers.call.fn(fetch), dynamic(() => ({ ok: true }))],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
@@ -153,7 +147,6 @@ describe('fetchProfile behavior', () => {
       .dispatch(inventorySuccess('user|1', []))
       .provide([
         [select(getCurrentUserId), 'myid'],
-        [select(getProfileDownloadServer), 'server'],
         [select(getResizeService), 'http://fake/resizeurl'],
         [matchers.call.fn(fetch), dynamic(() => ({ ok: true }))],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
@@ -181,7 +174,6 @@ describe('fetchProfile behavior', () => {
       .dispatch(inventorySuccess('user|1', []))
       .provide([
         [select(getCurrentUserId), 'myid'],
-        [select(getProfileDownloadServer), 'server'],
         [select(getResizeService), 'http://fake/resizeurl'],
         [matchers.call.fn(fetch), dynamic((call) => ({ ok: !call.args[0].startsWith('http://fake/resizeurl') }))],
         [call(profileServerRequest, 'user|1'), delayed({ avatars: [profile1] })],
