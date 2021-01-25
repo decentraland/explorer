@@ -12,14 +12,22 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private RectTransform sectionsContainer;
         [SerializeField] private GameObject sectionPrefab;
         [SerializeField] private Button closeButton;
+        [SerializeField] private Toggle pinQuestToggle;
+
+        private QuestModel quest;
 
         private void Awake()
         {
-            closeButton.onClick.AddListener(ClosePopup);
+            closeButton.onClick.AddListener(Close);
+
+            pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
+            DataStore.Quests.pinnedQuests.OnAdded += OnPinnedQuests;
+            DataStore.Quests.pinnedQuests.OnRemoved += OnUnpinnedQuest;
         }
 
-        public void Populate(QuestModel quest)
+        public void Populate(QuestModel newQuest)
         {
+            quest = newQuest;
             CleanUpQuestsList(); //TODO Reuse already instantiated quests
 
             questName.text = quest.name;
@@ -30,6 +38,36 @@ namespace DCL.Huds.QuestsPanel
                 CreateTask(quest.sections[i]);
             }
             Utils.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+            pinQuestToggle.SetIsOnWithoutNotify(DataStore.Quests.pinnedQuests.Contains(quest.id));
+        }
+
+        private void OnPinToggleValueChanged(bool isOn)
+        {
+            if (quest == null)
+                return;
+
+            if (isOn)
+            {
+                if (!DataStore.Quests.pinnedQuests.Contains(quest.id))
+                    DataStore.Quests.pinnedQuests.Add(quest.id);
+            }
+            else
+            {
+                if (DataStore.Quests.pinnedQuests.Contains(quest.id))
+                    DataStore.Quests.pinnedQuests.Remove(quest.id);
+            }
+        }
+
+        private void OnPinnedQuests(string questId)
+        {
+            if (quest != null && quest.id == questId)
+                pinQuestToggle.SetIsOnWithoutNotify(true);
+        }
+
+        private void OnUnpinnedQuest(string questId)
+        {
+            if (quest != null && quest.id == questId)
+                pinQuestToggle.SetIsOnWithoutNotify(false);
         }
 
         internal void SetThumbnail(string thumbnailURL)
@@ -49,7 +87,12 @@ namespace DCL.Huds.QuestsPanel
                 Destroy(sectionsContainer.GetChild(i).gameObject);
         }
 
-        internal void ClosePopup()
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Close()
         {
             gameObject.SetActive(false);
         }

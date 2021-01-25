@@ -1,21 +1,27 @@
 using DCL.Helpers;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Huds.QuestsPanel
 {
     public class QuestsPanelHUDView : MonoBehaviour
     {
-        private const string VIEW_PATH = "QuestsHUD";
+        private const string VIEW_PATH = "QuestsPanelHUD";
 
         [SerializeField] private RectTransform questsContainer;
         [SerializeField] private GameObject questPrefab;
         [SerializeField] private QuestsPanelPopup questPopup;
 
+        private string currentQuestInPopup = "";
+        private readonly Dictionary<string, QuestsPanelEntry> questEntries =  new Dictionary<string, QuestsPanelEntry>();
+
+        private bool layoutRebuildRequested = false;
+
         internal static QuestsPanelHUDView Create()
         {
             var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<QuestsPanelHUDView>();
 #if UNITY_EDITOR
-            view.gameObject.name = "_QuestHUDView";
+            view.gameObject.name = "_QuestHUDPanelView";
 #endif
             return view;
         }
@@ -25,33 +31,56 @@ namespace DCL.Huds.QuestsPanel
             questPopup.gameObject.SetActive(false);
         }
 
-        public void Populate(QuestModel[] quests)
+        public void AddOrUpdateQuest(string questId)
         {
-            CleanUpQuestsList(); //TODO Reuse already instantiated quests
-            for (int i = 0; i < quests.Length; i++)
+            if (!DataStore.Quests.quests.TryGetValue(questId, out QuestModel quest))
             {
-                CreateQuestEntry(quests[i]);
+                Debug.LogError($"Couldn't find quest with ID {questId} in DataStore");
+                return;
             }
-        }
 
-        internal void CreateQuestEntry(QuestModel quest)
-        {
-            var questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsPanelEntry>();
-            questEntry.OnReadMoreClicked += ShowQuestPopup;
-            questEntry.Populate(quest);
-        }
-
-        internal void ShowQuestPopup(QuestModel quest)
-        {
-            questPopup.Populate(quest);
-            questPopup.gameObject.SetActive(true);
-        }
-
-        internal void CleanUpQuestsList()
-        {
-            while (questsContainer.childCount > 0)
+            if(!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
             {
-                Destroy(questsContainer.GetChild(0).gameObject);
+                questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsPanelEntry>();
+                questEntry.OnReadMoreClicked += ShowQuestPopup;
+                questEntries.Add(questId, questEntry);
+            }
+
+            questEntry.Populate(quest);
+            layoutRebuildRequested = true;
+        }
+
+        public void RemoveQuest(string questId)
+        {
+            if(!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
+                return;
+
+            questEntries.Remove(questId);
+            Destroy(questEntry.gameObject);
+
+            if(currentQuestInPopup == questId)
+                questPopup.Close();
+        }
+
+        internal void ShowQuestPopup(string questId)
+        {
+            if (!DataStore.Quests.quests.TryGetValue(questId, out QuestModel quest))
+            {
+                Debug.Log($"Couldnt find quest with id {questId}");
+                return;
+            }
+
+            currentQuestInPopup = questId;
+            questPopup.Populate(quest);
+            questPopup.Show();
+        }
+
+        private void Update()
+        {
+            if (layoutRebuildRequested)
+            {
+                layoutRebuildRequested = false;
+                Utils.ForceRebuildLayoutImmediate(questsContainer);
             }
         }
     }

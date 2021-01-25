@@ -74,8 +74,8 @@ namespace DCL.Huds.QuestsTracker
         internal void SetExpandCollapseState(bool newIsExpanded)
         {
             isExpanded = newIsExpanded;
-            expandIcon.SetActive(isExpanded);
-            collapseIcon.SetActive(!isExpanded);
+            expandIcon.SetActive(!isExpanded);
+            collapseIcon.SetActive(isExpanded);
             tasksContainer.gameObject.SetActive(isExpanded);
             OnLayoutRebuildRequested?.Invoke();
         }

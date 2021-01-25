@@ -18,7 +18,12 @@ namespace DCL.Huds.QuestsTracker
 
         public static QuestsTrackerHUDView Create()
         {
-            return Instantiate(Resources.Load<GameObject>("QuestsTrackerHUD")).GetComponent<QuestsTrackerHUDView>();
+            QuestsTrackerHUDView view = Instantiate(Resources.Load<GameObject>("QuestsTrackerHUD")).GetComponent<QuestsTrackerHUDView>();
+
+#if UNITY_EDITOR
+            view.gameObject.name = "_QuestHUDTrackerView";
+#endif
+            return view;
         }
 
         private void Awake()
@@ -52,17 +57,21 @@ namespace DCL.Huds.QuestsTracker
 
         public void PinQuest(string questId)
         {
-            if (currentEntries.ContainsKey(questId))
+            if (currentEntries.TryGetValue(questId, out QuestsTrackerEntry entry))
+            {
+                entry.SetPinStatus(true);
                 RefreshLastUpdateTime(questId, true);
+            }
             else
                 AddQuest(questId, true);
         }
 
         public void UnpinQuest(string questId)
         {
-            if (!currentEntries.ContainsKey(questId))
+            if (!currentEntries.TryGetValue(questId, out QuestsTrackerEntry entry))
                 return;
 
+            entry.SetPinStatus(false);
             RefreshLastUpdateTime(questId, false);
         }
 
