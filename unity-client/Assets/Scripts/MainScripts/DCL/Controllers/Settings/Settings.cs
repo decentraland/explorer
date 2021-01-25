@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using DCL.Helpers;
 
 namespace DCL
 {
@@ -10,6 +11,7 @@ namespace DCL
 
         public event Action<SettingsData.QualitySettings> OnQualitySettingsChanged;
         public event Action<SettingsData.GeneralSettings> OnGeneralSettingsChanged;
+        public event Action OnResetAllSettings;
 
         public SettingsData.QualitySettings qualitySettings { get { return currentQualitySettings; } }
         public SettingsData.QualitySettingsData qualitySettingsPresets { get { return qualitySettingsPreset; } }
@@ -48,11 +50,11 @@ namespace DCL
         private void LoadQualitySettings()
         {
             bool isQualitySettingsSet = false;
-            if (PlayerPrefs.HasKey(QUALITY_SETTINGS_KEY))
+            if (PlayerPrefsUtils.HasKey(QUALITY_SETTINGS_KEY))
             {
                 try
                 {
-                    currentQualitySettings = JsonUtility.FromJson<SettingsData.QualitySettings>(PlayerPrefs.GetString(QUALITY_SETTINGS_KEY));
+                    currentQualitySettings = JsonUtility.FromJson<SettingsData.QualitySettings>(PlayerPrefsUtils.GetString(QUALITY_SETTINGS_KEY));
                     isQualitySettingsSet = true;
                 }
                 catch (Exception e)
@@ -70,12 +72,12 @@ namespace DCL
         {
             currentGeneralSettings = GetDefaultGeneralSettings();
 
-            if (PlayerPrefs.HasKey(GENERAL_SETTINGS_KEY))
+            if (PlayerPrefsUtils.HasKey(GENERAL_SETTINGS_KEY))
             {
                 try
                 {
                     object currentSetting = currentGeneralSettings;
-                    JsonUtility.FromJsonOverwrite(PlayerPrefs.GetString(GENERAL_SETTINGS_KEY), currentSetting);
+                    JsonUtility.FromJsonOverwrite(PlayerPrefsUtils.GetString(GENERAL_SETTINGS_KEY), currentSetting);
                     currentGeneralSettings = (SettingsData.GeneralSettings)currentSetting;
                 }
                 catch (Exception e)
@@ -93,6 +95,13 @@ namespace DCL
 
             ApplyQualitySettings(currentQualitySettings);
             ApplyGeneralSettings(currentGeneralSettings);
+        }
+
+        public void ResetAllSettings()
+        {
+            LoadDefaultSettings();
+            SaveSettings();
+            OnResetAllSettings?.Invoke();
         }
 
         private SettingsData.GeneralSettings GetDefaultGeneralSettings()
@@ -128,12 +137,18 @@ namespace DCL
 
         public void ApplyQualitySettings(SettingsData.QualitySettings settings)
         {
+            if (settings.Equals(currentQualitySettings))
+                return;
+
             currentQualitySettings = settings;
             OnQualitySettingsChanged?.Invoke(settings);
         }
 
         public void ApplyGeneralSettings(SettingsData.GeneralSettings settings)
         {
+            if (settings.Equals(currentGeneralSettings))
+                return;
+
             currentGeneralSettings = settings;
             OnGeneralSettingsChanged?.Invoke(settings);
             autosettingsEnabled.Set(settings.autoqualityOn);
@@ -141,9 +156,9 @@ namespace DCL
 
         public void SaveSettings()
         {
-            PlayerPrefs.SetString(GENERAL_SETTINGS_KEY, JsonUtility.ToJson(currentGeneralSettings));
-            PlayerPrefs.SetString(QUALITY_SETTINGS_KEY, JsonUtility.ToJson(currentQualitySettings));
-            PlayerPrefs.Save();
+            PlayerPrefsUtils.SetString(GENERAL_SETTINGS_KEY, JsonUtility.ToJson(currentGeneralSettings));
+            PlayerPrefsUtils.SetString(QUALITY_SETTINGS_KEY, JsonUtility.ToJson(currentQualitySettings));
+            PlayerPrefsUtils.Save();
         }
     }
 }

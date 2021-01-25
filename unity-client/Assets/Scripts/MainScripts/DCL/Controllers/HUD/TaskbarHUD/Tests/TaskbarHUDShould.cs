@@ -1,10 +1,10 @@
 using DCL.HelpAndSupportHUD;
-using DCL.SettingsHUD;
+using DCL.SettingsPanelHUD;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 
-public class TaskbarHUDShould : TestsBase
+public class TaskbarHUDShould : IntegrationTestSuite_Legacy
 {
     private TaskbarHUDController controller;
     private TaskbarHUDView view;
@@ -17,7 +17,7 @@ public class TaskbarHUDShould : TestsBase
     private PrivateChatWindowHUDController privateChatController;
     private FriendsHUDController friendsHudController;
     private WorldChatWindowHUDController worldChatWindowController;
-    private SettingsHUDController settingsHudController;
+    private SettingsPanelHUDController settingsPanelHudController;
     private HelpAndSupportHUDController helpAndSupportHUDController;
     private ExploreHUDController exploreHUDController;
 
@@ -54,7 +54,7 @@ public class TaskbarHUDShould : TestsBase
         privateChatController?.Dispose();
         worldChatWindowController?.Dispose();
         friendsHudController?.Dispose();
-        settingsHudController?.Dispose();
+        settingsPanelHudController?.Dispose();
         helpAndSupportHUDController?.Dispose();
         exploreHUDController?.Dispose();
 
@@ -91,10 +91,10 @@ public class TaskbarHUDShould : TestsBase
     [Test]
     public void AddSettingsWindowProperly()
     {
-        settingsHudController = new SettingsHUDController();
-        controller.AddSettingsWindow(settingsHudController);
+        settingsPanelHudController = new SettingsPanelHUDController();
+        controller.AddSettingsWindow(settingsPanelHudController);
 
-        Assert.IsTrue(settingsHudController.view.gameObject.activeSelf, "Settings window is disabled!");
+        Assert.IsTrue(settingsPanelHudController.view.gameObject.activeSelf, "Settings window is disabled!");
     }
 
     [Test]
@@ -160,7 +160,7 @@ public class TaskbarHUDShould : TestsBase
 
         var buttonList = view.GetButtonList();
 
-        Assert.AreEqual(6, buttonList.Count, "Chat head is missing when receiving a private message?");
+        Assert.AreEqual(7, buttonList.Count, "Chat head is missing when receiving a private message?");
 
         Assert.IsFalse(view.chatButton.toggledOn);
         Assert.IsTrue(buttonList[2] is ChatHeadButton);

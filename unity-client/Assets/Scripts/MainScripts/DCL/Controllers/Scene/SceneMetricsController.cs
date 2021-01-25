@@ -73,7 +73,8 @@ namespace DCL
             }
         }
 
-        [SerializeField] protected Model model;
+        [SerializeField]
+        protected Model model;
 
         protected Dictionary<DecentralandEntity, EntityMetrics> entitiesMetrics;
         private Dictionary<Mesh, int> uniqueMeshesRefCount;
@@ -143,6 +144,32 @@ namespace DCL
             }
 
             return cachedModel;
+        }
+
+        public bool IsInsideTheLimits()
+        {
+            Model limits = GetLimits();
+            Model usage = GetModel();
+
+            if (usage.triangles > limits.triangles)
+                return false;
+
+            if (usage.bodies > limits.bodies)
+                return false;
+
+            if (usage.entities > limits.entities)
+                return false;
+
+            if (usage.materials > limits.materials)
+                return false;
+
+            if (usage.textures > limits.textures)
+                return false;
+
+            if (usage.meshes > limits.meshes)
+                return false;
+
+            return true;
         }
 
         public void SendEvent()
@@ -285,7 +312,7 @@ namespace DCL
 
         void CalculateMaterials(DecentralandEntity entity, EntityMetrics entityMetrics)
         {
-            var originalMaterials = Environment.i.sceneBoundsChecker.GetOriginalMaterials(entity.meshesInfo);
+            var originalMaterials = Environment.i.world.sceneBoundsChecker.GetOriginalMaterials(entity.meshesInfo);
 
             int originalMaterialsCount = originalMaterials.Count;
 
@@ -294,7 +321,7 @@ namespace DCL
                 AddMaterial(entityMetrics, originalMaterials[i]);
 
                 if (VERBOSE)
-                    Debug.Log($"SceneMetrics: material (style: {Environment.i.sceneBoundsChecker.GetFeedbackStyle().GetType().FullName}) {originalMaterials[i].name} of entity {entity.entityId}");
+                    Debug.Log($"SceneMetrics: material (style: {Environment.i.world.sceneBoundsChecker.GetFeedbackStyle().GetType().FullName}) {originalMaterials[i].name} of entity {entity.entityId}");
             }
         }
 

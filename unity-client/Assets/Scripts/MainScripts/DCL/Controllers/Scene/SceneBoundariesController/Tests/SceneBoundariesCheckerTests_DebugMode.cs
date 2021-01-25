@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace SceneBoundariesCheckerTests
 {
-    public class SceneBoundariesCheckerTests_DebugMode : TestsBase
+    public class SceneBoundariesCheckerTests_DebugMode : IntegrationTestSuite_Legacy
     {
         protected override bool enableSceneIntegrityChecker => false;
         protected override bool justSceneSetUp => true;
@@ -19,13 +19,13 @@ namespace SceneBoundariesCheckerTests
         {
             yield return base.SetUp();
 
-            yield return SetUp_SceneController(debugMode: true);
             yield return SetUp_CharacterController();
 
-            Environment.i.sceneBoundsChecker.timeBetweenChecks = 0f;
+            Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
+            Environment.i.world.sceneBoundsChecker.timeBetweenChecks = 0f;
 
-            UnityEngine.Assertions.Assert.IsTrue(Environment.i.sceneBoundsChecker.enabled);
-            UnityEngine.Assertions.Assert.IsTrue(Environment.i.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker);
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.enabled);
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker);
         }
 
         [UnityTest]
@@ -54,7 +54,7 @@ namespace SceneBoundariesCheckerTests
 
             TestHelpers.RemoveSceneEntity(scene, entity.entityId);
 
-            Environment.i.parcelScenesCleaner.ForceCleanup();
+            Environment.i.platform.parcelScenesCleaner.ForceCleanup();
 
             yield return null;
 

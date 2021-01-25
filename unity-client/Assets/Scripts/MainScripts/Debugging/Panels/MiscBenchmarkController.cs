@@ -115,7 +115,9 @@ namespace DCL
 
         void Update()
         {
-            int messagesProcessedLastFrame = lastPendingMessages - Environment.i.messagingControllersManager.pendingMessagesCount;
+            MessagingControllersManager messagingManager = Environment.i.messaging.manager as MessagingControllersManager;
+
+            int messagesProcessedLastFrame = lastPendingMessages - messagingManager.pendingMessagesCount;
 
             if (messagesProcessedLastFrame > 0)
             {
@@ -124,7 +126,7 @@ namespace DCL
                 statsPanel.SetCellText(1, (int) Rows.MESSAGES_PER_SECOND_REAL, (mps / sampleCount).ToString(CultureInfo.InvariantCulture));
             }
 
-            lastPendingMessages = Environment.i.messagingControllersManager.pendingMessagesCount;
+            lastPendingMessages = messagingManager.pendingMessagesCount;
         }
 
 
@@ -139,7 +141,7 @@ namespace DCL
                 int materialCount = 0;
                 int meshesCount = 0;
 
-                var loadedScenes = Environment.i.worldState.loadedScenes;
+                var loadedScenes = Environment.i.world.state.loadedScenes;
 
                 foreach (var v in loadedScenes)
                 {
@@ -177,7 +179,9 @@ namespace DCL
                 Dictionary<string, int> pendingMessagesCount = new Dictionary<string, int>();
                 Dictionary<string, int> messagesReplaced = new Dictionary<string, int>();
 
-                using (var controllersIter = Environment.i.messagingControllersManager.messagingControllers.GetEnumerator())
+                MessagingControllersManager messagingManager = Environment.i.messaging.manager as MessagingControllersManager;
+
+                using (var controllersIter = messagingManager.messagingControllers.GetEnumerator())
                 {
                     while (controllersIter.MoveNext())
                     {

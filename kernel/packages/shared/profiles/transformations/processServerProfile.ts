@@ -30,11 +30,11 @@ export function noExclusiveMismatches(inventory: WearableId[]) {
 }
 
 export function calculateDisplayName(userId: string, profile: any): string {
-  if (profile.name && profile.hasClaimedName) {
+  if (profile && profile.name && profile.hasClaimedName) {
     return profile.name
   }
 
-  if (profile.unclaimedName) {
+  if (profile && profile.unclaimedName) {
     return `${filterInvalidNameCharacters(profile.unclaimedName)}#${userId.slice(-4)}`
   }
 
@@ -77,7 +77,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
 }
 
 /**
- * Flattens the object with a color field to avoid having two nested color fields when profile comess messed from server.
+ * Flattens the object with a color field to avoid having two nested color fields when profile comes messed from server.
  *
  * @param objectWithColor object to flatten if need be
  */

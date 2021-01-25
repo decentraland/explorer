@@ -5,11 +5,28 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class WorldState : ISceneHandler
+    public interface IWorldState : ISceneHandler
     {
-        public HashSet<string> readyScenes = new HashSet<string>();
-        public Dictionary<string, ParcelScene> loadedScenes = new Dictionary<string, ParcelScene>();
-        public List<ParcelScene> scenesSortedByDistance = new List<ParcelScene>();
+        HashSet<string> readyScenes { get; set; }
+        Dictionary<string, ParcelScene> loadedScenes { get; set; }
+        List<ParcelScene> scenesSortedByDistance { get; set; }
+        string globalSceneId { get; set; }
+        string currentSceneId { get; set; }
+        void Initialize();
+        string TryToGetSceneCoordsID(string id);
+        bool TryGetScene(string id, out ParcelScene scene);
+        Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null);
+        Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null);
+        bool IsCharacterInsideScene(ParcelScene scene);
+        Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
+        Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
+    }
+
+    public class WorldState : IWorldState
+    {
+        public HashSet<string> readyScenes { get; set; } = new HashSet<string>();
+        public Dictionary<string, ParcelScene> loadedScenes { get; set; } = new Dictionary<string, ParcelScene>();
+        public List<ParcelScene> scenesSortedByDistance { get; set; } = new List<ParcelScene>();
 
         public string globalSceneId { get; set; }
         public string currentSceneId { get; set; }
@@ -35,7 +52,7 @@ namespace DCL
         {
             scene = null;
 
-            if (!loadedScenes.ContainsKey(id))
+            if (string.IsNullOrEmpty(id) || !loadedScenes.ContainsKey(id))
                 return false;
 
             scene = loadedScenes[id];
@@ -75,6 +92,35 @@ namespace DCL
             Vector3 sceneOffset = sceneRealPosition - sceneFictionPosition;
             Vector3 solvedPosition = pos + sceneOffset;
             return solvedPosition;
+        }
+
+        public Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene = null)
+        {
+            return ConvertPointInSceneToUnityPosition(Vector3.zero, scene);
+        }
+
+        public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)
+        {
+            if (scene == null)
+            {
+                IWorldState worldState = Environment.i.world.state;
+                string sceneId = worldState.currentSceneId;
+
+                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
+                    scene = worldState.loadedScenes[worldState.currentSceneId];
+                else
+                    return pos;
+            }
+
+            return ConvertPointInSceneToUnityPosition(pos, new Vector2Int(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y));
+        }
+
+        public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint)
+        {
+            Vector3 scenePosition = Utils.GridToWorldPosition(scenePoint.x, scenePoint.y) + pos;
+            Vector3 worldPosition = PositionUtils.WorldToUnityPosition(scenePosition);
+
+            return worldPosition;
         }
 
         public bool IsCharacterInsideScene(ParcelScene scene)

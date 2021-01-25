@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class MessagingControllersManager
+    public class MessagingControllersManager : IMessagingControllersManager
     {
         public static bool VERBOSE = false;
 
@@ -17,7 +17,7 @@ namespace DCL
 
         public const string GLOBAL_MESSAGING_CONTROLLER = "global_messaging_controller";
 
-        public Dictionary<string, MessagingController> messagingControllers = new Dictionary<string, MessagingController>();
+        public Dictionary<string, MessagingController> messagingControllers { get; set; } = new Dictionary<string, MessagingController>();
         private string globalSceneId = null;
 
         private Coroutine mainCoroutine;
@@ -52,7 +52,7 @@ namespace DCL
             if (!string.IsNullOrEmpty(GLOBAL_MESSAGING_CONTROLLER))
                 messagingControllers.TryGetValue(GLOBAL_MESSAGING_CONTROLLER, out globalController);
 
-            Environment.i.sceneController.OnSortScenes += MarkBusesDirty;
+            Environment.i.world.sceneController.OnSortScenes += MarkBusesDirty;
 
             if (mainCoroutine == null)
             {
@@ -69,7 +69,7 @@ namespace DCL
 
         public void PopulateBusesToBeProcessed()
         {
-            WorldState worldState = Environment.i.worldState;
+            IWorldState worldState = Environment.i.world.state;
             string currentSceneId = worldState.currentSceneId;
             List<ParcelScene> scenesSortedByDistance = worldState.scenesSortedByDistance;
 
@@ -148,7 +148,7 @@ namespace DCL
             busesToProcessCount = busesToProcess.Count;
         }
 
-        public void Cleanup()
+        public void Dispose()
         {
             if (mainCoroutine != null)
             {
@@ -165,7 +165,7 @@ namespace DCL
                 }
             }
 
-            Environment.i.sceneController.OnSortScenes -= PopulateBusesToBeProcessed;
+            Environment.i.world.sceneController.OnSortScenes -= PopulateBusesToBeProcessed;
 
             messagingControllers.Clear();
         }
@@ -216,12 +216,12 @@ namespace DCL
             controller.Dispose();
         }
 
-        public void Enqueue(ParcelScene scene, MessagingBus.QueuedSceneMessage_Scene queuedMessage)
+        public void Enqueue(bool isUiBus, QueuedSceneMessage_Scene queuedMessage)
         {
-            messagingControllers[queuedMessage.sceneId].Enqueue(scene, queuedMessage, out MessagingBusType busId);
+            messagingControllers[queuedMessage.sceneId].Enqueue(isUiBus, queuedMessage, out MessagingBusType busId);
         }
 
-        public void ForceEnqueueToGlobal(MessagingBusType busId, MessagingBus.QueuedSceneMessage queuedMessage)
+        public void ForceEnqueueToGlobal(MessagingBusType busId, QueuedSceneMessage queuedMessage)
         {
             messagingControllers[GLOBAL_MESSAGING_CONTROLLER].ForceEnqueue(busId, queuedMessage);
         }
@@ -300,7 +300,7 @@ namespace DCL
             return false;
         }
 
-        public void RefreshControllerEnabledState(MessagingController controller)
+        private void RefreshControllerEnabledState(MessagingController controller)
         {
             if (controller == null || !controller.enabled)
                 return;

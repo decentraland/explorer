@@ -29,52 +29,15 @@ namespace DCL
         public const string OPEN_NFT_DIALOG = "OpenNFTDialog";
     }
 
-    public enum MessagingBusType
-    {
-        NONE,
-        UI,
-        INIT,
-        SYSTEM
-    }
-
     public enum QueueMode
     {
         Reliable,
         Lossy,
     }
 
-
     public class MessagingBus : IDisposable
     {
         public static bool VERBOSE = false;
-
-        public class QueuedSceneMessage
-        {
-            public enum Type
-            {
-                NONE,
-                SCENE_MESSAGE,
-                LOAD_PARCEL,
-                UPDATE_PARCEL,
-                TELEPORT,
-                UNLOAD_SCENES,
-                UNLOAD_PARCEL,
-                SCENE_STARTED
-            }
-
-            public string tag;
-            public Type type;
-            public string sceneId;
-            public string message;
-            public bool isUnreliable;
-            public string unreliableMessageKey;
-        }
-
-        public class QueuedSceneMessage_Scene : QueuedSceneMessage
-        {
-            public string method;
-            public object payload; //PB_SendSceneMessage
-        }
 
         public IMessageProcessHandler handler;
 
@@ -94,8 +57,9 @@ namespace DCL
         public string debugTag;
 
         public MessagingController owner;
+        private MessagingControllersManager manager;
 
-        Dictionary<string, LinkedListNode<MessagingBus.QueuedSceneMessage>> unreliableMessages = new Dictionary<string, LinkedListNode<MessagingBus.QueuedSceneMessage>>();
+        Dictionary<string, LinkedListNode<QueuedSceneMessage>> unreliableMessages = new Dictionary<string, LinkedListNode<QueuedSceneMessage>>();
         public int unreliableMessagesReplaced = 0;
 
         public bool enabled;
@@ -114,6 +78,7 @@ namespace DCL
             this.type = type;
             this.owner = owner;
             this.pendingMessagesCount = 0;
+            manager = Environment.i.messaging.manager as MessagingControllersManager;
         }
 
         public void Start()
@@ -201,13 +166,13 @@ namespace DCL
 
                 if (type == MessagingBusType.INIT)
                 {
-                    Environment.i.messagingControllersManager.pendingInitMessagesCount++;
+                    manager.pendingInitMessagesCount++;
                 }
 
                 if (owner != null)
                 {
                     owner.enabled = true;
-                    Environment.i.messagingControllersManager.MarkBusesDirty();
+                    manager.MarkBusesDirty();
                 }
             }
         }
@@ -310,14 +275,14 @@ namespace DCL
 
             if (type == MessagingBusType.INIT)
             {
-                Environment.i.messagingControllersManager.pendingInitMessagesCount--;
-                Environment.i.messagingControllersManager.processedInitMessagesCount++;
+                manager.pendingInitMessagesCount--;
+                manager.processedInitMessagesCount++;
             }
         }
 
         private LinkedListNode<QueuedSceneMessage> AddReliableMessage(QueuedSceneMessage message)
         {
-            Environment.i.messagingControllersManager.pendingMessagesCount++;
+            manager.pendingMessagesCount++;
             pendingMessagesCount++;
             return pendingMessages.AddLast(message);
         }
@@ -328,7 +293,7 @@ namespace DCL
             {
                 pendingMessages.RemoveFirst();
                 pendingMessagesCount--;
-                Environment.i.messagingControllersManager.pendingMessagesCount--;
+                manager.pendingMessagesCount--;
             }
         }
 
@@ -340,7 +305,7 @@ namespace DCL
 
         private void LogMessage(QueuedSceneMessage m, MessagingBus bus, bool logType = true)
         {
-            string finalTag = Environment.i.worldState.TryToGetSceneCoordsID(bus.debugTag);
+            string finalTag = Environment.i.world.state.TryToGetSceneCoordsID(bus.debugTag);
 
             if (logType)
             {
