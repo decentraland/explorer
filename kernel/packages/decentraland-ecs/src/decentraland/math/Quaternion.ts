@@ -218,8 +218,6 @@ export class Quaternion {
    * Implemented unity-based calculations from: https://stackoverflow.com/a/56055813
    */
   public static RotationYawPitchRollToRef(yaw: number, pitch: number, roll: number, result: Quaternion): void {
-    // console.log('pravs - RotationYawPitchRollToRef - from euler ' + (pitch * RAD2DEG) + ', ' + (yaw * RAD2DEG) + ', ' + (roll * RAD2DEG))
-
     let halfPitch = pitch * 0.5
     let halfYaw = yaw * 0.5
     let halfRoll = roll * 0.5
@@ -235,8 +233,6 @@ export class Quaternion {
     result.y = s2 * c1 * c3 - c2 * s1 * s3
     result.z = c2 * c1 * s3 - s2 * s1 * c3
     result.w = c2 * c1 * c3 + s2 * s1 * s3
-
-    // console.log('pravs - RotationYawPitchRollToRef - to quaternion x:' + result.x + ', y:' + result.y + ', z:' + result.z + ', w:' + result.w)
   }
 
   /**
