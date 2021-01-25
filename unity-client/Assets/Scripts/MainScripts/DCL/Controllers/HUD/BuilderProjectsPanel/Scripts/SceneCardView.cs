@@ -69,12 +69,12 @@ internal class SceneCardView : MonoBehaviour
 
     public void SetCoords(Vector2 coords)
     {
-        coordsText.text = coords.ToString();
+        coordsText.text = $"{coords.x},{coords.y}m";
     }
 
     public void SetSize(Vector2 size)
     {
-        sizeText.text = $"{size.ToString()}m";
+        sizeText.text = $"{size.x},{size.y}m";
     }
 
     public void SetThumbnail(Texture2D thumbnailTexture)

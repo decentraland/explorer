@@ -69,7 +69,7 @@ MonoBehaviour:
   contextMenuButton: {fileID: 4048026255157998503}
   roleOwnerGO: {fileID: 4216632035540313935}
   roleOperatorGO: {fileID: 6007334432933417947}
-  roleContributorGO: {fileID: 6557359877689629417}
+  roleContributorGO: {fileID: 7507047423982734982}
 --- !u!222 &1533866142872764801
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2352,12 +2352,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 3130099561394918876}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &6557359877689629417 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8102033898170093365, guid: fe7f93e6e01584a14ab2fc26f4a27388,
-    type: 3}
-  m_PrefabInstance: {fileID: 3130099561394918876}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8640074685801531106
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2542,15 +2536,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 13da09fd9630845cab9e22619f693345, type: 3}
---- !u!1 &4216632035540313935 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5576523245921903021, guid: 13da09fd9630845cab9e22619f693345,
-    type: 3}
-  m_PrefabInstance: {fileID: 8640074685801531106}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &7631092635760993552 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2161904243272426482, guid: 13da09fd9630845cab9e22619f693345,
+    type: 3}
+  m_PrefabInstance: {fileID: 8640074685801531106}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4216632035540313935 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5576523245921903021, guid: 13da09fd9630845cab9e22619f693345,
     type: 3}
   m_PrefabInstance: {fileID: 8640074685801531106}
   m_PrefabAsset: {fileID: 0}
