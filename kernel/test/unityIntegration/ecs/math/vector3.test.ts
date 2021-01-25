@@ -19,10 +19,6 @@ function vector3ToString(vec: Vector3) {
 }
 
 describe('ECS Vector3 tests', () => {
-  // console.log('pravs - A: ' + new Vector3(1, 1, 1))
-  // console.log('pravs - B: ' + Quaternion.Euler(45, 60, 90))
-  // console.log('pravs - C: ' + vector3ToString(new Vector3(1, 1, 1).rotate(Quaternion.Euler(45, 60, 90))))
-
   it('vector3.rotate', () => {
     expect(vector3ToString(new Vector3(1, 1, 1).rotate(Quaternion.Euler(45, 60, 90)))).to.eq(
       results.rotatedWithQuat01,
