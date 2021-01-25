@@ -5,7 +5,7 @@ using UnityEngine.UI;
 internal class SceneCardView : MonoBehaviour
 {
     public delegate void OnSceneIdEvent(string sceneId);
-    public delegate void OnContextMenuPressedEvent(string sceneId, bool isDeployedScene, bool isContributor);
+    public delegate void OnContextMenuPressedEvent(string sceneId, bool isDeployedScene, bool isOwnerOrOperator, bool isContributor);
 
     public static event OnSceneIdEvent OnJumpInPressed;
     public static event OnSceneIdEvent OnEditorPressed;
@@ -45,7 +45,13 @@ internal class SceneCardView : MonoBehaviour
     {
         jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneId));
         editorButton.onClick.AddListener(()=> OnEditorPressed?.Invoke(sceneId));
-        contextMenuButton.onClick.AddListener(()=> OnContextMenuPressed?.Invoke(sceneId, isSceneDeployed, userRole == UserRole.CONTRIBUTOR));
+
+        contextMenuButton.onClick.AddListener(
+            ()=>
+                OnContextMenuPressed?.Invoke(sceneId, isSceneDeployed,
+                    userRole == UserRole.OWNER || userRole == UserRole.OPERATOR,
+                    userRole == UserRole.CONTRIBUTOR)
+                );
     }
 
     public void Setup(string sceneId, bool isDeployed, string sceneName,
