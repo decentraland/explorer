@@ -12,6 +12,7 @@ public class BuildModeHUDView : MonoBehaviour
     public EntityInformationController entityInformationController;
     public ToolTipController toolTipController;
     public QuickBarView quickBarView;
+    public BuilderInWorldEntityListController entityListController;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
     public Button firstPersonChangeModeBtn,changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,closeEntityListBtn,catalogBtn,closeCatalogBtn;

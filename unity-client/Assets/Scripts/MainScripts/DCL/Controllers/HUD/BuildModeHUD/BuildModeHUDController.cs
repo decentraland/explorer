@@ -51,7 +51,7 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
-        buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
+        buildModeEntityListController = view.entityListController;
         entityInformationController = view.entityInformationController;
 
         entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);

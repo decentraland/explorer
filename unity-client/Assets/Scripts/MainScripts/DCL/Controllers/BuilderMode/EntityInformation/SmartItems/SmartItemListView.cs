@@ -93,4 +93,9 @@ public class SmartItemListView : MonoBehaviour
         parameterAdapter.SetParameter(parameter);
         childrenList.Add(parameterAdapter.gameObject);
     }
+
+    void OnParameterChange(SmartItemParameter smartItemParameter)
+    {
+
+    }
 }

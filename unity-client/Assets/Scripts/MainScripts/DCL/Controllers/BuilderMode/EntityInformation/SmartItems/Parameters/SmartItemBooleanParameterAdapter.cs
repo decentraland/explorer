@@ -20,7 +20,7 @@ public class SmartItemBooleanParameterAdapter : SmartItemUIParameterAdapter
         boolParameterToggle.gameObject.SetActive(true);
 
         bool defaultParameter = false;
-        bool.TryParse(parameter.defaultValue, out defaultParameter);
+        bool.TryParse(parameter.@default, out defaultParameter);
 
         boolParameterToggle.isOn = defaultParameter;
     }

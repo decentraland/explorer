@@ -28,6 +28,7 @@ public class SceneObject
     public List<string> tags;
 
     public string category;
+    public string titleToShow;
     public Dictionary<string, string> contents;
 
     public string created_at;

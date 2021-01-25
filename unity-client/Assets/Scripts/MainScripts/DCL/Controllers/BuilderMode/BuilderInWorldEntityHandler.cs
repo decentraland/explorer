@@ -327,7 +327,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         {
             HUDController.i.buildModeHud.ShowEntityInformation();
             HUDController.i.buildModeHud.EntityInformationSetEntity(entityEditable, sceneToEdit);
-            HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         }
 
 
@@ -411,7 +410,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
 
         NotifyEntityIsCreated(entity);
         EntityListChanged();
@@ -445,7 +443,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
 
         SetupEntityToEdit(newEntity, true);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
         return newEntity;
     }
@@ -555,7 +552,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         string idToRemove = entityToDelete.rootEntity.entityId;
         Destroy(entityToDelete);
         sceneToEdit.RemoveEntity(idToRemove, true);
-        HUDController.i.buildModeHud.UpdateSceneLimitInfo();
         EntityListChanged();
         builderInWorldBridge.RemoveEntityOnKernel(idToRemove, sceneToEdit);
     }

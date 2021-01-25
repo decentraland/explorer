@@ -37,14 +37,14 @@ public class SmartItemSliderParameter : SmartItemUIParameterAdapter
         sliderParameter.minValue = 0;
         sliderParameter.maxValue = amountOfSteps;
 
-        if(!string.IsNullOrEmpty(parameter.defaultValue))
+        if(!string.IsNullOrEmpty(parameter.@default))
         {
             float defaultValue = sliderParameter.minValue;
-            float.TryParse(parameter.defaultValue, out defaultValue);
+            float.TryParse((string) parameter.@default, out defaultValue);
 
-            int defaultValueConverted = (int) Mathf.Abs(defaultValue + minValue - maxValue / amountOfSteps);
+            int defaultValueConverted = (int) Mathf.Abs(defaultValue + minValue - Mathf.CeilToInt(maxValue / amountOfSteps));
 
-            sliderParameter.value = defaultValue;
+            sliderParameter.value = defaultValueConverted;
 
         }
         else

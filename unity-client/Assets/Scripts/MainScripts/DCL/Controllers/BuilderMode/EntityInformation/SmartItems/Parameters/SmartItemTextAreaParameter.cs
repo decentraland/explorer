@@ -20,6 +20,6 @@ public class SmartItemTextAreaParameter : SmartItemUIParameterAdapter
         textParameterInputField.gameObject.SetActive(true);
 
         textParameterInputField.contentType = TMP_InputField.ContentType.Standard;
-        textParameterInputField.text = parameter.defaultValue;
+        textParameterInputField.text = (string)  parameter.@default;
     }
 }

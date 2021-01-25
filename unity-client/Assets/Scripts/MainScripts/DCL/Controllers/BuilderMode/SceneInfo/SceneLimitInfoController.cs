@@ -10,17 +10,38 @@ using UnityEngine.UI;
 
 public class SceneLimitInfoController : MonoBehaviour
 {
+    [Header("Sprites")]
+    public Sprite openMenuSprite;
+    public Sprite closeMenuSprite;
+
     [Header("Design")]
     public Color lowFillColor, mediumFillColor, highFillColor;
 
     [Header("Scene references")]
 
-    public GameObject landHoverBtn;
-    public TextMeshProUGUI[] titleTxt;
+    public Image detailsToggleBtn;
+    public GameObject sceneLimitsBodyGO;
+    public TextMeshProUGUI titleTxt;
     public TextMeshProUGUI leftDescTxt, rightDescTxt;
     public Image[] fillsImgs;
 
     ParcelScene currentParcelScene;
+
+
+    int cont = 0;
+
+    private void Update()
+    {
+        if(cont >= 15)
+        {
+            cont = 0;
+            UpdateInfo();
+        }
+        else
+        {
+            cont++;
+        }
+    }
 
 
     public void SetParcelScene(ParcelScene parcelScene)
@@ -34,17 +55,27 @@ public class SceneLimitInfoController : MonoBehaviour
         return gameObject.activeSelf;
     }
 
+    public void ToggleSceneLimitsInfo()
+    {
+        if (!sceneLimitsBodyGO.activeSelf)
+            Enable();
+        else
+            Disable();
+    }
+
+
     public void Enable()
     {
-        gameObject.SetActive(true);
-        landHoverBtn.SetActive(false);
+        sceneLimitsBodyGO.SetActive(true);
+        detailsToggleBtn.sprite = openMenuSprite;
         UpdateInfo();
     }
 
     public void Disable()
     {
-        gameObject.SetActive(false);
-        landHoverBtn.SetActive(true);
+        sceneLimitsBodyGO.SetActive(false);
+
+        detailsToggleBtn.sprite = closeMenuSprite;
     }
 
     public void UpdateInfo()
@@ -53,13 +84,11 @@ public class SceneLimitInfoController : MonoBehaviour
         {
             int size = (int)Math.Sqrt(currentParcelScene.sceneData.parcels.Length);
             int meters = size * 16;
-            titleTxt[0].text = size + "x" + size + " LAND <color=#959696>" + meters + "x" + meters + "m";
-            titleTxt[1].text = size + "x" + size + " LAND";
+            titleTxt.text = size + "x" + size + " LAND <color=#959696>" + meters + "x" + meters + "m";
         }
         else
         {
-            titleTxt[0].text = BuilderInWorldSettings.CUSTOM_LAND;
-            titleTxt[1].text = BuilderInWorldSettings.CUSTOM_LAND;
+            titleTxt.text = BuilderInWorldSettings.CUSTOM_LAND;
         }
 
 
@@ -124,9 +153,9 @@ public class SceneLimitInfoController : MonoBehaviour
         if (percentTexture > result)
             result = percentTexture;
         if (percentmats > result)
-            result = percentBodies;
+            result = percentmats;
         if (percentMeshes > result)
-            result = percentBodies;
+            result = percentMeshes;
 
         return result;
     }

@@ -17,7 +17,7 @@ namespace DCL.Components
         public string id;
         public string label;
         public string type;
-        public string defaultValue;
+        public string @default;
         public string min;
         public string max;
         public string step;

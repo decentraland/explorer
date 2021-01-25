@@ -20,6 +20,6 @@ public class SmartItemFloatParameter : SmartItemUIParameterAdapter
         textParameterInputField.gameObject.SetActive(true);
         
         textParameterInputField.contentType = TMP_InputField.ContentType.DecimalNumber;
-        textParameterInputField.text = parameter.defaultValue;
+        textParameterInputField.text = (string) parameter.@default;
     }
 }

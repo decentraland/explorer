@@ -17,6 +17,8 @@ public class EntityInformationController : MonoBehaviour
 
     [Header("Prefab references")]
     public TextMeshProUGUI titleTxt;
+    public TextMeshProUGUI entityLimitsLeftTxt;
+    public TextMeshProUGUI entityLimitsRightTxt;
     public TMP_InputField nameIF;
     public RawImage entitytTumbailImg; 
     public AttributeXYZ positionAttribute;
@@ -121,8 +123,12 @@ public class EntityInformationController : MonoBehaviour
             smartItemListView.gameObject.SetActive(false);
 
         entitytTumbailImg.enabled = false;
-        GetThumbnail(entity.GetSceneObjectAssociated());
 
+        SceneObject entitySceneObject = entity.GetSceneObjectAssociated();
+
+        GetThumbnail(entitySceneObject);
+
+        UpdateLimitsInformation(entitySceneObject);
         UpdateEntityName(currentEntity);
         UpdateInfo(currentEntity);
     }
@@ -170,6 +176,28 @@ public class EntityInformationController : MonoBehaviour
             
         }
     }
+
+    void UpdateLimitsInformation(SceneObject sceneObject)
+    {
+        if (sceneObject == null)
+        {
+            entityLimitsLeftTxt.text = "";
+            entityLimitsRightTxt.text = "";
+            return;
+        }
+
+        string leftText = "ENTITIES: " + sceneObject.metrics.entities + "\n"+ 
+                          "BODIES: " + sceneObject.metrics.bodies + "\n" + 
+                          "TRIS: " + sceneObject.metrics.triangles;
+
+        string rightText = "TEXTURES: " + sceneObject.metrics.textures + "\n" +
+                           "MATERIALS: " + sceneObject.metrics.materials + "\n" +
+                           "GEOMETRIES: " + sceneObject.metrics.meshes;
+
+         entityLimitsLeftTxt.text = leftText;
+         entityLimitsRightTxt.text = rightText;
+    }
+
 
     private float RepeatWorking(float t, float length)
     {

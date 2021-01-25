@@ -161,4 +161,15 @@ public static partial class BuilderInWorldUtils
 
         return newList;
     }
+
+    public static void CopyRectTransform(RectTransform original, RectTransform rectTransformToCopy)
+    {
+        original.anchoredPosition = rectTransformToCopy.anchoredPosition;
+        original.anchorMax = rectTransformToCopy.anchorMax;
+        original.anchorMin = rectTransformToCopy.anchorMin;
+        original.offsetMax = rectTransformToCopy.offsetMax;
+        original.offsetMin = rectTransformToCopy.offsetMin;
+        original.sizeDelta = rectTransformToCopy.sizeDelta;
+        original.pivot = rectTransformToCopy.pivot;
+    }
 }
