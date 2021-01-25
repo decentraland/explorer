@@ -24,7 +24,7 @@ const delayed = (result: any) =>
 const delayedProfile = delayed({ avatars: [profile] })
 
 describe('fetchProfile behavior', () => {
-  it.only('completes once for more than one request of same user', () => {
+  it('completes once for more than one request of same user', () => {
     return expectSaga(profileSaga)
       .put(profileSuccess('user|1', 'passport' as any, true))
       .not.put(profileSuccess('user|1', 'passport' as any, true))
