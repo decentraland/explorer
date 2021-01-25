@@ -45,10 +45,9 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal TaskbarHUDController controller;
     internal bool isBarVisible = true;
-
-    private Dictionary<string, PortableExperienceTaskbarItem> activePortableExperienceItems = new Dictionary<string, PortableExperienceTaskbarItem>();
-    private Dictionary<string, PoolableObject> activePortableExperiencesPoolables = new Dictionary<string, PoolableObject>();
-    private Pool portableExperiencesPool = null;
+    internal Dictionary<string, PortableExperienceTaskbarItem> activePortableExperienceItems = new Dictionary<string, PortableExperienceTaskbarItem>();
+    internal Dictionary<string, PoolableObject> activePortableExperiencesPoolables = new Dictionary<string, PoolableObject>();
+    internal Pool portableExperiencesPool = null;
 
     public event System.Action OnChatToggleOn;
     public event System.Action OnChatToggleOff;
