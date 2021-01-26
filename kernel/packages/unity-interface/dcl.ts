@@ -48,6 +48,7 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
+import { getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -87,12 +88,12 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
 const pe1SourceRaw = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
 const pe1SourceBlob = new Blob([pe1SourceRaw])
 const pe1SourceUrl = URL.createObjectURL(pe1SourceBlob)
-const pe1IconUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Video-Game-Controller-Icon-IDV-green.svg/768px-Video-Game-Controller-Icon-IDV-green.svg.png'
+const pe1IconRelativeUrl = 'assets/icon.png'
 
 const pe2SourceRaw = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
 const pe2SourceBlob = new Blob([pe2SourceRaw])
 const pe2SourceUrl = URL.createObjectURL(pe2SourceBlob)
-const pe2IconUrl = 'https://image.flaticon.com/icons/png/512/779/779227.png'
+const pe2IconRelativeUrl = 'assets/icon.png'
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -147,8 +148,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'PE Example 1', pe1SourceUrl, pe1IconUrl)
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'PE Example 2', pe2SourceUrl, pe2IconUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'PE Example 1', pe1SourceUrl, pe1IconRelativeUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'PE Example 2', pe2SourceUrl, pe2IconRelativeUrl)
   }
 
   return {
@@ -179,31 +180,36 @@ export async function startGlobalScene(unityInterface: UnityInterface, cid: stri
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: false })
+  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: false, contents: [] })
 }
 
-export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string, iconContent: string) {
-  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent, iconContent))
+export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string, iconRelativeUrl: string) {
+  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent, iconRelativeUrl))
   loadParcelScene(scene, undefined, true)
+  scene.data.data.contents
   unityInterface.CreateUIScene({
     id: getParcelSceneID(scene),
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
     isPortableExperience: true,
-    icon: scene.data.data.icon
+    icon: scene.data.data.icon,
+    contents: scene.data.data.contents
   })
 }
 
-export function getMockedExperience(cid: string, title: string, fileContent: string, iconContent: string) {
+export function getMockedExperience(cid: string, title: string, fileContent: string, iconRelativeUrl: string) {
   // this is the mock
   return getLoadablePortableExperience({
     cid,
-    baseUrl: 'http://localhost/portable-experiences/content',
+    baseUrl: getFetchContentServer(globalThis.globalStore.getState()) + '/contents/',
     baseUrlBundles: 'MOCK',
-    mappings: [{ file: 'scene.json', hash: 'MOCK' }],
+    mappings: [
+      { file: 'scene.json', hash: 'MOCK' },
+      { file: 'assets/icon.png', hash: 'QmdcU2hPGvHjvfRvZRRfY1rX681PG1ESFAHTPiKNp5njZH' }
+    ],
 
     sceneJsonData: {
-      display: { title: title, favicon: iconContent },
+      display: { title: title, favicon: iconRelativeUrl },
       contact: { name: 'Decentraland' },
       owner: '',
       main: fileContent,

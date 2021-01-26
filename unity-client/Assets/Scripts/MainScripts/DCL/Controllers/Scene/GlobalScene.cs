@@ -27,8 +27,10 @@ namespace DCL.Controllers
         {
             this.sceneData = data;
 
-            contentProvider = new ContentProvider_Dummy();
+            contentProvider = new ContentProvider();
             contentProvider.baseUrl = data.baseUrl;
+            contentProvider.contents = data.contents;
+            contentProvider.BakeHashes();
         }
 
         protected override void SendMetricsEvent()

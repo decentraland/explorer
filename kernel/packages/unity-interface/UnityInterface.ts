@@ -17,7 +17,8 @@ import {
   BuilderConfiguration,
   Wearable,
   KernelConfigForRenderer,
-  RealmsInfoForRenderer
+  RealmsInfoForRenderer,
+  ContentMapping
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -155,7 +156,13 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
   }
 
-  public CreateUIScene(data: { id: string; name: string; baseUrl: string, isPortableExperience: boolean, icon?: string }) {
+  public CreateUIScene(data: {
+    id: string;
+    name: string;
+    baseUrl: string,
+    isPortableExperience: boolean,
+    icon?: string,
+    contents: Array<ContentMapping> }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
      * position is fixed at 0,0 and they are universe-wide. An example of this

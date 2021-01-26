@@ -12,6 +12,7 @@ namespace DCL.Models
         public string baseUrl;
         public bool isPortableExperience;
         public string icon;
+        public List<ContentServerUtils.MappingPair> contents;
     }
 
     [Serializable]

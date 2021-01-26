@@ -853,16 +853,19 @@ namespace DCL
             newScene.isPersistent = true;
             newScene.sceneName = globalScene.name;
             newScene.isPortableExperience = globalScene.isPortableExperience;
-            newScene.iconUrl = globalScene.icon;
 
             LoadParcelScenesMessage.UnityParcelScene data = new LoadParcelScenesMessage.UnityParcelScene
             {
                 id = newGlobalSceneId,
                 basePosition = new Vector2Int(0, 0),
-                baseUrl = globalScene.baseUrl
+                baseUrl = globalScene.baseUrl,
+                contents = globalScene.contents
             };
 
             newScene.SetData(data);
+
+            if (!string.IsNullOrEmpty(globalScene.icon))
+                newScene.iconUrl = newScene.contentProvider.GetContentsUrl(globalScene.icon);
 
             worldState.loadedScenes.Add(newGlobalSceneId, newScene);
             OnNewSceneAdded?.Invoke(newScene);
