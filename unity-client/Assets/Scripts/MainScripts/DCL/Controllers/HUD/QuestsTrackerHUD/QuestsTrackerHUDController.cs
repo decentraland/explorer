@@ -1,4 +1,6 @@
-﻿namespace DCL.Huds.QuestsTracker
+﻿using DCL.QuestsController;
+
+namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerHUDController : IHUD
     {

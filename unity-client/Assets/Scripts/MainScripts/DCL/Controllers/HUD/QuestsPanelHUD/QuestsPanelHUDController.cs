@@ -1,4 +1,5 @@
 ﻿using DCL.Helpers;
+using DCL.QuestsController;
 using System.Collections.Generic;
 
 namespace DCL.Huds.QuestsPanel
