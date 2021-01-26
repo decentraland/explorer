@@ -186,14 +186,13 @@ export async function startGlobalScene(unityInterface: UnityInterface, cid: stri
 export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string, iconRelativeUrl: string) {
   const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent, iconRelativeUrl))
   loadParcelScene(scene, undefined, true)
-  scene.data.data.contents
   unityInterface.CreateUIScene({
     id: getParcelSceneID(scene),
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
-    isPortableExperience: true,
+    contents: scene.data.data.contents,
     icon: scene.data.data.icon,
-    contents: scene.data.data.contents
+    isPortableExperience: true
   })
 }
 

@@ -160,9 +160,10 @@ export class UnityInterface {
     id: string;
     name: string;
     baseUrl: string,
-    isPortableExperience: boolean,
+    contents: Array<ContentMapping>,
     icon?: string,
-    contents: Array<ContentMapping> }) {
+    isPortableExperience: boolean,
+  }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
      * position is fixed at 0,0 and they are universe-wide. An example of this
