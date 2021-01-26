@@ -41,7 +41,10 @@ function startPreviewWatcher() {
     loadPreviewScene(wsScene)
       .then((scene) => {
         isSceneLoading = false
-        defaultScene.resolve(scene)
+        // TODO: Check why this is necessary
+        if (scene != undefined) {
+          defaultScene.resolve(scene)
+        }
       })
       .catch((err) => {
         isSceneLoading = false

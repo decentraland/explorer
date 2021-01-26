@@ -48,7 +48,6 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
-import { getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -179,7 +178,8 @@ export async function startGlobalScene(
     id: getParcelSceneID(scene),
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
-    isPortableExperience: false
+    isPortableExperience: false,
+    contents: []
   })
 }
 
