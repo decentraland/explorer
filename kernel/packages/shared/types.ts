@@ -142,6 +142,7 @@ export type LoadablePortableExperienceScene = {
   baseUrl: string
   baseUrlBundles: string
   land?: IPortableExperience
+  icon?: string
 }
 
 export const BillboardModes = {

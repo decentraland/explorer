@@ -858,10 +858,14 @@ namespace DCL
             {
                 id = newGlobalSceneId,
                 basePosition = new Vector2Int(0, 0),
-                baseUrl = globalScene.baseUrl
+                baseUrl = globalScene.baseUrl,
+                contents = globalScene.contents
             };
 
             newScene.SetData(data);
+
+            if (!string.IsNullOrEmpty(globalScene.icon))
+                newScene.iconUrl = newScene.contentProvider.GetContentsUrl(globalScene.icon);
 
             worldState.loadedScenes.Add(newGlobalSceneId, newScene);
             OnNewSceneAdded?.Invoke(newScene);

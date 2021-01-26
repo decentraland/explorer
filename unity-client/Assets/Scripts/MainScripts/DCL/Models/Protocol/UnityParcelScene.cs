@@ -10,6 +10,8 @@ namespace DCL.Models
         public string id;
         public string name;
         public string baseUrl;
+        public List<ContentServerUtils.MappingPair> contents;
+        public string icon;
         public bool isPortableExperience;
     }
 

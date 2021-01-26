@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,18 +11,22 @@ public class PortableExperienceContextMenu : MonoBehaviour
     private ShowHideAnimator menuAnimator;
 
     [SerializeField]
+    private TextMeshProUGUI menuTitle;
+
+    [SerializeField]
     private Button killButton;
 
     private TaskbarHUDController taskbarController;
     private string portableExperienceId;
 
-    internal void Initialize(string portableExperienceId, TaskbarHUDController taskbarController)
+    internal void ConfigureMenu(string portableExperienceId, string portableExperienceName, TaskbarHUDController taskbarController)
     {
         this.portableExperienceId = portableExperienceId;
         this.taskbarController = taskbarController;
 
         ShowMenu(false, true);
 
+        menuTitle.text = portableExperienceName;
         killButton.onClick.AddListener(KillPortableExperience);
     }
 

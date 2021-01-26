@@ -48,6 +48,7 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
+import { getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -189,6 +190,8 @@ export async function startPortableExperienceScene(unityInterface: UnityInterfac
     id: getParcelSceneID(scene),
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
+    contents: scene.data.data.contents,
+    icon: scene.data.data.icon,
     isPortableExperience: true
   })
 }
@@ -251,7 +254,8 @@ export function getLoadablePortableExperience(data: {
         [],
       baseUrl: baseUrl,
       baseUrlBundles: baseUrlBundles,
-      contents: mappings
+      contents: mappings,
+      icon: sceneJsonData.display?.favicon
     }
   }
 }

@@ -1,3 +1,4 @@
+using DCL;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,11 +28,25 @@ public class PortableExperienceTaskbarItem : MonoBehaviour
     internal void ConfigureItem(
         string portableExperienceId,
         string portableExperienceName,
+        string portableExperienceIconUrl,
         TaskbarHUDController taskbarController)
     {
         tooltipText.text = portableExperienceName;
         button.Initialize();
-        contextMenu.Initialize(portableExperienceId, taskbarController);
+        contextMenu.ConfigureMenu(portableExperienceId, portableExperienceName, taskbarController);
+
+        if (!string.IsNullOrEmpty(portableExperienceIconUrl))
+        {
+            ThumbnailsManager.GetThumbnail(portableExperienceIconUrl, OnIconReady);
+        }
+    }
+
+    private void OnIconReady(Asset_Texture iconAsset)
+    {
+        if (iconAsset != null)
+        {
+            icon.sprite = ThumbnailsManager.CreateSpriteFromTexture(iconAsset.texture);
+        }
     }
 
     internal void ShowContextMenu(bool visible)

@@ -3,6 +3,7 @@ using DCL.SettingsPanelHUD;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 public class TaskbarHUDShould : IntegrationTestSuite_Legacy
 {
@@ -210,5 +211,41 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
         Assert.IsTrue(view.moreMenu.collapseText.activeSelf, "The collapse text should be actived!");
         Assert.IsFalse(view.moreMenu.expandIcon.activeSelf, "The expand icon should not be actived!");
         Assert.IsFalse(view.moreMenu.expandText.activeSelf, "The expand text should not be actived!");
+    }
+
+    [Test]
+    public void AddPortableExperienceItemProperly()
+    {
+        // Arrange
+        string testPEId = "test-pe";
+
+        // Act
+        view.AddPortableExperienceElement(testPEId, "Test PE", "");
+
+        // Assert
+        Assert.IsTrue(view.portableExperiencesDiv.activeSelf, "The Portable Experiences Div should be actived!");
+        var newPE = view.rightButtonsContainer.GetComponentInChildren<PortableExperienceTaskbarItem>();
+        Assert.IsNotNull(newPE, "There should exists a PortableExperienceTaskbarItem as child!");
+        Assert.AreEqual(0, newPE.gameObject.transform.GetSiblingIndex(), "The sibling index for the new Portable Experience should be 0!");
+        Assert.IsTrue(view.activePortableExperienceItems.ContainsKey(testPEId), "The activePortableExperienceItems dictionary should contains the new PE added!");
+        Assert.IsTrue(view.activePortableExperiencesPoolables.ContainsKey(testPEId), "The activePortableExperiencesPoolables dictionary should contains the new PE added!");
+    }
+
+    [Test]
+    public void RemovePortableExperienceItemProperly()
+    {
+        // Arrange
+        string testPEId = "test-pe";
+
+        // Act
+        view.AddPortableExperienceElement(testPEId, "Test PE", "");
+        view.RemovePortableExperienceElement(testPEId);
+
+        // Assert
+        Assert.IsFalse(view.portableExperiencesDiv.activeSelf, "The Portable Experiences Div should not be actived!");
+        var newPE = view.rightButtonsContainer.GetComponentInChildren<PortableExperienceTaskbarItem>();
+        Assert.IsNull(newPE, "There should not exists a PortableExperienceTaskbarItem as child!");
+        Assert.IsFalse(view.activePortableExperienceItems.ContainsKey(testPEId), "The activePortableExperienceItems dictionary should not contains the new PE added!");
+        Assert.IsFalse(view.activePortableExperiencesPoolables.ContainsKey(testPEId), "The activePortableExperiencesPoolables dictionary should not contains the new PE added!");
     }
 }

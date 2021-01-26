@@ -1,3 +1,4 @@
+using DCL;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,6 +6,7 @@ using UnityEngine.UI;
 public class TaskbarHUDView : MonoBehaviour
 {
     const string VIEW_PATH = "Taskbar";
+    const string PORTABLE_EXPERIENCE_ITEMS_POOL = "PortableExperienceItems";
 
     [Header("Taskbar Animation")]
     [SerializeField] internal ShowHideAnimator taskbarAnimator;
@@ -43,8 +45,9 @@ public class TaskbarHUDView : MonoBehaviour
 
     internal TaskbarHUDController controller;
     internal bool isBarVisible = true;
-
-    private Dictionary<string, PortableExperienceTaskbarItem> activePortableExperiences = new Dictionary<string, PortableExperienceTaskbarItem>();
+    internal Dictionary<string, PortableExperienceTaskbarItem> activePortableExperienceItems = new Dictionary<string, PortableExperienceTaskbarItem>();
+    internal Dictionary<string, PoolableObject> activePortableExperiencesPoolables = new Dictionary<string, PoolableObject>();
+    internal Pool portableExperiencesPool = null;
 
     public event System.Action OnChatToggleOn;
     public event System.Action OnChatToggleOff;
@@ -70,7 +73,7 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(exploreButton);
         taskbarButtonList.Add(moreButton);
 
-        foreach (var portableExperience in activePortableExperiences)
+        foreach (var portableExperience in activePortableExperienceItems)
         {
             taskbarButtonList.Add(portableExperience.Value.mainButton);
         }
@@ -135,6 +138,14 @@ public class TaskbarHUDView : MonoBehaviour
 
         portableExperiencesDiv.SetActive(false);
 
+        portableExperiencesPool = PoolManager.i.AddPool(
+            PORTABLE_EXPERIENCE_ITEMS_POOL,
+            Instantiate(portableExperienceItem.gameObject),
+            maxPrewarmCount: 5,
+            isPersistent: true);
+
+        portableExperiencesPool.ForcePrewarm();
+
         AdjustRightButtonsLayoutWidth();
     }
 
@@ -160,7 +171,7 @@ public class TaskbarHUDView : MonoBehaviour
             moreMenu.ShowMoreMenu(false);
         else
         {
-            foreach (var portableExperience in activePortableExperiences)
+            foreach (var portableExperience in activePortableExperienceItems)
             {
                 if (portableExperience.Value.mainButton == obj)
                 {
@@ -208,7 +219,7 @@ public class TaskbarHUDView : MonoBehaviour
             moreMenu.ShowMoreMenu(true);
         else
         {
-            foreach (var portableExperience in activePortableExperiences)
+            foreach (var portableExperience in activePortableExperienceItems)
             {
                 if (portableExperience.Value.mainButton == obj)
                 {
@@ -337,37 +348,48 @@ public class TaskbarHUDView : MonoBehaviour
         }
     }
 
-    internal void AddPortableExperienceElement(string id, string name)
+    internal void AddPortableExperienceElement(string id, string name, string iconUrl)
     {
+        if (portableExperiencesPool == null)
+            return;
+
         portableExperiencesDiv.SetActive(true);
 
-        PortableExperienceTaskbarItem newPEItem = Instantiate(portableExperienceItem.gameObject, rightButtonsContainer.transform).GetComponent<PortableExperienceTaskbarItem>();
-        newPEItem.gameObject.name = $"PortableExperienceItem ({id})";
-        newPEItem.gameObject.transform.SetAsFirstSibling();
-        newPEItem.ConfigureItem(id, name, controller);
+        PoolableObject newPEPoolable = portableExperiencesPool.Get();
+        newPEPoolable.gameObject.name = $"PortableExperienceItem ({id})";
+        newPEPoolable.gameObject.transform.SetParent(rightButtonsContainer.transform);
+        newPEPoolable.gameObject.transform.localScale = Vector3.one;
+        newPEPoolable.gameObject.transform.SetAsFirstSibling();
 
+        PortableExperienceTaskbarItem newPEItem = newPEPoolable.gameObject.GetComponent<PortableExperienceTaskbarItem>();
+        newPEItem.ConfigureItem(id, name, iconUrl, controller);
         newPEItem.mainButton.OnToggleOn += OnWindowToggleOn;
         newPEItem.mainButton.OnToggleOff += OnWindowToggleOff;
 
-        activePortableExperiences.Add(id, newPEItem);
+        activePortableExperienceItems.Add(id, newPEItem);
+        activePortableExperiencesPoolables.Add(id, newPEPoolable);
 
         AdjustRightButtonsLayoutWidth();
     }
 
     internal void RemovePortableExperienceElement(string id)
     {
-        if (activePortableExperiences.ContainsKey(id))
+        if (portableExperiencesPool == null)
+            return;
+
+        if (activePortableExperienceItems.ContainsKey(id))
         {
-            PortableExperienceTaskbarItem peToRemove = activePortableExperiences[id];
+            PortableExperienceTaskbarItem peToRemove = activePortableExperienceItems[id];
 
             peToRemove.mainButton.OnToggleOn -= OnWindowToggleOn;
             peToRemove.mainButton.OnToggleOff -= OnWindowToggleOff;
 
-            activePortableExperiences.Remove(id);
-            Destroy(peToRemove.gameObject);
+            activePortableExperienceItems.Remove(id);
+            portableExperiencesPool.Release(activePortableExperiencesPoolables[id]);
+            activePortableExperiencesPoolables.Remove(id);
         }
 
-        if (activePortableExperiences.Count == 0)
+        if (activePortableExperienceItems.Count == 0)
             portableExperiencesDiv.SetActive(false);
 
         AdjustRightButtonsLayoutWidth();
