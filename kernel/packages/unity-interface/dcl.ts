@@ -84,14 +84,6 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
   }
 }
 
-const pe1SourceRaw = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
-const pe1SourceBlob = new Blob([pe1SourceRaw])
-const pe1SourceUrl = URL.createObjectURL(pe1SourceBlob)
-
-const pe2SourceRaw = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
-const pe2SourceBlob = new Blob([pe2SourceRaw])
-const pe2SourceUrl = URL.createObjectURL(pe2SourceBlob)
-
 ////////////////////////////////////////////////////////////////////////////////
 
 function debuggingDecorator(_gameInstance: GameInstance) {
@@ -145,8 +137,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'PE Example 1', pe1SourceUrl)
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'PE Example 2', pe2SourceUrl)
+    await startPortableExperienceScene(unityInterface, 'dcl-pe-example1', 'pe1')
+    // await startPortableExperienceScene(unityInterface, 'dcl-pe-example2', 'pe2')
   }
 
   return {
@@ -162,7 +154,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string) {
+export async function startGlobalScene(
+  unityInterface: UnityInterface,
+  cid: string,
+  title: string,
+  fileContent: string
+) {
   const scene = new UnityScene({
     sceneId: cid,
     name: title,
@@ -177,34 +174,47 @@ export async function startGlobalScene(unityInterface: UnityInterface, cid: stri
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: false })
-}
-
-export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string) {
-  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent))
-  loadParcelScene(scene, undefined, true)
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: true })
-}
-
-export function getMockedExperience(cid: string, title: string, fileContent: string) {
-  // this is the mock
-  return getLoadablePortableExperience({
-    cid,
-    baseUrl: 'http://localhost/portable-experiences/content',
-    baseUrlBundles: 'MOCK',
-    mappings: [{ file: 'scene.json', hash: 'MOCK' }],
-
-    sceneJsonData: {
-      display: { title: title },
-      contact: { name: 'Decentraland' },
-      owner: '',
-      main: fileContent,
-      tags: [],
-      scene: { base: '0,0', parcels: [] },
-      policy: {},
-      communications: { commServerUrl: '' }
-    }
+  unityInterface.CreateUIScene({
+    id: getParcelSceneID(scene),
+    name: scene.data.name,
+    baseUrl: scene.data.baseUrl,
+    isPortableExperience: false
   })
+}
+
+export async function startPortableExperienceScene(unityInterface: UnityInterface, cid: string, peId: string) {
+  const scene = new UnityPortableExperienceScene(await getMockedExperience(cid, peId))
+  loadParcelScene(scene, undefined, true)
+  unityInterface.CreateUIScene({
+    id: getParcelSceneID(scene),
+    name: scene.data.name,
+    baseUrl: scene.data.baseUrl,
+    isPortableExperience: true
+  })
+}
+
+export async function getMockedExperience(cid: string, peId: string) {
+  const baseUrl: string = 'https://static-pe.decentraland.io'
+  const sceneUrl: string = `${baseUrl}/${peId}/scene.json`
+  const mappingsUrl: string = `${baseUrl}/${peId}/mappings`
+
+  const result = await fetch(sceneUrl)
+
+  if (result.ok) {
+    const scene = (await result.json()) as SceneJsonData
+    const mappingsFetch = await fetch(mappingsUrl)
+    const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
+
+    return getLoadablePortableExperience({
+      cid,
+      baseUrl: 'http://localhost/portable-experiences/content',
+      baseUrlBundles: 'MOCK',
+      mappings: mappingsResponse.contents,
+      sceneJsonData: scene
+    })
+  } else {
+    throw new Error('Could not load scene.json')
+  }
 }
 
 // TODO: move to a proper PE file
@@ -336,8 +346,6 @@ export async function loadPreviewScene(ws?: string) {
     defaultLogger.info('finish...')
 
     return defaultScene
-  } else {
-    throw new Error('Could not load scene.json')
   }
 }
 
