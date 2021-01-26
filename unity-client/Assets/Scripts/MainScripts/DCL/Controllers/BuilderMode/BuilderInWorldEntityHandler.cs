@@ -46,6 +46,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     bool isMultiSelectionActive = false;
 
     float lastTransformReportTime;
+    float nextTimeToUpdateTransform;
 
     List<string> entityNameList = new List<string>();
 
@@ -119,7 +120,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if (selectedEntities.Count <= 0)
             return;
 
-        selectedEntities[0].transform.position = DCL.Environment.i.worldState.ConvertSceneToUnityPosition(position, sceneToEdit); 
+        selectedEntities[0].transform.position = DCL.Environment.i.world.state.ConvertSceneToUnityPosition(position, sceneToEdit); 
     }
 
     void UpdateEntityRotation(Vector3 rotation)
@@ -247,8 +248,8 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         selectedEntities.Remove(entity);
         currentActiveMode.EntityDeselected(entity);
         if (selectedEntities.Count <= 0 &&
-            HUDController.i.buildModeHud != null)
-            HUDController.i.buildModeHud.HideEntityInformation();
+            HUDController.i.builderInWorldMainHud != null)
+            HUDController.i.builderInWorldMainHud.HideEntityInformation();
     }
 
     public void DeselectEntities()
@@ -364,10 +365,10 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         currentActiveMode.SelectedEntity(entityEditable);
 
 
-        if (HUDController.i.buildModeHud != null)
+        if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.buildModeHud.ShowEntityInformation();
-            HUDController.i.buildModeHud.EntityInformationSetEntity(entityEditable, sceneToEdit);
+            HUDController.i.builderInWorldMainHud.ShowEntityInformation();
+            HUDController.i.builderInWorldMainHud.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
 
   

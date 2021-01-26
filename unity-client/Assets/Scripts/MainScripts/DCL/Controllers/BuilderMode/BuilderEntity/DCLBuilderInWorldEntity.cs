@@ -144,31 +144,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return null;
     }
 
-    public SceneObject GetSceneObjectAssociated()
-    {
-        if (associatedSceneObject != null)
-            return associatedSceneObject;
-
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
-        {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.GLTF_SHAPE)
-            {
-                string assetId = ((GLTFShape)keyValuePairBaseDisposable.Value).model.assetId;
-                associatedSceneObject = AssetCatalogBridge.GetSceneObjectById(assetId);
-                return associatedSceneObject;
-            }
-        }
-
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
-        {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NFT_SHAPE)
-            {
-                //TODO: Implement NFT SceneObject and return them
-            }
-        }
-        return null;
-    }
-
     public bool HasShape()
     {
         return isShapeComponentSet;
@@ -314,6 +289,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
             return descriptiveName = ((DCLName.Model)nameComponent.GetModel()).value;
         }
 
+        return "";
+    }
     #endregion
 
     void ShapeInit()

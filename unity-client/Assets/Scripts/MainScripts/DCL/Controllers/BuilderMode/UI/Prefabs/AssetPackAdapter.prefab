@@ -33,6 +33,7 @@ RectTransform:
   m_Children:
   - {fileID: 6914252666485799347}
   - {fileID: 6430386329554479890}
+  - {fileID: 9137059667624803161}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -392,7 +393,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &9137059667624803161
 RectTransform:
   m_ObjectHideFlags: 0
@@ -439,8 +440,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2312390470996644243, guid: ad7b2afa9169b4d4ea47e951ff944b2d,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8904709ac28854e45b9f35c012fd1c21, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

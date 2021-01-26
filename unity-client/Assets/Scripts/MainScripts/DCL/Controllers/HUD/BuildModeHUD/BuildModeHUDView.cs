@@ -204,7 +204,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void HideToolTip()
     {
-        tooltipController.Stop();
+        toolTipController.Stop();
     }
 
     #region Triggers
