@@ -33,7 +33,7 @@ public class PortableExperienceTaskbarItem : MonoBehaviour
     {
         tooltipText.text = portableExperienceName;
         button.Initialize();
-        contextMenu.Initialize(portableExperienceId, taskbarController);
+        contextMenu.ConfigureMenu(portableExperienceId, portableExperienceName, taskbarController);
 
         if (!string.IsNullOrEmpty(portableExperienceIconUrl))
         {
