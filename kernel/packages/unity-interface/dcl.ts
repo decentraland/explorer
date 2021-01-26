@@ -48,6 +48,7 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
+import { getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -138,7 +139,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
     await startPortableExperienceScene(unityInterface, 'dcl-pe-example1', 'pe1')
-    // await startPortableExperienceScene(unityInterface, 'dcl-pe-example2', 'pe2')
   }
 
   return {
@@ -184,7 +184,7 @@ export async function startGlobalScene(
 }
 
 export async function startPortableExperienceScene(unityInterface: UnityInterface, cid: string, peId: string) {
-  const scene = new UnityPortableExperienceScene(await getMockedExperience(cid, peId))
+  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(cid, peId))
   loadParcelScene(scene, undefined, true)
   unityInterface.CreateUIScene({
     id: getParcelSceneID(scene),
@@ -196,7 +196,7 @@ export async function startPortableExperienceScene(unityInterface: UnityInterfac
   })
 }
 
-export async function getMockedExperience(cid: string, peId: string) {
+export async function getPortableExperienceFromS3Bucket(cid: string, peId: string) {
   const baseUrl: string = 'https://static-pe.decentraland.io'
   const sceneUrl: string = `${baseUrl}/${peId}/scene.json`
   const mappingsUrl: string = `${baseUrl}/${peId}/mappings`
@@ -210,7 +210,7 @@ export async function getMockedExperience(cid: string, peId: string) {
 
     return getLoadablePortableExperience({
       cid,
-      baseUrl: 'http://localhost/portable-experiences/content',
+      baseUrl: getFetchContentServer(globalThis.globalStore.getState()) + '/contents/',
       baseUrlBundles: 'MOCK',
       mappings: mappingsResponse.contents,
       sceneJsonData: scene
