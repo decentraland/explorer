@@ -1606,6 +1606,7 @@ GameObject:
   - component: {fileID: 6553474889332959890}
   - component: {fileID: 1311366885191657452}
   - component: {fileID: 4343194088079031203}
+  - component: {fileID: 295612415622921887}
   m_Layer: 5
   m_Name: DayModeButton
   m_TagString: Untagged
@@ -1731,6 +1732,18 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!225 &295612415622921887
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094393999282562500}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2603694545027937816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1981,6 +1994,7 @@ GameObject:
   - component: {fileID: 2036737986261871158}
   - component: {fileID: 2196291874239998215}
   - component: {fileID: 4068330156861046491}
+  - component: {fileID: 6329735303318438042}
   m_Layer: 5
   m_Name: NightModeButton
   m_TagString: Untagged
@@ -2106,6 +2120,18 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!225 &6329735303318438042
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3353188904667138490}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3625380502454875568
 GameObject:
   m_ObjectHideFlags: 0
@@ -3512,6 +3538,8 @@ GameObject:
   - component: {fileID: 5359715670333115680}
   - component: {fileID: 3257714978902248256}
   - component: {fileID: 2783136463084012512}
+  - component: {fileID: 2550941768183551349}
+  - component: {fileID: 4950800031158998376}
   m_Layer: 5
   m_Name: HelpButton
   m_TagString: Untagged
@@ -3637,6 +3665,37 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &2550941768183551349
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4745382644908114123}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!225 &4950800031158998376
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4745382644908114123}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &4880327015657366470
 GameObject:
   m_ObjectHideFlags: 0
@@ -3878,7 +3937,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 214.03333, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1163524797233769629
@@ -5007,6 +5066,7 @@ GameObject:
   - component: {fileID: 7769267658850247127}
   - component: {fileID: 5147666751783043214}
   - component: {fileID: 4051645476680630674}
+  - component: {fileID: 111216387936504543}
   m_Layer: 5
   m_Name: HideUIButton
   m_TagString: Untagged
@@ -5132,6 +5192,18 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!225 &111216387936504543
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6732656422086074912}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6778910183623629656
 GameObject:
   m_ObjectHideFlags: 0
@@ -5144,7 +5216,7 @@ GameObject:
   - component: {fileID: 6837993016634265140}
   - component: {fileID: 7693650452536660701}
   m_Layer: 5
-  m_Name: CollapseText
+  m_Name: apseTextText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5301,6 +5373,8 @@ GameObject:
   - component: {fileID: 1954259143765856639}
   - component: {fileID: 7510301272497182283}
   - component: {fileID: 2972937949119167633}
+  - component: {fileID: 5202620765264291448}
+  - component: {fileID: 7623369726106013582}
   m_Layer: 5
   m_Name: CollapseBarButton
   m_TagString: Untagged
@@ -5428,6 +5502,37 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &5202620765264291448
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6879379445780578477}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!225 &7623369726106013582
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6879379445780578477}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7114272077052289652
 GameObject:
   m_ObjectHideFlags: 0
@@ -5515,6 +5620,8 @@ GameObject:
   - component: {fileID: 1651306248573838172}
   - component: {fileID: 702143947393827336}
   - component: {fileID: 7097478496321109117}
+  - component: {fileID: 6552739787088316042}
+  - component: {fileID: 851203167958653394}
   m_Layer: 5
   m_Name: ControlsButton
   m_TagString: Untagged
@@ -5640,6 +5747,37 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &6552739787088316042
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7171551362107323602}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!225 &851203167958653394
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7171551362107323602}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7316427552286486522
 GameObject:
   m_ObjectHideFlags: 0
@@ -6685,7 +6823,7 @@ RectTransform:
   m_Children:
   - {fileID: 5909646989787746867}
   m_Father: {fileID: 1160326602607001640}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6901,6 +7039,7 @@ GameObject:
   - component: {fileID: 3661075305854974943}
   - component: {fileID: 1688212778456124928}
   - component: {fileID: 1272731214946458082}
+  - component: {fileID: 8576010716867617073}
   m_Layer: 5
   m_Name: TutorialButton
   m_TagString: Untagged
@@ -7026,6 +7165,18 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!225 &8576010716867617073
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8756681825605470216}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &9020917434462224825
 GameObject:
   m_ObjectHideFlags: 0
