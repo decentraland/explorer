@@ -17,6 +17,7 @@ internal class BuilderProjectsPanelView : MonoBehaviour
     [SerializeField] internal LeftMenuButtonToggleView landToggle;
 
     [Header("Prefabs")]
+    [SerializeField] internal SceneCardView sceneCardViewPrefab;
     [SerializeField] internal SectionViewFactory sectionViewFactory;
 
     public event Action OnClosePressed;
