@@ -432,6 +432,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         int amount = selectedEntities.Count;
         for (int i = 0; i < amount; i++)
         {
+            if (selectedEntities[i].isNFT)
+                continue;
+
             DecentralandEntity entityDuplicated = DuplicateEntity(selectedEntities[i]);
             BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated, entityDuplicated.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated));
             entityActionList.Add(builderInWorldEntityAction);
@@ -575,8 +578,11 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             entityToEdit.IsNew = hasBeenCreated;
 
             string entityName = entityToEdit.GetDescriptiveName();
+            if (entityNameList.Contains(entityName))
+                entityToEdit.SetDescriptiveName(GetNewNameForEntity(entityToEdit.GetSceneObjectAssociated()));
+
             if (!string.IsNullOrEmpty(entityName))
-                entityNameList.Add(entityName);
+                entityNameList.Add(entityToEdit.GetDescriptiveName());
 
             return entityToEdit;
         }

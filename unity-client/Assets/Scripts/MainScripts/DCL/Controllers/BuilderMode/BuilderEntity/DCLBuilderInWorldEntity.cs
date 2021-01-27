@@ -138,7 +138,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (nftShapeComponent != null)
         {
-            //TODO: Implement NFT SceneObject and return them          
+            string assetId = ((NFTShape)nftShapeComponent).model.assetId;
+            associatedSceneObject = BuilderInWorldNFTController.i.GetNFTSceneObjectFromId(assetId);
+            return associatedSceneObject;
         }
 
         return null;

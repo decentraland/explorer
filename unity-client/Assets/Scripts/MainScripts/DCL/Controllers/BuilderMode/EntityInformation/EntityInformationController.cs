@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Models;
 using System;
@@ -210,6 +211,12 @@ public class EntityInformationController : MonoBehaviour
 
         if (sceneObject == null || string.IsNullOrEmpty(url))
             return;
+
+        if (sceneObject == null || string.IsNullOrEmpty(url))
+            return;
+
+        if (string.Equals(sceneObject.asset_pack_id, BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+            url = sceneObject.thumbnail;
 
         string newLoadedThumbnailURL = url;
         var newLoadedThumbnailPromise = new AssetPromise_Texture(url);

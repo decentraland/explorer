@@ -74,6 +74,9 @@ public class EntityListAdapter : MonoBehaviour
                 nameTxt.text = entityToEdit.descriptiveName;
             }
 
+            //NOTE (Adrian): this is done to force the text component to update, otherwise it won't show the text, seems like a bug on textmeshpro to me
+            nameInputField.textComponent.enabled = true;
+
             if (entityToEdit.IsVisible)
                 showImg.color = iconsSelectedColor;
             else
