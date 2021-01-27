@@ -5,7 +5,8 @@ internal interface ISectionViewFactory
     GameObject GetViewPrefab(SectionsController.SectionId id);
 }
 
-internal class SectionViewFactory : ScriptableObject, ISectionViewFactory
+[System.Serializable]
+internal class SectionViewFactory : ISectionViewFactory
 {
     [System.Serializable]
     internal class Section

@@ -43,20 +43,7 @@ internal class SectionsController : IDisposable
             view?.SetActive(false);
         }
 
-        switch (id)
-        {
-            case SectionId.SCENES_MAIN:
-                section = new SectionScenesController(view);
-                break;
-            case SectionId.SCENES_DEPLOYED:
-                break;
-            case SectionId.SCENES_PROJECT:
-                break;
-            case SectionId.LAND:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(id), id, null);
-        }
+        section = InstantiateSection(id, view);
 
         loadedSections.Add(id,section);
         OnSectionLoaded?.Invoke(section);
@@ -66,12 +53,14 @@ internal class SectionsController : IDisposable
     public void OpenSection(SectionId id)
     {
         var section = GetOrLoadSection(id);
-        if (!section.isVisible)
-            OpenSection(section);
+        OpenSection(section);
     }
 
     private void OpenSection(SectionBase section)
     {
+        if (currentOpenSection == section)
+            return;
+
         if (currentOpenSection != null)
         {
             currentOpenSection.SetVisible(false);
@@ -85,6 +74,25 @@ internal class SectionsController : IDisposable
             currentOpenSection.SetVisible(true);
             OnSectionShow?.Invoke(currentOpenSection);
         }
+    }
+
+    private SectionBase InstantiateSection(SectionId id, GameObject view)
+    {
+        switch (id)
+        {
+            case SectionId.SCENES_MAIN:
+                return new SectionScenesController(view);
+            case SectionId.SCENES_DEPLOYED:
+                break;
+            case SectionId.SCENES_PROJECT:
+                break;
+            case SectionId.LAND:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(id), id, null);
+        }
+
+        return null;
     }
 
     public void Dispose()

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 internal class BuilderProjectsPanelView : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] internal Button closeButton;
     [SerializeField] internal Button createSceneButton;
     [SerializeField] internal Button importSceneButton;
@@ -14,6 +15,9 @@ internal class BuilderProjectsPanelView : MonoBehaviour
     [SerializeField] internal LeftMenuButtonToggleView inWorldScenesToggle;
     [SerializeField] internal LeftMenuButtonToggleView projectsToggle;
     [SerializeField] internal LeftMenuButtonToggleView landToggle;
+
+    [Header("Prefabs")]
+    [SerializeField] internal SectionViewFactory sectionViewFactory;
 
     public event Action OnClosePressed;
     public event Action OnCreateScenePressed;
@@ -45,9 +49,7 @@ internal class BuilderProjectsPanelView : MonoBehaviour
 
     private void MOCKUP()
     {
-        SectionsController controller = new SectionsController(
-            Resources.Load<SectionViewFactory>("BuilderProjectsPanelSectionViewFactory"),
-            sectionsContainer);
+        SectionsController controller = new SectionsController(sectionViewFactory, sectionsContainer);
 
         OnScenesToggleChanged += (isOn) =>
         {

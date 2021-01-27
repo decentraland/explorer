@@ -1216,6 +1216,10 @@ MonoBehaviour:
   inWorldScenesToggle: {fileID: 8594735525190511007}
   projectsToggle: {fileID: 7339436357572126803}
   landToggle: {fileID: 8905361013166077019}
+  sectionViewFactory:
+    sections:
+    - id: 0
+      view: {fileID: 948900543927412617, guid: 06d0c2d9abd0f464e8992b17257f24d4, type: 3}
 --- !u!223 &3723003818699732366
 Canvas:
   m_ObjectHideFlags: 0
