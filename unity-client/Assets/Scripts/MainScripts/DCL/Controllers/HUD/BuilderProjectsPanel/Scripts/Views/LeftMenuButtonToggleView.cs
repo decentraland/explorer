@@ -60,6 +60,7 @@ internal class LeftMenuButtonToggleView : MonoBehaviour, IPointerEnterHandler, I
         {
             SetDefaultColor();
         }
+        OnToggleValueChanged?.Invoke(isOn);
     }
 
     private void SetSelectColor()

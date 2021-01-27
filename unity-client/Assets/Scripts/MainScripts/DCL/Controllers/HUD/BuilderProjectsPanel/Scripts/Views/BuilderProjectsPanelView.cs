@@ -8,16 +8,28 @@ internal class BuilderProjectsPanelView : MonoBehaviour
     [SerializeField] internal Button createSceneButton;
     [SerializeField] internal Button importSceneButton;
 
+    [SerializeField] internal Transform sectionsContainer;
+
     [SerializeField] internal LeftMenuButtonToggleView scenesToggle;
     [SerializeField] internal LeftMenuButtonToggleView inWorldScenesToggle;
     [SerializeField] internal LeftMenuButtonToggleView projectsToggle;
     [SerializeField] internal LeftMenuButtonToggleView landToggle;
 
+    public event Action OnClosePressed;
+    public event Action OnCreateScenePressed;
+    public event Action OnImportScenePressed;
+    public event Action<bool> OnScenesToggleChanged;
+    public event Action<bool> OnInWorldScenesToggleChanged;
+    public event Action<bool> OnProjectsToggleChanged;
+    public event Action<bool> OnLandToggleChanged;
+
     private void Awake()
     {
-        closeButton.onClick.AddListener(OnClosePressed);
-        createSceneButton.onClick.AddListener(OnCreateScenePressed);
-        importSceneButton.onClick.AddListener(OnImportScenePressed);
+        MOCKUP();
+
+        closeButton.onClick.AddListener(() => OnClosePressed?.Invoke());
+        createSceneButton.onClick.AddListener(() => OnCreateScenePressed?.Invoke());
+        importSceneButton.onClick.AddListener(() => OnImportScenePressed?.Invoke());
 
         scenesToggle.OnToggleValueChanged += OnScenesToggleChanged;
         inWorldScenesToggle.OnToggleValueChanged += OnInWorldScenesToggleChanged;
@@ -31,31 +43,27 @@ internal class BuilderProjectsPanelView : MonoBehaviour
         projectsToggle.gameObject.SetActive(hasProjectScenes);
     }
 
-    private void OnClosePressed()
+    private void MOCKUP()
     {
-    }
+        SectionsController controller = new SectionsController(
+            Resources.Load<SectionViewFactory>("BuilderProjectsPanelSectionViewFactory"),
+            sectionsContainer);
 
-    private void OnCreateScenePressed()
-    {
-    }
-
-    private void OnImportScenePressed()
-    {
-    }
-
-    private void OnScenesToggleChanged(bool isOn)
-    {
-    }
-
-    private void OnInWorldScenesToggleChanged(bool isOn)
-    {
-    }
-
-    private void OnProjectsToggleChanged(bool isOn)
-    {
-    }
-
-    private void OnLandToggleChanged(bool isOn)
-    {
+        OnScenesToggleChanged += (isOn) =>
+        {
+            if (isOn) controller.OpenSection(SectionsController.SectionId.SCENES_MAIN);
+        };
+        OnInWorldScenesToggleChanged += (isOn) =>
+        {
+            if (isOn) controller.OpenSection(SectionsController.SectionId.SCENES_DEPLOYED);
+        };
+        OnProjectsToggleChanged += (isOn) =>
+        {
+            if (isOn) controller.OpenSection(SectionsController.SectionId.SCENES_PROJECT);
+        };
+        OnLandToggleChanged += (isOn) =>
+        {
+            if (isOn) controller.OpenSection(SectionsController.SectionId.LAND);
+        };
     }
 }
