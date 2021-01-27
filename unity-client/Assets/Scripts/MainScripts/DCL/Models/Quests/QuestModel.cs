@@ -1,3 +1,5 @@
+using System.Linq;
+
 [System.Serializable]
 public class QuestModel
 {
@@ -9,4 +11,10 @@ public class QuestModel
     public string icon;
     public string jumpAction;
     public QuestSection[] sections;
+
+    public bool TryGetSection(string sectionId, out QuestSection section)
+    {
+        section = sections.FirstOrDefault(x => x.id == sectionId);
+        return section != null;
+    }
 }

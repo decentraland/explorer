@@ -16,6 +16,7 @@ namespace DCL.Huds.QuestsPanel
         private readonly Dictionary<string, QuestsPanelEntry> questEntries =  new Dictionary<string, QuestsPanelEntry>();
 
         private bool layoutRebuildRequested = false;
+        private static BaseDictionary<string, QuestModel> quests => DataStore.Quests.quests;
 
         internal static QuestsPanelHUDView Create()
         {
@@ -33,7 +34,7 @@ namespace DCL.Huds.QuestsPanel
 
         public void AddOrUpdateQuest(string questId)
         {
-            if (!DataStore.Quests.quests.TryGetValue(questId, out QuestModel quest))
+            if (!quests.TryGetValue(questId, out QuestModel quest))
             {
                 Debug.LogError($"Couldn't find quest with ID {questId} in DataStore");
                 return;
@@ -64,7 +65,7 @@ namespace DCL.Huds.QuestsPanel
 
         internal void ShowQuestPopup(string questId)
         {
-            if (!DataStore.Quests.quests.TryGetValue(questId, out QuestModel quest))
+            if (!quests.TryGetValue(questId, out QuestModel quest))
             {
                 Debug.Log($"Couldnt find quest with id {questId}");
                 return;

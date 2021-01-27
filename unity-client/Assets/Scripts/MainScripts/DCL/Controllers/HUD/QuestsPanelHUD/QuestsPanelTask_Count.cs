@@ -15,10 +15,10 @@ namespace DCL.Huds.QuestsPanel
 
         internal TaskPayload_Count payload;
 
-        public void Populate(string newPayload)
+        public void Populate(QuestTask task)
         {
-            payload = JsonUtility.FromJson<TaskPayload_Count>(newPayload);
-            stepName.text = payload.name;
+            payload = JsonUtility.FromJson<TaskPayload_Count>(task.payload);
+            stepName.text = task.name;
             start.text = payload.start.ToString();
             current.text = payload.current.ToString();
             end.text = payload.end.ToString();

@@ -8,6 +8,7 @@ namespace DCL.Huds.QuestsPanel
     {
         private QuestsPanelHUDView view;
         private IQuestsController questsController;
+        private static BaseDictionary<string, QuestModel> quests => DataStore.Quests.quests;
 
         public void Initialize(IQuestsController newQuestsController)
         {
@@ -15,10 +16,10 @@ namespace DCL.Huds.QuestsPanel
             view = QuestsPanelHUDView.Create();
 
             questsController.OnQuestProgressed += OnQuestProgressed;
-            DataStore.Quests.quests.OnAdded += OnQuestAdded;
-            DataStore.Quests.quests.OnRemoved += OnQuestRemoved;
-            DataStore.Quests.quests.OnSet += OnQuestSet;
-            OnQuestSet(DataStore.Quests.quests.Get());
+            quests.OnAdded += OnQuestAdded;
+            quests.OnRemoved += OnQuestRemoved;
+            quests.OnSet += OnQuestSet;
+            OnQuestSet(quests.Get());
         }
 
         private void OnQuestProgressed(string questId)
@@ -52,9 +53,9 @@ namespace DCL.Huds.QuestsPanel
         public void Dispose()
         {
             questsController.OnQuestProgressed -= OnQuestProgressed;
-            DataStore.Quests.quests.OnAdded -= OnQuestAdded;
-            DataStore.Quests.quests.OnRemoved -= OnQuestRemoved;
-            DataStore.Quests.quests.OnSet -= OnQuestSet;
+            quests.OnAdded -= OnQuestAdded;
+            quests.OnRemoved -= OnQuestRemoved;
+            quests.OnSet -= OnQuestSet;
         }
     }
 }

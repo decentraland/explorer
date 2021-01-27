@@ -15,24 +15,24 @@ namespace DCL.Huds.QuestsTracker
             switch (task.type)
             {
                 case "single":
-                    ApplyPayload(JsonUtility.FromJson<TaskPayload_Single>(task.payload));
+                    ApplyPayload(task.name, JsonUtility.FromJson<TaskPayload_Single>(task.payload));
                     break;
                 case "count":
-                    ApplyPayload(JsonUtility.FromJson<TaskPayload_Count>(task.payload));
+                    ApplyPayload(task.name, JsonUtility.FromJson<TaskPayload_Count>(task.payload));
                     break;
             }
         }
 
-        internal void ApplyPayload(TaskPayload_Single taskPayload)
+        internal void ApplyPayload(string taskName, TaskPayload_Single taskPayload)
         {
-            taskTitle.text = taskPayload.name;
+            taskTitle.text = taskName;
             progress.fillAmount = taskPayload.Progress();
             progressText.text = $"{taskPayload.Progress().ToString()}/1";
         }
 
-        internal void ApplyPayload(TaskPayload_Count taskPayload)
+        internal void ApplyPayload(string taskName, TaskPayload_Count taskPayload)
         {
-            taskTitle.text = taskPayload.name;
+            taskTitle.text = taskName;
             progress.fillAmount = taskPayload.Progress();
             progressText.text = $"{taskPayload.current}/{taskPayload.end}";
         }

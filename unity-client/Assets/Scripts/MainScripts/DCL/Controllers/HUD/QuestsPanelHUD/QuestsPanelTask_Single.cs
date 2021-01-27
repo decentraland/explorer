@@ -12,10 +12,10 @@ namespace DCL.Huds.QuestsPanel
 
         internal TaskPayload_Single payload;
 
-        public void Populate(string newPayload)
+        public void Populate(QuestTask task)
         {
-            payload = JsonUtility.FromJson<TaskPayload_Single>(newPayload);
-            taskName.text = payload.name;
+            payload = JsonUtility.FromJson<TaskPayload_Single>(task.payload);
+            taskName.text = task.name;
             status.isOn = payload.isDone;
         }
     }

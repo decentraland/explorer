@@ -6,12 +6,12 @@ public class QuestTask
     public string id;
     public string type;
     public string payload;
+    public string name;
 }
 
 [System.Serializable]
 public class TaskPayload_Single
 {
-    public string name;
     public bool isDone;
 
     public float Progress() => isDone ? 1 : 0;
@@ -20,7 +20,6 @@ public class TaskPayload_Single
 [System.Serializable]
 public class TaskPayload_Count
 {
-    public string name;
     public int start;
     public int end;
     public int current;

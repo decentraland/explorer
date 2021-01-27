@@ -29,7 +29,7 @@ namespace DCL.Huds.QuestsPanel
             }
 
             var taskUIEntry = Instantiate(prefab, tasksContainer).GetComponent<IQuestsPanelTask>();
-            taskUIEntry.Populate(task.payload);
+            taskUIEntry.Populate(task);
         }
 
         internal void CleanUpTasksList()

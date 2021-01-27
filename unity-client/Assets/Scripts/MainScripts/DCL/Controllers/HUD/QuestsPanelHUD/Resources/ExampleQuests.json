@@ -14,13 +14,15 @@
         "tasks": [
           {
             "id": "step0",
+            "name": "Find Kiki",
             "type": "single",
-            "payload": "{ \"name\": \"Find Kiki\", \"isDone\": true }"
+            "payload": "{ \"isDone\": true }"
           },
           {
             "id": "step1",
+            "name": "Collect pumpkins",
             "type": "count",
-            "payload": "{ \"name\": \"Collect pumpkins\", \"start\": 0, \"end\": 10, \"current\": 10 }"
+            "payload": "{ \"start\": 0, \"end\": 10, \"current\": 10 }"
           }
         ]
       },
@@ -31,18 +33,21 @@
         "tasks": [
           {
             "id": "step2",
+            "name": "Find the old lady",
             "type": "single",
-            "payload": "{ \"name\": \"Find the old lady\", \"isDone\": true }"
+            "payload": "{ \"isDone\": true }"
           },
           {
             "id": "step3",
+            "name": "Enter the house",
             "type": "single",
-            "payload": "{ \"name\": \"Enter the house\", \"isDone\": false }"
+            "payload": "{ \"isDone\": false }"
           },
           {
             "id": "step4",
+            "name": "Collect something fishy",
             "type": "count",
-            "payload": "{ \"name\": \"Collect something fishy\", \"start\": 0, \"end\": 10, \"current\": 2 }"
+            "payload": "{ \"start\": 0, \"end\": 10, \"current\": 2 }"
           }
         ]
       }
@@ -62,8 +67,9 @@
         "tasks": [
           {
             "id": "step0",
+            "name": "Jump High",
             "type": "single",
-            "payload": "{ \"name\": \"Jump High\", \"isDone\": true }"
+            "payload": "{ \"isDone\": true }"
           }
         ]
       },
@@ -74,8 +80,9 @@
         "tasks": [
           {
             "id": "step2",
+            "name": "Sneeze",
             "type": "single",
-            "payload": "{ \"name\": \"Sneeze\", \"isDone\": false }"
+            "payload": "{ \"isDone\": false }"
           }
         ]
       }

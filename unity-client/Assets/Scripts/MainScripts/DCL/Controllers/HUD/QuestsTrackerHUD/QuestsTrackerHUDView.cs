@@ -15,6 +15,7 @@ namespace DCL.Huds.QuestsTracker
         private readonly Dictionary<string, QuestsTrackerEntry> currentEntries = new Dictionary<string, QuestsTrackerEntry>();
         private readonly Dictionary<string, DateTime> lastUpdateTimestamp = new Dictionary<string, DateTime>();
         private bool layoutRebuildRequested;
+        private static BaseDictionary<string, QuestModel> quests => DataStore.Quests.quests;
 
         public static QuestsTrackerHUDView Create()
         {
@@ -33,7 +34,7 @@ namespace DCL.Huds.QuestsTracker
 
         public void AddQuest(string questId, bool isPinned)
         {
-            if (!DataStore.Quests.quests.TryGetValue(questId, out QuestModel quest))
+            if (!quests.TryGetValue(questId, out QuestModel quest))
             {
                 Debug.LogError($"Couldn't find quest with ID {questId} in DataStore");
                 return;
