@@ -148,8 +148,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'PE Example 1', pe1SourceUrl, pe1IconRelativeUrl)
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'PE Example 2', pe2SourceUrl, pe2IconRelativeUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'A cube above you!', pe1SourceUrl, pe1IconRelativeUrl)
+    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'Find the Dragon', pe2SourceUrl, pe2IconRelativeUrl)
   }
 
   return {
