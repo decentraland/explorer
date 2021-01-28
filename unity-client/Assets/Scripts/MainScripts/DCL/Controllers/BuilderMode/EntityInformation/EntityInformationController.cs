@@ -36,7 +36,7 @@ public class EntityInformationController : MonoBehaviour
     public event Action<Vector3> OnRotationChange;
     public event Action<Vector3> OnScaleChange;
 
-    public event Action<DCLBuilderInWorldEntity> OnNameChange;
+    public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
 
     DCLBuilderInWorldEntity currentEntity;
     ParcelScene parcelScene;
@@ -103,9 +103,11 @@ public class EntityInformationController : MonoBehaviour
 
     public void ChangeEntityName(string newName)
     {
-        titleTxt.text = newName;
-        currentEntity.SetDescriptiveName(newName);
-        OnNameChange?.Invoke(currentEntity);
+      
+       
+        OnNameChange?.Invoke(currentEntity,newName);
+
+        titleTxt.text = currentEntity.GetDescriptiveName();
     }
 
     public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)

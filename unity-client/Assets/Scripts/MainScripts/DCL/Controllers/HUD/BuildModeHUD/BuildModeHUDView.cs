@@ -17,9 +17,9 @@ public class BuildModeHUDView : MonoBehaviour
     public CatalogGroupListView catalogGroupListView;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
-    public Button firstPersonChangeModeBtn,changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,closeEntityListBtn,catalogBtn,closeCatalogBtn;
+    public Button firstPersonChangeModeBtn,changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn,closeCatalogBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
-
+    public Button[] closeEntityListBtns;
     public Button tutorialBtn;
     public Button logOutBtn;
 
@@ -71,7 +71,11 @@ public class BuildModeHUDView : MonoBehaviour
 
 
         entityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
-        closeEntityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
+
+        foreach (Button closeEntityListBtn in closeEntityListBtns)
+        {
+            closeEntityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
+        }
 
 
         catalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());

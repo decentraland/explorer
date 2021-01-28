@@ -312,8 +312,11 @@ namespace DCL.Controllers
             }
 
             foreach (KeyValuePair<System.Type, BaseDisposable> component in entity.GetSharedComponents())
-            {
-                SharedComponentAttach(newEntity.entityId, component.Value.id);
+            {                
+                BaseDisposable baseDisposable = SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
+                string jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(component.Value.GetModel());
+                baseDisposable.UpdateFromJSON(jsonModel);
+                SharedComponentAttach(newEntity.entityId, baseDisposable.id);
             }
 
             //NOTE: (Adrian) Evaluate if all created components should be handle as equals instead of different

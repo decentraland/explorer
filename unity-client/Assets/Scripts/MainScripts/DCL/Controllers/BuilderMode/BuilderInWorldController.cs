@@ -540,10 +540,12 @@ public class BuilderInWorldController : MonoBehaviour
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         }
 
+        name.ForceSetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
+
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
 
-        name.SetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
+    
 
         if(sceneObject.IsSmartItem())
         {
@@ -665,6 +667,8 @@ public class BuilderInWorldController : MonoBehaviour
                 isAdvancedModeActive = true;
                 if(HUDController.i.builderInWorldMainHud != null)
                    HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
+
+                avatarRenderer.SetAvatarVisibility(false);
                 break;
         }
 
@@ -943,7 +947,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         Environment.i.world.sceneController.ActivateBuilderInWorldEditScene();
 
-        avatarRenderer.SetAvatarVisibility(false);
+ 
 
         ActivateBuilderInWorldCamera();
         if (IsNewScene())

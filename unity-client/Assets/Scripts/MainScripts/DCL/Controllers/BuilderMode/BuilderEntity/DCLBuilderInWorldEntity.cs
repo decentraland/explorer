@@ -13,7 +13,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
 
-    public string descriptiveName { get; private set; }
 
     public event System.Action<DCLBuilderInWorldEntity> onStatusUpdate;
     public event System.Action<DCLBuilderInWorldEntity> OnDelete;
@@ -95,7 +94,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         entityUniqueId = rootEntity.scene.sceneData.id + rootEntity.entityId;
         IsVisible = rootEntity.gameObject.activeSelf;
 
-        descriptiveName = GetDescriptiveName();
         isShapeComponentSet = false;
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
@@ -271,12 +269,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (nameComponent != null)
         {
-           ((DCLName) nameComponent).SetNewName(newName);
+           ((DCLName) nameComponent).ForceSetNewName(newName);
         }
         else
         {
             DCLName name = (DCLName) rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
-            name.SetNewName(newName);
+            name.ForceSetNewName(newName);
             rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
         onStatusUpdate?.Invoke(this);
@@ -288,7 +286,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (nameComponent != null)
         {
-            return descriptiveName = ((DCLName.Model)nameComponent.GetModel()).value;
+            return ((DCLName.Model)nameComponent.GetModel()).value;
         }
 
         return "";
@@ -394,7 +392,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void OnNameUpdate(DCLName.Model model)
     {
-        descriptiveName = model.value;
         onStatusUpdate?.Invoke(this);
     }
 

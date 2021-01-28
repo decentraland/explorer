@@ -28,7 +28,7 @@ public class BuildModeHUDController : IHUD
     public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
     public event Action<DCLBuilderInWorldEntity> OnEntityLock;
     public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
-    public event Action<DCLBuilderInWorldEntity> OnEntityRename;
+    public event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
 
     public event Action<Vector3> OnSelectedObjectPositionChange;
     public event Action<Vector3> OnSelectedObjectRotationChange;
@@ -62,7 +62,7 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
         entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
-        entityInformationController.OnNameChange += (x) => OnEntityRename?.Invoke(x);
+        entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
         sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
         sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
 
@@ -70,7 +70,7 @@ public class BuildModeHUDController : IHUD
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
         buildModeEntityListController.OnEntityLock += (x) => OnEntityLock(x);
         buildModeEntityListController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
-        buildModeEntityListController.OnEntityRename += (x) => OnEntityRename(x);
+        buildModeEntityListController.OnEntityRename += (entity, newName) => OnEntityRename(entity, newName);
 
         buildModeEntityListController.CloseList();
 
