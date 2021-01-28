@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DCL.Huds.QuestsNotifications
 {
-    public class SectionNotification_Completed : MonoBehaviour
+    public class QuestNotification_SectionCompleted : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI sectionName;
 
