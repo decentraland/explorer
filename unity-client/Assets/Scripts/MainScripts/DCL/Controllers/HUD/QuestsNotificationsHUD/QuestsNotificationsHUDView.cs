@@ -8,16 +8,11 @@ namespace DCL.Huds.QuestsNotifications
     {
         private const float SECTION_NOTIFICATION_DURATION = 1.5f;
 
-        private enum NotificationType
-        {
-            Completed,
-            Unlocked
-        }
+        private readonly Queue<GameObject> notificationsQueue = new Queue<GameObject>();
 
-        private readonly Queue<(QuestSection section, NotificationType notificationType)> notificationsQueue = new Queue<(QuestSection, NotificationType)>();
-
-        [SerializeField] private SectionNotification_Completed completedNotification;
-        [SerializeField] private SectionNotification_Unlocked unlockedNotification;
+        [SerializeField] private GameObject sectionCompletedPrefab;
+        [SerializeField] private GameObject sectionUnlockedPrefab;
+        [SerializeField] private GameObject questCompletedPrefab;
 
         internal static QuestsNotificationsHUDView Create()
         {
@@ -31,18 +26,30 @@ namespace DCL.Huds.QuestsNotifications
         private void Awake()
         {
             StartCoroutine(ProcessSectionsNotificationQueue());
-            completedNotification.gameObject.SetActive(false);
-            unlockedNotification.gameObject.SetActive(false);
         }
 
         public void ShowSectionCompleted(QuestSection section)
         {
-            notificationsQueue.Enqueue((section, NotificationType.Completed));
+            var questNotification = Instantiate(sectionCompletedPrefab, transform).GetComponent<QuestNotification_SectionCompleted>();
+            questNotification.Populate(section);
+            questNotification.gameObject.SetActive(false);
+            notificationsQueue.Enqueue(questNotification.gameObject);
         }
 
         public void ShowSectionUnlocked(QuestSection section)
         {
-            notificationsQueue.Enqueue((section, NotificationType.Unlocked));
+            var questNotification = Instantiate(sectionUnlockedPrefab, transform).GetComponent<QuestNotification_SectionUnlocked>();
+            questNotification.Populate(section);
+            questNotification.gameObject.SetActive(false);
+            notificationsQueue.Enqueue(questNotification.gameObject);
+        }
+
+        public void ShowQuestCompleted(QuestModel quest)
+        {
+            var questNotification = Instantiate(questCompletedPrefab, transform).GetComponent<QuestNotification_QuestCompleted>();
+            questNotification.Populate(quest);
+            questNotification.gameObject.SetActive(false);
+            notificationsQueue.Enqueue(questNotification.gameObject);
         }
 
         private IEnumerator ProcessSectionsNotificationQueue()
@@ -51,16 +58,10 @@ namespace DCL.Huds.QuestsNotifications
             {
                 if (notificationsQueue.Count > 0)
                 {
-                    var notification = notificationsQueue.Dequeue();
-                    if (notification.notificationType == NotificationType.Completed)
-                        completedNotification.Populate(notification.section);
-                    else
-                        unlockedNotification.Populate(notification.section);
-                    completedNotification.gameObject.SetActive(notification.notificationType == NotificationType.Completed);
-                    unlockedNotification.gameObject.SetActive(notification.notificationType == NotificationType.Unlocked);
+                    GameObject notificationGO = notificationsQueue.Dequeue();
+                    notificationGO.gameObject.SetActive(true);
                     yield return WaitForSecondsCache.Get(SECTION_NOTIFICATION_DURATION);
-                    completedNotification.gameObject.SetActive(false);
-                    unlockedNotification.gameObject.SetActive(false);
+                    Destroy(notificationGO);
                 }
 
                 yield return WaitForSecondsCache.Get(0.5f);

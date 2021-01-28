@@ -35,10 +35,7 @@ namespace DCL.Huds.QuestsTracker
         public void AddQuest(string questId, bool isPinned)
         {
             if (!quests.TryGetValue(questId, out QuestModel quest))
-            {
-                Debug.LogError($"Couldn't find quest with ID {questId} in DataStore");
                 return;
-            }
 
             if (!currentEntries.TryGetValue(questId, out QuestsTrackerEntry questEntry))
             {
@@ -93,6 +90,16 @@ namespace DCL.Huds.QuestsTracker
                 lastUpdateTimestamp[questId] = dateToSet;
             else
                 lastUpdateTimestamp.Add(questId, dateToSet);
+        }
+
+        public void ClearEntries()
+        {
+            lastUpdateTimestamp.Clear();
+            foreach ((string key, QuestsTrackerEntry value) in currentEntries)
+            {
+                Destroy(value.gameObject);
+            }
+            currentEntries.Clear();
         }
 
         private IEnumerator DispatchEntriesRoutine()

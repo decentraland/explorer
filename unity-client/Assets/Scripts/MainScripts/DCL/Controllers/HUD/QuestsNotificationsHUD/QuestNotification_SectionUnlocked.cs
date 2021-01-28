@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DCL.Huds.QuestsNotifications
 {
-    public class SectionNotification_Unlocked : MonoBehaviour
+    public class QuestNotification_SectionUnlocked : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI sectionName;
         [SerializeField] private TextMeshProUGUI taskName;
