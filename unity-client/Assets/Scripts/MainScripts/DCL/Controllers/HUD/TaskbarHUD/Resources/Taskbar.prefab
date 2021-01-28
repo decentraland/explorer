@@ -1563,9 +1563,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8b939b5bedb9494b806609faeda7d8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hideOnEnable: 0
+  hideOnEnable: 1
   animSpeedFactor: 1
-  disableAfterFadeOut: 1
+  disableAfterFadeOut: 0
   visibleParam: visible
 --- !u!114 &5102413631459841666
 MonoBehaviour:
@@ -1580,19 +1580,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moreMenuAnimator: {fileID: 267723649576159537}
-  collapseBarButton: {fileID: 7510301272497182283}
+  timeBetweenAnimations: 0.01
+  collapseBarButton: {fileID: 7780974666533715729}
   collapseIcon: {fileID: 7316427552286486522}
   collapseText: {fileID: 6778910183623629656}
   expandIcon: {fileID: 935848962927964339}
   expandText: {fileID: 9157519028837207094}
-  hideUIButton: {fileID: 5147666751783043214}
-  controlsButton: {fileID: 702143947393827336}
+  hideUIButton: {fileID: 4164078527740191455}
+  controlsButton: {fileID: 4441687601482547214}
   controlsToggleAction: {fileID: 11400000, guid: 1d31dadea710e42ce80206a83c695e80,
     type: 2}
-  helpAndSupportButton: {fileID: 3257714978902248256}
-  tutorialButton: {fileID: 1688212778456124928}
-  dayModeButton: {fileID: 1311366885191657452}
-  nightModeButton: {fileID: 2196291874239998215}
+  helpAndSupportButton: {fileID: 6781059266848171967}
+  tutorialButton: {fileID: 6228848632713307020}
+  dayModeButton: {fileID: 6330028001698418096}
+  nightModeButton: {fileID: 2821951450840011534}
 --- !u!1 &2094393999282562500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1606,7 +1607,9 @@ GameObject:
   - component: {fileID: 6553474889332959890}
   - component: {fileID: 1311366885191657452}
   - component: {fileID: 4343194088079031203}
+  - component: {fileID: 1055635260988060801}
   - component: {fileID: 295612415622921887}
+  - component: {fileID: 6330028001698418096}
   m_Layer: 5
   m_Name: DayModeButton
   m_TagString: Untagged
@@ -1732,6 +1735,25 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &1055635260988060801
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094393999282562500}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!225 &295612415622921887
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1744,6 +1766,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &6330028001698418096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094393999282562500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 1311366885191657452}
+  buttonAnimator: {fileID: 1055635260988060801}
 --- !u!1 &2603694545027937816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1994,7 +2030,9 @@ GameObject:
   - component: {fileID: 2036737986261871158}
   - component: {fileID: 2196291874239998215}
   - component: {fileID: 4068330156861046491}
+  - component: {fileID: 8544591177226152426}
   - component: {fileID: 6329735303318438042}
+  - component: {fileID: 2821951450840011534}
   m_Layer: 5
   m_Name: NightModeButton
   m_TagString: Untagged
@@ -2120,6 +2158,25 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &8544591177226152426
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3353188904667138490}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!225 &6329735303318438042
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -2132,6 +2189,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &2821951450840011534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3353188904667138490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 2196291874239998215}
+  buttonAnimator: {fileID: 8544591177226152426}
 --- !u!1 &3625380502454875568
 GameObject:
   m_ObjectHideFlags: 0
@@ -3540,6 +3611,7 @@ GameObject:
   - component: {fileID: 2783136463084012512}
   - component: {fileID: 2550941768183551349}
   - component: {fileID: 4950800031158998376}
+  - component: {fileID: 6781059266848171967}
   m_Layer: 5
   m_Name: HelpButton
   m_TagString: Untagged
@@ -3696,6 +3768,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &6781059266848171967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4745382644908114123}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 3257714978902248256}
+  buttonAnimator: {fileID: 2550941768183551349}
 --- !u!1 &4880327015657366470
 GameObject:
   m_ObjectHideFlags: 0
@@ -5066,7 +5152,9 @@ GameObject:
   - component: {fileID: 7769267658850247127}
   - component: {fileID: 5147666751783043214}
   - component: {fileID: 4051645476680630674}
+  - component: {fileID: 3598127344089481857}
   - component: {fileID: 111216387936504543}
+  - component: {fileID: 4164078527740191455}
   m_Layer: 5
   m_Name: HideUIButton
   m_TagString: Untagged
@@ -5192,6 +5280,25 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &3598127344089481857
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6732656422086074912}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!225 &111216387936504543
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -5204,6 +5311,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &4164078527740191455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6732656422086074912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 5147666751783043214}
+  buttonAnimator: {fileID: 3598127344089481857}
 --- !u!1 &6778910183623629656
 GameObject:
   m_ObjectHideFlags: 0
@@ -5375,6 +5496,7 @@ GameObject:
   - component: {fileID: 2972937949119167633}
   - component: {fileID: 5202620765264291448}
   - component: {fileID: 7623369726106013582}
+  - component: {fileID: 7780974666533715729}
   m_Layer: 5
   m_Name: CollapseBarButton
   m_TagString: Untagged
@@ -5533,6 +5655,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &7780974666533715729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6879379445780578477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 7510301272497182283}
+  buttonAnimator: {fileID: 5202620765264291448}
 --- !u!1 &7114272077052289652
 GameObject:
   m_ObjectHideFlags: 0
@@ -5622,6 +5758,7 @@ GameObject:
   - component: {fileID: 7097478496321109117}
   - component: {fileID: 6552739787088316042}
   - component: {fileID: 851203167958653394}
+  - component: {fileID: 4441687601482547214}
   m_Layer: 5
   m_Name: ControlsButton
   m_TagString: Untagged
@@ -5778,6 +5915,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &4441687601482547214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7171551362107323602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 702143947393827336}
+  buttonAnimator: {fileID: 6552739787088316042}
 --- !u!1 &7316427552286486522
 GameObject:
   m_ObjectHideFlags: 0
@@ -7039,7 +7190,9 @@ GameObject:
   - component: {fileID: 3661075305854974943}
   - component: {fileID: 1688212778456124928}
   - component: {fileID: 1272731214946458082}
+  - component: {fileID: 4364468116114812075}
   - component: {fileID: 8576010716867617073}
+  - component: {fileID: 6228848632713307020}
   m_Layer: 5
   m_Name: TutorialButton
   m_TagString: Untagged
@@ -7165,6 +7318,25 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!95 &4364468116114812075
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8756681825605470216}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d9a97a5d343da4648886999276e337eb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!225 &8576010716867617073
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -7177,6 +7349,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &6228848632713307020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8756681825605470216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0f084047dbd75748add0101f98f6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainButton: {fileID: 1688212778456124928}
+  buttonAnimator: {fileID: 4364468116114812075}
 --- !u!1 &9020917434462224825
 GameObject:
   m_ObjectHideFlags: 0
