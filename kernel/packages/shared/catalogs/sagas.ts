@@ -97,8 +97,8 @@ function* initialLoad() {
       if (!(yield select(isInitialized))) {
         yield take(RENDERER_INITIALIZED)
       }
-      yield put(catalogLoaded('base-avatars', baseAvatars))
-      yield put(catalogLoaded('base-exclusive', baseExclusive))
+      yield put(catalogLoaded('base-avatars', baseAvatars as Wearable[]))
+      yield put(catalogLoaded('base-exclusive', baseExclusive as Wearable[]))
     } catch (error) {
       defaultLogger.error('[FATAL]: Could not load catalog!', error)
     }
