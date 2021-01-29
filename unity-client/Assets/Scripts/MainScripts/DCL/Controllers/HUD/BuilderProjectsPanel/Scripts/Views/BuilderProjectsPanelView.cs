@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -117,14 +119,14 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
                 scenesViewController.OnDeployedSceneAdded += deployedSceneListener.OnSceneAdded;
                 scenesViewController.OnDeployedSceneRemoved += deployedSceneListener.OnSceneRemoved;
                 scenesViewController.OnDeployedScenesSet += deployedSceneListener.OnSetScenes;
-                scenesViewController.SetListener(deployedSceneListener);
+                scenesViewController.NotifySet(deployedSceneListener);
             }
             if (sectionBase is IProjectSceneListener projectSceneListener)
             {
                 scenesViewController.OnProjectSceneAdded += projectSceneListener.OnSceneAdded;
                 scenesViewController.OnProjectSceneRemoved += projectSceneListener.OnSceneRemoved;
                 scenesViewController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
-                scenesViewController.SetListener(projectSceneListener);
+                scenesViewController.NotifySet(projectSceneListener);
             }
         };
 
@@ -152,7 +154,99 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
         scenesViewController.OnProjectSceneAdded += thisProjectSceneListener.OnSceneAdded;
         scenesViewController.OnProjectSceneRemoved += thisProjectSceneListener.OnSceneRemoved;
         scenesViewController.OnProjectScenesSet += thisProjectSceneListener.OnSetScenes;
-        scenesViewController.SetListener(thisDeployedSceneListener);
-        scenesViewController.SetListener(thisProjectSceneListener);
+        scenesViewController.NotifySet(thisDeployedSceneListener);
+        scenesViewController.NotifySet(thisProjectSceneListener);
+
+        StartCoroutine(MOCKUP_COROUNTINE(scenesViewController));
+    }
+
+    private IEnumerator MOCKUP_COROUNTINE(ScenesViewController scenesViewController)
+    {
+        const float TIME = 2;
+        List<ISceneData> scenes = new List<ISceneData>();
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("ADD PROJECT");
+
+        scenes.Add(new SceneData()
+        {
+            id = "MyProject1",
+            isDeployed = false,
+            name = "MyProject1"
+        });
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("ADD DEPLOY");
+
+        scenes.Add(new SceneData()
+        {
+            id = "MyDeploy1",
+            isDeployed = true,
+            name = "MyDeploy1"
+        });
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("ADD DEPLOY2");
+
+        scenes.Add(new SceneData()
+        {
+            id = "MyDeploy2",
+            isDeployed = true,
+            name = "MyDeploy2"
+        });
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("ADD DEPLOY3");
+
+        scenes.Add(new SceneData()
+        {
+            id = "MyDeploy3",
+            isDeployed = true,
+            name = "MyDeploy3"
+        });
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("ADD DEPLOY4");
+
+        scenes.Add(new SceneData()
+        {
+            id = "MyDeploy4",
+            isDeployed = true,
+            name = "MyDeploy4"
+        });
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("REMOVE DEPLOY3");
+
+        scenes = scenes.FindAll((data) => data.id != "MyDeploy3");
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("REMOVE DEPLOY4");
+
+        scenes = scenes.FindAll((data) => data.id != "MyDeploy4");
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("REMOVE DEPLOY2");
+
+        scenes = scenes.FindAll((data) => data.id != "MyDeploy2");
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("REMOVE DEPLOY1");
+
+        scenes = scenes.FindAll((data) => data.id != "MyDeploy1");
+        scenesViewController.SetScenes(scenes);
+
+        yield return new WaitForSeconds(TIME);
+        Debug.Log("REMOVE ALL");
+        scenesViewController.SetScenes(new List<ISceneData>());
+
     }
 }

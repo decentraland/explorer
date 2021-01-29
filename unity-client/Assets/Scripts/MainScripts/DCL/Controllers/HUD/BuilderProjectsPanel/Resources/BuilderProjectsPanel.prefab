@@ -1216,6 +1216,8 @@ MonoBehaviour:
   inWorldScenesToggle: {fileID: 8594735525190511007}
   projectsToggle: {fileID: 7339436357572126803}
   landToggle: {fileID: 8905361013166077019}
+  sceneCardViewPrefab: {fileID: 6743010040785150304, guid: 0384d382f4cd14fd5b14515c7eb2d514,
+    type: 3}
   sectionViewFactory:
     sections:
     - id: 0
@@ -1512,7 +1514,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 01ceb4e4b7d76441eaba3e5f74818588, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c9320582539b64f7aa5de415202ccc3d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

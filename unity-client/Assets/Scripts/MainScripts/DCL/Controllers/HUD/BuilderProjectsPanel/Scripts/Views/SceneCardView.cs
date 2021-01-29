@@ -1,4 +1,5 @@
 ﻿using DCL;
+using DCL.Helpers;
 using System;
 using TMPro;
 using UnityEngine;
@@ -53,6 +54,12 @@ internal class SceneCardView : MonoBehaviour
         SetSize(sceneData.size);
         SetDeployed(sceneData.isDeployed);
         SetUserRole(sceneData.isOwner, sceneData.isOperator, sceneData.isContributor);
+    }
+
+    public void SetParent(Transform parent)
+    {
+        transform.SetParent(parent);
+        transform.ResetLocalTRS();
     }
 
     public void SetName(string name)

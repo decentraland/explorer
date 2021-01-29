@@ -96,12 +96,12 @@ internal class ScenesViewController : IDisposable
         projectScenes.Clear();
     }
 
-    public void SetListener(IDeployedSceneListener listener)
+    public void NotifySet(IDeployedSceneListener listener)
     {
         listener.OnSetScenes(deployedScenes);
     }
 
-    public void SetListener(IProjectSceneListener listener)
+    public void NotifySet(IProjectSceneListener listener)
     {
         listener.OnSetScenes(deployedScenes);
     }
