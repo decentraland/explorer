@@ -304,7 +304,7 @@ export async function startUnitySceneWorkers() {
 // Builder functions
 let currentLoadedScene: SceneWorker | null
 
-export async function loadPreviewScene(ws?: string) {
+export async function loadPreviewScene(ws?: string): Promise<ILand> {
   const result = await fetch('/scene.json?nocache=' + Math.random())
 
   let lastId: string | null = null
@@ -354,6 +354,8 @@ export async function loadPreviewScene(ws?: string) {
     defaultLogger.info('finish...')
 
     return defaultScene
+  } else {
+    throw new Error('Could not load scene.json')
   }
 }
 
