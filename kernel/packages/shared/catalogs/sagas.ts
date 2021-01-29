@@ -138,7 +138,7 @@ function* handleCatalogRequest(action: CatalogRequestAction) {
 
   const wearables: Wearable[] = wearableIds
     .map((wearableId) =>
-      wearableId.startsWith(`dcl://base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
+      wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
     )
     .filter((wearable) => !!wearable)
   yield put(catalogSuccess(wearables))
