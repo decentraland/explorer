@@ -139,7 +139,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
     await startPortableExperienceScene(unityInterface, 'dcl-pe-example1', 'pe1')
-    await startPortableExperienceScene(unityInterface, 'dcl-pe-example1', 'pe2')
+    await startPortableExperienceScene(unityInterface, 'dcl-pe-example2', 'pe2')
   }
 
   return {
