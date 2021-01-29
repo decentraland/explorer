@@ -48,6 +48,7 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
+import { spawn } from '@decentraland/PortableExperiences'
 
 const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
 
@@ -138,9 +139,11 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
+
     // Temporal: Try to create several global scenes
-    await startPortableExperienceScene(unityInterface, 'dcl-pe-example1', 'pe1')
-    await startPortableExperienceScene(unityInterface, 'dcl-pe-example2', 'pe2')
+    // TODO: CHeck unityInterface,
+    await spawn('dcl-pe-example1', 'pe1')
+    await spawn('dcl-pe-example2', 'pe2')
   }
 
   return {
