@@ -26,8 +26,15 @@ namespace Tests
         [Test]
         public void DisplayCorrectlyWhenSceneIsDeployed()
         {
-            cardView.Setup("",true,"test",Vector2.zero,
-                Vector2.zero, null, SceneCardView.UserRole.OWNER);
+            cardView.Setup(new SceneData()
+            {
+                id = "",
+                isDeployed = true,
+                name = "test",
+                coords = Vector2Int.zero,
+                size = Vector2Int.zero,
+                isOwner = true
+            });
 
             //should show both jump-in and editor buttons
             Assert.IsTrue(cardView.jumpInButton.gameObject.activeSelf, "JumpIn button should be active");
@@ -46,8 +53,15 @@ namespace Tests
         [Test]
         public void DisplayCorrectlyWhenSceneIsNotDeployed()
         {
-            cardView.Setup("",false,"test",Vector2.zero,
-                Vector2.zero, null, SceneCardView.UserRole.CONTRIBUTOR);
+            cardView.Setup(new SceneData()
+            {
+                id = "",
+                isDeployed = false,
+                name = "test",
+                coords = Vector2Int.zero,
+                size = Vector2Int.zero,
+                isContributor = true
+            });
 
             //should show only editor button, no jump-in
             Assert.IsFalse(cardView.jumpInButton.gameObject.activeSelf, "JumpIn button should not be active");

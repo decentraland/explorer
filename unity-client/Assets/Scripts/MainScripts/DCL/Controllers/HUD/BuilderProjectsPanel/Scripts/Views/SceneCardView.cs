@@ -1,17 +1,14 @@
-﻿using TMPro;
+﻿using DCL;
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 internal class SceneCardView : MonoBehaviour
 {
-    public delegate void OnSceneIdEvent(string sceneId);
-    public delegate void OnContextMenuPressedEvent(string sceneId, bool isDeployedScene, bool isOwnerOrOperator, bool isContributor);
-
-    public static event OnSceneIdEvent OnJumpInPressed;
-    public static event OnSceneIdEvent OnEditorPressed;
-    public static event OnContextMenuPressedEvent OnContextMenuPressed;
-
-    public enum UserRole { OWNER, OPERATOR, CONTRIBUTOR, NONE }
+    public static event Action<ISceneData> OnJumpInPressed;
+    public static event Action<ISceneData> OnEditorPressed;
+    public static event Action<ISceneData> OnContextMenuPressed;
 
     [SerializeField] private Texture2D defaultThumbnail;
     [Space]
@@ -37,35 +34,25 @@ internal class SceneCardView : MonoBehaviour
     [SerializeField] internal GameObject roleOperatorGO;
     [SerializeField] internal GameObject roleContributorGO;
 
-    private string sceneId;
-    private bool isSceneDeployed;
-    private UserRole userRole;
+    internal ISceneData sceneData;
+    private AssetPromise_Texture thumbnailPromise;
 
     private void Awake()
     {
-        jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneId));
-        editorButton.onClick.AddListener(()=> OnEditorPressed?.Invoke(sceneId));
-
-        contextMenuButton.onClick.AddListener(
-            ()=>
-                OnContextMenuPressed?.Invoke(sceneId, isSceneDeployed,
-                    userRole == UserRole.OWNER || userRole == UserRole.OPERATOR,
-                    userRole == UserRole.CONTRIBUTOR)
-                );
+        jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneData));
+        editorButton.onClick.AddListener(()=> OnEditorPressed?.Invoke(sceneData));
+        contextMenuButton.onClick.AddListener(()=> OnContextMenuPressed?.Invoke(sceneData));
     }
 
-    public void Setup(string sceneId, bool isDeployed, string sceneName,
-        Vector2 sceneCoords, Vector2 sceneSize,
-        Texture2D thumbnailTexture, UserRole userRole)
+    public void Setup(ISceneData sceneData)
     {
-        this.sceneId = sceneId;
-
-        SetThumbnail(thumbnailTexture);
-        SetName(sceneName);
-        SetCoords(sceneCoords);
-        SetSize(sceneSize);
-        SetDeployed(isDeployed);
-        SetUserRole(userRole);
+        this.sceneData = sceneData;
+        SetThumbnail(sceneData.thumbnailUrl);
+        SetName(sceneData.name);
+        SetCoords(sceneData.coords);
+        SetSize(sceneData.size);
+        SetDeployed(sceneData.isDeployed);
+        SetUserRole(sceneData.isOwner, sceneData.isOperator, sceneData.isContributor);
     }
 
     public void SetName(string name)
@@ -73,14 +60,35 @@ internal class SceneCardView : MonoBehaviour
         sceneName.text = name;
     }
 
-    public void SetCoords(Vector2 coords)
+    public void SetCoords(Vector2Int coords)
     {
         coordsText.text = $"{coords.x},{coords.y}m";
     }
 
-    public void SetSize(Vector2 size)
+    public void SetSize(Vector2Int size)
     {
         sizeText.text = $"{size.x},{size.y}m";
+    }
+
+    public void SetThumbnail(string thumbnailUrl)
+    {
+        if (thumbnailPromise != null)
+        {
+            AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
+            thumbnailPromise = null;
+        }
+
+        if (string.IsNullOrEmpty(thumbnailUrl))
+        {
+            SetThumbnail((Texture2D) null);
+            return;
+        }
+
+        thumbnailPromise = new AssetPromise_Texture(thumbnailUrl);
+        thumbnailPromise.OnSuccessEvent += texture => SetThumbnail(texture.texture);
+        thumbnailPromise.OnFailEvent += texture => SetThumbnail((Texture2D) null);
+
+        AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
     }
 
     public void SetThumbnail(Texture2D thumbnailTexture)
@@ -90,31 +98,33 @@ internal class SceneCardView : MonoBehaviour
 
     public void SetDeployed(bool deployed)
     {
-        isSceneDeployed = deployed;
         coordsContainer.SetActive(deployed);
         sizeContainer.SetActive(!deployed);
         jumpInButton.gameObject.SetActive(deployed);
     }
 
-    public void SetUserRole(UserRole role)
+    public void SetUserRole(bool isOwner, bool isOperator, bool isContributor)
     {
-        userRole = role;
-
         roleOwnerGO.SetActive(false);
         roleOperatorGO.SetActive(false);
         roleContributorGO.SetActive(false);
 
-        switch (role)
+        if (isOwner)
         {
-            case UserRole.OWNER:
-                roleOwnerGO.SetActive(true);
-                break;
-            case UserRole.OPERATOR:
-                roleOperatorGO.SetActive(true);
-                break;
-            case UserRole.CONTRIBUTOR:
-                roleContributorGO.SetActive(true);
-                break;
+            roleOwnerGO.SetActive(true);
         }
+        else if (isOperator)
+        {
+            roleOperatorGO.SetActive(true);
+        }
+        else if (isContributor)
+        {
+            roleContributorGO.SetActive(true);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
     }
 }
