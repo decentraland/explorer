@@ -79,7 +79,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     Material editMaterial;
 
-    Dictionary<string, GameObject> collidersDictionary = new Dictionary<string, GameObject>();
+    Dictionary<string, List<GameObject>> collidersDictionary = new Dictionary<string, List<GameObject>>();
 
     public void Init(DecentralandEntity entity, Material editMaterial)
     {
@@ -219,10 +219,13 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
     public void DestroyColliders()
-    {
-        foreach (GameObject entityCollider in collidersDictionary.Values)
+    {   
+        foreach (List<GameObject> entityCollider in collidersDictionary.Values)
         {
-            GameObject.Destroy(entityCollider);
+            for(int i = entityCollider.Count-1; i > 0;i--)
+            {
+                Destroy(entityCollider[i]);
+            }      
         }
 
         collidersDictionary.Clear();
@@ -424,18 +427,25 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
-        GameObject entityCollider = new GameObject(entity.entityId);
-        entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+        //GameObject entityCollider = new GameObject(entity.entityId);
+        //entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+
+        //Transform t = entityCollider.transform;
+        //t.SetParent(meshInfo.meshRootGameObject.transform);
+        //t.ResetLocalTRS();
+
+        List<GameObject> colliderList = new List<GameObject>();
 
         for (int i = 0; i < meshInfo.renderers.Length; i++)
         {
+            GameObject entityColliderChildren = new GameObject(entity.entityId);
+            entityColliderChildren.layer = LayerMask.NameToLayer("OnBuilderPointerClick");      
 
-
-            Transform t = entityCollider.transform;
+            Transform t = entityColliderChildren.transform;
             t.SetParent(meshInfo.renderers[i].transform);
             t.ResetLocalTRS();
 
-            var meshCollider = entityCollider.AddComponent<MeshCollider>();
+            var meshCollider = entityColliderChildren.AddComponent<MeshCollider>();
 
             if (meshInfo.renderers[i] is SkinnedMeshRenderer)
             {
@@ -450,20 +460,23 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
 
             meshCollider.enabled = meshInfo.renderers[i].enabled;
+            colliderList.Add(entityColliderChildren);
 
             if (isNFT)
             {
                 if (collidersDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId))
                     collidersDictionary.Remove(entity.scene.sceneData.id + entity.entityId);
 
-                collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
+            
 
-                entityCollider = new GameObject(entity.entityId);
-                entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
+                collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, colliderList);
+
+                colliderList = new List<GameObject>();
             }
         }
 
-        if(!isNFT) collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, entityCollider);
+        if(!isNFT)
+            collidersDictionary.Add(entity.scene.sceneData.id + entity.entityId, colliderList);
     }
 
     bool IsEntityNFT()
