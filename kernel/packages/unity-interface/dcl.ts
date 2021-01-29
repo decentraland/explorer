@@ -48,7 +48,8 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
-import { getFetchContentServer } from 'shared/dao/selectors'
+
+const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -198,24 +199,27 @@ export async function startPortableExperienceScene(unityInterface: UnityInterfac
 }
 
 export async function getPortableExperienceFromS3Bucket(cid: string, peId: string) {
-  const baseUrl: string = 'https://static-pe.decentraland.io'
-  const sceneUrl: string = `${baseUrl}/${peId}/scene.json`
-  const mappingsUrl: string = `${baseUrl}/${peId}/mappings`
+  const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}`
 
-  const result = await fetch(sceneUrl)
+  const mappingsFetch = await fetch(`${baseUrl}/mappings`)
+  const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
-  if (result.ok) {
-    const scene = (await result.json()) as SceneJsonData
-    const mappingsFetch = await fetch(mappingsUrl)
-    const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
+  const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file == 'scene.json')
 
-    return getLoadablePortableExperience({
-      cid,
-      baseUrl: `${baseUrl}/${peId}`,
-      baseUrlBundles: 'MOCK',
-      mappings: mappingsResponse.contents,
-      sceneJsonData: scene
-    })
+  if (sceneJsonMapping) {
+    const sceneResponse = await fetch(`${baseUrl}/${sceneJsonMapping.hash}`)
+
+    if (sceneResponse.ok) {
+      const scene = (await sceneResponse.json()) as SceneJsonData
+      return getLoadablePortableExperience({
+        cid,
+        baseUrl: `${baseUrl}`,
+        mappings: mappingsResponse.contents,
+        sceneJsonData: scene
+      })
+    } else {
+      throw new Error('Could not load scene.json')
+    }
   } else {
     throw new Error('Could not load scene.json')
   }
@@ -227,9 +231,8 @@ export function getLoadablePortableExperience(data: {
   mappings: ContentMapping[]
   sceneJsonData: SceneJsonData
   baseUrl: string
-  baseUrlBundles: string
 }): EnvironmentData<LoadablePortableExperienceScene> {
-  const { cid, mappings, sceneJsonData, baseUrl, baseUrlBundles } = data
+  const { cid, mappings, sceneJsonData, baseUrl } = data
 
   const sceneJsons = mappings.filter((land) => land.file === 'scene.json')
   if (!sceneJsons.length) {
@@ -254,7 +257,7 @@ export function getLoadablePortableExperience(data: {
           sceneJsonData.scene.parcels.map(parseParcelPosition)) ||
         [],
       baseUrl: baseUrl,
-      baseUrlBundles: baseUrlBundles,
+      baseUrlBundles: '',
       contents: mappings,
       icon: sceneJsonData.display?.favicon
     }
