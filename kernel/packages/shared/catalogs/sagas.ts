@@ -55,7 +55,7 @@ function overrideBaseUrl(wearable: Wearable) {
       baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
     }
   } else {
-    return wearable ?? {}
+    return wearable
   }
 }
 
@@ -89,16 +89,17 @@ function* initialLoad() {
           }
         }
       }
-      const catalog = collections!
+      const catalog: Wearable[] = collections!
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
+        .filter((wearable) => !!wearable)
         .map(overrideBaseUrl)
       const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
       const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
       if (!(yield select(isInitialized))) {
         yield take(RENDERER_INITIALIZED)
       }
-      yield put(catalogLoaded('base-avatars', baseAvatars as Wearable[]))
-      yield put(catalogLoaded('base-exclusive', baseExclusive as Wearable[]))
+      yield put(catalogLoaded('base-avatars', baseAvatars))
+      yield put(catalogLoaded('base-exclusive', baseExclusive))
     } catch (error) {
       defaultLogger.error('[FATAL]: Could not load catalog!', error)
     }
