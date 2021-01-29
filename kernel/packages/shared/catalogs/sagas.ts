@@ -33,18 +33,12 @@ import { ensureRenderer } from 'shared/renderer/sagas'
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 
 /**
- * This saga handles both passports and assets required for the renderer to show the
- * users' inventory and avatar editor.
+ * This saga handles wearable definition fetching.
  *
- * When the renderer is initialized, it will fetch the asset catalog and submit it to the renderer.
+ * When the renderer detects a new wearable, but it doesn't know its definition, then it will create a catalog request.
  *
- * Whenever a passport is requested, it will fetch it and store it locally (see also: `selectors.ts`)
+ * This request will include the ids of the unknown wearables. We will then find the appropriate definition, and return it to the renderer.
  *
- * If a user avatar was not found, it will create a random passport (see: `handleRandomAsSuccess`)
- *
- * Lastly, we handle save requests by submitting both to the avatar legacy server as well as to the profile server.
- *
- * It's *very* important for the renderer to never receive a passport with items that have not been loaded into the catalog.
  */
 export function* catalogsSaga(): any {
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
