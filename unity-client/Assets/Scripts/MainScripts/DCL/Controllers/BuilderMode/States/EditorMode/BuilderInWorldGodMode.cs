@@ -83,7 +83,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         builderInputWrapper.OnMouseUp -= OnMouseUp;
         builderInputWrapper.OnMouseDrag -= OnMouseDrag;
 
-        if (HUDController.i.builderInWorldMainHud != null)
+        if (HUDController.i.builderInWorldMainHud == null)
             return;
 
         HUDController.i.builderInWorldMainHud.OnSelectedObjectPositionChange -= UpdateSelectionPosition;

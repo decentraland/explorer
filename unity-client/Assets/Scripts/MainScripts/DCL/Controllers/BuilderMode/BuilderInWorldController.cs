@@ -917,7 +917,10 @@ public class BuilderInWorldController : MonoBehaviour
 
         if(!UserHasPermissionOnParcelScene(sceneToEdit))
         {
-            //TODO: Show notifications saying that you don't have permission
+            Notification.Model notificationModel = new Notification.Model();
+            notificationModel.message = "You don't have permissions to operate this land";
+            notificationModel.type = NotificationFactory.Type.GENERIC;
+            HUDController.i.notificationHud.ShowNotification(notificationModel);
             return;
         }
 
