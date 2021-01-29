@@ -14,10 +14,10 @@ export type Wearable = {
   hides?: string[]
   replaces?: string[]
   rarity: RarityEnum
-  representations: BodyShapeRespresentation[]
+  representations: BodyShapeRepresentation[]
 }
 
-export type BodyShapeRespresentation = {
+export type BodyShapeRepresentation = {
   bodyShapes: string[]
   mainFile: string
   overrideHides?: string[]
@@ -36,7 +36,7 @@ export type ColorString = string
 
 export type CatalogState = {
   catalogs: {
-    [key: string]: { id: string; status: 'loading' | 'error' | 'ok'; data?: Wearable[]; error?: any }
+    [key: string]: { id: string; status: 'loading' | 'error' | 'ok'; data?: Record<WearableId, Wearable>; error?: any }
   }
 }
 

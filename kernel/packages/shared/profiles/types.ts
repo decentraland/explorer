@@ -11,7 +11,6 @@ export interface Profile {
   inventory: WearableId[]
   blocked?: string[]
   muted?: string[]
-  snapshots?: Snapshots
   version: number
   tutorialStep: number
   interests?: string[]

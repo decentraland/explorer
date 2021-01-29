@@ -17,7 +17,6 @@ import { Catalog, Wearable, Collection } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
-import { RarityEnum } from '../airdrops/interface'
 import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
@@ -56,16 +55,6 @@ function overrideBaseUrl(wearable: Wearable) {
   }
 }
 
-function overrideSwankyRarity(wearable: Wearable) {
-  if ((wearable.rarity as any) === 'swanky') {
-    return {
-      ...wearable,
-      rarity: 'rare' as RarityEnum
-    }
-  }
-  return wearable
-}
-
 function* initialLoad() {
   yield call(ensureRealmInitialized)
 
@@ -99,8 +88,6 @@ function* initialLoad() {
       const catalog = collections!
         .reduce((flatten, collection) => flatten.concat(collection.wearables), [] as Wearable[])
         .map(overrideBaseUrl)
-        // TODO - remove once all swankies are removed from service! - moliva - 22/05/2020
-        .map(overrideSwankyRarity)
       const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
       const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
       if (!(yield select(isInitialized))) {
@@ -131,7 +118,7 @@ function* initialLoad() {
   }
 }
 
-export function* handleAddCatalog(action: AddCatalogAction): any {
+function* handleAddCatalog(action: AddCatalogAction): any {
   // TODO (eordano, 16/Sep/2019): Validate correct schema
   if (!action.payload.catalog) {
     return
@@ -151,7 +138,7 @@ async function headCatalog(url: string) {
   return request.headers.get('etag')
 }
 
-export async function fetchCatalog(url: string) {
+async function fetchCatalog(url: string) {
   const request = await fetch(url)
   if (!request.ok) {
     throw new Error('Catalog not found')
@@ -160,7 +147,7 @@ export async function fetchCatalog(url: string) {
   return [await request.json(), etag]
 }
 
-export function sendWearablesCatalog(catalog: Catalog) {
+function sendWearablesCatalog(catalog: Catalog) {
   globalThis.unityInterface.AddWearablesToCatalog(catalog)
 }
 
