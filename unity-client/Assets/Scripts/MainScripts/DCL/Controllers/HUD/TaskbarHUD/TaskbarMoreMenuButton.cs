@@ -41,4 +41,13 @@ public class TaskbarMoreMenuButton : MonoBehaviour
 
         lastPlayedAnimation = newStatus;
     }
+
+    internal float GetAnimationLenght()
+    {
+        if (buttonAnimator.GetCurrentAnimatorClipInfoCount(0) == 0 ||
+            buttonAnimator.GetCurrentAnimatorClipInfo(0).Length == 0)
+            return 0f;
+
+        return buttonAnimator.GetCurrentAnimatorClipInfo(0)[0].clip.length;
+    }
 }

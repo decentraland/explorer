@@ -174,6 +174,9 @@ public class TaskbarMoreMenu : MonoBehaviour
                 yield return new WaitForSeconds(timeBetweenAnimations);
             }
 
+            if (sortedButtonsAnimations.Count > 0)
+                yield return new WaitForSeconds(sortedButtonsAnimations[0].GetAnimationLenght());
+
             moreMenuAnimator.Hide(instant);
         }
     }
