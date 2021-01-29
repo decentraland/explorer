@@ -1,4 +1,6 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
+import { startPortableExperienceScene } from 'unity-interface/dcl'
+import { stopPortableExperienceWorker } from 'worlds/parcelSceneManager'
 import { ExposableAPI } from './ExposableAPI'
 
 enum ExecutorType {
@@ -32,10 +34,26 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
+    await startPortableExperienceScene(spawnParams.portableExperienceId)
+    // TODO: Fill correctly the result
     return {
       pid: 'test',
       identifier: spawnParams.portableExperienceId,
       parentProcess: { type: ExecutorType.QUEST_UI, identifier: 'test' }
     }
+  }
+
+  /**
+   * Stops a portable experience. Only the executor that spawned the portable experience has permission to kill it.
+   * @param {Executor} [executor] - The executor that will stop the PE
+   * @param  {string} [pid] - The portable experience process id
+   *
+   * Returns true if was able to kill the portable experience, false if not.
+   */
+  @exposeMethod
+  async kill(pid: PortableExperienceIdentifier): Promise<boolean> {
+    stopPortableExperienceWorker(pid)
+    TODO: Check if we want to return a boolean
+    return true
   }
 }

@@ -21,4 +21,6 @@ declare module '@decentraland/PortableExperiences' {
   }
 
   export function spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle>
+
+  export function kill(pid: PortableExperienceIdentifier): Promise<boolean>
 }

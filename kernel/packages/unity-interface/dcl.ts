@@ -11,15 +11,7 @@ import {
 import { aborted } from 'shared/loading/ReportFatalError'
 import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import {
-  ContentMapping,
-  EnvironmentData,
-  ILand,
-  LoadableParcelScene,
-  LoadablePortableExperienceScene,
-  MappingsResponse,
-  SceneJsonData
-} from 'shared/types'
+import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
   enableParcelSceneLoading,
   getParcelSceneID,
@@ -31,13 +23,8 @@ import { SceneWorker } from 'shared/world/SceneWorker'
 import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
 import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
-import {
-  getSceneNameFromJsonData,
-  ILandToLoadableParcelScene,
-  ILandToLoadableParcelSceneUpdate
-} from 'shared/selectors'
+import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene, UnityPortableExperienceScene } from './UnityParcelScene'
-
 import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
@@ -47,10 +34,7 @@ import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
-import { spawn } from '@decentraland/PortableExperiences'
-
-const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
+import { getPortableExperienceFromS3Bucket } from './portableExperiencesHelper'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -141,9 +125,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
 
     // Temporal: Try to create several global scenes
-    // TODO: CHeck unityInterface,
-    await spawn('dcl-pe-example1', 'pe1')
-    await spawn('dcl-pe-example2', 'pe2')
+    await startPortableExperienceScene('pe1')
+    await startPortableExperienceScene('pe2')
   }
 
   return {
@@ -188,8 +171,8 @@ export async function startGlobalScene(
   })
 }
 
-export async function startPortableExperienceScene(unityInterface: UnityInterface, cid: string, peId: string) {
-  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(cid, peId))
+export async function startPortableExperienceScene(peId: string) {
+  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(peId))
   loadParcelScene(scene, undefined, true)
   unityInterface.CreateUIScene({
     id: getParcelSceneID(scene),
@@ -199,72 +182,6 @@ export async function startPortableExperienceScene(unityInterface: UnityInterfac
     icon: scene.data.data.icon,
     isPortableExperience: true
   })
-}
-
-export async function getPortableExperienceFromS3Bucket(cid: string, peId: string) {
-  const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
-
-  const mappingsFetch = await fetch(`${baseUrl}mappings`)
-  const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
-
-  const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
-
-  if (sceneJsonMapping) {
-    const sceneResponse = await fetch(`${baseUrl}${sceneJsonMapping.hash}`)
-
-    if (sceneResponse.ok) {
-      const scene = (await sceneResponse.json()) as SceneJsonData
-      return getLoadablePortableExperience({
-        cid,
-        baseUrl: `${baseUrl}`,
-        mappings: mappingsResponse.contents,
-        sceneJsonData: scene
-      })
-    } else {
-      throw new Error('Could not load scene.json')
-    }
-  } else {
-    throw new Error('Could not load scene.json')
-  }
-}
-
-// TODO: move to a proper PE file
-export function getLoadablePortableExperience(data: {
-  cid: string
-  mappings: ContentMapping[]
-  sceneJsonData: SceneJsonData
-  baseUrl: string
-}): EnvironmentData<LoadablePortableExperienceScene> {
-  const { cid, mappings, sceneJsonData, baseUrl } = data
-
-  const sceneJsons = mappings.filter((land) => land.file === 'scene.json')
-  if (!sceneJsons.length) {
-    throw new Error('Invalid scene mapping: no scene.json')
-  }
-
-  return {
-    sceneId: cid,
-    baseUrl: baseUrl,
-    name: getSceneNameFromJsonData(sceneJsonData),
-    main: sceneJsonData.main,
-    useFPSThrottling: false,
-    mappings,
-    data: {
-      id: cid,
-      basePosition: parseParcelPosition(sceneJsonData.scene.base),
-      name: getSceneNameFromJsonData(sceneJsonData),
-      parcels:
-        (sceneJsonData &&
-          sceneJsonData.scene &&
-          sceneJsonData.scene.parcels &&
-          sceneJsonData.scene.parcels.map(parseParcelPosition)) ||
-        [],
-      baseUrl: baseUrl,
-      baseUrlBundles: '',
-      contents: mappings,
-      icon: sceneJsonData.display?.favicon
-    }
-  }
 }
 
 export async function startUnitySceneWorkers() {
