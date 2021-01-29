@@ -72,10 +72,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityRename += ChangeEntityName;
 
-        HUDController.i.builderInWorldMainHud.OnSelectedObjectPositionChange += UpdateEntityPosition;
-        HUDController.i.builderInWorldMainHud.OnSelectedObjectRotationChange += UpdateEntityRotation;
-        HUDController.i.builderInWorldMainHud.OnSelectedObjectScaleChange += UpdateEntityScale;
-
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
     }
@@ -99,10 +95,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityRename -= ChangeEntityName;
 
-        HUDController.i.builderInWorldMainHud.OnSelectedObjectPositionChange -= UpdateEntityPosition;
-        HUDController.i.builderInWorldMainHud.OnSelectedObjectRotationChange -= UpdateEntityRotation;
-        HUDController.i.builderInWorldMainHud.OnSelectedObjectScaleChange -= UpdateEntityScale;
-
         hideSelectedEntitiesAction.OnTriggered -= hideSelectedEntitiesDelegate;
         showAllEntitiesAction.OnTriggered -= showAllEntitiesDelegate;
     }
@@ -113,30 +105,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY) return;
 
         ReportTransform();
-    }
-
-    void UpdateEntityPosition(Vector3 position)
-    {
-        if (selectedEntities.Count <= 0)
-            return;
-
-        selectedEntities[0].transform.position = DCL.Environment.i.world.state.ConvertSceneToUnityPosition(position, sceneToEdit); 
-    }
-
-    void UpdateEntityRotation(Vector3 rotation)
-    {
-        if (selectedEntities.Count <= 0)
-            return;
-
-        selectedEntities[0].transform.rotation = Quaternion.Euler(rotation); 
-    }
-
-    void UpdateEntityScale(Vector3 scale)
-    {
-        if (selectedEntities.Count <= 0)
-            return;
-
-        selectedEntities[0].transform.localScale = scale; 
     }
 
     void ReportTransform()

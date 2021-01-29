@@ -886,6 +886,19 @@ public class BuilderInWorldController : MonoBehaviour
         CheckEnterEditMode();
     }
 
+    bool UserHasPermissionOnParcelScene(ParcelScene scene)
+    {
+        UserProfile userProfile = UserProfile.GetOwnUserProfile();
+        foreach (UserProfileModel.ParcelsWithAccess parcelWithAccess in userProfile.parcelsWithAccess)
+        {
+            foreach (Vector2Int parcel in scene.sceneData.parcels)
+            {
+                if (parcel.x == parcelWithAccess.x && parcel.y == parcelWithAccess.y) return true;
+            }
+        }
+            return false;
+    }
+
     void CheckEnterEditMode()
     {
         if (catalogAdded && sceneReady) EnterEditMode();
@@ -902,7 +915,13 @@ public class BuilderInWorldController : MonoBehaviour
 
         FindSceneToEdit();
 
-        if(activateCamera)
+        if(!UserHasPermissionOnParcelScene(sceneToEdit))
+        {
+            //TODO: Show notifications saying that you don't have permission
+            return;
+        }
+
+        if (activateCamera)
             editorMode.ActivateCamera(sceneToEdit);
 
         sceneToEditId = sceneToEdit.sceneData.id;

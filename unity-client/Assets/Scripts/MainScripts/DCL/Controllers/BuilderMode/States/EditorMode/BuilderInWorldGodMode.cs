@@ -58,6 +58,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmosTransformEnd;
         DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmosTransformStart;
 
+
         builderInputWrapper.OnMouseDown += MouseDown;
         builderInputWrapper.OnMouseUp += MouseUp;
 
@@ -66,6 +67,24 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         squareMultiSelectionInputAction.OnStarted += (o) => squareMultiSelectionButtonPressed = true;
         squareMultiSelectionInputAction.OnFinished += (o) => squareMultiSelectionButtonPressed = false;
+    }
+
+    private void OnDestroy()
+    {
+        DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmosTransformEnd;
+        DCLBuilderGizmoManager.OnGizmoTransformObjectStart -= OnGizmosTransformStart;
+
+        if (HUDController.i.builderInWorldMainHud != null)
+            return;
+
+        HUDController.i.builderInWorldMainHud.OnSelectedObjectPositionChange -= UpdateSelectionPosition;
+        HUDController.i.builderInWorldMainHud.OnSelectedObjectRotationChange -= UpdateSelectionRotation;
+        HUDController.i.builderInWorldMainHud.OnSelectedObjectScaleChange -= UpdateSelectionScale;
+
+
+        HUDController.i.builderInWorldMainHud.OnTranslateSelectedAction -= TranslateMode;
+        HUDController.i.builderInWorldMainHud.OnRotateSelectedAction -= RotateMode;
+        HUDController.i.builderInWorldMainHud.OnScaleSelectedAction -= ScaleMode;
     }
 
     private void Update()
@@ -129,6 +148,42 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
+    public void UpdateSelectionPosition(Vector3 newPosition)
+    {
+        if (selectedEntities.Count != 1)
+            return;
+
+        editionGO.transform.position = DCL.Environment.i.world.state.ConvertSceneToUnityPosition(newPosition, sceneToEdit);
+        UpdateGizmosToSelectedEntities();
+    }
+
+    public void UpdateSelectionRotation(Vector3 rotation)
+    {
+        if (selectedEntities.Count != 1)
+            return;
+
+        editionGO.transform.rotation = Quaternion.Euler(rotation);
+    }
+
+    public void UpdateSelectionScale(Vector3 scale)
+    {
+        if (selectedEntities.Count != 1)
+            return;
+
+        editionGO.transform.localScale = scale;
+    }
+
+    public void UpdateGizmosToSelectedEntities()
+    {
+        List<EditableEntity> editableEntities = new List<EditableEntity>();
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
+        {
+            editableEntities.Add(entity);
+        }
+
+        gizmoManager.SetSelectedEntities(editionGO.transform, editableEntities);
+    }
+
     public override void Init(GameObject goToEdit, GameObject undoGo, GameObject snapGO, GameObject freeMovementGO, List<DCLBuilderInWorldEntity> selectedEntities)
     {
         base.Init(goToEdit, undoGo, snapGO, freeMovementGO, selectedEntities);
@@ -139,6 +194,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             HUDController.i.builderInWorldMainHud.OnTranslateSelectedAction += TranslateMode;
             HUDController.i.builderInWorldMainHud.OnRotateSelectedAction += RotateMode;
             HUDController.i.builderInWorldMainHud.OnScaleSelectedAction += ScaleMode;
+            HUDController.i.builderInWorldMainHud.OnSelectedObjectPositionChange += UpdateSelectionPosition;
+            HUDController.i.builderInWorldMainHud.OnSelectedObjectRotationChange += UpdateSelectionRotation;
+            HUDController.i.builderInWorldMainHud.OnSelectedObjectScaleChange += UpdateSelectionScale;
         }
     }
 
