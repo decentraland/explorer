@@ -97,6 +97,7 @@ export class Vector3 {
    * @param normal - direction of the normal
    * @returns the angle between vector0 and vector1
    */
+  // Unity returns a different result -> unsigned, smallest angle: https://docs.unity3d.com/ScriptReference/Vector3.Angle.html
   public static GetAngleBetweenVectors(vector0: Vector3, vector1: Vector3, normal: ReadOnlyVector3): number {
     const v0: Vector3 = vector0.normalizeToRef(MathTmp.Vector3[1])
     const v1: Vector3 = vector1.normalizeToRef(MathTmp.Vector3[2])

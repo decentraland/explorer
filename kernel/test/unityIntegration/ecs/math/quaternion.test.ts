@@ -39,7 +39,14 @@ const results = {
   normalized02: '(0.0, 0.7, 0.0, 0.7)',
   normalized03: '(-0.7, 0.2, -0.2, -0.6)',
   normalized04: '(0.0, -0.1, 0.0, -1.0)',
-  setFromToRotation01: '(0.0, 0.0, 0.0, 1.0)'
+  setFromToRotation01: '(0.0, 0.0, -0.7, 0.7)',
+  setFromToRotation02: '(0.7, 0.0, 0.0, 0.7)',
+  setFromToRotation03: '(0.5, -0.3, -0.1, 0.8)',
+  setFromToRotation04: '(-0.1, -0.5, -0.3, 0.8)',
+  setFromToRotation05: '(0.0, 1.0, 0.0, 0.0)',
+  setFromToRotation06: '(0.0, 0.0, 0.0, 1.0)',
+  setFromToRotation07: '(-1.0, 0.0, 0.0, 0.0)',
+  setFromToRotation08: '(0.0, 0.0, 0.0, 1.0)'
 }
 
 const normalize = (v: string) => (v === '-0.0' ? '0.0' : v)
@@ -202,9 +209,45 @@ describe('ECS Quaternion tests', () => {
   })
 
   it('quaternion.setFromToRotation', () => {
-    const q1 = Quaternion.Euler(10, 10, 10)
-    q1.setFromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100))
-    expect(quaternionToString(q1)).to.eq(results.setFromToRotation01, 'setFromToRotation01')
+    let upVector = Vector3.Up()
+    let quat = Quaternion.Identity
+    quat.setFromToRotation(Vector3.Up(), Vector3.Right(), upVector)
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation01, 'setFromToRotation01')
+
+    upVector = Vector3.Up()
+    quat = Quaternion.Identity
+    quat.setFromToRotation(Vector3.Up(), Vector3.Forward(), upVector)
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation02, 'setFromToRotation02')
+
+    upVector = new Vector3(50, 0, -39)
+    quat = Quaternion.Identity
+    quat.setFromToRotation(new Vector3(38, 56, 23), new Vector3(12, -5, 99), upVector)
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation03, 'setFromToRotation03')
+
+    upVector = new Vector3(-60, -80, -23)
+    quat = Quaternion.Identity
+    quat.setFromToRotation(new Vector3(-50, 0.5, 15), new Vector3(-66, 66, -91), upVector)
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation04, 'setFromToRotation04')
+
+    upVector = Vector3.Up()
+    quat = Quaternion.Identity
+    quat.setFromToRotation(new Vector3(-1, 0, 0), new Vector3(1, 0, 0), upVector) // Parallel opposite vectors case
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation05, 'setFromToRotation05')
+
+    upVector = Vector3.Up()
+    quat = Quaternion.Identity
+    quat.setFromToRotation(new Vector3(1, 0, 0), new Vector3(1, 0, 0), upVector) // same vectors case
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation06, 'setFromToRotation06')
+
+    upVector = Vector3.Left()
+    quat = Quaternion.Identity
+    quat.setFromToRotation(new Vector3(0, 1, 0), new Vector3(0, -1, 0), upVector)
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation07, 'setFromToRotation07')
+
+    upVector = Vector3.Left()
+    quat = Quaternion.Identity
+    quat.setFromToRotation(new Vector3(0, -1, 0), new Vector3(0, -1, 0), upVector)
+    expect(quaternionToString(quat)).to.eq(results.setFromToRotation08, 'setFromToRotation08')
   })
 
   it('Quaternion.Slerp', () => {

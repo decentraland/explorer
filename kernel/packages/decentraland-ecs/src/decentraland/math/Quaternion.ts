@@ -1,7 +1,7 @@
 import { Matrix } from './Matrix'
 import { Vector3 } from './Vector3'
 import { MathTmp } from './preallocatedVariables'
-import { DEG2RAD, RAD2DEG, Epsilon } from './types'
+import { DEG2RAD, RAD2DEG } from './types'
 
 /** @public */
 export type ReadOnlyQuaternion = {
@@ -484,33 +484,24 @@ export class Quaternion {
 
   /**
    * Creates a rotation which rotates from fromDirection to toDirection.
-   * @param from - defines the first Vector
-   * @param to - defines the second Vector
+   * @param from - defines the first direction Vector
+   * @param to - defines the target direction Vector
+   * Unity-based calculations implemented from https://forum.unity.com/threads/quaternion-lookrotation-around-an-axis.608470/#post-4069888
    */
-  public static FromToRotation(from: Vector3, to: Vector3): Quaternion {
-    const result = new Quaternion()
+  public static FromToRotation(from: Vector3, to: Vector3, up: Vector3 = MathTmp.staticUp): Quaternion {
     let v0 = from.normalize()
     let v1 = to.normalize()
-    let d = Vector3.Dot(v0, v1)
 
-    if (d > -1 + Epsilon) {
-      let s = Math.sqrt((1 + d) * 2)
-      let invs = 1 / s
-      let c = Vector3.Cross(v0, v1).scaleInPlace(invs)
-      result.set(c.x, c.y, c.z, s * 0.5)
-    } else if (d > 1 - Epsilon) {
-      return new Quaternion(0, 0, 0, 1)
+    const a = Vector3.Cross(v0, v1)
+    const w = Math.sqrt(v0.lengthSquared() * v1.lengthSquared()) + Vector3.Dot(v0, v1)
+    if (a.lengthSquared() < 0.0001) {
+      //the vectors are parallel, check w to find direction
+      //if w is 0 then values are opposite, and we sould rotate 180 degrees around the supplied axis
+      //otherwise the vectors in the same direction and no rotation should occur
+      return (Math.abs(w) < 0.0001) ? new Quaternion(up.x, up.y, up.z, 0).normalized : Quaternion.Identity
     } else {
-      let axis = Vector3.Cross(Vector3.Right(), v0)
-
-      if (axis.lengthSquared() < Epsilon) {
-        axis = Vector3.Cross(Vector3.Forward(), v0)
-      }
-
-      result.set(axis.x, axis.y, axis.z, 0)
+      return new Quaternion(a.x, a.y, a.z, w).normalized
     }
-
-    return result.normalize()
   }
 
   /**
@@ -527,7 +518,7 @@ export class Quaternion {
    * @param up - defines the direction
    */
   public setFromToRotation(from: Vector3, to: Vector3, up: Vector3 = MathTmp.staticUp) {
-    const result = Quaternion.FromToRotation(from, to)
+    const result = Quaternion.FromToRotation(from, to, up)
     this.x = result.x
     this.y = result.y
     this.z = result.z
