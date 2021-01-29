@@ -211,7 +211,7 @@ export async function getPortableExperienceFromS3Bucket(cid: string, peId: strin
 
     return getLoadablePortableExperience({
       cid,
-      baseUrl: getFetchContentServer(globalThis.globalStore.getState()) + '/contents/',
+      baseUrl: `${baseUrl}/${peId}`,
       baseUrlBundles: 'MOCK',
       mappings: mappingsResponse.contents,
       sceneJsonData: scene
