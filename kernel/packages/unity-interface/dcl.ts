@@ -199,15 +199,15 @@ export async function startPortableExperienceScene(unityInterface: UnityInterfac
 }
 
 export async function getPortableExperienceFromS3Bucket(cid: string, peId: string) {
-  const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}`
+  const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
 
-  const mappingsFetch = await fetch(`${baseUrl}/mappings`)
+  const mappingsFetch = await fetch(`${baseUrl}mappings`)
   const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
-  const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file == 'scene.json')
+  const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
 
   if (sceneJsonMapping) {
-    const sceneResponse = await fetch(`${baseUrl}/${sceneJsonMapping.hash}`)
+    const sceneResponse = await fetch(`${baseUrl}${sceneJsonMapping.hash}`)
 
     if (sceneResponse.ok) {
       const scene = (await sceneResponse.json()) as SceneJsonData
