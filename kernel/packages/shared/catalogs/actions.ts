@@ -3,10 +3,6 @@ import { Catalog, Wearable, WearableId } from './types'
 
 // Wearables catalog
 
-export const ADD_CATALOG = 'Add Catalog'
-export const addCatalog = (name: string, catalog: Catalog) => action(ADD_CATALOG, { name, catalog })
-export type AddCatalogAction = ReturnType<typeof addCatalog>
-
 export const CATALOG_REQUEST = 'Catalog Request'
 export const catalogRequest = (wearableIds: WearableId[]) => action(CATALOG_REQUEST, { wearableIds })
 export type CatalogRequestAction = ReturnType<typeof catalogRequest>
@@ -16,5 +12,5 @@ export const catalogSuccess = (wearables: Wearable[]) => action(CATALOG_SUCCESS,
 export type CatalogSuccessAction = ReturnType<typeof catalogSuccess>
 
 export const CATALOG_LOADED = 'Catalog Loaded'
-export const catalogLoaded = (name: string) => action(CATALOG_LOADED, { name })
+export const catalogLoaded = (name: string, catalog: Catalog) => action(CATALOG_LOADED, { name, catalog })
 export type CatalogLoadedAction = ReturnType<typeof catalogLoaded>

@@ -50,6 +50,7 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
+import { catalogRequest } from 'shared/catalogs/actions'
 
 declare const DCL: any
 
@@ -462,6 +463,10 @@ export class BrowserInterface {
     } else {
       globalThis.globalStore.dispatch(unmutePlayers(data.usersId))
     }
+  }
+
+  public RequestWearables(data: { wearableIds: string[] }) {
+    globalThis.globalStore.dispatch(catalogRequest(data.wearableIds))
   }
 }
 

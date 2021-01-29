@@ -11,8 +11,16 @@ import {
 import defaultLogger from 'shared/logger'
 import { isInitialized } from 'shared/renderer/selectors'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
-import { addCatalog, AddCatalogAction, ADD_CATALOG, catalogLoaded, CATALOG_LOADED } from './actions'
-import { baseCatalogsLoaded } from './selectors'
+import {
+  catalogLoaded,
+  CatalogRequestAction,
+  catalogSuccess,
+  CatalogSuccessAction,
+  CATALOG_LOADED,
+  CATALOG_REQUEST,
+  CATALOG_SUCCESS
+} from './actions'
+import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
 import { Catalog, Wearable, Collection } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
@@ -20,6 +28,7 @@ import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
+import { ensureRenderer } from 'shared/renderer/sagas'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 
@@ -40,7 +49,8 @@ declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 export function* catalogsSaga(): any {
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 
-  yield takeLatest(ADD_CATALOG, handleAddCatalog)
+  yield takeLatest(CATALOG_REQUEST, handleCatalogRequest)
+  yield takeLatest(CATALOG_SUCCESS, handleCatalogSuccess)
 }
 
 function overrideBaseUrl(wearable: Wearable) {
@@ -93,8 +103,8 @@ function* initialLoad() {
       if (!(yield select(isInitialized))) {
         yield take(RENDERER_INITIALIZED)
       }
-      yield put(addCatalog('base-avatars', baseAvatars))
-      yield put(addCatalog('base-exclusive', baseExclusive))
+      yield put(catalogLoaded('base-avatars', baseAvatars))
+      yield put(catalogLoaded('base-exclusive', baseExclusive))
     } catch (error) {
       defaultLogger.error('[FATAL]: Could not load catalog!', error)
     }
@@ -113,21 +123,33 @@ function* initialLoad() {
     } catch (e) {
       defaultLogger.warn(`Could not load base catalog`)
     }
-    yield put(addCatalog('base-avatars', baseCatalog))
-    yield put(addCatalog('base-exclusive', []))
+    yield put(catalogLoaded('base-avatars', baseCatalog))
+    yield put(catalogLoaded('base-exclusive', []))
   }
 }
 
-function* handleAddCatalog(action: AddCatalogAction): any {
-  // TODO (eordano, 16/Sep/2019): Validate correct schema
-  if (!action.payload.catalog) {
-    return
-  }
-  if (!(yield select(isInitialized))) {
-    yield take(RENDERER_INITIALIZED)
-  }
-  yield call(sendWearablesCatalog, action.payload.catalog)
-  yield put(catalogLoaded(action.payload.name))
+function* handleCatalogRequest(action: CatalogRequestAction) {
+  const { wearableIds } = action.payload
+
+  yield call(ensureBaseCatalogs)
+
+  const platformCatalog = yield select(getPlatformCatalog)
+  const exclusiveCatalog = yield select(getExclusiveCatalog)
+
+  const wearables: Wearable[] = wearableIds
+    .map((wearableId) =>
+      wearableId.startsWith(`dcl://base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
+    )
+    .filter((wearable) => !!wearable)
+  yield put(catalogSuccess(wearables))
+}
+
+function* handleCatalogSuccess(action: CatalogSuccessAction) {
+  const { wearables } = action.payload
+
+  yield call(ensureRenderer)
+
+  yield call(sendWearablesCatalog, wearables)
 }
 
 async function headCatalog(url: string) {

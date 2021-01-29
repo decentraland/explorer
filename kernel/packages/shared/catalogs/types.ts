@@ -36,7 +36,7 @@ export type ColorString = string
 
 export type CatalogState = {
   catalogs: {
-    [key: string]: { id: string; status: 'loading' | 'error' | 'ok'; data?: Record<WearableId, Wearable>; error?: any }
+    [key: string]: { id: string; status: 'error' | 'ok'; data?: Record<WearableId, Wearable>; error?: any }
   }
 }
 
