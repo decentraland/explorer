@@ -69,7 +69,7 @@ internal class SceneCardView : MonoBehaviour
 
     public void SetCoords(Vector2Int coords)
     {
-        coordsText.text = $"{coords.x},{coords.y}m";
+        coordsText.text = $"{coords.x},{coords.y}";
     }
 
     public void SetSize(Vector2Int size)
