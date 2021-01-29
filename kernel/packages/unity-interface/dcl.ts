@@ -48,7 +48,8 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 import { parseParcelPosition } from 'atomicHelpers/parcelScenePositions'
-import { getFetchContentServer } from 'shared/dao/selectors'
+
+const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -84,16 +85,6 @@ export function setLoadingScreenVisible(shouldShow: boolean) {
     TeleportController.stopTeleportAnimation()
   }
 }
-
-const pe1SourceRaw = require('raw-loader!../../public/test-portable-experiences/p1/bin/game.js')
-const pe1SourceBlob = new Blob([pe1SourceRaw])
-const pe1SourceUrl = URL.createObjectURL(pe1SourceBlob)
-const pe1IconRelativeUrl = 'assets/icon.png'
-
-const pe2SourceRaw = require('raw-loader!../../public/test-portable-experiences/p2/bin/game.js')
-const pe2SourceBlob = new Blob([pe2SourceRaw])
-const pe2SourceUrl = URL.createObjectURL(pe2SourceBlob)
-const pe2IconRelativeUrl = 'assets/icon.png'
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -148,8 +139,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
     // Temporal: Try to create several global scenes
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example1', 'A cube above you!', pe1SourceUrl, pe1IconRelativeUrl)
-    await startPortableExperinceScene(unityInterface, 'dcl-pe-example2', 'Find the Dragon', pe2SourceUrl, pe2IconRelativeUrl)
+    await startPortableExperienceScene(unityInterface, 'dcl-pe-example1', 'pe1')
+    await startPortableExperienceScene(unityInterface, 'dcl-pe-example2', 'pe2')
   }
 
   return {
@@ -165,7 +156,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string) {
+export async function startGlobalScene(
+  unityInterface: UnityInterface,
+  cid: string,
+  title: string,
+  fileContent: string
+) {
   const scene = new UnityScene({
     sceneId: cid,
     name: title,
@@ -180,11 +176,17 @@ export async function startGlobalScene(unityInterface: UnityInterface, cid: stri
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), name: scene.data.name, baseUrl: scene.data.baseUrl, isPortableExperience: false, contents: [] })
+  unityInterface.CreateUIScene({
+    id: getParcelSceneID(scene),
+    name: scene.data.name,
+    baseUrl: scene.data.baseUrl,
+    isPortableExperience: false,
+    contents: []
+  })
 }
 
-export async function startPortableExperinceScene(unityInterface: UnityInterface, cid: string, title: string, fileContent: string, iconRelativeUrl: string) {
-  const scene = new UnityPortableExperienceScene(getMockedExperience(cid, title, fileContent, iconRelativeUrl))
+export async function startPortableExperienceScene(unityInterface: UnityInterface, cid: string, peId: string) {
+  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(cid, peId))
   loadParcelScene(scene, undefined, true)
   unityInterface.CreateUIScene({
     id: getParcelSceneID(scene),
@@ -196,28 +198,31 @@ export async function startPortableExperinceScene(unityInterface: UnityInterface
   })
 }
 
-export function getMockedExperience(cid: string, title: string, fileContent: string, iconRelativeUrl: string) {
-  // this is the mock
-  return getLoadablePortableExperience({
-    cid,
-    baseUrl: getFetchContentServer(globalThis.globalStore.getState()) + '/contents/',
-    baseUrlBundles: 'MOCK',
-    mappings: [
-      { file: 'scene.json', hash: 'MOCK' },
-      { file: 'assets/icon.png', hash: 'QmdcU2hPGvHjvfRvZRRfY1rX681PG1ESFAHTPiKNp5njZH' }
-    ],
+export async function getPortableExperienceFromS3Bucket(cid: string, peId: string) {
+  const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
 
-    sceneJsonData: {
-      display: { title: title, favicon: iconRelativeUrl },
-      contact: { name: 'Decentraland' },
-      owner: '',
-      main: fileContent,
-      tags: [],
-      scene: { base: '0,0', parcels: [] },
-      policy: {},
-      communications: { commServerUrl: '' }
+  const mappingsFetch = await fetch(`${baseUrl}mappings`)
+  const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
+
+  const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
+
+  if (sceneJsonMapping) {
+    const sceneResponse = await fetch(`${baseUrl}${sceneJsonMapping.hash}`)
+
+    if (sceneResponse.ok) {
+      const scene = (await sceneResponse.json()) as SceneJsonData
+      return getLoadablePortableExperience({
+        cid,
+        baseUrl: `${baseUrl}`,
+        mappings: mappingsResponse.contents,
+        sceneJsonData: scene
+      })
+    } else {
+      throw new Error('Could not load scene.json')
     }
-  })
+  } else {
+    throw new Error('Could not load scene.json')
+  }
 }
 
 // TODO: move to a proper PE file
@@ -226,9 +231,8 @@ export function getLoadablePortableExperience(data: {
   mappings: ContentMapping[]
   sceneJsonData: SceneJsonData
   baseUrl: string
-  baseUrlBundles: string
 }): EnvironmentData<LoadablePortableExperienceScene> {
-  const { cid, mappings, sceneJsonData, baseUrl, baseUrlBundles } = data
+  const { cid, mappings, sceneJsonData, baseUrl } = data
 
   const sceneJsons = mappings.filter((land) => land.file === 'scene.json')
   if (!sceneJsons.length) {
@@ -253,7 +257,7 @@ export function getLoadablePortableExperience(data: {
           sceneJsonData.scene.parcels.map(parseParcelPosition)) ||
         [],
       baseUrl: baseUrl,
-      baseUrlBundles: baseUrlBundles,
+      baseUrlBundles: '',
       contents: mappings,
       icon: sceneJsonData.display?.favicon
     }
@@ -300,7 +304,7 @@ export async function startUnitySceneWorkers() {
 // Builder functions
 let currentLoadedScene: SceneWorker | null
 
-export async function loadPreviewScene(ws?: string) {
+export async function loadPreviewScene(ws?: string): Promise<ILand> {
   const result = await fetch('/scene.json?nocache=' + Math.random())
 
   let lastId: string | null = null
