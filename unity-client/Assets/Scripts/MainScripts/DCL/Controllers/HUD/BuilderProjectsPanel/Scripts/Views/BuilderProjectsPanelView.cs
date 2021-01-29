@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-internal class BuilderProjectsPanelView : MonoBehaviour
+internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener, IProjectSceneListener
 {
     [Header("References")]
     [SerializeField] internal Button closeButton;
@@ -28,6 +29,9 @@ internal class BuilderProjectsPanelView : MonoBehaviour
     public event Action<bool> OnProjectsToggleChanged;
     public event Action<bool> OnLandToggleChanged;
 
+    private int deployedScenesCount = 0;
+    private int projectScenesCount = 0;
+
     private void Awake()
     {
         MOCKUP();
@@ -42,31 +46,113 @@ internal class BuilderProjectsPanelView : MonoBehaviour
         landToggle.OnToggleValueChanged += OnLandToggleChanged;
     }
 
-    public void SetScenesSubMenu(bool hasDeployedScenes, bool hasProjectScenes)
+    private void SubmenuScenesDirty()
     {
-        inWorldScenesToggle.gameObject.SetActive(hasDeployedScenes);
-        projectsToggle.gameObject.SetActive(hasProjectScenes);
+        inWorldScenesToggle.gameObject.SetActive(deployedScenesCount > 0);
+        projectsToggle.gameObject.SetActive(projectScenesCount > 0);
+    }
+
+    void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
+    {
+        deployedScenesCount = scenes.Count;
+        SubmenuScenesDirty();
+    }
+
+    void IProjectSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
+    {
+        projectScenesCount = scenes.Count;
+        SubmenuScenesDirty();
+    }
+
+    void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)
+    {
+        deployedScenesCount++;
+        SubmenuScenesDirty();
+    }
+
+    void IProjectSceneListener.OnSceneAdded(SceneCardView scene)
+    {
+        projectScenesCount++;
+        SubmenuScenesDirty();
+    }
+
+    void IDeployedSceneListener.OnSceneRemoved(SceneCardView scene)
+    {
+        deployedScenesCount--;
+        SubmenuScenesDirty();
+    }
+
+    void IProjectSceneListener.OnSceneRemoved(SceneCardView scene)
+    {
+        projectScenesCount--;
+        SubmenuScenesDirty();
     }
 
     private void MOCKUP()
     {
-        SectionsController controller = new SectionsController(sectionViewFactory, sectionsContainer);
+        SectionsController sectionsController = new SectionsController(sectionViewFactory, sectionsContainer);
+        ScenesViewController scenesViewController = new ScenesViewController(sceneCardViewPrefab);
 
         OnScenesToggleChanged += (isOn) =>
         {
-            if (isOn) controller.OpenSection(SectionsController.SectionId.SCENES_MAIN);
+            if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
         };
         OnInWorldScenesToggleChanged += (isOn) =>
         {
-            if (isOn) controller.OpenSection(SectionsController.SectionId.SCENES_DEPLOYED);
+            if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_DEPLOYED);
         };
         OnProjectsToggleChanged += (isOn) =>
         {
-            if (isOn) controller.OpenSection(SectionsController.SectionId.SCENES_PROJECT);
+            if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_PROJECT);
         };
         OnLandToggleChanged += (isOn) =>
         {
-            if (isOn) controller.OpenSection(SectionsController.SectionId.LAND);
+            if (isOn) sectionsController.OpenSection(SectionsController.SectionId.LAND);
         };
+
+        sectionsController.OnSectionShow += sectionBase =>
+        {
+            if (sectionBase is IDeployedSceneListener deployedSceneListener)
+            {
+                scenesViewController.OnDeployedSceneAdded += deployedSceneListener.OnSceneAdded;
+                scenesViewController.OnDeployedSceneRemoved += deployedSceneListener.OnSceneRemoved;
+                scenesViewController.OnDeployedScenesSet += deployedSceneListener.OnSetScenes;
+                scenesViewController.SetListener(deployedSceneListener);
+            }
+            if (sectionBase is IProjectSceneListener projectSceneListener)
+            {
+                scenesViewController.OnProjectSceneAdded += projectSceneListener.OnSceneAdded;
+                scenesViewController.OnProjectSceneRemoved += projectSceneListener.OnSceneRemoved;
+                scenesViewController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
+                scenesViewController.SetListener(projectSceneListener);
+            }
+        };
+
+        sectionsController.OnSectionHide += sectionBase =>
+        {
+            if (sectionBase is IDeployedSceneListener deployedSceneListener)
+            {
+                scenesViewController.OnDeployedSceneAdded -= deployedSceneListener.OnSceneAdded;
+                scenesViewController.OnDeployedSceneRemoved -= deployedSceneListener.OnSceneRemoved;
+                scenesViewController.OnDeployedScenesSet -= deployedSceneListener.OnSetScenes;
+            }
+            if (sectionBase is IProjectSceneListener projectSceneListener)
+            {
+                scenesViewController.OnProjectSceneAdded -= projectSceneListener.OnSceneAdded;
+                scenesViewController.OnProjectSceneRemoved -= projectSceneListener.OnSceneRemoved;
+                scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
+            }
+        };
+
+        IDeployedSceneListener thisDeployedSceneListener = this;
+        IProjectSceneListener thisProjectSceneListener = this;
+        scenesViewController.OnDeployedSceneAdded += thisDeployedSceneListener.OnSceneAdded;
+        scenesViewController.OnDeployedSceneRemoved += thisDeployedSceneListener.OnSceneRemoved;
+        scenesViewController.OnDeployedScenesSet += thisDeployedSceneListener.OnSetScenes;
+        scenesViewController.OnProjectSceneAdded += thisProjectSceneListener.OnSceneAdded;
+        scenesViewController.OnProjectSceneRemoved += thisProjectSceneListener.OnSceneRemoved;
+        scenesViewController.OnProjectScenesSet += thisProjectSceneListener.OnSetScenes;
+        scenesViewController.SetListener(thisDeployedSceneListener);
+        scenesViewController.SetListener(thisProjectSceneListener);
     }
 }

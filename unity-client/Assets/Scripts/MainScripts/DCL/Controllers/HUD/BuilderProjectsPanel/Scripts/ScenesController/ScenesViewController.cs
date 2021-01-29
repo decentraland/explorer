@@ -11,8 +11,8 @@ internal class ScenesViewController : IDisposable
     public event Action<SceneCardView> OnProjectSceneAdded;
     public event Action<SceneCardView> OnProjectSceneRemoved;
 
-    private Dictionary<string, SceneCardView> deployedScenes = null;
-    private Dictionary<string, SceneCardView> projectScenes = null;
+    private Dictionary<string, SceneCardView> deployedScenes = new Dictionary<string, SceneCardView>();
+    private Dictionary<string, SceneCardView> projectScenes = new Dictionary<string, SceneCardView>();
 
     private readonly ScenesRefreshHelper scenesRefreshHelper = new ScenesRefreshHelper();
     private readonly SceneCardView sceneCardViewPrefab;
@@ -94,6 +94,16 @@ internal class ScenesViewController : IDisposable
         }
 
         projectScenes.Clear();
+    }
+
+    public void SetListener(IDeployedSceneListener listener)
+    {
+        listener.OnSetScenes(deployedScenes);
+    }
+
+    public void SetListener(IProjectSceneListener listener)
+    {
+        listener.OnSetScenes(deployedScenes);
     }
 
     private void SetScene(ISceneData sceneData)
