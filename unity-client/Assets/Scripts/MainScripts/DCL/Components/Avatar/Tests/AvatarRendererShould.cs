@@ -15,7 +15,7 @@ namespace AvatarShape_Tests
         private const string BLUE_BANDANA_ID = "dcl://base-avatars/blue_bandana";
 
         private AvatarModel avatarModel;
-        private WearableDictionary catalog;
+        private BaseDictionary<string, WearableItem> catalog;
         private AvatarRenderer avatarRenderer;
 
         [UnitySetUp]

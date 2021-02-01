@@ -1,3 +1,4 @@
+using DCL;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -7,35 +8,8 @@ public class CatalogController : MonoBehaviour
     public static bool VERBOSE = false;
     public static CatalogController i { get; private set; }
 
-    private static ItemDictionary itemCatalogValue;
-
-    public static ItemDictionary itemCatalog
-    {
-        get
-        {
-            if (itemCatalogValue == null)
-            {
-                itemCatalogValue = Resources.Load<ItemDictionary>("ItemCatalog");
-            }
-
-            return itemCatalogValue;
-        }
-    }
-
-    private static WearableDictionary wearableCatalogValue;
-
-    public static WearableDictionary wearableCatalog
-    {
-        get
-        {
-            if (wearableCatalogValue == null)
-            {
-                wearableCatalogValue = Resources.Load<WearableDictionary>("WearableCatalog");
-            }
-
-            return wearableCatalogValue;
-        }
-    }
+    public static BaseDictionary<string, Item> itemCatalog => DataStore.Catalog.items;
+    public static BaseDictionary<string, WearableItem> wearableCatalog => DataStore.Catalog.wearables;
 
     public void Awake()
     {

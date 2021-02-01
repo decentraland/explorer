@@ -16,7 +16,7 @@ public class AvatarEditorHUDController : IHUD
     public bool bypassUpdateAvatarPreview = false;
 
     private UserProfile userProfile;
-    private WearableDictionary catalog;
+    private BaseDictionary<string, WearableItem> catalog;
     bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
     protected readonly AvatarEditorHUDModel model = new AvatarEditorHUDModel();
@@ -35,7 +35,7 @@ public class AvatarEditorHUDController : IHUD
     {
     }
 
-    public void Initialize(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
+    public void Initialize(UserProfile userProfile, BaseDictionary<string, WearableItem> catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
@@ -56,7 +56,7 @@ public class AvatarEditorHUDController : IHUD
         this.userProfile.OnUpdate += LoadUserProfile;
     }
 
-    public void SetCatalog(WearableDictionary catalog)
+    public void SetCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         if (this.catalog != null)
         {
@@ -312,11 +312,11 @@ public class AvatarEditorHUDController : IHUD
         model.wearables.Clear();
     }
 
-    private void ProcessCatalog(WearableDictionary catalog)
+    private void ProcessCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         wearablesByCategory.Clear();
         view.RemoveAllWearables();
-        using (var iterator = catalog.GetEnumerator())
+        using (var iterator = catalog.Get().GetEnumerator())
         {
             while (iterator.MoveNext())
             {

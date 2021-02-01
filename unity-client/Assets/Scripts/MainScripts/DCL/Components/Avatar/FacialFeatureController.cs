@@ -122,7 +122,7 @@ public class FacialFeatureController
     public static FacialFeatureController CreateDefaultFacialFeature(string bodyShape, string category, Material material)
     {
         string defaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, category);
-        WearableItem wearable = CatalogController.wearableCatalog.GetOrDefault(defaultId);
+        CatalogController.wearableCatalog.TryGetValue(defaultId, out WearableItem wearable);
         if (wearable == null)
         {
             Debug.LogError($"Couldn't resolve wearable {defaultId}");
