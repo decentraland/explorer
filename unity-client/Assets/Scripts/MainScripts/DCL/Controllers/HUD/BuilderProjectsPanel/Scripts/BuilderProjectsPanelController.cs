@@ -35,8 +35,9 @@ public class BuilderProjectsPanelController
         scenesViewController.OnProjectSceneAdded += viewProjectSceneListener.OnSceneAdded;
         scenesViewController.OnProjectSceneRemoved += viewProjectSceneListener.OnSceneRemoved;
         scenesViewController.OnProjectScenesSet += viewProjectSceneListener.OnSetScenes;
-        scenesViewController.NotifySet(viewDeployedSceneListener);
-        scenesViewController.NotifySet(viewProjectSceneListener);
+
+        viewDeployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
+        viewProjectSceneListener.OnSetScenes(scenesViewController.projectScenes);
     }
 
     void OnSceneToggleChanged(bool isOn)
@@ -66,14 +67,14 @@ public class BuilderProjectsPanelController
             scenesViewController.OnDeployedSceneAdded += deployedSceneListener.OnSceneAdded;
             scenesViewController.OnDeployedSceneRemoved += deployedSceneListener.OnSceneRemoved;
             scenesViewController.OnDeployedScenesSet += deployedSceneListener.OnSetScenes;
-            scenesViewController.NotifySet(deployedSceneListener);
+            deployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
         }
         if (sectionBase is IProjectSceneListener projectSceneListener)
         {
             scenesViewController.OnProjectSceneAdded += projectSceneListener.OnSceneAdded;
             scenesViewController.OnProjectSceneRemoved += projectSceneListener.OnSceneRemoved;
             scenesViewController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
-            scenesViewController.NotifySet(projectSceneListener);
+            projectSceneListener.OnSetScenes(scenesViewController.projectScenes);
         }
     }
 

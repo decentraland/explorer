@@ -35,8 +35,8 @@ namespace Tests
             scenesController.OnProjectSceneRemoved += projectSceneListener.OnSceneRemoved;
             scenesController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
 
-            scenesController.NotifySet(deployedSceneListener);
-            scenesController.NotifySet(projectSceneListener);
+            deployedSceneListener.OnSetScenes(scenesController.deployedScenes);
+            projectSceneListener.OnSetScenes(scenesController.projectScenes);
         }
 
         [TearDown]
