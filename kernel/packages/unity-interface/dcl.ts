@@ -14,9 +14,7 @@ import { defaultLogger } from 'shared/logger'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
   enableParcelSceneLoading,
-  forceStopParcelSceneWorker,
   getParcelSceneID,
-  getSceneWorkerBySceneID,
   loadParcelScene,
   stopParcelSceneWorker
 } from 'shared/world/parcelSceneManager'
@@ -26,7 +24,7 @@ import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
 import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
-import { UnityParcelScene, UnityPortableExperienceScene } from './UnityParcelScene'
+import { UnityParcelScene } from './UnityParcelScene'
 import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
@@ -36,8 +34,7 @@ import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { getPortableExperienceFromS3Bucket, PortableExperienceUrn } from './portableExperiencesHelper'
-import { parseUrn, DecentralandAssetIdentifier, OffChainAsset } from '@dcl/urn-resolver'
+import { spawnPortableExperienceScene } from './portableExperiencesUtils'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -172,44 +169,6 @@ export async function startGlobalScene(
     isPortableExperience: false,
     contents: []
   })
-}
-
-export async function spawnPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<string> {
-  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
-
-  defaultLogger.info('URN...', parsedUrn)
-
-  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
-    throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
-  }
-
-  const scene = new UnityPortableExperienceScene(
-    await getPortableExperienceFromS3Bucket((parsedUrn as unknown) as OffChainAsset)
-  )
-  loadParcelScene(scene, undefined, true)
-  const parcelSceneId = getParcelSceneID(scene)
-  unityInterface.CreateUIScene({
-    id: parcelSceneId,
-    name: scene.data.name,
-    baseUrl: scene.data.baseUrl,
-    contents: scene.data.data.contents,
-    icon: scene.data.data.icon,
-    isPortableExperience: true
-  })
-  return parcelSceneId
-}
-
-function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
-  const offChainAsset = (dclId as unknown) as OffChainAsset
-  return !!offChainAsset.registry && offChainAsset.registry === 'static-portable-experiences'
-}
-
-export async function killPortableExperienceScene(peId: string) {
-  const peWorker = getSceneWorkerBySceneID(peId)
-
-  if (peWorker) {
-    forceStopParcelSceneWorker(peWorker)
-  }
 }
 
 export async function startUnitySceneWorkers() {

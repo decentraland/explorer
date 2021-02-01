@@ -1,5 +1,5 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
-import { spawnPortableExperienceScene, killPortableExperienceScene } from 'unity-interface/dcl'
+import { spawnPortableExperienceScene, killPortableExperienceScene } from 'unity-interface/portableExperiencesUtils'
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
 
@@ -13,19 +13,19 @@ type Executor = {
   identifier: string
 }
 type ContentIdentifier = string
-type PortableExperienceIdentifier = string
 type PortableExperienceHandle = {
   pid: string
-  identifier: PortableExperienceIdentifier
   parentProcess: Executor
 }
 type SpawnPortableExperienceParameters = {
   contentIdentifier: ContentIdentifier
-  portableExperienceId: PortableExperienceIdentifier
+  pid: string
 }
 
 @registerAPI('PortableExperiences')
 export class PortableExperiences extends ExposableAPI {
+  private currentPortableExperiences: Map<string, Executor> = new Map()
+
   /**
    * Starts a portable experience.
    * @param  {SpawnPortableExperienceParameters} [spawnParams] - Information to identify the PE
@@ -34,25 +34,34 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
-    const sceneId: string = await spawnPortableExperienceScene(spawnParams.portableExperienceId)
+    const sceneId: string = await spawnPortableExperienceScene(spawnParams.pid)
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+    const currentExecutor: Executor = { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
+    this.currentPortableExperiences.set(sceneId, currentExecutor)
 
     return {
       pid: sceneId,
-      identifier: spawnParams.portableExperienceId,
-      parentProcess: { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
+      parentProcess: currentExecutor
     }
   }
 
   /**
    * Stops a portable experience. Only the executor that spawned the portable experience has permission to kill it.
-   * @param {Executor} [executor] - The executor that will stop the PE
    * @param  {string} [pid] - The portable experience process id
    *
    * Returns true if was able to kill the portable experience, false if not.
    */
   @exposeMethod
-  async kill(pid: PortableExperienceIdentifier): Promise<void> {
-    killPortableExperienceScene(pid)
+  async kill(pid: string): Promise<boolean> {
+    const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+    const currentExecutor: Executor = { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
+    if (
+      this.currentPortableExperiences.has(pid) &&
+      JSON.stringify(this.currentPortableExperiences.get(pid)) === JSON.stringify(currentExecutor)
+    ) {
+      killPortableExperienceScene(pid)
+      return true
+    }
+    return false
   }
 }

@@ -7,14 +7,56 @@ import {
 } from '../shared/types'
 import { getSceneNameFromJsonData } from '../shared/selectors'
 import { parseParcelPosition } from '../atomicHelpers/parcelScenePositions'
-import { OffChainAsset } from '@dcl/urn-resolver'
-import defaultLogger from 'shared/logger'
+import { UnityPortableExperienceScene } from './UnityParcelScene'
+import {
+  forceStopParcelSceneWorker,
+  getParcelSceneID,
+  getSceneWorkerBySceneID,
+  loadParcelScene
+} from 'shared/world/parcelSceneManager'
+import { unityInterface } from './UnityInterface'
+import { parseUrn, DecentralandAssetIdentifier, OffChainAsset } from '@dcl/urn-resolver'
 
 const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
 export type PortableExperienceUrn = string
 
+export async function spawnPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<string> {
+  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
+
+  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
+    throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
+  }
+
+  const scene = new UnityPortableExperienceScene(
+    await getPortableExperienceFromS3Bucket((parsedUrn as unknown) as OffChainAsset)
+  )
+  loadParcelScene(scene, undefined, true)
+  const parcelSceneId = getParcelSceneID(scene)
+  unityInterface.CreateUIScene({
+    id: parcelSceneId,
+    name: scene.data.name,
+    baseUrl: scene.data.baseUrl,
+    contents: scene.data.data.contents,
+    icon: scene.data.data.icon,
+    isPortableExperience: true
+  })
+  return parcelSceneId
+}
+
+function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
+  const offChainAsset = (dclId as unknown) as OffChainAsset
+  return !!offChainAsset.registry && offChainAsset.registry === 'static-portable-experiences'
+}
+
+export async function killPortableExperienceScene(peId: string): Promise<void> {
+  const peWorker = getSceneWorkerBySceneID(peId)
+
+  if (peWorker) {
+    forceStopParcelSceneWorker(peWorker)
+  }
+}
+
 export async function getPortableExperienceFromS3Bucket(pe: OffChainAsset) {
-  defaultLogger.info('GETTING PE...', pe, pe.id)
   const peId: string = pe.id
   const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
 
