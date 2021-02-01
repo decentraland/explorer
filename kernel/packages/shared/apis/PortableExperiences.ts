@@ -1,5 +1,5 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
-import { startPortableExperienceScene, stopPortableExperienceScene } from 'unity-interface/dcl'
+import { spawnPortableExperienceScene, killPortableExperienceScene } from 'unity-interface/dcl'
 import { ExposableAPI } from './ExposableAPI'
 
 enum ExecutorType {
@@ -33,7 +33,7 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
-    await startPortableExperienceScene(spawnParams.portableExperienceId)
+    await spawnPortableExperienceScene(spawnParams.portableExperienceId)
     // TODO: Fill correctly the result
     return {
       pid: 'test',
@@ -51,7 +51,7 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async kill(pid: PortableExperienceIdentifier): Promise<boolean> {
-    stopPortableExperienceScene(pid)
+    killPortableExperienceScene(pid)
     // TODO: Check if we want to return a boolean
     return true
   }

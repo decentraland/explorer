@@ -127,8 +127,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
 
     // Temporal: Try to create several global scenes
-    await startPortableExperienceScene('pe1')
-    await startPortableExperienceScene('pe2')
+    await spawnPortableExperienceScene('pe1')
+    await spawnPortableExperienceScene('pe2')
   }
 
   return {
@@ -173,7 +173,7 @@ export async function startGlobalScene(
   })
 }
 
-export async function startPortableExperienceScene(peId: string) {
+export async function spawnPortableExperienceScene(peId: string) {
   const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(peId))
   loadParcelScene(scene, undefined, true)
   unityInterface.CreateUIScene({
@@ -186,7 +186,7 @@ export async function startPortableExperienceScene(peId: string) {
   })
 }
 
-export async function stopPortableExperienceScene(peId: string) {
+export async function killPortableExperienceScene(peId: string) {
   const peWorker = getSceneWorkerBySceneID(peId)
 
   if (peWorker) {
