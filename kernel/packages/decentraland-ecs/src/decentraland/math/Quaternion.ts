@@ -2,7 +2,7 @@ import { Matrix } from './Matrix'
 import { Vector3 } from './Vector3'
 import { MathTmp } from './preallocatedVariables'
 import { DEG2RAD, RAD2DEG } from './types'
-import {Scalar} from "./Scalar";
+import { Scalar } from "./Scalar"
 
 /** @public */
 export type ReadOnlyQuaternion = {
