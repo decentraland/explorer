@@ -17,13 +17,12 @@ namespace Tests
             const string sectionPrefabPath =
                 "Assets/Scripts/MainScripts/DCL/Controllers/HUD/BuilderProjectsPanel/Prefabs/SectionScenesView.prefab";
             var sectionPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(sectionPrefabPath);
-            var sectionView = Object.Instantiate(sectionPrefab);
 
             const string sceneCardPrefabPath =
                 "Assets/Scripts/MainScripts/DCL/Controllers/HUD/BuilderProjectsPanel/Prefabs/SceneCardView.prefab";
             var sceneCardPrefab = AssetDatabase.LoadAssetAtPath<SceneCardView>(sceneCardPrefabPath);
 
-            sectionController = new SectionScenesController(sectionView);
+            sectionController = new SectionScenesController();
             scenesController = new ScenesViewController(sceneCardPrefab);
 
             IDeployedSceneListener deployedSceneListener = sectionController;

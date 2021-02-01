@@ -4,22 +4,37 @@ using UnityEngine;
 
 internal class SectionScenesController : SectionBase, IDeployedSceneListener, IProjectSceneListener
 {
-    public override SectionsController.SectionId id => SectionsController.SectionId.SCENES_MAIN;
-
     internal const int MAX_CARDS = 3;
     internal readonly SectionScenesView view;
 
     private int deployedActiveCards = 0;
     private int projectActiveCards = 0;
 
-    public SectionScenesController(GameObject viewGO) : base(viewGO)
+    public SectionScenesController()
     {
-        view = viewGO.GetComponent<SectionScenesView>();
+        var prefab = Resources.Load<SectionScenesView>("BuilderProjectsPanelMenuSections/SectionScenesView");
+        view = Object.Instantiate(prefab);
+    }
+
+    public override void SetViewContainer(Transform viewContainer)
+    {
+        view.transform.SetParent(viewContainer);
+        view.transform.ResetLocalTRS();
     }
 
     public override void Dispose()
     {
-        Object.Destroy(viewGO);
+        Object.Destroy(view.gameObject);
+    }
+
+    public override void OnShow()
+    {
+        view.gameObject.SetActive(true);
+    }
+
+    public override void OnHide()
+    {
+        view.gameObject.SetActive(false);
     }
 
     private void ViewDirty()

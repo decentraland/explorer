@@ -21,7 +21,6 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
 
     [Header("Prefabs")]
     [SerializeField] internal SceneCardView sceneCardViewPrefab;
-    [SerializeField] internal SectionViewFactory sectionViewFactory;
 
     public event Action OnClosePressed;
     public event Action OnCreateScenePressed;

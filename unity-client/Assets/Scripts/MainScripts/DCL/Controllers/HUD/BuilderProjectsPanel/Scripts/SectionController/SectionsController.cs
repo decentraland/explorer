@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 internal class SectionsController : IDisposable
 {
@@ -10,7 +9,6 @@ internal class SectionsController : IDisposable
     public event Action<SectionBase> OnSectionHide;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
-    private ISectionViewFactory viewFactory;
     private Transform sectionsParent;
     private SectionBase currentOpenSection;
 
@@ -22,9 +20,8 @@ internal class SectionsController : IDisposable
         LAND
     }
 
-    public SectionsController(ISectionViewFactory viewFactory, Transform sectionsParent)
+    public SectionsController(Transform sectionsParent)
     {
-        this.viewFactory = viewFactory;
         this.sectionsParent = sectionsParent;
     }
 
@@ -35,15 +32,7 @@ internal class SectionsController : IDisposable
             return section;
         }
 
-        GameObject prefab = viewFactory.GetViewPrefab(id);
-        GameObject view = null;
-        if (prefab)
-        {
-            view = Object.Instantiate(prefab, sectionsParent);
-            view?.SetActive(false);
-        }
-
-        section = InstantiateSection(id, view);
+        section = InstantiateSection(id);
 
         loadedSections.Add(id,section);
         OnSectionLoaded?.Invoke(section);
@@ -76,12 +65,14 @@ internal class SectionsController : IDisposable
         }
     }
 
-    private SectionBase InstantiateSection(SectionId id, GameObject view)
+    private SectionBase InstantiateSection(SectionId id)
     {
+        SectionBase result = null;
         switch (id)
         {
             case SectionId.SCENES_MAIN:
-                return new SectionScenesController(view);
+                result = new SectionScenesController();
+                break;
             case SectionId.SCENES_DEPLOYED:
                 break;
             case SectionId.SCENES_PROJECT:
@@ -92,7 +83,9 @@ internal class SectionsController : IDisposable
                 throw new ArgumentOutOfRangeException(nameof(id), id, null);
         }
 
-        return null;
+        result?.SetViewContainer(sectionsParent);
+
+        return result;
     }
 
     public void Dispose()

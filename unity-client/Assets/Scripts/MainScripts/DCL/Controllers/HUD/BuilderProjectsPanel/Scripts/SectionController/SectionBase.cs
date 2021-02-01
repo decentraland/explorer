@@ -3,12 +3,12 @@ using UnityEngine;
 
 internal abstract class SectionBase : IDisposable
 {
-    protected GameObject viewGO;
-
-    public abstract SectionsController.SectionId id { get; }
     public bool isVisible { get; private set; } = false;
 
+    public abstract void SetViewContainer(Transform viewContainer);
     public abstract void Dispose();
+    public abstract void OnShow();
+    public abstract void OnHide();
 
     public void SetVisible(bool visible)
     {
@@ -16,17 +16,7 @@ internal abstract class SectionBase : IDisposable
             return;
 
         isVisible = visible;
-        viewGO.SetActive(visible);
-
         if (visible) OnShow();
         else OnHide();
-    }
-
-    public virtual void OnShow() { }
-    public virtual void OnHide() { }
-
-    protected SectionBase(GameObject viewGO)
-    {
-        this.viewGO = viewGO;
     }
 }

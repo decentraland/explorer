@@ -16,7 +16,7 @@ public class BuilderProjectsPanelController
         this.view = view;
         view.name = "_BuilderProjectsPanel";
 
-        sectionsController = new SectionsController(view.sectionViewFactory, view.sectionsContainer);
+        sectionsController = new SectionsController(view.sectionsContainer);
         scenesViewController = new ScenesViewController(view.sceneCardViewPrefab);
 
         view.OnScenesToggleChanged += OnSceneToggleChanged;
