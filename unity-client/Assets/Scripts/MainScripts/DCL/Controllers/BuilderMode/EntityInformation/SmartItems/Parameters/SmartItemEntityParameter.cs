@@ -20,7 +20,6 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter
         this.entitiesList = entitiesList;
     }
 
-
     public override void SetParameter(SmartItemParameter parameter)
     {
         base.SetParameter(parameter);
@@ -30,7 +29,6 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter
 
         GenerateDropdownContent();
     }
-
 
     void GenerateDropdownContent()
     {
@@ -49,8 +47,6 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter
 
         dropDown.AddOptions(optionsLabelList);
     }
-
-
 
     private void GetThumbnail(DCLBuilderInWorldEntity entity)
     {

@@ -102,9 +102,7 @@ public class EntityInformationController : MonoBehaviour
     }
 
     public void ChangeEntityName(string newName)
-    {
-      
-       
+    {      
         OnNameChange?.Invoke(currentEntity,newName);
 
         titleTxt.text = currentEntity.GetDescriptiveName();

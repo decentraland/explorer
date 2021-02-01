@@ -19,7 +19,6 @@ public class ActionEventAdapter : MonoBehaviour
     SmartItemComponent selectedComponent;
     List<DCLBuilderInWorldEntity> filteredList = new List<DCLBuilderInWorldEntity>();
 
-
     private void Start()
     {
         entityDropDown.onValueChanged.AddListener(SelectedEntity);
@@ -35,15 +34,13 @@ public class ActionEventAdapter : MonoBehaviour
         SelectedEntity(0);
     }
 
-
     void SelectedEntity(int number)
     { 
         SmartItemComponent component = (SmartItemComponent)filteredList[number].rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM);
         selectedComponent = component;
         GenerateActionDropdownContent(component.model.actions);
 
-        GenerateParametersFromSelectedOption();
-       
+        GenerateParametersFromSelectedOption();   
     }
 
     void GenerateParametersFromSelectedOption()

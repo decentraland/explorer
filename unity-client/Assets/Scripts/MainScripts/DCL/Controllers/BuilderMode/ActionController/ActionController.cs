@@ -87,6 +87,7 @@ public class ActionController : MonoBehaviour
             Debug.Log("Undo:  Current actions " + actionsMade.Count + "   Current undo index " + currentUndoStepIndex + "   Current redo index " + currentRedoStepIndex);
 
     }
+
     public void CreateActionEntityDeleted(DCLBuilderInWorldEntity entity)
     {
         List<DCLBuilderInWorldEntity> entityList = new List<DCLBuilderInWorldEntity>();

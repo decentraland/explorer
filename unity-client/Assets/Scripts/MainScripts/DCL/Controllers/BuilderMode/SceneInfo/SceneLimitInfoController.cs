@@ -43,7 +43,6 @@ public class SceneLimitInfoController : MonoBehaviour
         }
     }
 
-
     public void SetParcelScene(ParcelScene parcelScene)
     {
         currentParcelScene = parcelScene;
@@ -62,7 +61,6 @@ public class SceneLimitInfoController : MonoBehaviour
         else
             Disable();
     }
-
 
     public void Enable()
     {

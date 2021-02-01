@@ -11,6 +11,7 @@ namespace DCL.Components
         public string label;
         public SmartItemParameter[] parameters;
     }
+
     [System.Serializable]
     public class SmartItemParameter
     {

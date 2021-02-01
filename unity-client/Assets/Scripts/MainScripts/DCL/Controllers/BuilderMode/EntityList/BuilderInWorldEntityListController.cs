@@ -90,10 +90,8 @@ public class BuilderInWorldEntityListController : MonoBehaviour
 
     }
 
-
     public void EntityRename(DCLBuilderInWorldEntity entity, string newName)
     {
         OnEntityRename?.Invoke(entity, newName);
     }
-
 }

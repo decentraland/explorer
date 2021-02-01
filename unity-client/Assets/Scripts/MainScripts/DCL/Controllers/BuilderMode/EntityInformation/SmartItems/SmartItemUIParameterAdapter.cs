@@ -16,7 +16,7 @@ public class SmartItemUIParameterAdapter : MonoBehaviour
 
     public virtual void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
-
+        //TODO: Implement Smart Item action
     }
 
     public virtual void SetParameter(SmartItemParameter parameter)
@@ -29,5 +29,4 @@ public class SmartItemUIParameterAdapter : MonoBehaviour
     {
         OnParameterChange?.Invoke(currentParameter);
     }
-
 }

@@ -347,14 +347,12 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
         currentActiveMode.SelectedEntity(entityEditable);
 
-
         if (HUDController.i.builderInWorldMainHud != null)
         {
             HUDController.i.builderInWorldMainHud.ShowEntityInformation();
             HUDController.i.builderInWorldMainHud.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
-
-  
+ 
         outlinerController.CancelAllOutlines();
         return true;
     }

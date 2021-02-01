@@ -5,6 +5,5 @@ using UnityEngine;
 
 public class ActionEvent 
 {
-
     public List<DCLBuilderInWorldEntity> entityList;
 }

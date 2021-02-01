@@ -544,9 +544,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
-
-    
-
+  
         if(sceneObject.IsSmartItem())
         {
             SmartItemComponent.Model model = new SmartItemComponent.Model();
@@ -554,7 +552,6 @@ public class BuilderInWorldController : MonoBehaviour
             model.parameters = sceneObject.parameters;
 
             string jsonModel = JsonUtility.ToJson(model);
-
 
             sceneToEdit.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
@@ -564,7 +561,6 @@ public class BuilderInWorldController : MonoBehaviour
             component.ForceUpdate(jsonModel);
         }
 
-
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
             entity.isVoxel = true;
 
@@ -573,7 +569,6 @@ public class BuilderInWorldController : MonoBehaviour
             builderInWorldEntityHandler.DeselectEntities();
             builderInWorldEntityHandler.Select(entity.rootEntity);
         }
-
 
         entity.gameObject.transform.eulerAngles = Vector3.zero;
 

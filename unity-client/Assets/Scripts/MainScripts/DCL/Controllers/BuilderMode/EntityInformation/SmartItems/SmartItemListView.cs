@@ -96,6 +96,6 @@ public class SmartItemListView : MonoBehaviour
 
     void OnParameterChange(SmartItemParameter smartItemParameter)
     {
-
+        //TODO: Implement Smart Item action
     }
 }

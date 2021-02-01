@@ -6,8 +6,6 @@ namespace DCL.Components
 {
     public class SmartItemComponent : BaseComponent
     {
- 
-
         public class Model
         {
             public SmartItemAction[] actions;

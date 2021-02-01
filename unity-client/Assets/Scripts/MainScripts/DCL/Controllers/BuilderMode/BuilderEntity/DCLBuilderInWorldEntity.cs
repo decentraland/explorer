@@ -427,13 +427,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
-        //GameObject entityCollider = new GameObject(entity.entityId);
-        //entityCollider.layer = LayerMask.NameToLayer("OnBuilderPointerClick");
-
-        //Transform t = entityCollider.transform;
-        //t.SetParent(meshInfo.meshRootGameObject.transform);
-        //t.ResetLocalTRS();
-
         List<GameObject> colliderList = new List<GameObject>();
 
         for (int i = 0; i < meshInfo.renderers.Length; i++)
