@@ -214,7 +214,6 @@ export class Quaternion {
    * @param pitch - defines the rotation around X axis
    * @param roll - defines the rotation around Z axis
    * @param result - defines the target quaternion
-   *
    * Implemented unity-based calculations from: https://stackoverflow.com/a/56055813
    */
   public static RotationYawPitchRollToRef(yaw: number, pitch: number, roll: number, result: Quaternion): void {
@@ -495,9 +494,9 @@ export class Quaternion {
     const a = Vector3.Cross(v0, v1)
     const w = Math.sqrt(v0.lengthSquared() * v1.lengthSquared()) + Vector3.Dot(v0, v1)
     if (a.lengthSquared() < 0.0001) {
-      //the vectors are parallel, check w to find direction
-      //if w is 0 then values are opposite, and we sould rotate 180 degrees around the supplied axis
-      //otherwise the vectors in the same direction and no rotation should occur
+      // the vectors are parallel, check w to find direction
+      // if w is 0 then values are opposite, and we sould rotate 180 degrees around the supplied axis
+      // otherwise the vectors in the same direction and no rotation should occur
       return (Math.abs(w) < 0.0001) ? new Quaternion(up.x, up.y, up.z, 0).normalized : Quaternion.Identity
     } else {
       return new Quaternion(a.x, a.y, a.z, w).normalized

@@ -33,7 +33,7 @@ const results = {
   staticSlerp04: '(0.0, 0.3, 0.0, 0.9)',
   eulerAngles01: '(10.0, 10.0, 10.0)',
   eulerAngles02: '(0.0, 90.0, 0.0)',
-  eulerAngles03: '(80.0, -170.0, -140.1)', // In Unity we get (80.0, 190.0, 220.0), but both represent the same rotation -> 360 - 170 = 190; 360 - 140 = 220;
+  eulerAngles03: '(80.0, -170.0, -140.1)',
   eulerAngles04: '(-0.1, 10.0, 0.0)',
   normalized01: '(0.1, 0.1, 0.1, 1.0)',
   normalized02: '(0.0, 0.7, 0.0, 0.7)',
