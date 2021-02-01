@@ -16,7 +16,7 @@ declare module '@decentraland/PortableExperiences' {
     parentProcess: Executor
   }
   type SpawnPortableExperienceParameters = {
-    contentIdentifier: ContentIdentifier
+    urn: ContentIdentifier
     portableExperienceId: PortableExperienceIdentifier
   }
 
