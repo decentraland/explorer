@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
 
+/// <summary>
+/// This class is responsible for receiving a list of scenes and merge it with the previous list
+/// discriminating deployed and project scenes and triggering events when a new set of scenes arrive or
+/// when new scenes are added or removed.
+/// It instantiate and hold all the SceneCardViews to make them re-utilizable in every menu section screen.
+/// </summary>
 internal class ScenesViewController : IDisposable
 {
     public event Action<Dictionary<string, SceneCardView>> OnDeployedScenesSet;
@@ -17,11 +23,19 @@ internal class ScenesViewController : IDisposable
     private readonly ScenesRefreshHelper scenesRefreshHelper = new ScenesRefreshHelper();
     private readonly SceneCardView sceneCardViewPrefab;
 
+    /// <summary>
+    /// Ctor
+    /// </summary>
+    /// <param name="sceneCardViewPrefab">prefab for scene's card</param>
     public ScenesViewController(SceneCardView sceneCardViewPrefab)
     {
         this.sceneCardViewPrefab = sceneCardViewPrefab;
     }
 
+    /// <summary>
+    /// Set current user scenes (deployed and projects)
+    /// </summary>
+    /// <param name="scenesData">list of scenes</param>
     public void SetScenes(List<ISceneData> scenesData)
     {
         scenesRefreshHelper.Set(deployedScenes, projectScenes);
