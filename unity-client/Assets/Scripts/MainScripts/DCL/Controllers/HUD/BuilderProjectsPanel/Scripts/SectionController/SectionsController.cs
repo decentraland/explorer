@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class is in charge of handling open/close of the different menu sections
+/// </summary>
 internal class SectionsController : IDisposable
 {
     public event Action<SectionBase> OnSectionLoaded;
@@ -10,6 +13,7 @@ internal class SectionsController : IDisposable
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
+    private ISectionFactory sectionFactory;
     private SectionBase currentOpenSection;
 
     public enum SectionId
@@ -20,11 +24,30 @@ internal class SectionsController : IDisposable
         LAND
     }
 
-    public SectionsController(Transform sectionsParent)
+    /// <summary>
+    /// Ctor
+    /// </summary>
+    /// <param name="sectionsParent">container for the different sections view</param>
+    public SectionsController(Transform sectionsParent) : this(new SectionFactory(), sectionsParent)
     {
-        this.sectionsParent = sectionsParent;
     }
 
+    /// <summary>
+    /// Ctor
+    /// </summary>
+    /// <param name="sectionFactory">factory that instantiates menu sections</param>
+    /// <param name="sectionsParent">container for the different sections view</param>
+    public SectionsController(ISectionFactory sectionFactory, Transform sectionsParent)
+    {
+        this.sectionsParent = sectionsParent;
+        this.sectionFactory = sectionFactory;
+    }
+
+    /// <summary>
+    /// Get (load if not already loaded) the controller for certain menu section id
+    /// </summary>
+    /// <param name="id">id of the controller to get</param>
+    /// <returns></returns>
     public SectionBase GetOrLoadSection(SectionId id)
     {
         if (loadedSections.TryGetValue(id, out SectionBase section))
@@ -32,13 +55,19 @@ internal class SectionsController : IDisposable
             return section;
         }
 
-        section = InstantiateSection(id);
+        section = sectionFactory.GetSectionController(id);
+        section?.SetViewContainer(sectionsParent);
 
-        loadedSections.Add(id,section);
+        loadedSections.Add(id, section);
         OnSectionLoaded?.Invoke(section);
         return section;
     }
 
+    /// <summary>
+    /// Opens (make visible) a menu section. It will load it if necessary.
+    /// Closes (hides) the previously open section.
+    /// </summary>
+    /// <param name="id">id of the section to show</param>
     public void OpenSection(SectionId id)
     {
         var section = GetOrLoadSection(id);
@@ -65,29 +94,6 @@ internal class SectionsController : IDisposable
         }
     }
 
-    private SectionBase InstantiateSection(SectionId id)
-    {
-        SectionBase result = null;
-        switch (id)
-        {
-            case SectionId.SCENES_MAIN:
-                result = new SectionScenesController();
-                break;
-            case SectionId.SCENES_DEPLOYED:
-                break;
-            case SectionId.SCENES_PROJECT:
-                break;
-            case SectionId.LAND:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(id), id, null);
-        }
-
-        result?.SetViewContainer(sectionsParent);
-
-        return result;
-    }
-
     public void Dispose()
     {
         using (var iterator = loadedSections.GetEnumerator())
@@ -97,6 +103,7 @@ internal class SectionsController : IDisposable
                 iterator.Current.Value.Dispose();
             }
         }
+
         loadedSections.Clear();
     }
 }
