@@ -11,14 +11,14 @@ const results = {
   staticEuler03: '(0.0, 0.9, -0.4, 0.0)',
   staticEuler04: '(0.8, 0.0, 0.6, 0.0)',
   staticEuler05: '(-0.7, 0.2, -0.2, -0.6)',
-  staticFromToRotation01: '(0.0, 0.0, 0.0, 1.0)',
-  staticFromToRotation02: '(0.0, 0.7, 0.0, 0.7)',
-  staticFromToRotation03: '(0.0, 0.0, 0.4, 0.9)',
-  staticFromToRotation04: '(0.4, 0.0, 0.0, 0.9)',
-  staticFromToRotation05: '(-0.7, 0.0, 0.7, 0.3)', // In Unity we get (0.7, 0.0, -0.7, -0.3), but both represent the same euler rotation (336.9, 275.2, 154.7)
-  staticFromToRotation06: '(0.3, -0.2, 0.0, 0.9)',
-  staticFromToRotation07: '(0.1, 0.4, -0.1, 0.9)',
-  staticFromToRotation08: '(0.3, 0.0, -0.3, 0.9)',
+  staticFromToRotation01: '(0.0, 180.0, 0.0)',
+  staticFromToRotation02: '(0.0, 93.9, 0.0)',
+  staticFromToRotation03: '(0.0, 0.0, 44.5)',
+  staticFromToRotation04: '(45.0, 0.0, 0.0)',
+  staticFromToRotation05: '(-24.8, -83.8, 152.5)',
+  staticFromToRotation06: '(39.1, -24.4, -7.5)',
+  staticFromToRotation07: '(12.8, 45.1, -8.1)',
+  staticFromToRotation08: '(35.3, -15.0, -45.0)',
   staticRotateTowards01: '(0.1, 0.1, 0.1, 1.0)',
   staticRotateTowards02: '(0.0, 0.1, 0.0, 1.0)',
   staticRotateTowards03: '(0.0, 0.1, -0.1, -1.0)',
@@ -147,42 +147,44 @@ describe('ECS Quaternion tests', () => {
     )
   })
 
+  // These tests check against euler angles since we get a different quaternion result in Unity, but represent the same euler angles rotation.
   it('Quaternion.FromToRotation', () => {
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(0, 0, 0), new Vector3(100, 100, 100)).eulerAngles)).to.eq(
       results.staticFromToRotation01,
       'staticFromToRotation01'
     )
 
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(-10, -0, 110), new Vector3(4452, 0, 100)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(-10, -0, 110), new Vector3(4452, 0, 100)).eulerAngles)).to.eq(
       results.staticFromToRotation02,
       'staticFromToRotation02'
     )
 
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(1230, 10, 0), new Vector3(100, 100, 0)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(1230, 10, 0), new Vector3(100, 100, 0)).eulerAngles)).to.eq(
       results.staticFromToRotation03,
       'staticFromToRotation03'
     )
 
-    expect(
-      quaternionToString(Quaternion.FromToRotation(new Vector3(0, 123, -123), new Vector3(100, 213123, 100)))
-    ).to.eq(results.staticFromToRotation04, 'staticFromToRotation04')
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(0, 123, -123), new Vector3(100, 213123, 100)).eulerAngles)).to.eq(
+      results.staticFromToRotation04,
+      'staticFromToRotation04'
+    )
 
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(-10, -10, -10), new Vector3(360, -10, 360)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(-10, -10, -10), new Vector3(360, -10, 360)).eulerAngles)).to.eq(
       results.staticFromToRotation05,
       'staticFromToRotation05'
     )
 
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(12, -0, -400), new Vector3(200, 360, -400)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(12, -0, -400), new Vector3(200, 360, -400)).eulerAngles)).to.eq(
       results.staticFromToRotation06,
       'staticFromToRotation06'
     )
 
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(25, 45, 180), new Vector3(127, 0, 90)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(25, 45, 180), new Vector3(127, 0, 90)).eulerAngles)).to.eq(
       results.staticFromToRotation07,
       'staticFromToRotation07'
     )
 
-    expect(quaternionToString(Quaternion.FromToRotation(new Vector3(0, 1, 0), new Vector3(1, 1, 1)))).to.eq(
+    expect(vector3ToString(Quaternion.FromToRotation(new Vector3(0, 1, 0), new Vector3(1, 1, 1)).eulerAngles)).to.eq(
       results.staticFromToRotation08,
       'staticFromToRotation08'
     )
