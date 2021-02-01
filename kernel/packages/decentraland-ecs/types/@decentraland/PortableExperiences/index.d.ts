@@ -1,9 +1,5 @@
 declare module '@decentraland/PortableExperiences' {
-  enum ExecutorType {
-    SCENE = 'SCENE',
-    WEARABLE = 'WEARABLE',
-    QUEST_UI = 'QUEST_UI'
-  }
+  type ExecutorType = 'SCENE' | 'WEARABLE' | 'QUEST_UI'
   type Executor = {
     type: ExecutorType
     identifier: string

@@ -1,6 +1,7 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 import { spawnPortableExperienceScene, killPortableExperienceScene } from 'unity-interface/dcl'
 import { ExposableAPI } from './ExposableAPI'
+import { ParcelIdentity } from './ParcelIdentity'
 
 enum ExecutorType {
   SCENE = 'SCENE',
@@ -33,12 +34,13 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
-    await spawnPortableExperienceScene(spawnParams.portableExperienceId)
-    // TODO: Fill correctly the result
+    const sceneId: string = await spawnPortableExperienceScene(spawnParams.portableExperienceId)
+    const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+
     return {
-      pid: 'test',
+      pid: sceneId,
       identifier: spawnParams.portableExperienceId,
-      parentProcess: { type: ExecutorType.QUEST_UI, identifier: 'test' }
+      parentProcess: { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
     }
   }
 
@@ -50,9 +52,7 @@ export class PortableExperiences extends ExposableAPI {
    * Returns true if was able to kill the portable experience, false if not.
    */
   @exposeMethod
-  async kill(pid: PortableExperienceIdentifier): Promise<boolean> {
+  async kill(pid: PortableExperienceIdentifier): Promise<void> {
     killPortableExperienceScene(pid)
-    // TODO: Check if we want to return a boolean
-    return true
   }
 }

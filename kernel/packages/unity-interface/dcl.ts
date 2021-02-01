@@ -36,7 +36,8 @@ import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { getPortableExperienceFromS3Bucket } from './portableExperiencesHelper'
+import { getPortableExperienceFromS3Bucket, PortableExperienceUrn } from './portableExperiencesHelper'
+import { parseUrn, DecentralandAssetIdentifier, OffChainAsset } from '@dcl/urn-resolver'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -127,8 +128,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
 
     // Temporal: Try to create several global scenes
-    await spawnPortableExperienceScene('pe1')
-    await spawnPortableExperienceScene('pe2')
+    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe1')
+    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe2')
   }
 
   return {
@@ -173,19 +174,34 @@ export async function startGlobalScene(
   })
 }
 
-export async function spawnPortableExperienceScene(peId: string) {
-  const parsedUrn = await parseUrn(portableExperienceUrn)
-  if(!parsedUrn || isPortableExperience(parsedUrn)) return null // or throw
-  const scene = new UnityPortableExperienceScene(await getPortableFromParsedURN(parsedUrn))
+export async function spawnPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<string> {
+  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
+
+  defaultLogger.info('URN...', parsedUrn)
+
+  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
+    throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
+  }
+
+  const scene = new UnityPortableExperienceScene(
+    await getPortableExperienceFromS3Bucket((parsedUrn as unknown) as OffChainAsset)
+  )
   loadParcelScene(scene, undefined, true)
+  const parcelSceneId = getParcelSceneID(scene)
   unityInterface.CreateUIScene({
-    id: getParcelSceneID(scene),
+    id: parcelSceneId,
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
     contents: scene.data.data.contents,
     icon: scene.data.data.icon,
     isPortableExperience: true
   })
+  return parcelSceneId
+}
+
+function isPortableExperience(dclId: DecentralandAssetIdentifier): boolean {
+  const offChainAsset = (dclId as unknown) as OffChainAsset
+  return !!offChainAsset.registry && offChainAsset.registry == 'static-portable-experiences'
 }
 
 export async function killPortableExperienceScene(peId: string) {

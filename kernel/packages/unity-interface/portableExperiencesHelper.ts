@@ -7,10 +7,15 @@ import {
 } from '../shared/types'
 import { getSceneNameFromJsonData } from '../shared/selectors'
 import { parseParcelPosition } from '../atomicHelpers/parcelScenePositions'
+import { OffChainAsset } from '@dcl/urn-resolver'
+import defaultLogger from 'shared/logger'
 
 const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
+export type PortableExperienceUrn = string
 
-export async function getPortableExperienceFromS3Bucket(peId: string) {
+export async function getPortableExperienceFromS3Bucket(pe: OffChainAsset) {
+  defaultLogger.info('GETTING PE...', pe, pe.id)
+  const peId: string = pe.id
   const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
 
   const mappingsFetch = await fetch(`${baseUrl}mappings`)
