@@ -14,18 +14,23 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private TextMeshProUGUI description;
         [SerializeField] private Button readMoreButton;
         [SerializeField] private Toggle pinQuestToggle;
+        [SerializeField] private Image progressInTitle;
+        [SerializeField] private RectTransform completedProgressInTitle;
+        [SerializeField] private RectTransform completedMarkInTitle;
 
         private QuestModel quest;
 
         internal Action readMoreDelegate;
+        private static BaseCollection<string> pinnedQuests => DataStore.Quests.pinnedQuests;
 
         private void Awake()
         {
             readMoreButton.onClick.AddListener(() => readMoreDelegate?.Invoke());
             pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
-            DataStore.Quests.pinnedQuests.OnAdded += OnPinnedQuests;
-            DataStore.Quests.pinnedQuests.OnRemoved += OnUnpinnedQuest;
+            pinnedQuests.OnAdded += OnPinnedQuests;
+            pinnedQuests.OnRemoved += OnUnpinnedQuest;
         }
+
         public void Populate(QuestModel newQuest)
         {
             quest = newQuest;
@@ -34,7 +39,13 @@ namespace DCL.Huds.QuestsPanel
             questName.text = quest.name;
             description.text = quest.description;
             SetThumbnail(quest.thumbnail_entry);
-            pinQuestToggle.SetIsOnWithoutNotify(DataStore.Quests.pinnedQuests.Contains(quest.id));
+            pinQuestToggle.SetIsOnWithoutNotify(pinnedQuests.Contains(quest.id));
+
+            var questCompleted = quest.isCompleted;
+            pinQuestToggle.gameObject.SetActive(!questCompleted);
+            progressInTitle.fillAmount = quest.progress;
+            completedProgressInTitle.gameObject.SetActive(questCompleted);
+            completedMarkInTitle.gameObject.SetActive(questCompleted);
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -42,15 +53,21 @@ namespace DCL.Huds.QuestsPanel
             if (quest == null)
                 return;
 
+            if (quest.isCompleted)
+            {
+                pinnedQuests.Remove(quest.id);
+                pinQuestToggle.SetIsOnWithoutNotify(false);
+                return;
+            }
+
             if (isOn)
             {
-                if (!DataStore.Quests.pinnedQuests.Contains(quest.id))
-                    DataStore.Quests.pinnedQuests.Add(quest.id);
+                if (!pinnedQuests.Contains(quest.id))
+                    pinnedQuests.Add(quest.id);
             }
             else
             {
-                if (DataStore.Quests.pinnedQuests.Contains(quest.id))
-                    DataStore.Quests.pinnedQuests.Remove(quest.id);
+                pinnedQuests.Remove(quest.id);
             }
         }
 
@@ -73,8 +90,8 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnDestroy()
         {
-            DataStore.Quests.pinnedQuests.OnAdded -= OnUnpinnedQuest;
-            DataStore.Quests.pinnedQuests.OnRemoved -= OnPinnedQuests;
+            pinnedQuests.OnAdded -= OnUnpinnedQuest;
+            pinnedQuests.OnRemoved -= OnPinnedQuests;
         }
     }
 }

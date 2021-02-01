@@ -17,4 +17,7 @@ public class QuestModel
         section = sections.FirstOrDefault(x => x.id == sectionId);
         return section != null;
     }
+
+    public bool isCompleted => sections.All(x => x.progress >= 1);
+    public float progress => sections.Average(x => x.progress);
 }

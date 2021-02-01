@@ -39,6 +39,7 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnQuestSet(IEnumerable<KeyValuePair<string, QuestModel>> quests)
         {
+            view.ClearQuests();
             foreach ((string key, QuestModel value) in quests)
             {
                 OnQuestAdded(key, value);

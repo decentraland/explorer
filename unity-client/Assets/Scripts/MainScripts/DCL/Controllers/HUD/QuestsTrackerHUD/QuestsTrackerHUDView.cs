@@ -32,10 +32,16 @@ namespace DCL.Huds.QuestsTracker
             StartCoroutine(DispatchEntriesRoutine());
         }
 
-        public void AddQuest(string questId, bool isPinned)
+        public void AddOrUpdateQuest(string questId, bool isPinned)
         {
-            if (!quests.TryGetValue(questId, out QuestModel quest))
+            if (!quests.TryGetValue(questId, out QuestModel quest) )
                 return;
+
+            if (quest.isCompleted)
+            {
+                RemoveEntry(questId);
+                return;
+            }
 
             if (!currentEntries.TryGetValue(questId, out QuestsTrackerEntry questEntry))
             {
@@ -61,7 +67,7 @@ namespace DCL.Huds.QuestsTracker
                 RefreshLastUpdateTime(questId, true);
             }
             else
-                AddQuest(questId, true);
+                AddOrUpdateQuest(questId, true);
         }
 
         public void UnpinQuest(string questId)
@@ -109,13 +115,18 @@ namespace DCL.Huds.QuestsTracker
                 var entriesToRemove = lastUpdateTimestamp.Where(x => (DateTime.Now - x.Value) > TimeSpan.FromSeconds(3)).Select(x => x.Key).ToArray();
                 foreach (string questId in entriesToRemove)
                 {
-                    var entry = currentEntries[questId];
-                    currentEntries.Remove(questId);
-                    lastUpdateTimestamp.Remove(questId);
-                    Destroy(entry.gameObject);
+                    RemoveEntry(questId);
                 }
                 yield return WaitForSecondsCache.Get(0.25f);
             }
+        }
+
+        private void RemoveEntry(string questId)
+        {
+            var entry = currentEntries[questId];
+            currentEntries.Remove(questId);
+            lastUpdateTimestamp.Remove(questId);
+            Destroy(entry.gameObject);
         }
     }
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2524972318807527813}
   - component: {fileID: 7990304779888116230}
   m_Layer: 5
-  m_Name: SectionCompletedNotification
+  m_Name: QuestNotification_QuestCompleted
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 717e8c56635147f4a915e120a27ecb84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sectionName: {fileID: 7681841001019444265}
+  questName: {fileID: 7681841001019444265}
 --- !u!1 &1417582125084394279
 GameObject:
   m_ObjectHideFlags: 0
@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 8671987043189791020}
   - component: {fileID: 7681841001019444265}
   m_Layer: 5
-  m_Name: SectionName
+  m_Name: QuestName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -272,7 +272,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Day1
+  m_text: 'Halloween Quest
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 8f0c7039aba8d420aad6241bf1b80584, type: 2}
@@ -341,10 +343,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 7681841001019444265}
-    characterCount: 4
+    characterCount: 16
     spriteCount: 0
-    spaceCount: 0
-    wordCount: 1
+    spaceCount: 2
+    wordCount: 2
     linkCount: 0
     lineCount: 1
     pageCount: 1

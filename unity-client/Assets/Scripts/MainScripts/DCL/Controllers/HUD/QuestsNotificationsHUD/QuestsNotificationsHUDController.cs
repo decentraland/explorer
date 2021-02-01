@@ -17,6 +17,15 @@ namespace DCL.Huds.QuestsNotifications
 
             questsController.OnSectionCompleted += OnSectionCompleted;
             questsController.OnSectionUnlocked += OnSectionUnlocked;
+            questsController.OnQuestCompleted += OnQuestCompleted;
+        }
+
+        private void OnQuestCompleted(string questId)
+        {
+            if (!quests.TryGetValue(questId, out QuestModel quest))
+                return;
+
+            view?.ShowQuestCompleted(quest);
         }
 
         private void OnSectionCompleted(string questId, string sectionId)
@@ -50,6 +59,7 @@ namespace DCL.Huds.QuestsNotifications
         {
             questsController.OnSectionCompleted -= OnSectionCompleted;
             questsController.OnSectionUnlocked -= OnSectionUnlocked;
+            questsController.OnQuestCompleted -= OnQuestCompleted;
         }
     }
 

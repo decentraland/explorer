@@ -15,14 +15,15 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private Toggle pinQuestToggle;
 
         private QuestModel quest;
+        private static BaseCollection<string> baseCollection => DataStore.Quests.pinnedQuests;
 
         private void Awake()
         {
             closeButton.onClick.AddListener(Close);
 
             pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
-            DataStore.Quests.pinnedQuests.OnAdded += OnPinnedQuests;
-            DataStore.Quests.pinnedQuests.OnRemoved += OnUnpinnedQuest;
+            baseCollection.OnAdded += OnPinnedQuests;
+            baseCollection.OnRemoved += OnUnpinnedQuest;
         }
 
         public void Populate(QuestModel newQuest)
@@ -38,7 +39,7 @@ namespace DCL.Huds.QuestsPanel
                 CreateTask(quest.sections[i]);
             }
             Utils.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
-            pinQuestToggle.SetIsOnWithoutNotify(DataStore.Quests.pinnedQuests.Contains(quest.id));
+            pinQuestToggle.SetIsOnWithoutNotify(baseCollection.Contains(quest.id));
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -48,13 +49,13 @@ namespace DCL.Huds.QuestsPanel
 
             if (isOn)
             {
-                if (!DataStore.Quests.pinnedQuests.Contains(quest.id))
-                    DataStore.Quests.pinnedQuests.Add(quest.id);
+                if (!baseCollection.Contains(quest.id))
+                    baseCollection.Add(quest.id);
             }
             else
             {
-                if (DataStore.Quests.pinnedQuests.Contains(quest.id))
-                    DataStore.Quests.pinnedQuests.Remove(quest.id);
+                if (baseCollection.Contains(quest.id))
+                    baseCollection.Remove(quest.id);
             }
         }
 

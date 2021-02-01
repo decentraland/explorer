@@ -87,5 +87,59 @@
         ]
       }
     ]
+  },
+  {
+    "id": "quest2",
+    "name": "Other quest but completed",
+    "description": "Do Nothing because it's done. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. \nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    "thumbnail_entry": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "thumbnail_banner": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
+    "sections": [
+      {
+        "id": "task0",
+        "name": "Day 1",
+        "progress": 1,
+        "tasks": [
+          {
+            "id": "step0",
+            "name": "Find Kiki",
+            "type": "single",
+            "payload": "{ \"isDone\": true }"
+          },
+          {
+            "id": "step1",
+            "name": "Collect pumpkins",
+            "type": "count",
+            "payload": "{ \"start\": 0, \"end\": 10, \"current\": 10 }"
+          }
+        ]
+      },
+      {
+        "id": "task1",
+        "name": "Day 2",
+        "progress": 1,
+        "tasks": [
+          {
+            "id": "step2",
+            "name": "Find the old lady",
+            "type": "single",
+            "payload": "{ \"isDone\": true }"
+          },
+          {
+            "id": "step3",
+            "name": "Enter the house",
+            "type": "single",
+            "payload": "{ \"isDone\": false }"
+          },
+          {
+            "id": "step4",
+            "name": "Collect something fishy",
+            "type": "count",
+            "payload": "{ \"start\": 0, \"end\": 10, \"current\": 2 }"
+          }
+        ]
+      }
+    ]
   }
 ]

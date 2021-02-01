@@ -24,6 +24,7 @@ namespace DCL.Huds.QuestsTracker
 
         private QuestModel quest;
         private bool isExpanded;
+        private static BaseCollection<string> pinnedQuests => DataStore.Quests.pinnedQuests;
 
         public void Awake()
         {
@@ -85,15 +86,21 @@ namespace DCL.Huds.QuestsTracker
             if (quest == null)
                 return;
 
+            if (quest.isCompleted)
+            {
+                pinnedQuests.Remove(quest.id);
+                SetPinStatus(false);
+                return;
+            }
+
             if (isOn)
             {
-                if (!DataStore.Quests.pinnedQuests.Contains(quest.id))
-                    DataStore.Quests.pinnedQuests.Add(quest.id);
+                if (!pinnedQuests.Contains(quest.id))
+                    pinnedQuests.Add(quest.id);
             }
             else
             {
-                if (DataStore.Quests.pinnedQuests.Contains(quest.id))
-                    DataStore.Quests.pinnedQuests.Remove(quest.id);
+                pinnedQuests.Remove(quest.id);
             }
         }
 

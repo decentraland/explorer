@@ -45,7 +45,7 @@ namespace DCL.Huds.QuestsTracker
 
         private void OnQuestProgressed(string questId)
         {
-            view?.AddQuest(questId, pinnedQuests.Contains(questId));
+            view?.AddOrUpdateQuest(questId, pinnedQuests.Contains(questId));
         }
 
         private void OnPinnedQuest(string questId)

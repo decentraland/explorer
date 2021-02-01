@@ -63,6 +63,16 @@ namespace DCL.Huds.QuestsPanel
                 questPopup.Close();
         }
 
+        public void ClearQuests()
+        {
+            questPopup.Close();
+            foreach (QuestsPanelEntry questEntry in questEntries.Values)
+            {
+                Destroy(questEntry.gameObject);
+            }
+            questEntries.Clear();
+        }
+
         internal void ShowQuestPopup(string questId)
         {
             if (!quests.TryGetValue(questId, out QuestModel quest))
