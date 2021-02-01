@@ -46,14 +46,6 @@ export function stopParcelSceneWorker(worker: SceneWorker) {
   }
 }
 
-export function stopPortableExperienceWorker(cid: string) {
-  const peWorker = getSceneWorkerBySceneID(cid)
-
-  if (peWorker) {
-    forceStopParcelSceneWorker(peWorker)
-  }
-}
-
 export function forceStopParcelSceneWorker(worker: SceneWorker) {
   const sceneId = worker.getSceneId()
   worker.dispose()

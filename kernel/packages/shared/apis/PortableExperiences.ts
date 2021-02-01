@@ -1,6 +1,5 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
-import { startPortableExperienceScene } from 'unity-interface/dcl'
-import { stopPortableExperienceWorker } from 'worlds/parcelSceneManager'
+import { startPortableExperienceScene, stopPortableExperienceScene } from 'unity-interface/dcl'
 import { ExposableAPI } from './ExposableAPI'
 
 enum ExecutorType {
@@ -52,8 +51,8 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async kill(pid: PortableExperienceIdentifier): Promise<boolean> {
-    stopPortableExperienceWorker(pid)
-    TODO: Check if we want to return a boolean
+    stopPortableExperienceScene(pid)
+    // TODO: Check if we want to return a boolean
     return true
   }
 }

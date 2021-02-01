@@ -14,7 +14,9 @@ import { defaultLogger } from 'shared/logger'
 import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
   enableParcelSceneLoading,
+  forceStopParcelSceneWorker,
   getParcelSceneID,
+  getSceneWorkerBySceneID,
   loadParcelScene,
   stopParcelSceneWorker
 } from 'shared/world/parcelSceneManager'
@@ -182,6 +184,14 @@ export async function startPortableExperienceScene(peId: string) {
     icon: scene.data.data.icon,
     isPortableExperience: true
   })
+}
+
+export async function stopPortableExperienceScene(peId: string) {
+  const peWorker = getSceneWorkerBySceneID(peId)
+
+  if (peWorker) {
+    forceStopParcelSceneWorker(peWorker)
+  }
 }
 
 export async function startUnitySceneWorkers() {
