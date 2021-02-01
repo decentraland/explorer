@@ -2,6 +2,7 @@ import { Matrix } from './Matrix'
 import { Vector3 } from './Vector3'
 import { MathTmp } from './preallocatedVariables'
 import { DEG2RAD, RAD2DEG } from './types'
+import {Scalar} from "./Scalar";
 
 /** @public */
 export type ReadOnlyQuaternion = {
@@ -562,9 +563,9 @@ export class Quaternion {
     out.z *= RAD2DEG
 
     // ensure the degree values are between 0 and 360
-    out.x %= 360
-    out.y %= 360
-    out.z %= 360
+    out.x = Scalar.Repeat(out.x, 360)
+    out.y = Scalar.Repeat(out.y, 360)
+    out.z = Scalar.Repeat(out.z, 360)
 
     return out
   }
