@@ -15,6 +15,36 @@ internal static class MockBuilderProjectPanel_Controller
         controller = new BuilderProjectsPanelController(view);
     }
 
+    public static void AddScenes(int deployedCount, int projectCount)
+    {
+        if (!initialized)
+        {
+            Debug.LogError("Mock not initialized");
+            return;
+        }
+        List<ISceneData> scenes = new List<ISceneData>();
+
+        for (int i = 0; i < deployedCount; i++)
+        {
+            scenes.Add(new SceneData()
+            {
+                id = $"MyDeployedScene{i}",
+                isDeployed = true,
+                name = $"MyDeployedScene{i}"
+            });
+        }
+        for (int i = 0; i < projectCount; i++)
+        {
+            scenes.Add(new SceneData()
+            {
+                id = $"MyProject{i}",
+                isDeployed = false,
+                name = $"MyProject{i}"
+            });
+        }
+        controller.scenesViewController.SetScenes(scenes);
+    }
+
     public static void RunSectionScenesTestSequence()
     {
         if (!initialized)

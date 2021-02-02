@@ -36,7 +36,8 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
     private void Awake()
     {
         MockBuilderProjectPanel_Controller.Initialize(this);
-        MockBuilderProjectPanel_Controller.RunSectionScenesTestSequence();
+        MockBuilderProjectPanel_Controller.AddScenes(10, 5);
+        //MockBuilderProjectPanel_Controller.RunSectionScenesTestSequence();
 
         closeButton.onClick.AddListener(() => OnClosePressed?.Invoke());
         createSceneButton.onClick.AddListener(() => OnCreateScenePressed?.Invoke());
