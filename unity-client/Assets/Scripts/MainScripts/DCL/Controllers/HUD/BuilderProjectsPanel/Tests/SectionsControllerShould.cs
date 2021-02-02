@@ -117,11 +117,11 @@ namespace Tests
         {
         }
 
-        public override void OnShow()
+        protected override void OnShow()
         {
         }
 
-        public override void OnHide()
+        protected override void OnHide()
         {
         }
     }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DCL.Helpers;
+using UnityEngine;
 
 public class BuilderProjectsPanelController
 {
@@ -26,6 +27,7 @@ public class BuilderProjectsPanelController
 
         sectionsController.OnSectionShow += OnSectionShow;
         sectionsController.OnSectionHide += OnSectionHide;
+        sectionsController.OnRequestContextMenuHide += () => view.contextMenu.Hide();
 
         IDeployedSceneListener viewDeployedSceneListener = view;
         IProjectSceneListener viewProjectSceneListener = view;
@@ -38,6 +40,13 @@ public class BuilderProjectsPanelController
 
         viewDeployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
         viewProjectSceneListener.OnSetScenes(scenesViewController.projectScenes);
+
+        SceneCardView.OnContextMenuPressed += (sceneData, sceneCard) =>
+        {
+            view.contextMenu.transform.position = sceneCard.contextMenuButton.transform.position;
+            view.contextMenu.Show(sceneData.id, sceneData.isDeployed,
+                sceneData.isOwner || sceneData.isOperator, sceneData.isContributor);
+        };
     }
 
     void OnSceneToggleChanged(bool isOn)

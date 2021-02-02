@@ -10,6 +10,7 @@ internal class SectionsController : IDisposable
     public event Action<SectionBase> OnSectionLoaded;
     public event Action<SectionBase> OnSectionShow;
     public event Action<SectionBase> OnSectionHide;
+    public event Action OnRequestContextMenuHide;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -56,7 +57,12 @@ internal class SectionsController : IDisposable
         }
 
         section = sectionFactory.GetSectionController(id);
-        section?.SetViewContainer(sectionsParent);
+        if (section != null)
+        {
+            section.SetViewContainer(sectionsParent);
+            section.OnRequestOpenSection += OpenSection;
+            section.OnRequestContextMenuHide += OnRequestContextMenuHide;
+        }
 
         loadedSections.Add(id, section);
         OnSectionLoaded?.Invoke(section);

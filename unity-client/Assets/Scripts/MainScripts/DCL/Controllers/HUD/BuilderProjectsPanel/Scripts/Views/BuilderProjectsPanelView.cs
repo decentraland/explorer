@@ -19,6 +19,8 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
     [SerializeField] internal LeftMenuButtonToggleView projectsToggle;
     [SerializeField] internal LeftMenuButtonToggleView landToggle;
 
+    [SerializeField] internal SceneCardViewContextMenu contextMenu;
+
     [Header("Prefabs")]
     [SerializeField] internal SceneCardView sceneCardViewPrefab;
 
@@ -47,6 +49,8 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
         inWorldScenesToggle.OnToggleValueChanged += OnInWorldScenesToggleChanged;
         projectsToggle.OnToggleValueChanged += OnProjectsToggleChanged;
         landToggle.OnToggleValueChanged += OnLandToggleChanged;
+
+        contextMenu.Hide();
     }
 
     private void SubmenuScenesDirty()

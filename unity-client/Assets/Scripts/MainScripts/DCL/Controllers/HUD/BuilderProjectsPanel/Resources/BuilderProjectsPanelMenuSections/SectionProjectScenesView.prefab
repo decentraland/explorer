@@ -248,6 +248,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scenesCardContainer: {fileID: 3343721891500646499}
+  scrollRect: {fileID: 7817069368661186056}
 --- !u!223 &5433859732246970102
 Canvas:
   m_ObjectHideFlags: 0

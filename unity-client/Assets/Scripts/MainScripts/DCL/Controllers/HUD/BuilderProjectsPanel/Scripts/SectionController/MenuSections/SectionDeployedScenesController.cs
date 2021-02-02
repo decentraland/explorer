@@ -4,13 +4,15 @@ using UnityEngine;
 
 internal class SectionDeployedScenesController : SectionBase, IDeployedSceneListener
 {
-    private SectionDeployedScenesView view;
+    private readonly SectionDeployedScenesView view;
 
     public SectionDeployedScenesController()
     {
         var prefab =
             Resources.Load<SectionDeployedScenesView>("BuilderProjectsPanelMenuSections/SectionDeployedScenesView");
         view = Object.Instantiate(prefab);
+
+        view.scrollRect.onValueChanged.AddListener((value) => RequestHideContextMenu());
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -24,12 +26,12 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
         Object.Destroy(view.gameObject);
     }
 
-    public override void OnShow()
+    protected override void OnShow()
     {
         view.gameObject.SetActive(true);
     }
 
-    public override void OnHide()
+    protected override void OnHide()
     {
         view.gameObject.SetActive(false);
     }
@@ -43,6 +45,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
                 AddScene(iterator.Current.Value);
             }
         }
+        view.scrollRect.verticalNormalizedPosition = 1;
     }
 
     void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)

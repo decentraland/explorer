@@ -26,20 +26,27 @@ internal static class MockBuilderProjectPanel_Controller
 
         for (int i = 0; i < deployedCount; i++)
         {
+            int role = Random.Range(0, 3);
             scenes.Add(new SceneData()
             {
                 id = $"MyDeployedScene{i}",
+                name = $"MyDeployedScene{i}",
                 isDeployed = true,
-                name = $"MyDeployedScene{i}"
+                isOwner = role == 0,
+                isOperator = role == 1,
+                isContributor = role == 2
             });
         }
         for (int i = 0; i < projectCount; i++)
         {
+            int role = Random.Range(0, 2);
             scenes.Add(new SceneData()
             {
                 id = $"MyProject{i}",
+                name = $"MyProject{i}",
                 isDeployed = false,
-                name = $"MyProject{i}"
+                isOwner = role == 0,
+                isContributor = role == 1
             });
         }
         controller.scenesViewController.SetScenes(scenes);

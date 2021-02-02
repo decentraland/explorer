@@ -27,12 +27,12 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
         Object.Destroy(view.gameObject);
     }
 
-    public override void OnShow()
+    protected override void OnShow()
     {
         view.gameObject.SetActive(true);
     }
 
-    public override void OnHide()
+    protected override void OnHide()
     {
         view.gameObject.SetActive(false);
         deployedActiveCards = 0;

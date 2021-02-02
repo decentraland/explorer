@@ -9,7 +9,7 @@ internal class SceneCardView : MonoBehaviour
 {
     public static event Action<ISceneData> OnJumpInPressed;
     public static event Action<ISceneData> OnEditorPressed;
-    public static event Action<ISceneData> OnContextMenuPressed;
+    public static event Action<ISceneData, SceneCardView> OnContextMenuPressed;
 
     [SerializeField] private Texture2D defaultThumbnail;
     [Space]
@@ -28,7 +28,7 @@ internal class SceneCardView : MonoBehaviour
 
     [SerializeField] internal Button jumpInButton;
     [SerializeField] internal Button editorButton;
-    [SerializeField] private Button contextMenuButton;
+    [SerializeField] internal Button contextMenuButton;
     [Space]
 
     [SerializeField] internal GameObject roleOwnerGO;
@@ -42,7 +42,7 @@ internal class SceneCardView : MonoBehaviour
     {
         jumpInButton.onClick.AddListener(()=> OnJumpInPressed?.Invoke(sceneData));
         editorButton.onClick.AddListener(()=> OnEditorPressed?.Invoke(sceneData));
-        contextMenuButton.onClick.AddListener(()=> OnContextMenuPressed?.Invoke(sceneData));
+        contextMenuButton.onClick.AddListener(()=> OnContextMenuPressed?.Invoke(sceneData, this));
     }
 
     public void Setup(ISceneData sceneData)

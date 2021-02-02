@@ -1,16 +1,19 @@
 ﻿using DCL.Helpers;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 internal class SectionProjectScenesController : SectionBase, IProjectSceneListener
 {
-    private SectionProjectScenesView view;
+    private readonly SectionProjectScenesView view;
 
     public SectionProjectScenesController()
     {
         var prefab =
             Resources.Load<SectionProjectScenesView>("BuilderProjectsPanelMenuSections/SectionProjectScenesView");
         view = Object.Instantiate(prefab);
+
+        view.scrollRect.onValueChanged.AddListener((value) => RequestHideContextMenu());
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -24,12 +27,12 @@ internal class SectionProjectScenesController : SectionBase, IProjectSceneListen
         Object.Destroy(view.gameObject);
     }
 
-    public override void OnShow()
+    protected override void OnShow()
     {
         view.gameObject.SetActive(true);
     }
 
-    public override void OnHide()
+    protected override void OnHide()
     {
         view.gameObject.SetActive(false);
     }
@@ -43,6 +46,7 @@ internal class SectionProjectScenesController : SectionBase, IProjectSceneListen
                 AddScene(iterator.Current.Value);
             }
         }
+        view.scrollRect.verticalNormalizedPosition = 1;
     }
 
     void IProjectSceneListener.OnSceneAdded(SceneCardView scene)
