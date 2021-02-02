@@ -250,7 +250,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   if (!ALL_WEARABLES && WORLD_EXPLORER) {
     try {
-      const inventory: WearableId[] = yield fetchInventoryItemsByAddress(userId)
+      const inventory: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
       passport.avatar.wearables = passport.avatar.wearables.filter(
         (wearableId) => wearableId.startsWith('dcl://base-avatars') || inventory.includes(wearableId)
       )
