@@ -171,7 +171,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         for (int index = 0; index < collectiblesIds.Length; index++)
         {
             string collectibleId = collectiblesIds[index];
-            WearableItem collectible = CatalogController.wearableCatalog.Get(collectibleId);
+            CatalogController.wearableCatalog.TryGetValue(collectibleId, out WearableItem collectible);
             if (collectible == null) continue;
 
             var playerInfoCollectible =

@@ -93,7 +93,7 @@ public class AvatarEditorHUDController : IHUD
         if (userProfile.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape))
             return;
 
-        var bodyShape = CatalogController.wearableCatalog.Get(userProfile.avatar.bodyShape);
+        CatalogController.wearableCatalog.TryGetValue(userProfile.avatar.bodyShape, out var bodyShape);
 
         if (bodyShape == null)
         {
@@ -115,7 +115,7 @@ public class AvatarEditorHUDController : IHUD
 
         for (var i = 0; i < wearablesCount; i++)
         {
-            var wearable = CatalogController.wearableCatalog.Get(userProfile.avatar.wearables[i]);
+            CatalogController.wearableCatalog.TryGetValue(userProfile.avatar.wearables[i], out var wearable);
             if (wearable == null)
             {
                 Debug.LogError($"Couldn't find wearable with ID {userProfile.avatar.wearables[i]}");
@@ -142,7 +142,7 @@ public class AvatarEditorHUDController : IHUD
                 var defaultItemId = WearableLiterals.DefaultWearables.GetDefaultWearable(model.bodyShape.id, category);
                 if (defaultItemId != null)
                 {
-                    wearable = CatalogController.wearableCatalog.Get(defaultItemId);
+                    CatalogController.wearableCatalog.TryGetValue(defaultItemId, out wearable);
                 }
                 else
                 {
@@ -159,7 +159,7 @@ public class AvatarEditorHUDController : IHUD
 
     public void WearableClicked(string wearableId)
     {
-        var wearable = CatalogController.wearableCatalog.Get(wearableId);
+        CatalogController.wearableCatalog.TryGetValue(wearableId, out var wearable);
         if (wearable == null) return;
 
         if (wearable.category == Categories.BODY_SHAPE)
@@ -276,7 +276,8 @@ public class AvatarEditorHUDController : IHUD
         var defaultWearables = WearableLiterals.DefaultWearables.GetDefaultWearables(bodyShape.id);
         for (var i = 0; i < defaultWearables.Length; i++)
         {
-            EquipWearable(catalog.Get(defaultWearables[i]));
+            catalog.TryGetValue(defaultWearables[i], out var wearable);
+            EquipWearable(wearable);
         }
     }
 
