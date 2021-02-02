@@ -864,6 +864,7 @@ MonoBehaviour:
   expandIcon: {fileID: 8305297251812106536}
   collapseIcon: {fileID: 4856087641233257838}
   pinQuestToggle: {fileID: 1981296600491382650}
+  iconImage: {fileID: 6919818252187400862}
 --- !u!114 &1110194174154555277
 MonoBehaviour:
   m_ObjectHideFlags: 0

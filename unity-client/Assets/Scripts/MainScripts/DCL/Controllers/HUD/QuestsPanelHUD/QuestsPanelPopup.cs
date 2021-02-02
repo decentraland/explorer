@@ -13,6 +13,9 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private GameObject sectionPrefab;
         [SerializeField] private Button closeButton;
         [SerializeField] private Toggle pinQuestToggle;
+        [SerializeField] private RawImage thumbnailImage;
+
+        private AssetPromise_Texture thumbnailPromise;
 
         private QuestModel quest;
         private static BaseCollection<string> baseCollection => DataStore.Quests.pinnedQuests;
@@ -73,7 +76,25 @@ namespace DCL.Huds.QuestsPanel
 
         internal void SetThumbnail(string thumbnailURL)
         {
+            if (thumbnailPromise != null)
+            {
+                thumbnailPromise.ClearEvents();
+                AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
+            }
 
+            if (string.IsNullOrEmpty(thumbnailURL))
+                return;
+
+            thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
+            thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
+            thumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading quest panel popup thumbnail: {thumbnailURL}"); };
+
+            AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
+        }
+
+        private void OnThumbnailReady(Asset_Texture assetTexture)
+        {
+            thumbnailImage.texture = assetTexture.texture;
         }
 
         internal void CreateTask(QuestSection section)

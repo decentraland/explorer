@@ -17,6 +17,9 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private Image progressInTitle;
         [SerializeField] private RectTransform completedProgressInTitle;
         [SerializeField] private RectTransform completedMarkInTitle;
+        [SerializeField] private RawImage thumbnailImage;
+
+        private AssetPromise_Texture thumbnailPromise;
 
         private QuestModel quest;
 
@@ -85,7 +88,25 @@ namespace DCL.Huds.QuestsPanel
 
         internal void SetThumbnail(string thumbnailURL)
         {
+            if (thumbnailPromise != null)
+            {
+                thumbnailPromise.ClearEvents();
+                AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
+            }
 
+            if (string.IsNullOrEmpty(thumbnailURL))
+                return;
+
+            thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
+            thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
+            thumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading quest panel entry thumbnail: {thumbnailURL}"); };
+
+            AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
+        }
+
+        private void OnThumbnailReady(Asset_Texture assetTexture)
+        {
+            thumbnailImage.texture = assetTexture.texture;
         }
 
         private void OnDestroy()

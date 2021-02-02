@@ -21,6 +21,9 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] private GameObject expandIcon;
         [SerializeField] private GameObject collapseIcon;
         [SerializeField] private Toggle pinQuestToggle;
+        [SerializeField] private RawImage iconImage;
+
+        private AssetPromise_Texture iconPromise;
 
         private QuestModel quest;
         private bool isExpanded;
@@ -39,9 +42,9 @@ namespace DCL.Huds.QuestsTracker
         {
             quest = newQuest;
             questTitle.text = quest.name;
-            SetThumbnail(quest.icon);
+            SetIcon(quest.icon);
             QuestSection currentSection = quest.sections.First(x => x.progress < 1f);
-            sectionTitle.text = $"{currentSection.name} - {currentSection.progress*100}%";
+            sectionTitle.text = $"{currentSection.name} - {currentSection.progress * 100}%";
             progress.fillAmount = currentSection.progress;
 
             // TODO Reuse entries
@@ -61,14 +64,32 @@ namespace DCL.Huds.QuestsTracker
             taskUIEntry.Populate(task);
         }
 
-        internal void SetThumbnail(string url)
+        internal void SetIcon(string iconURL)
         {
+            if (iconPromise != null)
+            {
+                iconPromise.ClearEvents();
+                AssetPromiseKeeper_Texture.i.Forget(iconPromise);
+            }
 
+            if (string.IsNullOrEmpty(iconURL))
+                return;
+
+            iconPromise = new AssetPromise_Texture(iconURL);
+            iconPromise.OnSuccessEvent += OnIconReady;
+            iconPromise.OnFailEvent += x => { Debug.Log($"Error downloading quest tracker entry icon: {iconURL}"); };
+
+            AssetPromiseKeeper_Texture.i.Keep(iconPromise);
+        }
+
+        private void OnIconReady(Asset_Texture assetTexture)
+        {
+            iconImage.texture = assetTexture.texture;
         }
 
         internal void CleanUpTasksList()
         {
-            for(int i = tasksContainer.childCount - 1; i >= 0; i--)
+            for (int i = tasksContainer.childCount - 1; i >= 0; i--)
                 Destroy(tasksContainer.GetChild(i).gameObject);
         }
 

@@ -492,6 +492,7 @@ MonoBehaviour:
   progressInTitle: {fileID: 1938563841529327039}
   completedProgressInTitle: {fileID: 3536459222111797177}
   completedMarkInTitle: {fileID: 3326139216299930650}
+  thumbnailImage: {fileID: 1672406340778227926}
 --- !u!114 &3686857283893146268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -647,7 +648,7 @@ GameObject:
   - component: {fileID: 3867404968725228890}
   - component: {fileID: 1672406340778227926}
   m_Layer: 5
-  m_Name: Icon
+  m_Name: QuestThumbnail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
