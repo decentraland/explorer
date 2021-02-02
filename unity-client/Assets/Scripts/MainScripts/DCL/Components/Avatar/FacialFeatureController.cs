@@ -119,16 +119,15 @@ public class FacialFeatureController
         isReady = false;
     }
 
-    public static FacialFeatureController CreateDefaultFacialFeature(string bodyShape, string category, Material material)
+    public static Promise<FacialFeatureController> CreateDefaultFacialFeature(string bodyShape, string category, Material material)
     {
-        string defaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, category);
-        CatalogController.wearableCatalog.TryGetValue(defaultId, out WearableItem wearable);
-        if (wearable == null)
-        {
-            Debug.LogError($"Couldn't resolve wearable {defaultId}");
-            return null;
-        }
+        Promise<FacialFeatureController> facialFeaturePromise = new Promise<FacialFeatureController>();
 
-        return new FacialFeatureController(wearable, material);
+        string defaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, category);
+        CatalogController.RequestWearable(defaultId)
+            .Then((wearable) => facialFeaturePromise.Resolve(new FacialFeatureController(wearable, material)))
+            .Catch((error) => Debug.LogError(error));
+
+        return facialFeaturePromise;
     }
 }

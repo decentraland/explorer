@@ -171,15 +171,18 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         for (int index = 0; index < collectiblesIds.Length; index++)
         {
             string collectibleId = collectiblesIds[index];
-            CatalogController.wearableCatalog.TryGetValue(collectibleId, out WearableItem collectible);
-            if (collectible == null) continue;
 
-            var playerInfoCollectible =
-                collectiblesFactory.Instantiate<PlayerInfoCollectibleItem>(collectible.rarity,
-                    wearablesContainer.transform);
-            if (playerInfoCollectible == null) continue;
-            playerInfoCollectibles.Add(playerInfoCollectible);
-            playerInfoCollectible.Initialize(collectible);
+            CatalogController.RequestWearable(collectibleId)
+                .Then((collectible) =>
+                {
+                    var playerInfoCollectible = collectiblesFactory.Instantiate<PlayerInfoCollectibleItem>(collectible.rarity, wearablesContainer.transform);
+                    if (playerInfoCollectible != null)
+                    {
+                        playerInfoCollectibles.Add(playerInfoCollectible);
+                        playerInfoCollectible.Initialize(collectible);
+                    }
+                })
+                .Catch((error) => Debug.LogError(error));
         }
 
         emptyCollectiblesImage.SetActive(collectiblesIds.Length == 0);

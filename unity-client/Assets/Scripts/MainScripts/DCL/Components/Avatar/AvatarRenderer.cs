@@ -153,9 +153,16 @@ namespace DCL
             yield return new WaitUntil(() => gameObject.activeSelf);
 
             WearableItem resolvedBody = null;
-            if(!string.IsNullOrEmpty(model.bodyShape) && !CatalogController.wearableCatalog.TryGetValue(model.bodyShape, out resolvedBody))
+
+            if (!string.IsNullOrEmpty(model.bodyShape))
             {
-                Debug.LogError($"Bodyshape {model.bodyShape} not found in catalog");
+                var avatarBodyPromise = CatalogController.RequestWearable(model.bodyShape);
+                yield return avatarBodyPromise;
+
+                if (avatarBodyPromise.error != null)
+                    Debug.LogError(avatarBodyPromise.error);
+                else
+                    resolvedBody = avatarBodyPromise.value;
             }
 
             List<WearableItem> resolvedWearables = new List<WearableItem>();
@@ -163,13 +170,13 @@ namespace DCL
             {
                 for (int i = 0; i < model.wearables.Count; i++)
                 {
-                    if (!CatalogController.wearableCatalog.TryGetValue(model.wearables[i], out WearableItem item))
-                    {
-                        Debug.LogError($"Wearable {model.wearables[i]} not found in catalog");
-                        continue;
-                    }
+                    var avatarWearablePromise = CatalogController.RequestWearable(model.wearables[i]);
+                    yield return avatarWearablePromise;
 
-                    resolvedWearables.Add(item);
+                    if (avatarWearablePromise.error != null)
+                        Debug.LogError(avatarWearablePromise.error);
+                    else
+                        resolvedWearables.Add(avatarWearablePromise.value);
                 }
             }
 
@@ -193,9 +200,15 @@ namespace DCL
             {
                 HideAll();
                 bodyShapeController = new BodyShapeController(resolvedBody);
-                eyesController = FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYES, eyeMaterial);
-                eyebrowsController = FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYEBROWS, eyebrowMaterial);
-                mouthController = FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.MOUTH, mouthMaterial);
+
+                yield return FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYES, eyeMaterial)
+                    .Then((controller) => eyesController = controller);
+
+                yield return FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYEBROWS, eyebrowMaterial)
+                    .Then((controller) => eyebrowsController = controller);
+
+                yield return FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.MOUTH, mouthMaterial)
+                    .Then((controller) => mouthController = controller);
             }
             else
             {
@@ -231,13 +244,19 @@ namespace DCL
                 switch (category)
                 {
                     case Categories.EYES:
-                        eyesController = FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYES, eyeMaterial);
+                        yield return FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYES, eyeMaterial)
+                            .Then((controller) => eyesController = controller);
+
                         break;
                     case Categories.MOUTH:
-                        mouthController = FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.MOUTH, mouthMaterial);
+                        yield return FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.MOUTH, mouthMaterial)
+                            .Then((controller) => mouthController = controller);
+
                         break;
                     case Categories.EYEBROWS:
-                        eyebrowsController = FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYEBROWS, eyebrowMaterial);
+                        yield return FacialFeatureController.CreateDefaultFacialFeature(bodyShapeController.bodyShapeId, Categories.EYEBROWS, eyebrowMaterial)
+                            .Then((controller) => eyebrowsController = controller);
+
                         break;
                 }
             }

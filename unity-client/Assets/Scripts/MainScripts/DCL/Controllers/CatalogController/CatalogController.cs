@@ -1,6 +1,8 @@
 using DCL;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using DCL.Helpers;
+using DCL.Interface;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CatalogController : MonoBehaviour
@@ -11,11 +13,20 @@ public class CatalogController : MonoBehaviour
     public static BaseDictionary<string, Item> itemCatalog => DataStore.Catalog.items;
     public static BaseDictionary<string, WearableItem> wearableCatalog => DataStore.Catalog.wearables;
 
+    private static Dictionary<string, Promise<WearableItem>> pendingWearablePromises = new Dictionary<string, Promise<WearableItem>>();
+
     public void Awake()
     {
         i = this;
+
+        wearableCatalog.OnAdded += WearableReceivedOnCatalog;
     }
- 
+
+    private void OnDestroy()
+    {
+        wearableCatalog.OnAdded -= WearableReceivedOnCatalog;
+    }
+
     public void AddWearableToCatalog(string payload)
     {
         Item item = JsonUtility.FromJson<Item>(payload);
@@ -28,12 +39,17 @@ public class CatalogController : MonoBehaviour
             case "wearable":
                 {
                     WearableItem wearableItem = JsonUtility.FromJson<WearableItem>(payload);
-                    wearableCatalog.Add(wearableItem.id, wearableItem);
+
+                    if (!wearableCatalog.ContainsKey(wearableItem.id))
+                        wearableCatalog.Add(wearableItem.id, wearableItem);
+
                     break;
                 }
             case "item":
                 {
-                    itemCatalog.Add(item.id, item);
+                    if (!itemCatalog.ContainsKey(item.id))
+                        itemCatalog.Add(item.id, item);
+
                     break;
                 }
             default:
@@ -51,7 +67,8 @@ public class CatalogController : MonoBehaviour
         int count = items.Length;
         for (int i = 0; i < count; ++i)
         {
-            itemCatalog.Add(items[i].id, items[i]);
+            if (!itemCatalog.ContainsKey(items[i].id))
+                itemCatalog.Add(items[i].id, items[i]);
         }
     }
 
@@ -71,5 +88,38 @@ public class CatalogController : MonoBehaviour
     {
         itemCatalog?.Clear();
         wearableCatalog?.Clear();
+    }
+
+    public static Promise<WearableItem> RequestWearable(string wearableId)
+    {
+        Promise<WearableItem> promise = new Promise<WearableItem>();
+
+        if (wearableCatalog.TryGetValue(wearableId, out WearableItem wearable))
+        {
+            promise.Resolve(wearable);
+        }
+        else
+        {
+            if (!pendingWearablePromises.ContainsKey(wearableId))
+            {
+                pendingWearablePromises.Add(wearableId, promise);
+                WebInterface.RequestWearables(new string[] { wearableId });
+            }
+            else
+            {
+                pendingWearablePromises.TryGetValue(wearableId, out promise);
+            }
+        }
+
+        return promise;
+    }
+
+    private void WearableReceivedOnCatalog(string wearableId, WearableItem wearable)
+    {
+        if (pendingWearablePromises.TryGetValue(wearableId, out Promise<WearableItem> promise))
+        {
+            promise.Resolve(wearable);
+            pendingWearablePromises.Remove(wearableId);
+        }
     }
 }

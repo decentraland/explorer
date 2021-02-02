@@ -546,7 +546,7 @@ namespace DCL.Interface
         [System.Serializable]
         public class RequestWearablesPayload
         {
-            public string[] usersId;
+            public string[] wearableIds;
         }
 
 
@@ -1170,7 +1170,7 @@ namespace DCL.Interface
 
         public static void RequestWearables(string[] usersId)
         {
-            requestWearablesPayload.usersId = usersId;
+            requestWearablesPayload.wearableIds = usersId;
             SendMessage("RequestWearables", requestWearablesPayload);
         }
     }
