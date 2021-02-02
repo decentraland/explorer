@@ -132,7 +132,8 @@ namespace DCL.QuestsController
         [SerializeField] private TextAsset questsJson;
         private void Start()
         {
-            InitializeQuests(questsJson.text);
+            if(questsJson != null)
+                InitializeQuests(questsJson.text);
         }
 
         [ContextMenu("Add Entry")]

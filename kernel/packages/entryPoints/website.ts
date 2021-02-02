@@ -111,6 +111,9 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: true, visible: true })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: true, visible: true })
 
     //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //             so ensuring meta configuration is initialized in this stage is a must

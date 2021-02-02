@@ -22,7 +22,7 @@ namespace DCL.Huds.QuestsTracker
             QuestsTrackerHUDView view = Instantiate(Resources.Load<GameObject>("QuestsTrackerHUD")).GetComponent<QuestsTrackerHUDView>();
 
 #if UNITY_EDITOR
-            view.gameObject.name = "_QuestHUDTrackerView";
+            view.gameObject.name = "_QuestsTrackerHUDView";
 #endif
             return view;
         }

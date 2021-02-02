@@ -22,7 +22,7 @@ namespace DCL.Huds.QuestsPanel
         {
             var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<QuestsPanelHUDView>();
 #if UNITY_EDITOR
-            view.gameObject.name = "_QuestHUDPanelView";
+            view.gameObject.name = "_QuestsPanelHUDView";
 #endif
             return view;
         }

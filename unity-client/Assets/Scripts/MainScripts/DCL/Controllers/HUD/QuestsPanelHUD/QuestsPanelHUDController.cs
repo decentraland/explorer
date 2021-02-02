@@ -1,6 +1,7 @@
 ﻿using DCL.Helpers;
 using DCL.QuestsController;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace DCL.Huds.QuestsPanel
 {
@@ -10,16 +11,25 @@ namespace DCL.Huds.QuestsPanel
         private IQuestsController questsController;
         private static BaseDictionary<string, QuestModel> quests => DataStore.Quests.quests;
 
+        InputAction_Trigger toggleQuestsPanel;
+
         public void Initialize(IQuestsController newQuestsController)
         {
             questsController = newQuestsController;
             view = QuestsPanelHUDView.Create();
+
+            toggleQuestsPanel = Resources.Load<InputAction_Trigger>("ToggleQuestsPanelHud");
+            toggleQuestsPanel.OnTriggered += OnToggleActionTriggered;
 
             questsController.OnQuestProgressed += OnQuestProgressed;
             quests.OnAdded += OnQuestAdded;
             quests.OnRemoved += OnQuestRemoved;
             quests.OnSet += OnQuestSet;
             OnQuestSet(quests.Get());
+        }
+        private void OnToggleActionTriggered(DCLAction_Trigger action)
+        {
+            SetVisibility((!view?.gameObject.activeSelf) ?? false);
         }
 
         private void OnQuestProgressed(string questId)
@@ -53,6 +63,7 @@ namespace DCL.Huds.QuestsPanel
 
         public void Dispose()
         {
+            toggleQuestsPanel.OnTriggered -= OnToggleActionTriggered;
             questsController.OnQuestProgressed -= OnQuestProgressed;
             quests.OnAdded -= OnQuestAdded;
             quests.OnRemoved -= OnQuestRemoved;
