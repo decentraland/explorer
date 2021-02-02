@@ -5,23 +5,33 @@ import {
   getWearablesSafeURL,
   PIN_CATALYST,
   WSS_ENABLED,
-  TEST_WEARABLES_OVERRIDE
+  TEST_WEARABLES_OVERRIDE,
+  ALL_WEARABLES
 } from 'config'
 
 import defaultLogger from 'shared/logger'
-import { isInitialized } from 'shared/renderer/selectors'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
+  CatalogFailureAction,
   catalogLoaded,
   CatalogRequestAction,
   catalogSuccess,
   CatalogSuccessAction,
+  CATALOG_FAILURE,
   CATALOG_LOADED,
   CATALOG_REQUEST,
-  CATALOG_SUCCESS
+  CATALOG_SUCCESS,
+  InventoryFailure,
+  inventoryFailure,
+  InventoryRequest,
+  InventorySuccess,
+  inventorySuccess,
+  INVENTORY_FAILURE,
+  INVENTORY_REQUEST,
+  INVENTORY_SUCCESS
 } from './actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
-import { Catalog, Wearable, Collection } from './types'
+import { Catalog, Wearable, Collection, WearableId } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
@@ -45,6 +55,10 @@ export function* catalogsSaga(): any {
 
   yield takeLatest(CATALOG_REQUEST, handleCatalogRequest)
   yield takeLatest(CATALOG_SUCCESS, handleCatalogSuccess)
+  yield takeLatest(CATALOG_FAILURE, handleCatalogFailure)
+  yield takeLatest(INVENTORY_REQUEST, handleInventoryRequest)
+  yield takeLatest(INVENTORY_SUCCESS, handleInventorySuccess)
+  yield takeLatest(INVENTORY_FAILURE, handleInventoryFailure)
 }
 
 function overrideBaseUrl(wearable: Wearable) {
@@ -95,9 +109,6 @@ function* initialLoad() {
         .map(overrideBaseUrl)
       const baseAvatars = catalog.filter((_: Wearable) => _.tags && !_.tags.includes('exclusive'))
       const baseExclusive = catalog.filter((_: Wearable) => _.tags && _.tags.includes('exclusive'))
-      if (!(yield select(isInitialized))) {
-        yield take(RENDERER_INITIALIZED)
-      }
       yield put(catalogLoaded('base-avatars', baseAvatars))
       yield put(catalogLoaded('base-exclusive', baseExclusive))
     } catch (error) {
@@ -123,7 +134,7 @@ function* initialLoad() {
   }
 }
 
-function* handleCatalogRequest(action: CatalogRequestAction) {
+export function* handleCatalogRequest(action: CatalogRequestAction) {
   const { wearableIds } = action.payload
 
   yield call(ensureBaseCatalogs)
@@ -139,12 +150,22 @@ function* handleCatalogRequest(action: CatalogRequestAction) {
   yield put(catalogSuccess(wearables))
 }
 
-function* handleCatalogSuccess(action: CatalogSuccessAction) {
+export function* handleCatalogSuccess(action: CatalogSuccessAction) {
   const { wearables } = action.payload
 
   yield call(ensureRenderer)
 
   yield call(sendWearablesCatalog, wearables)
+}
+
+function* handleCatalogFailure(action: CatalogFailureAction) {
+  const { wearableIds, error } = action.payload
+
+  yield call(ensureRenderer)
+
+  defaultLogger.error(`Failed to fetch wearables ${wearableIds.join(',')}`, error)
+
+  // TODO: Decide what else to do on failure
 }
 
 async function headCatalog(url: string) {
@@ -164,7 +185,7 @@ async function fetchCatalog(url: string) {
   return [await request.json(), etag]
 }
 
-function sendWearablesCatalog(catalog: Catalog) {
+export function sendWearablesCatalog(catalog: Catalog) {
   globalThis.unityInterface.AddWearablesToCatalog(catalog)
 }
 
@@ -172,4 +193,61 @@ export function* ensureBaseCatalogs() {
   while (!(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
+}
+
+export function* handleInventoryRequest(action: InventoryRequest) {
+  const { userId } = action.payload
+  try {
+    yield call(ensureBaseCatalogs)
+
+    const exclusiveCatalog = yield select(getExclusiveCatalog)
+    let inventoryItems: Wearable[]
+    if (ALL_WEARABLES) {
+      inventoryItems = Object.values(exclusiveCatalog)
+    } else {
+      const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
+      inventoryItems = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
+    }
+    yield put(inventorySuccess(userId, inventoryItems))
+  } catch (error) {
+    yield put(inventoryFailure(userId, error))
+  }
+}
+
+export function* handleInventorySuccess(action: InventorySuccess) {
+  const { inventory: wearables } = action.payload
+  const wearableIds = wearables.map(({ id }) => id)
+
+  yield call(ensureRenderer)
+
+  // We are filling the catalog & updating the inventory in one operation. The idea is to avoid an extra step in displaying the whole inventory
+  yield call(sendWearablesCatalog, wearables)
+  yield call(sendInventory, wearableIds)
+}
+
+function* handleInventoryFailure(action: InventoryFailure) {
+  const { userId, error } = action.payload
+
+  yield call(ensureRenderer)
+
+  defaultLogger.error(`Failed to fetch inventory for user ${userId}`, error)
+
+  // TODO: Decide what else to do on failure
+}
+
+export async function fetchInventoryItemsByAddress(address: string): Promise<WearableId[]> {
+  if (!WORLD_EXPLORER) {
+    return []
+  }
+  const result = await fetch(`${getServerConfigurations().wearablesApi}/addresses/${address}/wearables?fields=id`)
+  if (!result.ok) {
+    throw new Error('Unable to fetch inventory for address ' + address)
+  }
+  const inventory: { id: string }[] = await result.json()
+
+  return inventory.map((wearable) => wearable.id)
+}
+
+export function sendInventory(inventory: WearableId[]) {
+  globalThis.unityInterface.SetInventory(inventory)
 }
