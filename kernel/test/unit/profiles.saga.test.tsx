@@ -13,7 +13,6 @@ import { isRealmInitialized, getResizeService } from '../../packages/shared/dao/
 import { getServerConfigurations } from 'config'
 import { sleep } from 'atomicHelpers/sleep'
 import { fetchInventoryItemsByAddress } from 'shared/catalogs/sagas'
-import { put } from 'redux-saga-test-plan/matchers'
 
 const profile = { data: 'profile' }
 
