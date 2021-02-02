@@ -19,6 +19,7 @@ internal class SectionFactory : ISectionFactory
                 result = new SectionDeployedScenesController();
                 break;
             case SectionsController.SectionId.SCENES_PROJECT:
+                result = new SectionProjectScenesController();
                 break;
             case SectionsController.SectionId.LAND:
                 break;
