@@ -35,6 +35,8 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
     public override void OnHide()
     {
         view.gameObject.SetActive(false);
+        deployedActiveCards = 0;
+        projectActiveCards = 0;
     }
 
     private void ViewDirty()
@@ -50,7 +52,6 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
 
     private void SetScenes(Dictionary<string, SceneCardView> scenes, Transform container)
     {
-        int i = MAX_CARDS;
         using (var iterator = scenes.GetEnumerator())
         {
             while (iterator.MoveNext())
