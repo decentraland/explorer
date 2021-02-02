@@ -45,7 +45,7 @@ import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
-import { getCurrentUserId } from 'shared/session/selectors'
+import { getCurrentUserId, getUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
@@ -470,7 +470,7 @@ export class BrowserInterface {
   }
 
   public RequestOwnInventory() {
-    const userId = getCurrentUserId(globalThis.globalStore.getState())!
+    const userId = getUserId(globalThis.globalStore.getState())!
     globalThis.globalStore.dispatch(inventoryRequest(userId))
   }
 }
