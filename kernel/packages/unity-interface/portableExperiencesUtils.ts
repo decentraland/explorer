@@ -27,9 +27,8 @@ export async function spawnPortableExperienceScene(portableExperienceUrn: Portab
     throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
   }
 
-  const scene = new UnityPortableExperienceScene(
-    await getPortableExperienceFromS3Bucket((parsedUrn as unknown) as OffChainAsset)
-  )
+  /* tslint:disable-next-line */
+  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(parsedUrn as OffChainAsset))
   loadParcelScene(scene, undefined, true)
   const parcelSceneId = getParcelSceneID(scene)
   unityInterface.CreateUIScene({
@@ -51,9 +50,13 @@ function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffC
   return false
 }
 
-export async function killPortableExperienceScene(peId: string): Promise<void> {
-  const peWorker = getSceneWorkerBySceneID(peId)
+export async function killPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<void> {
+  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
+  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
+    throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
+  }
 
+  const peWorker = getSceneWorkerBySceneID(parsedUrn.id)
   if (peWorker) {
     forceStopParcelSceneWorker(peWorker)
   }

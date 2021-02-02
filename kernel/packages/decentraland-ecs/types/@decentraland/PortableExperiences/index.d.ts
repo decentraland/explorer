@@ -4,7 +4,6 @@ declare module '@decentraland/PortableExperiences' {
     type: ExecutorType
     identifier: string
   }
-  type ContentIdentifier = string
   type PortableExperienceIdentifier = string
   type PortableExperienceHandle = {
     pid: string
@@ -12,8 +11,7 @@ declare module '@decentraland/PortableExperiences' {
     parentProcess: Executor
   }
   type SpawnPortableExperienceParameters = {
-    urn: ContentIdentifier
-    portableExperienceId: PortableExperienceIdentifier
+    urn: PortableExperienceIdentifier
   }
 
   export function spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle>

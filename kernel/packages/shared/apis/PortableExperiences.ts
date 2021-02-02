@@ -12,14 +12,13 @@ type Executor = {
   type: ExecutorType
   identifier: string
 }
-type ContentIdentifier = string
+type PortableExperienceIdentifier = string
 type PortableExperienceHandle = {
   pid: string
   parentProcess: Executor
 }
 type SpawnPortableExperienceParameters = {
-  contentIdentifier: ContentIdentifier
-  pid: string
+  urn: PortableExperienceIdentifier
 }
 
 @registerAPI('PortableExperiences')
@@ -34,7 +33,7 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
-    const sceneId: string = await spawnPortableExperienceScene(spawnParams.pid)
+    const sceneId: string = await spawnPortableExperienceScene(spawnParams.urn)
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
     const currentExecutor: Executor = { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
     this.currentPortableExperiences.set(sceneId, currentExecutor)
