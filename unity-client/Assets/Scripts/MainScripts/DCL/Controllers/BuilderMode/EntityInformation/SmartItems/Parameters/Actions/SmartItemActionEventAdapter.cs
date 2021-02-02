@@ -7,14 +7,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ActionEventAdapter : MonoBehaviour
+public class SmartItemActionEventAdapter : MonoBehaviour
 {
     public TMP_Dropdown entityDropDown;
     public TMP_Dropdown actionDropDown;
-    public Button addActionBtn;
     public SmartItemListView smartItemListView;
 
-    ActionEvent actionEvent;
+    SmartItemActionEvent actionEvent;
 
     SmartItemComponent selectedComponent;
     List<DCLBuilderInWorldEntity> filteredList = new List<DCLBuilderInWorldEntity>();
@@ -25,7 +24,7 @@ public class ActionEventAdapter : MonoBehaviour
         actionDropDown.onValueChanged.AddListener(GenerateParametersFromIndex);
     }
 
-    public void SetContent(ActionEvent actionEvent)
+    public void SetContent(SmartItemActionEvent actionEvent)
     {
         this.actionEvent = actionEvent;
         filteredList = BuilderInWorldUtils.FilterEntitiesBySmartItemComponentAndActions(actionEvent.entityList);
@@ -36,9 +35,9 @@ public class ActionEventAdapter : MonoBehaviour
 
     void SelectedEntity(int number)
     { 
-        SmartItemComponent component = (SmartItemComponent)filteredList[number].rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM);
-        selectedComponent = component;
-        GenerateActionDropdownContent(component.model.actions);
+        filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component);
+        selectedComponent = (SmartItemComponent) component;
+        GenerateActionDropdownContent(selectedComponent.model.actions);
 
         GenerateParametersFromSelectedOption();   
     }

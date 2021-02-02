@@ -90,9 +90,7 @@ public class ActionController : MonoBehaviour
 
     public void CreateActionEntityDeleted(DCLBuilderInWorldEntity entity)
     {
-        List<DCLBuilderInWorldEntity> entityList = new List<DCLBuilderInWorldEntity>();
-        entityList.Add(entity);
-        CreateActionEntityDeleted(entityList);
+        CreateActionEntityDeleted(new List<DCLBuilderInWorldEntity> { entity });
     }
 
     public void CreateActionEntityDeleted(List<DCLBuilderInWorldEntity> entityList)

@@ -29,16 +29,18 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
-            Model newModel = Utils.SafeFromJson<Model>(newJson);
-
-            model = newModel;
+            UpdateModel(newJson);
             yield return null;
         }
 
         public void ForceUpdate(string json)
         {
-            Model newModel = Utils.SafeFromJson<Model>(json);
+            UpdateModel(json);
+        }
 
+        void UpdateModel(string json)
+        {
+            Model newModel = Utils.SafeFromJson<Model>(json);
             model = newModel;
         }
     }

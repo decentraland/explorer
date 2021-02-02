@@ -15,7 +15,9 @@ public class SceneLimitInfoController : MonoBehaviour
     public Sprite closeMenuSprite;
 
     [Header("Design")]
-    public Color lowFillColor, mediumFillColor, highFillColor;
+    public Color lowFillColor;
+    public Color mediumFillColor;
+    public Color highFillColor;
 
     [Header("Scene references")]
 
@@ -27,19 +29,20 @@ public class SceneLimitInfoController : MonoBehaviour
 
     ParcelScene currentParcelScene;
 
+    const int FRAMES_BETWEEN_UPDATES = 15;
 
-    int cont = 0;
+    int infoDelayCont = 0;
 
     private void Update()
     {
-        if(cont >= 15)
+        if(infoDelayCont >= FRAMES_BETWEEN_UPDATES)
         {
-            cont = 0;
+            infoDelayCont = 0;
             UpdateInfo();
         }
         else
         {
-            cont++;
+            infoDelayCont++;
         }
     }
 
@@ -82,7 +85,7 @@ public class SceneLimitInfoController : MonoBehaviour
         {
             int size = (int)Math.Sqrt(currentParcelScene.sceneData.parcels.Length);
             int meters = size * 16;
-            titleTxt.text = size + "x" + size + " LAND <color=#959696>" + meters + "x" + meters + "m";
+            titleTxt.text = $"{size}x{size} LAND <color=#959696>{meters}x{meters}m";
         }
         else
         {
@@ -126,7 +129,7 @@ public class SceneLimitInfoController : MonoBehaviour
 
     string AppendUsageAndLimit(string name, int usage, int limit)
     {
-        string currentString = name + ":   " + usage + " / <color=#959696>" + limit + "</color>";
+        string currentString = $"{name}:   {usage} / <color=#959696>{limit}</color>";
         if (usage >= limit)
             currentString = "<color=red>" + currentString + "</color>";
         return currentString;

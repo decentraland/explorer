@@ -180,24 +180,23 @@ namespace DCL.Models
             }
         }
 
-        public BaseComponent GetBaseComponent(CLASS_ID_COMPONENT componentId)
+        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out BaseComponent component)
         {
-            BaseComponent component;
-            components.TryGetValue(componentId, out component);
-
-            return component;
+            return components.TryGetValue(componentId, out component);
         }
 
-        public BaseDisposable GetSharedComponent(CLASS_ID componentId)
+        public bool TryGetSharedComponent(CLASS_ID componentId, out BaseDisposable component)
         {
             foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in GetSharedComponents())
             {
                 if (keyValuePairBaseDisposable.Value.GetClassId() == (int) componentId)
                 {
-                    return keyValuePairBaseDisposable.Value;
+                    component = keyValuePairBaseDisposable.Value;
+                    return true;
                 }
             }
-            return null;
+            component = null;
+            return false;
         }
 
         public BaseDisposable GetSharedComponent(System.Type targetType)

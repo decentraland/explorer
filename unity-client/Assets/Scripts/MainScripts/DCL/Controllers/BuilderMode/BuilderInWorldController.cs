@@ -540,10 +540,10 @@ public class BuilderInWorldController : MonoBehaviour
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         }
 
-        name.ForceSetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
-
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
+
+        builderInWorldEntityHandler.SetEntityName(entity, sceneObject.name);
   
         if(sceneObject.IsSmartItem())
         {
@@ -557,8 +557,8 @@ public class BuilderInWorldController : MonoBehaviour
 
             //Note (Adrian): This shouldn't work this way, we can't wait a frame to set the data of the component so we force it to update
 
-            SmartItemComponent component = (SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM);
-            component.ForceUpdate(jsonModel);
+            entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent);
+            ((SmartItemComponent)baseComponent).ForceUpdate(jsonModel);
         }
 
         if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)

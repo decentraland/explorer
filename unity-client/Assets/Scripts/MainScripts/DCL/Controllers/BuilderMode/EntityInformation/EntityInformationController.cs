@@ -104,8 +104,6 @@ public class EntityInformationController : MonoBehaviour
     public void ChangeEntityName(string newName)
     {      
         OnNameChange?.Invoke(currentEntity,newName);
-
-        titleTxt.text = currentEntity.GetDescriptiveName();
     }
 
     public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)
@@ -119,9 +117,14 @@ public class EntityInformationController : MonoBehaviour
         parcelScene = currentScene;
 
         if (entity.HasSmartItemComponent())
-            smartItemListView.SetSmartItemParameters((SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM));
+        {
+            entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent);
+            smartItemListView.SetSmartItemParameters((SmartItemComponent) baseComponent);
+        }
         else
+        {
             smartItemListView.gameObject.SetActive(false);
+        }
 
         entitytTumbailImg.enabled = false;
 
@@ -187,13 +190,13 @@ public class EntityInformationController : MonoBehaviour
             return;
         }
 
-        string leftText = "ENTITIES: " + sceneObject.metrics.entities + "\n"+ 
-                          "BODIES: " + sceneObject.metrics.bodies + "\n" + 
-                          "TRIS: " + sceneObject.metrics.triangles;
+        string leftText = $"ENTITIES: {sceneObject.metrics.entities}\n"+ 
+                          $"BODIES: {sceneObject.metrics.bodies}\n" + 
+                          $"TRIS: {sceneObject.metrics.triangles}";
 
-        string rightText = "TEXTURES: " + sceneObject.metrics.textures + "\n" +
-                           "MATERIALS: " + sceneObject.metrics.materials + "\n" +
-                           "GEOMETRIES: " + sceneObject.metrics.meshes;
+        string rightText = $"TEXTURES: {sceneObject.metrics.textures}\n" +
+                           $"MATERIALS: {sceneObject.metrics.materials}\n" +
+                           $"GEOMETRIES: {sceneObject.metrics.meshes}";
 
          entityLimitsLeftTxt.text = leftText;
          entityLimitsRightTxt.text = rightText;
@@ -208,9 +211,6 @@ public class EntityInformationController : MonoBehaviour
     private void GetThumbnail(SceneObject sceneObject)
     {
         var url = sceneObject?.GetComposedThumbnailUrl();
-
-        if (sceneObject == null || string.IsNullOrEmpty(url))
-            return;
 
         if (sceneObject == null || string.IsNullOrEmpty(url))
             return;

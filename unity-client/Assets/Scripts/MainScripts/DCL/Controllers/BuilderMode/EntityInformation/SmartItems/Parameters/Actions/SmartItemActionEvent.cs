@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActionEvent 
+public class SmartItemActionEvent 
 {
     public List<DCLBuilderInWorldEntity> entityList;
 }

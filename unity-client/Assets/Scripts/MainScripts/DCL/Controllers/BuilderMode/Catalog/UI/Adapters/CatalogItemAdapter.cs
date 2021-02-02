@@ -27,7 +27,6 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
     string loadedThumbnailURL;
     AssetPromise_Texture loadedThumbnailPromise;
 
-
     public SceneObject GetContent()
     {
         return sceneObject;
@@ -42,10 +41,7 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         else
             favImg.color = offFavoriteColor;
 
-        if (string.IsNullOrEmpty(sceneObject.script))
-            smartItemGO.SetActive(false);
-        else
-            smartItemGO.SetActive(true);
+        smartItemGO.SetActive(!string.IsNullOrEmpty(sceneObject.script));
 
         GetThumbnail();
 

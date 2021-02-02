@@ -59,6 +59,8 @@ public class SceneObject
 
     public bool IsSmartItem()
     {
+        //NOTE (Adrian): this force the desactivation of smart item for the first version of the builder in world
+        return false;
         return !string.IsNullOrEmpty(script);
     }
 }
