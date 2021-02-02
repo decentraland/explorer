@@ -44,8 +44,11 @@ export async function spawnPortableExperienceScene(portableExperienceUrn: Portab
 }
 
 function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
-  const offChainAsset = (dclId as unknown) as OffChainAsset
-  return !!offChainAsset.registry && offChainAsset.registry === 'static-portable-experiences'
+  if (!!dclId) {
+    const offChainAsset = dclId as OffChainAsset
+    return !!offChainAsset.registry && offChainAsset.registry === 'static-portable-experiences'
+  }
+  return false
 }
 
 export async function killPortableExperienceScene(peId: string): Promise<void> {
