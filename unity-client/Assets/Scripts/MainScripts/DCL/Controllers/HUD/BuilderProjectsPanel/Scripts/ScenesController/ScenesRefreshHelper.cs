@@ -49,7 +49,7 @@ internal class ScenesRefreshHelper
         {
             return oldDeployedScenes;
         }
-        else if (WasProjectScene(sceneData))
+        if (WasProjectScene(sceneData))
         {
             return oldProjectsScenes;
         }
