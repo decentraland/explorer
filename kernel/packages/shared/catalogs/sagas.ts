@@ -166,7 +166,6 @@ export function* handleWearablesRequest(action: WearablesRequest) {
       yield put(wearablesFailure(context, error))
     }
   } else {
-    console.log('filters are', filters)
     yield put(wearablesFailure(context, WRONG_FILTERS_ERROR))
   }
 }
@@ -197,11 +196,11 @@ function areFiltersValidForV1(filters: WearablesRequestFilters) {
     }
   }
 
-  if (filters.ownedByUser != undefined) {
+  if (filters.ownedByUser !== undefined && filters.ownedByUser !== null) {
     filtersSet += 1
   }
 
-  if (filters.wearableIds != undefined) {
+  if (filters.wearableIds && filters.wearableIds.length > 0) {
     filtersSet += 1
   }
 
