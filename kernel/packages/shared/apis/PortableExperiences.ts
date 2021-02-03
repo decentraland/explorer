@@ -59,6 +59,25 @@ export class PortableExperiences extends ExposableAPI {
       JSON.stringify(this.currentPortableExperiences.get(pid)) === JSON.stringify(currentExecutor)
     ) {
       killPortableExperienceScene(pid)
+      this.currentPortableExperiences.delete(pid)
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Stops a portable experience from the current running portable scene.
+   *
+   * Returns true if was able to kill the portable experience, false if not.
+   */
+  @exposeMethod
+  async exit(): Promise<boolean> {
+    const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+    const executorCid = parcelIdentity.cid
+
+    if (this.currentPortableExperiences.has(executorCid)) {
+      killPortableExperienceScene(executorCid)
+      this.currentPortableExperiences.delete(executorCid)
       return true
     }
     return false
