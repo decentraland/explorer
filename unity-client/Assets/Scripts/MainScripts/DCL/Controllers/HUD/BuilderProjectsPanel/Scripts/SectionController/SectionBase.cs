@@ -3,8 +3,8 @@ using UnityEngine;
 
 internal abstract class SectionBase : IDisposable
 {
-    public event Action OnRequestContextMenuHide;
-    public event Action<SectionsController.SectionId> OnRequestOpenSection;
+    public static event Action OnRequestContextMenuHide;
+    public static event Action<SectionsController.SectionId> OnRequestOpenSection;
 
     public bool isVisible { get; private set; } = false;
 

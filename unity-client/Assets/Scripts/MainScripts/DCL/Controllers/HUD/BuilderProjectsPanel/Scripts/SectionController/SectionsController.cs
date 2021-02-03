@@ -42,6 +42,9 @@ internal class SectionsController : IDisposable
     {
         this.sectionsParent = sectionsParent;
         this.sectionFactory = sectionFactory;
+
+        SectionBase.OnRequestOpenSection += OpenSection;
+        SectionBase.OnRequestContextMenuHide += OnRequestContextMenuHide;
     }
 
     /// <summary>
@@ -60,8 +63,6 @@ internal class SectionsController : IDisposable
         if (section != null)
         {
             section.SetViewContainer(sectionsParent);
-            section.OnRequestOpenSection += OpenSection;
-            section.OnRequestContextMenuHide += OnRequestContextMenuHide;
         }
 
         loadedSections.Add(id, section);
