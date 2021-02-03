@@ -16,12 +16,14 @@
             "id": "step0",
             "name": "Find Kiki",
             "type": "single",
+            "coordinates" : "0,0",
             "payload": "{ \"isDone\": true }"
           },
           {
             "id": "step1",
             "name": "Collect pumpkins",
             "type": "count",
+            "coordinates" : "0,0",
             "payload": "{ \"start\": 0, \"end\": 10, \"current\": 10 }"
           }
         ]
@@ -35,6 +37,7 @@
             "id": "step2",
             "name": "Find the old lady",
             "type": "single",
+            "coordinates" : "0,0",
             "payload": "{ \"isDone\": true }"
           },
           {

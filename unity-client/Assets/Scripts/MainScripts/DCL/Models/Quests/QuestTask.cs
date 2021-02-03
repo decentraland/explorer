@@ -7,6 +7,7 @@ public class QuestTask
     public string type;
     public string payload;
     public string name;
+    public string coordinates;
 }
 
 [System.Serializable]

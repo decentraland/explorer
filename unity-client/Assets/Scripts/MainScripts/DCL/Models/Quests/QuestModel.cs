@@ -9,7 +9,6 @@ public class QuestModel
     public string thumbnail_entry;
     public string thumbnail_banner;
     public string icon;
-    public string jumpAction;
     public QuestSection[] sections;
 
     public bool TryGetSection(string sectionId, out QuestSection section)
