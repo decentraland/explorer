@@ -6,13 +6,13 @@ namespace Tests
     public class SectionsControllerShould
     {
         private SectionsController controller;
-        private SectionFactory sectionFactory;
+        private SectionFactory_Mock sectionFactory_Mock;
 
         [SetUp]
         public void SetUp()
         {
-            sectionFactory = new SectionFactory();
-            controller = new SectionsController(sectionFactory, null);
+            sectionFactory_Mock = new SectionFactory_Mock();
+            controller = new SectionsController(sectionFactory_Mock, null);
         }
 
         [TearDown]
@@ -37,8 +37,8 @@ namespace Tests
             controller.OpenSection(SectionsController.SectionId.SCENES_MAIN);
 
             Assert.IsTrue(openCallbackCalled);
-            Assert.IsTrue(sectionFactory.sectionScenesMain.isVisible);
-            Assert.AreEqual(sectionFactory.sectionScenesMain, sectionOpened);
+            Assert.IsTrue(sectionFactory_Mock.sectionScenesMain.isVisible);
+            Assert.AreEqual(sectionFactory_Mock.sectionScenesMain, sectionOpened);
         }
 
         [Test]
@@ -62,28 +62,28 @@ namespace Tests
 
             controller.OpenSection(SectionsController.SectionId.SCENES_MAIN);
 
-            Assert.IsTrue(sectionFactory.sectionScenesMain.isVisible);
-            Assert.AreEqual(sectionFactory.sectionScenesMain, openSection);
+            Assert.IsTrue(sectionFactory_Mock.sectionScenesMain.isVisible);
+            Assert.AreEqual(sectionFactory_Mock.sectionScenesMain, openSection);
 
             controller.OpenSection(SectionsController.SectionId.SCENES_PROJECT);
 
-            Assert.IsFalse(sectionFactory.sectionScenesMain.isVisible);
-            Assert.IsTrue(sectionFactory.sectionScenesProjects.isVisible);
+            Assert.IsFalse(sectionFactory_Mock.sectionScenesMain.isVisible);
+            Assert.IsTrue(sectionFactory_Mock.sectionScenesProjects.isVisible);
 
-            Assert.AreEqual(sectionFactory.sectionScenesProjects, openSection);
-            Assert.AreEqual(sectionFactory.sectionScenesMain, hiddenSection);
+            Assert.AreEqual(sectionFactory_Mock.sectionScenesProjects, openSection);
+            Assert.AreEqual(sectionFactory_Mock.sectionScenesMain, hiddenSection);
         }
     }
 
-    class SectionFactory : ISectionFactory
+    class SectionFactory_Mock : ISectionFactory
     {
-        public SectionScenesMain sectionScenesMain;
-        public SectionScenesProjects sectionScenesProjects;
+        public SectionBase sectionScenesMain;
+        public SectionBase sectionScenesProjects;
 
-        public SectionFactory()
+        public SectionFactory_Mock()
         {
-            sectionScenesMain = new SectionScenesMain();
-            sectionScenesProjects = new SectionScenesProjects();
+            sectionScenesMain = new Section_Mock();
+            sectionScenesProjects =  new Section_Mock();
         }
 
         SectionBase ISectionFactory.GetSectionController(SectionsController.SectionId id)
@@ -105,32 +105,24 @@ namespace Tests
 
             return result;
         }
-    }
 
-    class SectionBaseTest : SectionBase
-    {
-        public override void SetViewContainer(Transform viewContainer)
+        class Section_Mock : SectionBase
         {
+            public override void SetViewContainer(Transform viewContainer)
+            {
+            }
+
+            public override void Dispose()
+            {
+            }
+
+            public override void OnShow()
+            {
+            }
+
+            public override void OnHide()
+            {
+            }
         }
-
-        public override void Dispose()
-        {
-        }
-
-        protected override void OnShow()
-        {
-        }
-
-        protected override void OnHide()
-        {
-        }
-    }
-
-    class SectionScenesMain : SectionBaseTest
-    {
-    }
-
-    class SectionScenesProjects : SectionBaseTest
-    {
     }
 }
