@@ -27,48 +27,39 @@ public class CatalogController : MonoBehaviour
         wearableCatalog.OnAdded -= WearableReceivedOnCatalog;
     }
 
-    public void AddWearableToCatalog(string payload)
-    {
-        WearableRequestResponse request = JsonUtility.FromJson<WearableRequestResponse>(payload);
-
-        if (VERBOSE)
-            Debug.Log("add wearable: " + payload);
-
-        switch (request.wearable.type)
-        {
-            case "wearable":
-                {
-                    WearableItem wearableItem = request.wearable;
-
-                    if (!wearableCatalog.ContainsKey(wearableItem.id))
-                        wearableCatalog.Add(wearableItem.id, wearableItem);
-
-                    break;
-                }
-            case "item":
-                {
-                    if (!itemCatalog.ContainsKey(request.wearable.id))
-                        itemCatalog.Add(request.wearable.id, (Item)request.wearable);
-
-                    break;
-                }
-            default:
-                {
-                    Debug.LogError("Bad type in item, will not be added to catalog");
-                    break;
-                }
-        }
-    }
-
     public void AddWearablesToCatalog(string payload)
     {
-        Item[] items = JsonUtility.FromJson<Item[]>(payload);
+        WearablesRequestResponse request = JsonUtility.FromJson<WearablesRequestResponse>(payload);
 
-        int count = items.Length;
-        for (int i = 0; i < count; ++i)
+        if (VERBOSE)
+            Debug.Log("add wearables: " + payload);
+
+        for (int i = 0; i < request.wearables.Length; i++)
         {
-            if (!itemCatalog.ContainsKey(items[i].id))
-                itemCatalog.Add(items[i].id, items[i]);
+            switch (request.wearables[i].type)
+            {
+                case "wearable":
+                    {
+                        WearableItem wearableItem = request.wearables[i];
+
+                        if (!wearableCatalog.ContainsKey(wearableItem.id))
+                            wearableCatalog.Add(wearableItem.id, wearableItem);
+
+                        break;
+                    }
+                case "item":
+                    {
+                        if (!itemCatalog.ContainsKey(request.wearables[i].id))
+                            itemCatalog.Add(request.wearables[i].id, (Item)request.wearables[i]);
+
+                        break;
+                    }
+                default:
+                    {
+                        Debug.LogError("Bad type in item, will not be added to catalog");
+                        break;
+                    }
+            }
         }
     }
 

@@ -176,9 +176,9 @@ public class WearableItem : Item
 }
 
 [System.Serializable]
-public class WearableRequestResponse
+public class WearablesRequestResponse
 {
-    public WearableItem wearable;
+    public WearableItem[] wearables;
     public string context;
 }
 
