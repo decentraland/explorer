@@ -166,6 +166,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
       yield put(wearablesFailure(context, error))
     }
   } else {
+    console.log('filters are', filters)
     yield put(wearablesFailure(context, WRONG_FILTERS_ERROR))
   }
 }
@@ -189,7 +190,7 @@ function* handleWearablesFailure(action: WearablesFailure) {
 function areFiltersValidForV1(filters: WearablesRequestFilters) {
   let filtersSet = 0
   let ok = true
-  if (filters.collectionNames != undefined) {
+  if (filters.collectionNames && filters.collectionNames.length > 0) {
     filtersSet += 1
     if (filters.collectionNames.some((name) => name !== 'base-avatars')) {
       ok = false
