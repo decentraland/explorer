@@ -44,7 +44,7 @@ internal class SectionsController : IDisposable
         this.sectionFactory = sectionFactory;
 
         SectionBase.OnRequestOpenSection += OpenSection;
-        SectionBase.OnRequestContextMenuHide += OnRequestContextMenuHide;
+        SectionBase.OnRequestContextMenuHide += ()=> OnRequestContextMenuHide?.Invoke();
     }
 
     /// <summary>
