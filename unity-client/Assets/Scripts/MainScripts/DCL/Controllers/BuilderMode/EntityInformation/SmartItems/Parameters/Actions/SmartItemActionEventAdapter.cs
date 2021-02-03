@@ -34,8 +34,10 @@ public class SmartItemActionEventAdapter : MonoBehaviour
     }
 
     void SelectedEntity(int number)
-    { 
-        filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component);
+    {
+        if (!filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
+            return;
+
         selectedComponent = (SmartItemComponent) component;
         GenerateActionDropdownContent(selectedComponent.model.actions);
 

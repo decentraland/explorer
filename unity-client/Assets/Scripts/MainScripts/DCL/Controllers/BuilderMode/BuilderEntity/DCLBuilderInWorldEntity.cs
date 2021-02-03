@@ -109,10 +109,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool HasSmartItemActions()
     {
-        BaseComponent component;
-        rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out component);
-     
-        if (component == null)
+        if (!rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
             return false;
 
         return ((SmartItemComponent)component).HasActions();
@@ -123,18 +120,14 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (associatedSceneObject != null)
             return associatedSceneObject;
 
-        rootEntity.TryGetSharedComponent(CLASS_ID.GLTF_SHAPE, out BaseDisposable gltfShapeComponent);
-
-        if(gltfShapeComponent != null)
+        if(rootEntity.TryGetSharedComponent(CLASS_ID.GLTF_SHAPE, out BaseDisposable gltfShapeComponent))
         {
             string assetId = ((GLTFShape)gltfShapeComponent).model.assetId;
             associatedSceneObject = AssetCatalogBridge.GetSceneObjectById(assetId);
             return associatedSceneObject;
         }
 
-        rootEntity.TryGetSharedComponent(CLASS_ID.NFT_SHAPE, out BaseDisposable nftShapeComponent);
-
-        if (nftShapeComponent != null)
+        if (rootEntity.TryGetSharedComponent(CLASS_ID.NFT_SHAPE, out BaseDisposable nftShapeComponent))
         {
             string assetId = ((NFTShape)nftShapeComponent).model.assetId;
             associatedSceneObject = BuilderInWorldNFTController.i.GetNFTSceneObjectFromId(assetId);
@@ -207,11 +200,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public void DestroyColliders()
     {   
-        foreach (List<GameObject> entityCollider in collidersGameObjectDictionary.Values)
+        foreach (List<GameObject> entityColliderGameObject in collidersGameObjectDictionary.Values)
         {
-            for(int i = entityCollider.Count-1; i > 0;i--)
+            for(int i = entityColliderGameObject.Count-1; i > 0;i--)
             {
-                Destroy(entityCollider[i]);
+                Destroy(entityColliderGameObject[i]);
             }      
         }
 
@@ -255,9 +248,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public void SetDescriptiveName(string newName)
     {
-        rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent);
 
-        if (nameComponent != null)
+        if (rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent))
         {
            ((DCLName) nameComponent).ForceSetNewName(newName);
         }
@@ -272,9 +264,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public string GetDescriptiveName()
     {
-        rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent);
-
-        if (nameComponent != null)
+        if (rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent))
         {
             return ((DCLName.Model)nameComponent.GetModel()).value;
         }
