@@ -215,9 +215,10 @@ export class Quaternion {
    * @param pitch - defines the rotation around X axis
    * @param roll - defines the rotation around Z axis
    * @param result - defines the target quaternion
-   * Implemented unity-based calculations from: https://stackoverflow.com/a/56055813
    */
   public static RotationYawPitchRollToRef(yaw: number, pitch: number, roll: number, result: Quaternion): void {
+    // Implemented unity-based calculations from: https://stackoverflow.com/a/56055813
+
     let halfPitch = pitch * 0.5
     let halfYaw = yaw * 0.5
     let halfRoll = roll * 0.5
@@ -486,9 +487,10 @@ export class Quaternion {
    * Creates a rotation which rotates from fromDirection to toDirection.
    * @param from - defines the first direction Vector
    * @param to - defines the target direction Vector
-   * Unity-based calculations implemented from https://forum.unity.com/threads/quaternion-lookrotation-around-an-axis.608470/#post-4069888
    */
   public static FromToRotation(from: Vector3, to: Vector3, up: Vector3 = MathTmp.staticUp): Quaternion {
+    // Unity-based calculations implemented from https://forum.unity.com/threads/quaternion-lookrotation-around-an-axis.608470/#post-4069888
+
     let v0 = from.normalize()
     let v1 = to.normalize()
 
