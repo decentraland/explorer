@@ -45,12 +45,13 @@ import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
 import { StatefulWorker } from 'shared/world/StatefulWorker'
-import { getCurrentUserId, getUserId } from 'shared/session/selectors'
+import { getCurrentUserId } from 'shared/session/selectors'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
-import { catalogRequest, inventoryRequest } from 'shared/catalogs/actions'
+import { wearablesRequest } from 'shared/catalogs/actions'
+import { WearablesRequestFilters } from 'shared/catalogs/types'
 
 declare const DCL: any
 
@@ -465,13 +466,8 @@ export class BrowserInterface {
     }
   }
 
-  public RequestWearables(data: { wearableIds: string[] }) {
-    globalThis.globalStore.dispatch(catalogRequest(data.wearableIds))
-  }
-
-  public RequestOwnInventory() {
-    const userId = getUserId(globalThis.globalStore.getState())!
-    globalThis.globalStore.dispatch(inventoryRequest(userId))
+  public RequestWearables(filters: WearablesRequestFilters) {
+    globalThis.globalStore.dispatch(wearablesRequest(filters))
   }
 }
 
