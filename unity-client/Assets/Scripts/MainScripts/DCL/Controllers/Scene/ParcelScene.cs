@@ -538,7 +538,7 @@ namespace DCL.Controllers
             }
 
             BaseComponent newComponent = null;
-            DCLComponentFactory factory = ownerController.componentFactory;
+            IRuntimeComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
@@ -643,7 +643,7 @@ namespace DCL.Controllers
             }
 
             BaseComponent newComponent = null;
-            DCLComponentFactory factory = ownerController.componentFactory;
+            IRuntimeComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
             // HACK: (Zak) will be removed when we separate each
@@ -1019,9 +1019,10 @@ namespace DCL.Controllers
             switch (componentName)
             {
                 case "shape":
-                    if (entity.meshesInfo.currentShape != null)
+
+                    if (entity.meshesInfo.currentShape is BaseShape baseShape)
                     {
-                        entity.meshesInfo.currentShape.DetachFrom(entity);
+                        baseShape.DetachFrom(entity);
                     }
 
                     return;
