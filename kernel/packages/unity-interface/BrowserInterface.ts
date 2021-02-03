@@ -466,8 +466,8 @@ export class BrowserInterface {
     }
   }
 
-  public RequestWearables(filters: WearablesRequestFilters) {
-    globalThis.globalStore.dispatch(wearablesRequest(filters))
+  public RequestWearables(data: { filters: WearablesRequestFilters; context?: string }) {
+    globalThis.globalStore.dispatch(wearablesRequest(data.filters, data.context))
   }
 }
 
