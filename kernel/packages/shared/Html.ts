@@ -4,7 +4,7 @@ import { authenticate, updateTOS } from './session/actions'
 import { StoreContainer } from './store/rootTypes'
 import { LoadingState } from './loading/reducer'
 import { ENABLE_WEB3, PREVIEW } from '../config'
-import {ProviderType} from "./ethereum/ProviderType";
+import { ProviderType } from "./ethereum/ProviderType"
 
 declare const globalThis: StoreContainer
 const isReact = !!(window as any).reactVersion
