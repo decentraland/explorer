@@ -258,14 +258,10 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   }
 
-  public AddWearablesToCatalog(wearables: Wearable[]) {
+  public AddWearablesToCatalog(wearables: Wearable[], context?: string) {
     for (const wearable of wearables) {
-      this.SendMessageToUnity('Main', 'AddWearableToCatalog', JSON.stringify(wearable))
+      this.SendMessageToUnity('Main', 'AddWearableToCatalog', JSON.stringify({ wearable, context }))
     }
-  }
-
-  public SetInventory(wearableIds: string[]) {
-    this.SendMessageToUnity('Main', 'SetUserInventory', JSON.stringify(wearableIds))
   }
 
   public RemoveWearablesFromCatalog(wearableIds: string[]) {

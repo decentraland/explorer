@@ -1,4 +1,4 @@
-import { call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
+import { call, put, select, take, takeEvery } from 'redux-saga/effects'
 
 import {
   getServerConfigurations,
@@ -12,26 +12,19 @@ import {
 import defaultLogger from 'shared/logger'
 import { RENDERER_INITIALIZED } from 'shared/renderer/types'
 import {
-  CatalogFailureAction,
   catalogLoaded,
-  CatalogRequestAction,
-  catalogSuccess,
-  CatalogSuccessAction,
-  CATALOG_FAILURE,
   CATALOG_LOADED,
-  CATALOG_REQUEST,
-  CATALOG_SUCCESS,
-  InventoryFailure,
-  inventoryFailure,
-  InventoryRequest,
-  InventorySuccess,
-  inventorySuccess,
-  INVENTORY_FAILURE,
-  INVENTORY_REQUEST,
-  INVENTORY_SUCCESS
+  WearablesFailure,
+  wearablesFailure,
+  WearablesRequest,
+  WearablesSuccess,
+  wearablesSuccess,
+  WEARABLES_FAILURE,
+  WEARABLES_REQUEST,
+  WEARABLES_SUCCESS
 } from './actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
-import { Catalog, Wearable, Collection, WearableId } from './types'
+import { Catalog, Wearable, Collection, WearableId, WearablesRequestFilters } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
@@ -39,8 +32,11 @@ import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
+import { getUserId } from 'shared/session/selectors'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
+export const WRONG_FILTERS_ERROR =
+  'You must set one and only one filter for V1. Also, the only collection name allowed is base-avatars'
 
 /**
  * This saga handles wearable definition fetching.
@@ -53,12 +49,9 @@ declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 export function* catalogsSaga(): any {
   yield takeEvery(RENDERER_INITIALIZED, initialLoad)
 
-  yield takeLatest(CATALOG_REQUEST, handleCatalogRequest)
-  yield takeLatest(CATALOG_SUCCESS, handleCatalogSuccess)
-  yield takeLatest(CATALOG_FAILURE, handleCatalogFailure)
-  yield takeLatest(INVENTORY_REQUEST, handleInventoryRequest)
-  yield takeLatest(INVENTORY_SUCCESS, handleInventorySuccess)
-  yield takeLatest(INVENTORY_FAILURE, handleInventoryFailure)
+  yield takeEvery(WEARABLES_REQUEST, handleWearablesRequest)
+  yield takeEvery(WEARABLES_SUCCESS, handleWearablesSuccess)
+  yield takeEvery(WEARABLES_FAILURE, handleWearablesFailure)
 }
 
 function overrideBaseUrl(wearable: Wearable) {
@@ -134,38 +127,84 @@ function* initialLoad() {
   }
 }
 
-export function* handleCatalogRequest(action: CatalogRequestAction) {
-  const { wearableIds } = action.payload
+export function* handleWearablesRequest(action: WearablesRequest) {
+  const { filters, context } = action.payload
 
-  yield call(ensureBaseCatalogs)
+  const valid = areFiltersValidForV1(filters)
+  if (valid) {
+    try {
+      yield call(ensureBaseCatalogs)
 
-  const platformCatalog = yield select(getPlatformCatalog)
-  const exclusiveCatalog = yield select(getExclusiveCatalog)
+      const platformCatalog = yield select(getPlatformCatalog)
+      const exclusiveCatalog = yield select(getExclusiveCatalog)
 
-  const wearables: Wearable[] = wearableIds
-    .map((wearableId) =>
-      wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
-    )
-    .filter((wearable) => !!wearable)
-  yield put(catalogSuccess(wearables))
+      let response: Wearable[]
+      if (filters.wearableIds) {
+        // Filtering by ids
+        response = filters.wearableIds
+          .map((wearableId) =>
+            wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
+          )
+          .filter((wearable) => !!wearable)
+      } else if (filters.ownedByUser) {
+        // Only owned wearables
+        const userId = yield select(getUserId)
+        if (ALL_WEARABLES) {
+          response = Object.values(exclusiveCatalog)
+        } else {
+          const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
+          response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
+        }
+      } else if (filters.collectionNames) {
+        // We assume that the only collection name used is base-avatars
+        response = Object.values(platformCatalog)
+      } else {
+        throw new Error('Unknown filter')
+      }
+      yield put(wearablesSuccess(response, context))
+    } catch (error) {
+      yield put(wearablesFailure(context, error))
+    }
+  } else {
+    yield put(wearablesFailure(context, WRONG_FILTERS_ERROR))
+  }
 }
 
-export function* handleCatalogSuccess(action: CatalogSuccessAction) {
-  const { wearables } = action.payload
+export function* handleWearablesSuccess(action: WearablesSuccess) {
+  const { wearables, context } = action.payload
 
   yield call(ensureRenderer)
-
-  yield call(sendWearablesCatalog, wearables)
+  yield call(sendWearablesCatalog, wearables, context)
 }
 
-function* handleCatalogFailure(action: CatalogFailureAction) {
-  const { wearableIds, error } = action.payload
+function* handleWearablesFailure(action: WearablesFailure) {
+  const { context, error } = action.payload
+
+  defaultLogger.error(`Failed to fetch wearables for context '${context}'`, error)
 
   yield call(ensureRenderer)
+  // TODO: Decide how to communicate error to renderer
+}
 
-  defaultLogger.error(`Failed to fetch wearables ${wearableIds.join(',')}`, error)
+function areFiltersValidForV1(filters: WearablesRequestFilters) {
+  let filtersSet = 0
+  let ok = true
+  if (filters.collectionNames !== undefined) {
+    filtersSet += 1
+    if (filters.collectionNames.some((name) => name !== 'base-avatars')) {
+      ok = false
+    }
+  }
 
-  // TODO: Decide what else to do on failure
+  if (filters.ownedByUser !== undefined) {
+    filtersSet += 1
+  }
+
+  if (filters.wearableIds !== undefined) {
+    filtersSet += 1
+  }
+
+  return filtersSet === 1 && ok
 }
 
 async function headCatalog(url: string) {
@@ -185,54 +224,14 @@ async function fetchCatalog(url: string) {
   return [await request.json(), etag]
 }
 
-export function sendWearablesCatalog(catalog: Catalog) {
-  globalThis.unityInterface.AddWearablesToCatalog(catalog)
+export function sendWearablesCatalog(catalog: Catalog, context: string | undefined) {
+  globalThis.unityInterface.AddWearablesToCatalog(catalog, context)
 }
 
 export function* ensureBaseCatalogs() {
   while (!(yield select(baseCatalogsLoaded))) {
     yield take(CATALOG_LOADED)
   }
-}
-
-export function* handleInventoryRequest(action: InventoryRequest) {
-  const { userId } = action.payload
-  try {
-    yield call(ensureBaseCatalogs)
-
-    const exclusiveCatalog = yield select(getExclusiveCatalog)
-    let inventoryItems: Wearable[]
-    if (ALL_WEARABLES) {
-      inventoryItems = Object.values(exclusiveCatalog)
-    } else {
-      const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
-      inventoryItems = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
-    }
-    yield put(inventorySuccess(userId, inventoryItems))
-  } catch (error) {
-    yield put(inventoryFailure(userId, error))
-  }
-}
-
-export function* handleInventorySuccess(action: InventorySuccess) {
-  const { inventory: wearables } = action.payload
-  const wearableIds = wearables.map(({ id }) => id)
-
-  yield call(ensureRenderer)
-
-  // We are filling the catalog & updating the inventory in one operation. The idea is to avoid an extra step in displaying the whole inventory
-  yield call(sendWearablesCatalog, wearables)
-  yield call(sendInventory, wearableIds)
-}
-
-function* handleInventoryFailure(action: InventoryFailure) {
-  const { userId, error } = action.payload
-
-  yield call(ensureRenderer)
-
-  defaultLogger.error(`Failed to fetch inventory for user ${userId}`, error)
-
-  // TODO: Decide what else to do on failure
 }
 
 export async function fetchInventoryItemsByAddress(address: string): Promise<WearableId[]> {
@@ -246,8 +245,4 @@ export async function fetchInventoryItemsByAddress(address: string): Promise<Wea
   const inventory: { id: string }[] = await result.json()
 
   return inventory.map((wearable) => wearable.id)
-}
-
-export function sendInventory(inventory: WearableId[]) {
-  globalThis.unityInterface.SetInventory(inventory)
 }

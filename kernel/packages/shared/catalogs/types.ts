@@ -43,3 +43,9 @@ export type CatalogState = {
 export type RootCatalogState = {
   catalogs: CatalogState
 }
+
+export type WearablesRequestFilters = {
+  ownedByUser?: boolean
+  wearableIds?: WearableId[]
+  collectionNames?: string[]
+}
