@@ -189,18 +189,18 @@ function* handleWearablesFailure(action: WearablesFailure) {
 function areFiltersValidForV1(filters: WearablesRequestFilters) {
   let filtersSet = 0
   let ok = true
-  if (filters.collectionNames !== undefined) {
+  if (filters.collectionNames != undefined) {
     filtersSet += 1
     if (filters.collectionNames.some((name) => name !== 'base-avatars')) {
       ok = false
     }
   }
 
-  if (filters.ownedByUser !== undefined) {
+  if (filters.ownedByUser != undefined) {
     filtersSet += 1
   }
 
-  if (filters.wearableIds !== undefined) {
+  if (filters.wearableIds != undefined) {
     filtersSet += 1
   }
 
