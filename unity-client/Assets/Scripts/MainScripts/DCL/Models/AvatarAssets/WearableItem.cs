@@ -176,6 +176,13 @@ public class WearableItem : Item
 }
 
 [System.Serializable]
+public class WearableRequestResponse
+{
+    public WearableItem wearable;
+    public string context;
+}
+
+[System.Serializable]
 public class WearableContent
 {
     public string file;

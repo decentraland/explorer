@@ -29,16 +29,16 @@ public class CatalogController : MonoBehaviour
 
     public void AddWearableToCatalog(string payload)
     {
-        Item item = JsonUtility.FromJson<Item>(payload);
+        WearableRequestResponse request = JsonUtility.FromJson<WearableRequestResponse>(payload);
 
         if (VERBOSE)
             Debug.Log("add wearable: " + payload);
 
-        switch (item.type)
+        switch (request.wearable.type)
         {
             case "wearable":
                 {
-                    WearableItem wearableItem = JsonUtility.FromJson<WearableItem>(payload);
+                    WearableItem wearableItem = request.wearable;
 
                     if (!wearableCatalog.ContainsKey(wearableItem.id))
                         wearableCatalog.Add(wearableItem.id, wearableItem);
@@ -47,8 +47,8 @@ public class CatalogController : MonoBehaviour
                 }
             case "item":
                 {
-                    if (!itemCatalog.ContainsKey(item.id))
-                        itemCatalog.Add(item.id, item);
+                    if (!itemCatalog.ContainsKey(request.wearable.id))
+                        itemCatalog.Add(request.wearable.id, (Item)request.wearable);
 
                     break;
                 }
@@ -103,7 +103,12 @@ public class CatalogController : MonoBehaviour
             if (!pendingWearablePromises.ContainsKey(wearableId))
             {
                 pendingWearablePromises.Add(wearableId, promise);
-                WebInterface.RequestWearables(new string[] { wearableId });
+                WebInterface.RequestWearables(
+                    ownedByUser: null,
+                    wearableIds: new string[] { wearableId },
+                    collectionNames: null,
+                    context: null
+                );
             }
             else
             {

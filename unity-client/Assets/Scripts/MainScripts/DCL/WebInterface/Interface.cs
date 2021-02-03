@@ -544,9 +544,18 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class WearablesRequestFiltersPayload
+        {
+            public bool? ownedByUser;
+            public string[] wearableIds;
+            public string[] collectionNames;
+        }
+
+        [System.Serializable]
         public class RequestWearablesPayload
         {
-            public string[] wearableIds;
+            public WearablesRequestFiltersPayload filters;
+            public string context;
         }
 
 
@@ -1168,9 +1177,21 @@ namespace DCL.Interface
             SendMessage("CloseUserAvatar", closeUserAvatarPayload);
         }
 
-        public static void RequestWearables(string[] usersId)
+        public static void RequestWearables(
+            bool? ownedByUser,
+            string[] wearableIds,
+            string[] collectionNames,
+            string context)
         {
-            requestWearablesPayload.wearableIds = usersId;
+            requestWearablesPayload.filters = new WearablesRequestFiltersPayload
+            {
+                ownedByUser = ownedByUser,
+                wearableIds = wearableIds,
+                collectionNames = collectionNames
+            };
+
+            requestWearablesPayload.context = context;
+
             SendMessage("RequestWearables", requestWearablesPayload);
         }
     }
