@@ -15,7 +15,7 @@ const context = 'someContext'
 describe('Wearables Saga', () => {
 
   it('When a wearable is requested by id, then it is returned successfully', () => {
-    return expectSaga(handleWearablesRequest, wearablesRequest({ wearableIds: [wearableId1] }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ wearableIds: [wearableId1], ownedByUser: false }, context))
       .put(wearablesSuccess([wearable1], context))
       .provide([
         [select(baseCatalogsLoaded), true],
@@ -41,7 +41,7 @@ describe('Wearables Saga', () => {
 
   it('When base avatars are requested, then they are returned successfully', () => {
     const baseWearables = [wearable1]
-    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['base-avatars'] }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['base-avatars'], ownedByUser: false }, context))
       .put(wearablesSuccess(baseWearables, context))
       .provide([
         [select(baseCatalogsLoaded), true],
@@ -90,7 +90,7 @@ describe('Wearables Saga', () => {
   })
 
   it('When collection name is not base-avatars, then the request fails', () => {
-    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['some-other-collection'] }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['some-other-collection'], ownedByUser: false }, context))
       .put(wearablesFailure(context, WRONG_FILTERS_ERROR))
       .provide([
         [select(baseCatalogsLoaded), true],
