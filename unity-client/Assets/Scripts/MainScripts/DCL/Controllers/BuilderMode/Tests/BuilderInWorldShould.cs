@@ -79,14 +79,14 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
     }
 
     [UnityTest]
-    public IEnumerator SceneObjectFloorObject()
+    public IEnumerator CatalogItemFloorObject()
     {
-        SceneObject sceneObject = BuilderInWorldUtils.CreateFloorSceneObject();
+        CatalogItem catalogItem = BuilderInWorldUtils.CreateFloorSceneObject();
         LoadParcelScenesMessage.UnityParcelScene data = scene.sceneData;
         data.contents = new List<ContentServerUtils.MappingPair>();
         data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
 
-        foreach (KeyValuePair<string, string> content in sceneObject.contents)
+        foreach (KeyValuePair<string, string> content in catalogItem.contents)
         {
             ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
             mappingPair.file = content.Key;

@@ -8,9 +8,9 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
 {
     public TextMeshProUGUI categoryTxt;
     public GameObject categoryContentGO;
-    public System.Action<SceneObject> OnSceneObjectClicked;
-    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
-    public System.Action<SceneObject, CatalogItemAdapter, BaseEventData> OnAdapterStartDragging;
+    public System.Action<CatalogItem> OnCatalogItemClicked;
+    public System.Action<CatalogItem, CatalogItemAdapter> OnCatalogItemFavorite;
+    public System.Action<CatalogItem, CatalogItemAdapter, BaseEventData> OnAdapterStartDragging;
     public System.Action<PointerEventData> OnAdapterDrag, OnAdapterEndDrag;
 
 
@@ -18,16 +18,16 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     public GameObject catalogItemAdapterPrefab;
 
 
-    public void SetContent(string category, List<SceneObject> sceneObjectsList)
+    public void SetContent(string category, List<CatalogItem> sceneObjectsList)
     {
         categoryTxt.text = category.ToUpper();
         RemoveAdapters();
-        foreach (SceneObject sceneObject in sceneObjectsList)
+        foreach (CatalogItem catalogItem in sceneObjectsList)
         {
             CatalogItemAdapter adapter = Instantiate(catalogItemAdapterPrefab, categoryContentGO.transform).GetComponent<CatalogItemAdapter>();
-            adapter.SetContent(sceneObject);
-            adapter.OnSceneObjectClicked += SceneObjectClicked;
-            adapter.OnSceneObjectFavorite += SceneObjectFavorite;
+            adapter.SetContent(catalogItem);
+            adapter.OnCatalogItemClicked += CatalogItemClicked;
+            adapter.OnCatalogItemFavorite += CatalogItemFavorite;
             adapter.OnAdapterStartDrag += AdapterStartDragging;
             adapter.OnAdapterDrag += OnDrag;
             adapter.OnAdapterEndDrag += OnEndDrag;
@@ -55,18 +55,18 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
         OnAdapterEndDrag?.Invoke(eventData);
     }
 
-    void SceneObjectClicked(SceneObject sceneObjectClicked)
+    void CatalogItemClicked(CatalogItem catalogItemClicked)
     {
-        OnSceneObjectClicked?.Invoke(sceneObjectClicked);
+        OnCatalogItemClicked?.Invoke(catalogItemClicked);
     }
 
-    void SceneObjectFavorite(SceneObject sceneObjectClicked, CatalogItemAdapter adapter)
+    void CatalogItemFavorite(CatalogItem catalogItemClicked, CatalogItemAdapter adapter)
     {
-        OnSceneObjectFavorite?.Invoke(sceneObjectClicked, adapter);
+        OnCatalogItemFavorite?.Invoke(catalogItemClicked, adapter);
     }
 
-    void AdapterStartDragging(SceneObject sceneObjectClicked, CatalogItemAdapter adapter, BaseEventData data)
+    void AdapterStartDragging(CatalogItem catalogItemClicked, CatalogItemAdapter adapter, BaseEventData data)
     {
-        OnAdapterStartDragging?.Invoke(sceneObjectClicked, adapter, data);
+        OnAdapterStartDragging?.Invoke(catalogItemClicked, adapter, data);
     }
 }

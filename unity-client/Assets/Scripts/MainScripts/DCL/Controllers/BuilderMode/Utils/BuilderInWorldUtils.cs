@@ -13,9 +13,9 @@ using Environment = DCL.Environment;
 
 public static partial class BuilderInWorldUtils
 {
-    public static SceneObject CreateFloorSceneObject()
+    public static CatalogItem CreateFloorSceneObject()
     {
-        SceneObject floorSceneObject = new SceneObject();
+        CatalogItem floorSceneObject = new CatalogItem();
         floorSceneObject.id = BuilderInWorldSettings.FLOOR_ID;
 
         floorSceneObject.model = BuilderInWorldSettings.FLOOR_MODEL;

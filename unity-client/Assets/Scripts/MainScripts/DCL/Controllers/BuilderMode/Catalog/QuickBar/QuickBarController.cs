@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class QuickBarController 
 {
-    public event System.Action<SceneObject> OnSceneObjectSelected;
+    public event System.Action<CatalogItem> OnCatalogItemSelected;
 
-    SceneObject[] quickBarShortcutsSceneObjects = new SceneObject[amountOQuickBarfSlots];
+    CatalogItem[] quickBarShortcutsSceneObjects = new CatalogItem[amountOQuickBarfSlots];
 
     const int amountOQuickBarfSlots = 9;
 
@@ -18,10 +18,10 @@ public class QuickBarController
     public void QuickBarObjectSelected(int index)
     {
         if (quickBarShortcutsSceneObjects.Length > index && quickBarShortcutsSceneObjects[index] != null)
-            OnSceneObjectSelected?.Invoke(quickBarShortcutsSceneObjects[index]);
+            OnCatalogItemSelected?.Invoke(quickBarShortcutsSceneObjects[index]);
     }
 
-    void SetQuickBarShortcut(SceneObject sceneObject, int index)
+    void SetQuickBarShortcut(CatalogItem sceneObject, int index)
     {
         quickBarShortcutsSceneObjects[index] = sceneObject;
     }

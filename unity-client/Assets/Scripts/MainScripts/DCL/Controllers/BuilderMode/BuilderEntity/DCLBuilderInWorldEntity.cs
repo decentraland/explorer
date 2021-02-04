@@ -67,7 +67,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool isVoxel { get; set; } = false;
 
-    SceneObject associatedSceneObject;
+    CatalogItem associatedCatalogItem;
+
     public bool isFloor { get; set; } = false;
     public bool isNFT { get; set; } = false;
 
@@ -118,28 +119,25 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
 
-    public SceneObject GetSceneObjectAssociated()
+    public CatalogItem GetCatalogItemAssociated()
     {
-        if (associatedSceneObject != null)
-            return associatedSceneObject;
+        if (associatedCatalogItem != null)
+            return associatedCatalogItem;
 
         BaseDisposable gltfShapeComponent = rootEntity.GetSharedComponent(CLASS_ID.GLTF_SHAPE);
 
-        if(gltfShapeComponent != null)
-        {
-            string assetId = ((GLTFShape)gltfShapeComponent).model.assetId;
-            associatedSceneObject = AssetCatalogBridge.GetSceneObjectById(assetId);
-            return associatedSceneObject;
-        }
+        string assetId = null;
+
+        if (gltfShapeComponent != null)
+            assetId = ((GLTFShape)gltfShapeComponent).model.assetId;
 
         BaseDisposable nftShapeComponent = rootEntity.GetSharedComponent(CLASS_ID.NFT_SHAPE);
 
         if (nftShapeComponent != null)
-        {
-            string assetId = ((NFTShape)nftShapeComponent).model.assetId;
-            associatedSceneObject = BuilderInWorldNFTController.i.GetNFTSceneObjectFromId(assetId);
-            return associatedSceneObject;
-        }
+            assetId = ((NFTShape)nftShapeComponent).model.assetId;
+
+        if (!string.IsNullOrEmpty(assetId) && DataStore.BuilderInWorld.catalogItemDict.TryGetValue(assetId, out associatedCatalogItem))
+            return associatedCatalogItem;
 
         return null;
     }

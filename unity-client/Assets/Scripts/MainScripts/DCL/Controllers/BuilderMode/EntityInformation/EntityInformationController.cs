@@ -125,7 +125,7 @@ public class EntityInformationController : MonoBehaviour
 
         entitytTumbailImg.enabled = false;
 
-        SceneObject entitySceneObject = entity.GetSceneObjectAssociated();
+        CatalogItem entitySceneObject = entity.GetCatalogItemAssociated();
 
         GetThumbnail(entitySceneObject);
 
@@ -178,7 +178,7 @@ public class EntityInformationController : MonoBehaviour
         }
     }
 
-    void UpdateLimitsInformation(SceneObject sceneObject)
+    void UpdateLimitsInformation(CatalogItem sceneObject)
     {
         if (sceneObject == null)
         {
@@ -205,18 +205,12 @@ public class EntityInformationController : MonoBehaviour
         return (t - (Mathf.Floor(t / length) * length));
     }
 
-    private void GetThumbnail(SceneObject sceneObject)
+    private void GetThumbnail(CatalogItem catalogItem)
     {
-        var url = sceneObject?.GetComposedThumbnailUrl();
+        var url = catalogItem.thumbnailURL;
 
-        if (sceneObject == null || string.IsNullOrEmpty(url))
+        if (catalogItem == null || string.IsNullOrEmpty(url))
             return;
-
-        if (sceneObject == null || string.IsNullOrEmpty(url))
-            return;
-
-        if (string.Equals(sceneObject.asset_pack_id, BuilderInWorldSettings.ASSETS_COLLECTIBLES))
-            url = sceneObject.thumbnail;
 
         string newLoadedThumbnailURL = url;
         var newLoadedThumbnailPromise = new AssetPromise_Texture(url);

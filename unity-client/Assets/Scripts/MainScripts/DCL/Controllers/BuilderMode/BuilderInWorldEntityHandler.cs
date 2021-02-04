@@ -561,7 +561,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             string entityName = entityToEdit.GetDescriptiveName();
             if (entityNameList.Contains(entityName))
             {
-                entityName = GetNewNameForEntity(entityToEdit.GetSceneObjectAssociated());
+                entityName = GetNewNameForEntity(entityToEdit.GetCatalogItemAssociated());
                 entityToEdit.SetDescriptiveName(entityName);
             }
 
@@ -576,7 +576,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         }
     }
 
-    public string GetNewNameForEntity(SceneObject sceneObject)
+    public string GetNewNameForEntity(CatalogItem sceneObject)
     {
         int i = 1;
         string name = sceneObject.name;

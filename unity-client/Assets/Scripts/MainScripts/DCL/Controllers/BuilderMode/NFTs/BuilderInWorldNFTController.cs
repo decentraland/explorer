@@ -10,6 +10,8 @@ using UnityEngine;
 public class BuilderInWorldNFTController
 {
     public event System.Action OnNFTUsageChange;
+    public event System.Action OnNftsFetched;
+
     NFTOwner nftOwner;
 
     Coroutine fechNftsCoroutine;
@@ -88,20 +90,20 @@ public class BuilderInWorldNFTController
         }
     }
 
-    public SceneObject GetNFTSceneObjectFromId(string assetId)
+    public CatalogItem GetNFTSceneObjectFromId(string assetId)
     {
         foreach (NFTInfo nFTInfo in nftOwner.assets)
         {
             if(nFTInfo.assetContract.address == assetId)
-                return NFTInfoToSceneObject(nFTInfo);
+                return CatalogDataFactory.CreateCatalogItem(nFTInfo);
         }
 
         return null;
     }
 
-    public List<SceneObject> GetNFTsAsSceneObjects()
+    public List<CatalogItem> GetNFTsAsSceneObjects()
     {
-        List<SceneObject> sceneObjects = new List<SceneObject>();
+        List<CatalogItem> sceneObjects = new List<CatalogItem>();
 
         if (desactivateNFT ||
             nftOwner.assets == null)
@@ -109,7 +111,7 @@ public class BuilderInWorldNFTController
 
         foreach(NFTInfo nFTInfo in nftOwner.assets)
         {
-            sceneObjects.Add(NFTInfoToSceneObject(nFTInfo));
+            sceneObjects.Add(CatalogDataFactory.CreateCatalogItem(nFTInfo));
         }
         return sceneObjects;
     }
@@ -130,28 +132,12 @@ public class BuilderInWorldNFTController
         {
             this.nftOwner = nftOwner;
             desactivateNFT = false;
+            OnNftsFetched?.Invoke();
         },
         (error) =>
         {
             desactivateNFT = true;
             Debug.Log($"error getting NFT from owner:  {error}");
         });
-    }
-
-    SceneObject NFTInfoToSceneObject(NFTInfo nftInfo)
-    {
-        SceneObject sceneObject = new SceneObject();
-        sceneObject.asset_pack_id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
-        sceneObject.id = nftInfo.assetContract.address;
-        sceneObject.thumbnail = nftInfo.thumbnailUrl;
-        sceneObject.SetBaseURL(nftInfo.originalImageUrl);
-        sceneObject.name = nftInfo.name;
-        sceneObject.category = nftInfo.assetContract.name;
-        sceneObject.model = BuilderInWorldSettings.COLLECTIBLE_MODEL_PROTOCOL + nftInfo.assetContract.address+"/"+ nftInfo.tokenId;
-        sceneObject.tags = new List<string>();
-        sceneObject.contents = new Dictionary<string, string>();
-        sceneObject.metrics = new SceneObject.ObjectMetrics();
-
-        return sceneObject;
     }
 }

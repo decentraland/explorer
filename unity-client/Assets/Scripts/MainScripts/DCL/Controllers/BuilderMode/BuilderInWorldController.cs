@@ -124,8 +124,8 @@ public class BuilderInWorldController : MonoBehaviour
 
     string sceneToEditId;
 
-    SceneObject lastSceneObjectCreated;
-    SceneObject lastFloorSceneObjectUsed;
+    CatalogItem lastCatalogItemCreated;
+    CatalogItem lastFloorCalalogItemUsed;
 
     const float RAYCAST_MAX_DISTANCE = 10000f;
 
@@ -204,7 +204,7 @@ public class BuilderInWorldController : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnChangeModeAction += ChangeAdvanceMode;
         HUDController.i.builderInWorldMainHud.OnResetAction += ResetScaleAndRotation;
 
-        HUDController.i.builderInWorldMainHud.OnSceneObjectSelected += OnSceneObjectSelected;
+        HUDController.i.builderInWorldMainHud.OnCatalogItemSelected += OnCatalogItemSelected;
         HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
         HUDController.i.builderInWorldMainHud.OnPublishAction += PublishScene;
         HUDController.i.builderInWorldMainHud.OnLogoutAction += ExitEditMode;
@@ -253,7 +253,7 @@ public class BuilderInWorldController : MonoBehaviour
             HUDController.i.builderInWorldMainHud.OnChangeModeAction -= ChangeAdvanceMode;
             HUDController.i.builderInWorldMainHud.OnResetAction -= ResetScaleAndRotation;
 
-            HUDController.i.builderInWorldMainHud.OnSceneObjectSelected -= OnSceneObjectSelected;
+            HUDController.i.builderInWorldMainHud.OnCatalogItemSelected -= OnCatalogItemSelected;
             HUDController.i.builderInWorldMainHud.OnTutorialAction -= StartTutorial;
             HUDController.i.builderInWorldMainHud.OnPublishAction -= PublishScene;
             HUDController.i.builderInWorldMainHud.OnLogoutAction -= ExitEditMode;
@@ -410,7 +410,7 @@ public class BuilderInWorldController : MonoBehaviour
         }
     }
 
-    bool IsInsideTheLimits(SceneObject sceneObject)
+    bool IsInsideTheLimits(CatalogItem sceneObject)
     {
         if (HUDController.i.builderInWorldMainHud == null)
             return false;
@@ -457,12 +457,12 @@ public class BuilderInWorldController : MonoBehaviour
         return true;
     }
 
-    void OnSceneObjectSelected(SceneObject sceneObject)
+    void OnCatalogItemSelected(CatalogItem sceneObject)
     {
-        if (IsSceneObjectFloor(sceneObject))
+        if (IsCatalogItemFloor(sceneObject))
         {
             builderInWorldEntityHandler.DeleteFloorEntities();
-            SceneObject lastFloor = lastFloorSceneObjectUsed;
+            CatalogItem lastFloor = lastFloorCalalogItemUsed;
 
             CreateFloor(sceneObject);
 
@@ -477,18 +477,18 @@ public class BuilderInWorldController : MonoBehaviour
         }
     }
 
-    DCLBuilderInWorldEntity CreateSceneObject(SceneObject sceneObject, bool autoSelect = true, bool isFloor = false)
+    DCLBuilderInWorldEntity CreateSceneObject(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false)
     {
-        if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES && BuilderInWorldNFTController.i.IsNFTInUse(sceneObject.id)) return null;
+        if (catalogItem.IsNFT() && BuilderInWorldNFTController.i.IsNFTInUse(catalogItem.id)) return null;
 
-        IsInsideTheLimits(sceneObject);
+        IsInsideTheLimits(catalogItem);
 
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
         data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
 
-        foreach (KeyValuePair<string, string> content in sceneObject.contents)
+        foreach (KeyValuePair<string, string> content in catalogItem.contents)
         {
             ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
             mappingPair.file = content.Key;
@@ -521,35 +521,35 @@ public class BuilderInWorldController : MonoBehaviour
         else
             entityLocked.SetIsLocked(false);
 
-        if (sceneObject.asset_pack_id == BuilderInWorldSettings.ASSETS_COLLECTIBLES)
+        if (catalogItem.IsNFT())
         {
-            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
+            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
             nftShape.model = new NFTShape.Model();
             nftShape.model.color = new Color(0.6404918f, 0.611472f, 0.8584906f);
-            nftShape.model.src = sceneObject.model;
-            nftShape.model.assetId = sceneObject.id;
+            nftShape.model.src = catalogItem.model;
+            nftShape.model.assetId = catalogItem.id;
 
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, nftShape.id);
         }
         else
         {
-            GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(sceneObject.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
+            GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
             mesh.model = new LoadableShape.Model();
-            mesh.model.src = sceneObject.model;
-            mesh.model.assetId = sceneObject.id;
+            mesh.model.src = catalogItem.model;
+            mesh.model.assetId = catalogItem.id;
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         }
 
-        name.ForceSetNewName(builderInWorldEntityHandler.GetNewNameForEntity(sceneObject));
+        name.ForceSetNewName(builderInWorldEntityHandler.GetNewNameForEntity(catalogItem));
 
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
   
-        if(sceneObject.IsSmartItem())
+        if(catalogItem.IsSmartItem())
         {
             SmartItemComponent.Model model = new SmartItemComponent.Model();
-            model.actions = sceneObject.actions;
-            model.parameters = sceneObject.parameters;
+            model.actions = catalogItem.actions;
+            model.parameters = catalogItem.parameters;
 
             string jsonModel = JsonUtility.ToJson(model);
 
@@ -561,7 +561,7 @@ public class BuilderInWorldController : MonoBehaviour
             component.ForceUpdate(jsonModel);
         }
 
-        if (sceneObject.asset_pack_id == BuilderInWorldSettings.VOXEL_ASSETS_PACK_ID)
+        if (catalogItem.IsVoxel())
             entity.isVoxel = true;
 
         if (autoSelect)
@@ -575,7 +575,7 @@ public class BuilderInWorldController : MonoBehaviour
         currentActiveMode.CreatedEntity(entity);
         if (!isAdvancedModeActive)
             Utils.LockCursor();
-        lastSceneObjectCreated = sceneObject;
+        lastCatalogItemCreated = catalogItem;
 
         builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
         InputDone();
@@ -586,11 +586,11 @@ public class BuilderInWorldController : MonoBehaviour
 
     void CreateLastSceneObject()
     {
-        if (lastSceneObjectCreated != null)
+        if (lastCatalogItemCreated != null)
         {
             if (builderInWorldEntityHandler.IsAnyEntitySelected())
                 builderInWorldEntityHandler.DeselectEntities();
-            OnSceneObjectSelected(lastSceneObjectCreated);
+            OnCatalogItemSelected(lastCatalogItemCreated);
             InputDone();
         }
     }
@@ -1009,7 +1009,7 @@ public class BuilderInWorldController : MonoBehaviour
         isEditModeActivated = false;
     }
 
-    public bool IsSceneObjectFloor(SceneObject floorSceneObject)
+    public bool IsCatalogItemFloor(CatalogItem floorSceneObject)
     {
         return string.Equals(floorSceneObject.category, BuilderInWorldSettings.FLOOR_CATEGORY);
     }
@@ -1021,11 +1021,11 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void SetupNewScene()
     {
-        SceneObject floorSceneObject = BuilderInWorldUtils.CreateFloorSceneObject();
+        CatalogItem floorSceneObject = BuilderInWorldUtils.CreateFloorSceneObject();
         CreateFloor(floorSceneObject);
     }
 
-    public void CreateFloor(SceneObject floorSceneObject)
+    public void CreateFloor(CatalogItem floorSceneObject)
     {
         Vector3 initialPosition = new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
         Vector2Int[] parcelsPoints = sceneToEdit.sceneData.parcels;
@@ -1044,7 +1044,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         builderInWorldEntityHandler.DeselectEntities();
 
-        lastFloorSceneObjectUsed = floorSceneObject;
+        lastFloorCalalogItemUsed = floorSceneObject;
     }
 
     void OnFloorLoaded(DecentralandEntity entity)

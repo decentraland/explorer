@@ -7,15 +7,15 @@ using UnityEngine.EventSystems;
 public class SceneObjectDropController
 {
     public CatalogGroupListView catalogGroupListView;
-    public event Action<SceneObject> OnSceneObjectDropped;
+    public event Action<CatalogItem> OnCatalogItemDropped;
 
     public void SceneObjectDropped()
     {
         CatalogItemAdapter adapter = catalogGroupListView.GetLastSceneObjectDragged();
         if (adapter == null)
             return;
-        SceneObject sceneObject = adapter.GetContent();
+        CatalogItem catalogItem = adapter.GetContent();
 
-        OnSceneObjectDropped?.Invoke(sceneObject);
+        OnCatalogItemDropped?.Invoke(catalogItem);
     }
 }

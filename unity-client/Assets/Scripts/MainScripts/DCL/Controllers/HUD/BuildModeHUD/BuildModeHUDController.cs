@@ -22,7 +22,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnPublishAction;
     public event Action OnLogoutAction;
 
-    public event Action<SceneObject> OnSceneObjectSelected;
+    public event Action<CatalogItem> OnCatalogItemSelected;
 
     public event Action<DCLBuilderInWorldEntity> OnEntityClick;
     public event Action<DCLBuilderInWorldEntity> OnEntityDelete;
@@ -91,8 +91,8 @@ public class BuildModeHUDController : IHUD
         view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
         view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
 
-        sceneObjectDropController.OnSceneObjectDropped += SceneObjectSelected;
-        view.OnSceneObjectSelected += SceneObjectSelected;
+        sceneObjectDropController.OnCatalogItemDropped += SceneObjectSelected;
+        view.OnCatalogItemSelected += SceneObjectSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();
 
@@ -136,9 +136,9 @@ public class BuildModeHUDController : IHUD
         view.RefreshCatalogContent();
     }
 
-    void SceneObjectSelected(SceneObject sceneObject)
+    void SceneObjectSelected(CatalogItem sceneObject)
     {
-        OnSceneObjectSelected?.Invoke(sceneObject);
+        OnCatalogItemSelected?.Invoke(sceneObject);
         SetVisibilityOfCatalog(false);
     }
 
