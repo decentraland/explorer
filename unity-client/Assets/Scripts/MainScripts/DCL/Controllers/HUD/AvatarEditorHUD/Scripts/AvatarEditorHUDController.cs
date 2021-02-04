@@ -25,6 +25,8 @@ public class AvatarEditorHUDController : IHUD
     private ColorList eyeColorList;
     private ColorList hairColorList;
     private bool prevMouseLockState = false;
+    private bool ownedWearablesAlreadyRequested = false;
+    private bool baseWearablesAlreadyRequested = false;
 
     public AvatarEditorHUDView view;
 
@@ -53,27 +55,75 @@ public class AvatarEditorHUDController : IHUD
         SetCatalog(catalog);
 
         LoadUserProfile(userProfile, true);
-        this.userProfile.OnUpdate += LoadUserProfile;
+        this.userProfile.OnUpdate += OnUserProfileUpdated;
     }
 
     public void SetCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         if (this.catalog != null)
-        {
-            this.catalog.OnAdded -= AddWearable;
             this.catalog.OnRemoved -= RemoveWearable;
-        }
 
         this.catalog = catalog;
 
         ProcessCatalog(this.catalog);
-        this.catalog.OnAdded += AddWearable;
         this.catalog.OnRemoved += RemoveWearable;
     }
 
-    public void LoadUserProfile(UserProfile userProfile)
+    public void OnUserProfileUpdated(UserProfile userProfile)
     {
+        CoroutineStarter.Start(LoadUserProfile(userProfile));
+    }
+
+    private System.Collections.IEnumerator LoadUserProfile(UserProfile userProfile)
+    {
+        yield return LoadOwnedWearablesIfNeeded(userProfile);
+        yield return LoadBaseWearablesIfNeeded(userProfile);
+
         LoadUserProfile(userProfile, false);
+    }
+
+    private System.Collections.IEnumerator LoadOwnedWearablesIfNeeded(UserProfile userProfile)
+    {
+        if (ownedWearablesAlreadyRequested)
+            yield break;
+
+        //yield return new WaitForSeconds(3f);
+        ownedWearablesAlreadyRequested = true;
+        var ownedWearablesPromise = CatalogController.RequestOwnedWearables();
+        yield return ownedWearablesPromise;
+
+        if (ownedWearablesPromise.error != null)
+        {
+            ownedWearablesAlreadyRequested = false;
+            Debug.LogError(ownedWearablesPromise.error);
+        }
+        else
+        {
+            userProfile.UpdateInventory(ownedWearablesPromise.value.Select(x => x.id).ToArray());
+            ProcessCatalog(this.catalog);
+        }
+    }
+
+    private System.Collections.IEnumerator LoadBaseWearablesIfNeeded(UserProfile userProfile)
+    {
+        if (baseWearablesAlreadyRequested)
+            yield break;
+
+        //yield return new WaitForSeconds(3f);
+        baseWearablesAlreadyRequested = true;
+        var baseWearablesPromise = CatalogController.RequestBaseWearables();
+        yield return baseWearablesPromise;
+
+        if (baseWearablesPromise.error != null)
+        {
+            baseWearablesAlreadyRequested = false;
+            Debug.LogError(baseWearablesPromise.error);
+        }
+        else
+        {
+            userProfile.UpdateInventory(baseWearablesPromise.value.Select(x => x.id).ToArray());
+            ProcessCatalog(this.catalog);
+        }
     }
 
     public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
@@ -93,6 +143,11 @@ public class AvatarEditorHUDController : IHUD
         if (userProfile.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape))
             return;
 
+        LoadAvatarPreview(userProfile);
+    }
+
+    private void LoadAvatarPreview(UserProfile userProfile)
+    {
         CatalogController.RequestWearable(userProfile.avatar.bodyShape)
             .Then((requestedWearable) =>
             {
@@ -474,8 +529,7 @@ public class AvatarEditorHUDController : IHUD
         if (view != null)
             view.CleanUp();
 
-        this.userProfile.OnUpdate -= LoadUserProfile;
-        this.catalog.OnAdded -= AddWearable;
+        this.userProfile.OnUpdate -= OnUserProfileUpdated;
         this.catalog.OnRemoved -= RemoveWearable;
     }
 
@@ -497,7 +551,7 @@ public class AvatarEditorHUDController : IHUD
     public void DiscardAndClose()
     {
         if (!DataStore.isSignUpFlow.Get())
-            LoadUserProfile(userProfile);
+            OnUserProfileUpdated(userProfile);
         else
             WebInterface.SendCloseUserAvatar(true);
 

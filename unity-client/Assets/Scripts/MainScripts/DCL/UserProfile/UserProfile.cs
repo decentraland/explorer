@@ -37,7 +37,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        inventory.Clear();
         faceSnapshot = null;
 
         if (newModel == null)
@@ -60,11 +59,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
         model.muted = newModel.muted;
-
-        if (model.inventory != null)
-        {
-            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-        }
 
         if (downloadAssets && model.snapshots != null)
         {
@@ -128,6 +122,19 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
         OnAvatarExpressionSet?.Invoke(id, timestamp);
+    }
+
+    public void UpdateInventory(string[] inventoryIds)
+    {
+        var newInventoryToUpdate = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+
+        foreach (var inventoryItem in newInventoryToUpdate)
+        {
+            if (inventory.ContainsKey(inventoryItem.Key))
+                inventory[inventoryItem.Key] += inventoryItem.Value;
+            else
+                inventory.Add(inventoryItem.Key, inventoryItem.Value);
+        }
     }
 
     public string[] GetInventoryItemsIds()
