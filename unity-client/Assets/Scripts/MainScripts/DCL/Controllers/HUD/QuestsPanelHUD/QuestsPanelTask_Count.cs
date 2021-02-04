@@ -1,3 +1,4 @@
+using DCL.Interface;
 using System;
 using TMPro;
 using UnityEngine;
@@ -12,12 +13,28 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private TextMeshProUGUI end;
         [SerializeField] private TextMeshProUGUI current;
         [SerializeField] private Image ongoingProgress;
+        [SerializeField] private Button jumpInButton;
 
         internal TaskPayload_Count payload;
+        private Action jumpInDelegate;
+
+        public void Awake()
+        {
+            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke();});
+        }
 
         public void Populate(QuestTask task)
         {
             payload = JsonUtility.FromJson<TaskPayload_Count>(task.payload);
+
+            jumpInButton.gameObject.SetActive(task.progress < 1 && !string.IsNullOrEmpty(task.coordinates));
+            jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage
+            {
+                messageType = ChatMessage.Type.NONE,
+                recipient = string.Empty,
+                body = $"/goto {task.coordinates}",
+            });
+
             stepName.text = task.name;
             start.text = payload.start.ToString();
             current.text = payload.current.ToString();

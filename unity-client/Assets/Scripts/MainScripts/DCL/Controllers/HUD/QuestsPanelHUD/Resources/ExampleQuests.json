@@ -8,48 +8,53 @@
     "icon": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
     "sections": [
       {
-        "id": "task0",
+        "id": "section0",
         "name": "Day 1",
         "progress": 1,
         "tasks": [
           {
-            "id": "step0",
+            "id": "task0",
             "name": "Find Kiki",
             "type": "single",
             "coordinates" : "0,0",
+            "progress": 1,
             "payload": "{ \"isDone\": true }"
           },
           {
-            "id": "step1",
+            "id": "task1",
             "name": "Collect pumpkins",
             "type": "count",
             "coordinates" : "0,0",
+            "progress": 1,
             "payload": "{ \"start\": 0, \"end\": 10, \"current\": 10 }"
           }
         ]
       },
       {
-        "id": "task1",
+        "id": "section1",
         "name": "Day 2",
-        "progress": 0.25,
+        "progress": 0.33,
         "tasks": [
           {
-            "id": "step2",
+            "id": "task2",
             "name": "Find the old lady",
             "type": "single",
             "coordinates" : "0,0",
+            "progress": 1,
             "payload": "{ \"isDone\": true }"
           },
           {
-            "id": "step3",
+            "id": "task3",
             "name": "Enter the house",
             "type": "single",
+            "progress": 0,
             "payload": "{ \"isDone\": false }"
           },
           {
-            "id": "step4",
+            "id": "task4",
             "name": "Collect something fishy",
             "type": "count",
+            "progress": 0,
             "payload": "{ \"start\": 0, \"end\": 10, \"current\": 2 }"
           }
         ]
@@ -64,27 +69,30 @@
     "thumbnail_banner": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
     "sections": [
       {
-        "id": "task0",
+        "id": "section2",
         "name": "Week 1",
         "progress": 1,
         "tasks": [
           {
-            "id": "step0",
+            "id": "task5",
             "name": "Jump High",
             "type": "single",
+            "progress": 1,
             "payload": "{ \"isDone\": true }"
           }
         ]
       },
       {
-        "id": "task1",
+        "id": "section3",
         "name": "week 2",
         "progress": 0.8,
         "tasks": [
           {
-            "id": "step2",
+            "id": "task6",
             "name": "Sneeze",
             "type": "single",
+            "coordinates" : "0,0",
+            "progress": 0.8,
             "payload": "{ \"isDone\": false }"
           }
         ]
@@ -100,46 +108,51 @@
     "icon": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Jack-o%27-Lantern_2003-10-31.jpg",
     "sections": [
       {
-        "id": "task0",
+        "id": "section4",
         "name": "Day 1",
         "progress": 1,
         "tasks": [
           {
-            "id": "step0",
+            "id": "task7",
             "name": "Find Kiki",
             "type": "single",
+            "progress": 1,
             "payload": "{ \"isDone\": true }"
           },
           {
-            "id": "step1",
+            "id": "task8",
             "name": "Collect pumpkins",
             "type": "count",
+            "progress": 1,
             "payload": "{ \"start\": 0, \"end\": 10, \"current\": 10 }"
           }
         ]
       },
       {
-        "id": "task1",
+        "id": "section5",
         "name": "Day 2",
         "progress": 1,
         "tasks": [
           {
-            "id": "step2",
+            "id": "task9",
             "name": "Find the old lady",
             "type": "single",
+            "progress": 1,
             "payload": "{ \"isDone\": true }"
           },
           {
-            "id": "step3",
+            "id": "task10",
             "name": "Enter the house",
             "type": "single",
+            "progress": 1,
             "payload": "{ \"isDone\": false }"
           },
           {
-            "id": "step4",
+            "id": "task11",
             "name": "Collect something fishy",
             "type": "count",
-            "payload": "{ \"start\": 0, \"end\": 10, \"current\": 2 }"
+            "progress": 1,
+            "payload": "{ \"start\": 0, \"end\": 10, \"current\": 10 }"
           }
         ]
       }

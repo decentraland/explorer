@@ -1,5 +1,7 @@
 using DCL.Helpers;
+using DCL.Interface;
 using System;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +20,7 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private RectTransform completedProgressInTitle;
         [SerializeField] private RectTransform completedMarkInTitle;
         [SerializeField] private RawImage thumbnailImage;
+        [SerializeField] private Button jumpInButton;
 
         private AssetPromise_Texture thumbnailPromise;
 
@@ -26,8 +29,11 @@ namespace DCL.Huds.QuestsPanel
         internal Action readMoreDelegate;
         private static BaseCollection<string> pinnedQuests => DataStore.Quests.pinnedQuests;
 
+        private Action jumpInDelegate;
+
         private void Awake()
         {
+            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke();});
             readMoreButton.onClick.AddListener(() => readMoreDelegate?.Invoke());
             pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
             pinnedQuests.OnAdded += OnPinnedQuests;
@@ -37,6 +43,15 @@ namespace DCL.Huds.QuestsPanel
         public void Populate(QuestModel newQuest)
         {
             quest = newQuest;
+
+            QuestTask incompletedTask = quest.sections.FirstOrDefault(x => x.progress < 1)?.tasks.FirstOrDefault(x => x.progress < 1);
+            jumpInButton.gameObject.SetActive(incompletedTask != null && !string.IsNullOrEmpty(incompletedTask?.coordinates));
+            jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage
+            {
+                messageType = ChatMessage.Type.NONE,
+                recipient = string.Empty,
+                body = $"/goto {incompletedTask?.coordinates}",
+            });
 
             readMoreDelegate = () => OnReadMoreClicked?.Invoke(quest.id);
             questName.text = quest.name;

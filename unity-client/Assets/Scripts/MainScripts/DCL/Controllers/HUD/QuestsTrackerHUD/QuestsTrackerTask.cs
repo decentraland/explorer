@@ -23,7 +23,6 @@ namespace DCL.Huds.QuestsTracker
         public void Populate(QuestTask task)
         {
             taskTitle.text = task.name;
-            jumpInButton.gameObject.SetActive(!string.IsNullOrEmpty(task.coordinates));
             jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage
             {
                 messageType = ChatMessage.Type.NONE,
@@ -31,27 +30,23 @@ namespace DCL.Huds.QuestsTracker
                 body = $"/goto {task.coordinates}",
             });
 
+            jumpInButton.gameObject.SetActive(task.progress < 1 && !string.IsNullOrEmpty(task.coordinates));
+            progress.fillAmount = task.progress;
             switch (task.type)
             {
                 case "single":
-                    ApplyPayload(JsonUtility.FromJson<TaskPayload_Single>(task.payload));
+                    SetProgressText(task.progress, 1);
                     break;
                 case "count":
-                    ApplyPayload(JsonUtility.FromJson<TaskPayload_Count>(task.payload));
+                    var payload = JsonUtility.FromJson<TaskPayload_Count>(task.payload);
+                    SetProgressText(payload.current, payload.end);
                     break;
             }
         }
 
-        internal void ApplyPayload(TaskPayload_Single taskPayload)
+        internal void SetProgressText(float current, float end)
         {
-            progress.fillAmount = taskPayload.Progress();
-            progressText.text = $"{taskPayload.Progress().ToString()}/1";
-        }
-
-        internal void ApplyPayload(TaskPayload_Count taskPayload)
-        {
-            progress.fillAmount = taskPayload.Progress();
-            progressText.text = $"{taskPayload.current}/{taskPayload.end}";
+            progressText.text = $"{current}/{end}";
         }
     }
 }
