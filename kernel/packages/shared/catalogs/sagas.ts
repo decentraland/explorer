@@ -139,7 +139,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
       const exclusiveCatalog = yield select(getExclusiveCatalog)
 
       let response: Wearable[]
-      if (filters.wearableIds && filters.wearableIds.length > 0) {
+      if (filters.wearableIds) {
         // Filtering by ids
         response = filters.wearableIds
           .map((wearableId) =>
@@ -155,7 +155,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
           const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
           response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
         }
-      } else if (filters.collectionNames && filters.collectionNames.length > 0) {
+      } else if (filters.collectionNames) {
         // We assume that the only collection name used is base-avatars
         response = Object.values(platformCatalog)
       } else {
@@ -189,7 +189,7 @@ function* handleWearablesFailure(action: WearablesFailure) {
 function areFiltersValidForV1(filters: WearablesRequestFilters) {
   let filtersSet = 0
   let ok = true
-  if (filters.collectionNames && filters.collectionNames.length > 0) {
+  if (filters.collectionNames) {
     filtersSet += 1
     if (filters.collectionNames.some((name) => name !== 'base-avatars')) {
       ok = false
@@ -200,7 +200,7 @@ function areFiltersValidForV1(filters: WearablesRequestFilters) {
     filtersSet += 1
   }
 
-  if (filters.wearableIds && filters.wearableIds.length > 0) {
+  if (filters.wearableIds) {
     filtersSet += 1
   }
 

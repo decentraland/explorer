@@ -45,7 +45,7 @@ export type RootCatalogState = {
 }
 
 export type WearablesRequestFilters = {
-  ownedByUser: boolean
+  ownedByUser?: boolean
   wearableIds?: WearableId[]
   collectionNames?: string[]
 }
