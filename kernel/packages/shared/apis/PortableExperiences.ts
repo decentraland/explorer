@@ -1,30 +1,20 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
-import { spawnPortableExperienceScene, killPortableExperienceScene } from 'unity-interface/portableExperiencesUtils'
+import {
+  spawnPortableExperienceScene,
+  killPortableExperienceScene,
+  getPortableExperience,
+  PortableExperienceHandle,
+  PortableExperienceIdentifier
+} from 'unity-interface/portableExperiencesUtils'
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
 
-enum ExecutorType {
-  SCENE = 'SCENE',
-  WEARABLE = 'WEARABLE',
-  QUEST_UI = 'QUEST_UI'
-}
-type Executor = {
-  type: ExecutorType
-  identifier: string
-}
-type PortableExperienceIdentifier = string
-type PortableExperienceHandle = {
-  pid: string
-  parentProcess: Executor
-}
 type SpawnPortableExperienceParameters = {
   urn: PortableExperienceIdentifier
 }
 
 @registerAPI('PortableExperiences')
 export class PortableExperiences extends ExposableAPI {
-  private currentPortableExperiences: Map<string, Executor> = new Map()
-
   /**
    * Starts a portable experience.
    * @param  {SpawnPortableExperienceParameters} [spawnParams] - Information to identify the PE
@@ -33,15 +23,13 @@ export class PortableExperiences extends ExposableAPI {
    */
   @exposeMethod
   async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
-    const sceneId: string = await spawnPortableExperienceScene(spawnParams.urn)
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
-    const currentExecutor: Executor = { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
-    this.currentPortableExperiences.set(sceneId, currentExecutor)
+    const portableExperience: PortableExperienceHandle = await spawnPortableExperienceScene(
+      spawnParams.urn,
+      parcelIdentity.cid
+    )
 
-    return {
-      pid: sceneId,
-      parentProcess: currentExecutor
-    }
+    return portableExperience
   }
 
   /**
@@ -53,13 +41,10 @@ export class PortableExperiences extends ExposableAPI {
   @exposeMethod
   async kill(pid: string): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
-    const currentExecutor: Executor = { type: ExecutorType.SCENE, identifier: parcelIdentity.cid }
-    if (
-      this.currentPortableExperiences.has(pid) &&
-      JSON.stringify(this.currentPortableExperiences.get(pid)) === JSON.stringify(currentExecutor)
-    ) {
+
+    const portableExperience = getPortableExperience(pid)
+    if (!!portableExperience && portableExperience.cid == parcelIdentity.cid) {
       killPortableExperienceScene(pid)
-      this.currentPortableExperiences.delete(pid)
       return true
     }
     return false
@@ -75,11 +60,7 @@ export class PortableExperiences extends ExposableAPI {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
     const executorCid = parcelIdentity.cid
 
-    if (this.currentPortableExperiences.has(executorCid)) {
-      killPortableExperienceScene(executorCid)
-      this.currentPortableExperiences.delete(executorCid)
-      return true
-    }
-    return false
+    killPortableExperienceScene(executorCid)
+    return true
   }
 }

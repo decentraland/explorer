@@ -20,7 +20,30 @@ import { parseUrn, DecentralandAssetIdentifier, OffChainAsset } from '@dcl/urn-r
 const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
 export type PortableExperienceUrn = string
 
-export async function spawnPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<string> {
+declare var window: any
+window['spawnPortableExperienceScene'] = spawnPortableExperienceScene
+window['killPortableExperienceScene'] = killPortableExperienceScene
+
+export type PortableExperienceIdentifier = string
+export type PortableExperienceHandle = {
+  pid: PortableExperienceIdentifier
+  cid: string
+}
+
+let currentPortableExperiences: Map<string, string> = new Map()
+
+export function getPortableExperience(pid: string): PortableExperienceHandle | undefined {
+  if (currentPortableExperiences.has(pid)) {
+    return { pid: pid, cid: currentPortableExperiences.get(pid)! }
+  } else {
+    return undefined
+  }
+}
+
+export async function spawnPortableExperienceScene(
+  portableExperienceUrn: PortableExperienceUrn,
+  cid?: string
+): Promise<PortableExperienceHandle> {
   const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
 
   if (!parsedUrn || !isPortableExperience(parsedUrn)) {
@@ -39,7 +62,11 @@ export async function spawnPortableExperienceScene(portableExperienceUrn: Portab
     icon: scene.data.data.icon,
     isPortableExperience: true
   })
-  return parcelSceneId
+
+  const contentId = cid ?? ''
+  currentPortableExperiences.set(parcelSceneId, contentId)
+
+  return { pid: parcelSceneId, cid: contentId }
 }
 
 function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
@@ -50,15 +77,19 @@ function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffC
   return false
 }
 
-export async function killPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<void> {
+export async function killPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<boolean> {
   const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
   if (!parsedUrn || !isPortableExperience(parsedUrn)) {
     throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
   }
-
-  const peWorker = getSceneWorkerBySceneID(parsedUrn.id)
+  const sceneId: string = parsedUrn.id
+  const peWorker = getSceneWorkerBySceneID(sceneId)
   if (peWorker) {
     forceStopParcelSceneWorker(peWorker)
+    currentPortableExperiences.delete(sceneId)
+    return true
+  } else {
+    return false
   }
 }
 
