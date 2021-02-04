@@ -196,7 +196,7 @@ function areFiltersValidForV1(filters: WearablesRequestFilters) {
     }
   }
 
-  if (filters.ownedByUser !== undefined && filters.ownedByUser !== null) {
+  if (filters.ownedByUser) {
     filtersSet += 1
   }
 

@@ -97,7 +97,7 @@ public class CatalogController : MonoBehaviour
             {
                 pendingWearablePromises.Add(wearableId, promiseResult);
                 WebInterface.RequestWearables(
-                    ownedByUser: null,
+                    ownedByUser: false,
                     wearableIds: new string[] { wearableId },
                     collectionNames: null,
                     context: null
@@ -142,7 +142,7 @@ public class CatalogController : MonoBehaviour
         {
             pendingWearablesByContextPromises.Add(BASE_WEARABLES_CONTEXT, promiseResult);
             WebInterface.RequestWearables(
-                ownedByUser: null,
+                ownedByUser: false,
                 wearableIds: null,
                 collectionNames: new string[] { "base-avatars" },
                 context: BASE_WEARABLES_CONTEXT
