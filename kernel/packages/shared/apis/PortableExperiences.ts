@@ -4,7 +4,8 @@ import {
   killPortableExperienceScene,
   getPortableExperience,
   PortableExperienceHandle,
-  PortableExperienceIdentifier
+  PortableExperienceIdentifier,
+  PortableExperienceUrn
 } from 'unity-interface/portableExperiencesUtils'
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
@@ -59,8 +60,9 @@ export class PortableExperiences extends ExposableAPI {
   async exit(): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
     const executorCid = parcelIdentity.cid
+    const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${executorCid}`
 
-    killPortableExperienceScene(executorCid)
+    killPortableExperienceScene(portableExperienceUrn)
     return true
   }
 }
