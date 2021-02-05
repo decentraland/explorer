@@ -2,18 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActionsListView : ListView<ActionEvent>
+public class ActionsListView : ListView<SmartItemActionEvent>
 {
-    public ActionEventAdapter adapter;
+    public SmartItemActionEventAdapter adapter;
 
 
     public override void AddAdapters()
     {
         base.AddAdapters();
 
-        foreach (ActionEvent actionEvent in contentList)
+        foreach (SmartItemActionEvent actionEvent in contentList)
         {
-            ActionEventAdapter adapter = Instantiate(this.adapter, contentPanelTransform).GetComponent<ActionEventAdapter>();
+            SmartItemActionEventAdapter adapter = Instantiate(this.adapter, contentPanelTransform).GetComponent<SmartItemActionEventAdapter>();
             adapter.SetContent(actionEvent);
         }
     }
@@ -22,14 +22,14 @@ public class ActionsListView : ListView<ActionEvent>
     {
         for (int i = 0; i < contentPanelTransform.transform.childCount; i++)
         {
-            ActionEventAdapter toRemove = contentPanelTransform.transform.GetChild(i).gameObject.GetComponent<ActionEventAdapter>();
+            SmartItemActionEventAdapter toRemove = contentPanelTransform.transform.GetChild(i).gameObject.GetComponent<SmartItemActionEventAdapter>();
             Destroy(toRemove.gameObject);
         }
     }
 
     public void AddActionEventAdapter(List<DCLBuilderInWorldEntity> entityList)
     {
-        ActionEvent actionEvent = new ActionEvent();
+        SmartItemActionEvent actionEvent = new SmartItemActionEvent();
         actionEvent.entityList = entityList;
 
         contentList.Add(actionEvent);

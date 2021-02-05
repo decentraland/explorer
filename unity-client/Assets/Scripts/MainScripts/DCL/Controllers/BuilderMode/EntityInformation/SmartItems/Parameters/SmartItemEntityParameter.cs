@@ -50,7 +50,7 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter
 
     private void GetThumbnail(DCLBuilderInWorldEntity entity)
     {
-        var url = entity.GetCatalogItemAssociated()?.thumbnailURL;
+        var url = entity.GetSceneObjectAssociated()?.GetComposedThumbnailUrl();
 
         if (string.IsNullOrEmpty(url))
             return;

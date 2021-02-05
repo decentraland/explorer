@@ -70,7 +70,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityClick += ChangeEntitySelectionFromList;
         HUDController.i.builderInWorldMainHud.OnEntityLock += ChangeEntityLockStatus;
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
-        HUDController.i.builderInWorldMainHud.OnEntityRename += ChangeEntityName;
+        HUDController.i.builderInWorldMainHud.OnEntityRename += SetEntityName;
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
@@ -93,7 +93,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityLock -= ChangeEntityLockStatus;
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-        HUDController.i.builderInWorldMainHud.OnEntityRename -= ChangeEntityName;
+        HUDController.i.builderInWorldMainHud.OnEntityRename -= SetEntityName;
 
         hideSelectedEntitiesAction.OnTriggered -= hideSelectedEntitiesDelegate;
         showAllEntitiesAction.OnTriggered -= showAllEntitiesDelegate;
@@ -559,15 +559,17 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             entityToEdit.IsNew = hasBeenCreated;
 
             string entityName = entityToEdit.GetDescriptiveName();
-            if (entityNameList.Contains(entityName))
+            var sceneObject = entityToEdit.GetSceneObjectAssociated();
+            if ((string.IsNullOrEmpty(entityName) || entityNameList.Contains(entityName)) && sceneObject != null)
             {
-                entityName = GetNewNameForEntity(entityToEdit.GetCatalogItemAssociated());
-                entityToEdit.SetDescriptiveName(entityName);
+                entityName = GetNewNameForEntity(entityToEdit.GetSceneObjectAssociated());
+                SetEntityName(entityToEdit, entityName);
             }
-
-            if (!string.IsNullOrEmpty(entityName) && !entityNameList.Contains(entityName))
+            else if (!string.IsNullOrEmpty(entityName) && !entityNameList.Contains(entityName))
+            {
                 entityNameList.Add(entityName);
-
+            }
+          
             return entityToEdit;
         }
         else
@@ -578,13 +580,14 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public string GetNewNameForEntity(CatalogItem sceneObject)
     {
+        return GetNewNameForEntity(sceneObject.name);
+    }
+
+    public string GetNewNameForEntity(string name)
+    {
         int i = 1;
-        string name = sceneObject.name;
         if (!entityNameList.Contains(name))
-        {
-            entityNameList.Add(name);
             return name;
-        }
 
         string newName = name + " " + i;
         while (entityNameList.Contains(newName))
@@ -593,7 +596,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             newName = name + " " + i;
         }
 
-        entityNameList.Add(newName);
         return newName;
     }
 
@@ -710,12 +712,19 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         builderInWorldBridge.AddEntityOnKernel(entity, sceneToEdit);
     }
 
-    void ChangeEntityName(DCLBuilderInWorldEntity entityToApply,string newName)
+    public void SetEntityName(DCLBuilderInWorldEntity entityToApply,string newName)
     {
-        if (entityNameList.Contains(newName))
+        string currentName = entityToApply.GetDescriptiveName();
+
+        if (currentName == newName)
             return;
 
-        entityNameList.Remove(entityToApply.GetDescriptiveName());
+        if (entityNameList.Contains(newName))
+            newName = GetNewNameForEntity(newName);
+
+        if (entityNameList.Contains(currentName))
+            entityNameList.Remove(currentName);
+
         entityToApply.SetDescriptiveName(newName);
         entityNameList.Add(newName);
 

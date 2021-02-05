@@ -196,7 +196,7 @@ public class BuilderInWorldController : MonoBehaviour
         multiSelectionInputAction.OnStarted += multiSelectionStartDelegate;
         multiSelectionInputAction.OnFinished += multiSelectionFinishedDelegate;
 
-        HUDController.i.builderInWorldInititalHud.OnEnterEditMode += StartEnterEditMode;
+        HUDController.i.builderInWorldInititalHud.OnEnterEditMode += TryStartEnterEditMode;
         HUDController.i.builderInWorldMainHud.OnStopInput += StopInput;
         HUDController.i.builderInWorldMainHud.OnResumeInput += ResumeInput;
 
@@ -243,7 +243,7 @@ public class BuilderInWorldController : MonoBehaviour
         multiSelectionInputAction.OnFinished -= multiSelectionFinishedDelegate;
 
         if(HUDController.i.builderInWorldInititalHud != null)
-            HUDController.i.builderInWorldInititalHud.OnEnterEditMode -= StartEnterEditMode;
+            HUDController.i.builderInWorldInititalHud.OnEnterEditMode -= TryStartEnterEditMode;
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
@@ -360,7 +360,7 @@ public class BuilderInWorldController : MonoBehaviour
         catalogAdded = true;
         if(HUDController.i.builderInWorldMainHud != null)
            HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
-        CheckEnterEditMode();
+        StartEnterEditMode();
     }
 
     void StopInput()
@@ -540,16 +540,16 @@ public class BuilderInWorldController : MonoBehaviour
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
         }
 
-        name.ForceSetNewName(builderInWorldEntityHandler.GetNewNameForEntity(catalogItem));
-
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
+
+        builderInWorldEntityHandler.SetEntityName(entity, sceneObject.name);
   
-        if(catalogItem.IsSmartItem())
+        if(sceneObject.IsSmartItem())
         {
             SmartItemComponent.Model model = new SmartItemComponent.Model();
-            model.actions = catalogItem.actions;
-            model.parameters = catalogItem.parameters;
+            model.actions = sceneObject.actions;
+            model.parameters = sceneObject.parameters;
 
             string jsonModel = JsonUtility.ToJson(model);
 
@@ -557,8 +557,8 @@ public class BuilderInWorldController : MonoBehaviour
 
             //Note (Adrian): This shouldn't work this way, we can't wait a frame to set the data of the component so we force it to update
 
-            SmartItemComponent component = (SmartItemComponent) entity.rootEntity.GetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM);
-            component.ForceUpdate(jsonModel);
+            if(entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
+                 ((SmartItemComponent)baseComponent).ForceUpdate(jsonModel);
         }
 
         if (catalogItem.IsVoxel())
@@ -789,7 +789,7 @@ public class BuilderInWorldController : MonoBehaviour
             }
             else
             {
-                StartEnterEditMode();
+                TryStartEnterEditMode();
             }
         }
     }
@@ -894,19 +894,33 @@ public class BuilderInWorldController : MonoBehaviour
             return false;
     }
 
+    bool UserHasPermissionOnParcelScene(ParcelScene scene)
+    {
+        UserProfile userProfile = UserProfile.GetOwnUserProfile();
+        foreach (UserProfileModel.ParcelsWithAccess parcelWithAccess in userProfile.parcelsWithAccess)
+        {
+            foreach (Vector2Int parcel in scene.sceneData.parcels)
+            {
+                if (parcel.x == parcelWithAccess.x && parcel.y == parcelWithAccess.y) return true;
+            }
+        }
+            return false;
+    }
+
     void CheckEnterEditMode()
     {
         if (catalogAdded && sceneReady) EnterEditMode();
     }
 
-    public void StartEnterEditMode()
+    public void TryStartEnterEditMode()
     {
-        StartEnterEditMode(true);
+        TryStartEnterEditMode(true);
     }
 
-    public void StartEnterEditMode(bool activateCamera)
+    public void TryStartEnterEditMode(bool activateCamera)
     {
-        if (sceneToEditId != null) return;
+        if (sceneToEditId != null)
+            return;
 
         FindSceneToEdit();
 
@@ -921,6 +935,15 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (activateCamera)
             editorMode.ActivateCamera(sceneToEdit);
+
+        if (catalogAdded)
+            StartEnterEditMode();
+    }
+
+    void StartEnterEditMode()
+    {
+        if (sceneToEdit == null)
+            return;
 
         sceneToEditId = sceneToEdit.sceneData.id;
         inputController.isInputActive = false;

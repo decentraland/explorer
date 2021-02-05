@@ -42,10 +42,7 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         else
             favImg.color = offFavoriteColor;
 
-        if (catalogItem.IsSmartItem())
-            smartItemGO.SetActive(false);
-        else
-            smartItemGO.SetActive(true);
+        smartItemGO.SetActive(catalogItem.IsSmartItem());
 
         GetThumbnail();
 

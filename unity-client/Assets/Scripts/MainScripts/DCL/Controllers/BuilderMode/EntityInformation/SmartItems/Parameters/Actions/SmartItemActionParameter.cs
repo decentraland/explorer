@@ -11,7 +11,7 @@ public class SmartItemActionParameter : SmartItemUIParameterAdapter
     public ActionsListView actionsListView;
     public Button addActionBtn;
 
-    const string parameterType = "actions";
+    const string PARAMETER_TYPE = "actions";
 
     List<DCLBuilderInWorldEntity> entitiesList;
 
@@ -27,13 +27,14 @@ public class SmartItemActionParameter : SmartItemUIParameterAdapter
         this.entitiesList = entitiesList;
     }
 
-
     public override void SetParameter(SmartItemParameter parameter)
     {
         base.SetParameter(parameter);
 
-        if (parameter.type != parameterType)
+        if (parameter.type != PARAMETER_TYPE)
             return;
+
+        //TODO include the functionality of the parameter
     }
 
 

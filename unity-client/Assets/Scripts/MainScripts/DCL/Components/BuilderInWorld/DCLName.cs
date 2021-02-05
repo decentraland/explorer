@@ -58,7 +58,7 @@ public class DCLName : BaseDisposable
         return null;
     }
 
-    public void ApplyNewValue(string newJson)
+    void ApplyNewValue(string newJson)
     {
         Model newModel = Utils.SafeFromJson<Model>(newJson);
         if (newModel.value != model.value)
@@ -77,7 +77,7 @@ public class DCLName : BaseDisposable
                 if (oldValue != null)
                     decentralandEntity.gameObject.name.Replace(oldValue, "");
 
-                decentralandEntity.gameObject.name += "-" + model.value;
+                decentralandEntity.gameObject.name += $"-{model.value}"; 
             }
 #endif
         }
