@@ -157,7 +157,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     void FilterAssets(string nameToFilter)
     {
         filterObjects.Clear();
-        foreach (CatalogItemPack assetPack in BIWCatalogBridge.GetCatalogItemPackList())
+        foreach (CatalogItemPack assetPack in BIWCatalogManager.GetCatalogItemPackList())
         {
             foreach (CatalogItem catalogItem in assetPack.assets)
             {
@@ -338,7 +338,7 @@ public class SceneObjectCatalogController : MonoBehaviour
     public void ShowAssetsPacks()
     {
         catalogAssetPackListView.SetAssetPackStyle();
-        catalogAssetPackListView.SetContent(BIWCatalogBridge.GetCatalogItemPackList());
+        catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPackList());
         isShowingAssetPacks = true;
         catalogTitleTxt.text = BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE;
         RefreshCatalog();
@@ -374,7 +374,7 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     public void RefreshCatalog()
     {
-        catalogAssetPackListView.SetContent(BIWCatalogBridge.GetCatalogItemPackList());
+        catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPackList());
     }
 
 

@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BIWCatalogBridge
+public class BIWCatalogManager
 {
     public static bool VERBOSE = false;
-    public static AssetCatalogBridge i2 = new AssetCatalogBridge();
-    public static BIWCatalogBridge i
+    public static BIWCatalogManager i
     {
         get
         {
@@ -27,12 +26,11 @@ public class BIWCatalogBridge
 
     static void Init()
     {
-        i = new BIWCatalogBridge();
+        i = new BIWCatalogManager();
 
         BuilderInWorldNFTController.i.OnNftsFetched += ConvertCollectiblesPack;
-
-        ConvertAssetsPacks();
-        ConvertCollectiblesPack();
+        AssetCatalogBridge.OnSceneObjectAdded += AddSceneObject;
+        AssetCatalogBridge.OnSceneAssetPackAdded += AddSceneAssetPack; 
     }
 
     public static List<CatalogItemPack> GetCatalogItemPackList()
@@ -40,7 +38,7 @@ public class BIWCatalogBridge
         return DataStore.BuilderInWorld.catalogItemPackDict.GetValues();
     }
 
-    void FilterCategories()
+    private void FilterCategories()
     {
         List<SceneAssetPack> categoryList = new List<SceneAssetPack>();
         var assetPacks = AssetCatalogBridge.sceneAssetPackCatalog.GetValues().ToList();
@@ -82,24 +80,25 @@ public class BIWCatalogBridge
         categoryList = assetPackDic.Values.ToList();
     }
 
-    static void ConvertAssetsPacks()
+    private static void AddSceneObject(SceneObject sceneObject)
     {
-     
-        foreach (SceneAssetPack sceneAssetPack in  AssetCatalogBridge.sceneAssetPackCatalog.GetValues())
-        {
-            CatalogItemPack catalogItemPack = CreateCatalogItemPack(sceneAssetPack);
-            foreach(CatalogItem catalogItem in catalogItemPack.assets)
-            {
-                DataStore.BuilderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
-            }
+        if (DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(sceneObject.id))
+            return;
 
-            DataStore.BuilderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
-        }
-
-
+        CatalogItem catalogItem = CreateCatalogItem(sceneObject);
+        DataStore.BuilderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
     }
 
-    static void ConvertCollectiblesPack()
+    private static void AddSceneAssetPack(SceneAssetPack sceneAssetPack)
+    {
+        if (DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(sceneAssetPack.id))
+            return;
+
+        CatalogItemPack catalogItemPack = CreateCatalogItemPack(sceneAssetPack);
+        DataStore.BuilderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
+    }
+
+    private static void ConvertCollectiblesPack(List<NFTInfo> nftList)
     {
         CatalogItemPack collectiblesItemPack;
 
@@ -109,19 +108,26 @@ public class BIWCatalogBridge
             collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
             collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
 
-            collectiblesItemPack.assets = BuilderInWorldNFTController.i.GetNFTsAsSceneObjects();
-
             DataStore.BuilderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
         }
         else
         {
             collectiblesItemPack = DataStore.BuilderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES];
+            foreach (CatalogItem catalogItem in collectiblesItemPack.assets)
+            {
+                if (DataStore.BuilderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
+                    DataStore.BuilderInWorld.catalogItemDict.Remove(catalogItem.id);
+            }
+            collectiblesItemPack.assets.Clear();
         }
 
-        foreach (CatalogItem catalogItem in collectiblesItemPack.assets)
+        foreach (NFTInfo info in nftList)
         {
+            CatalogItem catalogItem = CreateCatalogItem(info);
             if(!DataStore.BuilderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
                 DataStore.BuilderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
+
+            collectiblesItemPack.assets.Add(catalogItem);
         }
     }
 

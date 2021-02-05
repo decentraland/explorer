@@ -10,7 +10,7 @@ using UnityEngine;
 public class BuilderInWorldNFTController
 {
     public event System.Action OnNFTUsageChange;
-    public event System.Action OnNftsFetched;
+    public event System.Action<List<NFTInfo>> OnNftsFetched;
 
     NFTOwner nftOwner;
 
@@ -90,32 +90,6 @@ public class BuilderInWorldNFTController
         }
     }
 
-    public CatalogItem GetNFTSceneObjectFromId(string assetId)
-    {
-        foreach (NFTInfo nFTInfo in nftOwner.assets)
-        {
-            if(nFTInfo.assetContract.address == assetId)
-                return CatalogDataFactory.CreateCatalogItem(nFTInfo);
-        }
-
-        return null;
-    }
-
-    public List<CatalogItem> GetNFTsAsSceneObjects()
-    {
-        List<CatalogItem> sceneObjects = new List<CatalogItem>();
-
-        if (desactivateNFT ||
-            nftOwner.assets == null)
-            return sceneObjects;
-
-        foreach(NFTInfo nFTInfo in nftOwner.assets)
-        {
-            sceneObjects.Add(CatalogDataFactory.CreateCatalogItem(nFTInfo));
-        }
-        return sceneObjects;
-    }
-
     void FetchNftsFromOwner()
     {
         if (fechNftsCoroutine != null) CoroutineStarter.Stop(fechNftsCoroutine);
@@ -132,7 +106,7 @@ public class BuilderInWorldNFTController
         {
             this.nftOwner = nftOwner;
             desactivateNFT = false;
-            OnNftsFetched?.Invoke();
+            OnNftsFetched?.Invoke(nftOwner.assets);
         },
         (error) =>
         {
