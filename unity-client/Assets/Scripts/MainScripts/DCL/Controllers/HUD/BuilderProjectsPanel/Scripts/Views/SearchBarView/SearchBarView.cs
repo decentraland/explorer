@@ -13,16 +13,15 @@ internal class SearchBarView : MonoBehaviour
     public event Action<string> OnSearch;
     public event OnSortOrderToggleDelegate OnSortOrderChanged;
 
-    [SerializeField] private SearchInputField inputField;
-    [SerializeField] private Button sortButton;
-    [SerializeField] private SortOrderToggleView sortToggle;
-    [SerializeField] private TextMeshProUGUI sortTypeLabel;
-    [SerializeField] private SortOrderToggleView sortOrderToggle;
-    [SerializeField] private Toggle ownerToggle;
-    [SerializeField] private Toggle operatorToggle;
-    [SerializeField] private Toggle contributorToggle;
+    [SerializeField] internal SearchInputField inputField;
+    [SerializeField] internal Button sortButton;
+    [SerializeField] internal TextMeshProUGUI sortTypeLabel;
+    [SerializeField] internal SortOrderToggleView sortOrderToggle;
+    [SerializeField] internal Toggle ownerToggle;
+    [SerializeField] internal Toggle operatorToggle;
+    [SerializeField] internal Toggle contributorToggle;
     [SerializeField] private TextMeshProUGUI resultLabel;
-    [SerializeField] private SortDropdownView sortDropdown;
+    [SerializeField] internal SortDropdownView sortDropdown;
 
     private string resultFormat;
     private bool filterOwner = false;
@@ -43,14 +42,26 @@ internal class SearchBarView : MonoBehaviour
         filterOperator = operatorToggle.isOn;
         filterContributor = contributorToggle.isOn;
 
-        inputField.OnSearchText += OnSearch;
-        sortToggle.OnToggle += b => OnSortOrderChanged?.Invoke(b);
-        SortDropdownButton.OnClick += OnSortTypeSelected;
+        inputField.OnSearchText += s => OnSearch?.Invoke(s);
+        sortOrderToggle.OnToggle += b => OnSortOrderChanged?.Invoke(b);
+        sortDropdown.OnSortTypeSelected += OnSortTypeSelected;
     }
 
     public void SetResultCount(int count)
     {
         resultLabel.text = string.Format(resultFormat, count);
+    }
+
+    public void ShowFilters(bool filterOwner, bool filterOperator, bool filterContributor)
+    {
+        ownerToggle.gameObject.SetActive(filterOwner);
+        operatorToggle.gameObject.SetActive(filterOperator);
+        contributorToggle.gameObject.SetActive(filterContributor);
+    }
+
+    public void SetSortTypes(string[] types)
+    {
+        sortDropdown.AddSortType(types);
     }
 
     private void OnSortButtonPressed()

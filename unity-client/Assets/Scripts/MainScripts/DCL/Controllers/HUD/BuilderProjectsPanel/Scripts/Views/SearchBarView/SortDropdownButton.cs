@@ -1,21 +1,21 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-internal class SortDropdownButton : MonoBehaviour
+internal class SortDropdownButton : MonoBehaviour, IPointerDownHandler
 {
-    public static event Action<string> OnClick;
+    public event Action<string> OnSelected;
 
-    [SerializeField] private Button_OnPointerDown button;
-    [SerializeField] private TextMeshProUGUI label;
-
-    private void Awake()
-    {
-        button.onPointerDown += () => OnClick?.Invoke(label.text);
-    }
+    [SerializeField] internal TextMeshProUGUI label;
 
     public void SetText(string text)
     {
         label.text = text;
+    }
+
+    void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
+    {
+        OnSelected?.Invoke(label.text);
     }
 }

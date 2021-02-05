@@ -6,13 +6,13 @@ using UnityEngine.UI;
 
 internal class SearchInputField : MonoBehaviour
 {
-    private const float IDLE_TYPE_TIME_TRIGGER_SEARCH = 1f;
+    internal const float IDLE_TYPE_TIME_TRIGGER_SEARCH = 1f;
 
     public event Action<string> OnSearchText;
 
-    [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private GameObject searchSpinner;
-    [SerializeField] private Button clearSearchButton;
+    [SerializeField] internal TMP_InputField inputField;
+    [SerializeField] internal GameObject searchSpinner;
+    [SerializeField] internal Button clearSearchButton;
 
     private Coroutine searchWhileTypingRoutine;
     private float lastValueChangeTime = 0;
