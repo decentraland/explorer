@@ -80,10 +80,10 @@ public class AvatarEditorHUDController : IHUD
 
     private System.Collections.IEnumerator LoadUserProfile(UserProfile userProfile)
     {
+        LoadUserProfile(userProfile, false);
+
         yield return LoadOwnedWearablesIfNeeded(userProfile);
         yield return LoadBaseWearablesIfNeeded(userProfile);
-
-        LoadUserProfile(userProfile, false);
     }
 
     private System.Collections.IEnumerator LoadOwnedWearablesIfNeeded(UserProfile userProfile)
