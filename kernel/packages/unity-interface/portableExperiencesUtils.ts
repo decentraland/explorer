@@ -27,14 +27,14 @@ window['killPortableExperienceScene'] = killPortableExperienceScene
 export type PortableExperienceIdentifier = string
 export type PortableExperienceHandle = {
   pid: PortableExperienceIdentifier
-  cid: string
+  parentCid: string
 }
 
 let currentPortableExperiences: Map<string, string> = new Map()
 
 export function getPortableExperience(pid: string): PortableExperienceHandle | undefined {
   if (currentPortableExperiences.has(pid)) {
-    return { pid: pid, cid: currentPortableExperiences.get(pid)! }
+    return { pid: pid, parentCid: currentPortableExperiences.get(pid)! }
   } else {
     return undefined
   }
@@ -42,7 +42,7 @@ export function getPortableExperience(pid: string): PortableExperienceHandle | u
 
 export async function spawnPortableExperienceScene(
   portableExperienceUrn: PortableExperienceUrn,
-  parentCid?: string
+  parentCid: string
 ): Promise<PortableExperienceHandle> {
   const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
 
@@ -63,10 +63,9 @@ export async function spawnPortableExperienceScene(
     isPortableExperience: true
   })
 
-  const contentId = cid ?? ''
-  currentPortableExperiences.set(parcelSceneId, contentId)
+  currentPortableExperiences.set(parcelSceneId, parentCid)
 
-  return { pid: parcelSceneId, cid: contentId }
+  return { pid: parcelSceneId, parentCid: parentCid }
 }
 
 function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {

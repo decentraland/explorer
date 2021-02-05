@@ -125,8 +125,8 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
 
     // Temporal: Try to create several global scenes
-    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe1')
-    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe2')
+    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe1', 'main')
+    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe2', 'main')
   }
 
   return {

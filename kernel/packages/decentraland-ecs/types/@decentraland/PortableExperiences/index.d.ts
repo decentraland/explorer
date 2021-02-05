@@ -2,7 +2,7 @@ declare module '@decentraland/PortableExperiences' {
   type PortableExperienceIdentifier = string
   type PortableExperienceHandle = {
     pid: PortableExperienceIdentifier
-    cid: string
+    parentCid: string
   }
   type SpawnPortableExperienceParameters = {
     urn: PortableExperienceIdentifier
