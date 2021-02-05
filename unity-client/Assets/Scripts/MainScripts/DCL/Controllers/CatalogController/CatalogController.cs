@@ -99,7 +99,7 @@ public class CatalogController : MonoBehaviour
                 WebInterface.RequestWearables(
                     ownedByUser: false,
                     wearableIds: new string[] { wearableId },
-                    collectionNames: null,
+                    collectionIds: null,
                     context: null
                 );
             }
@@ -122,7 +122,7 @@ public class CatalogController : MonoBehaviour
             WebInterface.RequestWearables(
                 ownedByUser: true,
                 wearableIds: null,
-                collectionNames: null,
+                collectionIds: null,
                 context: OWNED_WEARABLES_CONTEXT
             );
         }
@@ -144,7 +144,7 @@ public class CatalogController : MonoBehaviour
             WebInterface.RequestWearables(
                 ownedByUser: false,
                 wearableIds: null,
-                collectionNames: new string[] { "base-avatars" },
+                collectionIds: new string[] { "base-avatars" },
                 context: BASE_WEARABLES_CONTEXT
             );
         }

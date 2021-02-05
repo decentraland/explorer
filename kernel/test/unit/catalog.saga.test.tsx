@@ -19,7 +19,7 @@ describe('Wearables Saga', () => {
       .put(wearablesSuccess([wearable1], context))
       .provide([
         [select(baseCatalogsLoaded), true],
-        [select(getPlatformCatalog), { }],
+        [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
       ])
       .run()
@@ -31,7 +31,7 @@ describe('Wearables Saga', () => {
       .put(wearablesSuccess(wearables, context))
       .provide([
         [select(baseCatalogsLoaded), true],
-        [select(getPlatformCatalog), { }],
+        [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
         [select(getUserId), userId],
         [call(fetchInventoryItemsByAddress, userId), Promise.resolve([wearableId1])],
@@ -41,12 +41,12 @@ describe('Wearables Saga', () => {
 
   it('When base avatars are requested, then they are returned successfully', () => {
     const baseWearables = [wearable1]
-    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['base-avatars'] }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionIds: ['base-avatars'] }, context))
       .put(wearablesSuccess(baseWearables, context))
       .provide([
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), { [wearableId1]: wearable1 }],
-        [select(getExclusiveCatalog), { }],
+        [select(getExclusiveCatalog), {}],
       ])
       .run()
   })
@@ -69,8 +69,8 @@ describe('Wearables Saga', () => {
       .put(wearablesFailure(context, error))
       .provide([
         [select(baseCatalogsLoaded), true],
-        [select(getPlatformCatalog), { }],
-        [select(getExclusiveCatalog), { }],
+        [select(getPlatformCatalog), {}],
+        [select(getExclusiveCatalog), {}],
         [select(getUserId), userId],
         [call(fetchInventoryItemsByAddress, userId), throwError(error)],
       ])
@@ -83,14 +83,14 @@ describe('Wearables Saga', () => {
       .provide([
         [select(baseCatalogsLoaded), true],
         [select(getUserId), userId],
-        [select(getPlatformCatalog), { }],
-        [select(getExclusiveCatalog), { }],
+        [select(getPlatformCatalog), {}],
+        [select(getExclusiveCatalog), {}],
       ])
       .run()
   })
 
   it('When collection name is not base-avatars, then the request fails', () => {
-    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['some-other-collection'] }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ collectionIds: ['some-other-collection'] }, context))
       .put(wearablesFailure(context, WRONG_FILTERS_ERROR))
       .provide([
         [select(baseCatalogsLoaded), true],

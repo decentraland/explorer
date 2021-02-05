@@ -470,7 +470,7 @@ export class BrowserInterface {
     filters: {
       ownedByUser: boolean
       wearableIds?: string[] | null
-      collectionNames?: string[] | null
+      collectionIds?: string[] | null
     }
     context?: string
   }) {
@@ -478,7 +478,7 @@ export class BrowserInterface {
     const newFilters: WearablesRequestFilters = {
       ownedByUser: filters.ownedByUser ?? undefined,
       wearableIds: this.arrayCleanup(filters.wearableIds),
-      collectionNames: this.arrayCleanup(filters.collectionNames)
+      collectionIds: this.arrayCleanup(filters.collectionIds)
     }
     globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
   }
