@@ -83,12 +83,12 @@ public class AvatarEditorHUDController : IHUD
         LoadUserProfile(userProfile, false);
 
         yield return LoadOwnedWearablesIfNeeded(userProfile);
-        yield return LoadBaseWearablesIfNeeded(userProfile);
+        yield return LoadBaseWearablesIfNeeded();
     }
 
     private System.Collections.IEnumerator LoadOwnedWearablesIfNeeded(UserProfile userProfile)
     {
-        if (ownedWearablesAlreadyRequested)
+        if (ownedWearablesAlreadyRequested || string.IsNullOrEmpty(userProfile.userId))
             yield break;
 
         ownedWearablesAlreadyRequested = true;
@@ -106,7 +106,7 @@ public class AvatarEditorHUDController : IHUD
         }
     }
 
-    private System.Collections.IEnumerator LoadBaseWearablesIfNeeded(UserProfile userProfile)
+    private System.Collections.IEnumerator LoadBaseWearablesIfNeeded()
     {
         if (baseWearablesAlreadyRequested)
             yield break;

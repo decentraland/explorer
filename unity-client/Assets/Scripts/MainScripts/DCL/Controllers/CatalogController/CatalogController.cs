@@ -156,20 +156,20 @@ public class CatalogController : MonoBehaviour
         return promiseResult;
     }
 
-    private void ResolvePendingWearablePromise(string wearableId, WearableItem wearable)
+    private void ResolvePendingWearablePromise(string wearableId, WearableItem newWearableAddedIntoCatalog)
     {
         if (pendingWearablePromises.TryGetValue(wearableId, out Promise<WearableItem> promise))
         {
-            promise.Resolve(wearable);
+            promise.Resolve(newWearableAddedIntoCatalog);
             pendingWearablePromises.Remove(wearableId);
         }
     }
 
-    private void ResolvePendingWearablesByContextPromise(string context, WearableItem[] wearables)
+    private void ResolvePendingWearablesByContextPromise(string context, WearableItem[] newWearablesAddedIntoCatalog)
     {
         if (pendingWearablesByContextPromises.TryGetValue(context, out Promise<WearableItem[]> promise))
         {
-            promise.Resolve(wearables);
+            promise.Resolve(newWearablesAddedIntoCatalog);
             pendingWearablesByContextPromises.Remove(context);
         }
     }
