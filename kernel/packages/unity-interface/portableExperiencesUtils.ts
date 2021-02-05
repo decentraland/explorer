@@ -42,7 +42,7 @@ export function getPortableExperience(pid: string): PortableExperienceHandle | u
 
 export async function spawnPortableExperienceScene(
   portableExperienceUrn: PortableExperienceUrn,
-  cid?: string
+  parentCid?: string
 ): Promise<PortableExperienceHandle> {
   const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
 
