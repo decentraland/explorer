@@ -50,7 +50,7 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
-import { killPortableExperienceScene } from './portableExperiencesUtils'
+import { killPortableExperienceScene, PortableExperienceUrn } from './portableExperiencesUtils'
 
 declare const DCL: any
 
@@ -466,7 +466,9 @@ export class BrowserInterface {
   }
 
   public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
-    await killPortableExperienceScene(data.portableExperienceId)
+    const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${data.portableExperienceId}`
+
+    await killPortableExperienceScene(portableExperienceUrn)
   }
 }
 

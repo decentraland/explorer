@@ -44,8 +44,10 @@ export class PortableExperiences extends ExposableAPI {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
 
     const portableExperience = getPortableExperience(pid)
+
     if (!!portableExperience && portableExperience.parentCid == parcelIdentity.cid) {
-      killPortableExperienceScene(pid)
+      const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${pid}`
+      killPortableExperienceScene(portableExperienceUrn)
       return true
     }
     return false
