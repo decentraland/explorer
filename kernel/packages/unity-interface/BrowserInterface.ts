@@ -469,6 +469,7 @@ export class BrowserInterface {
     const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${data.portableExperienceId}`
 
     await killPortableExperienceScene(portableExperienceUrn)
+    unityInterface.UnloadScene(data.portableExperienceId)
   }
 }
 
