@@ -11,7 +11,7 @@ namespace DCL.Huds.QuestsPanel
 
         public void Populate(QuestSection section)
         {
-            CleanUpTasksList(); //TODO: Reuse already instantiated steps
+            CleanUpTasksList();
             taskName.text = section.name;
             foreach (QuestTask task in section.tasks)
             {

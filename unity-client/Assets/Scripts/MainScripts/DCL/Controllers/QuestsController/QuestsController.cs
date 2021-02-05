@@ -38,6 +38,8 @@ namespace DCL.QuestsController
         private static BaseCollection<string> pinnedQuests => DataStore.Quests.pinnedQuests;
         private static BaseDictionary<string, QuestModel> quests => DataStore.Quests.quests;
 
+        private bool pinnedQuestsIsDirty = false;
+
         private void Awake()
         {
             i = this;
@@ -46,8 +48,8 @@ namespace DCL.QuestsController
             {
                 pinnedQuests.Set(Utils.ParseJsonArray<string[]>(savedPinnedQuests));
             }
-            pinnedQuests.OnAdded += SavePinnedQuests;
-            pinnedQuests.OnRemoved += SavePinnedQuests;
+            pinnedQuests.OnAdded += OnPinnedQuestUpdated;
+            pinnedQuests.OnRemoved += OnPinnedQuestUpdated;
         }
 
         /// <summary>
@@ -116,16 +118,24 @@ namespace DCL.QuestsController
                 OnQuestCompleted?.Invoke(progressedQuest.id);
         }
 
-        private void SavePinnedQuests(string questId)
+        private void OnPinnedQuestUpdated(string questId)
         {
-            //TODO Alex: only save this once per frame
-            PlayerPrefs.SetString(PINNED_QUESTS_KEY, JsonConvert.SerializeObject(pinnedQuests.Get()));
+            pinnedQuestsIsDirty = true;
+        }
+
+        private void Update()
+        {
+            if (pinnedQuestsIsDirty)
+            {
+                pinnedQuestsIsDirty = false;
+                PlayerPrefs.SetString(PINNED_QUESTS_KEY, JsonConvert.SerializeObject(pinnedQuests.Get()));
+            }
         }
 
         private void OnDestroy()
         {
-            pinnedQuests.OnAdded -= SavePinnedQuests;
-            pinnedQuests.OnRemoved -= SavePinnedQuests;
+            pinnedQuests.OnAdded -= OnPinnedQuestUpdated;
+            pinnedQuests.OnRemoved -= OnPinnedQuestUpdated;
         }
 
         #region just for testing, dont merge this code. (IF you see this in a review, hit me)

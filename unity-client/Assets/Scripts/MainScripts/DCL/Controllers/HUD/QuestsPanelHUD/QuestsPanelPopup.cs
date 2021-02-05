@@ -1,4 +1,6 @@
 ﻿using DCL.Helpers;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +20,7 @@ namespace DCL.Huds.QuestsPanel
         private AssetPromise_Texture thumbnailPromise;
 
         private QuestModel quest;
+        private readonly List<QuestsPanelSection> sections = new List<QuestsPanelSection>();
         private static BaseCollection<string> baseCollection => DataStore.Quests.pinnedQuests;
 
         private void Awake()
@@ -32,17 +35,18 @@ namespace DCL.Huds.QuestsPanel
         public void Populate(QuestModel newQuest)
         {
             quest = newQuest;
-            CleanUpQuestsList(); //TODO Reuse already instantiated quests
+            PrepareSections(quest.sections.Length);
 
             questName.text = quest.name;
             description.text = quest.description;
             SetThumbnail(quest.thumbnail_banner);
             for (int i = 0; i < quest.sections.Length; i++)
             {
-                CreateTask(quest.sections[i]);
+                sections[i].Populate(quest.sections[i]);
             }
             Utils.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
             pinQuestToggle.SetIsOnWithoutNotify(baseCollection.Contains(quest.id));
+            pinQuestToggle.gameObject.SetActive(!quest.isCompleted);
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -97,16 +101,30 @@ namespace DCL.Huds.QuestsPanel
             thumbnailImage.texture = assetTexture.texture;
         }
 
-        internal void CreateTask(QuestSection section)
+        internal void CreateSection()
         {
-            var taskEntry = Instantiate(sectionPrefab, sectionsContainer).GetComponent<QuestsPanelSection>();
-            taskEntry.Populate(section);
+            sections.Add(Instantiate(sectionPrefab, sectionsContainer).GetComponent<QuestsPanelSection>());
         }
 
-        internal void CleanUpQuestsList()
+        internal void PrepareSections(int sectionsAmount)
         {
-            for(int i = sectionsContainer.childCount - 1; i >= 0; i--)
-                Destroy(sectionsContainer.GetChild(i).gameObject);
+            if (sections.Count == sectionsAmount)
+                return;
+
+            if (sections.Count < sectionsAmount)
+            {
+                while(sections.Count < sectionsAmount)
+                    CreateSection();
+            }
+            else
+            {
+                while (sections.Count > sectionsAmount)
+                {
+                    var section = sections.Last();
+                    sections.RemoveAt(sections.Count - 1);
+                    Destroy(section.gameObject);
+                }
+            }
         }
 
         public void Show()

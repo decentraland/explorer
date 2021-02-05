@@ -9,6 +9,8 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerHUDView : MonoBehaviour
     {
+        private const int ENTRIES_PER_FRAME = 5;
+
         [SerializeField] private RectTransform questsContainer;
         [SerializeField] private GameObject questPrefab;
 
@@ -16,6 +18,8 @@ namespace DCL.Huds.QuestsTracker
         private readonly Dictionary<string, DateTime> lastUpdateTimestamp = new Dictionary<string, DateTime>();
         private bool layoutRebuildRequested;
         private static BaseDictionary<string, QuestModel> quests => DataStore.Quests.quests;
+        private static BaseCollection<string> pinnedQuests => DataStore.Quests.pinnedQuests;
+        private readonly List<string> questsToBeAdded = new List<string>();
 
         public static QuestsTrackerHUDView Create()
         {
@@ -32,7 +36,15 @@ namespace DCL.Huds.QuestsTracker
             StartCoroutine(DispatchEntriesRoutine());
         }
 
-        public void AddOrUpdateQuest(string questId, bool isPinned)
+        public void RequestAddOrUpdateQuest(string questId)
+        {
+            if (questsToBeAdded.Contains(questId))
+                return;
+
+            questsToBeAdded.Add(questId);
+        }
+
+        private void AddOrUpdateQuest(string questId, bool isPinned)
         {
             if (!quests.TryGetValue(questId, out QuestModel quest) )
                 return;
@@ -85,6 +97,13 @@ namespace DCL.Huds.QuestsTracker
             {
                 layoutRebuildRequested = false;
                 Utils.ForceRebuildLayoutImmediate(questsContainer);
+            }
+
+            for (int i = 0; i < ENTRIES_PER_FRAME && questsToBeAdded.Count > 0; i++)
+            {
+                string questId = questsToBeAdded.First();
+                questsToBeAdded.RemoveAt(0);
+                AddOrUpdateQuest(questId, pinnedQuests.Contains(questId));
             }
         }
 

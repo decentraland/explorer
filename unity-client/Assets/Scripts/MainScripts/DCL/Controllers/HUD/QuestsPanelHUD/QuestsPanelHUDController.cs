@@ -34,12 +34,12 @@ namespace DCL.Huds.QuestsPanel
 
         private void OnQuestProgressed(string questId)
         {
-            view.AddOrUpdateQuest(questId);
+            view.RequestAddOrUpdateQuest(questId);
         }
 
         private void OnQuestAdded(string questId, QuestModel questModel)
         {
-            view.AddOrUpdateQuest(questId);
+            view.RequestAddOrUpdateQuest(questId);
         }
 
         private void OnQuestRemoved(string questId, QuestModel questModel)
