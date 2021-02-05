@@ -543,13 +543,13 @@ public class BuilderInWorldController : MonoBehaviour
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
         sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
 
-        builderInWorldEntityHandler.SetEntityName(entity, sceneObject.name);
+        builderInWorldEntityHandler.SetEntityName(entity, catalogItem.name);
   
-        if(sceneObject.IsSmartItem())
+        if(catalogItem.IsSmartItem())
         {
             SmartItemComponent.Model model = new SmartItemComponent.Model();
-            model.actions = sceneObject.actions;
-            model.parameters = sceneObject.parameters;
+            model.actions = catalogItem.actions;
+            model.parameters = catalogItem.parameters;
 
             string jsonModel = JsonUtility.ToJson(model);
 
@@ -888,23 +888,11 @@ public class BuilderInWorldController : MonoBehaviour
         {
             foreach (Vector2Int parcel in scene.sceneData.parcels)
             {
-                if (parcel.x == parcelWithAccess.x && parcel.y == parcelWithAccess.y) return true;
+                if (parcel.x == parcelWithAccess.x && parcel.y == parcelWithAccess.y)
+                    return true;
             }
         }
-            return false;
-    }
-
-    bool UserHasPermissionOnParcelScene(ParcelScene scene)
-    {
-        UserProfile userProfile = UserProfile.GetOwnUserProfile();
-        foreach (UserProfileModel.ParcelsWithAccess parcelWithAccess in userProfile.parcelsWithAccess)
-        {
-            foreach (Vector2Int parcel in scene.sceneData.parcels)
-            {
-                if (parcel.x == parcelWithAccess.x && parcel.y == parcelWithAccess.y) return true;
-            }
-        }
-            return false;
+        return false;
     }
 
     void CheckEnterEditMode()

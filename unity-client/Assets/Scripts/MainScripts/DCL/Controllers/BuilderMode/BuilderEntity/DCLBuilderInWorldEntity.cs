@@ -116,23 +116,17 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return ((SmartItemComponent)component).HasActions();
     }
 
-
-
     public CatalogItem GetCatalogItemAssociated()
     {
         if (associatedCatalogItem != null)
             return associatedCatalogItem;
 
-        BaseDisposable gltfShapeComponent = rootEntity.GetSharedComponent(CLASS_ID.GLTF_SHAPE);
-
         string assetId = null;
 
-        if (gltfShapeComponent != null)
+        if (rootEntity.TryGetSharedComponent(CLASS_ID.GLTF_SHAPE, out BaseDisposable gltfShapeComponent))
             assetId = ((GLTFShape)gltfShapeComponent).model.assetId;
 
-        BaseDisposable nftShapeComponent = rootEntity.GetSharedComponent(CLASS_ID.NFT_SHAPE);
-
-        if (nftShapeComponent != null)
+        if (rootEntity.TryGetSharedComponent(CLASS_ID.NFT_SHAPE, out BaseDisposable nftShapeComponent))
             assetId = ((NFTShape)nftShapeComponent).model.assetId;
 
         if (!string.IsNullOrEmpty(assetId) && DataStore.BuilderInWorld.catalogItemDict.TryGetValue(assetId, out associatedCatalogItem))

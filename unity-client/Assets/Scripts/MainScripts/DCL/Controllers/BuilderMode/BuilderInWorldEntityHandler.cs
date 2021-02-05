@@ -559,10 +559,11 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
             entityToEdit.IsNew = hasBeenCreated;
 
             string entityName = entityToEdit.GetDescriptiveName();
-            var sceneObject = entityToEdit.GetSceneObjectAssociated();
-            if ((string.IsNullOrEmpty(entityName) || entityNameList.Contains(entityName)) && sceneObject != null)
+            var catalogItem = entityToEdit.GetCatalogItemAssociated();
+
+            if ((string.IsNullOrEmpty(entityName) || entityNameList.Contains(entityName)) && catalogItem != null)
             {
-                entityName = GetNewNameForEntity(entityToEdit.GetSceneObjectAssociated());
+                entityName = GetNewNameForEntity(catalogItem);
                 SetEntityName(entityToEdit, entityName);
             }
             else if (!string.IsNullOrEmpty(entityName) && !entityNameList.Contains(entityName))

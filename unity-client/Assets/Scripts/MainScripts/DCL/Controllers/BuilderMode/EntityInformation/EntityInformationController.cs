@@ -181,22 +181,22 @@ public class EntityInformationController : MonoBehaviour
         }
     }
 
-    void UpdateLimitsInformation(SceneObject sceneObject)
+    void UpdateLimitsInformation(CatalogItem catalogItem)
     {
-        if (sceneObject == null)
+        if (catalogItem == null)
         {
             entityLimitsLeftTxt.text = "";
             entityLimitsRightTxt.text = "";
             return;
         }
 
-        string leftText = $"ENTITIES: {sceneObject.metrics.entities}\n"+ 
-                          $"BODIES: {sceneObject.metrics.bodies}\n" + 
-                          $"TRIS: {sceneObject.metrics.triangles}";
+        string leftText = $"ENTITIES: {catalogItem.metrics.entities}\n"+ 
+                          $"BODIES: {catalogItem.metrics.bodies}\n" + 
+                          $"TRIS: {catalogItem.metrics.triangles}";
 
-        string rightText = $"TEXTURES: {sceneObject.metrics.textures}\n" +
-                           $"MATERIALS: {sceneObject.metrics.materials}\n" +
-                           $"GEOMETRIES: {sceneObject.metrics.meshes}";
+        string rightText = $"TEXTURES: {catalogItem.metrics.textures}\n" +
+                           $"MATERIALS: {catalogItem.metrics.materials}\n" +
+                           $"GEOMETRIES: {catalogItem.metrics.meshes}";
 
          entityLimitsLeftTxt.text = leftText;
          entityLimitsRightTxt.text = rightText;
@@ -214,9 +214,6 @@ public class EntityInformationController : MonoBehaviour
 
         if (catalogItem == null || string.IsNullOrEmpty(url))
             return;
-
-        if (string.Equals(sceneObject.asset_pack_id, BuilderInWorldSettings.ASSETS_COLLECTIBLES))
-            url = sceneObject.thumbnail;
 
         string newLoadedThumbnailURL = url;
         var newLoadedThumbnailPromise = new AssetPromise_Texture(url);
