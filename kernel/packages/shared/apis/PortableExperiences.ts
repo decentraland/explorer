@@ -1,12 +1,11 @@
 import { registerAPI, exposeMethod } from 'decentraland-rpc/lib/host'
 import {
   spawnPortableExperienceScene,
-  killPortableExperienceScene,
   getPortableExperience,
   PortableExperienceHandle,
-  PortableExperienceIdentifier,
-  PortableExperienceUrn
+  PortableExperienceIdentifier
 } from 'unity-interface/portableExperiencesUtils'
+import { BrowserInterface } from 'unity-interface/BrowserInterface'
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
 
@@ -46,8 +45,7 @@ export class PortableExperiences extends ExposableAPI {
     const portableExperience = getPortableExperience(pid)
 
     if (!!portableExperience && portableExperience.parentCid == parcelIdentity.cid) {
-      const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${pid}`
-      killPortableExperienceScene(portableExperienceUrn)
+      BrowserInterface.KillPortableExperience({ portableExperienceId: pid })
       return true
     }
     return false
@@ -61,10 +59,8 @@ export class PortableExperiences extends ExposableAPI {
   @exposeMethod
   async exit(): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
-    const executorCid = parcelIdentity.cid
-    const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${executorCid}`
 
-    killPortableExperienceScene(portableExperienceUrn)
+    BrowserInterface.KillPortableExperience({ portableExperienceId: parcelIdentity.cid })
     return true
   }
 }
