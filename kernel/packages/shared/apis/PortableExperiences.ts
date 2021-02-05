@@ -3,9 +3,10 @@ import {
   spawnPortableExperienceScene,
   getPortableExperience,
   PortableExperienceHandle,
-  PortableExperienceIdentifier
+  PortableExperienceIdentifier,
+  PortableExperienceUrn,
+  killPortableExperienceScene
 } from 'unity-interface/portableExperiencesUtils'
-import { BrowserInterface } from 'unity-interface/BrowserInterface'
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
 
@@ -45,7 +46,8 @@ export class PortableExperiences extends ExposableAPI {
     const portableExperience = getPortableExperience(pid)
 
     if (!!portableExperience && portableExperience.parentCid == parcelIdentity.cid) {
-      BrowserInterface.KillPortableExperience({ portableExperienceId: pid })
+      const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${parcelIdentity.cid}`
+      await killPortableExperienceScene(portableExperienceUrn)
       return true
     }
     return false
@@ -60,7 +62,8 @@ export class PortableExperiences extends ExposableAPI {
   async exit(): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
 
-    BrowserInterface.KillPortableExperience({ portableExperienceId: parcelIdentity.cid })
+    const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${parcelIdentity.cid}`
+    await killPortableExperienceScene(portableExperienceUrn)
     return true
   }
 }

@@ -465,11 +465,10 @@ export class BrowserInterface {
     }
   }
 
-  public static async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
+  public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
     const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${data.portableExperienceId}`
 
     await killPortableExperienceScene(portableExperienceUrn)
-    unityInterface.UnloadScene(data.portableExperienceId)
   }
 }
 

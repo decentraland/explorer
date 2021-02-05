@@ -86,6 +86,7 @@ export async function killPortableExperienceScene(portableExperienceUrn: Portabl
   if (peWorker) {
     forceStopParcelSceneWorker(peWorker)
     currentPortableExperiences.delete(sceneId)
+    unityInterface.UnloadScene(sceneId)
     return true
   } else {
     return false
