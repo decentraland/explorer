@@ -9,8 +9,8 @@ using Categories = WearableLiterals.Categories;
 
 public class AvatarEditorHUDController : IHUD
 {
-    protected static readonly string[] categoriesThatMustHaveSelection = {Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH};
-    protected static readonly string[] categoriesToRandomize = {Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET};
+    protected static readonly string[] categoriesThatMustHaveSelection = { Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH };
+    protected static readonly string[] categoriesToRandomize = { Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET };
 
     [NonSerialized]
     public bool bypassUpdateAvatarPreview = false;
@@ -61,15 +61,19 @@ public class AvatarEditorHUDController : IHUD
     public void SetCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         if (this.catalog != null)
+        {
+            this.catalog.OnAdded -= AddWearable;
             this.catalog.OnRemoved -= RemoveWearable;
+        }
 
         this.catalog = catalog;
 
         ProcessCatalog(this.catalog);
+        this.catalog.OnAdded += AddWearable;
         this.catalog.OnRemoved += RemoveWearable;
     }
 
-    public void OnUserProfileUpdated(UserProfile userProfile)
+    public virtual void OnUserProfileUpdated(UserProfile userProfile)
     {
         CoroutineStarter.Start(LoadUserProfile(userProfile));
     }
@@ -87,7 +91,6 @@ public class AvatarEditorHUDController : IHUD
         if (ownedWearablesAlreadyRequested)
             yield break;
 
-        //yield return new WaitForSeconds(3f);
         ownedWearablesAlreadyRequested = true;
         var ownedWearablesPromise = CatalogController.RequestOwnedWearables();
         yield return ownedWearablesPromise;
@@ -99,8 +102,7 @@ public class AvatarEditorHUDController : IHUD
         }
         else
         {
-            userProfile.UpdateInventory(ownedWearablesPromise.value.Select(x => x.id).ToArray());
-            ProcessCatalog(this.catalog);
+            userProfile.SetInventory(ownedWearablesPromise.value.Select(x => x.id).ToArray());
         }
     }
 
@@ -109,7 +111,6 @@ public class AvatarEditorHUDController : IHUD
         if (baseWearablesAlreadyRequested)
             yield break;
 
-        //yield return new WaitForSeconds(3f);
         baseWearablesAlreadyRequested = true;
         var baseWearablesPromise = CatalogController.RequestBaseWearables();
         yield return baseWearablesPromise;
@@ -118,11 +119,6 @@ public class AvatarEditorHUDController : IHUD
         {
             baseWearablesAlreadyRequested = false;
             Debug.LogError(baseWearablesPromise.error);
-        }
-        else
-        {
-            userProfile.UpdateInventory(baseWearablesPromise.value.Select(x => x.id).ToArray());
-            ProcessCatalog(this.catalog);
         }
     }
 
@@ -143,45 +139,41 @@ public class AvatarEditorHUDController : IHUD
         if (userProfile.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape))
             return;
 
-        LoadAvatarPreview(userProfile);
-    }
+        CatalogController.wearableCatalog.TryGetValue(userProfile.avatar.bodyShape, out var bodyShape);
 
-    private void LoadAvatarPreview(UserProfile userProfile)
-    {
-        CatalogController.RequestWearable(userProfile.avatar.bodyShape)
-            .Then((requestedWearable) =>
+        if (bodyShape == null)
+        {
+            return;
+        }
+
+        view.SetIsWeb3(userProfile.hasConnectedWeb3);
+
+        ProcessCatalog(this.catalog);
+        EquipBodyShape(bodyShape);
+        EquipSkinColor(userProfile.avatar.skinColor);
+        EquipHairColor(userProfile.avatar.hairColor);
+        EquipEyesColor(userProfile.avatar.eyeColor);
+
+        model.wearables.Clear();
+        view.UnselectAllWearables();
+
+        int wearablesCount = userProfile.avatar.wearables.Count;
+
+        for (var i = 0; i < wearablesCount; i++)
+        {
+            CatalogController.wearableCatalog.TryGetValue(userProfile.avatar.wearables[i], out var wearable);
+            if (wearable == null)
             {
-                var bodyShape = requestedWearable;
+                Debug.LogError($"Couldn't find wearable with ID {userProfile.avatar.wearables[i]}");
+                continue;
+            }
 
-                view.SetIsWeb3(userProfile.hasConnectedWeb3);
+            EquipWearable(wearable);
+        }
 
-                ProcessCatalog(this.catalog);
-                EquipBodyShape(bodyShape);
-                EquipSkinColor(userProfile.avatar.skinColor);
-                EquipHairColor(userProfile.avatar.hairColor);
-                EquipEyesColor(userProfile.avatar.eyeColor);
+        EnsureWearablesCategoriesNotEmpty();
 
-                model.wearables.Clear();
-                view.UnselectAllWearables();
-
-                int wearablesCount = userProfile.avatar.wearables.Count;
-
-                for (var i = 0; i < wearablesCount; i++)
-                {
-                    CatalogController.RequestWearable(userProfile.avatar.wearables[i])
-                        .Then((wearable) => EquipWearable(wearable))
-                        .Catch((error) => Debug.LogError(error));
-                }
-
-                EnsureWearablesCategoriesNotEmpty();
-
-                UpdateAvatarPreview();
-            })
-            .Catch((error) =>
-            {
-                Debug.LogError(error);
-                return;
-            });
+        UpdateAvatarPreview();
     }
 
     private void EnsureWearablesCategoriesNotEmpty()
@@ -192,23 +184,20 @@ public class AvatarEditorHUDController : IHUD
             var category = categoriesThatMustHaveSelection[i];
             if (category != Categories.BODY_SHAPE && !(categoriesInUse.Contains(category)))
             {
+                WearableItem wearable;
                 var defaultItemId = WearableLiterals.DefaultWearables.GetDefaultWearable(model.bodyShape.id, category);
                 if (defaultItemId != null)
                 {
-                    CatalogController.RequestWearable(defaultItemId)
-                        .Then((requestedWearable) =>
-                        {
-                            if (requestedWearable != null)
-                                EquipWearable(requestedWearable);
-                        })
-                        .Catch((error) => Debug.LogError(error));
+                    CatalogController.wearableCatalog.TryGetValue(defaultItemId, out wearable);
                 }
                 else
                 {
-                    WearableItem wearable = wearablesByCategory[category].FirstOrDefault(x => x.SupportsBodyShape(model.bodyShape.id));
+                    wearable = wearablesByCategory[category].FirstOrDefault(x => x.SupportsBodyShape(model.bodyShape.id));
+                }
 
-                    if (wearable != null)
-                        EquipWearable(wearable);
+                if (wearable != null)
+                {
+                    EquipWearable(wearable);
                 }
             }
         }
@@ -216,41 +205,35 @@ public class AvatarEditorHUDController : IHUD
 
     public void WearableClicked(string wearableId)
     {
-        CatalogController.RequestWearable(wearableId)
-            .Then((wearable) =>
-            {
-                if (wearable.category == Categories.BODY_SHAPE)
-                {
-                    EquipBodyShape(wearable);
-                }
-                else
-                {
-                    if (model.wearables.Contains(wearable))
-                    {
-                        if (!categoriesThatMustHaveSelection.Contains(wearable.category))
-                        {
-                            UnequipWearable(wearable);
-                        }
-                    }
-                    else
-                    {
-                        var sameCategoryEquipped = model.wearables.FirstOrDefault(x => x.category == wearable.category);
-                        if (sameCategoryEquipped != null)
-                        {
-                            UnequipWearable(sameCategoryEquipped);
-                        }
+        CatalogController.wearableCatalog.TryGetValue(wearableId, out var wearable);
+        if (wearable == null) return;
 
-                        EquipWearable(wearable);
-                    }
+        if (wearable.category == Categories.BODY_SHAPE)
+        {
+            EquipBodyShape(wearable);
+        }
+        else
+        {
+            if (model.wearables.Contains(wearable))
+            {
+                if (!categoriesThatMustHaveSelection.Contains(wearable.category))
+                {
+                    UnequipWearable(wearable);
+                }
+            }
+            else
+            {
+                var sameCategoryEquipped = model.wearables.FirstOrDefault(x => x.category == wearable.category);
+                if (sameCategoryEquipped != null)
+                {
+                    UnequipWearable(sameCategoryEquipped);
                 }
 
-                UpdateAvatarPreview();
-            })
-            .Catch((error) =>
-            {
-                Debug.LogError(error);
-                return;
-            });
+                EquipWearable(wearable);
+            }
+        }
+
+        UpdateAvatarPreview();
     }
 
     public void HairColorClicked(Color color)
@@ -339,9 +322,8 @@ public class AvatarEditorHUDController : IHUD
         var defaultWearables = WearableLiterals.DefaultWearables.GetDefaultWearables(bodyShape.id);
         for (var i = 0; i < defaultWearables.Length; i++)
         {
-            CatalogController.RequestWearable(defaultWearables[i])
-                .Then((wearable) => EquipWearable(wearable))
-                .Catch((error) => Debug.LogError(error));
+            if (catalog.TryGetValue(defaultWearables[i], out var wearable))
+                EquipWearable(wearable);
         }
     }
 
@@ -530,6 +512,7 @@ public class AvatarEditorHUDController : IHUD
             view.CleanUp();
 
         this.userProfile.OnUpdate -= OnUserProfileUpdated;
+        this.catalog.OnAdded -= AddWearable;
         this.catalog.OnRemoved -= RemoveWearable;
     }
 

@@ -38,61 +38,57 @@ public class AvatarEditorHUDAudioHandler : MonoBehaviour
 
     void OnSelectWearable(string wearableId)
     {
-        CatalogController.RequestWearable(wearableId)
-            .Then((wearable) =>
-            {
-                wearableIsSameAsPrevious = (wearable == lastSelectedWearable);
-                if (wearableIsSameAsPrevious) return;
+        CatalogController.wearableCatalog.TryGetValue(wearableId, out var wearable);
+        wearableIsSameAsPrevious = (wearable == lastSelectedWearable);
+        if (wearableIsSameAsPrevious) return;
 
-                lastSelectedWearable = wearable;
-                if (wearable == null) return;
+        lastSelectedWearable = wearable;
+        if (wearable == null) return;
 
-                switch (wearable.category)
-                {
-                    case Categories.EYEBROWS:
-                        eventWearableHair.Play(true);
-                        break;
-                    case "facial_hair":
-                        eventWearableHair.Play(true);
-                        break;
-                    case Categories.FEET:
-                        eventWearableFootwear.Play(true);
-                        break;
-                    case Categories.HAIR:
-                        eventWearableHair.Play(true);
-                        break;
-                    case Categories.LOWER_BODY:
-                        eventWearableClothing.Play(true);
-                        break;
-                    case Categories.UPPER_BODY:
-                        eventWearableClothing.Play(true);
-                        break;
-                    case "eyewear":
-                        eventWearableEyewear.Play(true);
-                        break;
-                    case "tiara":
-                        eventWearableJewelry.Play(true);
-                        break;
-                    case "earring":
-                        eventWearableJewelry.Play(true);
-                        break;
-                    case "hat":
-                        eventWearableHatMask.Play(true);
-                        break;
-                    case "top_head":
-                        eventWearableFootwear.Play(true);
-                        break;
-                    case "helmet":
-                        eventWearableFootwear.Play(true);
-                        break;
-                    case "mask":
-                        eventWearableHatMask.Play(true);
-                        break;
-                    default:
-                        break;
-                }
-            })
-            .Catch((error) => Debug.LogError(error));
+        switch (wearable.category)
+        {
+            case Categories.EYEBROWS:
+                eventWearableHair.Play(true);
+                break;
+            case "facial_hair":
+                eventWearableHair.Play(true);
+                break;
+            case Categories.FEET:
+                eventWearableFootwear.Play(true);
+                break;
+            case Categories.HAIR:
+                eventWearableHair.Play(true);
+                break;
+            case Categories.LOWER_BODY:
+                eventWearableClothing.Play(true);
+                break;
+            case Categories.UPPER_BODY:
+                eventWearableClothing.Play(true);
+                break;
+            case "eyewear":
+                eventWearableEyewear.Play(true);
+                break;
+            case "tiara":
+                eventWearableJewelry.Play(true);
+                break;
+            case "earring":
+                eventWearableJewelry.Play(true);
+                break;
+            case "hat":
+                eventWearableHatMask.Play(true);
+                break;
+            case "top_head":
+                eventWearableFootwear.Play(true);
+                break;
+            case "helmet":
+                eventWearableFootwear.Play(true);
+                break;
+            case "mask":
+                eventWearableHatMask.Play(true);
+                break;
+            default:
+                break;
+        }
     }
 
     void OnEyeColorChanged(Color color)

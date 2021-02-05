@@ -60,6 +60,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.blocked = newModel.blocked;
         model.muted = newModel.muted;
 
+        if (model.inventory != null)
+        {
+            SetInventory(model.inventory);
+        }
+
         if (downloadAssets && model.snapshots != null)
         {
             //NOTE(Brian): Get before forget to prevent referenceCount == 0 and asset unload
@@ -124,17 +129,10 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         OnAvatarExpressionSet?.Invoke(id, timestamp);
     }
 
-    public void UpdateInventory(string[] inventoryIds)
+    public void SetInventory(string[] inventoryIds)
     {
-        var newInventoryToUpdate = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-
-        foreach (var inventoryItem in newInventoryToUpdate)
-        {
-            if (inventory.ContainsKey(inventoryItem.Key))
-                inventory[inventoryItem.Key] += inventoryItem.Value;
-            else
-                inventory.Add(inventoryItem.Key, inventoryItem.Value);
-        }
+        inventory.Clear();
+        inventory = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
     }
 
     public string[] GetInventoryItemsIds()

@@ -78,7 +78,7 @@ public class FacialFeatureController
         var representation = wearableItem.GetRepresentation(bodyShape.bodyShapeId);
 
         string mainTextureHash = representation?.contents?.FirstOrDefault(x => x.file == representation?.mainFile)?.hash;
-        if(mainTextureHash == null)
+        if (mainTextureHash == null)
             mainTextureHash = representation?.contents?.FirstOrDefault(x => !x.file.ToLower().Contains("_mask.png"))?.hash;
         string maskhash = representation?.contents?.FirstOrDefault(x => x.file.ToLower().Contains("_mask.png"))?.hash;
 
@@ -119,15 +119,16 @@ public class FacialFeatureController
         isReady = false;
     }
 
-    public static Promise<FacialFeatureController> CreateDefaultFacialFeature(string bodyShape, string category, Material material)
+    public static FacialFeatureController CreateDefaultFacialFeature(string bodyShape, string category, Material material)
     {
-        Promise<FacialFeatureController> facialFeaturePromise = new Promise<FacialFeatureController>();
-
         string defaultId = WearableLiterals.DefaultWearables.GetDefaultWearable(bodyShape, category);
-        CatalogController.RequestWearable(defaultId)
-            .Then((wearable) => facialFeaturePromise.Resolve(new FacialFeatureController(wearable, material)))
-            .Catch((error) => Debug.LogError(error));
+        CatalogController.wearableCatalog.TryGetValue(defaultId, out WearableItem wearable);
+        if (wearable == null)
+        {
+            Debug.LogError($"Couldn't resolve wearable {defaultId}");
+            return null;
+        }
 
-        return facialFeaturePromise;
+        return new FacialFeatureController(wearable, material);
     }
 }
