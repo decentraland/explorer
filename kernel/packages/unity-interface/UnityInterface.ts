@@ -264,6 +264,10 @@ export class UnityInterface {
     }
   }
 
+  public WearablesRequestFailed(error: string, context: string | undefined) {
+    this.SendMessageToUnity('Main', 'WearablesRequestFailed', JSON.stringify({ error, context }))
+  }
+
   public RemoveWearablesFromCatalog(wearableIds: string[]) {
     this.SendMessageToUnity('Main', 'RemoveWearablesFromCatalog', JSON.stringify(wearableIds))
   }

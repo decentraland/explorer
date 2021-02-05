@@ -16,6 +16,6 @@ export const wearablesSuccess = (wearables: Wearable[], context: string | undefi
 export type WearablesSuccess = ReturnType<typeof wearablesSuccess>
 
 export const WEARABLES_FAILURE = '[Failure] Wearable fetch'
-export const wearablesFailure = (context: string | undefined, error: any) =>
+export const wearablesFailure = (context: string | undefined, error: string) =>
   action(WEARABLES_FAILURE, { context, error })
 export type WearablesFailure = ReturnType<typeof wearablesFailure>

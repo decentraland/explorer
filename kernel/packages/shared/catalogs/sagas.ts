@@ -163,7 +163,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
       }
       yield put(wearablesSuccess(response, context))
     } catch (error) {
-      yield put(wearablesFailure(context, error))
+      yield put(wearablesFailure(context, error.message))
     }
   } else {
     yield put(wearablesFailure(context, WRONG_FILTERS_ERROR))
@@ -177,13 +177,13 @@ export function* handleWearablesSuccess(action: WearablesSuccess) {
   yield call(sendWearablesCatalog, wearables, context)
 }
 
-function* handleWearablesFailure(action: WearablesFailure) {
+export function* handleWearablesFailure(action: WearablesFailure) {
   const { context, error } = action.payload
 
   defaultLogger.error(`Failed to fetch wearables for context '${context}'`, error)
 
   yield call(ensureRenderer)
-  // TODO: Decide how to communicate error to renderer
+  yield call(informRequestFailure, error, context)
 }
 
 function areFiltersValidForV1(filters: WearablesRequestFilters) {
@@ -222,6 +222,10 @@ async function fetchCatalog(url: string) {
   }
   const etag = request.headers.get('etag')
   return [await request.json(), etag]
+}
+
+export function informRequestFailure(error: string, context: string | undefined) {
+  globalThis.unityInterface.WearablesRequestFailed(error, context)
 }
 
 export function sendWearablesCatalog(catalog: Catalog, context: string | undefined) {

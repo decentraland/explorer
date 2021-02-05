@@ -1,6 +1,6 @@
 import { expectSaga } from 'redux-saga-test-plan'
 import { call, select } from 'redux-saga/effects'
-import { fetchInventoryItemsByAddress, handleWearablesRequest, handleWearablesSuccess, sendWearablesCatalog, WRONG_FILTERS_ERROR } from 'shared/catalogs/sagas'
+import { fetchInventoryItemsByAddress, handleWearablesFailure, handleWearablesRequest, handleWearablesSuccess, informRequestFailure, sendWearablesCatalog, WRONG_FILTERS_ERROR } from 'shared/catalogs/sagas'
 import { wearablesFailure, wearablesRequest, wearablesSuccess } from 'shared/catalogs/actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from 'shared/catalogs/selectors'
 import { ensureRenderer } from 'shared/renderer/sagas'
@@ -64,9 +64,10 @@ describe('Wearables Saga', () => {
   })
 
   it('When wearables fetch fails to load, then the request fails', () => {
-    const error = new Error('Something failed')
+    const errorMessage = 'Something failed'
+    const error = new Error(errorMessage)
     return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: true }, context))
-      .put(wearablesFailure(context, error))
+      .put(wearablesFailure(context, errorMessage))
       .provide([
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), { }],
@@ -89,12 +90,23 @@ describe('Wearables Saga', () => {
       .run()
   })
 
-  it('When collection name is not base-avatars, then the request fails', () => {
+  it('When collection id is not base-avatars, then the request fails', () => {
     return expectSaga(handleWearablesRequest, wearablesRequest({ collectionNames: ['some-other-collection'] }, context))
       .put(wearablesFailure(context, WRONG_FILTERS_ERROR))
       .provide([
         [select(baseCatalogsLoaded), true],
         [select(getUserId), userId],
+      ])
+      .run()
+  })
+
+  it('When request fails, then the failure is informed', () => {
+    const errorMessage = 'Something failed'
+    return expectSaga(handleWearablesFailure, wearablesFailure(context, errorMessage))
+      .call(informRequestFailure, errorMessage, context)
+      .provide([
+        [call(ensureRenderer), true],
+        [call(informRequestFailure, errorMessage, context), null],
       ])
       .run()
   })
