@@ -15,7 +15,7 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private Image ongoingProgress;
         [SerializeField] private Button jumpInButton;
 
-        internal TaskPayload_Count payload;
+        internal TaskPayload_Numeric payload;
         private Action jumpInDelegate;
 
         public void Awake()
@@ -25,7 +25,7 @@ namespace DCL.Huds.QuestsPanel
 
         public void Populate(QuestTask task)
         {
-            payload = JsonUtility.FromJson<TaskPayload_Count>(task.payload);
+            payload = JsonUtility.FromJson<TaskPayload_Numeric>(task.payload);
 
             jumpInButton.gameObject.SetActive(task.progress < 1 && !string.IsNullOrEmpty(task.coordinates));
             jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage

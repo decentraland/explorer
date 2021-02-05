@@ -19,7 +19,7 @@ public class TaskPayload_Single
 }
 
 [System.Serializable]
-public class TaskPayload_Count
+public class TaskPayload_Numeric
 {
     public int start;
     public int end;

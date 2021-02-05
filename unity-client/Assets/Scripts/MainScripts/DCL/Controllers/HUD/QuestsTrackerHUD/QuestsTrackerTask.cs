@@ -17,7 +17,7 @@ namespace DCL.Huds.QuestsTracker
 
         public void Awake()
         {
-            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke();});
+            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); });
         }
 
         public void Populate(QuestTask task)
@@ -37,8 +37,8 @@ namespace DCL.Huds.QuestsTracker
                 case "single":
                     SetProgressText(task.progress, 1);
                     break;
-                case "count":
-                    var payload = JsonUtility.FromJson<TaskPayload_Count>(task.payload);
+                case "numeric":
+                    var payload = JsonUtility.FromJson<TaskPayload_Numeric>(task.payload);
                     SetProgressText(payload.current, payload.end);
                     break;
             }

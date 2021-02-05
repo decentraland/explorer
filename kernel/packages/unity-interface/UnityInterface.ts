@@ -26,6 +26,7 @@ import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
+import { QuestForRenderer } from 'shared/quests/types'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -357,11 +358,7 @@ export class UnityInterface {
   }
 
   public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
-    this.SendMessageToUnity(
-      'Main',
-      'UpdateGIFPointers',
-      JSON.stringify({ id, width, height, pointers, frameDelays })
-    )
+    this.SendMessageToUnity('Main', 'UpdateGIFPointers', JSON.stringify({ id, width, height, pointers, frameDelays }))
   }
 
   public SendGIFFetchFailure(id: string) {
@@ -403,11 +400,7 @@ export class UnityInterface {
   }
 
   public SetUserTalking(userId: string, talking: boolean) {
-    this.SendMessageToUnity(
-      'HUDController',
-      'SetUserTalking',
-      JSON.stringify({ userId: userId, talking: talking })
-    )
+    this.SendMessageToUnity('HUDController', 'SetUserTalking', JSON.stringify({ userId: userId, talking: talking }))
   }
 
   public SetUsersMuted(usersId: string[], muted: boolean) {
@@ -428,6 +421,14 @@ export class UnityInterface {
 
   public SendPublishSceneResult(result: DeploymentResult) {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
+  }
+
+  // *********************************************************************************
+  // ************** Quests messages **************
+  // *********************************************************************************
+
+  InitQuestsInfo(rendererQuests: QuestForRenderer[]) {
+    this.SendMessageToUnity('QuestsController', 'InitializeQuests', JSON.stringify(rendererQuests))
   }
 
   // *********************************************************************************
@@ -522,19 +523,19 @@ export class UnityInterface {
       return
     }
 
-    const originalSetThrew = this.Module["setThrew"]
+    const originalSetThrew = this.Module['setThrew']
     const unityModule = this.Module
     let isError = false
 
     function overrideSetThrew() {
-      unityModule["setThrew"] = function() {
+      unityModule['setThrew'] = function () {
         isError = true
         return originalSetThrew.apply(this, arguments)
       }
     }
 
     function restoreSetThrew() {
-      unityModule["setThrew"] = originalSetThrew
+      unityModule['setThrew'] = originalSetThrew
     }
 
     overrideSetThrew()
