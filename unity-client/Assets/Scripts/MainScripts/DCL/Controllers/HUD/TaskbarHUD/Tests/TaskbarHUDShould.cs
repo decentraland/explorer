@@ -114,7 +114,7 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
     {
         controller.AddControlsMoreOption();
 
-        Assert.IsTrue(view.moreMenu.controlsButton.IsActive(), "Controls more button is disabled!");
+        Assert.IsTrue(view.moreMenu.controlsButton.mainButton.IsActive(), "Controls more button is disabled!");
     }
 
     [Test]
@@ -196,7 +196,7 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
     [Test]
     public void ToggleBarVisibilityProperly()
     {
-        view.moreMenu.collapseBarButton.onClick.Invoke();
+        view.moreMenu.collapseBarButton.mainButton.onClick.Invoke();
 
         Assert.IsFalse(view.isBarVisible, "The bar should not be visible!");
         Assert.IsFalse(view.moreMenu.collapseIcon.activeSelf, "The collapse icon should not be actived!");
@@ -204,7 +204,7 @@ public class TaskbarHUDShould : IntegrationTestSuite_Legacy
         Assert.IsTrue(view.moreMenu.expandIcon.activeSelf, "The expand icon should be actived!");
         Assert.IsTrue(view.moreMenu.expandText.activeSelf, "The expand text should be actived!");
 
-        view.moreMenu.collapseBarButton.onClick.Invoke();
+        view.moreMenu.collapseBarButton.mainButton.onClick.Invoke();
 
         Assert.IsTrue(view.isBarVisible, "The bar should be visible!");
         Assert.IsTrue(view.moreMenu.collapseIcon.activeSelf, "The collapse icon should be actived!");
