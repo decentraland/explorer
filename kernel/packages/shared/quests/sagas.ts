@@ -78,7 +78,7 @@ function getProgressPayload(task: PlayerTaskDetails) {
         current: task.progressSummary?.current ?? progressMode.start
       }
     case 'step-based':
-      //TODO
+      // TODO
       return {}
   }
 }

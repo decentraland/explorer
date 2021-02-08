@@ -425,7 +425,7 @@ export enum HUDElementID {
   BUILD_MODE = 24,
   QUESTS_PANEL = 26,
   QUESTS_TRACKER = 27,
-  QUESTS_NOTIFICATIONS = 28,
+  QUESTS_NOTIFICATIONS = 28
 }
 
 export type HUDConfiguration = {
