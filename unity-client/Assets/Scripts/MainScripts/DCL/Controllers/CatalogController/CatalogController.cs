@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Interface;
 using System.Collections.Generic;
 using UnityEngine;
+using static DCL.Interface.WebInterface;
 
 public class CatalogController : MonoBehaviour
 {
@@ -10,15 +11,17 @@ public class CatalogController : MonoBehaviour
     private const string OWNED_WEARABLES_CONTEXT = "OwnedWearables";
     private const string BASE_WEARABLES_CONTEXT = "BaseWearables";
     private const float REQUESTS_TIME_OUT = 5f;
-    private const int FRAMES_TO_CHECK_TIME_OUTS = 1;
+    private const int FRAMES_TO_CHECK_FOR_SEND_REQUESTS = 1;
 
     public static CatalogController i { get; private set; }
 
     public static BaseDictionary<string, Item> itemCatalog => DataStore.Catalog.items;
     public static BaseDictionary<string, WearableItem> wearableCatalog => DataStore.Catalog.wearables;
 
-    private static Dictionary<string, Promise<WearableItem>> pendingWearablePromises = new Dictionary<string, Promise<WearableItem>>();
+    private static Dictionary<string, Promise<WearableItem>> awaitingWearablePromises = new Dictionary<string, Promise<WearableItem>>();
     private static Dictionary<string, float> pendingWearableRequestedTimes = new Dictionary<string, float>();
+    private static List<string> pendingWearableRequests = new List<string>();
+
     private static Dictionary<string, Promise<WearableItem[]>> pendingWearablesByContextPromises = new Dictionary<string, Promise<WearableItem[]>>();
     private static Dictionary<string, float> pendingWearablesByContextRequestedTimes = new Dictionary<string, float>();
 
@@ -29,8 +32,9 @@ public class CatalogController : MonoBehaviour
 
     private void Update()
     {
-        if (Time.frameCount % FRAMES_TO_CHECK_TIME_OUTS == 0)
+        if (Time.frameCount % FRAMES_TO_CHECK_FOR_SEND_REQUESTS == 0)
         {
+            SendPendingRequests();
             CheckForWearableRequestsTimeOuts();
             CheckForWearablesBycontextRequestsTimeOuts();
         }
@@ -110,20 +114,16 @@ public class CatalogController : MonoBehaviour
         }
         else
         {
-            if (!pendingWearablePromises.ContainsKey(wearableId))
+            if (!awaitingWearablePromises.ContainsKey(wearableId))
             {
-                pendingWearablePromises.Add(wearableId, promiseResult);
-                pendingWearableRequestedTimes.Add(wearableId, Time.realtimeSinceStartup);
-                WebInterface.RequestWearables(
-                    ownedByUser: false,
-                    wearableIds: new string[] { wearableId },
-                    collectionIds: null,
-                    context: null
-                );
+                awaitingWearablePromises.Add(wearableId, promiseResult);
+
+                // We accumulate all the requests during the same frames interval to send them all together
+                pendingWearableRequests.Add(wearableId);
             }
             else
             {
-                pendingWearablePromises.TryGetValue(wearableId, out promiseResult);
+                awaitingWearablePromises.TryGetValue(wearableId, out promiseResult);
             }
         }
 
@@ -178,14 +178,14 @@ public class CatalogController : MonoBehaviour
 
     private void ResolvePendingWearablePromise(string wearableId, WearableItem newWearableAddedIntoCatalog = null, string errorMessage = "")
     {
-        if (pendingWearablePromises.TryGetValue(wearableId, out Promise<WearableItem> promise))
+        if (awaitingWearablePromises.TryGetValue(wearableId, out Promise<WearableItem> promise))
         {
             if (string.IsNullOrEmpty(errorMessage))
                 promise.Resolve(newWearableAddedIntoCatalog);
             else
                 promise.Reject(errorMessage);
 
-            pendingWearablePromises.Remove(wearableId);
+            awaitingWearablePromises.Remove(wearableId);
         }
     }
 
@@ -199,6 +199,26 @@ public class CatalogController : MonoBehaviour
                 promise.Reject(errorMessage);
 
             pendingWearablesByContextPromises.Remove(context);
+        }
+    }
+
+    private void SendPendingRequests()
+    {
+        if (pendingWearableRequests.Count > 0)
+        {
+            foreach (var request in pendingWearableRequests)
+            {
+                pendingWearableRequestedTimes.Add(request, Time.realtimeSinceStartup);
+            }
+
+            WebInterface.RequestWearables(
+                ownedByUser: false,
+                wearableIds: pendingWearableRequests.ToArray(),
+                collectionIds: null,
+                context: null
+            );
+
+            pendingWearableRequests.Clear();
         }
     }
 

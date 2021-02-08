@@ -153,10 +153,24 @@ namespace DCL
             yield return new WaitUntil(() => gameObject.activeSelf);
 
             WearableItem resolvedBody = null;
-
+            Helpers.Promise<WearableItem> avatarBodyPromise = null;
             if (!string.IsNullOrEmpty(model.bodyShape))
             {
-                var avatarBodyPromise = CatalogController.RequestWearable(model.bodyShape);
+                avatarBodyPromise = CatalogController.RequestWearable(model.bodyShape);
+            }
+
+            List<WearableItem> resolvedWearables = new List<WearableItem>();
+            List<Helpers.Promise<WearableItem>> avatarWearablePromises = new List<Helpers.Promise<WearableItem>>();
+            if (model.wearables != null)
+            {
+                for (int i = 0; i < model.wearables.Count; i++)
+                {
+                    avatarWearablePromises.Add(CatalogController.RequestWearable(model.wearables[i]));
+                }
+            }
+
+            if (avatarBodyPromise != null)
+            {
                 yield return avatarBodyPromise;
 
                 if (!string.IsNullOrEmpty(avatarBodyPromise.error))
@@ -165,28 +179,12 @@ namespace DCL
                     resolvedBody = avatarBodyPromise.value;
             }
 
-            List<WearableItem> resolvedWearables = new List<WearableItem>();
-            if (model.wearables != null)
-            {
-                for (int i = 0; i < model.wearables.Count; i++)
-                {
-                    var avatarWearablePromise = CatalogController.RequestWearable(model.wearables[i]);
-                    yield return avatarWearablePromise;
-
-                    if (!string.IsNullOrEmpty(avatarWearablePromise.error))
-                        Debug.LogError(avatarWearablePromise.error);
-                    else
-                        resolvedWearables.Add(avatarWearablePromise.value);
-                }
-            }
-
             if (resolvedBody == null)
             {
                 isLoading = false;
                 this.OnSuccessEvent?.Invoke();
                 yield break;
             }
-
 
             bool bodyIsDirty = false;
             if (bodyShapeController != null && bodyShapeController.id != model?.bodyShape)
@@ -209,6 +207,16 @@ namespace DCL
                 //If bodyShape is downloading will call OnWearableLoadingSuccess (and therefore SetupDefaultMaterial) once ready
                 if (bodyShapeController.isReady)
                     bodyShapeController.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
+            }
+
+            foreach (var avatarWearablePromise in avatarWearablePromises)
+            {
+                yield return avatarWearablePromise;
+
+                if (!string.IsNullOrEmpty(avatarWearablePromise.error))
+                    Debug.LogError(avatarWearablePromise.error);
+                else
+                    resolvedWearables.Add(avatarWearablePromise.value);
             }
 
             HashSet<string> unusedCategories = new HashSet<string>(Categories.ALL);
