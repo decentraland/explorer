@@ -466,8 +466,25 @@ export class BrowserInterface {
     }
   }
 
-  public RequestWearables(data: { filters: WearablesRequestFilters; context?: string }) {
-    globalThis.globalStore.dispatch(wearablesRequest(data.filters, data.context))
+  public RequestWearables(data: {
+    filters: {
+      ownedByUser: string | null
+      wearableIds?: string[] | null
+      collectionIds?: string[] | null
+    }
+    context?: string
+  }) {
+    const { filters, context } = data
+    const newFilters: WearablesRequestFilters = {
+      ownedByUser: filters.ownedByUser ?? undefined,
+      wearableIds: this.arrayCleanup(filters.wearableIds),
+      collectionIds: this.arrayCleanup(filters.collectionIds)
+    }
+    globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
+  }
+
+  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
+    return !array || array.length === 0 ? undefined : array
   }
 }
 

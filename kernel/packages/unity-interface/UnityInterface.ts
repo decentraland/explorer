@@ -259,9 +259,7 @@ export class UnityInterface {
   }
 
   public AddWearablesToCatalog(wearables: Wearable[], context?: string) {
-    for (const wearable of wearables) {
-      this.SendMessageToUnity('Main', 'AddWearableToCatalog', JSON.stringify({ wearable, context }))
-    }
+    this.SendMessageToUnity('Main', 'AddWearablesToCatalog', JSON.stringify({ wearables, context }))
   }
 
   public WearablesRequestFailed(error: string, context: string | undefined) {

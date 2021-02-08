@@ -32,7 +32,6 @@ import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import { getUserId } from 'shared/session/selectors'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 export const WRONG_FILTERS_ERROR =
@@ -139,7 +138,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
       const exclusiveCatalog = yield select(getExclusiveCatalog)
 
       let response: Wearable[]
-      if (filters.wearableIds && filters.wearableIds.length > 0) {
+      if (filters.wearableIds) {
         // Filtering by ids
         response = filters.wearableIds
           .map((wearableId) =>
@@ -148,14 +147,13 @@ export function* handleWearablesRequest(action: WearablesRequest) {
           .filter((wearable) => !!wearable)
       } else if (filters.ownedByUser) {
         // Only owned wearables
-        const userId = yield select(getUserId)
         if (ALL_WEARABLES) {
           response = Object.values(exclusiveCatalog)
         } else {
-          const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
+          const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
           response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
         }
-      } else if (filters.collectionNames && filters.collectionNames.length > 0) {
+      } else if (filters.collectionIds) {
         // We assume that the only collection name used is base-avatars
         response = Object.values(platformCatalog)
       } else {
@@ -189,18 +187,18 @@ export function* handleWearablesFailure(action: WearablesFailure) {
 function areFiltersValid(filters: WearablesRequestFilters) {
   let filtersSet = 0
   let ok = true
-  if (filters.collectionNames && filters.collectionNames.length > 0) {
+  if (filters.collectionIds) {
     filtersSet += 1
-    if (filters.collectionNames.some((name) => name !== 'base-avatars')) {
+    if (filters.collectionIds.some((name) => name !== 'base-avatars')) {
       ok = false
     }
   }
 
-  if (filters.ownedByUser !== undefined && filters.ownedByUser !== null) {
+  if (filters.ownedByUser) {
     filtersSet += 1
   }
 
-  if (filters.wearableIds && filters.wearableIds.length > 0) {
+  if (filters.wearableIds) {
     filtersSet += 1
   }
 
