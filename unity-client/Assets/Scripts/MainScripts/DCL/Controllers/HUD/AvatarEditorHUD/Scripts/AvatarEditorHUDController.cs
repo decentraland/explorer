@@ -95,7 +95,7 @@ public class AvatarEditorHUDController : IHUD
         var ownedWearablesPromise = CatalogController.RequestOwnedWearables();
         yield return ownedWearablesPromise;
 
-        if (ownedWearablesPromise.error != null)
+        if (!string.IsNullOrEmpty(ownedWearablesPromise.error))
         {
             ownedWearablesAlreadyRequested = false;
             Debug.LogError(ownedWearablesPromise.error);
@@ -115,7 +115,7 @@ public class AvatarEditorHUDController : IHUD
         var baseWearablesPromise = CatalogController.RequestBaseWearables();
         yield return baseWearablesPromise;
 
-        if (baseWearablesPromise.error != null)
+        if (!string.IsNullOrEmpty(baseWearablesPromise.error))
         {
             baseWearablesAlreadyRequested = false;
             Debug.LogError(baseWearablesPromise.error);

@@ -159,7 +159,7 @@ namespace DCL
                 var avatarBodyPromise = CatalogController.RequestWearable(model.bodyShape);
                 yield return avatarBodyPromise;
 
-                if (avatarBodyPromise.error != null)
+                if (!string.IsNullOrEmpty(avatarBodyPromise.error))
                     Debug.LogError(avatarBodyPromise.error);
                 else
                     resolvedBody = avatarBodyPromise.value;
@@ -173,7 +173,7 @@ namespace DCL
                     var avatarWearablePromise = CatalogController.RequestWearable(model.wearables[i]);
                     yield return avatarWearablePromise;
 
-                    if (avatarWearablePromise.error != null)
+                    if (!string.IsNullOrEmpty(avatarWearablePromise.error))
                         Debug.LogError(avatarWearablePromise.error);
                     else
                         resolvedWearables.Add(avatarWearablePromise.value);
