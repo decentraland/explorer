@@ -465,6 +465,12 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class SetScenesLoadRadiusPayload
+        {
+            public float newRadius;
+        }
+
+        [System.Serializable]
         public class SetVoiceChatRecordingPayload
         {
             public bool recording;
@@ -607,6 +613,7 @@ namespace DCL.Interface
         private static OnGlobalPointerEventPayload onGlobalPointerEventPayload = new OnGlobalPointerEventPayload();
         private static OnGlobalPointerEvent onGlobalPointerEvent = new OnGlobalPointerEvent();
         private static AudioStreamingPayload onAudioStreamingEvent = new AudioStreamingPayload();
+        private static SetScenesLoadRadiusPayload setScenesLoadRadiusPayload = new SetScenesLoadRadiusPayload();
         private static SetVoiceChatRecordingPayload setVoiceChatRecordingPayload = new SetVoiceChatRecordingPayload();
 
         private static ApplySettingsPayload applySettingsPayload = new ApplySettingsPayload();
@@ -878,6 +885,12 @@ namespace DCL.Interface
         {
             delightedSurveyEnabled.enabled = enabled;
             SendMessage("SetDelightedSurveyEnabled", delightedSurveyEnabled);
+        }
+
+        public static void SetScenesLoadRadius(float newRadius)
+        {
+            setScenesLoadRadiusPayload.newRadius = newRadius;
+            SendMessage("SetScenesLoadRadius", setScenesLoadRadiusPayload);
         }
 
         [System.Serializable]

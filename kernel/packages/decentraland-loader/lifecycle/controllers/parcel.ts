@@ -27,6 +27,14 @@ export class ParcelLifeCycleController extends EventEmitter {
     this.config = config
   }
 
+  public setLineOfSightRadius (newRadius: number) {
+    console.log('pravs - ParcelLifecycleController - setLineOfSightRadius! ' + newRadius)
+
+    if (newRadius === this.config.lineOfSightRadius) return
+
+    this.config.lineOfSightRadius = newRadius
+  }
+
   reportCurrentPosition(position: Vector2Component): ParcelSightSeeingReport | undefined {
     if (this.currentPosition && this.currentPosition.x === position.x && this.currentPosition.y === position.y) {
       // same position, no news

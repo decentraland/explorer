@@ -12,6 +12,7 @@ import { ParcelLifeCycleController } from './controllers/parcel'
 import { PositionLifecycleController } from './controllers/position'
 import { SceneLifeCycleController, SceneLifeCycleStatusReport } from './controllers/scene'
 import { Adapter } from './lib/adapter'
+import { Vector2Component } from "../../atomicHelpers/landHelpers"
 
 const connector = new Adapter(WebWorkerTransport(self as any))
 
@@ -19,6 +20,7 @@ let parcelController: ParcelLifeCycleController
 let sceneController: SceneLifeCycleController
 let positionController: PositionLifecycleController
 let downloadManager: SceneDataDownloadManager
+let lastReportedPosition: Vector2Component
 
 /**
  * Hook all the events to the connector.
@@ -86,6 +88,7 @@ let downloadManager: SceneDataDownloadManager
       })
 
       connector.on('User.setPosition', (opt: { position: { x: number; y: number }; teleported: boolean }) => {
+        lastReportedPosition = opt.position
         positionController.reportCurrentPosition(opt.position, opt.teleported).catch((e) => {
           defaultLogger.error(`error while resolving new scenes around`, e)
         })
@@ -118,6 +121,15 @@ let downloadManager: SceneDataDownloadManager
 
       connector.on('Scene.status', (data: SceneLifeCycleStatusReport) => {
         sceneController.reportStatus(data.sceneId, data.status)
+      })
+
+      connector.on('SetScenesLoadRadius', (data: { newRadius: number }) => {
+        parcelController.setLineOfSightRadius(data.newRadius)
+
+        // TODO: something like this but without "respawning" as teleported...
+        // positionController.reportCurrentPosition(lastReportedPosition, true).catch((e) => {
+        //   defaultLogger.error(`error while resolving new scenes around`, e)
+        // })
       })
     }
   )
