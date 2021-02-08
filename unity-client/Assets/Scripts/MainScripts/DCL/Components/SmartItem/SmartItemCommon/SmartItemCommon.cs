@@ -1,9 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Components
 {
+    [System.Serializable]
+    public class SmartItemValues
+    {
+        Dictionary<object, object> values = new Dictionary<object, object>();
+    }
+
     [System.Serializable]
     public class SmartItemAction
     {
@@ -15,6 +22,19 @@ namespace DCL.Components
     [System.Serializable]
     public class SmartItemParameter
     {
+        public enum ParameterType
+        {
+            BOOLEAN,
+            TEXT,
+            TEXTAREA,
+            FLOAT,
+            INTEGER,
+            SLIDER,
+            OPTIONS,
+            ENTITY,
+            ACTIONS
+        }
+
         public string id;
         public string label;
         public string type;
@@ -29,6 +49,13 @@ namespace DCL.Components
         {
             public string label;
             public string value;
+        }
+
+        public ParameterType GetParameterType()
+        {
+            if (!Enum.TryParse(type.ToUpper(), out ParameterType myStatus))
+                Debug.Log($"Error parsing the smart item parameter type: {type}, The parameter doesn't exist!");
+            return myStatus;
         }
     }
 }

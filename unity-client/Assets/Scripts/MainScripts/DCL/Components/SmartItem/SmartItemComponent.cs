@@ -10,6 +10,7 @@ namespace DCL.Components
         {
             public SmartItemAction[] actions;
             public SmartItemParameter[] parameters;
+            public SmartItemValues values;
         }
 
         public Model model;

@@ -121,13 +121,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (associatedCatalogItem != null)
             return associatedCatalogItem;
 
-        string assetId = null;
+        IAssetCatalogReferenceHolder catalogHolder = rootEntity.TryGetComponent<IAssetCatalogReferenceHolder>();
+        if (catalogHolder == null)
+            return null;
 
-        if (rootEntity.TryGetSharedComponent(CLASS_ID.GLTF_SHAPE, out BaseDisposable gltfShapeComponent))
-            assetId = ((GLTFShape)gltfShapeComponent).model.assetId;
-
-        if (rootEntity.TryGetSharedComponent(CLASS_ID.NFT_SHAPE, out BaseDisposable nftShapeComponent))
-            assetId = ((NFTShape)nftShapeComponent).model.assetId;
+        string assetId = catalogHolder.GetAssetId();
 
         if (!string.IsNullOrEmpty(assetId) && DataStore.BuilderInWorld.catalogItemDict.TryGetValue(assetId, out associatedCatalogItem))
             return associatedCatalogItem;

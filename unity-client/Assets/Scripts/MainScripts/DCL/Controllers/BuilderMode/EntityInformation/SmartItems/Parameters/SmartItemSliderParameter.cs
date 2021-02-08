@@ -17,14 +17,9 @@ public class SmartItemSliderParameter : SmartItemUIParameterAdapter
     float maxValue;
     float stepSum;
 
-    const string parameterType = "slider";
-
     public override void SetParameter(SmartItemParameter parameter)
     {
         base.SetParameter(parameter);
-
-        if (parameter.type != parameterType)
-            return;
 
         minValue = float.Parse(parameter.min);
         maxValue = float.Parse(parameter.max);
@@ -57,7 +52,6 @@ public class SmartItemSliderParameter : SmartItemUIParameterAdapter
 
         sliderParameter.onValueChanged.AddListener(OnValueChange);
     }
-
 
     public void OnValueChange(float value)
     {

@@ -8,8 +8,6 @@ public class SmartItemTextParameter : SmartItemUIParameterAdapter
 {
     public TMP_InputField textParameterInputField;
 
-    const string parameterType = "text";
-
     private void Start()
     {
         textParameterInputField.onEndEdit.AddListener(OnValueChange);
@@ -19,15 +17,11 @@ public class SmartItemTextParameter : SmartItemUIParameterAdapter
     {
         base.SetParameter(parameter);
 
-        if (parameter.type != parameterType)
-            return;
-
         textParameterInputField.gameObject.SetActive(true);
 
         textParameterInputField.contentType = TMP_InputField.ContentType.Standard;
         textParameterInputField.text = (string) parameter.@default;
     }
-
 
     public void OnValueChange(string text)
     {

@@ -12,12 +12,7 @@ public class SmartItemUIParameterAdapter : MonoBehaviour
     public TextMeshProUGUI labelTxt;
     public Action<SmartItemParameter> OnParameterChange;
 
-    SmartItemParameter currentParameter;
-
-    public virtual void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
-    {
-        //TODO: Implement Smart Item action
-    }
+    protected SmartItemParameter currentParameter;
 
     public virtual void SetParameter(SmartItemParameter parameter)
     {

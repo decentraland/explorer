@@ -15,4 +15,9 @@ public class CatalogItemPack
     {
         return thumbnailURL;
     }
+
+    public void SetThumbnailULR(string url)
+    {
+        thumbnailURL = url;
+    }
 }

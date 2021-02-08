@@ -8,15 +8,9 @@ public class SmartItemOptionsParameter : SmartItemUIParameterAdapter
 {
     public TMP_Dropdown dropDown;
 
-    const string parameterType = "options";
-
     public override void SetParameter(SmartItemParameter parameter)
     {
         base.SetParameter(parameter);
-
-        if (parameter.type != parameterType)
-            return;
-
 
         dropDown.options = new List<TMP_Dropdown.OptionData>();
 

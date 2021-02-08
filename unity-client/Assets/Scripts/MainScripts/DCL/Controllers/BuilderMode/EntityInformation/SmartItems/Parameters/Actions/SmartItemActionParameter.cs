@@ -6,12 +6,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SmartItemActionParameter : SmartItemUIParameterAdapter
+public class SmartItemActionParameter : SmartItemUIParameterAdapter, IEntityListHandler
 {
     public ActionsListView actionsListView;
     public Button addActionBtn;
-
-    const string PARAMETER_TYPE = "actions";
 
     List<DCLBuilderInWorldEntity> entitiesList;
 
@@ -20,20 +18,14 @@ public class SmartItemActionParameter : SmartItemUIParameterAdapter
         addActionBtn.onClick.AddListener(AddEventAction);
     }
 
-    public override void SetEntityList(List<DCLBuilderInWorldEntity> entitiesList)
+    public void SetEntityList(List<DCLBuilderInWorldEntity> entitiesList)
     {
-        base.SetEntityList(entitiesList);
-
         this.entitiesList = entitiesList;
     }
 
     public override void SetParameter(SmartItemParameter parameter)
     {
         base.SetParameter(parameter);
-
-        if (parameter.type != PARAMETER_TYPE)
-            return;
-
         //TODO include the functionality of the parameter
     }
 

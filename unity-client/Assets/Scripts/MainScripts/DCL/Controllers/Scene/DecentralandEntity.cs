@@ -3,6 +3,7 @@ using DCL.Controllers;
 using DCL.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace DCL.Models
@@ -180,6 +181,19 @@ namespace DCL.Models
             }
         }
 
+        public T TryGetComponent<T>() where T : class
+        {
+            T component = components.Values.FirstOrDefault(x => x is T) as T;
+            if (component != null)
+                return component;
+
+            component = sharedComponents.Values.FirstOrDefault(x => x is T) as T;
+            if (component != null)
+                return component;
+
+            return null;
+        }
+
         public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out BaseComponent component)
         {
             return components.TryGetValue(componentId, out component);
@@ -187,7 +201,7 @@ namespace DCL.Models
 
         public bool TryGetSharedComponent(CLASS_ID componentId, out BaseDisposable component)
         {
-            foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in GetSharedComponents())
+            foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in sharedComponents)
             {
                 if (keyValuePairBaseDisposable.Value.GetClassId() == (int) componentId)
                 {

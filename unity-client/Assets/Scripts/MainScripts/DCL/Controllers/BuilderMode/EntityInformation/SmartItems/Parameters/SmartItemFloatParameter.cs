@@ -8,14 +8,9 @@ public class SmartItemFloatParameter : SmartItemUIParameterAdapter
 {
     public TMP_InputField textParameterInputField;
 
-    const string parameterType = "float";
-
     public override void SetParameter(SmartItemParameter parameter)
     {
         base.SetParameter(parameter);
-
-        if (parameter.type != parameterType)
-            return;
 
         textParameterInputField.gameObject.SetActive(true);
         

@@ -32,6 +32,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     [Header("Activation of Feature")]
     public bool activeFeature = false;
+    public bool byPassLandOwnershipCheck = false;
 
     [Header("Design variables")]
     public float scaleSpeed = 0.25f;
@@ -145,6 +146,10 @@ public class BuilderInWorldController : MonoBehaviour
 
     Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
 
+    private void Awake()
+    {
+        BIWCatalogManager.Init();
+    }
 
     void Start()
     {
@@ -550,6 +555,7 @@ public class BuilderInWorldController : MonoBehaviour
             SmartItemComponent.Model model = new SmartItemComponent.Model();
             model.actions = catalogItem.actions;
             model.parameters = catalogItem.parameters;
+            model.values = new SmartItemValues();
 
             string jsonModel = JsonUtility.ToJson(model);
 
@@ -874,7 +880,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void NewSceneReady(string id)
     {
-        if (sceneToEditId != id) return;
+        if (sceneToEditId != id)
+            return;
+
         Environment.i.world.sceneController.OnReadyScene -= NewSceneReady;
         sceneToEditId = null;
         sceneReady = true;
@@ -883,6 +891,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     bool UserHasPermissionOnParcelScene(ParcelScene scene)
     {
+        if (byPassLandOwnershipCheck)
+            return true;
+
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
         foreach (UserProfileModel.ParcelsWithAccess parcelWithAccess in userProfile.parcelsWithAccess)
         {

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace DCL.Components
 {
-    public class LoadableShape : BaseShape
+    public class LoadableShape : BaseShape,IAssetCatalogReferenceHolder
     {
         [System.Serializable]
         public new class Model : BaseShape.Model
@@ -74,6 +74,11 @@ namespace DCL.Components
         public override bool HasCollisions()
         {
             return model.withCollisions;
+        }
+
+        public string GetAssetId()
+        {
+            return model.assetId;
         }
     }
 

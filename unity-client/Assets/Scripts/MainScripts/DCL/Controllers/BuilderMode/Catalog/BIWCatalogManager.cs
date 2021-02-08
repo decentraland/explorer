@@ -9,28 +9,24 @@ using UnityEngine;
 public class BIWCatalogManager
 {
     public static bool VERBOSE = false;
+
     public static BIWCatalogManager i
     {
-        get
-        {
-            if (i == null)
-            {
-                Init();
-            }
+        get;
 
-            return i;
-        }
-
-        private set { i = value; }
+        private set;
     }
 
-    static void Init()
+    public static void Init()
     {
-        i = new BIWCatalogManager();
+        if (i == null)
+        {
+            i = new BIWCatalogManager();
 
-        BuilderInWorldNFTController.i.OnNftsFetched += ConvertCollectiblesPack;
-        AssetCatalogBridge.OnSceneObjectAdded += AddSceneObject;
-        AssetCatalogBridge.OnSceneAssetPackAdded += AddSceneAssetPack; 
+            BuilderInWorldNFTController.i.OnNftsFetched += ConvertCollectiblesPack;
+            AssetCatalogBridge.OnSceneObjectAdded += AddSceneObject;
+            AssetCatalogBridge.OnSceneAssetPackAdded += AddSceneAssetPack;
+        }
     }
 
     public static List<CatalogItemPack> GetCatalogItemPackList()
@@ -100,6 +96,9 @@ public class BIWCatalogManager
 
     private static void ConvertCollectiblesPack(List<NFTInfo> nftList)
     {
+        if (nftList == null)
+            return;
+
         CatalogItemPack collectiblesItemPack;
 
         if (!DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
@@ -107,6 +106,7 @@ public class BIWCatalogManager
             collectiblesItemPack = new CatalogItemPack();
             collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
             collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+            collectiblesItemPack.assets = new List<CatalogItem>();
 
             DataStore.BuilderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
         }
@@ -140,6 +140,8 @@ public class BIWCatalogManager
 
         catalogItemPack.assets = new List<CatalogItem>();
 
+        catalogItemPack.SetThumbnailULR(sceneAssetPack.ComposeThumbnailUrl());
+
         foreach (SceneObject sceneObject in sceneAssetPack.assets)
         {
             catalogItemPack.assets.Add(CreateCatalogItem(sceneObject));
@@ -167,9 +169,15 @@ public class BIWCatalogManager
         catalogItem.metrics = sceneObject.metrics;
 
         if (!string.IsNullOrEmpty(sceneObject.script))
+        {
             catalogItem.itemType = CatalogItem.ItemType.SMART_ITEM;
+            catalogItem.parameters = sceneObject.parameters;
+            catalogItem.actions = sceneObject.actions;
+        }
         else
+        {
             catalogItem.itemType = CatalogItem.ItemType.SCENE_OBJECT;
+        }
 
         return catalogItem;
     }
