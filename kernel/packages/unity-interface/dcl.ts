@@ -34,7 +34,6 @@ import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
-import { spawnPortableExperienceScene } from './portableExperiencesUtils'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -123,10 +122,6 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
-
-    // Temporal: Try to create several global scenes
-    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe1', 'main')
-    await spawnPortableExperienceScene('urn:decentraland:off-chain:static-portable-experiences:pe2', 'main')
   }
 
   return {
