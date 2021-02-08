@@ -130,7 +130,7 @@ function* initialLoad() {
 export function* handleWearablesRequest(action: WearablesRequest) {
   const { filters, context } = action.payload
 
-  const valid = areFiltersValidForV1(filters)
+  const valid = areFiltersValid(filters)
   if (valid) {
     try {
       yield call(ensureBaseCatalogs)
@@ -186,7 +186,7 @@ export function* handleWearablesFailure(action: WearablesFailure) {
   yield call(informRequestFailure, error, context)
 }
 
-function areFiltersValidForV1(filters: WearablesRequestFilters) {
+function areFiltersValid(filters: WearablesRequestFilters) {
   let filtersSet = 0
   let ok = true
   if (filters.collectionIds) {
