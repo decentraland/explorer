@@ -188,8 +188,6 @@ namespace DCL.Rendering
                 bool shouldBeVisible = TestRendererVisibleRule(profile, viewportSize, distance, boundsContainsPlayer, isOpaque, isEmissive);
                 bool shouldHaveShadow = TestRendererShadowRule(profile, viewportSize, distance, shadowTexelSize);
 
-                SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
-
                 if (OnDataReport != null)
                 {
                     if (!shouldBeVisible && !hiddenRenderers.Contains(r))
@@ -201,8 +199,19 @@ namespace DCL.Rendering
 
                 if (r is SkinnedMeshRenderer skr)
                 {
+                    // test if avatar
+                    bool isAvatar = true;
+
+                    if (isAvatar)
+                    {
+                        float avatarDistance = 10;
+                        shouldHaveShadow &= TestAvatarShadowRule(profile, avatarDistance);
+                    }
+
                     skr.updateWhenOffscreen = TestSkinnedRendererOffscreenRule(settings, distance);
                 }
+
+                SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);
 #if UNITY_EDITOR
                 DrawDebugGizmos(shouldBeVisible, bounds, boundingPoint);
 #endif
