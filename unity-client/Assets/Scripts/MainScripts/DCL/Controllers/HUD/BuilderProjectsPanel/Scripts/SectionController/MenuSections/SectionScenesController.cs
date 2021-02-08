@@ -1,5 +1,6 @@
 ﻿using DCL.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 internal class SectionScenesController : SectionBase, IDeployedSceneListener, IProjectSceneListener
@@ -7,13 +8,28 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
     internal const int MAX_CARDS = 3;
     internal readonly SectionScenesView view;
 
-    private int deployedActiveCards = 0;
-    private int projectActiveCards = 0;
+    private bool hasScenes = false;
+
+    public override ISectionSearchHandler searchHandler => hasScenes ? sceneSearchHandler : null;
+    public override SearchBarConfig searchBarConfig => new SearchBarConfig()
+    {
+        showFilterContributor = false,
+        showFilterOperator = false,
+        showFilterOwner = false,
+        showResultLabel = false
+    };
+
+    private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
+
+    private Dictionary<string, SceneCardView> deployedViews;
+    private Dictionary<string, SceneCardView> projectViews;
+    private List<SearchInfoScene> searchList = new List<SearchInfoScene>();
 
     public SectionScenesController()
     {
         var prefab = Resources.Load<SectionScenesView>("BuilderProjectsPanelMenuSections/SectionScenesView");
         view = Object.Instantiate(prefab);
+        sceneSearchHandler.OnResult += OnSearchResult;
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -35,123 +51,85 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
     protected override void OnHide()
     {
         view.gameObject.SetActive(false);
-        deployedActiveCards = 0;
-        projectActiveCards = 0;
+        searchList.Clear();
     }
 
     private void ViewDirty()
     {
         bool hasDeployedScenes = view.deployedSceneContainer.childCount > 0;
         bool hasProjectScenes = view.projectSceneContainer.childCount > 0;
+        hasScenes = hasDeployedScenes || hasProjectScenes;
 
-        view.contentScreen.SetActive(hasDeployedScenes || hasProjectScenes);
-        view.emptyScreen.SetActive(!hasDeployedScenes && !hasProjectScenes);
+        view.contentScreen.SetActive(hasScenes);
+        view.emptyScreen.SetActive(!hasScenes);
         view.inWorldContainer.SetActive(hasDeployedScenes);
         view.projectsContainer.SetActive(hasProjectScenes);
     }
 
-    private void SetScenes(Dictionary<string, SceneCardView> scenes, Transform container)
-    {
-        using (var iterator = scenes.GetEnumerator())
-        {
-            while (iterator.MoveNext())
-            {
-                AddScene(iterator.Current.Value, container, dirty: false);
-            }
-        }
-
-        ViewDirty();
-    }
-
-    private void AddScene(SceneCardView sceneCardView, Transform container, bool dirty = true)
-    {
-        ref int visibleCardsCount = ref projectActiveCards;
-        if (container == view.deployedSceneContainer)
-        {
-            visibleCardsCount = ref deployedActiveCards;
-        }
-
-        bool setVisible = visibleCardsCount < MAX_CARDS;
-        sceneCardView.SetParent(container);
-        sceneCardView.gameObject.SetActive(setVisible);
-
-        if (setVisible)
-        {
-            visibleCardsCount++;
-        }
-
-        if (dirty)
-        {
-            ViewDirty();
-        }
-    }
-
-    private void RemoveScene(SceneCardView sceneCardView, Transform container)
-    {
-        bool wasVisible = sceneCardView.gameObject.activeSelf;
-        sceneCardView.SetParent(null);
-
-        if (wasVisible)
-        {
-            if (container == view.deployedSceneContainer)
-            {
-                deployedActiveCards = ActivateNewCardInContainer(container, deployedActiveCards);
-            }
-            else if (container == view.projectSceneContainer)
-            {
-                projectActiveCards = ActivateNewCardInContainer(container, projectActiveCards);
-            }
-        }
-
-        ViewDirty();
-    }
-
-    private int ActivateNewCardInContainer(Transform container, int activeCards)
-    {
-        if (container.transform.childCount < 3)
-            return activeCards -1;
-
-        GameObject cardGO;
-        for (int i = 0; i < container.childCount; i++)
-        {
-            cardGO = container.GetChild(i).gameObject;
-            if (cardGO.activeSelf)
-                continue;
-
-            cardGO.SetActive(true);
-            return activeCards;
-        }
-
-        return activeCards -1;
-    }
-
     void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
     {
-        SetScenes(scenes, view.deployedSceneContainer);
+        deployedViews = scenes;
+        searchList.AddRange(scenes.Values.Select(scene => scene.searchInfo));
+        sceneSearchHandler.SetSearchableList(searchList);
     }
 
     void IProjectSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
     {
-        SetScenes(scenes, view.projectSceneContainer);
+        projectViews = scenes;
+        searchList.AddRange(scenes.Values.Select(scene => scene.searchInfo));
+        sceneSearchHandler.SetSearchableList(searchList);
     }
 
     void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)
     {
-        AddScene(scene, view.deployedSceneContainer);
+        sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
     void IProjectSceneListener.OnSceneAdded(SceneCardView scene)
     {
-        AddScene(scene, view.projectSceneContainer);
+        sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
     void IDeployedSceneListener.OnSceneRemoved(SceneCardView scene)
     {
-        RemoveScene(scene, view.deployedSceneContainer);
+        sceneSearchHandler.RemoveItem(scene.searchInfo);
     }
 
     void IProjectSceneListener.OnSceneRemoved(SceneCardView scene)
     {
-        RemoveScene(scene, view.projectSceneContainer);
+        sceneSearchHandler.RemoveItem(scene.searchInfo);
+    }
+
+    private void OnSearchResult(List<SearchInfoScene> searchInfoScenes)
+    {
+        if (deployedViews != null)
+            SetResult(deployedViews, searchInfoScenes, view.deployedSceneContainer);
+
+        if (projectViews != null)
+            SetResult(projectViews, searchInfoScenes, view.projectSceneContainer);
+
+        ViewDirty();
+    }
+
+    private void SetResult(Dictionary<string, SceneCardView> scenesViews, List<SearchInfoScene> searchInfoScenes,
+        Transform parent)
+    {
+        int count = 0;
+
+        for (int i = 0; i < searchInfoScenes.Count; i++)
+        {
+            if (scenesViews.TryGetValue(searchInfoScenes[i].id, out SceneCardView sceneView))
+            {
+                sceneView.SetParent(parent);
+                sceneView.transform.SetSiblingIndex(count);
+                sceneView.gameObject.SetActive(false);
+                count++;
+            }
+        }
+
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            parent.GetChild(i).gameObject.SetActive(i < count && i < MAX_CARDS);
+        }
     }
 }

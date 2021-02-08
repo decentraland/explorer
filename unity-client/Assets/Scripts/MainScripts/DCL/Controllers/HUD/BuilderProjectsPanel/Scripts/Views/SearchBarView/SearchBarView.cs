@@ -3,16 +3,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+internal class SearchBarConfig
+{
+    public bool showFilterOwner;
+    public bool showFilterOperator;
+    public bool showFilterContributor;
+    public bool showResultLabel;
+}
+
 internal class SearchBarView : MonoBehaviour
 {
-    public delegate void OnFilterDelegate(bool isOwner, bool isOperator, bool isContributor);
-    public delegate void OnSortOrderToggleDelegate(bool isDescending);
-
-    public event OnFilterDelegate OnFilter;
-    public event Action<string> OnSortType;
-    public event Action<string> OnSearch;
-    public event OnSortOrderToggleDelegate OnSortOrderChanged;
-
     [SerializeField] internal SearchInputField inputField;
     [SerializeField] internal Button sortButton;
     [SerializeField] internal TextMeshProUGUI sortTypeLabel;
@@ -28,6 +28,8 @@ internal class SearchBarView : MonoBehaviour
     private bool filterOperator = false;
     private bool filterContributor = false;
 
+    private ISectionSearchHandler searchHandler;
+
     private void Awake()
     {
         resultFormat = resultLabel.text;
@@ -42,8 +44,8 @@ internal class SearchBarView : MonoBehaviour
         filterOperator = operatorToggle.isOn;
         filterContributor = contributorToggle.isOn;
 
-        inputField.OnSearchText += s => OnSearch?.Invoke(s);
-        sortOrderToggle.OnToggle += b => OnSortOrderChanged?.Invoke(b);
+        inputField.OnSearchText += text => searchHandler?.SetSearchString(text);
+        sortOrderToggle.OnToggle += isDescending => searchHandler?.SetSortOrder(isDescending);
         sortDropdown.OnSortTypeSelected += OnSortTypeSelected;
     }
 
@@ -75,7 +77,7 @@ internal class SearchBarView : MonoBehaviour
     private void OnSortTypeSelected(string type)
     {
         sortTypeLabel.text = type;
-        OnSortType?.Invoke(type);
+        searchHandler?.SetSortType(type);
     }
 
     private void OnToggleOwner(bool isOn)
@@ -98,6 +100,55 @@ internal class SearchBarView : MonoBehaviour
 
     private void ReportFilter()
     {
-        OnFilter?.Invoke(filterOwner, filterOperator, filterContributor);
+        searchHandler?.SetFilter(filterOwner, filterOperator, filterContributor);
+    }
+
+    public void SetSearchBar(ISectionSearchHandler handler, SearchBarConfig config)
+    {
+        if (searchHandler != null)
+        {
+            searchHandler.OnUpdated -= OnUpdateResultCount;
+        }
+
+        searchHandler = handler;
+
+        if (searchHandler == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
+        sortDropdown.Clear();
+        sortDropdown.AddSortType(handler.sortTypes);
+
+        if (config != null)
+        {
+            ShowFilters(config.showFilterOwner, config.showFilterOperator, config.showFilterContributor);
+            resultLabel.gameObject.SetActive(config.showResultLabel);
+        }
+
+        ownerToggle.SetIsOnWithoutNotify(handler.filterOwner);
+        operatorToggle.SetIsOnWithoutNotify(handler.filterOperator);
+        contributorToggle.SetIsOnWithoutNotify(handler.filterContributor);
+        filterOwner = handler.filterOwner;
+        filterOperator = handler.filterOperator;
+        filterContributor = handler.filterContributor;
+
+        sortOrderToggle.SetWithoutNotify(handler.descendingSortOrder);
+
+        sortTypeLabel.text = handler.sortType;
+        inputField.inputField.SetTextWithoutNotify(handler.searchString);
+        SetResultCount(handler.resultCount);
+
+        searchHandler.OnUpdated += OnUpdateResultCount;
+
+        gameObject.SetActive(true);
+    }
+
+    private void OnUpdateResultCount()
+    {
+        if (searchHandler == null)
+            return;
+        SetResultCount(searchHandler.resultCount);
     }
 }

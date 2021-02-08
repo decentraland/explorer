@@ -20,6 +20,7 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
     [SerializeField] internal LeftMenuButtonToggleView landToggle;
 
     [SerializeField] internal SceneCardViewContextMenu contextMenu;
+    [SerializeField] internal SearchBarView searchBarView;
 
     [Header("Prefabs")]
     [SerializeField] internal SceneCardView sceneCardViewPrefab;

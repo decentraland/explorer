@@ -85,6 +85,7 @@ public class BuilderProjectsPanelController
             scenesViewController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
             projectSceneListener.OnSetScenes(scenesViewController.projectScenes);
         }
+        view.searchBarView.SetSearchBar(sectionBase.searchHandler, sectionBase.searchBarConfig);
     }
 
     void OnSectionHide(SectionBase sectionBase)
@@ -101,5 +102,6 @@ public class BuilderProjectsPanelController
             scenesViewController.OnProjectSceneRemoved -= projectSceneListener.OnSceneRemoved;
             scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
         }
+        view.searchBarView.SetSearchBar(null, null);
     }
 }

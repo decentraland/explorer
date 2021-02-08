@@ -1,10 +1,16 @@
 ﻿using DCL.Helpers;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 internal class SectionDeployedScenesController : SectionBase, IDeployedSceneListener
 {
+    public override ISectionSearchHandler searchHandler => sceneSearchHandler;
+
     private readonly SectionDeployedScenesView view;
+
+    private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
+    private Dictionary<string, SceneCardView> scenesViews;
 
     public SectionDeployedScenesController()
     {
@@ -13,6 +19,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
         view = Object.Instantiate(prefab);
 
         view.scrollRect.onValueChanged.AddListener((value) => RequestHideContextMenu());
+        sceneSearchHandler.OnResult += OnSearchResult;
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -38,19 +45,13 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
 
     void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
     {
-        using (var iterator = scenes.GetEnumerator())
-        {
-            while (iterator.MoveNext())
-            {
-                AddScene(iterator.Current.Value);
-            }
-        }
-        view.scrollRect.verticalNormalizedPosition = 1;
+        scenesViews = scenes;
+        sceneSearchHandler.SetSearchableList(scenes.Values.Select(scene => scene.searchInfo).ToList());
     }
 
     void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)
     {
-        AddScene(scene);
+        sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
     void IDeployedSceneListener.OnSceneRemoved(SceneCardView scene)
@@ -58,10 +59,27 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
         scene.gameObject.SetActive(false);
     }
 
-    private void AddScene(SceneCardView scene)
+    private void OnSearchResult(List<SearchInfoScene> searchInfoScenes)
     {
-        scene.SetParent(view.scenesCardContainer);
-        scene.gameObject.SetActive(true);
+        using (var iterator = scenesViews.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                iterator.Current.Value.SetParent(view.scenesCardContainer);
+
+                int index = searchInfoScenes.FindIndex(info => info.id == iterator.Current.Key);
+                if (index >= 0)
+                {
+                    iterator.Current.Value.gameObject.SetActive(true);
+                    iterator.Current.Value.transform.SetSiblingIndex(index);
+                }
+                else
+                {
+                    iterator.Current.Value.gameObject.SetActive(false);
+                }
+            }
+        }
+        view.scrollRect.verticalNormalizedPosition = 1;
     }
 
 }

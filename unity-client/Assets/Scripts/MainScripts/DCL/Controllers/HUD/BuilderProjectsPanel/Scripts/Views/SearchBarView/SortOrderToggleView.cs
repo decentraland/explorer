@@ -16,10 +16,15 @@ internal class SortOrderToggleView : MonoBehaviour, IPointerClickHandler
 
     public void Set(bool descending)
     {
+        SetWithoutNotify(descending);
+        OnToggle?.Invoke(descending);
+    }
+
+    public void SetWithoutNotify(bool descending)
+    {
         ascendingImage.color = descending ? deselectedColor : selectedColor;
         descendingImage.color = descending ? selectedColor : deselectedColor;
         isDescending = descending;
-        OnToggle?.Invoke(descending);
     }
 
     void IPointerClickHandler.OnPointerClick(PointerEventData eventData)

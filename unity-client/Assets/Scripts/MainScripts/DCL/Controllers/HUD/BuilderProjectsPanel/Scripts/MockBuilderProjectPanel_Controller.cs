@@ -34,7 +34,9 @@ internal static class MockBuilderProjectPanel_Controller
                 isDeployed = true,
                 isOwner = role == 0,
                 isOperator = role == 1,
-                isContributor = role == 2
+                isContributor = role == 2,
+                size = new Vector2Int(Random.Range(1,6),Random.Range(1,6)),
+                coords = new Vector2Int(Random.Range(-100,100),Random.Range(-100,100)),
             });
         }
         for (int i = 0; i < projectCount; i++)
@@ -46,7 +48,9 @@ internal static class MockBuilderProjectPanel_Controller
                 name = $"MyProject{i}",
                 isDeployed = false,
                 isOwner = role == 0,
-                isContributor = role == 1
+                isContributor = role == 1,
+                size = new Vector2Int(Random.Range(1,6),Random.Range(1,6)),
+                coords = new Vector2Int(Random.Range(-100,100),Random.Range(-100,100)),
             });
         }
         controller.scenesViewController.SetScenes(scenes);

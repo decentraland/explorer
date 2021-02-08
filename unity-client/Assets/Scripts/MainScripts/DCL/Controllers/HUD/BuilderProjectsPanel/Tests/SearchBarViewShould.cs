@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework;
 using System.Collections;
 using System.Linq;
 using UnityEditor;
@@ -38,15 +39,19 @@ namespace Tests
             string searchValueReceived = "";
             float searchTriggerTime = 0;
 
-            void OnSearchTriggered(string s)
-            {
-                searchTriggered = true;
-                searchValueReceived = s;
-                searchTriggerTime = Time.unscaledTime;
-            }
+            var handler = Substitute.For<ISectionSearchHandler>();
+            handler.WhenForAnyArgs(a => a.SetSearchString(""))
+                .Do(info =>
+                {
+                    searchTriggered = true;
+                    searchValueReceived = info.Arg<string>();
+                    searchTriggerTime = Time.unscaledTime;
+                });
+
+            view.SetSearchBar(handler, null);
+
             float searchTime = Time.unscaledTime;
 
-            view.OnSearch += OnSearchTriggered;
             view.inputField.inputField.text = searchValue;
             yield return new WaitForSeconds(idleTimeToTriggerSearch);
 
@@ -101,14 +106,16 @@ namespace Tests
             bool operatorON = false;
             bool contributorON = false;
 
-            void OnFilterSet(bool isOwner, bool isOperator, bool isContributor)
-            {
-                ownerON = isOwner;
-                operatorON = isOperator;
-                contributorON = isContributor;
-            }
+            var handler = Substitute.For<ISectionSearchHandler>();
+            handler.WhenForAnyArgs(a => a.SetFilter(false, false, false))
+                .Do(info =>
+                {
+                    ownerON = info.ArgAt<bool>(0);
+                    operatorON = info.ArgAt<bool>(1);
+                    contributorON = info.ArgAt<bool>(2);
+                });
 
-            view.OnFilter += OnFilterSet;
+            view.SetSearchBar(handler, null);
 
             view.ownerToggle.isOn = true;
             Assert.IsTrue(ownerON);
@@ -161,12 +168,15 @@ namespace Tests
         public void TriggerSortTypeCallback()
         {
             string selectedSort = "";
-            void OnSortType(string sortType)
-            {
-                selectedSort = sortType;
-            }
 
-            view.OnSortType += OnSortType;
+            var handler = Substitute.For<ISectionSearchHandler>();
+            handler.WhenForAnyArgs(a => a.SetSortType(""))
+                .Do(info =>
+                {
+                    selectedSort = info.Arg<string>();
+                });
+
+            view.SetSearchBar(handler, null);
 
             string[] sortTypes = new[] {"Type1"};
             view.SetSortTypes(sortTypes);
@@ -180,12 +190,15 @@ namespace Tests
         public void TriggerSortOrderCallback()
         {
             bool ascending = false;
-            void OnSortOrder(bool isAscending)
-            {
-                ascending = isAscending;
-            }
 
-            view.OnSortOrderChanged += OnSortOrder;
+            var handler = Substitute.For<ISectionSearchHandler>();
+            handler.WhenForAnyArgs(a => a.SetSortOrder(false))
+                .Do(info =>
+                {
+                    ascending = info.Arg<bool>();
+                });
+
+            view.SetSearchBar(handler, null);
 
             view.sortOrderToggle.Set(true);
             Assert.IsTrue(ascending);
