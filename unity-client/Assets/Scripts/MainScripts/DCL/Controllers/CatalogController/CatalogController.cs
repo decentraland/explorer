@@ -86,6 +86,23 @@ public class CatalogController : MonoBehaviour
         }
     }
 
+    public void WearablesRequestFailed(string payload)
+    {
+        WearablesRequestFailed requestFailedResponse = JsonUtility.FromJson<WearablesRequestFailed>(payload);
+
+        if (!string.IsNullOrEmpty(requestFailedResponse.context))
+        {
+            ResolvePendingWearablesByContextPromise(
+                requestFailedResponse.context,
+                null,
+                requestFailedResponse.error);
+        }
+        else
+        {
+            Debug.LogError(requestFailedResponse.error);
+        }
+    }
+
     public void RemoveWearablesFromCatalog(string payload)
     {
         string[] itemIDs = JsonUtility.FromJson<string[]>(payload);
@@ -137,7 +154,10 @@ public class CatalogController : MonoBehaviour
         if (!pendingWearablesByContextPromises.ContainsKey(OWNED_WEARABLES_CONTEXT))
         {
             pendingWearablesByContextPromises.Add(OWNED_WEARABLES_CONTEXT, promiseResult);
-            pendingWearablesByContextRequestedTimes.Add(OWNED_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
+
+            if (!pendingWearablesByContextRequestedTimes.ContainsKey(OWNED_WEARABLES_CONTEXT))
+                pendingWearablesByContextRequestedTimes.Add(OWNED_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
+
             WebInterface.RequestWearables(
                 ownedByUser: true,
                 wearableIds: null,
@@ -160,7 +180,10 @@ public class CatalogController : MonoBehaviour
         if (!pendingWearablesByContextPromises.ContainsKey(BASE_WEARABLES_CONTEXT))
         {
             pendingWearablesByContextPromises.Add(BASE_WEARABLES_CONTEXT, promiseResult);
-            pendingWearablesByContextRequestedTimes.Add(BASE_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
+
+            if (!pendingWearablesByContextRequestedTimes.ContainsKey(BASE_WEARABLES_CONTEXT))
+                pendingWearablesByContextRequestedTimes.Add(BASE_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
+
             WebInterface.RequestWearables(
                 ownedByUser: false,
                 wearableIds: null,
@@ -208,7 +231,8 @@ public class CatalogController : MonoBehaviour
         {
             foreach (var request in pendingWearableRequests)
             {
-                pendingWearableRequestedTimes.Add(request, Time.realtimeSinceStartup);
+                if (!pendingWearableRequestedTimes.ContainsKey(request))
+                    pendingWearableRequestedTimes.Add(request, Time.realtimeSinceStartup);
             }
 
             WebInterface.RequestWearables(

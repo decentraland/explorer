@@ -183,6 +183,13 @@ public class WearablesRequestResponse
 }
 
 [System.Serializable]
+public class WearablesRequestFailed
+{
+    public string error;
+    public string context;
+}
+
+[System.Serializable]
 public class WearableContent
 {
     public string file;
