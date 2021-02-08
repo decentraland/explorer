@@ -9,6 +9,7 @@ export function toRendererQuest(details: PlayerQuestDetails): QuestForRenderer {
     icon: details.icon,
     thumbnail_banner: details.thumbnailBanner,
     thumbnail_entry: details.thumbnailEntry,
+    status: details.progressStatus,
     sections: toRendererSections(details.tasks)
   }
 }
@@ -40,6 +41,7 @@ export function toRendererTask(task: PlayerTaskDetails): TaskForRenderer {
     name: task.description,
     coordinates: task.coordinates,
     payload: JSON.stringify(getProgressPayload(task)),
+    status: task.progressStatus,
     type: task.progressMode.type
   }
 }

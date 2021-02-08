@@ -10,6 +10,7 @@ export type TaskForRenderer = {
   name: string
   type: string
   progress: number
+  status: string
   coordinates?: string
   payload: string
 }
@@ -20,6 +21,7 @@ export type QuestForRenderer = {
   description: string
   thumbnail_entry?: string
   thumbnail_banner?: string
+  status: string
   icon?: string
   sections: SectionForRenderer[]
 }
