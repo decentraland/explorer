@@ -61,7 +61,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
         scene.gameObject.SetActive(false);
     }
 
-    private void OnSearchResult(List<SearchInfoScene> searchInfoScenes)
+    private void OnSearchResult(List<SceneSearchInfo> searchInfoScenes)
     {
         using (var iterator = scenesViews.GetEnumerator())
         {

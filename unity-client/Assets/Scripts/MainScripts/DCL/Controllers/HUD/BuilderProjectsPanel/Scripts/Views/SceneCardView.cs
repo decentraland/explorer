@@ -35,7 +35,7 @@ internal class SceneCardView : MonoBehaviour
     [SerializeField] internal GameObject roleOperatorGO;
     [SerializeField] internal GameObject roleContributorGO;
 
-    public SearchInfoScene searchInfo { get; } = new SearchInfoScene();
+    public SceneSearchInfo searchInfo { get; } = new SceneSearchInfo();
 
     internal ISceneData sceneData;
     private AssetPromise_Texture thumbnailPromise;

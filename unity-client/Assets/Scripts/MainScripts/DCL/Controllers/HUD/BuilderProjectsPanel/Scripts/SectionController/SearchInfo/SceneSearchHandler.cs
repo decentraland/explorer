@@ -9,9 +9,9 @@
         private readonly string[] scenesSortTypes = { NAME_SORT_TYPE, SIZE_SORT_TYPE };
 
         public event Action OnUpdated;
-        public event Action<List<SearchInfoScene>> OnResult;
+        public event Action<List<SceneSearchInfo>> OnResult;
 
-        private SearchHandler<SearchInfoScene> scenesSearchHandler;
+        private SearchHandler<SceneSearchInfo> scenesSearchHandler;
 
         private bool filterOwner = false;
         private bool filterOperator = false;
@@ -19,7 +19,7 @@
 
         public SceneSearchHandler()
         {
-            scenesSearchHandler = new SearchHandler<SearchInfoScene>(scenesSortTypes, (item) =>
+            scenesSearchHandler = new SearchHandler<SceneSearchInfo>(scenesSortTypes, (item) =>
             {
                 bool result = true;
                 if (filterContributor)
@@ -38,17 +38,17 @@
             };
         }
 
-        public void SetSearchableList(List<SearchInfoScene> list)
+        public void SetSearchableList(List<SceneSearchInfo> list)
         {
             scenesSearchHandler.SetSearchableList(list);
         }
 
-        public void AddItem(SearchInfoScene item)
+        public void AddItem(SceneSearchInfo item)
         {
             scenesSearchHandler.AddItem(item);
         }
 
-        public void RemoveItem(SearchInfoScene item)
+        public void RemoveItem(SceneSearchInfo item)
         {
             scenesSearchHandler.RemoveItem(item);
         }

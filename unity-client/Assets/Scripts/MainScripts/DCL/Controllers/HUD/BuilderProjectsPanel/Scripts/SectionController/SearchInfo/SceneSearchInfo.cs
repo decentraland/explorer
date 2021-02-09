@@ -1,7 +1,7 @@
     using System;
     using UnityEngine;
 
-    internal class SearchInfoScene : ISearchable, ISortable<SearchInfoScene>
+    internal class SceneSearchInfo : ISearchable, ISortable<SceneSearchInfo>
     {
         public string id;
         public string name { get; private set; }
@@ -12,7 +12,7 @@
 
         public string[] keywords { get; }
 
-        public SearchInfoScene()
+        public SceneSearchInfo()
         {
             keywords = new string[2];
         }
@@ -36,7 +36,7 @@
             this.isContributor = isContributor;
         }
 
-        public int Compare(string sortType, bool isDescendingOrder, SearchInfoScene other)
+        public int Compare(string sortType, bool isDescendingOrder, SceneSearchInfo other)
         {
             switch (sortType)
             {
