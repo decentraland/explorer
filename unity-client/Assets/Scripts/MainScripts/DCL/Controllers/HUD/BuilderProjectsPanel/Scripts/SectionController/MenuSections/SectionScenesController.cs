@@ -29,6 +29,10 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
     {
         var prefab = Resources.Load<SectionScenesView>("BuilderProjectsPanelMenuSections/SectionScenesView");
         view = Object.Instantiate(prefab);
+
+        view.btnProjectsViewAll.onClick.AddListener(()=> RequestOpenSection(SectionsController.SectionId.SCENES_PROJECT));
+        view.btnInWorldViewAll.onClick.AddListener(()=> RequestOpenSection(SectionsController.SectionId.SCENES_DEPLOYED));
+
         sceneSearchHandler.OnResult += OnSearchResult;
     }
 

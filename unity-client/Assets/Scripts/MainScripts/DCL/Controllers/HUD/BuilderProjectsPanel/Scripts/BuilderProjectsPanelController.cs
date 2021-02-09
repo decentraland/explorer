@@ -1,5 +1,7 @@
 ﻿using DCL.Helpers;
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class BuilderProjectsPanelController
 {
@@ -28,6 +30,7 @@ public class BuilderProjectsPanelController
         sectionsController.OnSectionShow += OnSectionShow;
         sectionsController.OnSectionHide += OnSectionHide;
         sectionsController.OnRequestContextMenuHide += () => view.contextMenu.Hide();
+        sectionsController.OnRequestOpenSection += OnRequestOpenSection;
 
         IDeployedSceneListener viewDeployedSceneListener = view;
         IProjectSceneListener viewProjectSceneListener = view;
@@ -103,5 +106,23 @@ public class BuilderProjectsPanelController
             scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
         }
         view.searchBarView.SetSearchBar(null, null);
+    }
+
+    void OnRequestOpenSection(SectionsController.SectionId id)
+    {
+        switch (id)
+        {
+            case SectionsController.SectionId.SCENES_MAIN:
+                view.scenesToggle.isOn = true;
+                break;
+            case SectionsController.SectionId.SCENES_DEPLOYED:
+                view.inWorldScenesToggle.isOn = true;
+                break;
+            case SectionsController.SectionId.SCENES_PROJECT:
+                view.projectsToggle.isOn = true;
+                break;
+            case SectionsController.SectionId.LAND:
+                break;
+        }
     }
 }

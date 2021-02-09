@@ -11,6 +11,7 @@ internal class SectionsController : IDisposable
     public event Action<SectionBase> OnSectionShow;
     public event Action<SectionBase> OnSectionHide;
     public event Action OnRequestContextMenuHide;
+    public event Action<SectionId> OnRequestOpenSection;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -43,7 +44,7 @@ internal class SectionsController : IDisposable
         this.sectionsParent = sectionsParent;
         this.sectionFactory = sectionFactory;
 
-        SectionBase.OnRequestOpenSection += OpenSection;
+        SectionBase.OnRequestOpenSection += (sectionId) => OnRequestOpenSection?.Invoke(sectionId);
         SectionBase.OnRequestContextMenuHide += ()=> OnRequestContextMenuHide?.Invoke();
     }
 
