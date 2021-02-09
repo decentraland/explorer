@@ -1,11 +1,19 @@
+using System;
 using DCL.Helpers;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using DCL.ABConverter;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityGLTF;
 using static DCL.ContentServerUtils;
+using Utils = DCL.Helpers.Utils;
+
+namespace DCL.ABConverter
+{
+}
 
 namespace DCL
 {
@@ -90,6 +98,13 @@ namespace DCL
             var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
             builder.Convert(avatarItemList);
+        }
+
+
+        [MenuItem("Decentraland/Start Visual Tests")]
+        public static void StartVisualTests()
+        {
+            VisualTests.StartVisualTests();
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
