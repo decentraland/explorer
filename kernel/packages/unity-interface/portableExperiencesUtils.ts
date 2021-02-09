@@ -15,7 +15,7 @@ import {
   loadParcelScene
 } from 'shared/world/parcelSceneManager'
 import { unityInterface } from './UnityInterface'
-import { DecentralandAssetIdentifier, resolveContentUrl, parseUrn, OffChainAsset } from '@dcl/urn-resolver'
+import { resolveUrlFromUrn } from '@dcl/urn-resolver'
 
 declare var window: any
 window['spawnPortableExperienceScene'] = spawnPortableExperienceScene
@@ -69,39 +69,25 @@ export async function getPortableExperience(pid: string): Promise<PortableExperi
   }
 }
 
-async function parsePortableExperienceUrn(sceneUrn: string): Promise<DecentralandAssetIdentifier> {
-  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(sceneUrn)
-  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
-    throw new Error(`Could not parse portable experience from urn: ${sceneUrn}`)
-  }
-  return parsedUrn
-}
-
-function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
-  /* tslint:disable-next-line */
-  return !!(dclId as OffChainAsset).registry && (dclId as OffChainAsset).registry === 'static-portable-experiences'
-}
-
 export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {
-  const parsedUrn: DecentralandAssetIdentifier = await parsePortableExperienceUrn(sceneUrn)
-  const mappingsUrl = await resolveContentUrl(parsedUrn)
+  const mappingsUrl = await resolveUrlFromUrn(sceneUrn)
   if (mappingsUrl === null) {
     throw new Error(`Could not resolve mappings for scene: ${sceneUrn}`)
   }
-  const baseUrl: string = new URL('..', mappingsUrl).toString()
-  const mappingsFetch = await fetch(baseUrl)
+  const mappingsFetch = await fetch(mappingsUrl)
   const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
   const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
 
   if (sceneJsonMapping) {
+    const baseUrl: string = mappingsUrl.slice(0, -1 * 'mappings'.length)
     const sceneResponse = await fetch(`${baseUrl}${sceneJsonMapping.hash}`)
 
     if (sceneResponse.ok) {
       const scene = (await sceneResponse.json()) as SceneJsonData
       return getLoadablePortableExperience({
         sceneUrn: sceneUrn,
-        baseUrl,
+        baseUrl: mappingsUrl,
         mappings: mappingsResponse.contents,
         sceneJsonData: scene
       })
