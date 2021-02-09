@@ -1,6 +1,6 @@
 import { put, takeEvery, select, call, takeLatest } from 'redux-saga/effects'
 
-import { STATIC_WORLD } from 'config'
+import { STATIC_WORLD, WORLD_EXPLORER } from 'config'
 
 import { establishingComms } from 'shared/loading/types'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
@@ -36,7 +36,6 @@ import {
 import { isVoiceChatRecording } from './selectors'
 import { unityInterface } from 'unity-interface/UnityInterface'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
-import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { userAuthentified } from 'shared/session'
 import { sceneObservable } from 'shared/world/sceneState'
 import { SceneFeatureToggles } from 'shared/types'
@@ -51,9 +50,7 @@ export function* commsSaga() {
   yield ensureMetaConfigurationInitialized()
   yield userAuthentified()
 
-  const identity = yield select(getCurrentIdentity)
-
-  if (yield select(isVoiceChatEnabledFor, identity.address)) {
+  if (WORLD_EXPLORER) {
     yield takeEvery(SET_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
     yield takeEvery(TOGGLE_VOICE_CHAT_RECORDING, updateVoiceChatRecordingStatus)
     yield takeEvery(VOICE_PLAYING_UPDATE, updateUserVoicePlaying)
