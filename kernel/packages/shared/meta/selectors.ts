@@ -50,7 +50,7 @@ export const isFeatureEnabled = (store: RootMetaState, featureName: FeatureFlags
 
 /** Convert camel case to upper snake case */
 function toUrlFlag(key: string) {
-  var result = key.replace(/([A-Z])/g, ' $1')
+  const result = key.replace(/([A-Z])/g, ' $1')
   return result.split(' ').join('_').toUpperCase()
 }
 
