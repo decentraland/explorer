@@ -87,7 +87,7 @@ export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {
       const scene = (await sceneResponse.json()) as SceneJsonData
       return getLoadablePortableExperience({
         sceneUrn: sceneUrn,
-        baseUrl: mappingsUrl,
+        baseUrl: baseUrl,
         mappings: mappingsResponse.contents,
         sceneJsonData: scene
       })
