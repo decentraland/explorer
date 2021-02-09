@@ -1,6 +1,6 @@
 import { CommsConfig, MessageOfTheDayConfig, RootMetaState } from './types'
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { getCatalystNodesDefaultURL } from 'config'
+import { getCatalystNodesDefaultURL, VOICE_CHAT_DISABLED_FLAG, WORLD_EXPLORER } from 'config'
 
 export const getAddedServers = (store: RootMetaState): string[] => {
   const { config } = store.meta
@@ -32,6 +32,9 @@ export const isMOTDInitialized = (store: RootMetaState): boolean =>
   store.meta.config.world ? store.meta.config.world?.messageOfTheDayInit || false : false
 export const getMessageOfTheDay = (store: RootMetaState): MessageOfTheDayConfig | null =>
   store.meta.config.world ? store.meta.config.world.messageOfTheDay || null : null
+
+export const isVoiceChatEnabledFor = (store: RootMetaState, userId: string): boolean =>
+  WORLD_EXPLORER && !VOICE_CHAT_DISABLED_FLAG
 
 export const getCatalystNodesEndpoint = (store: RootMetaState): string =>
   store.meta.config.servers?.catalystsNodesEndpoint ?? getCatalystNodesDefaultURL()

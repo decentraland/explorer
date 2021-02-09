@@ -100,6 +100,8 @@ export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
 export const REALM = qs.realm
 
+export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
+
 export const ENABLE_BUILDER_IN_WORLD = location.search.includes('ENABLE_BUILDER_IN_WORLD')
 
 export const AUTO_CHANGE_REALM = location.search.includes('AUTO_CHANGE_REALM')

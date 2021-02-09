@@ -5,8 +5,7 @@ import {
   COMMS,
   AUTO_CHANGE_REALM,
   genericAvatarSnapshots,
-  COMMS_PROFILE_TIMEOUT,
-  WORLD_EXPLORER
+  COMMS_PROFILE_TIMEOUT
 } from 'config'
 import { CommunicationsController } from 'shared/apis/CommunicationsController'
 import { defaultLogger } from 'shared/logger'
@@ -80,7 +79,7 @@ import { realmToString } from '../dao/utils/realmToString'
 import { queueTrackingEvent } from 'shared/analytics'
 import { messageReceived } from '../chat/actions'
 import { arrayEquals } from 'atomicHelpers/arrayEquals'
-import { getCommsConfig } from 'shared/meta/selectors'
+import { getCommsConfig, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { ensureMetaConfigurationInitialized } from 'shared/meta/index'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import {
@@ -1157,7 +1156,7 @@ async function doStartCommunications(context: Context) {
       }
     }, 100)
 
-    if (!voiceCommunicator && WORLD_EXPLORER) {
+    if (!voiceCommunicator && isVoiceChatEnabledFor(store.getState(), context.userInfo.userId!)) {
       voiceCommunicator = new VoiceCommunicator(
         context.userInfo.userId!,
         {
