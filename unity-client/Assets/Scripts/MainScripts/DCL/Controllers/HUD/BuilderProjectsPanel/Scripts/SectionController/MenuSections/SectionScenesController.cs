@@ -21,8 +21,8 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
 
     private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
 
-    private Dictionary<string, SceneCardView> deployedViews;
-    private Dictionary<string, SceneCardView> projectViews;
+    internal Dictionary<string, SceneCardView> deployedViews;
+    internal Dictionary<string, SceneCardView> projectViews;
     private List<SearchInfoScene> searchList = new List<SearchInfoScene>();
 
     public SectionScenesController()
@@ -52,6 +52,8 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
     {
         view.gameObject.SetActive(false);
         searchList.Clear();
+        deployedViews.Clear();
+        projectViews.Clear();
     }
 
     private void ViewDirty()
@@ -68,35 +70,41 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
 
     void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
     {
-        deployedViews = scenes;
+        UpdateDictionary(ref deployedViews, scenes);
         searchList.AddRange(scenes.Values.Select(scene => scene.searchInfo));
         sceneSearchHandler.SetSearchableList(searchList);
     }
 
     void IProjectSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
     {
-        projectViews = scenes;
+        UpdateDictionary(ref projectViews, scenes);
         searchList.AddRange(scenes.Values.Select(scene => scene.searchInfo));
         sceneSearchHandler.SetSearchableList(searchList);
     }
 
     void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)
     {
+        deployedViews.Add(scene.sceneData.id, scene);
         sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
     void IProjectSceneListener.OnSceneAdded(SceneCardView scene)
     {
+        projectViews.Add(scene.sceneData.id, scene);
         sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
     void IDeployedSceneListener.OnSceneRemoved(SceneCardView scene)
     {
+        scene.SetParent(null);
+        deployedViews.Remove(scene.sceneData.id);
         sceneSearchHandler.RemoveItem(scene.searchInfo);
     }
 
     void IProjectSceneListener.OnSceneRemoved(SceneCardView scene)
     {
+        scene.SetParent(null);
+        projectViews.Remove(scene.sceneData.id);
         sceneSearchHandler.RemoveItem(scene.searchInfo);
     }
 
@@ -118,13 +126,15 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
 
         for (int i = 0; i < searchInfoScenes.Count; i++)
         {
-            if (scenesViews.TryGetValue(searchInfoScenes[i].id, out SceneCardView sceneView))
+            if (!scenesViews.TryGetValue(searchInfoScenes[i].id, out SceneCardView sceneView))
             {
-                sceneView.SetParent(parent);
-                sceneView.transform.SetSiblingIndex(count);
-                sceneView.gameObject.SetActive(false);
-                count++;
+                continue;
             }
+
+            sceneView.SetParent(parent);
+            sceneView.transform.SetSiblingIndex(count);
+            sceneView.gameObject.SetActive(false);
+            count++;
         }
 
         for (int i = 0; i < parent.childCount; i++)
@@ -132,4 +142,28 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
             parent.GetChild(i).gameObject.SetActive(i < count && i < MAX_CARDS);
         }
     }
+
+    private void UpdateDictionary(ref Dictionary<string, SceneCardView> target, Dictionary<string, SceneCardView> newData)
+    {
+        if (newData.Count == 0)
+            return;
+
+        if (target == null)
+        {
+            target = new Dictionary<string, SceneCardView>(newData);
+            return;
+        }
+
+        using (var iterator = newData.GetEnumerator())
+        {
+            while (iterator.MoveNext())
+            {
+                if (target.ContainsKey(iterator.Current.Key))
+                    continue;
+
+                target.Add(iterator.Current.Key, iterator.Current.Value);
+            }
+        }
+    }
+
 }

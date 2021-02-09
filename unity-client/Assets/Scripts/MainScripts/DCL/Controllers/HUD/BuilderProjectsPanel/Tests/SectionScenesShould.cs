@@ -84,6 +84,8 @@ namespace Tests
             Assert.AreEqual(3,sectionController.view.deployedSceneContainer.childCount);
             Assert.AreEqual(1,GetVisibleChildrenAmount(sectionController.view.projectSceneContainer));
             Assert.AreEqual(3,GetVisibleChildrenAmount(sectionController.view.deployedSceneContainer));
+            Assert.AreEqual(sectionController.view.projectSceneContainer.childCount,sectionController.projectViews.Count);
+            Assert.AreEqual(sectionController.view.deployedSceneContainer.childCount,sectionController.deployedViews.Count);
 
             //add deployed scene
             scenes.Add(new SceneData(){isDeployed = true,id = "Deployed4"});
@@ -94,6 +96,8 @@ namespace Tests
             Assert.AreEqual(4,sectionController.view.deployedSceneContainer.childCount);
             Assert.AreEqual(1,GetVisibleChildrenAmount(sectionController.view.projectSceneContainer));
             Assert.AreEqual(3,GetVisibleChildrenAmount(sectionController.view.deployedSceneContainer));
+            Assert.AreEqual(sectionController.view.projectSceneContainer.childCount,sectionController.projectViews.Count);
+            Assert.AreEqual(sectionController.view.deployedSceneContainer.childCount,sectionController.deployedViews.Count);
 
             //remove deployed scene
             scenes = scenes.FindAll((data) => data.id != "Deployed3");
@@ -104,23 +108,31 @@ namespace Tests
             Assert.AreEqual(3,sectionController.view.deployedSceneContainer.childCount);
             Assert.AreEqual(1,GetVisibleChildrenAmount(sectionController.view.projectSceneContainer));
             Assert.AreEqual(3,GetVisibleChildrenAmount(sectionController.view.deployedSceneContainer));
+            Assert.AreEqual(sectionController.view.projectSceneContainer.childCount,sectionController.projectViews.Count);
+            Assert.AreEqual(sectionController.view.deployedSceneContainer.childCount,sectionController.deployedViews.Count);
 
             //remove all deployed
             scenes = new List<ISceneData>() {new SceneData() {isDeployed = false, id = "Project1"}};
             scenesController.SetScenes(scenes);
             Assert.IsFalse(sectionController.view.inWorldContainer.activeSelf);
             Assert.IsTrue(sectionController.view.projectsContainer.activeSelf);
+            Assert.AreEqual(sectionController.view.projectSceneContainer.childCount,sectionController.projectViews.Count);
+            Assert.AreEqual(sectionController.view.deployedSceneContainer.childCount,sectionController.deployedViews.Count);
 
             //switch project to deployed
             scenes = new List<ISceneData>() {new SceneData() {isDeployed = true, id = "Project1"}};
             scenesController.SetScenes(scenes);
             Assert.IsTrue(sectionController.view.inWorldContainer.activeSelf);
             Assert.IsFalse(sectionController.view.projectsContainer.activeSelf);
+            Assert.AreEqual(sectionController.view.projectSceneContainer.childCount,sectionController.projectViews.Count);
+            Assert.AreEqual(sectionController.view.deployedSceneContainer.childCount,sectionController.deployedViews.Count);
 
             //remove all scenes
             scenesController.SetScenes(new List<ISceneData>());
             Assert.IsFalse(sectionController.view.inWorldContainer.activeSelf);
             Assert.IsFalse(sectionController.view.projectsContainer.activeSelf);
+            Assert.AreEqual(sectionController.view.projectSceneContainer.childCount,sectionController.projectViews.Count);
+            Assert.AreEqual(sectionController.view.deployedSceneContainer.childCount,sectionController.deployedViews.Count);
         }
 
         public int GetVisibleChildrenAmount(Transform parent)

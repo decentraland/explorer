@@ -14,7 +14,10 @@ public static class SearchHelper
 
     public static bool SearchMatchItem<T>(string text, T item) where T : ISearchable
     {
-        return item.keywords.Any(keyword => keyword.Contains(text));
+        if (string.IsNullOrEmpty(text))
+            return true;
+
+        return item.keywords.Any(keyword => !string.IsNullOrEmpty(keyword) && keyword.Contains(text));
     }
 
     public static void Sort<T>(string sortType, List<T> input, bool descendingOrder) where T : ISortable<T>

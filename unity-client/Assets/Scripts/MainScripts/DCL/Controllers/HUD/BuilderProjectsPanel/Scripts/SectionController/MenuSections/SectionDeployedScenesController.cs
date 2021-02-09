@@ -45,17 +45,19 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
 
     void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
     {
-        scenesViews = scenes;
+        scenesViews = new Dictionary<string, SceneCardView>(scenes);
         sceneSearchHandler.SetSearchableList(scenes.Values.Select(scene => scene.searchInfo).ToList());
     }
 
     void IDeployedSceneListener.OnSceneAdded(SceneCardView scene)
     {
+        scenesViews.Add(scene.sceneData.id, scene);
         sceneSearchHandler.AddItem(scene.searchInfo);
     }
 
     void IDeployedSceneListener.OnSceneRemoved(SceneCardView scene)
     {
+        scenesViews.Remove(scene.sceneData.id);
         scene.gameObject.SetActive(false);
     }
 

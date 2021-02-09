@@ -21,13 +21,14 @@
         {
             scenesSearchHandler = new SearchHandler<SearchInfoScene>(scenesSortTypes, (item) =>
             {
+                bool result = true;
                 if (filterContributor)
-                    return item.isContributor;
-                if (filterOperator)
-                    return item.isOperator;
-                if (filterOwner)
-                    return item.isOwner;
-                return true;
+                    result = item.isContributor;
+                if (filterOperator && result)
+                    result = item.isOperator;
+                if (filterOwner && result)
+                    result = item.isOwner;
+                return result;
             });
 
             scenesSearchHandler.OnSearchChanged += list =>
