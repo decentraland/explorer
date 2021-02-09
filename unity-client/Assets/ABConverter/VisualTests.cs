@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using DCL.Helpers;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -10,13 +12,64 @@ namespace DCL.ABConverter
 {
     public static class VisualTests
     {
-        public static void StartVisualTests()
+        public static IEnumerator StartVisualTests()
         {
             EditorSceneManager.OpenScene($"Assets/ABConverter/VisualTestScene.unity", OpenSceneMode.Single);
 
+            string baselinePath = VisualTestHelpers.baselineImagesPath;
+            string testImagesPath = VisualTestHelpers.testImagesPath;
 
-            //var gltfs = LoadAndInstanceAllGltfAssets();
-            //var abs = LoadAndInstanceAllAssetBundles();
+            VisualTestHelpers.baselineImagesPath += "ABConverter/";
+            VisualTestHelpers.testImagesPath += "ABConverter/";
+
+            var gltfs = LoadAndInstanceAllGltfAssets();
+
+            VisualTestHelpers.generateBaseline = true;
+
+            foreach (GameObject go in gltfs)
+            {
+                go.SetActive(false);
+            }
+
+            foreach (GameObject go in gltfs)
+            {
+                go.SetActive(true);
+                yield return VisualTestHelpers.TakeSnapshot($"ABConverter_{go.name}.png", Camera.main, new Vector3(7, 7, 7), Vector3.zero);
+                go.SetActive(false);
+            }
+
+            VisualTestHelpers.generateBaseline = false;
+
+            var abs = LoadAndInstanceAllAssetBundles();
+
+            foreach (GameObject go in abs)
+            {
+                go.SetActive(false);
+            }
+
+            foreach (GameObject go in abs)
+            {
+                go.SetActive(true);
+                string testName = $"ABConverter_{go.name}.png";
+                yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, new Vector3(7, 7, 7), Vector3.zero);
+
+                bool result = false;
+                result = VisualTestHelpers.TestSnapshot(
+                    VisualTestHelpers.baselineImagesPath + testName,
+                    VisualTestHelpers.testImagesPath + testName,
+                    95);
+
+                if (result)
+                {
+                    Debug.Log("Test succeeded for " + testName);
+                }
+
+                go.SetActive(false);
+            }
+
+            VisualTestHelpers.baselineImagesPath = baselinePath;
+            VisualTestHelpers.testImagesPath += testImagesPath;
+            yield break;
         }
 
         public static GameObject[] LoadAndInstanceAllGltfAssets()
@@ -28,10 +81,8 @@ namespace DCL.ABConverter
             foreach (var guid in assets)
             {
                 GameObject gltf = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
-
-                string hashName = gltf.name;
-
                 var importedGLTF = Object.Instantiate(gltf);
+                importedGLTF.name = importedGLTF.name.Replace("(Clone)", "");
                 importedGLTFs.Add(importedGLTF);
             }
 
@@ -112,7 +163,9 @@ namespace DCL.ABConverter
 
                     if (asset is GameObject assetAsGameObject)
                     {
-                        results.Add(Object.Instantiate(assetAsGameObject));
+                        GameObject instance = Object.Instantiate(assetAsGameObject);
+                        results.Add(instance);
+                        instance.name = instance.name.Replace("(Clone)", "");
                     }
                 }
 

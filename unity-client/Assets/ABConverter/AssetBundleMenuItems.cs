@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using DCL.ABConverter;
+using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -104,7 +105,8 @@ namespace DCL
         [MenuItem("Decentraland/Start Visual Tests")]
         public static void StartVisualTests()
         {
-            VisualTests.StartVisualTests();
+            EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.StartVisualTests());
+
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Zone -110,-110")]
