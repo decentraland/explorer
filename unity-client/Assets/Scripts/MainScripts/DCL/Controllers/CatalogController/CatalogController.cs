@@ -147,7 +147,7 @@ public class CatalogController : MonoBehaviour
         return promiseResult;
     }
 
-    public static Promise<WearableItem[]> RequestOwnedWearables()
+    public static Promise<WearableItem[]> RequestOwnedWearables(string userId)
     {
         Promise<WearableItem[]> promiseResult = new Promise<WearableItem[]>();
 
@@ -159,7 +159,7 @@ public class CatalogController : MonoBehaviour
                 pendingWearablesByContextRequestedTimes.Add(OWNED_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
 
             WebInterface.RequestWearables(
-                ownedByUser: true,
+                ownedByUser: userId,
                 wearableIds: null,
                 collectionIds: null,
                 context: OWNED_WEARABLES_CONTEXT
@@ -185,7 +185,7 @@ public class CatalogController : MonoBehaviour
                 pendingWearablesByContextRequestedTimes.Add(BASE_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
 
             WebInterface.RequestWearables(
-                ownedByUser: false,
+                ownedByUser: null,
                 wearableIds: null,
                 collectionIds: new string[] { "base-avatars" },
                 context: BASE_WEARABLES_CONTEXT
@@ -236,7 +236,7 @@ public class CatalogController : MonoBehaviour
             }
 
             WebInterface.RequestWearables(
-                ownedByUser: false,
+                ownedByUser: null,
                 wearableIds: pendingWearableRequests.ToArray(),
                 collectionIds: null,
                 context: null

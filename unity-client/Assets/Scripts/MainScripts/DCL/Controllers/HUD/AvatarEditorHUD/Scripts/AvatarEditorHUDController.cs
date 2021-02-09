@@ -92,7 +92,7 @@ public class AvatarEditorHUDController : IHUD
             yield break;
 
         ownedWearablesAlreadyRequested = true;
-        var ownedWearablesPromise = CatalogController.RequestOwnedWearables();
+        var ownedWearablesPromise = CatalogController.RequestOwnedWearables(userProfile.userId);
         yield return ownedWearablesPromise;
 
         if (!string.IsNullOrEmpty(ownedWearablesPromise.error))

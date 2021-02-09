@@ -546,7 +546,7 @@ namespace DCL.Interface
         [System.Serializable]
         public class WearablesRequestFiltersPayload
         {
-            public bool ownedByUser;
+            public string ownedByUser;
             public string[] wearableIds;
             public string[] collectionIds;
         }
@@ -1178,7 +1178,7 @@ namespace DCL.Interface
         }
 
         public static void RequestWearables(
-            bool ownedByUser,
+            string ownedByUser,
             string[] wearableIds,
             string[] collectionIds,
             string context)
