@@ -81,7 +81,9 @@ public class SearchHandler<T> where T: ISearchable, ISortable<T>
 
         if (searchFilterChanged || searchStringChanged)
         {
-            currentResult = SearchHelper.Filter(searchResult, currentFilterPredicate);
+            currentResult = currentFilterPredicate != null
+                ? SearchHelper.Filter(searchResult, currentFilterPredicate)
+                : searchResult;
         }
 
         if (searchSortChanged || searchStringChanged)
