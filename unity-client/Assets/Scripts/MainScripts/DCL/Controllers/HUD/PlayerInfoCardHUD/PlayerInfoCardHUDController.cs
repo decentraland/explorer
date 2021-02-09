@@ -1,4 +1,5 @@
 using DCL.Interface;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerInfoCardHUDController : IHUD
@@ -133,7 +134,13 @@ public class PlayerInfoCardHUDController : IHUD
 
     private void SetUserProfile(UserProfile userProfile)
     {
-        view.SetUserProfile(userProfile);
+        CatalogController.RequestOwnedWearables(userProfile.userId)
+            .Then((ownedWearables) =>
+            {
+                userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
+                view.SetUserProfile(userProfile);
+            })
+            .Catch((error) => Debug.LogError(error));
     }
 
     public void SetVisibility(bool visible)
