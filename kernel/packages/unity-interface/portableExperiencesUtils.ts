@@ -97,7 +97,10 @@ export async function getPortableExperienceFromS3Bucket(pe: OffChainAsset) {
   const peId: string = pe.id
   const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
 
-  const mappingsFetch = await fetch(`${baseUrl}mappings`)
+// import {resolveContentUrl} from '@dcl/urn-resolver'
+const mappingsUrl = await resolveContentUrl(pe)
+const baseUrl: string = (new URL('..', mappingsUrl)).toString()
+const mappingsFetch = await resolveContentUrl(mappingsUrl)
   const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
   const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
