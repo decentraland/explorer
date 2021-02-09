@@ -80,17 +80,30 @@ public class AvatarEditorHUDController : IHUD
 
     private System.Collections.IEnumerator LoadUserProfile(UserProfile userProfile)
     {
-        LoadUserProfile(userProfile, false);
+        if (!baseWearablesAlreadyRequested)
+            yield return LoadBaseWearables();
 
-        yield return LoadOwnedWearablesIfNeeded(userProfile);
-        yield return LoadBaseWearablesIfNeeded();
+        if (!string.IsNullOrEmpty(userProfile.userId) && !ownedWearablesAlreadyRequested)
+            yield return LoadOwnedWearables(userProfile);
+
+        LoadUserProfile(userProfile, false);
     }
 
-    private System.Collections.IEnumerator LoadOwnedWearablesIfNeeded(UserProfile userProfile)
+    private System.Collections.IEnumerator LoadBaseWearables()
     {
-        if (ownedWearablesAlreadyRequested || string.IsNullOrEmpty(userProfile.userId))
-            yield break;
+        baseWearablesAlreadyRequested = true;
+        var baseWearablesPromise = CatalogController.RequestBaseWearables();
+        yield return baseWearablesPromise;
 
+        if (!string.IsNullOrEmpty(baseWearablesPromise.error))
+        {
+            baseWearablesAlreadyRequested = false;
+            Debug.LogError(baseWearablesPromise.error);
+        }
+    }
+
+    private System.Collections.IEnumerator LoadOwnedWearables(UserProfile userProfile)
+    {
         ownedWearablesAlreadyRequested = true;
         var ownedWearablesPromise = CatalogController.RequestOwnedWearables(userProfile.userId);
         yield return ownedWearablesPromise;
@@ -103,22 +116,6 @@ public class AvatarEditorHUDController : IHUD
         else
         {
             userProfile.SetInventory(ownedWearablesPromise.value.Select(x => x.id).ToArray());
-        }
-    }
-
-    private System.Collections.IEnumerator LoadBaseWearablesIfNeeded()
-    {
-        if (baseWearablesAlreadyRequested)
-            yield break;
-
-        baseWearablesAlreadyRequested = true;
-        var baseWearablesPromise = CatalogController.RequestBaseWearables();
-        yield return baseWearablesPromise;
-
-        if (!string.IsNullOrEmpty(baseWearablesPromise.error))
-        {
-            baseWearablesAlreadyRequested = false;
-            Debug.LogError(baseWearablesPromise.error);
         }
     }
 

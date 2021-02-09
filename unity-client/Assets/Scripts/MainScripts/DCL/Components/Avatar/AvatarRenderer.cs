@@ -179,6 +179,16 @@ namespace DCL
                     resolvedBody = avatarBodyPromise.value;
             }
 
+            foreach (var avatarWearablePromise in avatarWearablePromises)
+            {
+                yield return avatarWearablePromise;
+
+                if (!string.IsNullOrEmpty(avatarWearablePromise.error))
+                    Debug.LogError(avatarWearablePromise.error);
+                else
+                    resolvedWearables.Add(avatarWearablePromise.value);
+            }
+
             if (resolvedBody == null)
             {
                 isLoading = false;
@@ -207,16 +217,6 @@ namespace DCL
                 //If bodyShape is downloading will call OnWearableLoadingSuccess (and therefore SetupDefaultMaterial) once ready
                 if (bodyShapeController.isReady)
                     bodyShapeController.SetupDefaultMaterial(defaultMaterial, model.skinColor, model.hairColor);
-            }
-
-            foreach (var avatarWearablePromise in avatarWearablePromises)
-            {
-                yield return avatarWearablePromise;
-
-                if (!string.IsNullOrEmpty(avatarWearablePromise.error))
-                    Debug.LogError(avatarWearablePromise.error);
-                else
-                    resolvedWearables.Add(avatarWearablePromise.value);
             }
 
             HashSet<string> unusedCategories = new HashSet<string>(Categories.ALL);
