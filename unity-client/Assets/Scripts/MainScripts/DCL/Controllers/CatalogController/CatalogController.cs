@@ -193,7 +193,7 @@ public class CatalogController : MonoBehaviour
         }
         else
         {
-            pendingWearablesByContextPromises.TryGetValue(OWNED_WEARABLES_CONTEXT, out promiseResult);
+            pendingWearablesByContextPromises.TryGetValue(BASE_WEARABLES_CONTEXT, out promiseResult);
         }
 
         return promiseResult;
