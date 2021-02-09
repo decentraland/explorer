@@ -125,7 +125,6 @@ export async function getLoadablePortableExperience(data: {
   if (!sceneJsons.length) {
     throw new Error('Invalid scene mapping: no scene.json')
   }
-
   // TODO: obtain sceneId from Content Server
   return {
     sceneId: sceneUrn,
