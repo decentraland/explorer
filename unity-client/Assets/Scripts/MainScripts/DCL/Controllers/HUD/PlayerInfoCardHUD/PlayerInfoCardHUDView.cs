@@ -1,11 +1,15 @@
-using DCL;
+using System;
 using DCL.Helpers;
 using System.Collections.Generic;
+using DCL;
+using DCL.Configuration;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Linq;
 
 public class PlayerInfoCardHUDView : MonoBehaviour
 {
@@ -164,22 +168,30 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         avatarPicture.texture = currentUserProfile.faceSnapshot;
 
         ClearCollectibles();
-        var collectiblesIds = currentUserProfile.GetInventoryItemsIds();
-        for (int index = 0; index < collectiblesIds.Length; index++)
-        {
-            string collectibleId = collectiblesIds[index];
-            WearableItem collectible = CatalogController.wearableCatalog.Get(collectibleId);
-            if (collectible == null) continue;
 
-            var playerInfoCollectible =
-                collectiblesFactory.Instantiate<PlayerInfoCollectibleItem>(collectible.rarity,
-                    wearablesContainer.transform);
-            if (playerInfoCollectible == null) continue;
-            playerInfoCollectibles.Add(playerInfoCollectible);
-            playerInfoCollectible.Initialize(collectible);
-        }
+        CatalogController.RequestOwnedWearables(userProfile.userId)
+            .Then((ownedWearables) =>
+            {
+                currentUserProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
 
-        emptyCollectiblesImage.SetActive(collectiblesIds.Length == 0);
+                var collectiblesIds = currentUserProfile.GetInventoryItemsIds();
+                for (int index = 0; index < collectiblesIds.Length; index++)
+                {
+                    string collectibleId = collectiblesIds[index];
+                    CatalogController.wearableCatalog.TryGetValue(collectibleId, out WearableItem collectible);
+                    if (collectible == null) continue;
+
+                    var playerInfoCollectible =
+                        collectiblesFactory.Instantiate<PlayerInfoCollectibleItem>(collectible.rarity,
+                            wearablesContainer.transform);
+                    if (playerInfoCollectible == null) continue;
+                    playerInfoCollectibles.Add(playerInfoCollectible);
+                    playerInfoCollectible.Initialize(collectible);
+                }
+
+                emptyCollectiblesImage.SetActive(collectiblesIds.Length == 0);
+            })
+            .Catch((error) => Debug.Log(error));
 
         SetIsBlocked(IsBlocked(userProfile.userId));
 
