@@ -1,6 +1,6 @@
 import { Store } from 'redux'
-import { EntityType } from 'dcl-catalyst-commons'
-import { ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
+import { EntityType, Hashing } from 'dcl-catalyst-commons'
+import { CatalystClient, ContentClient, DeploymentBuilder, DeploymentData } from 'dcl-catalyst-client'
 import { call, throttle, put, race, select, take, takeEvery } from 'redux-saga/effects'
 
 import { getServerConfigurations, ALL_WEARABLES, PREVIEW, ethereumConfigurations, RESET_TUTORIAL } from 'config'
@@ -39,14 +39,14 @@ import {
   DeployProfile
 } from './actions'
 import { generateRandomUserProfile } from './generateRandomUserProfile'
-import { getProfile, getProfileDownloadServer, hasConnectedWeb3 } from './selectors'
+import { getProfile, hasConnectedWeb3 } from './selectors'
 import { processServerProfile } from './transformations/processServerProfile'
 import { profileToRendererFormat } from './transformations/profileToRendererFormat'
 import { buildServerMetadata, ensureServerFormat } from './transformations/profileToServerFormat'
 import { Profile, ContentFile, Avatar, ProfileType } from './types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { Authenticator } from 'dcl-crypto'
-import { getUpdateProfileServer, getResizeService, isResizeServiceUrl } from '../dao/selectors'
+import { getUpdateProfileServer, getResizeService, isResizeServiceUrl, getCatalystServer } from '../dao/selectors'
 import { WORLD_EXPLORER } from '../../config/index'
 import { backupProfile } from 'shared/profiles/generateRandomUserProfile'
 import { getResourcesURL } from '../location'
@@ -72,8 +72,6 @@ import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
 
-const CID = require('cids')
-const multihashing = require('multihashing-async')
 const toBuffer = require('blob-to-buffer')
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
@@ -143,7 +141,7 @@ function* initialProfileLoad() {
       const net: keyof typeof ethereumConfigurations = yield select(getCurrentNetwork)
       const names = yield fetchOwnedENS(ethereumConfigurations[net].names, userId)
 
-      // patch profile to readd missing name
+      // patch profile to re-add missing name
       profile = { ...profile, name: names[0], hasClaimedName: true }
 
       if (names && names.length > 0) {
@@ -192,40 +190,35 @@ function scheduleProfileUpdate(profile: Profile) {
   }).catch((e) => defaultLogger.error(`error while updating profile`, e))
 }
 
-export function* getProfileByUserId(userId: string): any {
+export function* doesProfileExist(userId: string): any {
   try {
-    const server = yield select(getProfileDownloadServer)
-    const profiles: { avatars: object[] } = yield profileServerRequest(server, userId)
+    const profiles: { avatars: object[] } = yield profileServerRequest(userId)
 
-    if (profiles.avatars.length !== 0) {
-      return profiles.avatars[0]
-    }
+    return profiles.avatars.length > 0
   } catch (error) {
     if (error.message !== 'Profile not found') {
       defaultLogger.log(`Error requesting profile for auth check ${userId}, `, error)
     }
   }
-  return null
+  return false
 }
 
 export function* handleFetchProfile(action: ProfileRequestAction): any {
-  const userId = action.payload.userId
-  const email = ''
+  const { userId, profileType } = action.payload
 
   const currentId = yield select(getCurrentUserId)
   let profile: any
   let hasConnectedWeb3 = false
   if (WORLD_EXPLORER) {
     try {
-      if (action.payload.profileType === ProfileType.LOCAL && currentId !== userId) {
-        const peerProfile: Profile = yield requestLocalProfileToPeers(action.payload.userId)
+      if (profileType === ProfileType.LOCAL && currentId !== userId) {
+        const peerProfile: Profile = yield requestLocalProfileToPeers(userId)
         if (peerProfile) {
           profile = ensureServerFormat(peerProfile)
           profile.hasClaimedName = false // for now, comms profiles can't have claimed names
         }
       } else {
-        const serverUrl = yield select(getProfileDownloadServer)
-        const profiles: { avatars: object[] } = yield call(profileServerRequest, serverUrl, userId)
+        const profiles: { avatars: object[] } = yield call(profileServerRequest, userId)
 
         if (profiles.avatars.length !== 0) {
           profile = profiles.avatars[0]
@@ -261,7 +254,7 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   if (currentId === userId) {
-    profile.email = email
+    profile.email = ''
   }
 
   yield populateFaceIfNecessary(profile, '256')
@@ -321,7 +314,7 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
       }
 
       if (response.ok) {
-        // only populate image field if resize service responsed correctly
+        // only populate image field if resize service responded correctly
         profile.avatar = { ...profile.avatar, snapshots: { ...profile.avatar?.snapshots, [selector]: faceUrl } }
       }
     } catch (e) {
@@ -330,29 +323,10 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
   }
 }
 
-export async function profileServerRequest(serverUrl: string, userId: string) {
-  try {
-    const request = await fetch(`${serverUrl}/${userId}`)
-    if (!request.ok) {
-      throw new Error('Profile not found')
-    }
-    return await request.json()
-  } catch (up) {
-    throw up
-  }
-}
-
-export function* createSignUpProfile(profile: Profile, identity: ExplorerIdentity) {
-  const url: string = yield select(getUpdateProfileServer)
-  const userId = profile.userId
-  // to prevent save a email on profile
-  profile.email = ''
-  return yield modifyAvatar({
-    url,
-    userId,
-    identity,
-    profile
-  })
+export async function profileServerRequest(userId: string) {
+  const catalystUrl = getCatalystServer(globalThis.globalStore.getState())
+  const client = new CatalystClient(catalystUrl, 'EXPLORER')
+  return client.fetchProfile(userId)
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {
@@ -490,23 +464,18 @@ export function fetchProfileLocally(address: string) {
   }
 }
 
-async function calculateBufferHash(buffer: Buffer): Promise<string> {
-  const hash = await multihashing(buffer, 'sha2-256')
-  return new CID(0, 'dag-pb', hash).toBaseEncodedString()
-}
-
 async function buildSnapshotContent(selector: string, value: string): Promise<[string, string, ContentFile?]> {
   let hash: string
   let contentFile: ContentFile | undefined
 
-  const name = `./${selector}.png`
+  const name = `${selector}.png`
 
   if (isResizeServiceUrl(globalThis.globalStore.getState(), value)) {
     // value is coming in a resize service url => generate image & upload content
     const blob = await fetch(value).then((r) => r.blob())
 
     contentFile = await makeContentFile(name, blob)
-    hash = await calculateBufferHash(contentFile.content)
+    hash = await Hashing.calculateHash(contentFile)
   } else if (value.includes('://')) {
     // value is already a URL => use existing hash
     hash = value.split('/').pop()!
@@ -515,7 +484,7 @@ async function buildSnapshotContent(selector: string, value: string): Promise<[s
     const blob = base64ToBlob(value)
 
     contentFile = await makeContentFile(name, blob)
-    hash = await calculateBufferHash(contentFile.content)
+    hash = await Hashing.calculateHash(contentFile)
   }
 
   return [name, hash, contentFile]
@@ -559,7 +528,7 @@ async function deploy(
   const preparationData = await (contentFiles.size
     ? DeploymentBuilder.buildEntity(EntityType.PROFILE, [identity.address], contentFiles, metadata)
     : DeploymentBuilder.buildEntityWithoutNewFiles(EntityType.PROFILE, [identity.address], contentHashes, metadata))
-  // sign the entity id fetchMetaContentServer
+  // sign the entity id
   const authChain = Authenticator.signPayload(identity, preparationData.entityId)
   // Build the client
   const catalyst = new ContentClient(url, 'explorer-kernel-profile')

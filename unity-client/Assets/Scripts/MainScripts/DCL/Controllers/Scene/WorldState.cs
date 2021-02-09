@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
 using UnityEngine;
@@ -18,6 +18,8 @@ namespace DCL
         Vector3 ConvertUnityToScenePosition(Vector3 pos, ParcelScene scene = null);
         Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null);
         bool IsCharacterInsideScene(ParcelScene scene);
+        Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
+        Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
     }
 
     public class WorldState : IWorldState
@@ -75,21 +77,36 @@ namespace DCL
 
         public Vector3 ConvertSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)
         {
+            return ConvertPointInSceneToUnityPosition(pos, scene);
+        }
+
+        public Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene = null)
+        {
+            return ConvertPointInSceneToUnityPosition(Vector3.zero, scene);
+        }
+
+        public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, ParcelScene scene = null)
+        {
             if (scene == null)
             {
-                string sceneId = currentSceneId;
+                IWorldState worldState = Environment.i.world.state;
+                string sceneId = worldState.currentSceneId;
 
-                if (!string.IsNullOrEmpty(sceneId) && loadedScenes.ContainsKey(sceneId))
-                    scene = loadedScenes[currentSceneId];
+                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
+                    scene = worldState.loadedScenes[worldState.currentSceneId];
                 else
                     return pos;
             }
 
-            Vector3 sceneRealPosition = scene.gameObject.transform.position;
-            Vector3 sceneFictionPosition = new Vector3(scene.sceneData.basePosition.x, 0, scene.sceneData.basePosition.y);
-            Vector3 sceneOffset = sceneRealPosition - sceneFictionPosition;
-            Vector3 solvedPosition = pos + sceneOffset;
-            return solvedPosition;
+            return ConvertPointInSceneToUnityPosition(pos, new Vector2Int(scene.sceneData.basePosition.x, scene.sceneData.basePosition.y));
+        }
+
+        public Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint)
+        {
+            Vector3 scenePosition = Utils.GridToWorldPosition(scenePoint.x, scenePoint.y) + pos;
+            Vector3 worldPosition = PositionUtils.WorldToUnityPosition(scenePosition);
+
+            return worldPosition;
         }
 
         public bool IsCharacterInsideScene(ParcelScene scene)
