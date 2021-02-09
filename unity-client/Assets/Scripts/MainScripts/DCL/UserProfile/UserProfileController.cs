@@ -69,9 +69,15 @@ public class UserProfileController : MonoBehaviour
 
     public void AddUserProfileToCatalog(UserProfileModel model)
     {
-        var userProfile = ScriptableObject.CreateInstance<UserProfile>();
-        userProfile.UpdateData(model);
-        userProfilesCatalog.Add(model.userId, userProfile);
+        CatalogController.RequestOwnedWearables(model.userId)
+            .Then((ownedWearables) =>
+            {
+                var userProfile = ScriptableObject.CreateInstance<UserProfile>();
+                userProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
+                userProfile.UpdateData(model);
+                userProfilesCatalog.Add(model.userId, userProfile);
+            })
+            .Catch((error) => Debug.LogError(error));
     }
 
     public static UserProfile GetProfileByName(string targetUserName)
