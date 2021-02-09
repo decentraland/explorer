@@ -3,15 +3,13 @@ import {
   spawnPortableExperienceScene,
   getPortableExperience,
   PortableExperienceHandle,
-  PortableExperienceIdentifier,
-  PortableExperienceUrn,
   killPortableExperienceScene
 } from 'unity-interface/portableExperiencesUtils'
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
 
 type SpawnPortableExperienceParameters = {
-  urn: PortableExperienceIdentifier
+  urn: string
 }
 
 @registerAPI('PortableExperiences')
@@ -42,12 +40,10 @@ export class PortableExperiences extends ExposableAPI {
   @exposeMethod
   async kill(pid: string): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
-
-    const portableExperience = getPortableExperience(pid)
+    const portableExperience: PortableExperienceHandle | undefined = await getPortableExperience(pid)
 
     if (!!portableExperience && portableExperience.parentCid == parcelIdentity.cid) {
-      const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${parcelIdentity.cid}`
-      await killPortableExperienceScene(portableExperienceUrn)
+      await killPortableExperienceScene(pid)
       return true
     }
     return false
@@ -62,8 +58,12 @@ export class PortableExperiences extends ExposableAPI {
   async exit(): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
 
-    const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${parcelIdentity.cid}`
+    const portableExperienceUrn: string = buildPortableExperienceUrn(parcelIdentity)
     await killPortableExperienceScene(portableExperienceUrn)
     return true
   }
+}
+
+function buildPortableExperienceUrn(parcelIdentity: ParcelIdentity): string {
+  return `urn:decentraland:off-chain:static-portable-experiences:${parcelIdentity.cid}`
 }

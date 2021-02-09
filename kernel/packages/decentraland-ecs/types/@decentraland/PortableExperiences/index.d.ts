@@ -1,16 +1,16 @@
 declare module '@decentraland/PortableExperiences' {
-  type PortableExperienceIdentifier = string
+  type PortableExperienceUrn = string
   type PortableExperienceHandle = {
-    pid: PortableExperienceIdentifier
+    pid: PortableExperienceUrn
     parentCid: string
   }
   type SpawnPortableExperienceParameters = {
-    urn: PortableExperienceIdentifier
+    urn: PortableExperienceUrn
   }
 
   export function spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle>
 
-  export function kill(pid: PortableExperienceIdentifier): Promise<boolean>
+  export function kill(pid: PortableExperienceUrn): Promise<boolean>
 
   export function exit(): Promise<boolean>
 }

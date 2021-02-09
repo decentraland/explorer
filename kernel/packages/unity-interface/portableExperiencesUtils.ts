@@ -15,43 +15,25 @@ import {
   loadParcelScene
 } from 'shared/world/parcelSceneManager'
 import { unityInterface } from './UnityInterface'
-import { parseUrn, DecentralandAssetIdentifier, OffChainAsset } from '@dcl/urn-resolver'
-
-const STATIC_PORTABLE_SCENES_S3_BUCKET_URL = 'https://static-pe.decentraland.io'
-export type PortableExperienceUrn = string
+import { DecentralandAssetIdentifier, resolveContentUrl, parseUrn, OffChainAsset } from '@dcl/urn-resolver'
 
 declare var window: any
 window['spawnPortableExperienceScene'] = spawnPortableExperienceScene
 window['killPortableExperienceScene'] = killPortableExperienceScene
 
-export type PortableExperienceIdentifier = string
 export type PortableExperienceHandle = {
-  pid: PortableExperienceIdentifier
+  pid: string
   parentCid: string
 }
 
 let currentPortableExperiences: Map<string, string> = new Map()
 
-export function getPortableExperience(pid: string): PortableExperienceHandle | undefined {
-  if (currentPortableExperiences.has(pid)) {
-    return { pid: pid, parentCid: currentPortableExperiences.get(pid)! }
-  } else {
-    return undefined
-  }
-}
-
 export async function spawnPortableExperienceScene(
-  portableExperienceUrn: PortableExperienceUrn,
+  sceneUrn: string,
   parentCid: string
 ): Promise<PortableExperienceHandle> {
-  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
+  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(sceneUrn))
 
-  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
-    throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
-  }
-
-  /* tslint:disable-next-line */
-  const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(parsedUrn as OffChainAsset))
   loadParcelScene(scene, undefined, true)
   const parcelSceneId = getParcelSceneID(scene)
   unityInterface.CreateUIScene({
@@ -62,45 +44,52 @@ export async function spawnPortableExperienceScene(
     icon: scene.data.data.icon,
     isPortableExperience: true
   })
+  currentPortableExperiences.set(sceneUrn, parentCid)
 
-  currentPortableExperiences.set(parcelSceneId, parentCid)
-
-  return { pid: parcelSceneId, parentCid: parentCid }
+  return { pid: sceneUrn, parentCid: parentCid }
 }
 
-function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
-  if (dclId) {
-    /* tslint:disable-next-line */
-    return !!(dclId as OffChainAsset).registry && (dclId as OffChainAsset).registry === 'static-portable-experiences'
-  }
-  return false
-}
-
-export async function killPortableExperienceScene(portableExperienceUrn: PortableExperienceUrn): Promise<boolean> {
-  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(portableExperienceUrn)
-  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
-    throw new Error(`Could not parse portable experience from urn: ${portableExperienceUrn}`)
-  }
-  const sceneId: string = parsedUrn.id
-  const peWorker = getSceneWorkerBySceneID(sceneId)
+export async function killPortableExperienceScene(sceneUrn: string): Promise<boolean> {
+  const peWorker = getSceneWorkerBySceneID(sceneUrn)
   if (peWorker) {
     forceStopParcelSceneWorker(peWorker)
-    currentPortableExperiences.delete(sceneId)
-    unityInterface.UnloadScene(sceneId)
+    currentPortableExperiences.delete(sceneUrn)
+    unityInterface.UnloadScene(sceneUrn)
     return true
   } else {
     return false
   }
 }
 
-export async function getPortableExperienceFromS3Bucket(pe: OffChainAsset) {
-  const peId: string = pe.id
-  const baseUrl: string = `${STATIC_PORTABLE_SCENES_S3_BUCKET_URL}/${peId}/`
+export async function getPortableExperience(pid: string): Promise<PortableExperienceHandle | undefined> {
+  if (currentPortableExperiences.has(pid)) {
+    return { pid: pid, parentCid: currentPortableExperiences.get(pid)! }
+  } else {
+    return undefined
+  }
+}
 
-// import {resolveContentUrl} from '@dcl/urn-resolver'
-const mappingsUrl = await resolveContentUrl(pe)
-const baseUrl: string = (new URL('..', mappingsUrl)).toString()
-const mappingsFetch = await resolveContentUrl(mappingsUrl)
+async function parsePortableExperienceUrn(sceneUrn: string): Promise<DecentralandAssetIdentifier> {
+  const parsedUrn: DecentralandAssetIdentifier | null = await parseUrn(sceneUrn)
+  if (!parsedUrn || !isPortableExperience(parsedUrn)) {
+    throw new Error(`Could not parse portable experience from urn: ${sceneUrn}`)
+  }
+  return parsedUrn
+}
+
+function isPortableExperience(dclId: DecentralandAssetIdentifier): dclId is OffChainAsset {
+  /* tslint:disable-next-line */
+  return !!(dclId as OffChainAsset).registry && (dclId as OffChainAsset).registry === 'static-portable-experiences'
+}
+
+export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {
+  const parsedUrn: DecentralandAssetIdentifier = await parsePortableExperienceUrn(sceneUrn)
+  const mappingsUrl = await resolveContentUrl(parsedUrn)
+  if (mappingsUrl === null) {
+    throw new Error(`Could not resolve mappings for scene: ${sceneUrn}`)
+  }
+  const baseUrl: string = new URL('..', mappingsUrl).toString()
+  const mappingsFetch = await fetch(`${baseUrl}mappings`)
   const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
   const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
@@ -111,8 +100,8 @@ const mappingsFetch = await resolveContentUrl(mappingsUrl)
     if (sceneResponse.ok) {
       const scene = (await sceneResponse.json()) as SceneJsonData
       return getLoadablePortableExperience({
-        peId,
-        baseUrl: `${baseUrl}`,
+        sceneUrn: sceneUrn,
+        baseUrl,
         mappings: mappingsResponse.contents,
         sceneJsonData: scene
       })
@@ -124,30 +113,29 @@ const mappingsFetch = await resolveContentUrl(mappingsUrl)
   }
 }
 
-export function getLoadablePortableExperience(data: {
-  peId: string
+export async function getLoadablePortableExperience(data: {
+  sceneUrn: string
+  baseUrl: string
   mappings: ContentMapping[]
   sceneJsonData: SceneJsonData
-  baseUrl: string
-}): EnvironmentData<LoadablePortableExperienceScene> {
-  const { peId, mappings, sceneJsonData, baseUrl } = data
+}): Promise<EnvironmentData<LoadablePortableExperienceScene>> {
+  const { sceneUrn, baseUrl, mappings, sceneJsonData } = data
 
   const sceneJsons = mappings.filter((land) => land.file === 'scene.json')
   if (!sceneJsons.length) {
     throw new Error('Invalid scene mapping: no scene.json')
   }
 
-  const cid = peId // TODO: Load this from content server
-
+  // TODO: obtain sceneId from Content Server
   return {
-    sceneId: cid,
+    sceneId: sceneUrn,
     baseUrl: baseUrl,
     name: getSceneNameFromJsonData(sceneJsonData),
     main: sceneJsonData.main,
     useFPSThrottling: false,
     mappings,
     data: {
-      id: cid,
+      id: sceneUrn,
       basePosition: parseParcelPosition(sceneJsonData.scene.base),
       name: getSceneNameFromJsonData(sceneJsonData),
       parcels:

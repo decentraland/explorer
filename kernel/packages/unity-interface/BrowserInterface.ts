@@ -40,7 +40,6 @@ import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
-
 import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
@@ -50,7 +49,7 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
-import { killPortableExperienceScene, PortableExperienceUrn } from './portableExperiencesUtils'
+import { killPortableExperienceScene } from './portableExperiencesUtils'
 
 declare const DCL: any
 
@@ -466,7 +465,7 @@ export class BrowserInterface {
   }
 
   public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
-    const portableExperienceUrn: PortableExperienceUrn = `urn:decentraland:off-chain:static-portable-experiences:${data.portableExperienceId}`
+    const portableExperienceUrn: string = `urn:decentraland:off-chain:static-portable-experiences:${data.portableExperienceId}`
 
     await killPortableExperienceScene(portableExperienceUrn)
   }
