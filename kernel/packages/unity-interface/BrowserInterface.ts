@@ -468,7 +468,7 @@ export class BrowserInterface {
 
   public RequestWearables(data: {
     filters: {
-      ownedByUser: boolean
+      ownedByUser: string | null
       wearableIds?: string[] | null
       collectionIds?: string[] | null
     }

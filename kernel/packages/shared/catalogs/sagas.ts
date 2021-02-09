@@ -32,7 +32,6 @@ import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import { getUserId } from 'shared/session/selectors'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 export const WRONG_FILTERS_ERROR =
@@ -148,11 +147,10 @@ export function* handleWearablesRequest(action: WearablesRequest) {
           .filter((wearable) => !!wearable)
       } else if (filters.ownedByUser) {
         // Only owned wearables
-        const userId = yield select(getUserId)
         if (ALL_WEARABLES) {
           response = Object.values(exclusiveCatalog)
         } else {
-          const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
+          const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
           response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
         }
       } else if (filters.collectionIds) {

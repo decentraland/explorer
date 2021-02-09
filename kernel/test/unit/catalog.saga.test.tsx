@@ -5,7 +5,6 @@ import { wearablesFailure, wearablesRequest, wearablesSuccess } from 'shared/cat
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from 'shared/catalogs/selectors'
 import { ensureRenderer } from 'shared/renderer/sagas'
 import { throwError } from 'redux-saga-test-plan/providers'
-import { getUserId } from 'shared/session/selectors'
 
 const wearableId1 = 'WearableId1'
 const wearable1 = { id: wearableId1 } as any
@@ -27,13 +26,12 @@ describe('Wearables Saga', () => {
 
   it('When all owned wearables are requested, then they are returned successfully', () => {
     const wearables = [wearable1]
-    return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: true }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: userId }, context))
       .put(wearablesSuccess(wearables, context))
       .provide([
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), { [wearableId1]: wearable1 }],
-        [select(getUserId), userId],
         [call(fetchInventoryItemsByAddress, userId), Promise.resolve([wearableId1])],
       ])
       .run()
@@ -66,24 +64,22 @@ describe('Wearables Saga', () => {
   it('When wearables fetch fails to load, then the request fails', () => {
     const errorMessage = 'Something failed'
     const error = new Error(errorMessage)
-    return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: true }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ ownedByUser: userId }, context))
       .put(wearablesFailure(context, errorMessage))
       .provide([
         [select(baseCatalogsLoaded), true],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), {}],
-        [select(getUserId), userId],
         [call(fetchInventoryItemsByAddress, userId), throwError(error)],
       ])
       .run()
   })
 
   it('When more than one filter is set, then the request fails', () => {
-    return expectSaga(handleWearablesRequest, wearablesRequest({ wearableIds: ['some-id'], ownedByUser: true }, context))
+    return expectSaga(handleWearablesRequest, wearablesRequest({ wearableIds: ['some-id'], ownedByUser: userId }, context))
       .put(wearablesFailure(context, WRONG_FILTERS_ERROR))
       .provide([
         [select(baseCatalogsLoaded), true],
-        [select(getUserId), userId],
         [select(getPlatformCatalog), {}],
         [select(getExclusiveCatalog), {}],
       ])
@@ -95,7 +91,6 @@ describe('Wearables Saga', () => {
       .put(wearablesFailure(context, WRONG_FILTERS_ERROR))
       .provide([
         [select(baseCatalogsLoaded), true],
-        [select(getUserId), userId],
       ])
       .run()
   })
