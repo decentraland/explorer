@@ -60,11 +60,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.blocked = newModel.blocked;
         model.muted = newModel.muted;
 
-        if (model.inventory != null)
-        {
-            SetInventory(model.inventory);
-        }
-
         if (downloadAssets && model.snapshots != null)
         {
             //NOTE(Brian): Get before forget to prevent referenceCount == 0 and asset unload

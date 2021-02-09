@@ -13,11 +13,6 @@ namespace AvatarEditorHUD_Tests
         public AvatarEditorHUDView myView => view;
         public string[] myCategoriesThatMustHaveSelection => categoriesThatMustHaveSelection;
         public string[] myCategoriesToRandomize => categoriesToRandomize;
-
-        public override void OnUserProfileUpdated(UserProfile userProfile)
-        {
-            LoadUserProfile(userProfile, false);
-        }
     }
 
     public class WearableItemsShould : IntegrationTestSuite_Legacy

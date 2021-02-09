@@ -25,8 +25,6 @@ public class AvatarEditorHUDController : IHUD
     private ColorList eyeColorList;
     private ColorList hairColorList;
     private bool prevMouseLockState = false;
-    private bool ownedWearablesAlreadyRequested = false;
-    private bool baseWearablesAlreadyRequested = false;
 
     public AvatarEditorHUDView view;
 
@@ -55,7 +53,7 @@ public class AvatarEditorHUDController : IHUD
         SetCatalog(catalog);
 
         LoadUserProfile(userProfile, true);
-        this.userProfile.OnUpdate += OnUserProfileUpdated;
+        this.userProfile.OnUpdate += LoadUserProfile;
     }
 
     public void SetCatalog(BaseDictionary<string, WearableItem> catalog)
@@ -73,50 +71,9 @@ public class AvatarEditorHUDController : IHUD
         this.catalog.OnRemoved += RemoveWearable;
     }
 
-    public virtual void OnUserProfileUpdated(UserProfile userProfile)
+    private void LoadUserProfile(UserProfile userProfile)
     {
-        CoroutineStarter.Start(LoadUserProfile(userProfile));
-    }
-
-    private System.Collections.IEnumerator LoadUserProfile(UserProfile userProfile)
-    {
-        if (!baseWearablesAlreadyRequested)
-            yield return LoadBaseWearables();
-
-        if (!string.IsNullOrEmpty(userProfile.userId) && !ownedWearablesAlreadyRequested)
-            yield return LoadOwnedWearables(userProfile);
-
         LoadUserProfile(userProfile, false);
-    }
-
-    private System.Collections.IEnumerator LoadBaseWearables()
-    {
-        baseWearablesAlreadyRequested = true;
-        var baseWearablesPromise = CatalogController.RequestBaseWearables();
-        yield return baseWearablesPromise;
-
-        if (!string.IsNullOrEmpty(baseWearablesPromise.error))
-        {
-            baseWearablesAlreadyRequested = false;
-            Debug.LogError(baseWearablesPromise.error);
-        }
-    }
-
-    private System.Collections.IEnumerator LoadOwnedWearables(UserProfile userProfile)
-    {
-        ownedWearablesAlreadyRequested = true;
-        var ownedWearablesPromise = CatalogController.RequestOwnedWearables(userProfile.userId);
-        yield return ownedWearablesPromise;
-
-        if (!string.IsNullOrEmpty(ownedWearablesPromise.error))
-        {
-            ownedWearablesAlreadyRequested = false;
-            Debug.LogError(ownedWearablesPromise.error);
-        }
-        else
-        {
-            userProfile.SetInventory(ownedWearablesPromise.value.Select(x => x.id).ToArray());
-        }
     }
 
     public void LoadUserProfile(UserProfile userProfile, bool forceLoading)
@@ -508,7 +465,7 @@ public class AvatarEditorHUDController : IHUD
         if (view != null)
             view.CleanUp();
 
-        this.userProfile.OnUpdate -= OnUserProfileUpdated;
+        this.userProfile.OnUpdate -= LoadUserProfile;
         this.catalog.OnAdded -= AddWearable;
         this.catalog.OnRemoved -= RemoveWearable;
     }
@@ -531,7 +488,7 @@ public class AvatarEditorHUDController : IHUD
     public void DiscardAndClose()
     {
         if (!DataStore.isSignUpFlow.Get())
-            OnUserProfileUpdated(userProfile);
+            LoadUserProfile(userProfile);
         else
             WebInterface.SendCloseUserAvatar(true);
 
