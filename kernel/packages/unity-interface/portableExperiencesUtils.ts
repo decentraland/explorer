@@ -89,7 +89,7 @@ export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {
     throw new Error(`Could not resolve mappings for scene: ${sceneUrn}`)
   }
   const baseUrl: string = new URL('..', mappingsUrl).toString()
-  const mappingsFetch = await fetch(`${baseUrl}mappings`)
+  const mappingsFetch = await fetch(baseUrl)
   const mappingsResponse = (await mappingsFetch.json()) as MappingsResponse
 
   const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
