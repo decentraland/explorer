@@ -27,6 +27,10 @@ export async function spawnPortableExperienceScene(
   sceneUrn: string,
   parentCid: string
 ): Promise<PortableExperienceHandle> {
+  const peWorker = getSceneWorkerBySceneID(sceneUrn)
+  if (peWorker) {
+    throw new Error(`Portable Scene: "${sceneUrn}" is already running.`)
+  }
   const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(sceneUrn))
   loadParcelScene(scene, undefined, true)
   unityInterface.CreateUIScene({
