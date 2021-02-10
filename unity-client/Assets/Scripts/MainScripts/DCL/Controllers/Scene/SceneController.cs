@@ -453,11 +453,9 @@ namespace DCL
 
         public void EnqueueSceneMessage(QueuedSceneMessage_Scene message)
         {
-            Environment.i.world.state.TryGetScene(message.sceneId, out ParcelScene scene);
-
+            bool isGlobalScene = Environment.i.world.state.IsGlobalScene(message.sceneId);
             Environment.i.messaging.manager.AddControllerIfNotExists(this, message.sceneId);
-
-            Environment.i.messaging.manager.Enqueue(scene is GlobalScene, message);
+            Environment.i.messaging.manager.Enqueue(isGlobalScene, message);
         }
 
         //======================================================================

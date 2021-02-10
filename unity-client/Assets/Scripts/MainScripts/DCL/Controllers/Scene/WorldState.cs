@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
 using UnityEngine;
@@ -20,6 +20,7 @@ namespace DCL
         bool IsCharacterInsideScene(ParcelScene scene);
         Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
         Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
+        bool IsGlobalScene(string sceneId);
     }
 
     public class WorldState : IWorldState
@@ -38,6 +39,16 @@ namespace DCL
             readyScenes = new HashSet<string>();
             loadedScenes = new Dictionary<string, ParcelScene>();
             scenesSortedByDistance = new List<ParcelScene>();
+        }
+
+        public bool IsGlobalScene(string sceneId)
+        {
+            if (TryGetScene(sceneId, out ParcelScene scene))
+            {
+                return scene is GlobalScene;
+            }
+
+            return false;
         }
 
         public string TryToGetSceneCoordsID(string id)
