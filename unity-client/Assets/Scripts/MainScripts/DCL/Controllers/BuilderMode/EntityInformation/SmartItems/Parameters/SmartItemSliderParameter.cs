@@ -12,41 +12,28 @@ public class SmartItemSliderParameter : SmartItemUIParameterAdapter
     public TextMeshProUGUI valueTxt;
     public Slider sliderParameter;
 
-    float amountOfSteps;
-    float minValue;
-    float maxValue;
-    float stepSum;
+    private float amountOfSteps;
+    private float minValue;
+    private float maxValue;
+    private float stepSum;
 
-    public override void SetParameter(SmartItemParameter parameter)
+    public override void SetInfo()
     {
-        base.SetParameter(parameter);
+        base.SetInfo();
 
-        minValue = float.Parse(parameter.min);
-        maxValue = float.Parse(parameter.max);
+        minValue = float.Parse(currentParameter.min);
+        maxValue = float.Parse(currentParameter.max);
 
-        stepSum = float.Parse(parameter.step, CultureInfo.InvariantCulture);
-
+        stepSum = float.Parse(currentParameter.step, CultureInfo.InvariantCulture);
 
         amountOfSteps = Mathf.RoundToInt((maxValue - minValue) / stepSum);
 
         sliderParameter.minValue = 0;
         sliderParameter.maxValue = amountOfSteps;
 
-        if(!string.IsNullOrEmpty(parameter.@default))
-        {
-            float defaultValue = sliderParameter.minValue;
-            float.TryParse((string) parameter.@default, out defaultValue);
+        int currentValue = ConvertParameterValueToSliderValue((float) GetParameterValue());
 
-            int defaultValueConverted = (int) Mathf.Abs(defaultValue + minValue - Mathf.CeilToInt(maxValue / amountOfSteps));
-
-            sliderParameter.value = defaultValueConverted;
-
-        }
-        else
-        {
-            sliderParameter.value = sliderParameter.minValue;
-        }
-
+        sliderParameter.value = currentValue;
 
         SetSliderText(sliderParameter.value);
 
@@ -56,11 +43,53 @@ public class SmartItemSliderParameter : SmartItemUIParameterAdapter
     public void OnValueChange(float value)
     {
         SetSliderText(value);
+        SetParameterValue(ConvertSliderValueToParameterValue(value));
     }
 
-    void SetSliderText(float value)
+    private void SetSliderText(float value)
     {
-        float convertedValue = minValue + value * stepSum;
-        valueTxt.text = convertedValue.ToString();
+        float convertedValue = ConvertSliderValueToParameterValue(value);
+        valueTxt.text = convertedValue.ToString();     
+    }
+
+    private float ConvertSliderValueToParameterValue(float value)
+    {
+        return minValue + value * stepSum;
+    }
+
+    private int ConvertParameterValueToSliderValue(float value)
+    {
+        return (int)Mathf.Abs((value - minValue) / stepSum);
+    }
+
+    protected override object GetParameterValue()
+    {
+        object value = base.GetParameterValue();
+        float sliderValue;
+
+        float.TryParse(currentParameter.min, out sliderValue);     
+  
+        if(value is string stringValue)
+        {
+            if (!string.IsNullOrEmpty(stringValue))
+            {
+                if(float.TryParse(stringValue, out float defaultValue))
+                    return defaultValue;
+            }
+            else
+            {
+                return sliderValue;
+            }
+        }
+        else if (value is float sliderValueFloat)
+        {
+            return sliderValueFloat;
+        }
+        else
+        {
+            sliderValue = sliderParameter.minValue;
+        }
+
+        return sliderValue;
     }
 }

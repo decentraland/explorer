@@ -15,10 +15,10 @@ public class SmartItemListView : MonoBehaviour
 
     public void SetSmartItemParameters(SmartItemComponent smartItemComponent)
     {
-        SetSmartItemParameters(smartItemComponent.model.parameters);
+        SetSmartItemParameters(smartItemComponent.model.parameters, smartItemComponent.model.values.values);
     }
 
-    public void SetSmartItemParameters(SmartItemParameter[] parameters)
+    public void SetSmartItemParameters(SmartItemParameter[] parameters, Dictionary<object,object> smartItemValues)
     {
         for(int i = 0; i <childrenList.Count;i++)
         {
@@ -30,7 +30,7 @@ public class SmartItemListView : MonoBehaviour
         foreach (SmartItemParameter parameter in parameters)
         {
             SmartItemUIParameterAdapter prefabToInstantiate = factory.GetPrefab(parameter.GetParameterType());
-            InstantiateParameter(parameter, prefabToInstantiate);
+            InstantiateParameter(parameter, smartItemValues, prefabToInstantiate);
         }
 
     }
@@ -40,7 +40,7 @@ public class SmartItemListView : MonoBehaviour
         this.entitiesList = entitiesList;
     }
 
-    void InstantiateParameter(SmartItemParameter parameter, SmartItemUIParameterAdapter parameterAdapterPrefab)
+    void InstantiateParameter(SmartItemParameter parameter, Dictionary<object, object> smartItemValues, SmartItemUIParameterAdapter parameterAdapterPrefab)
     {
         SmartItemUIParameterAdapter parameterAdapter = Instantiate(parameterAdapterPrefab.gameObject, transform).GetComponent<SmartItemUIParameterAdapter>();
 
@@ -48,7 +48,7 @@ public class SmartItemListView : MonoBehaviour
         if(entityListHanlder != null)
             entityListHanlder.SetEntityList(entitiesList);
 
-        parameterAdapter.SetParameter(parameter);
+        parameterAdapter.SetParameter(parameter,smartItemValues);
         childrenList.Add(parameterAdapter.gameObject);
     }
 

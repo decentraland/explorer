@@ -30,16 +30,12 @@ namespace DCL.Components
 
             //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
             //TODO: Analyze if we can catch this upstream and stop the IEnumerator
-            if(isDestroyed)
+            if (isDestroyed)
                 yield break;
 
             Model prevModel = model;
             model = Utils.SafeFromJson<Model>(newJson);
-
-            bool forceUpdate = prevModel.volume != model.volume;
-            settingsVolume = Settings.i.generalSettings.sfxVolume;
-
-            UpdatePlayingState(forceUpdate);
+            ApplyCurrentModel(prevModel);
 
             yield return null;
         }
@@ -146,6 +142,21 @@ namespace DCL.Components
                 //Set volume to 0 (temporary solution until the refactor in #1421)
                 Interface.WebInterface.SendAudioStreamEvent(model.url, true, 0);
             }
+        }
+
+        public override void SetModel(object model)
+        {
+            Model prevModel = this.model;
+            this.model = (Model)model;
+            ApplyCurrentModel(prevModel);
+        }
+
+        private void ApplyCurrentModel(Model prevModel)
+        {
+            bool forceUpdate = prevModel.volume != model.volume;
+            settingsVolume = Settings.i.generalSettings.sfxVolume;
+
+            UpdatePlayingState(forceUpdate);
         }
     }
 }

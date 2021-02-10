@@ -10,9 +10,37 @@ using Newtonsoft.Json.Linq;
 using DCL.Configuration;
 using static ProtocolV2;
 using Environment = DCL.Environment;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public static partial class BuilderInWorldUtils
 {
+    public static T DeepCopy<T>(T other)
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(ms, other);
+            ms.Position = 0;
+            return (T)formatter.Deserialize(ms);
+        }
+    }
+
+    public static SmartItemAction CopySmartAction(SmartItemAction actionToCopy)
+    {
+        SmartItemAction newAction = new SmartItemAction();
+        newAction.id = actionToCopy.id;
+        newAction.label = actionToCopy.label;
+        newAction.parameters = new SmartItemParameter[actionToCopy.parameters.Length];
+
+        //for(int i = 0; actionToCopy.parameters.Length; i++)
+        //{
+        //    SmartItemParameter newParameter = DeepCopy(actionToCopy.parameters[i]);
+        //    newAction.parameters[i] = actionToCopy.parameters[i]
+        //}
+
+        return newAction;
+    }
     public static CatalogItem CreateFloorSceneObject()
     {
         CatalogItem floorSceneObject = new CatalogItem();

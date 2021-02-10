@@ -81,6 +81,7 @@ public class SceneObjectCatalogController : MonoBehaviour
         favoritesToggle.onValueChanged.AddListener(FavoritesFilter);
         assetPackToggle.onValueChanged.AddListener(AssetsPackFilter);
 
+
     }
 
     private void OnDestroy()

@@ -11,14 +11,19 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter, IEntityList
 
     List<DCLBuilderInWorldEntity> entitiesList;
 
+    private void Start()
+    {
+        dropDown.onValueChanged.AddListener(OnValueChange);
+    }
+
     public void SetEntityList(List<DCLBuilderInWorldEntity> entitiesList)
     {
         this.entitiesList = entitiesList;
     }
 
-    public override void SetParameter(SmartItemParameter parameter)
+    public override void SetInfo()
     {
-        base.SetParameter(parameter);
+        base.SetInfo();
 
         GenerateDropdownContent();
     }
@@ -39,6 +44,15 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter, IEntityList
         }
 
         dropDown.AddOptions(optionsLabelList);
+
+
+        string value = (string)GetParameterValue();
+
+        for (int i = 0; i < entitiesList.Count; i++)
+        {
+            if (entitiesList[i].rootEntity.entityId == value)
+                dropDown.SetValueWithoutNotify(i);
+        }
     }
 
     private void GetThumbnail(DCLBuilderInWorldEntity entity)
@@ -61,5 +75,14 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter, IEntityList
     public void SetThumbnail(Asset_Texture texture)
     {
         //TODO: Implement the Image of the entity for the dropdown
+    }
+
+    private void OnValueChange(int currentIndex)
+    {
+        foreach (DCLBuilderInWorldEntity entity in entitiesList)
+        {
+            if (entity.GetDescriptiveName() == dropDown.options[currentIndex].text)
+                SetParameterValue(entity.rootEntity.entityId);
+        }
     }
 }

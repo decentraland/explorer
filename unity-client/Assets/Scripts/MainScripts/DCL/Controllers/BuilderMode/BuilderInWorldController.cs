@@ -559,12 +559,12 @@ public class BuilderInWorldController : MonoBehaviour
 
             string jsonModel = JsonUtility.ToJson(model);
 
+            //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
             sceneToEdit.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
-            //Note (Adrian): This shouldn't work this way, we can't wait a frame to set the data of the component so we force it to update
-
+            //Note (Adrian): We can't wait to set the component 1 frame, so we set it
             if(entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-                 ((SmartItemComponent)baseComponent).ForceUpdate(jsonModel);
+                 ((SmartItemComponent)baseComponent).SetModel(model);
         }
 
         if (catalogItem.IsVoxel())

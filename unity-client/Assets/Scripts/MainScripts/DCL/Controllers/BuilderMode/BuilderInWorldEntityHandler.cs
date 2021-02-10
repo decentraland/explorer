@@ -71,6 +71,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityLock += ChangeEntityLockStatus;
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityRename += SetEntityName;
+        HUDController.i.builderInWorldMainHud.OnEntitySmartItemComponentUpdate += UpdateSmartItemComponentInKernel;
 
         actionController.OnRedo += ReSelectEntities;
         actionController.OnUndo += ReSelectEntities;
@@ -83,6 +84,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         actionController.OnRedo -= ReSelectEntities;
         actionController.OnUndo -= ReSelectEntities;
 
+        hideSelectedEntitiesAction.OnTriggered -= hideSelectedEntitiesDelegate;
+        showAllEntitiesAction.OnTriggered -= showAllEntitiesDelegate;
+
         if (HUDController.i.builderInWorldMainHud == null)
             return;
 
@@ -94,9 +98,6 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
         HUDController.i.builderInWorldMainHud.OnEntityRename -= SetEntityName;
-
-        hideSelectedEntitiesAction.OnTriggered -= hideSelectedEntitiesDelegate;
-        showAllEntitiesAction.OnTriggered -= showAllEntitiesDelegate;
     }
 
     private void Update()
@@ -711,6 +712,11 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     public void NotifyEntityIsCreated(DecentralandEntity entity)
     {
         builderInWorldBridge.AddEntityOnKernel(entity, sceneToEdit);
+    }
+
+    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate)
+    {
+        builderInWorldBridge.UpdateSmartItemComponent(entityToUpdate);
     }
 
     public void SetEntityName(DCLBuilderInWorldEntity entityToApply,string newName)

@@ -1079,7 +1079,7 @@ MonoBehaviour:
   m_CaptionImage: {fileID: 0}
   m_ItemText: {fileID: 6645906770740741698}
   m_ItemImage: {fileID: 0}
-  m_Value: 0
+  m_Value: -1
   m_Options:
     m_Options:
     - m_Text: Reset Action
@@ -1994,6 +1994,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityDropDown: {fileID: 9125676000891055594}
   actionDropDown: {fileID: 5203340576988586646}
+  optionsDropDown: {fileID: 6516142293551376863}
   smartItemListView: {fileID: 4922164096762811872}
 --- !u!114 &234509542720662296
 MonoBehaviour:

@@ -29,6 +29,7 @@ public class BuildModeHUDController : IHUD
     public event Action<DCLBuilderInWorldEntity> OnEntityLock;
     public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
     public event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
+    public event Action<DCLBuilderInWorldEntity> OnEntitySmartItemComponentUpdate;
 
     public event Action<Vector3> OnSelectedObjectPositionChange;
     public event Action<Vector3> OnSelectedObjectRotationChange;
@@ -63,6 +64,8 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
         entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
         entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
+        entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
+
         sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
         sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
 

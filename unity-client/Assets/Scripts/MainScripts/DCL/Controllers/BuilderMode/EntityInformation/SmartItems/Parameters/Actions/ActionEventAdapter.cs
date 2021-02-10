@@ -66,7 +66,7 @@ public class ActionEventAdapter : MonoBehaviour
         }
 
         smartItemListView.SetEntityList(actionEvent.entityList);
-        smartItemListView.SetSmartItemParameters(selectedAction.parameters);
+        smartItemListView.SetSmartItemParameters(selectedAction.parameters, selectedComponent.model.values.values);
     }
 
     void GenerateActionDropdownContent(SmartItemAction[] actions)

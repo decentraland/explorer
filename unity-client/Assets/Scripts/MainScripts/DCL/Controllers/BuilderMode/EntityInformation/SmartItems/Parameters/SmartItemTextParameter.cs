@@ -13,18 +13,19 @@ public class SmartItemTextParameter : SmartItemUIParameterAdapter
         textParameterInputField.onEndEdit.AddListener(OnValueChange);
     }
 
-    public override void SetParameter(SmartItemParameter parameter)
+    public override void SetInfo()
     {
-        base.SetParameter(parameter);
+        base.SetInfo();
 
         textParameterInputField.gameObject.SetActive(true);
 
         textParameterInputField.contentType = TMP_InputField.ContentType.Standard;
-        textParameterInputField.text = (string) parameter.@default;
+
+        textParameterInputField.SetTextWithoutNotify((string)GetParameterValue());
     }
 
     public void OnValueChange(string text)
     {
-        //TODO: Implement Smart Item action
+        SetParameterValue(text);
     }
 }

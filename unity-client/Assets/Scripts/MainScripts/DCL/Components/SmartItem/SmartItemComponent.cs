@@ -30,19 +30,15 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(string newJson)
         {
-            UpdateModel(newJson);
-            yield return null;
-        }
-
-        public void ForceUpdate(string json)
-        {
-            UpdateModel(json);
-        }
-
-        void UpdateModel(string json)
-        {
-            Model newModel = Utils.SafeFromJson<Model>(json);
+            Model newModel = Utils.SafeFromJson<Model>(newJson);
             model = newModel;
+            yield break;
         }
+
+        public override void SetModel(object model)
+        {
+            this.model = (Model)model;
+        }
+
     }
 }

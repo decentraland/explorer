@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DCL;
 using DCL.Components;
 using System.Collections;
@@ -51,18 +51,7 @@ public class AvatarModifierArea : BaseComponent
 
         // Update
         model = Utils.SafeFromJson<Model>(newJson);
-        if (model.modifiers != null)
-        {
-            // Add all listeners
-            foreach (string modifierKey in model.modifiers)
-            {
-                if (!modifiers.TryGetValue(modifierKey, out AvatarModifier modifier))
-                    continue;
-
-                OnAvatarEnter += modifier.ApplyModifier;
-                OnAvatarExit += modifier.RemoveModifier;
-            }
-        }
+        ApplyCurrentModel();
 
         yield break;
     }
@@ -153,6 +142,33 @@ public class AvatarModifierArea : BaseComponent
             foreach (GameObject avatar in avatars)
             {
                 OnAvatarExit?.Invoke(avatar);
+            }
+        }
+    }
+
+    public override void SetModel(object model)
+    {
+        RemoveAllModifiers();
+        OnAvatarEnter = null;
+        OnAvatarExit = null;
+
+        this.model = (Model)model;
+
+        ApplyCurrentModel();
+    }
+
+    private void ApplyCurrentModel()
+    {
+        if (model.modifiers != null)
+        {
+            // Add all listeners
+            foreach (string modifierKey in model.modifiers)
+            {
+                if (!modifiers.TryGetValue(modifierKey, out AvatarModifier modifier))
+                    continue;
+
+                OnAvatarEnter += modifier.ApplyModifier;
+                OnAvatarExit += modifier.RemoveModifier;
             }
         }
     }

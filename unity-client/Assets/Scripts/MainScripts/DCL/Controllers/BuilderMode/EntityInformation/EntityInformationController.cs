@@ -37,19 +37,20 @@ public class EntityInformationController : MonoBehaviour
     public event Action<Vector3> OnScaleChange;
 
     public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
+    public event Action<DCLBuilderInWorldEntity> OnSmartItemComponentUpdate;
 
-    DCLBuilderInWorldEntity currentEntity;
-    ParcelScene parcelScene;
+    private DCLBuilderInWorldEntity currentEntity;
+    private ParcelScene parcelScene;
 
-    bool isEnable = false;
-    bool isChangingName = false;
+    private bool isEnable = false;
+    private bool isChangingName = false;
 
-    int framesBetweenUpdate = 5;
-    int framesCount = 0;
+    private const int FRAMES_BETWEEN_UPDATES = 5;
+    private int framesCount = 0;
 
-    string loadedThumbnailURL;
+    private string loadedThumbnailURL;
 
-    AssetPromise_Texture loadedThumbnailPromise;
+    private AssetPromise_Texture loadedThumbnailPromise;
 
     private void Start()
     {
@@ -66,7 +67,7 @@ public class EntityInformationController : MonoBehaviour
         if (currentEntity == null)
             return;
 
-        if (framesCount >= framesBetweenUpdate)
+        if (framesCount >= FRAMES_BETWEEN_UPDATES)
         {
             UpdateInfo(currentEntity);
             framesCount = 0;
@@ -108,8 +109,11 @@ public class EntityInformationController : MonoBehaviour
 
     public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)
     {
-        if (currentEntity != null)
+        EntityDeselected();
+        if (currentEntity != null)       
             entity.onStatusUpdate -= UpdateEntityName;
+            
+
 
         currentEntity = entity;
         currentEntity.onStatusUpdate += UpdateEntityName;
@@ -147,6 +151,23 @@ public class EntityInformationController : MonoBehaviour
     {
         gameObject.SetActive(false);
         isEnable = false;
+
+        if (currentEntity != null)
+            EntityDeselected();
+    }
+
+    public void EntityDeselected()
+    {
+        if (currentEntity == null)
+            return;
+
+        if (currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
+        {
+            SmartItemComponent smartItemComponent = (SmartItemComponent)component;
+            SmartItemComponent.Model modelo =  smartItemComponent.model;
+            modelo.ToString();
+            OnSmartItemComponentUpdate?.Invoke(currentEntity);
+        }
     }
 
     public void UpdateEntityName(DCLBuilderInWorldEntity entity)
