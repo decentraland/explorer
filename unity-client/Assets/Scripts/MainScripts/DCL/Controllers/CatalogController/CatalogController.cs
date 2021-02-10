@@ -139,17 +139,19 @@ public class CatalogController : MonoBehaviour
 
     public static Promise<WearableItem> RequestWearable(string wearableId)
     {
-        Promise<WearableItem> promiseResult = new Promise<WearableItem>();
+        Promise<WearableItem> promiseResult;
 
         if (wearableCatalog.TryGetValue(wearableId, out WearableItem wearable))
         {
             wearablesInUseCounters[wearableId]++;
+            promiseResult = new Promise<WearableItem>();
             promiseResult.Resolve(wearable);
         }
         else
         {
             if (!awaitingWearablePromises.ContainsKey(wearableId))
             {
+                promiseResult = new Promise<WearableItem>();
                 awaitingWearablePromises.Add(wearableId, promiseResult);
 
                 // We accumulate all the requests during the same frames interval to send them all together
@@ -166,10 +168,11 @@ public class CatalogController : MonoBehaviour
 
     public static Promise<WearableItem[]> RequestOwnedWearables(string userId)
     {
-        Promise<WearableItem[]> promiseResult = new Promise<WearableItem[]>();
+        Promise<WearableItem[]> promiseResult;
 
         if (!awaitingWearablesByContextPromises.ContainsKey(OWNED_WEARABLES_CONTEXT))
         {
+            promiseResult = new Promise<WearableItem[]>();
             awaitingWearablesByContextPromises.Add(OWNED_WEARABLES_CONTEXT, promiseResult);
 
             if (!pendingWearablesByContextRequestedTimes.ContainsKey(OWNED_WEARABLES_CONTEXT))
@@ -192,10 +195,11 @@ public class CatalogController : MonoBehaviour
 
     public static Promise<WearableItem[]> RequestBaseWearables()
     {
-        Promise<WearableItem[]> promiseResult = new Promise<WearableItem[]>();
+        Promise<WearableItem[]> promiseResult;
 
         if (!awaitingWearablesByContextPromises.ContainsKey(BASE_WEARABLES_CONTEXT))
         {
+            promiseResult = new Promise<WearableItem[]>();
             awaitingWearablesByContextPromises.Add(BASE_WEARABLES_CONTEXT, promiseResult);
 
             if (!pendingWearablesByContextRequestedTimes.ContainsKey(BASE_WEARABLES_CONTEXT))
