@@ -173,6 +173,9 @@ namespace DCL
                 }
             }
 
+            // In this point, all the requests related to the avatar's wearables have been collected and sent to the CatalogController to be sent to kernel as a unique request.
+            // From here we wait for the response of the requested wearables and process them.
+
             if (avatarBodyPromise != null)
             {
                 yield return avatarBodyPromise;

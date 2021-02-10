@@ -22,13 +22,12 @@ public class CatalogController : MonoBehaviour
     private static Dictionary<string, int> wearablesInUseCounters = new Dictionary<string, int>();
     private static Dictionary<string, Promise<WearableItem>> awaitingWearablePromises = new Dictionary<string, Promise<WearableItem>>();
     private static Dictionary<string, float> pendingWearableRequestedTimes = new Dictionary<string, float>();
-    private static List<string> pendingRequestsToSend = new List<string>();
-
-    private static Dictionary<string, Promise<WearableItem[]>> pendingWearablesByContextPromises = new Dictionary<string, Promise<WearableItem[]>>();
+    private static Dictionary<string, Promise<WearableItem[]>> awaitingWearablesByContextPromises = new Dictionary<string, Promise<WearableItem[]>>();
     private static Dictionary<string, float> pendingWearablesByContextRequestedTimes = new Dictionary<string, float>();
-
-    private float timeSinceLastRequestsTimeOutCheck = 0f;
+    private static List<string> pendingRequestsToSend = new List<string>();
     private float timeSinceLastUnusedWearablesCheck = 0f;
+
+    
 
     public void Awake()
     {
@@ -169,9 +168,9 @@ public class CatalogController : MonoBehaviour
     {
         Promise<WearableItem[]> promiseResult = new Promise<WearableItem[]>();
 
-        if (!pendingWearablesByContextPromises.ContainsKey(OWNED_WEARABLES_CONTEXT))
+        if (!awaitingWearablesByContextPromises.ContainsKey(OWNED_WEARABLES_CONTEXT))
         {
-            pendingWearablesByContextPromises.Add(OWNED_WEARABLES_CONTEXT, promiseResult);
+            awaitingWearablesByContextPromises.Add(OWNED_WEARABLES_CONTEXT, promiseResult);
 
             if (!pendingWearablesByContextRequestedTimes.ContainsKey(OWNED_WEARABLES_CONTEXT))
                 pendingWearablesByContextRequestedTimes.Add(OWNED_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
@@ -185,7 +184,7 @@ public class CatalogController : MonoBehaviour
         }
         else
         {
-            pendingWearablesByContextPromises.TryGetValue(OWNED_WEARABLES_CONTEXT, out promiseResult);
+            awaitingWearablesByContextPromises.TryGetValue(OWNED_WEARABLES_CONTEXT, out promiseResult);
         }
 
         return promiseResult;
@@ -195,9 +194,9 @@ public class CatalogController : MonoBehaviour
     {
         Promise<WearableItem[]> promiseResult = new Promise<WearableItem[]>();
 
-        if (!pendingWearablesByContextPromises.ContainsKey(BASE_WEARABLES_CONTEXT))
+        if (!awaitingWearablesByContextPromises.ContainsKey(BASE_WEARABLES_CONTEXT))
         {
-            pendingWearablesByContextPromises.Add(BASE_WEARABLES_CONTEXT, promiseResult);
+            awaitingWearablesByContextPromises.Add(BASE_WEARABLES_CONTEXT, promiseResult);
 
             if (!pendingWearablesByContextRequestedTimes.ContainsKey(BASE_WEARABLES_CONTEXT))
                 pendingWearablesByContextRequestedTimes.Add(BASE_WEARABLES_CONTEXT, Time.realtimeSinceStartup);
@@ -211,7 +210,7 @@ public class CatalogController : MonoBehaviour
         }
         else
         {
-            pendingWearablesByContextPromises.TryGetValue(BASE_WEARABLES_CONTEXT, out promiseResult);
+            awaitingWearablesByContextPromises.TryGetValue(BASE_WEARABLES_CONTEXT, out promiseResult);
         }
 
         return promiseResult;
@@ -243,14 +242,14 @@ public class CatalogController : MonoBehaviour
 
     private void ResolvePendingWearablesByContextPromise(string context, WearableItem[] newWearablesAddedIntoCatalog = null, string errorMessage = "")
     {
-        if (pendingWearablesByContextPromises.TryGetValue(context, out Promise<WearableItem[]> promise))
+        if (awaitingWearablesByContextPromises.TryGetValue(context, out Promise<WearableItem[]> promise))
         {
             if (string.IsNullOrEmpty(errorMessage))
                 promise.Resolve(newWearablesAddedIntoCatalog);
             else
                 promise.Reject(errorMessage);
 
-            pendingWearablesByContextPromises.Remove(context);
+            awaitingWearablesByContextPromises.Remove(context);
         }
     }
 
