@@ -31,6 +31,7 @@ namespace DCL
         internal bool isLoading = false;
 
         private Coroutine loadCoroutine;
+        private List<string> wearablesInUse = new List<string>();
 
         private void Awake()
         {
@@ -110,6 +111,9 @@ namespace DCL
             isLoading = false;
             OnFailEvent = null;
             OnSuccessEvent = null;
+
+            CatalogController.RemoveWearablesInUse(wearablesInUse);
+            wearablesInUse.Clear();
         }
 
         void CleanUpUnusedItems()
@@ -174,9 +178,14 @@ namespace DCL
                 yield return avatarBodyPromise;
 
                 if (!string.IsNullOrEmpty(avatarBodyPromise.error))
+                {
                     Debug.LogError(avatarBodyPromise.error);
+                }
                 else
+                {
                     resolvedBody = avatarBodyPromise.value;
+                    wearablesInUse.Add(avatarBodyPromise.value.id);
+                }
             }
 
             foreach (var avatarWearablePromise in avatarWearablePromises)
@@ -184,9 +193,14 @@ namespace DCL
                 yield return avatarWearablePromise;
 
                 if (!string.IsNullOrEmpty(avatarWearablePromise.error))
+                {
                     Debug.LogError(avatarWearablePromise.error);
+                }
                 else
+                {
                     resolvedWearables.Add(avatarWearablePromise.value);
+                    wearablesInUse.Add(avatarWearablePromise.value.id);
+                }
             }
 
             if (resolvedBody == null)

@@ -62,6 +62,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
 
     private MouseCatcher mouseCatcher;
+    private List<string> loadedWearables = new List<string>();
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -144,7 +145,14 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     public void SetCardActive(bool active)
     {
         if (active && mouseCatcher != null)
+        {
             mouseCatcher.UnlockCursor();
+        }
+        else if (!active)
+        {
+            CatalogController.RemoveWearablesInUse(loadedWearables);
+            loadedWearables.Clear();
+        }
 
         cardCanvas.enabled = active;
         CommonScriptableObjects.playerInfoCardVisibleState.Set(active);
@@ -173,6 +181,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
             .Then((ownedWearables) =>
             {
                 currentUserProfile.SetInventory(ownedWearables.Select(x => x.id).ToArray());
+                loadedWearables.AddRange(ownedWearables.Select(x => x.id));
 
                 var collectiblesIds = currentUserProfile.GetInventoryItemsIds();
                 for (int index = 0; index < collectiblesIds.Length; index++)
