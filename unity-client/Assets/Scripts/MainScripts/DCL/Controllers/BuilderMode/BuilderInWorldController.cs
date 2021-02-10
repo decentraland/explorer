@@ -889,6 +889,7 @@ public class BuilderInWorldController : MonoBehaviour
             Debug.unityLogger.logEnabled = true;
             Debug.Log("Access to X:" + parcelWithAccess.x + "   Y:" + parcelWithAccess.y + "     ROLE: " + parcelWithAccess.landRole);
             Debug.unityLogger.logEnabled = false;
+
             foreach (Vector2Int parcel in scene.sceneData.parcels)
             {
                 if (parcel.x == parcelWithAccess.x && parcel.y == parcelWithAccess.y) return true;
