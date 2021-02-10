@@ -8,12 +8,7 @@ import {
 import { getSceneNameFromJsonData } from '../shared/selectors'
 import { parseParcelPosition } from '../atomicHelpers/parcelScenePositions'
 import { UnityPortableExperienceScene } from './UnityParcelScene'
-import {
-  forceStopParcelSceneWorker,
-  getParcelSceneID,
-  getSceneWorkerBySceneID,
-  loadParcelScene
-} from 'shared/world/parcelSceneManager'
+import { forceStopParcelSceneWorker, getSceneWorkerBySceneID, loadParcelScene } from 'shared/world/parcelSceneManager'
 import { unityInterface } from './UnityInterface'
 import { resolveUrlFromUrn } from '@dcl/urn-resolver'
 
@@ -33,11 +28,9 @@ export async function spawnPortableExperienceScene(
   parentCid: string
 ): Promise<PortableExperienceHandle> {
   const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(sceneUrn))
-
   loadParcelScene(scene, undefined, true)
-  const parcelSceneId = getParcelSceneID(scene)
   unityInterface.CreateUIScene({
-    id: parcelSceneId,
+    id: sceneUrn,
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
     contents: scene.data.data.contents,
@@ -80,8 +73,9 @@ export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {
   const sceneJsonMapping = mappingsResponse.contents.find(($) => $.file === 'scene.json')
 
   if (sceneJsonMapping) {
-    const baseUrl: string = mappingsUrl.slice(0, -1 * 'mappings'.length)
-    const sceneResponse = await fetch(`${baseUrl}${sceneJsonMapping.hash}`)
+    const baseUrl: string = new URL('.', mappingsUrl).toString()
+    const sceneUrl = `${baseUrl}${sceneJsonMapping.hash}`
+    const sceneResponse = await fetch(sceneUrl)
 
     if (sceneResponse.ok) {
       const scene = (await sceneResponse.json()) as SceneJsonData

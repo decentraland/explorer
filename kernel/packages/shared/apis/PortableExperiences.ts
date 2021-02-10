@@ -58,12 +58,7 @@ export class PortableExperiences extends ExposableAPI {
   async exit(): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
 
-    const portableExperienceUrn: string = buildPortableExperienceUrn(parcelIdentity)
-    await killPortableExperienceScene(portableExperienceUrn)
+    await killPortableExperienceScene(parcelIdentity.cid)
     return true
   }
-}
-
-function buildPortableExperienceUrn(parcelIdentity: ParcelIdentity): string {
-  return `urn:decentraland:off-chain:static-portable-experiences:${parcelIdentity.cid}`
 }

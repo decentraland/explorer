@@ -465,9 +465,7 @@ export class BrowserInterface {
   }
 
   public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
-    const portableExperienceUrn: string = `urn:decentraland:off-chain:static-portable-experiences:${data.portableExperienceId}`
-
-    await killPortableExperienceScene(portableExperienceUrn)
+    await killPortableExperienceScene(data.portableExperienceId)
   }
 }
 
