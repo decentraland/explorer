@@ -16,8 +16,8 @@ public class CatalogController : MonoBehaviour
 
     public static CatalogController i { get; private set; }
 
-    public static BaseDictionary<string, Item> itemCatalog => DataStore.Catalog.items;
-    public static BaseDictionary<string, WearableItem> wearableCatalog => DataStore.Catalog.wearables;
+    public static BaseDictionary<string, Item> itemCatalog => DataStore.i.items;
+    public static BaseDictionary<string, WearableItem> wearableCatalog => DataStore.i.wearables;
 
     private static Dictionary<string, int> wearablesInUseCounters = new Dictionary<string, int>();
     private static Dictionary<string, Promise<WearableItem>> awaitingWearablePromises = new Dictionary<string, Promise<WearableItem>>();
