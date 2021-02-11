@@ -17,6 +17,7 @@ public class ActionEventAdapter : MonoBehaviour
     ActionEvent actionEvent;
 
     SmartItemComponent selectedComponent;
+    DCLBuilderInWorldEntity selectedEntity;
     List<DCLBuilderInWorldEntity> filteredList = new List<DCLBuilderInWorldEntity>();
 
     private void Start()
@@ -36,13 +37,14 @@ public class ActionEventAdapter : MonoBehaviour
 
     void SelectedEntity(int number)
     {
-        if (filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-        {
-            selectedComponent = (SmartItemComponent)baseComponent;
-            GenerateActionDropdownContent(selectedComponent.model.actions);
+        if (!filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
+            return;
 
-            GenerateParametersFromSelectedOption();
-        }
+        selectedEntity = filteredList[number];
+        selectedComponent = (SmartItemComponent)baseComponent;
+        GenerateActionDropdownContent(filteredList[number].GetSmartItemActions());
+
+        GenerateParametersFromSelectedOption();
     }
 
     void GenerateParametersFromSelectedOption()
@@ -55,7 +57,7 @@ public class ActionEventAdapter : MonoBehaviour
         string label = actionDropDown.options[index].text;
 
         SmartItemAction selectedAction = null;
-        foreach (SmartItemAction action in selectedComponent.model.actions)
+        foreach (SmartItemAction action in selectedEntity.GetSmartItemActions())
         {
             if (action.label == label)
             {
@@ -66,7 +68,7 @@ public class ActionEventAdapter : MonoBehaviour
         }
 
         smartItemListView.SetEntityList(actionEvent.entityList);
-        smartItemListView.SetSmartItemParameters(selectedAction.parameters, selectedComponent.model.values.values);
+        smartItemListView.SetSmartItemParameters(selectedAction.parameters, selectedComponent.model.values);
     }
 
     void GenerateActionDropdownContent(SmartItemAction[] actions)

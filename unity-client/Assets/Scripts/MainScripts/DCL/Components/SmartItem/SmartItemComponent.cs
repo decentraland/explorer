@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
 
@@ -8,9 +9,7 @@ namespace DCL.Components
     {
         public class Model
         {
-            public SmartItemAction[] actions;
-            public SmartItemParameter[] parameters;
-            public SmartItemValues values;
+            public Dictionary<object, object> values;
         }
 
         public Model model;
@@ -18,14 +17,6 @@ namespace DCL.Components
         public override object GetModel()
         {
             return model;
-        }
-
-        public bool HasActions()
-        {
-            if (model.actions.Length > 0)
-                return true;
-
-            return false;
         }
 
         public override IEnumerator ApplyChanges(string newJson)

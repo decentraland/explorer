@@ -6,24 +6,14 @@ using UnityEngine;
 namespace DCL.Components
 {
     [System.Serializable]
-    public class SmartItemValues
-    {
-        public Dictionary<object, object> values = new Dictionary<object, object>();
-    }
-
-    [System.Serializable]
     public class SmartItemActionable
     {
         [NonSerialized]
         public string actionableId;
         public string entityId;
         public string actionId;
-        public SmartItemValues parameterValue = new SmartItemValues();
+        public Dictionary<object, object> values = new Dictionary<object, object>();
 
-        public SmartItemActionable()
-        {
-            actionableId = Guid.NewGuid().ToString();
-        }
     }
 
     [System.Serializable]

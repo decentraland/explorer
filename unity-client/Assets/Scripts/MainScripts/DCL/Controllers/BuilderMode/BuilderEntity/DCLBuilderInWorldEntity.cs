@@ -103,19 +103,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
-    public bool HasSmartItemComponent()
-    {
-        return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
-    }
-
-    public bool HasSmartItemActions()
-    {
-        if (!rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
-            return false;
-
-        return ((SmartItemComponent)component).HasActions();
-    }
-
     public CatalogItem GetCatalogItemAssociated()
     {
         if (associatedCatalogItem != null)
@@ -209,6 +196,32 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     #region Components
 
+    #region SmartItem
+
+    public bool HasSmartItemComponent()
+    {
+        return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
+    }
+
+    public bool HasSmartItemActions()
+    {
+        return GetCatalogItemAssociated().HasActions();
+    }
+
+    public SmartItemParameter[] GetSmartItemParameters()
+    {
+        return GetCatalogItemAssociated().parameters;
+    }
+
+    public SmartItemAction[] GetSmartItemActions()
+    {
+        return GetCatalogItemAssociated().actions;
+    }
+
+    #endregion
+
+    #region Locked
+
     public bool GetIsLockedValue()
     {
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
@@ -242,6 +255,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
+    #endregion
+
+    #region DescriptiveName
+
     public void SetDescriptiveName(string newName)
     {
 
@@ -267,6 +284,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         return "";
     }
+
+    #endregion
+
     #endregion
 
     void ShapeInit()
@@ -278,8 +298,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         CreateCollidersForEntity(rootEntity);
 
-        if (isFloor) IsLocked = true;
-        if (IsEntityAVoxel()) SetEntityAsVoxel();
+        if (isFloor)
+            IsLocked = true;
+        if (IsEntityAVoxel())
+            SetEntityAsVoxel();
         if(isNFT)
         {
             foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
@@ -476,9 +498,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     bool IsEntityAVoxel()
     {
-        if (rootEntity.meshesInfo?.currentShape == null) return false;
-        if (rootEntity.meshesInfo.renderers?.Length <= 0) return false;
-        if (rootEntity.meshesInfo.mergedBounds.size != Vector3.one) return false;
+        if (rootEntity.meshesInfo?.currentShape == null)
+            return false;
+        if (rootEntity.meshesInfo.renderers?.Length <= 0)
+            return false;
+        if (rootEntity.meshesInfo.mergedBounds.size != Vector3.one)
+            return false;
         return true;
     }
 }

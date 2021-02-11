@@ -123,7 +123,7 @@ public class EntityInformationController : MonoBehaviour
         if (entity.HasSmartItemComponent())
         {
             if(entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-                smartItemListView.SetSmartItemParameters((SmartItemComponent) baseComponent);
+                smartItemListView.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent) baseComponent).model.values);
         }
         else
         {
@@ -154,6 +154,7 @@ public class EntityInformationController : MonoBehaviour
 
         if (currentEntity != null)
             EntityDeselected();
+        currentEntity = null;
     }
 
     public void EntityDeselected()

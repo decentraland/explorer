@@ -64,4 +64,12 @@ public class CatalogItem
     {
         return isVoxel;
     }
+
+    public bool HasActions()
+    {
+        if (actions.Length > 0)
+            return true;
+        
+        return false;
+    }
 }

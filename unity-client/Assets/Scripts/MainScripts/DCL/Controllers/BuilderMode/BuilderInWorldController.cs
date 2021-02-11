@@ -553,9 +553,7 @@ public class BuilderInWorldController : MonoBehaviour
         if(catalogItem.IsSmartItem())
         {
             SmartItemComponent.Model model = new SmartItemComponent.Model();
-            model.actions = catalogItem.actions;
-            model.parameters = catalogItem.parameters;
-            model.values = new SmartItemValues();
+            model.values = new Dictionary<object, object>();
 
             string jsonModel = JsonUtility.ToJson(model);
 

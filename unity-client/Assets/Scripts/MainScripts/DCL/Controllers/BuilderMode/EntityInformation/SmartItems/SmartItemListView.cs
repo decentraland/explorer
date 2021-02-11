@@ -13,11 +13,6 @@ public class SmartItemListView : MonoBehaviour
 
     List<GameObject> childrenList = new List<GameObject>();
 
-    public void SetSmartItemParameters(SmartItemComponent smartItemComponent)
-    {
-        SetSmartItemParameters(smartItemComponent.model.parameters, smartItemComponent.model.values.values);
-    }
-
     public void SetSmartItemParameters(SmartItemParameter[] parameters, Dictionary<object,object> smartItemValues)
     {
         for(int i = 0; i <childrenList.Count;i++)

@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Components;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -77,16 +78,16 @@ public class SmartItemActionParameter : SmartItemUIParameterAdapter, IEntityList
     public void CreateEventAction()
     {
         var actionsGeneric = GetParameterValue();
-        if (actionsGeneric == null)
-            return;
+
         List<SmartItemActionable> actions;
 
-        if ((actionsGeneric is List<SmartItemActionable>))
+        if (actionsGeneric != null && (actionsGeneric is List<SmartItemActionable>))
             actions = (List<SmartItemActionable>)actionsGeneric;
         else
             actions = new List<SmartItemActionable>();
 
-        SmartItemActionable action = new SmartItemActionable();       
+        SmartItemActionable action = new SmartItemActionable();
+        action.actionableId = Guid.NewGuid().ToString();
         actions.Add(action);     
         AddEventAction(action);
         SetParameterValue(actions);

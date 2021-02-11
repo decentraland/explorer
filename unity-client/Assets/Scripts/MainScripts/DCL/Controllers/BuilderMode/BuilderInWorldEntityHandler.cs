@@ -716,7 +716,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
 
     public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate)
     {
-        builderInWorldBridge.UpdateSmartItemComponent(entityToUpdate);
+        builderInWorldBridge.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
     }
 
     public void SetEntityName(DCLBuilderInWorldEntity entityToApply,string newName)

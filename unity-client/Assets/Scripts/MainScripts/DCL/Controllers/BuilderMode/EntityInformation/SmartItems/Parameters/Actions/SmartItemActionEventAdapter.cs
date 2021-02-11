@@ -19,7 +19,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
 
     private SmartItemActionEvent actionEvent;
 
-    private SmartItemComponent selectedComponent;
+    private DCLBuilderInWorldEntity selectedEntity;
     private List<DCLBuilderInWorldEntity> filteredList = new List<DCLBuilderInWorldEntity>();
 
     private void Start()
@@ -62,11 +62,10 @@ public class SmartItemActionEventAdapter : MonoBehaviour
     public void SetContent(SmartItemActionEvent actionEvent)
     {
         this.actionEvent = actionEvent;
-        actionEvent.smartItemActionable = new SmartItemActionable();
         filteredList = BuilderInWorldUtils.FilterEntitiesBySmartItemComponentAndActions(actionEvent.entityList);
 
         GenerateEntityDropdownContent();
-        SelectedEntity(0);
+        SelectedEntity(entityDropDown.value);
     }
 
     private void SelectedEntity(int number)
@@ -75,8 +74,8 @@ public class SmartItemActionEventAdapter : MonoBehaviour
             return;
 
         actionEvent.smartItemActionable.entityId = filteredList[number].rootEntity.entityId;
-        selectedComponent = (SmartItemComponent) component;
-        GenerateActionDropdownContent(selectedComponent.model.actions);
+        selectedEntity = filteredList[number];
+        GenerateActionDropdownContent(filteredList[number].GetSmartItemActions());
 
         GenerateParametersFromSelectedOption();   
     }
@@ -91,7 +90,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
         string label = actionDropDown.options[index].text;
 
         SmartItemAction selectedAction = null;
-        foreach (SmartItemAction action in selectedComponent.model.actions)
+        foreach (SmartItemAction action in selectedEntity.GetSmartItemActions())
         {
             if (action.label == label)
             {
@@ -102,7 +101,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
 
         actionEvent.smartItemActionable.actionId = selectedAction.id;
         smartItemListView.SetEntityList(actionEvent.entityList);
-        smartItemListView.SetSmartItemParameters(selectedAction.parameters, actionEvent.values);
+        smartItemListView.SetSmartItemParameters(selectedAction.parameters, actionEvent.smartItemActionable.values);
     }
 
     void GenerateActionDropdownContent(SmartItemAction[] actions)
