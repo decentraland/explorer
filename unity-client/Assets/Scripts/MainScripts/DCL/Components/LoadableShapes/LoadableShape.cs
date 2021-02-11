@@ -47,7 +47,7 @@ namespace DCL.Components
             return result as T;
         }
 
-        public LoadableShape(ParcelScene scene) : base(scene)
+        public LoadableShape(IParcelScene scene) : base(scene)
         {
         }
 
@@ -81,11 +81,11 @@ namespace DCL.Components
         where LoadWrapperType : LoadWrapper, new()
         where LoadWrapperModelType : LoadableShape.Model, new()
     {
-
         private bool isLoaded = false;
         private bool failed = false;
         private event Action<BaseDisposable> OnReadyCallbacks;
         public System.Action<DecentralandEntity> OnEntityShapeUpdated;
+
         new public LoadWrapperModelType model
         {
             get
@@ -110,7 +110,7 @@ namespace DCL.Components
             set { base.previousModel = value; }
         }
 
-        public LoadableShape(ParcelScene scene) : base(scene)
+        public LoadableShape(IParcelScene scene) : base(scene)
         {
             OnDetach += DetachShape;
             OnAttach += AttachShape;
@@ -168,7 +168,7 @@ namespace DCL.Components
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
                 loadableShape.initialVisibility = model.visible;
-                loadableShape.Load(model.src, OnLoadCompleted, OnLoadFailed);               
+                loadableShape.Load(model.src, OnLoadCompleted, OnLoadFailed);
             }
             else
             {

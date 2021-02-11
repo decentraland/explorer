@@ -10,7 +10,7 @@ namespace DCL.Models
     [Serializable]
     public class DecentralandEntity : DCL.ICleanable, DCL.ICleanableEventDispatcher
     {
-        public ParcelScene scene;
+        public IParcelScene scene;
         public bool markedForCleanup = false;
 
         public Dictionary<string, DecentralandEntity> children = new Dictionary<string, DecentralandEntity>();
@@ -166,7 +166,7 @@ namespace DCL.Models
             sharedComponents.Add(componentType, component);
         }
 
-        public void RemoveSharedComponent(System.Type targetType, bool triggerDettaching = true)
+        public void RemoveSharedComponent(System.Type targetType, bool triggerDetaching = true)
         {
             if (sharedComponents.TryGetValue(targetType, out BaseDisposable component))
             {
@@ -175,7 +175,7 @@ namespace DCL.Models
 
                 sharedComponents.Remove(targetType);
 
-                if (triggerDettaching)
+                if (triggerDetaching)
                     component.DetachFrom(this, targetType);
             }
         }
@@ -195,6 +195,7 @@ namespace DCL.Models
                     return true;
                 }
             }
+
             component = null;
             return false;
         }

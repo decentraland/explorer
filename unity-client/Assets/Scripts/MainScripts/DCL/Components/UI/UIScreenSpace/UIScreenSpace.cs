@@ -4,6 +4,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,7 +20,7 @@ namespace DCL.Components
         private DCLCharacterPosition currentCharacterPosition;
         private CanvasGroup canvasGroup;
 
-        public UIScreenSpace(ParcelScene scene) : base(scene)
+        public UIScreenSpace(IParcelScene scene) : base(scene)
         {
             DCLCharacterController.OnCharacterMoved += OnCharacterMoved;
 
@@ -49,10 +50,8 @@ namespace DCL.Components
         {
             model = Utils.SafeFromJson<Model>(newJson);
 
-            if (scene.uiScreenSpace == null)
+            if (scene.GetSharedComponent<UIScreenSpace>() == null)
             {
-                scene.uiScreenSpace = this;
-
                 InitializeCanvas();
             }
             else if (DCLCharacterController.i != null)
@@ -115,7 +114,7 @@ namespace DCL.Components
 
             GameObject canvasGameObject = new GameObject("UIScreenSpace");
             canvasGameObject.layer = LayerMask.NameToLayer("UI");
-            canvasGameObject.transform.SetParent(scene.transform);
+            canvasGameObject.transform.SetParent(scene.GetSceneTransform());
             canvasGameObject.transform.ResetLocalTRS();
 
             // Canvas

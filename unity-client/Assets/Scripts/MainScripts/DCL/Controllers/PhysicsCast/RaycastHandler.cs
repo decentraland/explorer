@@ -8,7 +8,7 @@ namespace DCL.Helpers
     {
         private void SetHitInfo(ref HitInfo hitInfo, RaycastHit hit)
         {
-            hitInfo.point = Environment.i.world.state.ConvertUnityToScenePosition(hit.point);
+            hitInfo.point = WorldStateUtils.ConvertUnityToScenePosition(hit.point);
             hitInfo.distance = hit.distance;
             hitInfo.normal = hit.normal;
             hitInfo.collider = hit.collider;
@@ -28,7 +28,7 @@ namespace DCL.Helpers
             return false;
         }
 
-        public RaycastResultInfo Raycast(Ray ray, float distance, LayerMask layerMaskTarget, ParcelScene scene)
+        public RaycastResultInfo Raycast(Ray ray, float distance, LayerMask layerMaskTarget, IParcelScene scene)
         {
             RaycastResultInfo raycastInfo = new RaycastResultInfo();
 
@@ -43,7 +43,7 @@ namespace DCL.Helpers
             return raycastInfo;
         }
 
-        public RaycastResultInfoList RaycastAll(Ray ray, float distance, LayerMask layerMaskTarget, ParcelScene scene)
+        public RaycastResultInfoList RaycastAll(Ray ray, float distance, LayerMask layerMaskTarget, IParcelScene scene)
         {
             RaycastResultInfoList raycastInfo = new RaycastResultInfoList();
             raycastInfo.ray = ray;
@@ -67,7 +67,7 @@ namespace DCL.Helpers
             return raycastInfo;
         }
 
-        private void SetRaycastInfoData(ref RaycastHitInfo hitInfo, ParcelScene scene)
+        private void SetRaycastInfoData(ref RaycastHitInfo hitInfo, IParcelScene scene)
         {
             if (hitInfo.hit.collider == null)
                 return;
@@ -77,7 +77,7 @@ namespace DCL.Helpers
 
             if (scene != null)
                 hitInfo.isValid = info.scene == scene;
-            else if (scene == null && Environment.i.world.state.IsCharacterInsideScene(info.scene))
+            else if (scene == null && WorldStateUtils.IsCharacterInsideScene(info.scene))
                 hitInfo.isValid = true;
         }
     }

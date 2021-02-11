@@ -73,7 +73,9 @@ namespace DCL
             // NOTE: in case of a single scene loaded (preview or builder) sceneId is set to null when stepping outside
             if (didHit && validCurrentSceneId && validCurrentScene)
             {
-                GraphicRaycaster raycaster = worldState.loadedScenes[currentSceneId].uiScreenSpace?.graphicRaycaster;
+                UIScreenSpace currentUIScreenSpace = worldState.loadedScenes[currentSceneId].GetSharedComponent<UIScreenSpace>();
+                GraphicRaycaster raycaster = currentUIScreenSpace?.graphicRaycaster;
+
                 if (raycaster)
                 {
                     uiGraphicRaycastPointerEventData.position = new Vector2(Screen.width / 2, Screen.height / 2);
