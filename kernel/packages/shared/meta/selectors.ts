@@ -1,6 +1,6 @@
-import { CommsConfig, MessageOfTheDayConfig, RootMetaState } from './types'
+import { CommsConfig, FeatureFlags, MessageOfTheDayConfig, RootMetaState } from './types'
 import { Vector2Component } from 'atomicHelpers/landHelpers'
-import { getCatalystNodesDefaultURL, VOICE_CHAT_DISABLED_FLAG, VOICE_CHAT_ENABLED_FLAG, WORLD_EXPLORER } from 'config'
+import { getCatalystNodesDefaultURL, VOICE_CHAT_DISABLED_FLAG, WORLD_EXPLORER } from 'config'
 
 export const getAddedServers = (store: RootMetaState): string[] => {
   const { config } = store.meta
@@ -33,16 +33,26 @@ export const isMOTDInitialized = (store: RootMetaState): boolean =>
 export const getMessageOfTheDay = (store: RootMetaState): MessageOfTheDayConfig | null =>
   store.meta.config.world ? store.meta.config.world.messageOfTheDay || null : null
 
-export const isVoiceChatEnabled = (store: RootMetaState): boolean => {
-  if (!WORLD_EXPLORER || VOICE_CHAT_DISABLED_FLAG) return false
-  return !!getCommsConfig(store).voiceChatEnabled || VOICE_CHAT_ENABLED_FLAG
+export const isVoiceChatEnabledFor = (store: RootMetaState, userId: string): boolean =>
+  WORLD_EXPLORER && !VOICE_CHAT_DISABLED_FLAG
+
+export const isFeatureEnabled = (store: RootMetaState, featureName: FeatureFlags, ifNotSet: boolean): boolean => {
+  const queryParamFlag = toUrlFlag(featureName)
+  if (location.search.includes(`DISABLE_${queryParamFlag}`)) {
+    return false
+  } else if (location.search.includes(`ENABLE_${queryParamFlag}`)) {
+    return true
+  } else {
+    const featureFlag = store.meta.config?.featureFlags?.[`explorer-${featureName}`]
+    return featureFlag ?? ifNotSet
+  }
 }
 
-export const getVoiceChatAllowlist = (store: RootMetaState): string[] => getCommsConfig(store).voiceChatAllowlist ?? []
-
-export const isVoiceChatEnabledFor = (store: RootMetaState, userId: string): boolean =>
-  isVoiceChatEnabled(store) ||
-  (getVoiceChatAllowlist(store).includes(userId) && !VOICE_CHAT_DISABLED_FLAG && WORLD_EXPLORER)
+/** Convert camel case to upper snake case */
+function toUrlFlag(key: string) {
+  const result = key.replace(/([A-Z])/g, ' $1')
+  return result.split(' ').join('_').toUpperCase()
+}
 
 export const getCatalystNodesEndpoint = (store: RootMetaState): string =>
   store.meta.config.servers?.catalystsNodesEndpoint ?? getCatalystNodesDefaultURL()
