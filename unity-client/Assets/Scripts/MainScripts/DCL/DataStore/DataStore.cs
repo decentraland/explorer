@@ -2,17 +2,21 @@ using Variables.RealmsInfo;
 
 namespace DCL
 {
-    public static class DataStore
+    public class DataStore
     {
-        static public readonly CurrentRealmVariable playerRealm = new CurrentRealmVariable();
-        static public readonly RealmsVariable realmsInfo = new RealmsVariable();
-        static public readonly DebugConfig debugConfig = new DebugConfig();
-        static public readonly BaseVariable<bool> isSignUpFlow = new BaseVariable<bool>();
+        private static DataStore instance = new DataStore();
+        public static DataStore i { get => instance; }
+        public static void Clear() => instance = new DataStore();
 
-        public static class Catalog
+        public readonly CurrentRealmVariable playerRealm = new CurrentRealmVariable();
+        public readonly RealmsVariable realmsInfo = new RealmsVariable();
+        public readonly DebugConfig debugConfig = new DebugConfig();
+        public readonly BaseVariable<bool> isSignUpFlow = new BaseVariable<bool>();
+
+        public class Catalog
         {
-            static public readonly BaseDictionary<string, WearableItem> wearables = new BaseDictionary<string, WearableItem>();
-            static public readonly BaseDictionary<string, Item> items = new BaseDictionary<string, Item>();
+            public readonly BaseDictionary<string, WearableItem> wearables = new BaseDictionary<string, WearableItem>();
+            public readonly BaseDictionary<string, Item> items = new BaseDictionary<string, Item>();
         }
     }
 }
