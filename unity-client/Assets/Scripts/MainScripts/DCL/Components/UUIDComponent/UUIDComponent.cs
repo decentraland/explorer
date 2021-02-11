@@ -90,6 +90,5 @@ namespace DCL
                 Setup(scene, entity, model);
             }
         }
-     
     }
 }

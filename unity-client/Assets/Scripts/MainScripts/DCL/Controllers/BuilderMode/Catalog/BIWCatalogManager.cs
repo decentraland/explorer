@@ -34,6 +34,47 @@ public class BIWCatalogManager
         return DataStore.BuilderInWorld.catalogItemPackDict.GetValues();
     }
 
+    public static List<CatalogItemPack> GetCatalogItemPacksFilteredByCategories()
+    {
+        var assetPacks = DataStore.BuilderInWorld.catalogItemPackDict.GetValues();
+
+        Dictionary<string, CatalogItemPack> assetPackDic = new Dictionary<string, CatalogItemPack>();
+
+        foreach (CatalogItemPack catalogAssetPack in assetPacks)
+        {
+            foreach (CatalogItem catalogItem in catalogAssetPack.assets)
+            {
+                if (!assetPackDic.ContainsKey(catalogItem.category))
+                {
+                    CatalogItemPack categoryAssetPack = new CatalogItemPack();
+                    categoryAssetPack.SetThumbnailULR(catalogItem.thumbnailURL);
+                    categoryAssetPack.title = catalogItem.category;
+                    categoryAssetPack.assets = new List<CatalogItem>();
+                    catalogItem.categoryName = catalogAssetPack.title;
+                    categoryAssetPack.assets.Add(catalogItem);
+
+                    if (!string.IsNullOrEmpty(categoryAssetPack.title))
+                    {
+                        if (categoryAssetPack.title.Length == 1)
+                            categoryAssetPack.title = categoryAssetPack.title.ToUpper();
+                        else
+                            categoryAssetPack.title = char.ToUpper(categoryAssetPack.title[0]) + categoryAssetPack.title.Substring(1);
+                    }
+
+                    assetPackDic.Add(catalogItem.category, categoryAssetPack);
+                    continue;
+                }
+                else
+                {
+                    catalogItem.categoryName = catalogAssetPack.title;
+                    assetPackDic[catalogItem.category].assets.Add(catalogItem);
+                }
+            }
+        }
+
+        return assetPackDic.Values.ToList();
+    }
+
     private void FilterCategories()
     {
         List<SceneAssetPack> categoryList = new List<SceneAssetPack>();

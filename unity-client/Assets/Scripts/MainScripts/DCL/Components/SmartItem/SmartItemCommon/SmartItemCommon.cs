@@ -13,7 +13,6 @@ namespace DCL.Components
         public string entityId;
         public string actionId;
         public Dictionary<object, object> values = new Dictionary<object, object>();
-
     }
 
     [System.Serializable]

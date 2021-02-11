@@ -29,7 +29,6 @@ public class BuilderInWorldBridge : MonoBehaviour
 
     public void UpdateSmartItemComponent(DCLBuilderInWorldEntity entity, ParcelScene scene)
     {
-
         SmartItemComponent smartItemComponent = entity.rootEntity.TryGetComponent<SmartItemComponent>(); 
         if (smartItemComponent == null)
            return;
@@ -41,7 +40,6 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.data = smartItemComponent.model.values;
 
         ChangeEntityComponent(entitySingleComponentPayload, scene);
-
     }
 
     public void PublishSceneResult(string payload)

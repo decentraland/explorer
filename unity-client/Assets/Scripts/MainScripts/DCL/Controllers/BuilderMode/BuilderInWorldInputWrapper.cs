@@ -103,7 +103,6 @@ public class BuilderInWorldInputWrapper : MonoBehaviour
         OnMouseDragRaw?.Invoke(buttonId, mousePosition, axisX, axisY);
     }
 
-
     private bool CanDrag()
     {
         if (!canInputBeMade ||

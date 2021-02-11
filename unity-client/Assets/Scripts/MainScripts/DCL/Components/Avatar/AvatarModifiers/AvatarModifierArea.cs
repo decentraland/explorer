@@ -172,5 +172,4 @@ public class AvatarModifierArea : BaseComponent
             }
         }
     }
-
 }

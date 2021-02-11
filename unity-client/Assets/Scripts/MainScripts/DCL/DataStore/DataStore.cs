@@ -13,6 +13,7 @@ namespace DCL
         {
             static public readonly BaseDictionary<string, CatalogItem> catalogItemDict = new BaseDictionary<string, CatalogItem>();
             static public readonly BaseDictionary<string, CatalogItemPack> catalogItemPackDict = new BaseDictionary<string, CatalogItemPack>();
+            static public readonly BaseDictionary<string, CatalogItemPack> catalogItemCategoryDict = new BaseDictionary<string, CatalogItemPack>();
         }
     }
 }

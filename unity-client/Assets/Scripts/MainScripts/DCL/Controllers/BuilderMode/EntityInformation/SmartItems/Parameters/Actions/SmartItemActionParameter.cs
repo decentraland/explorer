@@ -47,6 +47,8 @@ public class SmartItemActionParameter : SmartItemUIParameterAdapter, IEntityList
     {
         base.SetInfo();
 
+        KEY_NAME = currentParameter.id;
+
         var actionsGeneric = GetParameterValue();
         if (actionsGeneric == null || !(actionsGeneric is List<SmartItemActionable>))
             return;

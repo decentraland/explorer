@@ -18,19 +18,19 @@ public class FavoritesController
         return favoritesSceneObjects;
     }
 
-    public void ToggleFavoriteState(CatalogItem sceneObject, CatalogItemAdapter adapter)
+    public void ToggleFavoriteState(CatalogItem catalogItem, CatalogItemAdapter adapter)
     {
-        if (!favoritesSceneObjects.Contains(sceneObject))
+        if (!favoritesSceneObjects.Contains(catalogItem))
         {
-            favoritesSceneObjects.Add(sceneObject);
-            sceneObject.SetFavorite(true);
+            favoritesSceneObjects.Add(catalogItem);
+            catalogItem.SetFavorite(true);
         }
         else
         {
-            favoritesSceneObjects.Remove(sceneObject);
-            sceneObject.SetFavorite(false);
+            favoritesSceneObjects.Remove(catalogItem);
+            catalogItem.SetFavorite(false);
         }
 
-        adapter.SetFavorite(sceneObject.IsFavorite());
+        adapter.SetFavorite(catalogItem.IsFavorite());
     }
 }

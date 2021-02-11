@@ -14,7 +14,6 @@ public class CatalogItem
         SMART_ITEM = 2
     }
 
-
     public string id;
     public ItemType itemType;
 

@@ -71,11 +71,11 @@ public class SceneObjectCatalogController : MonoBehaviour
 
         quickBarView.OnQuickBarShortcutSelected += QuickBarInput;
         catalogAssetPackListView.OnCatalogPackClick += OnCatalogItemPackSelected;
-        catalogGroupListView.OnCatalogItemClicked += SceneObjectSelected;
+        catalogGroupListView.OnCatalogItemClicked += CatalogItemSelected;
         searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
 
      
-        quickBarController.OnCatalogItemSelected += SceneObjectSelected;
+        quickBarController.OnCatalogItemSelected += CatalogItemSelected;
 
         categoryToggle.onValueChanged.AddListener(CategoryFilter);
         favoritesToggle.onValueChanged.AddListener(FavoritesFilter);
@@ -88,9 +88,9 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         quickBarView.OnQuickBarShortcutSelected -= QuickBarInput;
         catalogAssetPackListView.OnCatalogPackClick -= OnCatalogItemPackSelected;
-        catalogGroupListView.OnCatalogItemClicked -= SceneObjectSelected;
+        catalogGroupListView.OnCatalogItemClicked -= CatalogItemSelected;
         if(quickBarController != null)
-            quickBarController.OnCatalogItemSelected -= SceneObjectSelected;
+            quickBarController.OnCatalogItemSelected -= CatalogItemSelected;
     }
 
     public void AssetsPackFilter(bool isOn)
@@ -222,30 +222,30 @@ public class SceneObjectCatalogController : MonoBehaviour
         catalogGroupListView.SetContent(favorites);
     }
     
-    void SceneObjectSelected(CatalogItem catalogItem)
+    void CatalogItemSelected(CatalogItem catalogItem)
     {
         OnCatalogItemSelected?.Invoke(catalogItem);
     }
 
-    void OnCatalogItemPackSelected(CatalogItemPack sceneAssetPack)
+    void OnCatalogItemPackSelected(CatalogItemPack catalogItemPack)
     {
         ShowCatalogContent();
 
-        SetAssetPackInListView(sceneAssetPack);
+        SetAssetPackInListView(catalogItemPack);
     }
 
-    void SetAssetPackInListView(CatalogItemPack sceneAssetPack)
+    void SetAssetPackInListView(CatalogItemPack catalogItemPack)
     {
-        catalogTitleTxt.text = sceneAssetPack.title;
+        catalogTitleTxt.text = catalogItemPack.title;
         Dictionary<string, List<CatalogItem>> groupedSceneObjects = new Dictionary<string, List<CatalogItem>>();
 
-        foreach (CatalogItem sceneObject in sceneAssetPack.assets)
+        foreach (CatalogItem sceneObject in catalogItemPack.assets)
         {
             string titleToUse = sceneObject.categoryName;
 
             if (!groupedSceneObjects.ContainsKey(titleToUse))
             {          
-                groupedSceneObjects.Add(titleToUse, GetAssetsListByCategory(titleToUse, sceneAssetPack));
+                groupedSceneObjects.Add(titleToUse, GetAssetsListByCategory(titleToUse, catalogItemPack));
             }
         }
 
@@ -279,57 +279,10 @@ public class SceneObjectCatalogController : MonoBehaviour
         return gameObject.activeSelf;
     }
 
-    //void FilterCategories()
-    //{
-    //    categoryList = new List<CatalogItemPack>();
-    //    var assetPacks = AssetCatalogBridge.sceneAssetPackCatalog.GetValues().ToList();
-
-    //    Dictionary<string, CatalogItemPack> assetPackDic = new Dictionary<string, CatalogItemPack>();
-
-    //    foreach(SceneAssetPack assetPack in assetPacks)
-    //    {
-    //        foreach(SceneObject sceneObject in assetPack.assets)
-    //        {
-    //            if (!assetPackDic.ContainsKey(sceneObject.category))
-    //            {
-    //                SceneAssetPack categoryAssetPack = new SceneAssetPack();
-    //                categoryAssetPack.thumbnail = sceneObject.category;
-    //                categoryAssetPack.title = sceneObject.category;
-    //                categoryAssetPack.assets = new List<SceneObject>();
-    //                sceneObject.titleToShow = assetPack.title;
-    //                categoryAssetPack.assets.Add(sceneObject);
-
-    //                if(!string.IsNullOrEmpty(categoryAssetPack.title))
-    //                {
-    //                    if (categoryAssetPack.title.Length == 1)
-    //                        categoryAssetPack.title = categoryAssetPack.title.ToUpper();
-    //                    else
-    //                        categoryAssetPack.title =  char.ToUpper(categoryAssetPack.title[0]) + categoryAssetPack.title.Substring(1);
-    //                }
-
-    //                assetPackDic.Add(sceneObject.category, categoryAssetPack);
-    //                continue;
-    //            }
-    //            else
-    //            {
-    //                sceneObject.titleToShow = assetPack.title;
-    //                assetPackDic[sceneObject.category].assets.Add(sceneObject);
-    //            }
-    //        }
-    //    }
-
-    //    categoryList = assetPackDic.Values.ToList();
-    //}
-
     public void ShowCategories()
     {
-        //if(categoryList == null)
-        //{
-        //    FilterCategories();
-        //}
-
         catalogAssetPackListView.SetCategoryStyle();
-        catalogAssetPackListView.SetContent(categoryList);
+        catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories());
         isShowingAssetPacks = true;
         catalogTitleTxt.text = BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE;
         catalogAssetPackListView.gameObject.SetActive(true);
@@ -377,7 +330,6 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPackList());
     }
-
 
     List<CatalogItem> GetAssetsListByCategory(string category, CatalogItemPack sceneAssetPack)
     {
