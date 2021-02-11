@@ -51,18 +51,18 @@ public class SceneObjectCatalogController : MonoBehaviour
     public RectTransform searchBarMaxSizeRT;
     public RectTransform assetPackMaxSizeRT;
 
-    List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
-    List<CatalogItemPack> categoryList;
+    private List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
 
-    string lastFilterName = "";
-    bool catalogInitializaed = false, isShowingAssetPacks = false, isFavoriteFilterActive = false;
+    private string lastFilterName = "";
+    private bool isShowingAssetPacks = false;
+    private bool isFavoriteFilterActive = false;
 
-    bool isCatalogExpanded = false;
+    private bool isCatalogExpanded = false;
 
-    bool isFilterByAssetPacks = true;
+    private bool isFilterByAssetPacks = true;
 
-    const string favoriteName = "Favorites";
-    QuickBarController quickBarController;
+    private const string FAVORITE_NAME = "Favorites";
+    private QuickBarController quickBarController;
 
     private void Start()
     {
@@ -80,8 +80,6 @@ public class SceneObjectCatalogController : MonoBehaviour
         categoryToggle.onValueChanged.AddListener(CategoryFilter);
         favoritesToggle.onValueChanged.AddListener(FavoritesFilter);
         assetPackToggle.onValueChanged.AddListener(AssetsPackFilter);
-
-
     }
 
     private void OnDestroy()
@@ -183,11 +181,11 @@ public class SceneObjectCatalogController : MonoBehaviour
         }
     }
 
-    void AddNewSceneObjectCategoryToFilter(CatalogItem sceneObject)
+    void AddNewSceneObjectCategoryToFilter(CatalogItem catalogItem)
     {
-        Dictionary<string, List<CatalogItem>> groupedSceneObjects = new Dictionary<string, List<CatalogItem>>();
-        groupedSceneObjects.Add(sceneObject.category, new List<CatalogItem>() { sceneObject });
-        filterObjects.Add(groupedSceneObjects);
+        Dictionary<string, List<CatalogItem>> groupedCatalogItems = new Dictionary<string, List<CatalogItem>>();
+        groupedCatalogItems.Add(catalogItem.category, new List<CatalogItem>() { catalogItem });
+        filterObjects.Add(groupedCatalogItems);
     }
 
     #endregion
@@ -211,13 +209,13 @@ public class SceneObjectCatalogController : MonoBehaviour
 
     void ShowFavorites()
     {
-        catalogTitleTxt.text = favoriteName;
+        catalogTitleTxt.text = FAVORITE_NAME;
         ShowCatalogContent();
 
         List<Dictionary<string, List<CatalogItem>>> favorites = new List<Dictionary<string, List<CatalogItem>>>();
-        Dictionary<string, List<CatalogItem>> groupedSceneObjects = new Dictionary<string, List<CatalogItem>>();
-        groupedSceneObjects.Add(favoriteName, favoritesController.GetFavorites());
-        favorites.Add(groupedSceneObjects);
+        Dictionary<string, List<CatalogItem>> groupedCategoryItems = new Dictionary<string, List<CatalogItem>>();
+        groupedCategoryItems.Add(FAVORITE_NAME, favoritesController.GetFavorites());
+        favorites.Add(groupedCategoryItems);
 
         catalogGroupListView.SetContent(favorites);
     }
@@ -231,27 +229,27 @@ public class SceneObjectCatalogController : MonoBehaviour
     {
         ShowCatalogContent();
 
-        SetAssetPackInListView(catalogItemPack);
+        SetCatalogAssetPackInListView(catalogItemPack);
     }
 
-    void SetAssetPackInListView(CatalogItemPack catalogItemPack)
+    void SetCatalogAssetPackInListView(CatalogItemPack catalogItemPack)
     {
         catalogTitleTxt.text = catalogItemPack.title;
-        Dictionary<string, List<CatalogItem>> groupedSceneObjects = new Dictionary<string, List<CatalogItem>>();
+        Dictionary<string, List<CatalogItem>> groupedCatalogItem = new Dictionary<string, List<CatalogItem>>();
 
         foreach (CatalogItem sceneObject in catalogItemPack.assets)
         {
             string titleToUse = sceneObject.categoryName;
 
-            if (!groupedSceneObjects.ContainsKey(titleToUse))
+            if (!groupedCatalogItem.ContainsKey(titleToUse))
             {          
-                groupedSceneObjects.Add(titleToUse, GetAssetsListByCategory(titleToUse, catalogItemPack));
+                groupedCatalogItem.Add(titleToUse, GetAssetsListByCategory(titleToUse, catalogItemPack));
             }
         }
 
         List<Dictionary<string, List<CatalogItem>>> contentList = new List<Dictionary<string, List<CatalogItem>>>
         {
-            groupedSceneObjects
+            groupedCatalogItem
         };
 
         catalogGroupListView.SetContent(contentList);

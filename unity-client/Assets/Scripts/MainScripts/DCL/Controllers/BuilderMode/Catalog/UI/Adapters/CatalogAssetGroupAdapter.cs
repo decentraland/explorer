@@ -13,16 +13,14 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
     public System.Action<CatalogItem, CatalogItemAdapter, BaseEventData> OnAdapterStartDragging;
     public System.Action<PointerEventData> OnAdapterDrag, OnAdapterEndDrag;
 
-
     [Header("Prefab References")]
     public GameObject catalogItemAdapterPrefab;
 
-
-    public void SetContent(string category, List<CatalogItem> sceneObjectsList)
+    public void SetContent(string category, List<CatalogItem> catalogItemList)
     {
         categoryTxt.text = category.ToUpper();
         RemoveAdapters();
-        foreach (CatalogItem catalogItem in sceneObjectsList)
+        foreach (CatalogItem catalogItem in catalogItemList)
         {
             CatalogItemAdapter adapter = Instantiate(catalogItemAdapterPrefab, categoryContentGO.transform).GetComponent<CatalogItemAdapter>();
             adapter.SetContent(catalogItem);
@@ -36,7 +34,6 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
 
     public void RemoveAdapters()
     {
-
         for (int i = 0; i < categoryContentGO.transform.childCount; i++)
         {
             GameObject toRemove = categoryContentGO.transform.GetChild(i).gameObject;
@@ -44,28 +41,27 @@ public class CatalogAssetGroupAdapter : MonoBehaviour
         }
     }
 
-
-    void OnDrag(PointerEventData eventData)
+    private void OnDrag(PointerEventData eventData)
     {
         OnAdapterDrag?.Invoke(eventData);
     }
 
-    void OnEndDrag(PointerEventData eventData)
+    private void OnEndDrag(PointerEventData eventData)
     {
         OnAdapterEndDrag?.Invoke(eventData);
     }
 
-    void CatalogItemClicked(CatalogItem catalogItemClicked)
+    private void CatalogItemClicked(CatalogItem catalogItemClicked)
     {
         OnCatalogItemClicked?.Invoke(catalogItemClicked);
     }
 
-    void CatalogItemFavorite(CatalogItem catalogItemClicked, CatalogItemAdapter adapter)
+    private void CatalogItemFavorite(CatalogItem catalogItemClicked, CatalogItemAdapter adapter)
     {
         OnCatalogItemFavorite?.Invoke(catalogItemClicked, adapter);
     }
 
-    void AdapterStartDragging(CatalogItem catalogItemClicked, CatalogItemAdapter adapter, BaseEventData data)
+    private void AdapterStartDragging(CatalogItem catalogItemClicked, CatalogItemAdapter adapter, BaseEventData data)
     {
         OnAdapterStartDragging?.Invoke(catalogItemClicked, adapter, data);
     }

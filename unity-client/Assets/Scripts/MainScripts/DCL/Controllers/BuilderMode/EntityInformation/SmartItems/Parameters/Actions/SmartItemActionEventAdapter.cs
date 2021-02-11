@@ -41,6 +41,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
                 RemoveActionable();
                 break;
         }
+        optionsDropDown.SetValueWithoutNotify(1);
     }
 
     public SmartItemActionEvent GetContent()
@@ -56,6 +57,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
 
     public void ResetActionable()
     {
+        actionEvent.smartItemActionable.values.Clear();
         SetContent(actionEvent);
     }
 

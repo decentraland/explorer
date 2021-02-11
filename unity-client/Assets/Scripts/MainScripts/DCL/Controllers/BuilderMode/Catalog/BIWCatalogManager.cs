@@ -71,50 +71,7 @@ public class BIWCatalogManager
                 }
             }
         }
-
         return assetPackDic.Values.ToList();
-    }
-
-    private void FilterCategories()
-    {
-        List<SceneAssetPack> categoryList = new List<SceneAssetPack>();
-        var assetPacks = AssetCatalogBridge.sceneAssetPackCatalog.GetValues().ToList();
-
-        Dictionary<string, SceneAssetPack> assetPackDic = new Dictionary<string, SceneAssetPack>();
-
-        foreach (SceneAssetPack assetPack in assetPacks)
-        {
-            foreach (SceneObject sceneObject in assetPack.assets)
-            {
-                if (!assetPackDic.ContainsKey(sceneObject.category))
-                {
-                    SceneAssetPack categoryAssetPack = new SceneAssetPack();
-                    categoryAssetPack.thumbnail = sceneObject.category;
-                    categoryAssetPack.title = sceneObject.category;
-                    categoryAssetPack.assets = new List<SceneObject>();
-                    sceneObject.titleToShow = assetPack.title;
-                    categoryAssetPack.assets.Add(sceneObject);
-
-                    if (!string.IsNullOrEmpty(categoryAssetPack.title))
-                    {
-                        if (categoryAssetPack.title.Length == 1)
-                            categoryAssetPack.title = categoryAssetPack.title.ToUpper();
-                        else
-                            categoryAssetPack.title = char.ToUpper(categoryAssetPack.title[0]) + categoryAssetPack.title.Substring(1);
-                    }
-
-                    assetPackDic.Add(sceneObject.category, categoryAssetPack);
-                    continue;
-                }
-                else
-                {
-                    sceneObject.titleToShow = assetPack.title;
-                    assetPackDic[sceneObject.category].assets.Add(sceneObject);
-                }
-            }
-        }
-
-        categoryList = assetPackDic.Values.ToList();
     }
 
     private static void AddSceneObject(SceneObject sceneObject)

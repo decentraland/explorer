@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FavoritesController 
 {
-    List<CatalogItem> favoritesSceneObjects = new List<CatalogItem>();
+    List<CatalogItem> favoritesCatalogItems = new List<CatalogItem>();
 
     public CatalogGroupListView catalogGroupListView;
 
@@ -15,19 +15,19 @@ public class FavoritesController
 
     public List<CatalogItem> GetFavorites()
     {
-        return favoritesSceneObjects;
+        return favoritesCatalogItems;
     }
 
     public void ToggleFavoriteState(CatalogItem catalogItem, CatalogItemAdapter adapter)
     {
-        if (!favoritesSceneObjects.Contains(catalogItem))
+        if (!favoritesCatalogItems.Contains(catalogItem))
         {
-            favoritesSceneObjects.Add(catalogItem);
+            favoritesCatalogItems.Add(catalogItem);
             catalogItem.SetFavorite(true);
         }
         else
         {
-            favoritesSceneObjects.Remove(catalogItem);
+            favoritesCatalogItems.Remove(catalogItem);
             catalogItem.SetFavorite(false);
         }
 
