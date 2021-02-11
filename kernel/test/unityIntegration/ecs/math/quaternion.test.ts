@@ -5,7 +5,7 @@ const results = {
   staticAngle01: '90.00',
   staticAngle02: '14.85',
   staticAngle03: '4.99997',
-  staticAngle04: '179.9',
+  staticAngle04: '180',
   staticEuler01: '(0.0, 0.0, 0.0, 1.0)',
   staticEuler02: '(0.5, -0.5, 0.5, 0.5)',
   staticEuler03: '(0.0, 0.9, -0.4, 0.0)',
