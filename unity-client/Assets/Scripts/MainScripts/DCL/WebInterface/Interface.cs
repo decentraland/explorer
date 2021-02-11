@@ -549,6 +549,21 @@ namespace DCL.Interface
             public string portableExperienceId;
         }
 
+        [System.Serializable]
+        public class WearablesRequestFiltersPayload
+        {
+            public string ownedByUser;
+            public string[] wearableIds;
+            public string[] collectionIds;
+        }
+
+        [System.Serializable]
+        public class RequestWearablesPayload
+        {
+            public WearablesRequestFiltersPayload filters;
+            public string context;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -629,6 +644,7 @@ namespace DCL.Interface
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
         private static StringPayload stringPayload = new StringPayload();
         private static KillPortableExperiencePayload killPortableExperiencePayload = new KillPortableExperiencePayload();
+        private static RequestWearablesPayload requestWearablesPayload = new RequestWearablesPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -1172,6 +1188,24 @@ namespace DCL.Interface
         {
             killPortableExperiencePayload.portableExperienceId = portableExperienceId;
             SendMessage("KillPortableExperience", killPortableExperiencePayload);
+        }
+
+        public static void RequestWearables(
+            string ownedByUser,
+            string[] wearableIds,
+            string[] collectionIds,
+            string context)
+        {
+            requestWearablesPayload.filters = new WearablesRequestFiltersPayload
+            {
+                ownedByUser = ownedByUser,
+                wearableIds = wearableIds,
+                collectionIds = collectionIds
+            };
+
+            requestWearablesPayload.context = context;
+
+            SendMessage("RequestWearables", requestWearablesPayload);
         }
     }
 }

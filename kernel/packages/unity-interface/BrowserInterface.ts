@@ -50,6 +50,8 @@ import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
 import { killPortableExperienceScene } from './portableExperiencesUtils'
+import { wearablesRequest } from 'shared/catalogs/actions'
+import { WearablesRequestFilters } from 'shared/catalogs/types'
 
 declare const DCL: any
 
@@ -466,6 +468,27 @@ export class BrowserInterface {
 
   public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
     await killPortableExperienceScene(data.portableExperienceId)
+  }
+
+  public RequestWearables(data: {
+    filters: {
+      ownedByUser: string | null
+      wearableIds?: string[] | null
+      collectionIds?: string[] | null
+    }
+    context?: string
+  }) {
+    const { filters, context } = data
+    const newFilters: WearablesRequestFilters = {
+      ownedByUser: filters.ownedByUser ?? undefined,
+      wearableIds: this.arrayCleanup(filters.wearableIds),
+      collectionIds: this.arrayCleanup(filters.collectionIds)
+    }
+    globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
+  }
+
+  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
+    return !array || array.length === 0 ? undefined : array
   }
 }
 
