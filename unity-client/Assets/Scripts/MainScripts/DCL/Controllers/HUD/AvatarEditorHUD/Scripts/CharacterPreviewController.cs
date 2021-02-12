@@ -2,6 +2,7 @@ using DCL;
 using System;
 using System.Collections;
 using UnityEngine;
+using Environment = DCL.Environment;
 
 public class CharacterPreviewController : MonoBehaviour
 {
@@ -109,6 +110,9 @@ public class CharacterPreviewController : MonoBehaviour
 
     private IEnumerator TakeSnapshots_Routine(OnSnapshotsReady callback)
     {
+        var isCulling = Environment.i.platform.cullingController.objectsTracker.IsDirty()
+                        && Environment.i.platform.cullingController.IsRunning();
+
         var current = camera.targetTexture;
         camera.targetTexture = null;
         var avatarAnimator = avatarRenderer.gameObject.GetComponent<AvatarAnimatorLegacy>();
@@ -116,6 +120,12 @@ public class CharacterPreviewController : MonoBehaviour
         SetFocus(CameraFocus.FaceSnapshot, false);
         avatarAnimator.Reset();
         yield return null;
+
+        if (isCulling)
+        {
+            EnforceDisableAvatarCulling();
+        }
+
         Texture2D face = Snapshot(SNAPSHOT_FACE_WIDTH_RES, SNAPSHOT_FACE_HEIGHT_RES);
         Texture2D face128 = Snapshot(SNAPSHOT_FACE_128_WIDTH_RES, SNAPSHOT_FACE_128_HEIGHT_RES);
         Texture2D face256 = Snapshot(SNAPSHOT_FACE_256_WIDTH_RES, SNAPSHOT_FACE_256_HEIGHT_RES);
@@ -190,5 +200,14 @@ public class CharacterPreviewController : MonoBehaviour
     public void Rotate(float rotationVelocity)
     {
         avatarRenderer.transform.Rotate(Time.deltaTime * rotationVelocity * Vector3.up);
+    }
+
+    private void EnforceDisableAvatarCulling()
+    {
+        var renderers = avatarRenderer.gameObject.GetComponents<Renderer>();
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Environment.i.platform.cullingController.SetCullingForRenderer(renderers[i], true, true);
+        }
     }
 }

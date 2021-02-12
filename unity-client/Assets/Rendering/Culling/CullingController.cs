@@ -21,6 +21,7 @@ namespace DCL.Rendering
         void SetAnimationCulling(bool enabled);
         void SetShadowCulling(bool enabled);
         bool IsRunning();
+        void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow);
 
         bool IsDirty();
         ICullingObjectsTracker objectsTracker { get; }
@@ -211,6 +212,29 @@ namespace DCL.Rendering
         }
 
         /// <summary>
+        /// Sets shadows and visibility for a given renderer.
+        /// </summary>
+        /// <param name="r">Renderer to be culled</param>
+        /// <param name="shouldBeVisible">If false, the renderer visibility will be set to false.</param>
+        /// <param name="shouldHaveShadow">If false, the renderer shadow will be toggled off.</param>
+        public void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
+        {
+            var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
+
+            if (settings.enableObjectCulling)
+            {
+                if (r.forceRenderingOff != !shouldBeVisible)
+                    r.forceRenderingOff = !shouldBeVisible;
+            }
+
+            if (settings.enableShadowCulling)
+            {
+                if (r.shadowCastingMode != targetMode)
+                    r.shadowCastingMode = targetMode;
+            }
+        }
+
+        /// <summary>
         /// Main culling loop. Controlled by Start() and Stop() methods.
         /// </summary>
         IEnumerator UpdateCoroutine()
@@ -255,29 +279,6 @@ namespace DCL.Rendering
                 RaiseDataReport();
                 timeBudgetCount = 0;
                 yield return null;
-            }
-        }
-
-        /// <summary>
-        /// Sets shadows and visibility for a given renderer.
-        /// </summary>
-        /// <param name="r">Renderer to be culled</param>
-        /// <param name="shouldBeVisible">If false, the renderer visibility will be set to false.</param>
-        /// <param name="shouldHaveShadow">If false, the renderer shadow will be toggled off.</param>
-        internal void SetCullingForRenderer(Renderer r, bool shouldBeVisible, bool shouldHaveShadow)
-        {
-            var targetMode = shouldHaveShadow ? ShadowCastingMode.On : ShadowCastingMode.Off;
-
-            if (settings.enableObjectCulling)
-            {
-                if (r.forceRenderingOff != !shouldBeVisible)
-                    r.forceRenderingOff = !shouldBeVisible;
-            }
-
-            if (settings.enableShadowCulling)
-            {
-                if (r.shadowCastingMode != targetMode)
-                    r.shadowCastingMode = targetMode;
             }
         }
 
