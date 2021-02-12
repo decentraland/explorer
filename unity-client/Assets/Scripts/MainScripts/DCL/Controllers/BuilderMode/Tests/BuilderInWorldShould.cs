@@ -78,54 +78,6 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         Assert.IsNotNull(voxelController.freeCameraMovement, "Camera reference on the builder-in-world voxel controller are null, check them all!");
     }
 
-    [UnityTest]
-    public IEnumerator CatalogItemFloorObject()
-    {
-        CatalogItem catalogItem = BuilderInWorldUtils.CreateFloorSceneObject();
-        LoadParcelScenesMessage.UnityParcelScene data = scene.sceneData;
-        data.contents = new List<ContentServerUtils.MappingPair>();
-        data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
-
-        foreach (KeyValuePair<string, string> content in catalogItem.contents)
-        {
-            ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
-            mappingPair.file = content.Key;
-            mappingPair.hash = content.Value;
-            bool found = false;
-            foreach (ContentServerUtils.MappingPair mappingPairToCheck in data.contents)
-            {
-                if (mappingPairToCheck.file == mappingPair.file)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                data.contents.Add(mappingPair);
-        }
-
-        Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
-
-
-        string entityId = "1";
-        TestHelpers.CreateSceneEntity(scene, entityId);
-
-        TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
-            new
-            {
-                assetId = BuilderInWorldSettings.FLOOR_TEXTURE_VALUE,
-                src = BuilderInWorldSettings.FLOOR_MODEL
-            })); ;
-
-        LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[entityId]);
-        yield return new WaitUntil(() => gltfShape.alreadyLoaded);
-
-        Assert.IsTrue(
-         scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
-        "Floor should be loaded, is the SceneObject not working anymore?");
-    }
-
     protected override IEnumerator TearDown()
     {
         AssetCatalogBridge.ClearCatalog();
