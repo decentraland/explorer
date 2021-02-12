@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DCL.Controllers;
+using System.Collections.Generic;
 
 public class TaskbarHUDController : IHUD
 {
@@ -103,7 +104,9 @@ public class TaskbarHUDController : IHUD
         {
             this.sceneController.OnNewPortableExperienceSceneAdded += SceneController_OnNewPortableExperienceSceneAdded;
             this.sceneController.OnNewPortableExperienceSceneRemoved += SceneController_OnNewPortableExperienceSceneRemoved;
-            foreach (GlobalScene portableExperienceToAdd in worldState.GetActivePortableExperienceScenes())
+
+            List<GlobalScene> activePortableExperiences = worldState.GetActivePortableExperienceScenes();
+            foreach (GlobalScene portableExperienceToAdd in activePortableExperiences)
             {
                 SceneController_OnNewPortableExperienceSceneAdded(portableExperienceToAdd);
             }

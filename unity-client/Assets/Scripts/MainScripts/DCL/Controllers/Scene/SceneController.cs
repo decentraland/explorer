@@ -751,6 +751,7 @@ namespace DCL
             var scene = worldState.loadedScenes[sceneId];
 
             worldState.loadedScenes.Remove(sceneId);
+            worldState.globalSceneIds.Remove(sceneId);
 
             // Remove the scene id from the msg. priorities list
             worldState.scenesSortedByDistance.Remove(scene);

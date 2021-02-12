@@ -267,112 +267,122 @@ namespace DCL
 
         private void ProcessButtonUp(WebInterface.ACTION_BUTTON buttonId, bool useRaycast, LayerMask pointerEventLayer, int globalLayer)
         {
-            RaycastHitInfo raycastGlobalLayerHitInfo;
-            Ray ray = GetRayFromCamera();
-
-            // Raycast for global pointer events
-            RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, null);
-            raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
-
-            if (pointerUpEvent != null)
+            IWorldState worldState = Environment.i.world.state;
+            List<string> currentSceneAndPortableExperienceIds = worldState.currentSceneAndPortableExperienceIds;
+            foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
-                // Raycast for pointer event components
-                RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, null);
+                RaycastHitInfo raycastGlobalLayerHitInfo;
+                Ray ray = GetRayFromCamera();
 
-                bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
-                bool isSameEntityThatWasPressed = AreCollidersFromSameEntity(raycastInfoPointerEventLayer.hitInfo, lastPointerDownEventHitInfo);
+                // Raycast for global pointer events
+                RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[sceneId]);
+                raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
 
-                if (!isOnClickComponentBlocked && isSameEntityThatWasPressed)
+                if (pointerUpEvent != null)
                 {
-                    bool isHitInfoValid = raycastInfoPointerEventLayer.hitInfo.hit.collider != null;
-                    pointerUpEvent.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit, isHitInfoValid);
+                    // Raycast for pointer event components
+                    RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, worldState.loadedScenes[sceneId]);
+
+                    bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
+                    bool isSameEntityThatWasPressed = AreCollidersFromSameEntity(raycastInfoPointerEventLayer.hitInfo, lastPointerDownEventHitInfo);
+
+                    if (!isOnClickComponentBlocked && isSameEntityThatWasPressed)
+                    {
+                        bool isHitInfoValid = raycastInfoPointerEventLayer.hitInfo.hit.collider != null;
+                        pointerUpEvent.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit, isHitInfoValid);
+                    }
+
+                    pointerUpEvent = null;
                 }
 
-                pointerUpEvent = null;
-            }
+                //string sceneId = Environment.i.world.state.currentSceneId;
 
-            string sceneId = Environment.i.world.state.currentSceneId;
+                if (useRaycast && raycastGlobalLayerHitInfo.isValid)
+                {
+                    CollidersManager.i.GetColliderInfo(raycastGlobalLayerHitInfo.hit.collider, out ColliderInfo colliderInfo);
 
-            if (useRaycast && raycastGlobalLayerHitInfo.isValid)
-            {
-                CollidersManager.i.GetColliderInfo(raycastGlobalLayerHitInfo.hit.collider, out ColliderInfo colliderInfo);
-
-                WebInterface.ReportGlobalPointerUpEvent(
-                    buttonId,
-                    raycastInfoGlobalLayer.ray,
-                    raycastGlobalLayerHitInfo.hit.point,
-                    raycastGlobalLayerHitInfo.hit.normal,
-                    raycastGlobalLayerHitInfo.hit.distance,
-                    sceneId,
-                    colliderInfo.entity != null ? colliderInfo.entity.entityId : null,
-                    colliderInfo.meshName,
-                    isHitInfoValid: true);
-            }
-            else
-            {
-                WebInterface.ReportGlobalPointerUpEvent(buttonId, raycastInfoGlobalLayer.ray, Vector3.zero, Vector3.zero, 0, sceneId);
+                    WebInterface.ReportGlobalPointerUpEvent(
+                        buttonId,
+                        raycastInfoGlobalLayer.ray,
+                        raycastGlobalLayerHitInfo.hit.point,
+                        raycastGlobalLayerHitInfo.hit.normal,
+                        raycastGlobalLayerHitInfo.hit.distance,
+                        sceneId,
+                        colliderInfo.entity != null ? colliderInfo.entity.entityId : null,
+                        colliderInfo.meshName,
+                        isHitInfoValid: true);
+                }
+                else
+                {
+                    WebInterface.ReportGlobalPointerUpEvent(buttonId, raycastInfoGlobalLayer.ray, Vector3.zero, Vector3.zero, 0, sceneId);
+                }
             }
         }
 
         private void ProcessButtonDown(WebInterface.ACTION_BUTTON buttonId, bool useRaycast, LayerMask pointerEventLayer, int globalLayer)
         {
-            RaycastHitInfo raycastGlobalLayerHitInfo;
-            Ray ray = GetRayFromCamera();
-
-            // Raycast for pointer event components
-            RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, null);
-
-            // Raycast for global pointer events
-            RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, null);
-            raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
-
-            bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
-
-            if (!isOnClickComponentBlocked && raycastInfoPointerEventLayer.hitInfo.hit.collider)
+            IWorldState worldState = Environment.i.world.state;
+            List<string> currentSceneAndPortableExperienceIds = worldState.currentSceneAndPortableExperienceIds;
+            foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
-                Collider collider = raycastInfoPointerEventLayer.hitInfo.hit.collider;
+                RaycastHitInfo raycastGlobalLayerHitInfo;
+                Ray ray = GetRayFromCamera();
 
-                GameObject hitGameObject;
-                if (CollidersManager.i.GetColliderInfo(collider, out ColliderInfo info))
-                    hitGameObject = info.entity.gameObject;
+                // Raycast for pointer event components
+                RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, worldState.loadedScenes[sceneId]);
+
+                // Raycast for global pointer events
+                RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[sceneId]);
+                raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
+
+                bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
+
+                if (!isOnClickComponentBlocked && raycastInfoPointerEventLayer.hitInfo.hit.collider)
+                {
+                    Collider collider = raycastInfoPointerEventLayer.hitInfo.hit.collider;
+
+                    GameObject hitGameObject;
+                    if (CollidersManager.i.GetColliderInfo(collider, out ColliderInfo info))
+                        hitGameObject = info.entity.gameObject;
+                    else
+                        hitGameObject = collider.gameObject;
+
+                    OnClick onClick = hitGameObject.GetComponentInChildren<OnClick>();
+                    if (AreSameEntity(onClick, info))
+                        onClick.Report(buttonId, raycastInfoPointerEventLayer.hitInfo.hit);
+
+                    OnPointerDown onPointerDown = hitGameObject.GetComponentInChildren<OnPointerDown>();
+                    if (IsAvatarPointerEvent(onPointerDown) || AreSameEntity(onPointerDown, info))
+                        onPointerDown.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
+
+                    pointerUpEvent = hitGameObject.GetComponentInChildren<OnPointerUp>();
+                    if (!AreSameEntity(pointerUpEvent, info))
+                        pointerUpEvent = null;
+
+                    lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
+                }
+
+                //string sceneId = Environment.i.world.state.currentSceneId;
+
+                if (useRaycast && raycastGlobalLayerHitInfo.isValid)
+                {
+                    CollidersManager.i.GetColliderInfo(raycastGlobalLayerHitInfo.hit.collider, out ColliderInfo colliderInfo);
+
+                    WebInterface.ReportGlobalPointerDownEvent(
+                        buttonId,
+                        raycastInfoGlobalLayer.ray,
+                        raycastGlobalLayerHitInfo.hit.point,
+                        raycastGlobalLayerHitInfo.hit.normal,
+                        raycastGlobalLayerHitInfo.hit.distance,
+                        sceneId,
+                        colliderInfo.entity != null ? colliderInfo.entity.entityId : null,
+                        colliderInfo.meshName,
+                        isHitInfoValid: true);
+                }
                 else
-                    hitGameObject = collider.gameObject;
-
-                OnClick onClick = hitGameObject.GetComponentInChildren<OnClick>();
-                if (AreSameEntity(onClick, info))
-                    onClick.Report(buttonId, raycastInfoPointerEventLayer.hitInfo.hit);
-
-                OnPointerDown onPointerDown = hitGameObject.GetComponentInChildren<OnPointerDown>();
-                if (IsAvatarPointerEvent(onPointerDown) || AreSameEntity(onPointerDown, info))
-                    onPointerDown.Report(buttonId, ray, raycastInfoPointerEventLayer.hitInfo.hit);
-
-                pointerUpEvent = hitGameObject.GetComponentInChildren<OnPointerUp>();
-                if (!AreSameEntity(pointerUpEvent, info))
-                    pointerUpEvent = null;
-
-                lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
-            }
-
-            string sceneId = Environment.i.world.state.currentSceneId;
-
-            if (useRaycast && raycastGlobalLayerHitInfo.isValid)
-            {
-                CollidersManager.i.GetColliderInfo(raycastGlobalLayerHitInfo.hit.collider, out ColliderInfo colliderInfo);
-
-                WebInterface.ReportGlobalPointerDownEvent(
-                    buttonId,
-                    raycastInfoGlobalLayer.ray,
-                    raycastGlobalLayerHitInfo.hit.point,
-                    raycastGlobalLayerHitInfo.hit.normal,
-                    raycastGlobalLayerHitInfo.hit.distance,
-                    sceneId,
-                    colliderInfo.entity != null ? colliderInfo.entity.entityId : null,
-                    colliderInfo.meshName,
-                    isHitInfoValid: true);
-            }
-            else
-            {
-                WebInterface.ReportGlobalPointerDownEvent(buttonId, raycastInfoGlobalLayer.ray, Vector3.zero, Vector3.zero, 0, sceneId);
+                {
+                    WebInterface.ReportGlobalPointerDownEvent(buttonId, raycastInfoGlobalLayer.ray, Vector3.zero, Vector3.zero, 0, sceneId);
+                }
             }
         }
 

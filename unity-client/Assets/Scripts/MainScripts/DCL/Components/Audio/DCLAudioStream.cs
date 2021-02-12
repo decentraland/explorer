@@ -64,7 +64,7 @@ namespace DCL.Components
         {
             if (scene == null) return false;
             if (string.IsNullOrEmpty(currentSceneId)) return false;
-            return scene.sceneData.id == currentSceneId;
+            return scene.sceneData.id == currentSceneId || (scene is GlobalScene && ((GlobalScene)scene).isPortableExperience);
         }
 
         private void UpdatePlayingState(bool forceStateUpdate)
