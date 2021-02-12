@@ -51,7 +51,7 @@ public class BuildModeHUDView : MonoBehaviour
     public event Action<CatalogItem> OnCatalogItemSelected;
     public event Action OnStopInput, OnResumeInput,OnTutorialAction,OnPublishAction;
     public event Action OnLogoutAction;
-    public event Action OnSceneObjectDrop;
+    public event Action OnCatalogItemDrop;
 
     private void Awake()
     {
@@ -154,7 +154,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void SceneObjectDroppedInView()
     {
-        OnSceneObjectDrop?.Invoke();
+        OnCatalogItemDrop?.Invoke();
     }
 
     public void SetVisibilityOfCatalog(bool isVisible)

@@ -61,7 +61,7 @@ public class QuickBarView : MonoBehaviour
 
     public void SceneObjectDropped(BaseEventData data)
     {
-        CatalogItemAdapter adapter = catalogGroupListView.GetLastSceneObjectDragged();
+        CatalogItemAdapter adapter = catalogGroupListView.GetLastCatalogItemDragged();
         CatalogItem catalogItem = adapter.GetContent();
 
         if (adapter.thumbnailImg.enabled)

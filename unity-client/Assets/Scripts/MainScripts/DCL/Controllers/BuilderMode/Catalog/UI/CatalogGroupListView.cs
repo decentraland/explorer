@@ -68,7 +68,7 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<CatalogItem
         Destroy(draggedObject);
     }
 
-    public CatalogItemAdapter GetLastSceneObjectDragged()
+    public CatalogItemAdapter GetLastCatalogItemDragged()
     {
         return catalogItemAdapterDragged;
     }

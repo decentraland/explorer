@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class SceneObjectDropController
+public class CatalogItemDropController
 {
     public CatalogGroupListView catalogGroupListView;
     public event Action<CatalogItem> OnCatalogItemDropped;
 
-    public void SceneObjectDropped()
+    public void CatalogitemDropped()
     {
-        CatalogItemAdapter adapter = catalogGroupListView.GetLastSceneObjectDragged();
+        CatalogItemAdapter adapter = catalogGroupListView.GetLastCatalogItemDragged();
         if (adapter == null)
             return;
         CatalogItem catalogItem = adapter.GetContent();

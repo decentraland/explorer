@@ -42,8 +42,6 @@ public class SmartItemOptionsParameter : SmartItemUIParameterAdapter
         {
             if(options.label == dropDown.options[currentIndex].text)
                 SetParameterValue(options.value);
-        }
-       
+        }      
     }
-
 }

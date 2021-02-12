@@ -43,7 +43,7 @@ public class BuildModeHUDController : IHUD
 
     BuilderInWorldEntityListController buildModeEntityListController;
     EntityInformationController entityInformationController;
-    SceneObjectDropController sceneObjectDropController;
+    CatalogItemDropController catalogItemDropController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
@@ -54,7 +54,7 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
 
-        sceneObjectDropController = new SceneObjectDropController();
+        catalogItemDropController = new CatalogItemDropController();
 
         buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
         buildModeEntityListController = view.entityListController;
@@ -66,8 +66,8 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
         entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
 
-        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
-        sceneObjectDropController.catalogGroupListView = view.catalogGroupListView;
+        catalogItemDropController.catalogGroupListView = view.catalogGroupListView;
+        catalogItemDropController.catalogGroupListView = view.catalogGroupListView;
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -77,7 +77,7 @@ public class BuildModeHUDController : IHUD
 
         buildModeEntityListController.CloseList();
 
-        view.OnSceneObjectDrop += () => sceneObjectDropController.SceneObjectDropped();
+        view.OnCatalogItemDrop += () => catalogItemDropController.CatalogitemDropped();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
         view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
         view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
@@ -94,8 +94,8 @@ public class BuildModeHUDController : IHUD
         view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
         view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
 
-        sceneObjectDropController.OnCatalogItemDropped += SceneObjectSelected;
-        view.OnCatalogItemSelected += SceneObjectSelected;
+        catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
+        view.OnCatalogItemSelected += CatalogItemSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();
 
@@ -139,9 +139,9 @@ public class BuildModeHUDController : IHUD
         view.RefreshCatalogContent();
     }
 
-    void SceneObjectSelected(CatalogItem sceneObject)
+    void CatalogItemSelected(CatalogItem catalogItem)
     {
-        OnCatalogItemSelected?.Invoke(sceneObject);
+        OnCatalogItemSelected?.Invoke(catalogItem);
         SetVisibilityOfCatalog(false);
     }
 

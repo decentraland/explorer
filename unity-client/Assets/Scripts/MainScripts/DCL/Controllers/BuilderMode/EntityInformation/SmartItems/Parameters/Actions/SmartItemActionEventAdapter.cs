@@ -106,7 +106,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
         smartItemListView.SetSmartItemParameters(selectedAction.parameters, actionEvent.smartItemActionable.values);
     }
 
-    void GenerateActionDropdownContent(SmartItemAction[] actions)
+    private void GenerateActionDropdownContent(SmartItemAction[] actions)
     {
         actionDropDown.ClearOptions();
 
@@ -130,7 +130,7 @@ public class SmartItemActionEventAdapter : MonoBehaviour
         actionDropDown.SetValueWithoutNotify(indexToUse);
     }
 
-    void GenerateEntityDropdownContent()
+    private void GenerateEntityDropdownContent()
     {
         entityDropDown.ClearOptions();
 

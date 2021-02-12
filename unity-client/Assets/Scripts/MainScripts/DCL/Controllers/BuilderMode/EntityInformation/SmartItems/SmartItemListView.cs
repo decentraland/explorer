@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class SmartItemListView : MonoBehaviour
 {
-
-    [Header("Parameters")]
     [SerializeField] private SmartItemParameterFactory factory;
 
     List<DCLBuilderInWorldEntity> entitiesList = new List<DCLBuilderInWorldEntity>();
@@ -27,7 +25,6 @@ public class SmartItemListView : MonoBehaviour
             SmartItemUIParameterAdapter prefabToInstantiate = factory.GetPrefab(parameter.GetParameterType());
             InstantiateParameter(parameter, smartItemValues, prefabToInstantiate);
         }
-
     }
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> entitiesList)
@@ -45,10 +42,5 @@ public class SmartItemListView : MonoBehaviour
 
         parameterAdapter.SetParameter(parameter,smartItemValues);
         childrenList.Add(parameterAdapter.gameObject);
-    }
-
-    void OnParameterChange(SmartItemParameter smartItemParameter)
-    {
-        //TODO: Implement Smart Item action
     }
 }

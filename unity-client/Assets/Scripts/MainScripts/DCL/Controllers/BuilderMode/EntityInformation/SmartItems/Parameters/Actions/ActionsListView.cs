@@ -8,7 +8,6 @@ public class ActionsListView : ListView<SmartItemActionEvent>
     public SmartItemActionEventAdapter adapter;
     public System.Action<SmartItemActionable> OnActionableRemove;
 
-
     public override void AddAdapters()
     {
         base.AddAdapters();
@@ -30,7 +29,7 @@ public class ActionsListView : ListView<SmartItemActionEvent>
         }
     }
 
-    void RemoveAdapter(SmartItemActionEventAdapter adapter)
+    private void RemoveAdapter(SmartItemActionEventAdapter adapter)
     {
         adapter.OnActionableRemove -= RemoveActionable;
         Destroy(adapter.gameObject);
