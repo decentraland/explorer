@@ -97,7 +97,7 @@ public class AssetCatalogBridge : MonoBehaviour
     public static void ClearCatalog()
     {
         sceneObjectCatalog.Clear();
-        sceneAssetPackCatalogValue.Clear();
+        sceneAssetPackCatalog.Clear();
     }
 
     public static void AddSceneObjectToCatalog(SceneObject sceneObject)

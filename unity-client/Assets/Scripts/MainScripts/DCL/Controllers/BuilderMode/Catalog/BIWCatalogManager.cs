@@ -29,6 +29,13 @@ public class BIWCatalogManager
         }
     }
 
+    public static void ClearCatalog()
+    {
+        DataStore.BuilderInWorld.catalogItemDict.Clear();
+        DataStore.BuilderInWorld.catalogItemPackDict.Clear();
+        DataStore.BuilderInWorld.catalogItemCategoryDict.Clear();
+    }
+
     public static List<CatalogItemPack> GetCatalogItemPackList()
     {
         return DataStore.BuilderInWorld.catalogItemPackDict.GetValues();

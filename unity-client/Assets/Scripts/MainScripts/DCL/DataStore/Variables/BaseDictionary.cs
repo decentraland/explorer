@@ -59,6 +59,11 @@ public class BaseDictionary<TKey, TValue> : IBaseDictionary<TKey, TValue>
         return true;
     }
 
+    public void Clear()
+    {
+        dictionary.Clear();
+    }
+
     public bool ContainsKey(TKey key) => dictionary.ContainsKey(key);
     public bool ContainsValue(TValue value) => dictionary.ContainsValue(value);
 
