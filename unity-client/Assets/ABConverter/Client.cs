@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using UnityEditor;
+using Unity.EditorCoroutines.Editor;
 using UnityEngine;
 
 namespace DCL.ABConverter
@@ -18,7 +17,7 @@ namespace DCL.ABConverter
             public bool deleteDownloadPathAfterFinished = false;
 
             /// <summary>
-            /// If set to true, Asset Bundles will not be built at all, and only the asset dump will be performed. 
+            /// If set to true, Asset Bundles will not be built at all, and only the asset dump will be performed.
             /// </summary>
             public bool dumpOnly = false;
 
@@ -34,7 +33,7 @@ namespace DCL.ABConverter
             public bool verbose = false;
 
             /// <summary>
-            /// Output folder for asset bundles, by default, they will be stored in Assets/../AssetBundles. 
+            /// Output folder for asset bundles, by default, they will be stored in Assets/../AssetBundles.
             /// </summary>
             public string finalAssetBundlePath = Config.ASSET_BUNDLES_PATH_ROOT + Path.DirectorySeparatorChar;
 
@@ -89,7 +88,7 @@ namespace DCL.ABConverter
         }
 
         /// <summary>
-        /// Start the conversion process with the given commandLineArgs. 
+        /// Start the conversion process with the given commandLineArgs.
         /// </summary>
         /// <param name="commandLineArgs">An array with the command line arguments.</param>
         /// <exception cref="ArgumentException">When an invalid argument is passed</exception>
@@ -193,7 +192,8 @@ namespace DCL.ABConverter
             }
 
             var core = new ABConverter.Core(env, settings);
-            core.Convert(rawContents.ToArray());
+            core.Convert(rawContents.ToArray(), codes => EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.StartVisualTests(env)));
+
             return core.state;
         }
 

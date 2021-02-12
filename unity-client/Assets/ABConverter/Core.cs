@@ -83,9 +83,14 @@ namespace DCL.ABConverter
             public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
             {
                 if (OnFinish == null)
+                {
                     OnFinish = CleanAndExit;
+                }
                 else
+                {
+                    OnFinish -= CleanAndExit;
                     OnFinish += CleanAndExit;
+                }
 
                 startTime = Time.realtimeSinceStartup;
 

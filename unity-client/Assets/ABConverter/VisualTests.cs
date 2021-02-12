@@ -6,13 +6,14 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 
 namespace DCL.ABConverter
 {
     public static class VisualTests
     {
-        public static IEnumerator StartVisualTests()
+        static readonly string abPath = Application.dataPath + "/../AssetBundles/";
+
+        public static IEnumerator StartVisualTests(Environment env = null)
         {
             EditorSceneManager.OpenScene($"Assets/ABConverter/VisualTestScene.unity", OpenSceneMode.Single);
 
@@ -22,7 +23,7 @@ namespace DCL.ABConverter
             VisualTestHelpers.baselineImagesPath += "ABConverter/";
             VisualTestHelpers.testImagesPath += "ABConverter/";
 
-            var gltfs = LoadAndInstanceAllGltfAssets();
+            var gltfs = LoadAndInstantiateAllGltfAssets();
 
             VisualTestHelpers.generateBaseline = true;
 
@@ -40,7 +41,7 @@ namespace DCL.ABConverter
 
             VisualTestHelpers.generateBaseline = false;
 
-            var abs = LoadAndInstanceAllAssetBundles();
+            var abs = LoadAndInstantiateAllAssetBundles();
 
             foreach (GameObject go in abs)
             {
@@ -54,25 +55,40 @@ namespace DCL.ABConverter
                 yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, new Vector3(7, 7, 7), Vector3.zero);
 
                 bool result = false;
-                result = VisualTestHelpers.TestSnapshot(
-                    VisualTestHelpers.baselineImagesPath + testName,
-                    VisualTestHelpers.testImagesPath + testName,
-                    95);
 
-                if (result)
+                // TODO: Remove after testing
+                // Random fail for testing
+                // if (Random.Range(0, 2) == 0)
+                // {
+                    result = VisualTestHelpers.TestSnapshot(
+                        VisualTestHelpers.baselineImagesPath + testName,
+                        VisualTestHelpers.testImagesPath + testName,
+                        95);
+                // }
+
+                Debug.Log("Test " + (result ? "succeeded" : "failed") + " for " + testName);
+
+                // Delete failed AB files to avoid uploading them
+                if (!result && env != null)
                 {
-                    Debug.Log("Test succeeded for " + testName);
+                    string filePath = abPath + go.name;
+                    env.file.Delete(filePath);
+
+                    string depMapPath = filePath + ".depmap";
+                    env.file.Delete(depMapPath);
+
+                    // TODO: Notify some metrics API or something to let know that this asset has conversion problems and we should manually take a look
                 }
 
                 go.SetActive(false);
             }
 
             VisualTestHelpers.baselineImagesPath = baselinePath;
-            VisualTestHelpers.testImagesPath += testImagesPath;
+            VisualTestHelpers.testImagesPath = testImagesPath;
             yield break;
         }
 
-        public static GameObject[] LoadAndInstanceAllGltfAssets()
+        public static GameObject[] LoadAndInstantiateAllGltfAssets()
         {
             var assets = AssetDatabase.FindAssets("t:GameObject", new[] {"Assets/_Downloaded"});
 
@@ -89,12 +105,11 @@ namespace DCL.ABConverter
             return importedGLTFs.ToArray();
         }
 
-        public static GameObject[] LoadAndInstanceAllAssetBundles()
+        public static GameObject[] LoadAndInstantiateAllAssetBundles()
         {
             Caching.ClearCache();
 
             string workingFolderName = "_Downloaded";
-            string abPath = Application.dataPath + "/../AssetBundles/";
 
             var pathList = Directory.GetDirectories(Application.dataPath + "/" + workingFolderName);
 
@@ -127,6 +142,9 @@ namespace DCL.ABConverter
                 string path = abPath + hash;
                 var req = UnityWebRequestAssetBundle.GetAssetBundle(path);
 
+                if(SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
+                    req.url = req.url.Replace("http://localhost", "file:///");
+
                 req.SendWebRequest();
 
                 while (!req.isDone)
@@ -144,6 +162,9 @@ namespace DCL.ABConverter
             {
                 string path = abPath + hash;
                 var req = UnityWebRequestAssetBundle.GetAssetBundle(path);
+
+                if(SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
+                    req.url = req.url.Replace("http://localhost", "file:///");
 
                 req.SendWebRequest();
 
