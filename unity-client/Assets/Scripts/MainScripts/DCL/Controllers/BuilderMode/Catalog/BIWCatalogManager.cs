@@ -9,23 +9,16 @@ using UnityEngine;
 public class BIWCatalogManager
 {
     public static bool VERBOSE = false;
-
-    public static BIWCatalogManager i
-    {
-        get;
-
-        private set;
-    }
+    private static bool IS_INIT = false;
 
     public static void Init()
     {
-        if (i == null)
+        if (!IS_INIT)
         {
-            i = new BIWCatalogManager();
-
             BuilderInWorldNFTController.i.OnNftsFetched += ConvertCollectiblesPack;
             AssetCatalogBridge.OnSceneObjectAdded += AddSceneObject;
             AssetCatalogBridge.OnSceneAssetPackAdded += AddSceneAssetPack;
+            IS_INIT = true;
         }
     }
 
@@ -81,7 +74,7 @@ public class BIWCatalogManager
         return assetPackDic.Values.ToList();
     }
 
-    private static void AddSceneObject(SceneObject sceneObject)
+    public static void AddSceneObject(SceneObject sceneObject)
     {
         if (DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(sceneObject.id))
             return;
@@ -90,7 +83,7 @@ public class BIWCatalogManager
         DataStore.BuilderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
     }
 
-    private static void AddSceneAssetPack(SceneAssetPack sceneAssetPack)
+    public static void AddSceneAssetPack(SceneAssetPack sceneAssetPack)
     {
         if (DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(sceneAssetPack.id))
             return;
@@ -99,7 +92,7 @@ public class BIWCatalogManager
         DataStore.BuilderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
     }
 
-    private static void ConvertCollectiblesPack(List<NFTInfo> nftList)
+    public static void ConvertCollectiblesPack(List<NFTInfo> nftList)
     {
         if (nftList == null)
             return;
@@ -136,7 +129,7 @@ public class BIWCatalogManager
         }
     }
 
-    private static CatalogItemPack CreateCatalogItemPack(SceneAssetPack sceneAssetPack)
+    public static CatalogItemPack CreateCatalogItemPack(SceneAssetPack sceneAssetPack)
     {
         CatalogItemPack catalogItemPack = new CatalogItemPack();
 
@@ -155,7 +148,7 @@ public class BIWCatalogManager
         return catalogItemPack;
     }
 
-    private static CatalogItem CreateCatalogItem(SceneObject sceneObject)
+    public static CatalogItem CreateCatalogItem(SceneObject sceneObject)
     {
         CatalogItem catalogItem = new CatalogItem();
         catalogItem.id = sceneObject.id;
@@ -187,7 +180,7 @@ public class BIWCatalogManager
         return catalogItem;
     }
 
-    private static CatalogItem CreateCatalogItem(NFTInfo nFTInfo)
+    public static CatalogItem CreateCatalogItem(NFTInfo nFTInfo)
     {
         CatalogItem catalogItem = new CatalogItem();
         catalogItem.itemType = CatalogItem.ItemType.NFT;
