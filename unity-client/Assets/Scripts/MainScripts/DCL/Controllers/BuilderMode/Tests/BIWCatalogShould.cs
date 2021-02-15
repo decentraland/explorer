@@ -13,9 +13,9 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
 
         BuilderInWorldTestHelper.CreateTestCatalogLocal();
 
-        Assert.Greater(DataStore.BuilderInWorld.catalogItemDict.Count(), 0);
-        Assert.Greater(DataStore.BuilderInWorld.catalogItemPackDict.Count(), 0);
-        Assert.Greater(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 0);
+        Assert.AreEqual(DataStore.BuilderInWorld.catalogItemDict.Count(), 1);
+        Assert.AreEqual(DataStore.BuilderInWorld.catalogItemPackDict.Count(), 1);
+        Assert.AreEqual(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 1);
 
     }
 
@@ -26,9 +26,9 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
 
         BuilderInWorldTestHelper.CreateNFT();
 
-        Assert.Greater(DataStore.BuilderInWorld.catalogItemDict.Count(), 0);
-        Assert.Greater(DataStore.BuilderInWorld.catalogItemPackDict.Count(), 0);
-        Assert.Greater(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 0);
+        Assert.AreEqual(DataStore.BuilderInWorld.catalogItemDict.Count(), 1);
+        Assert.AreEqual(DataStore.BuilderInWorld.catalogItemPackDict.Count(), 1);
+        Assert.AreEqual(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 1);
     }
 
     protected override IEnumerator TearDown()
