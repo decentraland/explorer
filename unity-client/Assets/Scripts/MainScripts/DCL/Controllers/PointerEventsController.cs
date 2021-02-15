@@ -268,7 +268,7 @@ namespace DCL
         private void ProcessButtonUp(WebInterface.ACTION_BUTTON buttonId, bool useRaycast, LayerMask pointerEventLayer, int globalLayer)
         {
             IWorldState worldState = Environment.i.world.state;
-            List<string> currentSceneAndPortableExperienceIds = worldState.currentSceneAndPortableExperienceIds;
+            List<string> currentSceneAndPortableExperienceIds = worldState.GetCurrentSceneAndCurrentPortableExperiences();
             foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
                 RaycastHitInfo raycastGlobalLayerHitInfo;
@@ -295,8 +295,6 @@ namespace DCL
                     pointerUpEvent = null;
                 }
 
-                //string sceneId = Environment.i.world.state.currentSceneId;
-
                 if (useRaycast && raycastGlobalLayerHitInfo.isValid)
                 {
                     CollidersManager.i.GetColliderInfo(raycastGlobalLayerHitInfo.hit.collider, out ColliderInfo colliderInfo);
@@ -322,7 +320,7 @@ namespace DCL
         private void ProcessButtonDown(WebInterface.ACTION_BUTTON buttonId, bool useRaycast, LayerMask pointerEventLayer, int globalLayer)
         {
             IWorldState worldState = Environment.i.world.state;
-            List<string> currentSceneAndPortableExperienceIds = worldState.currentSceneAndPortableExperienceIds;
+            List<string> currentSceneAndPortableExperienceIds = worldState.GetCurrentSceneAndCurrentPortableExperiences();
             foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
                 RaycastHitInfo raycastGlobalLayerHitInfo;
@@ -361,8 +359,6 @@ namespace DCL
 
                     lastPointerDownEventHitInfo = raycastInfoPointerEventLayer.hitInfo;
                 }
-
-                //string sceneId = Environment.i.world.state.currentSceneId;
 
                 if (useRaycast && raycastGlobalLayerHitInfo.isValid)
                 {

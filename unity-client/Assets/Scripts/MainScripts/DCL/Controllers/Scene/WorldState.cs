@@ -12,7 +12,6 @@ namespace DCL
         List<ParcelScene> scenesSortedByDistance { get; set; }
         List<string> globalSceneIds { get; set; }
         string currentSceneId { get; set; }
-        List<string> currentSceneAndPortableExperienceIds { get; }
         void Initialize();
         string TryToGetSceneCoordsID(string id);
         bool TryGetScene(string id, out ParcelScene scene);
@@ -22,6 +21,7 @@ namespace DCL
         Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
         Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
         List<GlobalScene> GetActivePortableExperienceScenes();
+        List<string> GetCurrentSceneAndCurrentPortableExperiences();
     }
 
     public class WorldState : IWorldState
@@ -32,7 +32,6 @@ namespace DCL
 
         public List<string> globalSceneIds { get; set; }
         public string currentSceneId { get; set; }
-        public List<string> currentSceneAndPortableExperienceIds => GetCurrentSceneAndCurrentPortableExperiences();
 
         public void Initialize()
         {
@@ -151,7 +150,7 @@ namespace DCL
             return activePortableExperienceScenes;
         }
 
-        private List<string> GetCurrentSceneAndCurrentPortableExperiences()
+        public List<string> GetCurrentSceneAndCurrentPortableExperiences()
         {
             List<string> currentSceneAndPortableExperiencesIds = new List<string>();
             currentSceneAndPortableExperiencesIds.Add(currentSceneId);
