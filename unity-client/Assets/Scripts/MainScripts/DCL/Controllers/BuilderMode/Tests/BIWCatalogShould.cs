@@ -7,6 +7,38 @@ using UnityEngine;
 public class BIWCatalogShould : IntegrationTestSuite_Legacy
 {
     [Test]
+    public void BuilderInWorldQuickBar()
+    {
+        BIWCatalogManager.Init();
+        BuilderInWorldTestHelper.CreateTestCatalogLocal();
+
+        QuickBarController quickBarController = new QuickBarController(new QuickBarView());
+
+        for(int i = 0; i < quickBarController.GetSlotsCount();i++)
+        {
+
+        }
+
+    }
+
+        [Test]
+    public void BuilderInWorldToggleFavorite()
+    {
+        BIWCatalogManager.Init();
+        BuilderInWorldTestHelper.CreateTestCatalogLocal();
+
+        CatalogItem item = DataStore.BuilderInWorld.catalogItemDict.GetValues()[0];
+
+        FavoritesController favoritesController = new FavoritesController(new CatalogGroupListView());
+        favoritesController.ToggleFavoriteState(item, null);
+        Assert.IsTrue(item.IsFavorite());
+
+        favoritesController.ToggleFavoriteState(item, null);
+        Assert.IsFalse(item.IsFavorite());
+    }
+
+
+    [Test]
     public void CatalogItemsSceneObject()
     {
         BIWCatalogManager.Init();

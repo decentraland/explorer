@@ -71,7 +71,7 @@ public class QuickBarView : MonoBehaviour
         }
     }
 
-    void SetQuickBarShortcut(CatalogItem catalogItem, int index, Texture texture)
+    private void SetQuickBarShortcut(CatalogItem catalogItem, int index, Texture texture)
     {
         OnQuickBarAdd?.Invoke(catalogItem, index);
      
