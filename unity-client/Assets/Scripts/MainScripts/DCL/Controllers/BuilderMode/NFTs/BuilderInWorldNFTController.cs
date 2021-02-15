@@ -90,13 +90,21 @@ public class BuilderInWorldNFTController
         }
     }
 
-    void FetchNftsFromOwner()
+    private void FetchNftsFromOwner()
     {
         if (fechNftsCoroutine != null) CoroutineStarter.Stop(fechNftsCoroutine);
         fechNftsCoroutine = CoroutineStarter.Start(FetchNfts());
     }
 
-    IEnumerator FetchNfts()
+    public void NftsFeteched(NFTOwner nftOwner)
+    {
+        this.nftOwner = nftOwner;
+        string json = JsonUtility.ToJson(nftOwner);
+        desactivateNFT = false;
+        OnNftsFetched?.Invoke(this.nftOwner.assets);
+    }
+
+    private IEnumerator FetchNfts()
     {
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
 
@@ -104,9 +112,7 @@ public class BuilderInWorldNFTController
 
         yield return NFTHelper.FetchNFTsFromOwner(userId, (nftOwner) =>
         {
-            this.nftOwner = nftOwner;
-            desactivateNFT = false;
-            OnNftsFetched?.Invoke(nftOwner.assets);
+            NftsFeteched(nftOwner);
         },
         (error) =>
         {

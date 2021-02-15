@@ -77,18 +77,6 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
     }
 
     [Test]
-    public void CatalogItems()
-    {
-        BIWCatalogManager.Init();
-
-        BuilderInWorldTestHelper.CreateTestCatalogLocal();
-
-        Assert.Greater(DataStore.BuilderInWorld.catalogItemDict.Count(), 0);
-        Assert.Greater(DataStore.BuilderInWorld.catalogItemPackDict.Count(), 0);
-        Assert.Greater(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 0);      
-    }
-
-    [Test]
     public void BuilderInWorldEntityComponents()
     {
         string entityId = "1";

@@ -1,4 +1,5 @@
 using DCL.Helpers;
+using DCL.Helpers.NFT;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -11,18 +12,28 @@ public static class BuilderInWorldTestHelper
     {
         AssetCatalogBridge.ClearCatalog();
 
-        string jsonPath = Utils.GetTestsAssetsPath() + "/SceneObjects/catalog.json";
+        string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/sceneObjectCatalog.json";
 
 
         if(File.Exists(jsonPath))
         {
-            Debug.Log("File found!");
-            BinaryFormatter formatter = new BinaryFormatter();
-            FileStream stream = new FileStream(jsonPath, FileMode.Open);
-
-            string jsonValue = formatter.Deserialize(stream) as string;
+            string jsonValue = File.ReadAllText(jsonPath);
             AssetCatalogBridge.i.AddFullSceneObjectCatalog(jsonValue);
-            stream.Close();
         }
+    }
+
+    public static void CreateNFT()
+    {     
+        string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/nftAsset.json";
+
+
+        if (File.Exists(jsonPath))
+        {
+            string jsonValue = File.ReadAllText(jsonPath);
+            NFTOwner owner = NFTOwner.defaultNFTOwner;
+            owner.assets.Add(JsonUtility.FromJson<NFTInfo>(jsonValue));
+            BuilderInWorldNFTController.i.NftsFeteched(owner);
+        }
+
     }
 }
