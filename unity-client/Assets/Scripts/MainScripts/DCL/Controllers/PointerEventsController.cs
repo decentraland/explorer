@@ -269,11 +269,10 @@ namespace DCL
         {
             IWorldState worldState = Environment.i.world.state;
             List<string> currentSceneAndPortableExperienceIds = worldState.GetCurrentSceneAndCurrentPortableExperiences();
+            RaycastHitInfo raycastGlobalLayerHitInfo;
+            Ray ray = GetRayFromCamera();
             foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
-                RaycastHitInfo raycastGlobalLayerHitInfo;
-                Ray ray = GetRayFromCamera();
-
                 // Raycast for global pointer events
                 RaycastResultInfo raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[sceneId]);
                 raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
@@ -321,11 +320,10 @@ namespace DCL
         {
             IWorldState worldState = Environment.i.world.state;
             List<string> currentSceneAndPortableExperienceIds = worldState.GetCurrentSceneAndCurrentPortableExperiences();
+            RaycastHitInfo raycastGlobalLayerHitInfo;
+            Ray ray = GetRayFromCamera();
             foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
-                RaycastHitInfo raycastGlobalLayerHitInfo;
-                Ray ray = GetRayFromCamera();
-
                 // Raycast for pointer event components
                 RaycastResultInfo raycastInfoPointerEventLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, pointerEventLayer, worldState.loadedScenes[sceneId]);
 
