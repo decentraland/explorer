@@ -71,7 +71,7 @@ namespace DCL.Components
                 return;
             }
 
-            audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) ? model.volume : 0f;
+            audioSource.volume = ((scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) || (scene is GlobalScene && ((GlobalScene)scene).isPortableExperience)) ? model.volume : 0f;
             audioSource.loop = model.loop;
             audioSource.pitch = model.pitch;
             audioSource.spatialBlend = 1;
@@ -113,7 +113,7 @@ namespace DCL.Components
         {
             if (audioSource != null)
             {
-                audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
+                audioSource.volume = ((scene.sceneData.id == currentSceneId) || (scene is GlobalScene && ((GlobalScene)scene).isPortableExperience)) ? model.volume : 0f;
             }
         }
 
