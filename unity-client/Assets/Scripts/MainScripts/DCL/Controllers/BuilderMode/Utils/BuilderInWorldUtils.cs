@@ -200,6 +200,21 @@ public static partial class BuilderInWorldUtils
         return JsonConvert.DeserializeObject<EntityData>(json);
     }
 
+    public static List<DCLBuilderInWorldEntity> RemoveGroundEntities(List<DCLBuilderInWorldEntity> entityList)
+    {
+        List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();
+
+        foreach (DCLBuilderInWorldEntity entity in entityList)
+        {
+            if (entity.isFloor)
+                continue;
+
+            newList.Add(entity);
+        }
+
+        return newList;
+    }
+
     public static List<DCLBuilderInWorldEntity> FilterEntitiesBySmartItemComponentAndActions(List<DCLBuilderInWorldEntity> entityList)
     {
         List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();

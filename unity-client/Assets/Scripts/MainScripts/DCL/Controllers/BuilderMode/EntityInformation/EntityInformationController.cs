@@ -166,7 +166,6 @@ public class EntityInformationController : MonoBehaviour
         {
             SmartItemComponent smartItemComponent = (SmartItemComponent)component;
             SmartItemComponent.Model modelo =  smartItemComponent.model;
-            modelo.ToString();
             OnSmartItemComponentUpdate?.Invoke(currentEntity);
         }
     }
