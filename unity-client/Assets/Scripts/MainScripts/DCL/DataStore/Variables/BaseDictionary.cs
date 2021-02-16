@@ -62,6 +62,7 @@ public class BaseDictionary<TKey, TValue> : IBaseDictionary<TKey, TValue>
     public void Clear()
     {
         dictionary.Clear();
+        OnSet?.Invoke(new Dictionary<TKey, TValue>());
     }
 
     public bool ContainsKey(TKey key) => dictionary.ContainsKey(key);
