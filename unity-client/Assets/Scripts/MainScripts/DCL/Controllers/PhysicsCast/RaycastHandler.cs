@@ -76,7 +76,7 @@ namespace DCL.Helpers
                 return;
 
             if (scene != null)
-                hitInfo.isValid = info.scene == scene || (scene is GlobalScene && ((GlobalScene)scene).isPortableExperience);
+                hitInfo.isValid = (info.scene == scene) || (scene is GlobalScene && ((GlobalScene)scene).isPortableExperience);
             else if (scene == null && Environment.i.world.state.IsCharacterInsideScene(info.scene))
                 hitInfo.isValid = true;
         }

@@ -271,6 +271,7 @@ namespace DCL
             List<string> currentSceneAndPortableExperienceIds = worldState.GetCurrentSceneAndCurrentPortableExperiences();
             RaycastHitInfo raycastGlobalLayerHitInfo;
             Ray ray = GetRayFromCamera();
+
             foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
                 // Raycast for global pointer events
@@ -322,6 +323,7 @@ namespace DCL
             List<string> currentSceneAndPortableExperienceIds = worldState.GetCurrentSceneAndCurrentPortableExperiences();
             RaycastHitInfo raycastGlobalLayerHitInfo;
             Ray ray = GetRayFromCamera();
+
             foreach (string sceneId in currentSceneAndPortableExperienceIds)
             {
                 // Raycast for pointer event components
