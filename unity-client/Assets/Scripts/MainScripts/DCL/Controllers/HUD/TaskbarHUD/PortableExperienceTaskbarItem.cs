@@ -21,6 +21,9 @@ public class PortableExperienceTaskbarItem : MonoBehaviour
     private Image icon;
 
     [SerializeField]
+    private GameObject loading;
+
+    [SerializeField]
     private PortableExperienceContextMenu contextMenu;
 
     public TaskbarButton mainButton { get => button; }
@@ -37,6 +40,8 @@ public class PortableExperienceTaskbarItem : MonoBehaviour
 
         if (!string.IsNullOrEmpty(portableExperienceIconUrl))
         {
+            icon.enabled = false;
+            loading.SetActive(true);
             ThumbnailsManager.GetThumbnail(portableExperienceIconUrl, OnIconReady);
         }
     }
@@ -46,6 +51,8 @@ public class PortableExperienceTaskbarItem : MonoBehaviour
         if (iconAsset != null)
         {
             icon.sprite = ThumbnailsManager.CreateSpriteFromTexture(iconAsset.texture);
+            icon.enabled = true;
+            loading.SetActive(false);
         }
     }
 
