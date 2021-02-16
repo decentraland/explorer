@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 
@@ -31,6 +32,9 @@ namespace DCL.Controllers
             contentProvider.baseUrl = data.baseUrl;
             contentProvider.contents = data.contents;
             contentProvider.BakeHashes();
+
+            if (DCLCharacterController.i != null)
+                gameObject.transform.position = PositionUtils.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
         }
 
         protected override void SendMetricsEvent()
