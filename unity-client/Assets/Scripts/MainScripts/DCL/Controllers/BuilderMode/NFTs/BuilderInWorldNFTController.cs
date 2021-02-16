@@ -12,15 +12,15 @@ public class BuilderInWorldNFTController
     public event System.Action OnNFTUsageChange;
     public event System.Action<List<NFTInfo>> OnNftsFetched;
 
-    NFTOwner nftOwner;
+    private NFTOwner nftOwner;
 
-    Coroutine fechNftsCoroutine;
+    private Coroutine fechNftsCoroutine;
 
-    static BuilderInWorldNFTController instance;
+    private static BuilderInWorldNFTController instance;
 
-    List<NFTInfo> nftsAlreadyInUse = new List<NFTInfo>();
+    private List<NFTInfo> nftsAlreadyInUse = new List<NFTInfo>();
 
-    bool desactivateNFT = false;
+    private bool desactivateNFT = false;
 
     public static BuilderInWorldNFTController i
     {
@@ -72,6 +72,11 @@ public class BuilderInWorldNFTController
             nftsAlreadyInUse.Remove(info);
             OnNFTUsageChange?.Invoke();
         }
+    }
+
+    public List<NFTInfo> GetNfts()
+    {
+        return nftOwner.assets;
     }
 
     public void UseNFT(string id)

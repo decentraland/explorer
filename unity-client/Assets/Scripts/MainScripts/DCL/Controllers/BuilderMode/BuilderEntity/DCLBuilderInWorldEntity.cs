@@ -467,7 +467,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             collidersGameObjectDictionary.Add(entity.scene.sceneData.id + entity.entityId, colliderList);
     }
 
-    bool IsEntityNFT()
+    public bool IsEntityNFT()
     {
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
         {
