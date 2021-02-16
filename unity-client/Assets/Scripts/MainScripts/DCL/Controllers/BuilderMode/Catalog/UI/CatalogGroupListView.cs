@@ -28,16 +28,19 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<CatalogItem
             foreach (KeyValuePair<string, List<CatalogItem>> assetPackGroup in assetPackGroups)
             {
                 CatalogAssetGroupAdapter adapter = Instantiate(categoryItemAdapterPrefab, contentPanelTransform).GetComponent<CatalogAssetGroupAdapter>();
-
                 adapter.SetContent(assetPackGroup.Key, assetPackGroup.Value);
-                adapter.OnCatalogItemClicked += CatalogItemSelected;
-                adapter.OnCatalogItemFavorite += CatalogItemFavorite;
-                adapter.OnAdapterStartDragging += AdapterStartDragging;
-                adapter.OnAdapterDrag += OnDrag;
-                adapter.OnAdapterEndDrag += OnEndDrag;
-
+                AddAdapter(adapter);
             }
         }
+    }
+
+    public void AddAdapter(CatalogAssetGroupAdapter adapter)
+    {   
+        adapter.OnCatalogItemClicked += CatalogItemSelected;
+        adapter.OnCatalogItemFavorite += CatalogItemFavorite;
+        adapter.OnAdapterStartDragging += AdapterStartDragging;
+        adapter.OnAdapterDrag += OnDrag;
+        adapter.OnAdapterEndDrag += OnEndDrag;
     }
 
     private void OnDrag(PointerEventData data)

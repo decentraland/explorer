@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Helpers;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,22 +7,45 @@ using UnityEngine;
 
 public class BIWCatalogShould : IntegrationTestSuite_Legacy
 {
+    private GameObject gameObjectToUse;
+
     [Test]
     public void BuilderInWorldQuickBar()
     {
         BIWCatalogManager.Init();
         BuilderInWorldTestHelper.CreateTestCatalogLocal();
+        gameObjectToUse = new GameObject();
+        CatalogItem item = DataStore.BuilderInWorld.catalogItemDict.GetValues()[0];
 
-        QuickBarController quickBarController = new QuickBarController(new QuickBarView());
+        CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
+        adapter.SetContent(item);
 
-        for(int i = 0; i < quickBarController.GetSlotsCount();i++)
+        CatalogAssetGroupAdapter groupAdatper = new CatalogAssetGroupAdapter();
+        groupAdatper.AddAdapter(adapter);
+
+        CatalogGroupListView catalogGroupListView = new CatalogGroupListView();
+        catalogGroupListView.AddAdapter(groupAdatper);
+        catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
+   
+        QuickBarView quickBarView = new QuickBarView();
+     
+        quickBarView.catalogGroupListView = catalogGroupListView;
+
+        QuickBarController quickBarController = new QuickBarController(quickBarView);
+        int slots = quickBarController.GetSlotsCount();
+        quickBarView.shortcutsImgs = new QuickBarSlot[slots];
+
+        for (int i = 0; i < slots; i++)
         {
-
+            quickBarView.SetIndexToDrop(i);
+            adapter.AdapterStartDragging(null);
+            quickBarView.SceneObjectDropped(null);
+            Assert.AreEqual(item, quickBarController.QuickBarObjectSelected(i));
         }
 
     }
 
-        [Test]
+    [Test]
     public void BuilderInWorldToggleFavorite()
     {
         BIWCatalogManager.Init();
@@ -67,6 +91,8 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     {
         AssetCatalogBridge.ClearCatalog();
         BIWCatalogManager.ClearCatalog();
+        if (gameObjectToUse != null)
+            GameObject.Destroy(gameObjectToUse);
         yield return base.TearDown();
     }
 }

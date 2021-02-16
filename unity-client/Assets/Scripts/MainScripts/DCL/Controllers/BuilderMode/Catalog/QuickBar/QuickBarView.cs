@@ -78,7 +78,8 @@ public class QuickBarView : MonoBehaviour
         if (index >= shortcutsImgs.Length)
             return;
 
-        shortcutsImgs[index].SetTexture(texture);
+        if(shortcutsImgs[index] != null && texture != null)
+            shortcutsImgs[index].SetTexture(texture);
     }
 
     public void QuickBarInput(int quickBarSlot)
