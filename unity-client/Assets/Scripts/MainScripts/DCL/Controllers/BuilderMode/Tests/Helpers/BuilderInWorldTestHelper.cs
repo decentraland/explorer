@@ -25,8 +25,19 @@ public static class BuilderInWorldTestHelper
         return adapter;
     }
 
+    public static void CreateTestCatalogLocalMultipleFloorObjects()
+    {
+        AssetCatalogBridge.ClearCatalog();
+        string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/multipleSceneObjectsCatalog.json";
 
-    public static void CreateTestCatalogLocal()
+        if (File.Exists(jsonPath))
+        {
+            string jsonValue = File.ReadAllText(jsonPath);
+            AssetCatalogBridge.i.AddFullSceneObjectCatalog(jsonValue);
+        }
+    }
+
+    public static void CreateTestCatalogLocalSingleObject()
     {
         AssetCatalogBridge.ClearCatalog();
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/sceneObjectCatalog.json";

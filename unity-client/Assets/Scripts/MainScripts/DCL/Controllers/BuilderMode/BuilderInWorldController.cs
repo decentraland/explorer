@@ -156,26 +156,7 @@ public class BuilderInWorldController : MonoBehaviour
         KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
         KernelConfig.i.OnChange += OnKernelConfigChanged;
 
-        if (snapGO == null)
-            snapGO = new GameObject("SnapGameObject");
-
-        snapGO.transform.SetParent(transform);
-
-        if (freeMovementGO == null)
-            freeMovementGO = new GameObject("FreeMovementGO");
-
-        freeMovementGO.transform.SetParent(cameraParentGO.transform);
-
-        if (editionGO == null)
-            editionGO = new GameObject("EditionGO");
-
-        editionGO.transform.SetParent(cameraParentGO.transform);
-
-        if (undoGO == null)
-        {
-            undoGO = new GameObject("UndoGameObject");
-            undoGO.transform.SetParent(transform);
-        }
+        InitGameObjects();
 
         HUDConfiguration hudConfig = new HUDConfiguration();
         hudConfig.active = true;
@@ -390,6 +371,30 @@ public class BuilderInWorldController : MonoBehaviour
         editorMode.OnActionGenerated += actionController.AddAction;
     }
 
+    public void InitGameObjects()
+    {
+        if (snapGO == null)
+            snapGO = new GameObject("SnapGameObject");
+
+        snapGO.transform.SetParent(transform);
+
+        if (freeMovementGO == null)
+            freeMovementGO = new GameObject("FreeMovementGO");
+
+        freeMovementGO.transform.SetParent(cameraParentGO.transform);
+
+        if (editionGO == null)
+            editionGO = new GameObject("EditionGO");
+
+        editionGO.transform.SetParent(cameraParentGO.transform);
+
+        if (undoGO == null)
+        {
+            undoGO = new GameObject("UndoGameObject");
+            undoGO.transform.SetParent(transform);
+        }
+    }
+
     void StartTutorial()
     {
         TutorialController.i.SetBuilderInWorldTutorialEnabled();
@@ -462,24 +467,44 @@ public class BuilderInWorldController : MonoBehaviour
         return true;
     }
 
-    void OnCatalogItemSelected(CatalogItem sceneObject)
+    void OnCatalogItemSelected(CatalogItem catalogItem)
     {
-        if (IsCatalogItemFloor(sceneObject))
+        if (IsCatalogItemFloor(catalogItem))
         {
-            builderInWorldEntityHandler.DeleteFloorEntities();
-            CatalogItem lastFloor = lastFloorCalalogItemUsed;
-
-            CreateFloor(sceneObject);
-
-            BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
-
-            buildAction.CreateChangeFloorAction(lastFloor, sceneObject);
-            actionController.AddAction(buildAction);
+            ChangeFloor(catalogItem);
         }
         else
         {
-            CreateSceneObject(sceneObject);
+            CreateSceneObject(catalogItem);
         }
+    }
+
+    public void ChangeFloor(CatalogItem newFloorObject)
+    {
+        CatalogItem lastFloor = lastFloorCalalogItemUsed;
+        if (lastFloor == null)
+            lastFloor = FindCurrentFloorCatalogItem();
+
+        builderInWorldEntityHandler.DeleteFloorEntities();
+
+        CreateFloor(newFloorObject);
+
+        BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
+
+        buildAction.CreateChangeFloorAction(lastFloor, newFloorObject);
+        actionController.AddAction(buildAction);
+    }
+
+    public CatalogItem FindCurrentFloorCatalogItem()
+    {
+        foreach (DCLBuilderInWorldEntity entity in builderInWorldEntityHandler.GetAllEntitiesFromCurrentScene())
+        {
+            if (entity.isFloor)
+            {
+                return entity.GetCatalogItemAssociated();
+            }
+        }
+        return null;
     }
 
     DCLBuilderInWorldEntity CreateSceneObject(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false)
@@ -492,7 +517,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
         data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
-
+        if (data.contents == null)
+            data.contents = new List<ContentServerUtils.MappingPair>();
         foreach (KeyValuePair<string, string> content in catalogItem.contents)
         {
             ContentServerUtils.MappingPair mappingPair = new ContentServerUtils.MappingPair();
@@ -507,7 +533,6 @@ public class BuilderInWorldController : MonoBehaviour
                     break;
                 }
             }
-
             if (!found)
                 data.contents.Add(mappingPair);
         }
@@ -518,7 +543,11 @@ public class BuilderInWorldController : MonoBehaviour
         DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
         DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
 
-        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, currentActiveMode.GetCreatedEntityPoint(), editionGO.transform.position);
+        Vector3 startPoint = Vector3.zero;
+        if (currentActiveMode != null)
+            startPoint = currentActiveMode.GetCreatedEntityPoint();
+
+        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPoint, editionGO.transform.position);
         entity.isFloor = isFloor;
 
         if (entity.isFloor)
@@ -576,7 +605,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         entity.gameObject.transform.eulerAngles = Vector3.zero;
 
-        currentActiveMode.CreatedEntity(entity);
+        currentActiveMode?.CreatedEntity(entity);
         if (!isAdvancedModeActive)
             Utils.LockCursor();
         lastCatalogItemCreated = catalogItem;
@@ -768,6 +797,11 @@ public class BuilderInWorldController : MonoBehaviour
         {
             DCLBuilderOutline outliner = Camera.main.GetComponent<DCLBuilderOutline>();
             Destroy(outliner);
+        }
+
+        foreach(GameObject gameObject in floorPlaceHolderDict.Values)
+        {
+            Destroy(gameObject);
         }
     }
 
@@ -1059,7 +1093,7 @@ public class BuilderInWorldController : MonoBehaviour
 
             GameObject floorPlaceHolder =  Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
             floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
-            builderInWorldBridge.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
+            builderInWorldBridge?.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
         }
 
         builderInWorldEntityHandler.DeselectEntities();

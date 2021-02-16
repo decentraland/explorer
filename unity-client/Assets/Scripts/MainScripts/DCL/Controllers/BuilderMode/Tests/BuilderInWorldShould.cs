@@ -14,7 +14,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 public class BuilderInWorldShould : IntegrationTestSuite_Legacy
-{ 
+{
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();

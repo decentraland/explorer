@@ -177,6 +177,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
+        associatedCatalogItem = null;
         DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         OnDelete?.Invoke(this);
     }

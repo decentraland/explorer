@@ -13,7 +13,7 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     public void BuilderInWorldQuickBar()
     {
         BIWCatalogManager.Init();
-        BuilderInWorldTestHelper.CreateTestCatalogLocal();
+        BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
         gameObjectToUse = new GameObject();
         CatalogItem item = DataStore.BuilderInWorld.catalogItemDict.GetValues()[0];
 
@@ -49,7 +49,7 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     public void BuilderInWorldToggleFavorite()
     {
         BIWCatalogManager.Init();
-        BuilderInWorldTestHelper.CreateTestCatalogLocal();
+        BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
 
         CatalogItem item = DataStore.BuilderInWorld.catalogItemDict.GetValues()[0];
 
@@ -67,7 +67,7 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     {
         BIWCatalogManager.Init();
 
-        BuilderInWorldTestHelper.CreateTestCatalogLocal();
+        BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
 
         Assert.AreEqual(DataStore.BuilderInWorld.catalogItemDict.Count(), 1);
         Assert.AreEqual(DataStore.BuilderInWorld.catalogItemPackDict.Count(), 1);
