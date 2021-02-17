@@ -32,7 +32,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     [Header("Activation of Feature")]
     public bool activeFeature = false;
-    public bool byPassLandOwnershipCheck = false;
+    public bool bypassLandOwnershipCheck = false;
 
     [Header("Design variables")]
     public float scaleSpeed = 0.25f;
@@ -889,7 +889,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     bool UserHasPermissionOnParcelScene(ParcelScene scene)
     {
-        if (byPassLandOwnershipCheck)
+        if (bypassLandOwnershipCheck)
             return true;
 
         UserProfile userProfile = UserProfile.GetOwnUserProfile();

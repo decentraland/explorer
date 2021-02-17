@@ -6,22 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BIWCatalogManager
+public static class BIWCatalogManager
 {
     public static bool VERBOSE = false;
-
-    public static BIWCatalogManager i
-    {
-        get;
-
-        private set;
-    }
+    private static bool INIT = false;
 
     public static void Init()
     {
-        if (i == null)
+        if (!INIT)
         {
-            i = new BIWCatalogManager();
+            INIT = true;
 
             BuilderInWorldNFTController.i.OnNftsFetched += ConvertCollectiblesPack;
             AssetCatalogBridge.OnSceneObjectAdded += AddSceneObject;

@@ -34,10 +34,7 @@ public class CatalogItem
 
     private bool isFavorite = false;
 
-    public string GetThumbnailUrl()
-    {
-        return thumbnailURL;
-    }
+    public string GetThumbnailUrl() => thumbnailURL;
 
     public void SetFavorite(bool isFavorite)
     {
