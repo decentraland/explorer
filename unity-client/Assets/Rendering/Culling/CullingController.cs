@@ -331,17 +331,17 @@ namespace DCL.Rendering
             var renderers = objectsTracker.GetRenderers();
             var animations = objectsTracker.GetAnimations();
 
-            for (var i = 0; i < skinnedRenderers.Length; i++)
+            for (var i = 0; i < skinnedRenderers?.Length; i++)
             {
                 skinnedRenderers[i].updateWhenOffscreen = true;
             }
 
-            for (var i = 0; i < animations.Length; i++)
+            for (var i = 0; i < animations?.Length; i++)
             {
                 animations[i].cullingType = AnimationCullingType.AlwaysAnimate;
             }
 
-            for (var i = 0; i < renderers.Length; i++)
+            for (var i = 0; i < renderers?.Length; i++)
             {
                 renderers[i].forceRenderingOff = false;
             }
