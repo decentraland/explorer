@@ -46,13 +46,16 @@ namespace DCL.Components
         {
         }
 
+        private bool initialized = false;
+
         public override IEnumerator ApplyChanges(string newJson)
         {
             model = Utils.SafeFromJson<Model>(newJson);
 
-            if (scene.GetSharedComponent<UIScreenSpace>() == null)
+            if (!initialized)
             {
                 InitializeCanvas();
+                initialized = true;
             }
             else if (DCLCharacterController.i != null)
             {
