@@ -67,7 +67,7 @@ namespace DCL.Rendering
 
         internal static bool TestAvatarShadowRule(CullingControllerProfile profile, float avatarDistance)
         {
-            return true;
+            return avatarDistance < profile.maxShadowDistanceForAvatars;
         }
 
         /// <summary>

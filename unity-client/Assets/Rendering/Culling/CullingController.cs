@@ -160,6 +160,7 @@ namespace DCL.Rendering
                     continue;
 
                 bool rendererIsInIgnoreLayer = ((1 << r.gameObject.layer) & settings.ignoredLayersMask) != 0;
+
                 if (rendererIsInIgnoreLayer)
                 {
                     SetCullingForRenderer(r, true, true);
@@ -188,6 +189,22 @@ namespace DCL.Rendering
                 bool shouldBeVisible = TestRendererVisibleRule(profile, viewportSize, distance, boundsContainsPlayer, isOpaque, isEmissive);
                 bool shouldHaveShadow = TestRendererShadowRule(profile, viewportSize, distance, shadowTexelSize);
 
+                if (r is SkinnedMeshRenderer skr)
+                {
+                    Material mat = skr.sharedMaterial;
+                    bool isAvatarRenderer = false;
+
+                    if (mat != null && mat.shader != null)
+                        isAvatarRenderer = mat.shader.name == "DCL/Toon Shader";
+
+                    if (isAvatarRenderer)
+                    {
+                        shouldHaveShadow &= TestAvatarShadowRule(profile, distance);
+                    }
+
+                    skr.updateWhenOffscreen = TestSkinnedRendererOffscreenRule(settings, distance);
+                }
+
                 if (OnDataReport != null)
                 {
                     if (!shouldBeVisible && !hiddenRenderers.Contains(r))
@@ -195,20 +212,6 @@ namespace DCL.Rendering
 
                     if (shouldBeVisible && !shouldHaveShadow && !shadowlessRenderers.Contains(r))
                         shadowlessRenderers.Add(r);
-                }
-
-                if (r is SkinnedMeshRenderer skr)
-                {
-                    // test if avatar
-                    bool isAvatar = true;
-
-                    if (isAvatar)
-                    {
-                        float avatarDistance = 10;
-                        shouldHaveShadow &= TestAvatarShadowRule(profile, avatarDistance);
-                    }
-
-                    skr.updateWhenOffscreen = TestSkinnedRendererOffscreenRule(settings, distance);
                 }
 
                 SetCullingForRenderer(r, shouldBeVisible, shouldHaveShadow);

@@ -20,6 +20,11 @@ namespace DCL.Rendering
         public float shadowDistanceThreshold;
 
         /// <summary>
+        /// Avatars with more than this distance from camera: should never have shadow, regardless other checks
+        /// </summary>
+        public float maxShadowDistanceForAvatars;
+
+        /// <summary>
         /// Emissive and bigger than this, should be visible
         /// </summary>
         public float emissiveSizeThreshold;
