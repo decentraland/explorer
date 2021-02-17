@@ -61,7 +61,6 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
         Assert.IsFalse(item.IsFavorite());
     }
 
-
     [Test]
     public void CatalogItemsSceneObject()
     {

@@ -98,11 +98,20 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         DCLName dclName = biwEntity.rootEntity.TryGetComponent<DCLName>();
         Assert.IsNotNull(dclName);
 
+        string newName = "TestingName";
+        dclName.ForceSetNewName(newName);
+        Assert.AreEqual(newName, biwEntity.GetDescriptiveName());
+
+
         DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
         scene.SharedComponentAttach(biwEntity.rootEntity.entityId, entityLocked.id);
 
         DCLLockedOnEdit dclLockedOnEdit = biwEntity.rootEntity.TryGetComponent<DCLLockedOnEdit>();
         Assert.IsNotNull(dclLockedOnEdit);
+
+        bool isLocked = true;
+        dclLockedOnEdit.SetIsLocked(isLocked);
+        Assert.AreEqual(biwEntity.IsLocked,isLocked);
     }
 
     [Test]

@@ -64,7 +64,6 @@ public class BIWNftsShould : IntegrationTestSuite_Legacy
         Assert.AreEqual(associatedCatalogItem, catalogItem);
     }
 
-
     protected override IEnumerator TearDown()
     {
         BIWCatalogManager.ClearCatalog();

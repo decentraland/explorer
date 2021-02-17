@@ -20,7 +20,7 @@ public class ActionController : MonoBehaviour
     int currentUndoStepIndex = 0;
     int currentRedoStepIndex = 0;
 
-    public void ResetActionList()
+    public void Clear()
     {
         actionsMade.Clear();
         currentUndoStepIndex = 0;

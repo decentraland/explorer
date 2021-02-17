@@ -761,6 +761,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void UndoEditionGOLastStep()
     {
+        if (undoGO == null || editionGO == null)
+            return;
+
         BuilderInWorldUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
     }
 
@@ -1162,7 +1165,7 @@ public class BuilderInWorldController : MonoBehaviour
             if (scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
             {
                 if (sceneToEdit != null && sceneToEdit != scene)
-                    actionController.ResetActionList();
+                    actionController.Clear();
                 sceneToEdit = scene;
                 break;
             }

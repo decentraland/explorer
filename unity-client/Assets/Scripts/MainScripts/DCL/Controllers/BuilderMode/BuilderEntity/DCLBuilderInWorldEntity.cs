@@ -353,7 +353,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void SaveOriginalMaterialAndSetEditMaterials()
     {
-        if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length < 1) return;
+        if (rootEntity.meshesInfo == null ||
+            rootEntity.meshesInfo.renderers == null ||
+            rootEntity.meshesInfo.renderers.Length < 1) return;
 
         if (isNFT) return;
 

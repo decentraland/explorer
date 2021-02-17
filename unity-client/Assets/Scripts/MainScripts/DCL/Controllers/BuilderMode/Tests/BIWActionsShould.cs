@@ -186,6 +186,7 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         BIWCatalogManager.ClearCatalog();
         BuilderInWorldNFTController.i.ClearNFTs();
         controller.CleanItems();
+        actionController.Clear();
         yield return base.TearDown();
     }
 }

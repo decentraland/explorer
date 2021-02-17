@@ -11,6 +11,11 @@ public class OutlinerController : MonoBehaviour
    
     List<DCLBuilderInWorldEntity> entitiesOutlined = new List<DCLBuilderInWorldEntity>();
 
+    public bool IsEntityOutlined(DCLBuilderInWorldEntity entity)
+    {
+        return entitiesOutlined.Contains(entity);
+    }
+
     public void OutlineEntities(List<DCLBuilderInWorldEntity> entitiesToEdit)
     {
         foreach(DCLBuilderInWorldEntity entityToEdit in entitiesToEdit)
