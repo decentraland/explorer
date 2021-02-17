@@ -37,7 +37,7 @@ internal class SortDropdownView : MonoBehaviour, IDeselectHandler
             gameObject.SetActive(true);
         }
 
-        if (!(EventSystem.current is null))
+        if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(gameObject);
         }
