@@ -21,7 +21,7 @@ namespace DCL
         Vector3 ConvertScenePositionToUnityPosition(ParcelScene scene);
         Vector3 ConvertPointInSceneToUnityPosition(Vector3 pos, Vector2Int scenePoint);
         List<GlobalScene> GetActivePortableExperienceScenes();
-        List<string> GetCurrentSceneAndCurrentPortableExperiences();
+        List<string> GetActivePortableExperienceIds();
     }
 
     public class WorldState : IWorldState
@@ -150,10 +150,9 @@ namespace DCL
             return activePortableExperienceScenes;
         }
 
-        public List<string> GetCurrentSceneAndCurrentPortableExperiences()
+        public List<string> GetActivePortableExperienceIds()
         {
             List<string> currentSceneAndPortableExperiencesIds = new List<string>();
-            currentSceneAndPortableExperiencesIds.Add(currentSceneId);
 
             foreach (var globalSceneId in globalSceneIds)
             {
