@@ -4,10 +4,37 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class BIWCatalogShould : IntegrationTestSuite_Legacy
 {
     private GameObject gameObjectToUse;
+
+    [Test]
+    public void BuilderInWorldSearch()
+    {
+        BIWCatalogManager.Init();
+        gameObjectToUse = new GameObject();
+        string nameToFilter = "Sandy";
+        BuilderInWorldTestHelper.CreateTestCatalogLocalMultipleFloorObjects();
+
+        CatalogItem catalogItemToFilter = null;
+        foreach (CatalogItem catalogItem in DataStore.BuilderInWorld.catalogItemDict.GetValues())
+        {
+            if (catalogItem.name.Contains(nameToFilter))
+            {
+                catalogItemToFilter = catalogItem;
+                return;
+            }
+        }
+
+        SceneObjectCatalogController sceneObjectCatalogController = Utils.GetOrCreateComponent<SceneObjectCatalogController>(gameObjectToUse);
+        List<Dictionary<string, List<CatalogItem>>>  result = sceneObjectCatalogController.FilterAssets(nameToFilter);
+
+        CatalogItem filteredItem =  result[0].Values.ToList()[0][0];
+
+        Assert.AreEqual(filteredItem, catalogItemToFilter);
+    }
 
     [Test]
     public void BuilderInWorldQuickBar()
@@ -26,9 +53,9 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
         CatalogGroupListView catalogGroupListView = new CatalogGroupListView();
         catalogGroupListView.AddAdapter(groupAdatper);
         catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
-   
+
         QuickBarView quickBarView = new QuickBarView();
-     
+
         quickBarView.catalogGroupListView = catalogGroupListView;
 
         QuickBarController quickBarController = new QuickBarController(quickBarView);
