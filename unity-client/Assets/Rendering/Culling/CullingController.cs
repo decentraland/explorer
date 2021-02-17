@@ -118,6 +118,7 @@ namespace DCL.Rendering
             CommonScriptableObjects.playerUnityPosition.OnChange -= OnPlayerUnityPositionChange;
             MeshesInfo.OnAnyUpdated -= MarkDirty;
             StopInternal();
+            ResetObjects();
         }
 
         public void StopInternal()
