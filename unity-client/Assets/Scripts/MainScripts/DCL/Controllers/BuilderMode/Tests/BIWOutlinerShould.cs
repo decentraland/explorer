@@ -30,7 +30,7 @@ public class BIWOutlinerShould : IntegrationTestSuite_Legacy
 
         LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[ENTITY_ID]);
         yield return new WaitUntil(() => gltfShape.alreadyLoaded);
-        controller.builderInWorldEntityHandler.EnterEditMode(scene);
+        controller.builderInWorldEntityHandler.StarEditMode(scene);
         entity = controller.builderInWorldEntityHandler.GetConvertedEntity(scene.entities[ENTITY_ID]);
     }
 

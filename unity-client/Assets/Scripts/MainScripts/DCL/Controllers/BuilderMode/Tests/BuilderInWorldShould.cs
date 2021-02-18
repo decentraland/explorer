@@ -15,11 +15,6 @@ using UnityEngine.TestTools;
 
 public class BuilderInWorldShould : IntegrationTestSuite_Legacy
 {
-    protected override IEnumerator SetUp()
-    {
-        yield return base.SetUp();
-    }
-
     [Test]
     public void GroundRaycast()
     {

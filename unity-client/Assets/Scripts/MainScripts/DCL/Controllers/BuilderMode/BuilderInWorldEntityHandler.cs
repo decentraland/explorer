@@ -150,7 +150,7 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         isMultiSelectionActive = isActive;
     }
 
-    public void EnterEditMode(ParcelScene sceneToEdit)
+    public void StarEditMode(ParcelScene sceneToEdit)
     {
         this.sceneToEdit = sceneToEdit;
         SetupAllEntities();

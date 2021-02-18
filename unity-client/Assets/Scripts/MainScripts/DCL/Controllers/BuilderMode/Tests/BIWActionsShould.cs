@@ -9,9 +9,10 @@ using UnityEngine.TestTools;
 public class BIWActionsShould : IntegrationTestSuite_Legacy
 {
     private const string ENTITY_ID = "1";
-    BuilderInWorldController controller;
-    ActionController actionController;
-    BuilderInWorldEntityHandler entityHandler;
+    private BuilderInWorldController controller;
+    private ActionController actionController;
+    private BuilderInWorldEntityHandler entityHandler;
+    private BIWFloorHandler biwFloorHandler;
 
     protected override IEnumerator SetUp()
     {
@@ -19,10 +20,11 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         controller = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
         actionController = controller.actionController;
         entityHandler = controller.builderInWorldEntityHandler;
+        biwFloorHandler = controller.biwFloorHandler;
         entityHandler.Init();
 
         TestHelpers.CreateSceneEntity(scene, ENTITY_ID);
-        entityHandler.EnterEditMode(scene);
+        entityHandler.StarEditMode(scene);
     }
 
     [Test]
@@ -142,8 +144,9 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         yield return null;
         yield return null;
         controller.sceneToEdit = scene;
-        controller.CreateFloor(oldFloor);
-        controller.ChangeFloor(newFloor);
+        biwFloorHandler.StarEditMode(scene);
+        biwFloorHandler.CreateFloor(oldFloor);
+        biwFloorHandler.ChangeFloor(newFloor);
 
         buildModeAction.CreateChangeFloorAction(oldFloor, newFloor);
         actionController.AddAction(buildModeAction);

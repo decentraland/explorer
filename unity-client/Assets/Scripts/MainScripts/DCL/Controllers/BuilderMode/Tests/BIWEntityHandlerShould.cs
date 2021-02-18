@@ -20,7 +20,7 @@ public class BIWEntityHandlerShould : IntegrationTestSuite_Legacy
         entityHandler.Init();
 
         TestHelpers.CreateSceneEntity(scene, ENTITY_ID);
-        entityHandler.EnterEditMode(scene);
+        entityHandler.StarEditMode(scene);
         entity = entityHandler.GetAllEntitiesFromCurrentScene().FirstOrDefault();
     }
 

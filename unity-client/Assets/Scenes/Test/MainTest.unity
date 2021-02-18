@@ -1148,6 +1148,11 @@ PrefabInstance:
       propertyPath: avatarRenderer
       value: 
       objectReference: {fileID: 689415105}
+    - target: {fileID: 1208871511274338203, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: biwFloorHandler
+      value: 
+      objectReference: {fileID: 1183867545}
     - target: {fileID: 1208871511845330199, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: builderCamera
@@ -1185,6 +1190,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1057dc9d5eb891048bccaceaa1e70597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1183867545 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3914047899784263749, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1183867543}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaf470ec8f3ccaa45b055d5d6ce0381c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1315552880

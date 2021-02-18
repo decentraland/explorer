@@ -1277,6 +1277,21 @@ PrefabInstance:
       propertyPath: builderInWorldBridge
       value: 
       objectReference: {fileID: 322303338}
+    - target: {fileID: 3629122442816111540, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: cursorGO
+      value: 
+      objectReference: {fileID: 326638024064006572}
+    - target: {fileID: 3629122442816111540, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: avatarRenderer
+      value: 
+      objectReference: {fileID: 2021276774}
+    - target: {fileID: 3914047899784263749, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: builderInWorldBridge
+      value: 
+      objectReference: {fileID: 322303338}
     - target: {fileID: 7801740759641975108, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: builderInWorldBridge

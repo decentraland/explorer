@@ -208,6 +208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activeFeature: 1
+  byPassLandOwnershipCheck: 0
   scaleSpeed: 0.05
   rotationSpeed: 1.25
   msBetweenInputInteraction: 200
@@ -221,16 +222,14 @@ MonoBehaviour:
   inputController: {fileID: 0}
   avatarRenderer: {fileID: 0}
   outlinerController: {fileID: 1208871511725701524}
+  biwFloorHandler: {fileID: 3914047899784263749}
   builderInputWrapper: {fileID: 1208871511405416592}
   gizmoManager: {fileID: 1208871511615770936}
   actionController: {fileID: 1208871512032110241}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   builderInWorldBridge: {fileID: 0}
   outlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4, type: 2}
-  dclBuilderMeshLoadIndicatorController: {fileID: 4453536760248188691}
-  meshLoadIndicator: {fileID: 4025507285860166352}
-  floorPrefab: {fileID: 3848538323447533592, guid: ea1dee13f58202f409bb86c92a202112,
-    type: 3}
+  biwModeController: {fileID: 3629122442816111540}
   firstPersonMode: {fileID: 1208871511546216253}
   editorMode: {fileID: 1208871512657624393}
   builderRendererIndex: 1
@@ -251,7 +250,6 @@ MonoBehaviour:
     type: 2}
   sceneToEdit: {fileID: 0}
   isEditModeActivated: 0
-  isSnapActive: 1
   isMultiSelectionActive: 0
   isAdvancedModeActive: 1
   isOutlineCheckActive: 1
@@ -1024,8 +1022,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b96042e804882648915f5b4d1daa70b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  builderInWorldController: {fileID: 1208871511274338203}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  biwFloorHandler: {fileID: 3914047899784263749}
 --- !u!1 &1208871512097731729
 GameObject:
   m_ObjectHideFlags: 0
@@ -2101,8 +2099,10 @@ GameObject:
   m_Component:
   - component: {fileID: 3815261039525738060}
   - component: {fileID: 7801740759641975108}
+  - component: {fileID: 3914047899784263749}
+  - component: {fileID: 3629122442816111540}
   m_Layer: 0
-  m_Name: EntityController
+  m_Name: Controllers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2146,6 +2146,46 @@ MonoBehaviour:
   hideSelectedEntitiesAction: {fileID: 11400000, guid: a9f9f5fb4f1639d4b8461c2838cfae56,
     type: 2}
   showAllEntitiesAction: {fileID: 11400000, guid: f0a0f94cc4fd01c4e82210e0de670a65,
+    type: 2}
+--- !u!114 &3914047899784263749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaf470ec8f3ccaa45b055d5d6ce0381c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionController: {fileID: 1208871512032110241}
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  dclBuilderMeshLoadIndicatorController: {fileID: 4453536760248188691}
+  meshLoadIndicator: {fileID: 4025507285860166352}
+  builderInWorldBridge: {fileID: 0}
+  builderInWorldController: {fileID: 1208871511274338203}
+  floorPrefab: {fileID: 3848538323447533592, guid: ea1dee13f58202f409bb86c92a202112,
+    type: 3}
+--- !u!114 &3629122442816111540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e11da1303cf0068408b61de1acb4f347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cursorGO: {fileID: 0}
+  avatarRenderer: {fileID: 0}
+  actionController: {fileID: 1208871512032110241}
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  firstPersonMode: {fileID: 1208871511546216253}
+  editorMode: {fileID: 1208871512657624393}
+  toggleSnapModeInputAction: {fileID: 11400000, guid: 9069f92e06a1094478a137f5274d1ab6,
     type: 2}
 --- !u!1 &7515311309793266013
 GameObject:
