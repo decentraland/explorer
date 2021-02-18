@@ -12,15 +12,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Environment = DCL.Environment;
 
-public class BuilderInWorldEntityHandler : MonoBehaviour
+public class BuilderInWorldEntityHandler : BIWController
 {
     [Header("Design variables")]
     public float duplicateOffset = 2f;
     public float msBetweenTransformUpdates = 2000;
+    public float distanceLimitToSelectObjects = 50;
 
 
     [Header("Prefab References")]
-    public OutlinerController outlinerController;
+    public BIWOutlinerController outlinerController;
     public BuilderInWorldController buildModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
@@ -37,21 +38,22 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
     internal InputAction_Trigger showAllEntitiesAction;
 
     public event Action<DCLBuilderInWorldEntity> onSelectedEntity;
-    ParcelScene sceneToEdit;
 
-    Dictionary<string, DCLBuilderInWorldEntity> convertedEntities = new Dictionary<string, DCLBuilderInWorldEntity>();
-    List<DCLBuilderInWorldEntity> selectedEntities = new List<DCLBuilderInWorldEntity>();
+    private Dictionary<string, DCLBuilderInWorldEntity> convertedEntities = new Dictionary<string, DCLBuilderInWorldEntity>();
+    private List<DCLBuilderInWorldEntity> selectedEntities = new List<DCLBuilderInWorldEntity>();
 
-    BuilderInWorldMode currentActiveMode;
-    bool isMultiSelectionActive = false;
+    private BuilderInWorldMode currentActiveMode;
+    private bool isMultiSelectionActive = false;
 
-    float lastTransformReportTime;
-    float nextTimeToUpdateTransform;
+    private float lastTransformReportTime;
+    private float nextTimeToUpdateTransform;
 
-    List<string> entityNameList = new List<string>();
+    private List<string> entityNameList = new List<string>();
 
-    InputAction_Trigger.Triggered hideSelectedEntitiesDelegate;
-    InputAction_Trigger.Triggered showAllEntitiesDelegate;
+    private InputAction_Trigger.Triggered hideSelectedEntitiesDelegate;
+    private InputAction_Trigger.Triggered showAllEntitiesDelegate;
+
+    private const float RAYCAST_MAX_DISTANCE = 10000f;
 
     private void Start()
     {
@@ -62,8 +64,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         showAllEntitiesAction.OnTriggered += showAllEntitiesDelegate;
     }
 
-    public void Init()
+    public override void Init()
     {
+        base.Init();
         if (HUDController.i.builderInWorldMainHud != null)
         {
             HUDController.i.builderInWorldMainHud.OnEntityDelete += DeleteSingleEntity;
@@ -103,15 +106,17 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         HUDController.i.builderInWorldMainHud.OnEntityRename -= SetEntityName;
     }
 
-    private void Update()
+    protected override void FrameUpdate()
     {
+        base.FrameUpdate();
+
         if (selectedEntities.Count <= 0) return;
         if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY) return;
 
         ReportTransform();
     }
 
-    void ReportTransform()
+    private void ReportTransform()
     {
         if (DCLTime.realtimeSinceStartup >= nextTimeToUpdateTransform)
         {
@@ -150,9 +155,9 @@ public class BuilderInWorldEntityHandler : MonoBehaviour
         isMultiSelectionActive = isActive;
     }
 
-    public void StarEditMode(ParcelScene sceneToEdit)
+    public override void EnterEditMode(ParcelScene sceneToEdit)
     {
-        this.sceneToEdit = sceneToEdit;
+        base.EnterEditMode(sceneToEdit);
         SetupAllEntities();
         EntityListChanged();
     }

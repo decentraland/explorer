@@ -30,7 +30,7 @@ Transform:
   m_Children:
   - {fileID: 8349600464820682797}
   m_Father: {fileID: 1208871511274338202}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4453536760248188691
 MonoBehaviour:
@@ -187,7 +187,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3815261039525738060}
-  - {fileID: 1208871511725701525}
   - {fileID: 2469348291275968250}
   - {fileID: 1208871512032110246}
   - {fileID: 1208871511405416594}
@@ -207,52 +206,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce9f3e99bfa1950438d79c75c333a17b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeFeature: 1
+  activeFeature: 0
   byPassLandOwnershipCheck: 0
-  scaleSpeed: 0.05
-  rotationSpeed: 1.25
-  msBetweenInputInteraction: 200
   distanceLimitToSelectObjects: 50
-  snapFactor: 1
-  snapRotationDegresFactor: 30
-  snapScaleFactor: 0.25
-  snapDistanceToActivateMovement: 1
   cameraParentGO: {fileID: 0}
   cursorGO: {fileID: 0}
   inputController: {fileID: 0}
   avatarRenderer: {fileID: 0}
-  outlinerController: {fileID: 1208871511725701524}
+  outlinerController: {fileID: 0}
+  bIWInputHandler: {fileID: 7967273911288970493}
+  biwPublishController: {fileID: 8098075348912393403}
+  biwCreatorController: {fileID: 1515935919}
+  biwModeController: {fileID: 3629122442816111540}
   biwFloorHandler: {fileID: 3914047899784263749}
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
   builderInputWrapper: {fileID: 1208871511405416592}
   gizmoManager: {fileID: 1208871511615770936}
   actionController: {fileID: 1208871512032110241}
-  builderInWorldEntityHandler: {fileID: 7801740759641975108}
   builderInWorldBridge: {fileID: 0}
   outlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4, type: 2}
-  biwModeController: {fileID: 3629122442816111540}
   firstPersonMode: {fileID: 1208871511546216253}
   editorMode: {fileID: 1208871512657624393}
   builderRendererIndex: 1
   layerToRaycast:
     serializedVersion: 2
     m_Bits: 16384
-  editModeChangeInputAction: {fileID: 11400000, guid: 4f763868020343f469cebb00aaf01960,
-    type: 2}
-  toggleCreateLastSceneObjectInputAction: {fileID: 11400000, guid: 888a1a2d0ea847a40a6b201ed64f680e,
-    type: 2}
-  toggleRedoActionInputAction: {fileID: 11400000, guid: 04b9b1db1e772b84ba73426304948e60,
-    type: 2}
-  toggleUndoActionInputAction: {fileID: 11400000, guid: 4cee9aa16106c7d44900a13123280dac,
-    type: 2}
-  toggleSnapModeInputAction: {fileID: 11400000, guid: 9069f92e06a1094478a137f5274d1ab6,
-    type: 2}
-  multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
-    type: 2}
   sceneToEdit: {fileID: 0}
   isEditModeActivated: 0
   isMultiSelectionActive: 0
   isAdvancedModeActive: 1
-  isOutlineCheckActive: 1
 --- !u!1 &1208871511283293828
 GameObject:
   m_ObjectHideFlags: 0
@@ -362,7 +344,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1208871511274338202}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1208871511405416592
 MonoBehaviour:
@@ -681,50 +663,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.5, z: 2.8}
   m_Center: {x: 0, y: 0, z: 1.7}
---- !u!1 &1208871511725701514
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1208871511725701525}
-  - component: {fileID: 1208871511725701524}
-  m_Layer: 0
-  m_Name: OutlinerController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1208871511725701525
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208871511725701514}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1208871511274338202}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1208871511725701524
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208871511725701514}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8bc39fa9c95b3f45afae1ed751b3303, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  outlineMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4, type: 2}
 --- !u!1 &1208871511799072618
 GameObject:
   m_ObjectHideFlags: 0
@@ -1008,7 +946,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1208871511274338202}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1208871512032110241
 MonoBehaviour:
@@ -1612,7 +1550,7 @@ MonoBehaviour:
   gizmoManager: {fileID: 1208871511615770936}
   voxelController: {fileID: 1208871512657624392}
   builderInputWrapper: {fileID: 1208871511405416592}
-  outlinerController: {fileID: 1208871511725701524}
+  outlinerController: {fileID: 0}
   buildModeController: {fileID: 1208871511274338203}
   cameraController: {fileID: 0}
   lookAtT: {fileID: 1208871513090114763}
@@ -1641,7 +1579,7 @@ MonoBehaviour:
   builderInputWrapper: {fileID: 1208871511405416592}
   buildModeController: {fileID: 1208871511274338203}
   buildEditorMode: {fileID: 1208871512657624393}
-  outlinerController: {fileID: 1208871511725701524}
+  outlinerController: {fileID: 0}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   freeCameraMovement: {fileID: 0}
   actionController: {fileID: 1208871512032110241}
@@ -1788,7 +1726,7 @@ Transform:
   - {fileID: 1208871511546216242}
   - {fileID: 1208871512657624398}
   m_Father: {fileID: 1208871511274338202}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1208871513006312414
 GameObject:
@@ -2101,6 +2039,11 @@ GameObject:
   - component: {fileID: 7801740759641975108}
   - component: {fileID: 3914047899784263749}
   - component: {fileID: 3629122442816111540}
+  - component: {fileID: 1515935919}
+  - component: {fileID: 8098075348912393403}
+  - component: {fileID: 7967273911288970493}
+  - component: {fileID: 2133213680157780304}
+  - component: {fileID: 4340718453677319861}
   m_Layer: 0
   m_Name: Controllers
   m_TagString: Untagged
@@ -2136,7 +2079,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   duplicateOffset: 2
   msBetweenTransformUpdates: 2000
-  outlinerController: {fileID: 1208871511725701524}
+  distanceLimitToSelectObjects: 50
+  outlinerController: {fileID: 4340718453677319861}
   buildModeController: {fileID: 1208871511274338203}
   actionController: {fileID: 1208871512032110241}
   builderInWorldBridge: {fileID: 0}
@@ -2164,6 +2108,7 @@ MonoBehaviour:
   dclBuilderMeshLoadIndicatorController: {fileID: 4453536760248188691}
   meshLoadIndicator: {fileID: 4025507285860166352}
   builderInWorldBridge: {fileID: 0}
+  biwCreatorController: {fileID: 2133213680157780304}
   builderInWorldController: {fileID: 1208871511274338203}
   floorPrefab: {fileID: 3848538323447533592, guid: ea1dee13f58202f409bb86c92a202112,
     type: 3}
@@ -2187,6 +2132,103 @@ MonoBehaviour:
   editorMode: {fileID: 1208871512657624393}
   toggleSnapModeInputAction: {fileID: 11400000, guid: 9069f92e06a1094478a137f5274d1ab6,
     type: 2}
+--- !u!114 &1515935919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9cc0526a987be489ee7f8e156b3a92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  biwModeController: {fileID: 3629122442816111540}
+  biwFloorHandler: {fileID: 3914047899784263749}
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  toggleCreateLastSceneObjectInputAction: {fileID: 11400000, guid: 888a1a2d0ea847a40a6b201ed64f680e,
+    type: 2}
+--- !u!114 &8098075348912393403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 514b9309ea090774d876c6d2b5ed547d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  builderInWorldBridge: {fileID: 0}
+--- !u!114 &7967273911288970493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 772524078f323eb4eaa7f6f15a571ba1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  msBetweenInputInteraction: 200
+  builderInWorldController: {fileID: 1208871511274338203}
+  actionController: {fileID: 1208871512032110241}
+  biwModeController: {fileID: 3629122442816111540}
+  builderInputWrapper: {fileID: 1208871511405416592}
+  outlinerController: {fileID: 4340718453677319861}
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  editModeChangeInputAction: {fileID: 11400000, guid: 4f763868020343f469cebb00aaf01960,
+    type: 2}
+  toggleRedoActionInputAction: {fileID: 11400000, guid: 04b9b1db1e772b84ba73426304948e60,
+    type: 2}
+  toggleUndoActionInputAction: {fileID: 11400000, guid: 4cee9aa16106c7d44900a13123280dac,
+    type: 2}
+  toggleSnapModeInputAction: {fileID: 11400000, guid: 9069f92e06a1094478a137f5274d1ab6,
+    type: 2}
+  multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
+    type: 2}
+  isEditModeActivated: 0
+  isMultiSelectionActive: 0
+  isAdvancedModeActive: 1
+--- !u!114 &2133213680157780304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9cc0526a987be489ee7f8e156b3a92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  biwModeController: {fileID: 3629122442816111540}
+  biwFloorHandler: {fileID: 3914047899784263749}
+  builderInWorldEntityHandler: {fileID: 7801740759641975108}
+  toggleCreateLastSceneObjectInputAction: {fileID: 11400000, guid: 888a1a2d0ea847a40a6b201ed64f680e,
+    type: 2}
+--- !u!114 &4340718453677319861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5373867681970374750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8bc39fa9c95b3f45afae1ed751b3303, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  builderRendererIndex: 1
+  outlineMaterial: {fileID: 2100000, guid: 92b0ce4a86423dd48b66212090fc7e34, type: 2}
+  cameraOutlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4,
+    type: 2}
+  builderInWorldController: {fileID: 1208871511274338203}
 --- !u!1 &7515311309793266013
 GameObject:
   m_ObjectHideFlags: 0

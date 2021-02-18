@@ -1,9 +1,10 @@
 using DCL.Controllers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BIWModeController : MonoBehaviour
+public class BIWModeController : BIWController
 {
     public enum EditModeState
     {
@@ -27,7 +28,7 @@ public class BIWModeController : MonoBehaviour
     [SerializeField]
     internal InputAction_Trigger toggleSnapModeInputAction;
 
-    public System.Action OnInputDone;
+    public Action OnInputDone;
 
     private EditModeState currentEditModeState = EditModeState.Inactive;
 
@@ -37,7 +38,7 @@ public class BIWModeController : MonoBehaviour
     private bool isAdvancedModeActive = true;
 
     private InputAction_Trigger.Triggered snapModeDelegate;
-    private ParcelScene sceneToEdit;
+    private GameObject editionGO;
 
     private void Start()
     {
@@ -58,6 +59,9 @@ public class BIWModeController : MonoBehaviour
 
     public void Init(GameObject editionGO, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO)
     {
+        base.Init();
+        this.editionGO = editionGO;
+
         firstPersonMode.Init(editionGO, undoGO, snapGO, freeMovementGO, builderInWorldEntityHandler.GetSelectedEntityList());
         editorMode.Init(editionGO, undoGO, snapGO, freeMovementGO, builderInWorldEntityHandler.GetSelectedEntityList());
 
@@ -68,15 +72,21 @@ public class BIWModeController : MonoBehaviour
         editorMode.OnActionGenerated += actionController.AddAction;
     }
 
-    public void StartEditMode(ParcelScene parcelScene)
+    public Vector3 GetCurrentEditionPosition()
     {
-        this.sceneToEdit = parcelScene;
+        return editionGO.transform.position;
+    }
+
+    public override void EnterEditMode(ParcelScene parcelScene)
+    {
+        base.EnterEditMode(parcelScene);
         if (currentActiveMode == null)
             SetBuildMode(BIWModeController.EditModeState.Editor);
     }
 
-    public void ExitEditMode()
+    public override void ExitEditMode()
     {
+        base.ExitEditMode();
         SetBuildMode(EditModeState.Inactive);
     }
 
@@ -177,16 +187,18 @@ public class BIWModeController : MonoBehaviour
                     HUDController.i.builderInWorldMainHud.ActivateFirstPersonModeUI();
                     HUDController.i.builderInWorldMainHud.SetVisibilityOfCatalog(false);
                 }
-                cursorGO.SetActive(true);
+                if(cursorGO != null)
+                   cursorGO.SetActive(true);
                 break;
             case EditModeState.Editor:
-                cursorGO.SetActive(false);
+                if (cursorGO != null)
+                    cursorGO.SetActive(false);
                 currentActiveMode = editorMode;
                 isAdvancedModeActive = true;
                 if (HUDController.i.builderInWorldMainHud != null)
                     HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
 
-                avatarRenderer.SetAvatarVisibility(false);
+                avatarRenderer?.SetAvatarVisibility(false);
                 break;
         }
 

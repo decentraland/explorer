@@ -11,7 +11,7 @@ public class BIWOutlinerShould : IntegrationTestSuite_Legacy
 {
     private const string ENTITY_ID = "1";
     DCLBuilderInWorldEntity entity;
-    OutlinerController outlinerController;
+    BIWOutlinerController outlinerController;
 
 
     protected override IEnumerator SetUp()
@@ -30,7 +30,7 @@ public class BIWOutlinerShould : IntegrationTestSuite_Legacy
 
         LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(scene.entities[ENTITY_ID]);
         yield return new WaitUntil(() => gltfShape.alreadyLoaded);
-        controller.builderInWorldEntityHandler.StarEditMode(scene);
+        controller.builderInWorldEntityHandler.EnterEditMode(scene);
         entity = controller.builderInWorldEntityHandler.GetConvertedEntity(scene.entities[ENTITY_ID]);
     }
 

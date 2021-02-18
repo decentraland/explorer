@@ -24,7 +24,7 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         entityHandler.Init();
 
         TestHelpers.CreateSceneEntity(scene, ENTITY_ID);
-        entityHandler.StarEditMode(scene);
+        entityHandler.EnterEditMode(scene);
     }
 
     [Test]
@@ -144,7 +144,10 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         yield return null;
         yield return null;
         controller.sceneToEdit = scene;
-        biwFloorHandler.StarEditMode(scene);
+        controller.InitControllers();
+        biwFloorHandler.EnterEditMode(scene);
+        controller.biwCreatorController.EnterEditMode(scene);
+
         biwFloorHandler.CreateFloor(oldFloor);
         biwFloorHandler.ChangeFloor(newFloor);
 

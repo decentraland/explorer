@@ -1292,6 +1292,11 @@ PrefabInstance:
       propertyPath: builderInWorldBridge
       value: 
       objectReference: {fileID: 322303338}
+    - target: {fileID: 3914047899784263749, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+        type: 3}
+      propertyPath: biwCreatorController
+      value: 
+      objectReference: {fileID: 1515935919}
     - target: {fileID: 7801740759641975108, guid: ceb04930a6bb25b44a6ad241f62abdf5,
         type: 3}
       propertyPath: builderInWorldBridge
@@ -1299,6 +1304,65 @@ PrefabInstance:
       objectReference: {fileID: 322303338}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ceb04930a6bb25b44a6ad241f62abdf5, type: 3}
+--- !u!114 &1515935915 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3914047899784263749, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1515935914}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515935917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaf470ec8f3ccaa45b055d5d6ce0381c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1515935916 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3629122442816111540, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1515935914}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515935917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e11da1303cf0068408b61de1acb4f347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1515935917 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5373867681970374750, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1515935914}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1515935918 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7801740759641975108, guid: ceb04930a6bb25b44a6ad241f62abdf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1515935914}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515935917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 277da019a2f2a3e4284a74984580a806, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1515935919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515935917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d9cc0526a987be489ee7f8e156b3a92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  biwModeController: {fileID: 1515935916}
+  biwFloorHandler: {fileID: 1515935915}
+  builderInWorldEntityHandler: {fileID: 1515935918}
+  toggleCreateLastSceneObjectInputAction: {fileID: 11400000, guid: 888a1a2d0ea847a40a6b201ed64f680e,
+    type: 2}
 --- !u!114 &1608366483 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4096479600627248540, guid: b0965b55b892d438da492708ea09799c,

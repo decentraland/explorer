@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BIWFloorHandler : MonoBehaviour
+public class BIWFloorHandler : BIWController
 {
     [Header("Prefab References")]
     public ActionController actionController;
@@ -15,6 +15,7 @@ public class BIWFloorHandler : MonoBehaviour
     public DCLBuilderMeshLoadIndicatorController dclBuilderMeshLoadIndicatorController;
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
     public BuilderInWorldBridge builderInWorldBridge;
+    public BIWCreatorController biwCreatorController;
     public BuilderInWorldController builderInWorldController;
 
     [Header("Prefabs")]
@@ -22,16 +23,10 @@ public class BIWFloorHandler : MonoBehaviour
 
     private CatalogItem lastFloorCalalogItemUsed;
     private Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
-    private ParcelScene scene;
 
     private void Start()
     {
         meshLoadIndicator.SetCamera(Camera.main);
-    }
-
-    public void StarEditMode(ParcelScene sceneToEdit)
-    {
-        scene = sceneToEdit;
     }
 
     public void Clean()
@@ -84,18 +79,18 @@ public class BIWFloorHandler : MonoBehaviour
     public void CreateFloor(CatalogItem floorSceneObject)
     {
         Vector3 initialPosition = new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
-        Vector2Int[] parcelsPoints = scene.sceneData.parcels;
+        Vector2Int[] parcelsPoints = sceneToEdit.sceneData.parcels;
 
         foreach (Vector2Int parcel in parcelsPoints)
         {
-            DCLBuilderInWorldEntity decentralandEntity = builderInWorldController.CreateSceneObject(floorSceneObject, false, true);
+            DCLBuilderInWorldEntity decentralandEntity = biwCreatorController.CreateSceneObject(floorSceneObject, false, true);
             decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
             decentralandEntity.transform.position = Environment.i.world.state.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
             dclBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
 
             GameObject floorPlaceHolder = GameObject.Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
             floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
-            builderInWorldBridge?.EntityTransformReport(decentralandEntity.rootEntity, scene);
+            builderInWorldBridge?.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
         }
 
         builderInWorldEntityHandler.DeselectEntities();

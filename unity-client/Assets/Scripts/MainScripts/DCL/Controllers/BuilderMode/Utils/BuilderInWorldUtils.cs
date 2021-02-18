@@ -12,6 +12,7 @@ using static ProtocolV2;
 using Environment = DCL.Environment;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using DCL.Controllers;
 
 public static partial class BuilderInWorldUtils
 {
