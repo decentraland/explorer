@@ -156,7 +156,7 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
   }
 
-  public CreateUIScene(data: {
+  public CreateGlobalScene(data: {
     id: string;
     name: string;
     baseUrl: string,
@@ -170,7 +170,7 @@ export class UnityInterface {
      * kind of scenes is the Avatar scene. All the avatars are just GLTFs in
      * a scene.
      */
-    this.SendMessageToUnity('Main', 'CreateUIScene', JSON.stringify(data))
+    this.SendMessageToUnity('Main', 'CreateGlobalScene', JSON.stringify(data))
   }
 
   /** Sends the camera position & target to the engine */

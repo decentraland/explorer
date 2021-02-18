@@ -107,7 +107,7 @@ namespace DCL
             Environment.i.world.sceneController.UnloadScene(sceneId);
         }
 
-        public void CreateUIScene(string payload)
+        public void CreateGlobalScene(string payload)
         {
             Environment.i.world.sceneController.CreateGlobalScene(payload);
         }

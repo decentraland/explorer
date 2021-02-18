@@ -157,7 +157,7 @@ export async function startGlobalScene(
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateUIScene({
+  unityInterface.CreateGlobalScene({
     id: getParcelSceneID(scene),
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,

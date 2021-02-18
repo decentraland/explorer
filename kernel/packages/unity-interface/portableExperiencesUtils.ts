@@ -33,7 +33,7 @@ export async function spawnPortableExperienceScene(
   }
   const scene = new UnityPortableExperienceScene(await getPortableExperienceFromS3Bucket(sceneUrn))
   loadParcelScene(scene, undefined, true)
-  unityInterface.CreateUIScene({
+  unityInterface.CreateGlobalScene({
     id: sceneUrn,
     name: scene.data.name,
     baseUrl: scene.data.baseUrl,
