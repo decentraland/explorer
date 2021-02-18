@@ -35,7 +35,10 @@ namespace DCL.Components
 
             Model prevModel = model;
             model = Utils.SafeFromJson<Model>(newJson);
-            ApplyCurrentModel(prevModel);
+            bool forceUpdate = prevModel.volume != this.model.volume;
+            settingsVolume = Settings.i.generalSettings.sfxVolume;
+
+            UpdatePlayingState(forceUpdate);
 
             yield return null;
         }
@@ -148,12 +151,8 @@ namespace DCL.Components
         {
             Model prevModel = this.model;
             this.model = (Model)model;
-            ApplyCurrentModel(prevModel);
-        }
 
-        private void ApplyCurrentModel(Model prevModel)
-        {
-            bool forceUpdate = prevModel.volume != model.volume;
+            bool forceUpdate = prevModel.volume != this.model.volume;
             settingsVolume = Settings.i.generalSettings.sfxVolume;
 
             UpdatePlayingState(forceUpdate);
