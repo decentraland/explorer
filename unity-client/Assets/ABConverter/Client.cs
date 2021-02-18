@@ -192,7 +192,7 @@ namespace DCL.ABConverter
             }
 
             var core = new ABConverter.Core(env, settings);
-            core.Convert(rawContents.ToArray(), codes => EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.StartVisualTests(env)));
+            core.Convert(rawContents.ToArray(), codes => EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(core: core, env: env)));
 
             return core.state;
         }

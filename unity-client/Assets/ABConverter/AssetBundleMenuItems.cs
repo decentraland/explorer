@@ -105,7 +105,7 @@ namespace DCL
         [MenuItem("Decentraland/Start Visual Tests")]
         public static void StartVisualTests()
         {
-            EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.StartVisualTests());
+            EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets());
 
         }
 
@@ -113,6 +113,12 @@ namespace DCL
         public static void DumpZoneArea()
         {
             ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
+        }
+
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Tominoya Casino")]
+        public static void DumpTominoyaCasino()
+        {
+            ABConverter.Client.DumpArea(new Vector2Int(-119, 135), new Vector2Int(1, 1));
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
