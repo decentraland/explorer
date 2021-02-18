@@ -296,12 +296,12 @@ namespace DCL
 
             // Raycast for global pointer events (for each PE scene)
             List<string> currentPortableExperienceIds = worldState.GetActivePortableExperienceIds();
-            foreach (string sceneId in currentPortableExperienceIds)
+            for (int i = 0; i < currentPortableExperienceIds.Count; i++)
             {
-                raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[sceneId]);
+                raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[currentPortableExperienceIds[i]]);
                 raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
 
-                ReportGlobalPointerUpEvent(buttonId, useRaycast, raycastGlobalLayerHitInfo, raycastInfoGlobalLayer, sceneId);
+                ReportGlobalPointerUpEvent(buttonId, useRaycast, raycastGlobalLayerHitInfo, raycastInfoGlobalLayer, currentPortableExperienceIds[i]);
             }
         }
 
@@ -349,12 +349,12 @@ namespace DCL
 
             // Raycast for global pointer events (for each PE scene)
             List<string> currentPortableExperienceIds = worldState.GetActivePortableExperienceIds();
-            foreach (string sceneId in currentPortableExperienceIds)
+            for (int i = 0; i < currentPortableExperienceIds.Count; i++)
             {
-                raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[sceneId]);
+                raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[currentPortableExperienceIds[i]]);
                 raycastGlobalLayerHitInfo = raycastInfoGlobalLayer.hitInfo;
 
-                ReportGlobalPointerDownEvent(buttonId, useRaycast, raycastGlobalLayerHitInfo, raycastInfoGlobalLayer, sceneId);
+                ReportGlobalPointerDownEvent(buttonId, useRaycast, raycastGlobalLayerHitInfo, raycastInfoGlobalLayer, currentPortableExperienceIds[i]);
             }
         }
 

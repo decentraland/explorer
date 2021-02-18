@@ -106,9 +106,9 @@ public class TaskbarHUDController : IHUD
             this.sceneController.OnNewPortableExperienceSceneRemoved += SceneController_OnNewPortableExperienceSceneRemoved;
 
             List<GlobalScene> activePortableExperiences = worldState.GetActivePortableExperienceScenes();
-            foreach (GlobalScene portableExperienceToAdd in activePortableExperiences)
+            for (int i = 0; i < activePortableExperiences.Count; i++)
             {
-                SceneController_OnNewPortableExperienceSceneAdded(portableExperienceToAdd);
+                SceneController_OnNewPortableExperienceSceneAdded(activePortableExperiences[i]);
             }
         }
 
