@@ -1,5 +1,6 @@
 ﻿using System;
 using DCL.Components;
+using DCL.Controllers;
 using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -14,7 +15,7 @@ namespace DCL
     {
         public static Main i { get; private set; }
 
-        public DCLComponentFactory componentFactory;
+        public RuntimeComponentFactory componentFactory;
 
         public DebugConfig debugConfig;
 
@@ -31,16 +32,16 @@ namespace DCL
 
             i = this;
 
-            DataStore.debugConfig.soloScene = debugConfig.soloScene;
-            DataStore.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
-            DataStore.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
-            DataStore.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
+            DataStore.i.debugConfig.soloScene = debugConfig.soloScene;
+            DataStore.i.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
+            DataStore.i.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
+            DataStore.i.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
 
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
                 performanceMetricsController = new PerformanceMetricsController();
                 RenderProfileManifest.i.Initialize();
-                Environment.SetupWithDefaults();
+                Environment.SetupWithBuilders(worldRuntimeBuilder: RuntimeContextBuilder);
             }
 
 #if !UNITY_EDITOR
@@ -54,6 +55,17 @@ namespace DCL
             // We should re-enable this later as produces a performance regression.
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
                 Environment.i.platform.cullingController.SetAnimationCulling(false);
+        }
+
+        WorldRuntimeContext RuntimeContextBuilder()
+        {
+            return new WorldRuntimeContext(
+                state: new WorldState(),
+                sceneController: new SceneController(),
+                pointerEventsController: new PointerEventsController(),
+                sceneBoundsChecker: new SceneBoundsChecker(),
+                blockersController: new WorldBlockersController(),
+                componentFactory: componentFactory);
         }
 
         private void Start()

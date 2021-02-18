@@ -7,7 +7,9 @@
         "CullingController",
         "PhysicsSyncController",
         "Clipboard",
-        "DebugController"
+        "DebugController",
+        "RuntimeComponentFactory",
+        "MessagingContext"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

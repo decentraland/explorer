@@ -1,6 +1,9 @@
 {
     "name": "DataStore",
-    "references": [],
+    "references": [
+        "GUID:b1087c5731ff68448a0a9c625bb7e52d",
+        "GUID:7ac9f9c835ec1084ab35e3f9b176cf1e"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

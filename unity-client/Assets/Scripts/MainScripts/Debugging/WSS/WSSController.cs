@@ -100,6 +100,7 @@ namespace DCL
         public RenderingController renderingController;
         public DCLCharacterController characterController;
         private Builder.DCLBuilderBridge builderBridge = null;
+        private BuilderInWorldBridge builderInWorldBridge = null;
         public CameraController cameraController;
         public GameObject bridgesGameObject;
 
@@ -155,7 +156,7 @@ namespace DCL
             }
 
 #if UNITY_EDITOR
-            DCL.DataStore.debugConfig.isWssDebugMode = true;
+            DCL.DataStore.i.debugConfig.isWssDebugMode = true;
 
             ws = new WebSocketServer("ws://localhost:5000");
             ws.AddWebSocketService<DCLWebSocketService>("/dcl");
@@ -385,11 +386,11 @@ namespace DCL
                             case "SetBuilderConfiguration":
                                 GetBuilderBridge()?.SetBuilderConfiguration(msg.payload);
                                 break;
-                            case "AddWearableToCatalog":
-                                CatalogController.i?.AddWearableToCatalog(msg.payload);
-                                break;
                             case "AddWearablesToCatalog":
                                 CatalogController.i?.AddWearablesToCatalog(msg.payload);
+                                break;
+                            case "WearablesRequestFailed":
+                                CatalogController.i?.WearablesRequestFailed(msg.payload);
                                 break;
                             case "RemoveWearablesFromCatalog":
                                 CatalogController.i?.RemoveWearablesFromCatalog(msg.payload);
@@ -475,6 +476,9 @@ namespace DCL
                                 //TODO(Brian): Move this to bridges
                                 Main.i.SendMessage(msg.type);
                                 break;
+                            case "PublishSceneResult":
+                                GetBuilderInWorldBridge()?.PublishSceneResult(msg.payload);
+                                break;
                             default:
                                 Debug.Log(
                                     "<b><color=#FF0000>WSSController:</color></b> received an unknown message from kernel to renderer: " +
@@ -497,6 +501,16 @@ namespace DCL
             }
 
             return builderBridge;
+        }
+
+        private BuilderInWorldBridge GetBuilderInWorldBridge()
+        {
+            if (builderInWorldBridge == null)
+            {
+                builderInWorldBridge = FindObjectOfType<BuilderInWorldBridge>();
+            }
+
+            return builderInWorldBridge;
         }
     }
 }

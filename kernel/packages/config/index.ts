@@ -93,18 +93,14 @@ export const USE_LOCAL_COMMS = location.search.includes('LOCAL_COMMS') || PREVIE
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
 export const COMMS_PROFILE_TIMEOUT = 10000
 
-export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
 export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
-export const FETCH_META_CONTENT_SERVICE = qs.FETCH_META_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
 export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
 export const REALM = qs.realm
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
-
-export const VOICE_CHAT_ENABLED_FLAG = location.search.includes('VOICE_CHAT_ENABLED')
 
 export const ENABLE_BUILDER_IN_WORLD = location.search.includes('ENABLE_BUILDER_IN_WORLD')
 
@@ -127,7 +123,6 @@ export const INIT_PRE_LOAD = location.search.includes('INIT_PRE_LOAD')
 
 export const NO_MOTD = location.search.includes('NO_MOTD')
 export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
-export const ENABLE_OLD_SETTINGS = location.search.indexOf('ENABLE_OLD_SETTINGS') !== -1
 
 export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
 export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
@@ -144,6 +139,8 @@ export const FORCE_RENDERING_STYLE = qs.FORCE_RENDERING_STYLE
 export const TEST_WEARABLES_OVERRIDE = location.search.includes('TEST_WEARABLES')
 
 const META_CONFIG_URL = qs.META_CONFIG_URL
+
+const QUESTS_SERVER_URL = qs.QUESTS_SERVER_URL ?? 'https://quests-api.decentraland.io'
 
 export namespace commConfigurations {
   export const debug = true
@@ -277,13 +274,16 @@ export function getServerConfigurations() {
   const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
+  const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
   const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
 
   return {
     contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
+    explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
+    questsUrl: QUESTS_SERVER_URL,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // ** TODO - unused, remove - moliva - 03/07/2020

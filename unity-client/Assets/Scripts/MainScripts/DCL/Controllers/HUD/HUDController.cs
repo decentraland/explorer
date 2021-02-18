@@ -1,6 +1,5 @@
 using DCL;
 using DCL.HelpAndSupportHUD;
-using DCL.SettingsHUD;
 using DCL.SettingsPanelHUD;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,9 +43,6 @@ public class HUDController : MonoBehaviour
     public AvatarEditorHUDController avatarEditorHud =>
         GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
 
-    // TODO (Santi): Remove once the new Settings HUD is implemented
-    public SettingsHUDController settingsHud => GetHUDElement(HUDElementID.SETTINGS) as SettingsHUDController;
-
     public SettingsPanelHUDController settingsPanelHud => GetHUDElement(HUDElementID.SETTINGS_PANEL) as SettingsPanelHUDController;
 
     public ExpressionsHUDController expressionsHud =>
@@ -86,12 +82,14 @@ public class HUDController : MonoBehaviour
 
     public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
 
-    public BuildModeHUDController buildModeHud => GetHUDElement(HUDElementID.BUILD_MODE) as BuildModeHUDController;
+    public BuildModeHUDController builderInWorldMainHud => GetHUDElement(HUDElementID.BUILDER_IN_WORLD_MAIN) as BuildModeHUDController;
+
+    public BuilderInWorldInititalHUDController builderInWorldInititalHud => GetHUDElement(HUDElementID.BUILDER_IN_WORLD_INITIAL) as BuilderInWorldInititalHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
-    private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
+    private BaseDictionary<string, WearableItem> wearableCatalog => CatalogController.wearableCatalog;
 
     private void ShowAvatarEditor()
     {
@@ -116,7 +114,6 @@ public class HUDController : MonoBehaviour
                                        (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
 
         if (anyInputFieldIsSelected ||
-            settingsHud.view.isOpen || // TODO (Santi): Remove once the new Settings HUD is implemented
             settingsPanelHud.view.isOpen ||
             avatarEditorHud.view.isOpen ||
             DCL.NavmapView.isOpen ||
@@ -145,7 +142,7 @@ public class HUDController : MonoBehaviour
         PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
-        SETTINGS = 5,
+        SETTINGS_PANEL = 5,
         EXPRESSIONS = 6,
         PLAYER_INFO_CARD = 7,
         AIRDROPPING = 8,
@@ -164,8 +161,8 @@ public class HUDController : MonoBehaviour
         EMAIL_PROMPT = 21,
         USERS_AROUND_LIST_HUD = 22,
         GRAPHIC_CARD_WARNING = 23,
-        BUILD_MODE = 24,
-        SETTINGS_PANEL = 25,
+        BUILDER_IN_WORLD_MAIN = 24,
+        BUILDER_IN_WORLD_INITIAL = 25,
         COUNT = 26
     }
 
@@ -222,10 +219,6 @@ public class HUDController : MonoBehaviour
                 {
                     avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
                 }
-                break;
-            case HUDElementID.SETTINGS:
-                // TODO (Santi): Remove once the new Settings HUD is implemented
-                CreateHudElement<SettingsHUDController>(configuration, hudElementId);
                 break;
             case HUDElementID.SETTINGS_PANEL:
                 CreateHudElement<SettingsPanelHUDController>(configuration, hudElementId);
@@ -313,8 +306,9 @@ public class HUDController : MonoBehaviour
                         taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i, FriendsController.i);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+                        taskbarHud.AddBuilderInWorldWindow(builderInWorldInititalHud);
 
-                        bool addOldSettingsHUD = false;
+
                         if (!string.IsNullOrEmpty(extraPayload))
                         {
                             var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
@@ -322,15 +316,9 @@ public class HUDController : MonoBehaviour
                             {
                                 taskbarHud.OnAddVoiceChat();
                             }
-
-                            // TODO (Santi): Remove once the new Settings HUD is implemented
-                            addOldSettingsHUD = config.enableOldSettings;
                         }
 
-                        if (addOldSettingsHUD)
-                            taskbarHud.AddSettingsWindow(settingsHud);
-                        else
-                            taskbarHud.AddSettingsWindow(settingsPanelHud);
+                        taskbarHud.AddSettingsWindow(settingsPanelHud);
                     }
                 }
                 else
@@ -385,8 +373,11 @@ public class HUDController : MonoBehaviour
             case HUDElementID.GRAPHIC_CARD_WARNING:
                 CreateHudElement<GraphicCardWarningHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.BUILD_MODE:
+            case HUDElementID.BUILDER_IN_WORLD_MAIN:
                 CreateHudElement<BuildModeHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.BUILDER_IN_WORLD_INITIAL:
+                CreateHudElement<BuilderInWorldInititalHUDController>(configuration, hudElementId);
                 break;
         }
 
@@ -495,7 +486,7 @@ public class HUDController : MonoBehaviour
     {
         if (avatarEditorHud != null)
         {
-            DataStore.isSignUpFlow.Set(true);
+            DataStore.i.isSignUpFlow.Set(true);
             ShowAvatarEditor();
         }
     }

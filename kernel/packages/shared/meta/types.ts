@@ -18,6 +18,7 @@ export type MetaConfiguration = {
   }
   world: WorldConfig
   comms: CommsConfig
+  featureFlags?: Record<string, boolean>
 }
 
 export type WorldConfig = {
@@ -25,7 +26,6 @@ export type WorldConfig = {
   renderProfile?: RenderProfile
   messageOfTheDay?: MessageOfTheDayConfig | null
   messageOfTheDayInit?: boolean
-  enableOldSettings?: boolean
 }
 
 export type MessageOfTheDayConfig = {
@@ -57,6 +57,8 @@ export type CommsConfig = {
   relaySuspensionDisabled?: boolean
   relaySuspensionInterval?: number
   relaySuspensionDuration?: number
-  voiceChatEnabled?: boolean
-  voiceChatAllowlist?: string[]
+}
+
+export enum FeatureFlags {
+  WEARABLES_V2 = 'wearables_v2'
 }
