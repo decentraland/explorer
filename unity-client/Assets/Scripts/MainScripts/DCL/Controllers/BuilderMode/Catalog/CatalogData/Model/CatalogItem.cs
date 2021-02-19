@@ -34,35 +34,17 @@ public class CatalogItem
 
     private bool isFavorite = false;
 
-    public string GetThumbnailUrl()
-    {
-        return thumbnailURL;
-    }
+    public string GetThumbnailUrl() => thumbnailURL;
 
-    public void SetFavorite(bool isFavorite)
-    {
-        this.isFavorite = isFavorite;
-    }
+    public void SetFavorite(bool isFavorite) => this.isFavorite = isFavorite;
 
-    public bool IsFavorite()
-    {
-        return isFavorite;
-    }
+    public bool IsFavorite() => isFavorite;
 
-    public bool IsNFT()
-    {
-        return itemType == ItemType.NFT;
-    }
+    public bool IsNFT() => itemType == ItemType.NFT;
 
-    public bool IsSmartItem()
-    {
-        return itemType == ItemType.SMART_ITEM;
-    }
+    public bool IsSmartItem() => itemType == ItemType.SMART_ITEM;
 
-    public bool IsVoxel()
-    {
-        return isVoxel;
-    }
+    public bool IsVoxel() => isVoxel;
 
     public bool HasActions()
     {

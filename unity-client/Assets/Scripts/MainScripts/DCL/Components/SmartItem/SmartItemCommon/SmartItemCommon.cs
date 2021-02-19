@@ -48,6 +48,9 @@ namespace DCL.Components
         public string step;
         public OptionsParameter[] options;
 
+        private ParameterType enumType;
+        private bool enumCached = false;
+
         [System.Serializable]
         public class OptionsParameter
         {
@@ -57,9 +60,15 @@ namespace DCL.Components
 
         public ParameterType GetParameterType()
         {
+            if (enumCached)
+                return enumType;
+
             if (!Enum.TryParse(type.ToUpper(), out ParameterType myStatus))
                 Debug.Log($"Error parsing the smart item parameter type: {type}, The parameter doesn't exist!");
-            return myStatus;
+
+            enumType = myStatus;
+            enumCached = true;
+            return enumType;
         }
     }
 }

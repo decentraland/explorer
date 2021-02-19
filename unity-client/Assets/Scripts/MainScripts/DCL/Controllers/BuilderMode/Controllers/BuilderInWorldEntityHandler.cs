@@ -732,6 +732,11 @@ public class BuilderInWorldEntityHandler : BIWController
         builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
     }
 
+    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate)
+    {
+        builderInWorldBridge.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
+    }
+
     public void SetEntityName(DCLBuilderInWorldEntity entityToApply,string newName)
     {
         string currentName = entityToApply.GetDescriptiveName();

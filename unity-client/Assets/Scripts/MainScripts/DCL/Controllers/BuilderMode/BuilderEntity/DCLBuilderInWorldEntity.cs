@@ -114,7 +114,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         string assetId = catalogHolder.GetAssetId();
 
-        if (!string.IsNullOrEmpty(assetId) && DataStore.BuilderInWorld.catalogItemDict.TryGetValue(assetId, out associatedCatalogItem))
+        if (!string.IsNullOrEmpty(assetId) && DataStore.i.builderInWorld.catalogItemDict.TryGetValue(assetId, out associatedCatalogItem))
             return associatedCatalogItem;
 
         return null;

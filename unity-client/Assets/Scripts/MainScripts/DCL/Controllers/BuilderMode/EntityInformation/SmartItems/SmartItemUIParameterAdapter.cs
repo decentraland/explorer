@@ -39,23 +39,22 @@ public class SmartItemUIParameterAdapter : MonoBehaviour
 
     protected virtual void SetParameterValue(object value)
     {
-        if (currentValues.ContainsKey(KEY_NAME))
-        {
+        if (currentValues.ContainsKey(KEY_NAME))        
             currentValues[KEY_NAME] = value;
-        }
-        else
-        {
+        
+        else       
             currentValues.Add(KEY_NAME, value);
-        }
+        
     }
 
     protected virtual object GetParameterValue()
     {
         if (currentValues.ContainsKey(KEY_NAME))
             return currentValues[KEY_NAME];
-        else if (!string.IsNullOrEmpty(currentParameter.@default))
+
+        if (!string.IsNullOrEmpty(currentParameter.@default))
             return currentParameter.@default;
-        else
-            return null;
+        
+        return null;
     }
 }

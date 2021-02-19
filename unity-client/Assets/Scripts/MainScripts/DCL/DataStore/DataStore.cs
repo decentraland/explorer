@@ -2,18 +2,24 @@ using Variables.RealmsInfo;
 
 namespace DCL
 {
-    public static class DataStore
+    public class DataStore
     {
-        static public readonly CurrentRealmVariable playerRealm = new CurrentRealmVariable();
-        static public readonly RealmsVariable realmsInfo = new RealmsVariable();
-        static public readonly DebugConfig debugConfig = new DebugConfig();
-        static public readonly BaseVariable<bool> isSignUpFlow = new BaseVariable<bool>();
+        private static DataStore instance = new DataStore();
+        public static DataStore i { get => instance; }
+        public static void Clear() => instance = new DataStore();
 
-        public static class BuilderInWorld
+        public readonly CurrentRealmVariable playerRealm = new CurrentRealmVariable();
+        public readonly RealmsVariable realmsInfo = new RealmsVariable();
+        public readonly DebugConfig debugConfig = new DebugConfig();
+        public readonly BaseVariable<bool> isSignUpFlow = new BaseVariable<bool>();
+        public readonly BaseDictionary<string, WearableItem> wearables = new BaseDictionary<string, WearableItem>();
+        public readonly BaseDictionary<string, Item> items = new BaseDictionary<string, Item>();
+        public readonly BuilderInWorld builderInWorld = new BuilderInWorld();
+
+        public class BuilderInWorld
         {
-            static public readonly BaseDictionary<string, CatalogItem> catalogItemDict = new BaseDictionary<string, CatalogItem>();
-            static public readonly BaseDictionary<string, CatalogItemPack> catalogItemPackDict = new BaseDictionary<string, CatalogItemPack>();
-            static public readonly BaseDictionary<string, CatalogItemPack> catalogItemCategoryDict = new BaseDictionary<string, CatalogItemPack>();
+            public readonly BaseDictionary<string, CatalogItem> catalogItemDict = new BaseDictionary<string, CatalogItem>();
+            public readonly BaseDictionary<string, CatalogItemPack> catalogItemPackDict = new BaseDictionary<string, CatalogItemPack>();
         }
     }
 }

@@ -25,7 +25,7 @@ public class BuilderInWorldController : MonoBehaviour
 {
     [Header("Activation of Feature")]
     public bool activeFeature = false;
-    public bool byPassLandOwnershipCheck = false;
+    public bool bypassLandOwnershipCheck = false;
 
     [Header("Scene References")]
     public GameObject cameraParentGO;
@@ -308,7 +308,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private bool UserHasPermissionOnParcelScene(ParcelScene scene)
     {
-        if (byPassLandOwnershipCheck)
+        if (bypassLandOwnershipCheck)
             return true;
 
         UserProfile userProfile = UserProfile.GetOwnUserProfile();
