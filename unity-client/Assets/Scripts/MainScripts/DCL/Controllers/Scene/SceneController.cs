@@ -203,7 +203,7 @@ namespace DCL
             IParcelScene scene;
             bool res = false;
             IWorldState worldState = Environment.i.world.state;
-            DebugConfig debugConfig = DataStore.debugConfig;
+            DebugConfig debugConfig = DataStore.i.debugConfig;
 
             if (worldState.loadedScenes.TryGetValue(sceneId, out scene))
             {
@@ -591,7 +591,7 @@ namespace DCL
                 }
             }
 
-            if (!DataStore.debugConfig.isDebugMode && string.IsNullOrEmpty(worldState.currentSceneId))
+            if (!DataStore.i.debugConfig.isDebugMode && string.IsNullOrEmpty(worldState.currentSceneId))
             {
                 // When we don't know the current scene yet, we must lock the rendering from enabling until it is set
                 CommonScriptableObjects.rendererState.AddLock(this);
@@ -643,7 +643,7 @@ namespace DCL
             var sceneToLoad = scene;
 
 
-            DebugConfig debugConfig = DataStore.debugConfig;
+            DebugConfig debugConfig = DataStore.i.debugConfig;
 #if UNITY_EDITOR
             if (debugConfig.soloScene && sceneToLoad.basePosition.ToString() != debugConfig.soloSceneCoords.ToString())
             {
@@ -828,7 +828,7 @@ namespace DCL
         public void CreateUIScene(string json)
         {
 #if UNITY_EDITOR
-            DebugConfig debugConfig = DataStore.debugConfig;
+            DebugConfig debugConfig = DataStore.i.debugConfig;
 
             if (debugConfig.soloScene && debugConfig.ignoreGlobalScenes)
                 return;
