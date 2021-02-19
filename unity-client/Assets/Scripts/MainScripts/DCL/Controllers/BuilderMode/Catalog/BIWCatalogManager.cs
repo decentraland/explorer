@@ -24,19 +24,18 @@ public class BIWCatalogManager
 
     public static void ClearCatalog()
     {
-        DataStore.BuilderInWorld.catalogItemDict.Clear();
-        DataStore.BuilderInWorld.catalogItemPackDict.Clear();
-        DataStore.BuilderInWorld.catalogItemCategoryDict.Clear();
+        DataStore.i.builderInWorld.catalogItemDict.Clear();
+        DataStore.i.builderInWorld.catalogItemPackDict.Clear();
     }
 
     public static List<CatalogItemPack> GetCatalogItemPackList()
     {
-        return DataStore.BuilderInWorld.catalogItemPackDict.GetValues();
+        return DataStore.i.builderInWorld.catalogItemPackDict.GetValues();
     }
 
     public static List<CatalogItemPack> GetCatalogItemPacksFilteredByCategories()
     {
-        var assetPacks = DataStore.BuilderInWorld.catalogItemPackDict.GetValues();
+        var assetPacks = DataStore.i.builderInWorld.catalogItemPackDict.GetValues();
 
         Dictionary<string, CatalogItemPack> assetPackDic = new Dictionary<string, CatalogItemPack>();
 
@@ -76,20 +75,20 @@ public class BIWCatalogManager
 
     public static void AddSceneObject(SceneObject sceneObject)
     {
-        if (DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(sceneObject.id))
+        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(sceneObject.id))
             return;
 
         CatalogItem catalogItem = CreateCatalogItem(sceneObject);
-        DataStore.BuilderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
+        DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
     }
 
     public static void AddSceneAssetPack(SceneAssetPack sceneAssetPack)
     {
-        if (DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(sceneAssetPack.id))
+        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(sceneAssetPack.id))
             return;
 
         CatalogItemPack catalogItemPack = CreateCatalogItemPack(sceneAssetPack);
-        DataStore.BuilderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
+        DataStore.i.builderInWorld.catalogItemPackDict.Add(catalogItemPack.id, catalogItemPack);
     }
 
     public static void ConvertCollectiblesPack(List<NFTInfo> nftList)
@@ -99,22 +98,22 @@ public class BIWCatalogManager
 
         CatalogItemPack collectiblesItemPack;
 
-        if (!DataStore.BuilderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+        if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
         {
             collectiblesItemPack = new CatalogItemPack();
             collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
             collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
             collectiblesItemPack.assets = new List<CatalogItem>();
 
-            DataStore.BuilderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
         }
         else
         {
-            collectiblesItemPack = DataStore.BuilderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES];
+            collectiblesItemPack = DataStore.i.builderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES];
             foreach (CatalogItem catalogItem in collectiblesItemPack.assets)
             {
-                if (DataStore.BuilderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
-                    DataStore.BuilderInWorld.catalogItemDict.Remove(catalogItem.id);
+                if (DataStore.i.builderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
+                    DataStore.i.builderInWorld.catalogItemDict.Remove(catalogItem.id);
             }
             collectiblesItemPack.assets.Clear();
         }
@@ -122,8 +121,8 @@ public class BIWCatalogManager
         foreach (NFTInfo info in nftList)
         {
             CatalogItem catalogItem = CreateCatalogItem(info);
-            if(!DataStore.BuilderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
-                DataStore.BuilderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
+            if(!DataStore.i.builderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
+                DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
 
             collectiblesItemPack.assets.Add(catalogItem);
         }

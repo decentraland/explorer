@@ -135,8 +135,8 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
      
         BuilderInWorldTestHelper.CreateTestCatalogLocalMultipleFloorObjects();
 
-        CatalogItem oldFloor = DataStore.BuilderInWorld.catalogItemDict.GetValues()[0];
-        CatalogItem newFloor = DataStore.BuilderInWorld.catalogItemDict.GetValues()[1];
+        CatalogItem oldFloor = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
+        CatalogItem newFloor = DataStore.i.builderInWorld.catalogItemDict.GetValues()[1];
         BuildInWorldCompleteAction buildModeAction = new BuildInWorldCompleteAction();
 
         controller.InitGameObjects();

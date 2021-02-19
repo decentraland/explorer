@@ -41,7 +41,7 @@ public class BIWNftsShould : IntegrationTestSuite_Legacy
     [Test]
     public void NftComponent()
     {
-        CatalogItem catalogItem = DataStore.BuilderInWorld.catalogItemDict.GetValues()[0];
+        CatalogItem catalogItem = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
         string entityId = "1";
         TestHelpers.CreateSceneEntity(scene, entityId);
 

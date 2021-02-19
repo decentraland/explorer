@@ -102,13 +102,4 @@ public class SmartItemEntityParameter : SmartItemUIParameterAdapter, IEntityList
                 SetParameterValue(entity.rootEntity.entityId);
         }
     }
-
-    private void OnValueChange(int currentIndex)
-    {
-        foreach (DCLBuilderInWorldEntity entity in entitiesList)
-        {
-            if (entity.GetDescriptiveName() == dropDown.options[currentIndex].text)
-                SetParameterValue(entity.rootEntity.entityId);
-        }
-    }
 }
