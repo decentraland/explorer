@@ -73,9 +73,12 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(exploreButton);
         taskbarButtonList.Add(moreButton);
 
-        foreach (var portableExperience in activePortableExperienceItems)
+        using (var iterator = activePortableExperienceItems.GetEnumerator())
         {
-            taskbarButtonList.Add(portableExperience.Value.mainButton);
+            while (iterator.MoveNext())
+            {
+                taskbarButtonList.Add(iterator.Current.Value.mainButton);
+            }
         }
 
         return taskbarButtonList;
@@ -171,12 +174,15 @@ public class TaskbarHUDView : MonoBehaviour
             moreMenu.ShowMoreMenu(false);
         else
         {
-            foreach (var portableExperience in activePortableExperienceItems)
+            using (var iterator = activePortableExperienceItems.GetEnumerator())
             {
-                if (portableExperience.Value.mainButton == obj)
+                while (iterator.MoveNext())
                 {
-                    portableExperience.Value.ShowContextMenu(false);
-                    break;
+                    if (iterator.Current.Value.mainButton == obj)
+                    {
+                        iterator.Current.Value.ShowContextMenu(false);
+                        break;
+                    }
                 }
             }
         }
@@ -219,12 +225,15 @@ public class TaskbarHUDView : MonoBehaviour
             moreMenu.ShowMoreMenu(true);
         else
         {
-            foreach (var portableExperience in activePortableExperienceItems)
+            using (var iterator = activePortableExperienceItems.GetEnumerator())
             {
-                if (portableExperience.Value.mainButton == obj)
+                while (iterator.MoveNext())
                 {
-                    portableExperience.Value.ShowContextMenu(true);
-                    break;
+                    if (iterator.Current.Value.mainButton == obj)
+                    {
+                        iterator.Current.Value.ShowContextMenu(true);
+                        break;
+                    }
                 }
             }
         }
