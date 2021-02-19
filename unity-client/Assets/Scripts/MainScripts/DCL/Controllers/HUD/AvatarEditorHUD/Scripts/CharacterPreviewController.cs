@@ -1,6 +1,7 @@
 using DCL;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterPreviewController : MonoBehaviour
@@ -49,7 +50,7 @@ public class CharacterPreviewController : MonoBehaviour
 
     private void Awake()
     {
-        cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
+        cameraFocusLookUp = new Dictionary<CameraFocus, Transform>()
         {
             {CameraFocus.DefaultEditing, defaultEditingTemplate},
             {CameraFocus.FaceEditing, faceEditingTemplate},
