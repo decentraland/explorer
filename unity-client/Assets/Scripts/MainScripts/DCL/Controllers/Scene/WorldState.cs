@@ -137,9 +137,9 @@ namespace DCL
 
             foreach (var globalSceneId in globalSceneIds)
             {
-                if (loadedScenes.ContainsKey(globalSceneId))
+                if (loadedScenes.TryGetValue(globalSceneId, out ParcelScene scene))
                 {
-                    GlobalScene peScene = loadedScenes[globalSceneId] as GlobalScene;
+                    GlobalScene peScene = scene as GlobalScene;
                     if (peScene.isPortableExperience)
                     {
                         activePortableExperienceScenes.Add(peScene);
@@ -156,9 +156,9 @@ namespace DCL
 
             foreach (var globalSceneId in globalSceneIds)
             {
-                if (loadedScenes.ContainsKey(globalSceneId))
+                if (loadedScenes.TryGetValue(globalSceneId, out ParcelScene scene))
                 {
-                    GlobalScene peScene = loadedScenes[globalSceneId] as GlobalScene;
+                    GlobalScene peScene = scene as GlobalScene;
                     if (peScene.isPortableExperience)
                     {
                         currentSceneAndPortableExperiencesIds.Add(globalSceneId);

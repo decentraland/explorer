@@ -732,7 +732,7 @@ namespace DCL
                 ParcelScene sceneToUnload = worldState.loadedScenes[sceneKey];
                 sceneToUnload.isPersistent = false;
 
-                if (sceneToUnload is GlobalScene && ((GlobalScene)sceneToUnload).isPortableExperience)
+                if (sceneToUnload is GlobalScene globalScene && globalScene.isPortableExperience)
                     OnNewPortableExperienceSceneRemoved?.Invoke(sceneKey);
             }
         }

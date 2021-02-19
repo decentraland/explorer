@@ -95,11 +95,11 @@ namespace DCL
 
             sortedControllersCount = sortedControllers.Count;
 
-            bool uiSceneControllerActive = globalSceneControllers.Count > 0;
+            bool globalSceneControllerActive = globalSceneControllers.Count > 0;
             bool globalControllerActive = globalController != null && globalController.enabled;
             bool currentSceneControllerActive = currentSceneController != null && currentSceneController.enabled;
 
-            bool atLeastOneControllerShouldBeProcessed = uiSceneControllerActive || globalControllerActive || currentSceneControllerActive || sortedControllersCount > 0;
+            bool atLeastOneControllerShouldBeProcessed = globalSceneControllerActive || globalControllerActive || currentSceneControllerActive || sortedControllersCount > 0;
 
             if (!atLeastOneControllerShouldBeProcessed)
                 return;
@@ -209,8 +209,7 @@ namespace DCL
                 messagingControllers.Remove(sceneId);
             }
 
-            if (globalSceneControllers.ContainsKey(sceneId))
-                globalSceneControllers.Remove(sceneId);
+            globalSceneControllers.Remove(sceneId);
         }
 
         void DisposeController(MessagingController controller)
