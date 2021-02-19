@@ -36,7 +36,7 @@ public class IntegrationTestSuite_Legacy
     protected virtual bool justSceneSetUp => false;
     protected virtual bool enableSceneIntegrityChecker => true;
 
-    TestSceneIntegrityChecker testSceneIntegrityChecker;
+    protected TestSceneIntegrityChecker testSceneIntegrityChecker;
 
     [UnitySetUp]
     protected virtual IEnumerator SetUp()
@@ -114,7 +114,7 @@ public class IntegrationTestSuite_Legacy
         if (MapRenderer.i != null)
             MapRenderer.i.Cleanup();
 
-        yield return testSceneIntegrityChecker.TestSceneSnapshot();
+        yield return testSceneIntegrityChecker?.TestSceneSnapshot();
     }
 
     protected void TearDown_PromiseKeepers()
