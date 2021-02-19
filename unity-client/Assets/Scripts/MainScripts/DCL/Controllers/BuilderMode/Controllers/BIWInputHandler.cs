@@ -1,3 +1,4 @@
+using DCL.Controllers;
 using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,10 +39,7 @@ public class BIWInputHandler : BIWController
     private InputAction_Trigger.Triggered redoDelegate;
     private InputAction_Trigger.Triggered undoDelegate;
 
-    [HideInInspector]
-    public bool isEditModeActivated = false,
-    isMultiSelectionActive = false,
-    isAdvancedModeActive = true;
+    private bool isMultiSelectionActive = false;
 
     private float nexTimeToReceiveInput;
 
@@ -64,6 +62,7 @@ public class BIWInputHandler : BIWController
         multiSelectionInputAction.OnStarted += multiSelectionStartDelegate;
         multiSelectionInputAction.OnFinished += multiSelectionFinishedDelegate;
     }
+
     private void OnDestroy()
     {
         editModeChangeInputAction.OnTriggered -= OnEditModeChangeAction;
@@ -76,6 +75,21 @@ public class BIWInputHandler : BIWController
 
         builderInputWrapper.OnMouseClick -= MouseClick;
         biwModeController.OnInputDone -= InputDone;
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.OnStopInput -= StopInput;
+            HUDController.i.builderInWorldMainHud.OnResumeInput -= ResumeInput;
+        }
+    }
+
+    public override void Init()
+    {
+        base.Init();
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.OnStopInput += StopInput;
+            HUDController.i.builderInWorldMainHud.OnResumeInput += ResumeInput;
+        }
     }
 
     protected override void FrameUpdate()
@@ -84,13 +98,25 @@ public class BIWInputHandler : BIWController
 
         if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
         {
-            if (Utils.isCursorLocked || isAdvancedModeActive)
+            if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
                 CheckEditModeInput();
             biwModeController.CheckInput();
         }
     }
 
-    void CheckEditModeInput()
+    public override void EnterEditMode(ParcelScene sceneToEdit)
+    {
+        base.EnterEditMode(sceneToEdit);
+        builderInputWrapper.gameObject.SetActive(true);
+    }
+
+    public override void ExitEditMode()
+    {
+        base.ExitEditMode();
+        builderInputWrapper.gameObject.SetActive(false);
+    }
+
+    private void CheckEditModeInput()
     {
         if (!builderInWorldEntityHandler.IsAnyEntitySelected() || isMultiSelectionActive)
         {
@@ -103,7 +129,7 @@ public class BIWInputHandler : BIWController
         }
     }
 
-    void StartMultiSelection()
+    private void StartMultiSelection()
     {
         isMultiSelectionActive = true;
         builderInWorldEntityHandler.SetMultiSelectionActive(isMultiSelectionActive);
@@ -111,7 +137,7 @@ public class BIWInputHandler : BIWController
         biwModeController.StartMultiSelection();
     }
 
-    void EndMultiSelection()
+    private void EndMultiSelection()
     {
         isMultiSelectionActive = false;
         builderInWorldEntityHandler.SetMultiSelectionActive(isMultiSelectionActive);
@@ -119,13 +145,13 @@ public class BIWInputHandler : BIWController
         outlinerController.CancelUnselectedOutlines();
     }
 
-    void MouseClick(int buttonID, Vector3 position)
+    private void MouseClick(int buttonID, Vector3 position)
     {
-        if (!isEditModeActivated) return;
+        if (!isEditModeActive) return;
 
         if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
         {
-            if (Utils.isCursorLocked || isAdvancedModeActive)
+            if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
             {
                 if (buttonID == 0)
                 {
@@ -133,24 +159,25 @@ public class BIWInputHandler : BIWController
                     InputDone();
                     return;
                 }
-
                 outlinerController.CheckOutline();
             }
         }
     }
+
+    public bool IsMultiSelectionActive() => isMultiSelectionActive;
 
     private void OnEditModeChangeAction(DCLAction_Trigger action)
     {
         builderInWorldController.ChangeFeatureActivationState();
     }
 
-    void RedoAction()
+    private void RedoAction()
     {
         actionController.TryToRedoAction();
         InputDone();
     }
 
-    void UndoAction()
+    private void UndoAction()
     {
         InputDone();
 
@@ -159,7 +186,8 @@ public class BIWInputHandler : BIWController
 
         actionController.TryToUndoAction();
     }
-    void MouseClickDetected()
+
+    private void MouseClickDetected()
     {
         DCLBuilderInWorldEntity entityToSelect = builderInWorldController.GetEntityOnPointer();
         if (entityToSelect != null)
@@ -172,8 +200,18 @@ public class BIWInputHandler : BIWController
         }
     }
 
-    void InputDone()
+    private void InputDone()
     {
         nexTimeToReceiveInput = Time.timeSinceLevelLoad + msBetweenInputInteraction / 1000;
+    }
+
+    private void StopInput()
+    {
+        builderInputWrapper.StopInput();
+    }
+
+    private void ResumeInput()
+    {
+        builderInputWrapper.ResumeInput();
     }
 }

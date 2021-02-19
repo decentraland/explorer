@@ -10,7 +10,7 @@ public class BIWModeController : BIWController
     {
         Inactive = 0,
         FirstPerson = 1,
-        Editor = 2
+        GodMode = 2
     }
 
     [Header("Scene References")]
@@ -39,6 +39,7 @@ public class BIWModeController : BIWController
 
     private InputAction_Trigger.Triggered snapModeDelegate;
     private GameObject editionGO;
+    private GameObject undoGO;
 
     private void Start()
     {
@@ -55,12 +56,19 @@ public class BIWModeController : BIWController
 
         firstPersonMode.OnActionGenerated -= actionController.AddAction;
         editorMode.OnActionGenerated -= actionController.AddAction;
+
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.OnChangeModeAction -= ChangeAdvanceMode;
+            HUDController.i.builderInWorldMainHud.OnResetAction -= ResetScaleAndRotation;
+        }
     }
 
     public void Init(GameObject editionGO, GameObject undoGO, GameObject snapGO, GameObject freeMovementGO)
     {
         base.Init();
         this.editionGO = editionGO;
+        this.undoGO = undoGO;
 
         firstPersonMode.Init(editionGO, undoGO, snapGO, freeMovementGO, builderInWorldEntityHandler.GetSelectedEntityList());
         editorMode.Init(editionGO, undoGO, snapGO, freeMovementGO, builderInWorldEntityHandler.GetSelectedEntityList());
@@ -70,6 +78,17 @@ public class BIWModeController : BIWController
 
         firstPersonMode.OnActionGenerated += actionController.AddAction;
         editorMode.OnActionGenerated += actionController.AddAction;
+
+        if (HUDController.i.builderInWorldMainHud != null)
+        {
+            HUDController.i.builderInWorldMainHud.OnChangeModeAction += ChangeAdvanceMode;
+            HUDController.i.builderInWorldMainHud.OnResetAction += ResetScaleAndRotation;
+        }
+    }
+
+    public bool IsGodModeActive()
+    {
+        return currentEditModeState == EditModeState.GodMode;
     }
 
     public Vector3 GetCurrentEditionPosition()
@@ -77,11 +96,19 @@ public class BIWModeController : BIWController
         return editionGO.transform.position;
     }
 
+    public void UndoEditionGOLastStep()
+    {
+        if (undoGO == null || editionGO == null)
+            return;
+
+        BuilderInWorldUtils.CopyGameObjectStatus(undoGO, editionGO, false, false);
+    }
+
     public override void EnterEditMode(ParcelScene parcelScene)
     {
         base.EnterEditMode(parcelScene);
         if (currentActiveMode == null)
-            SetBuildMode(BIWModeController.EditModeState.Editor);
+            SetBuildMode(EditModeState.GodMode);
     }
 
     public override void ExitEditMode()
@@ -91,7 +118,6 @@ public class BIWModeController : BIWController
     }
 
     public BuilderInWorldMode GetCurrentMode() => currentActiveMode;
-
 
     private void InputDone()
     {
@@ -133,13 +159,24 @@ public class BIWModeController : BIWController
         currentActiveMode?.CreatedEntity(entity);
     }
 
+    public float GetMaxDistanceToSelectEntities()
+    {
+        return currentActiveMode.maxDistanceToSelectEntities;
+    }
+
+    public Vector3 GetMousePosition()
+    {
+        return currentActiveMode.GetPointerPosition();
+    }
+
     public Vector3 GetModeCreationEntryPoint()
     {
         if (currentActiveMode != null)
             return currentActiveMode.GetCreatedEntityPoint();
         return Vector3.zero;
     }
-    void ChangeSnapMode()
+
+    private void ChangeSnapMode()
     {
         SetSnapActive(!isSnapActive);
         InputDone();
@@ -165,7 +202,7 @@ public class BIWModeController : BIWController
         }
         else
         {
-            SetBuildMode(EditModeState.Editor);
+            SetBuildMode(EditModeState.GodMode);
         }
     }
 
@@ -190,7 +227,7 @@ public class BIWModeController : BIWController
                 if(cursorGO != null)
                    cursorGO.SetActive(true);
                 break;
-            case EditModeState.Editor:
+            case EditModeState.GodMode:
                 if (cursorGO != null)
                     cursorGO.SetActive(false);
                 currentActiveMode = editorMode;

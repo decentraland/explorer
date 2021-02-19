@@ -208,33 +208,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeFeature: 0
   byPassLandOwnershipCheck: 0
-  distanceLimitToSelectObjects: 50
   cameraParentGO: {fileID: 0}
   cursorGO: {fileID: 0}
   inputController: {fileID: 0}
   avatarRenderer: {fileID: 0}
-  outlinerController: {fileID: 0}
+  outlinerController: {fileID: 4340718453677319861}
   bIWInputHandler: {fileID: 7967273911288970493}
   biwPublishController: {fileID: 8098075348912393403}
   biwCreatorController: {fileID: 1515935919}
   biwModeController: {fileID: 3629122442816111540}
   biwFloorHandler: {fileID: 3914047899784263749}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
-  builderInputWrapper: {fileID: 1208871511405416592}
-  gizmoManager: {fileID: 1208871511615770936}
   actionController: {fileID: 1208871512032110241}
   builderInWorldBridge: {fileID: 0}
-  outlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4, type: 2}
-  firstPersonMode: {fileID: 1208871511546216253}
   editorMode: {fileID: 1208871512657624393}
-  builderRendererIndex: 1
   layerToRaycast:
     serializedVersion: 2
     m_Bits: 16384
-  sceneToEdit: {fileID: 0}
-  isEditModeActivated: 0
-  isMultiSelectionActive: 0
-  isAdvancedModeActive: 1
+  isBuilderInWorldActivated: 0
 --- !u!1 &1208871511283293828
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,6 +471,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2af637224d652ff40bb5fc50a399b070, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDistanceToSelectEntities: 15
   snapFactor: 1
   snapRotationDegresFactor: 30
   snapScaleFactor: 0.25
@@ -1538,6 +1530,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 479b86093c625a641b028d46e304e1cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDistanceToSelectEntities: 9999
   snapFactor: 1
   snapRotationDegresFactor: 0.5
   snapScaleFactor: 0.5
@@ -2082,6 +2075,7 @@ MonoBehaviour:
   distanceLimitToSelectObjects: 50
   outlinerController: {fileID: 4340718453677319861}
   buildModeController: {fileID: 1208871511274338203}
+  biwModeController: {fileID: 3629122442816111540}
   actionController: {fileID: 1208871512032110241}
   builderInWorldBridge: {fileID: 0}
   editMaterial: {fileID: 2100000, guid: 92b0ce4a86423dd48b66212090fc7e34, type: 2}
@@ -2108,7 +2102,7 @@ MonoBehaviour:
   dclBuilderMeshLoadIndicatorController: {fileID: 4453536760248188691}
   meshLoadIndicator: {fileID: 4025507285860166352}
   builderInWorldBridge: {fileID: 0}
-  biwCreatorController: {fileID: 2133213680157780304}
+  biwCreatorController: {fileID: 1515935919}
   builderInWorldController: {fileID: 1208871511274338203}
   floorPrefab: {fileID: 3848538323447533592, guid: ea1dee13f58202f409bb86c92a202112,
     type: 3}
@@ -2192,9 +2186,6 @@ MonoBehaviour:
     type: 2}
   multiSelectionInputAction: {fileID: 11400000, guid: 5c1dc0623e14bc3439b6f58922b177ba,
     type: 2}
-  isEditModeActivated: 0
-  isMultiSelectionActive: 0
-  isAdvancedModeActive: 1
 --- !u!114 &2133213680157780304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2229,6 +2220,7 @@ MonoBehaviour:
   cameraOutlinerMaterial: {fileID: 2100000, guid: 2bf8916261b5ffc46b4ba519ff75ede4,
     type: 2}
   builderInWorldController: {fileID: 1208871511274338203}
+  biwInputHandler: {fileID: 7967273911288970493}
 --- !u!1 &7515311309793266013
 GameObject:
   m_ObjectHideFlags: 0

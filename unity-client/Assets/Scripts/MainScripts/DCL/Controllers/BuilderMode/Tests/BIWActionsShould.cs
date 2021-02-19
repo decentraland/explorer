@@ -13,6 +13,7 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
     private ActionController actionController;
     private BuilderInWorldEntityHandler entityHandler;
     private BIWFloorHandler biwFloorHandler;
+    private BIWCreatorController biwCreatorController;
 
     protected override IEnumerator SetUp()
     {
@@ -21,6 +22,7 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         actionController = controller.actionController;
         entityHandler = controller.builderInWorldEntityHandler;
         biwFloorHandler = controller.biwFloorHandler;
+        biwCreatorController = controller.biwCreatorController;
         entityHandler.Init();
 
         TestHelpers.CreateSceneEntity(scene, ENTITY_ID);
@@ -137,16 +139,15 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         CatalogItem newFloor = DataStore.BuilderInWorld.catalogItemDict.GetValues()[1];
         BuildInWorldCompleteAction buildModeAction = new BuildInWorldCompleteAction();
 
-
-
         controller.InitGameObjects();
         yield return null;
         yield return null;
         yield return null;
-        controller.sceneToEdit = scene;
+        controller.FindSceneToEdit();
         controller.InitControllers();
+
+        biwCreatorController.EnterEditMode(scene);
         biwFloorHandler.EnterEditMode(scene);
-        controller.biwCreatorController.EnterEditMode(scene);
 
         biwFloorHandler.CreateFloor(oldFloor);
         biwFloorHandler.ChangeFloor(newFloor);

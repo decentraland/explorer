@@ -23,6 +23,7 @@ public class BuilderInWorldEntityHandler : BIWController
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
     public BuilderInWorldController buildModeController;
+    public BIWModeController biwModeController;
     public ActionController actionController;
     public BuilderInWorldBridge builderInWorldBridge;
 
@@ -413,7 +414,6 @@ public class BuilderInWorldEntityHandler : BIWController
             return null;
     }
 
-
     public void DuplicateSelectedEntities()
     {
         BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
@@ -534,7 +534,7 @@ public class BuilderInWorldEntityHandler : BIWController
                 entitiesToRemove.Add(entity);
         }
 
-        buildModeController.UndoEditionGOLastStep();
+        biwModeController.UndoEditionGOLastStep();
 
         foreach (DCLBuilderInWorldEntity entity in entitiesToRemove)
         {
@@ -801,7 +801,6 @@ public class BuilderInWorldEntityHandler : BIWController
                 break;
             }
         }
-
         return areAllIn;
     }
 }

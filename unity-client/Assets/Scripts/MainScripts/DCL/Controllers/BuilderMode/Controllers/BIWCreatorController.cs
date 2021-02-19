@@ -19,6 +19,7 @@ public class BIWCreatorController : BIWController
     internal InputAction_Trigger toggleCreateLastSceneObjectInputAction;
 
     public Action OnInputDone;
+
     //Note(Adrian): This is for tutorial purposes
     public Action OnSceneObjectPlaced;
 
@@ -30,7 +31,6 @@ public class BIWCreatorController : BIWController
     {
         createLastSceneObjectDelegate = (action) => CreateLastSceneObject();
         toggleCreateLastSceneObjectInputAction.OnTriggered += createLastSceneObjectDelegate;
-
     }
 
     private void OnDestroy()
@@ -90,19 +90,116 @@ public class BIWCreatorController : BIWController
             HUDController.i.builderInWorldMainHud.ShowSceneLimitsPassed();
             return false;
         }
-
         return true;
     }
 
-
     public DCLBuilderInWorldEntity CreateSceneObject(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false)
     {
-        if (catalogItem.IsNFT() && BuilderInWorldNFTController.i.IsNFTInUse(catalogItem.id)) return null;
+        if (catalogItem.IsNFT() && BuilderInWorldNFTController.i.IsNFTInUse(catalogItem.id))
+            return null;
 
         IsInsideTheLimits(catalogItem);
 
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
+        AddSceneMappings(catalogItem);
 
+        Vector3 startPoint = biwModeController.GetModeCreationEntryPoint();
+
+        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPoint, biwModeController.GetCurrentEditionPosition());
+        entity.isFloor = isFloor;
+
+        AddShape(catalogItem, entity);
+        AddEntityNameComponent(catalogItem, entity);
+
+        AddLockedComponent(entity);
+
+        if (catalogItem.IsSmartItem())
+        {
+            AddSmartItemComponent(entity);
+        }
+
+        if (catalogItem.IsVoxel())
+            entity.isVoxel = true;
+
+        if (autoSelect)
+        {
+            builderInWorldEntityHandler.DeselectEntities();
+            builderInWorldEntityHandler.Select(entity.rootEntity);
+        }
+
+        entity.gameObject.transform.eulerAngles = Vector3.zero;
+
+        biwModeController.CreatedEntity(entity);
+
+        lastCatalogItemCreated = catalogItem;
+
+        builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
+        OnInputDone?.Invoke();
+        OnSceneObjectPlaced?.Invoke();
+        return entity;
+    }
+
+    #region Add Components
+
+    private void AddSmartItemComponent(DCLBuilderInWorldEntity entity)
+    {
+        SmartItemComponent.Model model = new SmartItemComponent.Model();
+        model.values = new Dictionary<object, object>();
+
+        string jsonModel = JsonUtility.ToJson(model);
+
+        //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
+        sceneToEdit.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+
+        //Note (Adrian): We can't wait to set the component 1 frame, so we set it
+        if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
+            ((SmartItemComponent)baseComponent).SetModel(model);
+    }
+
+    private void AddEntityNameComponent(CatalogItem catalogItem, DCLBuilderInWorldEntity entity)
+    {
+        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
+        builderInWorldEntityHandler.SetEntityName(entity, catalogItem.name);
+    }
+
+    private void AddLockedComponent(DCLBuilderInWorldEntity entity)
+    {
+        DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
+        if (entity.isFloor)
+            entityLocked.SetIsLocked(true);
+        else
+            entityLocked.SetIsLocked(false);
+
+        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
+    }
+
+    private void AddShape(CatalogItem catalogItem, DCLBuilderInWorldEntity entity)
+    {
+        if (catalogItem.IsNFT())
+        {
+            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
+            nftShape.model = new NFTShape.Model();
+            nftShape.model.color = new Color(0.6404918f, 0.611472f, 0.8584906f);
+            nftShape.model.src = catalogItem.model;
+            nftShape.model.assetId = catalogItem.id;
+
+            sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, nftShape.id);
+        }
+        else
+        {
+            GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
+            mesh.model = new LoadableShape.Model();
+            mesh.model.src = catalogItem.model;
+            mesh.model.assetId = catalogItem.id;
+            sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
+        }
+    }
+
+    #endregion
+
+    private void AddSceneMappings(CatalogItem catalogItem)
+    {
         LoadParcelScenesMessage.UnityParcelScene data = sceneToEdit.sceneData;
         data.baseUrl = BuilderInWorldSettings.BASE_URL_CATALOG;
         if (data.contents == null)
@@ -124,82 +221,7 @@ public class BIWCreatorController : BIWController
             if (!found)
                 data.contents.Add(mappingPair);
         }
-
         DCL.Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
-
-
-        DCLName name = (DCLName)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
-        DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)sceneToEdit.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
-
-        Vector3 startPoint = biwModeController.GetModeCreationEntryPoint();
-
-        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPoint, biwModeController.GetCurrentEditionPosition());
-        entity.isFloor = isFloor;
-
-        if (entity.isFloor)
-            entityLocked.SetIsLocked(true);
-        else
-            entityLocked.SetIsLocked(false);
-
-        if (catalogItem.IsNFT())
-        {
-            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
-            nftShape.model = new NFTShape.Model();
-            nftShape.model.color = new Color(0.6404918f, 0.611472f, 0.8584906f);
-            nftShape.model.src = catalogItem.model;
-            nftShape.model.assetId = catalogItem.id;
-
-            sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, nftShape.id);
-        }
-        else
-        {
-            GLTFShape mesh = (GLTFShape)sceneToEdit.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.GLTF_SHAPE));
-            mesh.model = new LoadableShape.Model();
-            mesh.model.src = catalogItem.model;
-            mesh.model.assetId = catalogItem.id;
-            sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, mesh.id);
-        }
-
-        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, name.id);
-        sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, entityLocked.id);
-
-        builderInWorldEntityHandler.SetEntityName(entity, catalogItem.name);
-
-        if (catalogItem.IsSmartItem())
-        {
-            SmartItemComponent.Model model = new SmartItemComponent.Model();
-            model.values = new Dictionary<object, object>();
-
-            string jsonModel = JsonUtility.ToJson(model);
-
-            //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
-            sceneToEdit.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
-
-            //Note (Adrian): We can't wait to set the component 1 frame, so we set it
-            if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-                ((SmartItemComponent)baseComponent).SetModel(model);
-        }
-
-        if (catalogItem.IsVoxel())
-            entity.isVoxel = true;
-
-        if (autoSelect)
-        {
-            builderInWorldEntityHandler.DeselectEntities();
-            builderInWorldEntityHandler.Select(entity.rootEntity);
-        }
-
-        entity.gameObject.transform.eulerAngles = Vector3.zero;
-
-        biwModeController.CreatedEntity(entity);
-
-        lastCatalogItemCreated = catalogItem;
-
-        builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
-        OnInputDone?.Invoke();
-        OnSceneObjectPlaced?.Invoke();
-
-        return entity;
     }
 
     void CreateLastSceneObject()

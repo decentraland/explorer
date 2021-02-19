@@ -16,6 +16,7 @@ public class BIWOutlinerController : BIWController
     public Material cameraOutlinerMaterial;
 
     public BuilderInWorldController builderInWorldController;
+    public BIWInputHandler biwInputHandler;
    
     private List<DCLBuilderInWorldEntity> entitiesOutlined = new List<DCLBuilderInWorldEntity>();
     private int outlinerOptimizationCounter = 0;
@@ -45,7 +46,7 @@ public class BIWOutlinerController : BIWController
             if (!BuilderInWorldUtils.IsPointerOverUIElement())
             {
                 DCLBuilderInWorldEntity entity = builderInWorldController.GetEntityOnPointer();
-                if (!builderInWorldController.IsMultiSelectionActive())
+                if (!biwInputHandler.IsMultiSelectionActive())
                     CancelAllOutlines();
                 else
                     CancelUnselectedOutlines();

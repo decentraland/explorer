@@ -31,6 +31,7 @@ public class BIWPublishController : BIWController
             checkerSceneLimitsOptimizationCounter++;
         }
     }
+
     private void OnDestroy()
     {
         if (HUDController.i.builderInWorldMainHud != null)
@@ -62,5 +63,4 @@ public class BIWPublishController : BIWController
         builderInWorldBridge.PublishScene(sceneToEdit);
         HUDController.i.builderInWorldMainHud.PublishStart();
     }
-
 }

@@ -7,29 +7,29 @@ public class BIWController : MonoBehaviour
 {
     protected ParcelScene sceneToEdit;
 
-    protected bool isFeatureActive = false;
+    protected bool isEditModeActive = false;
 
     public virtual void Init()
     {
-        isFeatureActive = false;
+        isEditModeActive = false;
     }
 
     public virtual void EnterEditMode(ParcelScene sceneToEdit)
     {
         this.sceneToEdit = sceneToEdit;
-        isFeatureActive = true;
+        isEditModeActive = true;
     }
 
     public virtual void ExitEditMode()
     {
-        isFeatureActive = false;
+        isEditModeActive = false;
         sceneToEdit = null;
     }
 
     // Update is called once per frame
     protected virtual void Update()
     {
-        if (!isFeatureActive)
+        if (!isEditModeActive)
             return;
         FrameUpdate();
     }
