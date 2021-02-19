@@ -164,5 +164,11 @@ namespace DCL.Components
                 audioSource.Play();
             }
         }
+
+        public override void SetModel(object model)
+        {
+            this.model = (Model)model;
+            ApplyCurrentModel();
+        }
     }
 }
