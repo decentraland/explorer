@@ -38,6 +38,8 @@ namespace DCL.Components
             bool forceUpdate = prevModel.volume != this.model.volume;
             settingsVolume = Settings.i.generalSettings.sfxVolume;
 
+            UpdatePlayingState(forceUpdate);
+
             yield return null;
         }
 

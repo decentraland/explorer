@@ -94,7 +94,6 @@ public class BIWFloorHandler : BIWController
         }
 
         builderInWorldEntityHandler.DeselectEntities();
-
         lastFloorCalalogItemUsed = floorSceneObject;
     }
 

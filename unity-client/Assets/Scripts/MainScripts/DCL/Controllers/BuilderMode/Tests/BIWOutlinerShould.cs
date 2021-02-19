@@ -13,7 +13,6 @@ public class BIWOutlinerShould : IntegrationTestSuite_Legacy
     DCLBuilderInWorldEntity entity;
     BIWOutlinerController outlinerController;
 
-
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
@@ -38,7 +37,6 @@ public class BIWOutlinerShould : IntegrationTestSuite_Legacy
     public void OutlineEnity()
     {
         outlinerController.OutlineEntity(entity);
-
         Assert.IsTrue(outlinerController.IsEntityOutlined(entity));
 
         outlinerController.CancelEntityOutline(entity);

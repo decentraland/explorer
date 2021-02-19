@@ -47,11 +47,9 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         actionController.AddAction(buildModeAction);
 
         actionController.TryToUndoAction();
-
         Assert.IsTrue(scene.entities[ENTITY_ID].gameObject.transform.position == oldPosition);
 
         actionController.TryToRedoAction();
-
         Assert.IsTrue(scene.entities[ENTITY_ID].gameObject.transform.position == newPosition);
     }
 
@@ -73,11 +71,9 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         actionController.AddAction(buildModeAction);
 
         actionController.TryToUndoAction();
-
         Assert.IsTrue(scene.entities[ENTITY_ID].gameObject.transform.rotation.eulerAngles == oldRotation);
 
         actionController.TryToRedoAction();
-
         Assert.IsTrue(scene.entities[ENTITY_ID].gameObject.transform.rotation.eulerAngles == newRotation);
     }
 
@@ -99,11 +95,9 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         actionController.AddAction(buildModeAction);
 
         actionController.TryToUndoAction();
-
         Assert.IsTrue(scene.entities[ENTITY_ID].gameObject.transform.localScale == oldScale);
 
         actionController.TryToRedoAction();
-
         Assert.IsTrue(scene.entities[ENTITY_ID].gameObject.transform.localScale == newScale);
     }
 
@@ -128,8 +122,8 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         Assert.IsFalse(scene.entities.ContainsKey(ENTITY_ID));
     }
 
-    [UnityTest]
-    public IEnumerator UndoRedoChangeFloorAction()
+    [Test]
+    public void UndoRedoChangeFloorAction()
     {
         BIWCatalogManager.Init();
      
@@ -140,9 +134,6 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
         BuildInWorldCompleteAction buildModeAction = new BuildInWorldCompleteAction();
 
         controller.InitGameObjects();
-        yield return null;
-        yield return null;
-        yield return null;
         controller.FindSceneToEdit();
         controller.InitControllers();
 

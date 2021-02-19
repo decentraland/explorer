@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BIWCatalogManager
+public static class BIWCatalogManager
 {
     public static bool VERBOSE = false;
     private static bool IS_INIT = false;

@@ -26,7 +26,6 @@ public class BIWController : MonoBehaviour
         sceneToEdit = null;
     }
 
-    // Update is called once per frame
     protected virtual void Update()
     {
         if (!isEditModeActive)

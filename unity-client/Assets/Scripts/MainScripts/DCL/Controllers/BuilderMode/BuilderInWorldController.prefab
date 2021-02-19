@@ -207,7 +207,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activeFeature: 0
-  byPassLandOwnershipCheck: 0
+  bypassLandOwnershipCheck: 0
   cameraParentGO: {fileID: 0}
   cursorGO: {fileID: 0}
   inputController: {fileID: 0}
@@ -1543,7 +1543,7 @@ MonoBehaviour:
   gizmoManager: {fileID: 1208871511615770936}
   voxelController: {fileID: 1208871512657624392}
   builderInputWrapper: {fileID: 1208871511405416592}
-  outlinerController: {fileID: 0}
+  outlinerController: {fileID: 4340718453677319861}
   buildModeController: {fileID: 1208871511274338203}
   cameraController: {fileID: 0}
   lookAtT: {fileID: 1208871513090114763}
@@ -1572,7 +1572,7 @@ MonoBehaviour:
   builderInputWrapper: {fileID: 1208871511405416592}
   buildModeController: {fileID: 1208871511274338203}
   buildEditorMode: {fileID: 1208871512657624393}
-  outlinerController: {fileID: 0}
+  outlinerController: {fileID: 4340718453677319861}
   builderInWorldEntityHandler: {fileID: 7801740759641975108}
   freeCameraMovement: {fileID: 0}
   actionController: {fileID: 1208871512032110241}

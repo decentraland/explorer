@@ -96,12 +96,12 @@ public class BIWInputHandler : BIWController
     {
         base.FrameUpdate();
 
-        if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
-        {
-            if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
-                CheckEditModeInput();
-            biwModeController.CheckInput();
-        }
+        if (Time.timeSinceLevelLoad < nexTimeToReceiveInput)
+            return;
+
+        if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
+            CheckEditModeInput();
+        biwModeController.CheckInput();
     }
 
     public override void EnterEditMode(ParcelScene sceneToEdit)
@@ -147,20 +147,21 @@ public class BIWInputHandler : BIWController
 
     private void MouseClick(int buttonID, Vector3 position)
     {
-        if (!isEditModeActive) return;
+        if (!isEditModeActive)
+            return;
 
-        if (Time.timeSinceLevelLoad >= nexTimeToReceiveInput)
+        if (Time.timeSinceLevelLoad < nexTimeToReceiveInput)
+            return;
+
+        if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
         {
-            if (Utils.isCursorLocked || biwModeController.IsGodModeActive())
+            if (buttonID == 0)
             {
-                if (buttonID == 0)
-                {
-                    MouseClickDetected();
-                    InputDone();
-                    return;
-                }
-                outlinerController.CheckOutline();
+                MouseClickDetected();
+                InputDone();
+                return;
             }
+            outlinerController.CheckOutline();
         }
     }
 

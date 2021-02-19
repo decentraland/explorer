@@ -47,7 +47,7 @@ public class BIWCreatorController : BIWController
             HUDController.i.builderInWorldMainHud.OnCatalogItemSelected += OnCatalogItemSelected;
     }
 
-    bool IsInsideTheLimits(CatalogItem sceneObject)
+    private bool IsInsideTheLimits(CatalogItem sceneObject)
     {
         if (HUDController.i.builderInWorldMainHud == null)
             return false;
@@ -224,7 +224,7 @@ public class BIWCreatorController : BIWController
         DCL.Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
     }
 
-    void CreateLastSceneObject()
+    private void CreateLastSceneObject()
     {
         if (lastCatalogItemCreated != null)
         {
@@ -235,7 +235,7 @@ public class BIWCreatorController : BIWController
         }
     }
 
-    void OnCatalogItemSelected(CatalogItem catalogItem)
+    private void OnCatalogItemSelected(CatalogItem catalogItem)
     {
         if (biwFloorHandler.IsCatalogItemFloor(catalogItem))
         {

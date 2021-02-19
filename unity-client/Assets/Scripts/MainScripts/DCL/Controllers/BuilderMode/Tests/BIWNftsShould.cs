@@ -13,7 +13,6 @@ using UnityEngine.TestTools;
 
 public class BIWNftsShould : IntegrationTestSuite_Legacy
 {
-
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
@@ -30,11 +29,9 @@ public class BIWNftsShould : IntegrationTestSuite_Legacy
         Assert.IsFalse(BuilderInWorldNFTController.i.IsNFTInUse(idToTest));
 
         BuilderInWorldNFTController.i.UseNFT(idToTest);
-
         Assert.IsTrue(BuilderInWorldNFTController.i.IsNFTInUse(idToTest));
 
         BuilderInWorldNFTController.i.StopUsingNFT(idToTest);
-
         Assert.IsFalse(BuilderInWorldNFTController.i.IsNFTInUse(idToTest));
     }
 
@@ -60,7 +57,6 @@ public class BIWNftsShould : IntegrationTestSuite_Legacy
 
         CatalogItem associatedCatalogItem = biwEntity.GetCatalogItemAssociated();
         Assert.IsTrue(associatedCatalogItem.IsNFT());
-
         Assert.AreEqual(associatedCatalogItem, catalogItem);
     }
 
