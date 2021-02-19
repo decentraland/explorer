@@ -12,7 +12,7 @@ cd $BUILD_PATH
 export BUILD_PATH=$PWD
 cd ../..
 
-${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' /opt/Unity/Editor/Unity} \
+${UNITY_EXECUTABLE:-xvfb-run --auto-servernum --server-args='-screen 0 640x480x24' $UNITY_PATH/Editor/Unity} \
   -projectPath $(pwd) \
   -quit \
   -batchmode \
