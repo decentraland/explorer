@@ -214,11 +214,11 @@ namespace Tests
 
             Assert.IsTrue(Environment.i.world.state.loadedScenes.ContainsKey(loadedSceneID));
 
+            var loadedScene = Environment.i.world.state.loadedScenes[loadedSceneID] as ParcelScene;
             // Add 1 entity to the loaded scene
-            TestHelpers.CreateSceneEntity(Environment.i.world.state.loadedScenes[loadedSceneID] as ParcelScene, "6");
+            TestHelpers.CreateSceneEntity(loadedScene, "6");
 
-            var sceneRootGameObject = Environment.i.world.state.loadedScenes[loadedSceneID];
-            var sceneEntities = Environment.i.world.state.loadedScenes[loadedSceneID].entities;
+            var sceneEntities = loadedScene.entities;
 
             sceneController.UnloadScene(loadedSceneID);
 
@@ -227,7 +227,7 @@ namespace Tests
 
             Assert.IsTrue(Environment.i.world.state.loadedScenes.ContainsKey(loadedSceneID) == false);
 
-            Assert.IsTrue(sceneRootGameObject == null, "Scene root gameobject reference is not getting destroyed.");
+            Assert.IsTrue(loadedScene == null, "Scene root gameobject reference is not getting destroyed.");
 
             foreach (var entity in sceneEntities)
             {
