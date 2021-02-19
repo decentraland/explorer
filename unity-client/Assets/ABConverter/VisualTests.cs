@@ -56,18 +56,11 @@ namespace DCL.ABConverter
                 string testName = $"ABConverter_{go.name}.png";
                 yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, new Vector3(7, 7, 7), Vector3.zero);
 
-                bool result = false;
-
-                // TODO: Remove after testing
-                // Random fail for testing
-                // if (Random.Range(0, 2) == 0)
-                // {
-                    result = VisualTestHelpers.TestSnapshot(
+                bool result = VisualTestHelpers.TestSnapshot(
                         VisualTestHelpers.baselineImagesPath + testName,
                         VisualTestHelpers.testImagesPath + testName,
                         95,
                         false);
-                // }
 
                 // Delete failed AB files to avoid uploading them
                 if (!result && env != null)
