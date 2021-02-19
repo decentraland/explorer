@@ -17,8 +17,6 @@ public class BuilderInWorldEntityHandler : BIWController
     [Header("Design variables")]
     public float duplicateOffset = 2f;
     public float msBetweenTransformUpdates = 2000;
-    public float distanceLimitToSelectObjects = 50;
-
 
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
