@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
+using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -49,7 +49,7 @@ namespace DCL.ABConverter
 
             private float startTime;
             private int totalAssets;
-            private int skippedAssets;
+            public int skippedAssets;
 
             private Environment env;
             private static Logger log = new Logger("ABConverter.Core");
@@ -142,20 +142,17 @@ namespace DCL.ABConverter
 
                                 state.lastErrorCode = ErrorCodes.SUCCESS;
                                 state.step = State.Step.FINISHED;
-                                OnFinish?.Invoke(state.lastErrorCode);
                             }
                             else
                             {
                                 state.lastErrorCode = ErrorCodes.ASSET_BUNDLE_BUILD_FAIL;
                                 state.step = State.Step.FINISHED;
-                                OnFinish?.Invoke(state.lastErrorCode);
                             }
                         }
                         else
                         {
                             state.lastErrorCode = ErrorCodes.SUCCESS;
                             state.step = State.Step.FINISHED;
-                            OnFinish?.Invoke(state.lastErrorCode);
                         }
                     }
                     catch (Exception e)
@@ -163,10 +160,11 @@ namespace DCL.ABConverter
                         log.Error(e.Message + "\n" + e.StackTrace);
                         state.lastErrorCode = ErrorCodes.UNDEFINED;
                         state.step = State.Step.FINISHED;
-                        OnFinish?.Invoke(state.lastErrorCode);
                         EditorApplication.update -= UpdateLoop;
                     }
                 }
+
+                EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(core: this, env: env, OnFinish: OnFinish));
 
                 EditorApplication.update += UpdateLoop;
             }
@@ -534,7 +532,7 @@ namespace DCL.ABConverter
             private void CleanAndExit(ErrorCodes errorCode)
             {
                 float conversionTime = Time.realtimeSinceStartup - startTime;
-                logBuffer = $"Conversion finished!. error code = {errorCode}";
+                logBuffer = $"Conversion finished!. last error code = {errorCode}";
 
                 logBuffer += "\n";
                 logBuffer += $"Converted {totalAssets - skippedAssets} of {totalAssets}. (Skipped {skippedAssets})\n";

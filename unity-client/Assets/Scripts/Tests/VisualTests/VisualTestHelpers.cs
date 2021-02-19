@@ -27,7 +27,7 @@ namespace DCL.Helpers
         /// <summary>
         /// This coroutine will take a visual test snapshot positioning the camera from shotPosition and pointing at shotTarget.
         /// Used in tandem with GenerateBaselineForTest(), TakeSnapshot will also generate the baseline test images.
-        /// 
+        ///
         /// Snapshot name will be generated dinamically using the name set in InitVisualTestsScene() and an static counter.
         /// </summary>
         /// <param name="shotPosition">camera will be placed here.</param>
@@ -76,7 +76,7 @@ namespace DCL.Helpers
             TestSnapshot(baselineImagesPath + snapshotName, testImagesPath + snapshotName, TestSettings.VISUAL_TESTS_APPROVED_AFFINITY);
         }
 
-        public static bool TestSnapshot(string baselineImagePathWithFilename, string testImagePathWithFilename, float ratio)
+        public static bool TestSnapshot(string baselineImagePathWithFilename, string testImagePathWithFilename, float ratio, bool assert = true)
         {
             if (generateBaseline || !File.Exists(baselineImagePathWithFilename))
                 return false;
@@ -84,8 +84,11 @@ namespace DCL.Helpers
             float ratioResult =
                 ComputeImageAffinityPercentage(baselineImagePathWithFilename, testImagePathWithFilename);
 
-            Assert.IsTrue(ratioResult > ratio,
-                $"{Path.GetFileName(baselineImagePathWithFilename)} has {ratioResult}% affinity, the minimum is {ratio}%. A diff image has been generated. Check it out at {testImagesPath}");
+            if (assert)
+            {
+                Assert.IsTrue(ratioResult > ratio,
+            $"{Path.GetFileName(baselineImagePathWithFilename)} has {ratioResult}% affinity, the minimum is {ratio}%. A diff image has been generated. Check it out at {testImagesPath}");
+            }
 
             return ratioResult > ratio;
         }

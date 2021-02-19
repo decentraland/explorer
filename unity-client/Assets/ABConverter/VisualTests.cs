@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using DCL.Helpers;
+using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Networking;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace DCL.ABConverter
 {
@@ -15,9 +18,8 @@ namespace DCL.ABConverter
         static readonly string baselinePath = VisualTestHelpers.baselineImagesPath;
         static readonly string testImagesPath = VisualTestHelpers.testImagesPath;
 
-        public static IEnumerator TestConvertedAssets(Core core = null, Environment env = null)
+        public static IEnumerator TestConvertedAssets(Core core = null, Environment env = null, Action<Core.ErrorCodes> OnFinish = null)
         {
-            Debug.Log("AB Visual Test - 1 - ");
             EditorSceneManager.OpenScene($"Assets/ABConverter/VisualTestScene.unity", OpenSceneMode.Single);
 
             VisualTestHelpers.baselineImagesPath += "ABConverter/";
@@ -40,11 +42,8 @@ namespace DCL.ABConverter
             }
 
             VisualTestHelpers.generateBaseline = false;
-            Debug.Log("AB Visual Test - 2");
 
             var abs = LoadAndInstantiateAllAssetBundles();
-
-            Debug.Log("AB Visual Test - 3");
 
             foreach (GameObject go in abs)
             {
@@ -66,10 +65,9 @@ namespace DCL.ABConverter
                     result = VisualTestHelpers.TestSnapshot(
                         VisualTestHelpers.baselineImagesPath + testName,
                         VisualTestHelpers.testImagesPath + testName,
-                        95);
+                        95,
+                        false);
                 // }
-
-                Debug.Log("AB Visual Test - 4 -  " + (result ? "succeeded" : "failed") + " for " + go.name);
 
                 // Delete failed AB files to avoid uploading them
                 if (!result && env != null)
@@ -83,6 +81,9 @@ namespace DCL.ABConverter
                         env.file.Delete(depMapPath);
                     }
 
+                    if (core != null)
+                        core.skippedAssets++;
+
                     // TODO: Notify some metrics API or something to let know that this asset has conversion problems and we should manually take a look
                     Debug.Log("Visual Test Detection: FAILED converting asset -> " + go.name);
                 }
@@ -92,12 +93,14 @@ namespace DCL.ABConverter
 
             VisualTestHelpers.baselineImagesPath = baselinePath;
             VisualTestHelpers.testImagesPath = testImagesPath;
+
+            OnFinish?.Invoke ((core != null) ? core.state.lastErrorCode : Core.ErrorCodes.UNDEFINED);
             yield break;
         }
 
-        public static GameObject[] LoadAndInstantiateAllGltfAssets(string targetAssetHash = "")
+        public static GameObject[] LoadAndInstantiateAllGltfAssets()
         {
-            var assets = AssetDatabase.FindAssets($"t:GameObject {targetAssetHash}", new[] {"Assets/_Downloaded"});
+            var assets = AssetDatabase.FindAssets($"t:GameObject", new[] {"Assets/_Downloaded"});
 
             List<GameObject> importedGLTFs = new List<GameObject>();
 
@@ -112,7 +115,7 @@ namespace DCL.ABConverter
             return importedGLTFs.ToArray();
         }
 
-        public static GameObject[] LoadAndInstantiateAllAssetBundles(string targetAssetHash = "")
+        public static GameObject[] LoadAndInstantiateAllAssetBundles()
         {
             Caching.ClearCache();
 
@@ -128,7 +131,7 @@ namespace DCL.ABConverter
                 var hash = new DirectoryInfo(paths).Name;
                 var path = "Assets/" + workingFolderName + "/" + hash;
                 // var guids = AssetDatabase.FindAssets("t:GameObject", new[] {path});
-                var guids = AssetDatabase.FindAssets($"t:GameObject {targetAssetHash}", new[] {path});
+                var guids = AssetDatabase.FindAssets("t:GameObject", new[] {path});
 
                 // NOTE(Brian): If no gameObjects are found, we assume they are dependency assets (textures, etc).
                 if (guids.Length == 0)
@@ -161,7 +164,7 @@ namespace DCL.ABConverter
 
                 if (req.isHttpError || req.isNetworkError)
                 {
-                    Debug.Log("Failed to instantiate AB, missing source file for visual testing : " + hash);
+                    Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
                     continue;
                 }
 
@@ -188,7 +191,7 @@ namespace DCL.ABConverter
 
                 if (req.isHttpError || req.isNetworkError)
                 {
-                    Debug.Log("Failed to instantiate AB, missing source file for visual testing : " + hash);
+                    Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
                     continue;
                 }
 
