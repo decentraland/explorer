@@ -131,7 +131,6 @@ export type LoadableParcelScene = {
   land?: ILand
 }
 
-// TODO: review this works in unity global scene
 /** THIS INTERFACE CANNOT CHANGE, IT IS USED IN THE UNITY BUILD */
 export type LoadablePortableExperienceScene = {
   id: string
@@ -260,10 +259,6 @@ export interface ILand {
 }
 
 export interface IPortableExperience {
-  /**
-   * sceneId: Now it is either an internal identifier or the rootCID.
-   * In the future will change to the sceneCID
-   */
   cid: string
   baseUrl: string
   baseUrlBundles: string

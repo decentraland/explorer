@@ -13,6 +13,7 @@ import { unityInterface } from './UnityInterface'
 import { resolveUrlFromUrn } from '@dcl/urn-resolver'
 
 declare var window: any
+// TODO: Remove this when portable experiences are full-available
 window['spawnPortableExperienceScene'] = spawnPortableExperienceScene
 window['killPortableExperienceScene'] = killPortableExperienceScene
 
@@ -59,11 +60,8 @@ export async function killPortableExperienceScene(sceneUrn: string): Promise<boo
 }
 
 export async function getPortableExperience(pid: string): Promise<PortableExperienceHandle | undefined> {
-  if (currentPortableExperiences.has(pid)) {
-    return { pid: pid, parentCid: currentPortableExperiences.get(pid)! }
-  } else {
-    return undefined
-  }
+  const parentCid = currentPortableExperiences.get(pid)
+  return parentCid ? { pid, parentCid } : undefined
 }
 
 export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {

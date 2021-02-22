@@ -141,13 +141,13 @@ export async function startGlobalScene(
   unityInterface: UnityInterface,
   cid: string,
   title: string,
-  fileContent: string
+  fileContentUrl: string
 ) {
   const scene = new UnityScene({
     sceneId: cid,
     name: title,
     baseUrl: location.origin,
-    main: fileContent,
+    main: fileContentUrl,
     useFPSThrottling: false,
     data: {},
     mappings: []

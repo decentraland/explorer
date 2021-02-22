@@ -8,27 +8,20 @@ import {
 import { ExposableAPI } from './ExposableAPI'
 import { ParcelIdentity } from './ParcelIdentity'
 
-type SpawnPortableExperienceParameters = {
-  urn: string
-}
+type PortableExperienceUrn = string
 
 @registerAPI('PortableExperiences')
 export class PortableExperiences extends ExposableAPI {
   /**
    * Starts a portable experience.
-   * @param  {SpawnPortableExperienceParameters} [spawnParams] - Information to identify the PE
+   * @param  {SpawnPortableExperienceParameters} [pid] - Information to identify the PE
    *
    * Returns the handle of the portable experience.
    */
   @exposeMethod
-  async spawn(spawnParams: SpawnPortableExperienceParameters): Promise<PortableExperienceHandle> {
+  async spawn(pid: PortableExperienceUrn): Promise<PortableExperienceHandle> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
-    const portableExperience: PortableExperienceHandle = await spawnPortableExperienceScene(
-      spawnParams.urn,
-      parcelIdentity.cid
-    )
-
-    return portableExperience
+    return await spawnPortableExperienceScene(pid, parcelIdentity.cid)
   }
 
   /**
@@ -38,13 +31,12 @@ export class PortableExperiences extends ExposableAPI {
    * Returns true if was able to kill the portable experience, false if not.
    */
   @exposeMethod
-  async kill(pid: string): Promise<boolean> {
+  async kill(pid: PortableExperienceUrn): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
     const portableExperience: PortableExperienceHandle | undefined = await getPortableExperience(pid)
 
     if (!!portableExperience && portableExperience.parentCid == parcelIdentity.cid) {
-      await killPortableExperienceScene(pid)
-      return true
+      return await killPortableExperienceScene(pid)
     }
     return false
   }
@@ -58,7 +50,6 @@ export class PortableExperiences extends ExposableAPI {
   async exit(): Promise<boolean> {
     const parcelIdentity: ParcelIdentity = this.options.getAPIInstance(ParcelIdentity)
 
-    await killPortableExperienceScene(parcelIdentity.cid)
-    return true
+    return await killPortableExperienceScene(parcelIdentity.cid)
   }
 }
