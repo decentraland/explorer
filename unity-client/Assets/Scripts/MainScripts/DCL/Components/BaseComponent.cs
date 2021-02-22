@@ -12,10 +12,19 @@ namespace DCL.Components
         Coroutine routine { get; }
         string componentName { get; }
         void UpdateFromJSON(string json);
-        IEnumerator ApplyChanges(string newJson);
+        void UpdateFromObject(BaseModel model);
+        IEnumerator ApplyChanges(BaseModel model);
         void RaiseOnAppliedChanges();
         ComponentUpdateHandler CreateUpdateHandler();
         bool IsValid();
+        BaseModel GetModel();
+        void SetModel(BaseModel model);
+        int GetClassId();
+    }
+
+    public abstract class BaseModel
+    {
+        public abstract BaseModel GetModelFromJSON(string json);
     }
 
     /// <summary>
@@ -59,27 +68,39 @@ namespace DCL.Components
 
         public string componentName => "BaseComponent";
 
+        protected BaseModel model;
+
         public void RaiseOnAppliedChanges()
         {
         }
 
         public void UpdateFromJSON(string json)
         {
-            updateHandler.ApplyChangesIfModified(json);
+            UpdateFromObject(model.GetModelFromJSON(json));
         }
+
+        public void UpdateFromObject(BaseModel model)
+        {
+            updateHandler.ApplyChangesIfModified(model);
+        }
+
+        public abstract IEnumerator ApplyChanges(BaseModel model);
 
         void OnEnable()
         {
             if (updateHandler == null)
                 updateHandler = CreateUpdateHandler();
 
-            updateHandler.ApplyChangesIfModified(updateHandler.oldSerialization ?? "{}");
+            updateHandler.ApplyChangesIfModified(model);
         }
 
-        public abstract object GetModel();
-        public abstract void SetModel(object model);
+        public BaseModel GetModel() => model;
 
-        public abstract IEnumerator ApplyChanges(string newJson);
+        public void SetModel(BaseModel newModel)
+        {
+            model = newModel;
+            UpdateFromObject(model);
+        }
 
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {
@@ -106,5 +127,7 @@ namespace DCL.Components
             if (updateHandler == null)
                 updateHandler = CreateUpdateHandler();
         }
+
+        public abstract int GetClassId();
     }
 }

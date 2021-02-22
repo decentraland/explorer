@@ -13,7 +13,6 @@ namespace DCL.Components
 
         public abstract int GetClassId();
 
-
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public Coroutine routine => updateHandler.routine;
@@ -23,15 +22,19 @@ namespace DCL.Components
         public event System.Action<DecentralandEntity> OnDetach;
         public event Action<BaseDisposable> OnAppliedChanges;
 
-        private string oldSerialization = null;
-
         public DCL.Controllers.ParcelScene scene { get; }
         public HashSet<DecentralandEntity> attachedEntities = new HashSet<DecentralandEntity>();
 
+        protected BaseModel model;
 
         public void UpdateFromJSON(string json)
         {
-            updateHandler.ApplyChangesIfModified(json);
+            UpdateFromObject(model.GetModelFromJSON(json));
+        }
+
+        public void UpdateFromObject(BaseModel model)
+        {
+            updateHandler.ApplyChangesIfModified(model);
         }
 
         public BaseDisposable(DCL.Controllers.ParcelScene scene)
@@ -44,7 +47,6 @@ namespace DCL.Components
         {
             OnAppliedChanges?.Invoke(this);
         }
-
 
         public virtual void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)
         {
@@ -99,9 +101,9 @@ namespace DCL.Components
             DetachFromEveryEntity();
         }
 
-        public abstract object GetModel();
+        public BaseModel GetModel() => model;
 
-        public abstract IEnumerator ApplyChanges(string newJson);
+        public abstract IEnumerator ApplyChanges(BaseModel model);
 
         public MonoBehaviour GetCoroutineOwner()
         {
@@ -130,6 +132,12 @@ namespace DCL.Components
         {
             //By default there's no initialization process and we call back as soon as we get the suscription
             callback.Invoke(this);
+        }
+
+        public void SetModel(BaseModel newModel)
+        {
+            model = newModel;
+            UpdateFromObject(model);
         }
     }
 }

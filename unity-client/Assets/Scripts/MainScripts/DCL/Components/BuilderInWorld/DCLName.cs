@@ -14,72 +14,73 @@ using UnityEngine;
 public class DCLName : BaseDisposable
 {
     [System.Serializable]
-    public class Model
+    public class Model : BaseModel
     {
         public string value;
-    }
 
-    public Model model;
+        public override bool Equals(object obj)
+        {
+            var item = obj as Model;
+
+            if (item == null)
+            {
+                return false;
+            }
+
+            return value.Equals(item.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override BaseModel GetModelFromJSON(string json)
+        {
+            return JsonUtility.FromJson<Model>(json);
+        }
+    }
 
     public DCLName(ParcelScene scene) : base(scene)
     {
         model = new Model();
     }
 
+    private string oldName;
+
     public override int GetClassId()
     {
-        return (int)CLASS_ID.NAME;
+        return (int) CLASS_ID.NAME;
     }
 
-    public override object GetModel()
+    public override IEnumerator ApplyChanges(BaseModel newModel)
     {
-        return model;
+        Model modelToApply = (Model)newModel;
+
+        model = modelToApply;
+
+        foreach (DecentralandEntity entity in attachedEntities)
+        {
+            entity.OnNameChange?.Invoke(modelToApply);
+        }
+
+#if UNITY_EDITOR
+        foreach (DecentralandEntity decentralandEntity in this.attachedEntities)
+        {
+            if (string.IsNullOrEmpty(oldName))
+                decentralandEntity.gameObject.name.Replace(oldName, "");
+
+            decentralandEntity.gameObject.name += $"-{modelToApply.value}";
+        }
+#endif
+        oldName = modelToApply.value;
+        return null;
     }
 
     public void SetNewName(string value)
     {
         Model newModel = new Model();
         newModel.value = value;
-
-        UpdateFromJSON(JsonUtility.ToJson(newModel));
-    }
-
-    public void ForceSetNewName(string value)
-    {
-        Model newModel = new Model();
-        newModel.value = value;
-
-        ApplyNewValue(JsonUtility.ToJson(newModel));
-    }
-
-    public override IEnumerator ApplyChanges(string newJson)
-    {
-        ApplyNewValue(newJson);
-        yield break;
-    }
-
-    void ApplyNewValue(string newJson)
-    {
-        Model newModel = Utils.SafeFromJson<Model>(newJson);
-        if (newModel.value != model.value)
-        {
-            string oldValue = model.value;
-            model = newModel;
-
-            foreach (DecentralandEntity entity in attachedEntities)
-            {
-                entity.OnNameChange?.Invoke(newModel);
-            }
-
-#if UNITY_EDITOR
-            foreach (DecentralandEntity decentralandEntity in this.attachedEntities)
-            {
-                if (oldValue != null)
-                    decentralandEntity.gameObject.name.Replace(oldValue, "");
-
-                decentralandEntity.gameObject.name += $"-{model.value}"; 
-            }
-#endif
-        }
+        SetModel(newModel);
     }
 }

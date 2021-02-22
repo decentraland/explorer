@@ -264,12 +264,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent))
         {
-           ((DCLName) nameComponent).ForceSetNewName(newName);
+           ((DCLName) nameComponent).SetNewName(newName);
         }
         else
         {
             DCLName name = (DCLName) rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
-            name.ForceSetNewName(newName);
+            name.SetNewName(newName);
             rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
         onStatusUpdate?.Invoke(this);
