@@ -44,8 +44,8 @@ internal class SectionsController : IDisposable
         this.sectionsParent = sectionsParent;
         this.sectionFactory = sectionFactory;
 
-        SectionBase.OnRequestOpenSection += (sectionId) => OnRequestOpenSection?.Invoke(sectionId);
-        SectionBase.OnRequestContextMenuHide += ()=> OnRequestContextMenuHide?.Invoke();
+        SectionBase.OnRequestOpenSection += OnOpenSectionRequested;
+        SectionBase.OnRequestContextMenuHide += OnHideContextMenuRequested;
     }
 
     /// <summary>
@@ -104,6 +104,9 @@ internal class SectionsController : IDisposable
 
     public void Dispose()
     {
+        SectionBase.OnRequestOpenSection -= OnOpenSectionRequested;
+        SectionBase.OnRequestContextMenuHide -= OnHideContextMenuRequested;
+
         using (var iterator = loadedSections.GetEnumerator())
         {
             while (iterator.MoveNext())
@@ -113,5 +116,15 @@ internal class SectionsController : IDisposable
         }
 
         loadedSections.Clear();
+    }
+
+    private void OnOpenSectionRequested(SectionId sectionId)
+    {
+        OnRequestOpenSection?.Invoke(sectionId);
+    }
+
+    private void OnHideContextMenuRequested()
+    {
+        OnRequestContextMenuHide?.Invoke();
     }
 }
