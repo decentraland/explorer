@@ -42,7 +42,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     [Header("UI Modules")]
     public TooltipView tooltipView;
-    private ToolTipController tooltipController;
+    private ITooltipController tooltipController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -53,10 +53,10 @@ public class BuildModeHUDView : MonoBehaviour
     public event Action OnLogoutAction;
     public event Action OnCatalogItemDrop;
 
-    public void Initialize(ToolTipController tooltipController)
+    public void Initialize(ITooltipController tooltipController)
     {
         this.tooltipController = tooltipController;
-        tooltipView.Initialize(this.tooltipController);
+        this.tooltipController.Initialize(tooltipView);
     }
 
     private void Awake()

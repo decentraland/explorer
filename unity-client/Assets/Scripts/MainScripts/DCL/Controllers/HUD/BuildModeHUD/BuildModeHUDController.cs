@@ -51,7 +51,7 @@ public class BuildModeHUDController : IHUD
 
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
-        view.Initialize(new ToolTipController());
+        view.Initialize(new TooltipController());
 
         catalogItemDropController = new CatalogItemDropController();
 
