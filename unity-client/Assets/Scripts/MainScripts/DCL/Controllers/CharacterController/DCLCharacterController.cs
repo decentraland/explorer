@@ -102,9 +102,9 @@ public class DCLCharacterController : MonoBehaviour
     [System.NonSerialized]
     public float movingPlatformSpeed;
 
-    [HideInInspector] public System.Action OnJump;
-    [HideInInspector] public System.Action OnHitGround;
-    [HideInInspector] public System.Action<float> OnMoved;
+    public event System.Action OnJump;
+    public event System.Action OnHitGround;
+    public event System.Action<float> OnMoved;
 
     void Awake()
     {
@@ -209,7 +209,7 @@ public class DCLCharacterController : MonoBehaviour
             OnCharacterMoved?.Invoke(characterPosition);
 
             float distance = Vector3.Distance(characterPosition.worldPosition, lastPosition);
-            if (distance != 0f && isGrounded)
+            if (distance > 0f && isGrounded)
                 OnMoved?.Invoke(distance / Time.deltaTime);
         }
 

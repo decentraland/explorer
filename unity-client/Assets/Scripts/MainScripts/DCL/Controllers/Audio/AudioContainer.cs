@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Audio;
 using ReorderableList;
+using System.Collections.Generic;
 
 public class AudioContainer : MonoBehaviour
 {
@@ -55,7 +56,7 @@ public class AudioContainer : MonoBehaviour
                 return audioEvents[i];
         }
 
-        Debug.Log(name + "'s AudioContainer couldn't find an event called " + eventName);
+        Debug.Log($"{name}'s AudioContainer couldn't find an event called {eventName}");
         return null;
     }
 }
