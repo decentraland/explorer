@@ -49,7 +49,7 @@ export class EthConnector {
       return this.result
     }
 
-    this.result = await connection.connect(type as any, this.getChainId())
+    this.result = await connection.connect(type, this.getChainId())
     return this.result
   }
 

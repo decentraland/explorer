@@ -63,7 +63,7 @@ import {
   UPDATE_TOS,
   updateTOS,
   userAuthentified,
-  authenticate as authenticateAction,
+  authenticate as authenticateAction
 } from './actions'
 import Html from '../Html'
 import { fetchProfileLocally, doesProfileExist } from '../profiles/sagas'
@@ -125,7 +125,6 @@ function* initSession() {
 
   yield put(changeLoginStage(LoginStage.SIGN_IN))
 
-
   if (ENABLE_WEB3) {
     const connecetor = getEthConnector()
     if (connecetor.isConnected()) {
@@ -151,7 +150,13 @@ function* checkPreviousSession() {
       yield put(signInSetCurrentProvider(identity.provider))
     }
   } else {
-    connecetor.disconnect()
+
+    try {
+      yield call(() => connecetor.disconnect())
+    } catch (e) {
+      logger.error(e)
+    }
+
     removeStoredSession(session?.userId)
   }
 }
