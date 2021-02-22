@@ -1,5 +1,5 @@
 import React from "react";
-
+import { ProviderType } from "decentraland-connect/dist/types"
 import { Meta, Story } from "@storybook/react";
 import { EthLogin, EthLoginProps } from "./EthLogin";
 
@@ -37,5 +37,5 @@ export const LoginPreviousSession = Template.bind({});
 LoginPreviousSession.args = {
   ...Template.args,
   loading: false,
-  provider: "Metamask",
+  provider: ProviderType.INJECTED,
 };

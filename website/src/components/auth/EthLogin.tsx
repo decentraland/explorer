@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ProviderType } from "decentraland-connect/dist/types"
 import { WalletSelector } from "./wallet/WalletSelector";
 import { LoginHeader } from "./LoginHeader";
 import { Spinner } from "../common/Spinner";
@@ -7,10 +8,10 @@ import "./EthLogin.css";
 
 export interface EthLoginProps {
   loading: boolean;
-  provider: string | null | undefined;
+  provider: ProviderType | null | undefined;
   showWallet?: boolean;
   hasWallet?: boolean;
-  onLogin: (provider: string) => void;
+  onLogin: (provider: ProviderType | null) => void;
   onGuest: () => void;
 }
 
@@ -19,7 +20,7 @@ export const EthLogin: React.FC<EthLoginProps> = (props) => {
   const isLoading = props.loading || showWallet;
 
   function handlePlay() {
-    if (props.provider) {
+    if (props.provider !== undefined) {
       return props.onLogin(props.provider);
     }
     setShowWallet(true);

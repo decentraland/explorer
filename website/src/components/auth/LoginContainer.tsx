@@ -1,15 +1,15 @@
 import React from "react";
+import { connect } from "react-redux";
+import { ProviderType } from "decentraland-connect/dist/types"
 import { Navbar } from "../common/Navbar";
 import { EthLogin } from "./EthLogin";
 import { EthConnectAdvice } from "./EthConnectAdvice";
 import { EthSignAdvice } from "./EthSignAdvice";
-import { connect } from "react-redux";
 import SignUpContainer from "./SignUpContainer";
 import { Container } from "../common/Container";
 import { BeginnersGuide } from "./BeginnersGuide";
 import { BigFooter } from "../common/BigFooter";
 import "./LoginContainer.css";
-import { AuthType } from "../../utils";
 
 declare var window: Window & {
   ethereum: any;
@@ -37,10 +37,10 @@ const mapStateToProps = (state: any) => {
 };
 
 const mapDispatchToProps = (dispatch: any) => ({
-  onLogin: (provider: string) =>
+  onLogin: (provider: ProviderType | null) =>
     dispatch({ type: "[Authenticate]", payload: { provider } }),
   onGuest: () =>
-    dispatch({ type: "[Authenticate]", payload: { provider: AuthType.GUEST } }),
+    dispatch({ type: "[Authenticate]", payload: { provider: null } }),
 });
 
 export interface LoginContainerProps {
@@ -50,7 +50,7 @@ export interface LoginContainerProps {
   provider?: string | null;
   showWallet?: boolean;
   hasWallet?: boolean;
-  onLogin: (provider: string) => void;
+  onLogin: (provider: ProviderType | null) => void;
   onGuest: () => void;
 }
 
@@ -60,10 +60,10 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const shouldShow =
     LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar";
   const provider = props.hasWallet
-    ? AuthType.INJECTED
-    : props.provider === AuthType.FORTMATIC
-    ? props.provider
-    : null;
+    ? ProviderType.INJECTED
+    : props.provider === ProviderType.FORTMATIC
+      ? props.provider
+      : null;
   return (
     <React.Fragment>
       {shouldShow && (

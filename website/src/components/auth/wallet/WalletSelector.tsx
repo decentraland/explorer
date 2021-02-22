@@ -1,5 +1,5 @@
 import React from "react";
-import { AuthType } from "../../../utils";
+import { ProviderType } from "decentraland-connect";
 import { Modal } from "../../common/Modal";
 import { WalletButton, WalletButtonLogo } from "./WalletButton";
 import { Spinner } from "../../common/Spinner";
@@ -9,7 +9,7 @@ export interface WalletSelectorProps {
   show: boolean;
   loading: boolean;
   hasWallet: boolean;
-  onClick: (provider: string) => void;
+  onClick: (provider: ProviderType | null) => void;
   onCancel: () => void;
 }
 
@@ -20,8 +20,8 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
   onClick,
   onCancel,
 }) => {
-  function handleClick(_: React.MouseEvent, provider: AuthType) {
-    if (provider === AuthType.INJECTED && !hasWallet) {
+  function handleClick(_: React.MouseEvent, provider: ProviderType) {
+    if (provider === ProviderType.INJECTED && !hasWallet) {
       return;
     }
     if (onClick) {

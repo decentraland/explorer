@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { AuthType } from "../../../utils";
+import { ProviderType } from "decentraland-connect";
 import MetamaskLogo from "../../../images/login/metamask.svg";
 import FortmaticLogo from "../../../images/login/fortmatic.svg";
 import "./WalletButton.css";
@@ -15,7 +15,7 @@ export interface WalletButtonProps {
   href?: string;
   onClick: (
     event: React.MouseEvent<HTMLAnchorElement>,
-    authType: AuthType
+    providerType: ProviderType
   ) => void;
 }
 
@@ -26,7 +26,7 @@ export const WalletButton: React.FC<WalletButtonProps> = ({
   onClick,
 }) => {
   const provider =
-    logo === WalletButtonLogo.METAMASK ? AuthType.INJECTED : AuthType.FORTMATIC;
+    logo === WalletButtonLogo.METAMASK ? ProviderType.INJECTED : ProviderType.FORTMATIC;
   const src = useMemo(() => {
     switch (logo) {
       case "Fortmatic":
