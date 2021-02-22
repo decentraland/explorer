@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AvatarAudioHandlerLocal : MonoBehaviour
 {
+    const float WALK_RUN_CROSSOVER_DISTANCE = 7.3f;
     const float WALK_INTERVAL_SEC = 0.4f;
     const float RUN_INTERVAL_SEC = 0.27f;
 
@@ -63,7 +64,7 @@ public class AvatarAudioHandlerLocal : MonoBehaviour
 
         if (intervalTimer < 0f)
         {
-            if (distance > 7.3f)
+            if (distance > WALK_RUN_CROSSOVER_DISTANCE)
             {
                 if (footstepRun != null)
                     footstepRun.Play(true);
