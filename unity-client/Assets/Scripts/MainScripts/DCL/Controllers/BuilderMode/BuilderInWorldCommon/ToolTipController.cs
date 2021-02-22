@@ -1,57 +1,65 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ToolTipController : MonoBehaviour
+public interface IToolTipController
 {
-    public float alphaSpeed = 3f;
-    public RectTransform tooltipRT;
-    public CanvasGroup tooltipCG;
-    public TextMeshProUGUI tooltipTxt;
+    void Initialize(float alphaSpeed, RectTransform tooltipRT, CanvasGroup tooltipCG, TextMeshProUGUI tooltipTxt);
+    void SetTooltipText(string text);
+    void ShowTooltip(BaseEventData data);
+    void HideTooltip();
+    void KillTooltipCoroutine();
+}
 
-    Coroutine changeAlphaCoroutine;
+public class ToolTipController : IToolTipController
+{
+    private float alphaSpeed = 3f;
+    private RectTransform tooltipRT;
+    private CanvasGroup tooltipCG;
+    private TextMeshProUGUI tooltipTxt;
+    private Coroutine changeAlphaCoroutine;
 
-
-    private void OnDestroy()
+    public void Initialize(float alphaSpeed, RectTransform tooltipRT, CanvasGroup tooltipCG, TextMeshProUGUI tooltipTxt)
     {
-        if (changeAlphaCoroutine != null)
-            CoroutineStarter.Stop(changeAlphaCoroutine);
+        this.alphaSpeed = alphaSpeed;
+        this.tooltipRT = tooltipRT;
+        this.tooltipCG = tooltipCG;
+        this.tooltipTxt = tooltipTxt;
     }
 
-
-    public void Stop()
-    {
-        if (changeAlphaCoroutine != null)
-            CoroutineStarter.Stop(changeAlphaCoroutine);
-        changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(1, 0));
-    }
-
-    public void OnHoverEnter(BaseEventData data)
-    {
-        if (!(data is PointerEventData dataConverted))
-            return;
-        RectTransform selectedRT = dataConverted.pointerEnter.GetComponent<RectTransform>();
-        
-        tooltipRT.position = selectedRT.position-Vector3.up*selectedRT.rect.height;
-        if (changeAlphaCoroutine != null)
-            CoroutineStarter.Stop(changeAlphaCoroutine);
-        changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(0, 1));
-
-    }
-
-    public void SetText(string text)
+    public void SetTooltipText(string text)
     {
         tooltipTxt.text = text;
     }
 
-    public void OnHoverExit()
+    public void ShowTooltip(BaseEventData data)
     {
-        Stop();
+        if (!(data is PointerEventData dataConverted))
+            return;
+
+        RectTransform selectedRT = dataConverted.pointerEnter.GetComponent<RectTransform>();
+        tooltipRT.position = selectedRT.position - Vector3.up * selectedRT.rect.height;
+
+        KillTooltipCoroutine();
+
+        changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(0, 1));
+
     }
 
-    IEnumerator ChangeAlpha(float from, float to)
+    public void HideTooltip()
+    {
+        KillTooltipCoroutine();
+        changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(1, 0));
+    }
+
+    public void KillTooltipCoroutine()
+    {
+        if (changeAlphaCoroutine != null)
+            CoroutineStarter.Stop(changeAlphaCoroutine);
+    }
+
+    private IEnumerator ChangeAlpha(float from, float to)
     {
         tooltipCG.alpha = from;
 

@@ -1,9 +1,7 @@
-using System.Collections;
+using DCL.Controllers;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using DCL.Helpers;
-using System;
-using DCL.Controllers;
 
 public class BuildModeHUDController : IHUD
 {
@@ -53,6 +51,7 @@ public class BuildModeHUDController : IHUD
 
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
+        view.Initialize(new ToolTipController());
 
         catalogItemDropController = new CatalogItemDropController();
 

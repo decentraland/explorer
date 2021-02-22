@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +9,6 @@ public class BuildModeHUDView : MonoBehaviour
     public SceneLimitInfoController sceneLimitInfoController;
     public SceneObjectCatalogController sceneObjectCatalogController;
     public EntityInformationController entityInformationController;
-    public ToolTipController toolTipController;
     public QuickBarView quickBarView;
     public BuilderInWorldEntityListController entityListController;
     public CatalogGroupListView catalogGroupListView;
@@ -43,6 +40,9 @@ public class BuildModeHUDView : MonoBehaviour
     [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
     [SerializeField] internal InputAction_Trigger toggleCatalogInputAction;
 
+    [Header("UI Modules")]
+    public TooltipView tooltipView;
+    private ToolTipController tooltipController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -52,6 +52,12 @@ public class BuildModeHUDView : MonoBehaviour
     public event Action OnStopInput, OnResumeInput,OnTutorialAction,OnPublishAction;
     public event Action OnLogoutAction;
     public event Action OnCatalogItemDrop;
+
+    public void Initialize(ToolTipController tooltipController)
+    {
+        this.tooltipController = tooltipController;
+        tooltipView.Initialize(this.tooltipController);
+    }
 
     private void Awake()
     {
@@ -208,7 +214,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void HideToolTip()
     {
-        toolTipController.Stop();
+        tooltipController.HideTooltip();
     }
 
     #region Triggers
