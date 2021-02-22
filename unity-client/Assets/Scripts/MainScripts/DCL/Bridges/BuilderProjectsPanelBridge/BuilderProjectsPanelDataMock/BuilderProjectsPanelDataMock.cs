@@ -29,13 +29,18 @@ public class BuilderProjectsPanelDataMock
             return;
         }
 
+        int dupliCount = 1;
         string newId = project.id + project.id.Substring(project.id.Length - 1);
-        while(projects.ContainsKey(newId))
+        while (projects.ContainsKey(newId))
+        {
             newId += newId.Substring(newId.Length - 1);
+            dupliCount++;
+        }
 
         var newProject = project;
         newProject.id = newId;
         newProject.isDeployed = false;
+        newProject.name = $"{project.name}({dupliCount})";
         projects.Add(newId, newProject);
 
         SendFetchProjects();
