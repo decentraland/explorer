@@ -14,6 +14,7 @@ internal interface ISceneData
     bool isDeployed { get; }
 }
 
+[Serializable]
 internal class SceneData : ISceneData
 {
     public Vector2Int coords;

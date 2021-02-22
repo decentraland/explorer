@@ -36,7 +36,7 @@ internal class ScenesViewController : IDisposable
     /// Set current user scenes (deployed and projects)
     /// </summary>
     /// <param name="scenesData">list of scenes</param>
-    public void SetScenes(List<ISceneData> scenesData)
+    public void SetScenes(ISceneData[] scenesData)
     {
         scenesRefreshHelper.Set(deployedScenes, projectScenes);
 
@@ -44,7 +44,7 @@ internal class ScenesViewController : IDisposable
         projectScenes = new Dictionary<string, SceneCardView>();
 
         // update or create new scenes view
-        for (int i = 0; i < scenesData.Count; i++)
+        for (int i = 0; i < scenesData.Length; i++)
         {
             SetScene(scenesData[i]);
         }
