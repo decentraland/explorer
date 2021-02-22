@@ -50,7 +50,7 @@ public class TooltipView : MonoBehaviour, ITooltipView
         KillTooltipCoroutine();
     }
 
-    internal IEnumerator ChangeAlpha(float from, float to)
+    private IEnumerator ChangeAlpha(float from, float to)
     {
         tooltipCG.alpha = from;
 
@@ -69,7 +69,7 @@ public class TooltipView : MonoBehaviour, ITooltipView
         changeAlphaCoroutine = null;
     }
 
-    internal void KillTooltipCoroutine()
+    private void KillTooltipCoroutine()
     {
         if (changeAlphaCoroutine != null)
             CoroutineStarter.Stop(changeAlphaCoroutine);
