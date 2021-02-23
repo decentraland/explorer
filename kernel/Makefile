@@ -129,7 +129,7 @@ static/dist/%.js: build-essentials packages/entryPoints/%.ts
 
 # Release
 
-DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/website.js static/dist/0.js static/dist/1.js static/dist/2.js static/dist/3.js
+DIST_ENTRYPOINTS := static/dist/editor.js static/dist/preview.js static/dist/website.js
 DIST_STATIC_FILES := static/export.html static/preview.html static/fonts static/images static/unity static/default-profile/contents
 DIST_PACKAGE_JSON := packages/decentraland-ecs/package.json
 
