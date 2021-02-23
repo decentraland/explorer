@@ -110,7 +110,7 @@ query GetNameByBeneficiary($beneficiary: String) {
 
   try {
     const jsonResponse: GraphResponse = await queryGraph(theGraphBaseUrl, query, variables)
-    return jsonResponse.data.nfts.map((nft) => nft.ens.subdomain)
+    return jsonResponse.nfts.map((nft) => nft.ens.subdomain)
   } catch (e) {
     // do nothing
   }
