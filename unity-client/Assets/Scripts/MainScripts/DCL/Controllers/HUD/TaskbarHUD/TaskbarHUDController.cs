@@ -120,7 +120,7 @@ public class TaskbarHUDController : IHUD
             this.sceneController.OnNewPortableExperienceSceneAdded += SceneController_OnNewPortableExperienceSceneAdded;
             this.sceneController.OnNewPortableExperienceSceneRemoved += SceneController_OnNewPortableExperienceSceneRemoved;
 
-            List<GlobalScene> activePortableExperiences = worldState.GetActivePortableExperienceScenes();
+            List<GlobalScene> activePortableExperiences = WorldStateUtils.GetActivePortableExperienceScenes();
             for (int i = 0; i < activePortableExperiences.Count; i++)
             {
                 SceneController_OnNewPortableExperienceSceneAdded(activePortableExperiences[i]);

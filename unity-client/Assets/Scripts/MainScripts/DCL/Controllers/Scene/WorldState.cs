@@ -17,8 +17,6 @@ namespace DCL
         bool TryGetScene<T>(string id, out T scene) where T : class, IParcelScene;
         IParcelScene GetScene(string id);
         bool Contains(string id);
-        List<GlobalScene> GetActivePortableExperienceScenes();
-        List<string> GetActivePortableExperienceIds();
     }
 
     public class WorldState : IWorldState
@@ -75,6 +73,9 @@ namespace DCL
             if (result)
                 scene = baseScene as T;
 
+            if (scene == null)
+                result = false;
+
             return result;
         }
 
@@ -93,44 +94,6 @@ namespace DCL
             }
 
             return allLoadedParcelCoords;
-        }
-
-        public List<GlobalScene> GetActivePortableExperienceScenes()
-        {
-            List<GlobalScene> activePortableExperienceScenes = new List<GlobalScene>();
-
-            foreach (var globalSceneId in globalSceneIds)
-            {
-                if (loadedScenes.TryGetValue(globalSceneId, out IParcelScene scene))
-                {
-                    GlobalScene peScene = scene as GlobalScene;
-                    if (peScene.isPortableExperience)
-                    {
-                        activePortableExperienceScenes.Add(peScene);
-                    }
-                }
-            }
-
-            return activePortableExperienceScenes;
-        }
-
-        public List<string> GetActivePortableExperienceIds()
-        {
-            List<string> currentSceneAndPortableExperiencesIds = new List<string>();
-
-            foreach (var globalSceneId in globalSceneIds)
-            {
-                if (loadedScenes.TryGetValue(globalSceneId, out IParcelScene scene))
-                {
-                    GlobalScene peScene = scene as GlobalScene;
-                    if (peScene.isPortableExperience)
-                    {
-                        currentSceneAndPortableExperiencesIds.Add(globalSceneId);
-                    }
-                }
-            }
-
-            return currentSceneAndPortableExperiencesIds;
         }
     }
 }

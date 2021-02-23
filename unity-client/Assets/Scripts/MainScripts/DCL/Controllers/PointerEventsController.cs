@@ -297,7 +297,7 @@ namespace DCL
             ReportGlobalPointerUpEvent(buttonId, useRaycast, raycastGlobalLayerHitInfo, raycastInfoGlobalLayer, worldState.currentSceneId);
 
             // Raycast for global pointer events (for each PE scene)
-            List<string> currentPortableExperienceIds = worldState.GetActivePortableExperienceIds();
+            List<string> currentPortableExperienceIds = WorldStateUtils.GetActivePortableExperienceIds();
             for (int i = 0; i < currentPortableExperienceIds.Count; i++)
             {
                 raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[currentPortableExperienceIds[i]]);
@@ -350,7 +350,7 @@ namespace DCL
             ReportGlobalPointerDownEvent(buttonId, useRaycast, raycastGlobalLayerHitInfo, raycastInfoGlobalLayer, worldState.currentSceneId);
 
             // Raycast for global pointer events (for each PE scene)
-            List<string> currentPortableExperienceIds = worldState.GetActivePortableExperienceIds();
+            List<string> currentPortableExperienceIds = WorldStateUtils.GetActivePortableExperienceIds();
             for (int i = 0; i < currentPortableExperienceIds.Count; i++)
             {
                 raycastInfoGlobalLayer = raycastHandler.Raycast(ray, charCamera.farClipPlane, globalLayer, worldState.loadedScenes[currentPortableExperienceIds[i]]);
