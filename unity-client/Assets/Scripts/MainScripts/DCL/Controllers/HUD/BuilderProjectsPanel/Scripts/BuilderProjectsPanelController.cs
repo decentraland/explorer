@@ -10,6 +10,7 @@ public class BuilderProjectsPanelController : IDisposable
     internal readonly ScenesViewController scenesViewController;
 
     internal BuilderProjectsPanelBridge bridge = null;
+
     internal readonly SectionsHandler sectionsHandler;
     internal readonly SceneContextMenuHandler sceneContextMenuHandler;
 
@@ -49,8 +50,23 @@ public class BuilderProjectsPanelController : IDisposable
         sectionsController = new SectionsController(view.sectionsContainer);
         scenesViewController = new ScenesViewController(view.sceneCardViewPrefab);
 
+        SetView();
+
+        if (bridge != null)
+        {
+            bridge.OnProjectsSet += OnProjectsUpdated;
+            bridge.SendFetchProjects();
+        }
+
+        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view);
+        sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController, bridge);
+    }
+
+    void SetView()
+    {
         IDeployedSceneListener viewDeployedSceneListener = view;
         IProjectSceneListener viewProjectSceneListener = view;
+
         scenesViewController.OnDeployedSceneAdded += viewDeployedSceneListener.OnSceneAdded;
         scenesViewController.OnDeployedSceneRemoved += viewDeployedSceneListener.OnSceneRemoved;
         scenesViewController.OnDeployedScenesSet += viewDeployedSceneListener.OnSetScenes;
@@ -60,15 +76,6 @@ public class BuilderProjectsPanelController : IDisposable
 
         viewDeployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
         viewProjectSceneListener.OnSetScenes(scenesViewController.projectScenes);
-
-        if (bridge != null)
-        {
-            bridge.OnProjectsSet += OnProjectsUpdated;
-            bridge.SendFetchProjects();
-        }
-
-        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view);
-        sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, bridge);
     }
 
     void OnProjectsUpdated(string payload)

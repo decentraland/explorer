@@ -19,7 +19,6 @@ internal class SectionsHandler : IDisposable
 
         sectionsController.OnSectionShow += OnSectionShow;
         sectionsController.OnSectionHide += OnSectionHide;
-        sectionsController.OnRequestContextMenuHide += OnRequestContextMenuHide;
         sectionsController.OnRequestOpenSection += OnRequestOpenSection;
     }
 
@@ -32,7 +31,6 @@ internal class SectionsHandler : IDisposable
 
         sectionsController.OnSectionShow -= OnSectionShow;
         sectionsController.OnSectionHide -= OnSectionHide;
-        sectionsController.OnRequestContextMenuHide -= OnRequestContextMenuHide;
         sectionsController.OnRequestOpenSection -= OnRequestOpenSection;
     }
 
@@ -94,11 +92,6 @@ internal class SectionsHandler : IDisposable
         }
 
         view.searchBarView.SetSearchBar(null, null);
-    }
-
-    void OnRequestContextMenuHide()
-    {
-        view.contextMenu.Hide();
     }
 
     void OnRequestOpenSection(SectionsController.SectionId id)

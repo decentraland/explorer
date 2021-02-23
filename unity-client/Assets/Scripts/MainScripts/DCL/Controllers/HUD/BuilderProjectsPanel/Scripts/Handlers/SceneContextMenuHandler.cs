@@ -4,11 +4,15 @@ internal class SceneContextMenuHandler : IDisposable
 {
     private readonly SceneCardViewContextMenu contextMenu;
     private readonly BuilderProjectsPanelBridge bridge;
+    private readonly SectionsController sectionsController;
 
-    public SceneContextMenuHandler(SceneCardViewContextMenu contextMenu, BuilderProjectsPanelBridge bridge)
+    public SceneContextMenuHandler(SceneCardViewContextMenu contextMenu, SectionsController sectionsController, BuilderProjectsPanelBridge bridge)
     {
         this.contextMenu = contextMenu;
         this.bridge = bridge;
+        this.sectionsController = sectionsController;
+
+        sectionsController.OnRequestContextMenuHide += OnRequestContextMenuHide;
 
         SceneCardView.OnContextMenuPressed += OnContextMenuOpen;
 
@@ -23,6 +27,8 @@ internal class SceneContextMenuHandler : IDisposable
 
     public void Dispose()
     {
+        sectionsController.OnRequestContextMenuHide -= OnRequestContextMenuHide;
+
         SceneCardView.OnContextMenuPressed -= OnContextMenuOpen;
 
         contextMenu.OnSettingsPressed -= OnContextMenuSettingsPressed;
@@ -39,6 +45,11 @@ internal class SceneContextMenuHandler : IDisposable
         contextMenu.transform.position = sceneCard.contextMenuButton.transform.position;
         contextMenu.Show(sceneData.id, sceneData.isDeployed,
             sceneData.isOwner || sceneData.isOperator, sceneData.isContributor);
+    }
+
+    void OnRequestContextMenuHide()
+    {
+        contextMenu.Hide();
     }
 
     void OnContextMenuSettingsPressed(string id)
