@@ -463,13 +463,11 @@ export type CatalystNode = {
 }
 
 export type GraphResponse = {
-  data: {
-    nfts: {
-      ens: {
-        subdomain: string
-      }
-    }[]
-  }
+  nfts: {
+    ens: {
+      subdomain: string
+    }
+  }[]
 }
 
 export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
