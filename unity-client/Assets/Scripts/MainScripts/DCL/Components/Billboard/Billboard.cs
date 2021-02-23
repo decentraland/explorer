@@ -42,6 +42,11 @@ namespace DCL
         Vector3Variable cameraPosition => CommonScriptableObjects.cameraPosition;
         Vector3 lastPosition;
 
+        private void Awake()
+        {
+            model = new Model();
+        }
+
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             cameraPosition.OnChange -= CameraPositionChanged;

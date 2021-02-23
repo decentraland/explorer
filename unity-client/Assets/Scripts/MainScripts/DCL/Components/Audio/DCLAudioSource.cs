@@ -40,10 +40,10 @@ namespace DCL.Components
                 else
                     clipIdIsEqual = audioClipId.Equals(item.audioClipId);
 
-                return clipIdIsEqual ||
-                       playing.Equals(item.playing) ||
-                       volume.Equals(item.volume) ||
-                       loop.Equals(item.loop) ||
+                return clipIdIsEqual &&
+                       playing.Equals(item.playing) &&
+                       volume.Equals(item.volume) &&
+                       loop.Equals(item.loop) &&
                        pitch.Equals(item.pitch);
             }
 

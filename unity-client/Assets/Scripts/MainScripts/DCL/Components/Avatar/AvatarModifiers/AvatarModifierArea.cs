@@ -38,8 +38,7 @@ public class AvatarModifierArea : BaseComponent
         }
     }
 
-    [HideInInspector]
-    public Model model = new Model();
+    private Model cachedModel = new Model();
 
     private HashSet<GameObject> avatarsInArea = new HashSet<GameObject>();
     private event Action<GameObject> OnAvatarEnter;
@@ -84,7 +83,7 @@ public class AvatarModifierArea : BaseComponent
 
     private void Update()
     {
-        if (model?.area == null)
+        if (cachedModel?.area == null)
         {
             return;
         }
@@ -135,7 +134,7 @@ public class AvatarModifierArea : BaseComponent
 
         Vector3 center = entity.gameObject.transform.position;
         Quaternion rotation = entity.gameObject.transform.rotation;
-        return model.area.DetectAvatars(center, rotation);
+        return cachedModel.area.DetectAvatars(center, rotation);
     }
 
     private void RemoveAllModifiers()
@@ -145,7 +144,7 @@ public class AvatarModifierArea : BaseComponent
 
     private void RemoveAllModifiers(HashSet<GameObject> avatars)
     {
-        if (model?.area == null)
+        if (cachedModel?.area == null)
         {
             return;
         }
@@ -161,10 +160,11 @@ public class AvatarModifierArea : BaseComponent
 
     private void ApplyCurrentModel()
     {
-        if (model.modifiers != null)
+        cachedModel = (Model)this.model;
+        if (cachedModel.modifiers != null)
         {
             // Add all listeners
-            foreach (string modifierKey in model.modifiers)
+            foreach (string modifierKey in cachedModel.modifiers)
             {
                 if (!modifiers.TryGetValue(modifierKey, out AvatarModifier modifier))
                     continue;
