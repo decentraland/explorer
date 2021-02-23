@@ -142,7 +142,8 @@ public class TaskbarHUDController : IHUD
             return;
 
         view.questPanelButton.SetToggleState(current, false);
-        view.SelectButton(view.questPanelButton);
+        if(current)
+            view.SelectButton(view.questPanelButton);
     }
 
     private void CloseWindowTrigger_OnTriggered(DCLAction_Trigger action)
