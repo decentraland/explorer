@@ -7,7 +7,6 @@ public class BuildModeHUDView : MonoBehaviour
 {
     public SmartItemListView smartItemListView;
     public SceneLimitInfoController sceneLimitInfoController;
-    public EntityInformationController entityInformationController;
     public BuilderInWorldEntityListController entityListController;
     public CatalogGroupListView catalogGroupListView;
 
@@ -45,6 +44,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IQuickBarController quickBarController;
     public SceneCatalogView sceneCatalogView;
     private ISceneCatalogController sceneCatalogController;
+    public EntityInformationView entityInformationView;
+    private IEntityInformationController entityInformationController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -58,7 +59,8 @@ public class BuildModeHUDView : MonoBehaviour
     public void Initialize(
         ITooltipController tooltipController,
         ISceneCatalogController sceneCatalogController,
-        IQuickBarController quickBarController)
+        IQuickBarController quickBarController,
+        IEntityInformationController entityInformationController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -69,6 +71,9 @@ public class BuildModeHUDView : MonoBehaviour
         this.sceneCatalogController = sceneCatalogController;
         this.sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
         this.sceneCatalogController.OnCatalogItemSelected += (x) => OnCatalogItemSelected?.Invoke(x);
+
+        this.entityInformationController = entityInformationController;
+        this.entityInformationController.Initialize(entityInformationView);
     }
 
     private void Awake()
@@ -142,6 +147,7 @@ public class BuildModeHUDView : MonoBehaviour
         tooltipController.Dispose();
         quickBarController.Dispose();
         sceneCatalogController.Dispose();
+        entityInformationController.Dispose();
     }
 
     public void PublishStart()

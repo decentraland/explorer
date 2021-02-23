@@ -20,7 +20,7 @@ public class QuickBarController : IQuickBarController
     public event System.Action<int> OnQuickBarShortcutSelected;
     public event System.Action<CatalogItem> OnCatalogItemSelected;
 
-    private QuickBarView view;
+    private QuickBarView quickBarView;
     private CatalogGroupListView catalogGroupListView;
 
     private CatalogItem[] quickBarShortcutsCatalogItems = new CatalogItem[AMOUNT_OF_QUICK_SLOTS];
@@ -28,23 +28,23 @@ public class QuickBarController : IQuickBarController
 
     const int AMOUNT_OF_QUICK_SLOTS = 9;
 
-    public void Initialize(QuickBarView view, CatalogGroupListView catalogGroupListView)
+    public void Initialize(QuickBarView quickBarView, CatalogGroupListView catalogGroupListView)
     {
-        this.view = view;
+        this.quickBarView = quickBarView;
         this.catalogGroupListView = catalogGroupListView;
 
-        view.OnQuickBarObjectSelected += OnQuickBarObjectSelected;
-        view.OnSetIndexToDrop += SetIndexToDrop;
-        view.OnSceneObjectDropped += SceneObjectDropped;
-        view.OnQuickBarInputTriggered += QuickBarInput;
+        quickBarView.OnQuickBarObjectSelected += OnQuickBarObjectSelected;
+        quickBarView.OnSetIndexToDrop += SetIndexToDrop;
+        quickBarView.OnSceneObjectDropped += SceneObjectDropped;
+        quickBarView.OnQuickBarInputTriggered += QuickBarInput;
     }
 
     public void Dispose()
     {
-        view.OnQuickBarObjectSelected -= OnQuickBarObjectSelected;
-        view.OnSetIndexToDrop -= SetIndexToDrop;
-        view.OnSceneObjectDropped -= SceneObjectDropped;
-        view.OnQuickBarInputTriggered -= QuickBarInput;
+        quickBarView.OnQuickBarObjectSelected -= OnQuickBarObjectSelected;
+        quickBarView.OnSetIndexToDrop -= SetIndexToDrop;
+        quickBarView.OnSceneObjectDropped -= SceneObjectDropped;
+        quickBarView.OnQuickBarInputTriggered -= QuickBarInput;
     }
 
     public int GetSlotsCount()
@@ -88,7 +88,7 @@ public class QuickBarController : IQuickBarController
     private void SetQuickBarShortcut(CatalogItem catalogItem, int index, Texture texture)
     {
         quickBarShortcutsCatalogItems[index] = catalogItem;
-        view.SetTextureToShortcut(index, texture);
+        quickBarView.SetTextureToShortcut(index, texture);
     }
 
     public void QuickBarInput(int quickBarSlot)

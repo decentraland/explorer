@@ -45,16 +45,19 @@ public class QuickBarView : MonoBehaviour
         quickBar9InputAction.OnTriggered -= OnQuickBar9InputTriggedered;
     }
 
+    // TODO (Santi): Called from imspector!
     public void QuickBarObjectSelected(int index)
     {
         OnQuickBarObjectSelected?.Invoke(index);
     }
 
+    // TODO (Santi): Called from imspector!
     public void SetIndexToDrop(int index)
     {
         OnSetIndexToDrop?.Invoke(index);
     }
 
+    // TODO (Santi): Called from imspector!
     public void SceneObjectDropped(BaseEventData data)
     {
         OnSceneObjectDropped?.Invoke(data);

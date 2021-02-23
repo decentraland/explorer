@@ -40,12 +40,12 @@ public class BuildModeHUDController : IHUD
     internal BuildModeHUDView view;
 
     BuilderInWorldEntityListController buildModeEntityListController;
-    EntityInformationController entityInformationController;
     CatalogItemDropController catalogItemDropController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
     private SceneCatalogController sceneCatalogController;
+    private EntityInformationController entityInformationController;
 
     public BuildModeHUDController()
     {
@@ -56,13 +56,13 @@ public class BuildModeHUDController : IHUD
         view.Initialize(
             new TooltipController(),
             sceneCatalogController = new SceneCatalogController(),
-            new QuickBarController());
+            new QuickBarController(),
+            entityInformationController = new EntityInformationController());
 
         catalogItemDropController = new CatalogItemDropController();
 
         buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
         buildModeEntityListController = view.entityListController;
-        entityInformationController = view.entityInformationController;
 
         entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);

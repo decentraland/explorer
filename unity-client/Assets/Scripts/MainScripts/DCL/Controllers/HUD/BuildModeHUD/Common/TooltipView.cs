@@ -12,21 +12,24 @@ public class TooltipView : MonoBehaviour
     [SerializeField] internal CanvasGroup tooltipCG;
     [SerializeField] internal TextMeshProUGUI tooltipTxt;
 
-    public void SetText(string text)
-    {
-        tooltipTxt.text = text;
-    }
-
     public void SetTooltipPosition(Vector3 pos)
     {
         tooltipRT.position = pos;
     }
 
+    // TODO (Santi): Called from imspector!
+    public void SetText(string text)
+    {
+        tooltipTxt.text = text;
+    }
+
+    // TODO (Santi): Called from imspector!
     public void OnHoverEnter(BaseEventData data)
     {
         OnShowTooltip?.Invoke(data);
     }
 
+    // TODO (Santi): Called from imspector!
     public void OnHoverExit()
     {
         OnHideTooltip?.Invoke();

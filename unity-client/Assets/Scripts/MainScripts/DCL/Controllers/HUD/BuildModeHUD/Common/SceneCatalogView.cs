@@ -37,6 +37,7 @@ public class SceneCatalogView : MonoBehaviour
 
     private bool isCatalogExpanded = false;
 
+    // TODO (Santi): Called from imspector!
     public void ToggleCatalogExpanse()
     {
         if(isCatalogExpanded)
@@ -59,14 +60,15 @@ public class SceneCatalogView : MonoBehaviour
         isCatalogExpanded = !isCatalogExpanded;
     }
 
-    public void SetCatalogTitle(string text)
-    {
-        catalogTitleTxt.text = text;
-    }
-
+    // TODO (Santi): Called from imspector!
     public void Back()
     {
         OnSceneCatalogBack?.Invoke();
+    }
+
+    public void SetCatalogTitle(string text)
+    {
+        catalogTitleTxt.text = text;
     }
 
     public bool IsCatalogOpen()
