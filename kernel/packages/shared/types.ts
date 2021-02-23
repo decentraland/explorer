@@ -443,7 +443,10 @@ export enum HUDElementID {
   EMAIL_PROMPT = 21,
   USERS_AROUND_LIST_HUD = 22,
   GRAPHIC_CARD_WARNING = 23,
-  BUILD_MODE = 24
+  BUILD_MODE = 24,
+  QUESTS_PANEL = 26,
+  QUESTS_TRACKER = 27,
+  QUESTS_NOTIFICATIONS = 28
 }
 
 export type HUDConfiguration = {
@@ -460,13 +463,11 @@ export type CatalystNode = {
 }
 
 export type GraphResponse = {
-  data: {
-    nfts: {
-      ens: {
-        subdomain: string
-      }
-    }[]
-  }
+  nfts: {
+    ens: {
+      subdomain: string
+    }
+  }[]
 }
 
 export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
