@@ -39,14 +39,12 @@ export const play = Template.bind({});
 play.args = {
   ...Template.args,
   stage: LoginStage.SIGN_IN,
-  hasWallet: true,
 };
 
 export const playAsGuest = Template.bind({});
 playAsGuest.args = {
   ...Template.args,
   stage: LoginStage.SIGN_IN,
-  hasWallet: false,
 };
 
 export const passport = Template.bind({});

@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import { connection } from "decentraland-connect/dist/index"
 import { ProviderType } from "decentraland-connect/dist/types"
 import { Navbar } from "../common/Navbar";
 import { EthLogin } from "./EthLogin";
@@ -11,10 +12,6 @@ import { BeginnersGuide } from "./BeginnersGuide";
 import { BigFooter } from "../common/BigFooter";
 import "./LoginContainer.css";
 
-declare var window: Window & {
-  ethereum: any;
-};
-
 export enum LoginStage {
   LOADING = "loading",
   SIGN_IN = "signIn",
@@ -25,22 +22,19 @@ export enum LoginStage {
 }
 
 const mapStateToProps = (state: any) => {
-  const params = new URLSearchParams(window.location.search);
+  const availableProviders = connection.getAvailableProviders()
   return {
     stage: state.session.loginStage,
     signing: state.session.signing,
     subStage: state.session.signup.stage,
     provider: state.session.currentProvider,
-    showWalletSelector: params.has("show_wallet"),
-    hasWallet: !!window.ethereum,
+    availableProviders,
   };
 };
 
 const mapDispatchToProps = (dispatch: any) => ({
-  onLogin: (provider: ProviderType | null) =>
-    dispatch({ type: "[Authenticate]", payload: { provider } }),
-  onGuest: () =>
-    dispatch({ type: "[Authenticate]", payload: { provider: null } }),
+  onLogin: (provider: ProviderType | null) => (console.log(provider),
+    dispatch({ type: "[Authenticate]", payload: { provider } })),
 });
 
 export interface LoginContainerProps {
@@ -48,10 +42,8 @@ export interface LoginContainerProps {
   signing: boolean;
   subStage: string;
   provider?: string | null;
-  showWallet?: boolean;
-  hasWallet?: boolean;
+  availableProviders?: ProviderType[];
   onLogin: (provider: ProviderType | null) => void;
-  onGuest: () => void;
 }
 
 export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
@@ -59,11 +51,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
   const full = loading || props.stage === LoginStage.SIGN_IN;
   const shouldShow =
     LoginStage.COMPLETED !== props.stage && props.subStage !== "avatar";
-  const provider = props.hasWallet
-    ? ProviderType.INJECTED
-    : props.provider === ProviderType.FORTMATIC
-      ? props.provider
-      : null;
+
   return (
     <React.Fragment>
       {shouldShow && (
@@ -76,12 +64,9 @@ export const LoginContainer: React.FC<LoginContainerProps> = (props) => {
             <Container className="eth-login-popup">
               {full && (
                 <EthLogin
-                  hasWallet={props.hasWallet}
                   loading={loading || props.signing}
+                  availableProviders={props.availableProviders}
                   onLogin={props.onLogin}
-                  onGuest={props.onGuest}
-                  provider={provider}
-                  showWallet={props.showWallet}
                 />
               )}
               {props.stage === LoginStage.CONNECT_ADVICE && (

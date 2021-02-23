@@ -4,11 +4,11 @@ import { defaultLogger } from 'shared/logger'
 import { Account } from 'web3x/account'
 import { Eth } from 'web3x/eth'
 import { ProviderType } from 'decentraland-connect'
-import { EthConnector } from './Connector'
+import { EthereumConnector } from './EthereumConnector'
 import { LegacyProviderAdapter } from 'web3x/providers'
 import { EDITOR } from 'config'
 
-let ethConnector: EthConnector
+let ethConnector: EthereumConnector
 export const providerFuture = future()
 export const requestManager = new RequestManager((window as any).ethereum ?? null)
 
@@ -27,13 +27,13 @@ export function createEthWhenNotConnectedToWeb3(): Eth {
     return new Eth(new LegacyProviderAdapter((window as any).ethereum))
   } else {
     // If not, we use infura
-    return new Eth(EthConnector.createWeb3xWebsocketProvider())
+    return new Eth(EthereumConnector.createWeb3xWebsocketProvider())
   }
 }
 
-export function getEthConnector(): EthConnector {
+export function getEthConnector(): EthereumConnector {
   if (!ethConnector) {
-    ethConnector = new EthConnector()
+    ethConnector = new EthereumConnector()
   }
   return ethConnector
 }

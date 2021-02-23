@@ -5,7 +5,7 @@ import { ETHEREUM_NETWORK, ethereumConfigurations } from '../../config'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { ChainId, connection, ConnectionResponse, ProviderType } from 'decentraland-connect'
 
-export class EthConnector {
+export class EthereumConnector {
   private type: ProviderType | null = null
   private result: ConnectionResponse | undefined
   private readonly network: ETHEREUM_NETWORK
@@ -43,7 +43,7 @@ export class EthConnector {
       this.result = {
         chainId: this.getChainId(),
         account: null,
-        provider: EthConnector.createWeb3xWebsocketProvider()
+        provider: EthereumConnector.createWeb3xWebsocketProvider()
       }
 
       return this.result

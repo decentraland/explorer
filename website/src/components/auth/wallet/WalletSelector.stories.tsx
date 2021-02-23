@@ -28,7 +28,6 @@ Default.args = {
 export const DisabledButton = Default.bind({});
 DisabledButton.args = {
   ...Default.args,
-  hasWallet: false,
 };
 
 export const Loading = Template.bind({});
