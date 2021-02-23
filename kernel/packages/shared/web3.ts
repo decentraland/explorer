@@ -131,7 +131,7 @@ export async function fetchOwner(url: string, name: string) {
 
   try {
     const resp = await queryGraph(url, query, variables)
-    return resp.data.nfts.length === 1 ? (resp.data.nfts[0].owner.address as string) : null
+    return resp.nfts.length === 1 ? (resp.nfts[0].owner.address as string) : null
   } catch (error) {
     defaultLogger.error(`Error querying graph`, error)
     throw error
