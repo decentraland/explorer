@@ -18,6 +18,7 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] internal RawImage thumbnailImage;
 
         private AssetPromise_Texture thumbnailPromise;
+        private bool forceRebuildLayout = false;
 
         internal QuestModel quest;
         internal readonly List<QuestsPanelSection> sections = new List<QuestsPanelSection>();
@@ -47,9 +48,9 @@ namespace DCL.Huds.QuestsPanel
             {
                 sections[i].Populate(quest.sections[i]);
             }
-            Utils.ForceRebuildLayoutImmediate(rectTransform);
             pinQuestToggle.SetIsOnWithoutNotify(baseCollection.Contains(quest.id));
             pinQuestToggle.gameObject.SetActive(!quest.isCompleted);
+            forceRebuildLayout = true;
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -138,6 +139,15 @@ namespace DCL.Huds.QuestsPanel
         public void Close()
         {
             gameObject.SetActive(false);
+        }
+
+        private void Update()
+        {
+            if (forceRebuildLayout)
+            {
+                forceRebuildLayout = false;
+                rectTransform.ForceUpdateLayout();
+            }
         }
     }
 }
