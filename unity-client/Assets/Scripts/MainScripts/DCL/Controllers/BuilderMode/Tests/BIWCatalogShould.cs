@@ -28,8 +28,8 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
             }
         }
 
-        SceneObjectCatalogController sceneObjectCatalogController = Utils.GetOrCreateComponent<SceneObjectCatalogController>(gameObjectToUse);
-        List<Dictionary<string, List<CatalogItem>>>  result = sceneObjectCatalogController.FilterAssets(nameToFilter);
+        SceneCatalogController sceneCatalogController = new SceneCatalogController();
+        List<Dictionary<string, List<CatalogItem>>>  result = sceneCatalogController.FilterAssets(nameToFilter);
 
         CatalogItem filteredItem =  result[0].Values.ToList()[0][0];
 
@@ -58,7 +58,8 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
 
         quickBarView.catalogGroupListView = catalogGroupListView;
 
-        QuickBarController quickBarController = new QuickBarController(quickBarView);
+        QuickBarController quickBarController = new QuickBarController();
+        quickBarController.Initialize(quickBarView);
         int slots = quickBarController.GetSlotsCount();
         quickBarView.shortcutsImgs = new QuickBarSlot[slots];
 

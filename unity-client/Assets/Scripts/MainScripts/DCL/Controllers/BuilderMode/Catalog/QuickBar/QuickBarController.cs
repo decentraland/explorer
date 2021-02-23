@@ -10,7 +10,7 @@ public class QuickBarController
 
     const int AMOUNT_OF_QUICK_SLOTS = 9;
 
-    public QuickBarController(QuickBarView view)
+    public void Initialize(QuickBarView view)
     { 
         view.OnQuickBarAdd += SetQuickBarShortcut;
     }

@@ -7,9 +7,7 @@ public class BuildModeHUDView : MonoBehaviour
 {
     public SmartItemListView smartItemListView;
     public SceneLimitInfoController sceneLimitInfoController;
-    public SceneObjectCatalogController sceneObjectCatalogController;
     public EntityInformationController entityInformationController;
-    public QuickBarView quickBarView;
     public BuilderInWorldEntityListController entityListController;
     public CatalogGroupListView catalogGroupListView;
 
@@ -43,6 +41,10 @@ public class BuildModeHUDView : MonoBehaviour
     [Header("UI Modules")]
     public TooltipView tooltipView;
     private ITooltipController tooltipController;
+    public QuickBarView quickBarView;
+    private QuickBarController quickBarController;
+    public SceneCatalogView sceneCatalogView;
+    private ISceneCatalogController sceneCatalogController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -53,10 +55,20 @@ public class BuildModeHUDView : MonoBehaviour
     public event Action OnLogoutAction;
     public event Action OnCatalogItemDrop;
 
-    public void Initialize(ITooltipController tooltipController)
+    public void Initialize(
+        ITooltipController tooltipController,
+        ISceneCatalogController sceneCatalogController,
+        QuickBarController quickBarController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
+
+        this.quickBarController = quickBarController;
+        this.quickBarController.Initialize(quickBarView);
+
+        this.sceneCatalogController = sceneCatalogController;
+        this.sceneCatalogController.Initialize(sceneCatalogView, quickBarView, quickBarController);
+        this.sceneCatalogController.OnCatalogItemSelected += (x) => OnCatalogItemSelected?.Invoke(x);
     }
 
     private void Awake()
@@ -102,7 +114,6 @@ public class BuildModeHUDView : MonoBehaviour
         duplicateBtn.onClick.AddListener(() => OnDuplicateSelectionAction?.Invoke());
         deleteBtn.onClick.AddListener(() => OnDeleteSelectionAction?.Invoke());
 
-        sceneObjectCatalogController.OnCatalogItemSelected += (x) => OnCatalogItemSelected?.Invoke(x);
         catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
         catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
 
@@ -127,6 +138,9 @@ public class BuildModeHUDView : MonoBehaviour
         toggleOpenEntityListInputAction.OnTriggered -= OnEntityListActionTriggered;
         toggleSceneInfoInputAction.OnTriggered -= OnSceneLimitInfoControllerChangeVisibilityTriggered;
         toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
+
+        tooltipController.Dispose();
+        sceneCatalogController.Dispose();
     }
 
     public void PublishStart()
@@ -150,12 +164,12 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void RefreshCatalogAssetPack()
     {
-        sceneObjectCatalogController.RefreshAssetPack();
+        sceneCatalogController.RefreshAssetPack();
     }
 
     public void RefreshCatalogContent()
     {
-        sceneObjectCatalogController.RefreshCatalog();
+        sceneCatalogController.RefreshCatalog();
     }
 
     public void SceneObjectDroppedInView()
@@ -166,9 +180,9 @@ public class BuildModeHUDView : MonoBehaviour
     public void SetVisibilityOfCatalog(bool isVisible)
     {
         if (isVisible)
-            sceneObjectCatalogController.OpenCatalog();
+            sceneCatalogController.OpenCatalog();
         else
-            sceneObjectCatalogController.CloseCatalog();
+            sceneCatalogController.CloseCatalog();
     }
 
     public void ChangeVisibilityOfSceneLimit(bool shouldBeVisible)

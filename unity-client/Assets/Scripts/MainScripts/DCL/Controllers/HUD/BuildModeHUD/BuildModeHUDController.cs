@@ -45,13 +45,18 @@ public class BuildModeHUDController : IHUD
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
+    private SceneCatalogController sceneCatalogController;
+
     public BuildModeHUDController()
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("BuildModeHUD")).GetComponent<BuildModeHUDView>();
 
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
-        view.Initialize(new TooltipController());
+        view.Initialize(
+            new TooltipController(),
+            sceneCatalogController = new SceneCatalogController(),
+            new QuickBarController());
 
         catalogItemDropController = new CatalogItemDropController();
 
@@ -154,7 +159,7 @@ public class BuildModeHUDController : IHUD
 
     public void ChangeVisibilityOfCatalog()
     {
-        isCatalogOpen = !view.sceneObjectCatalogController.IsCatalogOpen();
+        isCatalogOpen = !sceneCatalogController.IsCatalogOpen();
         SetVisibilityOfCatalog(isCatalogOpen);
     }
 
