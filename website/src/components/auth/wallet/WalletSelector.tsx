@@ -54,7 +54,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
     }
 
     return result
-  }, [availableProviders])
+  }, [availableProviders, hasWallet])
 
   function isActive(wallet: WalletButtonLogo) {
     switch (wallet) {
