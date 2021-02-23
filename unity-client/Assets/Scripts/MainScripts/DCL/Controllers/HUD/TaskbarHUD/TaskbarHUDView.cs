@@ -24,6 +24,7 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal TaskbarButton settingsButton;
     [SerializeField] internal TaskbarButton exploreButton;
     [SerializeField] internal TaskbarButton builderInWorldButton;
+    [SerializeField] internal TaskbarButton questPanelButton;
 
     [Header("More Button Config")]
     [SerializeField] internal TaskbarButton moreButton;
@@ -54,6 +55,7 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action OnExploreToggleOff;
     public event System.Action OnMoreToggleOn;
     public event System.Action OnMoreToggleOff;
+    public event System.Action<bool> OnQuestPanelToggled;
 
     internal List<TaskbarButton> GetButtonList()
     {
@@ -65,6 +67,7 @@ public class TaskbarHUDView : MonoBehaviour
         taskbarButtonList.Add(settingsButton);
         taskbarButtonList.Add(exploreButton);
         taskbarButtonList.Add(moreButton);
+        taskbarButtonList.Add(questPanelButton);
         return taskbarButtonList;
     }
 
@@ -100,6 +103,7 @@ public class TaskbarHUDView : MonoBehaviour
         settingsButton.Initialize();
         exploreButton.Initialize();
         moreButton.Initialize();
+        questPanelButton.Initialize();
 
         chatHeadsGroup.OnHeadToggleOn += OnWindowToggleOn;
         chatHeadsGroup.OnHeadToggleOff += OnWindowToggleOff;
@@ -111,7 +115,7 @@ public class TaskbarHUDView : MonoBehaviour
         friendsButton.OnToggleOff += OnWindowToggleOff;
 
         builderInWorldButton.OnToggleOn += OnWindowToggleOn;
-        builderInWorldButton.OnToggleOff += OnWindowToggleOff;       
+        builderInWorldButton.OnToggleOff += OnWindowToggleOff;
 
         settingsButton.OnToggleOn += OnWindowToggleOn;
         settingsButton.OnToggleOff += OnWindowToggleOff;
@@ -121,11 +125,21 @@ public class TaskbarHUDView : MonoBehaviour
 
         moreButton.OnToggleOn += OnWindowToggleOn;
         moreButton.OnToggleOff += OnWindowToggleOff;
+
+        questPanelButton.OnToggleOn -= OnWindowToggleOn;
+        questPanelButton.OnToggleOff -= OnWindowToggleOff;
+        questPanelButton.OnToggleOn += OnWindowToggleOn;
+        questPanelButton.OnToggleOff += OnWindowToggleOff;
     }
 
     public void SetBuilderInWorldStatus(bool isActive)
     {
         builderInWorldButton.gameObject.SetActive(isActive);
+    }
+
+    public void SetQuestsPanelStatus(bool isActive)
+    {
+        questPanelButton.gameObject.SetActive(isActive);
     }
 
     private void OnWindowToggleOff(TaskbarButton obj)
@@ -142,6 +156,8 @@ public class TaskbarHUDView : MonoBehaviour
             OnExploreToggleOff?.Invoke();
         else if (obj == moreButton)
             moreMenu.ShowMoreMenu(false);
+        else if (obj == questPanelButton)
+            OnQuestPanelToggled?.Invoke(false);
 
         if (AllButtonsToggledOff())
         {
@@ -179,11 +195,13 @@ public class TaskbarHUDView : MonoBehaviour
             OnExploreToggleOn?.Invoke();
         else if (obj == moreButton)
             moreMenu.ShowMoreMenu(true);
+        else if (obj == questPanelButton)
+            OnQuestPanelToggled?.Invoke(true);
 
         SelectButton(obj);
     }
 
-    void SelectButton(TaskbarButton obj)
+    public void SelectButton(TaskbarButton obj)
     {
         var taskbarButtonList = GetButtonList();
 
@@ -307,6 +325,12 @@ public class TaskbarHUDView : MonoBehaviour
         {
             moreButton.OnToggleOn -= OnWindowToggleOn;
             moreButton.OnToggleOff -= OnWindowToggleOff;
+        }
+
+        if (questPanelButton != null)
+        {
+            questPanelButton.OnToggleOn -= OnWindowToggleOn;
+            questPanelButton.OnToggleOff -= OnWindowToggleOff;
         }
     }
 }

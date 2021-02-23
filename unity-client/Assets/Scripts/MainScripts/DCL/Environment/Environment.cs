@@ -108,6 +108,7 @@ namespace DCL
                 messaging?.Dispose();
                 world?.Dispose();
                 platform?.Dispose();
+                PoolManager.i?.Cleanup();
             }
         }
     }
