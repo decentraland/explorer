@@ -56,18 +56,16 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
 
         QuickBarView quickBarView = new QuickBarView();
 
-        quickBarView.catalogGroupListView = catalogGroupListView;
-
         QuickBarController quickBarController = new QuickBarController();
-        quickBarController.Initialize(quickBarView);
+        quickBarController.Initialize(quickBarView, catalogGroupListView);
         int slots = quickBarController.GetSlotsCount();
         quickBarView.shortcutsImgs = new QuickBarSlot[slots];
 
         for (int i = 0; i < slots; i++)
         {
-            quickBarView.SetIndexToDrop(i);
+            quickBarController.SetIndexToDrop(i);
             adapter.AdapterStartDragging(null);
-            quickBarView.SceneObjectDropped(null);
+            quickBarController.SceneObjectDropped(null);
             Assert.AreEqual(item, quickBarController.QuickBarObjectSelected(i));
         }
 

@@ -42,7 +42,7 @@ public class BuildModeHUDView : MonoBehaviour
     public TooltipView tooltipView;
     private ITooltipController tooltipController;
     public QuickBarView quickBarView;
-    private QuickBarController quickBarController;
+    private IQuickBarController quickBarController;
     public SceneCatalogView sceneCatalogView;
     private ISceneCatalogController sceneCatalogController;
 
@@ -58,16 +58,16 @@ public class BuildModeHUDView : MonoBehaviour
     public void Initialize(
         ITooltipController tooltipController,
         ISceneCatalogController sceneCatalogController,
-        QuickBarController quickBarController)
+        IQuickBarController quickBarController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
 
         this.quickBarController = quickBarController;
-        this.quickBarController.Initialize(quickBarView);
+        this.quickBarController.Initialize(quickBarView, sceneCatalogView.catalogGroupListView);
 
         this.sceneCatalogController = sceneCatalogController;
-        this.sceneCatalogController.Initialize(sceneCatalogView, quickBarView, quickBarController);
+        this.sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
         this.sceneCatalogController.OnCatalogItemSelected += (x) => OnCatalogItemSelected?.Invoke(x);
     }
 
@@ -140,6 +140,7 @@ public class BuildModeHUDView : MonoBehaviour
         toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
 
         tooltipController.Dispose();
+        quickBarController.Dispose();
         sceneCatalogController.Dispose();
     }
 

@@ -1,19 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class QuickBarView : MonoBehaviour
 {
-    public QuickBarSlot[] shortcutsImgs;
-    public Canvas generalCanvas;
-    public CatalogGroupListView catalogGroupListView;
+    public event System.Action<int> OnQuickBarObjectSelected;
+    public event System.Action<int> OnSetIndexToDrop;
+    public event System.Action<BaseEventData> OnSceneObjectDropped;
+    public event System.Action<int> OnQuickBarInputTriggered;
 
-
-    public event System.Action<int> OnQuickBarShortcutSelected;
-    public event System.Action<CatalogItem, int> OnQuickBarAdd;
-
+    [SerializeField] internal QuickBarSlot[] shortcutsImgs;
     [SerializeField] internal InputAction_Trigger quickBar1InputAction;
     [SerializeField] internal InputAction_Trigger quickBar2InputAction;
     [SerializeField] internal InputAction_Trigger quickBar3InputAction;
@@ -23,10 +18,6 @@ public class QuickBarView : MonoBehaviour
     [SerializeField] internal InputAction_Trigger quickBar7InputAction;
     [SerializeField] internal InputAction_Trigger quickBar8InputAction;
     [SerializeField] internal InputAction_Trigger quickBar9InputAction;
-
-
-    int lastIndexDroped = -1;
-
 
     private void Start()
     {
@@ -54,73 +45,72 @@ public class QuickBarView : MonoBehaviour
         quickBar9InputAction.OnTriggered -= OnQuickBar9InputTriggedered;
     }
 
+    public void QuickBarObjectSelected(int index)
+    {
+        OnQuickBarObjectSelected?.Invoke(index);
+    }
+
     public void SetIndexToDrop(int index)
     {
-        lastIndexDroped = index;
+        OnSetIndexToDrop?.Invoke(index);
     }
 
     public void SceneObjectDropped(BaseEventData data)
     {
-        CatalogItemAdapter adapter = catalogGroupListView.GetLastCatalogItemDragged();
-        CatalogItem catalogItem = adapter.GetContent();
-
-        if (adapter.thumbnailImg.enabled)
-        {
-            Texture texture = adapter.thumbnailImg.texture;
-            SetQuickBarShortcut(catalogItem, lastIndexDroped, texture);
-        }
+        OnSceneObjectDropped?.Invoke(data);
     }
 
-    private void SetQuickBarShortcut(CatalogItem catalogItem, int index, Texture texture)
+    public void SetTextureToShortcut(int shortcutIndex, Texture texture)
     {
-        OnQuickBarAdd?.Invoke(catalogItem, index);
-     
-        if (index >= shortcutsImgs.Length)
+        if (shortcutIndex >= shortcutsImgs.Length)
             return;
 
-        if(shortcutsImgs[index] != null && texture != null)
-            shortcutsImgs[index].SetTexture(texture);
+        if (shortcutsImgs[shortcutIndex] != null && texture != null)
+            shortcutsImgs[shortcutIndex].SetTexture(texture);
     }
 
-    public void QuickBarInput(int quickBarSlot)
+    private void OnQuickBar1InputTriggedered(DCLAction_Trigger action)
     {
-        OnQuickBarShortcutSelected?.Invoke(quickBarSlot);
+        OnQuickBarInputTriggered?.Invoke(0);
+    }
+
+    private void OnQuickBar2InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(1);
+    }
+
+    private void OnQuickBar3InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(2);
+    }
+
+    private void OnQuickBar4InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(3);
+    }
+
+    private void OnQuickBar5InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(4);
+    }
+
+    private void OnQuickBar6InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(5);
+    }
+
+    private void OnQuickBar7InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(6);
+    }
+
+    private void OnQuickBar8InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggered?.Invoke(7);
     }
 
     private void OnQuickBar9InputTriggedered(DCLAction_Trigger action)
     {
-        QuickBarInput(8);
-    }
-    private void OnQuickBar8InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(7);
-    }
-    private void OnQuickBar7InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(6);
-    }
-    private void OnQuickBar6InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(5);
-    }
-    private void OnQuickBar5InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(4);
-    }
-    private void OnQuickBar4InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(3);
-    }
-    private void OnQuickBar3InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(2);
-    }
-    private void OnQuickBar2InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(1);
-    }
-    private void OnQuickBar1InputTriggedered(DCLAction_Trigger action)
-    {
-        QuickBarInput(0);
+        OnQuickBarInputTriggered?.Invoke(8);
     }
 }

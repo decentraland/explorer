@@ -7,7 +7,7 @@ public interface ISceneCatalogController
 {
     event Action<CatalogItem> OnCatalogItemSelected;
 
-    void Initialize(SceneCatalogView view, QuickBarView quickBarView, QuickBarController quickBarController);
+    void Initialize(SceneCatalogView view, IQuickBarController quickBarController);
     void Dispose();
     void AssetsPackFilter(bool isOn);
     void CategoryFilter(bool isOn);
@@ -35,9 +35,8 @@ public class SceneCatalogController : ISceneCatalogController
     public event Action<CatalogItem> OnCatalogItemSelected;
 
     private SceneCatalogView sceneCatalogView;
-    private QuickBarView quickBarView;
     private List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
-    private QuickBarController quickBarController;
+    private IQuickBarController quickBarController;
     private FavoritesController favoritesController;
     internal bool isShowingAssetPacks = false;
     private bool isFilterByAssetPacks = true;
@@ -45,11 +44,9 @@ public class SceneCatalogController : ISceneCatalogController
 
     public void Initialize(
         SceneCatalogView sceneCatalogView,
-        QuickBarView quickBarView,
-        QuickBarController quickBarController)
+        IQuickBarController quickBarController)
     {
         this.sceneCatalogView = sceneCatalogView;
-        this.quickBarView = quickBarView;
         this.quickBarController = quickBarController;
         favoritesController = new FavoritesController(sceneCatalogView.catalogGroupListView);
 
@@ -60,13 +57,13 @@ public class SceneCatalogController : ISceneCatalogController
         sceneCatalogView.favoritesToggle.onValueChanged.AddListener(FavoritesFilter);
         sceneCatalogView.assetPackToggle.onValueChanged.AddListener(AssetsPackFilter);
         sceneCatalogView.OnSceneCatalogBack += SceneCatalogBack;
-        quickBarView.OnQuickBarShortcutSelected += QuickBarInput;
+        quickBarController.OnQuickBarShortcutSelected += QuickBarInput;
         quickBarController.OnCatalogItemSelected += CatalogItemSelected;
     }
 
     public void Dispose()
     {
-        quickBarView.OnQuickBarShortcutSelected -= QuickBarInput;
+        quickBarController.OnQuickBarShortcutSelected -= QuickBarInput;
         sceneCatalogView.catalogAssetPackListView.OnCatalogPackClick -= OnCatalogItemPackSelected;
         sceneCatalogView.catalogGroupListView.OnCatalogItemClicked -= CatalogItemSelected;
         sceneCatalogView.searchInputField.onValueChanged.RemoveListener(OnSearchInputChanged);
