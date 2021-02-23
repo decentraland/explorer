@@ -6,7 +6,7 @@ namespace DCL.Helpers
 {
     public class RaycastHandler : IRaycastHandler
     {
-        private void SetHitInfo(ref HitInfo hitInfo, RaycastHit hit, ParcelScene scene)
+        private void SetHitInfo(ref HitInfo hitInfo, RaycastHit hit, IParcelScene scene)
         {
             hitInfo.point = WorldStateUtils.ConvertUnityToScenePosition(hit.point, scene);
             hitInfo.distance = hit.distance;
@@ -14,7 +14,7 @@ namespace DCL.Helpers
             hitInfo.collider = hit.collider;
         }
 
-        private bool Raycast(Ray ray, out HitInfo hitInfo, float distance, LayerMask layerMask, ParcelScene scene)
+        private bool Raycast(Ray ray, out HitInfo hitInfo, float distance, LayerMask layerMask, IParcelScene scene)
         {
             RaycastHit hit;
             hitInfo = new HitInfo();

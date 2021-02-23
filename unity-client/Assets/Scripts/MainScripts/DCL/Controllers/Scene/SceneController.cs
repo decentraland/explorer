@@ -738,9 +738,10 @@ namespace DCL
             Environment.i.messaging.manager.RemoveController(sceneKey);
 
             IWorldState worldState = Environment.i.world.state;
+
             if (worldState.loadedScenes.ContainsKey(sceneKey))
             {
-                ParcelScene sceneToUnload = worldState.loadedScenes[sceneKey];
+                ParcelScene sceneToUnload = worldState.GetScene(sceneKey) as ParcelScene;
                 sceneToUnload.isPersistent = false;
 
                 if (sceneToUnload is GlobalScene globalScene && globalScene.isPortableExperience)

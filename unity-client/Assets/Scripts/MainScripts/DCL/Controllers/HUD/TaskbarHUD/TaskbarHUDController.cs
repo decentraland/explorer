@@ -7,8 +7,8 @@ using DCL.SettingsPanelHUD;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using DCL.Controllers;
 using System.Collections.Generic;
+using DCL.Controllers;
 
 public class TaskbarHUDController : IHUD
 {
@@ -38,10 +38,25 @@ public class TaskbarHUDController : IHUD
 
     public event System.Action OnAnyTaskbarButtonClicked;
 
-    public RectTransform tutorialTooltipReference { get => view.moreTooltipReference; }
-    public RectTransform exploreTooltipReference { get => view.exploreTooltipReference; }
-    public RectTransform socialTooltipReference { get => view.socialTooltipReference; }
-    public TaskbarMoreMenu moreMenu { get => view.moreMenu; }
+    public RectTransform tutorialTooltipReference
+    {
+        get => view.moreTooltipReference;
+    }
+
+    public RectTransform exploreTooltipReference
+    {
+        get => view.exploreTooltipReference;
+    }
+
+    public RectTransform socialTooltipReference
+    {
+        get => view.socialTooltipReference;
+    }
+
+    public TaskbarMoreMenu moreMenu
+    {
+        get => view.moreMenu;
+    }
 
     public void Initialize(
         IMouseCatcher mouseCatcher,
@@ -409,10 +424,7 @@ public class TaskbarHUDController : IHUD
 
         helpAndSupportHud = controller;
         view.OnAddHelpAndSupportWindow();
-        helpAndSupportHud.view.OnClose += () =>
-        {
-            MarkWorldChatAsReadIfOtherWindowIsOpen();
-        };
+        helpAndSupportHud.view.OnClose += () => { MarkWorldChatAsReadIfOtherWindowIsOpen(); };
     }
 
     public void OnAddVoiceChat()
