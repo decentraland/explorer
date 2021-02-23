@@ -2,6 +2,7 @@ using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Components
@@ -12,6 +13,48 @@ namespace DCL.Components
         new public class Model : UIShape.Model
         {
             public TextShape.Model textModel;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       name == model.name &&
+                       parentComponent == model.parentComponent &&
+                       visible == model.visible &&
+                       opacity == model.opacity &&
+                       hAlign == model.hAlign &&
+                       vAlign == model.vAlign &&
+                       EqualityComparer<UIValue>.Default.Equals(width, model.width) &&
+                       EqualityComparer<UIValue>.Default.Equals(height, model.height) &&
+                       EqualityComparer<UIValue>.Default.Equals(positionX, model.positionX) &&
+                       EqualityComparer<UIValue>.Default.Equals(positionY, model.positionY) &&
+                       isPointerBlocker == model.isPointerBlocker &&
+                       onClick == model.onClick &&
+                       EqualityComparer<TextShape.Model>.Default.Equals(textModel, model.textModel);
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return textModel.GetDataFromJSON(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -719573550;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(parentComponent);
+                hashCode = hashCode * -1521134295 + visible.GetHashCode();
+                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hAlign);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vAlign);
+                hashCode = hashCode * -1521134295 + width.GetHashCode();
+                hashCode = hashCode * -1521134295 + height.GetHashCode();
+                hashCode = hashCode * -1521134295 + positionX.GetHashCode();
+                hashCode = hashCode * -1521134295 + positionY.GetHashCode();
+                hashCode = hashCode * -1521134295 + isPointerBlocker.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(onClick);
+                hashCode = hashCode * -1521134295 + EqualityComparer<TextShape.Model>.Default.GetHashCode(textModel);
+                return hashCode;
+            }
         }
 
         public override string referencesContainerPrefabName => "UIText";
@@ -34,11 +77,11 @@ namespace DCL.Components
         {
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             if (!scene.isTestScene)
             {
-                model.textModel = Utils.SafeFromJson<TextShape.Model>(newJson);
+                model.textModel = (TextShape.Model) newModel;
             }
 
             yield return TextShape.ApplyModelChanges(scene, referencesContainer.text, model.textModel);

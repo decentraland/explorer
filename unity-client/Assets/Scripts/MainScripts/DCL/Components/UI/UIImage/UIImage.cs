@@ -2,6 +2,7 @@ using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,6 +23,68 @@ namespace DCL.Components
             public float paddingBottom = 0f;
             public float paddingLeft = 0f;
             public bool sizeInPixels = true;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       base.Equals(obj) &&
+                       name == model.name &&
+                       parentComponent == model.parentComponent &&
+                       visible == model.visible &&
+                       opacity == model.opacity &&
+                       hAlign == model.hAlign &&
+                       vAlign == model.vAlign &&
+                       EqualityComparer<UIValue>.Default.Equals(width, model.width) &&
+                       EqualityComparer<UIValue>.Default.Equals(height, model.height) &&
+                       EqualityComparer<UIValue>.Default.Equals(positionX, model.positionX) &&
+                       EqualityComparer<UIValue>.Default.Equals(positionY, model.positionY) &&
+                       isPointerBlocker == model.isPointerBlocker &&
+                       onClick == model.onClick &&
+                       source == model.source &&
+                       sourceLeft == model.sourceLeft &&
+                       sourceTop == model.sourceTop &&
+                       sourceWidth == model.sourceWidth &&
+                       sourceHeight == model.sourceHeight &&
+                       paddingTop == model.paddingTop &&
+                       paddingRight == model.paddingRight &&
+                       paddingBottom == model.paddingBottom &&
+                       paddingLeft == model.paddingLeft &&
+                       sizeInPixels == model.sizeInPixels;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = 382117979;
+                hashCode = hashCode * -1521134295 + base.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(parentComponent);
+                hashCode = hashCode * -1521134295 + visible.GetHashCode();
+                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hAlign);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vAlign);
+                hashCode = hashCode * -1521134295 + width.GetHashCode();
+                hashCode = hashCode * -1521134295 + height.GetHashCode();
+                hashCode = hashCode * -1521134295 + positionX.GetHashCode();
+                hashCode = hashCode * -1521134295 + positionY.GetHashCode();
+                hashCode = hashCode * -1521134295 + isPointerBlocker.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(onClick);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(source);
+                hashCode = hashCode * -1521134295 + sourceLeft.GetHashCode();
+                hashCode = hashCode * -1521134295 + sourceTop.GetHashCode();
+                hashCode = hashCode * -1521134295 + sourceWidth.GetHashCode();
+                hashCode = hashCode * -1521134295 + sourceHeight.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingTop.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingRight.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingBottom.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingLeft.GetHashCode();
+                hashCode = hashCode * -1521134295 + sizeInPixels.GetHashCode();
+                return hashCode;
+            }
         }
 
         public override string referencesContainerPrefabName => "UIImage";
@@ -48,7 +111,7 @@ namespace DCL.Components
 
         Coroutine fetchRoutine;
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             RectTransform parentRecTransform = referencesContainer.GetComponentInParent<RectTransform>();
 

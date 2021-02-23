@@ -29,12 +29,12 @@ namespace DCL.Components
 
         public void UpdateFromJSON(string json)
         {
-            UpdateFromObject(model.GetModelFromJSON(json));
+            UpdateFromObject(model.GetDataFromJSON(json));
         }
 
         public void UpdateFromObject(BaseModel model)
         {
-            updateHandler.ApplyChangesIfModified(model);
+            SetModel(model);
         }
 
         public BaseDisposable(DCL.Controllers.ParcelScene scene)
@@ -101,7 +101,7 @@ namespace DCL.Components
             DetachFromEveryEntity();
         }
 
-        public BaseModel GetModel() => model;
+        public virtual BaseModel GetModel() => model;
 
         public abstract IEnumerator ApplyChanges(BaseModel model);
 
@@ -137,7 +137,7 @@ namespace DCL.Components
         public void SetModel(BaseModel newModel)
         {
             model = newModel;
-            UpdateFromObject(model);
+            updateHandler.ApplyChangesIfModified(model);
         }
     }
 }

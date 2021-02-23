@@ -1,30 +1,49 @@
 using System.Collections;
+using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Models;
 
 namespace DCL.Components
 {
     public class DCLAudioStream : BaseComponent, IOutOfSceneBoundariesHandler
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string url;
             public bool playing = false;
             public float volume = 1;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       url == model.url &&
+                       playing == model.playing &&
+                       volume == model.volume;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = 1642971146;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(url);
+                hashCode = hashCode * -1521134295 + playing.GetHashCode();
+                hashCode = hashCode * -1521134295 + volume.GetHashCode();
+                return hashCode;
+            }
         }
 
-        public Model model;
         private bool isPlaying = false;
         private float settingsVolume = 0;
         private bool isDestroyed = false;
+        private Model prevModel = new Model();
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
@@ -33,13 +52,12 @@ namespace DCL.Components
             if (isDestroyed)
                 yield break;
 
-            Model prevModel = model;
-            model = Utils.SafeFromJson<Model>(newJson);
-            bool forceUpdate = prevModel.volume != this.model.volume;
+            Model model = (Model)newModel;
+            bool forceUpdate = prevModel.volume != model.volume;
             settingsVolume = Settings.i.generalSettings.sfxVolume;
 
             UpdatePlayingState(forceUpdate);
-
+            prevModel = model;
             yield return null;
         }
 
@@ -75,6 +93,7 @@ namespace DCL.Components
 
             bool canPlayStream = IsPlayerInSameSceneAsComponent(CommonScriptableObjects.sceneID) && CommonScriptableObjects.rendererState;
 
+            Model model = (Model) this.model;
             bool shouldStopStream = (isPlaying && !model.playing) || (isPlaying && !canPlayStream);
             bool shouldStartStream = !isPlaying && canPlayStream && model.playing;
 
@@ -121,12 +140,14 @@ namespace DCL.Components
 
         private void StopStreaming()
         {
+            Model model = (Model) this.model;
             isPlaying = false;
             Interface.WebInterface.SendAudioStreamEvent(model.url, false, model.volume * settingsVolume);
         }
 
         private void StartStreaming()
         {
+            Model model = (Model) this.model;
             isPlaying = true;
             Interface.WebInterface.SendAudioStreamEvent(model.url, true, model.volume * settingsVolume);
         }
@@ -142,20 +163,15 @@ namespace DCL.Components
             }
             else
             {
+                Model model = (Model) this.model;
                 //Set volume to 0 (temporary solution until the refactor in #1421)
                 Interface.WebInterface.SendAudioStreamEvent(model.url, true, 0);
             }
         }
 
-        public override void SetModel(object model)
+        public override int GetClassId()
         {
-            Model prevModel = this.model;
-            this.model = (Model)model;
-
-            bool forceUpdate = prevModel.volume != this.model.volume;
-            settingsVolume = Settings.i.generalSettings.sfxVolume;
-
-            UpdatePlayingState(forceUpdate);
+            return (int) CLASS_ID_COMPONENT.AUDIO_STREAM;
         }
     }
 }

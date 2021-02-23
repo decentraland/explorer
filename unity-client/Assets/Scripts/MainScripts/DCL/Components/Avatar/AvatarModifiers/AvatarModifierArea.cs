@@ -6,16 +6,36 @@ using System.Collections.Generic;
 using System.Linq;
 using DCL.Helpers;
 using UnityEngine;
+using DCL.Models;
 
 public class AvatarModifierArea : BaseComponent
 {
     [Serializable]
-    public class Model
+    public class Model : BaseModel
     {
         // TODO: Change to TriggerArea and handle deserialization with subclasses
         public BoxTriggerArea area;
         public string[] modifiers;
 
+        public override bool Equals(object obj)
+        {
+            return obj is Model model &&
+                   EqualityComparer<BoxTriggerArea>.Default.Equals(area, model.area) &&
+                   EqualityComparer<string[]>.Default.Equals(modifiers, model.modifiers);
+        }
+
+        public override BaseModel GetDataFromJSON(string json)
+        {
+            return Utils.SafeFromJson<Model>(json);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = -64555011;
+            hashCode = hashCode * -1521134295 + EqualityComparer<BoxTriggerArea>.Default.GetHashCode(area);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string[]>.Default.GetHashCode(modifiers);
+            return hashCode;
+        }
     }
 
     [HideInInspector]
@@ -36,12 +56,7 @@ public class AvatarModifierArea : BaseComponent
         };
     }
 
-    public override object GetModel()
-    {
-        return model;
-    }
-
-    public override IEnumerator ApplyChanges(string newJson)
+    public override IEnumerator ApplyChanges(BaseModel newModel)
     {
 
         // Clean up
@@ -49,8 +64,6 @@ public class AvatarModifierArea : BaseComponent
         OnAvatarEnter = null;
         OnAvatarExit = null;
 
-        // Update
-        model = Utils.SafeFromJson<Model>(newJson);
         ApplyCurrentModel();
 
         yield break;
@@ -146,17 +159,6 @@ public class AvatarModifierArea : BaseComponent
         }
     }
 
-    public override void SetModel(object model)
-    {
-        RemoveAllModifiers();
-        OnAvatarEnter = null;
-        OnAvatarExit = null;
-
-        this.model = (Model)model;
-
-        ApplyCurrentModel();
-    }
-
     private void ApplyCurrentModel()
     {
         if (model.modifiers != null)
@@ -171,5 +173,10 @@ public class AvatarModifierArea : BaseComponent
                 OnAvatarExit += modifier.RemoveModifier;
             }
         }
+    }
+
+    public override int GetClassId()
+    {
+        return (int) CLASS_ID_COMPONENT.AVATAR_MODIFIER_AREA;
     }
 }

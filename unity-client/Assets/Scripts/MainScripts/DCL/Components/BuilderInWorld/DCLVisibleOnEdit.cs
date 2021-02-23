@@ -14,12 +14,26 @@ using UnityEngine;
 public class DCLVisibleOnEdit : BaseDisposable
 {
     [System.Serializable]
-    public class Model
+    public class Model : BaseModel
     {
         public bool isVisible;
-    }
 
-    public Model model;
+        public override bool Equals(object obj)
+        {
+            return obj is Model model &&
+                   isVisible == model.isVisible;
+        }
+
+        public override BaseModel GetDataFromJSON(string json)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return -1553349351 + isVisible.GetHashCode();
+        }
+    }
 
     public DCLVisibleOnEdit(ParcelScene scene) : base(scene)
     {
@@ -31,20 +45,9 @@ public class DCLVisibleOnEdit : BaseDisposable
         return (int)CLASS_ID.VISIBLE_ON_EDIT;
     }
 
-    public override object GetModel()
+    public override IEnumerator ApplyChanges(BaseModel newModel)
     {
-        return model;
-    }
-
-    public override IEnumerator ApplyChanges(string newJson)
-    {
-        Model newModel = Utils.SafeFromJson<Model>(newJson);
-        if (newModel.isVisible != model.isVisible)
-        {
-            model = newModel;
-            RaiseOnAppliedChanges();
-        }
-
+        RaiseOnAppliedChanges();
         return null;
     }
 

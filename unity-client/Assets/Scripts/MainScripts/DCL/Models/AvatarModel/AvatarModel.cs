@@ -1,9 +1,10 @@
+using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class AvatarModel
+public class AvatarModel : BaseModel
 {
     public string id;
     public string name;
@@ -43,5 +44,10 @@ public class AvatarModel
         expressionTriggerId = other.expressionTriggerId;
         expressionTriggerTimestamp = other.expressionTriggerTimestamp;
         wearables = new List<string>(other.wearables);
+    }
+
+    public override BaseModel GetDataFromJSON(string json)
+    {
+        return Utils.SafeFromJson<AvatarModel>(json);
     }
 }

@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Components
@@ -10,7 +11,7 @@ namespace DCL.Components
     public class DCLAudioClip : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string url;
             public bool loop = false;
@@ -18,9 +19,32 @@ namespace DCL.Components
 
             [Range(0f, 1f)]
             public double volume = 1f;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       url == model.url &&
+                       loop == model.loop &&
+                       shouldTryToLoad == model.shouldTryToLoad &&
+                       volume == model.volume;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -359229882;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(url);
+                hashCode = hashCode * -1521134295 + loop.GetHashCode();
+                hashCode = hashCode * -1521134295 + shouldTryToLoad.GetHashCode();
+                hashCode = hashCode * -1521134295 + volume.GetHashCode();
+                return hashCode;
+            }
         }
 
-        public Model model;
         public AudioClip audioClip;
         private bool isDisposed = false;
 
@@ -40,6 +64,20 @@ namespace DCL.Components
             model = new Model();
 
             loadingState = LoadState.IDLE;
+        }
+
+        public double GetVolume()
+        {
+            return ((Model)model).volume;
+        }
+
+        public bool GetIsLoop()
+        {
+            return ((Model)model).loop;
+        }
+        public bool GetShouldTryLoad()
+        {
+            return ((Model)model).shouldTryToLoad;
         }
 
         public override int GetClassId()
@@ -81,7 +119,7 @@ namespace DCL.Components
                 && loadingState != LoadState.LOADING_COMPLETED)
             {
                 loadingState = LoadState.LOADING_IN_PROGRESS;
-
+                Model model = (Model) this.model;
                 if (scene.contentProvider.HasContentsUrl(model.url))
                 {
                     yield return Utils.FetchAudioClip(scene.contentProvider.GetContentsUrl(model.url),
@@ -100,12 +138,7 @@ namespace DCL.Components
             }
         }
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
@@ -114,7 +147,7 @@ namespace DCL.Components
             if(isDisposed)
                 yield break;
 
-            model = Utils.SafeFromJson<Model>(newJson);
+            Model model =  (Model) newModel;
 
             if (!string.IsNullOrEmpty(model.url))
             {

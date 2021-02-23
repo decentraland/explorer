@@ -17,6 +17,11 @@ namespace DCL.Components
             public bool openEnded = false;
             public float? radius;
             public float arc = 360f;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public ConeShape(ParcelScene scene) : base(scene) { }
@@ -28,6 +33,7 @@ namespace DCL.Components
 
         public override Mesh GenerateGeometry()
         {
+            var model = (Model)this.model;
             return PrimitiveMeshBuilder.BuildCone(50, model.radiusTop, model.radiusBottom, 2f, 0f, true, false);
         }
 
@@ -36,7 +42,7 @@ namespace DCL.Components
             if (currentMesh == null) return true;
 
             Model newConeModel = newModel as Model;
-
+            var model = (Model)this.model;
             return newConeModel.radius != model.radius
                     || newConeModel.radiusTop != model.radiusTop
                     || newConeModel.radiusBottom != model.radiusBottom

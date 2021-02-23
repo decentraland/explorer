@@ -123,7 +123,7 @@ public class EntityInformationController : MonoBehaviour
         if (entity.HasSmartItemComponent())
         {
             if(entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-                smartItemListView.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent) baseComponent).model.values);
+                smartItemListView.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent) baseComponent).GetValues());
         }
         else
         {
@@ -165,8 +165,6 @@ public class EntityInformationController : MonoBehaviour
         if (currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
         {
             SmartItemComponent smartItemComponent = (SmartItemComponent)component;
-            SmartItemComponent.Model modelo =  smartItemComponent.model;
-            modelo.ToString();
             OnSmartItemComponentUpdate?.Invoke(currentEntity);
         }
     }

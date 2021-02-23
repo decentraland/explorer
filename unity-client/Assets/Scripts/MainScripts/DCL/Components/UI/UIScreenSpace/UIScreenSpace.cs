@@ -45,9 +45,9 @@ namespace DCL.Components
         {
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            model = Utils.SafeFromJson<Model>(newJson);
+            var model = (Model) newModel;
 
             if (scene.uiScreenSpace == null)
             {
@@ -99,6 +99,8 @@ namespace DCL.Components
         {
             if (canvas != null && scene != null)
             {
+                var model = (Model) this.model;
+
                 bool isInsideSceneBounds = scene.IsInsideSceneBoundaries(Utils.WorldToGridPosition(currentCharacterPosition.worldPosition));
                 bool shouldBeVisible = scene.isPersistent || (model.visible && isInsideSceneBounds && !CommonScriptableObjects.allUIHidden.Get());
                 canvasGroup.alpha = shouldBeVisible ? 1f : 0f;

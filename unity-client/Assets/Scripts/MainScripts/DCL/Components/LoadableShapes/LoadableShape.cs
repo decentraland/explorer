@@ -16,9 +16,13 @@ namespace DCL.Components
         {
             public string src;
             public string assetId;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
-        public Model model = new Model();
         protected Model previousModel = new Model();
 
         protected static Dictionary<GameObject, LoadWrapper> attachedLoaders = new Dictionary<GameObject, LoadWrapper>();
@@ -49,6 +53,7 @@ namespace DCL.Components
 
         public LoadableShape(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()
@@ -56,28 +61,26 @@ namespace DCL.Components
             return -1;
         }
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             return null;
         }
 
         public override bool IsVisible()
         {
+            Model model = (Model)this.model;
             return model.visible;
         }
 
         public override bool HasCollisions()
         {
+            Model model = (Model)this.model;
             return model.withCollisions;
         }
 
         public string GetAssetId()
         {
+            Model model = (Model)this.model;
             return model.assetId;
         }
     }
@@ -121,10 +124,10 @@ namespace DCL.Components
             OnAttach += AttachShape;
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            previousModel = model;
-            model = Utils.SafeFromJson<LoadWrapperModelType>(newJson);
+           
+            LoadWrapperModelType model = (LoadWrapperModelType) newModel;
 
             bool updateVisibility = previousModel.visible != model.visible;
             bool updateCollisions = previousModel.withCollisions != model.withCollisions || previousModel.isPointerBlocker != model.isPointerBlocker;
@@ -144,7 +147,7 @@ namespace DCL.Components
 
                 entity.OnShapeUpdated?.Invoke(entity);
             }
-
+            previousModel = model;
             return null;
         }
 
@@ -242,7 +245,7 @@ namespace DCL.Components
 
             entity.meshesInfo.renderers = entity.meshRootGameObject.GetComponentsInChildren<Renderer>();
 
-            var model = (entity.meshesInfo.currentShape as LoadableShape).model;
+            var model = (Model) (entity.meshesInfo.currentShape as LoadableShape).GetModel();
             ConfigureVisibility(entity.meshRootGameObject, model.visible, loadWrapper.entity.meshesInfo.renderers);
 
             ConfigureColliders(entity);

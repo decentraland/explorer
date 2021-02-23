@@ -106,9 +106,9 @@ namespace Tests
             yield return audioClip.routine;
 
             // 2. Check configured values
-            Assert.IsTrue(audioClip.model.loop);
-            Assert.IsFalse(audioClip.model.shouldTryToLoad);
-            Assert.AreEqual(0.8f, audioClip.model.volume);
+            Assert.IsTrue(audioClip.GetIsLoop());
+            Assert.IsFalse(audioClip.GetShouldTryLoad());
+            Assert.AreEqual(0.8f, audioClip.GetVolume());
 
             // 3. Update component with missing values
             componentModel = new DCLAudioClip.Model { };
@@ -118,9 +118,9 @@ namespace Tests
             yield return audioClip.routine;
 
             // 4. Check defaulted values
-            Assert.IsFalse(audioClip.model.loop);
-            Assert.IsTrue(audioClip.model.shouldTryToLoad);
-            Assert.AreEqual(1f, audioClip.model.volume);
+            Assert.IsFalse(audioClip.GetIsLoop());
+            Assert.IsTrue(audioClip.GetShouldTryLoad());
+            Assert.AreEqual(1f, audioClip.GetVolume());
         }
 
         [UnityTest]
@@ -208,7 +208,7 @@ namespace Tests
             AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.model.volume);
+            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.GetVolume());
         }
 
         [UnityTest]
@@ -260,7 +260,7 @@ namespace Tests
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.model.volume);
+            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.GetVolume());
         }
 
         [Test]

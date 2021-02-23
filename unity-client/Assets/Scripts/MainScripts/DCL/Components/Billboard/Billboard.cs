@@ -2,36 +2,52 @@ using DCL.Components;
 using System.Collections;
 using DCL.Helpers;
 using UnityEngine;
+using DCL.Models;
 
 namespace DCL
 {
     public class Billboard : BaseComponent
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public bool x = true;
             public bool y = true;
             public bool z = true;
-        }
 
-        public Model model = new Model();
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       x == model.x &&
+                       y == model.y &&
+                       z == model.z;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json); 
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = 373119288;
+                hashCode = hashCode * -1521134295 + x.GetHashCode();
+                hashCode = hashCode * -1521134295 + y.GetHashCode();
+                hashCode = hashCode * -1521134295 + z.GetHashCode();
+                return hashCode;
+            }
+        }
 
         Transform entityTransform;
         Vector3Variable cameraPosition => CommonScriptableObjects.cameraPosition;
         Vector3 lastPosition;
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             cameraPosition.OnChange -= CameraPositionChanged;
             cameraPosition.OnChange += CameraPositionChanged;
 
-            model = Utils.SafeFromJson<Model>(newJson);
+            Model model = (Model)newModel;
 
             ChangeOrientation();
 
@@ -48,6 +64,11 @@ namespace DCL
 
                 entityTransform = entity.gameObject.transform;
             }
+        }
+
+        new public Model GetModel()
+        {
+            return (Model)model;
         }
 
         public void OnDestroy()
@@ -73,6 +94,7 @@ namespace DCL
             bool hasTextShape = entity.components.ContainsKey(Models.CLASS_ID_COMPONENT.TEXT_SHAPE);
             Vector3 lookAtDir = hasTextShape ? (entityTransform.position - cameraPosition) : (cameraPosition - entityTransform.position);
 
+            Model model = (Model) this.model;
             // Note (Zak): This check is here to avoid normalizing twice if not needed
             if (!(model.x && model.y && model.z))
             {
@@ -104,9 +126,9 @@ namespace DCL
             ChangeOrientation();
         }
 
-        public override void SetModel(object model)
+        public override int GetClassId()
         {
-            this.model = (Model)model;
+            return (int) CLASS_ID_COMPONENT.BILLBOARD;
         }
     }
 }

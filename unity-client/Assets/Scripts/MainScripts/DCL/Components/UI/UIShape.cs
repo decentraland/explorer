@@ -2,6 +2,7 @@ using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -81,9 +82,9 @@ namespace DCL.Components
         /// <summary>
         /// This is called by UIShapeUpdateHandler before calling ApplyChanges.
         /// </summary>
-        public void PreApplyChanges(string newJson)
+        public void PreApplyChanges(BaseModel newModel)
         {
-            model = Utils.SafeFromJson<ModelType>(newJson);
+            model = (ModelType) newModel;
 
             raiseOnAttached = false;
             firstApplyChangesCall = false;
@@ -139,7 +140,7 @@ namespace DCL.Components
     public class UIShape : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string name;
             public string parentComponent;
@@ -153,6 +154,46 @@ namespace DCL.Components
             public UIValue positionY = new UIValue(0f);
             public bool isPointerBlocker = true;
             public string onClick;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       name == model.name &&
+                       parentComponent == model.parentComponent &&
+                       visible == model.visible &&
+                       opacity == model.opacity &&
+                       hAlign == model.hAlign &&
+                       vAlign == model.vAlign &&
+                       EqualityComparer<UIValue>.Default.Equals(width, model.width) &&
+                       EqualityComparer<UIValue>.Default.Equals(height, model.height) &&
+                       EqualityComparer<UIValue>.Default.Equals(positionX, model.positionX) &&
+                       EqualityComparer<UIValue>.Default.Equals(positionY, model.positionY) &&
+                       isPointerBlocker == model.isPointerBlocker &&
+                       onClick == model.onClick;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -495793;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(parentComponent);
+                hashCode = hashCode * -1521134295 + visible.GetHashCode();
+                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hAlign);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vAlign);
+                hashCode = hashCode * -1521134295 + width.GetHashCode();
+                hashCode = hashCode * -1521134295 + height.GetHashCode();
+                hashCode = hashCode * -1521134295 + positionX.GetHashCode();
+                hashCode = hashCode * -1521134295 + positionY.GetHashCode();
+                hashCode = hashCode * -1521134295 + isPointerBlocker.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(onClick);
+                return hashCode;
+            }
         }
 
         public override string componentName => GetDebugName();
@@ -160,11 +201,11 @@ namespace DCL.Components
         public UIReferencesContainer referencesContainer;
         public RectTransform childHookRectTransform;
 
-        public Model model = new Model();
         public UIShape parentUIComponent { get; protected set; }
 
         public UIShape(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()
@@ -174,6 +215,7 @@ namespace DCL.Components
 
         public string GetDebugName()
         {
+            Model model = (Model) this.model;
             if (string.IsNullOrEmpty(model.name))
             {
                 return GetType().Name;
@@ -184,18 +226,14 @@ namespace DCL.Components
             }
         }
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newJson)
         {
             return null;
         }
 
         internal T InstantiateUIGameObject<T>(string prefabPath) where T : UIReferencesContainer
         {
+            Model model = (Model)this.model;
             GameObject uiGameObject = null;
             bool targetParentExists = !string.IsNullOrEmpty(model.parentComponent) &&
                                       scene.disposableComponents.ContainsKey(model.parentComponent);
@@ -260,6 +298,7 @@ namespace DCL.Components
             {
                 parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
             }
+            Model model = (Model)this.model;
 
             referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 model.width.GetScaledValue(parentTransform.rect.width));
@@ -279,6 +318,7 @@ namespace DCL.Components
             Utils.ForceRebuildLayoutImmediate(parentTransform);
             referencesContainer.layoutElement.ignoreLayout = true;
 
+            Model model = (Model)this.model;
             // Reposition
             Vector3 position = Vector3.zero;
             position.x = model.positionX.GetScaledValue(parentTransform.rect.width);
@@ -384,6 +424,7 @@ namespace DCL.Components
 
         protected void ConfigureAlignment(LayoutGroup layout)
         {
+            Model model = (Model)this.model;
             switch (model.vAlign)
             {
                 case "top":

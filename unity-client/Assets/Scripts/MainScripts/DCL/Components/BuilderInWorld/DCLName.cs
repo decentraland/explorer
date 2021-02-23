@@ -30,14 +30,14 @@ public class DCLName : BaseDisposable
             return value.Equals(item.value);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public override BaseModel GetModelFromJSON(string json)
+        public override BaseModel GetDataFromJSON(string json)
         {
             return JsonUtility.FromJson<Model>(json);
+        }
+
+        public override int GetHashCode()
+        {
+            return -1584136870 + EqualityComparer<string>.Default.GetHashCode(value);
         }
     }
 

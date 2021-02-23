@@ -19,7 +19,7 @@ namespace DCL.Components
         private const float OUTOFSCENE_TEX_UPDATE_INTERVAL = 1.5f;
 
         [System.Serializable]
-        new public class Model
+        new public class Model : BaseModel
         {
             public string videoClipId;
             public bool playing = false;
@@ -29,9 +29,39 @@ namespace DCL.Components
             public float seek = -1;
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
-        }
 
-        new protected internal Model model;
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       videoClipId == model.videoClipId &&
+                       playing == model.playing &&
+                       volume == model.volume &&
+                       playbackRate == model.playbackRate &&
+                       loop == model.loop &&
+                       seek == model.seek &&
+                       wrap == model.wrap &&
+                       samplingMode == model.samplingMode;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -652872899;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(videoClipId);
+                hashCode = hashCode * -1521134295 + playing.GetHashCode();
+                hashCode = hashCode * -1521134295 + volume.GetHashCode();
+                hashCode = hashCode * -1521134295 + playbackRate.GetHashCode();
+                hashCode = hashCode * -1521134295 + loop.GetHashCode();
+                hashCode = hashCode * -1521134295 + seek.GetHashCode();
+                hashCode = hashCode * -1521134295 + wrap.GetHashCode();
+                hashCode = hashCode * -1521134295 + samplingMode.GetHashCode();
+                return hashCode;
+            }
+        }
 
         internal WebVideoPlayer texturePlayer;
         private Coroutine texturePlayerUpdateRoutine;
@@ -50,7 +80,7 @@ namespace DCL.Components
             model = new Model();
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
@@ -59,7 +89,7 @@ namespace DCL.Components
             if(isDisposed)
                 yield break;
 
-            model = Utils.SafeFromJson<Model>(newJson);
+            var model = (Model) newModel;
 
             unitySamplingMode = model.samplingMode;
 
@@ -150,6 +180,11 @@ namespace DCL.Components
                 texturePlayer.SetPlaybackRate(model.playbackRate);
                 texturePlayer.SetLoop(model.loop);
             }
+        }
+
+        public float GetVolume()
+        {
+            return ((Model)model).volume;
         }
 
         private bool HasTexturePropertiesChanged()
@@ -462,7 +497,7 @@ namespace DCL.Components
 
             bool MaterialInfo.IsVisible()
             {
-                if (!shape.model.visible) return false;
+                if (!((UIShape.Model)shape.GetModel()).visible) return false;
                 return IsParentVisible(shape);
             }
 

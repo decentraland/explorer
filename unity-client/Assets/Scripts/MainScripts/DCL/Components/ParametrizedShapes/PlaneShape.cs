@@ -13,6 +13,10 @@ namespace DCL.Components
             public float[] uvs;
             public float width = 1f; // Plane
             public float height = 1f; // Plane
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public PlaneShape(ParcelScene scene) : base(scene)
@@ -27,7 +31,7 @@ namespace DCL.Components
         public override Mesh GenerateGeometry()
         {
             Mesh mesh = PrimitiveMeshBuilder.BuildPlane(1f);
-
+            var model = (Model)this.model;
             if (model.uvs != null && model.uvs.Length > 0)
             {
                 mesh.uv = Utils.FloatArrayToV2List(model.uvs);
@@ -42,7 +46,7 @@ namespace DCL.Components
                 return true;
 
             Model newPlaneModel = newModel as Model;
-
+            var model = (Model)this.model;
             if (newPlaneModel.uvs != null && model.uvs != null)
             {
                 if (newPlaneModel.uvs.Length != model.uvs.Length)

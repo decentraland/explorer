@@ -322,7 +322,7 @@ namespace DCL.Controllers
             //NOTE: (Adrian) Evaluate if all created components should be handle as equals instead of different
             foreach (KeyValuePair<string, UUIDComponent> component in entity.uuidComponents)
             {
-                EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.model);
+                EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.GetModel());
             }
 
             return newEntity;

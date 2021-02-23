@@ -2,23 +2,56 @@ using DCL.Helpers;
 using System.Collections;
 using DCL.Controllers;
 using UnityEngine;
+using DCL.Models;
+using System.Collections.Generic;
 
 namespace DCL.Components
 {
     public class DCLAudioSource : BaseComponent, IOutOfSceneBoundariesHandler
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string audioClipId;
             public bool playing;
             public float volume = 1f;
             public bool loop = false;
             public float pitch = 1f;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override bool Equals(object obj)
+            {
+                var item = obj as Model;
+
+                if (item == null)
+                {
+                    return false;
+                }
+
+                return audioClipId.Equals(item.audioClipId) ||
+                       playing.Equals(item.playing) ||
+                       volume.Equals(item.volume) ||
+                       loop.Equals(item.loop) ||
+                       pitch.Equals(item.pitch);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = 1859268890;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(audioClipId);
+                hashCode = hashCode * -1521134295 + playing.GetHashCode();
+                hashCode = hashCode * -1521134295 + volume.GetHashCode();
+                hashCode = hashCode * -1521134295 + loop.GetHashCode();
+                hashCode = hashCode * -1521134295 + pitch.GetHashCode();
+                return hashCode;
+            }
         }
 
         public float playTime => audioSource.time;
-        public Model model;
         internal AudioSource audioSource;
         DCLAudioClip lastDCLAudioClip;
 
@@ -39,12 +72,12 @@ namespace DCL.Components
             lastDCLAudioClip = dclAudioClip;
         }
 
-        public override object GetModel()
+        public double GetVolume()
         {
-            return model;
+            return ((Model)model).volume;
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel baseModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
@@ -52,8 +85,6 @@ namespace DCL.Components
             //TODO: Analyze if we can catch this upstream and stop the IEnumerator
             if (isDestroyed)
                 yield break;
-
-            model = Utils.SafeFromJson<Model>(newJson);
 
             CommonScriptableObjects.sceneID.OnChange -= OnCurrentSceneChanged;
             CommonScriptableObjects.sceneID.OnChange += OnCurrentSceneChanged;
@@ -71,6 +102,7 @@ namespace DCL.Components
                 return;
             }
 
+            Model model = (Model) this.model;
             audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) ? model.volume : 0f;
             audioSource.loop = model.loop;
             audioSource.pitch = model.pitch;
@@ -113,6 +145,7 @@ namespace DCL.Components
         {
             if (audioSource != null)
             {
+                Model model = (Model)this.model;
                 audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
             }
         }
@@ -152,7 +185,7 @@ namespace DCL.Components
             {
                 audioSource.clip = clip.audioClip;
             }
-
+            Model model = (Model)this.model;
             if (audioSource.enabled && model.playing && !audioSource.isPlaying)
             {
                 //To remove a pesky and quite unlikely warning when the audiosource is out of scenebounds
@@ -160,10 +193,9 @@ namespace DCL.Components
             }
         }
 
-        public override void SetModel(object model)
+        public override int GetClassId()
         {
-            this.model = (Model)model;
-            ApplyCurrentModel();
+            return (int) CLASS_ID_COMPONENT.AUDIO_SOURCE;
         }
     }
 }

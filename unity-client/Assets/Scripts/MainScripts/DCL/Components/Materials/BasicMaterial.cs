@@ -2,6 +2,7 @@ using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -10,16 +11,37 @@ namespace DCL.Components
     public class BasicMaterial : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string texture;
 
             // value that defines if a pixel is visible or invisible (no transparency gradients)
             [Range(0f, 1f)] public float alphaTest = 0.5f;
             public bool castShadows = true;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       texture == model.texture &&
+                       alphaTest == model.alphaTest &&
+                       castShadows == model.castShadows;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json); 
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -136990414;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(texture);
+                hashCode = hashCode * -1521134295 + alphaTest.GetHashCode();
+                hashCode = hashCode * -1521134295 + castShadows.GetHashCode();
+                return hashCode;
+            }
         }
 
-        public Model model = new Model();
         public Material material;
 
         private DCLTexture dclTexture = null;
@@ -37,6 +59,11 @@ namespace DCL.Components
             OnDetach += OnMaterialDetached;
         }
 
+        new public Model GetModel()
+        {
+            return (Model)model;
+        }
+
         public override int GetClassId()
         {
             return (int)CLASS_ID.BASIC_MATERIAL;
@@ -51,12 +78,7 @@ namespace DCL.Components
             base.AttachTo(entity);
         }
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             if (material == null)
             {
@@ -67,7 +89,7 @@ namespace DCL.Components
             material.name = "BasicMaterial_" + id;
 #endif
 
-            model = Utils.SafeFromJson<Model>(newJson);
+            Model model = (Model) newModel;
 
             if (!string.IsNullOrEmpty(model.texture))
             {
@@ -122,6 +144,8 @@ namespace DCL.Components
             var meshRenderer = meshGameObject.GetComponent<MeshRenderer>();
             if (meshRenderer == null)
                 return;
+
+            Model model = (Model) this.model;
 
             meshRenderer.shadowCastingMode = model.castShadows ? ShadowCastingMode.On : ShadowCastingMode.Off;
             if (meshRenderer.sharedMaterial != material)

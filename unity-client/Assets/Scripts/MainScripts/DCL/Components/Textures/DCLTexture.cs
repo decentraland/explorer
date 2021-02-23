@@ -5,18 +5,43 @@ using System;
 using System.Collections;
 using DCL.Helpers;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace DCL
 {
     public class DCLTexture : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string src;
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
             public bool hasAlpha = false;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       src == model.src &&
+                       wrap == model.wrap &&
+                       samplingMode == model.samplingMode &&
+                       hasAlpha == model.hasAlpha;
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -643838858;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(src);
+                hashCode = hashCode * -1521134295 + wrap.GetHashCode();
+                hashCode = hashCode * -1521134295 + samplingMode.GetHashCode();
+                hashCode = hashCode * -1521134295 + hasAlpha.GetHashCode();
+                return hashCode;
+            }
         }
 
         public enum BabylonWrapMode
@@ -26,7 +51,6 @@ namespace DCL
             MIRROR
         }
 
-        protected Model model;
         AssetPromise_Texture texturePromise = null;
 
         public TextureWrapMode unityWrap;
@@ -41,6 +65,7 @@ namespace DCL
 
         public DCLTexture(DCL.Controllers.ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public static IEnumerator FetchFromComponent(ParcelScene scene, string componentId,
@@ -71,12 +96,7 @@ namespace DCL
             OnFinish.Invoke(textureComponent);
         }
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
@@ -85,7 +105,7 @@ namespace DCL
             if(isDisposed)
                 yield break;
 
-            model = Utils.SafeFromJson<Model>(newJson);
+            Model model = (Model) newModel;
 
             unitySamplingMode = model.samplingMode;
 

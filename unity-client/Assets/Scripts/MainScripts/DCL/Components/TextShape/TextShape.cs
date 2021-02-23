@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Models;
 using TMPro;
 using UnityEngine;
 
@@ -9,7 +11,7 @@ namespace DCL.Components
     public class TextShape : BaseComponent
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public bool billboard;
 
@@ -48,31 +50,98 @@ namespace DCL.Components
             [Header("Text outline properties")] public float outlineWidth = 0f;
 
             public Color outlineColor = Color.white;
+
+            public override bool Equals(object obj)
+            {
+                return obj is Model model &&
+                       billboard == model.billboard &&
+                       value == model.value &&
+                       visible == model.visible &&
+                       color.Equals(model.color) &&
+                       opacity == model.opacity &&
+                       fontSize == model.fontSize &&
+                       fontAutoSize == model.fontAutoSize &&
+                       fontWeight == model.fontWeight &&
+                       font == model.font &&
+                       hTextAlign == model.hTextAlign &&
+                       vTextAlign == model.vTextAlign &&
+                       width == model.width &&
+                       height == model.height &&
+                       adaptWidth == model.adaptWidth &&
+                       adaptHeight == model.adaptHeight &&
+                       paddingTop == model.paddingTop &&
+                       paddingRight == model.paddingRight &&
+                       paddingBottom == model.paddingBottom &&
+                       paddingLeft == model.paddingLeft &&
+                       lineSpacing == model.lineSpacing &&
+                       lineCount == model.lineCount &&
+                       textWrapping == model.textWrapping &&
+                       shadowBlur == model.shadowBlur &&
+                       shadowOffsetX == model.shadowOffsetX &&
+                       shadowOffsetY == model.shadowOffsetY &&
+                       shadowColor.Equals(model.shadowColor) &&
+                       outlineWidth == model.outlineWidth &&
+                       outlineColor.Equals(model.outlineColor);
+            }
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+
+            public override int GetHashCode()
+            {
+                int hashCode = -852556059;
+                hashCode = hashCode * -1521134295 + billboard.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(value);
+                hashCode = hashCode * -1521134295 + visible.GetHashCode();
+                hashCode = hashCode * -1521134295 + color.GetHashCode();
+                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
+                hashCode = hashCode * -1521134295 + fontSize.GetHashCode();
+                hashCode = hashCode * -1521134295 + fontAutoSize.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(fontWeight);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(font);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hTextAlign);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vTextAlign);
+                hashCode = hashCode * -1521134295 + width.GetHashCode();
+                hashCode = hashCode * -1521134295 + height.GetHashCode();
+                hashCode = hashCode * -1521134295 + adaptWidth.GetHashCode();
+                hashCode = hashCode * -1521134295 + adaptHeight.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingTop.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingRight.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingBottom.GetHashCode();
+                hashCode = hashCode * -1521134295 + paddingLeft.GetHashCode();
+                hashCode = hashCode * -1521134295 + lineSpacing.GetHashCode();
+                hashCode = hashCode * -1521134295 + lineCount.GetHashCode();
+                hashCode = hashCode * -1521134295 + textWrapping.GetHashCode();
+                hashCode = hashCode * -1521134295 + shadowBlur.GetHashCode();
+                hashCode = hashCode * -1521134295 + shadowOffsetX.GetHashCode();
+                hashCode = hashCode * -1521134295 + shadowOffsetY.GetHashCode();
+                hashCode = hashCode * -1521134295 + shadowColor.GetHashCode();
+                hashCode = hashCode * -1521134295 + outlineWidth.GetHashCode();
+                hashCode = hashCode * -1521134295 + outlineColor.GetHashCode();
+                return hashCode;
+            }
         }
 
-        public Model model;
         public TextMeshPro text;
         public RectTransform rectTransform;
+        public Model cachedModel;
 
         public void Update()
         {
-            if (model.billboard && Camera.main != null)
+            if (cachedModel.billboard && Camera.main != null)
             {
                 transform.forward = Camera.main.transform.forward;
             }
         }
 
-        public override object GetModel()
-        {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             if (rectTransform == null) yield break;
 
-            model = Utils.SafeFromJson<Model>(newJson);
-
+            Model model = (Model) newModel;
+            cachedModel = model;
             PrepareRectTransform();
 
             yield return ApplyModelChanges(scene, text, model);
@@ -181,16 +250,9 @@ namespace DCL.Components
             }
         }
 
-        public override void SetModel(object model)
-        {
-            this.model = (Model)model;
-            PrepareRectTransform();
-            ApplyCurrentModel();
-        }
-
         private void ApplyCurrentModel()
         {
-            ApplyModelChanges(scene, text, model);
+            ApplyModelChanges(scene, text, cachedModel);
         }
 
         private void PrepareRectTransform()
@@ -204,14 +266,19 @@ namespace DCL.Components
             // sizeDelta being reset to 0,0)
             // to fix textWrapping and avoid backwards compatibility issues as result of the size being properly set (like text alignment)
             // we only set it if textWrapping is enabled.
-            if (model.textWrapping)
+            if (cachedModel.textWrapping)
             {
-                rectTransform.sizeDelta = new Vector2(model.width, model.height);
+                rectTransform.sizeDelta = new Vector2(cachedModel.width, cachedModel.height);
             }
             else
             {
                 rectTransform.sizeDelta = Vector2.zero;
             }
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.UI_TEXT_SHAPE;
         }
     }
 }

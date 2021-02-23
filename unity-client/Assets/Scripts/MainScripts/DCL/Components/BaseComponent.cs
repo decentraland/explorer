@@ -22,11 +22,6 @@ namespace DCL.Components
         int GetClassId();
     }
 
-    public abstract class BaseModel
-    {
-        public abstract BaseModel GetModelFromJSON(string json);
-    }
-
     /// <summary>
     /// Unity is unable to yield a coroutine while is already being yielded by another one.
     /// To fix that we wrap the routine in a CustomYieldInstruction.
@@ -76,12 +71,12 @@ namespace DCL.Components
 
         public void UpdateFromJSON(string json)
         {
-            UpdateFromObject(model.GetModelFromJSON(json));
+            UpdateFromObject(model.GetDataFromJSON(json));
         }
 
         public void UpdateFromObject(BaseModel model)
         {
-            updateHandler.ApplyChangesIfModified(model);
+            SetModel(model);
         }
 
         public abstract IEnumerator ApplyChanges(BaseModel model);
@@ -94,12 +89,12 @@ namespace DCL.Components
             updateHandler.ApplyChangesIfModified(model);
         }
 
-        public BaseModel GetModel() => model;
+        public virtual BaseModel GetModel() => model;
 
         public void SetModel(BaseModel newModel)
         {
             model = newModel;
-            UpdateFromObject(model);
+            updateHandler.ApplyChangesIfModified(model);
         }
 
         public virtual ComponentUpdateHandler CreateUpdateHandler()

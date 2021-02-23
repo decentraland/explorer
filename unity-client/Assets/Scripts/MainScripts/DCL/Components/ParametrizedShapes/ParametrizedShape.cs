@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -8,7 +8,6 @@ namespace DCL.Components
 {
     public abstract class ParametrizedShape<T> : BaseShape where T : BaseShape.Model, new()
     {
-        public T model = new T();
         bool visibilityDirty = false;
         bool collisionsDirty = false;
 
@@ -33,6 +32,7 @@ namespace DCL.Components
 
         void UpdateRenderer(DecentralandEntity entity)
         {
+            var model = (T) this.model;
             if (visibilityDirty)
             {
                 ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
@@ -106,14 +106,10 @@ namespace DCL.Components
             entity.meshesInfo.CleanReferences();
         }
 
-        public override object GetModel()
+        public override IEnumerator ApplyChanges(BaseModel newModelRaw)
         {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
-        {
-            var newModel = Utils.SafeFromJson<T>(newJson);
+            var newModel = (T)newModelRaw;
+            var model = (T) this.model;
             visibilityDirty = newModel.visible != model.visible;
             collisionsDirty = newModel.withCollisions != model.withCollisions || newModel.isPointerBlocker != model.isPointerBlocker;
             bool shouldGenerateMesh = ShouldGenerateNewMesh(newModel);
@@ -157,11 +153,13 @@ namespace DCL.Components
 
         public override bool IsVisible()
         {
+            var model = (T)this.model;
             return model.visible;
         }
 
         public override bool HasCollisions()
         {
+            var model = (T)this.model;
             return model.withCollisions;
         }
 
