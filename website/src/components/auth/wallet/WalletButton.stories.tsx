@@ -9,9 +9,7 @@ import {
 export default {
   title: "Explorer/auth/WalletButton",
   args: {
-    logo: "",
-    title: "",
-    description: "",
+    type: "",
   },
   component: WalletButton,
   argTypes: {
