@@ -42,7 +42,7 @@ export interface LoginContainerProps {
   signing: boolean;
   subStage: string;
   provider?: string | null;
-  availableProviders?: ProviderType[];
+  availableProviders: ProviderType[];
   onLogin: (provider: ProviderType | null) => void;
 }
 

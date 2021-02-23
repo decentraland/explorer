@@ -8,7 +8,7 @@ import "./EthLogin.css";
 
 export interface EthLoginProps {
   loading: boolean;
-  availableProviders?: ProviderType[];
+  availableProviders: ProviderType[];
   onLogin: (provider: ProviderType | null) => void;
 }
 

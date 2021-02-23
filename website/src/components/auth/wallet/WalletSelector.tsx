@@ -9,7 +9,7 @@ import "./WalletSelector.css";
 export interface WalletSelectorProps {
   open: boolean;
   loading: boolean;
-  availableProviders?: ProviderType[];
+  availableProviders: ProviderType[];
   onLogin: (provider: ProviderType | null) => void;
   onCancel: () => void;
 }
@@ -21,8 +21,7 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
   onLogin,
   onCancel,
 }) => {
-  const providers = useMemo(() => availableProviders || [], [availableProviders])
-  const hasWallet = providers.includes(ProviderType.INJECTED)
+  const hasWallet = availableProviders.includes(ProviderType.INJECTED)
   function handleLogin(provider: ProviderType) {
     if (provider === ProviderType.INJECTED && !hasWallet) {
       return;
@@ -46,16 +45,16 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
       result.push(WalletButtonLogo.METAMASK)
     }
 
-    if (providers.includes(ProviderType.FORTMATIC)) {
+    if (availableProviders.includes(ProviderType.FORTMATIC)) {
       result.push(WalletButtonLogo.FORTMATIC)
     }
 
-    if (providers.includes(ProviderType.WALLET_CONNECT)) {
+    if (availableProviders.includes(ProviderType.WALLET_CONNECT)) {
       result.push(WalletButtonLogo.WALLET_CONNECT)
     }
 
     return result
-  }, providers)
+  }, [availableProviders])
 
   function isActive(wallet: WalletButtonLogo) {
     switch (wallet) {
