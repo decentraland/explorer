@@ -13,6 +13,7 @@ public class BuilderProjectsPanelController : IDisposable
 
     internal readonly SectionsHandler sectionsHandler;
     internal readonly SceneContextMenuHandler sceneContextMenuHandler;
+    internal readonly LeftMenuButtonsHandler leftMenuButtonsHandler;
 
     public BuilderProjectsPanelController() : this(
         Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel")))
@@ -28,6 +29,7 @@ public class BuilderProjectsPanelController : IDisposable
 
         sectionsHandler.Dispose();
         sceneContextMenuHandler.Dispose();
+        leftMenuButtonsHandler.Dispose();
 
         sectionsController.Dispose();
         scenesViewController.Dispose();
@@ -58,8 +60,9 @@ public class BuilderProjectsPanelController : IDisposable
             bridge.SendFetchProjects();
         }
 
-        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view);
+        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view.searchBarView);
         sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController, bridge);
+        leftMenuButtonsHandler = new LeftMenuButtonsHandler(view, sectionsController);
     }
 
     void SetView()

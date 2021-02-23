@@ -4,57 +4,25 @@ internal class SectionsHandler : IDisposable
 {
     private readonly SectionsController sectionsController;
     private readonly ScenesViewController scenesViewController;
-    private readonly BuilderProjectsPanelView view;
+    private readonly SearchBarView searchBarView;
 
-    public SectionsHandler(SectionsController sectionsController, ScenesViewController scenesViewController, BuilderProjectsPanelView view)
+    public SectionsHandler(SectionsController sectionsController, ScenesViewController scenesViewController, SearchBarView searchBarView)
     {
         this.sectionsController = sectionsController;
         this.scenesViewController = scenesViewController;
-        this.view = view;
-
-        view.OnScenesToggleChanged += OnSceneToggleChanged;
-        view.OnInWorldScenesToggleChanged += OnInWorldScenesToggleChanged;
-        view.OnProjectsToggleChanged += OnProjectsToggleChanged;
-        view.OnLandToggleChanged += OnLandToggleChanged;
+        this.searchBarView = searchBarView;
 
         sectionsController.OnSectionShow += OnSectionShow;
         sectionsController.OnSectionHide += OnSectionHide;
-        sectionsController.OnRequestOpenSection += OnRequestOpenSection;
     }
 
     public void Dispose()
     {
-        view.OnScenesToggleChanged -= OnSceneToggleChanged;
-        view.OnInWorldScenesToggleChanged -= OnInWorldScenesToggleChanged;
-        view.OnProjectsToggleChanged -= OnProjectsToggleChanged;
-        view.OnLandToggleChanged -= OnLandToggleChanged;
-
         sectionsController.OnSectionShow -= OnSectionShow;
         sectionsController.OnSectionHide -= OnSectionHide;
-        sectionsController.OnRequestOpenSection -= OnRequestOpenSection;
     }
 
-    void OnSceneToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
-    }
-
-    void OnInWorldScenesToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_DEPLOYED);
-    }
-
-    void OnProjectsToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_PROJECT);
-    }
-
-    void OnLandToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.LAND);
-    }
-
-     void OnSectionShow(SectionBase sectionBase)
+    void OnSectionShow(SectionBase sectionBase)
     {
         if (sectionBase is IDeployedSceneListener deployedSceneListener)
         {
@@ -72,7 +40,7 @@ internal class SectionsHandler : IDisposable
             projectSceneListener.OnSetScenes(scenesViewController.projectScenes);
         }
 
-        view.searchBarView.SetSearchBar(sectionBase.searchHandler, sectionBase.searchBarConfig);
+        searchBarView.SetSearchBar(sectionBase.searchHandler, sectionBase.searchBarConfig);
     }
 
     void OnSectionHide(SectionBase sectionBase)
@@ -91,24 +59,6 @@ internal class SectionsHandler : IDisposable
             scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
         }
 
-        view.searchBarView.SetSearchBar(null, null);
-    }
-
-    void OnRequestOpenSection(SectionsController.SectionId id)
-    {
-        switch (id)
-        {
-            case SectionsController.SectionId.SCENES_MAIN:
-                view.scenesToggle.isOn = true;
-                break;
-            case SectionsController.SectionId.SCENES_DEPLOYED:
-                view.inWorldScenesToggle.isOn = true;
-                break;
-            case SectionsController.SectionId.SCENES_PROJECT:
-                view.projectsToggle.isOn = true;
-                break;
-            case SectionsController.SectionId.LAND:
-                break;
-        }
+        searchBarView.SetSearchBar(null, null);
     }
 }
