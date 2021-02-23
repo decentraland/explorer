@@ -22,7 +22,14 @@ export enum LoginStage {
 }
 
 const mapStateToProps = (state: any) => {
+  // test all connectors
+  const enableProviders = new Set([
+    ProviderType.INJECTED, // Ready
+    // ProviderType.FORTMATIC, // Ready
+    // ProviderType.WALLET_CONNECT, // Missing configuration
+  ])
   const availableProviders = connection.getAvailableProviders()
+    .filter(provider => enableProviders.has(provider))
   return {
     stage: state.session.loginStage,
     signing: state.session.signing,
