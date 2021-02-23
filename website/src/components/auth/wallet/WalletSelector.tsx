@@ -21,10 +21,9 @@ export const WalletSelector: React.FC<WalletSelectorProps> = ({
   onLogin,
   onCancel,
 }) => {
-  const providers = availableProviders || []
+  const providers = useMemo(() => availableProviders || [], [availableProviders])
   const hasWallet = providers.includes(ProviderType.INJECTED)
   function handleLogin(provider: ProviderType) {
-    console.log(provider)
     if (provider === ProviderType.INJECTED && !hasWallet) {
       return;
     }

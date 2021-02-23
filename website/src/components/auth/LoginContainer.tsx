@@ -33,8 +33,8 @@ const mapStateToProps = (state: any) => {
 };
 
 const mapDispatchToProps = (dispatch: any) => ({
-  onLogin: (provider: ProviderType | null) => (console.log(provider),
-    dispatch({ type: "[Authenticate]", payload: { provider } })),
+  onLogin: (provider: ProviderType | null) =>
+    dispatch({ type: "[Authenticate]", payload: { provider } })
 });
 
 export interface LoginContainerProps {
