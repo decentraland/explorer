@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DCL.Helpers;
 using UnityEngine;
+using DCL.Controllers;
 
 namespace DCL.Components
 {
@@ -58,6 +59,11 @@ namespace DCL.Components
         Dictionary<string, AnimationClip> clipNameToClip = new Dictionary<string, AnimationClip>();
         Dictionary<AnimationClip, AnimationState> clipToState = new Dictionary<AnimationClip, AnimationState>();
 
+        private void Awake()
+        {
+            model = new Model();
+        }
+
         private void OnDestroy()
         {
             entity.OnShapeUpdated -= OnComponentUpdated;
@@ -66,7 +72,7 @@ namespace DCL.Components
         public override IEnumerator ApplyChanges(BaseModel model)
         {
             //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
-            if (model == null)
+            if (entity == null)
                 return null;
 
             entity.OnShapeUpdated -= OnComponentUpdated;

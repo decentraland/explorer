@@ -13,7 +13,7 @@ namespace DCL.Components
         public class Model : BaseModel
         {
             public string audioClipId;
-            public bool playing;
+            public bool playing = false;
             public float volume = 1f;
             public bool loop = false;
             public float pitch = 1f;
@@ -32,7 +32,15 @@ namespace DCL.Components
                     return false;
                 }
 
-                return audioClipId.Equals(item.audioClipId) ||
+                bool clipIdIsEqual = false;
+                if (string.IsNullOrEmpty(audioClipId) && string.IsNullOrEmpty(audioClipId))
+                    clipIdIsEqual = true;
+                else if (string.IsNullOrEmpty(audioClipId) || string.IsNullOrEmpty(audioClipId))
+                    clipIdIsEqual = false;
+                else
+                    clipIdIsEqual = audioClipId.Equals(item.audioClipId);
+
+                return clipIdIsEqual ||
                        playing.Equals(item.playing) ||
                        volume.Equals(item.volume) ||
                        loop.Equals(item.loop) ||
@@ -60,6 +68,7 @@ namespace DCL.Components
         private void Awake()
         {
             audioSource = gameObject.GetOrCreateComponent<AudioSource>();
+            model = new Model();
         }
 
         public void InitDCLAudioClip(DCLAudioClip dclAudioClip)

@@ -184,7 +184,8 @@ namespace DCL
             }
 
             var model = (AvatarModel)this.model;
-            avatarUserInfo.userId = model.id;
+            if(model != null)
+                avatarUserInfo.userId = model.id;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
         }
 
