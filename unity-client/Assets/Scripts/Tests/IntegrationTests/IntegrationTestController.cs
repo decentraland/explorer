@@ -44,7 +44,7 @@ public class IntegrationTestController : MonoBehaviour
 
         yield return new WaitForAllMessagesProcessed();
 
-        var scene = Environment.i.world.state.GetScene<ParcelScene>(sceneName);
+        ParcelScene scene = Environment.i.world.state.GetScene(sceneName) as ParcelScene;
 
         //NOTE(Brian): This is making my eyes bleed.
         sceneController.SendSceneMessage(
@@ -106,7 +106,7 @@ public class IntegrationTestController : MonoBehaviour
 
     public IEnumerator Verify()
     {
-        var scene = Environment.i.world.state.GetScene<ParcelScene>(sceneName);
+        var scene = Environment.i.world.state.GetScene(sceneName) as ParcelScene;
         var cube = scene.entities[entityId];
 
         Assert.IsTrue(cube != null);

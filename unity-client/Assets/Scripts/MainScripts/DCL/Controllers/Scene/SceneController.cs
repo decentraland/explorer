@@ -715,7 +715,12 @@ namespace DCL
             var sceneToLoad = scene;
 
             ProfilingEvents.OnMessageProcessStart?.Invoke(MessagingTypes.SCENE_UPDATE);
-            Environment.i.world.state.GetScene<ParcelScene>(sceneToLoad.id).SetUpdateData(sceneToLoad);
+
+            ParcelScene parcelScene = Environment.i.world.state.GetScene(sceneToLoad.id) as ParcelScene;
+
+            if (parcelScene != null)
+                parcelScene.SetUpdateData(sceneToLoad);
+
             ProfilingEvents.OnMessageProcessEnds?.Invoke(MessagingTypes.SCENE_UPDATE);
         }
 

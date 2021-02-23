@@ -123,6 +123,12 @@ namespace DCL.Components
 
         public override void Dispose()
         {
+            if (fetchRoutine != null)
+            {
+                CoroutineStarter.Stop(fetchRoutine);
+                fetchRoutine = null;
+            }
+
             dclTexture?.DetachFrom(this);
 
             if (referencesContainer != null)

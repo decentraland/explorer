@@ -37,17 +37,17 @@ namespace Tests
 
             GameObject sceneGo = GameObject.Find(sceneGameObjectNamePrefix + sceneId);
 
-            GlobalScene scene = Environment.i.world.state.loadedScenes[sceneId] as GlobalScene;
+            GlobalScene globalScene = Environment.i.world.state.loadedScenes[sceneId] as GlobalScene;
 
-            Assert.IsTrue(scene != null, "Scene isn't a GlobalScene?");
+            Assert.IsTrue(globalScene != null, "Scene isn't a GlobalScene?");
             Assert.IsTrue(sceneGo != null, "scene game object not found!");
             Assert.IsTrue(Environment.i.world.state.loadedScenes[sceneId] != null, "Scene not in loaded dictionary!");
-            Assert.IsTrue(Environment.i.world.state.GetScene<ParcelScene>(sceneId).unloadWithDistance == false,
+            Assert.IsTrue(globalScene.unloadWithDistance == false,
                 "Scene will unload when far!");
 
-            Assert.IsTrue(scene.IsInsideSceneBoundaries(new Vector2Int(1000, 1000)),
+            Assert.IsTrue(globalScene.IsInsideSceneBoundaries(new Vector2Int(1000, 1000)),
                 "IsInsideSceneBoundaries() should always return true.");
-            Assert.IsTrue(scene.IsInsideSceneBoundaries(new Vector2Int(-1000, -1000)),
+            Assert.IsTrue(globalScene.IsInsideSceneBoundaries(new Vector2Int(-1000, -1000)),
                 "IsInsideSceneBoundaries() should always return true.");
 
             yield return null;

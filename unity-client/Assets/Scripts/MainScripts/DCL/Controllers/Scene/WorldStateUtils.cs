@@ -22,8 +22,10 @@ namespace DCL
         {
             var worldState = Environment.i.world.state;
 
-            if (worldState.loadedScenes.ContainsKey(id))
-                return worldState.loadedScenes[id].sceneData.basePosition.ToString();
+            if (worldState.TryGetScene(id, out IParcelScene parcelScene))
+            {
+                return parcelScene.sceneData.basePosition.ToString();
+            }
 
             return id;
         }
@@ -32,13 +34,9 @@ namespace DCL
         {
             if (scene == null)
             {
-                var worldState = Environment.i.world.state;
+                scene = GetCurrentScene();
 
-                string sceneId = worldState.currentSceneId;
-
-                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
-                    scene = worldState.loadedScenes[worldState.currentSceneId];
-                else
+                if (scene == null)
                     return pos;
             }
 
@@ -60,12 +58,9 @@ namespace DCL
         {
             if (scene == null)
             {
-                IWorldState worldState = Environment.i.world.state;
-                string sceneId = worldState.currentSceneId;
+                scene = GetCurrentScene();
 
-                if (!string.IsNullOrEmpty(sceneId) && worldState.loadedScenes.ContainsKey(sceneId))
-                    scene = worldState.loadedScenes[worldState.currentSceneId];
-                else
+                if (scene == null)
                     return pos;
             }
 
@@ -83,6 +78,18 @@ namespace DCL
         public static bool IsCharacterInsideScene(IParcelScene scene)
         {
             return scene.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition);
+        }
+
+        static IParcelScene GetCurrentScene()
+        {
+            var worldState = Environment.i.world.state;
+            string currentSceneId = worldState.currentSceneId;
+            bool foundCurrentScene = worldState.loadedScenes.TryGetValue(currentSceneId, out IParcelScene scene);
+
+            if (string.IsNullOrEmpty(currentSceneId) || !foundCurrentScene)
+                return null;
+
+            return scene;
         }
     }
 }

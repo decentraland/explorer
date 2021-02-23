@@ -14,7 +14,7 @@ namespace DCL
         void Initialize();
         bool TryGetScene(string id, out IParcelScene scene);
         bool TryGetScene<T>(string id, out T scene) where T : class, IParcelScene;
-        T GetScene<T>(string id) where T : class, IParcelScene;
+        IParcelScene GetScene(string id);
         bool Contains(string id);
     }
 
@@ -36,13 +36,12 @@ namespace DCL
             scenesSortedByDistance = new List<IParcelScene>();
         }
 
-        public T GetScene<T>(string id)
-            where T : class, IParcelScene
+        public IParcelScene GetScene(string id)
         {
             if (!Contains(id))
                 return null;
 
-            return loadedScenes[id] as T;
+            return loadedScenes[id];
         }
 
         public bool Contains(string id)
