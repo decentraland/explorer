@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
 using DCL.Controllers;
+using DCL.Helpers;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL
@@ -9,13 +10,15 @@ namespace DCL
         HashSet<string> readyScenes { get; set; }
         Dictionary<string, IParcelScene> loadedScenes { get; set; }
         List<IParcelScene> scenesSortedByDistance { get; set; }
-        string globalSceneId { get; set; }
+        List<string> globalSceneIds { get; set; }
         string currentSceneId { get; set; }
         void Initialize();
         bool TryGetScene(string id, out IParcelScene scene);
         bool TryGetScene<T>(string id, out T scene) where T : class, IParcelScene;
         IParcelScene GetScene(string id);
         bool Contains(string id);
+        List<GlobalScene> GetActivePortableExperienceScenes();
+        List<string> GetActivePortableExperienceIds();
     }
 
     public class WorldState : IWorldState
@@ -24,12 +27,12 @@ namespace DCL
         public Dictionary<string, IParcelScene> loadedScenes { get; set; } = new Dictionary<string, IParcelScene>();
         public List<IParcelScene> scenesSortedByDistance { get; set; } = new List<IParcelScene>();
 
-        public string globalSceneId { get; set; }
+        public List<string> globalSceneIds { get; set; }
         public string currentSceneId { get; set; }
 
         public void Initialize()
         {
-            globalSceneId = null;
+            globalSceneIds = new List<string>();
             currentSceneId = null;
             readyScenes = new HashSet<string>();
             loadedScenes = new Dictionary<string, IParcelScene>();
@@ -90,6 +93,44 @@ namespace DCL
             }
 
             return allLoadedParcelCoords;
+        }
+
+        public List<GlobalScene> GetActivePortableExperienceScenes()
+        {
+            List<GlobalScene> activePortableExperienceScenes = new List<GlobalScene>();
+
+            foreach (var globalSceneId in globalSceneIds)
+            {
+                if (loadedScenes.TryGetValue(globalSceneId, out IParcelScene scene))
+                {
+                    GlobalScene peScene = scene as GlobalScene;
+                    if (peScene.isPortableExperience)
+                    {
+                        activePortableExperienceScenes.Add(peScene);
+                    }
+                }
+            }
+
+            return activePortableExperienceScenes;
+        }
+
+        public List<string> GetActivePortableExperienceIds()
+        {
+            List<string> currentSceneAndPortableExperiencesIds = new List<string>();
+
+            foreach (var globalSceneId in globalSceneIds)
+            {
+                if (loadedScenes.TryGetValue(globalSceneId, out IParcelScene scene))
+                {
+                    GlobalScene peScene = scene as GlobalScene;
+                    if (peScene.isPortableExperience)
+                    {
+                        currentSceneAndPortableExperiencesIds.Add(globalSceneId);
+                    }
+                }
+            }
+
+            return currentSceneAndPortableExperiencesIds;
         }
     }
 }
