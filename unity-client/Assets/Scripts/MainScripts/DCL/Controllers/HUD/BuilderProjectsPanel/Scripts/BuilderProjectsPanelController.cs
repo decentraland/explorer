@@ -10,6 +10,8 @@ public class BuilderProjectsPanelController : IDisposable
     internal readonly ScenesViewController scenesViewController;
 
     internal BuilderProjectsPanelBridge bridge = null;
+    internal readonly SectionsHandler sectionsHandler;
+    internal readonly SceneContextMenuHandler sceneContextMenuHandler;
 
     public BuilderProjectsPanelController() : this(
         Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel")))
@@ -18,19 +20,13 @@ public class BuilderProjectsPanelController : IDisposable
 
     public void Dispose()
     {
-        SceneCardView.OnContextMenuPressed -= OnContextMenuOpen;
-        view.contextMenu.OnSettingsPressed -= OnContextMenuSettingsPressed;
-        view.contextMenu.OnDuplicatePressed -= OnContextMenuDuplicatePressed;
-        view.contextMenu.OnDownloadPressed -= OnContextMenuDownloadPressed;
-        view.contextMenu.OnSharePressed -= OnContextMenuSharePressed;
-        view.contextMenu.OnUnpublishPressed -= OnContextMenuUnpublishPressed;
-        view.contextMenu.OnDeletePressed -= OnContextMenuDeletePressed;
-        view.contextMenu.OnQuitContributorPressed -= OnContextMenuQuitContributorPressed;
-
         if (bridge != null)
         {
             bridge.OnProjectsSet -= OnProjectsUpdated;
         }
+
+        sectionsHandler.Dispose();
+        sceneContextMenuHandler.Dispose();
 
         sectionsController.Dispose();
         scenesViewController.Dispose();
@@ -53,16 +49,6 @@ public class BuilderProjectsPanelController : IDisposable
         sectionsController = new SectionsController(view.sectionsContainer);
         scenesViewController = new ScenesViewController(view.sceneCardViewPrefab);
 
-        view.OnScenesToggleChanged += OnSceneToggleChanged;
-        view.OnInWorldScenesToggleChanged += OnInWorldScenesToggleChanged;
-        view.OnProjectsToggleChanged += OnProjectsToggleChanged;
-        view.OnLandToggleChanged += OnLandToggleChanged;
-
-        sectionsController.OnSectionShow += OnSectionShow;
-        sectionsController.OnSectionHide += OnSectionHide;
-        sectionsController.OnRequestContextMenuHide += () => view.contextMenu.Hide();
-        sectionsController.OnRequestOpenSection += OnRequestOpenSection;
-
         IDeployedSceneListener viewDeployedSceneListener = view;
         IProjectSceneListener viewProjectSceneListener = view;
         scenesViewController.OnDeployedSceneAdded += viewDeployedSceneListener.OnSceneAdded;
@@ -75,21 +61,14 @@ public class BuilderProjectsPanelController : IDisposable
         viewDeployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
         viewProjectSceneListener.OnSetScenes(scenesViewController.projectScenes);
 
-        SceneCardView.OnContextMenuPressed += OnContextMenuOpen;
-
-        view.contextMenu.OnSettingsPressed += OnContextMenuSettingsPressed;
-        view.contextMenu.OnDuplicatePressed += OnContextMenuDuplicatePressed;
-        view.contextMenu.OnDownloadPressed += OnContextMenuDownloadPressed;
-        view.contextMenu.OnSharePressed += OnContextMenuSharePressed;
-        view.contextMenu.OnUnpublishPressed += OnContextMenuUnpublishPressed;
-        view.contextMenu.OnDeletePressed += OnContextMenuDeletePressed;
-        view.contextMenu.OnQuitContributorPressed += OnContextMenuQuitContributorPressed;
-
         if (bridge != null)
         {
             bridge.OnProjectsSet += OnProjectsUpdated;
             bridge.SendFetchProjects();
         }
+
+        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view);
+        sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, bridge);
     }
 
     void OnProjectsUpdated(string payload)
@@ -98,125 +77,6 @@ public class BuilderProjectsPanelController : IDisposable
         {
             var scenes = Utils.ParseJsonArray<SceneData[]>(payload);
             scenesViewController.SetScenes(scenes);
-        }
-    }
-
-    void OnContextMenuOpen(ISceneData sceneData, SceneCardView sceneCard)
-    {
-        view.contextMenu.transform.position = sceneCard.contextMenuButton.transform.position;
-        view.contextMenu.Show(sceneData.id, sceneData.isDeployed,
-            sceneData.isOwner || sceneData.isOperator, sceneData.isContributor);
-    }
-
-    void OnContextMenuSettingsPressed(string id)
-    {
-    }
-
-    void OnContextMenuDuplicatePressed(string id)
-    {
-        bridge?.SendDuplicateProject(id);
-    }
-
-    void OnContextMenuDownloadPressed(string id)
-    {
-        bridge?.SendDownload(id);
-    }
-
-    void OnContextMenuSharePressed(string id)
-    {
-        bridge?.SendShare(id);
-    }
-
-    void OnContextMenuUnpublishPressed(string id)
-    {
-        bridge?.SendUnPublish(id);
-    }
-
-    void OnContextMenuDeletePressed(string id)
-    {
-        bridge?.SendDelete(id);
-    }
-
-    void OnContextMenuQuitContributorPressed(string id)
-    {
-        bridge?.SendQuitContributor(id);
-    }
-
-    void OnSceneToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
-    }
-
-    void OnInWorldScenesToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_DEPLOYED);
-    }
-
-    void OnProjectsToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.SCENES_PROJECT);
-    }
-
-    void OnLandToggleChanged(bool isOn)
-    {
-        if (isOn) sectionsController.OpenSection(SectionsController.SectionId.LAND);
-    }
-
-    void OnSectionShow(SectionBase sectionBase)
-    {
-        if (sectionBase is IDeployedSceneListener deployedSceneListener)
-        {
-            scenesViewController.OnDeployedSceneAdded += deployedSceneListener.OnSceneAdded;
-            scenesViewController.OnDeployedSceneRemoved += deployedSceneListener.OnSceneRemoved;
-            scenesViewController.OnDeployedScenesSet += deployedSceneListener.OnSetScenes;
-            deployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
-        }
-
-        if (sectionBase is IProjectSceneListener projectSceneListener)
-        {
-            scenesViewController.OnProjectSceneAdded += projectSceneListener.OnSceneAdded;
-            scenesViewController.OnProjectSceneRemoved += projectSceneListener.OnSceneRemoved;
-            scenesViewController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
-            projectSceneListener.OnSetScenes(scenesViewController.projectScenes);
-        }
-
-        view.searchBarView.SetSearchBar(sectionBase.searchHandler, sectionBase.searchBarConfig);
-    }
-
-    void OnSectionHide(SectionBase sectionBase)
-    {
-        if (sectionBase is IDeployedSceneListener deployedSceneListener)
-        {
-            scenesViewController.OnDeployedSceneAdded -= deployedSceneListener.OnSceneAdded;
-            scenesViewController.OnDeployedSceneRemoved -= deployedSceneListener.OnSceneRemoved;
-            scenesViewController.OnDeployedScenesSet -= deployedSceneListener.OnSetScenes;
-        }
-
-        if (sectionBase is IProjectSceneListener projectSceneListener)
-        {
-            scenesViewController.OnProjectSceneAdded -= projectSceneListener.OnSceneAdded;
-            scenesViewController.OnProjectSceneRemoved -= projectSceneListener.OnSceneRemoved;
-            scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
-        }
-
-        view.searchBarView.SetSearchBar(null, null);
-    }
-
-    void OnRequestOpenSection(SectionsController.SectionId id)
-    {
-        switch (id)
-        {
-            case SectionsController.SectionId.SCENES_MAIN:
-                view.scenesToggle.isOn = true;
-                break;
-            case SectionsController.SectionId.SCENES_DEPLOYED:
-                view.inWorldScenesToggle.isOn = true;
-                break;
-            case SectionsController.SectionId.SCENES_PROJECT:
-                view.projectsToggle.isOn = true;
-                break;
-            case SectionsController.SectionId.LAND:
-                break;
         }
     }
 }
