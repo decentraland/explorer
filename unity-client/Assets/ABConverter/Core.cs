@@ -82,15 +82,7 @@ namespace DCL.ABConverter
             /// <param name="OnFinish">End callback with the proper ErrorCode</param>
             public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
             {
-                if (OnFinish == null)
-                {
-                    OnFinish = CleanAndExit;
-                }
-                else
-                {
-                    OnFinish -= CleanAndExit;
-                    OnFinish += CleanAndExit;
-                }
+                OnFinish += CleanAndExit;
 
                 startTime = Time.realtimeSinceStartup;
 
