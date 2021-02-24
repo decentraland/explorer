@@ -57,7 +57,8 @@ public class BuildModeHUDController : IHUD
             new TooltipController(),
             sceneCatalogController = new SceneCatalogController(),
             new QuickBarController(),
-            entityInformationController = new EntityInformationController());
+            entityInformationController = new EntityInformationController(),
+            new FirstPersonModeController());
 
         catalogItemDropController = new CatalogItemDropController();
 

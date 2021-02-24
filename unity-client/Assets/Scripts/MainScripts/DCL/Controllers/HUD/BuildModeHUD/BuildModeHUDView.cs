@@ -46,6 +46,8 @@ public class BuildModeHUDView : MonoBehaviour
     private ISceneCatalogController sceneCatalogController;
     public EntityInformationView entityInformationView;
     private IEntityInformationController entityInformationController;
+    public FirstPersonModeView firstPersonModeView;
+    private IFirstPersonModeController firstPersonModeController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -60,7 +62,8 @@ public class BuildModeHUDView : MonoBehaviour
         ITooltipController tooltipController,
         ISceneCatalogController sceneCatalogController,
         IQuickBarController quickBarController,
-        IEntityInformationController entityInformationController)
+        IEntityInformationController entityInformationController,
+        IFirstPersonModeController firstPersonModeController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -74,6 +77,9 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.entityInformationController = entityInformationController;
         this.entityInformationController.Initialize(entityInformationView);
+
+        this.firstPersonModeController = firstPersonModeController;
+        this.firstPersonModeController.Initialize(firstPersonModeView, tooltipController);
     }
 
     private void Awake()
@@ -148,6 +154,7 @@ public class BuildModeHUDView : MonoBehaviour
         quickBarController.Dispose();
         sceneCatalogController.Dispose();
         entityInformationController.Dispose();
+        firstPersonModeController.Dispose();
     }
 
     public void PublishStart()
