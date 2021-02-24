@@ -22,6 +22,14 @@ public static class BIWCatalogManager
         }
     }
 
+    public static void Dispose()
+    {
+        BuilderInWorldNFTController.i.OnNftsFetched -= ConvertCollectiblesPack;
+        AssetCatalogBridge.OnSceneObjectAdded -= AddSceneObject;
+        AssetCatalogBridge.OnSceneAssetPackAdded -= AddSceneAssetPack;
+        IS_INIT = false;
+    }
+
     public static void ClearCatalog()
     {
         DataStore.i.builderInWorld.catalogItemDict.Clear();

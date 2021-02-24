@@ -52,7 +52,7 @@ public class BuilderInWorldEntityHandler : BIWController
     private InputAction_Trigger.Triggered hideSelectedEntitiesDelegate;
     private InputAction_Trigger.Triggered showAllEntitiesDelegate;
 
-    private const float RAYCAST_MAX_DISTANCE = 10000f;
+    private BuildModeHUDController hudController;
 
     private void Start()
     {
@@ -68,14 +68,15 @@ public class BuilderInWorldEntityHandler : BIWController
         base.Init();
         if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.builderInWorldMainHud.OnEntityDelete += DeleteSingleEntity;
-            HUDController.i.builderInWorldMainHud.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
-            HUDController.i.builderInWorldMainHud.OnDeleteSelectedAction += DeleteSelectedEntitiesInput;
-            HUDController.i.builderInWorldMainHud.OnEntityClick += ChangeEntitySelectionFromList;
-            HUDController.i.builderInWorldMainHud.OnEntityLock += ChangeEntityLockStatus;
-            HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
-            HUDController.i.builderInWorldMainHud.OnEntityRename += SetEntityName;
-            HUDController.i.builderInWorldMainHud.OnEntitySmartItemComponentUpdate += UpdateSmartItemComponentInKernel;
+            hudController = HUDController.i.builderInWorldMainHud;
+            hudController.OnEntityDelete += DeleteSingleEntity;
+            hudController.OnDuplicateSelectedAction += DuplicateSelectedEntitiesInput;
+            hudController.OnDeleteSelectedAction += DeleteSelectedEntitiesInput;
+            hudController.OnEntityClick += ChangeEntitySelectionFromList;
+            hudController.OnEntityLock += ChangeEntityLockStatus;
+            hudController.OnEntityChangeVisibility += ChangeEntityVisibilityStatus;
+            hudController.OnEntityRename += SetEntityName;
+            hudController.OnEntitySmartItemComponentUpdate += UpdateSmartItemComponentInKernel;
         }
 
         actionController.OnRedo += ReSelectEntities;
@@ -92,17 +93,17 @@ public class BuilderInWorldEntityHandler : BIWController
         hideSelectedEntitiesAction.OnTriggered -= hideSelectedEntitiesDelegate;
         showAllEntitiesAction.OnTriggered -= showAllEntitiesDelegate;
 
-        if (HUDController.i.builderInWorldMainHud == null)
+        if (hudController == null)
             return;
 
-        HUDController.i.builderInWorldMainHud.OnEntityDelete -= DeleteSingleEntity;
-        HUDController.i.builderInWorldMainHud.OnDuplicateSelectedAction -= DuplicateSelectedEntitiesInput;
-        HUDController.i.builderInWorldMainHud.OnDeleteSelectedAction -= DeleteSelectedEntitiesInput;
-        HUDController.i.builderInWorldMainHud.OnEntityClick -= ChangeEntitySelectionFromList;
-        HUDController.i.builderInWorldMainHud.OnEntityLock -= ChangeEntityLockStatus;
-        HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-        HUDController.i.builderInWorldMainHud.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-        HUDController.i.builderInWorldMainHud.OnEntityRename -= SetEntityName;
+       hudController.OnEntityDelete -= DeleteSingleEntity;
+       hudController.OnDuplicateSelectedAction -= DuplicateSelectedEntitiesInput;
+       hudController.OnDeleteSelectedAction -= DeleteSelectedEntitiesInput;
+       hudController.OnEntityClick -= ChangeEntitySelectionFromList;
+       hudController.OnEntityLock -= ChangeEntityLockStatus;
+       hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
+       hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
+       hudController.OnEntityRename -= SetEntityName;
     }
 
     protected override void FrameUpdate()
@@ -247,8 +248,8 @@ public class BuilderInWorldEntityHandler : BIWController
         selectedEntities.Remove(entity);
         currentActiveMode?.EntityDeselected(entity);
         if (selectedEntities.Count <= 0 &&
-            HUDController.i.builderInWorldMainHud != null)
-            HUDController.i.builderInWorldMainHud.HideEntityInformation();
+           hudController != null)
+           hudController.HideEntityInformation();
     }
 
     public void DeselectEntities()
@@ -365,8 +366,8 @@ public class BuilderInWorldEntityHandler : BIWController
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
-            HUDController.i.builderInWorldMainHud.ShowEntityInformation();
-            HUDController.i.builderInWorldMainHud.EntityInformationSetEntity(entityEditable, sceneToEdit);
+           hudController.ShowEntityInformation();
+           hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
  
         outlinerController?.CancelAllOutlines();
@@ -509,7 +510,7 @@ public class BuilderInWorldEntityHandler : BIWController
         parcelScene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
 
         DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(newEntity, true);
-        HUDController.i.builderInWorldMainHud?.UpdateSceneLimitInfo();
+       hudController?.UpdateSceneLimitInfo();
 
         EntityListChanged();
         return convertedEntity;
@@ -544,7 +545,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (HUDController.i.builderInWorldMainHud == null)
             return;
-        HUDController.i.builderInWorldMainHud.SetEntityList(GetEntitiesInCurrentScene());
+       hudController.SetEntityList(GetEntitiesInCurrentScene());
     }
 
     List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
@@ -657,7 +658,7 @@ public class BuilderInWorldEntityHandler : BIWController
         Destroy(entityToDelete);
         if(sceneToEdit.entities.ContainsKey(idToRemove))
             sceneToEdit.RemoveEntity(idToRemove, true);
-        HUDController.i.builderInWorldMainHud?.RefreshCatalogAssetPack();
+       hudController?.RefreshCatalogAssetPack();
         EntityListChanged();
         builderInWorldBridge?.RemoveEntityOnKernel(idToRemove, sceneToEdit);
     }
