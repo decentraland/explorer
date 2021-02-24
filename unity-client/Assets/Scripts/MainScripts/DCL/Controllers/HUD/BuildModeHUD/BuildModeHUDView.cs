@@ -8,7 +8,7 @@ public class BuildModeHUDView : MonoBehaviour
     public SceneLimitInfoController sceneLimitInfoController;
     public BuilderInWorldEntityListController entityListController;
 
-    public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
+    public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
     public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
     public Button[] closeEntityListBtns;
@@ -41,6 +41,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IEntityInformationController entityInformationController;
     public FirstPersonModeView firstPersonModeView;
     private IFirstPersonModeController firstPersonModeController;
+    public ShortcutsView shortcutsView;
+    private IShortcutsController shortcutsController;
     public PublishPopupView publishPopupView;
     private IPublishPopupController publishPopupController;
 
@@ -59,6 +61,7 @@ public class BuildModeHUDView : MonoBehaviour
         IQuickBarController quickBarController,
         IEntityInformationController entityInformationController,
         IFirstPersonModeController firstPersonModeController,
+        IShortcutsController shortcutsController,
         IPublishPopupController publishPopupController)
     {
         this.tooltipController = tooltipController;
@@ -77,6 +80,9 @@ public class BuildModeHUDView : MonoBehaviour
         this.firstPersonModeController = firstPersonModeController;
         this.firstPersonModeController.Initialize(firstPersonModeView, tooltipController);
         firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
+
+        this.shortcutsController = shortcutsController;
+        this.shortcutsController.Initialize(shortcutsView);
 
         this.publishPopupController = publishPopupController;
         this.publishPopupController.Initialize(publishPopupView);
@@ -152,6 +158,7 @@ public class BuildModeHUDView : MonoBehaviour
         sceneCatalogController.Dispose();
         entityInformationController.Dispose();
         firstPersonModeController.Dispose();
+        shortcutsController.Dispose();
         publishPopupController.Dispose();
     }
 
@@ -212,7 +219,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void SetVisibilityOfControls(bool isVisible)
     {
-        shortCutsGO.SetActive(isVisible);
+        shortcutsController.SetActive(isVisible);
     }
 
     public void SetVisibilityOfExtraBtns(bool isVisible)

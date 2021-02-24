@@ -4098,7 +4098,6 @@ MonoBehaviour:
   - {fileID: 851071765230286962}
   tutorialBtn: {fileID: 851071764309699371}
   logOutBtn: {fileID: 4981720413718675245}
-  publishGO: {fileID: 2788452752197117950}
   publishStatusTxt: {fileID: 7417626639985680352}
   showHideAnimator: {fileID: -7688998270734876550}
   toggleUIVisibilityInputAction: {fileID: 11400000, guid: 406d4343cf8bb7a4c9abde62ea95895c,
@@ -4130,6 +4129,7 @@ MonoBehaviour:
   sceneCatalogView: {fileID: 6818990461646912356}
   entityInformationView: {fileID: 3377244296335278993}
   firstPersonModeView: {fileID: 6319890495403155759}
+  shortcutsView: {fileID: 8959533887765265647}
   publishPopupView: {fileID: 7727836457821266519}
 --- !u!223 &851071764747098676
 Canvas:
@@ -12109,6 +12109,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 6089806714433841560}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8959533887765265647 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2942537657974822263, guid: 2ac3a56ee8936454c87991fa3e93bcea,
+    type: 3}
+  m_PrefabInstance: {fileID: 6089806714433841560}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851071763985788044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe0690e219f4fc741a20d6389e57af56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &171709071262527391 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6260388914990581255, guid: 2ac3a56ee8936454c87991fa3e93bcea,
@@ -12245,12 +12257,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7c57e64e27f56c143925f8c47f6ff2b3, type: 3}
---- !u!1 &2788452752197117950 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5203811818029387293, guid: 7c57e64e27f56c143925f8c47f6ff2b3,
-    type: 3}
-  m_PrefabInstance: {fileID: 7963828991800142307}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1296877563891201531 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9185754462392474648, guid: 7c57e64e27f56c143925f8c47f6ff2b3,
@@ -12275,7 +12281,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 7963828991800142307}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2788452752197117950}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8dd0ccc8d8f0eaf4ea72f294d0786f56, type: 3}

@@ -59,6 +59,7 @@ public class BuildModeHUDController : IHUD
             new QuickBarController(),
             entityInformationController = new EntityInformationController(),
             new FirstPersonModeController(),
+            new ShortcutsController(),
             new PublishPopupController());
 
         catalogItemDropController = new CatalogItemDropController();
