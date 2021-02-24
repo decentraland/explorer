@@ -98,7 +98,7 @@ public class BuildModeHUDView : MonoBehaviour
         this.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView, buildModeHUDController);
 
         this.publishBtnController = publishBtnController;
-        this.publishBtnController.Initialize(publishBtnView, tooltipController, buildModeHUDController);
+        this.publishBtnController.Initialize(publishBtnView, tooltipController);
         publishBtnController.OnClick += () => OnPublishAction?.Invoke();
     }
 

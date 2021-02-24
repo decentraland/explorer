@@ -4,7 +4,7 @@ public interface IPublishBtnController
 {
     event System.Action OnClick;
 
-    void Initialize(PublishBtnView publishBtnView, ITooltipController tooltipController, BuildModeHUDController buildModeHUDController);
+    void Initialize(PublishBtnView publishBtnView, ITooltipController tooltipController);
     void Dispose();
     void Click();
     void ShowTooltip(BaseEventData eventData, string tooltipText);
@@ -18,13 +18,11 @@ public class PublishBtnController : IPublishBtnController
 
     private PublishBtnView publishBtnView;
     private ITooltipController tooltipController;
-    private BuildModeHUDController buildModeHUDController;
 
-    public void Initialize(PublishBtnView publishBtnView, ITooltipController tooltipController, BuildModeHUDController buildModeHUDController)
+    public void Initialize(PublishBtnView publishBtnView, ITooltipController tooltipController)
     {
         this.publishBtnView = publishBtnView;
         this.tooltipController = tooltipController;
-        this.buildModeHUDController = buildModeHUDController;
 
         publishBtnView.OnPublishButtonClick += Click;
         publishBtnView.OnShowTooltip += ShowTooltip;
@@ -40,7 +38,6 @@ public class PublishBtnController : IPublishBtnController
 
     public void Click()
     {
-        buildModeHUDController.ChangeVisibilityOfExtraBtns();
         OnClick?.Invoke();
     }
 
