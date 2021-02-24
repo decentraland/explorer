@@ -8,7 +8,6 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Networking;
 using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 namespace DCL.ABConverter
 {
@@ -19,7 +18,7 @@ namespace DCL.ABConverter
         static readonly string testImagesPath = VisualTestHelpers.testImagesPath;
         static readonly float snapshotCamOffset = 3;
 
-        public static IEnumerator TestConvertedAssets(Core core = null, Environment env = null, Action<Core.ErrorCodes> OnFinish = null)
+        public static IEnumerator TestConvertedAssets(Environment env = null, Action<int> OnFinish = null)
         {
             EditorSceneManager.OpenScene($"Assets/ABConverter/VisualTestScene.unity", OpenSceneMode.Single);
 
@@ -56,22 +55,25 @@ namespace DCL.ABConverter
                 go.SetActive(false);
             }
 
+            int skippedAssets = 0;
+
             foreach (GameObject go in abs)
             {
+                string testName = $"ABConverter_{go.name}.png";
+
                 go.SetActive(true);
 
                 // unify all child renderer bounds and use that to position the camera
                 var mergedBounds = Helpers.Utils.BuildMergedBounds(go.GetComponentsInChildren<Renderer>());
                 Vector3 cameraPosition = new Vector3(mergedBounds.min.x - snapshotCamOffset, mergedBounds.max.y + snapshotCamOffset, mergedBounds.min.z - snapshotCamOffset);
 
-                string testName = $"ABConverter_{go.name}.png";
                 yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
 
                 bool result = VisualTestHelpers.TestSnapshot(
-                        VisualTestHelpers.baselineImagesPath + testName,
-                        VisualTestHelpers.testImagesPath + testName,
-                        95,
-                        false);
+                    VisualTestHelpers.baselineImagesPath + testName,
+                    VisualTestHelpers.testImagesPath + testName,
+                    95,
+                    false);
 
                 // Delete failed AB files to avoid uploading them
                 if (!result && env != null)
@@ -85,8 +87,7 @@ namespace DCL.ABConverter
                         env.file.Delete(depMapPath);
                     }
 
-                    if (core != null)
-                        core.skippedAssets++;
+                    skippedAssets++;
 
                     // TODO: Notify some metrics API or something to let know that this asset has conversion problems and we should manually take a look
                     Debug.Log("Visual Test Detection: FAILED converting asset -> " + go.name);
@@ -98,7 +99,7 @@ namespace DCL.ABConverter
             VisualTestHelpers.baselineImagesPath = baselinePath;
             VisualTestHelpers.testImagesPath = testImagesPath;
 
-            OnFinish?.Invoke ((core != null) ? core.state.lastErrorCode : Core.ErrorCodes.UNDEFINED);
+            OnFinish?.Invoke(skippedAssets);
             yield break;
         }
 

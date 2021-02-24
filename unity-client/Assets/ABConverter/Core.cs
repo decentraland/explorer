@@ -163,12 +163,17 @@ namespace DCL.ABConverter
                         EditorApplication.update -= UpdateLoop;
                     }
 
-                    EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(core: this, env: env, OnFinish: OnFinish));
+                    EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(
+                        env: env,
+                        OnFinish: (skippedAssetsCount) =>
+                        {
+                            this.skippedAssets = skippedAssetsCount;
+                            OnFinish?.Invoke(state.lastErrorCode);
+                        }));
                 }
 
                 EditorApplication.update += UpdateLoop;
             }
-
 
             /// <summary>
             /// Dump all assets and tag them for asset bundle building.
