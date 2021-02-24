@@ -13,7 +13,7 @@ namespace DCL.QuestsController
     public delegate void SectionUnlocked(string questId, string sectionId);
     public delegate void TaskProgressed(string questId, string sectionId, string taskId);
 
-    public interface IQuestsController
+    public interface IQuestsController : IDisposable
     {
         event QuestProgressed OnQuestProgressed;
         event QuestCompleted OnQuestCompleted;
@@ -24,7 +24,6 @@ namespace DCL.QuestsController
         void InitializeQuests(List<QuestModel> parsedQuests);
         void UpdateQuestProgress(QuestModel progressedQuest);
         void RemoveQuest(QuestModel quest);
-        void CleanUp();
     }
 
     public class QuestsController : IQuestsController
@@ -44,10 +43,8 @@ namespace DCL.QuestsController
 
         private bool pinnedQuestsIsDirty = false;
 
-        public static void Initialize()
+        static QuestsController()
         {
-            if (i != null)
-                return;
             i = new QuestsController();
         }
 
@@ -142,7 +139,7 @@ namespace DCL.QuestsController
             }
         }
 
-        public void CleanUp()
+        public void Dispose()
         {
             pinnedQuests.OnAdded -= OnPinnedQuestUpdated;
             pinnedQuests.OnRemoved -= OnPinnedQuestUpdated;

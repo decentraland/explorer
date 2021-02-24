@@ -5,11 +5,6 @@ using DCL.Helpers;
 
 public class QuestsBridge : MonoBehaviour
 {
-    private void Awake()
-    {
-        QuestsController.Initialize();
-    }
-
     public void InitializeQuests(string jsonMessage)
     {
         var parsedQuests = Utils.ParseJsonArray<List<QuestModel>>(jsonMessage);
@@ -30,6 +25,6 @@ public class QuestsBridge : MonoBehaviour
 
     private void OnDestroy()
     {
-        QuestsController.i.CleanUp();
+        QuestsController.i?.Dispose();
     }
 }

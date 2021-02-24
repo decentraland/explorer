@@ -15,6 +15,7 @@ namespace DCL.Huds.QuestsTracker
         void UnpinQuest(string questId);
         void ClearEntries();
         void SetVisibility(bool visibility);
+        void Dispose();
     }
 
     public class QuestsTrackerHUDView : MonoBehaviour, IQuestsTrackerHUDView
@@ -150,6 +151,11 @@ namespace DCL.Huds.QuestsTracker
         public void SetVisibility(bool visibility)
         {
             gameObject.SetActive(visibility);
+        }
+
+        public void Dispose()
+        {
+            Destroy(gameObject);
         }
 
         private IEnumerator AddEntriesRoutine()
