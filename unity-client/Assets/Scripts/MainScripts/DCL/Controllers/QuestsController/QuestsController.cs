@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace DCL.QuestsController
 {
@@ -22,15 +21,13 @@ namespace DCL.QuestsController
         event SectionUnlocked OnSectionUnlocked;
         event TaskProgressed OnTaskProgressed;
 
-        void InitializeQuests(string jsonMessage);
         void InitializeQuests(List<QuestModel> parsedQuests);
-        void UpdateQuestProgress(string jsonMessage);
         void UpdateQuestProgress(QuestModel progressedQuest);
-        void RemoveQuest(string jsonMessage);
         void RemoveQuest(QuestModel quest);
+        void CleanUp();
     }
 
-    public class QuestsController : MonoBehaviour, IQuestsController
+    public class QuestsController : IQuestsController
     {
         private const string PINNED_QUESTS_KEY = "PinnedQuests";
 
@@ -47,9 +44,15 @@ namespace DCL.QuestsController
 
         private bool pinnedQuestsIsDirty = false;
 
-        private void Awake()
+        public static void Initialize()
         {
-            i = this;
+            if (i != null)
+                return;
+            i = new QuestsController();
+        }
+
+        public QuestsController()
+        {
             var savedPinnedQuests = PlayerPrefs.GetString(PINNED_QUESTS_KEY, null);
             if (!string.IsNullOrEmpty(savedPinnedQuests))
             {
@@ -57,16 +60,6 @@ namespace DCL.QuestsController
             }
             pinnedQuests.OnAdded += OnPinnedQuestUpdated;
             pinnedQuests.OnRemoved += OnPinnedQuestUpdated;
-        }
-
-        /// <summary>
-        /// Bulk initialization of quests
-        /// </summary>
-        /// <param name="jsonMessage">it must contain a QuestModel array</param>
-        public void InitializeQuests(string jsonMessage)
-        {
-            var parsedQuests = Utils.ParseJsonArray<List<QuestModel>>(jsonMessage);
-            InitializeQuests(parsedQuests);
         }
 
         /// <summary>
@@ -81,16 +74,6 @@ namespace DCL.QuestsController
                 pinnedQuests.Remove(questId);
             }
             quests.Set(parsedQuests.Select(x => (x.id, x)));
-        }
-
-        /// <summary>
-        /// Update progress in a quest
-        /// </summary>
-        /// <param name="jsonMessage">it must contain a QuestModel</param>
-        public void UpdateQuestProgress(string jsonMessage)
-        {
-            var progressedQuest = JsonUtility.FromJson<QuestModel>(jsonMessage);
-            UpdateQuestProgress(progressedQuest);
         }
 
         /// <summary>
@@ -140,12 +123,6 @@ namespace DCL.QuestsController
                 OnQuestCompleted?.Invoke(progressedQuest.id);
         }
 
-        public void RemoveQuest(string jsonMessage)
-        {
-            var quest = JsonUtility.FromJson<QuestModel>(jsonMessage);
-            RemoveQuest(quest);
-        }
-
         public void RemoveQuest(QuestModel quest)
         {
             quests.Remove(quest.id);
@@ -165,7 +142,7 @@ namespace DCL.QuestsController
             }
         }
 
-        private void OnDestroy()
+        public void CleanUp()
         {
             pinnedQuests.OnAdded -= OnPinnedQuestUpdated;
             pinnedQuests.OnRemoved -= OnPinnedQuestUpdated;
