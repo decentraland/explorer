@@ -162,9 +162,9 @@ namespace DCL.ABConverter
                         state.step = State.Step.FINISHED;
                         EditorApplication.update -= UpdateLoop;
                     }
-                }
 
-                EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(core: this, env: env, OnFinish: OnFinish));
+                    EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(core: this, env: env, OnFinish: OnFinish));
+                }
 
                 EditorApplication.update += UpdateLoop;
             }

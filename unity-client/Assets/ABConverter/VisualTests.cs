@@ -17,6 +17,7 @@ namespace DCL.ABConverter
         static readonly string abPath = Application.dataPath + "/../AssetBundles/";
         static readonly string baselinePath = VisualTestHelpers.baselineImagesPath;
         static readonly string testImagesPath = VisualTestHelpers.testImagesPath;
+        static readonly float snapshotCamOffset = 3;
 
         public static IEnumerator TestConvertedAssets(Core core = null, Environment env = null, Action<Core.ErrorCodes> OnFinish = null)
         {
@@ -37,7 +38,12 @@ namespace DCL.ABConverter
             foreach (GameObject go in gltfs)
             {
                 go.SetActive(true);
-                yield return VisualTestHelpers.TakeSnapshot($"ABConverter_{go.name}.png", Camera.main, new Vector3(7, 7, 7), Vector3.zero);
+
+                // unify all child renderer bounds and use that to position the camera
+                var mergedBounds = Helpers.Utils.BuildMergedBounds(go.GetComponentsInChildren<Renderer>());
+                Vector3 cameraPosition = new Vector3(mergedBounds.min.x - snapshotCamOffset, mergedBounds.max.y + snapshotCamOffset, mergedBounds.min.z - snapshotCamOffset);
+
+                yield return VisualTestHelpers.TakeSnapshot($"ABConverter_{go.name}.png", Camera.main, cameraPosition, mergedBounds.center);
                 go.SetActive(false);
             }
 
@@ -53,8 +59,13 @@ namespace DCL.ABConverter
             foreach (GameObject go in abs)
             {
                 go.SetActive(true);
+
+                // unify all child renderer bounds and use that to position the camera
+                var mergedBounds = Helpers.Utils.BuildMergedBounds(go.GetComponentsInChildren<Renderer>());
+                Vector3 cameraPosition = new Vector3(mergedBounds.min.x - snapshotCamOffset, mergedBounds.max.y + snapshotCamOffset, mergedBounds.min.z - snapshotCamOffset);
+
                 string testName = $"ABConverter_{go.name}.png";
-                yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, new Vector3(7, 7, 7), Vector3.zero);
+                yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
 
                 bool result = VisualTestHelpers.TestSnapshot(
                         VisualTestHelpers.baselineImagesPath + testName,
@@ -123,7 +134,6 @@ namespace DCL.ABConverter
             {
                 var hash = new DirectoryInfo(paths).Name;
                 var path = "Assets/" + workingFolderName + "/" + hash;
-                // var guids = AssetDatabase.FindAssets("t:GameObject", new[] {path});
                 var guids = AssetDatabase.FindAssets("t:GameObject", new[] {path});
 
                 // NOTE(Brian): If no gameObjects are found, we assume they are dependency assets (textures, etc).
