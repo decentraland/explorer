@@ -1,4 +1,6 @@
 using DCL;
+using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Models;
 using System;
@@ -12,10 +14,14 @@ public class EntityInformationController : MonoBehaviour
 {
     [Header("Sprites")]
     public Sprite openMenuSprite;
+
     public Sprite closeMenuSprite;
 
     [Header("Prefab references")]
     public TextMeshProUGUI titleTxt;
+
+    public TextMeshProUGUI entityLimitsLeftTxt;
+    public TextMeshProUGUI entityLimitsRightTxt;
     public TMP_InputField nameIF;
     public RawImage entitytTumbailImg;
     public AttributeXYZ positionAttribute;
@@ -25,26 +31,28 @@ public class EntityInformationController : MonoBehaviour
     public GameObject basicsGO;
     public Image detailsToggleBtn;
     public Image basicToggleBtn;
+    public SmartItemListView smartItemListView;
 
 
     public event Action<Vector3> OnPositionChange;
     public event Action<Vector3> OnRotationChange;
     public event Action<Vector3> OnScaleChange;
 
-    public event Action<DCLBuilderInWorldEntity> OnNameChange;
+    public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
+    public event Action<DCLBuilderInWorldEntity> OnSmartItemComponentUpdate;
 
-    DCLBuilderInWorldEntity currentEntity;
-    ParcelScene parcelScene;
+    private DCLBuilderInWorldEntity currentEntity;
+    private ParcelScene parcelScene;
 
-    bool isEnable = false;
-    bool isChangingName = false;
+    private bool isEnable = false;
+    private bool isChangingName = false;
 
-    int framesBetweenUpdate = 5;
-    int framesCount = 0;
+    private const int FRAMES_BETWEEN_UPDATES = 5;
+    private int framesCount = 0;
 
-    string loadedThumbnailURL;
+    private string loadedThumbnailURL;
 
-    AssetPromise_Texture loadedThumbnailPromise;
+    private AssetPromise_Texture loadedThumbnailPromise;
 
     private void Start()
     {
@@ -61,7 +69,7 @@ public class EntityInformationController : MonoBehaviour
         if (currentEntity == null)
             return;
 
-        if (framesCount >= framesBetweenUpdate)
+        if (framesCount >= FRAMES_BETWEEN_UPDATES)
         {
             UpdateInfo(currentEntity);
             framesCount = 0;
@@ -98,25 +106,39 @@ public class EntityInformationController : MonoBehaviour
 
     public void ChangeEntityName(string newName)
     {
-        titleTxt.text = newName;
-        currentEntity.SetDescriptiveName(newName);
-        OnNameChange?.Invoke(currentEntity);
+        OnNameChange?.Invoke(currentEntity, newName);
     }
 
     public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)
     {
-        if (currentEntity != null)
+        EntityDeselected();
+        if (currentEntity != null)       
             entity.onStatusUpdate -= UpdateEntityName;
+            
+
 
         currentEntity = entity;
         currentEntity.onStatusUpdate += UpdateEntityName;
 
         parcelScene = currentScene;
 
+        if (entity.HasSmartItemComponent())
+        {
+            if(entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
+                smartItemListView.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent) baseComponent).model.values);
+        }
+        else
+        {
+            smartItemListView.gameObject.SetActive(false);
+        }
 
         entitytTumbailImg.enabled = false;
-        GetThumbnail(entity.GetSceneObjectAssociated());
 
+        CatalogItem entitySceneObject = entity.GetCatalogItemAssociated();
+
+        GetThumbnail(entitySceneObject);
+
+        UpdateLimitsInformation(entitySceneObject);
         UpdateEntityName(currentEntity);
         UpdateInfo(currentEntity);
     }
@@ -131,6 +153,24 @@ public class EntityInformationController : MonoBehaviour
     {
         gameObject.SetActive(false);
         isEnable = false;
+
+        if (currentEntity != null)
+            EntityDeselected();
+        currentEntity = null;
+    }
+
+    public void EntityDeselected()
+    {
+        if (currentEntity == null)
+            return;
+
+        if (currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
+        {
+            SmartItemComponent smartItemComponent = (SmartItemComponent)component;
+            SmartItemComponent.Model modelo =  smartItemComponent.model;
+            modelo.ToString();
+            OnSmartItemComponentUpdate?.Invoke(currentEntity);
+        }
     }
 
     public void UpdateEntityName(DCLBuilderInWorldEntity entity)
@@ -146,7 +186,7 @@ public class EntityInformationController : MonoBehaviour
     {
         if (entity.gameObject != null)
         {
-            Vector3 positionConverted = DCL.Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, parcelScene);
+            Vector3 positionConverted = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position, parcelScene);
             Vector3 currentRotation = entity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = entity.gameObject.transform.localScale;
 
@@ -161,20 +201,41 @@ public class EntityInformationController : MonoBehaviour
             positionAttribute.SetValues(positionConverted);
             rotationAttribute.SetValues(currentRotation);
             scaleAttribute.SetValues(currentScale);
-
         }
     }
+
+    void UpdateLimitsInformation(CatalogItem catalogItem)
+    {
+        if (catalogItem == null)
+        {
+            entityLimitsLeftTxt.text = "";
+            entityLimitsRightTxt.text = "";
+            return;
+        }
+
+        string leftText = $"ENTITIES: {catalogItem.metrics.entities}\n"+ 
+                          $"BODIES: {catalogItem.metrics.bodies}\n" + 
+                          $"TRIS: {catalogItem.metrics.triangles}";
+
+        string rightText = $"TEXTURES: {catalogItem.metrics.textures}\n" +
+                           $"MATERIALS: {catalogItem.metrics.materials}\n" +
+                           $"GEOMETRIES: {catalogItem.metrics.meshes}";
+
+        entityLimitsLeftTxt.text = leftText;
+        entityLimitsRightTxt.text = rightText;
+    }
+
 
     private float RepeatWorking(float t, float length)
     {
         return (t - (Mathf.Floor(t / length) * length));
     }
 
-    private void GetThumbnail(SceneObject sceneObject)
+    private void GetThumbnail(CatalogItem catalogItem)
     {
-        var url = sceneObject?.GetComposedThumbnailUrl();
+        var url = catalogItem.thumbnailURL;
 
-        if (sceneObject == null || string.IsNullOrEmpty(url))
+        if (catalogItem == null || string.IsNullOrEmpty(url))
             return;
 
         string newLoadedThumbnailURL = url;

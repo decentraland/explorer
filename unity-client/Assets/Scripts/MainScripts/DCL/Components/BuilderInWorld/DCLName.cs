@@ -21,14 +21,14 @@ public class DCLName : BaseDisposable
 
     public Model model;
 
-    public DCLName(ParcelScene scene) : base(scene)
+    public DCLName(IParcelScene scene) : base(scene)
     {
         model = new Model();
     }
 
     public override int GetClassId()
     {
-        return (int)CLASS_ID.NAME;
+        return (int) CLASS_ID.NAME;
     }
 
     public override object GetModel()
@@ -44,7 +44,21 @@ public class DCLName : BaseDisposable
         UpdateFromJSON(JsonUtility.ToJson(newModel));
     }
 
+    public void ForceSetNewName(string value)
+    {
+        Model newModel = new Model();
+        newModel.value = value;
+
+        ApplyNewValue(JsonUtility.ToJson(newModel));
+    }
+
     public override IEnumerator ApplyChanges(string newJson)
+    {
+        ApplyNewValue(newJson);
+        yield break;
+    }
+
+    void ApplyNewValue(string newJson)
     {
         Model newModel = Utils.SafeFromJson<Model>(newJson);
         if (newModel.value != model.value)
@@ -52,7 +66,7 @@ public class DCLName : BaseDisposable
             string oldValue = model.value;
             model = newModel;
 
-            foreach(DecentralandEntity entity in attachedEntities)
+            foreach (DecentralandEntity entity in attachedEntities)
             {
                 entity.OnNameChange?.Invoke(newModel);
             }
@@ -60,14 +74,12 @@ public class DCLName : BaseDisposable
 #if UNITY_EDITOR
             foreach (DecentralandEntity decentralandEntity in this.attachedEntities)
             {
-                if(oldValue != null)
+                if (oldValue != null)
                     decentralandEntity.gameObject.name.Replace(oldValue, "");
 
-                decentralandEntity.gameObject.name += "-"+model.value;
+                decentralandEntity.gameObject.name += $"-{model.value}";
             }
 #endif
         }
-
-        return null;
     }
 }

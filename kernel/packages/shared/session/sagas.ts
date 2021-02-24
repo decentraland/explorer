@@ -65,7 +65,7 @@ import {
 } from './actions'
 import { ProviderType } from '../ethereum/ProviderType'
 import Html from '../Html'
-import { fetchProfileLocally, getProfileByUserId } from '../profiles/sagas'
+import { fetchProfileLocally, doesProfileExist } from '../profiles/sagas'
 import { generateRandomUserProfile } from '../profiles/generateRandomUserProfile'
 import { unityInterface } from '../../unity-interface/UnityInterface'
 import { getSignUpIdentity, getSignUpProfile } from './selectors'
@@ -151,9 +151,9 @@ function* authenticate(action: AuthenticateAction) {
     return
   }
   const session = yield authorize()
-  let profile = yield getProfileByUserId(session.userId)
+  let profileExists = yield doesProfileExist(session.userId)
 
-  if (profile || isGuestWithProfile(session) || PREVIEW) {
+  if (profileExists || isGuestWithProfile(session) || PREVIEW) {
     return yield signIn(session.userId, session.identity)
   }
   return yield startSignUp(session.userId, session.identity)
@@ -172,7 +172,6 @@ function* startSignUp(userId: string, identity: ExplorerIdentity) {
   profile.ethAddress = identity.rawAddress
   profile.unclaimedName = '' // clean here to allow user complete in passport step
   profile.hasClaimedName = false
-  profile.inventory = []
   profile.version = 0
 
   yield put(signUpSetIdentity(userId, identity))
@@ -299,7 +298,6 @@ function* signUp() {
   profile.userId = session.userId
   profile.ethAddress = session.identity.rawAddress
   profile.version = 0
-  profile.inventory = []
   profile.hasClaimedName = false
   if (profile.email) {
     identifyEmail(profile.email, isGuest() ? undefined : profile.userId)

@@ -511,7 +511,7 @@ namespace DCL.Helpers
             Cursor.lockState = CursorLockMode.Locked;
             lockedInFrame = Time.frameCount;
 
-            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current?.SetSelectedGameObject(null);
         }
 
         public static void UnlockCursor()
@@ -534,7 +534,7 @@ namespace DCL.Helpers
 #endif
             Cursor.lockState = CursorLockMode.None;
 
-            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current?.SetSelectedGameObject(null);
         }
 
         #region BROWSER_ONLY
@@ -629,6 +629,12 @@ namespace DCL.Helpers
             float z = float.IsInfinity(value.z) ? 0 : value.z;
 
             return new Vector3(x, y, z);
+        }
+
+        public static void Deconstruct<T1, T2>(this KeyValuePair<T1, T2> tuple, out T1 key, out T2 value)
+        {
+            key = tuple.Key;
+            value = tuple.Value;
         }
     }
 }

@@ -10,16 +10,18 @@ using Newtonsoft.Json.Linq;
 using DCL.Configuration;
 using static ProtocolV2;
 using Environment = DCL.Environment;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public static partial class BuilderInWorldUtils
 {
-    public static SceneObject CreateFloorSceneObject()
+    public static CatalogItem CreateFloorSceneObject()
     {
-        SceneObject floorSceneObject = new SceneObject();
+        CatalogItem floorSceneObject = new CatalogItem();
         floorSceneObject.id = BuilderInWorldSettings.FLOOR_ID;
 
         floorSceneObject.model = BuilderInWorldSettings.FLOOR_MODEL;
-        floorSceneObject.name  = BuilderInWorldSettings.FLOOR_NAME;
+        floorSceneObject.name = BuilderInWorldSettings.FLOOR_NAME;
 
         floorSceneObject.contents = new Dictionary<string, string>();
 
@@ -31,14 +33,15 @@ public static partial class BuilderInWorldUtils
         return floorSceneObject;
     }
 
-    public static Dictionary<string,string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
+    public static Dictionary<string, string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
     {
         Dictionary<string, string> mappingDict = new Dictionary<string, string>();
 
-        foreach(ContentServerUtils.MappingPair mappingPair in contents)
+        foreach (ContentServerUtils.MappingPair mappingPair in contents)
         {
             mappingDict.Add(mappingPair.file, mappingPair.hash);
         }
+
         return mappingDict;
     }
 
@@ -95,7 +98,7 @@ public static partial class BuilderInWorldUtils
     public static bool IsWithInSelectionBounds(Vector3 point, Vector3 lastClickMousePosition, Vector3 mousePosition)
     {
         Camera camera = Camera.main;
-        var viewPortBounds = BuilderInWorldUtils.GetViewportBounds(camera, lastClickMousePosition, mousePosition);
+        var viewPortBounds = GetViewportBounds(camera, lastClickMousePosition, mousePosition);
         return viewPortBounds.Contains(camera.WorldToViewportPoint(point));
     }
 
@@ -147,7 +150,7 @@ public static partial class BuilderInWorldUtils
             {
                 EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
 
-                entityComponentModel.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+                entityComponentModel.position = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 
@@ -168,7 +171,7 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {
                 EntityData.NFTComponent nFTComponent = new EntityData.NFTComponent();
-                NFTShape.Model model = (NFTShape.Model)keyValuePair.Value.GetModel();
+                NFTShape.Model model = (NFTShape.Model) keyValuePair.Value.GetModel();
 
                 nFTComponent.id = keyValuePair.Value.id;
                 nFTComponent.color = new ColorRepresentation(model.color);
@@ -196,5 +199,31 @@ public static partial class BuilderInWorldUtils
     public static EntityData ConvertJSONToEntityData(string json)
     {
         return JsonConvert.DeserializeObject<EntityData>(json);
+    }
+
+    public static List<DCLBuilderInWorldEntity> FilterEntitiesBySmartItemComponentAndActions(List<DCLBuilderInWorldEntity> entityList)
+    {
+        List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();
+
+        foreach (DCLBuilderInWorldEntity entity in entityList)
+        {
+            if (!entity.HasSmartItemComponent() || !entity.HasSmartItemActions())
+                continue;
+
+            newList.Add(entity);
+        }
+
+        return newList;
+    }
+
+    public static void CopyRectTransform(RectTransform original, RectTransform rectTransformToCopy)
+    {
+        original.anchoredPosition = rectTransformToCopy.anchoredPosition;
+        original.anchorMax = rectTransformToCopy.anchorMax;
+        original.anchorMin = rectTransformToCopy.anchorMin;
+        original.offsetMax = rectTransformToCopy.offsetMax;
+        original.offsetMin = rectTransformToCopy.offsetMin;
+        original.sizeDelta = rectTransformToCopy.sizeDelta;
+        original.pivot = rectTransformToCopy.pivot;
     }
 }

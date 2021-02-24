@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace DCL.Components
 {
-    public class LoadableShape : BaseShape
+    public class LoadableShape : BaseShape,IAssetCatalogReferenceHolder
     {
         [System.Serializable]
         public new class Model : BaseShape.Model
@@ -47,7 +47,7 @@ namespace DCL.Components
             return result as T;
         }
 
-        public LoadableShape(ParcelScene scene) : base(scene)
+        public LoadableShape(IParcelScene scene) : base(scene)
         {
         }
 
@@ -75,17 +75,22 @@ namespace DCL.Components
         {
             return model.withCollisions;
         }
+
+        public string GetAssetId()
+        {
+            return model.assetId;
+        }
     }
 
     public class LoadableShape<LoadWrapperType, LoadWrapperModelType> : LoadableShape
         where LoadWrapperType : LoadWrapper, new()
         where LoadWrapperModelType : LoadableShape.Model, new()
     {
-
         private bool isLoaded = false;
         private bool failed = false;
         private event Action<BaseDisposable> OnReadyCallbacks;
         public System.Action<DecentralandEntity> OnEntityShapeUpdated;
+
         new public LoadWrapperModelType model
         {
             get
@@ -110,7 +115,7 @@ namespace DCL.Components
             set { base.previousModel = value; }
         }
 
-        public LoadableShape(ParcelScene scene) : base(scene)
+        public LoadableShape(IParcelScene scene) : base(scene)
         {
             OnDetach += DetachShape;
             OnAttach += AttachShape;
@@ -148,7 +153,7 @@ namespace DCL.Components
             ContentProvider provider = null;
 
             if (!string.IsNullOrEmpty(model.assetId))
-                provider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneAsetPackCatalog(model.assetId);
+                provider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneObjectCatalog(model.assetId);
 
             if (provider == null)
                 provider = scene.contentProvider;
@@ -163,12 +168,12 @@ namespace DCL.Components
                 if (loadableShape is LoadWrapper_GLTF gltfLoadWrapper)
                     gltfLoadWrapper.customContentProvider = provider;
 
+                entity.meshesInfo.currentShape = this;
+
                 loadableShape.entity = entity;
                 loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
                 loadableShape.initialVisibility = model.visible;
                 loadableShape.Load(model.src, OnLoadCompleted, OnLoadFailed);
-
-                entity.meshesInfo.currentShape = this;
             }
             else
             {

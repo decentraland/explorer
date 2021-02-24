@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using DCL.Controllers;
 using UnityEngine;
 
 namespace DCL
@@ -145,22 +146,23 @@ namespace DCL
 
                 foreach (var v in loadedScenes)
                 {
-                    if (v.Value.metricsController != null)
+                    ParcelScene scene = v.Value as ParcelScene;
+                    if (scene.metricsController != null)
                     {
-                        meshesCount += v.Value.metricsController.GetModel().meshes;
-                        materialCount += v.Value.metricsController.GetModel().materials;
+                        meshesCount += scene.metricsController.GetModel().meshes;
+                        materialCount += scene.metricsController.GetModel().materials;
                     }
 
-                    sharedCount += v.Value.disposableComponents.Count;
+                    sharedCount += scene.disposableComponents.Count;
 
-                    foreach (var e in v.Value.disposableComponents)
+                    foreach (var e in scene.disposableComponents)
                     {
                         sharedAttachCount += e.Value.attachedEntities.Count;
                     }
 
-                    entityCount += v.Value.entities.Count;
+                    entityCount += scene.entities.Count;
 
-                    foreach (var e in v.Value.entities)
+                    foreach (var e in scene.entities)
                     {
                         componentCount += e.Value.components.Count;
                     }
@@ -179,7 +181,9 @@ namespace DCL
                 Dictionary<string, int> pendingMessagesCount = new Dictionary<string, int>();
                 Dictionary<string, int> messagesReplaced = new Dictionary<string, int>();
 
-                using (var controllersIter = Environment.i.messaging.manager.messagingControllers.GetEnumerator())
+                MessagingControllersManager messagingManager = Environment.i.messaging.manager as MessagingControllersManager;
+
+                using (var controllersIter = messagingManager.messagingControllers.GetEnumerator())
                 {
                     while (controllersIter.MoveNext())
                     {

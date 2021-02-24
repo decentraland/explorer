@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public abstract class BaseShape : BaseDisposable
+    public abstract class BaseShape : BaseDisposable, IShape
     {
         [System.Serializable]
         public class Model
@@ -15,7 +15,7 @@ namespace DCL.Components
             public bool visible = true;
         }
 
-        public BaseShape(ParcelScene scene) : base(scene)
+        public BaseShape(IParcelScene scene) : base(scene)
         {
         }
 

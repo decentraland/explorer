@@ -49,8 +49,7 @@ namespace DCL.Components
         public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 
-        [NonSerialized]
-        public ParcelScene scene;
+        public IParcelScene scene;
 
         [NonSerialized]
         public DecentralandEntity entity;
@@ -77,6 +76,7 @@ namespace DCL.Components
         }
 
         public abstract object GetModel();
+        public abstract void SetModel(object model);
 
         public abstract IEnumerator ApplyChanges(string newJson);
 

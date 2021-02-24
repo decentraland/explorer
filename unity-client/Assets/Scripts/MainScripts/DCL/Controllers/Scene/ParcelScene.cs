@@ -10,29 +10,46 @@ using UnityEngine.Assertions;
 
 namespace DCL.Controllers
 {
-    public class ParcelScene : MonoBehaviour
+    public interface IParcelScene
+    {
+        Transform GetSceneTransform();
+        Dictionary<string, DecentralandEntity> entities { get; }
+        Dictionary<string, BaseDisposable> disposableComponents { get; }
+        T GetSharedComponent<T>() where T : class;
+        BaseDisposable GetSharedComponent(string id);
+        event System.Action<DecentralandEntity> OnEntityAdded;
+        event System.Action<DecentralandEntity> OnEntityRemoved;
+        LoadParcelScenesMessage.UnityParcelScene sceneData { get; }
+        ContentProvider contentProvider { get; }
+        bool isPersistent { get; }
+        bool isTestScene { get; }
+        bool IsInsideSceneBoundaries(DCLCharacterPosition charPosition);
+        bool IsInsideSceneBoundaries(Bounds objectBounds);
+        bool IsInsideSceneBoundaries(Vector2Int gridPosition, float height = 0f);
+        bool IsInsideSceneBoundaries(Vector3 worldPosition, float height = 0f);
+    }
+
+    public class ParcelScene : MonoBehaviour, IParcelScene
     {
         public static bool VERBOSE = false;
-
-        public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
-        public Dictionary<string, BaseDisposable> disposableComponents = new Dictionary<string, BaseDisposable>();
+        public Dictionary<string, DecentralandEntity> entities { get; private set; } = new Dictionary<string, DecentralandEntity>();
+        public Dictionary<string, BaseDisposable> disposableComponents { get; private set; } = new Dictionary<string, BaseDisposable>();
         public LoadParcelScenesMessage.UnityParcelScene sceneData { get; protected set; }
 
         public HashSet<Vector2Int> parcels = new HashSet<Vector2Int>();
         public SceneController ownerController;
         public SceneMetricsController metricsController;
-        public UIScreenSpace uiScreenSpace;
 
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
 
-        public ContentProvider contentProvider;
+        public ContentProvider contentProvider { get; protected set; }
+
+        public bool isTestScene { get; set; } = false;
+        public bool isPersistent { get; set; } = false;
 
         [System.NonSerialized]
-        public bool isTestScene = false;
-
-        [System.NonSerialized]
-        public bool isPersistent = false;
+        public string sceneName;
 
         [System.NonSerialized]
         public bool unloadWithDistance = true;
@@ -198,7 +215,9 @@ namespace DCL.Controllers
             if (parcels.Count == 0) return false;
 
             float heightLimit = metricsController.GetLimits().sceneHeight;
-            if (height > heightLimit) return false;
+
+            if (height > heightLimit)
+                return false;
 
             return parcels.Contains(gridPosition);
         }
@@ -243,6 +262,11 @@ namespace DCL.Controllers
             if (parcels.Contains(targetCoordinate)) return true;
 
             return false;
+        }
+
+        public Transform GetSceneTransform()
+        {
+            return transform;
         }
 
         public DecentralandEntity CreateEntity(string id)
@@ -302,7 +326,7 @@ namespace DCL.Controllers
 
             if (entity.parent != null) SetEntityParent(newEntity.entityId, entity.parent.entityId);
 
-            DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position);
+            DCLTransform.model.position = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position);
             DCLTransform.model.rotation = entity.gameObject.transform.rotation;
             DCLTransform.model.scale = entity.gameObject.transform.lossyScale;
 
@@ -313,10 +337,13 @@ namespace DCL.Controllers
 
             foreach (KeyValuePair<System.Type, BaseDisposable> component in entity.GetSharedComponents())
             {
-                SharedComponentAttach(newEntity.entityId, component.Value.id);
+                BaseDisposable baseDisposable = SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
+                string jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(component.Value.GetModel());
+                baseDisposable.UpdateFromJSON(jsonModel);
+                SharedComponentAttach(newEntity.entityId, baseDisposable.id);
             }
 
-            //TODO: (Adrian) Evaluate if all created components should be handle as equals instead of different
+            //NOTE: (Adrian) Evaluate if all created components should be handle as equals instead of different
             foreach (KeyValuePair<string, UUIDComponent> component in entity.uuidComponents)
             {
                 EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.model);
@@ -597,11 +624,34 @@ namespace DCL.Controllers
                     newComponent = EntityUUIDComponentUpdate(entity, type, model);
                 }
             }
+            else
+            {
+                if (!entity.components.ContainsKey(classId))
+                {
+                    newComponent = factory.CreateItemFromId<BaseComponent>(classId);
+
+                    if (newComponent != null)
+                    {
+                        newComponent.scene = this;
+                        newComponent.entity = entity;
+
+                        entity.components.Add(classId, newComponent);
+
+                        newComponent.transform.SetParent(entity.gameObject.transform, false);
+                        newComponent.UpdateFromJSON((string) data);
+                    }
+                }
+                else
+                {
+                    newComponent = EntityComponentUpdate(entity, classId, (string) data);
+                }
+            }
 
             Environment.i.platform.physicsSyncController.MarkDirty();
             Environment.i.platform.cullingController.MarkDirty();
             return newComponent;
         }
+
 
         public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
         {
@@ -874,7 +924,7 @@ namespace DCL.Controllers
                 case CLASS_ID.UI_FULLSCREEN_SHAPE:
                 case CLASS_ID.UI_SCREEN_SPACE_SHAPE:
                 {
-                    if (uiScreenSpace == null)
+                    if (GetSharedComponent<UIScreenSpace>() == null)
                     {
                         newComponent = new UIScreenSpace(this);
                     }
@@ -989,6 +1039,12 @@ namespace DCL.Controllers
             RemoveEntityComponent(decentralandEntity, name);
         }
 
+        public T GetSharedComponent<T>()
+            where T : class
+        {
+            return disposableComponents.Values.FirstOrDefault(x => x is T) as T;
+        }
+
         private void RemoveComponentType<T>(DecentralandEntity entity, CLASS_ID_COMPONENT classId)
             where T : MonoBehaviour
         {
@@ -1019,9 +1075,10 @@ namespace DCL.Controllers
             switch (componentName)
             {
                 case "shape":
-                    if (entity.meshesInfo.currentShape != null)
+
+                    if (entity.meshesInfo.currentShape is BaseShape baseShape)
                     {
-                        entity.meshesInfo.currentShape.DetachFrom(entity);
+                        baseShape.DetachFrom(entity);
                     }
 
                     return;
@@ -1127,19 +1184,20 @@ namespace DCL.Controllers
 
         public string GetStateString()
         {
+            string baseState = isPersistent ? "global-scene" : "scene";
             switch (sceneLifecycleHandler.state)
             {
                 case SceneLifecycleHandler.State.NOT_READY:
-                    return $"scene:{prettyName} - not ready...";
+                    return $"{baseState}:{prettyName} - not ready...";
                 case SceneLifecycleHandler.State.WAITING_FOR_INIT_MESSAGES:
-                    return $"scene:{prettyName} - waiting for init messages...";
+                    return $"{baseState}:{prettyName} - waiting for init messages...";
                 case SceneLifecycleHandler.State.WAITING_FOR_COMPONENTS:
                     if (disposableComponents != null && disposableComponents.Count > 0)
-                        return $"scene:{prettyName} - left to ready:{disposableComponents.Count - sceneLifecycleHandler.disposableNotReadyCount}/{disposableComponents.Count}";
+                        return $"{baseState}:{prettyName} - left to ready:{disposableComponents.Count - sceneLifecycleHandler.disposableNotReadyCount}/{disposableComponents.Count}";
                     else
-                        return $"scene:{prettyName} - no components. waiting...";
+                        return $"{baseState}:{prettyName} - no components. waiting...";
                 case SceneLifecycleHandler.State.READY:
-                    return $"scene:{prettyName} - ready!";
+                    return $"{baseState}:{prettyName} - ready!";
             }
 
             return $"scene:{prettyName} - no state?";

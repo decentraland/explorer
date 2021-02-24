@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DCL.Helpers;
+using DCL.Models;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UniversalRenderPipelineAsset = UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
@@ -90,6 +91,7 @@ namespace DCL.Rendering
             running = true;
             CommonScriptableObjects.rendererState.OnChange += OnRendererStateChange;
             CommonScriptableObjects.playerUnityPosition.OnChange += OnPlayerUnityPositionChange;
+            MeshesInfo.OnAnyUpdated += MarkDirty;
             StartInternal();
         }
 
@@ -114,7 +116,9 @@ namespace DCL.Rendering
             running = false;
             CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
             CommonScriptableObjects.playerUnityPosition.OnChange -= OnPlayerUnityPositionChange;
+            MeshesInfo.OnAnyUpdated -= MarkDirty;
             StopInternal();
+            ResetObjects();
         }
 
         public void StopInternal()
@@ -141,7 +145,6 @@ namespace DCL.Rendering
                 renderers = objectsTracker.GetRenderers();
             else
                 renderers = objectsTracker.GetSkinnedRenderers();
-
 
 
             for (var i = 0; i < renderers.Length; i++)
@@ -328,17 +331,17 @@ namespace DCL.Rendering
             var renderers = objectsTracker.GetRenderers();
             var animations = objectsTracker.GetAnimations();
 
-            for (var i = 0; i < skinnedRenderers.Length; i++)
+            for (var i = 0; i < skinnedRenderers?.Length; i++)
             {
                 skinnedRenderers[i].updateWhenOffscreen = true;
             }
 
-            for (var i = 0; i < animations.Length; i++)
+            for (var i = 0; i < animations?.Length; i++)
             {
                 animations[i].cullingType = AnimationCullingType.AlwaysAnimate;
             }
 
-            for (var i = 0; i < renderers.Length; i++)
+            for (var i = 0; i < renderers?.Length; i++)
             {
                 renderers[i].forceRenderingOff = false;
             }

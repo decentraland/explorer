@@ -71,7 +71,7 @@ namespace DCL.Components
                 return;
             }
 
-            audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) ? model.volume : 0f;
+            audioSource.volume = ((scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) || (scene is GlobalScene globalScene && globalScene.isPortableExperience)) ? model.volume : 0f;
             audioSource.loop = model.loop;
             audioSource.pitch = model.pitch;
             audioSource.spatialBlend = 1;
@@ -113,7 +113,12 @@ namespace DCL.Components
         {
             if (audioSource != null)
             {
-                audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
+                float volume = 0;
+                if ((scene.sceneData.id == currentSceneId) || (scene is GlobalScene globalScene && globalScene.isPortableExperience))
+                {
+                    volume = model.volume;
+                }
+                audioSource.volume = volume;
             }
         }
 
@@ -158,6 +163,12 @@ namespace DCL.Components
                 //To remove a pesky and quite unlikely warning when the audiosource is out of scenebounds
                 audioSource.Play();
             }
+        }
+
+        public override void SetModel(object model)
+        {
+            this.model = (Model)model;
+            ApplyCurrentModel();
         }
     }
 }
