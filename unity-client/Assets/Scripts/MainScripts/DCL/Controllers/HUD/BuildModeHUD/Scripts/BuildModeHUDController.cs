@@ -64,7 +64,8 @@ public class BuildModeHUDController : IHUD
             new PublishPopupController(),
             new DragAndDropSceneObjectController(),
             new PublishBtnController(),
-            new InspectorBtnController());
+            new InspectorBtnController(),
+            new CatalogBtnController());
 
         catalogItemDropController = new CatalogItemDropController();
 
