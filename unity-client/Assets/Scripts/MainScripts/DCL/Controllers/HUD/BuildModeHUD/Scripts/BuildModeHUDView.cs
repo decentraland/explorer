@@ -9,7 +9,7 @@ public class BuildModeHUDView : MonoBehaviour
     public BuilderInWorldEntityListController entityListController;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
-    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn;
+    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,catalogBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
@@ -49,6 +49,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IDragAndDropSceneObjectController dragAndDropSceneObjectController;
     public PublishBtnView publishBtnView;
     private IPublishBtnController publishBtnController;
+    public InspectorBtnView inspectorBtnView;
+    private IInspectorBtnController inspectorBtnController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -69,7 +71,8 @@ public class BuildModeHUDView : MonoBehaviour
         IShortcutsController shortcutsController,
         IPublishPopupController publishPopupController,
         IDragAndDropSceneObjectController dragAndDropSceneObjectController,
-        IPublishBtnController publishBtnController)
+        IPublishBtnController publishBtnController,
+        IInspectorBtnController inspectorBtnController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -100,6 +103,10 @@ public class BuildModeHUDView : MonoBehaviour
         this.publishBtnController = publishBtnController;
         this.publishBtnController.Initialize(publishBtnView, tooltipController);
         publishBtnController.OnClick += () => OnPublishAction?.Invoke();
+
+        this.inspectorBtnController = inspectorBtnController;
+        this.inspectorBtnController.Initialize(inspectorBtnView, tooltipController);
+        inspectorBtnController.OnClick += () => OnEntityListChangeVisibilityAction?.Invoke();
     }
 
     private void Awake()
@@ -117,9 +124,6 @@ public class BuildModeHUDView : MonoBehaviour
         toggleOpenEntityListInputAction.OnTriggered += OnEntityListActionTriggered;
         toggleSceneInfoInputAction.OnTriggered += OnSceneLimitInfoControllerChangeVisibilityTriggered;
         toggleCatalogInputAction.OnTriggered += OnSceneCatalogControllerChangeVisibilityTriggered;
-
-
-        entityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
 
         foreach (Button closeEntityListBtn in closeEntityListBtns)
         {
