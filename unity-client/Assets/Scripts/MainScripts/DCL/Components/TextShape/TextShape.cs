@@ -128,6 +128,11 @@ namespace DCL.Components
         public RectTransform rectTransform;
         public Model cachedModel;
 
+        private void Awake()
+        {
+            model = new Model();
+        }
+
         public void Update()
         {
             if (cachedModel.billboard && Camera.main != null)

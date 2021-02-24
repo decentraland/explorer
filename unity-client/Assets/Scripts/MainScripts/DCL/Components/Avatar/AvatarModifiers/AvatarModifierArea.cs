@@ -53,6 +53,7 @@ public class AvatarModifierArea : BaseComponent
             { "HIDE_AVATARS", new HideAvatarsModifier() },
             { "DISABLE_PASSPORTS", new DisablePassportModifier() }
         };
+        model = new Model();
     }
 
     public override IEnumerator ApplyChanges(BaseModel newModel)
@@ -65,7 +66,7 @@ public class AvatarModifierArea : BaseComponent
 
         ApplyCurrentModel();
 
-        yield break;
+        return null;
     }
 
     private void OnDestroy()
@@ -134,7 +135,7 @@ public class AvatarModifierArea : BaseComponent
 
         Vector3 center = entity.gameObject.transform.position;
         Quaternion rotation = entity.gameObject.transform.rotation;
-        return cachedModel.area.DetectAvatars(center, rotation);
+        return cachedModel.area?.DetectAvatars(center, rotation);
     }
 
     private void RemoveAllModifiers()

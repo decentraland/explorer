@@ -23,6 +23,7 @@ namespace DCL.Components
         }
 
         public Mesh currentMesh { get; protected set; }
+        public Model previousModel;
 
         public ParametrizedShape(ParcelScene scene) : base(scene)
         {
@@ -88,7 +89,7 @@ namespace DCL.Components
             collisionsDirty = true;
             UpdateRenderer(entity);
 
-            entity.OnShapeUpdated?.Invoke(entity);
+            entity.OnShapeUpdated?.Invoke(entity);          
         }
 
         void OnShapeDetached(DecentralandEntity entity)
@@ -109,11 +110,13 @@ namespace DCL.Components
         public override IEnumerator ApplyChanges(BaseModel newModelRaw)
         {
             var newModel = (T)newModelRaw;
-            var model = (T) this.model;
-            visibilityDirty = newModel.visible != model.visible;
-            collisionsDirty = newModel.withCollisions != model.withCollisions || newModel.isPointerBlocker != model.isPointerBlocker;
+
+            if (previousModel != null)
+            {
+                visibilityDirty = newModel.visible != previousModel.visible;
+                collisionsDirty = newModel.withCollisions != previousModel.withCollisions || newModel.isPointerBlocker != previousModel.isPointerBlocker;
+            }
             bool shouldGenerateMesh = ShouldGenerateNewMesh(newModel);
-            model = newModel;
 
             //NOTE(Brian): Only generate meshes here if they already are attached to something.
             //             Otherwise, the mesh will be created on the OnShapeAttached.
@@ -140,7 +143,7 @@ namespace DCL.Components
                     }
                 }
             }
-
+            previousModel = newModel;
             return null;
         }
 

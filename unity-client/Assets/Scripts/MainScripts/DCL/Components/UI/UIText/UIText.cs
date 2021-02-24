@@ -14,6 +14,11 @@ namespace DCL.Components
         {
             public TextShape.Model textModel;
 
+            public Model()
+            {
+                textModel = new TextShape.Model();
+            }
+
             public override bool Equals(object obj)
             {
                 return obj is Model model &&
@@ -34,7 +39,7 @@ namespace DCL.Components
 
             public override BaseModel GetDataFromJSON(string json)
             {
-                return textModel.GetDataFromJSON(json);
+                return Utils.SafeFromJson<Model>(json);
             }
 
             public override int GetHashCode()
@@ -60,7 +65,8 @@ namespace DCL.Components
         public override string referencesContainerPrefabName => "UIText";
 
         public UIText(ParcelScene scene) : base(scene)
-        {
+        {        
+            model = new Model();
         }
 
         public override int GetClassId()

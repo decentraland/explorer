@@ -28,6 +28,7 @@ namespace DCL.Components
             {
                 CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
             }
+            model = new Model();
         }
 
         public override int GetClassId()

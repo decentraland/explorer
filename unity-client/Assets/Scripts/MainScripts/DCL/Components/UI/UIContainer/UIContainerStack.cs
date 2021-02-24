@@ -87,6 +87,7 @@ namespace DCL.Components
 
         public UIContainerStack(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()
@@ -137,7 +138,7 @@ namespace DCL.Components
             UIShape childComponent = updatedComponent as UIShape;
             Assert.IsTrue(childComponent != null, "This should never happen!!!!");
         
-            if (((Model)childComponent.GetModel()).parentComponent != id)
+            if (((UIShape.Model)childComponent.GetModel()).parentComponent != id)
             {
                 RefreshAll();
                 return;

@@ -57,6 +57,7 @@ namespace DCL.Components
 
             OnAttach += OnMaterialAttached;
             OnDetach += OnMaterialDetached;
+            model = new Model();
         }
 
         new public Model GetModel()

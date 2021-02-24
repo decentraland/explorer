@@ -96,6 +96,7 @@ namespace DCL.Components
 
         public UIScrollRect(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)

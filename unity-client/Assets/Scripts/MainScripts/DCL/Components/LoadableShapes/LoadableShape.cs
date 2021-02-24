@@ -129,10 +129,17 @@ namespace DCL.Components
            
             LoadWrapperModelType model = (LoadWrapperModelType) newModel;
 
-            bool updateVisibility = previousModel.visible != model.visible;
-            bool updateCollisions = previousModel.withCollisions != model.withCollisions || previousModel.isPointerBlocker != model.isPointerBlocker;
-            bool triggerAttachment = (!string.IsNullOrEmpty(model.src) && previousModel.src != model.src) ||
-                                     (!string.IsNullOrEmpty(model.assetId) && previousModel.assetId != model.assetId);
+            bool updateVisibility = true;
+            bool updateCollisions = true;
+            bool triggerAttachment = true;
+
+            if (previousModel != null)
+            {
+                updateVisibility = previousModel.visible != model.visible;
+                updateCollisions = previousModel.withCollisions != model.withCollisions || previousModel.isPointerBlocker != model.isPointerBlocker;
+                triggerAttachment = (!string.IsNullOrEmpty(model.src) && previousModel.src != model.src) ||
+                                         (!string.IsNullOrEmpty(model.assetId) && previousModel.assetId != model.assetId);
+            }
 
             foreach (var entity in attachedEntities)
             {

@@ -46,6 +46,11 @@ namespace DCL
             }
         }
 
+        private void Awake()
+        {
+            model = new Model();
+        }
+
         public virtual void Setup(ParcelScene scene, DecentralandEntity entity, UUIDComponent.Model model)
         {
         }

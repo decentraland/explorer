@@ -93,6 +93,7 @@ namespace DCL.Components
 
         public UIImage(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()
