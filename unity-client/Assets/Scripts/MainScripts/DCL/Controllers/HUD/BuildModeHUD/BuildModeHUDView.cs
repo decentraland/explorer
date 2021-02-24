@@ -11,7 +11,7 @@ public class BuildModeHUDView : MonoBehaviour
     public CatalogGroupListView catalogGroupListView;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
-    public Button firstPersonChangeModeBtn,changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn,closeCatalogBtn;
+    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn,closeCatalogBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
@@ -80,6 +80,7 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.firstPersonModeController = firstPersonModeController;
         this.firstPersonModeController.Initialize(firstPersonModeView, tooltipController);
+        firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
     }
 
     private void Awake()
@@ -112,7 +113,6 @@ public class BuildModeHUDView : MonoBehaviour
 
 
         changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
-        firstPersonChangeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
         extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
         controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
         closeControlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());

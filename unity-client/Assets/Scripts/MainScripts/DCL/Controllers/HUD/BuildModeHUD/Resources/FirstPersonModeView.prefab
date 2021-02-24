@@ -49,6 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b8d1b2e789fb754eb21833ad286c03e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainButton: {fileID: 404395254036622744}
   tooltipText: Change Camera (I)
   changeModeEventTrigger: {fileID: 2533142243847039932}
 --- !u!1 &404395254036622750
