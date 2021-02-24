@@ -24,7 +24,10 @@ namespace DCL.Components
             }
         }
 
-        public ConeShape(ParcelScene scene) : base(scene) { }
+        public ConeShape(ParcelScene scene) : base(scene)
+        {
+            model = new Model();
+        }
 
         public override int GetClassId()
         {

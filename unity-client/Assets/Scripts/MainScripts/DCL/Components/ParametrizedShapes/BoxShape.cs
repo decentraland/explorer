@@ -12,7 +12,10 @@ namespace DCL.Components
         {
         }
 
-        public BoxShape(ParcelScene scene) : base(scene) { }
+        public BoxShape(ParcelScene scene) : base(scene)
+        {
+            model = new Model();
+        }
 
         public static Mesh cubeMesh = null;
         private static int cubeMeshRefCount = 0;

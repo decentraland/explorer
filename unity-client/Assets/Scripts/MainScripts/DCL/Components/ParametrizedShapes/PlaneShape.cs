@@ -21,6 +21,7 @@ namespace DCL.Components
 
         public PlaneShape(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()

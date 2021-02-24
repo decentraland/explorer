@@ -23,7 +23,10 @@ namespace DCL.Components
             }
         }
 
-        public CylinderShape(ParcelScene scene) : base(scene) { }
+        public CylinderShape(ParcelScene scene) : base(scene)
+        {
+            model = new Model();
+        }
 
         public override int GetClassId()
         {

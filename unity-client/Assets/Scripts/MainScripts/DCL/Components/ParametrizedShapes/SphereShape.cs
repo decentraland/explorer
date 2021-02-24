@@ -14,6 +14,7 @@ namespace DCL.Components
 
         public SphereShape(ParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()
