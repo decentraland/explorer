@@ -14,11 +14,6 @@ public class BuildModeHUDView : MonoBehaviour
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
     public Button logOutBtn;
-
-    public GameObject publishGO;
-    public GameObject publishingGO;
-    public GameObject publishingFinishedGO;
-
     public TextMeshProUGUI publishStatusTxt;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
@@ -46,6 +41,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IEntityInformationController entityInformationController;
     public FirstPersonModeView firstPersonModeView;
     private IFirstPersonModeController firstPersonModeController;
+    public PublishPopupView publishPopupView;
+    private IPublishPopupController publishPopupController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -61,7 +58,8 @@ public class BuildModeHUDView : MonoBehaviour
         ISceneCatalogController sceneCatalogController,
         IQuickBarController quickBarController,
         IEntityInformationController entityInformationController,
-        IFirstPersonModeController firstPersonModeController)
+        IFirstPersonModeController firstPersonModeController,
+        IPublishPopupController publishPopupController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -79,6 +77,9 @@ public class BuildModeHUDView : MonoBehaviour
         this.firstPersonModeController = firstPersonModeController;
         this.firstPersonModeController.Initialize(firstPersonModeView, tooltipController);
         firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
+
+        this.publishPopupController = publishPopupController;
+        this.publishPopupController.Initialize(publishPopupView);
     }
 
     private void Awake()
@@ -151,20 +152,17 @@ public class BuildModeHUDView : MonoBehaviour
         sceneCatalogController.Dispose();
         entityInformationController.Dispose();
         firstPersonModeController.Dispose();
+        publishPopupController.Dispose();
     }
 
     public void PublishStart()
     {
-        publishGO.SetActive(true);
-        publishingGO.SetActive(true);
-        publishingFinishedGO.SetActive(false);
+        publishPopupController.PublishStart();
     }
 
     public void PublishEnd(string message)
     {
-        publishingGO.SetActive(false);
-        publishingFinishedGO.SetActive(true);
-        publishStatusTxt.text = message;
+        publishPopupController.PublishEnd(message);
     }
 
     public void SetPublishBtnAvailability(bool isAvailable)
