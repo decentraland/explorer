@@ -6,7 +6,7 @@ public class DragAndDropSceneObjectView : MonoBehaviour
 {
     public event System.Action OnDrop;
 
-    [SerializeField] internal EventTrigger changeModeEventTrigger;
+    [SerializeField] internal EventTrigger dragAndDropEventTrigger;
 
     private void Awake()
     {
@@ -18,7 +18,7 @@ public class DragAndDropSceneObjectView : MonoBehaviour
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = eventType;
         entry.callback.AddListener(call);
-        changeModeEventTrigger.triggers.Add(entry);
+        dragAndDropEventTrigger.triggers.Add(entry);
     }
 
     public void Drop()

@@ -10,7 +10,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
     public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn;
-    public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
+    public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
     public Button logOutBtn;
@@ -47,6 +47,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IPublishPopupController publishPopupController;
     public DragAndDropSceneObjectView dragAndDropSceneObjectView;
     private IDragAndDropSceneObjectController dragAndDropSceneObjectController;
+    public PublishBtnView publishBtnView;
+    private IPublishBtnController publishBtnController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -66,7 +68,8 @@ public class BuildModeHUDView : MonoBehaviour
         IFirstPersonModeController firstPersonModeController,
         IShortcutsController shortcutsController,
         IPublishPopupController publishPopupController,
-        IDragAndDropSceneObjectController dragAndDropSceneObjectController)
+        IDragAndDropSceneObjectController dragAndDropSceneObjectController,
+        IPublishBtnController publishBtnController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -93,6 +96,10 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.dragAndDropSceneObjectController = dragAndDropSceneObjectController;
         this.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView, buildModeHUDController);
+
+        this.publishBtnController = publishBtnController;
+        this.publishBtnController.Initialize(publishBtnView, tooltipController, buildModeHUDController);
+        publishBtnController.OnClick += () => OnPublishAction?.Invoke();
     }
 
     private void Awake()
@@ -139,7 +146,7 @@ public class BuildModeHUDView : MonoBehaviour
         sceneCatalogView.catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
 
         tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
-        publishBtn.onClick.AddListener(() => OnPublishAction?.Invoke());
+
         logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke());
     }
 
@@ -168,6 +175,7 @@ public class BuildModeHUDView : MonoBehaviour
         shortcutsController.Dispose();
         publishPopupController.Dispose();
         dragAndDropSceneObjectController.Dispose();
+        publishBtnController.Dispose();
     }
 
     public void PublishStart()
@@ -182,7 +190,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void SetPublishBtnAvailability(bool isAvailable)
     {
-        publishBtn.interactable = isAvailable;
+        publishBtnController.SetInteractable(isAvailable);
     }
 
     public void RefreshCatalogAssetPack()

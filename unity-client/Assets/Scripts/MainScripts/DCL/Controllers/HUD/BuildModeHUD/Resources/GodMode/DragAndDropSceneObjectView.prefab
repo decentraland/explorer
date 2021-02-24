@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d50955c51c76b604d82574ff618226f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  changeModeEventTrigger: {fileID: 1319588336676430489}
+  dragAndDropEventTrigger: {fileID: 1319588336676430489}
 --- !u!114 &2340292817128041451
 MonoBehaviour:
   m_ObjectHideFlags: 0

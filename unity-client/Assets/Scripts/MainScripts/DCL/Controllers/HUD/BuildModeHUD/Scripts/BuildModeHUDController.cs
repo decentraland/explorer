@@ -62,7 +62,8 @@ public class BuildModeHUDController : IHUD
             new FirstPersonModeController(),
             new ShortcutsController(),
             new PublishPopupController(),
-            new DragAndDropSceneObjectController());
+            new DragAndDropSceneObjectController(),
+            new PublishBtnController());
 
         catalogItemDropController = new CatalogItemDropController();
 
