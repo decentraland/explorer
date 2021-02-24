@@ -15,6 +15,7 @@ public class SceneCatalogView : MonoBehaviour
     [SerializeField] internal Toggle categoryToggle;
     [SerializeField] internal Toggle favoritesToggle;
     [SerializeField] internal Toggle assetPackToggle;
+    [SerializeField] internal Button hideCatalogBtn;
 
     [Header("Catalog RectTransforms")]
     [SerializeField] internal RectTransform panelRT;

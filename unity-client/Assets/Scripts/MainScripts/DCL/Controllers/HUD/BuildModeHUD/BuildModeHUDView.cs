@@ -5,13 +5,11 @@ using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
-    public SmartItemListView smartItemListView;
     public SceneLimitInfoController sceneLimitInfoController;
     public BuilderInWorldEntityListController entityListController;
-    public CatalogGroupListView catalogGroupListView;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO, shortCutsGO;
-    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn,closeCatalogBtn;
+    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn,entityListBtn,catalogBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn,publishBtn;
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
@@ -107,10 +105,8 @@ public class BuildModeHUDView : MonoBehaviour
             closeEntityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
         }
 
-
         catalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
-        closeCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
-
+        sceneCatalogView.hideCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
 
         changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
         extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
@@ -125,8 +121,8 @@ public class BuildModeHUDView : MonoBehaviour
         duplicateBtn.onClick.AddListener(() => OnDuplicateSelectionAction?.Invoke());
         deleteBtn.onClick.AddListener(() => OnDeleteSelectionAction?.Invoke());
 
-        catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
-        catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
+        sceneCatalogView.catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
+        sceneCatalogView.catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
 
         tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
         publishBtn.onClick.AddListener(() => OnPublishAction?.Invoke());

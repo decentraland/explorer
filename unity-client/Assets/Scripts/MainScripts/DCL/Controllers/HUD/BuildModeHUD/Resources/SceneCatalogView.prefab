@@ -2094,7 +2094,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9164274516587283706}
   m_HandleRect: {fileID: 9164274516587283707}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3352,7 +3352,7 @@ GameObject:
   - component: {fileID: 9164274516819457004}
   - component: {fileID: 3044571813177970572}
   m_Layer: 5
-  m_Name: SceneCatalog
+  m_Name: SceneCatalogView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3396,10 +3396,10 @@ MonoBehaviour:
   catalogAssetPackListView: {fileID: 8285016998033159335}
   catalogGroupListView: {fileID: 9164274516264469572}
   searchInputField: {fileID: 9164274516946305851}
-  quickBarView: {fileID: 0}
   categoryToggle: {fileID: 7474071482632753083}
   favoritesToggle: {fileID: 1123582241676762620}
   assetPackToggle: {fileID: 4418187777106020839}
+  hideCatalogBtn: {fileID: 9164274517318511039}
   panelRT: {fileID: 9164274515348817592}
   headerRT: {fileID: 9164274516257064006}
   searchBarRT: {fileID: 9164274516946305848}

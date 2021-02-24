@@ -71,8 +71,7 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
         entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
 
-        catalogItemDropController.catalogGroupListView = view.catalogGroupListView;
-        catalogItemDropController.catalogGroupListView = view.catalogGroupListView;
+        catalogItemDropController.catalogGroupListView = view.sceneCatalogView.catalogGroupListView;
 
         buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
         buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -227,7 +226,7 @@ public class BuildModeHUDController : IHUD
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
         buildModeEntityListController.SetEntityList(entityList);
-        view.smartItemListView.SetEntityList(entityList);
+        view.entityInformationView.smartItemListView.SetEntityList(entityList);
     }
 
     public void ChangeVisibilityOfEntityList()
