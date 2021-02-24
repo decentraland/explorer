@@ -54,13 +54,15 @@ public class BuildModeHUDController : IHUD
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
         view.Initialize(
+            this,
             new TooltipController(),
             sceneCatalogController = new SceneCatalogController(),
             new QuickBarController(),
             entityInformationController = new EntityInformationController(),
             new FirstPersonModeController(),
             new ShortcutsController(),
-            new PublishPopupController());
+            new PublishPopupController(),
+            new DragAndDropSceneObjectController());
 
         catalogItemDropController = new CatalogItemDropController();
 
@@ -83,7 +85,7 @@ public class BuildModeHUDController : IHUD
 
         buildModeEntityListController.CloseList();
 
-        view.OnCatalogItemDrop += () => catalogItemDropController.CatalogitemDropped();
+        view.OnCatalogItemDrop += () => SceneObjectDroppedInView();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
         view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
         view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
@@ -306,5 +308,10 @@ public class BuildModeHUDController : IHUD
             return false;
 
         return view.showHideAnimator.isVisible;
+    }
+
+    public void SceneObjectDroppedInView()
+    {
+        catalogItemDropController.CatalogitemDropped();
     }
 }

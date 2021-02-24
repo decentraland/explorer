@@ -45,6 +45,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IShortcutsController shortcutsController;
     public PublishPopupView publishPopupView;
     private IPublishPopupController publishPopupController;
+    public DragAndDropSceneObjectView dragAndDropSceneObjectView;
+    private IDragAndDropSceneObjectController dragAndDropSceneObjectController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -56,13 +58,15 @@ public class BuildModeHUDView : MonoBehaviour
     public event Action OnCatalogItemDrop;
 
     public void Initialize(
+        BuildModeHUDController buildModeHUDController,
         ITooltipController tooltipController,
         ISceneCatalogController sceneCatalogController,
         IQuickBarController quickBarController,
         IEntityInformationController entityInformationController,
         IFirstPersonModeController firstPersonModeController,
         IShortcutsController shortcutsController,
-        IPublishPopupController publishPopupController)
+        IPublishPopupController publishPopupController,
+        IDragAndDropSceneObjectController dragAndDropSceneObjectController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -86,6 +90,9 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.publishPopupController = publishPopupController;
         this.publishPopupController.Initialize(publishPopupView);
+
+        this.dragAndDropSceneObjectController = dragAndDropSceneObjectController;
+        this.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView, buildModeHUDController);
     }
 
     private void Awake()
@@ -160,6 +167,7 @@ public class BuildModeHUDView : MonoBehaviour
         firstPersonModeController.Dispose();
         shortcutsController.Dispose();
         publishPopupController.Dispose();
+        dragAndDropSceneObjectController.Dispose();
     }
 
     public void PublishStart()
