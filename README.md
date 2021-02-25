@@ -1,14 +1,16 @@
 # Decentraland Explorer
 
-### Before you start
+This is the [decentraland explorer](https://play.decentraland.org) official repository.
+
+## Before you start
 
 1. [Contribution Guidelines](.github/CONTRIBUTING.md)
 2. [Coding Guidelines](unity-client/style-guidelines.md)
 3. Code Review Standards
 
-## Running the Explorer
+# Running the Explorer
 
-### Main Dependencies
+## Main Dependencies
 
 This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ .
 So, before anything make sure you have it installed by typing:
@@ -18,14 +20,14 @@ So, before anything make sure you have it installed by typing:
 
 ---
 
-### Debug using Unity only
+## Debug using Unity only
 
-#### Why you should care
+### Why you should care
 
 Take this path if you intend to contribute on features without the need of modifying Kernel.
 This is the recommended path for artists.
 
-#### Steps
+### Steps
 
 1. Download and install Unity 2019.4.0f1
 2. Open the scene named `InitialScene`
@@ -36,9 +38,9 @@ and `Base url custom` is set to `https://play.decentraland.zone/?`
 6. A browser tab with `explorer` should open automatically and steal your focus, don't close it!. Login with your wallet, go back to Unity and explorer should start running on the `Game View`.
 7. As you can see, `WSSController` has other special options like the starting position, etc. You are welcome to use them as you see fit, but you'll have to close the tab and restart the scene for them to make effect.
 
-#### Troubleshooting
+### Troubleshooting
 
-##### Missing git lfs extension
+#### Missing git lfs extension
 If while trying to compile the Unity project you get an error regarding some libraries that can not be added (for instance Newtonsoft
 Json.NET or Google Protobuf), please execute the following command in the root folder:
 
@@ -49,13 +51,13 @@ Then, on the Unity editor, click on `Assets > Reimport All`
 
 ---
 
-### Debug using Kernel only
+## Debug using Kernel only
 
-#### Why you should care
+### Why you should care
 
 Kernel mostly takes care of scene code execution and sandboxing, communication with catalysts, external services, comms, etc. If you want to delve into any of this, you may want to follow these steps and don't bother with the Unity installation.
 
-#### Steps
+### Steps
 
 Make sure you have the following dependencies:
 - Latest version of GNU make, install it using `brew install make`
@@ -84,7 +86,7 @@ The make process will take a while. When its finished, you can start debugging t
 
 Note that the Unity version used by this approach will be the latest version deployed to `master` branch. If you need a local Unity build, check out the [advanced debugging scenarios](#advanced-debugging-scenarios).
 
-#### Run kernel tests
+### Run kernel tests
 
 To see test logs/errors directly in the browser, run:
 
@@ -92,9 +94,9 @@ To see test logs/errors directly in the browser, run:
 
 Now, navigate to [http://localhost:8080/test](http://localhost:8080/test)
 
-#### Troubleshooting
+### Troubleshooting
 
-##### Missing xcrun (macOS)
+#### Missing xcrun (macOS)
 If you get the "missing xcrun" error when trying to run the `make watch` command, you should download the latest command line tools for macOS, either by downloading them from https://developer.apple.com/download/more/?=command%20line%20tools or by re-installing XCode
 
 ---
@@ -109,11 +111,11 @@ If the CI succeeds, you can browse to the generated link and test your changes. 
 
 ---
 <a name="advanced-debugging-scenarios"></a>
-## Advanced debugging scenarios
+# Advanced debugging scenarios
 
-### Debug with Unity Editor + local Kernel
+## Debug with Unity Editor + local Kernel
 
-#### Why you should care
+### Why you should care
 
 You may want to use this approach for any features that need both Kernel and Unity modifications, and you need to watch Unity code changes fast without the need of injecting a wasm targeted build in the browser. 
 
@@ -121,22 +123,22 @@ When the steps are followed, you will be able to test your changes with just pre
 
 This is the most useful debugging scenario for advanced feature implementation.
 
-#### Steps
+### Steps
 
 * Make sure you have the proper Unity version up and running
 * Make sure you are running kernel through `make watch` command.
 * Back in unity editor, open the `WSSController` component inspector of `InitialScene`
 * Make sure that is setup correctly
 
-### Debug with browsers + local Unity build
+## Debug with browsers + local Unity build
 
-#### Why you should care
+### Why you should care
 
 Use this approach if you want to ensure your Unity modifications run well in the wasm targeted unity build, but don't want to wait for the CI to kick in. This is also useful for remote profiling. 
 
 When the steps are followed, you will be able to run the local Unity build by going to `localhost:3000` without the need of CI.
 
-#### Steps
+### Steps
 
 1. Make sure you have the proper Unity version up and running
 2. Make sure you are running kernel through `make watch` command.
@@ -154,6 +156,8 @@ When the steps are followed, you will be able to run the local Unity build by go
 - [Kernel-unity native interface explainer and maintenance guide](docs/kernel-unity-native-interface-explainer.md)
 - [How to create typescript workers](docs/how-to-create-typescript-workers.md)
 - [How to add/update protobuf-compiled components](docs/how-to-add-or-update-protobuf-compiled-components.md)
+
+For more advanced topics, don't forget to check out our [Architecture Decisions Records](https://github.com/decentraland/adr) (ADR) repository. 
 
 ## Copyright info
 
