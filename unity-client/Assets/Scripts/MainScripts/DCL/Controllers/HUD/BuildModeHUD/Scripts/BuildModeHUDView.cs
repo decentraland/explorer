@@ -14,7 +14,6 @@ public class BuildModeHUDView : MonoBehaviour
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
     public Button logOutBtn;
-    public TextMeshProUGUI publishStatusTxt;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
