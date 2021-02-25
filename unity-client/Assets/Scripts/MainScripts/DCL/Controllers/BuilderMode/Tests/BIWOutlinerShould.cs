@@ -1,17 +1,20 @@
+using DCL;
 using DCL.Components;
 using DCL.Configuration;
+using DCL.Controllers;
 using DCL.Helpers;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using Tests;
 using UnityEngine;
 
 public class BIWOutlinerShould : IntegrationTestSuite_Legacy
 {
     private const string ENTITY_ID = "1";
-    DCLBuilderInWorldEntity entity;
-    BIWOutlinerController outlinerController;
+    private DCLBuilderInWorldEntity entity;
+    private BIWOutlinerController outlinerController;
 
     protected override IEnumerator SetUp()
     {

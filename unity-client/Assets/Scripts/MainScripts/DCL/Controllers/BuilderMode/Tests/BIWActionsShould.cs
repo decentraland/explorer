@@ -1,8 +1,10 @@
 using DCL;
+using DCL.Controllers;
 using DCL.Helpers;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using Tests;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -126,7 +128,7 @@ public class BIWActionsShould : IntegrationTestSuite_Legacy
     public void UndoRedoChangeFloorAction()
     {
         BIWCatalogManager.Init();
-     
+
         BuilderInWorldTestHelper.CreateTestCatalogLocalMultipleFloorObjects();
 
         CatalogItem oldFloor = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
