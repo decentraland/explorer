@@ -79,8 +79,10 @@ public class BIWNftsShould : IntegrationTestSuite
 
     protected override IEnumerator TearDown()
     {
+
         BIWCatalogManager.ClearCatalog();
         BuilderInWorldNFTController.i.ClearNFTs();
         yield return base.TearDown();
+        PoolManager.i.Cleanup();
     }
 }
