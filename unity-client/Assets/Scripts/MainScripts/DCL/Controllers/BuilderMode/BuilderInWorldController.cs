@@ -263,7 +263,7 @@ public class BuilderInWorldController : MonoBehaviour
     public VoxelEntityHit GetCloserUnselectedVoxelEntityOnPointer()
     {
         RaycastHit[] hits;
-        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);       
+        UnityEngine.Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         float currentDistance = 9999;
         VoxelEntityHit voxelEntityHit = null;
@@ -340,7 +340,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         FindSceneToEdit();
 
-        if(!UserHasPermissionOnParcelScene(sceneToEdit))
+        if (!UserHasPermissionOnParcelScene(sceneToEdit))
         {
             Notification.Model notificationModel = new Notification.Model();
             notificationModel.message = "You don't have permissions to operate this land";
@@ -395,7 +395,7 @@ public class BuilderInWorldController : MonoBehaviour
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(false);
 
         DCLCharacterController.OnPositionSet += ExitAfterCharacterTeleport;
- 
+
         StartBiwControllers();
         Environment.i.world.sceneController.ActivateBuilderInWorldEditScene();
 

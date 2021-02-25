@@ -85,7 +85,7 @@ public class BIWFloorHandler : BIWController
         {
             DCLBuilderInWorldEntity decentralandEntity = biwCreatorController.CreateSceneObject(floorSceneObject, false, true);
             decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
-            decentralandEntity.transform.position = Environment.i.world.state.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+            decentralandEntity.transform.position = WorldStateUtils.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
             dclBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
 
             GameObject floorPlaceHolder = GameObject.Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);

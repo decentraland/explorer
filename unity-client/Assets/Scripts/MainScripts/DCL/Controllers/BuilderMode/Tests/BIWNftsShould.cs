@@ -10,21 +10,38 @@ using System.Collections.Generic;
 using Tests;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Environment = DCL.Environment;
 
-public class BIWNftsShould : IntegrationTestSuite_Legacy
+public class BIWNftsShould : IntegrationTestSuite
 {
+    private ParcelScene scene;
+    private const string ENTITY_ID = "1";
+
+    protected override WorldRuntimeContext CreateRuntimeContext()
+    {
+        return DCL.Tests.WorldRuntimeContextFactory.CreateWithCustomMocks
+        (
+            sceneController: new SceneController(),
+            state: new WorldState(),
+            componentFactory: RuntimeComponentFactory.Create(),
+            sceneBoundsChecker: new SceneBoundsChecker()
+        );
+    }
+
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
+        scene = (ParcelScene) Environment.i.world.sceneController.CreateTestScene();
+        TestHelpers.CreateSceneEntity(scene, ENTITY_ID);
         BIWCatalogManager.Init();
         BuilderInWorldTestHelper.CreateNFT();
     }
 
     [Test]
     public void NftsUsage()
-    { 
-        string idToTest = BuilderInWorldNFTController.i.GetNfts()[0].assetContract.address; 
+    {
+        string idToTest = BuilderInWorldNFTController.i.GetNfts()[0].assetContract.address;
 
         Assert.IsFalse(BuilderInWorldNFTController.i.IsNFTInUse(idToTest));
 
@@ -39,11 +56,11 @@ public class BIWNftsShould : IntegrationTestSuite_Legacy
     public void NftComponent()
     {
         CatalogItem catalogItem = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
-        string entityId = "1";
-        TestHelpers.CreateSceneEntity(scene, entityId);
 
-        DCLBuilderInWorldEntity biwEntity = Utils.GetOrCreateComponent<DCLBuilderInWorldEntity>(scene.entities[entityId].gameObject);
-        biwEntity.Init(scene.entities[entityId], null);
+
+
+        DCLBuilderInWorldEntity biwEntity = Utils.GetOrCreateComponent<DCLBuilderInWorldEntity>(scene.entities[ENTITY_ID].gameObject);
+        biwEntity.Init(scene.entities[ENTITY_ID], null);
 
         NFTShape nftShape = (NFTShape) scene.SharedComponentCreate(catalogItem.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
         nftShape.model = new NFTShape.Model();
@@ -62,8 +79,10 @@ public class BIWNftsShould : IntegrationTestSuite_Legacy
 
     protected override IEnumerator TearDown()
     {
+
         BIWCatalogManager.ClearCatalog();
         BuilderInWorldNFTController.i.ClearNFTs();
         yield return base.TearDown();
+        PoolManager.i.Cleanup();
     }
 }

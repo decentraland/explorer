@@ -5,16 +5,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Tests;
+using UnityEngine.TestTools;
 
-public class BIWCatalogShould : IntegrationTestSuite_Legacy
+public class BIWCatalogShould
 {
     private GameObject gameObjectToUse;
+
+    [UnitySetUp]
+    protected IEnumerator SetUp()
+    {
+        BIWCatalogManager.Init();
+        gameObjectToUse = new GameObject();
+        gameObjectToUse.AddComponent<AssetCatalogBridge>();
+        yield return null;
+    }
 
     [Test]
     public void BuilderInWorldSearch()
     {
-        BIWCatalogManager.Init();
-        gameObjectToUse = new GameObject();
+
         string nameToFilter = "Sandy";
         BuilderInWorldTestHelper.CreateTestCatalogLocalMultipleFloorObjects();
 
@@ -39,9 +49,7 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     [Test]
     public void BuilderInWorldQuickBar()
     {
-        BIWCatalogManager.Init();
         BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
-        gameObjectToUse = new GameObject();
         CatalogItem item = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
 
         CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
@@ -74,7 +82,6 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     [Test]
     public void BuilderInWorldToggleFavorite()
     {
-        BIWCatalogManager.Init();
         BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
 
         CatalogItem item = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
@@ -90,21 +97,16 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
     [Test]
     public void CatalogItemsSceneObject()
     {
-        BIWCatalogManager.Init();
-
         BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
 
         Assert.AreEqual(DataStore.i.builderInWorld.catalogItemDict.Count(), 1);
         Assert.AreEqual(DataStore.i.builderInWorld.catalogItemPackDict.Count(), 1);
         Assert.AreEqual(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 1);
-
     }
 
     [Test]
     public void CatalogItemsNfts()
     {
-        BIWCatalogManager.Init();
-
         BuilderInWorldTestHelper.CreateNFT();
 
         Assert.AreEqual(DataStore.i.builderInWorld.catalogItemDict.Count(), 1);
@@ -112,12 +114,14 @@ public class BIWCatalogShould : IntegrationTestSuite_Legacy
         Assert.AreEqual(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories().Count, 1);
     }
 
-    protected override IEnumerator TearDown()
+    [UnityTearDown]
+    protected IEnumerator TearDown()
     {
         AssetCatalogBridge.ClearCatalog();
         BIWCatalogManager.ClearCatalog();
+        BIWCatalogManager.Dispose();
         if (gameObjectToUse != null)
             GameObject.Destroy(gameObjectToUse);
-        yield return base.TearDown();
+        yield return null;
     }
 }
