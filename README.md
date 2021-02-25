@@ -8,14 +8,13 @@
 
 ## Running the Explorer
 
+### Main Dependencies
+
 This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ .
 So, before anything make sure you have it installed by typing:
 
     git lfs install
     git lfs pull
-
-Explorer is composed of two main projects, Kernel (ts) and Renderer (Unity). The Unity part needs its Kernel ts-based counterpart for many [responsibilities](https://docs.google.com/document/d/1_lzi3V5IDaVRJbTKNsNEcaG0L21VPydiUx5uamiyQnY/edit).
-However, if you only intend to make changes related to Unity only you can skip the Kernel build by connecting Unity Editor with a deployed explorer build via websocket. More on this on the following section.
 
 ---
 
@@ -54,7 +53,7 @@ Then, on the Unity editor, click on `Assets > Reimport All`
 
 #### Why you should care
 
-TBD
+Kernel mostly takes care of scene code execution and sandboxing, communication with catalysts, external services, comms, etc. If you want to delve into any of this, you may want to follow these steps and don't bother with the Unity installation.
 
 #### Steps
 
@@ -83,7 +82,7 @@ By now, you can run and watch a server with the kernel build by typing:
 
 The make process will take a while. When its finished, you can start debugging the browser's explorer by going to http://localhost:3000/
 
-Note that the Unity version used by this approach will be the latest version deployed to `master` branch. If you need a local Unity build, check out the **advanced debugging scenarios**.
+Note that the Unity version used by this approach will be the latest version deployed to `master` branch. If you need a local Unity build, check out the [advanced debugging scenarios](#advanced-debugging-scenarios).
 
 #### Run kernel tests
 
@@ -100,13 +99,27 @@ If you get the "missing xcrun" error when trying to run the `make watch` command
 
 ---
 
+## Testing your branch using automated builds
+
+When any commit is pushed to `master`, a build is generated and deployed to:
+    
+    https://play.decentraland.zone/branch/<branch-name>/index.html
+
+If the CI succeeds, you can browse to the generated link and test your changes. Bear in mind that any push will kick the CI, and there's no need to create a pull request.
+
+---
+<a name="advanced-debugging-scenarios"></a>
 ## Advanced debugging scenarios
 
 ### Debug with Unity Editor + local Kernel
 
 #### Why you should care
 
-TBD
+You may want to use this approach for any features that need both Kernel and Unity modifications, and you need to watch Unity code changes fast without the need of injecting a wasm targeted build in the browser. 
+
+When the steps are followed, you will be able to test your changes with just pressing the "Play" button within Unity. This will open a tab running the local Kernel build and Unity will connect to it using websocket. 
+
+This is the most useful debugging scenario for advanced feature implementation.
 
 #### Steps
 
@@ -119,15 +132,18 @@ TBD
 
 #### Why you should care
 
-TBD
+Use this approach if you want to ensure your Unity modifications run well in the wasm targeted unity build, but don't want to wait for the CI to kick in. This is also useful for remote profiling. 
+
+When the steps are followed, you will be able to run the local Unity build by going to `localhost:3000` without the need of CI.
 
 #### Steps
 
 1. Make sure you have the proper Unity version up and running
 2. Make sure you are running kernel through `make watch` command.
 3. Produce a Unity wasm targeted build using the Build menu.
-4. When the build finishes, only copy all the files with the `file1` and `file2` extensions to `static/unity/Build` folder within the `kernel` project. Do not copy the `unity loader` and `unity.json` files.
+4. When the build finishes, only copy all the files with the `unityweb` extension to `static/unity/Build` folder within the `kernel` project. **Do not** copy the `UnityLoader.js` and `unity.json` files.
 5. Run the browser explorer through `localhost:3000`. Now, it should use your local Unity build.
+6. If you need a Unity re-build, you can just replace the files and reload the browser the without restarting the `make watch` process.
 
 ## Technical how-to guides and explainers
 
