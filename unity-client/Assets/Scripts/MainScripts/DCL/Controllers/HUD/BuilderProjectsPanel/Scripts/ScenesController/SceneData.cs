@@ -12,6 +12,9 @@ internal interface ISceneData
     bool isOperator { get; }
     bool isContributor { get; }
     bool isDeployed { get; }
+    int entitiesCount { get; }
+    string authorThumbnail { get; }
+    string authorName { get; }
 }
 
 [Serializable]
@@ -26,6 +29,9 @@ internal class SceneData : ISceneData
     public bool isOperator;
     public bool isContributor;
     public bool isDeployed;
+    public int entitiesCount;
+    public string authorThumbnail;
+    public string authorName;
 
     Vector2Int ISceneData.coords => coords;
     Vector2Int ISceneData.size => size;
@@ -36,4 +42,7 @@ internal class SceneData : ISceneData
     bool ISceneData.isOperator => isOperator;
     bool ISceneData.isContributor => isContributor;
     bool ISceneData.isDeployed => isDeployed;
+    int ISceneData.entitiesCount => entitiesCount;
+    string ISceneData.authorThumbnail => authorThumbnail;
+    string ISceneData.authorName => authorName;
 }

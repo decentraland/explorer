@@ -82,6 +82,13 @@ public class BuilderProjectsPanelDataMock
     {
         const int deployedCount = 4;
         const int projectCount = 6;
+        const string contentUrl = "https://peer.decentraland.org/content/contents/";
+        string[] avatarThumbnail = new[] {"", $"{contentUrl}QmPXa5strH7cWJTZWKYtKiVG8it2nEpkdpQYhKxxnMMapP"};
+        string[] scenesThumbnail = new[]
+        {
+            "", "https://decentraland.org/images/thumbnail/genesis-plaza.png","https://peer.decentraland.org/content/contents/Qmc9nJxR6MoRMaspUMYPRcanrYGeRrz9PCAdo1qSYboaKm",
+            "https://peer.decentraland.org/content/contents/QmeRyqAuJojXxtHh26aMQLa2RwgoHW4fLJu7hctQ1Rba3W","https://peer.decentraland.org/content/contents/Qmb7mYufcDYiLv9Vg3zxyCGvpbtLoY2gah6sdonzgRURRV"
+        };
 
         for (int i = 0; i < deployedCount; i++)
         {
@@ -97,6 +104,10 @@ public class BuilderProjectsPanelDataMock
                 isContributor = role == 2,
                 size = new Vector2Int(Random.Range(1,6),Random.Range(1,6)),
                 coords = new Vector2Int(Random.Range(-100,100),Random.Range(-100,100)),
+                entitiesCount = Random.Range(1,60),
+                authorName = $"User#{Random.Range(100,6000)}",
+                authorThumbnail = avatarThumbnail[Random.Range(0,avatarThumbnail.Length)],
+                thumbnailUrl = scenesThumbnail[Random.Range(0,scenesThumbnail.Length)]
             });
         }
         for (int i = 0; i < projectCount; i++)
@@ -112,6 +123,10 @@ public class BuilderProjectsPanelDataMock
                 isContributor = role == 1,
                 size = new Vector2Int(Random.Range(1,6),Random.Range(1,6)),
                 coords = new Vector2Int(Random.Range(-100,100),Random.Range(-100,100)),
+                entitiesCount = Random.Range(1,60),
+                authorName = $"User#{Random.Range(100,6000)}",
+                authorThumbnail = avatarThumbnail[Random.Range(0,avatarThumbnail.Length)],
+                thumbnailUrl = scenesThumbnail[Random.Range(0,scenesThumbnail.Length)]
             });
         }
     }

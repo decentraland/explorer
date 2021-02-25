@@ -23,8 +23,6 @@ internal class SectionFactory : ISectionFactory
                 break;
             case SectionsController.SectionId.LAND:
                 break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(id), id, null);
         }
 
         return result;

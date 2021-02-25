@@ -5,12 +5,17 @@ internal class SceneContextMenuHandler : IDisposable
     private readonly SceneCardViewContextMenu contextMenu;
     private readonly BuilderProjectsPanelBridge bridge;
     private readonly SectionsController sectionsController;
+    private readonly ScenesViewController scenesViewController;
+    private readonly LeftMenuSettingsViewHandler leftMenuSettingsViewHandler;
 
-    public SceneContextMenuHandler(SceneCardViewContextMenu contextMenu, SectionsController sectionsController, BuilderProjectsPanelBridge bridge)
+    public SceneContextMenuHandler(SceneCardViewContextMenu contextMenu, SectionsController sectionsController,
+        ScenesViewController scenesViewController, BuilderProjectsPanelBridge bridge, LeftMenuSettingsViewHandler leftMenuSettingsViewHandler)
     {
         this.contextMenu = contextMenu;
         this.bridge = bridge;
         this.sectionsController = sectionsController;
+        this.scenesViewController = scenesViewController;
+        this.leftMenuSettingsViewHandler = leftMenuSettingsViewHandler;
 
         sectionsController.OnRequestContextMenuHide += OnRequestContextMenuHide;
 
@@ -54,6 +59,21 @@ internal class SceneContextMenuHandler : IDisposable
 
     void OnContextMenuSettingsPressed(string id)
     {
+        ISceneData sceneData = null;
+        if (scenesViewController.deployedScenes.TryGetValue(id, out SceneCardView deployedSceneCardView))
+        {
+            sceneData = deployedSceneCardView.sceneData;
+        }
+        else if (scenesViewController.projectScenes.TryGetValue(id, out SceneCardView projectSceneCardView))
+        {
+            sceneData = projectSceneCardView.sceneData;
+        }
+
+        if (sceneData != null)
+        {
+            sectionsController.OpenSection(SectionsController.SectionId.SETTINGS_PROJECT_GENERAL);
+            leftMenuSettingsViewHandler.SetProjectData(sceneData);
+        }
     }
 
     void OnContextMenuDuplicatePressed(string id)

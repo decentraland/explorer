@@ -11,7 +11,7 @@ internal class SectionsController : IDisposable
     public event Action<SectionBase> OnSectionShow;
     public event Action<SectionBase> OnSectionHide;
     public event Action OnRequestContextMenuHide;
-    public event Action<SectionId> OnRequestOpenSection;
+    public event Action<SectionId> OnOpenSectionId;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -23,7 +23,8 @@ internal class SectionsController : IDisposable
         SCENES_MAIN,
         SCENES_DEPLOYED,
         SCENES_PROJECT,
-        LAND
+        LAND,
+        SETTINGS_PROJECT_GENERAL
     }
 
     /// <summary>
@@ -44,7 +45,7 @@ internal class SectionsController : IDisposable
         this.sectionsParent = sectionsParent;
         this.sectionFactory = sectionFactory;
 
-        SectionBase.OnRequestOpenSection += OnOpenSectionRequested;
+        SectionBase.OnRequestOpenSection += OpenSection;
         SectionBase.OnRequestContextMenuHide += OnHideContextMenuRequested;
     }
 
@@ -79,13 +80,17 @@ internal class SectionsController : IDisposable
     public void OpenSection(SectionId id)
     {
         var section = GetOrLoadSection(id);
-        OpenSection(section);
+        var success = OpenSection(section);
+        if (success)
+        {
+            OnOpenSectionId?.Invoke(id);
+        }
     }
 
-    private void OpenSection(SectionBase section)
+    private bool OpenSection(SectionBase section)
     {
         if (currentOpenSection == section)
-            return;
+            return false;
 
         if (currentOpenSection != null)
         {
@@ -100,11 +105,13 @@ internal class SectionsController : IDisposable
             currentOpenSection.SetVisible(true);
             OnSectionShow?.Invoke(currentOpenSection);
         }
+
+        return true;
     }
 
     public void Dispose()
     {
-        SectionBase.OnRequestOpenSection -= OnOpenSectionRequested;
+        SectionBase.OnRequestOpenSection -= OpenSection;
         SectionBase.OnRequestContextMenuHide -= OnHideContextMenuRequested;
 
         using (var iterator = loadedSections.GetEnumerator())
@@ -116,11 +123,6 @@ internal class SectionsController : IDisposable
         }
 
         loadedSections.Clear();
-    }
-
-    private void OnOpenSectionRequested(SectionId sectionId)
-    {
-        OnRequestOpenSection?.Invoke(sectionId);
     }
 
     private void OnHideContextMenuRequested()

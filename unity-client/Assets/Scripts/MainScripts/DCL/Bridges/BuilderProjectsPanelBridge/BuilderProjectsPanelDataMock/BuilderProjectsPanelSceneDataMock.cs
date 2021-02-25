@@ -13,4 +13,7 @@ public struct BuilderProjectsPanelSceneDataMock
     public bool isOperator;
     public bool isContributor;
     public bool isDeployed;
+    public int entitiesCount;
+    public string authorThumbnail;
+    public string authorName;
 }
