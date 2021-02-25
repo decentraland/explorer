@@ -8,21 +8,16 @@ export const ErrorFatal: React.FC = () => (
     <div className="error-background" />
     <div className="errormessage">
       <div className="errortext col">
-        <div className="error">Error</div>
+        <div className="error">Oops!</div>
         <div className="communicationslink">
-          An unexpected error ocurred when loading the world
+          Something went wrong
         </div>
         <div className="givesomedetailof">
-          This might be just temporary. <br />
-          <br /> Please try reloading, and if the problem persists,
-          <br />
-          feel free to reach out to us at <br />{" "}
-          <a href="mailto:developers@decentraland.org">
-            developers@decentraland.org
-          </a>
-          <br />
-          <br />
-          Thank you for helping us improve!
+          If you have any ad blocking extensions, try turning them off for this
+          site.<br /><br />
+          Loading should not take any longer than 2-3 minutes. <br />
+          If you seem to be stuck, make sure hardware acceleration is on.
+          <a href="https://docs.decentraland.org/decentraland/hardware-acceleration/">LEARN MORE</a>
         </div>
         <div className="cta">
           <button
