@@ -5,10 +5,6 @@ using UnityEngine.UI;
 public class BuildModeHUDView : MonoBehaviour
 {
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
-    public Button changeModeBtn,extraBtn,controlsBtn,hideUIBtn;
-    public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
-    public Button tutorialBtn;
-    public Button logOutBtn;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
@@ -49,6 +45,8 @@ public class BuildModeHUDView : MonoBehaviour
     private ICatalogBtnController catalogBtnController;
     public InspectorView inspectorView;
     internal IInspectorController inspectorController;
+    public TopActionsButtonsView topActionsButtonsView;
+    private ITopActionsButtonsController topActionsButtonsController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -72,7 +70,8 @@ public class BuildModeHUDView : MonoBehaviour
         IPublishBtnController publishBtnController,
         IInspectorBtnController inspectorBtnController,
         ICatalogBtnController catalogBtnController,
-        IInspectorController inspectorController)
+        IInspectorController inspectorController,
+        ITopActionsButtonsController topActionsButtonsController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -116,6 +115,9 @@ public class BuildModeHUDView : MonoBehaviour
         this.inspectorController = inspectorController;
         this.inspectorController.Initialize(inspectorView);
         inspectorController.SetCloseButtonsAction(() => OnEntityListChangeVisibilityAction?.Invoke());
+
+        this.topActionsButtonsController = topActionsButtonsController;
+        this.topActionsButtonsController.Initialize(topActionsButtonsView);
     }
 
     private void Awake()
@@ -136,25 +138,25 @@ public class BuildModeHUDView : MonoBehaviour
 
         sceneCatalogView.hideCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
 
-        changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
-        extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
-        controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
+        topActionsButtonsView.changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
+        topActionsButtonsView.extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
+        topActionsButtonsView.extraActionsView.controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
 
-        hideUIBtn.onClick.AddListener(() => OnChangeUIVisbilityAction?.Invoke());
+        topActionsButtonsView.extraActionsView.hideUIBtn.onClick.AddListener(() => OnChangeUIVisbilityAction?.Invoke());
 
-        translateBtn.onClick.AddListener(() => OnTranslateSelectionAction?.Invoke());
-        rotateBtn.onClick.AddListener(() => OnRotateSelectionAction?.Invoke());
-        scaleBtn.onClick.AddListener(() => OnScaleSelectionAction?.Invoke());
-        resetBtn.onClick.AddListener(() => OnResetSelectedAction?.Invoke());
-        duplicateBtn.onClick.AddListener(() => OnDuplicateSelectionAction?.Invoke());
-        deleteBtn.onClick.AddListener(() => OnDeleteSelectionAction?.Invoke());
+        topActionsButtonsView.translateBtn.onClick.AddListener(() => OnTranslateSelectionAction?.Invoke());
+        topActionsButtonsView.rotateBtn.onClick.AddListener(() => OnRotateSelectionAction?.Invoke());
+        topActionsButtonsView.scaleBtn.onClick.AddListener(() => OnScaleSelectionAction?.Invoke());
+        topActionsButtonsView.resetBtn.onClick.AddListener(() => OnResetSelectedAction?.Invoke());
+        topActionsButtonsView.duplicateBtn.onClick.AddListener(() => OnDuplicateSelectionAction?.Invoke());
+        topActionsButtonsView.deleteBtn.onClick.AddListener(() => OnDeleteSelectionAction?.Invoke());
 
         sceneCatalogView.catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
         sceneCatalogView.catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
 
-        tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
+        topActionsButtonsView.extraActionsView.tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
 
-        logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke());
+        topActionsButtonsView.logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke());
     }
 
     private void OnDestroy()
@@ -186,6 +188,7 @@ public class BuildModeHUDView : MonoBehaviour
         inspectorBtnController.Dispose();
         catalogBtnController.Dispose();
         inspectorController.Dispose();
+        topActionsButtonsController.Dispose();
     }
 
     public void PublishStart()
