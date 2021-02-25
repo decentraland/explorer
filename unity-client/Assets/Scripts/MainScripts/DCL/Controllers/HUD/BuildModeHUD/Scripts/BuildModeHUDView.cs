@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
-    public SceneLimitInfoController sceneLimitInfoController;
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
     public Button changeModeBtn,extraBtn,controlsBtn,hideUIBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
@@ -184,6 +183,9 @@ public class BuildModeHUDView : MonoBehaviour
         publishPopupController.Dispose();
         dragAndDropSceneObjectController.Dispose();
         publishBtnController.Dispose();
+        inspectorBtnController.Dispose();
+        catalogBtnController.Dispose();
+        inspectorController.Dispose();
     }
 
     public void PublishStart()
@@ -233,11 +235,11 @@ public class BuildModeHUDView : MonoBehaviour
     {
         if (!isVisible)
         {
-            sceneLimitInfoController.Disable();
+            inspectorController.sceneLimitsController.Disable();
         }
         else
         {
-            sceneLimitInfoController.Enable();
+            inspectorController.sceneLimitsController.Enable();
         }
     }
 

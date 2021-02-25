@@ -126,7 +126,7 @@ public class BuildModeHUDController : IHUD
 
     public void SetParcelScene(ParcelScene parcelScene)
     {
-        view.sceneLimitInfoController.SetParcelScene(parcelScene);
+        view.inspectorController.sceneLimitsController.SetParcelScene(parcelScene);
     }
 
     public void SetPublishBtnAvailability(bool isAvailable)
@@ -179,7 +179,7 @@ public class BuildModeHUDController : IHUD
 
     public void UpdateSceneLimitInfo()
     {
-        view.sceneLimitInfoController.UpdateInfo();
+        view.inspectorController.sceneLimitsController.UpdateInfo();
     }
 
     public void ChangeVisibilityOfSceneInfo(bool shouldBeVisibile)

@@ -10,9 +10,11 @@ public class InspectorView : MonoBehaviour
     internal event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
 
     [SerializeField] internal EntityListView entityListView;
+    [SerializeField] internal SceneLimitsView sceneLimitsView;
     [SerializeField] internal Button[] closeEntityListBtns;
 
     internal List<DCLBuilderInWorldEntity> entitiesList;
+    internal ISceneLimitsController sceneLimitsController;
 
     private void Awake()
     {
@@ -24,6 +26,9 @@ public class InspectorView : MonoBehaviour
     {
         entityListView.OnActionInvoked -= EntityActionInvoked;
         entityListView.OnEntityRename -= EntityRename;
+
+        if (sceneLimitsController != null)
+            sceneLimitsController.Dispose();
     }
 
     private void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
@@ -57,5 +62,11 @@ public class InspectorView : MonoBehaviour
         {
             closeEntityListBtn.onClick.AddListener(call);
         }
+    }
+
+    public void ConfigureSceneLimits(ISceneLimitsController sceneLimitsController)
+    {
+        this.sceneLimitsController = sceneLimitsController;
+        this.sceneLimitsController.Initialize(sceneLimitsView);
     }
 }

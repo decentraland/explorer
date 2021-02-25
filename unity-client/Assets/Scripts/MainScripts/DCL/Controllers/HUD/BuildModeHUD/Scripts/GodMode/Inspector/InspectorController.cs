@@ -18,6 +18,8 @@ public interface IInspectorController
     event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
     event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
 
+    ISceneLimitsController sceneLimitsController { get; }
+
     void Initialize(InspectorView inspectorView);
     void Dispose();
     void OpenEntityList();
@@ -37,6 +39,8 @@ public class InspectorController : IInspectorController
     public event Action<DCLBuilderInWorldEntity> OnEntityChangeVisibility;
     public event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
 
+    public ISceneLimitsController sceneLimitsController => inspectorView.sceneLimitsController;
+
     private InspectorView inspectorView;
 
     public void Initialize(InspectorView inspectorView)
@@ -45,6 +49,8 @@ public class InspectorController : IInspectorController
 
         inspectorView.OnEntityActionInvoked += EntityActionInvoked;
         inspectorView.OnEntityRename += EntityRename;
+
+        inspectorView.ConfigureSceneLimits(new SceneLimitsController());
     }
 
     public void Dispose()

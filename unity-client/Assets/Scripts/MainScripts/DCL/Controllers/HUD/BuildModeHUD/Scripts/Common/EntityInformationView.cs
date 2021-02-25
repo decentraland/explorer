@@ -34,7 +34,6 @@ public class EntityInformationView : MonoBehaviour
     public bool isEnable { get; set; } = false;
 
     private const int FRAMES_BETWEEN_UPDATES = 5;
-    private int framesCount = 0;
 
     private void LateUpdate()
     {
@@ -44,15 +43,8 @@ public class EntityInformationView : MonoBehaviour
         if (currentEntity == null)
             return;
 
-        if (framesCount >= FRAMES_BETWEEN_UPDATES)
-        {
+        if (Time.frameCount % FRAMES_BETWEEN_UPDATES == 0)
             OnUpdateInfo?.Invoke(currentEntity);
-            framesCount = 0;
-        }
-        else
-        {
-            framesCount++;
-        }
     }
 
     // TODO (Santi): Called from imspector!
