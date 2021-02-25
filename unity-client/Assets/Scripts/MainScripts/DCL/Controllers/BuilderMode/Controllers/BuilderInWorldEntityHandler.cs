@@ -16,6 +16,7 @@ public class BuilderInWorldEntityHandler : BIWController
 {
     [Header("Design variables")]
     public float duplicateOffset = 2f;
+
     public float msBetweenTransformUpdates = 2000;
 
     [Header("Prefab References")]
@@ -33,6 +34,7 @@ public class BuilderInWorldEntityHandler : BIWController
     [Header("InputActions")]
     [SerializeField]
     internal InputAction_Trigger hideSelectedEntitiesAction;
+
     [SerializeField]
     internal InputAction_Trigger showAllEntitiesAction;
 
@@ -168,7 +170,7 @@ public class BuilderInWorldEntityHandler : BIWController
         if (entityInPointer == null)
             return false;
 
-        foreach(DCLBuilderInWorldEntity entity in selectedEntities)
+        foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
             if (entityInPointer == entity)
                 return true;
@@ -201,10 +203,11 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         DeselectEntities();
 
-        foreach(DCLBuilderInWorldEntity entity in convertedEntities.Values)
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
             entity.Delete();
         }
+
         convertedEntities.Clear();
     }
 
@@ -331,7 +334,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-           if (!entity.IsVisible)
+            if (!entity.IsVisible)
                 entity.ToggleShowStatus();
         }
     }
@@ -369,8 +372,8 @@ public class BuilderInWorldEntityHandler : BIWController
            hudController.ShowEntityInformation();
            hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
- 
-        outlinerController?.CancelAllOutlines();
+
+        outlinerController.CancelAllOutlines();
         return true;
     }
 
@@ -480,7 +483,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
         if (data.nftComponent != null)
         {
-            NFTShape nftShape = (NFTShape)sceneToEdit.SharedComponentCreate(data.nftComponent.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
+            NFTShape nftShape = (NFTShape) sceneToEdit.SharedComponentCreate(data.nftComponent.id, Convert.ToInt32(CLASS_ID.NFT_SHAPE));
             nftShape.model = new NFTShape.Model();
             nftShape.model.color = data.nftComponent.color.ToColor();
             nftShape.model.src = data.nftComponent.src;
@@ -498,7 +501,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
-        DCLTransform.model.position = Environment.i.world.state.ConvertUnityToScenePosition(entryPoint, parcelScene);
+        DCLTransform.model.position = WorldStateUtils.ConvertUnityToScenePosition(entryPoint, parcelScene);
 
         Vector3 pointToLookAt = Camera.main.transform.position;
         pointToLookAt.y = editionGOPosition.y;
@@ -582,7 +585,7 @@ public class BuilderInWorldEntityHandler : BIWController
             {
                 entityNameList.Add(entityName);
             }
-          
+
             return entityToEdit;
         }
         else
@@ -616,13 +619,14 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         List<DCLBuilderInWorldEntity> entitiesToDelete = new List<DCLBuilderInWorldEntity>();
 
-        foreach(DCLBuilderInWorldEntity entity in convertedEntities.Values)
+        foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-            if(entity.isFloor)
+            if (entity.isFloor)
             {
                 entitiesToDelete.Add(entity);
             }
         }
+
         foreach (DCLBuilderInWorldEntity entity in entitiesToDelete)
             DeleteEntity(entity);
     }
@@ -731,7 +735,7 @@ public class BuilderInWorldEntityHandler : BIWController
         builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
     }
 
-    public void SetEntityName(DCLBuilderInWorldEntity entityToApply,string newName)
+    public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName)
     {
         string currentName = entityToApply.GetDescriptiveName();
 

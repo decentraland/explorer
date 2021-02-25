@@ -131,6 +131,19 @@ export type LoadableParcelScene = {
   land?: ILand
 }
 
+/** THIS INTERFACE CANNOT CHANGE, IT IS USED IN THE UNITY BUILD */
+export type LoadablePortableExperienceScene = {
+  id: string
+  name: string
+  basePosition: { x: number; y: number }
+  parcels: Array<{ x: number; y: number }>
+  contents: Array<ContentMapping>
+  baseUrl: string
+  baseUrlBundles: string
+  land?: IPortableExperience
+  icon?: string
+}
+
 export const BillboardModes = {
   BILLBOARDMODE_NONE: 0,
   BILLBOARDMODE_X: 1,
@@ -242,6 +255,14 @@ export interface ILand {
   sceneJsonData: SceneJsonData
   baseUrl: string
   baseUrlBundles: string
+  mappingsResponse: MappingsResponse
+}
+
+export interface IPortableExperience {
+  cid: string
+  baseUrl: string
+  baseUrlBundles: string
+  sceneJsonData: SceneJsonData
   mappingsResponse: MappingsResponse
 }
 
@@ -422,7 +443,10 @@ export enum HUDElementID {
   EMAIL_PROMPT = 21,
   USERS_AROUND_LIST_HUD = 22,
   GRAPHIC_CARD_WARNING = 23,
-  BUILD_MODE = 24
+  BUILD_MODE = 24,
+  QUESTS_PANEL = 26,
+  QUESTS_TRACKER = 27,
+  QUESTS_NOTIFICATIONS = 28
 }
 
 export type HUDConfiguration = {
@@ -439,13 +463,11 @@ export type CatalystNode = {
 }
 
 export type GraphResponse = {
-  data: {
-    nfts: {
-      ens: {
-        subdomain: string
-      }
-    }[]
-  }
+  nfts: {
+    ens: {
+      subdomain: string
+    }
+  }[]
 }
 
 export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
