@@ -65,7 +65,7 @@ namespace DCL.Components
         public override string referencesContainerPrefabName => "UIText";
 
         public UIText(ParcelScene scene) : base(scene)
-        {        
+        {
             model = new Model();
         }
 
@@ -87,7 +87,7 @@ namespace DCL.Components
         {
             if (!scene.isTestScene)
             {
-                model.textModel = (TextShape.Model) newModel;
+                model = (Model) newModel;
             }
 
             yield return TextShape.ApplyModelChanges(scene, referencesContainer.text, model.textModel);

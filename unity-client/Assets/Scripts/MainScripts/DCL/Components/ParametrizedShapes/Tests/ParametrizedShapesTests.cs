@@ -327,7 +327,8 @@ public class ParametrizedShapesTests : IntegrationTestSuite_Legacy
         }
 
         // Act: Update withCollision
-        yield return shapeComponent.ApplyChanges(new BaseShape.Model {withCollisions = withCollision});
+        shapeComponent.SetModel(new BoxShape.Model {withCollisions = withCollision});
+        yield return shapeComponent.routine;
 
         // Assert:
         foreach (DecentralandEntity entity in entities)
@@ -359,7 +360,8 @@ public class ParametrizedShapesTests : IntegrationTestSuite_Legacy
         }
 
         // Act: Update visible
-        yield return shapeComponent.ApplyChanges(new BaseShape.Model {visible = visible});
+        shapeComponent.SetModel(new BoxShape.Model {visible = visible, withCollisions = true, isPointerBlocker = true});
+        yield return shapeComponent.routine;
 
         // Assert:
         foreach (DecentralandEntity entity in entities)

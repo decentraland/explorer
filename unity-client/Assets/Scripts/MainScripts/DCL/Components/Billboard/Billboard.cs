@@ -25,7 +25,7 @@ namespace DCL
 
             public override BaseModel GetDataFromJSON(string json)
             {
-                return Utils.SafeFromJson<Model>(json); 
+                return Utils.SafeFromJson<Model>(json);
             }
 
             public override int GetHashCode()
@@ -56,17 +56,10 @@ namespace DCL
 
             ChangeOrientation();
 
+
             if (entityTransform == null)
             {
-                //NOTE(Zak): We have to wait one frame because if not the entity will be null. (I'm Brian, but Zak wrote the code so read this in his voice)
-                yield return null;
-
-                if (entity == null || entity.gameObject == null)
-                {
-                    Debug.LogWarning("It seems skipping a frame didnt work, entity/GO is still null");
-                    yield break;
-                }
-
+                yield return new WaitUntil(() => entity != null);
                 entityTransform = entity.gameObject.transform;
             }
         }
@@ -87,6 +80,7 @@ namespace DCL
             //NOTE(Brian): This fixes #757 (https://github.com/decentraland/unity-client/issues/757)
             //             We must find a more performant way to handle this, until that time, this is the approach.
 
+            if (entityTransform == null) return;
             if (transform.position == lastPosition) return;
 
             lastPosition = transform.position;
@@ -120,7 +114,6 @@ namespace DCL
         {
             if (entityTransform == null)
                 return;
-
             Vector3 lookAtVector = GetLookAtVector();
             if(lookAtVector != Vector3.zero)
                 entityTransform.forward = lookAtVector;

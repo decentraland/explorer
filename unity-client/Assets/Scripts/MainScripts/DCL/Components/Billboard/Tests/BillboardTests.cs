@@ -34,11 +34,12 @@ namespace Tests
 
             yield return CreateComponent(x: true, y: true, z: true);
 
-            yield return null;
+            yield return billboard.routine;
 
             Transform entityTransform = scene.entities[entityId].gameObject.transform;
             Vector3 lookAt = GetLookAtVector(billboard.GetModel(), entityTransform);
 
+            yield return null;
             Assert.AreApproximatelyEqual(lookAt.x, entityTransform.forward.x, "billboard entity forward vector should be the same as the calculated one");
             Assert.AreApproximatelyEqual(lookAt.y, entityTransform.forward.y, "billboard entity forward vector should be the same as the calculated one");
             Assert.AreApproximatelyEqual(lookAt.z, entityTransform.forward.z, "billboard entity forward vector should be the same as the calculated one");
@@ -77,7 +78,7 @@ namespace Tests
 
             yield return CreateComponent(x: true, y: true, z: true);
 
-            yield return null;
+            yield return billboard.routine;
 
             var entity = scene.entities[entityId];
             Transform entityTransform = entity.gameObject.transform;

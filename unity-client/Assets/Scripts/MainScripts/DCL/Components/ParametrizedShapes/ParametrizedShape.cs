@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -31,9 +31,10 @@ namespace DCL.Components
             OnDetach += OnShapeDetached;
         }
 
-        void UpdateRenderer(DecentralandEntity entity)
+        void UpdateRenderer(DecentralandEntity entity, Model model = null)
         {
-            var model = (T) this.model;
+            if(model == null)
+                model = (T) this.model;
             if (visibilityDirty)
             {
                 ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
@@ -89,7 +90,7 @@ namespace DCL.Components
             collisionsDirty = true;
             UpdateRenderer(entity);
 
-            entity.OnShapeUpdated?.Invoke(entity);          
+            entity.OnShapeUpdated?.Invoke(entity);
         }
 
         void OnShapeDetached(DecentralandEntity entity)
@@ -137,7 +138,7 @@ namespace DCL.Components
                         collisionsDirty = cachedCollisionDirty;
 
                         var entity = iterator.Current;
-                        UpdateRenderer(entity);
+                        UpdateRenderer(entity,newModel);
 
                         entity.OnShapeUpdated?.Invoke(entity);
                     }
