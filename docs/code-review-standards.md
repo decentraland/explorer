@@ -6,7 +6,9 @@ In this document we are going to explore the main things we look for in a code r
 
 ## What to look for?
 
-### Ensure the general approach for the feature/fix/refactor is the proper one
+Aside of general review guidelines that are applied everywhere, here's a list of needs that are addressed by code reviews and are particularly valued by the Decentraland collaborators. 
+
+### Ensure the general approach of the PR is the proper one
 The reviewer has to ensure that the general approach of the intended change is the proper one. 
 
 Sometimes, the best solution isn’t viable because we have urgency or the solution is too expensive to implement right now. If this is the case we generally agree on creating an issue to address the change later as technical debt. 
@@ -15,44 +17,56 @@ Sometimes, the best solution isn’t viable because we have urgency or the solut
 
 #### Code and architecture style
 
-Aside from using a linter, there are many details to look for in a pull request that can't be automated. The contributions are coming from many of us, but the code has to be felt as if it was written by a single person. 
+There are many details to look for in a pull request that can't be automated. The contributions are coming from many of us, but the code has to be felt as if it was written by a single person. 
 
 This said, any contribution should be curated using the [coding guidelines]() document.
 
 #### Approach consistency
 
-In a large codebase it's usual to stumble upon a same problem twice. Be an algorithmic, API or architectural issue, we have to make sure two equivalent issues have the same solution applied. 
+In a large codebase it's usual to stumble upon a same problem twice. Be an algorithmic, API or architectural issue, we have to make sure two equivalent issues have the same solution applied when its sensible to do so. 
 
 This has many benefits, including: 
 
 * **Developer friendly codebase:** if any collaborator already looked at this solution elsewhere, she will already be familiar with it in a new place.
 
 * **High productivity:** we can reach a toolset of well known solutions.
-* **High quality solutions:** many collaborators are looking for consensus on the best solution possible for a particular common problem.   
+
+* **High quality solutions:** if many collaborators are looking for consensus on the best solution possible for a particular common problem, the outcome will be as high quality as it can be.   
+
+#### Documentation
+
+TBD
+
+### Prevent performance and bug regressions
 
 
-### Prevent performance and bugs regressions
-* Smoke testing.
-* Performance tests (TBD).
-* Proper usage of API.
-* Unit testing coverage.
+#### Smoke testing
+#### Unit testing coverage
+#### Proper usage of API
+
+
 
 
 
 ### Prevent unnecessary technical debt
-* Simplificación de algoritmos
-* Análisis de escalabilidad de sistemas
-* Comentarlo y crear issues para atacarlo después
+* KISS and good engineering principles
+* Look out for API good practices
+* If it can't be prevented, let's track it.
 
 
-### Improve team’s knowledge of the code base
+### Improve team’s knowledge of the codebase
 By requesting a code review, the knowledge of the changes are shared and the collaborators will stay up to date with the codebase. This is important for our productivity as this enables informed decision making and effective ownership. 
 
-Always remember that the collective excellence reigns over the individual. 
+Always remember that the greatest changes of the world are brought by collective excellence rather than by isolated achievements.
 
 
-### Special Considerations
 
-### Big pull requests
+## Code review process recommendations
+
+### Strive to get reviews as fast as possible
+
+### Avoid big pull requests
+
+### Bring on critical reviewers
 
 
