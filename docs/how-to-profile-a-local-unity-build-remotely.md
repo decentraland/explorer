@@ -1,4 +1,4 @@
-### Unity manual build + remote profiling guide
+### How to profile a local Unity build remotely
 
 #### Option 1
 1. Run `make watch` in a terminal at `kernel/`. Wait for it to finish and leave it watching for changes. **This step must be done before replacing the build files or they may be replaced again with the latest published build files when the `make watch` process runs**

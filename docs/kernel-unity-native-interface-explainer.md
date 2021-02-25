@@ -1,4 +1,4 @@
-### Native Kernel-Renderer Interface
+### Kernel-unity native interface explainer and maintenance guide
 
 #### Overview 
 In some cases, using `SendMessage` is not performant enough to pass data

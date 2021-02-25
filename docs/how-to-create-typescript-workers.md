@@ -1,4 +1,5 @@
-## Creating a typescript Worker in Kernel
+## How to create typescript workers
+
 You can check the files used for our simple gif-processor worker (`packages/gif-processor`):
 1. Create relevant folder inside `packages/` and put a .ts file for the main thread and another .ts for the worker (gif-processor example: `processor.ts` and `worker.ts`)
 

@@ -147,12 +147,13 @@ When the steps are followed, you will be able to run the local Unity build by go
 
 ## Technical how-to guides and explainers
 
-- [How to create new SDK components]()
-- [How to debug with local test parcels and preview scenes]()
-- [How to use Unity visual tests]()
-- [How to profile a local Unity build remotely]()
-- [Kernel-unity native interface explainer and maintenance guide]()
-- [Create typescript worker how-to guide]()
+- [How to create new SDK components](docs/how-to-create-new-sdk-components.md)
+- [How to debug with local test parcels and preview scenes](docs/how-to-test-parcels-and-preview-scenes.md)
+- [How to use Unity visual tests](docs/how-to-use-unity-visual-tests.md)
+- [How to profile a local Unity build remotely](docs/how-to-profile-a-local-unity-build-remotely.md)
+- [Kernel-unity native interface explainer and maintenance guide](docs/kernel-unity-native-interface-explainer.md)
+- [How to create typescript workers](docs/how-to-create-typescript-workers.md)
+- [How to add/update protobuf-compiled components](docs/how-to-add-or-update-protobuf-compiled-components.md)
 
 ## Copyright info
 

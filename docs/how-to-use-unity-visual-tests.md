@@ -1,4 +1,4 @@
-### How to create Unity Visual Tests
+### How to use Unity Visual Tests
 
 #### Overview
 

@@ -1,10 +1,12 @@
-## Test parcels and preview scenes debug how-to
+## How to debug with local test parcels and preview scenes
 
-Optionally, you can build the test scenes which are used in `debug` mode:
+### Test Scenes
+
+You can build the test scenes which are used by entering kernel with the `debug` mode:
 
     make test-scenes
 
-Optionally, if you want to run the client in `debug` mode, append the following query parameter to the URL:
+If you want to run the client in `debug` mode, append the following query parameter to the URL:
 
     http://localhost:3000/?DEBUG_MODE
 
@@ -14,21 +16,14 @@ To spawn in a specific set of coordinates append the following query paramter:
 
 
 
-(If you want the test scenes to be updated dynamically after the first build, you should run `make watch-only-test-scenes` in another terminal and keep it watching for changes)
+If you want the test scenes to be updated dynamically after the first build, you should run `make watch-only-test-scenes` in another terminal and keep it watching for changes.
 
-It is possible to define new parcels inside this repo for testing purposes. To do so, create a new folder in `public/test-scenes`. There are several conventions to be followed regarding the name of these folders and the positions of the parcels, these can be found in the [README](https://github.com/decentraland/client/blob/master/public/test-scenes/README.md) file.
+### Creating new test scenes
+It is possible to define new scenes inside this repo for testing purposes. To do so, create a new folder in `public/test-scenes`. There are several conventions to be followed regarding the name of these folders and the positions of the parcels, these can be found in the [README](https://github.com/decentraland/client/blob/master/public/test-scenes/README.md) file.
 
 To edit and make sure that `make watch` is rebuilding the scene when you are hacking on a new feature of the kernel, make sure to modify `targets/scenes/basic-scenes.json` and point to the scene you're working on.
 
-All test parcels can be accessed inside visual tests:
-
-```ts
-import { loadTestParcel } from 'test/testHelpers'
-
-describe('My example test', function() {
-  loadTestParcel(200, 10)
-  // ...
-```
+### Preview Mode Scenes
 
 #### Unity Editor debugging with dcl scene in "preview mode"
 
