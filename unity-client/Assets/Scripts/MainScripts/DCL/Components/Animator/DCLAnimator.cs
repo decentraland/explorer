@@ -37,7 +37,7 @@ namespace DCL.Components
 
             public override BaseModel GetDataFromJSON(string json)
             {
-                return Utils.SafeFromJson<Model>(json); 
+                return Utils.SafeFromJson<Model>(json);
             }
 
             public override bool Equals(object obj)
@@ -71,10 +71,6 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(BaseModel model)
         {
-            //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
-            if (entity == null)
-                return null;
-
             entity.OnShapeUpdated -= OnComponentUpdated;
             entity.OnShapeUpdated += OnComponentUpdated;
 

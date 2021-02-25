@@ -57,10 +57,6 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
-            if (newModel == null)
-                yield break;
-
             if (oldModel == newModel)
                 yield break;
 

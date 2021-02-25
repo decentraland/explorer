@@ -86,7 +86,7 @@ namespace DCL.Components
             if (updateHandler == null)
                 updateHandler = CreateUpdateHandler();
 
-            updateHandler.ApplyChangesIfModified(model);
+            // updateHandler.ApplyChangesIfModified(model);
         }
 
         public virtual BaseModel GetModel() => model;
