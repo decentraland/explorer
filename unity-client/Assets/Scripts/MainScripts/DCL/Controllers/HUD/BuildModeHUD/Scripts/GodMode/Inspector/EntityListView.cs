@@ -1,14 +1,13 @@
-using DCL.Models;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EntityListView : ListView<DCLBuilderInWorldEntity>
 {
-    public EntityListAdapter entityListAdapter;
+    [SerializeField] internal EntityListAdapter entityListAdapter;
 
-    public System.Action<BuilderInWorldEntityListController.EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActioninvoked;
+    public System.Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     public System.Action<DCLBuilderInWorldEntity, string> OnEntityRename;
+
+    public bool isActive => gameObject.activeSelf;
 
     public override void AddAdapters()
     {
@@ -37,13 +36,18 @@ public class EntityListView : ListView<DCLBuilderInWorldEntity>
         }
     }
 
-    public void EntityActionInvoked(BuilderInWorldEntityListController.EntityAction action, DCLBuilderInWorldEntity entityToApply,EntityListAdapter adapter)
+    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply,EntityListAdapter adapter)
     {
-        OnActioninvoked?.Invoke(action, entityToApply,adapter);
+        OnActionInvoked?.Invoke(action, entityToApply,adapter);
     }
 
     public void EntityRename(DCLBuilderInWorldEntity entity, string newName)
     {
         OnEntityRename?.Invoke(entity, newName);
+    }
+
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
     }
 }

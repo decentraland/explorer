@@ -1,17 +1,13 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
     public SceneLimitInfoController sceneLimitInfoController;
-    public BuilderInWorldEntityListController entityListController;
-
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
     public Button changeModeBtn,extraBtn,controlsBtn,hideUIBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
-    public Button[] closeEntityListBtns;
     public Button tutorialBtn;
     public Button logOutBtn;
 
@@ -52,6 +48,8 @@ public class BuildModeHUDView : MonoBehaviour
     private IInspectorBtnController inspectorBtnController;
     public CatalogBtnView catalogBtnView;
     private ICatalogBtnController catalogBtnController;
+    public InspectorView inspectorView;
+    internal IInspectorController inspectorController;
 
     public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
     public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
@@ -74,7 +72,8 @@ public class BuildModeHUDView : MonoBehaviour
         IDragAndDropSceneObjectController dragAndDropSceneObjectController,
         IPublishBtnController publishBtnController,
         IInspectorBtnController inspectorBtnController,
-        ICatalogBtnController catalogBtnController)
+        ICatalogBtnController catalogBtnController,
+        IInspectorController inspectorController)
     {
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
@@ -114,6 +113,10 @@ public class BuildModeHUDView : MonoBehaviour
         this.catalogBtnController = catalogBtnController;
         this.catalogBtnController.Initialize(catalogBtnView, tooltipController);
         catalogBtnController.OnClick += () => OnSceneCatalogControllerChangeVisibilityAction?.Invoke();
+
+        this.inspectorController = inspectorController;
+        this.inspectorController.Initialize(inspectorView);
+        inspectorController.SetCloseButtonsAction(() => OnEntityListChangeVisibilityAction?.Invoke());
     }
 
     private void Awake()
@@ -131,11 +134,6 @@ public class BuildModeHUDView : MonoBehaviour
         toggleOpenEntityListInputAction.OnTriggered += OnEntityListActionTriggered;
         toggleSceneInfoInputAction.OnTriggered += OnSceneLimitInfoControllerChangeVisibilityTriggered;
         toggleCatalogInputAction.OnTriggered += OnSceneCatalogControllerChangeVisibilityTriggered;
-
-        foreach (Button closeEntityListBtn in closeEntityListBtns)
-        {
-            closeEntityListBtn.onClick.AddListener(() => OnEntityListChangeVisibilityAction?.Invoke());
-        }
 
         sceneCatalogView.hideCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
 

@@ -39,13 +39,13 @@ public class BuildModeHUDController : IHUD
 
     internal BuildModeHUDView view;
 
-    BuilderInWorldEntityListController buildModeEntityListController;
     CatalogItemDropController catalogItemDropController;
 
     bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
 
     private SceneCatalogController sceneCatalogController;
     private EntityInformationController entityInformationController;
+    private InspectorController inspectorController;
 
     public BuildModeHUDController()
     {
@@ -65,12 +65,10 @@ public class BuildModeHUDController : IHUD
             new DragAndDropSceneObjectController(),
             new PublishBtnController(),
             new InspectorBtnController(),
-            new CatalogBtnController());
+            new CatalogBtnController(),
+            inspectorController = new InspectorController());
 
         catalogItemDropController = new CatalogItemDropController();
-
-        buildModeEntityListController = view.GetComponentInChildren<BuilderInWorldEntityListController>();
-        buildModeEntityListController = view.entityListController;
 
         entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
@@ -80,13 +78,13 @@ public class BuildModeHUDController : IHUD
 
         catalogItemDropController.catalogGroupListView = view.sceneCatalogView.catalogGroupListView;
 
-        buildModeEntityListController.OnEntityClick += (x) => OnEntityClick(x);
-        buildModeEntityListController.OnEntityDelete += (x) => OnEntityDelete(x);
-        buildModeEntityListController.OnEntityLock += (x) => OnEntityLock(x);
-        buildModeEntityListController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
-        buildModeEntityListController.OnEntityRename += (entity, newName) => OnEntityRename(entity, newName);
+        inspectorController.OnEntityClick += (x) => OnEntityClick(x);
+        inspectorController.OnEntityDelete += (x) => OnEntityDelete(x);
+        inspectorController.OnEntityLock += (x) => OnEntityLock(x);
+        inspectorController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
+        inspectorController.OnEntityRename += (entity, newName) => OnEntityRename(entity, newName);
 
-        buildModeEntityListController.CloseList();
+        inspectorController.CloseList();
 
         view.OnCatalogItemDrop += () => SceneObjectDroppedInView();
         view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
@@ -96,7 +94,6 @@ public class BuildModeHUDController : IHUD
         view.OnSceneLimitInfoChangeVisibility += ChangeVisibilityOfSceneInfo;
         view.OnSceneLimitInfoControllerChangeVisibilityAction += ChangeVisibilityOfSceneInfo;
         view.OnSceneCatalogControllerChangeVisibilityAction += ChangeVisibilityOfCatalog;
-
 
         view.OnTranslateSelectionAction += () => OnTranslateSelectedAction?.Invoke();
         view.OnRotateSelectionAction += () => OnRotateSelectedAction?.Invoke();
@@ -109,7 +106,6 @@ public class BuildModeHUDController : IHUD
         view.OnCatalogItemSelected += CatalogItemSelected;
         view.OnStopInput += () => OnStopInput?.Invoke();
         view.OnResumeInput += () => OnResumeInput?.Invoke();
-
 
         view.OnEntityListChangeVisibilityAction += () => ChangeVisibilityOfEntityList();
 
@@ -160,6 +156,7 @@ public class BuildModeHUDController : IHUD
     {
         isCatalogOpen = isVisible;
         view.SetVisibilityOfCatalog(isCatalogOpen);
+
         if (isVisible)
             OnCatalogOpen?.Invoke();
     }
@@ -232,7 +229,7 @@ public class BuildModeHUDController : IHUD
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
-        buildModeEntityListController.SetEntityList(entityList);
+        inspectorController.SetEntityList(entityList);
         view.entityInformationView.smartItemListView.SetEntityList(entityList);
     }
 
@@ -242,17 +239,17 @@ public class BuildModeHUDController : IHUD
         if (isEntityListVisible)
         {
             OnEntityListVisible?.Invoke();
-            buildModeEntityListController.OpenEntityList();
+            inspectorController.OpenEntityList();
         }
         else
         {
-            buildModeEntityListController.CloseList();
+            inspectorController.CloseList();
         }
     }
 
     public void ClearEntityList()
     {
-        buildModeEntityListController.ClearList();
+        inspectorController.ClearList();
     }
 
     public void ChangeVisibilityOfControls()
@@ -281,7 +278,6 @@ public class BuildModeHUDController : IHUD
         {
 
             view.showHideAnimator.Hide();
-
             AudioScriptableObjects.fadeOut.Play(true);
         }
         else if (!IsVisible() && visible)

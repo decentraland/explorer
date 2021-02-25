@@ -1,6 +1,3 @@
-using DCL.Models;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +9,7 @@ public class EntityListAdapter : MonoBehaviour
     public TextMeshProUGUI nameTxt;
     public TMP_InputField nameInputField;
     public Image selectedImg, lockImg, showImg;
-    public System.Action<BuilderInWorldEntityListController.EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
+    public System.Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     public System.Action<DCLBuilderInWorldEntity, string> OnEntityRename;
     DCLBuilderInWorldEntity currentEntity;
 
@@ -42,22 +39,22 @@ public class EntityListAdapter : MonoBehaviour
 
     public void SelectOrDeselect()
     {
-        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.SELECT,currentEntity, this);
+        OnActionInvoked?.Invoke(EntityAction.SELECT,currentEntity, this);
     }
 
     public void ShowOrHide()
     {
-         OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.SHOW, currentEntity, this);
+         OnActionInvoked?.Invoke(EntityAction.SHOW, currentEntity, this);
     }
 
     public void LockOrUnlock()
     {
-        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.LOCK, currentEntity, this);
+        OnActionInvoked?.Invoke(EntityAction.LOCK, currentEntity, this);
     }
 
     public void DeleteEntity()
     {
-        OnActionInvoked?.Invoke(BuilderInWorldEntityListController.EntityAction.DELETE, currentEntity, this);
+        OnActionInvoked?.Invoke(EntityAction.DELETE, currentEntity, this);
     }
 
     void SetInfo(DCLBuilderInWorldEntity entityToEdit)
