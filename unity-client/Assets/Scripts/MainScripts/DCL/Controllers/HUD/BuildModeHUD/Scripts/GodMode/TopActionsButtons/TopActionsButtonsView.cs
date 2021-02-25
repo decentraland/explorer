@@ -26,6 +26,8 @@ public class TopActionsButtonsView : MonoBehaviour
 
     [SerializeField] internal ExtraActionsView extraActionsView;
 
+    internal IExtraActionsController extraActionsController;
+
     private void Awake()
     {
         changeModeBtn.onClick.AddListener(OnChangeModeClick);
@@ -50,6 +52,9 @@ public class TopActionsButtonsView : MonoBehaviour
         duplicateBtn.onClick.RemoveListener(OnDuplicateClick);
         deleteBtn.onClick.RemoveListener(OnDeleteClick);
         logOutBtn.onClick.RemoveListener(OnLogOutClick);
+
+        if (extraActionsController != null)
+            extraActionsController.Dispose();
     }
 
     public void OnChangeModeClick()
@@ -95,5 +100,11 @@ public class TopActionsButtonsView : MonoBehaviour
     public void OnLogOutClick()
     {
         OnLogOutClicked?.Invoke();
+    }
+
+    public void ConfigureExtraActions(IExtraActionsController extraActionsController)
+    {
+        this.extraActionsController = extraActionsController;
+        this.extraActionsController.Initialize(extraActionsView);
     }
 }

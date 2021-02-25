@@ -12,8 +12,20 @@ public interface ITopActionsButtonsController
                  OnDeleteClick,
                  OnLogOutClick;
 
+    IExtraActionsController extraActionsController { get; }
+
     void Initialize(TopActionsButtonsView topActionsButtonsView);
     void Dispose();
+
+    void ChangeModeClicked();
+    void ExtraClicked();
+    void TranslateClicked();
+    void RotateClicked();
+    void ScaleClicked();
+    void ResetClicked();
+    void DuplicateClicked();
+    void DeleteClicked();
+    void LogOutClicked();
 }
 
 public class TopActionsButtonsController : ITopActionsButtonsController
@@ -27,6 +39,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
                         OnDuplicateClick,
                         OnDeleteClick,
                         OnLogOutClick;
+
+    public IExtraActionsController extraActionsController => topActionsButtonsView.extraActionsController;
 
     private TopActionsButtonsView topActionsButtonsView;
 
@@ -43,6 +57,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDuplicateClicked += DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked += DeleteClicked;
         topActionsButtonsView.OnLogOutClicked += LogOutClicked;
+
+        topActionsButtonsView.ConfigureExtraActions(new ExtraActionsController());
     }
 
     public void Dispose()
@@ -58,47 +74,47 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnLogOutClicked -= LogOutClicked;
     }
 
-    private void ChangeModeClicked()
+    public void ChangeModeClicked()
     {
         OnChangeModeClick?.Invoke();
     }
 
-    private void ExtraClicked()
+    public void ExtraClicked()
     {
         OnExtraClick?.Invoke();
     }
 
-    private void TranslateClicked()
+    public void TranslateClicked()
     {
         OnTranslateClick?.Invoke();
     }
 
-    private void RotateClicked()
+    public void RotateClicked()
     {
         OnRotateClick?.Invoke();
     }
 
-    private void ScaleClicked()
+    public void ScaleClicked()
     {
         OnScaleClick?.Invoke();
     }
 
-    private void ResetClicked()
+    public void ResetClicked()
     {
         OnResetClick?.Invoke();
     }
 
-    private void DuplicateClicked()
+    public void DuplicateClicked()
     {
         OnDuplicateClick?.Invoke();
     }
 
-    private void DeleteClicked()
+    public void DeleteClicked()
     {
         OnDeleteClick?.Invoke();
     }
 
-    private void LogOutClicked()
+    public void LogOutClicked()
     {
         OnLogOutClick?.Invoke();
     }

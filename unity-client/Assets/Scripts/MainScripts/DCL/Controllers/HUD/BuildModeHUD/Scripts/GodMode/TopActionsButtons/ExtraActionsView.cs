@@ -22,6 +22,11 @@ public class ExtraActionsView : MonoBehaviour
         tutorialBtn.onClick.RemoveListener(OnTutorialClick);
     }
 
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
+
     public void OnControlsClick()
     {
         OnControlsClicked?.Invoke();

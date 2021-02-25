@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
-    public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
+    public GameObject firstPersonCanvasGO, godModeCanvasGO;
 
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
@@ -127,17 +127,15 @@ public class BuildModeHUDView : MonoBehaviour
         topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectionAction?.Invoke();
         topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectionAction?.Invoke();
         topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
-
-        topActionsButtonsView.extraActionsView.controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
-        topActionsButtonsView.extraActionsView.hideUIBtn.onClick.AddListener(() => OnChangeUIVisbilityAction?.Invoke());
-        topActionsButtonsView.extraActionsView.tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
+        topActionsButtonsController.extraActionsController.OnControlsClick += () => OnControlsVisibilityAction?.Invoke();
+        topActionsButtonsController.extraActionsController.OnHideUIClick += () => OnChangeUIVisbilityAction?.Invoke();
+        topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
     }
 
     private void Awake()
     {
         toggleUIVisibilityInputAction.OnTriggered += OnUIVisiblityToggleActionTriggered;
         toggleControlsVisibilityInputAction.OnTriggered += OnControlsToggleActionTriggered;
-
         toggleChangeCameraInputAction.OnTriggered += OnChangeModeActionTriggered;
         toggleTranslateInputAction.OnTriggered += OnTranslateActionTriggered;
         toggleRotateInputAction.OnTriggered += OnRotateActionTriggered;
@@ -148,7 +146,6 @@ public class BuildModeHUDView : MonoBehaviour
         toggleOpenEntityListInputAction.OnTriggered += OnEntityListActionTriggered;
         toggleSceneInfoInputAction.OnTriggered += OnSceneLimitInfoControllerChangeVisibilityTriggered;
         toggleCatalogInputAction.OnTriggered += OnSceneCatalogControllerChangeVisibilityTriggered;
-
         sceneCatalogView.hideCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
         sceneCatalogView.catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
         sceneCatalogView.catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
@@ -248,7 +245,7 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void SetVisibilityOfExtraBtns(bool isVisible)
     {
-        extraBtnsGO.SetActive(isVisible);
+        topActionsButtonsController.extraActionsController.SetActive(isVisible);
     }
 
     public void SetFirstPersonView()
