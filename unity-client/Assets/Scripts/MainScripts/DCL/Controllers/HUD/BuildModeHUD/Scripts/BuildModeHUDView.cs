@@ -118,6 +118,19 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.topActionsButtonsController = topActionsButtonsController;
         this.topActionsButtonsController.Initialize(topActionsButtonsView);
+        topActionsButtonsController.OnChangeModeClick += () => OnChangeModeAction?.Invoke();
+        topActionsButtonsController.OnExtraClick += () => OnExtraBtnsClick?.Invoke();
+        topActionsButtonsController.OnTranslateClick += () => OnTranslateSelectionAction?.Invoke();
+        topActionsButtonsController.OnRotateClick += () => OnRotateSelectionAction?.Invoke();
+        topActionsButtonsController.OnScaleClick += () => OnScaleSelectionAction?.Invoke();
+        topActionsButtonsController.OnResetClick += () => OnResetSelectedAction?.Invoke();
+        topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectionAction?.Invoke();
+        topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectionAction?.Invoke();
+        topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
+
+        topActionsButtonsView.extraActionsView.controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
+        topActionsButtonsView.extraActionsView.hideUIBtn.onClick.AddListener(() => OnChangeUIVisbilityAction?.Invoke());
+        topActionsButtonsView.extraActionsView.tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
     }
 
     private void Awake()
@@ -137,26 +150,8 @@ public class BuildModeHUDView : MonoBehaviour
         toggleCatalogInputAction.OnTriggered += OnSceneCatalogControllerChangeVisibilityTriggered;
 
         sceneCatalogView.hideCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
-
-        topActionsButtonsView.changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
-        topActionsButtonsView.extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
-        topActionsButtonsView.extraActionsView.controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
-
-        topActionsButtonsView.extraActionsView.hideUIBtn.onClick.AddListener(() => OnChangeUIVisbilityAction?.Invoke());
-
-        topActionsButtonsView.translateBtn.onClick.AddListener(() => OnTranslateSelectionAction?.Invoke());
-        topActionsButtonsView.rotateBtn.onClick.AddListener(() => OnRotateSelectionAction?.Invoke());
-        topActionsButtonsView.scaleBtn.onClick.AddListener(() => OnScaleSelectionAction?.Invoke());
-        topActionsButtonsView.resetBtn.onClick.AddListener(() => OnResetSelectedAction?.Invoke());
-        topActionsButtonsView.duplicateBtn.onClick.AddListener(() => OnDuplicateSelectionAction?.Invoke());
-        topActionsButtonsView.deleteBtn.onClick.AddListener(() => OnDeleteSelectionAction?.Invoke());
-
         sceneCatalogView.catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
         sceneCatalogView.catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
-
-        topActionsButtonsView.extraActionsView.tutorialBtn.onClick.AddListener(() => OnTutorialAction?.Invoke());
-
-        topActionsButtonsView.logOutBtn.onClick.AddListener(() => OnLogoutAction?.Invoke());
     }
 
     private void OnDestroy()
