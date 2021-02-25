@@ -9,7 +9,7 @@ public class BuildModeHUDView : MonoBehaviour
     public BuilderInWorldEntityListController entityListController;
 
     public GameObject firstPersonCanvasGO, godModeCanvasGO, extraBtnsGO;
-    public Button changeModeBtn,extraBtn,controlsBtn,closeControlsBtn,hideUIBtn;
+    public Button changeModeBtn,extraBtn,controlsBtn,hideUIBtn;
     public Button translateBtn, rotateBtn, scaleBtn, resetBtn, duplicateBtn, deleteBtn;
     public Button[] closeEntityListBtns;
     public Button tutorialBtn;
@@ -96,6 +96,7 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.shortcutsController = shortcutsController;
         this.shortcutsController.Initialize(shortcutsView);
+        shortcutsController.OnCloseClick += () => OnControlsVisibilityAction?.Invoke();
 
         this.publishPopupController = publishPopupController;
         this.publishPopupController.Initialize(publishPopupView);
@@ -142,7 +143,7 @@ public class BuildModeHUDView : MonoBehaviour
         changeModeBtn.onClick.AddListener(() => OnChangeModeAction?.Invoke());
         extraBtn.onClick.AddListener(() => OnExtraBtnsClick?.Invoke());
         controlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
-        closeControlsBtn.onClick.AddListener(() => OnControlsVisibilityAction?.Invoke());
+
         hideUIBtn.onClick.AddListener(() => OnChangeUIVisbilityAction?.Invoke());
 
         translateBtn.onClick.AddListener(() => OnTranslateSelectionAction?.Invoke());
