@@ -21,7 +21,7 @@ There are many details to look for in a pull request that can't be automated. Th
 
 This said, any contribution should be curated using the [coding guidelines]() document.
 
-#### Approach consistency
+#### Solution consistency
 
 In a large codebase it's usual to stumble upon a same problem twice. Be an algorithmic, API or architectural issue, we have to make sure two equivalent issues have the same solution applied when its sensible to do so. 
 
@@ -33,40 +33,52 @@ This has many benefits, including:
 
 * **High quality solutions:** if many collaborators are looking for consensus on the best solution possible for a particular common problem, the outcome will be as high quality as it can be.   
 
-#### Documentation
-
-TBD
 
 ### Prevent performance and bug regressions
 
+[IBM found](http://www.ifsq.org/work-holland-1999.html) that each hour of code review saves about 100 hours of related work, including QA. After introducing code reviews, [Raytheon reduced](http://www.ifsq.org/finding-idd-7.html) its cost of rework from 40% to 20% of the project cost. The money cost of fixing bugs dropped by 50%. 
 
-#### Smoke testing
-#### Unit testing coverage
-#### Proper usage of API
+So, we can inspect the code to look for bugs, and we can also:
 
+* **Do smoke testing:** The code may have tests, but is not assured that the tests will cover every use case in a E2E scenario. Run a CI build and give it a whirl.
 
+* **Ensure the code has enough testing coverage:** *All pull requests* that add new features should introduce tests. If the change is a fix, check if a test can be made to cover it.
 
-
+* **Check API usage is following good practices:** Not keeping good API practices can introduce performance issues down the road. In the worst of cases they can introduce bugs.
 
 ### Prevent unnecessary technical debt
-* KISS and good engineering principles
-* Look out for API good practices
-* If it can't be prevented, let's track it.
+#### KISS and good engineering principles
+Contributions should follow good engineering principles like KISS, DRY and SOLID when is sensible to do so. Bad practices will lead to architecture issues later, so its best to prevent them.
 
+#### If it can't be prevented, let's track it
+Sometimes, a request for improvement can't be made because of dangling technical debt that comes from a previous change or time constraints. When this is the case, make sure the issue gets tracked to approach it later.
 
-### Improve team’s knowledge of the codebase
+### Improve transparency of the codebase, raise code standards
 By requesting a code review, the knowledge of the changes are shared and the collaborators will stay up to date with the codebase. This is important for our productivity as this enables informed decision making and effective ownership. 
 
+On top of this, good code ideas spread like gospel, raising the quality bar for all the reviewers involved.
+
 Always remember that the greatest changes of the world are brought by collective excellence rather than by isolated achievements.
-
-
 
 ## Code review process recommendations
 
 ### Strive to get reviews as fast as possible
 
+[Data indicates](https://codeclimate.com/blog/virtuous-circle-software-delivery/) that the delay on getting reviews is one of the biggest offenders of software cycle throughput.
+*  When work starts on a new branch, the matching pull request should be opened as soon as possible.
+
+*  Review requests should be fired ASAP as well, so don't wait until your code is perfect before asking.
+
 ### Avoid big pull requests
 
-### Bring on critical reviewers
+Reviews are more effective on small pull requests. [A Cisco study on code reviews](https://static1.smartbear.co/support/media/resources/cc/book/code-review-cisco-case-study.pdf) shows that a single developer can review a limited number of lines of code before losing effectiveness.
 
+* Try to divide the work of big features on smaller pull requests. Plan ahead. Use feature toggling if applicable.
 
+* No pull request can be too small. If a given change had to be a one liner, go for it.
+
+* If everything fails and the PR came out big, bring more reviewers and try to add a guide on the PR description that guides the reviewer through the code. Live meetings to explain the code are very welcome as well. 
+
+### Bring critical reviewers on board
+
+When working on any existing piece of code, you'd want to get a review the original contributor or owner of the feature. If the repository settings let you merge, that doesn't mean an additional reviewer shouldn't be brought on board.
