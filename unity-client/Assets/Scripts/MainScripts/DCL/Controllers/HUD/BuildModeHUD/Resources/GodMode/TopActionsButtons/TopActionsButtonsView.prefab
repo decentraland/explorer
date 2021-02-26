@@ -764,6 +764,20 @@ MonoBehaviour:
   duplicateBtn: {fileID: 3820961471389997161}
   deleteBtn: {fileID: 3820961471485577506}
   logOutBtn: {fileID: 8929500230923893616}
+  toggleChangeCameraInputAction: {fileID: 11400000, guid: 02c21a2f1fb6f714f84c2fd94640f53a,
+    type: 2}
+  toggleTranslateInputAction: {fileID: 11400000, guid: c30e7470bcfa51844ab8120da4ae4faf,
+    type: 2}
+  toggleRotateInputAction: {fileID: 11400000, guid: 321cf4baeaa41d647a6198e45d74ee87,
+    type: 2}
+  toggleScaleInputAction: {fileID: 11400000, guid: 9e5ca5b6a25bef24eaa80d22ea3959ae,
+    type: 2}
+  toggleResetInputAction: {fileID: 11400000, guid: 9d995e577b758d248b97f78c9825d831,
+    type: 2}
+  toggleDuplicateInputAction: {fileID: 11400000, guid: 43948507e81566e499e81e633a1dcf23,
+    type: 2}
+  toggleDeleteInputAction: {fileID: 11400000, guid: 9ec10551302c6334da92572890605db3,
+    type: 2}
   extraActionsView: {fileID: 622442294154787895}
 --- !u!1 &3820961471198908670
 GameObject:
@@ -3070,7 +3084,7 @@ PrefabInstance:
     - target: {fileID: 1949570749023691527, guid: 5a94ae885ab81854b83aefeed1f35c79,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5a94ae885ab81854b83aefeed1f35c79, type: 3}

@@ -59,6 +59,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnLogOutClicked += LogOutClicked;
 
         topActionsButtonsView.ConfigureExtraActions(new ExtraActionsController());
+        extraActionsController.SetActive(false);
     }
 
     public void Dispose()

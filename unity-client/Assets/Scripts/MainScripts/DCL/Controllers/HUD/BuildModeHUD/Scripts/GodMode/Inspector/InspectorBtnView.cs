@@ -10,12 +10,15 @@ public class InspectorBtnView : MonoBehaviour
     public event System.Action OnHideTooltip;
 
     [SerializeField] internal Button mainButton;
-    [SerializeField] internal string tooltipText = "Open Entity List (Y)";
+    [SerializeField] internal string tooltipText = "Open Entity List (Q)";
     [SerializeField] internal EventTrigger inspectorButtonEventTrigger;
+    [SerializeField] internal InputAction_Trigger toggleOpenEntityListInputAction;
 
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
+        toggleOpenEntityListInputAction.OnTriggered += (action) => OnPointerClick();
+
         ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
         ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }

@@ -5,7 +5,10 @@ using System.Collections.Generic;
 
 public interface ISceneCatalogController
 {
+    event Action OnHideCatalogClicked;
     event Action<CatalogItem> OnCatalogItemSelected;
+    event Action OnResumeInput;
+    event Action OnStopInput;
 
     void Initialize(SceneCatalogView view, IQuickBarController quickBarController);
     void Dispose();
@@ -32,7 +35,10 @@ public interface ISceneCatalogController
 
 public class SceneCatalogController : ISceneCatalogController
 {
+    public event Action OnHideCatalogClicked;
     public event Action<CatalogItem> OnCatalogItemSelected;
+    public event Action OnResumeInput;
+    public event Action OnStopInput;
 
     private SceneCatalogView sceneCatalogView;
     private List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
@@ -50,8 +56,11 @@ public class SceneCatalogController : ISceneCatalogController
         this.quickBarController = quickBarController;
         favoritesController = new FavoritesController(sceneCatalogView.catalogGroupListView);
 
+        sceneCatalogView.OnHideCatalogClicked += HideCatalogClicked;
         sceneCatalogView.catalogAssetPackListView.OnCatalogPackClick += OnCatalogItemPackSelected;
         sceneCatalogView.catalogGroupListView.OnCatalogItemClicked += CatalogItemSelected;
+        sceneCatalogView.catalogGroupListView.OnResumeInput += ResumeInput;
+        sceneCatalogView.catalogGroupListView.OnStopInput += StopInput;
         sceneCatalogView.searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
         sceneCatalogView.categoryToggle.onValueChanged.AddListener(CategoryFilter);
         sceneCatalogView.favoritesToggle.onValueChanged.AddListener(FavoritesFilter);
@@ -63,9 +72,12 @@ public class SceneCatalogController : ISceneCatalogController
 
     public void Dispose()
     {
+        sceneCatalogView.OnHideCatalogClicked -= HideCatalogClicked;
         quickBarController.OnQuickBarShortcutSelected -= QuickBarInput;
         sceneCatalogView.catalogAssetPackListView.OnCatalogPackClick -= OnCatalogItemPackSelected;
         sceneCatalogView.catalogGroupListView.OnCatalogItemClicked -= CatalogItemSelected;
+        sceneCatalogView.catalogGroupListView.OnResumeInput -= ResumeInput;
+        sceneCatalogView.catalogGroupListView.OnStopInput -= StopInput;
         sceneCatalogView.searchInputField.onValueChanged.RemoveListener(OnSearchInputChanged);
         sceneCatalogView.categoryToggle.onValueChanged.RemoveListener(CategoryFilter);
         sceneCatalogView.favoritesToggle.onValueChanged.RemoveListener(FavoritesFilter);
@@ -178,6 +190,21 @@ public class SceneCatalogController : ISceneCatalogController
     public void CatalogItemSelected(CatalogItem catalogItem)
     {
         OnCatalogItemSelected?.Invoke(catalogItem);
+    }
+
+    public void ResumeInput()
+    {
+        OnResumeInput?.Invoke();
+    }
+
+    public void StopInput()
+    {
+        OnStopInput?.Invoke();
+    }
+
+    public void HideCatalogClicked()
+    {
+        OnHideCatalogClicked?.Invoke();
     }
 
     public void OnCatalogItemPackSelected(CatalogItemPack catalogItemPack)

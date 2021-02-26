@@ -63,8 +63,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 3627911379302986150}
-  tooltipText: Open Catalog (J)
+  tooltipText: Open Catalog (C)
   catalogButtonEventTrigger: {fileID: 8272876307093568983}
+  toggleCatalogInputAction: {fileID: 11400000, guid: 7a0d84998e5175746a922761f2a867fe,
+    type: 2}
 --- !u!114 &3627911379302986145
 MonoBehaviour:
   m_ObjectHideFlags: 0

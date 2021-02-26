@@ -10,14 +10,23 @@ public class CatalogBtnView : MonoBehaviour
     public event System.Action OnHideTooltip;
 
     [SerializeField] internal Button mainButton;
-    [SerializeField] internal string tooltipText = "Open Catalog (J)";
+    [SerializeField] internal string tooltipText = "Open Catalog (C)";
     [SerializeField] internal EventTrigger catalogButtonEventTrigger;
+    [SerializeField] internal InputAction_Trigger toggleCatalogInputAction;
 
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
+        toggleCatalogInputAction.OnTriggered += (action) => OnPointerClick();
+
         ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
         ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
+    }
+
+    private void OnDestroy()
+    {
+        mainButton.onClick.RemoveListener(OnPointerClick);
+        toggleCatalogInputAction.OnTriggered -= (action) => OnPointerClick();
     }
 
     private void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)

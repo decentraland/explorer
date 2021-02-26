@@ -295,8 +295,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainButton: {fileID: 4596999121916340282}
-  tooltipText: Open Entity List (Y)
+  tooltipText: Open Entity List (Q)
   inspectorButtonEventTrigger: {fileID: 5170231848033826819}
+  toggleOpenEntityListInputAction: {fileID: 11400000, guid: 8564ac18833cf9a4aa9290543b5698d3,
+    type: 2}
 --- !u!114 &4596999121916340285
 MonoBehaviour:
   m_ObjectHideFlags: 0

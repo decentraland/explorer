@@ -299,6 +299,8 @@ MonoBehaviour:
   rightDescTxt: {fileID: 1436151706876337121}
   limitUsageFillsImgs:
   - {fileID: 5614818989794907175}
+  toggleSceneInfoInputAction: {fileID: 11400000, guid: b01ba6523971e0149a23c36b50259cdd,
+    type: 2}
 --- !u!114 &4626944618038899896
 MonoBehaviour:
   m_ObjectHideFlags: 0

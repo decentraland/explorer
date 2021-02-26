@@ -18,17 +18,29 @@ public class SceneLimitsView : MonoBehaviour
     [SerializeField] internal Color highFillColor;
 
     [Header("Scene references")]
-
     [SerializeField] internal Image detailsToggleBtn;
     [SerializeField] internal GameObject sceneLimitsBodyGO;
     [SerializeField] internal TextMeshProUGUI titleTxt;
-    [SerializeField] internal TextMeshProUGUI leftDescTxt, rightDescTxt;
+    [SerializeField] internal TextMeshProUGUI leftDescTxt;
+    [SerializeField] internal TextMeshProUGUI rightDescTxt;
     [SerializeField] internal Image[] limitUsageFillsImgs;
+
+    [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
 
     internal bool isBodyActived => sceneLimitsBodyGO.activeSelf;
 
     private UnityAction updateInfoAction;
     private const int FRAMES_BETWEEN_UPDATES = 15;
+
+    private void Awake()
+    {
+        toggleSceneInfoInputAction.OnTriggered += (action) => ToggleSceneLimitsInfo();
+    }
+
+    private void OnDestroy()
+    {
+        toggleSceneInfoInputAction.OnTriggered -= (action) => ToggleSceneLimitsInfo();
+    }
 
     private void Update()
     {

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class SceneCatalogView : MonoBehaviour
 {
+    public event System.Action OnHideCatalogClicked;
     public event System.Action OnSceneCatalogBack;
 
     [Header("Prefab References")]
@@ -38,6 +39,16 @@ public class SceneCatalogView : MonoBehaviour
 
     private bool isCatalogExpanded = false;
 
+    private void Awake()
+    {
+        hideCatalogBtn.onClick.AddListener(OnHideCatalogClick);
+    }
+
+    private void OnDestroy()
+    {
+        hideCatalogBtn.onClick.RemoveListener(OnHideCatalogClick);
+    }
+
     // TODO (Santi): Called from imspector!
     public void ToggleCatalogExpanse()
     {
@@ -59,6 +70,11 @@ public class SceneCatalogView : MonoBehaviour
         }
 
         isCatalogExpanded = !isCatalogExpanded;
+    }
+
+    public void OnHideCatalogClick()
+    {
+        OnHideCatalogClicked?.Invoke();
     }
 
     // TODO (Santi): Called from imspector!

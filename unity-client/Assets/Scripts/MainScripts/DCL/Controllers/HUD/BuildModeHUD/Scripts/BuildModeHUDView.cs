@@ -1,61 +1,65 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BuildModeHUDView : MonoBehaviour
 {
-    public GameObject firstPersonCanvasGO, godModeCanvasGO;
+    [Header("Main Containers")]
+    [SerializeField] internal GameObject firstPersonCanvasGO;
+    [SerializeField] internal GameObject godModeCanvasGO;
 
+    [Header("Animator")]
     [SerializeField] internal ShowHideAnimator showHideAnimator;
-    [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
-    [SerializeField] internal InputAction_Trigger toggleControlsVisibilityInputAction;
-    [SerializeField] internal InputAction_Trigger toggleTranslateInputAction;
-    [SerializeField] internal InputAction_Trigger toggleRotateInputAction;
-    [SerializeField] internal InputAction_Trigger toggleScaleInputAction;
-    [SerializeField] internal InputAction_Trigger toggleDuplicateInputAction;
-    [SerializeField] internal InputAction_Trigger toggleDeleteInputAction;
-    [SerializeField] internal InputAction_Trigger toggleChangeCameraInputAction;
-    [SerializeField] internal InputAction_Trigger toggleResetInputAction;
-    [SerializeField] internal InputAction_Trigger toggleOpenEntityListInputAction;
-    [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
-    [SerializeField] internal InputAction_Trigger toggleCatalogInputAction;
 
     [Header("UI Modules")]
-    public TooltipView tooltipView;
+    [SerializeField] internal TooltipView tooltipView;
     private ITooltipController tooltipController;
-    public QuickBarView quickBarView;
+    [SerializeField] internal QuickBarView quickBarView;
     private IQuickBarController quickBarController;
-    public SceneCatalogView sceneCatalogView;
+    [SerializeField] internal SceneCatalogView sceneCatalogView;
     private ISceneCatalogController sceneCatalogController;
-    public EntityInformationView entityInformationView;
+    [SerializeField] internal EntityInformationView entityInformationView;
     private IEntityInformationController entityInformationController;
-    public FirstPersonModeView firstPersonModeView;
+    [SerializeField] internal FirstPersonModeView firstPersonModeView;
     private IFirstPersonModeController firstPersonModeController;
-    public ShortcutsView shortcutsView;
+    [SerializeField] internal ShortcutsView shortcutsView;
     private IShortcutsController shortcutsController;
-    public PublishPopupView publishPopupView;
+    [SerializeField] internal PublishPopupView publishPopupView;
     private IPublishPopupController publishPopupController;
-    public DragAndDropSceneObjectView dragAndDropSceneObjectView;
+    [SerializeField] internal DragAndDropSceneObjectView dragAndDropSceneObjectView;
     private IDragAndDropSceneObjectController dragAndDropSceneObjectController;
-    public PublishBtnView publishBtnView;
+    [SerializeField] internal PublishBtnView publishBtnView;
     private IPublishBtnController publishBtnController;
-    public InspectorBtnView inspectorBtnView;
+    [SerializeField] internal InspectorBtnView inspectorBtnView;
     private IInspectorBtnController inspectorBtnController;
-    public CatalogBtnView catalogBtnView;
+    [SerializeField] internal CatalogBtnView catalogBtnView;
     private ICatalogBtnController catalogBtnController;
-    public InspectorView inspectorView;
+    [SerializeField] internal InspectorView inspectorView;
     internal IInspectorController inspectorController;
-    public TopActionsButtonsView topActionsButtonsView;
+    [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
     private ITopActionsButtonsController topActionsButtonsController;
 
-    public event Action OnControlsVisibilityAction, OnChangeUIVisbilityAction, OnTranslateSelectionAction, OnRotateSelectionAction, OnScaleSelectionAction, OnResetSelectedAction, OnDuplicateSelectionAction, OnDeleteSelectionAction;
-    public event Action OnChangeModeAction,OnExtraBtnsClick,OnEntityListChangeVisibilityAction,OnSceneLimitInfoControllerChangeVisibilityAction, OnSceneCatalogControllerChangeVisibilityAction;
-    public event Action<bool> OnSceneLimitInfoChangeVisibility;
+    public event Action OnControlsVisibilityAction,
+                        OnChangeUIVisbilityAction,
+                        OnTranslateSelectionAction,
+                        OnRotateSelectionAction,
+                        OnScaleSelectionAction,
+                        OnResetSelectedAction,
+                        OnDuplicateSelectionAction,
+                        OnDeleteSelectionAction,
+                        OnChangeModeAction,
+                        OnExtraBtnsClick,
+                        OnEntityListChangeVisibilityAction,
+                        OnSceneLimitInfoControllerChangeVisibilityAction,
+                        OnSceneCatalogControllerChangeVisibilityAction,
+                        OnStopInput,
+                        OnResumeInput,
+                        OnTutorialAction,
+                        OnPublishAction,
+                        OnLogoutAction,
+                        OnCatalogItemDrop;
 
+    public event Action<bool> OnSceneLimitInfoChangeVisibility;
     public event Action<CatalogItem> OnCatalogItemSelected;
-    public event Action OnStopInput, OnResumeInput,OnTutorialAction,OnPublishAction;
-    public event Action OnLogoutAction;
-    public event Action OnCatalogItemDrop;
 
     public void Initialize(
         BuildModeHUDController buildModeHUDController,
@@ -81,7 +85,10 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.sceneCatalogController = sceneCatalogController;
         this.sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
+        this.sceneCatalogController.OnHideCatalogClicked += () => OnSceneCatalogControllerChangeVisibilityAction?.Invoke();
         this.sceneCatalogController.OnCatalogItemSelected += (x) => OnCatalogItemSelected?.Invoke(x);
+        this.sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
+        this.sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
 
         this.entityInformationController = entityInformationController;
         this.entityInformationController.Initialize(entityInformationView);
@@ -132,42 +139,8 @@ public class BuildModeHUDView : MonoBehaviour
         topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
     }
 
-    private void Awake()
-    {
-        toggleUIVisibilityInputAction.OnTriggered += OnUIVisiblityToggleActionTriggered;
-        toggleControlsVisibilityInputAction.OnTriggered += OnControlsToggleActionTriggered;
-        toggleChangeCameraInputAction.OnTriggered += OnChangeModeActionTriggered;
-        toggleTranslateInputAction.OnTriggered += OnTranslateActionTriggered;
-        toggleRotateInputAction.OnTriggered += OnRotateActionTriggered;
-        toggleScaleInputAction.OnTriggered += OnScaleActionTriggered;
-        toggleResetInputAction.OnTriggered += OnResetActionTriggered;
-        toggleDuplicateInputAction.OnTriggered += OnDuplicateActionTriggered;
-        toggleDeleteInputAction.OnTriggered += OnDeleteActionTriggered;
-        toggleOpenEntityListInputAction.OnTriggered += OnEntityListActionTriggered;
-        toggleSceneInfoInputAction.OnTriggered += OnSceneLimitInfoControllerChangeVisibilityTriggered;
-        toggleCatalogInputAction.OnTriggered += OnSceneCatalogControllerChangeVisibilityTriggered;
-        sceneCatalogView.hideCatalogBtn.onClick.AddListener(() => OnSceneCatalogControllerChangeVisibilityAction?.Invoke());
-        sceneCatalogView.catalogGroupListView.OnResumeInput += () => OnResumeInput?.Invoke();
-        sceneCatalogView.catalogGroupListView.OnStopInput += () => OnStopInput?.Invoke();
-    }
-
     private void OnDestroy()
     {
-        toggleUIVisibilityInputAction.OnTriggered -= OnUIVisiblityToggleActionTriggered;
-        toggleControlsVisibilityInputAction.OnTriggered -= OnControlsToggleActionTriggered;
-
-        toggleChangeCameraInputAction.OnTriggered -= OnChangeModeActionTriggered;
-        toggleTranslateInputAction.OnTriggered -= OnTranslateActionTriggered;
-        toggleRotateInputAction.OnTriggered -= OnRotateActionTriggered;
-        toggleScaleInputAction.OnTriggered -= OnScaleActionTriggered;
-        toggleResetInputAction.OnTriggered -= OnResetActionTriggered;
-        toggleDuplicateInputAction.OnTriggered -= OnDuplicateActionTriggered;
-        toggleDeleteInputAction.OnTriggered -= OnDeleteActionTriggered;
-
-        toggleOpenEntityListInputAction.OnTriggered -= OnEntityListActionTriggered;
-        toggleSceneInfoInputAction.OnTriggered -= OnSceneLimitInfoControllerChangeVisibilityTriggered;
-        toggleCatalogInputAction.OnTriggered -= OnSceneCatalogControllerChangeVisibilityTriggered;
-
         tooltipController.Dispose();
         quickBarController.Dispose();
         sceneCatalogController.Dispose();
@@ -266,67 +239,4 @@ public class BuildModeHUDView : MonoBehaviour
     {
         tooltipController.HideTooltip();
     }
-
-    #region Triggers
-
-    private void OnSceneCatalogControllerChangeVisibilityTriggered(DCLAction_Trigger action)
-    {
-        OnSceneCatalogControllerChangeVisibilityAction?.Invoke();
-    }
-
-    private void OnSceneLimitInfoControllerChangeVisibilityTriggered(DCLAction_Trigger action)
-    {
-        OnSceneLimitInfoControllerChangeVisibilityAction?.Invoke();
-    }
-
-    private void OnEntityListActionTriggered(DCLAction_Trigger action)
-    {
-        OnEntityListChangeVisibilityAction?.Invoke();
-    }
-    private void OnResetActionTriggered(DCLAction_Trigger action)
-    {
-        OnResetSelectedAction?.Invoke();
-    }
-
-    private void OnChangeModeActionTriggered(DCLAction_Trigger action)
-    {
-        OnChangeModeAction?.Invoke();
-    }
-
-    private void OnDeleteActionTriggered(DCLAction_Trigger action)
-    {
-        OnDeleteSelectionAction?.Invoke();
-    }
-
-    private void OnDuplicateActionTriggered(DCLAction_Trigger action)
-    {
-        OnDuplicateSelectionAction?.Invoke();
-    }
-
-    private void OnScaleActionTriggered(DCLAction_Trigger action)
-    {
-        OnScaleSelectionAction?.Invoke();
-    }
-
-    private void OnRotateActionTriggered(DCLAction_Trigger action)
-    {
-        OnRotateSelectionAction?.Invoke();
-    }
-
-    private void OnTranslateActionTriggered(DCLAction_Trigger action)
-    {
-        OnTranslateSelectionAction?.Invoke();
-    }
-
-    private void OnControlsToggleActionTriggered(DCLAction_Trigger action)
-    {
-        OnControlsVisibilityAction?.Invoke();
-    }
-
-    private void OnUIVisiblityToggleActionTriggered(DCLAction_Trigger action)
-    {
-        OnChangeUIVisbilityAction?.Invoke();
-    }
-
-    #endregion
 }
