@@ -51,14 +51,14 @@ namespace DCL.Components
 
         }
 
-        public PlaneShape(ParcelScene scene) : base(scene)
+        public PlaneShape(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
 
         public override int GetClassId()
         {
-            return (int)CLASS_ID.PLANE_SHAPE;
+            return (int) CLASS_ID.PLANE_SHAPE;
         }
 
         public override Mesh GenerateGeometry()

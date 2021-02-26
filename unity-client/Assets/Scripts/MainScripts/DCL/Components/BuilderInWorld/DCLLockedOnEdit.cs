@@ -35,14 +35,14 @@ public class DCLLockedOnEdit : BaseDisposable
         }
     }
 
-    public DCLLockedOnEdit(ParcelScene scene) : base(scene)
+    public DCLLockedOnEdit(IParcelScene scene) : base(scene)
     {
         model = new Model();
     }
 
     public override int GetClassId()
     {
-        return (int)CLASS_ID.LOCKED_ON_EDIT;
+        return (int) CLASS_ID.LOCKED_ON_EDIT;
     }
 
     public void SetIsLocked(bool value)

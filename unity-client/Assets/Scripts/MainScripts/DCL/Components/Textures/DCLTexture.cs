@@ -63,18 +63,18 @@ namespace DCL
             return (int) CLASS_ID.TEXTURE;
         }
 
-        public DCLTexture(DCL.Controllers.ParcelScene scene) : base(scene)
+        public DCLTexture(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
 
-        public static IEnumerator FetchFromComponent(ParcelScene scene, string componentId,
+        public static IEnumerator FetchFromComponent(IParcelScene scene, string componentId,
             System.Action<Texture2D> OnFinish)
         {
             yield return FetchTextureComponent(scene, componentId, (dclTexture) => { OnFinish?.Invoke(dclTexture.texture); });
         }
 
-        public static IEnumerator FetchTextureComponent(ParcelScene scene, string componentId,
+        public static IEnumerator FetchTextureComponent(IParcelScene scene, string componentId,
             System.Action<DCLTexture> OnFinish)
         {
             if (!scene.disposableComponents.ContainsKey(componentId))
@@ -102,7 +102,7 @@ namespace DCL
 
             //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
             //TODO: Analyze if we can catch this upstream and stop the IEnumerator
-            if(isDisposed)
+            if (isDisposed)
                 yield break;
 
             Model model = (Model) newModel;

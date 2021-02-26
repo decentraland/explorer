@@ -26,7 +26,7 @@ namespace DCL.Components
         private Model previousModel;
         private Model cachedModel;
 
-        public ParametrizedShape(ParcelScene scene) : base(scene)
+        public ParametrizedShape(IParcelScene scene) : base(scene)
         {
             OnAttach += OnShapeAttached;
             OnDetach += OnShapeDetached;

@@ -35,14 +35,14 @@ public class DCLVisibleOnEdit : BaseDisposable
         }
     }
 
-    public DCLVisibleOnEdit(ParcelScene scene) : base(scene)
+    public DCLVisibleOnEdit(IParcelScene scene) : base(scene)
     {
         model = new Model();
     }
 
     public override int GetClassId()
     {
-        return (int)CLASS_ID.VISIBLE_ON_EDIT;
+        return (int) CLASS_ID.VISIBLE_ON_EDIT;
     }
 
     public override IEnumerator ApplyChanges(BaseModel newModel)
@@ -50,6 +50,4 @@ public class DCLVisibleOnEdit : BaseDisposable
         RaiseOnAppliedChanges();
         return null;
     }
-
-
 }

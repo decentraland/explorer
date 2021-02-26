@@ -2,6 +2,7 @@ using DCL.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DCL.Controllers;
 using UnityEngine;
 
 namespace DCL.Components
@@ -10,6 +11,7 @@ namespace DCL.Components
     {
         public virtual string componentName => GetType().Name;
         public string id;
+        public IParcelScene scene { get; protected set; }
 
         public abstract int GetClassId();
 
@@ -22,7 +24,6 @@ namespace DCL.Components
         public event System.Action<DecentralandEntity> OnDetach;
         public event Action<BaseDisposable> OnAppliedChanges;
 
-        public DCL.Controllers.ParcelScene scene { get; }
         public HashSet<DecentralandEntity> attachedEntities = new HashSet<DecentralandEntity>();
 
         protected BaseModel model;
@@ -37,7 +38,7 @@ namespace DCL.Components
             SetModel(model);
         }
 
-        public BaseDisposable(DCL.Controllers.ParcelScene scene)
+        public BaseDisposable(IParcelScene scene)
         {
             this.scene = scene;
             updateHandler = CreateUpdateHandler();
@@ -104,11 +105,6 @@ namespace DCL.Components
         public virtual BaseModel GetModel() => model;
 
         public abstract IEnumerator ApplyChanges(BaseModel model);
-
-        public MonoBehaviour GetCoroutineOwner()
-        {
-            return scene;
-        }
 
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {

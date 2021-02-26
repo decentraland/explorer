@@ -51,7 +51,7 @@ namespace DCL.Components
             }
         }
 
-        public BaseShape(ParcelScene scene) : base(scene)
+        public BaseShape(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }

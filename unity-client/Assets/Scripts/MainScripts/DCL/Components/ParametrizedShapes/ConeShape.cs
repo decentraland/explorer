@@ -60,15 +60,15 @@ namespace DCL.Components
                 }
             }
         }
-
-        public ConeShape(ParcelScene scene) : base(scene)
+        
+        public ConeShape(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
 
         public override int GetClassId()
         {
-            return (int)CLASS_ID.CONE_SHAPE;
+            return (int) CLASS_ID.CONE_SHAPE;
         }
 
         public override Mesh GenerateGeometry()

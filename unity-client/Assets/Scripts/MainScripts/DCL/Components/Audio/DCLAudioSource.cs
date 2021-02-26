@@ -110,8 +110,9 @@ namespace DCL.Components
                 Debug.LogWarning("AudioSource is null!.");
                 return;
             }
-
+            
             Model model = (Model) this.model;
+            audioSource.volume = ((scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) || (scene is GlobalScene globalScene && globalScene.isPortableExperience)) ? model.volume : 0f;
             audioSource.volume = (scene.sceneData.id == CommonScriptableObjects.sceneID.Get()) ? model.volume : 0f;
             audioSource.loop = model.loop;
             audioSource.pitch = model.pitch;
@@ -155,7 +156,12 @@ namespace DCL.Components
             if (audioSource != null)
             {
                 Model model = (Model)this.model;
-                audioSource.volume = (scene.sceneData.id == currentSceneId) ? model.volume : 0f;
+                float volume = 0;
+                if ((scene.sceneData.id == currentSceneId) || (scene is GlobalScene globalScene && globalScene.isPortableExperience))
+                {
+                    volume = model.volume;
+                }
+                audioSource.volume = volume;
             }
         }
 

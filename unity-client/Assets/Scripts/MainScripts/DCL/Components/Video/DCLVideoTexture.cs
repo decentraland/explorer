@@ -75,7 +75,7 @@ namespace DCL.Components
 
         internal Dictionary<string, MaterialInfo> attachedMaterials = new Dictionary<string, MaterialInfo>();
 
-        public DCLVideoTexture(ParcelScene scene) : base(scene)
+        public DCLVideoTexture(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
@@ -86,7 +86,7 @@ namespace DCL.Components
 
             //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
             //TODO: Analyze if we can catch this upstream and stop the IEnumerator
-            if(isDisposed)
+            if (isDisposed)
                 yield break;
 
             var model = (Model) newModel;
@@ -109,6 +109,7 @@ namespace DCL.Components
             if (texturePlayer == null)
             {
                 DCLVideoClip dclVideoClip = scene.GetSharedComponent(model.videoClipId) as DCLVideoClip;
+
                 if (dclVideoClip == null)
                 {
                     Debug.LogError("Wrong video clip type when playing VideoTexture!!");
@@ -281,7 +282,7 @@ namespace DCL.Components
             if (scene == null) return false;
             if (string.IsNullOrEmpty(currentSceneId)) return false;
 
-            return scene.sceneData.id == currentSceneId;
+            return (scene.sceneData.id == currentSceneId) || (scene is GlobalScene globalScene && globalScene.isPortableExperience);
         }
 
         private void OnPlayerCoordsChanged(Vector2Int coords, Vector2Int prevCoords)

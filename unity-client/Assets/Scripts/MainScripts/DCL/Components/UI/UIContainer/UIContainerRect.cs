@@ -71,14 +71,14 @@ namespace DCL.Components
 
         public override string referencesContainerPrefabName => "UIContainerRect";
 
-        public UIContainerRect(ParcelScene scene) : base(scene)
+        public UIContainerRect(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
 
         public override int GetClassId()
         {
-            return (int)CLASS_ID.UI_CONTAINER_RECT;
+            return (int) CLASS_ID.UI_CONTAINER_RECT;
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)

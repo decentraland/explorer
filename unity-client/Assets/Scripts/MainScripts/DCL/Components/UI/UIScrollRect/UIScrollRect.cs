@@ -94,7 +94,7 @@ namespace DCL.Components
 
         public override string referencesContainerPrefabName => "UIScrollRect";
 
-        public UIScrollRect(ParcelScene scene) : base(scene)
+        public UIScrollRect(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }

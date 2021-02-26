@@ -15,7 +15,8 @@ namespace DCL.Components
         {
             public bool billboard;
 
-            [Header("Font Properties")] public string value = "";
+            [Header("Font Properties")]
+            public string value = "";
 
             public bool visible = true;
 
@@ -26,7 +27,8 @@ namespace DCL.Components
             public string fontWeight = "normal";
             public string font;
 
-            [Header("Text box properties")] public string hTextAlign = "bottom";
+            [Header("Text box properties")]
+            public string hTextAlign = "bottom";
 
             public string vTextAlign = "left";
             public float width = 1f;
@@ -41,13 +43,15 @@ namespace DCL.Components
             public int lineCount = 0;
             public bool textWrapping = false;
 
-            [Header("Text shadow properties")] public float shadowBlur = 0f;
+            [Header("Text shadow properties")]
+            public float shadowBlur = 0f;
 
             public float shadowOffsetX = 0f;
             public float shadowOffsetY = 0f;
             public Color shadowColor = new Color(1, 1, 1);
 
-            [Header("Text outline properties")] public float outlineWidth = 0f;
+            [Header("Text outline properties")]
+            public float outlineWidth = 0f;
 
             public Color outlineColor = Color.white;
 
@@ -157,7 +161,7 @@ namespace DCL.Components
             yield return ApplyModelChanges(scene, text, model);
         }
 
-        public static IEnumerator ApplyModelChanges(ParcelScene scene, TMP_Text text, Model model)
+        public static IEnumerator ApplyModelChanges(IParcelScene scene, TMP_Text text, Model model)
         {
             if (!string.IsNullOrEmpty(model.font))
             {

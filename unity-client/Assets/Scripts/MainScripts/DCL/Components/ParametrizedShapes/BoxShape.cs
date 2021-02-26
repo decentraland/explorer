@@ -16,7 +16,7 @@ namespace DCL.Components
             }
         }
 
-        public BoxShape(ParcelScene scene) : base(scene)
+        public BoxShape(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
@@ -26,7 +26,7 @@ namespace DCL.Components
 
         public override int GetClassId()
         {
-            return (int)CLASS_ID.BOX_SHAPE;
+            return (int) CLASS_ID.BOX_SHAPE;
         }
 
         public override Mesh GenerateGeometry()

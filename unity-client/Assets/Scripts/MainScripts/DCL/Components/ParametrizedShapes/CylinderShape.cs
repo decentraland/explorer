@@ -61,7 +61,7 @@ namespace DCL.Components
             }
         }
 
-        public CylinderShape(ParcelScene scene) : base(scene)
+        public CylinderShape(IParcelScene scene) : base(scene)
         {
             model = new Model();
         }
@@ -79,7 +79,7 @@ namespace DCL.Components
 
         protected override bool ShouldGenerateNewMesh(BaseShape.Model newModel)
         {
-            if(currentMesh == null) return true;
+            if (currentMesh == null) return true;
 
             Model newCylinderModel = newModel as Model;
             var model = (Model)this.model;

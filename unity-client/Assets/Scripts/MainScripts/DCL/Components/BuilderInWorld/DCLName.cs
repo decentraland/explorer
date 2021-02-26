@@ -41,7 +41,7 @@ public class DCLName : BaseDisposable
         }
     }
 
-    public DCLName(ParcelScene scene) : base(scene)
+    public DCLName(IParcelScene scene) : base(scene)
     {
         model = new Model();
     }
