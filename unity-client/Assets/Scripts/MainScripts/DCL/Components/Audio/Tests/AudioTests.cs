@@ -263,6 +263,32 @@ namespace Tests
             Assert.AreEqual(unityAudioSource.volume, dclAudioSource.GetVolume());
         }
 
+        [UnityTest]
+        public IEnumerator AudioStreamComponentCreation()
+        {
+            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            DCLAudioStream.Model model = new DCLAudioStream.Model()
+            {
+                url = "https://audio.dcl.guru/radio/8110/radio.mp3",
+                playing = false,
+                volume = 1f
+            };
+            DCLAudioStream component = TestHelpers.EntityComponentCreate<DCLAudioStream, DCLAudioStream.Model>(scene, entity,model );
+            
+            yield return component.routine;
+            Assert.IsFalse(component.GetModel().playing);
+
+            model.playing = true;
+            component.SetModel(model);
+            yield return component.routine;
+            Assert.IsTrue(component.GetModel().playing);
+            
+            model.playing = false;
+            component.SetModel(model);
+            yield return component.routine; 
+            Assert.IsFalse(component.GetModel().playing);
+        }
+
         [Test]
         public void AudioClip_OnReadyBeforeLoading()
         {

@@ -11,7 +11,7 @@ namespace DCL.Components
     {
         public class Model : BaseModel
         {
-            public Dictionary<object, object> values;
+            public Dictionary<object, object> values = new Dictionary<object, object>();
 
             public override bool Equals(object obj)
             {
@@ -28,6 +28,11 @@ namespace DCL.Components
             {
                 return 1649527923 + EqualityComparer<Dictionary<object, object>>.Default.GetHashCode(values);
             }
+        }
+
+        private void Awake()
+        {
+            model = new Model();
         }
 
         public override IEnumerator ApplyChanges(BaseModel newModel)

@@ -37,6 +37,7 @@ namespace DCL
 
         private void Awake()
         {
+            model = new AvatarModel();
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DCL.Controllers;
@@ -38,11 +39,15 @@ namespace DCL.Components
             }
         }
 
+        private void Awake() { model = new Model(); }
+
         private bool isPlaying = false;
         private float settingsVolume = 0;
         private bool isDestroyed = false;
         private Model prevModel = new Model();
 
+        new public Model GetModel() { return (Model) model;}
+        
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
