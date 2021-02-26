@@ -10,6 +10,14 @@ namespace DCL.Components
         [System.Serializable]
         public new class Model : LoadableShape.Model
         {
+            public Color color = new Color(0.6404918f, 0.611472f, 0.8584906f); // "light purple" default, same as in explorer
+            public int style = 0;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+            
             protected bool Equals(Model other)
             {
                 return color.Equals(other.color) && style == other.style &&
@@ -37,14 +45,6 @@ namespace DCL.Components
                 {
                     return (color.GetHashCode() * 397) ^ style;
                 }
-            }
-
-            public Color color = new Color(0.6404918f, 0.611472f, 0.8584906f); // "light purple" default, same as in explorer
-            public int style = 0;
-
-            public override BaseModel GetDataFromJSON(string json)
-            {
-                return Utils.SafeFromJson<Model>(json);
             }
         }
 

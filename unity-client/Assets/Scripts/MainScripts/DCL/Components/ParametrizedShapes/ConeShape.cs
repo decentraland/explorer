@@ -80,17 +80,18 @@ namespace DCL.Components
 
         protected override bool ShouldGenerateNewMesh(BaseShape.Model newModel)
         {
-            if (currentMesh == null) return true;
+            if (currentMesh == null)
+                return true;
 
             Model newConeModel = newModel as Model;
             var model = (Model)this.model;
             return newConeModel.radius != model.radius
-                    || newConeModel.radiusTop != model.radiusTop
-                    || newConeModel.radiusBottom != model.radiusBottom
-                    || newConeModel.segmentsHeight != model.segmentsHeight
-                    || newConeModel.segmentsRadial != model.segmentsRadial
-                    || newConeModel.openEnded != model.openEnded
-                    || newConeModel.arc != model.arc;
+                   || newConeModel.radiusTop != model.radiusTop
+                   || newConeModel.radiusBottom != model.radiusBottom
+                   || newConeModel.segmentsHeight != model.segmentsHeight
+                   || newConeModel.segmentsRadial != model.segmentsRadial
+                   || newConeModel.openEnded != model.openEnded
+                   || newConeModel.arc != model.arc;
         }
     }
 }
