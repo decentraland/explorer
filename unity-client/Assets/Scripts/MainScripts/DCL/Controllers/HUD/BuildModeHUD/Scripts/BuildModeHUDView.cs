@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class BuildModeHUDView : MonoBehaviour
@@ -34,35 +33,13 @@ public class BuildModeHUDView : MonoBehaviour
     [SerializeField] internal CatalogBtnView catalogBtnView;
     private ICatalogBtnController catalogBtnController;
     [SerializeField] internal InspectorView inspectorView;
-    internal IInspectorController inspectorController;
+    private IInspectorController inspectorController;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
     private ITopActionsButtonsController topActionsButtonsController;
 
-    public event Action OnControlsVisibilityAction,
-                        OnChangeUIVisbilityAction,
-                        OnTranslateSelectionAction,
-                        OnRotateSelectionAction,
-                        OnScaleSelectionAction,
-                        OnResetSelectedAction,
-                        OnDuplicateSelectionAction,
-                        OnDeleteSelectionAction,
-                        OnChangeModeAction,
-                        OnExtraBtnsClick,
-                        OnEntityListChangeVisibilityAction,
-                        OnSceneLimitInfoControllerChangeVisibilityAction,
-                        OnSceneCatalogControllerChangeVisibilityAction,
-                        OnStopInput,
-                        OnResumeInput,
-                        OnTutorialAction,
-                        OnPublishAction,
-                        OnLogoutAction,
-                        OnCatalogItemDrop;
-
-    public event Action<bool> OnSceneLimitInfoChangeVisibility;
-    public event Action<CatalogItem> OnCatalogItemSelected;
+    internal bool isShowHideAnimatorVisible => showHideAnimator.isVisible;
 
     public void Initialize(
-        BuildModeHUDController buildModeHUDController,
         ITooltipController tooltipController,
         ISceneCatalogController sceneCatalogController,
         IQuickBarController quickBarController,
@@ -85,58 +62,36 @@ public class BuildModeHUDView : MonoBehaviour
 
         this.sceneCatalogController = sceneCatalogController;
         this.sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
-        this.sceneCatalogController.OnHideCatalogClicked += () => OnSceneCatalogControllerChangeVisibilityAction?.Invoke();
-        this.sceneCatalogController.OnCatalogItemSelected += (x) => OnCatalogItemSelected?.Invoke(x);
-        this.sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
-        this.sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
 
         this.entityInformationController = entityInformationController;
         this.entityInformationController.Initialize(entityInformationView);
 
         this.firstPersonModeController = firstPersonModeController;
         this.firstPersonModeController.Initialize(firstPersonModeView, tooltipController);
-        firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
 
         this.shortcutsController = shortcutsController;
         this.shortcutsController.Initialize(shortcutsView);
-        shortcutsController.OnCloseClick += () => OnControlsVisibilityAction?.Invoke();
 
         this.publishPopupController = publishPopupController;
         this.publishPopupController.Initialize(publishPopupView);
 
         this.dragAndDropSceneObjectController = dragAndDropSceneObjectController;
-        this.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView, buildModeHUDController);
+        this.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView);
 
         this.publishBtnController = publishBtnController;
         this.publishBtnController.Initialize(publishBtnView, tooltipController);
-        publishBtnController.OnClick += () => OnPublishAction?.Invoke();
 
         this.inspectorBtnController = inspectorBtnController;
         this.inspectorBtnController.Initialize(inspectorBtnView, tooltipController);
-        inspectorBtnController.OnClick += () => OnEntityListChangeVisibilityAction?.Invoke();
 
         this.catalogBtnController = catalogBtnController;
         this.catalogBtnController.Initialize(catalogBtnView, tooltipController);
-        catalogBtnController.OnClick += () => OnSceneCatalogControllerChangeVisibilityAction?.Invoke();
 
         this.inspectorController = inspectorController;
         this.inspectorController.Initialize(inspectorView);
-        inspectorController.SetCloseButtonsAction(() => OnEntityListChangeVisibilityAction?.Invoke());
 
         this.topActionsButtonsController = topActionsButtonsController;
         this.topActionsButtonsController.Initialize(topActionsButtonsView);
-        topActionsButtonsController.OnChangeModeClick += () => OnChangeModeAction?.Invoke();
-        topActionsButtonsController.OnExtraClick += () => OnExtraBtnsClick?.Invoke();
-        topActionsButtonsController.OnTranslateClick += () => OnTranslateSelectionAction?.Invoke();
-        topActionsButtonsController.OnRotateClick += () => OnRotateSelectionAction?.Invoke();
-        topActionsButtonsController.OnScaleClick += () => OnScaleSelectionAction?.Invoke();
-        topActionsButtonsController.OnResetClick += () => OnResetSelectedAction?.Invoke();
-        topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectionAction?.Invoke();
-        topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectionAction?.Invoke();
-        topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
-        topActionsButtonsController.extraActionsController.OnControlsClick += () => OnControlsVisibilityAction?.Invoke();
-        topActionsButtonsController.extraActionsController.OnHideUIClick += () => OnChangeUIVisbilityAction?.Invoke();
-        topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
     }
 
     private void OnDestroy()
@@ -181,22 +136,12 @@ public class BuildModeHUDView : MonoBehaviour
         sceneCatalogController.RefreshCatalog();
     }
 
-    public void SceneObjectDroppedInView()
-    {
-        OnCatalogItemDrop?.Invoke();
-    }
-
     public void SetVisibilityOfCatalog(bool isVisible)
     {
         if (isVisible)
             sceneCatalogController.OpenCatalog();
         else
             sceneCatalogController.CloseCatalog();
-    }
-
-    public void ChangeVisibilityOfSceneLimit(bool shouldBeVisible)
-    {
-        OnSceneLimitInfoChangeVisibility?.Invoke(shouldBeVisible);
     }
 
     public void SetVisibilityOfSceneInfo(bool isVisible)
@@ -238,5 +183,18 @@ public class BuildModeHUDView : MonoBehaviour
     public void HideToolTip()
     {
         tooltipController.HideTooltip();
+    }
+
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
+
+    public void AnimatorShow(bool isVisible)
+    {
+        if (isVisible)
+            showHideAnimator.Show();
+        else
+            showHideAnimator.Hide();
     }
 }

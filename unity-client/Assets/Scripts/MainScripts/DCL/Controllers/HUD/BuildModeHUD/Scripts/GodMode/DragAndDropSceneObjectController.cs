@@ -1,18 +1,20 @@
 public interface IDragAndDropSceneObjectController
 {
-    void Initialize(DragAndDropSceneObjectView dragAndDropSceneObjectView, BuildModeHUDController buildModeHUDController);
+    event System.Action OnDrop;
+
+    void Initialize(DragAndDropSceneObjectView dragAndDropSceneObjectView);
     void Dispose();
 }
 
 public class DragAndDropSceneObjectController : IDragAndDropSceneObjectController
 {
-    private DragAndDropSceneObjectView dragAndDropSceneObjectView;
-    private BuildModeHUDController buildModeHUDController;
+    public event System.Action OnDrop;
 
-    public void Initialize(DragAndDropSceneObjectView dragAndDropSceneObjectView, BuildModeHUDController buildModeHUDController)
+    private DragAndDropSceneObjectView dragAndDropSceneObjectView;
+
+    public void Initialize(DragAndDropSceneObjectView dragAndDropSceneObjectView)
     {
         this.dragAndDropSceneObjectView = dragAndDropSceneObjectView;
-        this.buildModeHUDController = buildModeHUDController;
 
         dragAndDropSceneObjectView.OnDrop += Drop;
     }
@@ -24,6 +26,6 @@ public class DragAndDropSceneObjectController : IDragAndDropSceneObjectControlle
 
     private void Drop()
     {
-        buildModeHUDController.SceneObjectDroppedInView();
+        OnDrop?.Invoke();
     }
 }

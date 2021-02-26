@@ -28,86 +28,164 @@ public class BuildModeHUDController : IHUD
     public event Action<Vector3> OnSelectedObjectPositionChange;
     public event Action<Vector3> OnSelectedObjectRotationChange;
     public event Action<Vector3> OnSelectedObjectScaleChange;
-    
-    //Note(Adrian): This is used right now for tutorial purposes
-    public event Action OnCatalogOpen;
+    public event Action OnCatalogOpen; // Note(Adrian): This is used right now for tutorial purposes
 
-    internal BuildModeHUDView view;
+    private BuildModeHUDView view;
 
-    CatalogItemDropController catalogItemDropController;
+    private bool areExtraButtonsVisible = false,
+                 isControlsVisible = false, 
+                 isEntityListVisible = false, 
+                 isSceneLimitInfoVisibile = false,
+                 isCatalogOpen = false;
 
-    bool areExtraButtonsVisible = false,isControlsVisible = false, isEntityListVisible = false, isSceneLimitInfoVisibile = false,isCatalogOpen = false;
-
+    private TooltipController tooltipController;
     private SceneCatalogController sceneCatalogController;
+    private QuickBarController quickBarController;
     private EntityInformationController entityInformationController;
+    private FirstPersonModeController firstPersonModeController;
+    private ShortcutsController shortcutsController;
+    private PublishPopupController publishPopupController;
+    private DragAndDropSceneObjectController dragAndDropSceneObjectController;
+    private PublishBtnController publishBtnController;
+    private InspectorBtnController inspectorBtnController;
+    private CatalogBtnController catalogBtnController;
     private InspectorController inspectorController;
+    private TopActionsButtonsController topActionsButtonsController;
+    private CatalogItemDropController catalogItemDropController;
 
     public BuildModeHUDController()
     {
-        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("BuildModeHUD")).GetComponent<BuildModeHUDView>();
+        CreateBuildModeControllers();
+        CreateParentView();
+        ConfigureSceneCatalogController();
+        ConfigureEntityInformationController();
+        ConfigureFirstPersonModeController();
+        ConfigureShortcutsController();
+        ConfigureDragAndDropSceneObjectController();
+        ConfigurePublishBtnController();
+        ConfigureInspectorBtnController();
+        ConfigureCatalogBtnController();
+        ConfigureInspectorController();
+        ConfigureTopActionsButtonsController();
+        ConfigureCatalogItemDropController();
+    }
 
+    internal void CreateBuildModeControllers()
+    {
+        tooltipController = new TooltipController();
+        sceneCatalogController = new SceneCatalogController();
+        quickBarController = new QuickBarController();
+        entityInformationController = new EntityInformationController();
+        firstPersonModeController = new FirstPersonModeController();
+        shortcutsController = new ShortcutsController();
+        publishPopupController = new PublishPopupController();
+        dragAndDropSceneObjectController = new DragAndDropSceneObjectController();
+        publishBtnController = new PublishBtnController();
+        inspectorBtnController = new InspectorBtnController();
+        catalogBtnController = new CatalogBtnController();
+        inspectorController = new InspectorController();
+        topActionsButtonsController = new TopActionsButtonsController();
+        catalogItemDropController = new CatalogItemDropController();
+    }
+
+    internal void CreateParentView()
+    {
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("BuildModeHUD")).GetComponent<BuildModeHUDView>();
         view.name = "_BuildModeHUD";
         view.gameObject.SetActive(false);
         view.Initialize(
-            this,
-            new TooltipController(),
-            sceneCatalogController = new SceneCatalogController(),
-            new QuickBarController(),
-            entityInformationController = new EntityInformationController(),
-            new FirstPersonModeController(),
-            new ShortcutsController(),
-            new PublishPopupController(),
-            new DragAndDropSceneObjectController(),
-            new PublishBtnController(),
-            new InspectorBtnController(),
-            new CatalogBtnController(),
-            inspectorController = new InspectorController(),
-            new TopActionsButtonsController());
+            tooltipController,
+            sceneCatalogController,
+            quickBarController,
+            entityInformationController,
+            firstPersonModeController,
+            shortcutsController,
+            publishPopupController,
+            dragAndDropSceneObjectController,
+            publishBtnController,
+            inspectorBtnController,
+            catalogBtnController,
+            inspectorController,
+            topActionsButtonsController);
+    }
 
-        catalogItemDropController = new CatalogItemDropController();
+    internal void ConfigureSceneCatalogController()
+    {
+        sceneCatalogController.OnHideCatalogClicked += ChangeVisibilityOfCatalog;
+        sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
+        sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
+        sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
+    }
 
+    internal void ConfigureEntityInformationController()
+    {
         entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
         entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
         entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
         entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
+    }
 
-        catalogItemDropController.catalogGroupListView = view.sceneCatalogView.catalogGroupListView;
+    internal void ConfigureFirstPersonModeController()
+    {
+        firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
+    }
 
+    internal void ConfigureShortcutsController()
+    {
+        shortcutsController.OnCloseClick += ChangeVisibilityOfControls;
+    }
+
+    internal void ConfigureDragAndDropSceneObjectController()
+    {
+        dragAndDropSceneObjectController.OnDrop += () => SceneObjectDroppedInView();
+    }
+
+    internal void ConfigurePublishBtnController()
+    {
+        publishBtnController.OnClick += () => OnPublishAction?.Invoke();
+    }
+
+    internal void ConfigureInspectorBtnController()
+    {
+        inspectorBtnController.OnClick += () => ChangeVisibilityOfEntityList();
+    }
+
+    internal void ConfigureCatalogBtnController()
+    {
+        catalogBtnController.OnClick += ChangeVisibilityOfCatalog;
+    }
+
+    internal void ConfigureInspectorController()
+    {
         inspectorController.OnEntityClick += (x) => OnEntityClick(x);
         inspectorController.OnEntityDelete += (x) => OnEntityDelete(x);
         inspectorController.OnEntityLock += (x) => OnEntityLock(x);
         inspectorController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
         inspectorController.OnEntityRename += (entity, newName) => OnEntityRename(entity, newName);
+        inspectorController.SetCloseButtonsAction(ChangeVisibilityOfEntityList);
+    }
 
-        inspectorController.CloseList();
+    internal void ConfigureTopActionsButtonsController()
+    {
+        topActionsButtonsController.OnChangeModeClick += () => OnChangeModeAction?.Invoke();
+        topActionsButtonsController.OnExtraClick += ChangeVisibilityOfExtraBtns;
+        topActionsButtonsController.OnTranslateClick += () => OnTranslateSelectedAction?.Invoke();
+        topActionsButtonsController.OnRotateClick += () => OnRotateSelectedAction?.Invoke();
+        topActionsButtonsController.OnScaleClick += () => OnScaleSelectedAction?.Invoke();
+        topActionsButtonsController.OnResetClick += () => OnResetAction?.Invoke();
+        topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectedAction?.Invoke();
+        topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectedAction?.Invoke();
+        topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
+        topActionsButtonsController.extraActionsController.OnControlsClick += ChangeVisibilityOfControls;
+        topActionsButtonsController.extraActionsController.OnHideUIClick += ChangeVisibilityOfUI;
+        topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
+    }
 
-        view.OnCatalogItemDrop += () => SceneObjectDroppedInView();
-        view.OnChangeModeAction += () => OnChangeModeAction?.Invoke();
-        view.OnExtraBtnsClick += ChangeVisibilityOfExtraBtns;
-        view.OnControlsVisibilityAction += ChangeVisibilityOfControls;
-        view.OnChangeUIVisbilityAction += ChangeVisibilityOfUI;
-        view.OnSceneLimitInfoChangeVisibility += ChangeVisibilityOfSceneInfo;
-        view.OnSceneLimitInfoControllerChangeVisibilityAction += ChangeVisibilityOfSceneInfo;
-        view.OnSceneCatalogControllerChangeVisibilityAction += ChangeVisibilityOfCatalog;
-
-        view.OnTranslateSelectionAction += () => OnTranslateSelectedAction?.Invoke();
-        view.OnRotateSelectionAction += () => OnRotateSelectedAction?.Invoke();
-        view.OnScaleSelectionAction += () => OnScaleSelectedAction?.Invoke();
-        view.OnResetSelectedAction += () => OnResetAction?.Invoke();
-        view.OnDuplicateSelectionAction += () => OnDuplicateSelectedAction?.Invoke();
-        view.OnDeleteSelectionAction += () => OnDeleteSelectedAction?.Invoke();
-
+    internal void ConfigureCatalogItemDropController()
+    {
+        catalogItemDropController.catalogGroupListView = view.sceneCatalogView.catalogGroupListView;
         catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
-        view.OnCatalogItemSelected += CatalogItemSelected;
-        view.OnStopInput += () => OnStopInput?.Invoke();
-        view.OnResumeInput += () => OnResumeInput?.Invoke();
-
-        view.OnEntityListChangeVisibilityAction += () => ChangeVisibilityOfEntityList();
-
-        view.OnTutorialAction += () => OnTutorialAction?.Invoke();
-        view.OnPublishAction += () => OnPublishAction?.Invoke();
-        view.OnLogoutAction += () => OnLogoutAction?.Invoke();
     }
 
     public void PublishStart()
@@ -122,7 +200,7 @@ public class BuildModeHUDController : IHUD
 
     public void SetParcelScene(ParcelScene parcelScene)
     {
-        view.inspectorController.sceneLimitsController.SetParcelScene(parcelScene);
+        inspectorController.sceneLimitsController.SetParcelScene(parcelScene);
     }
 
     public void SetPublishBtnAvailability(bool isAvailable)
@@ -175,7 +253,7 @@ public class BuildModeHUDController : IHUD
 
     public void UpdateSceneLimitInfo()
     {
-        view.inspectorController.sceneLimitsController.UpdateInfo();
+        inspectorController.sceneLimitsController.UpdateInfo();
     }
 
     public void ChangeVisibilityOfSceneInfo(bool shouldBeVisibile)
@@ -272,14 +350,13 @@ public class BuildModeHUDController : IHUD
 
         if (IsVisible() && !visible)
         {
-
-            view.showHideAnimator.Hide();
+            view.AnimatorShow(false);
             AudioScriptableObjects.fadeOut.Play(true);
         }
         else if (!IsVisible() && visible)
         {
-            view.gameObject.SetActive(true);
-            view.showHideAnimator.Show();
+            view.SetActive(true);
+            view.AnimatorShow(true);
             AudioScriptableObjects.fadeIn.Play(true);
         }
     }
@@ -302,7 +379,7 @@ public class BuildModeHUDController : IHUD
         if (!view)
             return false;
 
-        return view.showHideAnimator.isVisible;
+        return view.isShowHideAnimatorVisible;
     }
 
     public void SceneObjectDroppedInView()

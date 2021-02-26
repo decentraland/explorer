@@ -51,6 +51,7 @@ public class InspectorController : IInspectorController
         inspectorView.OnEntityRename += EntityRename;
 
         inspectorView.ConfigureSceneLimits(new SceneLimitsController());
+        CloseList();
     }
 
     public void Dispose()
