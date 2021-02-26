@@ -86,6 +86,8 @@ namespace DCL.ABConverter
             {
                 OnFinish += CleanAndExit;
 
+                DataStore.i.ABConversorRunning = true;
+
                 startTime = Time.realtimeSinceStartup;
 
                 log.Info($"Conversion start... free space in disk: {PathUtils.GetFreeSpace()}");
@@ -108,9 +110,9 @@ namespace DCL.ABConverter
 
                         env.assetDatabase.Refresh();
 
-                        if (assetsAlreadyDumped && DataStore.ABConversorGLTFMissingDependencies.Count > 0)
+                        if (assetsAlreadyDumped && DataStore.i.ABConversorGLTFMissingDependencies.Count > 0)
                         {
-                            Debug.Log("Missing dependencies detected: " + DataStore.ABConversorGLTFMissingDependencies.Count);
+                            Debug.Log("Missing dependencies detected: " + DataStore.i.ABConversorGLTFMissingDependencies.Count);
 
                             if (string.IsNullOrEmpty(sceneCid))
                             {
@@ -119,7 +121,7 @@ namespace DCL.ABConverter
                                 return;
                             }
 
-                            foreach (string missingDep in DataStore.ABConversorGLTFMissingDependencies)
+                            foreach (string missingDep in DataStore.i.ABConversorGLTFMissingDependencies)
                             {
                                 Debug.Log($"Adding missing dependency {missingDep} to rawContents...");
 
@@ -128,18 +130,19 @@ namespace DCL.ABConverter
 
                                 // 2. Add the new files to rawContents
                                 var listContents = rawContents.ToList();
-                                // listContents.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file == missingDep).ToArray());
+
+                                // TODO: full path in content server contains relative paths like 'models/texture.png' but inside GLTFSceneImporter we just read 'texture.png'.
+                                // We should implement a solution without using the .Contains(), to avoid problems with files in different paths but with the same filename
                                 listContents.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(missingDep)).ToArray());
                                 rawContents = listContents.ToArray();
                             }
 
-                            DataStore.ABConversorGLTFMissingDependencies.Clear();
+                            DataStore.i.ABConversorGLTFMissingDependencies.Clear();
                             assetsAlreadyDumped = false;
                             EditorApplication.update -= UpdateLoop;
 
                             // re-trigger conversion
-                            // Convert(rawContents, OnFinish, sceneCid);
-                            Convert(rawContents, OnFinish);
+                            Convert(rawContents, OnFinish, sceneCid);
 
                             return;
                         }
@@ -201,6 +204,7 @@ namespace DCL.ABConverter
                         OnFinish: (skippedAssetsCount) =>
                         {
                             this.skippedAssets = skippedAssetsCount;
+                            DataStore.i.ABConversorRunning = false;
                             OnFinish?.Invoke(state.lastErrorCode);
                         }));
                 }

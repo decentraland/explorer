@@ -19,7 +19,8 @@ namespace DCL
         public readonly DataStore_Quests Quests = new DataStore_Quests();
         public readonly DataStore_HUDs HUDs = new DataStore_HUDs();
 
-        static public readonly List<string> ABConversorGLTFMissingDependencies = new List<string>();
+        public bool ABConversorRunning = false;
+        public readonly List<string> ABConversorGLTFMissingDependencies = new List<string>();
 
         public class BuilderInWorld
         {

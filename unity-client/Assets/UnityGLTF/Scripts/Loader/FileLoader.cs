@@ -37,10 +37,11 @@ namespace UnityGLTF.Loader
 
             if (!File.Exists(pathToLoad))
             {
-                // TODO: Add ABV Conversion time check here
-                DCL.DataStore.ABConversorGLTFMissingDependencies.Add(fileToLoad);
-
                 Debug.LogError($"Buffer file not found ({pathToLoad}) -- {fileToLoad}");
+
+                if(DCL.DataStore.i.ABConversorRunning)
+                    DCL.DataStore.i.ABConversorGLTFMissingDependencies.Add(fileToLoad);
+
                 yield break;
             }
 
@@ -66,6 +67,10 @@ namespace UnityGLTF.Loader
             if (!File.Exists(pathToLoad))
             {
                 Debug.LogError("Buffer file not found -- " + fileToLoad);
+
+                if(DCL.DataStore.i.ABConversorRunning)
+                    DCL.DataStore.i.ABConversorGLTFMissingDependencies.Add(fileToLoad);
+
                 return;
             }
 

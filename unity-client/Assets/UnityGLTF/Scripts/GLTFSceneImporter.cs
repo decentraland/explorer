@@ -509,7 +509,6 @@ namespace UnityGLTF
                     streamingImagesStaticList.Add(image.Uri);
                     streamingImagesLocalList.Add(image.Uri);
 
-                    Debug.Log("Pravs - GLTFSCeneImporter - ConstructImageBuffer() -> " + image.Uri);
                     yield return _loader.LoadStream(image.Uri);
                     _assetCache.ImageStreamCache[sourceId] = _loader.LoadedStream;
 

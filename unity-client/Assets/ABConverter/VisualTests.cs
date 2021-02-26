@@ -32,6 +32,7 @@ namespace DCL.ABConverter
             if (gltfs.Length == 0)
             {
                 Debug.Log("Visual Test Detection: no instantiated GLTFs...");
+                OnFinish?.Invoke(0);
                 yield break;
             }
 
@@ -61,6 +62,7 @@ namespace DCL.ABConverter
             if (abs.Length == 0)
             {
                 Debug.Log("Visual Test Detection: no instantiated ABs...");
+                OnFinish?.Invoke(0);
                 yield break;
             }
 
@@ -83,18 +85,11 @@ namespace DCL.ABConverter
 
                 yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
 
-                bool result = false;
-
-                // TODO: Remove after testing
-                // Random fail for testing
-                // if (Random.Range(0, 2) == 0)
-                // {
-                    result = VisualTestHelpers.TestSnapshot(
+                bool result = VisualTestHelpers.TestSnapshot(
                         VisualTestHelpers.baselineImagesPath + testName,
                         VisualTestHelpers.testImagesPath + testName,
                         95,
                         false);
-                // }
 
                 // Delete failed AB files to avoid uploading them
                 if (!result && env != null)
@@ -110,7 +105,7 @@ namespace DCL.ABConverter
 
                     skippedAssets++;
 
-                    // TODO: Notify some metrics API or something to let know that this asset has conversion problems and we should manually take a look
+                    // TODO: Notify some metrics API or something to let us know that this asset has conversion problems so that we take a look manually
                     Debug.Log("Visual Test Detection: FAILED converting asset -> " + go.name);
                 }
 
@@ -121,7 +116,6 @@ namespace DCL.ABConverter
             VisualTestHelpers.testImagesPath = testImagesPath;
 
             OnFinish?.Invoke(skippedAssets);
-            yield break;
         }
 
         public static GameObject[] LoadAndInstantiateAllGltfAssets()
