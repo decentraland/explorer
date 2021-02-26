@@ -12,6 +12,7 @@ using static ProtocolV2;
 using Environment = DCL.Environment;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using DCL.Controllers;
 
 public static partial class BuilderInWorldUtils
 {
@@ -21,7 +22,7 @@ public static partial class BuilderInWorldUtils
         floorSceneObject.id = BuilderInWorldSettings.FLOOR_ID;
 
         floorSceneObject.model = BuilderInWorldSettings.FLOOR_MODEL;
-        floorSceneObject.name  = BuilderInWorldSettings.FLOOR_NAME;
+        floorSceneObject.name = BuilderInWorldSettings.FLOOR_NAME;
 
         floorSceneObject.contents = new Dictionary<string, string>();
 
@@ -33,14 +34,15 @@ public static partial class BuilderInWorldUtils
         return floorSceneObject;
     }
 
-    public static Dictionary<string,string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
+    public static Dictionary<string, string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
     {
         Dictionary<string, string> mappingDict = new Dictionary<string, string>();
 
-        foreach(ContentServerUtils.MappingPair mappingPair in contents)
+        foreach (ContentServerUtils.MappingPair mappingPair in contents)
         {
             mappingDict.Add(mappingPair.file, mappingPair.hash);
         }
+
         return mappingDict;
     }
 
@@ -149,7 +151,7 @@ public static partial class BuilderInWorldUtils
             {
                 EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
 
-                entityComponentModel.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+                entityComponentModel.position = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 
@@ -170,7 +172,7 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {
                 EntityData.NFTComponent nFTComponent = new EntityData.NFTComponent();
-                NFTShape.Model model = (NFTShape.Model)keyValuePair.Value.GetModel();
+                NFTShape.Model model = (NFTShape.Model) keyValuePair.Value.GetModel();
 
                 nFTComponent.id = keyValuePair.Value.id;
                 nFTComponent.color = new ColorRepresentation(model.color);
@@ -198,6 +200,21 @@ public static partial class BuilderInWorldUtils
     public static EntityData ConvertJSONToEntityData(string json)
     {
         return JsonConvert.DeserializeObject<EntityData>(json);
+    }
+
+    public static List<DCLBuilderInWorldEntity> RemoveGroundEntities(List<DCLBuilderInWorldEntity> entityList)
+    {
+        List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();
+
+        foreach (DCLBuilderInWorldEntity entity in entityList)
+        {
+            if (entity.isFloor)
+                continue;
+
+            newList.Add(entity);
+        }
+
+        return newList;
     }
 
     public static List<DCLBuilderInWorldEntity> FilterEntitiesBySmartItemComponentAndActions(List<DCLBuilderInWorldEntity> entityList)

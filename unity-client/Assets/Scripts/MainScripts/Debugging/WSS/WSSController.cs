@@ -140,6 +140,7 @@ namespace DCL
         public bool enableTutorial = false;
         public bool builderInWorld = false;
         public bool soloScene = true;
+        public bool questsEnabled = true;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
 
@@ -219,6 +220,11 @@ namespace DCL
                 if (builderInWorld)
                 {
                     debugString += "ENABLE_BUILDER_IN_WORLD&";
+                }
+
+                if (questsEnabled)
+                {
+                    debugString += "QUESTS_ENABLED&";
                 }
 
                 string debugPanelString = "";
@@ -476,6 +482,8 @@ namespace DCL
                                 break;
                             case "SetKernelConfiguration":
                             case "UpdateRealmsInfo":
+                            case "InitializeQuests":
+                            case "UpdateQuestProgress":
                                 bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             case "SetDisableAssetBundles":
