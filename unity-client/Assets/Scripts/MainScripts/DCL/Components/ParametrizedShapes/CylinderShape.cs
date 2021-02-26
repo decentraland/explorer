@@ -41,9 +41,9 @@ namespace DCL.Components
 
             protected bool Equals(Model other)
             {
-                return radiusTop.Equals(other.radiusTop) && radiusBottom.Equals(other.radiusBottom) &&
-                       segmentsHeight.Equals(other.segmentsHeight) && segmentsRadial.Equals(other.segmentsRadial) &&
-                       openEnded == other.openEnded && Nullable.Equals(radius, other.radius) && arc.Equals(other.arc);
+                return  base.Equals(other) && radiusTop.Equals(other.radiusTop) && radiusBottom.Equals(other.radiusBottom) &&
+                        segmentsHeight.Equals(other.segmentsHeight) && segmentsRadial.Equals(other.segmentsRadial) &&
+                        openEnded == other.openEnded && Nullable.Equals(radius, other.radius) && arc.Equals(other.arc);
             }
 
             public override bool Equals(object obj)

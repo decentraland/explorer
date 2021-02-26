@@ -21,7 +21,7 @@ namespace DCL.Components
 
             protected bool Equals(Model other)
             {
-                return Equals(uvs, other.uvs) && width.Equals(other.width) && height.Equals(other.height);
+                return base.Equals(other) && Equals(uvs, other.uvs) && width.Equals(other.width) && height.Equals(other.height);
             }
 
             public override bool Equals(object obj)

@@ -34,8 +34,8 @@ namespace DCL.Components
 
         public override void SetModel(BaseModel newModel)
         {
-            base.SetModel(newModel);
             cachedModel = (Model)newModel;
+            base.SetModel(newModel);
         }
 
         void UpdateRenderer(DecentralandEntity entity, Model model = null)

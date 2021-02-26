@@ -21,6 +21,33 @@ namespace DCL.Components
             {
                 return Utils.SafeFromJson<Model>(json);
             }
+            
+            protected bool Equals(Model other)
+            {
+                return base.Equals(other) && src == other.src && assetId == other.assetId;
+            }
+            
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != this.GetType())
+                    return false;
+                return Equals((Model) obj);
+            }
+            
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hashCode = base.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (src != null ? src.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (assetId != null ? assetId.GetHashCode() : 0);
+                    return hashCode;
+                }
+            }
         }
 
         protected Model previousModel = new Model();

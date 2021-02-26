@@ -270,9 +270,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
         else
         {
             ParcelScene scene = rootEntity.scene as ParcelScene;
-            DCLName name = (DCLName) rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+            DCLName name = (DCLName) scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
             name.SetNewName(newName);
-            rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
+            scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
 
         onStatusUpdate?.Invoke(this);

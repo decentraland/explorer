@@ -12,7 +12,9 @@ namespace DCL.Components
         {
             protected bool Equals(Model other)
             {
-                return color.Equals(other.color) && style == other.style;
+                return color.Equals(other.color) && style == other.style &&
+                       withCollisions == other.withCollisions && isPointerBlocker == other.isPointerBlocker && visible == other.visible &&
+                       src == other.src && assetId == other.assetId;
             }
 
             public override bool Equals(object obj)
