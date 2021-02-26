@@ -110,11 +110,11 @@ namespace Tests
             yield return textShapeComponent.routine;
 
             // 2. Check configured values
-            Assert.AreEqual(Color.green, textShapeComponent.cachedModel.color);
-            Assert.AreEqual(0.25f, textShapeComponent.cachedModel.width);
-            Assert.AreEqual(3, textShapeComponent.cachedModel.lineCount);
-            Assert.IsTrue(textShapeComponent.cachedModel.fontAutoSize);
-            Assert.AreEqual(Color.red, textShapeComponent.cachedModel.shadowColor);
+            Assert.AreEqual(Color.green, textShapeComponent.GetModel().color);
+            Assert.AreEqual(0.25f, textShapeComponent.GetModel().width);
+            Assert.AreEqual(3, textShapeComponent.GetModel().lineCount);
+            Assert.IsTrue(textShapeComponent.GetModel().fontAutoSize);
+            Assert.AreEqual(Color.red, textShapeComponent.GetModel().shadowColor);
 
             // 3. Update component with missing values
             scene.EntityComponentUpdate(scene.entities[entityId], CLASS_ID_COMPONENT.TEXT_SHAPE,
@@ -123,11 +123,11 @@ namespace Tests
             yield return textShapeComponent.routine;
 
             // 4. Check defaulted values
-            Assert.AreEqual(Color.white, textShapeComponent.cachedModel.color);
-            Assert.AreEqual(1f, textShapeComponent.cachedModel.width);
-            Assert.AreEqual(0, textShapeComponent.cachedModel.lineCount);
-            Assert.IsFalse(textShapeComponent.cachedModel.fontAutoSize);
-            Assert.AreEqual(new Color(1, 1, 1), textShapeComponent.cachedModel.shadowColor);
+            Assert.AreEqual(Color.white, textShapeComponent.GetModel().color);
+            Assert.AreEqual(1f, textShapeComponent.GetModel().width);
+            Assert.AreEqual(0, textShapeComponent.GetModel().lineCount);
+            Assert.IsFalse(textShapeComponent.GetModel().fontAutoSize);
+            Assert.AreEqual(new Color(1, 1, 1), textShapeComponent.GetModel().shadowColor);
         }
 
         [UnityTest]
@@ -144,7 +144,7 @@ namespace Tests
             TextMeshPro tmpro = textShapeComponent.gameObject.GetComponentInChildren<TextMeshPro>();
 
             Assert.NotNull(tmpro);
-            Assert.AreEqual(opacity, textShapeComponent.cachedModel.opacity);
+            Assert.AreEqual(opacity, textShapeComponent.GetModel().opacity);
             Assert.AreEqual(tmpro.color.a, opacity);
         }
 
@@ -159,8 +159,8 @@ namespace Tests
             TextMeshPro tmpro = textShapeComponent.gameObject.GetComponentInChildren<TextMeshPro>();
 
             Assert.NotNull(tmpro);
-            Assert.AreEqual(0.3f, textShapeComponent.cachedModel.opacity);
-            Assert.IsTrue(textShapeComponent.cachedModel.visible);
+            Assert.AreEqual(0.3f, textShapeComponent.GetModel().opacity);
+            Assert.IsTrue(textShapeComponent.GetModel().visible);
             Assert.AreEqual(tmpro.color.a, 0.3f);
         }
 
@@ -175,8 +175,8 @@ namespace Tests
             TextMeshPro tmpro = textShapeComponent.gameObject.GetComponentInChildren<TextMeshPro>();
 
             Assert.NotNull(tmpro);
-            Assert.AreEqual(0.3f, textShapeComponent.cachedModel.opacity);
-            Assert.IsFalse(textShapeComponent.cachedModel.visible);
+            Assert.AreEqual(0.3f, textShapeComponent.GetModel().opacity);
+            Assert.IsFalse(textShapeComponent.GetModel().visible);
             Assert.AreEqual(tmpro.color.a, 0f);
         }
     }

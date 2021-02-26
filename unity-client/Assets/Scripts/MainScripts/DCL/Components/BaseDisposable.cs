@@ -134,7 +134,7 @@ namespace DCL.Components
             callback.Invoke(this);
         }
 
-        public void SetModel(BaseModel newModel)
+        public virtual void SetModel(BaseModel newModel)
         {
             model = newModel;
             updateHandler.ApplyChangesIfModified(model);

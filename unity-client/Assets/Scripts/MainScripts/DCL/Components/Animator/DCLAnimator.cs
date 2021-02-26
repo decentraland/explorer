@@ -78,6 +78,7 @@ namespace DCL.Components
 
             return null;
         }
+
         new public Model GetModel()
         {
             return (Model)model;

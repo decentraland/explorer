@@ -10,6 +10,33 @@ namespace DCL.Components
         [System.Serializable]
         public new class Model : LoadableShape.Model
         {
+            protected bool Equals(Model other)
+            {
+                return color.Equals(other.color) && style == other.style;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                if (obj.GetType() != this.GetType())
+                    return false;
+
+                return Equals((Model) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (color.GetHashCode() * 397) ^ style;
+                }
+            }
+
             public Color color = new Color(0.6404918f, 0.611472f, 0.8584906f); // "light purple" default, same as in explorer
             public int style = 0;
 

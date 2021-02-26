@@ -75,6 +75,7 @@ namespace DCL.Components
         {
             return ((Model)model).loop;
         }
+
         public bool GetShouldTryLoad()
         {
             return ((Model)model).shouldTryToLoad;

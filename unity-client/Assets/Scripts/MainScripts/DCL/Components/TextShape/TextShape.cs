@@ -126,7 +126,7 @@ namespace DCL.Components
 
         public TextMeshPro text;
         public RectTransform rectTransform;
-        public Model cachedModel;
+        private Model cachedModel;
 
         private void Awake()
         {
@@ -139,6 +139,11 @@ namespace DCL.Components
             {
                 transform.forward = Camera.main.transform.forward;
             }
+        }
+
+        new public Model GetModel()
+        {
+            return cachedModel;
         }
 
         public override IEnumerator ApplyChanges(BaseModel newModel)

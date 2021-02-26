@@ -107,7 +107,7 @@ namespace Tests
             }));
 
             yield return WaitUntilGrounded();
-            yield return new WaitForSecondsRealtime(30);
+
             Assert.IsTrue(DCLCharacterController.i.groundTransform == shapeEntity.meshRootGameObject.transform);
 
             // Place the character barely passing the limits to trigger the world repositioning

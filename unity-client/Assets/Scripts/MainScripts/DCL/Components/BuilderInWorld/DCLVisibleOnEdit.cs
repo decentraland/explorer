@@ -26,7 +26,7 @@ public class DCLVisibleOnEdit : BaseDisposable
 
         public override BaseModel GetDataFromJSON(string json)
         {
-            throw new System.NotImplementedException();
+            return Utils.SafeFromJson<Model>(json);
         }
 
         public override int GetHashCode()
@@ -51,5 +51,5 @@ public class DCLVisibleOnEdit : BaseDisposable
         return null;
     }
 
-  
+
 }

@@ -23,12 +23,19 @@ namespace DCL.Components
         }
 
         public Mesh currentMesh { get; protected set; }
-        public Model previousModel;
+        private Model previousModel;
+        private Model cachedModel;
 
         public ParametrizedShape(ParcelScene scene) : base(scene)
         {
             OnAttach += OnShapeAttached;
             OnDetach += OnShapeDetached;
+        }
+
+        public override void SetModel(BaseModel newModel)
+        {
+            base.SetModel(newModel);
+            cachedModel = (Model)newModel;
         }
 
         void UpdateRenderer(DecentralandEntity entity, Model model = null)
@@ -157,14 +164,12 @@ namespace DCL.Components
 
         public override bool IsVisible()
         {
-            var model = (T)this.model;
-            return model.visible;
+            return cachedModel.visible;
         }
 
         public override bool HasCollisions()
         {
-            var model = (T)this.model;
-            return model.withCollisions;
+            return cachedModel.withCollisions;
         }
 
         protected virtual bool ShouldGenerateNewMesh(BaseShape.Model newModel)
