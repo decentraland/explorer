@@ -79,6 +79,8 @@ Reviews are more effective on small pull requests. [A Cisco study on code review
 
 * If everything fails and the PR came out big, bring more reviewers and try to add a guide on the PR description that guides the reviewer through the code. Live meetings to explain the code are very welcome as well. 
 
+* Bonus advice: some auditors use our commit throughput to correlate with MANA performance. So smaller commits indirectly contribute to MANA performance. *(please don't take this too serious)*  
+
 ### Bring critical reviewers on board
 
 When working on any existing piece of code, you'd want to get a review the original contributor or owner of the feature. If the repository settings let you merge, that doesn't mean an additional reviewer shouldn't be brought on board.
