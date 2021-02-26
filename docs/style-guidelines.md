@@ -1,5 +1,11 @@
 # Coding Guidelines
 
+## Typescript
+
+TBD
+
+## C# / Unity
+
 ### Coding Style 
 
 For all our style needs we are using an [`.editorconfig`](https://editorconfig.org/) file. 

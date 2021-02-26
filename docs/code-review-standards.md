@@ -19,7 +19,7 @@ Sometimes, the best solution isn’t viable because we have urgency or the solut
 
 There are many details to look for in a pull request that can't be automated. The contributions are coming from many of us, but the code has to be felt as if it was written by a single person. 
 
-This said, any contribution should be curated using the [coding guidelines]() document.
+This said, any contribution should be curated using the [coding guidelines](style-guidelines.md) document.
 
 #### Solution consistency
 
@@ -38,17 +38,17 @@ This has many benefits, including:
 
 [IBM found](http://www.ifsq.org/work-holland-1999.html) that each hour of code review saves about 100 hours of related work, including QA. After introducing code reviews, [Raytheon reduced](http://www.ifsq.org/finding-idd-7.html) its cost of rework from 40% to 20% of the project cost. The money cost of fixing bugs dropped by 50%. 
 
-So, we can inspect the code to look for bugs, and we can also:
+We can inspect the code to look for bugs, and we can also:
 
 * **Do smoke testing:** The code may have tests, but is not assured that the tests will cover every use case in a E2E scenario. Run a CI build and give it a whirl.
 
 * **Ensure the code has enough testing coverage:** *All pull requests* that add new features should introduce tests. If the change is a fix, check if a test can be made to cover it.
 
-* **Check API usage is following good practices:** Not keeping good API practices can introduce performance issues down the road. In the worst of cases they can introduce bugs.
+* **Check API usages are following good practices:** Not keeping good API practices can introduce performance issues down the road. In the worst of cases they can introduce bugs.
 
 ### Prevent unnecessary technical debt
 #### KISS and good engineering principles
-Contributions should follow good engineering principles like KISS, DRY and SOLID when is sensible to do so. Bad practices will lead to architecture issues later, so its best to prevent them.
+Contributions should follow good engineering principles like KISS, DRY and SOLID when is sensible to do so. Bad practices lead to [come smell](https://refactoring.guru/refactoring/smells). Always remember that code smell [increases the cost](https://martinfowler.com/articles/is-quality-worth-cost.html) of improving any software project, so we should avoid it.
 
 #### If it can't be prevented, let's track it
 Sometimes, a request for improvement can't be made because of dangling technical debt that comes from a previous change or time constraints. When this is the case, make sure the issue gets tracked to approach it later.
@@ -75,7 +75,7 @@ Reviews are more effective on small pull requests. [A Cisco study on code review
 
 * Try to divide the work of big features on smaller pull requests. Plan ahead. Use feature toggling if applicable.
 
-* No pull request can be too small. If a given change had to be a one liner, go for it.
+* No pull request can be too small. If a given change has to be a one liner, go for it.
 
 * If everything fails and the PR came out big, bring more reviewers and try to add a guide on the PR description that guides the reviewer through the code. Live meetings to explain the code are very welcome as well. 
 
