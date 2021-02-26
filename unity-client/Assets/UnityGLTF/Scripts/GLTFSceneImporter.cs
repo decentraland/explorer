@@ -201,7 +201,7 @@ namespace UnityGLTF
 
         public void Dispose()
         {
-            //NOTE(Brian): If the coroutine is interrupted and the local streaming list contains something, 
+            //NOTE(Brian): If the coroutine is interrupted and the local streaming list contains something,
             //             we must clean the static list or other GLTFSceneImporter instances might get stuck.
             int streamingImagesLocalListCount = streamingImagesLocalList.Count;
 
@@ -402,7 +402,7 @@ namespace UnityGLTF
         }
 
         /// <summary>
-        /// Initializes the top-level created node by adding an instantiated GLTF object component to it, 
+        /// Initializes the top-level created node by adding an instantiated GLTF object component to it,
         /// so that it can cleanup after itself properly when destroyed
         /// </summary>
         private void InitializeGltfTopLevelObject()
@@ -509,6 +509,7 @@ namespace UnityGLTF
                     streamingImagesStaticList.Add(image.Uri);
                     streamingImagesLocalList.Add(image.Uri);
 
+                    Debug.Log("Pravs - GLTFSCeneImporter - ConstructImageBuffer() -> " + image.Uri);
                     yield return _loader.LoadStream(image.Uri);
                     _assetCache.ImageStreamCache[sourceId] = _loader.LoadedStream;
 
@@ -695,9 +696,9 @@ namespace UnityGLTF
                 Stream stream = null;
                 if (image.Uri == null)
                 {
-                    //NOTE(Zak): This fixes current issues of concurrent texture loading, 
-                    //           but it's possible that it would happen again in the future. 
-                    //           If that happens, we'll have implement some locking behavior for concurrent 
+                    //NOTE(Zak): This fixes current issues of concurrent texture loading,
+                    //           but it's possible that it would happen again in the future.
+                    //           If that happens, we'll have implement some locking behavior for concurrent
                     //           import calls.
 
                     //NOTE(Brian): We can't yield between the stream creation and the stream.Read because
@@ -2373,7 +2374,7 @@ namespace UnityGLTF
                     continue;
                 }
 
-                //TODO(Brian): Remove old material here if the material won't be used. 
+                //TODO(Brian): Remove old material here if the material won't be used.
                 //             (We can use Resources.UnloadUnusedAssets too, but I hate to rely on this)
                 if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(materialCRC))
                 {

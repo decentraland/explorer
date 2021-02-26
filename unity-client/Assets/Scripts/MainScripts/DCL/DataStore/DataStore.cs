@@ -1,4 +1,5 @@
-using Variables.RealmsInfo;
+﻿using Variables.RealmsInfo;
+using System.Collections.Generic;
 
 namespace DCL
 {
@@ -17,6 +18,8 @@ namespace DCL
         public readonly BuilderInWorld builderInWorld = new BuilderInWorld();
         public readonly DataStore_Quests Quests = new DataStore_Quests();
         public readonly DataStore_HUDs HUDs = new DataStore_HUDs();
+
+        static public readonly List<string> ABConversorGLTFMissingDependencies = new List<string>();
 
         public class BuilderInWorld
         {

@@ -20,12 +20,20 @@ namespace DCL.ABConverter
 
         public static IEnumerator TestConvertedAssets(Environment env = null, Action<int> OnFinish = null)
         {
+            Debug.Log("Visual Test Detection: Starting converted assets testing...");
+
             EditorSceneManager.OpenScene($"Assets/ABConverter/VisualTestScene.unity", OpenSceneMode.Single);
 
             VisualTestHelpers.baselineImagesPath += "ABConverter/";
             VisualTestHelpers.testImagesPath += "ABConverter/";
 
             var gltfs = LoadAndInstantiateAllGltfAssets();
+
+            if (gltfs.Length == 0)
+            {
+                Debug.Log("Visual Test Detection: no instantiated GLTFs...");
+                yield break;
+            }
 
             VisualTestHelpers.generateBaseline = true;
 
@@ -50,6 +58,12 @@ namespace DCL.ABConverter
 
             var abs = LoadAndInstantiateAllAssetBundles();
 
+            if (abs.Length == 0)
+            {
+                Debug.Log("Visual Test Detection: no instantiated ABs...");
+                yield break;
+            }
+
             foreach (GameObject go in abs)
             {
                 go.SetActive(false);
@@ -69,11 +83,18 @@ namespace DCL.ABConverter
 
                 yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
 
-                bool result = VisualTestHelpers.TestSnapshot(
-                    VisualTestHelpers.baselineImagesPath + testName,
-                    VisualTestHelpers.testImagesPath + testName,
-                    95,
-                    false);
+                bool result = false;
+
+                // TODO: Remove after testing
+                // Random fail for testing
+                // if (Random.Range(0, 2) == 0)
+                // {
+                    result = VisualTestHelpers.TestSnapshot(
+                        VisualTestHelpers.baselineImagesPath + testName,
+                        VisualTestHelpers.testImagesPath + testName,
+                        95,
+                        false);
+                // }
 
                 // Delete failed AB files to avoid uploading them
                 if (!result && env != null)

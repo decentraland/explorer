@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityGLTF;
 using UnityGLTF.Cache;
+using DCL;
 
 namespace DCL.ABConverter
 {
@@ -80,7 +81,8 @@ namespace DCL.ABConverter
             /// </summary>
             /// <param name="rawContents">A list detailing assets to be dumped</param>
             /// <param name="OnFinish">End callback with the proper ErrorCode</param>
-            public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
+            /// <param name="sceneCid">The asset scene ID in case any dependency is missing</param>
+            public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null, string sceneCid = null)
             {
                 OnFinish += CleanAndExit;
 
@@ -106,8 +108,45 @@ namespace DCL.ABConverter
 
                         env.assetDatabase.Refresh();
 
+                        if (assetsAlreadyDumped && DataStore.ABConversorGLTFMissingDependencies.Count > 0)
+                        {
+                            Debug.Log("Missing dependencies detected: " + DataStore.ABConversorGLTFMissingDependencies.Count);
+
+                            if (string.IsNullOrEmpty(sceneCid))
+                            {
+                                Debug.Log("Scene ID missing... as the missing dependencies cannot be downloaded the conversion is aborted.");
+                                EditorApplication.update -= UpdateLoop;
+                                return;
+                            }
+
+                            foreach (string missingDep in DataStore.ABConversorGLTFMissingDependencies)
+                            {
+                                Debug.Log($"Adding missing dependency {missingDep} to rawContents...");
+
+                                // 1. Create mapping pairs with the known files, searching the hash in the scene's mappings
+                                ContentServerUtils.MappingsAPIData parcelInfoApiData = ABConverter.Utils.GetSceneMappingsData(env.webRequest, settings.tld, sceneCid);
+
+                                // 2. Add the new files to rawContents
+                                var listContents = rawContents.ToList();
+                                // listContents.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file == missingDep).ToArray());
+                                listContents.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(missingDep)).ToArray());
+                                rawContents = listContents.ToArray();
+                            }
+
+                            DataStore.ABConversorGLTFMissingDependencies.Clear();
+                            assetsAlreadyDumped = false;
+                            EditorApplication.update -= UpdateLoop;
+
+                            // re-trigger conversion
+                            // Convert(rawContents, OnFinish, sceneCid);
+                            Convert(rawContents, OnFinish);
+
+                            return;
+                        }
+
                         if (!assetsAlreadyDumped)
                         {
+                            Debug.Log("Convert - Starting asset dump");
                             state.step = State.Step.DUMPING_ASSETS;
                             shouldGenerateAssetBundles |= DumpAssets(rawContents);
                             assetsAlreadyDumped = true;
@@ -124,6 +163,8 @@ namespace DCL.ABConverter
 
                         if (shouldGenerateAssetBundles)
                         {
+                            Debug.Log("Convert - Should generate ABs...");
+
                             AssetBundleManifest manifest;
 
                             state.step = State.Step.BUILDING_ASSET_BUNDLES;
@@ -178,6 +219,27 @@ namespace DCL.ABConverter
                 List<AssetPath> bufferPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.bufferExtensions);
                 List<AssetPath> texturePaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.textureExtensions);
 
+                /*Debug.Log("------- Dump Assets-TexturePaths -------");
+                foreach (var path in texturePaths)
+                {
+                    Debug.Log(path);
+                }
+                Debug.Log("-----------------------------");
+
+                Debug.Log("------- Dump Assets-gltfPaths -------");
+                foreach (var path in gltfPaths)
+                {
+                    Debug.Log(path);
+                }
+                Debug.Log("-----------------------------");
+
+                Debug.Log("------- Dump Assets-bufferPaths -------");
+                foreach (var path in bufferPaths)
+                {
+                    Debug.Log(path);
+                }
+                Debug.Log("-----------------------------");*/
+
                 List<AssetPath> assetsToMark = new List<AssetPath>();
 
                 if (!FilterDumpList(ref gltfPaths))
@@ -200,6 +262,7 @@ namespace DCL.ABConverter
 
                 MarkAllAssetBundles(assetsToMark);
                 MarkShaderAssetBundle();
+
                 return true;
             }
 
@@ -590,12 +653,10 @@ namespace DCL.ABConverter
                 env.assetDatabase.SaveAssets();
             }
 
-
             internal void CleanAssetBundleFolder(string[] assetBundles)
             {
                 ABConverter.Utils.CleanAssetBundleFolder(env.file, settings.finalAssetBundlePath, assetBundles, hashLowercaseToHashProper);
             }
-
 
             internal void PopulateLowercaseMappings(ContentServerUtils.MappingPair[] pairs)
             {
@@ -621,7 +682,6 @@ namespace DCL.ABConverter
                 var mainShader = Shader.Find("DCL/LWRP/Lit");
                 ABConverter.Utils.MarkAssetForAssetBundleBuild(env.assetDatabase, mainShader, MAIN_SHADER_AB_NAME);
             }
-
 
             internal virtual void InitializeDirectoryPaths(bool deleteIfExists)
             {
