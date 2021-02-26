@@ -13,7 +13,8 @@ namespace DCL.Components
         {
             public bool billboard;
 
-            [Header("Font Properties")] public string value = "";
+            [Header("Font Properties")]
+            public string value = "";
 
             public bool visible = true;
 
@@ -24,7 +25,8 @@ namespace DCL.Components
             public string fontWeight = "normal";
             public string font;
 
-            [Header("Text box properties")] public string hTextAlign = "bottom";
+            [Header("Text box properties")]
+            public string hTextAlign = "bottom";
 
             public string vTextAlign = "left";
             public float width = 1f;
@@ -39,13 +41,15 @@ namespace DCL.Components
             public int lineCount = 0;
             public bool textWrapping = false;
 
-            [Header("Text shadow properties")] public float shadowBlur = 0f;
+            [Header("Text shadow properties")]
+            public float shadowBlur = 0f;
 
             public float shadowOffsetX = 0f;
             public float shadowOffsetY = 0f;
             public Color shadowColor = new Color(1, 1, 1);
 
-            [Header("Text outline properties")] public float outlineWidth = 0f;
+            [Header("Text outline properties")]
+            public float outlineWidth = 0f;
 
             public Color outlineColor = Color.white;
         }
@@ -73,28 +77,12 @@ namespace DCL.Components
 
             model = Utils.SafeFromJson<Model>(newJson);
 
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
-
-            // NOTE: previously width and height weren't working (setting sizeDelta before anchors and offset result in
-            // sizeDelta being reset to 0,0)
-            // to fix textWrapping and avoid backwards compatibility issues as result of the size being properly set (like text alignment)
-            // we only set it if textWrapping is enabled.
-            if (model.textWrapping)
-            {
-                rectTransform.sizeDelta = new Vector2(model.width, model.height);
-            }
-            else
-            {
-                rectTransform.sizeDelta = Vector2.zero;
-            }
+            PrepareRectTransform();
 
             yield return ApplyModelChanges(scene, text, model);
         }
 
-        public static IEnumerator ApplyModelChanges(ParcelScene scene, TMP_Text text, Model model)
+        public static IEnumerator ApplyModelChanges(IParcelScene scene, TMP_Text text, Model model)
         {
             if (!string.IsNullOrEmpty(model.font))
             {
@@ -194,6 +182,39 @@ namespace DCL.Components
                         default:
                             return TextAlignmentOptions.Center;
                     }
+            }
+        }
+
+        public override void SetModel(object model)
+        {
+            this.model = (Model)model;
+            PrepareRectTransform();
+            ApplyCurrentModel();
+        }
+
+        private void ApplyCurrentModel()
+        {
+            ApplyModelChanges(scene, text, model);
+        }
+
+        private void PrepareRectTransform()
+        {
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.offsetMax = Vector2.zero;
+
+            // NOTE: previously width and height weren't working (setting sizeDelta before anchors and offset result in
+            // sizeDelta being reset to 0,0)
+            // to fix textWrapping and avoid backwards compatibility issues as result of the size being properly set (like text alignment)
+            // we only set it if textWrapping is enabled.
+            if (model.textWrapping)
+            {
+                rectTransform.sizeDelta = new Vector2(model.width, model.height);
+            }
+            else
+            {
+                rectTransform.sizeDelta = Vector2.zero;
             }
         }
     }
