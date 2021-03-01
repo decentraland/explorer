@@ -58,9 +58,6 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            if (oldModel == newModel)
-                yield break;
-
             DisablePassport();
 
             var model = (AvatarModel) newModel;

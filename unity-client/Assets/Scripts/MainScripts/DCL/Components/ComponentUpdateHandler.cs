@@ -39,9 +39,6 @@ namespace DCL
 
         protected void HandleUpdate(BaseModel newSerialization)
         {
-            if (oldSerialization == null && newSerialization == null)
-                return;
-            
             if (newSerialization.Equals(oldSerialization))
                 return;
 

@@ -17,6 +17,9 @@ public class QuestTrackingInfo : BaseComponent
 
     public override void UpdateFromModel(BaseModel newModel)
     {
+        if(newModel == null)
+            return;
+        
         base.UpdateFromModel(newModel);
         if (!(newModel is QuestModel quest))
             return;
