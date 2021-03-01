@@ -16,9 +16,12 @@ internal class ScenesViewController : IDisposable
     public event Action<Dictionary<string, SceneCardView>> OnProjectScenesSet;
     public event Action<SceneCardView> OnProjectSceneAdded;
     public event Action<SceneCardView> OnProjectSceneRemoved;
+    public event Action<ISceneData> OnSceneSelected; 
 
     public Dictionary<string, SceneCardView> deployedScenes { private set; get; } = new Dictionary<string, SceneCardView>();
     public Dictionary<string, SceneCardView> projectScenes { private set; get; } = new Dictionary<string, SceneCardView>();
+
+    public ISceneData selectedScene { private set; get; }
 
     private readonly ScenesRefreshHelper scenesRefreshHelper = new ScenesRefreshHelper();
     private readonly SceneCardView sceneCardViewPrefab;
@@ -84,6 +87,30 @@ internal class ScenesViewController : IDisposable
         if (scenesRefreshHelper.isOldProjectScenesEmpty && projectScenes.Count > 0)
         {
             OnProjectScenesSet?.Invoke(projectScenes);
+        }
+    }
+
+    /// <summary>
+    /// Set selected scene
+    /// </summary>
+    /// <param name="id">scene id</param>
+    public void SelectScene(string id)
+    {
+        ISceneData sceneData = null;
+        if (deployedScenes.TryGetValue(id, out SceneCardView deployedSceneCardView))
+        {
+            sceneData = deployedSceneCardView.sceneData;
+        }
+        else if (projectScenes.TryGetValue(id, out SceneCardView projectSceneCardView))
+        {
+            sceneData = projectSceneCardView.sceneData;
+        }
+
+        selectedScene = sceneData;
+        
+        if (sceneData != null)
+        {
+            OnSceneSelected?.Invoke(sceneData);
         }
     }
 

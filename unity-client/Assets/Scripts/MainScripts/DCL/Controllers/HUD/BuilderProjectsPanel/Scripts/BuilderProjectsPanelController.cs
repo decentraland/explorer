@@ -62,11 +62,11 @@ public class BuilderProjectsPanelController : IDisposable
             bridge.SendFetchProjects();
         }
 
-        leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(view.settingsViewReferences);
+        leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(scenesViewController, view.settingsViewReferences);
         sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view.searchBarView);
         leftMenuHandler = new LeftMenuHandler(view, sectionsController);
         sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController,
-            scenesViewController, bridge, leftMenuSettingsViewHandler);
+            scenesViewController, bridge);
 
         sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
     }

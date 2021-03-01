@@ -23,6 +23,9 @@ internal class SectionFactory : ISectionFactory
                 break;
             case SectionsController.SectionId.LAND:
                 break;
+            case SectionsController.SectionId.SETTINGS_PROJECT_GENERAL:
+                result = new SectionSceneGeneralSettingsController();
+                break;
         }
 
         return result;

@@ -18,6 +18,7 @@ internal class LeftMenuSettingsViewReferences
     public GameObject avatarThumbnailContainer;
     public RawImage avatarImage;
     public TextMeshProUGUI authorNameText;
+    public LeftMenuButtonToggleView adminsMenuToggle;
 }
 
 internal class LeftMenuSettingsViewHandler : IDisposable
@@ -26,33 +27,25 @@ internal class LeftMenuSettingsViewHandler : IDisposable
     private const string SCENE_TITLE = "Scene settings";
 
     private readonly LeftMenuSettingsViewReferences viewReferences;
+    private readonly ScenesViewController scenesViewController;
     private readonly Texture defaultThumbnail;
 
     private AssetPromise_Texture promiseAvatarThumbnail;
     private AssetPromise_Texture promiseSceneThumbnail;
 
-    public LeftMenuSettingsViewHandler(LeftMenuSettingsViewReferences viewReferences)
+    public LeftMenuSettingsViewHandler(ScenesViewController scenesViewController, LeftMenuSettingsViewReferences viewReferences)
     {
         this.viewReferences = viewReferences;
+        this.scenesViewController = scenesViewController;
         defaultThumbnail = viewReferences.thumbnail.texture;
-    }
 
-    public void SetProjectData(ISceneData sceneData)
-    {
-        viewReferences.titleLabel.text = sceneData.isDeployed ? SCENE_TITLE : PROJECT_TITLE;
-        viewReferences.coordsContainer.SetActive(sceneData.isDeployed);
-        viewReferences.sizeContainer.SetActive(!sceneData.isDeployed);
-        viewReferences.entitiesCountContainer.SetActive(!sceneData.isDeployed);
-        viewReferences.coordsText.text = $"{sceneData.coords.x},{sceneData.coords.y}";
-        viewReferences.sizeText.text = $"{sceneData.size.x},{sceneData.size.y}m";
-        viewReferences.entitiesCountText.text = sceneData.entitiesCount.ToString();
-        viewReferences.authorNameText.text = sceneData.authorName;
-
-        SetThumbnails(sceneData);
+        scenesViewController.OnSceneSelected += OnSelectScene;
     }
 
     public void Dispose()
     {
+        scenesViewController.OnSceneSelected -= OnSelectScene;
+        
         if (promiseAvatarThumbnail != null)
         {
             AssetPromiseKeeper_Texture.i.Forget(promiseAvatarThumbnail);
@@ -64,6 +57,21 @@ internal class LeftMenuSettingsViewHandler : IDisposable
 
         promiseAvatarThumbnail = null;
         promiseSceneThumbnail = null;
+    }
+    
+    void SetProjectData(ISceneData sceneData)
+    {
+        viewReferences.titleLabel.text = sceneData.isDeployed ? SCENE_TITLE : PROJECT_TITLE;
+        viewReferences.coordsContainer.SetActive(sceneData.isDeployed);
+        viewReferences.sizeContainer.SetActive(!sceneData.isDeployed);
+        viewReferences.entitiesCountContainer.SetActive(!sceneData.isDeployed);
+        viewReferences.coordsText.text = $"{sceneData.coords.x},{sceneData.coords.y}";
+        viewReferences.sizeText.text = $"{sceneData.size.x},{sceneData.size.y}m";
+        viewReferences.entitiesCountText.text = sceneData.entitiesCount.ToString();
+        viewReferences.authorNameText.text = sceneData.authorName;
+        viewReferences.adminsMenuToggle.gameObject.SetActive(sceneData.isDeployed);
+
+        SetThumbnails(sceneData);
     }
 
     void SetThumbnails(ISceneData sceneData)
@@ -109,5 +117,9 @@ internal class LeftMenuSettingsViewHandler : IDisposable
             AssetPromiseKeeper_Texture.i.Keep(promiseSceneThumbnail);
         }
     }
-
+    
+    void OnSelectScene(ISceneData sceneData)
+    {
+        SetProjectData(sceneData);
+    }
 }

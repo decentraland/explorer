@@ -14,12 +14,14 @@ internal class SectionsHandler : IDisposable
 
         sectionsController.OnSectionShow += OnSectionShow;
         sectionsController.OnSectionHide += OnSectionHide;
+        scenesViewController.OnSceneSelected += OnSelectScene;
     }
 
     public void Dispose()
     {
         sectionsController.OnSectionShow -= OnSectionShow;
         sectionsController.OnSectionHide -= OnSectionHide;
+        scenesViewController.OnSceneSelected -= OnSelectScene;
     }
 
     void OnSectionShow(SectionBase sectionBase)
@@ -40,6 +42,12 @@ internal class SectionsHandler : IDisposable
             projectSceneListener.OnSetScenes(scenesViewController.projectScenes);
         }
 
+        if (sectionBase is ISelectSceneListener selectSceneListener)
+        {
+            scenesViewController.OnSceneSelected += selectSceneListener.OnSelectScene;
+            selectSceneListener.OnSelectScene(scenesViewController.selectedScene);
+        }
+
         searchBarView.SetSearchBar(sectionBase.searchHandler, sectionBase.searchBarConfig);
     }
 
@@ -58,7 +66,17 @@ internal class SectionsHandler : IDisposable
             scenesViewController.OnProjectSceneRemoved -= projectSceneListener.OnSceneRemoved;
             scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
         }
+        
+        if (sectionBase is ISelectSceneListener selectSceneListener)
+        {
+            scenesViewController.OnSceneSelected -= selectSceneListener.OnSelectScene;
+        }        
 
         searchBarView.SetSearchBar(null, null);
+    }
+    
+    void OnSelectScene(ISceneData sceneData)
+    {
+        sectionsController.OpenSection(SectionsController.SectionId.SETTINGS_PROJECT_GENERAL);
     }
 }
