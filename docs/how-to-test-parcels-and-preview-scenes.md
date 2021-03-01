@@ -4,22 +4,25 @@
 
 You can test and debug components and SDK functionalities with many test-scenes located at `kernel/public/test-scenes/`, running the client in `debug` mode.
 
-1. Test scenes must be built once locally before using them by running:
+1. Start the regular kernel server in a terminal at '/kernel' and leave it watching for changes
 
-    make test-scenes
+    `make watch`
 
-Note that the test-scenes building may take a while.
+2. In **another terminal** in '/kernel' run the following command to build the test scenes and keep watching changes on them (changes will be visible when refreshing the browser):
 
-2. To run the client in `debug` mode, append the following query parameter to the URL:
+    `make watch-only-test-scenes`
+
+Note that the test-scenes building may take a while (10 mins or more).
+
+3. To run the client in `debug` mode, append the following query parameter to the URL:
 
     http://localhost:3000/?DEBUG_MODE
 
-3. To spawn at the specific coordinates of a test scene append the position query paramter:
+4. To spawn at the specific coordinates of a test scene append the position query paramter:
 
-    http://localhost:3000/?DEBUG_MODE&position=10,10
+    http://localhost:3000/?DEBUG_MODE&position=-100,100
 
-
-4. (optional) If you want the test scenes to be updated dynamically after the first build (to be able to modify the scenes code and see the changes by reloading the browser), you should run `make watch-only-test-scenes` in another terminal (as you'd also need a terminal running the regular `make watch` in parallel) and keep it watching for changes.
+NOTE(optional): If you don't need to modify the test-scenes and just build them once, you may only run once `make test-scenes` (it takes a while) and that'd be it.
 
 ### Creating New Test Scenes
 It is possible to define new scenes inside this repo for testing purposes. To do so, create a new folder in `kernel/public/test-scenes`. There are several conventions to be followed regarding the name of these folders and the positions of the parcels, these can be found in the [README](https://github.com/decentraland/client/blob/master/public/test-scenes/README.md) file.
