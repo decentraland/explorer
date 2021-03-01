@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace DCL.Components
@@ -34,12 +35,15 @@ namespace DCL.Components
                        EqualityComparer<UIValue>.Default.Equals(positionY, model.positionY) &&
                        isPointerBlocker == model.isPointerBlocker &&
                        onClick == model.onClick &&
-                       EqualityComparer<TextShape.Model>.Default.Equals(textModel, model.textModel);
+                       textModel == model.textModel;
             }
 
             public override BaseModel GetDataFromJSON(string json)
             {
-                return Utils.SafeFromJson<Model>(json);
+                Model model = Utils.SafeFromJson<Model>(json);
+                textModel = (TextShape.Model) textModel.GetDataFromJSON(json);
+                model.textModel = textModel;
+                return model;
             }
 
             public override int GetHashCode()

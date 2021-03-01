@@ -56,7 +56,7 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(BaseModel baseModel)
         {
-            yield return null;
+            return null;
         }
 
         public override int GetClassId()

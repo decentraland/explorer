@@ -12,13 +12,12 @@ namespace DCL.Components
         Coroutine routine { get; }
         string componentName { get; }
         void UpdateFromJSON(string json);
-        void UpdateFromObject(BaseModel model);
+        void UpdateFromModel(BaseModel model);
         IEnumerator ApplyChanges(BaseModel model);
         void RaiseOnAppliedChanges();
         ComponentUpdateHandler CreateUpdateHandler();
         bool IsValid();
         BaseModel GetModel();
-        void SetModel(BaseModel model);
         int GetClassId();
     }
 
@@ -68,14 +67,15 @@ namespace DCL.Components
         {
         }
 
-        public void UpdateFromJSON(string json)
+        public virtual void UpdateFromJSON(string json)
         {
-            UpdateFromObject(model.GetDataFromJSON(json));
+            UpdateFromModel(model.GetDataFromJSON(json));
         }
 
-        public void UpdateFromObject(BaseModel model)
+        public virtual void UpdateFromModel(BaseModel newModel)
         {
-            SetModel(model);
+            model = newModel;
+            updateHandler.ApplyChangesIfModified(model);
         }
 
         public abstract IEnumerator ApplyChanges(BaseModel model);
@@ -87,12 +87,6 @@ namespace DCL.Components
         }
 
         public virtual BaseModel GetModel() => model;
-
-        public virtual void SetModel(BaseModel newModel)
-        {
-            model = newModel;
-            updateHandler.ApplyChangesIfModified(model);
-        }
 
         public virtual ComponentUpdateHandler CreateUpdateHandler()
         {

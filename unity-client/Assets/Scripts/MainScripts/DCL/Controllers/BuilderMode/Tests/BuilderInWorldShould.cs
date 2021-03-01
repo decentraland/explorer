@@ -148,7 +148,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         {
             //Note (Adrian): We can't wait to set the component 1 frame in production, so we set it like production
             smartItemComponent = ((SmartItemComponent)baseComponent);
-            smartItemComponent.SetModel(model);
+            smartItemComponent.UpdateFromModel(model);
         }
         else
         {

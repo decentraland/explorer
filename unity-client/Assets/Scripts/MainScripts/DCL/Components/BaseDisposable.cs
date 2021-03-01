@@ -28,14 +28,15 @@ namespace DCL.Components
 
         protected BaseModel model;
 
-        public void UpdateFromJSON(string json)
+        public virtual void UpdateFromJSON(string json)
         {
-            UpdateFromObject(model.GetDataFromJSON(json));
+            UpdateFromModel(model.GetDataFromJSON(json));
         }
 
-        public void UpdateFromObject(BaseModel model)
+        public virtual void UpdateFromModel(BaseModel newModel)
         {
-            SetModel(model);
+            model = newModel;
+            updateHandler.ApplyChangesIfModified(model);
         }
 
         public BaseDisposable(IParcelScene scene)
@@ -128,12 +129,6 @@ namespace DCL.Components
         {
             //By default there's no initialization process and we call back as soon as we get the suscription
             callback.Invoke(this);
-        }
-
-        public virtual void SetModel(BaseModel newModel)
-        {
-            model = newModel;
-            updateHandler.ApplyChangesIfModified(model);
         }
     }
 }

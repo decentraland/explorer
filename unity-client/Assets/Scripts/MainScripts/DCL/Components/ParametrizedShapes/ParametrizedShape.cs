@@ -32,10 +32,10 @@ namespace DCL.Components
             OnDetach += OnShapeDetached;
         }
 
-        public override void SetModel(BaseModel newModel)
+        public override void UpdateFromModel(BaseModel newModel)
         {
             cachedModel = (Model)newModel;
-            base.SetModel(newModel);
+            base.UpdateFromModel(newModel);
         }
 
         void UpdateRenderer(DecentralandEntity entity, Model model = null)

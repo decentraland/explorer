@@ -1105,6 +1105,28 @@ namespace DCL.Controllers
             if (newComponent != null && newComponent.isRoutineRunning)
                 yieldInstruction = newComponent.yieldInstruction;
         }
+        
+        public BaseDisposable SharedComponentUpdate(string id, BaseModel model)
+        {
+            if (disposableComponents.TryGetValue(id, out BaseDisposable disposableComponent))
+            {
+                disposableComponent.UpdateFromModel(model);
+                return disposableComponent;
+            }
+            else
+            {
+                if (gameObject == null)
+                {
+                    Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
+                }
+                else
+                {
+                    Debug.LogError($"Unknown disposableComponent {id}", gameObject);
+                }
+            }
+
+            return null;
+        }
 
         public BaseDisposable SharedComponentUpdate(string id, string json)
         {

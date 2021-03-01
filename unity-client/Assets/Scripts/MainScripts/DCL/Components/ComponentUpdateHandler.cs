@@ -12,7 +12,7 @@ namespace DCL
         public Coroutine routine { get; protected set; }
 
         public WaitForComponentUpdate yieldInstruction;
-        public BaseModel oldSerialization { get; protected set; }
+        public BaseModel oldSerialization { get; protected set; } = null;
 
         public IComponent owner;
 
@@ -28,6 +28,7 @@ namespace DCL
         {
             this.owner = owner;
             this.routine = null;
+            
             yieldInstruction = new WaitForComponentUpdate(owner);
         }
 
@@ -40,7 +41,7 @@ namespace DCL
         {
             if (oldSerialization == null && newSerialization == null)
                 return;
-
+            
             if (newSerialization.Equals(oldSerialization))
                 return;
 

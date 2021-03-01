@@ -32,7 +32,7 @@ public class DCLName : BaseDisposable
 
         public override BaseModel GetDataFromJSON(string json)
         {
-            return JsonUtility.FromJson<Model>(json);
+            return Utils.SafeFromJson<Model>(json);
         }
 
         public override int GetHashCode()
@@ -81,6 +81,6 @@ public class DCLName : BaseDisposable
     {
         Model newModel = new Model();
         newModel.value = value;
-        SetModel(newModel);
+        UpdateFromModel(newModel);
     }
 }

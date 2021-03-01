@@ -15,9 +15,9 @@ public class QuestTrackingInfo : BaseComponent
 
     new public QuestModel GetModel() { return cachedModel; }
 
-    public override void SetModel(BaseModel newModel)
+    public override void UpdateFromModel(BaseModel newModel)
     {
-        base.SetModel(newModel);
+        base.UpdateFromModel(newModel);
         if (!(newModel is QuestModel quest))
             return;
 

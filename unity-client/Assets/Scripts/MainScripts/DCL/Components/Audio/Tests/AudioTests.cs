@@ -279,12 +279,12 @@ namespace Tests
             Assert.IsFalse(component.GetModel().playing);
 
             model.playing = true;
-            component.SetModel(model);
+            component.UpdateFromModel(model);
             yield return component.routine;
             Assert.IsTrue(component.GetModel().playing);
             
             model.playing = false;
-            component.SetModel(model);
+            component.UpdateFromModel(model);
             yield return component.routine; 
             Assert.IsFalse(component.GetModel().playing);
         }

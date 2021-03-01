@@ -327,7 +327,7 @@ public class ParametrizedShapesTests : IntegrationTestSuite_Legacy
         }
 
         // Act: Update withCollision
-        shapeComponent.SetModel(new BoxShape.Model {withCollisions = withCollision});
+        shapeComponent.UpdateFromModel(new BoxShape.Model {withCollisions = withCollision});
         yield return shapeComponent.routine;
 
         // Assert:
@@ -360,7 +360,7 @@ public class ParametrizedShapesTests : IntegrationTestSuite_Legacy
         }
 
         // Act: Update visible
-        shapeComponent.SetModel(new BoxShape.Model {visible = visible, withCollisions = true, isPointerBlocker = true});
+        shapeComponent.UpdateFromModel(new BoxShape.Model {visible = visible, withCollisions = true, isPointerBlocker = true});
         yield return shapeComponent.routine;
 
         // Assert:
