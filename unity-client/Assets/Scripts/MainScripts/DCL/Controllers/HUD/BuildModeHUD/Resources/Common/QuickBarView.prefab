@@ -292,18 +292,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149717697440182}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 8
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149717697440180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,33 +305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 8
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149717720923983
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,18 +440,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149717720923980}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149717720923978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,33 +453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 1
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149717898734192
 GameObject:
   m_ObjectHideFlags: 0
@@ -1016,18 +942,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149718227659039}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 7
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149718227659037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1040,33 +955,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 7
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149718235987393
 GameObject:
   m_ObjectHideFlags: 0
@@ -1201,18 +1090,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149718235987454}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 4
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149718235987452
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1225,33 +1103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 4
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149718284477259
 GameObject:
   m_ObjectHideFlags: 0
@@ -2043,7 +1895,7 @@ GameObject:
   - component: {fileID: 4150149718372546792}
   - component: {fileID: 1584688192203948387}
   m_Layer: 5
-  m_Name: QuickBarShortcuts
+  m_Name: QuickBarView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2091,8 +1943,26 @@ MonoBehaviour:
   - {fileID: 5970219144266253250}
   - {fileID: 2174497899842581339}
   - {fileID: 1280225560823950131}
-  generalCanvas: {fileID: 0}
-  catalogGroupListView: {fileID: 0}
+  shortcutsButtons:
+  - {fileID: 4150149718997101699}
+  - {fileID: 4150149717720923981}
+  - {fileID: 4150149719408763117}
+  - {fileID: 4150149718965725684}
+  - {fileID: 4150149718235987455}
+  - {fileID: 4150149719234510471}
+  - {fileID: 4150149719053854402}
+  - {fileID: 4150149718227659232}
+  - {fileID: 4150149717697440183}
+  shortcutsEventTriggers:
+  - {fileID: 4150149718997101698}
+  - {fileID: 4150149717720923978}
+  - {fileID: 4150149719408763114}
+  - {fileID: 4150149718965725681}
+  - {fileID: 4150149718235987452}
+  - {fileID: 4150149719234510468}
+  - {fileID: 4150149719053854463}
+  - {fileID: 4150149718227659037}
+  - {fileID: 4150149717697440180}
   quickBar1InputAction: {fileID: 11400000, guid: 019a8b4972b1c1a45b15beba521da248,
     type: 2}
   quickBar2InputAction: {fileID: 11400000, guid: 702cc9951626b2342be70c2ea20e6b3c,
@@ -2387,18 +2257,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149718965725683}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 3
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149718965725681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2411,33 +2270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 3
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149718997101701
 GameObject:
   m_ObjectHideFlags: 0
@@ -2572,18 +2405,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149718997101700}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149718997101698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2596,33 +2418,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149719017608881
 GameObject:
   m_ObjectHideFlags: 0
@@ -2913,18 +2709,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149719053854401}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 6
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149719053854463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2937,33 +2722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 6
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149719234510473
 GameObject:
   m_ObjectHideFlags: 0
@@ -3098,18 +2857,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149719234510470}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 5
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149719234510468
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3122,33 +2870,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 5
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149719401343477
 GameObject:
   m_ObjectHideFlags: 0
@@ -3354,18 +3076,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150149719408763116}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1584688192203948387}
-        m_MethodName: QuickBarObjectSelected
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &4150149719408763114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3378,33 +3089,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 6
-    callback:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SetIndexToDrop
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 2
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1584688192203948387}
-          m_MethodName: SceneObjectDropped
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  m_Delegates: []
 --- !u!1 &4150149719437645689
 GameObject:
   m_ObjectHideFlags: 0
