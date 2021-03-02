@@ -57,11 +57,11 @@ public class BuildModeHUDView : MonoBehaviour
         this.tooltipController = tooltipController;
         this.tooltipController.Initialize(tooltipView);
 
-        this.quickBarController = quickBarController;
-        this.quickBarController.Initialize(quickBarView, sceneCatalogView.catalogGroupListView);
-
         this.sceneCatalogController = sceneCatalogController;
         this.sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
+
+        this.quickBarController = quickBarController;
+        this.quickBarController.Initialize(quickBarView, sceneCatalogController);
 
         this.entityInformationController = entityInformationController;
         this.entityInformationController.Initialize(entityInformationView);

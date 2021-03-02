@@ -31,6 +31,7 @@ public interface ISceneCatalogController
     void CloseCatalog();
     void RefreshAssetPack();
     void RefreshCatalog();
+    CatalogItemAdapter GetLastCatalogItemDragged();
 }
 
 public class SceneCatalogController : ISceneCatalogController
@@ -319,5 +320,10 @@ public class SceneCatalogController : ISceneCatalogController
     public void RefreshCatalog()
     {
         sceneCatalogView.catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPackList());
+    }
+
+    public CatalogItemAdapter GetLastCatalogItemDragged()
+    {
+        return sceneCatalogView.catalogGroupListView.GetLastCatalogItemDragged();
     }
 }

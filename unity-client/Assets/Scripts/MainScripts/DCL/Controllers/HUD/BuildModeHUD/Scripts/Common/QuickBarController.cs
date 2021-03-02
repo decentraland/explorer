@@ -6,7 +6,7 @@ public interface IQuickBarController
     event System.Action<int> OnQuickBarShortcutSelected;
     event System.Action<CatalogItem> OnCatalogItemSelected;
 
-    void Initialize(QuickBarView view, CatalogGroupListView catalogGroupListView);
+    void Initialize(IQuickBarView view, ISceneCatalogController sceneCatalogController);
     void Dispose();
     int GetSlotsCount();
     CatalogItem QuickBarObjectSelected(int index);
@@ -20,18 +20,18 @@ public class QuickBarController : IQuickBarController
     public event System.Action<int> OnQuickBarShortcutSelected;
     public event System.Action<CatalogItem> OnCatalogItemSelected;
 
-    private QuickBarView quickBarView;
-    private CatalogGroupListView catalogGroupListView;
+    private IQuickBarView quickBarView;
+    private ISceneCatalogController sceneCatalogController;
 
     private CatalogItem[] quickBarShortcutsCatalogItems = new CatalogItem[AMOUNT_OF_QUICK_SLOTS];
     private int lastIndexDroped = -1;
 
     const int AMOUNT_OF_QUICK_SLOTS = 9;
 
-    public void Initialize(QuickBarView quickBarView, CatalogGroupListView catalogGroupListView)
+    public void Initialize(IQuickBarView quickBarView, ISceneCatalogController sceneCatalogController)
     {
         this.quickBarView = quickBarView;
-        this.catalogGroupListView = catalogGroupListView;
+        this.sceneCatalogController = sceneCatalogController;
 
         quickBarView.OnQuickBarObjectSelected += OnQuickBarObjectSelected;
         quickBarView.OnSetIndexToDrop += SetIndexToDrop;
@@ -75,7 +75,7 @@ public class QuickBarController : IQuickBarController
 
     public void SceneObjectDropped(BaseEventData data)
     {
-        CatalogItemAdapter adapter = catalogGroupListView.GetLastCatalogItemDragged();
+        CatalogItemAdapter adapter = sceneCatalogController.GetLastCatalogItemDragged();
         CatalogItem catalogItem = adapter.GetContent();
 
         if (adapter.thumbnailImg.enabled)

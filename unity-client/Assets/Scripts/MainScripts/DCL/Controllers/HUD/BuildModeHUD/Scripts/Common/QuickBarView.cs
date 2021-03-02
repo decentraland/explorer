@@ -1,14 +1,39 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class QuickBarView : MonoBehaviour
+public interface IQuickBarView
 {
-    public event System.Action<int> OnQuickBarObjectSelected;
-    public event System.Action<int> OnSetIndexToDrop;
-    public event System.Action<BaseEventData> OnSceneObjectDropped;
-    public event System.Action<int> OnQuickBarInputTriggered;
+    event Action<int> OnQuickBarInputTriggered;
+    event Action<int> OnQuickBarObjectSelected;
+    event Action<BaseEventData> OnSceneObjectDropped;
+    event Action<int> OnSetIndexToDrop;
+
+    void ConfigureEventTrigger(int index, EventTriggerType eventType, UnityAction<BaseEventData> call);
+    void OnQuickBar1InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar2InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar3InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar4InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar5InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar6InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar7InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar8InputTriggedered(DCLAction_Trigger action);
+    void OnQuickBar9InputTriggedered(DCLAction_Trigger action);
+    void QuickBarObjectSelected(int index);
+    void RemoveEventTrigger(int index, EventTriggerType eventType);
+    void SceneObjectDropped(BaseEventData data);
+    void SetIndexToDrop(int index);
+    void SetTextureToShortcut(int shortcutIndex, Texture texture);
+}
+
+public class QuickBarView : MonoBehaviour, IQuickBarView
+{
+    public event Action<int> OnQuickBarObjectSelected;
+    public event Action<int> OnSetIndexToDrop;
+    public event Action<BaseEventData> OnSceneObjectDropped;
+    public event Action<int> OnQuickBarInputTriggered;
 
     [SerializeField] internal QuickBarSlot[] shortcutsImgs;
     [SerializeField] internal Button[] shortcutsButtons;
@@ -77,7 +102,7 @@ public class QuickBarView : MonoBehaviour
         quickBar9InputAction.OnTriggered -= OnQuickBar9InputTriggedered;
     }
 
-    private void ConfigureEventTrigger(int index, EventTriggerType eventType, UnityAction<BaseEventData> call)
+    public void ConfigureEventTrigger(int index, EventTriggerType eventType, UnityAction<BaseEventData> call)
     {
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = eventType;
@@ -85,7 +110,7 @@ public class QuickBarView : MonoBehaviour
         shortcutsEventTriggers[index].triggers.Add(entry);
     }
 
-    private void RemoveEventTrigger(int index, EventTriggerType eventType)
+    public void RemoveEventTrigger(int index, EventTriggerType eventType)
     {
         shortcutsEventTriggers[index].triggers.RemoveAll(x => x.eventID == eventType);
     }
@@ -114,47 +139,47 @@ public class QuickBarView : MonoBehaviour
             shortcutsImgs[shortcutIndex].SetTexture(texture);
     }
 
-    private void OnQuickBar1InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar1InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(0);
     }
 
-    private void OnQuickBar2InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar2InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(1);
     }
 
-    private void OnQuickBar3InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar3InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(2);
     }
 
-    private void OnQuickBar4InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar4InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(3);
     }
 
-    private void OnQuickBar5InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar5InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(4);
     }
 
-    private void OnQuickBar6InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar6InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(5);
     }
 
-    private void OnQuickBar7InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar7InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(6);
     }
 
-    private void OnQuickBar8InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar8InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(7);
     }
 
-    private void OnQuickBar9InputTriggedered(DCLAction_Trigger action)
+    public void OnQuickBar9InputTriggedered(DCLAction_Trigger action)
     {
         OnQuickBarInputTriggered?.Invoke(8);
     }
