@@ -1,18 +1,21 @@
+using System;
+
 public interface IDragAndDropSceneObjectController
 {
-    event System.Action OnDrop;
+    event Action OnDrop;
 
-    void Initialize(DragAndDropSceneObjectView dragAndDropSceneObjectView);
+    void Initialize(IDragAndDropSceneObjectView dragAndDropSceneObjectView);
     void Dispose();
+    void Drop();
 }
 
 public class DragAndDropSceneObjectController : IDragAndDropSceneObjectController
 {
-    public event System.Action OnDrop;
+    public event Action OnDrop;
 
-    private DragAndDropSceneObjectView dragAndDropSceneObjectView;
+    private IDragAndDropSceneObjectView dragAndDropSceneObjectView;
 
-    public void Initialize(DragAndDropSceneObjectView dragAndDropSceneObjectView)
+    public void Initialize(IDragAndDropSceneObjectView dragAndDropSceneObjectView)
     {
         this.dragAndDropSceneObjectView = dragAndDropSceneObjectView;
 
@@ -24,7 +27,7 @@ public class DragAndDropSceneObjectController : IDragAndDropSceneObjectControlle
         dragAndDropSceneObjectView.OnDrop -= Drop;
     }
 
-    private void Drop()
+    public void Drop()
     {
         OnDrop?.Invoke();
     }
