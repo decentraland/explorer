@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,10 +7,9 @@ using UnityEngine.UI;
 public class CircleLoadingAnimator : MonoBehaviour
 {
     public float animSpeed = 6f;
-    Image fillImage;
 
+    Image fillImage;
     Coroutine coroutine;
- 
 
     private void OnEnable()
     {
