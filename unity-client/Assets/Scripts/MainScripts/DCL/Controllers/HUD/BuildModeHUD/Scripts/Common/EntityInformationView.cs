@@ -3,7 +3,42 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EntityInformationView : MonoBehaviour
+public interface IEntityInformationView
+{
+    DCLBuilderInWorldEntity currentEntity { get; set; }
+    bool isEnable { get; set; }
+    AttributeXYZ position { get; }
+    AttributeXYZ rotation { get; }
+    AttributeXYZ scale { get; }
+    SmartItemListView smartItemList { get; }
+
+    event Action OnDisable;
+    event Action OnEndChangingName;
+    event Action<DCLBuilderInWorldEntity, string> OnNameChange;
+    event Action OnStartChangingName;
+    event Action<DCLBuilderInWorldEntity> OnUpdateInfo;
+
+    void ChangeEntityName(string newName);
+    void Disable();
+    void EndChangingName();
+    void SeEntityLimitsLeftText(string text);
+    void SeEntityLimitsRightText(string text);
+    void SetActive(bool isActive);
+    void SetCurrentEntity(DCLBuilderInWorldEntity entity);
+    void SetEntityThumbnailEnable(bool isEnable);
+    void SetEntityThumbnailTexture(Texture2D texture);
+    void SeTitleText(string text);
+    void SetNameIFText(string text);
+    void SetPositionAttribute(Vector3 newPos);
+    void SetRotationAttribute(Vector3 newRotation);
+    void SetScaleAttribute(Vector3 newScale);
+    void SetSmartItemListViewActive(bool isActive);
+    void StartChangingName();
+    void ToggleBasicInfo();
+    void ToggleDetailsInfo();
+}
+
+public class EntityInformationView : MonoBehaviour, IEntityInformationView
 {
     [Header("Sprites")]
     [SerializeField] internal Sprite openMenuSprite;
@@ -14,7 +49,7 @@ public class EntityInformationView : MonoBehaviour
     [SerializeField] internal TextMeshProUGUI entityLimitsLeftTxt;
     [SerializeField] internal TextMeshProUGUI entityLimitsRightTxt;
     [SerializeField] internal TMP_InputField nameIF;
-    [SerializeField] internal RawImage entitytTumbailImg; 
+    [SerializeField] internal RawImage entitytTumbailImg;
     [SerializeField] internal AttributeXYZ positionAttribute;
     [SerializeField] internal AttributeXYZ rotationAttribute;
     [SerializeField] internal AttributeXYZ scaleAttribute;
@@ -25,8 +60,15 @@ public class EntityInformationView : MonoBehaviour
     [SerializeField] internal SmartItemListView smartItemListView;
     [SerializeField] internal Button backButton;
     [SerializeField] internal Button hideCatalogButton;
-    [SerializeField] internal Button detailsBackButton;
-    [SerializeField] internal Button basicInfoBackButton;
+    [SerializeField] internal Button detailsToggleButton;
+    [SerializeField] internal Button basicInfoTogglekButton;
+
+    public DCLBuilderInWorldEntity currentEntity { get; set; }
+    public bool isEnable { get; set; } = false;
+    public AttributeXYZ position => positionAttribute;
+    public AttributeXYZ rotation => rotationAttribute;
+    public AttributeXYZ scale => scaleAttribute;
+    public SmartItemListView smartItemList => smartItemListView;
 
     public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
     public event Action<DCLBuilderInWorldEntity> OnUpdateInfo;
@@ -34,17 +76,14 @@ public class EntityInformationView : MonoBehaviour
     public event Action OnEndChangingName;
     public event Action OnDisable;
 
-    public DCLBuilderInWorldEntity currentEntity { get; set; }
-    public bool isEnable { get; set; } = false;
-
-    private const int FRAMES_BETWEEN_UPDATES = 5;
+    internal const int FRAMES_BETWEEN_UPDATES = 5;
 
     private void Awake()
     {
         backButton.onClick.AddListener(Disable);
         hideCatalogButton.onClick.AddListener(Disable);
-        detailsBackButton.onClick.AddListener(ToggleDetailsInfo);
-        basicInfoBackButton.onClick.AddListener(ToggleBasicInfo);
+        detailsToggleButton.onClick.AddListener(ToggleDetailsInfo);
+        basicInfoTogglekButton.onClick.AddListener(ToggleBasicInfo);
         nameIF.onEndEdit.AddListener((newName) => ChangeEntityName(newName));
         nameIF.onSelect.AddListener((newName) => StartChangingName());
         nameIF.onDeselect.AddListener((newName) => EndChangingName());
@@ -54,8 +93,8 @@ public class EntityInformationView : MonoBehaviour
     {
         backButton.onClick.RemoveListener(Disable);
         hideCatalogButton.onClick.RemoveListener(Disable);
-        detailsBackButton.onClick.RemoveListener(ToggleDetailsInfo);
-        basicInfoBackButton.onClick.RemoveListener(ToggleBasicInfo);
+        detailsToggleButton.onClick.RemoveListener(ToggleDetailsInfo);
+        basicInfoTogglekButton.onClick.RemoveListener(ToggleBasicInfo);
         nameIF.onEndEdit.RemoveListener((newName) => ChangeEntityName(newName));
         nameIF.onSelect.RemoveListener((newName) => StartChangingName());
         nameIF.onDeselect.RemoveListener((newName) => EndChangingName());
@@ -71,6 +110,11 @@ public class EntityInformationView : MonoBehaviour
 
         if (Time.frameCount % FRAMES_BETWEEN_UPDATES == 0)
             OnUpdateInfo?.Invoke(currentEntity);
+    }
+
+    public void SetCurrentEntity(DCLBuilderInWorldEntity entity)
+    {
+        currentEntity = entity;
     }
 
     public void ToggleDetailsInfo()
@@ -107,11 +151,17 @@ public class EntityInformationView : MonoBehaviour
 
     public void SetEntityThumbnailEnable(bool isEnable)
     {
+        if (entitytTumbailImg == null)
+            return;
+
         entitytTumbailImg.enabled = isEnable;
     }
 
     public void SetEntityThumbnailTexture(Texture2D texture)
     {
+        if (entitytTumbailImg == null)
+            return;
+
         entitytTumbailImg.texture = texture;
     }
 
@@ -128,5 +178,35 @@ public class EntityInformationView : MonoBehaviour
     public void SeEntityLimitsRightText(string text)
     {
         entityLimitsRightTxt.text = text;
+    }
+
+    public void SetSmartItemListViewActive(bool isActive)
+    {
+        smartItemListView.gameObject.SetActive(isActive);
+    }
+
+    public void SetNameIFText(string text)
+    {
+        nameIF.SetTextWithoutNotify(text);
+    }
+
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
+
+    public void SetPositionAttribute(Vector3 newPos)
+    {
+        positionAttribute.SetValues(newPos);
+    }
+
+    public void SetRotationAttribute(Vector3 newRotation)
+    {
+        rotationAttribute.SetValues(newRotation);
+    }
+
+    public void SetScaleAttribute(Vector3 newScale)
+    {
+        scaleAttribute.SetValues(newScale);
     }
 }

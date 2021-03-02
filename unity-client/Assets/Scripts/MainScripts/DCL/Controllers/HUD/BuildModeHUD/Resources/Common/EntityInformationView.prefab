@@ -9065,8 +9065,8 @@ MonoBehaviour:
   smartItemListView: {fileID: 5686465573134754310}
   backButton: {fileID: 2965905026032899351}
   hideCatalogButton: {fileID: 7960249195805054106}
-  detailsBackButton: {fileID: 5461605552408377446}
-  basicInfoBackButton: {fileID: 1808548721378345531}
+  detailsToggleButton: {fileID: 5461605552408377446}
+  basicInfoTogglekButton: {fileID: 1808548721378345531}
 --- !u!1 &8190457264338810058
 GameObject:
   m_ObjectHideFlags: 0

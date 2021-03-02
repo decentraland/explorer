@@ -11,8 +11,9 @@ public interface IEntityInformationController
     event Action<Vector3> OnRotationChange;
     event Action<Vector3> OnScaleChange;
     event Action<DCLBuilderInWorldEntity, string> OnNameChange;
+    event Action<DCLBuilderInWorldEntity> OnSmartItemComponentUpdate;
 
-    void Initialize(EntityInformationView view);
+    void Initialize(IEntityInformationView view);
     void Dispose();
     void PositionChanged(Vector3 pos);
     void RotationChanged(Vector3 rot);
@@ -36,18 +37,18 @@ public class EntityInformationController : IEntityInformationController
     public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
     public event Action<DCLBuilderInWorldEntity> OnSmartItemComponentUpdate;
 
-    private EntityInformationView entityInformationView;
+    private IEntityInformationView entityInformationView;
     private ParcelScene parcelScene;
     private AssetPromise_Texture loadedThumbnailPromise;
     private bool isChangingName = false;
 
-    public void Initialize(EntityInformationView entityInformationView)
+    public void Initialize(IEntityInformationView entityInformationView)
     {
         this.entityInformationView = entityInformationView;
 
-        entityInformationView.positionAttribute.OnChanged += PositionChanged;
-        entityInformationView.rotationAttribute.OnChanged += RotationChanged;
-        entityInformationView.scaleAttribute.OnChanged += ScaleChanged;
+        entityInformationView.position.OnChanged += PositionChanged;
+        entityInformationView.rotation.OnChanged += RotationChanged;
+        entityInformationView.scale.OnChanged += ScaleChanged;
         entityInformationView.OnNameChange += NameChanged;
         entityInformationView.OnStartChangingName += StartChangingName;
         entityInformationView.OnEndChangingName += EndChangingName;
@@ -57,9 +58,9 @@ public class EntityInformationController : IEntityInformationController
 
     public void Dispose()
     {
-        entityInformationView.positionAttribute.OnChanged -= PositionChanged;
-        entityInformationView.rotationAttribute.OnChanged -= RotationChanged;
-        entityInformationView.scaleAttribute.OnChanged -= ScaleChanged;
+        entityInformationView.position.OnChanged -= PositionChanged;
+        entityInformationView.rotation.OnChanged -= RotationChanged;
+        entityInformationView.scale.OnChanged -= ScaleChanged;
         entityInformationView.OnNameChange -= NameChanged;
         entityInformationView.OnUpdateInfo -= UpdateInfo;
         entityInformationView.OnStartChangingName -= StartChangingName;
@@ -114,18 +115,18 @@ public class EntityInformationController : IEntityInformationController
         if (entityInformationView.currentEntity != null)
             entity.onStatusUpdate -= UpdateEntityName;
 
-        entityInformationView.currentEntity = entity;
+        entityInformationView.SetCurrentEntity(entity);
         entityInformationView.currentEntity.onStatusUpdate += UpdateEntityName;
         parcelScene = currentScene;
 
         if (entity.HasSmartItemComponent())
         {
             if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-                entityInformationView.smartItemListView.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent)baseComponent).model.values);
+                entityInformationView.smartItemList.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent)baseComponent).model.values);
         }
         else
         {
-            entityInformationView.smartItemListView.gameObject.SetActive(false);
+            entityInformationView.SetSmartItemListViewActive(false);
         }
 
         entityInformationView.SetEntityThumbnailEnable(false);
@@ -136,7 +137,7 @@ public class EntityInformationController : IEntityInformationController
         UpdateInfo(entityInformationView.currentEntity);
     }
 
-    private void GetThumbnail(CatalogItem catalogItem)
+    internal void GetThumbnail(CatalogItem catalogItem)
     {
         var url = catalogItem.thumbnailURL;
 
@@ -152,25 +153,22 @@ public class EntityInformationController : IEntityInformationController
         loadedThumbnailPromise = newLoadedThumbnailPromise;
     }
 
-    private void SetThumbnail(Asset_Texture texture)
+    internal void SetThumbnail(Asset_Texture texture)
     {
-        if (entityInformationView.entitytTumbailImg != null)
-        {
-            entityInformationView.SetEntityThumbnailEnable(true);
-            entityInformationView.SetEntityThumbnailTexture(texture.texture);
-        }
+        entityInformationView.SetEntityThumbnailEnable(true);
+        entityInformationView.SetEntityThumbnailTexture(texture.texture);
     }
 
-    private void UpdateEntityName(DCLBuilderInWorldEntity entity)
+    internal void UpdateEntityName(DCLBuilderInWorldEntity entity)
     {
         string currentName = entity.GetDescriptiveName();
         entityInformationView.SeTitleText(currentName);
 
         if (!isChangingName)
-            entityInformationView.nameIF.SetTextWithoutNotify(currentName);
+            entityInformationView.SetNameIFText(currentName);
     }
 
-    private void UpdateLimitsInformation(CatalogItem catalogItem)
+    internal void UpdateLimitsInformation(CatalogItem catalogItem)
     {
         if (catalogItem == null)
         {
@@ -193,22 +191,19 @@ public class EntityInformationController : IEntityInformationController
 
     public void Enable()
     {
-        entityInformationView.gameObject.SetActive(true);
+        entityInformationView.SetActive(true);
         entityInformationView.isEnable = true;
     }
 
     public void Disable()
     {
-        entityInformationView.gameObject.SetActive(false);
+        entityInformationView.SetActive(false);
         entityInformationView.isEnable = false;
-
-        if (entityInformationView.currentEntity != null)
-            EntityDeselected();
-
-        entityInformationView.currentEntity = null;
+        EntityDeselected();
+        entityInformationView.SetCurrentEntity(null);
     }
 
-    private void EntityDeselected()
+    internal void EntityDeselected()
     {
         if (entityInformationView.currentEntity == null)
             return;
@@ -238,13 +233,13 @@ public class EntityInformationController : IEntityInformationController
 
             currentRotation = newEuler;
 
-            entityInformationView.positionAttribute.SetValues(positionConverted);
-            entityInformationView.rotationAttribute.SetValues(currentRotation);
-            entityInformationView.scaleAttribute.SetValues(currentScale);
+            entityInformationView.SetPositionAttribute(positionConverted);
+            entityInformationView.SetRotationAttribute(currentRotation);
+            entityInformationView.SetScaleAttribute(currentScale);
         }
     }
 
-    private float RepeatWorking(float t, float length)
+    internal float RepeatWorking(float t, float length)
     {
         return (t - (Mathf.Floor(t / length) * length));
     }
