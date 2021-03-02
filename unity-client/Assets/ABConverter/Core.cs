@@ -111,7 +111,7 @@ namespace DCL.ABConverter
 
                         env.assetDatabase.Refresh();
 
-                        if (assetsAlreadyDumped && DataStore.i.ABConversorGLTFMissingDependencies.Count > 0)
+                        if (assetsAlreadyDumped && DataStore.i.ABConversorGLTFMissingDependencies.Count > 0 && sceneCid != null)
                         {
                             Debug.Log("Core.Convert(): Missing dependencies detected: " + DataStore.i.ABConversorGLTFMissingDependencies.Count);
 
