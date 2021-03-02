@@ -45,43 +45,41 @@ public class BIWCatalogShould
         Assert.AreEqual(filteredItem, catalogItemToFilter);
     }
 
-    // TODO (Santi): Adapt test!
-    //[Test]
-    //public void BuilderInWorldQuickBar()
-    //{
-    //    BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
-    //    CatalogItem item = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
+    [Test]
+    public void BuilderInWorldQuickBar()
+    {
+        BuilderInWorldTestHelper.CreateTestCatalogLocalSingleObject();
+        CatalogItem item = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
 
-    //    CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
-    //    adapter.SetContent(item);
+        CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
+        adapter.SetContent(item);
 
-    //    CatalogAssetGroupAdapter groupAdatper = new CatalogAssetGroupAdapter();
-    //    groupAdatper.AddAdapter(adapter);
+        CatalogAssetGroupAdapter groupAdatper = new CatalogAssetGroupAdapter();
+        groupAdatper.AddAdapter(adapter);
 
-    //    CatalogGroupListView catalogGroupListView = new CatalogGroupListView();
-    //    catalogGroupListView.AddAdapter(groupAdatper);
-    //    catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
-    //    SceneCatalogView sceneCatalogView = new SceneCatalogView();
-    //    sceneCatalogView.catalogGroupListView = catalogGroupListView;
-    //    SceneCatalogController sceneCatalogController = new SceneCatalogController();
+        CatalogGroupListView catalogGroupListView = new CatalogGroupListView();
+        catalogGroupListView.AddAdapter(groupAdatper);
+        catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
+        SceneCatalogView sceneCatalogView = SceneCatalogView.Create();
+        sceneCatalogView.catalogGroupListView = catalogGroupListView;
+        SceneCatalogController sceneCatalogController = new SceneCatalogController();
 
-    //    QuickBarView quickBarView = new QuickBarView();
+        QuickBarView quickBarView = QuickBarView.Create();
 
-    //    QuickBarController quickBarController = new QuickBarController();
-    //    sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
-    //    quickBarController.Initialize(quickBarView, sceneCatalogController);
-    //    int slots = quickBarController.GetSlotsCount();
-    //    quickBarView.shortcutsImgs = new QuickBarSlot[slots];
+        QuickBarController quickBarController = new QuickBarController();
+        sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
+        quickBarController.Initialize(quickBarView, sceneCatalogController);
+        int slots = quickBarController.GetSlotsCount();
+        quickBarView.shortcutsImgs = new QuickBarSlot[slots];
 
-    //    for (int i = 0; i < slots; i++)
-    //    {
-    //        quickBarController.SetIndexToDrop(i);
-    //        adapter.AdapterStartDragging(null);
-    //        quickBarController.SceneObjectDropped(null);
-    //        Assert.AreEqual(item, quickBarController.QuickBarObjectSelected(i));
-    //    }
-
-    //}
+        for (int i = 0; i < slots; i++)
+        {
+            quickBarController.SetIndexToDrop(i);
+            adapter.AdapterStartDragging(null);
+            quickBarController.SceneObjectDropped(null);
+            Assert.AreEqual(item, quickBarController.QuickBarObjectSelected(i));
+        }
+    }
 
     [Test]
     public void BuilderInWorldToggleFavorite()

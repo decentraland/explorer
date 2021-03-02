@@ -70,6 +70,16 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 
     internal bool isCatalogExpanded = false;
 
+    private const string VIEW_PATH = "Common/SceneCatalogView";
+
+    internal static SceneCatalogView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<SceneCatalogView>();
+        view.gameObject.name = "_SceneCatalogView";
+
+        return view;
+    }
+
     private void Awake()
     {
         hideCatalogBtn.onClick.AddListener(OnHideCatalogClick);

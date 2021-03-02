@@ -48,6 +48,16 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
     [SerializeField] internal InputAction_Trigger quickBar8InputAction;
     [SerializeField] internal InputAction_Trigger quickBar9InputAction;
 
+    private const string VIEW_PATH = "Common/QuickBarView";
+
+    internal static QuickBarView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<QuickBarView>();
+        view.gameObject.name = "_QuickBarView";
+
+        return view;
+    }
+
     private void Awake()
     {
         for (int i = 0; i < shortcutsButtons.Length; i++)
