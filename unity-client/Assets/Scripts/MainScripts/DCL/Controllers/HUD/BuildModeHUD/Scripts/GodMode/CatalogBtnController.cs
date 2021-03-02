@@ -1,10 +1,11 @@
+using System;
 using UnityEngine.EventSystems;
 
 public interface ICatalogBtnController
 {
-    event System.Action OnClick;
+    event Action OnClick;
 
-    void Initialize(CatalogBtnView catalogBtnView, ITooltipController tooltipController);
+    void Initialize(ICatalogBtnView catalogBtnView, ITooltipController tooltipController);
     void Dispose();
     void Click();
     void ShowTooltip(BaseEventData eventData, string tooltipText);
@@ -13,12 +14,12 @@ public interface ICatalogBtnController
 
 public class CatalogBtnController : ICatalogBtnController
 {
-    public event System.Action OnClick;
+    public event Action OnClick;
 
-    private CatalogBtnView catalogBtnView;
+    private ICatalogBtnView catalogBtnView;
     private ITooltipController tooltipController;
 
-    public void Initialize(CatalogBtnView catalogBtnView, ITooltipController tooltipController)
+    public void Initialize(ICatalogBtnView catalogBtnView, ITooltipController tooltipController)
     {
         this.catalogBtnView = catalogBtnView;
         this.tooltipController = tooltipController;
