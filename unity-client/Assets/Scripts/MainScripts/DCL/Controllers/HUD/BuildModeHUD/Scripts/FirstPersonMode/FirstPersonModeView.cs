@@ -1,13 +1,27 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FirstPersonModeView : MonoBehaviour
+public interface IFirstPersonModeView
 {
-    public event System.Action OnFirstPersonModeClick;
-    public event System.Action<BaseEventData, string> OnShowTooltip;
-    public event System.Action OnHideTooltip;
+    event Action OnFirstPersonModeClick;
+    event Action OnHideTooltip;
+    event Action<BaseEventData, string> OnShowTooltip;
+
+    void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
+    void OnPointerClick();
+    void OnPointerEnter(PointerEventData eventData);
+    void OnPointerExit();
+    void RemoveEventTrigger(EventTriggerType eventType);
+}
+
+public class FirstPersonModeView : MonoBehaviour, IFirstPersonModeView
+{
+    public event Action OnFirstPersonModeClick;
+    public event Action<BaseEventData, string> OnShowTooltip;
+    public event Action OnHideTooltip;
 
     [SerializeField] internal Button mainButton;
     [SerializeField] internal string tooltipText = "Change Camera (I)";
@@ -20,12 +34,24 @@ public class FirstPersonModeView : MonoBehaviour
         ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }
 
-    private void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
+    private void OnDestroy()
+    {
+        mainButton.onClick.RemoveListener(OnPointerClick);
+        RemoveEventTrigger(EventTriggerType.PointerEnter);
+        RemoveEventTrigger(EventTriggerType.PointerExit);
+    }
+
+    public void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
     {
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = eventType;
         entry.callback.AddListener(call);
         changeModeEventTrigger.triggers.Add(entry);
+    }
+
+    public void RemoveEventTrigger(EventTriggerType eventType)
+    {
+        changeModeEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }
 
     public void OnPointerClick()

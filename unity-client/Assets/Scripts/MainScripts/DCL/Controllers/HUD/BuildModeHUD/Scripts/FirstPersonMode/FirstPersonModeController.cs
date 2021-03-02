@@ -1,10 +1,11 @@
+using System;
 using UnityEngine.EventSystems;
 
 public interface IFirstPersonModeController
 {
-    event System.Action OnClick;
+    event Action OnClick;
 
-    void Initialize(FirstPersonModeView firstPersonModeView, ITooltipController tooltipController);
+    void Initialize(IFirstPersonModeView firstPersonModeView, ITooltipController tooltipController);
     void Dispose();
     void Click();
     void ShowTooltip(BaseEventData eventData, string tooltipText);
@@ -13,12 +14,12 @@ public interface IFirstPersonModeController
 
 public class FirstPersonModeController : IFirstPersonModeController
 {
-    public event System.Action OnClick;
+    public event Action OnClick;
 
-    private FirstPersonModeView firstPersonModeView;
+    private IFirstPersonModeView firstPersonModeView;
     private ITooltipController tooltipController;
 
-    public void Initialize(FirstPersonModeView firstPersonModeView, ITooltipController tooltipController)
+    public void Initialize(IFirstPersonModeView firstPersonModeView, ITooltipController tooltipController)
     {
         this.firstPersonModeView = firstPersonModeView;
         this.tooltipController = tooltipController;
