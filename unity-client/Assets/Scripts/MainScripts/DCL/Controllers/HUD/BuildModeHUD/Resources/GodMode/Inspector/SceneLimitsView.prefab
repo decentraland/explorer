@@ -299,6 +299,7 @@ MonoBehaviour:
   rightDescTxt: {fileID: 1436151706876337121}
   limitUsageFillsImgs:
   - {fileID: 5614818989794907175}
+  toggleButton: {fileID: 4351891833548037573}
   toggleSceneInfoInputAction: {fileID: 11400000, guid: b01ba6523971e0149a23c36b50259cdd,
     type: 2}
 --- !u!114 &4626944618038899896
@@ -1307,15 +1308,4 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8633157937983439365}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4103045442843736023}
-        m_MethodName: ToggleSceneLimitsInfo
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []

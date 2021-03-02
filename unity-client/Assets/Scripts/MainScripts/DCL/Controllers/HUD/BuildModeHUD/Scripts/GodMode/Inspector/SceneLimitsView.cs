@@ -24,7 +24,9 @@ public class SceneLimitsView : MonoBehaviour
     [SerializeField] internal TextMeshProUGUI leftDescTxt;
     [SerializeField] internal TextMeshProUGUI rightDescTxt;
     [SerializeField] internal Image[] limitUsageFillsImgs;
+    [SerializeField] internal Button toggleButton;
 
+    [Header("Input Actions")]
     [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
 
     internal bool isBodyActived => sceneLimitsBodyGO.activeSelf;
@@ -35,11 +37,13 @@ public class SceneLimitsView : MonoBehaviour
     private void Awake()
     {
         toggleSceneInfoInputAction.OnTriggered += (action) => ToggleSceneLimitsInfo();
+        toggleButton.onClick.AddListener(ToggleSceneLimitsInfo);
     }
 
     private void OnDestroy()
     {
         toggleSceneInfoInputAction.OnTriggered -= (action) => ToggleSceneLimitsInfo();
+        toggleButton.onClick.RemoveListener(ToggleSceneLimitsInfo);
     }
 
     private void Update()
@@ -53,7 +57,6 @@ public class SceneLimitsView : MonoBehaviour
         updateInfoAction = call;
     }
 
-    // TODO (Santi): Called from imspector!
     public void ToggleSceneLimitsInfo()
     {
         OnToggleSceneLimitsInfo?.Invoke();
