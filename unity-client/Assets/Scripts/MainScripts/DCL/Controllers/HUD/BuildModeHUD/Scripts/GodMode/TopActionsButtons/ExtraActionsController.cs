@@ -2,9 +2,11 @@ using System;
 
 public interface IExtraActionsController
 {
-    event Action OnControlsClick, OnHideUIClick, OnTutorialClick;
+    event Action OnControlsClick,
+                 OnHideUIClick,
+                 OnTutorialClick;
 
-    void Initialize(ExtraActionsView extraActionsView);
+    void Initialize(IExtraActionsView extraActionsView);
     void Dispose();
     void SetActive(bool isActive);
     void ControlsClicked();
@@ -14,11 +16,13 @@ public interface IExtraActionsController
 
 public class ExtraActionsController : IExtraActionsController
 {
-    public event Action OnControlsClick, OnHideUIClick, OnTutorialClick;
+    public event Action OnControlsClick,
+                        OnHideUIClick, 
+                        OnTutorialClick;
 
-    private ExtraActionsView extraActionsView;
+    private IExtraActionsView extraActionsView;
 
-    public void Initialize(ExtraActionsView extraActionsView)
+    public void Initialize(IExtraActionsView extraActionsView)
     {
         this.extraActionsView = extraActionsView;
 

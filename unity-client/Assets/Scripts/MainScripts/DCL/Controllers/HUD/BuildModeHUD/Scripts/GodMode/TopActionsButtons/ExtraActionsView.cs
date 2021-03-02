@@ -2,11 +2,23 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ExtraActionsView : MonoBehaviour
+public interface IExtraActionsView
 {
-    internal event Action OnControlsClicked,
-                          OnHideUIClicked,
-                          OnTutorialClicked;
+    event Action OnControlsClicked,
+                 OnHideUIClicked,
+                 OnTutorialClicked;
+
+    void OnControlsClick();
+    void OnHideUIClick();
+    void OnTutorialClick();
+    void SetActive(bool isActive);
+}
+
+public class ExtraActionsView : MonoBehaviour, IExtraActionsView
+{
+    public event Action OnControlsClicked,
+                        OnHideUIClicked,
+                        OnTutorialClicked;
 
     [Header("Buttons")]
     [SerializeField] internal Button hideUIBtn;
