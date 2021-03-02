@@ -1,10 +1,11 @@
+using System;
 using UnityEngine.EventSystems;
 
 public interface IPublishBtnController
 {
-    event System.Action OnClick;
+    event Action OnClick;
 
-    void Initialize(PublishBtnView publishBtnView, ITooltipController tooltipController);
+    void Initialize(IPublishBtnView publishBtnView, ITooltipController tooltipController);
     void Dispose();
     void Click();
     void ShowTooltip(BaseEventData eventData, string tooltipText);
@@ -14,12 +15,12 @@ public interface IPublishBtnController
 
 public class PublishBtnController : IPublishBtnController
 {
-    public event System.Action OnClick;
+    public event Action OnClick;
 
-    private PublishBtnView publishBtnView;
+    private IPublishBtnView publishBtnView;
     private ITooltipController tooltipController;
 
-    public void Initialize(PublishBtnView publishBtnView, ITooltipController tooltipController)
+    public void Initialize(IPublishBtnView publishBtnView, ITooltipController tooltipController)
     {
         this.publishBtnView = publishBtnView;
         this.tooltipController = tooltipController;
