@@ -1,6 +1,6 @@
 public interface IPublishPopupController
 {
-    void Initialize(PublishPopupView publishPopupView);
+    void Initialize(IPublishPopupView publishPopupView);
     void Dispose();
     void PublishStart();
     void PublishEnd(string message);
@@ -8,9 +8,9 @@ public interface IPublishPopupController
 
 public class PublishPopupController : IPublishPopupController
 {
-    private PublishPopupView publishPopupView;
+    private IPublishPopupView publishPopupView;
 
-    public void Initialize(PublishPopupView publishPopupView)
+    public void Initialize(IPublishPopupView publishPopupView)
     {
         this.publishPopupView = publishPopupView;
     }

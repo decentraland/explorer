@@ -1,7 +1,13 @@
 using TMPro;
 using UnityEngine;
 
-public class PublishPopupView : MonoBehaviour
+public interface IPublishPopupView
+{
+    void PublishEnd(string message);
+    void PublishStart();
+}
+
+public class PublishPopupView : MonoBehaviour, IPublishPopupView
 {
     [SerializeField] internal GameObject publishingGO;
     [SerializeField] internal GameObject publishingFinishedGO;
