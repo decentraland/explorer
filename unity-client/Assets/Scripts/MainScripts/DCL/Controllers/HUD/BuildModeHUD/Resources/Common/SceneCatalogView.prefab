@@ -2931,18 +2931,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9164274516329364507}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3044571813177970572}
-        m_MethodName: Back
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &9164274516478218804
 GameObject:
   m_ObjectHideFlags: 0
@@ -3400,6 +3389,8 @@ MonoBehaviour:
   favoritesToggle: {fileID: 1123582241676762620}
   assetPackToggle: {fileID: 4418187777106020839}
   hideCatalogBtn: {fileID: 9164274517318511039}
+  backgBtn: {fileID: 9164274516329364504}
+  toggleCatalogBtn: {fileID: 9164274517301949792}
   panelRT: {fileID: 9164274515348817592}
   headerRT: {fileID: 9164274516257064006}
   searchBarRT: {fileID: 9164274516946305848}
@@ -3705,18 +3696,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9164274517060906142}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: TranslateMode
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &9164274517067509941
 GameObject:
   m_ObjectHideFlags: 0
@@ -4109,18 +4089,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9164274517301949795}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3044571813177970572}
-        m_MethodName: ToggleCatalogExpanse
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &9164274517318511037
 GameObject:
   m_ObjectHideFlags: 0
@@ -4238,15 +4207,4 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9164274517318511038}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: ChangeVisibilityOfCatalog
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []

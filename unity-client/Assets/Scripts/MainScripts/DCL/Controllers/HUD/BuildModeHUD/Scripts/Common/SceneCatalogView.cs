@@ -17,6 +17,8 @@ public class SceneCatalogView : MonoBehaviour
     [SerializeField] internal Toggle favoritesToggle;
     [SerializeField] internal Toggle assetPackToggle;
     [SerializeField] internal Button hideCatalogBtn;
+    [SerializeField] internal Button backgBtn;
+    [SerializeField] internal Button toggleCatalogBtn;
 
     [Header("Catalog RectTransforms")]
     [SerializeField] internal RectTransform panelRT;
@@ -42,14 +44,17 @@ public class SceneCatalogView : MonoBehaviour
     private void Awake()
     {
         hideCatalogBtn.onClick.AddListener(OnHideCatalogClick);
+        backgBtn.onClick.AddListener(Back);
+        toggleCatalogBtn.onClick.AddListener(ToggleCatalogExpanse);
     }
 
     private void OnDestroy()
     {
         hideCatalogBtn.onClick.RemoveListener(OnHideCatalogClick);
+        backgBtn.onClick.RemoveListener(Back);
+        toggleCatalogBtn.onClick.RemoveListener(ToggleCatalogExpanse);
     }
 
-    // TODO (Santi): Called from imspector!
     public void ToggleCatalogExpanse()
     {
         if(isCatalogExpanded)
@@ -77,7 +82,6 @@ public class SceneCatalogView : MonoBehaviour
         OnHideCatalogClicked?.Invoke();
     }
 
-    // TODO (Santi): Called from imspector!
     public void Back()
     {
         OnSceneCatalogBack?.Invoke();
