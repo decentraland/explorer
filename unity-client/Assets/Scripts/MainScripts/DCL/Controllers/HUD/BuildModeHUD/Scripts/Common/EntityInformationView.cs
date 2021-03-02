@@ -41,24 +41,24 @@ public class EntityInformationView : MonoBehaviour
 
     private void Awake()
     {
-        backButton.onClick.AddListener(() => OnDisable?.Invoke());
-        hideCatalogButton.onClick.AddListener(() => OnDisable?.Invoke());
+        backButton.onClick.AddListener(Disable);
+        hideCatalogButton.onClick.AddListener(Disable);
         detailsBackButton.onClick.AddListener(ToggleDetailsInfo);
         basicInfoBackButton.onClick.AddListener(ToggleBasicInfo);
-        nameIF.onEndEdit.AddListener((newName) => OnNameChange?.Invoke(currentEntity, newName));
-        nameIF.onSelect.AddListener((newName) => OnStartChangingName?.Invoke());
-        nameIF.onDeselect.AddListener((newName) => OnEndChangingName?.Invoke());
+        nameIF.onEndEdit.AddListener((newName) => ChangeEntityName(newName));
+        nameIF.onSelect.AddListener((newName) => StartChangingName());
+        nameIF.onDeselect.AddListener((newName) => EndChangingName());
     }
 
     private void OnDestroy()
     {
-        backButton.onClick.RemoveListener(() => OnDisable?.Invoke());
-        hideCatalogButton.onClick.RemoveListener(() => OnDisable?.Invoke());
+        backButton.onClick.RemoveListener(Disable);
+        hideCatalogButton.onClick.RemoveListener(Disable);
         detailsBackButton.onClick.RemoveListener(ToggleDetailsInfo);
         basicInfoBackButton.onClick.RemoveListener(ToggleBasicInfo);
-        nameIF.onEndEdit.RemoveListener((newName) => OnNameChange?.Invoke(currentEntity, newName));
-        nameIF.onSelect.RemoveListener((newName) => OnStartChangingName?.Invoke());
-        nameIF.onDeselect.RemoveListener((newName) => OnEndChangingName?.Invoke());
+        nameIF.onEndEdit.RemoveListener((newName) => ChangeEntityName(newName));
+        nameIF.onSelect.RemoveListener((newName) => StartChangingName());
+        nameIF.onDeselect.RemoveListener((newName) => EndChangingName());
     }
 
     private void LateUpdate()
@@ -83,6 +83,26 @@ public class EntityInformationView : MonoBehaviour
     {
         basicsGO.SetActive(!basicsGO.activeSelf);
         basicToggleBtn.sprite = basicsGO.activeSelf ? openMenuSprite : closeMenuSprite;
+    }
+
+    public void StartChangingName()
+    {
+        OnStartChangingName?.Invoke();
+    }
+
+    public void EndChangingName()
+    {
+        OnEndChangingName?.Invoke();
+    }
+
+    public void ChangeEntityName(string newName)
+    {
+        OnNameChange?.Invoke(currentEntity, newName);
+    }
+
+    public void Disable()
+    {
+        OnDisable?.Invoke();
     }
 
     public void SetEntityThumbnailEnable(bool isEnable)
