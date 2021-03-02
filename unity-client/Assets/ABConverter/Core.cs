@@ -84,6 +84,7 @@ namespace DCL.ABConverter
             /// <param name="sceneCid">The asset scene ID in case any dependency is missing</param>
             public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null, string sceneCid = null)
             {
+                OnFinish -= CleanAndExit;
                 OnFinish += CleanAndExit;
 
                 DataStore.i.ABConversorRunning = true;
