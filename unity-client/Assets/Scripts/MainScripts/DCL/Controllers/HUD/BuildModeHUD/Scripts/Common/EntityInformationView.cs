@@ -23,6 +23,10 @@ public class EntityInformationView : MonoBehaviour
     [SerializeField] internal Image detailsToggleBtn;
     [SerializeField] internal Image basicToggleBtn;
     [SerializeField] internal SmartItemListView smartItemListView;
+    [SerializeField] internal Button backButton;
+    [SerializeField] internal Button hideCatalogButton;
+    [SerializeField] internal Button detailsBackButton;
+    [SerializeField] internal Button basicInfoBackButton;
 
     public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
     public event Action<DCLBuilderInWorldEntity> OnUpdateInfo;
@@ -34,6 +38,28 @@ public class EntityInformationView : MonoBehaviour
     public bool isEnable { get; set; } = false;
 
     private const int FRAMES_BETWEEN_UPDATES = 5;
+
+    private void Awake()
+    {
+        backButton.onClick.AddListener(() => OnDisable?.Invoke());
+        hideCatalogButton.onClick.AddListener(() => OnDisable?.Invoke());
+        detailsBackButton.onClick.AddListener(ToggleDetailsInfo);
+        basicInfoBackButton.onClick.AddListener(ToggleBasicInfo);
+        nameIF.onEndEdit.AddListener((newName) => OnNameChange?.Invoke(currentEntity, newName));
+        nameIF.onSelect.AddListener((newName) => OnStartChangingName?.Invoke());
+        nameIF.onDeselect.AddListener((newName) => OnEndChangingName?.Invoke());
+    }
+
+    private void OnDestroy()
+    {
+        backButton.onClick.RemoveListener(() => OnDisable?.Invoke());
+        hideCatalogButton.onClick.RemoveListener(() => OnDisable?.Invoke());
+        detailsBackButton.onClick.RemoveListener(ToggleDetailsInfo);
+        basicInfoBackButton.onClick.RemoveListener(ToggleBasicInfo);
+        nameIF.onEndEdit.RemoveListener((newName) => OnNameChange?.Invoke(currentEntity, newName));
+        nameIF.onSelect.RemoveListener((newName) => OnStartChangingName?.Invoke());
+        nameIF.onDeselect.RemoveListener((newName) => OnEndChangingName?.Invoke());
+    }
 
     private void LateUpdate()
     {
@@ -47,42 +73,16 @@ public class EntityInformationView : MonoBehaviour
             OnUpdateInfo?.Invoke(currentEntity);
     }
 
-    // TODO (Santi): Called from imspector!
     public void ToggleDetailsInfo()
     {
         detailsGO.SetActive(!detailsGO.activeSelf);
         detailsToggleBtn.sprite = detailsGO.activeSelf ? openMenuSprite : closeMenuSprite;
     }
 
-    // TODO (Santi): Called from imspector!
     public void ToggleBasicInfo()
     {
         basicsGO.SetActive(!basicsGO.activeSelf);
         basicToggleBtn.sprite = basicsGO.activeSelf ? openMenuSprite : closeMenuSprite;
-    }
-
-    // TODO (Santi): Called from imspector!
-    public void StartChangingName()
-    {
-        OnStartChangingName?.Invoke();
-    }
-
-    // TODO (Santi): Called from imspector!
-    public void EndChangingName()
-    {
-        OnEndChangingName?.Invoke();
-    }
-
-    // TODO (Santi): Called from imspector!
-    public void ChangeEntityName(string newName)
-    {      
-        OnNameChange?.Invoke(currentEntity, newName);
-    }
-
-    // TODO (Santi): Called from imspector!
-    public void Disable()
-    {
-        OnDisable?.Invoke();
     }
 
     public void SetEntityThumbnailEnable(bool isEnable)

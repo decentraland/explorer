@@ -1547,18 +1547,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8403043295966859024}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: ToggleDetailsInfo
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &1674976706805758786
 GameObject:
   m_ObjectHideFlags: 0
@@ -4400,18 +4389,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6897772342297949975}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: Disable
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &4003601990038804319
 GameObject:
   m_ObjectHideFlags: 0
@@ -4861,18 +4839,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3956722472438189609}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: ToggleBasicInfo
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &4415594967818849980
 GameObject:
   m_ObjectHideFlags: 0
@@ -5737,49 +5704,16 @@ MonoBehaviour:
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: ChangeEntityName
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnSelect:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: StartChangingName
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_OnDeselect:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: EndChangingName
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_OnTextSelection:
     m_PersistentCalls:
       m_Calls: []
@@ -7391,18 +7325,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4939147846776505284}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8987509843347612041}
-        m_MethodName: Disable
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &6884612357138337140
 GameObject:
   m_ObjectHideFlags: 0
@@ -9140,6 +9063,10 @@ MonoBehaviour:
   detailsToggleBtn: {fileID: 8403043295966859024}
   basicToggleBtn: {fileID: 3956722472438189609}
   smartItemListView: {fileID: 5686465573134754310}
+  backButton: {fileID: 2965905026032899351}
+  hideCatalogButton: {fileID: 7960249195805054106}
+  detailsBackButton: {fileID: 5461605552408377446}
+  basicInfoBackButton: {fileID: 1808548721378345531}
 --- !u!1 &8190457264338810058
 GameObject:
   m_ObjectHideFlags: 0
