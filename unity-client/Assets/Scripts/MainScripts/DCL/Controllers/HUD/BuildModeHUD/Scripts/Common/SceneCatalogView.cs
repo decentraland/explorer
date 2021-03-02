@@ -1,12 +1,41 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SceneCatalogView : MonoBehaviour
+public interface ISceneCatalogView
 {
-    public event System.Action OnHideCatalogClicked;
-    public event System.Action OnSceneCatalogBack;
+    CatalogAssetPackListView catalogAssetPackList { get; }
+    CatalogGroupListView catalogGroupList { get; }
+    TMP_InputField searchInput { get; }
+    Toggle category { get; }
+    Toggle favorites { get; }
+    Toggle assetPack { get; }
+
+    event Action OnHideCatalogClicked;
+    event Action OnSceneCatalogBack;
+
+    void Back();
+    void CloseCatalog();
+    bool IsCatalogOpen();
+    void OnHideCatalogClick();
+    void SetCatalogTitle(string text);
+    void ToggleCatalogExpanse();
+    void SetActive(bool isActive);
+}
+
+public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
+{
+    public CatalogAssetPackListView catalogAssetPackList => catalogAssetPackListView;
+    public CatalogGroupListView catalogGroupList => catalogGroupListView;
+    public TMP_InputField searchInput => searchInputField;
+    public Toggle category => categoryToggle;
+    public Toggle favorites => favoritesToggle;
+    public Toggle assetPack => assetPackToggle;
+
+    public event Action OnHideCatalogClicked;
+    public event Action OnSceneCatalogBack;
 
     [Header("Prefab References")]
     [SerializeField] internal TextMeshProUGUI catalogTitleTxt;
@@ -39,7 +68,7 @@ public class SceneCatalogView : MonoBehaviour
     [SerializeField] internal RectTransform searchBarMaxSizeRT;
     [SerializeField] internal RectTransform assetPackMaxSizeRT;
 
-    private bool isCatalogExpanded = false;
+    internal bool isCatalogExpanded = false;
 
     private void Awake()
     {
@@ -57,7 +86,7 @@ public class SceneCatalogView : MonoBehaviour
 
     public void ToggleCatalogExpanse()
     {
-        if(isCatalogExpanded)
+        if (isCatalogExpanded)
         {
             BuilderInWorldUtils.CopyRectTransform(panelRT, panelMinSizeRT);
             BuilderInWorldUtils.CopyRectTransform(headerRT, headerMinSizeRT);
@@ -99,13 +128,18 @@ public class SceneCatalogView : MonoBehaviour
 
     public void CloseCatalog()
     {
-        if(gameObject.activeSelf)
+        if (gameObject.activeSelf)
             StartCoroutine(CloseCatalogAfterOneFrame());
     }
 
-    private IEnumerator CloseCatalogAfterOneFrame()
+    internal IEnumerator CloseCatalogAfterOneFrame()
     {
         yield return null;
         gameObject.SetActive(false);
+    }
+
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
     }
 }

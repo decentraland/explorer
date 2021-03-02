@@ -10,7 +10,7 @@ public interface ISceneCatalogController
     event Action OnResumeInput;
     event Action OnStopInput;
 
-    void Initialize(SceneCatalogView view, IQuickBarController quickBarController);
+    void Initialize(ISceneCatalogView view, IQuickBarController quickBarController);
     void Dispose();
     void AssetsPackFilter(bool isOn);
     void CategoryFilter(bool isOn);
@@ -41,31 +41,29 @@ public class SceneCatalogController : ISceneCatalogController
     public event Action OnResumeInput;
     public event Action OnStopInput;
 
-    private SceneCatalogView sceneCatalogView;
-    private List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
+    private ISceneCatalogView sceneCatalogView;
     private IQuickBarController quickBarController;
     private FavoritesController favoritesController;
-    internal bool isShowingAssetPacks = false;
+    private List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
+    private bool isShowingAssetPacks = false;
     private bool isFilterByAssetPacks = true;
     private const string FAVORITE_NAME = "Favorites";
 
-    public void Initialize(
-        SceneCatalogView sceneCatalogView,
-        IQuickBarController quickBarController)
+    public void Initialize(ISceneCatalogView sceneCatalogView, IQuickBarController quickBarController)
     {
         this.sceneCatalogView = sceneCatalogView;
         this.quickBarController = quickBarController;
-        favoritesController = new FavoritesController(sceneCatalogView.catalogGroupListView);
+        favoritesController = new FavoritesController(sceneCatalogView.catalogGroupList);
 
         sceneCatalogView.OnHideCatalogClicked += HideCatalogClicked;
-        sceneCatalogView.catalogAssetPackListView.OnCatalogPackClick += OnCatalogItemPackSelected;
-        sceneCatalogView.catalogGroupListView.OnCatalogItemClicked += CatalogItemSelected;
-        sceneCatalogView.catalogGroupListView.OnResumeInput += ResumeInput;
-        sceneCatalogView.catalogGroupListView.OnStopInput += StopInput;
-        sceneCatalogView.searchInputField.onValueChanged.AddListener(OnSearchInputChanged);
-        sceneCatalogView.categoryToggle.onValueChanged.AddListener(CategoryFilter);
-        sceneCatalogView.favoritesToggle.onValueChanged.AddListener(FavoritesFilter);
-        sceneCatalogView.assetPackToggle.onValueChanged.AddListener(AssetsPackFilter);
+        sceneCatalogView.catalogAssetPackList.OnCatalogPackClick += OnCatalogItemPackSelected;
+        sceneCatalogView.catalogGroupList.OnCatalogItemClicked += CatalogItemSelected;
+        sceneCatalogView.catalogGroupList.OnResumeInput += ResumeInput;
+        sceneCatalogView.catalogGroupList.OnStopInput += StopInput;
+        sceneCatalogView.searchInput.onValueChanged.AddListener(OnSearchInputChanged);
+        sceneCatalogView.category.onValueChanged.AddListener(CategoryFilter);
+        sceneCatalogView.favorites.onValueChanged.AddListener(FavoritesFilter);
+        sceneCatalogView.assetPack.onValueChanged.AddListener(AssetsPackFilter);
         sceneCatalogView.OnSceneCatalogBack += SceneCatalogBack;
         quickBarController.OnQuickBarShortcutSelected += QuickBarInput;
         quickBarController.OnCatalogItemSelected += CatalogItemSelected;
@@ -74,16 +72,16 @@ public class SceneCatalogController : ISceneCatalogController
     public void Dispose()
     {
         sceneCatalogView.OnHideCatalogClicked -= HideCatalogClicked;
-        quickBarController.OnQuickBarShortcutSelected -= QuickBarInput;
-        sceneCatalogView.catalogAssetPackListView.OnCatalogPackClick -= OnCatalogItemPackSelected;
-        sceneCatalogView.catalogGroupListView.OnCatalogItemClicked -= CatalogItemSelected;
-        sceneCatalogView.catalogGroupListView.OnResumeInput -= ResumeInput;
-        sceneCatalogView.catalogGroupListView.OnStopInput -= StopInput;
-        sceneCatalogView.searchInputField.onValueChanged.RemoveListener(OnSearchInputChanged);
-        sceneCatalogView.categoryToggle.onValueChanged.RemoveListener(CategoryFilter);
-        sceneCatalogView.favoritesToggle.onValueChanged.RemoveListener(FavoritesFilter);
-        sceneCatalogView.assetPackToggle.onValueChanged.RemoveListener(AssetsPackFilter);
+        sceneCatalogView.catalogAssetPackList.OnCatalogPackClick -= OnCatalogItemPackSelected;
+        sceneCatalogView.catalogGroupList.OnCatalogItemClicked -= CatalogItemSelected;
+        sceneCatalogView.catalogGroupList.OnResumeInput -= ResumeInput;
+        sceneCatalogView.catalogGroupList.OnStopInput -= StopInput;
+        sceneCatalogView.searchInput.onValueChanged.RemoveListener(OnSearchInputChanged);
+        sceneCatalogView.category.onValueChanged.RemoveListener(CategoryFilter);
+        sceneCatalogView.favorites.onValueChanged.RemoveListener(FavoritesFilter);
+        sceneCatalogView.assetPack.onValueChanged.RemoveListener(AssetsPackFilter);
         sceneCatalogView.OnSceneCatalogBack -= SceneCatalogBack;
+        quickBarController.OnQuickBarShortcutSelected -= QuickBarInput;
 
         if (quickBarController != null)
             quickBarController.OnCatalogItemSelected -= CatalogItemSelected;
@@ -130,7 +128,7 @@ public class SceneCatalogController : ISceneCatalogController
         {
             ShowCatalogContent();
             FilterAssets(currentSearchInput);
-            sceneCatalogView.catalogGroupListView.SetContent(filterObjects);
+            sceneCatalogView.catalogGroupList.SetContent(filterObjects);
         }
     }
 
@@ -163,7 +161,7 @@ public class SceneCatalogController : ISceneCatalogController
         return filterObjects;
     }
 
-    private void AddNewSceneObjectCategoryToFilter(CatalogItem catalogItem)
+    internal void AddNewSceneObjectCategoryToFilter(CatalogItem catalogItem)
     {
         Dictionary<string, List<CatalogItem>> groupedCatalogItems = new Dictionary<string, List<CatalogItem>>();
         groupedCatalogItems.Add(catalogItem.category, new List<CatalogItem>() { catalogItem });
@@ -185,7 +183,7 @@ public class SceneCatalogController : ISceneCatalogController
         groupedCategoryItems.Add(FAVORITE_NAME, favoritesController.GetFavorites());
         favorites.Add(groupedCategoryItems);
 
-        sceneCatalogView.catalogGroupListView.SetContent(favorites);
+        sceneCatalogView.catalogGroupList.SetContent(favorites);
     }
 
     public void CatalogItemSelected(CatalogItem catalogItem)
@@ -211,11 +209,10 @@ public class SceneCatalogController : ISceneCatalogController
     public void OnCatalogItemPackSelected(CatalogItemPack catalogItemPack)
     {
         ShowCatalogContent();
-
         SetCatalogAssetPackInListView(catalogItemPack);
     }
 
-    private void SetCatalogAssetPackInListView(CatalogItemPack catalogItemPack)
+    internal void SetCatalogAssetPackInListView(CatalogItemPack catalogItemPack)
     {
         sceneCatalogView.SetCatalogTitle(catalogItemPack.title);
         Dictionary<string, List<CatalogItem>> groupedCatalogItem = new Dictionary<string, List<CatalogItem>>();
@@ -235,10 +232,10 @@ public class SceneCatalogController : ISceneCatalogController
             groupedCatalogItem
         };
 
-        sceneCatalogView.catalogGroupListView.SetContent(contentList);
+        sceneCatalogView.catalogGroupList.SetContent(contentList);
     }
 
-    private List<CatalogItem> GetAssetsListByCategory(string category, CatalogItemPack sceneAssetPack)
+    internal List<CatalogItem> GetAssetsListByCategory(string category, CatalogItemPack sceneAssetPack)
     {
         List<CatalogItem> catalogItemList = new List<CatalogItem>();
 
@@ -273,30 +270,30 @@ public class SceneCatalogController : ISceneCatalogController
 
     public void ShowCategories()
     {
-        sceneCatalogView.catalogAssetPackListView.SetCategoryStyle();
-        sceneCatalogView.catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories());
+        sceneCatalogView.catalogAssetPackList.SetCategoryStyle();
+        sceneCatalogView.catalogAssetPackList.SetContent(BIWCatalogManager.GetCatalogItemPacksFilteredByCategories());
         isShowingAssetPacks = true;
         sceneCatalogView.SetCatalogTitle(BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE);
-        sceneCatalogView.catalogAssetPackListView.gameObject.SetActive(true);
-        sceneCatalogView.catalogGroupListView.gameObject.SetActive(false);
+        sceneCatalogView.catalogAssetPackList.gameObject.SetActive(true);
+        sceneCatalogView.catalogGroupList.gameObject.SetActive(false);
     }
 
     public void ShowAssetsPacks()
     {
-        sceneCatalogView.catalogAssetPackListView.SetAssetPackStyle();
-        sceneCatalogView.catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPackList());
+        sceneCatalogView.catalogAssetPackList.SetAssetPackStyle();
+        sceneCatalogView.catalogAssetPackList.SetContent(BIWCatalogManager.GetCatalogItemPackList());
         isShowingAssetPacks = true;
         sceneCatalogView.SetCatalogTitle(BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE);
         RefreshCatalog();
-        sceneCatalogView.catalogAssetPackListView.gameObject.SetActive(true);
-        sceneCatalogView.catalogGroupListView.gameObject.SetActive(false);
+        sceneCatalogView.catalogAssetPackList.gameObject.SetActive(true);
+        sceneCatalogView.catalogGroupList.gameObject.SetActive(false);
     }
 
     public void ShowCatalogContent()
     {
         isShowingAssetPacks = false;
-        sceneCatalogView.catalogAssetPackListView.gameObject.SetActive(false);
-        sceneCatalogView.catalogGroupListView.gameObject.SetActive(true);
+        sceneCatalogView.catalogAssetPackList.gameObject.SetActive(false);
+        sceneCatalogView.catalogGroupList.gameObject.SetActive(true);
     }
 
     public void OpenCatalog()
@@ -304,7 +301,7 @@ public class SceneCatalogController : ISceneCatalogController
         RefreshCatalog();
         sceneCatalogView.SetCatalogTitle(BuilderInWorldSettings.CATALOG_ASSET_PACK_TITLE);
         Utils.UnlockCursor();
-        sceneCatalogView.gameObject.SetActive(true);
+        sceneCatalogView.SetActive(true);
     }
 
     public void CloseCatalog()
@@ -314,16 +311,16 @@ public class SceneCatalogController : ISceneCatalogController
 
     public void RefreshAssetPack()
     {
-        sceneCatalogView.catalogGroupListView.RefreshDisplay();
+        sceneCatalogView.catalogGroupList.RefreshDisplay();
     }
 
     public void RefreshCatalog()
     {
-        sceneCatalogView.catalogAssetPackListView.SetContent(BIWCatalogManager.GetCatalogItemPackList());
+        sceneCatalogView.catalogAssetPackList.SetContent(BIWCatalogManager.GetCatalogItemPackList());
     }
 
     public CatalogItemAdapter GetLastCatalogItemDragged()
     {
-        return sceneCatalogView.catalogGroupListView.GetLastCatalogItemDragged();
+        return sceneCatalogView.catalogGroupList.GetLastCatalogItemDragged();
     }
 }

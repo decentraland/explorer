@@ -1,10 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public interface IQuickBarController
 {
-    event System.Action<int> OnQuickBarShortcutSelected;
-    event System.Action<CatalogItem> OnCatalogItemSelected;
+    event Action<int> OnQuickBarShortcutSelected;
+    event Action<CatalogItem> OnCatalogItemSelected;
 
     void Initialize(IQuickBarView view, ISceneCatalogController sceneCatalogController);
     void Dispose();
@@ -17,8 +18,8 @@ public interface IQuickBarController
 
 public class QuickBarController : IQuickBarController
 {
-    public event System.Action<int> OnQuickBarShortcutSelected;
-    public event System.Action<CatalogItem> OnCatalogItemSelected;
+    public event Action<int> OnQuickBarShortcutSelected;
+    public event Action<CatalogItem> OnCatalogItemSelected;
 
     private IQuickBarView quickBarView;
     private ISceneCatalogController sceneCatalogController;
