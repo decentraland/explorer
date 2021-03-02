@@ -78,6 +78,22 @@ public class BuilderProjectsPanelDataMock
         SendFetchProjects();
     }
 
+    public void SendSceneUpdate(string id, string name, string description, string[] requiredPermissions, bool isMatureContent, bool allowVoiceChat)
+    {
+        if (!projects.TryGetValue(id, out BuilderProjectsPanelSceneDataMock project))
+        {
+            return;
+        }
+        
+        project.name = name;
+        project.description = description;
+        project.requiredPermissions = requiredPermissions;
+        project.isMatureContent = isMatureContent;
+        project.allowVoiceChat = allowVoiceChat;
+        projects[project.id] = project;
+        SendFetchProjects();
+    }
+
     private void GenerateMockProjects()
     {
         const int deployedCount = 4;
@@ -88,6 +104,12 @@ public class BuilderProjectsPanelDataMock
         {
             "", "https://decentraland.org/images/thumbnail/genesis-plaza.png","https://peer.decentraland.org/content/contents/Qmc9nJxR6MoRMaspUMYPRcanrYGeRrz9PCAdo1qSYboaKm",
             "https://peer.decentraland.org/content/contents/QmeRyqAuJojXxtHh26aMQLa2RwgoHW4fLJu7hctQ1Rba3W","https://peer.decentraland.org/content/contents/Qmb7mYufcDYiLv9Vg3zxyCGvpbtLoY2gah6sdonzgRURRV"
+        };
+
+        string[][] permissions =
+        {
+            null, new [] { "" }, new [] { "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE" }, new [] { "ALLOW_TO_TRIGGER_AVATAR_EMOTE" },
+            new [] { "ALLOW_TO_TRIGGER_AVATAR_EMOTE", "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE" }
         };
 
         for (int i = 0; i < deployedCount; i++)
@@ -107,7 +129,11 @@ public class BuilderProjectsPanelDataMock
                 entitiesCount = Random.Range(1,60),
                 authorName = $"User#{Random.Range(100,6000)}",
                 authorThumbnail = avatarThumbnail[Random.Range(0,avatarThumbnail.Length)],
-                thumbnailUrl = scenesThumbnail[Random.Range(0,scenesThumbnail.Length)]
+                thumbnailUrl = scenesThumbnail[Random.Range(0,scenesThumbnail.Length)],
+                allowVoiceChat = Random.Range(0, 1) == 1,
+                isMatureContent = Random.Range(0, 5) < 1,
+                requiredPermissions = permissions[Random.Range(0,permissions.Length)],
+                description = Random.Range(0, 1) == 1? "Some description" : ""
             });
         }
         for (int i = 0; i < projectCount; i++)
@@ -126,7 +152,11 @@ public class BuilderProjectsPanelDataMock
                 entitiesCount = Random.Range(1,60),
                 authorName = $"User#{Random.Range(100,6000)}",
                 authorThumbnail = avatarThumbnail[Random.Range(0,avatarThumbnail.Length)],
-                thumbnailUrl = scenesThumbnail[Random.Range(0,scenesThumbnail.Length)]
+                thumbnailUrl = scenesThumbnail[Random.Range(0,scenesThumbnail.Length)],
+                allowVoiceChat = Random.Range(0, 1) == 1,
+                isMatureContent = Random.Range(0, 5) < 1,
+                requiredPermissions = permissions[Random.Range(0,permissions.Length)],
+                description = Random.Range(0, 1) == 1? "Some description" : ""
             });
         }
     }

@@ -15,6 +15,10 @@ internal interface ISceneData
     int entitiesCount { get; }
     string authorThumbnail { get; }
     string authorName { get; }
+    string[] requiredPermissions { get; }
+    bool isMatureContent { get; }
+    bool allowVoiceChat { get; }
+    string description { get; }
 }
 
 [Serializable]
@@ -32,6 +36,10 @@ internal class SceneData : ISceneData
     public int entitiesCount;
     public string authorThumbnail;
     public string authorName;
+    public string[] requiredPermissions;
+    public bool isMatureContent;
+    public bool allowVoiceChat;
+    public string description;
 
     Vector2Int ISceneData.coords => coords;
     Vector2Int ISceneData.size => size;
@@ -45,4 +53,8 @@ internal class SceneData : ISceneData
     int ISceneData.entitiesCount => entitiesCount;
     string ISceneData.authorThumbnail => authorThumbnail;
     string ISceneData.authorName => authorName;
+    string[] ISceneData.requiredPermissions => requiredPermissions;
+    bool ISceneData.isMatureContent => isMatureContent;
+    bool ISceneData.allowVoiceChat => allowVoiceChat;
+    string ISceneData.description => description;
 }

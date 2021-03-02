@@ -12,6 +12,7 @@ internal class SectionsController : IDisposable
     public event Action<SectionBase> OnSectionHide;
     public event Action OnRequestContextMenuHide;
     public event Action<SectionId> OnOpenSectionId;
+    public event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -47,6 +48,7 @@ internal class SectionsController : IDisposable
 
         SectionBase.OnRequestOpenSection += OpenSection;
         SectionBase.OnRequestContextMenuHide += OnHideContextMenuRequested;
+        SectionBase.OnRequestUpdateSceneData += OnUpdateSceneDataRequested;
     }
 
     /// <summary>
@@ -113,6 +115,7 @@ internal class SectionsController : IDisposable
     {
         SectionBase.OnRequestOpenSection -= OpenSection;
         SectionBase.OnRequestContextMenuHide -= OnHideContextMenuRequested;
+        SectionBase.OnRequestUpdateSceneData -= OnUpdateSceneDataRequested;
 
         using (var iterator = loadedSections.GetEnumerator())
         {
@@ -128,5 +131,10 @@ internal class SectionsController : IDisposable
     private void OnHideContextMenuRequested()
     {
         OnRequestContextMenuHide?.Invoke();
+    }
+
+    private void OnUpdateSceneDataRequested(string id, SceneUpdatePayload updatePayload)
+    {
+        OnRequestUpdateSceneData?.Invoke(id, updatePayload);
     }
 }

@@ -5,6 +5,7 @@ internal abstract class SectionBase : IDisposable
 {
     public static event Action OnRequestContextMenuHide;
     public static event Action<SectionsController.SectionId> OnRequestOpenSection;
+    public static event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
 
     public bool isVisible { get; private set; } = false;
     public virtual ISectionSearchHandler searchHandler { get; protected set; } = null;
@@ -39,5 +40,10 @@ internal abstract class SectionBase : IDisposable
     protected void RequestHideContextMenu()
     {
         OnRequestContextMenuHide?.Invoke();
+    }
+
+    protected void RequestUpdateSceneData(string id, SceneUpdatePayload updatePayload)
+    {
+        OnRequestUpdateSceneData?.Invoke(id, updatePayload);
     }
 }

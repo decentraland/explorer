@@ -1,4 +1,4 @@
 internal interface ISelectSceneListener
 {
-    void OnSelectScene(ISceneData sceneData);
+    void OnSelectScene(SceneCardView sceneCardView);
 }

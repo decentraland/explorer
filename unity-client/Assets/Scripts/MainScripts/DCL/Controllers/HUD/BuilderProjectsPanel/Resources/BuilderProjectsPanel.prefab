@@ -3367,6 +3367,7 @@ MonoBehaviour:
     avatarThumbnailContainer: {fileID: 5093093892353339738}
     avatarImage: {fileID: 4513147324902183127}
     authorNameText: {fileID: 338454054351000294}
+    adminsMenuToggle: {fileID: 5161656191955093869}
   sceneCardViewPrefab: {fileID: 6743010040785150304, guid: 0384d382f4cd14fd5b14515c7eb2d514,
     type: 3}
 --- !u!223 &3723003818699732366
@@ -4214,7 +4215,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6347901935940684467
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4261,7 +4262,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1cd9e1b6a24a643d2944851e1fc980f8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d811af9f233a74328a75c3c192a39996, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4855,6 +4856,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SceneCardViewContextMenu
+      objectReference: {fileID: 0}
+    - target: {fileID: 1825667629365014829, guid: f43161113de474b8db9143af378476b8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2107598550803245627, guid: f43161113de474b8db9143af378476b8,
         type: 3}

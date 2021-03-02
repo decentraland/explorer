@@ -16,4 +16,8 @@ public struct BuilderProjectsPanelSceneDataMock
     public int entitiesCount;
     public string authorThumbnail;
     public string authorName;
+    public string[] requiredPermissions;
+    public bool isMatureContent;
+    public bool allowVoiceChat;
+    public string description;
 }

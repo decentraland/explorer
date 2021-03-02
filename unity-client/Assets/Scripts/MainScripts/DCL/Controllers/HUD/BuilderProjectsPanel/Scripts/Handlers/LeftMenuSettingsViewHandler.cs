@@ -118,8 +118,8 @@ internal class LeftMenuSettingsViewHandler : IDisposable
         }
     }
     
-    void OnSelectScene(ISceneData sceneData)
+    void OnSelectScene(SceneCardView sceneCardView)
     {
-        SetProjectData(sceneData);
+        SetProjectData(sceneCardView.sceneData);
     }
 }

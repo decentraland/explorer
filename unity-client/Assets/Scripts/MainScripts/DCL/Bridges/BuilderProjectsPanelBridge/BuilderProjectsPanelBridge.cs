@@ -62,4 +62,10 @@ public class BuilderProjectsPanelBridge : MonoBehaviour
     {
         dataMocker?.SendQuitContributor(id);
     }
+
+    public void SendSceneUpdate(string id, SceneUpdatePayload payload)
+    {
+        dataMocker?.SendSceneUpdate(id, payload.name, payload.description, 
+            payload.requiredPermissions, payload.isMatureContent, payload.allowVoiceChat);
+    }
 }

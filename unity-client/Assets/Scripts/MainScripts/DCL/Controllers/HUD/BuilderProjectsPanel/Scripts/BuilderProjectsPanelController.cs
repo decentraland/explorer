@@ -27,6 +27,7 @@ public class BuilderProjectsPanelController : IDisposable
         {
             bridge.OnProjectsSet -= OnProjectsUpdated;
         }
+        sectionsController.OnRequestUpdateSceneData -= OnRequestUpdateSceneData;
 
         leftMenuSettingsViewHandler.Dispose();
         sectionsHandler.Dispose();
@@ -60,6 +61,7 @@ public class BuilderProjectsPanelController : IDisposable
         {
             bridge.OnProjectsSet += OnProjectsUpdated;
             bridge.SendFetchProjects();
+            sectionsController.OnRequestUpdateSceneData += OnRequestUpdateSceneData;
         }
 
         leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(scenesViewController, view.settingsViewReferences);
@@ -94,5 +96,10 @@ public class BuilderProjectsPanelController : IDisposable
             var scenes = Utils.ParseJsonArray<SceneData[]>(payload);
             scenesViewController.SetScenes(scenes);
         }
+    }
+
+    void OnRequestUpdateSceneData(string id, SceneUpdatePayload updatePayload)
+    {
+        bridge?.SendSceneUpdate(id, updatePayload);
     }
 }

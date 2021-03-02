@@ -1,10 +1,13 @@
-﻿using DCL.Helpers;
+﻿using System;
+using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 internal class SectionSceneGeneralSettingsView : MonoBehaviour
 {
+    public event Action OnApplyChanges;
+    
     [SerializeField] internal TMP_InputField nameInputField;
     [SerializeField] internal TMP_InputField descriptionInputField;
     [SerializeField] internal TMP_Text nameCharCount;
@@ -17,16 +20,6 @@ internal class SectionSceneGeneralSettingsView : MonoBehaviour
     [SerializeField] internal Toggle toggleMovePlayer;
     [SerializeField] internal Button applyButton;
 
-    public void SetName(string sceneName)
-    {
-        nameInputField.text = sceneName;
-    }
-    
-    public void SetDescription(string sceneDescription)
-    {
-        descriptionInputField.text = sceneDescription;
-    }
-
     public void SetParent(Transform parent)
     {
         transform.SetParent(parent);
@@ -36,6 +29,16 @@ internal class SectionSceneGeneralSettingsView : MonoBehaviour
     public void SetActive(bool active)
     {
         gameObject.SetActive(active);
+    }
+    
+    public void SetName(string sceneName)
+    {
+        nameInputField.text = sceneName;
+    }
+    
+    public void SetDescription(string sceneDescription)
+    {
+        descriptionInputField.text = sceneDescription;
     }
 
     public void SetConfigurationActive(bool active)
@@ -67,6 +70,36 @@ internal class SectionSceneGeneralSettingsView : MonoBehaviour
     {
         toggleMatureContent.isOn = mature;
     }
+    
+    public string GetName()
+    {
+        return nameInputField.text;
+    }
+    
+    public string GetDescription()
+    {
+        return descriptionInputField.text;
+    }
+
+    public bool GetAllowVoiceChat()
+    {
+        return toggleVoiceChat.isOn;
+    }
+
+    public bool GetAllowTriggerEmotes()
+    {
+        return toggleEmotes.isOn;
+    }
+
+    public bool GetAllowMovePlayer()
+    {
+        return toggleMovePlayer.isOn;
+    }
+
+    public bool GetMatureContent()
+    {
+        return toggleMatureContent.isOn;
+    }
 
     private void Awake()
     {
@@ -78,5 +111,6 @@ internal class SectionSceneGeneralSettingsView : MonoBehaviour
         {
             descriptionCharCount.text = $"{value.Length}/{descriptionInputField.characterLimit}";
         });        
+        applyButton.onClick.AddListener(()=> OnApplyChanges?.Invoke());
     }
 }
