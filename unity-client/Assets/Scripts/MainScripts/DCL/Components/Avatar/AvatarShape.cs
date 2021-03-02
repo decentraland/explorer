@@ -12,7 +12,6 @@ namespace DCL
 {
     public class AvatarShape : BaseComponent
     {
-
         private const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
 
         public static event Action<DecentralandEntity, AvatarShape> OnAvatarShapeUpdated;
