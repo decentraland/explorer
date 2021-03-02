@@ -91,7 +91,7 @@ public class BuildModeHUDView : MonoBehaviour
         this.inspectorController.Initialize(inspectorView);
 
         this.topActionsButtonsController = topActionsButtonsController;
-        this.topActionsButtonsController.Initialize(topActionsButtonsView);
+        this.topActionsButtonsController.Initialize(topActionsButtonsView, tooltipController);
     }
 
     private void OnDestroy()

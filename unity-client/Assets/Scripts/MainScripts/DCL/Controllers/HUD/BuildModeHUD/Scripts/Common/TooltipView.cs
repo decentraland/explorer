@@ -17,21 +17,8 @@ public class TooltipView : MonoBehaviour
         tooltipRT.position = pos;
     }
 
-    // TODO (Santi): Called from imspector!
     public void SetText(string text)
     {
         tooltipTxt.text = text;
-    }
-
-    // TODO (Santi): Called from imspector!
-    public void OnHoverEnter(BaseEventData data)
-    {
-        OnShowTooltip?.Invoke(data);
-    }
-
-    // TODO (Santi): Called from imspector!
-    public void OnHoverExit()
-    {
-        OnHideTooltip?.Invoke();
     }
 }

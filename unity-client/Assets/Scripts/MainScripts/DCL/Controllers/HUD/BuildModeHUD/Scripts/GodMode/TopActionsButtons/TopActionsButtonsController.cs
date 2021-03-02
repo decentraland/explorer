@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.EventSystems;
 
 public interface ITopActionsButtonsController
 {
@@ -14,9 +15,8 @@ public interface ITopActionsButtonsController
 
     IExtraActionsController extraActionsController { get; }
 
-    void Initialize(TopActionsButtonsView topActionsButtonsView);
+    void Initialize(TopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController);
     void Dispose();
-
     void ChangeModeClicked();
     void ExtraClicked();
     void TranslateClicked();
@@ -26,6 +26,8 @@ public interface ITopActionsButtonsController
     void DuplicateClicked();
     void DeleteClicked();
     void LogOutClicked();
+    void TooltipPointerEntered(BaseEventData eventData, string tooltipText);
+    void TooltipPointerExited();
 }
 
 public class TopActionsButtonsController : ITopActionsButtonsController
@@ -43,10 +45,12 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public IExtraActionsController extraActionsController => topActionsButtonsView.extraActionsController;
 
     private TopActionsButtonsView topActionsButtonsView;
+    private ITooltipController tooltipController;
 
-    public void Initialize(TopActionsButtonsView topActionsButtonsView)
+    public void Initialize(TopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController)
     {
         this.topActionsButtonsView = topActionsButtonsView;
+        this.tooltipController = tooltipController;
 
         topActionsButtonsView.OnChangeModeClicked += ChangeModeClicked;
         topActionsButtonsView.OnExtraClicked += ExtraClicked;
@@ -57,6 +61,16 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDuplicateClicked += DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked += DeleteClicked;
         topActionsButtonsView.OnLogOutClicked += LogOutClicked;
+        topActionsButtonsView.OnPointerExit += TooltipPointerExited;
+        topActionsButtonsView.OnChangeCameraModePointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnTranslatePointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnRotatePointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnScalePointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnResetPointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnDuplicatePointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnDeletePointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnMoreActionsPointerEnter += TooltipPointerEntered;
+        topActionsButtonsView.OnLogoutPointerEnter += TooltipPointerEntered;
 
         topActionsButtonsView.ConfigureExtraActions(new ExtraActionsController());
         extraActionsController.SetActive(false);
@@ -73,6 +87,16 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDuplicateClicked -= DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked -= DeleteClicked;
         topActionsButtonsView.OnLogOutClicked -= LogOutClicked;
+        topActionsButtonsView.OnPointerExit -= TooltipPointerExited;
+        topActionsButtonsView.OnChangeCameraModePointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnTranslatePointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnRotatePointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnScalePointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnResetPointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnDuplicatePointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnDeletePointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnMoreActionsPointerEnter -= TooltipPointerEntered;
+        topActionsButtonsView.OnLogoutPointerEnter -= TooltipPointerEntered;
     }
 
     public void ChangeModeClicked()
@@ -118,5 +142,16 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public void LogOutClicked()
     {
         OnLogOutClick?.Invoke();
+    }
+
+    public void TooltipPointerEntered(BaseEventData eventData, string tooltipText)
+    {
+        tooltipController.ShowTooltip(eventData);
+        tooltipController.SetTooltipText(tooltipText);
+    }
+
+    public void TooltipPointerExited()
+    {
+        tooltipController.HideTooltip();
     }
 }

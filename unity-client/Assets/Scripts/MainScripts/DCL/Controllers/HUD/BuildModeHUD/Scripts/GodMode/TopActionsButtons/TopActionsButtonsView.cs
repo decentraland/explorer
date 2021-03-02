@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TopActionsButtonsView : MonoBehaviour
@@ -12,8 +14,19 @@ public class TopActionsButtonsView : MonoBehaviour
                           OnResetClicked,
                           OnDuplicateClicked,
                           OnDeleteClicked,
-                          OnLogOutClicked;
+                          OnLogOutClicked,
+                          OnPointerExit;
 
+    internal event Action<BaseEventData, string> OnChangeCameraModePointerEnter,
+                                                 OnTranslatePointerEnter,
+                                                 OnRotatePointerEnter,
+                                                 OnScalePointerEnter,
+                                                 OnResetPointerEnter,
+                                                 OnDuplicatePointerEnter,
+                                                 OnDeletePointerEnter,
+                                                 OnMoreActionsPointerEnter,
+                                                 OnLogoutPointerEnter;
+     
     [Header("Buttons")]
     [SerializeField] internal Button changeModeBtn;
     [SerializeField] internal Button extraBtn;
@@ -34,6 +47,28 @@ public class TopActionsButtonsView : MonoBehaviour
     [SerializeField] internal InputAction_Trigger toggleDuplicateInputAction;
     [SerializeField] internal InputAction_Trigger toggleDeleteInputAction;
 
+    [Header("Event Triggers")]
+    [SerializeField] internal EventTrigger changeCameraModeEventTrigger;
+    [SerializeField] internal EventTrigger translateEventTrigger;
+    [SerializeField] internal EventTrigger rotateEventTrigger;
+    [SerializeField] internal EventTrigger scaleEventTrigger;
+    [SerializeField] internal EventTrigger resetEventTrigger;
+    [SerializeField] internal EventTrigger duplicateEventTrigger;
+    [SerializeField] internal EventTrigger deleteEventTrigger;
+    [SerializeField] internal EventTrigger moreActionsEventTrigger;
+    [SerializeField] internal EventTrigger logoutEventTrigger;
+
+    [Header("Tooltip Texts")]
+    [SerializeField] internal string changeCameraModeTooltipText = "Change Camera (V)";
+    [SerializeField] internal string translateTooltipText = "Translate (M)";
+    [SerializeField] internal string rotateTooltipText = "Rotate (R)";
+    [SerializeField] internal string scaleTooltipText = "Scale (G)";
+    [SerializeField] internal string resetTooltipText = "Reset (Control+R)";
+    [SerializeField] internal string duplicateTooltipText = "Duplicate (Control+D)";
+    [SerializeField] internal string deleteTooltipText = "Delete (Del) or (Backspace)";
+    [SerializeField] internal string moreActionsTooltipText = "Extra Actions";
+    [SerializeField] internal string logoutTooltipText = "Exit from edition";
+
     [Header("Sub-Views")]
     [SerializeField] internal ExtraActionsView extraActionsView;
 
@@ -50,6 +85,96 @@ public class TopActionsButtonsView : MonoBehaviour
         deleteBtn.onClick.AddListener(OnDeleteClick);
         logOutBtn.onClick.AddListener(OnLogOutClick);
         extraBtn.onClick.AddListener(OnExtraClick);
+
+        ConfigureEventTrigger(
+            changeCameraModeEventTrigger, 
+            EventTriggerType.PointerEnter, 
+            (eventData) => OnChangeCameraModePointerEnter?.Invoke(eventData, changeCameraModeTooltipText));
+
+        ConfigureEventTrigger(
+            changeCameraModeEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            translateEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnTranslatePointerEnter?.Invoke(eventData, translateTooltipText));
+
+        ConfigureEventTrigger(
+            translateEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            rotateEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnRotatePointerEnter?.Invoke(eventData, rotateTooltipText));
+
+        ConfigureEventTrigger(
+            rotateEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            scaleEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnScalePointerEnter?.Invoke(eventData, scaleTooltipText));
+
+        ConfigureEventTrigger(
+            scaleEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            resetEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnResetPointerEnter?.Invoke(eventData, resetTooltipText));
+
+        ConfigureEventTrigger(
+            resetEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            duplicateEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnDuplicatePointerEnter?.Invoke(eventData, duplicateTooltipText));
+
+        ConfigureEventTrigger(
+            duplicateEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            deleteEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnDeletePointerEnter?.Invoke(eventData, deleteTooltipText));
+
+        ConfigureEventTrigger(
+            deleteEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            moreActionsEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnMoreActionsPointerEnter?.Invoke(eventData, moreActionsTooltipText));
+
+        ConfigureEventTrigger(
+            moreActionsEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
+
+        ConfigureEventTrigger(
+            logoutEventTrigger,
+            EventTriggerType.PointerEnter,
+            (eventData) => OnLogoutPointerEnter?.Invoke(eventData, logoutTooltipText));
+
+        ConfigureEventTrigger(
+            logoutEventTrigger,
+            EventTriggerType.PointerExit,
+            (eventData) => OnPointerExit?.Invoke());
 
         toggleChangeCameraInputAction.OnTriggered += (action) => OnChangeModeClick();
         toggleTranslateInputAction.OnTriggered += (action) => OnTranslateClick();
@@ -72,6 +197,25 @@ public class TopActionsButtonsView : MonoBehaviour
         logOutBtn.onClick.RemoveListener(OnLogOutClick);
         extraBtn.onClick.RemoveListener(OnExtraClick);
 
+        RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(translateEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(translateEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(rotateEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(rotateEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(scaleEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(scaleEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(resetEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(resetEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(duplicateEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(duplicateEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(deleteEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(deleteEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerExit);
+        RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerEnter);
+        RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerExit);
+
         toggleChangeCameraInputAction.OnTriggered -= (action) => OnChangeModeClick();
         toggleTranslateInputAction.OnTriggered -= (action) => OnTranslateClick();
         toggleRotateInputAction.OnTriggered -= (action) => OnRotateClick();
@@ -82,6 +226,19 @@ public class TopActionsButtonsView : MonoBehaviour
 
         if (extraActionsController != null)
             extraActionsController.Dispose();
+    }
+
+    private void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
+    {
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = eventType;
+        entry.callback.AddListener(call);
+        eventTrigger.triggers.Add(entry);
+    }
+
+    private void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
+    {
+        eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }
 
     public void ConfigureExtraActions(IExtraActionsController extraActionsController)
