@@ -4,17 +4,38 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class InspectorView : MonoBehaviour
+public interface IInspectorView
 {
-    internal event Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnEntityActionInvoked;
-    internal event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
+    EntityListView entityList { get; }
+    List<DCLBuilderInWorldEntity> entities { get; }
+    ISceneLimitsController sceneLimitsController { get; }
+
+    event Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnEntityActionInvoked;
+    event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
+
+    void ClearEntitiesList();
+    void ConfigureSceneLimits(ISceneLimitsController sceneLimitsController);
+    void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter);
+    void EntityRename(DCLBuilderInWorldEntity entity, string newName);
+    void SetActive(bool isActive);
+    void SetCloseButtonsAction(UnityAction call);
+    void SetEntitiesList(List<DCLBuilderInWorldEntity> entities);
+}
+
+public class InspectorView : MonoBehaviour, IInspectorView
+{
+    public EntityListView entityList => entityListView;
+    public List<DCLBuilderInWorldEntity> entities => entitiesList;
+    public ISceneLimitsController sceneLimitsController { get; private set; }
+
+    public event Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnEntityActionInvoked;
+    public event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
 
     [SerializeField] internal EntityListView entityListView;
     [SerializeField] internal SceneLimitsView sceneLimitsView;
     [SerializeField] internal Button[] closeEntityListBtns;
 
     internal List<DCLBuilderInWorldEntity> entitiesList;
-    internal ISceneLimitsController sceneLimitsController;
 
     private void Awake()
     {
@@ -31,27 +52,27 @@ public class InspectorView : MonoBehaviour
             sceneLimitsController.Dispose();
     }
 
-    private void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
+    public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
     {
         OnEntityActionInvoked?.Invoke(action, entityToApply, adapter);
     }
 
-    private void EntityRename(DCLBuilderInWorldEntity entity, string newName)
+    public void EntityRename(DCLBuilderInWorldEntity entity, string newName)
     {
         OnEntityRename?.Invoke(entity, newName);
     }
 
-    internal void SetActive(bool isActive)
+    public void SetActive(bool isActive)
     {
         gameObject.SetActive(isActive);
     }
 
-    internal void SetEntitiesList(List<DCLBuilderInWorldEntity> entities)
+    public void SetEntitiesList(List<DCLBuilderInWorldEntity> entities)
     {
         entitiesList = entities;
     }
 
-    internal void ClearEntitiesList()
+    public void ClearEntitiesList()
     {
         entitiesList.Clear();
     }

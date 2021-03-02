@@ -20,7 +20,7 @@ public interface IInspectorController
 
     ISceneLimitsController sceneLimitsController { get; }
 
-    void Initialize(InspectorView inspectorView);
+    void Initialize(IInspectorView inspectorView);
     void Dispose();
     void OpenEntityList();
     void SetEntityList(List<DCLBuilderInWorldEntity> sceneEntities);
@@ -41,9 +41,9 @@ public class InspectorController : IInspectorController
 
     public ISceneLimitsController sceneLimitsController => inspectorView.sceneLimitsController;
 
-    private InspectorView inspectorView;
+    private IInspectorView inspectorView;
 
-    public void Initialize(InspectorView inspectorView)
+    public void Initialize(IInspectorView inspectorView)
     {
         this.inspectorView = inspectorView;
 
@@ -62,31 +62,31 @@ public class InspectorController : IInspectorController
 
     public void OpenEntityList()
     {
-        inspectorView.entityListView.SetContent(inspectorView.entitiesList);
+        inspectorView.entityList.SetContent(inspectorView.entities);
         inspectorView.SetActive(true);
-        inspectorView.entityListView.SetActive(true);
+        inspectorView.entityList.SetActive(true);
     }
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> sceneEntities)
     {
-        if (inspectorView.entityListView == null)
+        if (inspectorView.entityList == null)
             return;
 
         inspectorView.SetEntitiesList(sceneEntities);
-        if (inspectorView.entityListView.isActive)
-            inspectorView.entityListView.SetContent(inspectorView.entitiesList);
+        if (inspectorView.entityList.isActive)
+            inspectorView.entityList.SetContent(inspectorView.entities);
     }
 
     public void ClearList()
     {
         inspectorView.ClearEntitiesList();
-        inspectorView.entityListView.RemoveAdapters();
+        inspectorView.entityList.RemoveAdapters();
     }
 
     public void CloseList()
     {
         inspectorView.SetActive(false);
-        inspectorView.entityListView.SetActive(false);
+        inspectorView.entityList.SetActive(false);
     }
 
     public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
