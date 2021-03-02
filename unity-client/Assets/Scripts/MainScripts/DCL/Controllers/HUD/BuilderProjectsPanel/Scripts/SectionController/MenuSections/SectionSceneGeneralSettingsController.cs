@@ -7,8 +7,8 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionSceneGeneralSettingsView";
     
-    private const string PERMISSION_MOVE_PLAYER = "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE";
-    private const string PERMISSION_TRIGGER_EMOTES = "ALLOW_TO_TRIGGER_AVATAR_EMOTE";
+    internal const string PERMISSION_MOVE_PLAYER = "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE";
+    internal const string PERMISSION_TRIGGER_EMOTES = "ALLOW_TO_TRIGGER_AVATAR_EMOTE";
 
     private ISceneData sceneData;
     
@@ -40,18 +40,9 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
         view.SetParent(viewContainer);
     }
 
-    protected override void OnShow()
+    public void SetSceneData(ISceneData sceneData)
     {
-        view.SetActive(true);
-    }
-
-    protected override void OnHide()
-    {
-        view.SetActive(false);
-    }
-    void ISelectSceneListener.OnSelectScene(SceneCardView sceneCardView)
-    {
-        sceneData = sceneCardView.sceneData;
+        this.sceneData = sceneData;
         
         view.SetName(sceneData.name);
         view.SetDescription(sceneData.description);
@@ -65,6 +56,20 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
             view.SetAllowVoiceChat(sceneData.allowVoiceChat);
             view.SetMatureContent(sceneData.isMatureContent);
         }
+    }
+
+    protected override void OnShow()
+    {
+        view.SetActive(true);
+    }
+
+    protected override void OnHide()
+    {
+        view.SetActive(false);
+    }
+    void ISelectSceneListener.OnSelectScene(SceneCardView sceneCardView)
+    {
+        SetSceneData(sceneCardView.sceneData);
     }
 
     void OnApplyChanges()
