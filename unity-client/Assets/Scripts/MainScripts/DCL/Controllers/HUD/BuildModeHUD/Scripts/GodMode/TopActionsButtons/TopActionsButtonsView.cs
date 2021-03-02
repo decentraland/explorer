@@ -4,29 +4,66 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TopActionsButtonsView : MonoBehaviour
+public interface ITopActionsButtonsView
 {
-    internal event Action OnChangeModeClicked,
-                          OnExtraClicked,
-                          OnTranslateClicked,
-                          OnRotateClicked,
-                          OnScaleClicked,
-                          OnResetClicked,
-                          OnDuplicateClicked,
-                          OnDeleteClicked,
-                          OnLogOutClicked,
-                          OnPointerExit;
+    event Action OnChangeModeClicked,
+                 OnExtraClicked,
+                 OnTranslateClicked,
+                 OnRotateClicked,
+                 OnScaleClicked,
+                 OnResetClicked,
+                 OnDuplicateClicked,
+                 OnDeleteClicked,
+                 OnLogOutClicked,
+                 OnPointerExit;
 
-    internal event Action<BaseEventData, string> OnChangeCameraModePointerEnter,
-                                                 OnTranslatePointerEnter,
-                                                 OnRotatePointerEnter,
-                                                 OnScalePointerEnter,
-                                                 OnResetPointerEnter,
-                                                 OnDuplicatePointerEnter,
-                                                 OnDeletePointerEnter,
-                                                 OnMoreActionsPointerEnter,
-                                                 OnLogoutPointerEnter;
-     
+    event Action<BaseEventData, string> OnChangeCameraModePointerEnter,
+                                        OnTranslatePointerEnter,
+                                        OnRotatePointerEnter,
+                                        OnScalePointerEnter,
+                                        OnResetPointerEnter,
+                                        OnDuplicatePointerEnter,
+                                        OnDeletePointerEnter,
+                                        OnMoreActionsPointerEnter,
+                                        OnLogoutPointerEnter;
+
+    void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call);
+    void ConfigureExtraActions(IExtraActionsController extraActionsController);
+    void OnChangeModeClick();
+    void OnDeleteClick();
+    void OnDuplicateClick();
+    void OnExtraClick();
+    void OnLogOutClick();
+    void OnResetClick();
+    void OnRotateClick();
+    void OnScaleClick();
+    void OnTranslateClick();
+    void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType);
+}
+
+public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
+{
+    public event Action OnChangeModeClicked,
+                        OnExtraClicked,
+                        OnTranslateClicked,
+                        OnRotateClicked,
+                        OnScaleClicked,
+                        OnResetClicked,
+                        OnDuplicateClicked,
+                        OnDeleteClicked,
+                        OnLogOutClicked,
+                        OnPointerExit;
+
+    public event Action<BaseEventData, string> OnChangeCameraModePointerEnter,
+                                               OnTranslatePointerEnter,
+                                               OnRotatePointerEnter,
+                                               OnScalePointerEnter,
+                                               OnResetPointerEnter,
+                                               OnDuplicatePointerEnter,
+                                               OnDeletePointerEnter,
+                                               OnMoreActionsPointerEnter,
+                                               OnLogoutPointerEnter;
+
     [Header("Buttons")]
     [SerializeField] internal Button changeModeBtn;
     [SerializeField] internal Button extraBtn;
@@ -87,8 +124,8 @@ public class TopActionsButtonsView : MonoBehaviour
         extraBtn.onClick.AddListener(OnExtraClick);
 
         ConfigureEventTrigger(
-            changeCameraModeEventTrigger, 
-            EventTriggerType.PointerEnter, 
+            changeCameraModeEventTrigger,
+            EventTriggerType.PointerEnter,
             (eventData) => OnChangeCameraModePointerEnter?.Invoke(eventData, changeCameraModeTooltipText));
 
         ConfigureEventTrigger(
@@ -228,7 +265,7 @@ public class TopActionsButtonsView : MonoBehaviour
             extraActionsController.Dispose();
     }
 
-    private void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
+    public void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
     {
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = eventType;
@@ -236,7 +273,7 @@ public class TopActionsButtonsView : MonoBehaviour
         eventTrigger.triggers.Add(entry);
     }
 
-    private void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
+    public void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
     {
         eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }

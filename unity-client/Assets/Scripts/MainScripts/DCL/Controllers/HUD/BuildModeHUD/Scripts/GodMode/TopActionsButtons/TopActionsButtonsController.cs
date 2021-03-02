@@ -15,7 +15,7 @@ public interface ITopActionsButtonsController
 
     IExtraActionsController extraActionsController { get; }
 
-    void Initialize(TopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController);
+    void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController);
     void Dispose();
     void ChangeModeClicked();
     void ExtraClicked();
@@ -42,12 +42,12 @@ public class TopActionsButtonsController : ITopActionsButtonsController
                         OnDeleteClick,
                         OnLogOutClick;
 
-    public IExtraActionsController extraActionsController => topActionsButtonsView.extraActionsController;
+    public IExtraActionsController extraActionsController { get; private set; }
 
-    private TopActionsButtonsView topActionsButtonsView;
+    private ITopActionsButtonsView topActionsButtonsView;
     private ITooltipController tooltipController;
 
-    public void Initialize(TopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController)
+    public void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController)
     {
         this.topActionsButtonsView = topActionsButtonsView;
         this.tooltipController = tooltipController;
@@ -72,7 +72,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnMoreActionsPointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter += TooltipPointerEntered;
 
-        topActionsButtonsView.ConfigureExtraActions(new ExtraActionsController());
+        extraActionsController = new ExtraActionsController();
+        topActionsButtonsView.ConfigureExtraActions(extraActionsController);
         extraActionsController.SetActive(false);
     }
 
