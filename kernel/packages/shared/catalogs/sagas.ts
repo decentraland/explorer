@@ -231,12 +231,14 @@ async function mapUrnToLegacyId(wearableIds: WearableId[]): Promise<WearableId[]
       return wearableId
     }
 
-    const result = await parseUrn(wearableId)
-    if (result?.type === 'off-chain') {
-      return `dcl://${result.registry}/${result.id}`
-    } else if (result?.type === 'blockchain-collection-v1') {
-      return `dcl://${result.collectionName}/${result.id}`
-    }
+    try {
+      const result = await parseUrn(wearableId)
+      if (result?.type === 'off-chain') {
+        return `dcl://${result.registry}/${result.id}`
+      } else if (result?.type === 'blockchain-collection-v1') {
+        return `dcl://${result.collectionName}/${result.id}`
+      }
+    } catch {}
   })
 
   const mappedIds = await Promise.all(promises)
