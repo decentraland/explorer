@@ -112,30 +112,31 @@ namespace DCL.ABConverter
 
                         if (assetsAlreadyDumped && DataStore.i.ABConversorGLTFMissingDependencies.Count > 0)
                         {
-                            Debug.Log("Missing dependencies detected: " + DataStore.i.ABConversorGLTFMissingDependencies.Count);
+                            Debug.Log("Core.Convert(): Missing dependencies detected: " + DataStore.i.ABConversorGLTFMissingDependencies.Count);
 
                             if (string.IsNullOrEmpty(sceneCid))
                             {
-                                Debug.Log("Scene ID missing... as the missing dependencies cannot be downloaded the conversion is aborted.");
+                                Debug.Log("Core.Convert(): Scene ID missing... as the missing dependencies cannot be downloaded the conversion is aborted.");
                                 EditorApplication.update -= UpdateLoop;
                                 return;
                             }
 
+                            // Add missing dependencies to the rawContents collection
+                            var listContents = rawContents.ToList();
                             foreach (string missingDep in DataStore.i.ABConversorGLTFMissingDependencies)
                             {
-                                Debug.Log($"Adding missing dependency {missingDep} to rawContents...");
+                                Debug.Log($"Core.Convert(): Adding missing dependency {missingDep} to rawContents...");
 
                                 // 1. Create mapping pairs with the known files, searching the hash in the scene's mappings
                                 ContentServerUtils.MappingsAPIData parcelInfoApiData = ABConverter.Utils.GetSceneMappingsData(env.webRequest, settings.tld, sceneCid);
 
                                 // 2. Add the new files to rawContents
-                                var listContents = rawContents.ToList();
-
                                 // TODO: full path in content server contains relative paths like 'models/texture.png' but inside GLTFSceneImporter we just read 'texture.png'.
                                 // We should implement a solution without using the .Contains(), to avoid problems with files in different paths but with the same filename
                                 listContents.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(missingDep)).ToArray());
-                                rawContents = listContents.ToArray();
                             }
+
+                            rawContents = listContents.ToArray();
 
                             DataStore.i.ABConversorGLTFMissingDependencies.Clear();
                             assetsAlreadyDumped = false;
@@ -149,7 +150,6 @@ namespace DCL.ABConverter
 
                         if (!assetsAlreadyDumped)
                         {
-                            Debug.Log("Convert - Starting asset dump");
                             state.step = State.Step.DUMPING_ASSETS;
                             shouldGenerateAssetBundles |= DumpAssets(rawContents);
                             assetsAlreadyDumped = true;
@@ -166,8 +166,6 @@ namespace DCL.ABConverter
 
                         if (shouldGenerateAssetBundles)
                         {
-                            Debug.Log("Convert - Should generate ABs...");
-
                             AssetBundleManifest manifest;
 
                             state.step = State.Step.BUILDING_ASSET_BUNDLES;
@@ -222,27 +220,6 @@ namespace DCL.ABConverter
                 List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.gltfExtensions);
                 List<AssetPath> bufferPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.bufferExtensions);
                 List<AssetPath> texturePaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, rawContents, Config.textureExtensions);
-
-                /*Debug.Log("------- Dump Assets-TexturePaths -------");
-                foreach (var path in texturePaths)
-                {
-                    Debug.Log(path);
-                }
-                Debug.Log("-----------------------------");
-
-                Debug.Log("------- Dump Assets-gltfPaths -------");
-                foreach (var path in gltfPaths)
-                {
-                    Debug.Log(path);
-                }
-                Debug.Log("-----------------------------");
-
-                Debug.Log("------- Dump Assets-bufferPaths -------");
-                foreach (var path in bufferPaths)
-                {
-                    Debug.Log(path);
-                }
-                Debug.Log("-----------------------------");*/
 
                 List<AssetPath> assetsToMark = new List<AssetPath>();
 

@@ -220,20 +220,19 @@ namespace DCL.ABConverter
 
             log.Info($"Building {assetHash} asset...");
 
-            List<ContentServerUtils.MappingPair> rawContents = new List<ContentServerUtils.MappingPair>();
-            rawContents.Add(new ContentServerUtils.MappingPair
-            {
-                file = assetFilename,
-                hash = assetHash
-            });
-
             EnsureEnvironment();
 
             if (settings == null)
                 settings = new Settings();
 
             var core = new ABConverter.Core(env, settings);
-            core.Convert(rawContents.ToArray(), null, sceneCid);
+            core.Convert(new [] {
+                new ContentServerUtils.MappingPair
+                {
+                    file = assetFilename,
+                    hash = assetHash
+                }
+            }, null, sceneCid);
 
             return core.state;
         }
@@ -289,11 +288,11 @@ namespace DCL.ABConverter
             if (settings == null)
                 settings = new Settings();
 
-            return ConvertScenesToAssetBundles(new List<string> {cid}, settings);
+            return ConvertScenesToAssetBundles(new List<string> { cid }, settings);
         }
 
         /// <summary>
-        /// FOR DEBUGGING PURPOSE ONLY: Dump a single asset (and its dependencies) given an asset hash and scene Cid
+        /// Dump a single asset (and its dependencies) given an asset hash and scene Cid
         /// </summary>
         /// <param name="assetHash">The asset's content server hash</param>
         /// <param name="assetFilename">The asset's content server file name</param>
