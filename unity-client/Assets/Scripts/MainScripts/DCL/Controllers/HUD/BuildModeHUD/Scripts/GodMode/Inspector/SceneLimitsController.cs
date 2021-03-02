@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public interface ISceneLimitsController
 {
-    void Initialize(SceneLimitsView sceneLimitsView);
+    void Initialize(ISceneLimitsView sceneLimitsView);
     void Dispose();
     void SetParcelScene(ParcelScene parcelScene);
     void ToggleSceneLimitsInfo();
@@ -18,10 +18,10 @@ public interface ISceneLimitsController
 
 public class SceneLimitsController : ISceneLimitsController
 {
-    private SceneLimitsView sceneLimitsView;
+    private ISceneLimitsView sceneLimitsView;
     private ParcelScene currentParcelScene;
 
-    public void Initialize(SceneLimitsView sceneLimitsView)
+    public void Initialize(ISceneLimitsView sceneLimitsView)
     {
         this.sceneLimitsView = sceneLimitsView;
 
@@ -68,7 +68,7 @@ public class SceneLimitsController : ISceneLimitsController
         {
             int size = (int)Math.Sqrt(currentParcelScene.sceneData.parcels.Length);
             int meters = size * 16;
-            sceneLimitsView.titleTxt.text = $"{size}x{size} LAND <color=#959696>{meters}x{meters}m";
+            sceneLimitsView.SetTitleText($"{size}x{size} LAND <color=#959696>{meters}x{meters}m");
         }
         else
         {
@@ -91,18 +91,18 @@ public class SceneLimitsController : ISceneLimitsController
         SetFillInfo();
     }
 
-    private void SetFillInfo()
+    internal void SetFillInfo()
     {
         float percentAmount = GetHigherLimitPercentInfo();
-        Color colorToUse = sceneLimitsView.lowFillColor;
+        Color colorToUse = sceneLimitsView.lfColor;
 
         if (percentAmount > 66)
-            colorToUse = sceneLimitsView.mediumFillColor;
+            colorToUse = sceneLimitsView.mfColor;
 
         if (percentAmount > 85)
-            colorToUse = sceneLimitsView.highFillColor;
+            colorToUse = sceneLimitsView.hfColor;
 
-        foreach (Image img in sceneLimitsView.limitUsageFillsImgs)
+        foreach (Image img in sceneLimitsView.limitUsageFillsImages)
         {
             if (img == null)
                 continue;
@@ -112,7 +112,7 @@ public class SceneLimitsController : ISceneLimitsController
         }
     }
 
-    private string AppendUsageAndLimit(string name, int usage, int limit)
+    internal string AppendUsageAndLimit(string name, int usage, int limit)
     {
         string currentString = $"{name}:   {usage} / <color=#959696>{limit}</color>";
 
@@ -122,7 +122,7 @@ public class SceneLimitsController : ISceneLimitsController
         return currentString;
     }
 
-    private float GetHigherLimitPercentInfo()
+    internal float GetHigherLimitPercentInfo()
     {
         SceneMetricsController.Model limits = currentParcelScene.metricsController.GetLimits();
         SceneMetricsController.Model usage = currentParcelScene.metricsController.GetModel();
@@ -149,7 +149,7 @@ public class SceneLimitsController : ISceneLimitsController
         return result;
     }
 
-    private bool IsParcelSceneSquare(ParcelScene scene)
+    internal bool IsParcelSceneSquare(ParcelScene scene)
     {
         Vector2Int[] parcelsPoints = scene.sceneData.parcels;
         int minX = int.MaxValue;

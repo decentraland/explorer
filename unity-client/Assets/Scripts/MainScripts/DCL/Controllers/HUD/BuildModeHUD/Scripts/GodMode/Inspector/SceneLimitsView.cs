@@ -4,9 +4,35 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class SceneLimitsView : MonoBehaviour
+public interface ISceneLimitsView
 {
-    internal event Action OnToggleSceneLimitsInfo;
+    Color lfColor { get; }
+    Color mfColor { get; }
+    Color hfColor { get; }
+    Image[] limitUsageFillsImages { get; }
+
+    bool isBodyActived { get; }
+
+    event Action OnToggleSceneLimitsInfo;
+
+    void SetBodyActive(bool isActive);
+    void SetDetailsToggleAsClose();
+    void SetDetailsToggleAsOpen();
+    void SetLeftDescText(string text);
+    void SetRightDescText(string text);
+    void SetTitleText(string text);
+    void SetUpdateCallback(UnityAction call);
+    void ToggleSceneLimitsInfo();
+}
+
+public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
+{
+    public Color lfColor => lowFillColor;
+    public Color mfColor => mediumFillColor;
+    public Color hfColor => highFillColor;
+    public Image[] limitUsageFillsImages => limitUsageFillsImgs;
+
+    public event Action OnToggleSceneLimitsInfo;
 
     [Header("Sprites")]
     [SerializeField] internal Sprite openMenuSprite;
@@ -29,7 +55,7 @@ public class SceneLimitsView : MonoBehaviour
     [Header("Input Actions")]
     [SerializeField] internal InputAction_Trigger toggleSceneInfoInputAction;
 
-    internal bool isBodyActived => sceneLimitsBodyGO.activeSelf;
+    public bool isBodyActived => sceneLimitsBodyGO.activeSelf;
 
     private UnityAction updateInfoAction;
     private const int FRAMES_BETWEEN_UPDATES = 15;
@@ -40,16 +66,16 @@ public class SceneLimitsView : MonoBehaviour
         toggleButton.onClick.AddListener(ToggleSceneLimitsInfo);
     }
 
-    private void OnDestroy()
-    {
-        toggleSceneInfoInputAction.OnTriggered -= (action) => ToggleSceneLimitsInfo();
-        toggleButton.onClick.RemoveListener(ToggleSceneLimitsInfo);
-    }
-
     private void Update()
     {
         if (Time.frameCount % FRAMES_BETWEEN_UPDATES == 0)
             updateInfoAction();
+    }
+
+    private void OnDestroy()
+    {
+        toggleSceneInfoInputAction.OnTriggered -= (action) => ToggleSceneLimitsInfo();
+        toggleButton.onClick.RemoveListener(ToggleSceneLimitsInfo);
     }
 
     public void SetUpdateCallback(UnityAction call)
