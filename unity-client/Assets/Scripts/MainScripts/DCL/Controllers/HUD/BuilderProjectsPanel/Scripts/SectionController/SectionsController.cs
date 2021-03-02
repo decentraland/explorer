@@ -45,10 +45,6 @@ internal class SectionsController : IDisposable
     {
         this.sectionsParent = sectionsParent;
         this.sectionFactory = sectionFactory;
-
-        SectionBase.OnRequestOpenSection += OpenSection;
-        SectionBase.OnRequestContextMenuHide += OnHideContextMenuRequested;
-        SectionBase.OnRequestUpdateSceneData += OnUpdateSceneDataRequested;
     }
 
     /// <summary>
@@ -97,6 +93,7 @@ internal class SectionsController : IDisposable
         if (currentOpenSection != null)
         {
             currentOpenSection.SetVisible(false);
+            UnSubscribeEvents(currentOpenSection);
             OnSectionHide?.Invoke(currentOpenSection);
         }
 
@@ -105,6 +102,7 @@ internal class SectionsController : IDisposable
         if (currentOpenSection != null)
         {
             currentOpenSection.SetVisible(true);
+            SubscribeEvents(currentOpenSection);
             OnSectionShow?.Invoke(currentOpenSection);
         }
 
@@ -113,10 +111,6 @@ internal class SectionsController : IDisposable
 
     public void Dispose()
     {
-        SectionBase.OnRequestOpenSection -= OpenSection;
-        SectionBase.OnRequestContextMenuHide -= OnHideContextMenuRequested;
-        SectionBase.OnRequestUpdateSceneData -= OnUpdateSceneDataRequested;
-
         using (var iterator = loadedSections.GetEnumerator())
         {
             while (iterator.MoveNext())
@@ -136,5 +130,37 @@ internal class SectionsController : IDisposable
     private void OnUpdateSceneDataRequested(string id, SceneUpdatePayload updatePayload)
     {
         OnRequestUpdateSceneData?.Invoke(id, updatePayload);
+    }
+
+    private void SubscribeEvents(SectionBase sectionBase)
+    {
+        if (sectionBase is ISectionOpenSectionRequester openSectionRequester)
+        {
+            openSectionRequester.OnRequestOpenSection += OpenSection;
+        }
+        if (sectionBase is ISectionHideContextMenuRequester hideContextMenuRequester)
+        {
+            hideContextMenuRequester.OnRequestContextMenuHide += OnHideContextMenuRequested;
+        }
+        if (sectionBase is ISectionUpdateSceneDataRequester updateSceneDataRequester)
+        {
+            updateSceneDataRequester.OnRequestUpdateSceneData += OnUpdateSceneDataRequested;
+        }        
+    }
+    
+    private void UnSubscribeEvents(SectionBase sectionBase)
+    {
+        if (sectionBase is ISectionOpenSectionRequester openSectionRequester)
+        {
+            openSectionRequester.OnRequestOpenSection -= OpenSection;
+        }
+        if (sectionBase is ISectionHideContextMenuRequester hideContextMenuRequester)
+        {
+            hideContextMenuRequester.OnRequestContextMenuHide -= OnHideContextMenuRequested;
+        }        
+        if (sectionBase is ISectionUpdateSceneDataRequester updateSceneDataRequester)
+        {
+            updateSceneDataRequester.OnRequestUpdateSceneData -= OnUpdateSceneDataRequested;
+        }
     }
 }

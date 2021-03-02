@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-internal class SectionSceneGeneralSettingsController : SectionBase, ISelectSceneListener
+internal class SectionSceneGeneralSettingsController : SectionBase, ISelectSceneListener, ISectionUpdateSceneDataRequester
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionSceneGeneralSettingsView";
     
@@ -14,6 +14,8 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
     
     private readonly SceneUpdatePayload sceneUpdatePayload = new SceneUpdatePayload();
     private readonly SectionSceneGeneralSettingsView view;
+
+    public event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
 
     public SectionSceneGeneralSettingsController() : this(
         Object.Instantiate(Resources.Load<SectionSceneGeneralSettingsView>(VIEW_PREFAB_PATH))
@@ -86,6 +88,6 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
             permissions = new [] { PERMISSION_TRIGGER_EMOTES };
         }
         sceneUpdatePayload.requiredPermissions = permissions;
-        RequestUpdateSceneData(sceneData.id, sceneUpdatePayload);
+        OnRequestUpdateSceneData?.Invoke(sceneData.id, sceneUpdatePayload);
     }
 }

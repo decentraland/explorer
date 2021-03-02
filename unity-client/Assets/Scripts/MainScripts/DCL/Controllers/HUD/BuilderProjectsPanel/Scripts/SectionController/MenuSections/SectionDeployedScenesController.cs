@@ -1,10 +1,14 @@
-﻿using DCL.Helpers;
+﻿using System;
+using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-internal class SectionDeployedScenesController : SectionBase, IDeployedSceneListener
+internal class SectionDeployedScenesController : SectionBase, IDeployedSceneListener, ISectionHideContextMenuRequester
 {
+    public event Action OnRequestContextMenuHide;
+    
     public override ISectionSearchHandler searchHandler => sceneSearchHandler;
 
     private readonly SectionDeployedScenesView view;
@@ -18,7 +22,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
             Resources.Load<SectionDeployedScenesView>("BuilderProjectsPanelMenuSections/SectionDeployedScenesView");
         view = Object.Instantiate(prefab);
 
-        view.scrollRect.onValueChanged.AddListener((value) => RequestHideContextMenu());
+        view.scrollRect.onValueChanged.AddListener((value) => OnRequestContextMenuHide?.Invoke());
         sceneSearchHandler.OnResult += OnSearchResult;
     }
 
