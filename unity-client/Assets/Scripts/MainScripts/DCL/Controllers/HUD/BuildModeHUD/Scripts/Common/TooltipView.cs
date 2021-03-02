@@ -1,9 +1,24 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class TooltipView : MonoBehaviour
+public interface ITooltipView
 {
+    float alphaTranstionSpeed { get; }
+
+    event Action OnHideTooltip;
+    event Action<BaseEventData> OnShowTooltip;
+
+    void SetText(string text);
+    void SetTooltipPosition(Vector3 pos);
+    void SetTooltipAlpha(float alphaValue);
+}
+
+public class TooltipView : MonoBehaviour, ITooltipView
+{
+    public float alphaTranstionSpeed => alphaSpeed;
+
     public event System.Action<BaseEventData> OnShowTooltip;
     public event System.Action OnHideTooltip;
 
@@ -20,5 +35,10 @@ public class TooltipView : MonoBehaviour
     public void SetText(string text)
     {
         tooltipTxt.text = text;
+    }
+
+    public void SetTooltipAlpha(float alphaValue)
+    {
+        tooltipCG.alpha = alphaValue;
     }
 }

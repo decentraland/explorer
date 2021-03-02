@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 public interface ITooltipController
 {
-    void Initialize(TooltipView view);
+    void Initialize(ITooltipView view);
     void Dispose();
     void SetTooltipText(string text);
     void ShowTooltip(BaseEventData data);
@@ -13,10 +13,10 @@ public interface ITooltipController
 
 public class TooltipController : ITooltipController
 {
-    private TooltipView view;
+    private ITooltipView view;
     private Coroutine changeAlphaCoroutine;
 
-    public void Initialize(TooltipView view)
+    public void Initialize(ITooltipView view)
     {
         this.view = view;
 
@@ -56,26 +56,26 @@ public class TooltipController : ITooltipController
         changeAlphaCoroutine = CoroutineStarter.Start(ChangeAlpha(1, 0));
     }
 
-    private IEnumerator ChangeAlpha(float from, float to)
+    internal IEnumerator ChangeAlpha(float from, float to)
     {
-        view.tooltipCG.alpha = from;
+        view.SetTooltipAlpha(from);
 
         float currentAlpha = from;
         float destinationAlpha = to;
 
         float fractionOfJourney = 0;
-        float speed = view.alphaSpeed;
+        float speed = view.alphaTranstionSpeed;
         while (fractionOfJourney < 1)
         {
             fractionOfJourney += Time.unscaledDeltaTime * speed;
             float lerpedAlpha = Mathf.Lerp(currentAlpha, destinationAlpha, fractionOfJourney);
-            view.tooltipCG.alpha = lerpedAlpha;
+            view.SetTooltipAlpha(lerpedAlpha);
             yield return null;
         }
         changeAlphaCoroutine = null;
     }
 
-    private void KillTooltipCoroutine()
+    internal void KillTooltipCoroutine()
     {
         if (changeAlphaCoroutine != null)
             CoroutineStarter.Stop(changeAlphaCoroutine);
