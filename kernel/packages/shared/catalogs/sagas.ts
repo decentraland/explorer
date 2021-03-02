@@ -24,7 +24,7 @@ import {
   WEARABLES_SUCCESS
 } from './actions'
 import { baseCatalogsLoaded, getExclusiveCatalog, getPlatformCatalog } from './selectors'
-import { Catalog, Wearable, Collection, WearableId, WearablesRequestFilters } from './types'
+import { Catalog, Wearable, Collection, WearableId, WearablesRequestFilters, BodyShapeRepresentation } from './types'
 import { WORLD_EXPLORER } from '../../config/index'
 import { getResourcesURL } from '../location'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
@@ -32,6 +32,10 @@ import { StoreContainer } from '../store/rootTypes'
 import { retrieve, store } from 'shared/cache'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
+import { isFeatureEnabled } from 'shared/meta/selectors'
+import { FeatureFlags } from 'shared/meta/types'
+import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
+import { parseUrn } from '@dcl/urn-resolver'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 export const WRONG_FILTERS_ERROR =
@@ -132,33 +136,12 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   const valid = areFiltersValid(filters)
   if (valid) {
     try {
-      yield call(ensureBaseCatalogs)
+      const shouldUseV2 = WORLD_EXPLORER && (yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false))
 
-      const platformCatalog = yield select(getPlatformCatalog)
-      const exclusiveCatalog = yield select(getExclusiveCatalog)
+      const response: Wearable[] = shouldUseV2
+        ? yield call(fetchWearablesV2, filters)
+        : yield call(fetchWearablesV1, filters)
 
-      let response: Wearable[]
-      if (filters.wearableIds) {
-        // Filtering by ids
-        response = filters.wearableIds
-          .map((wearableId) =>
-            wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
-          )
-          .filter((wearable) => !!wearable)
-      } else if (filters.ownedByUser) {
-        // Only owned wearables
-        if (ALL_WEARABLES) {
-          response = Object.values(exclusiveCatalog)
-        } else {
-          const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
-          response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
-        }
-      } else if (filters.collectionIds) {
-        // We assume that the only collection name used is base-avatars
-        response = Object.values(platformCatalog)
-      } else {
-        throw new Error('Unknown filter')
-      }
       yield put(wearablesSuccess(response, context))
     } catch (error) {
       yield put(wearablesFailure(context, error.message))
@@ -166,6 +149,131 @@ export function* handleWearablesRequest(action: WearablesRequest) {
   } else {
     yield put(wearablesFailure(context, WRONG_FILTERS_ERROR))
   }
+}
+
+function* fetchWearablesV2(filters: WearablesRequestFilters) {
+  const client: CatalystClient = new CatalystClient('', '')
+
+  const result: any[] = []
+  if (filters.ownedByUser) {
+    // TODO: What about ALL_WEARABLES?
+
+    const ownedWearables: OwnedWearablesWithDefinition[] = yield call(fetchOwnedWearables, filters.ownedByUser, client)
+    for (const { amount, definition } of ownedWearables) {
+      for (let i = 0; i < amount; i++) {
+        result.push(definition)
+      }
+    }
+  } else {
+    const wearables = yield call(fetchWearablesByFilters, filters, client)
+    result.push(...wearables)
+  }
+
+  return result.map(mapV2WearableIntoV1).map(overrideBaseUrl)
+}
+
+function fetchOwnedWearables(ethAddress: string, client: CatalystClient) {
+  return client.fetchOwnedWearables(ethAddress, true)
+}
+
+function fetchWearablesByFilters(filters: WearablesRequestFilters, client: CatalystClient) {
+  // This is necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
+  const newIds = !filters?.wearableIds ? undefined : filters.wearableIds.map(mapLegacyToUrn)
+  return client.fetchWearables({
+    ...filters,
+    wearableIds: newIds
+  })
+}
+
+function mapLegacyToUrn(id: WearableId): WearableId {
+  if (!id.startsWith('dcl://base-avatars')) {
+    return id
+  }
+  const name = id.substring(id.lastIndexOf('/') + 1)
+  return `decentraland:off-chain:base-avatars:${name}`
+}
+
+function mapV2RepresentationIntoV1(representation: any): BodyShapeRepresentation {
+  const { contents, ...other } = representation
+  const newContents = contents.map(({ key, url }: { key: string; url: string }) => ({
+    file: key,
+    hash: url.substring(url.lastIndexOf('/') + 1)
+  }))
+  return {
+    ...other,
+    content: newContents
+  }
+}
+
+/** We need to map the v2 wearable format into the v1 format, that is accepted by the renderer */
+function mapV2WearableIntoV1(v2: any): Wearable {
+  const { id, data, rarity } = v2
+  const { category, tags, hides, replaces, representations } = data
+  return {
+    id,
+    type: 'wearable',
+    category,
+    tags,
+    hides,
+    replaces,
+    rarity,
+    representations: representations.map(mapV2RepresentationIntoV1),
+    baseUrl: '',
+    baseUrlBundles: ''
+  }
+}
+
+async function mapUrnToLegacyId(wearableIds: WearableId[]): Promise<WearableId[]> {
+  const promises = wearableIds.map(async (wearableId) => {
+    if (wearableId.startsWith('dcl://')) {
+      return wearableId
+    }
+
+    const result = await parseUrn(wearableId)
+    if (result?.type === 'off-chain') {
+      return `dcl://${result.registry}/${result.id}`
+    } else if (result?.type === 'blockchain-collection-v1') {
+      return `dcl://${result.collectionName}/${result.id}`
+    }
+  })
+
+  const mappedIds = await Promise.all(promises)
+  return mappedIds.filter((mappedId): mappedId is WearableId => !!mappedId)
+}
+
+function* fetchWearablesV1(filters: WearablesRequestFilters) {
+  yield call(ensureBaseCatalogs)
+
+  const platformCatalog = yield select(getPlatformCatalog)
+  const exclusiveCatalog = yield select(getExclusiveCatalog)
+
+  let response: Wearable[]
+  if (filters.wearableIds) {
+    // Filtering by ids
+    const mappedFromUrns: WearableId[] = yield call(mapUrnToLegacyId, filters.wearableIds)
+    response = mappedFromUrns
+      .map((wearableId) =>
+        wearableId === 'dcl://base-avatars/SchoolShoes' ? 'dcl://base-avatars/Moccasin' : wearableId
+      )
+      .map((wearableId) =>
+        wearableId.includes(`base-avatars`) ? platformCatalog[wearableId] : exclusiveCatalog[wearableId]
+      )
+      .filter((wearable) => !!wearable)
+  } else if (filters.ownedByUser) {
+    // Only owned wearables
+    if (ALL_WEARABLES) {
+      response = Object.values(exclusiveCatalog)
+    } else {
+      const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
+      response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
+    }
+  } else if (filters.collectionIds) {
+    // We assume that the only collection id used is base-avatars
+    response = Object.values(platformCatalog)
+  } else {
+    throw new Error('Unknown filter')
+  }
+  return response
 }
 
 export function* handleWearablesSuccess(action: WearablesSuccess) {

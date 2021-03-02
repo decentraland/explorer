@@ -62,6 +62,8 @@ import { UNEXPECTED_ERROR } from 'shared/loading/types'
 import { fetchParcelsWithAccess } from './fetchLand'
 import { ParcelsWithAccess } from 'decentraland-ecs/src'
 import { WearableId } from 'shared/types'
+import { isFeatureEnabled } from 'shared/meta/selectors'
+import { FeatureFlags } from 'shared/meta/types'
 
 const toBuffer = require('blob-to-buffer')
 
@@ -247,12 +249,13 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   yield populateFaceIfNecessary(profile, '128')
 
   const passport: Profile = yield call(processServerProfile, userId, profile)
+  const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
 
-  if (!ALL_WEARABLES && WORLD_EXPLORER) {
+  if (!ALL_WEARABLES && WORLD_EXPLORER && !shouldUseV2) {
     try {
       const inventory: WearableId[] = yield call(fetchInventoryItemsByAddress, userId)
       passport.avatar.wearables = passport.avatar.wearables.filter(
-        (wearableId) => wearableId.startsWith('dcl://base-avatars') || inventory.includes(wearableId)
+        (wearableId) => wearableId.includes('base-avatars') || inventory.includes(wearableId)
       )
     } catch (e) {
       defaultLogger.error(`Failed to fetch inventory to filter owned wearables`)
@@ -304,9 +307,11 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
 }
 
 export async function profileServerRequest(userId: string) {
-  const catalystUrl = getCatalystServer(globalThis.globalStore.getState())
+  const state = globalThis.globalStore.getState()
+  const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
-  return client.fetchProfile(userId)
+  const shouldUseV2: boolean = isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
+  return shouldUseV2 ? client.fetchProfiles([userId]).then((profiles) => profiles[0]) : client.fetchProfile(userId)
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {

@@ -98,7 +98,7 @@
     "blob-to-buffer": "^1.2.8",
     "body-scroll-lock": "^2.5.10",
     "cids": "^0.7.3",
-    "dcl-catalyst-client": "^3.0.1",
+    "dcl-catalyst-client": "^3.2.1-20210227001013.commit-ba25cbd",
     "dcl-crypto": "^2.2.0",
     "dcl-ecs-quests": "^1.0.0",
     "dcl-quests-client": "^2.0.0",
