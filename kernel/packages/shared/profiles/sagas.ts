@@ -310,8 +310,13 @@ export async function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
-  const shouldUseV2: boolean = isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
-  return shouldUseV2 ? client.fetchProfiles([userId]).then((profiles) => profiles[0]) : client.fetchProfile(userId)
+  const shouldUseV2: boolean = WORLD_EXPLORER && isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
+  if (shouldUseV2) {
+    return client.fetchProfiles([userId]).then((profiles) => profiles[0])
+  } else {
+    const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
+    return response.json()
+  }
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {
