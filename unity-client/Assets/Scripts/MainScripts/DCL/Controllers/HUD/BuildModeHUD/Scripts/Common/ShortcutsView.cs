@@ -1,7 +1,16 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShortcutsView : MonoBehaviour
+public interface IShortcutsView
+{
+    event Action OnCloseButtonClick;
+
+    void OnCloseClick();
+    void SetActive(bool isActive);
+}
+
+public class ShortcutsView : MonoBehaviour, IShortcutsView
 {
     public event System.Action OnCloseButtonClick;
 

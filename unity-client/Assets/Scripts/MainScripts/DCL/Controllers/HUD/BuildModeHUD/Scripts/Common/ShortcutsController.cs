@@ -2,7 +2,7 @@ public interface IShortcutsController
 {
     event System.Action OnCloseClick;
 
-    void Initialize(ShortcutsView publishPopupView);
+    void Initialize(IShortcutsView publishPopupView);
     void Dispose();
     void SetActive(bool isActive);
     void CloseButtonClicked();
@@ -12,9 +12,9 @@ public class ShortcutsController : IShortcutsController
 {
     public event System.Action OnCloseClick;
 
-    private ShortcutsView publishPopupView;
+    private IShortcutsView publishPopupView;
 
-    public void Initialize(ShortcutsView publishPopupView)
+    public void Initialize(IShortcutsView publishPopupView)
     {
         this.publishPopupView = publishPopupView;
 
