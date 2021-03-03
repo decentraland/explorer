@@ -94,6 +94,7 @@ public class AudioEvent : ScriptableObject
         {
             Debug.LogError($"AudioEvent: Tried to play {name} with audioClip equal to null.");
             return;
+        }
 
         // Check if AudioSource is active and check cooldown time
         if (!source.gameObject.activeSelf)
