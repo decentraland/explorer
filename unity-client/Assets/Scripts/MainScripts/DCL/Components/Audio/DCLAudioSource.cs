@@ -32,15 +32,7 @@ namespace DCL.Components
                     return false;
                 }
 
-                bool clipIdIsEqual = false;
-                if (string.IsNullOrEmpty(audioClipId) && string.IsNullOrEmpty(audioClipId))
-                    clipIdIsEqual = true;
-                else if (string.IsNullOrEmpty(audioClipId) || string.IsNullOrEmpty(audioClipId))
-                    clipIdIsEqual = false;
-                else
-                    clipIdIsEqual = audioClipId.Equals(item.audioClipId);
-
-                return clipIdIsEqual &&
+                return audioClipId == item.audioClipId &&
                        playing.Equals(item.playing) &&
                        volume.Equals(item.volume) &&
                        loop.Equals(item.loop) &&
