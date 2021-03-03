@@ -78,7 +78,11 @@ public class AudioEvent : ScriptableObject
     public void RandomizeIndex(int from, int to)
     {
         int newIndex;
-        do { newIndex = Random.Range(from, to); } while (clips.Length > 1 && newIndex == lastPlayedIndex);
+        do
+        {
+            newIndex = Random.Range(from, to);
+        } while (clips.Length > 1 && newIndex == lastPlayedIndex);
+
         clipIndex = newIndex;
     }
 
@@ -86,13 +90,13 @@ public class AudioEvent : ScriptableObject
     {
         if (source == null)
         {
-            Debug.LogError($"AudioEvent: Tried to play {name} with source equal to null.");
+            Debug.Log($"AudioEvent: Tried to play {name} with source equal to null.");
             return;
         }
 
         if (source.clip == null)
         {
-            Debug.LogError($"AudioEvent: Tried to play {name} with audioClip equal to null.");
+            Debug.Log($"AudioEvent: Tried to play {name} with audioClip equal to null.");
             return;
         }
 
