@@ -19,13 +19,23 @@ public class TooltipView : MonoBehaviour, ITooltipView
 {
     public float alphaTranstionSpeed => alphaSpeed;
 
-    public event System.Action<BaseEventData> OnShowTooltip;
-    public event System.Action OnHideTooltip;
+    public event Action<BaseEventData> OnShowTooltip;
+    public event Action OnHideTooltip;
 
     [SerializeField] internal float alphaSpeed = 3f;
     [SerializeField] internal RectTransform tooltipRT;
     [SerializeField] internal CanvasGroup tooltipCG;
     [SerializeField] internal TextMeshProUGUI tooltipTxt;
+
+    private const string VIEW_PATH = "Common/ToolTipView";
+
+    internal static TooltipView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TooltipView>();
+        view.gameObject.name = "_TooltipView";
+
+        return view;
+    }
 
     public void SetTooltipPosition(Vector3 pos)
     {
