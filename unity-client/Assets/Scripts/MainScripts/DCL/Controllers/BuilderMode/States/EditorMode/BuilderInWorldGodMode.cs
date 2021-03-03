@@ -253,7 +253,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         dragStartedPoint = GetFloorPointAtMouse(position);
 
-        if (!squareMultiSelectionButtonPressed)
+        if (!squareMultiSelectionButtonPressed || isPlacingNewObject)
             return;
 
         isDoingSquareMultiSelection = true;
@@ -285,7 +285,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     void EndDraggingSelectedEntities()
     {
-        if (wasGizmosActive)
+        if (wasGizmosActive && !isPlacingNewObject)
         {
             gizmoManager.ShowGizmo();
         }
@@ -298,7 +298,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         canDragSelectedEntities = false;
     }
 
-    public void EndBoundMultiSelection()
+    private void EndBoundMultiSelection()
     {
         isDoingSquareMultiSelection = false;
         mousePressed = false;
@@ -458,8 +458,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         if (selectedEntities.Count <= 0)
             gizmoManager.HideGizmo();
 
-        if (isPlacingNewObject && !entityDeselected.HasShape())
-            builderInWorldEntityHandler.DeleteEntity(entityDeselected);
+        // if (isPlacingNewObject && !entityDeselected.HasShape())
+        //     builderInWorldEntityHandler.DeleteEntity(entityDeselected);
 
         isPlacingNewObject = false;
         DesactivateVoxelMode();

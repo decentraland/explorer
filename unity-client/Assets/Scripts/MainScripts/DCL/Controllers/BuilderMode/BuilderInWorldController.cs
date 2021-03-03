@@ -33,6 +33,7 @@ public class BuilderInWorldController : MonoBehaviour
     public GameObject cursorGO;
     public InputController inputController;
     public PlayerAvatarController avatarRenderer;
+    public GameObject[] groundVisualsGO;
 
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
@@ -51,6 +52,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     private ParcelScene sceneToEdit;
 
+    [Header("Project References")]
+    public Material skyBoxMaterial;
+
     [HideInInspector]
     public bool isBuilderInWorldActivated = false;
 
@@ -67,6 +71,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private bool catalogAdded = false;
     private bool sceneReady = false;
+    private Material previousSkyBoxMaterial;
 
     private void Awake()
     {
@@ -403,6 +408,13 @@ public class BuilderInWorldController : MonoBehaviour
             SetupNewScene();
 
         isBuilderInWorldActivated = true;
+
+        foreach (var groundVisual in groundVisualsGO)
+        {
+            groundVisual.SetActive(false);
+        }
+        previousSkyBoxMaterial = RenderSettings.skybox;
+        RenderSettings.skybox = skyBoxMaterial;
     }
 
     public void ExitEditMode()
@@ -436,8 +448,14 @@ public class BuilderInWorldController : MonoBehaviour
 
         Environment.i.world.sceneController.DeactivateBuilderInWorldEditScene();
         ExitBiwControllers();
+        
+        foreach (var groundVisual in groundVisualsGO)
+        {
+            groundVisual.SetActive(true);
+        }
 
         isBuilderInWorldActivated = false;
+        RenderSettings.skybox = previousSkyBoxMaterial;
     }
 
     public void StartBiwControllers()

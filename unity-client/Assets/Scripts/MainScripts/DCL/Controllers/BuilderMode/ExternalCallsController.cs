@@ -10,9 +10,13 @@ public class ExternalCallsController
     private static ExternalCallsController instanceValue;
 
     List<IEnumerator> callList = new List<IEnumerator>();
-
-    Coroutine callerCourutine;
+    
     bool isRunningCalls;
+    
+    private static int retryCont = 0;
+
+    private const int RETRY_AMOUNTS = 3;
+
     public static ExternalCallsController i
     {
         get
@@ -32,11 +36,11 @@ public class ExternalCallsController
 
     }
 
-    public void GetContentAsByteArray(string url, Action<string,byte[]> functionToCall)
+    public void GetContentAsByteArray(string url, Action<string, byte[]> functionToCall)
     {
         callList.Add(MakeGetCall(url, functionToCall, null));
-        if(!isRunningCalls)  
-                callerCourutine = CoroutineStarter.Start(MakeExternalCalls());
+        if (!isRunningCalls)
+            CoroutineStarter.Start(MakeExternalCalls());
     }
 
     IEnumerator MakeExternalCalls()
@@ -56,27 +60,43 @@ public class ExternalCallsController
         UnityWebRequest www = UnityWebRequest.Get(url);
         UnityWebRequestAsyncOperation www2 = www.SendWebRequest();
 
-        while (!www2.isDone)
+        bool retry = true;
+        retryCont = 0;
+        while (retry)
         {
-            yield return null;
-        }
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {         
-            byte[] byteArray = www.downloadHandler.data;
-            if(byteArrayFunctionToCall != null)
+            retry = false;
+            while (!www2.isDone)
             {
-                byteArrayFunctionToCall.Invoke(url,byteArray);
+                yield return null;
             }
-            else if (functionToCall != null)
+            if (www.isNetworkError || www.isHttpError)
             {
-                string result = System.Text.Encoding.UTF8.GetString(byteArray);
-                functionToCall?.Invoke(result);
+                Debug.Log(www.error);
+                if (retryCont < RETRY_AMOUNTS)
+                {
+                    retry = true;
+                    retryCont++;
+                }
+                else
+                {
+                    yield break;
+                }
+       
             }
-           
+            else
+            {
+                byte[] byteArray = www.downloadHandler.data;
+                if (byteArrayFunctionToCall != null)
+                {
+                    byteArrayFunctionToCall.Invoke(url, byteArray);
+                }
+                else if (functionToCall != null)
+                {
+                    string result = System.Text.Encoding.UTF8.GetString(byteArray);
+                    functionToCall?.Invoke(result);
+                }
+
+            }
         }
     }
 }

@@ -271,6 +271,7 @@ MonoBehaviour:
   cursorGO: {fileID: 0}
   inputController: {fileID: 0}
   avatarRenderer: {fileID: 0}
+  groundVisualsGO: []
   outlinerController: {fileID: 4993453681677180110}
   bIWInputHandler: {fileID: 6563051222090226857}
   biwPublishController: {fileID: 8821150653254988965}
@@ -284,6 +285,7 @@ MonoBehaviour:
   layerToRaycast:
     serializedVersion: 2
     m_Bits: 16384
+  skyBoxMaterial: {fileID: 2100000, guid: 899091b108419404aad5edee33f5a383, type: 2}
   isBuilderInWorldActivated: 0
 --- !u!1 &1208871511283293828
 GameObject:
@@ -2176,6 +2178,8 @@ MonoBehaviour:
   biwModeController: {fileID: 4364144288841107711}
   biwFloorHandler: {fileID: 1205861337032038080}
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
+  loadingObjectPrefab: {fileID: 8290156843023242693, guid: 1bb0d1bb76ba9f64da0542e03c213662,
+    type: 3}
   toggleCreateLastSceneObjectInputAction: {fileID: 11400000, guid: 888a1a2d0ea847a40a6b201ed64f680e,
     type: 2}
 --- !u!1 &4590602730705578794
