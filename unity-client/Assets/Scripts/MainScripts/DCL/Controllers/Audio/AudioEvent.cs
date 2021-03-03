@@ -86,16 +86,25 @@ public class AudioEvent : ScriptableObject
     {
         if (source == null)
         {
-            Debug.Log($"AudioEvent: Tried to play {name} with source equal to null.");
+            Debug.LogError($"AudioEvent: Tried to play {name} with source equal to null.");
             return;
         }
 
         if (source.clip == null)
+        {
+            Debug.LogError($"AudioEvent: Tried to play {name} with audioClip equal to null.");
             return;
 
         // Check if AudioSource is active and check cooldown time
-        if (!source.gameObject.activeSelf || Time.time < nextAvailablePlayTime)
+        if (!source.gameObject.activeSelf)
+        {
             return;
+        }
+
+        if (Time.time < nextAvailablePlayTime)
+        {
+            return;
+        }
 
         source.clip = clips[clipIndex];
         source.pitch = pitch + Random.Range(0f, randomPitch) - (randomPitch * 0.5f);
