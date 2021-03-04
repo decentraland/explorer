@@ -60,11 +60,14 @@ function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
 export let targetHeight: number = 1080
 
 function resizeCanvas(module: any) {
+  let desiredHeight = 1080
+
   if (targetHeight > 2000) {
     targetHeight = window.innerHeight * devicePixelRatio
+    desiredHeight = targetHeight
+  } else {
+    desiredHeight = targetHeight - (window.outerHeight - window.innerHeight) * devicePixelRatio
   }
-
-  let desiredHeight = targetHeight
 
   let ratio = desiredHeight / module.canvas.height
   module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
@@ -158,12 +161,12 @@ export class UnityInterface {
   }
 
   public CreateGlobalScene(data: {
-    id: string;
-    name: string;
-    baseUrl: string,
-    contents: Array<ContentMapping>,
-    icon?: string,
-    isPortableExperience: boolean,
+    id: string
+    name: string
+    baseUrl: string
+    contents: Array<ContentMapping>
+    icon?: string
+    isPortableExperience: boolean
   }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
