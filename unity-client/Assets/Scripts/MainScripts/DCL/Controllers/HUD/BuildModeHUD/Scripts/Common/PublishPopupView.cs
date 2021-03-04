@@ -13,6 +13,16 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
     [SerializeField] internal GameObject publishingFinishedGO;
     [SerializeField] internal TextMeshProUGUI publishStatusTxt;
 
+    private const string VIEW_PATH = "Common/PublishPopupView";
+
+    internal static PublishPopupView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<PublishPopupView>();
+        view.gameObject.name = "_PublishPopupView";
+
+        return view;
+    }
+
     public void PublishStart()
     {
         gameObject.SetActive(true);

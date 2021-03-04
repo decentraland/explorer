@@ -12,7 +12,7 @@ public interface IShortcutsView
 
 public class ShortcutsView : MonoBehaviour, IShortcutsView
 {
-    public event System.Action OnCloseButtonClick;
+    public event Action OnCloseButtonClick;
 
     [SerializeField] internal Button closeButton;
 
