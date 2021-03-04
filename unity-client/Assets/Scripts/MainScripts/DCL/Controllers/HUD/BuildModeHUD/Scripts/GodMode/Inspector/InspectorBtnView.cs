@@ -28,6 +28,16 @@ public class InspectorBtnView : MonoBehaviour, IInspectorBtnView
     [SerializeField] internal EventTrigger inspectorButtonEventTrigger;
     [SerializeField] internal InputAction_Trigger toggleOpenEntityListInputAction;
 
+    private const string VIEW_PATH = "GodMode/Inspector/InspectorBtnView";
+
+    internal static InspectorBtnView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<InspectorBtnView>();
+        view.gameObject.name = "_InspectorBtnView";
+
+        return view;
+    }
+
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
