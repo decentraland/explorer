@@ -42,7 +42,7 @@ namespace DCL
 
             if (entityTransform == null)
             {
-                yield return new WaitUntil(() => entity != null);
+                yield return new WaitUntil(() => entity.gameObject != null);
                 entityTransform = entity.gameObject.transform;
             }
         }

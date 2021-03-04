@@ -24,7 +24,9 @@ namespace DCL.Components
 
             public override BaseModel GetDataFromJSON(string json)
             {
-                return Utils.SafeFromJson<Model>(json);
+                Model model = Utils.SafeFromJson<Model>(json);
+                model.textModel = Utils.SafeFromJson<TextShape.Model>(json);
+                return model;
             }
         }
 
@@ -58,11 +60,8 @@ namespace DCL.Components
         {
             //NOTE(Brian): We have to serialize twice now, but in the future we should fix the
             //             client data structure to be like this, so we can serialize all of it in one shot.
-            if (!scene.isTestScene)
-            {
-                model.textModel = (TextShape.Model) newModel;
-            }
-
+            model = (Model) newModel;
+            
             inputField.textViewport = referencesContainer.rectTransform;
 
             UnsuscribeFromEvents();

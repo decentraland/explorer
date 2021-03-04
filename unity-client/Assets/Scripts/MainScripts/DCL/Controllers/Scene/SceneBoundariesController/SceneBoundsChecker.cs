@@ -255,6 +255,9 @@ namespace DCL.Controllers
         {
             for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
             {
+                if (entity.meshesInfo.renderers[i] == null)
+                    continue;
+                
                 if (!entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
                 {
                     feedbackStyle.OnRendererExitBounds(entity.meshesInfo.renderers[i]);

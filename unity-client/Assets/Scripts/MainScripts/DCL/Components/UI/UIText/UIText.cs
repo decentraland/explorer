@@ -52,10 +52,7 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            if (!scene.isTestScene)
-            {
-                model = (Model) newModel;
-            }
+            model = (Model) newModel;
 
             yield return TextShape.ApplyModelChanges(scene, referencesContainer.text, model.textModel);
 
