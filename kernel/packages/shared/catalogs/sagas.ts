@@ -214,12 +214,13 @@ function mapV2WearablesIntoV1(v2Wearables: any[]): Promise<Wearable[]> {
 }
 
 async function mapV2WearableIntoV1(v2Wearable: any): Promise<Wearable> {
-  const { id, data, rarity, i18n } = v2Wearable
+  const { id, data, rarity, i18n, thumbnail } = v2Wearable
   const { category, tags, hides, replaces, representations } = data
   const newId = await mapUrnToLegacyId(id)
   const newRepresentations: BodyShapeRepresentation[] = await Promise.all(
     representations.map(mapV2RepresentationIntoV1)
   )
+  const newThumbnail = thumbnail.substring(thumbnail.lastIndexOf('/') + 1)
 
   return {
     id: newId ?? id,
@@ -231,6 +232,7 @@ async function mapV2WearableIntoV1(v2Wearable: any): Promise<Wearable> {
     rarity,
     representations: newRepresentations,
     i18n,
+    thumbnail: newThumbnail,
     baseUrl: '',
     baseUrlBundles: ''
   }

@@ -17,6 +17,7 @@ export type Wearable = {
   rarity: RarityEnum
   representations: BodyShapeRepresentation[]
   i18n: { code: string; text: string }[]
+  thumbnail: string
 }
 
 export type BodyShapeRepresentation = {

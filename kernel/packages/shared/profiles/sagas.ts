@@ -262,7 +262,6 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   }
 
   const mappedWearables = yield call(mapUrnsToLegacyId, passport.avatar.wearables)
-  console.log(passport.avatar.wearables, mappedWearables)
   passport.avatar.wearables = mappedWearables
 
   const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
