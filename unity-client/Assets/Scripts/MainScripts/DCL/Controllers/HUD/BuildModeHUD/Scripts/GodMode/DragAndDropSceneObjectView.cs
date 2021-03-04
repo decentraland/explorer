@@ -18,6 +18,16 @@ public class DragAndDropSceneObjectView : MonoBehaviour, IDragAndDropSceneObject
 
     [SerializeField] internal EventTrigger dragAndDropEventTrigger;
 
+    private const string VIEW_PATH = "GodMode/DragAndDropSceneObjectView";
+
+    internal static DragAndDropSceneObjectView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<DragAndDropSceneObjectView>();
+        view.gameObject.name = "_DragAndDropSceneObjectView";
+
+        return view;
+    }
+
     private void Awake()
     {
         ConfigureEventTrigger(EventTriggerType.Drop, (eventData) => Drop());

@@ -36,7 +36,7 @@ namespace Tests.BuildModeHUD
             {
                 triggerActionCalled = true;
             });
-            quickBarView.shortcutsEventTriggers[0].triggers[0].callback.Invoke(null);
+            quickBarView.shortcutsEventTriggers[0].triggers.FirstOrDefault(x => x.eventID == EventTriggerType.Drop).callback.Invoke(null);
 
             // Assert
             Assert.IsTrue(
