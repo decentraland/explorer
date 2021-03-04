@@ -13,10 +13,11 @@ export const ErrorFatal: React.FC = () => (
           Something went wrong
         </div>
         <div className="givesomedetailof">
-          If you have any ad blocking extensions, try turning them off for this
-          site.<br /><br />
-          Loading should not take any longer than 2-3 minutes. <br />
-          If you seem to be stuck, make sure hardware acceleration is on.
+          If you have any ad blocking extensions,<br />
+          try turning them off for this site.<br />
+          <br />
+          Loading should not take any longer than 2-3 minutes.<br />
+          If you seem to be stuck, make sure hardware acceleration is on.<br />
           <a href="https://docs.decentraland.org/decentraland/hardware-acceleration/">LEARN MORE</a>
         </div>
         <div className="cta">
