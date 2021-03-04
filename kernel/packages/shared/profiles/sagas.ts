@@ -255,14 +255,18 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   const passport: Profile = yield call(processServerProfile, userId, profile)
 
-  // These mappings are necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
-  const mappedBodyShape = yield call(mapUrnToLegacyId, passport.avatar.bodyShape)
-  if (mappedBodyShape) {
-    passport.avatar.bodyShape = mappedBodyShape
+  if (passport.avatar?.bodyShape) {
+    // These mappings are necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
+    const mappedBodyShape = yield call(mapUrnToLegacyId, passport.avatar.bodyShape)
+    if (mappedBodyShape) {
+      passport.avatar.bodyShape = mappedBodyShape
+    }
   }
 
-  const mappedWearables = yield call(mapUrnsToLegacyId, passport.avatar.wearables)
-  passport.avatar.wearables = mappedWearables
+  if (passport.avatar?.wearables) {
+    const mappedWearables = yield call(mapUrnsToLegacyId, passport.avatar.wearables)
+    passport.avatar.wearables = mappedWearables
+  }
 
   const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
 
