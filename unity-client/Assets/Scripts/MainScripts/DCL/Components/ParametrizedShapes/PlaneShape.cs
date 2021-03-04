@@ -18,37 +18,6 @@ namespace DCL.Components
             {
                 return Utils.SafeFromJson<Model>(json);
             }
-
-            protected bool Equals(Model other)
-            {
-                return base.Equals(other) && Equals(uvs, other.uvs) && width.Equals(other.width) && height.Equals(other.height);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
-
-                if (ReferenceEquals(this, obj))
-                    return true;
-
-                if (obj.GetType() != this.GetType())
-                    return false;
-
-                return Equals((Model)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    var hashCode = (uvs != null ? uvs.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ width.GetHashCode();
-                    hashCode = (hashCode * 397) ^ height.GetHashCode();
-                    return hashCode;
-                }
-            }
-
         }
 
         public PlaneShape(IParcelScene scene) : base(scene)

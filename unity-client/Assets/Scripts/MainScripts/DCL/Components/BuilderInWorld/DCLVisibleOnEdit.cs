@@ -18,20 +18,9 @@ public class DCLVisibleOnEdit : BaseDisposable
     {
         public bool isVisible;
 
-        public override bool Equals(object obj)
-        {
-            return obj is Model model &&
-                   isVisible == model.isVisible;
-        }
-
         public override BaseModel GetDataFromJSON(string json)
         {
             return Utils.SafeFromJson<Model>(json);
-        }
-
-        public override int GetHashCode()
-        {
-            return -1553349351 + isVisible.GetHashCode();
         }
     }
 

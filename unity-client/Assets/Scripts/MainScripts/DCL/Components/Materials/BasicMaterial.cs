@@ -21,26 +21,9 @@ namespace DCL.Components
 
             public bool castShadows = true;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       texture == model.texture &&
-                       alphaTest == model.alphaTest &&
-                       castShadows == model.castShadows;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json); 
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -136990414;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(texture);
-                hashCode = hashCode * -1521134295 + alphaTest.GetHashCode();
-                hashCode = hashCode * -1521134295 + castShadows.GetHashCode();
-                return hashCode;
             }
         }
 

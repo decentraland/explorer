@@ -106,9 +106,9 @@ namespace Tests
             yield return audioClip.routine;
 
             // 2. Check configured values
-            Assert.IsTrue(audioClip.GetIsLoop());
-            Assert.IsFalse(audioClip.GetShouldTryLoad());
-            Assert.AreEqual(0.8f, audioClip.GetVolume());
+            Assert.IsTrue(audioClip.IsLoop());
+            Assert.IsFalse(audioClip.ShouldTryLoad());
+            Assert.AreEqual(0.8f, audioClip.Volume());
 
             // 3. Update component with missing values
             componentModel = new DCLAudioClip.Model { };
@@ -118,9 +118,9 @@ namespace Tests
             yield return audioClip.routine;
 
             // 4. Check defaulted values
-            Assert.IsFalse(audioClip.GetIsLoop());
-            Assert.IsTrue(audioClip.GetShouldTryLoad());
-            Assert.AreEqual(1f, audioClip.GetVolume());
+            Assert.IsFalse(audioClip.IsLoop());
+            Assert.IsTrue(audioClip.ShouldTryLoad());
+            Assert.AreEqual(1f, audioClip.Volume());
         }
 
         [UnityTest]

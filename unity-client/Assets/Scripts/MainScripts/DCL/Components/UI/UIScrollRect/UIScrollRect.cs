@@ -26,69 +26,10 @@ namespace DCL.Components
             public float paddingBottom = 0f;
             public float paddingLeft = 0f;
             public string OnChanged;
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       base.Equals(obj) &&
-                       name == model.name &&
-                       parentComponent == model.parentComponent &&
-                       visible == model.visible &&
-                       opacity == model.opacity &&
-                       hAlign == model.hAlign &&
-                       vAlign == model.vAlign &&
-                       EqualityComparer<UIValue>.Default.Equals(width, model.width) &&
-                       EqualityComparer<UIValue>.Default.Equals(height, model.height) &&
-                       EqualityComparer<UIValue>.Default.Equals(positionX, model.positionX) &&
-                       EqualityComparer<UIValue>.Default.Equals(positionY, model.positionY) &&
-                       isPointerBlocker == model.isPointerBlocker &&
-                       onClick == model.onClick &&
-                       valueX == model.valueX &&
-                       valueY == model.valueY &&
-                       borderColor.Equals(model.borderColor) &&
-                       backgroundColor.Equals(model.backgroundColor) &&
-                       isHorizontal == model.isHorizontal &&
-                       isVertical == model.isVertical &&
-                       paddingTop == model.paddingTop &&
-                       paddingRight == model.paddingRight &&
-                       paddingBottom == model.paddingBottom &&
-                       paddingLeft == model.paddingLeft &&
-                       OnChanged == model.OnChanged;
-            }
-
+            
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -667376577;
-                hashCode = hashCode * -1521134295 + base.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(parentComponent);
-                hashCode = hashCode * -1521134295 + visible.GetHashCode();
-                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hAlign);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vAlign);
-                hashCode = hashCode * -1521134295 + width.GetHashCode();
-                hashCode = hashCode * -1521134295 + height.GetHashCode();
-                hashCode = hashCode * -1521134295 + positionX.GetHashCode();
-                hashCode = hashCode * -1521134295 + positionY.GetHashCode();
-                hashCode = hashCode * -1521134295 + isPointerBlocker.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(onClick);
-                hashCode = hashCode * -1521134295 + valueX.GetHashCode();
-                hashCode = hashCode * -1521134295 + valueY.GetHashCode();
-                hashCode = hashCode * -1521134295 + borderColor.GetHashCode();
-                hashCode = hashCode * -1521134295 + backgroundColor.GetHashCode();
-                hashCode = hashCode * -1521134295 + isHorizontal.GetHashCode();
-                hashCode = hashCode * -1521134295 + isVertical.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingTop.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingRight.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingBottom.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingLeft.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(OnChanged);
-                return hashCode;
             }
         }
 

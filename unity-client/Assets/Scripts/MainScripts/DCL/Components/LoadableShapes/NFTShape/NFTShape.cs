@@ -17,35 +17,6 @@ namespace DCL.Components
             {
                 return Utils.SafeFromJson<Model>(json);
             }
-            
-            protected bool Equals(Model other)
-            {
-                return color.Equals(other.color) && style == other.style &&
-                       withCollisions == other.withCollisions && isPointerBlocker == other.isPointerBlocker && visible == other.visible &&
-                       src == other.src && assetId == other.assetId;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
-
-                if (ReferenceEquals(this, obj))
-                    return true;
-
-                if (obj.GetType() != this.GetType())
-                    return false;
-
-                return Equals((Model) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return (color.GetHashCode() * 397) ^ style;
-                }
-            }
         }
 
         public override string componentName => "NFT Shape";

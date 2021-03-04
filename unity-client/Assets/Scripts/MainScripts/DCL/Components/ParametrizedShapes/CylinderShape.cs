@@ -11,21 +11,6 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : BaseShape.Model
         {
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    var hashCode = radiusTop.GetHashCode();
-                    hashCode = (hashCode * 397) ^ radiusBottom.GetHashCode();
-                    hashCode = (hashCode * 397) ^ segmentsHeight.GetHashCode();
-                    hashCode = (hashCode * 397) ^ segmentsRadial.GetHashCode();
-                    hashCode = (hashCode * 397) ^ openEnded.GetHashCode();
-                    hashCode = (hashCode * 397) ^ radius.GetHashCode();
-                    hashCode = (hashCode * 397) ^ arc.GetHashCode();
-                    return hashCode;
-                }
-            }
-
             public float radiusTop = 1f;
             public float radiusBottom = 1f;
             public float segmentsHeight = 1f;
@@ -37,27 +22,6 @@ namespace DCL.Components
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            protected bool Equals(Model other)
-            {
-                return  base.Equals(other) && radiusTop.Equals(other.radiusTop) && radiusBottom.Equals(other.radiusBottom) &&
-                        segmentsHeight.Equals(other.segmentsHeight) && segmentsRadial.Equals(other.segmentsRadial) &&
-                        openEnded == other.openEnded && Nullable.Equals(radius, other.radius) && arc.Equals(other.arc);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
-
-                if (ReferenceEquals(this, obj))
-                    return true;
-
-                if (obj.GetType() != this.GetType())
-                    return false;
-
-                return Equals((Model)obj);
             }
         }
 

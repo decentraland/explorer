@@ -29,37 +29,10 @@ namespace DCL.Components
             public float seek = -1;
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       videoClipId == model.videoClipId &&
-                       playing == model.playing &&
-                       volume == model.volume &&
-                       playbackRate == model.playbackRate &&
-                       loop == model.loop &&
-                       seek == model.seek &&
-                       wrap == model.wrap &&
-                       samplingMode == model.samplingMode;
-            }
-
+            
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -652872899;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(videoClipId);
-                hashCode = hashCode * -1521134295 + playing.GetHashCode();
-                hashCode = hashCode * -1521134295 + volume.GetHashCode();
-                hashCode = hashCode * -1521134295 + playbackRate.GetHashCode();
-                hashCode = hashCode * -1521134295 + loop.GetHashCode();
-                hashCode = hashCode * -1521134295 + seek.GetHashCode();
-                hashCode = hashCode * -1521134295 + wrap.GetHashCode();
-                hashCode = hashCode * -1521134295 + samplingMode.GetHashCode();
-                return hashCode;
             }
         }
 

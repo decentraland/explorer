@@ -16,26 +16,9 @@ namespace DCL.Components
             public bool playing = false;
             public float volume = 1;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       url == model.url &&
-                       playing == model.playing &&
-                       volume == model.volume;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = 1642971146;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(url);
-                hashCode = hashCode * -1521134295 + playing.GetHashCode();
-                hashCode = hashCode * -1521134295 + volume.GetHashCode();
-                return hashCode;
             }
         }
 

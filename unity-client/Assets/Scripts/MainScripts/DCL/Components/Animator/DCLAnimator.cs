@@ -39,17 +39,6 @@ namespace DCL.Components
             {
                 return Utils.SafeFromJson<Model>(json);
             }
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       EqualityComparer<DCLAnimationState[]>.Default.Equals(states, model.states);
-            }
-
-            public override int GetHashCode()
-            {
-                return 282409271 + EqualityComparer<DCLAnimationState[]>.Default.GetHashCode(states);
-            }
         }
 
         [System.NonSerialized]

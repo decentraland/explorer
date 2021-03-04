@@ -18,20 +18,9 @@ namespace DCL.Components
         {
             public string src;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       src == model.src;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json); 
-            }
-
-            public override int GetHashCode()
-            {
-                return -1871387087 + EqualityComparer<string>.Default.GetHashCode(src);
             }
         }
 

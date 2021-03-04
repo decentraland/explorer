@@ -15,26 +15,9 @@ namespace DCL
             public bool y = true;
             public bool z = true;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       x == model.x &&
-                       y == model.y &&
-                       z == model.z;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = 373119288;
-                hashCode = hashCode * -1521134295 + x.GetHashCode();
-                hashCode = hashCode * -1521134295 + y.GetHashCode();
-                hashCode = hashCode * -1521134295 + z.GetHashCode();
-                return hashCode;
             }
         }
 

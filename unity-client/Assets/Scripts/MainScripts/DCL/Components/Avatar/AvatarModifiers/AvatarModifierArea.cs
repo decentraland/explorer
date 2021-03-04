@@ -16,25 +16,10 @@ public class AvatarModifierArea : BaseComponent
         // TODO: Change to TriggerArea and handle deserialization with subclasses
         public BoxTriggerArea area;
         public string[] modifiers;
-
-        public override bool Equals(object obj)
-        {
-            return obj is Model model &&
-                   EqualityComparer<BoxTriggerArea>.Default.Equals(area, model.area) &&
-                   EqualityComparer<string[]>.Default.Equals(modifiers, model.modifiers);
-        }
-
+        
         public override BaseModel GetDataFromJSON(string json)
         {
             return Utils.SafeFromJson<Model>(json);
-        }
-
-        public override int GetHashCode()
-        {
-            int hashCode = -64555011;
-            hashCode = hashCode * -1521134295 + EqualityComparer<BoxTriggerArea>.Default.GetHashCode(area);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string[]>.Default.GetHashCode(modifiers);
-            return hashCode;
         }
     }
 

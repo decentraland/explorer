@@ -18,26 +18,9 @@ public class DCLName : BaseDisposable
     {
         public string value;
 
-        public override bool Equals(object obj)
-        {
-            var item = obj as Model;
-
-            if (item == null)
-            {
-                return false;
-            }
-
-            return value.Equals(item.value);
-        }
-
         public override BaseModel GetDataFromJSON(string json)
         {
             return Utils.SafeFromJson<Model>(json);
-        }
-
-        public override int GetHashCode()
-        {
-            return -1584136870 + EqualityComparer<string>.Default.GetHashCode(value);
         }
     }
 

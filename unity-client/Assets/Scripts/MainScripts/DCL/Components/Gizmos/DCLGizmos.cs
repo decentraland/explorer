@@ -24,33 +24,10 @@ namespace DCL.Components
             public bool cycle = true;
             public string selectedGizmo = Gizmo.NONE;
             public bool localReference = false;
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       position == model.position &&
-                       rotation == model.rotation &&
-                       scale == model.scale &&
-                       cycle == model.cycle &&
-                       selectedGizmo == model.selectedGizmo &&
-                       localReference == model.localReference;
-            }
-
+            
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -1948302438;
-                hashCode = hashCode * -1521134295 + position.GetHashCode();
-                hashCode = hashCode * -1521134295 + rotation.GetHashCode();
-                hashCode = hashCode * -1521134295 + scale.GetHashCode();
-                hashCode = hashCode * -1521134295 + cycle.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(selectedGizmo);
-                hashCode = hashCode * -1521134295 + localReference.GetHashCode();
-                return hashCode;
             }
         }
 

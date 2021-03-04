@@ -25,24 +25,9 @@ namespace DCL
             public string type;
             public string uuid;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       type == model.type &&
-                       uuid == model.uuid;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json); 
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = 698321543;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(type);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(uuid);
-                return hashCode;
             }
         }
 

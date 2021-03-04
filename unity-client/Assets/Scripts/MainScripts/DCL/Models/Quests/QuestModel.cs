@@ -36,36 +36,4 @@ public class QuestModel : BaseModel
     public float progress => sections.Average(x => x.progress);
 
     public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<QuestModel>(json); }
-
-    protected bool Equals(QuestModel other)
-    {
-        return id == other.id && name == other.name && description == other.description && thumbnail_entry == other.thumbnail_entry && status == other.status && thumbnail_banner == other.thumbnail_banner && icon == other.icon && Equals(sections, other.sections);
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != this.GetType())
-            return false;
-        return Equals((QuestModel) obj);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            int hashCode = (id != null ? id.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (name != null ? name.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (description != null ? description.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (thumbnail_entry != null ? thumbnail_entry.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (status != null ? status.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (thumbnail_banner != null ? thumbnail_banner.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (icon != null ? icon.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ (sections != null ? sections.GetHashCode() : 0);
-            return hashCode;
-        }
-    }
 }

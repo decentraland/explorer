@@ -18,29 +18,10 @@ namespace DCL
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
             public bool hasAlpha = false;
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       src == model.src &&
-                       wrap == model.wrap &&
-                       samplingMode == model.samplingMode &&
-                       hasAlpha == model.hasAlpha;
-            }
-
+            
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -643838858;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(src);
-                hashCode = hashCode * -1521134295 + wrap.GetHashCode();
-                hashCode = hashCode * -1521134295 + samplingMode.GetHashCode();
-                hashCode = hashCode * -1521134295 + hasAlpha.GetHashCode();
-                return hashCode;
             }
         }
 

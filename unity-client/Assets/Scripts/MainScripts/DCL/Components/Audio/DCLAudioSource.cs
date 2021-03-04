@@ -22,33 +22,6 @@ namespace DCL.Components
             {
                 return Utils.SafeFromJson<Model>(json);
             }
-
-            public override bool Equals(object obj)
-            {
-                var item = obj as Model;
-
-                if (item == null)
-                {
-                    return false;
-                }
-
-                return audioClipId == item.audioClipId &&
-                       playing.Equals(item.playing) &&
-                       volume.Equals(item.volume) &&
-                       loop.Equals(item.loop) &&
-                       pitch.Equals(item.pitch);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = 1859268890;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(audioClipId);
-                hashCode = hashCode * -1521134295 + playing.GetHashCode();
-                hashCode = hashCode * -1521134295 + volume.GetHashCode();
-                hashCode = hashCode * -1521134295 + loop.GetHashCode();
-                hashCode = hashCode * -1521134295 + pitch.GetHashCode();
-                return hashCode;
-            }
         }
 
         public float playTime => audioSource.time;

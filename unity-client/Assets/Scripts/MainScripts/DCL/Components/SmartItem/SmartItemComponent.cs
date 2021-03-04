@@ -12,21 +12,10 @@ namespace DCL.Components
         public class Model : BaseModel
         {
             public Dictionary<object, object> values = new Dictionary<object, object>();
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       EqualityComparer<Dictionary<object, object>>.Default.Equals(values, model.values);
-            }
-
+            
             public override BaseModel GetDataFromJSON(string json)
             {
                 return JsonConvert.DeserializeObject<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                return 1649527923 + EqualityComparer<Dictionary<object, object>>.Default.GetHashCode(values);
             }
         }
 

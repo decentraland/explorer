@@ -54,77 +54,10 @@ namespace DCL.Components
             public float outlineWidth = 0f;
 
             public Color outlineColor = Color.white;
-
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       billboard == model.billboard &&
-                       value == model.value &&
-                       visible == model.visible &&
-                       color.Equals(model.color) &&
-                       opacity == model.opacity &&
-                       fontSize == model.fontSize &&
-                       fontAutoSize == model.fontAutoSize &&
-                       fontWeight == model.fontWeight &&
-                       font == model.font &&
-                       hTextAlign == model.hTextAlign &&
-                       vTextAlign == model.vTextAlign &&
-                       width == model.width &&
-                       height == model.height &&
-                       adaptWidth == model.adaptWidth &&
-                       adaptHeight == model.adaptHeight &&
-                       paddingTop == model.paddingTop &&
-                       paddingRight == model.paddingRight &&
-                       paddingBottom == model.paddingBottom &&
-                       paddingLeft == model.paddingLeft &&
-                       lineSpacing == model.lineSpacing &&
-                       lineCount == model.lineCount &&
-                       textWrapping == model.textWrapping &&
-                       shadowBlur == model.shadowBlur &&
-                       shadowOffsetX == model.shadowOffsetX &&
-                       shadowOffsetY == model.shadowOffsetY &&
-                       shadowColor.Equals(model.shadowColor) &&
-                       outlineWidth == model.outlineWidth &&
-                       outlineColor.Equals(model.outlineColor);
-            }
-
+            
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -852556059;
-                hashCode = hashCode * -1521134295 + billboard.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(value);
-                hashCode = hashCode * -1521134295 + visible.GetHashCode();
-                hashCode = hashCode * -1521134295 + color.GetHashCode();
-                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
-                hashCode = hashCode * -1521134295 + fontSize.GetHashCode();
-                hashCode = hashCode * -1521134295 + fontAutoSize.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(fontWeight);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(font);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hTextAlign);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vTextAlign);
-                hashCode = hashCode * -1521134295 + width.GetHashCode();
-                hashCode = hashCode * -1521134295 + height.GetHashCode();
-                hashCode = hashCode * -1521134295 + adaptWidth.GetHashCode();
-                hashCode = hashCode * -1521134295 + adaptHeight.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingTop.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingRight.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingBottom.GetHashCode();
-                hashCode = hashCode * -1521134295 + paddingLeft.GetHashCode();
-                hashCode = hashCode * -1521134295 + lineSpacing.GetHashCode();
-                hashCode = hashCode * -1521134295 + lineCount.GetHashCode();
-                hashCode = hashCode * -1521134295 + textWrapping.GetHashCode();
-                hashCode = hashCode * -1521134295 + shadowBlur.GetHashCode();
-                hashCode = hashCode * -1521134295 + shadowOffsetX.GetHashCode();
-                hashCode = hashCode * -1521134295 + shadowOffsetY.GetHashCode();
-                hashCode = hashCode * -1521134295 + shadowColor.GetHashCode();
-                hashCode = hashCode * -1521134295 + outlineWidth.GetHashCode();
-                hashCode = hashCode * -1521134295 + outlineColor.GetHashCode();
-                return hashCode;
             }
         }
 

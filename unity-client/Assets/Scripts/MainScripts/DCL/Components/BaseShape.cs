@@ -19,36 +19,6 @@ namespace DCL.Components
             {
                 return Utils.SafeFromJson<Model>(json);
             }
-
-            protected bool Equals(Model other)
-            {
-                return withCollisions == other.withCollisions && isPointerBlocker == other.isPointerBlocker && visible == other.visible;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
-
-                if (ReferenceEquals(this, obj))
-                    return true;
-
-                if (obj.GetType() != this.GetType())
-                    return false;
-
-                return Equals((Model)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    var hashCode = withCollisions.GetHashCode();
-                    hashCode = (hashCode * 397) ^ isPointerBlocker.GetHashCode();
-                    hashCode = (hashCode * 397) ^ visible.GetHashCode();
-                    return hashCode;
-                }
-            }
         }
 
         public BaseShape(IParcelScene scene) : base(scene)

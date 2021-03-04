@@ -12,7 +12,6 @@ namespace DCL
         public Coroutine routine { get; protected set; }
 
         public WaitForComponentUpdate yieldInstruction;
-        public BaseModel oldSerialization { get; protected set; } = null;
 
         public IComponent owner;
 
@@ -39,9 +38,6 @@ namespace DCL
 
         protected void HandleUpdate(BaseModel newSerialization)
         {
-            if (newSerialization.Equals(oldSerialization))
-                return;
-
             queue.Enqueue(newSerialization);
 
             if (!isRoutineRunning)
@@ -53,8 +49,6 @@ namespace DCL
                     routine = CoroutineStarter.Start(enumerator);
                 }
             }
-
-            oldSerialization = newSerialization;
         }
 
         public void Stop()
@@ -71,8 +65,7 @@ namespace DCL
         public void Cleanup()
         {
             Stop();
-
-            oldSerialization = null;
+            
             queue.Clear();
         }
 

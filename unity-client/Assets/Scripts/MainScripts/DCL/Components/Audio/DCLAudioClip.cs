@@ -20,28 +20,9 @@ namespace DCL.Components
             [Range(0f, 1f)]
             public double volume = 1f;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       url == model.url &&
-                       loop == model.loop &&
-                       shouldTryToLoad == model.shouldTryToLoad &&
-                       volume == model.volume;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -359229882;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(url);
-                hashCode = hashCode * -1521134295 + loop.GetHashCode();
-                hashCode = hashCode * -1521134295 + shouldTryToLoad.GetHashCode();
-                hashCode = hashCode * -1521134295 + volume.GetHashCode();
-                return hashCode;
             }
         }
 
@@ -66,21 +47,12 @@ namespace DCL.Components
             loadingState = LoadState.IDLE;
         }
 
-        public double GetVolume()
-        {
-            return ((Model)model).volume;
-        }
+        public double Volume => ((Model)model).volume;
 
-        public bool GetIsLoop()
-        {
-            return ((Model)model).loop;
-        }
-
-        public bool GetShouldTryLoad()
-        {
-            return ((Model)model).shouldTryToLoad;
-        }
-
+        public bool IsLoop() => ((Model)model).loop;
+        
+        public bool ShouldTryLoad() => ((Model)model).shouldTryToLoad;
+        
         public override int GetClassId()
         {
             return (int) CLASS_ID.AUDIO_CLIP;

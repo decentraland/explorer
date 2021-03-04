@@ -17,21 +17,10 @@ public class DCLLockedOnEdit : BaseDisposable
     public class Model : BaseModel
     {
         public bool isLocked;
-
-        public override bool Equals(object obj)
-        {
-            return obj is Model model &&
-                   isLocked == model.isLocked;
-        }
-
+        
         public override BaseModel GetDataFromJSON(string json)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public override int GetHashCode()
-        {
-            return -2132214789 + isLocked.GetHashCode();
+            return Utils.SafeFromJson < Model > (json);
         }
     }
 

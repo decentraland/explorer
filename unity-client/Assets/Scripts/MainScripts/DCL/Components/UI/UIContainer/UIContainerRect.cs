@@ -18,54 +18,9 @@ namespace DCL.Components
             public bool adaptWidth = false;
             public bool adaptHeight = false;
 
-            public override bool Equals(object obj)
-            {
-                return obj is Model model &&
-                       base.Equals(obj) &&
-                       name == model.name &&
-                       parentComponent == model.parentComponent &&
-                       visible == model.visible &&
-                       opacity == model.opacity &&
-                       hAlign == model.hAlign &&
-                       vAlign == model.vAlign &&
-                       EqualityComparer<UIValue>.Default.Equals(width, model.width) &&
-                       EqualityComparer<UIValue>.Default.Equals(height, model.height) &&
-                       EqualityComparer<UIValue>.Default.Equals(positionX, model.positionX) &&
-                       EqualityComparer<UIValue>.Default.Equals(positionY, model.positionY) &&
-                       isPointerBlocker == model.isPointerBlocker &&
-                       onClick == model.onClick &&
-                       thickness == model.thickness &&
-                       color.Equals(model.color) &&
-                       adaptWidth == model.adaptWidth &&
-                       adaptHeight == model.adaptHeight;
-            }
-
             public override BaseModel GetDataFromJSON(string json)
             {
                 return Utils.SafeFromJson<Model>(json);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -1401569357;
-                hashCode = hashCode * -1521134295 + base.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(parentComponent);
-                hashCode = hashCode * -1521134295 + visible.GetHashCode();
-                hashCode = hashCode * -1521134295 + opacity.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(hAlign);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(vAlign);
-                hashCode = hashCode * -1521134295 + width.GetHashCode();
-                hashCode = hashCode * -1521134295 + height.GetHashCode();
-                hashCode = hashCode * -1521134295 + positionX.GetHashCode();
-                hashCode = hashCode * -1521134295 + positionY.GetHashCode();
-                hashCode = hashCode * -1521134295 + isPointerBlocker.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(onClick);
-                hashCode = hashCode * -1521134295 + thickness.GetHashCode();
-                hashCode = hashCode * -1521134295 + color.GetHashCode();
-                hashCode = hashCode * -1521134295 + adaptWidth.GetHashCode();
-                hashCode = hashCode * -1521134295 + adaptHeight.GetHashCode();
-                return hashCode;
             }
         }
 
