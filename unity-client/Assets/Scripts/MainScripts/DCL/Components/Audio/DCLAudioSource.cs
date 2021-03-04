@@ -46,10 +46,7 @@ namespace DCL.Components
             lastDCLAudioClip = dclAudioClip;
         }
 
-        public double GetVolume()
-        {
-            return ((Model)model).volume;
-        }
+        public double Volume => ((Model)model).volume;
 
         public override IEnumerator ApplyChanges(BaseModel baseModel)
         {

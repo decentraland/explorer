@@ -49,9 +49,9 @@ namespace DCL.Components
 
         public double Volume => ((Model)model).volume;
 
-        public bool IsLoop() => ((Model)model).loop;
+        public bool IsLoop => ((Model)model).loop;
         
-        public bool ShouldTryLoad() => ((Model)model).shouldTryToLoad;
+        public bool ShouldTryLoad => ((Model)model).shouldTryToLoad;
         
         public override int GetClassId()
         {

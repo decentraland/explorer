@@ -16,6 +16,21 @@ public class AvatarModel : BaseModel
     public string expressionTriggerId = null;
     public long expressionTriggerTimestamp = -1;
     public bool talking = false;
+    
+    public bool Equals(AvatarModel other)
+    {
+        bool wearablesAreEqual = wearables.All(other.wearables.Contains) && wearables.Count == other.wearables.Count;
+
+        return id == other.id &&
+               name == other.name &&
+               bodyShape == other.bodyShape &&
+               skinColor == other.skinColor &&
+               hairColor == other.hairColor &&
+               eyeColor == other.eyeColor &&
+               expressionTriggerId == other.expressionTriggerId &&
+               expressionTriggerTimestamp == other.expressionTriggerTimestamp &&
+               wearablesAreEqual;
+    }
 
     public void CopyFrom(AvatarModel other)
     {
