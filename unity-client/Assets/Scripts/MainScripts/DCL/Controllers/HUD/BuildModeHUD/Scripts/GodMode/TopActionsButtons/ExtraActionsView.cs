@@ -29,6 +29,16 @@ public class ExtraActionsView : MonoBehaviour, IExtraActionsView
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
     [SerializeField] internal InputAction_Trigger toggleControlsVisibilityInputAction;
 
+    private const string VIEW_PATH = "GodMode/TopActionsButtons/ExtraActionsView";
+
+    internal static ExtraActionsView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ExtraActionsView>();
+        view.gameObject.name = "_ExtraActionsView";
+
+        return view;
+    }
+
     private void Awake()
     {
         hideUIBtn.onClick.AddListener(OnHideUIClick);
