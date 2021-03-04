@@ -9,11 +9,11 @@ import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
 import { NETWORK_MISMATCH, setTLDError } from './loading/types'
-import Html from './Html'
 import { ReportFatalError } from './loading/ReportFatalError'
 import { StoreContainer } from './store/rootTypes'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
 import { Fetcher } from 'dcl-catalyst-commons'
+import Html from './Html'
 
 declare const globalThis: StoreContainer
 
@@ -110,7 +110,7 @@ query GetNameByBeneficiary($beneficiary: String) {
 
   try {
     const jsonResponse: GraphResponse = await queryGraph(theGraphBaseUrl, query, variables)
-    return jsonResponse.data.nfts.map((nft) => nft.ens.subdomain)
+    return jsonResponse.nfts.map((nft) => nft.ens.subdomain)
   } catch (e) {
     // do nothing
   }
@@ -131,7 +131,7 @@ export async function fetchOwner(url: string, name: string) {
 
   try {
     const resp = await queryGraph(url, query, variables)
-    return resp.data.nfts.length === 1 ? (resp.data.nfts[0].owner.address as string) : null
+    return resp.nfts.length === 1 ? (resp.nfts[0].owner.address as string) : null
   } catch (error) {
     defaultLogger.error(`Error querying graph`, error)
     throw error

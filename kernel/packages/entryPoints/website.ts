@@ -17,7 +17,7 @@ import {
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, QUESTS_ENABLED } from '../config/index'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
@@ -51,6 +51,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
     { active: true, visible: true },
     {
       enableVoiceChat: voiceChatEnabled,
+      enableQuestPanel: QUESTS_ENABLED
     }
   )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
@@ -91,7 +92,7 @@ namespace webApp {
   export async function loadUnity({ instancedJS }: InitializeUnityResult) {
     const i = (await instancedJS).unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
-    const renderProfile = worldConfig ? (worldConfig.renderProfile ?? RenderProfile.DEFAULT) : RenderProfile.DEFAULT
+    const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -111,6 +112,9 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: QUESTS_ENABLED, visible: true })
 
     //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //             so ensuring meta configuration is initialized in this stage is a must
@@ -202,6 +206,12 @@ namespace webApp {
       }
 
       console['error'](error)
+      if (error.message && error.message.includes('The error you provided does not contain a stack trace')) {
+        // This error is something that react causes only on development, with unhandled promises and strange errors with no stack trace (i.e, matrix errors).
+        // Some libraries (i.e, matrix client) don't handle promises well and we shouldn't crash the explorer because of that
+        return
+      }
+
       ReportFatalError(error.message)
     }
     return true

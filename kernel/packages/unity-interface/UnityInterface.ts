@@ -17,7 +17,8 @@ import {
   BuilderConfiguration,
   Wearable,
   KernelConfigForRenderer,
-  RealmsInfoForRenderer
+  RealmsInfoForRenderer,
+  ContentMapping
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -26,6 +27,7 @@ import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
+import { QuestForRenderer } from 'dcl-ecs-quests/src/types'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -155,14 +157,21 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
   }
 
-  public CreateUIScene(data: { id: string; baseUrl: string }) {
+  public CreateGlobalScene(data: {
+    id: string;
+    name: string;
+    baseUrl: string,
+    contents: Array<ContentMapping>,
+    icon?: string,
+    isPortableExperience: boolean,
+  }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
      * position is fixed at 0,0 and they are universe-wide. An example of this
      * kind of scenes is the Avatar scene. All the avatars are just GLTFs in
      * a scene.
      */
-    this.SendMessageToUnity('Main', 'CreateUIScene', JSON.stringify(data))
+    this.SendMessageToUnity('Main', 'CreateGlobalScene', JSON.stringify(data))
   }
 
   /** Sends the camera position & target to the engine */
@@ -258,10 +267,12 @@ export class UnityInterface {
     this.SendMessageToUnity('Main', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   }
 
-  public AddWearablesToCatalog(wearables: Wearable[]) {
-    for (const wearable of wearables) {
-      this.SendMessageToUnity('Main', 'AddWearableToCatalog', JSON.stringify(wearable))
-    }
+  public AddWearablesToCatalog(wearables: Wearable[], context?: string) {
+    this.SendMessageToUnity('Main', 'AddWearablesToCatalog', JSON.stringify({ wearables, context }))
+  }
+
+  public WearablesRequestFailed(error: string, context: string | undefined) {
+    this.SendMessageToUnity('Main', 'WearablesRequestFailed', JSON.stringify({ error, context }))
   }
 
   public RemoveWearablesFromCatalog(wearableIds: string[]) {
@@ -357,11 +368,7 @@ export class UnityInterface {
   }
 
   public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
-    this.SendMessageToUnity(
-      'Main',
-      'UpdateGIFPointers',
-      JSON.stringify({ id, width, height, pointers, frameDelays })
-    )
+    this.SendMessageToUnity('Main', 'UpdateGIFPointers', JSON.stringify({ id, width, height, pointers, frameDelays }))
   }
 
   public SendGIFFetchFailure(id: string) {
@@ -403,11 +410,7 @@ export class UnityInterface {
   }
 
   public SetUserTalking(userId: string, talking: boolean) {
-    this.SendMessageToUnity(
-      'HUDController',
-      'SetUserTalking',
-      JSON.stringify({ userId: userId, talking: talking })
-    )
+    this.SendMessageToUnity('HUDController', 'SetUserTalking', JSON.stringify({ userId: userId, talking: talking }))
   }
 
   public SetUsersMuted(usersId: string[], muted: boolean) {
@@ -428,6 +431,18 @@ export class UnityInterface {
 
   public SendPublishSceneResult(result: DeploymentResult) {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
+  }
+
+  // *********************************************************************************
+  // ************** Quests messages **************
+  // *********************************************************************************
+
+  InitQuestsInfo(rendererQuests: QuestForRenderer[]) {
+    this.SendMessageToUnity('Bridges', 'InitializeQuests', JSON.stringify(rendererQuests))
+  }
+
+  UpdateQuestProgress(rendererQuest: QuestForRenderer) {
+    this.SendMessageToUnity('Bridges', 'UpdateQuestProgress', JSON.stringify(rendererQuest))
   }
 
   // *********************************************************************************
@@ -522,19 +537,19 @@ export class UnityInterface {
       return
     }
 
-    const originalSetThrew = this.Module["setThrew"]
+    const originalSetThrew = this.Module['setThrew']
     const unityModule = this.Module
     let isError = false
 
     function overrideSetThrew() {
-      unityModule["setThrew"] = function() {
+      unityModule['setThrew'] = function () {
         isError = true
         return originalSetThrew.apply(this, arguments)
       }
     }
 
     function restoreSetThrew() {
-      unityModule["setThrew"] = originalSetThrew
+      unityModule['setThrew'] = originalSetThrew
     }
 
     overrideSetThrew()
