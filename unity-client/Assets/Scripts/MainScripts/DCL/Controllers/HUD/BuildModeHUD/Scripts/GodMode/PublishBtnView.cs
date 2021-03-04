@@ -28,6 +28,16 @@ public class PublishBtnView : MonoBehaviour, IPublishBtnView
     [SerializeField] internal string tooltipText = "Publish Scene";
     [SerializeField] internal EventTrigger publishButtonEventTrigger;
 
+    private const string VIEW_PATH = "GodMode/PublishBtnView";
+
+    internal static PublishBtnView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<PublishBtnView>();
+        view.gameObject.name = "_PublishBtnView";
+
+        return view;
+    }
+
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
