@@ -53,7 +53,12 @@ import { RootState } from 'shared/store/rootTypes'
 import { requestLocalProfileToPeers, updateCommsUser } from 'shared/comms'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { ensureRenderer } from 'shared/renderer/sagas'
-import { ensureBaseCatalogs, fetchInventoryItemsByAddress } from 'shared/catalogs/sagas'
+import {
+  ensureBaseCatalogs,
+  fetchInventoryItemsByAddress,
+  mapUrnToLegacyId,
+  mapUrnsToLegacyId
+} from 'shared/catalogs/sagas'
 import { base64ToBlob } from 'atomicHelpers/base64ToBlob'
 import { LocalProfilesRepository } from './LocalProfilesRepository'
 import { getProfileType } from './getProfileType'
@@ -249,6 +254,17 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
   yield populateFaceIfNecessary(profile, '128')
 
   const passport: Profile = yield call(processServerProfile, userId, profile)
+
+  // These mappings are necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
+  const mappedBodyShape = yield call(mapUrnToLegacyId, passport.avatar.bodyShape)
+  if (mappedBodyShape) {
+    passport.avatar.bodyShape = mappedBodyShape
+  }
+
+  const mappedWearables = yield call(mapUrnsToLegacyId, passport.avatar.wearables)
+  console.log(passport.avatar.wearables, mappedWearables)
+  passport.avatar.wearables = mappedWearables
+
   const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
 
   if (!ALL_WEARABLES && WORLD_EXPLORER && !shouldUseV2) {
