@@ -57,8 +57,18 @@ public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
 
     public bool isBodyActived => sceneLimitsBodyGO.activeSelf;
 
-    private UnityAction updateInfoAction;
+    internal UnityAction updateInfoAction;
     private const int FRAMES_BETWEEN_UPDATES = 15;
+
+    private const string VIEW_PATH = "GodMode/Inspector/SceneLimitsView";
+
+    internal static SceneLimitsView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<SceneLimitsView>();
+        view.gameObject.name = "_SceneLimitsView";
+
+        return view;
+    }
 
     private void Awake()
     {
