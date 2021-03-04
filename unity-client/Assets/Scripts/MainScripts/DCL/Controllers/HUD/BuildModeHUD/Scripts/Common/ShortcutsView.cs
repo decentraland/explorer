@@ -16,6 +16,16 @@ public class ShortcutsView : MonoBehaviour, IShortcutsView
 
     [SerializeField] internal Button closeButton;
 
+    private const string VIEW_PATH = "Common/ShortcutsView";
+
+    internal static ShortcutsView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ShortcutsView>();
+        view.gameObject.name = "_ShortcutsView";
+
+        return view;
+    }
+
     private void Awake()
     {
         closeButton.onClick.AddListener(OnCloseClick);
