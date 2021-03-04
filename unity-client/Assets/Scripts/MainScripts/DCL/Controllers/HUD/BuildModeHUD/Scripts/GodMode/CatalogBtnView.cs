@@ -28,6 +28,16 @@ public class CatalogBtnView : MonoBehaviour, ICatalogBtnView
     [SerializeField] internal EventTrigger catalogButtonEventTrigger;
     [SerializeField] internal InputAction_Trigger toggleCatalogInputAction;
 
+    private const string VIEW_PATH = "GodMode/CatalogBtnView";
+
+    internal static CatalogBtnView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<CatalogBtnView>();
+        view.gameObject.name = "_CatalogBtnView";
+
+        return view;
+    }
+
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
