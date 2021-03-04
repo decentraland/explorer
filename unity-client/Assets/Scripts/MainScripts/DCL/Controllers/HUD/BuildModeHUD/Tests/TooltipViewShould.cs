@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Tests.BuildModeHUD
+namespace Tests.BuildModeHUDViews
 {
     public class TooltipViewShould
     {

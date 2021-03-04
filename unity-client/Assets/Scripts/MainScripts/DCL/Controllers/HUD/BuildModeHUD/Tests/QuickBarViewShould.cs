@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Tests.BuildModeHUD
+namespace Tests.BuildModeHUDViews
 {
     public class QuickBarViewShould
     {

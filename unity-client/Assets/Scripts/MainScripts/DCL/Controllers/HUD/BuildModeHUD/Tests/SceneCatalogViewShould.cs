@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests.BuildModeHUD
+namespace Tests.BuildModeHUDViews
 {
     public class SceneCatalogViewShould
     {

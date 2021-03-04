@@ -111,6 +111,16 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
 
     internal IExtraActionsController extraActionsController;
 
+    private const string VIEW_PATH = "GodMode/TopActionsButtons/TopActionsButtonsView";
+
+    internal static TopActionsButtonsView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TopActionsButtonsView>();
+        view.gameObject.name = "_TopActionsButtonsView";
+
+        return view;
+    }
+
     private void Awake()
     {
         changeModeBtn.onClick.AddListener(OnChangeModeClick);
