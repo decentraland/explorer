@@ -495,7 +495,7 @@
   font-family: "-apple-system", Helvetica, Arial, serif;
   font-weight: 600;
   font-style: normal;
-  font-size: 18px;
+  font-size: 28px;
   color: rgba(255, 255, 255, 1);
   text-align: right;
   letter-spacing: 1.1px;
@@ -515,7 +515,6 @@
 
 #error-fatal.error-container .errormessage .givesomedetailof a {
   color: rgba(255, 255, 255, 1);
-  text-decoration: none;
 }
 
 #error-fatal.error-container .errormessage .givesomedetailof a:visited {
