@@ -5,20 +5,20 @@ using UnityEngine.EventSystems;
 
 namespace Tests.BuildModeHUDViews
 {
-    public class PublishBtnViewShould
+    public class FirstPersonModeViewShould
     {
-        private PublishBtnView publishBtnView;
+        private FirstPersonModeView firstPersonModeView;
 
         [SetUp]
         public void SetUp()
         {
-            publishBtnView = PublishBtnView.Create();
+            firstPersonModeView = FirstPersonModeView.Create();
         }
 
         [TearDown]
         public void TearDown()
         {
-            Object.Destroy(publishBtnView.gameObject);
+            Object.Destroy(firstPersonModeView.gameObject);
         }
 
         [Test]
@@ -28,19 +28,19 @@ namespace Tests.BuildModeHUDViews
         {
             // Arrange
             bool triggerActionCalled = false;
-            if (publishBtnView.publishButtonEventTrigger != null)
-                publishBtnView.publishButtonEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
+            if (firstPersonModeView.changeModeEventTrigger != null)
+                firstPersonModeView.changeModeEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
 
             // Act
-            publishBtnView.ConfigureEventTrigger(eventType, (eventData) =>
+            firstPersonModeView.ConfigureEventTrigger(eventType, (eventData) =>
             {
                 triggerActionCalled = true;
             });
-            publishBtnView.publishButtonEventTrigger.triggers.First(x => x.eventID == eventType).callback.Invoke(null);
+            firstPersonModeView.changeModeEventTrigger.triggers.First(x => x.eventID == eventType).callback.Invoke(null);
 
             // Assert
             Assert.IsTrue(
-                publishBtnView.publishButtonEventTrigger.triggers.Count(x => x.eventID == eventType) == 1,
+                firstPersonModeView.changeModeEventTrigger.triggers.Count(x => x.eventID == eventType) == 1,
                 "The number of configured event triggers does not match!");
             Assert.IsTrue(triggerActionCalled, "The trigger action has not been called!");
         }
@@ -54,14 +54,14 @@ namespace Tests.BuildModeHUDViews
             EventTrigger.Entry newTrigger = new EventTrigger.Entry();
             newTrigger.eventID = eventType;
             newTrigger.callback.AddListener(null);
-            publishBtnView.publishButtonEventTrigger.triggers.Add(newTrigger);
+            firstPersonModeView.changeModeEventTrigger.triggers.Add(newTrigger);
 
             // Act
-            publishBtnView.RemoveEventTrigger(eventType);
+            firstPersonModeView.RemoveEventTrigger(eventType);
 
             // Assert
             Assert.IsTrue(
-                publishBtnView.publishButtonEventTrigger.triggers.Count(x => x.eventID == eventType) == 0,
+                firstPersonModeView.changeModeEventTrigger.triggers.Count(x => x.eventID == eventType) == 0,
                 "The number of configured event triggers does not match!");
         }
 
@@ -70,10 +70,10 @@ namespace Tests.BuildModeHUDViews
         {
             // Arrange
             bool isClicked = false;
-            publishBtnView.OnPublishButtonClick += () => isClicked = true;
+            firstPersonModeView.OnFirstPersonModeClick += () => isClicked = true;
 
             // Act
-            publishBtnView.OnPointerClick();
+            firstPersonModeView.OnPointerClick();
 
             // Assert
             Assert.IsTrue(isClicked, "isClicked is false!");
@@ -84,21 +84,21 @@ namespace Tests.BuildModeHUDViews
         {
             // Arrange
             PointerEventData sentEventData = new PointerEventData(null);
-            publishBtnView.tooltipText = "Test text";
+            firstPersonModeView.tooltipText = "Test text";
             PointerEventData returnedEventData = null;
             string returnedTooltipText = "";
-            publishBtnView.OnShowTooltip += (data, text) =>
+            firstPersonModeView.OnShowTooltip += (data, text) =>
             {
                 returnedEventData = (PointerEventData)data;
                 returnedTooltipText = text;
             };
 
             // Act
-            publishBtnView.OnPointerEnter(sentEventData);
+            firstPersonModeView.OnPointerEnter(sentEventData);
 
             // Assert
             Assert.AreEqual(sentEventData, returnedEventData, "The event data does not match!");
-            Assert.AreEqual(publishBtnView.tooltipText, returnedTooltipText, "The tooltip text does not match!");
+            Assert.AreEqual(firstPersonModeView.tooltipText, returnedTooltipText, "The tooltip text does not match!");
         }
 
         [Test]
@@ -106,28 +106,13 @@ namespace Tests.BuildModeHUDViews
         {
             // Arrange
             bool isHidden = false;
-            publishBtnView.OnHideTooltip += () => isHidden = true;
+            firstPersonModeView.OnHideTooltip += () => isHidden = true;
 
             // Act
-            publishBtnView.OnPointerExit();
+            firstPersonModeView.OnPointerExit();
 
             // Assert
             Assert.IsTrue(isHidden, "isHidden is false!");
-        }
-
-        [Test]
-        [TestCase(true)]
-        [TestCase(false)]
-        public void SetInteractableCorrectly(bool isInteractable)
-        {
-            // Arrange
-            publishBtnView.mainButton.interactable = !isInteractable;
-
-            // Act
-            publishBtnView.SetInteractable(isInteractable);
-
-            // Assert
-            Assert.AreEqual(isInteractable, publishBtnView.mainButton.interactable, "The interactable property does not match!");
         }
     }
 }

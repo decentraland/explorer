@@ -27,6 +27,16 @@ public class FirstPersonModeView : MonoBehaviour, IFirstPersonModeView
     [SerializeField] internal string tooltipText = "Change Camera (I)";
     [SerializeField] internal EventTrigger changeModeEventTrigger;
 
+    private const string VIEW_PATH = "FirstPersonMode/FirstPersonModeView";
+
+    internal static FirstPersonModeView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<FirstPersonModeView>();
+        view.gameObject.name = "_FirstPersonModeView";
+
+        return view;
+    }
+
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
