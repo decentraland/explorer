@@ -95,7 +95,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
             fetchRoutine = CoroutineStarter.Start(Fetch(delayRequest));
         }
 
-        public OpenSeaRequestGroup(float delayRequest, IEnumerable<KeyValuePair<string, OpenSeaRequest>> existentRequests, Func<float> getRetryDelay)
+        private OpenSeaRequestGroup(float delayRequest, IEnumerable<KeyValuePair<string, OpenSeaRequest>> existentRequests, Func<float> getRetryDelay)
         {
             isOpen = false;
             foreach ((string key, OpenSeaRequest value) in existentRequests)
@@ -151,7 +151,6 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
 
                     if (!request.isNetworkError && !request.isHttpError)
                     {
-                        Debug.Log(request.downloadHandler.text);
                         response = Utils.FromJsonWithNulls<AssetsResponse>(request.downloadHandler.text);
                     }
 
