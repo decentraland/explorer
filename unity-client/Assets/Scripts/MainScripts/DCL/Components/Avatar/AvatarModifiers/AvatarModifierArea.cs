@@ -46,8 +46,8 @@ public class AvatarModifierArea : BaseComponent
 
         // Clean up
         RemoveAllModifiers();
-        OnAvatarEnter = null;
         OnAvatarExit = null;
+        OnAvatarEnter = null;
 
         // Update
         model = Utils.SafeFromJson<Model>(newJson);
@@ -59,11 +59,11 @@ public class AvatarModifierArea : BaseComponent
     private void OnDestroy()
     {
         var toRemove = new HashSet<GameObject>();
-        if(avatarsInArea != null)
+        if (avatarsInArea != null)
             toRemove.UnionWith(avatarsInArea);
 
         var currentInArea = DetectAllAvatarsInArea();
-        if(currentInArea != null)
+        if (currentInArea != null)
             toRemove.UnionWith(currentInArea);
 
         RemoveAllModifiers(toRemove);
@@ -81,10 +81,10 @@ public class AvatarModifierArea : BaseComponent
         if (AreSetEquals(avatarsInArea, newAvatarsInArea))
             return;
 
-        if(avatarsInArea == null)
+        if (avatarsInArea == null)
             avatarsInArea = new HashSet<GameObject>();
 
-        if(newAvatarsInArea == null)
+        if (newAvatarsInArea == null)
             newAvatarsInArea = new HashSet<GameObject>();
 
         // Call event for avatars that just entered the area
