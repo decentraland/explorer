@@ -77,6 +77,15 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     public event Action OnDisable;
 
     internal const int FRAMES_BETWEEN_UPDATES = 5;
+    private const string VIEW_PATH = "Common/EntityInformationView";
+
+    internal static EntityInformationView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<EntityInformationView>();
+        view.gameObject.name = "_EntityInformationView";
+
+        return view;
+    }
 
     private void Awake()
     {
