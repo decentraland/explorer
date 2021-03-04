@@ -46,10 +46,10 @@ public class AvatarModifierArea : BaseComponent
 
         // Clean up
         RemoveAllModifiers();
-        OnAvatarExit = null;
         OnAvatarEnter = null;
+        OnAvatarExit = null;
 
-        // Update
+        // Update model
         model = Utils.SafeFromJson<Model>(newJson);
         ApplyCurrentModel();
 
