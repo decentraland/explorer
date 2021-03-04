@@ -26,7 +26,7 @@ public class InspectorView : MonoBehaviour, IInspectorView
 {
     public EntityListView entityList => entityListView;
     public List<DCLBuilderInWorldEntity> entities => entitiesList;
-    public ISceneLimitsController sceneLimitsController { get; private set; }
+    public ISceneLimitsController sceneLimitsController { get; internal set; }
 
     public event Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnEntityActionInvoked;
     public event Action<DCLBuilderInWorldEntity, string> OnEntityRename;
@@ -36,6 +36,16 @@ public class InspectorView : MonoBehaviour, IInspectorView
     [SerializeField] internal Button[] closeEntityListBtns;
 
     internal List<DCLBuilderInWorldEntity> entitiesList;
+
+    private const string VIEW_PATH = "GodMode/Inspector/InspectorView";
+
+    internal static InspectorView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<InspectorView>();
+        view.gameObject.name = "_InspectorView";
+
+        return view;
+    }
 
     private void Awake()
     {
