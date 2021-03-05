@@ -16,8 +16,8 @@ public class InspectorBtnController : IInspectorBtnController
 {
     public event Action OnClick;
 
-    private IInspectorBtnView inspectorBtnView;
-    private ITooltipController tooltipController;
+    internal IInspectorBtnView inspectorBtnView;
+    internal ITooltipController tooltipController;
 
     public void Initialize(IInspectorBtnView inspectorBtnView, ITooltipController tooltipController)
     {
