@@ -60,16 +60,20 @@ function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
 export let targetHeight: number = 1080
 
 function resizeCanvas(module: any) {
-  let desiredHeight = 1080
+  // When renderer is configured with unlimited resolution,
+  // the targetHeight is set to an arbitrary high value
+  let assumeUnlimitedResolution: boolean = targetHeight > 2000
+  let finalHeight
 
-  if (targetHeight > 2000) {
+  if (assumeUnlimitedResolution) {
     targetHeight = window.innerHeight * devicePixelRatio
-    desiredHeight = targetHeight
+    finalHeight = targetHeight
   } else {
-    desiredHeight = targetHeight - (window.outerHeight - window.innerHeight) * devicePixelRatio
+    let browserBarHeight = (window.outerHeight - window.innerHeight) * devicePixelRatio
+    finalHeight = targetHeight - browserBarHeight
   }
 
-  let ratio = desiredHeight / module.canvas.height
+  let ratio = finalHeight / module.canvas.height
   module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
 }
 
