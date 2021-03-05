@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 5176108183135982475}
   - component: {fileID: 5176108183135982476}
   - component: {fileID: 5176108183135982477}
+  - component: {fileID: 4283432888366188920}
   m_Layer: 0
-  m_Name: Explosion
+  m_Name: VFX_WearableChange
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5176108183135982478}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.90528035, y: 0.79745036, z: 2.6734014}
+  m_LocalPosition: {x: 0, y: 1.7, z: 0}
   m_LocalScale: {x: 0.2167592, y: 0.21675935, z: 0.21675935}
   m_Children: []
   m_Father: {fileID: 0}
@@ -4821,3 +4822,16 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
+--- !u!114 &4283432888366188920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5176108183135982478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dafcf2c65303d24a994d54b7b771578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  particles: {fileID: 5176108183135982476}

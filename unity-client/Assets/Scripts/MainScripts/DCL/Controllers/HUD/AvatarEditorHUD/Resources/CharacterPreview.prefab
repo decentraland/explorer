@@ -381,133 +381,10 @@ MonoBehaviour:
     isGrounded: 1
     expressionTriggerId: 
     expressionTriggerTimestamp: 0
+    deltaTime: 0
   target: {fileID: 6705057966129581724}
-  walkBlendtreeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0.00044631958
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.070767246
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.67525685
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.9299866
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  runBlendtreeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.67064095
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.93293583
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  idleBlendtreeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.08866989
-      value: 0
-      inSlope: -0.029007528
-      outSlope: 0
-      tangentMode: 65
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.09491654
-    - serializedVersion: 3
-      time: 0.99554443
-      value: 0
-      inSlope: -0
-      outSlope: 0
-      tangentMode: 5
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  runMinSpeed: 6
+  walkMinSpeed: 0.1
 --- !u!114 &8922715421469685814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -524,10 +401,11 @@ MonoBehaviour:
   eyeMaterial: {fileID: 2100000, guid: fcfa021e0982c0840aaefe7411340f7f, type: 2}
   eyebrowMaterial: {fileID: 2100000, guid: db9e974bee285614b8ea2d8832d1a563, type: 2}
   mouthMaterial: {fileID: 2100000, guid: aa8f029bd537edb44b72b4737ca9b81d, type: 2}
-  useFx: 1
-  fxChangeWearable: {fileID: 5176108183135982478, guid: 519485bde70494ec39ff527893b93d54,
+  useFx: 0
+  fxChangeWearablePrefab: {fileID: 5176108183135982478, guid: 519485bde70494ec39ff527893b93d54,
     type: 3}
-  fxSpawn: {fileID: 4461659837953358430, guid: a409a73da0b844cf28dfb4e8066f3fdd, type: 3}
+  fxSpawnPrefab: {fileID: 4461659837953358430, guid: a409a73da0b844cf28dfb4e8066f3fdd,
+    type: 3}
 --- !u!1 &7113636141788214316
 GameObject:
   m_ObjectHideFlags: 0
@@ -994,6 +872,7 @@ MonoBehaviour:
   sourceTransform: {fileID: 6705057966129581724}
   nameText: {fileID: 3666619223202213297}
   offset: {x: 0, y: 3, z: 0}
+  talkingAnimator: {fileID: 0}
 --- !u!1 &8716808962879380553
 GameObject:
   m_ObjectHideFlags: 0
