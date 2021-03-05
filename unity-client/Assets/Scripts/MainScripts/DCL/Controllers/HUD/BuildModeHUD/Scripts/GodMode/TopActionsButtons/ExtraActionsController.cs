@@ -20,7 +20,7 @@ public class ExtraActionsController : IExtraActionsController
                         OnHideUIClick, 
                         OnTutorialClick;
 
-    private IExtraActionsView extraActionsView;
+    internal IExtraActionsView extraActionsView;
 
     public void Initialize(IExtraActionsView extraActionsView)
     {
