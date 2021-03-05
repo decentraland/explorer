@@ -16,8 +16,8 @@ public class FirstPersonModeController : IFirstPersonModeController
 {
     public event Action OnClick;
 
-    private IFirstPersonModeView firstPersonModeView;
-    private ITooltipController tooltipController;
+    internal IFirstPersonModeView firstPersonModeView;
+    internal ITooltipController tooltipController;
 
     public void Initialize(IFirstPersonModeView firstPersonModeView, ITooltipController tooltipController)
     {
