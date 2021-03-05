@@ -17,7 +17,7 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
 
   let profile: any | undefined = undefined
   try {
-    const profiles: { avatars: object[] } = await client.fetchProfile(`default${_number}`)
+    const [profiles]: { avatars: object[] }[] = await client.fetchProfiles([`default${_number}`])
     if (profiles.avatars.length !== 0) {
       profile = profiles.avatars[0]
     }
