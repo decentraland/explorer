@@ -16,8 +16,8 @@ public class CatalogBtnController : ICatalogBtnController
 {
     public event Action OnClick;
 
-    private ICatalogBtnView catalogBtnView;
-    private ITooltipController tooltipController;
+    internal ICatalogBtnView catalogBtnView;
+    internal ITooltipController tooltipController;
 
     public void Initialize(ICatalogBtnView catalogBtnView, ITooltipController tooltipController)
     {
