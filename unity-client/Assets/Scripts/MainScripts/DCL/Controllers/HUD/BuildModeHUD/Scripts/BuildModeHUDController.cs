@@ -90,8 +90,7 @@ public class BuildModeHUDController : IHUD
 
     internal void CreateParentView()
     {
-        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("BuildModeHUD")).GetComponent<BuildModeHUDView>();
-        view.name = "_BuildModeHUD";
+        view = BuildModeHUDView.Create();
         view.gameObject.SetActive(false);
         view.Initialize(
             tooltipController,

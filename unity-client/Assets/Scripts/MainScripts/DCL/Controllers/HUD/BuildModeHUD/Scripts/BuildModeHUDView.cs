@@ -11,33 +11,43 @@ public class BuildModeHUDView : MonoBehaviour
 
     [Header("UI Modules")]
     [SerializeField] internal TooltipView tooltipView;
-    private ITooltipController tooltipController;
+    internal ITooltipController tooltipController;
     [SerializeField] internal QuickBarView quickBarView;
-    private IQuickBarController quickBarController;
+    internal IQuickBarController quickBarController;
     [SerializeField] internal SceneCatalogView sceneCatalogView;
-    private ISceneCatalogController sceneCatalogController;
+    internal ISceneCatalogController sceneCatalogController;
     [SerializeField] internal EntityInformationView entityInformationView;
-    private IEntityInformationController entityInformationController;
+    internal IEntityInformationController entityInformationController;
     [SerializeField] internal FirstPersonModeView firstPersonModeView;
-    private IFirstPersonModeController firstPersonModeController;
+    internal IFirstPersonModeController firstPersonModeController;
     [SerializeField] internal ShortcutsView shortcutsView;
-    private IShortcutsController shortcutsController;
+    internal IShortcutsController shortcutsController;
     [SerializeField] internal PublishPopupView publishPopupView;
-    private IPublishPopupController publishPopupController;
+    internal IPublishPopupController publishPopupController;
     [SerializeField] internal DragAndDropSceneObjectView dragAndDropSceneObjectView;
-    private IDragAndDropSceneObjectController dragAndDropSceneObjectController;
+    internal IDragAndDropSceneObjectController dragAndDropSceneObjectController;
     [SerializeField] internal PublishBtnView publishBtnView;
-    private IPublishBtnController publishBtnController;
+    internal IPublishBtnController publishBtnController;
     [SerializeField] internal InspectorBtnView inspectorBtnView;
-    private IInspectorBtnController inspectorBtnController;
+    internal IInspectorBtnController inspectorBtnController;
     [SerializeField] internal CatalogBtnView catalogBtnView;
-    private ICatalogBtnController catalogBtnController;
+    internal ICatalogBtnController catalogBtnController;
     [SerializeField] internal InspectorView inspectorView;
-    private IInspectorController inspectorController;
+    internal IInspectorController inspectorController;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
-    private ITopActionsButtonsController topActionsButtonsController;
+    internal ITopActionsButtonsController topActionsButtonsController;
 
     internal bool isShowHideAnimatorVisible => showHideAnimator.isVisible;
+
+    private const string VIEW_PATH = "BuildModeHUD";
+
+    internal static BuildModeHUDView Create()
+    {
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<BuildModeHUDView>();
+        view.gameObject.name = "_BuildModeHUD";
+
+        return view;
+    }
 
     public void Initialize(
         ITooltipController tooltipController,
@@ -146,14 +156,10 @@ public class BuildModeHUDView : MonoBehaviour
 
     public void SetVisibilityOfSceneInfo(bool isVisible)
     {
-        if (!isVisible)
-        {
-            inspectorController.sceneLimitsController.Disable();
-        }
-        else
-        {
+        if (isVisible)
             inspectorController.sceneLimitsController.Enable();
-        }
+        else
+            inspectorController.sceneLimitsController.Disable();
     }
 
     public void SetVisibilityOfControls(bool isVisible)
