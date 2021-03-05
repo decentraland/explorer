@@ -37,18 +37,24 @@ public class EntityInformationController : IEntityInformationController
     public event Action<DCLBuilderInWorldEntity, string> OnNameChange;
     public event Action<DCLBuilderInWorldEntity> OnSmartItemComponentUpdate;
 
-    private IEntityInformationView entityInformationView;
-    private ParcelScene parcelScene;
-    private AssetPromise_Texture loadedThumbnailPromise;
-    private bool isChangingName = false;
+    internal IEntityInformationView entityInformationView;
+    internal ParcelScene parcelScene;
+    internal AssetPromise_Texture loadedThumbnailPromise;
+    internal bool isChangingName = false;
 
     public void Initialize(IEntityInformationView entityInformationView)
     {
         this.entityInformationView = entityInformationView;
 
-        entityInformationView.position.OnChanged += PositionChanged;
-        entityInformationView.rotation.OnChanged += RotationChanged;
-        entityInformationView.scale.OnChanged += ScaleChanged;
+        if (entityInformationView.position != null)
+            entityInformationView.position.OnChanged += PositionChanged;
+
+        if (entityInformationView.rotation != null)
+            entityInformationView.rotation.OnChanged += RotationChanged;
+
+        if (entityInformationView.scale != null)
+            entityInformationView.scale.OnChanged += ScaleChanged;
+
         entityInformationView.OnNameChange += NameChanged;
         entityInformationView.OnStartChangingName += StartChangingName;
         entityInformationView.OnEndChangingName += EndChangingName;
@@ -58,9 +64,15 @@ public class EntityInformationController : IEntityInformationController
 
     public void Dispose()
     {
-        entityInformationView.position.OnChanged -= PositionChanged;
-        entityInformationView.rotation.OnChanged -= RotationChanged;
-        entityInformationView.scale.OnChanged -= ScaleChanged;
+        if (entityInformationView.position != null)
+            entityInformationView.position.OnChanged -= PositionChanged;
+
+        if (entityInformationView.rotation != null)
+            entityInformationView.rotation.OnChanged -= RotationChanged;
+
+        if (entityInformationView.scale != null)
+            entityInformationView.scale.OnChanged -= ScaleChanged;
+
         entityInformationView.OnNameChange -= NameChanged;
         entityInformationView.OnUpdateInfo -= UpdateInfo;
         entityInformationView.OnStartChangingName -= StartChangingName;
@@ -111,12 +123,14 @@ public class EntityInformationController : IEntityInformationController
     public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)
     {
         EntityDeselected();
+        entityInformationView.SetCurrentEntity(entity);
 
         if (entityInformationView.currentEntity != null)
+        {
             entity.onStatusUpdate -= UpdateEntityName;
-
-        entityInformationView.SetCurrentEntity(entity);
-        entityInformationView.currentEntity.onStatusUpdate += UpdateEntityName;
+            entityInformationView.currentEntity.onStatusUpdate += UpdateEntityName;
+        }
+        
         parcelScene = currentScene;
 
         if (entity.HasSmartItemComponent())
@@ -139,9 +153,12 @@ public class EntityInformationController : IEntityInformationController
 
     internal void GetThumbnail(CatalogItem catalogItem)
     {
+        if (catalogItem == null)
+            return;
+
         var url = catalogItem.thumbnailURL;
 
-        if (catalogItem == null || string.IsNullOrEmpty(url))
+        if (string.IsNullOrEmpty(url))
             return;
 
         string newLoadedThumbnailURL = url;
@@ -161,6 +178,9 @@ public class EntityInformationController : IEntityInformationController
 
     internal void UpdateEntityName(DCLBuilderInWorldEntity entity)
     {
+        if (entity == null)
+            return;
+
         string currentName = entity.GetDescriptiveName();
         entityInformationView.SeTitleText(currentName);
 
@@ -219,7 +239,7 @@ public class EntityInformationController : IEntityInformationController
 
     public void UpdateInfo(DCLBuilderInWorldEntity entity)
     {
-        if (entity.gameObject != null)
+        if (entity != null && entity.gameObject != null)
         {
             Vector3 positionConverted = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position, parcelScene);
             Vector3 currentRotation = entity.gameObject.transform.rotation.eulerAngles;

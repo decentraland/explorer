@@ -171,15 +171,15 @@ namespace Tests.BuildModeHUDControllers
         public void CatalogItemSelectedCorrectly()
         {
             // Arrange
-            CatalogItem retournedCatalogItem = null;
+            CatalogItem returnedCatalogItem = null;
             CatalogItem testCatalogItem = new CatalogItem();
-            buildModeHUDController.OnCatalogItemSelected += (item) => { retournedCatalogItem = item; };
+            buildModeHUDController.OnCatalogItemSelected += (item) => { returnedCatalogItem = item; };
 
             // Act
             buildModeHUDController.CatalogItemSelected(testCatalogItem);
 
             // Assert
-            Assert.AreEqual(testCatalogItem, retournedCatalogItem, "The catalog item does not march!");
+            Assert.AreEqual(testCatalogItem, returnedCatalogItem, "The catalog item does not march!");
         }
 
         [Test]

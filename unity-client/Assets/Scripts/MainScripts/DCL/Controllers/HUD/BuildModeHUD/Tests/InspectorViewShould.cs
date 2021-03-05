@@ -30,22 +30,22 @@ namespace Tests.BuildModeHUDViews
             EntityListAdapter testEntityListAdapter = new GameObject().AddComponent<EntityListAdapter>();
             testEntity.entityUniqueId = "testId";
             EntityAction testEntityAction = EntityAction.SHOW;
-            DCLBuilderInWorldEntity retournedEntity = null;
-            EntityListAdapter retournedEntityListAdapter = null;
+            DCLBuilderInWorldEntity returnedEntity = null;
+            EntityListAdapter returnedEntityListAdapter = null;
             EntityAction retournedEntityAction = EntityAction.DELETE;
             inspectorView.OnEntityActionInvoked += (action, entityToApply, adapter) =>
             {
                 retournedEntityAction = action;
-                retournedEntity = entityToApply;
-                retournedEntityListAdapter = adapter;
+                returnedEntity = entityToApply;
+                returnedEntityListAdapter = adapter;
             };
 
             // Act
             inspectorView.EntityActionInvoked(testEntityAction, testEntity, testEntityListAdapter);
 
             // Assert
-            Assert.AreEqual(testEntity.entityUniqueId, retournedEntity.entityUniqueId, "The entity does not match!!");
-            Assert.AreEqual(testEntityListAdapter, retournedEntityListAdapter, "The entity list adapter does not match!!");
+            Assert.AreEqual(testEntity.entityUniqueId, returnedEntity.entityUniqueId, "The entity does not match!!");
+            Assert.AreEqual(testEntityListAdapter, returnedEntityListAdapter, "The entity list adapter does not match!!");
             Assert.AreEqual(testEntityAction, retournedEntityAction, "The entity action does not match!!");
         }
 
