@@ -403,8 +403,8 @@ public class BuildModeHUDController : IHUD
     {
         if (view == null)
             return;
-
-        UnityEngine.Object.Destroy(view.viewGO);
+        else
+            UnityEngine.Object.Destroy(view.viewGO);
     }
 
     public void ToggleVisibility()
