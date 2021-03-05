@@ -30,33 +30,33 @@ public class BuildModeHUDController : IHUD
     public event Action<Vector3> OnSelectedObjectScaleChange;
     public event Action OnCatalogOpen; // Note(Adrian): This is used right now for tutorial purposes
 
-    private BuildModeHUDView view;
+    internal IBuildModeHUDView view;
 
-    private bool areExtraButtonsVisible = false,
-                 isControlsVisible = false, 
-                 isEntityListVisible = false, 
-                 isSceneLimitInfoVisibile = false,
-                 isCatalogOpen = false;
+    internal bool areExtraButtonsVisible = false,
+                  isControlsVisible = false, 
+                  isEntityListVisible = false, 
+                  isSceneLimitInfoVisibile = false,
+                  isCatalogOpen = false;
 
-    private TooltipController tooltipController;
-    private SceneCatalogController sceneCatalogController;
-    private QuickBarController quickBarController;
-    private EntityInformationController entityInformationController;
-    private FirstPersonModeController firstPersonModeController;
-    private ShortcutsController shortcutsController;
-    private PublishPopupController publishPopupController;
-    private DragAndDropSceneObjectController dragAndDropSceneObjectController;
-    private PublishBtnController publishBtnController;
-    private InspectorBtnController inspectorBtnController;
-    private CatalogBtnController catalogBtnController;
-    private InspectorController inspectorController;
-    private TopActionsButtonsController topActionsButtonsController;
-    private CatalogItemDropController catalogItemDropController;
+    internal ITooltipController tooltipController;
+    internal ISceneCatalogController sceneCatalogController;
+    internal IQuickBarController quickBarController;
+    internal IEntityInformationController entityInformationController;
+    internal IFirstPersonModeController firstPersonModeController;
+    internal IShortcutsController shortcutsController;
+    internal IPublishPopupController publishPopupController;
+    internal IDragAndDropSceneObjectController dragAndDropSceneObjectController;
+    internal IPublishBtnController publishBtnController;
+    internal IInspectorBtnController inspectorBtnController;
+    internal ICatalogBtnController catalogBtnController;
+    internal IInspectorController inspectorController;
+    internal ITopActionsButtonsController topActionsButtonsController;
+    internal CatalogItemDropController catalogItemDropController;
 
     public BuildModeHUDController()
     {
         CreateBuildModeControllers();
-        CreateParentView();
+        CreateParentView(BuildModeHUDView.Create());
         ConfigureSceneCatalogController();
         ConfigureEntityInformationController();
         ConfigureFirstPersonModeController();
@@ -68,6 +68,40 @@ public class BuildModeHUDController : IHUD
         ConfigureInspectorController();
         ConfigureTopActionsButtonsController();
         ConfigureCatalogItemDropController();
+    }
+
+    public BuildModeHUDController(
+        IBuildModeHUDView buildModeHUDView,
+        ITooltipController tooltipController,
+        ISceneCatalogController sceneCatalogController,
+        IQuickBarController quickBarController,
+        IEntityInformationController entityInformationController,
+        IFirstPersonModeController firstPersonModeController,
+        IShortcutsController shortcutsController,
+        IPublishPopupController publishPopupController,
+        IDragAndDropSceneObjectController dragAndDropSceneObjectController,
+        IPublishBtnController publishBtnController,
+        IInspectorBtnController inspectorBtnController,
+        ICatalogBtnController catalogBtnController,
+        IInspectorController inspectorController,
+        ITopActionsButtonsController topActionsButtonsController)
+    {
+        this.tooltipController = tooltipController;
+        this.sceneCatalogController = sceneCatalogController;
+        this.quickBarController = quickBarController;
+        this.entityInformationController = entityInformationController;
+        this.firstPersonModeController = firstPersonModeController;
+        this.shortcutsController = shortcutsController;
+        this.publishPopupController = publishPopupController;
+        this.dragAndDropSceneObjectController = dragAndDropSceneObjectController;
+        this.publishBtnController = publishBtnController;
+        this.inspectorBtnController = inspectorBtnController;
+        this.catalogBtnController = catalogBtnController;
+        this.inspectorController = inspectorController;
+        this.topActionsButtonsController = topActionsButtonsController;
+        this.catalogItemDropController = new CatalogItemDropController();
+
+        CreateParentView(buildModeHUDView);
     }
 
     internal void CreateBuildModeControllers()
@@ -88,10 +122,13 @@ public class BuildModeHUDController : IHUD
         catalogItemDropController = new CatalogItemDropController();
     }
 
-    internal void CreateParentView()
+    internal void CreateParentView(IBuildModeHUDView newView)
     {
-        view = BuildModeHUDView.Create();
-        view.gameObject.SetActive(false);
+        view = newView;
+        
+        if (view.viewGO != null)
+            view.viewGO.SetActive(false);
+
         view.Initialize(
             tooltipController,
             sceneCatalogController,
@@ -108,7 +145,7 @@ public class BuildModeHUDController : IHUD
             topActionsButtonsController);
     }
 
-    internal void ConfigureSceneCatalogController()
+    private void ConfigureSceneCatalogController()
     {
         sceneCatalogController.OnHideCatalogClicked += ChangeVisibilityOfCatalog;
         sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
@@ -116,7 +153,7 @@ public class BuildModeHUDController : IHUD
         sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
     }
 
-    internal void ConfigureEntityInformationController()
+    private void ConfigureEntityInformationController()
     {
         entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
         entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
@@ -125,37 +162,37 @@ public class BuildModeHUDController : IHUD
         entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
     }
 
-    internal void ConfigureFirstPersonModeController()
+    private void ConfigureFirstPersonModeController()
     {
         firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
     }
 
-    internal void ConfigureShortcutsController()
+    private void ConfigureShortcutsController()
     {
         shortcutsController.OnCloseClick += ChangeVisibilityOfControls;
     }
 
-    internal void ConfigureDragAndDropSceneObjectController()
+    private void ConfigureDragAndDropSceneObjectController()
     {
         dragAndDropSceneObjectController.OnDrop += () => SceneObjectDroppedInView();
     }
 
-    internal void ConfigurePublishBtnController()
+    private void ConfigurePublishBtnController()
     {
         publishBtnController.OnClick += () => OnPublishAction?.Invoke();
     }
 
-    internal void ConfigureInspectorBtnController()
+    private void ConfigureInspectorBtnController()
     {
         inspectorBtnController.OnClick += () => ChangeVisibilityOfEntityList();
     }
 
-    internal void ConfigureCatalogBtnController()
+    private void ConfigureCatalogBtnController()
     {
         catalogBtnController.OnClick += ChangeVisibilityOfCatalog;
     }
 
-    internal void ConfigureInspectorController()
+    private void ConfigureInspectorController()
     {
         inspectorController.OnEntityClick += (x) => OnEntityClick(x);
         inspectorController.OnEntityDelete += (x) => OnEntityDelete(x);
@@ -165,7 +202,7 @@ public class BuildModeHUDController : IHUD
         inspectorController.SetCloseButtonsAction(ChangeVisibilityOfEntityList);
     }
 
-    internal void ConfigureTopActionsButtonsController()
+    private void ConfigureTopActionsButtonsController()
     {
         topActionsButtonsController.OnChangeModeClick += () => OnChangeModeAction?.Invoke();
         topActionsButtonsController.OnExtraClick += ChangeVisibilityOfExtraBtns;
@@ -181,9 +218,9 @@ public class BuildModeHUDController : IHUD
         topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
     }
 
-    internal void ConfigureCatalogItemDropController()
+    private void ConfigureCatalogItemDropController()
     {
-        catalogItemDropController.catalogGroupListView = view.sceneCatalogView.catalogGroupListView;
+        catalogItemDropController.catalogGroupListView = view.sceneCatalog.catalogGroupListView;
         catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
     }
 
@@ -219,7 +256,7 @@ public class BuildModeHUDController : IHUD
         view.RefreshCatalogContent();
     }
 
-    void CatalogItemSelected(CatalogItem catalogItem)
+    public void CatalogItemSelected(CatalogItem catalogItem)
     {
         OnCatalogItemSelected?.Invoke(catalogItem);
         SetVisibilityOfCatalog(false);
@@ -303,7 +340,9 @@ public class BuildModeHUDController : IHUD
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
         inspectorController.SetEntityList(entityList);
-        view.entityInformationView.smartItemListView.SetEntityList(entityList);
+
+        if (view.entityInformation != null)
+            view.entityInformation.smartItemListView.SetEntityList(entityList);
     }
 
     public void ChangeVisibilityOfEntityList()
@@ -344,7 +383,7 @@ public class BuildModeHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
-        if (!view)
+        if (view == null)
             return;
 
         if (IsVisible() && !visible)
@@ -362,10 +401,10 @@ public class BuildModeHUDController : IHUD
 
     public void Dispose()
     {
-        if (view)
-        {
-            UnityEngine.Object.Destroy(view.gameObject);
-        }
+        if (view == null)
+            return;
+
+        UnityEngine.Object.Destroy(view.viewGO);
     }
 
     public void ToggleVisibility()
@@ -375,7 +414,7 @@ public class BuildModeHUDController : IHUD
 
     public bool IsVisible()
     {
-        if (!view)
+        if (view == null)
             return false;
 
         return view.isShowHideAnimatorVisible;

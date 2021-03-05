@@ -1,7 +1,36 @@
 using UnityEngine;
 
-public class BuildModeHUDView : MonoBehaviour
+public interface IBuildModeHUDView
 {
+    GameObject viewGO { get; }
+    SceneCatalogView sceneCatalog { get; }
+    EntityInformationView entityInformation { get; }
+    bool isShowHideAnimatorVisible { get; }
+
+    void AnimatorShow(bool isVisible);
+    void HideToolTip();
+    void Initialize(ITooltipController tooltipController, ISceneCatalogController sceneCatalogController, IQuickBarController quickBarController, IEntityInformationController entityInformationController, IFirstPersonModeController firstPersonModeController, IShortcutsController shortcutsController, IPublishPopupController publishPopupController, IDragAndDropSceneObjectController dragAndDropSceneObjectController, IPublishBtnController publishBtnController, IInspectorBtnController inspectorBtnController, ICatalogBtnController catalogBtnController, IInspectorController inspectorController, ITopActionsButtonsController topActionsButtonsController);
+    void PublishEnd(string message);
+    void PublishStart();
+    void RefreshCatalogAssetPack();
+    void RefreshCatalogContent();
+    void SetActive(bool isActive);
+    void SetFirstPersonView();
+    void SetGodModeView();
+    void SetPublishBtnAvailability(bool isAvailable);
+    void SetVisibilityOfCatalog(bool isVisible);
+    void SetVisibilityOfControls(bool isVisible);
+    void SetVisibilityOfExtraBtns(bool isVisible);
+    void SetVisibilityOfSceneInfo(bool isVisible);
+}
+
+public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
+{
+    public GameObject viewGO => gameObject;
+    public SceneCatalogView sceneCatalog => sceneCatalogView;
+    public EntityInformationView entityInformation => entityInformationView;
+    public bool isShowHideAnimatorVisible => showHideAnimator.isVisible;
+
     [Header("Main Containers")]
     [SerializeField] internal GameObject firstPersonCanvasGO;
     [SerializeField] internal GameObject godModeCanvasGO;
@@ -36,8 +65,6 @@ public class BuildModeHUDView : MonoBehaviour
     internal IInspectorController inspectorController;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
     internal ITopActionsButtonsController topActionsButtonsController;
-
-    internal bool isShowHideAnimatorVisible => showHideAnimator.isVisible;
 
     private const string VIEW_PATH = "BuildModeHUD";
 
