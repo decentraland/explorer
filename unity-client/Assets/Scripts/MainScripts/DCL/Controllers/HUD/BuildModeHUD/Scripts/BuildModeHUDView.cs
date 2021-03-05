@@ -9,7 +9,20 @@ public interface IBuildModeHUDView
 
     void AnimatorShow(bool isVisible);
     void HideToolTip();
-    void Initialize(ITooltipController tooltipController, ISceneCatalogController sceneCatalogController, IQuickBarController quickBarController, IEntityInformationController entityInformationController, IFirstPersonModeController firstPersonModeController, IShortcutsController shortcutsController, IPublishPopupController publishPopupController, IDragAndDropSceneObjectController dragAndDropSceneObjectController, IPublishBtnController publishBtnController, IInspectorBtnController inspectorBtnController, ICatalogBtnController catalogBtnController, IInspectorController inspectorController, ITopActionsButtonsController topActionsButtonsController);
+    void Initialize(
+        ITooltipController tooltipController, 
+        ISceneCatalogController sceneCatalogController, 
+        IQuickBarController quickBarController, 
+        IEntityInformationController entityInformationController, 
+        IFirstPersonModeController firstPersonModeController, 
+        IShortcutsController shortcutsController, 
+        IPublishPopupController publishPopupController, 
+        IDragAndDropSceneObjectController dragAndDropSceneObjectController, 
+        IPublishBtnController publishBtnController, 
+        IInspectorBtnController inspectorBtnController, 
+        ICatalogBtnController catalogBtnController, 
+        IInspectorController inspectorController, 
+        ITopActionsButtonsController topActionsButtonsController);
     void PublishEnd(string message);
     void PublishStart();
     void RefreshCatalogAssetPack();
