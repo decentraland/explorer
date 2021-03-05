@@ -23,6 +23,7 @@ namespace DCL.Components
             }
         }
 
+        // test
         public Mesh currentMesh { get; protected set; }
 
         public ParametrizedShape(IParcelScene scene) : base(scene)
