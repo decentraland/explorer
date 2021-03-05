@@ -41,7 +41,7 @@ public class InspectorController : IInspectorController
 
     public ISceneLimitsController sceneLimitsController => inspectorView.sceneLimitsController;
 
-    private IInspectorView inspectorView;
+    internal IInspectorView inspectorView;
 
     public void Initialize(IInspectorView inspectorView)
     {
@@ -62,31 +62,43 @@ public class InspectorController : IInspectorController
 
     public void OpenEntityList()
     {
-        inspectorView.entityList.SetContent(inspectorView.entities);
+        if (inspectorView.entityList != null)
+        {
+            if (inspectorView.entities != null)
+                inspectorView.entityList.SetContent(inspectorView.entities);
+
+            inspectorView.entityList.SetActive(true);
+        }
+
         inspectorView.SetActive(true);
-        inspectorView.entityList.SetActive(true);
     }
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> sceneEntities)
     {
-        if (inspectorView.entityList == null)
-            return;
-
         inspectorView.SetEntitiesList(sceneEntities);
-        if (inspectorView.entityList.isActive)
+
+        if (inspectorView.entityList != null &&
+            inspectorView.entityList.isActive &&
+            inspectorView.entities != null)
+        {
             inspectorView.entityList.SetContent(inspectorView.entities);
+        }
     }
 
     public void ClearList()
     {
         inspectorView.ClearEntitiesList();
-        inspectorView.entityList.RemoveAdapters();
+
+        if (inspectorView.entityList != null)
+            inspectorView.entityList.RemoveAdapters();
     }
 
     public void CloseList()
     {
         inspectorView.SetActive(false);
-        inspectorView.entityList.SetActive(false);
+
+        if (inspectorView.entityList != null)
+            inspectorView.entityList.SetActive(false);
     }
 
     public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)

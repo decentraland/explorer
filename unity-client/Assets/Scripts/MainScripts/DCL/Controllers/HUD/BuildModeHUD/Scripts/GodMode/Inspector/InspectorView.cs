@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public interface IInspectorView
 {
-    EntityListView entityList { get; }
+    EntityListView entityList { get; set; }
     List<DCLBuilderInWorldEntity> entities { get; }
     ISceneLimitsController sceneLimitsController { get; }
 
@@ -24,7 +24,17 @@ public interface IInspectorView
 
 public class InspectorView : MonoBehaviour, IInspectorView
 {
-    public EntityListView entityList => entityListView;
+    public EntityListView entityList 
+    {
+        get 
+        { 
+            return entityListView; 
+        }
+        set 
+        {
+            entityListView = value;
+        }
+    }
     public List<DCLBuilderInWorldEntity> entities => entitiesList;
     public ISceneLimitsController sceneLimitsController { get; internal set; }
 
