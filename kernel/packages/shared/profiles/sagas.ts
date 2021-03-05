@@ -331,7 +331,7 @@ export async function profileServerRequest(userId: string) {
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
   const shouldUseV2: boolean = WORLD_EXPLORER && isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
   if (shouldUseV2) {
-    return client.fetchProfiles([userId]).then((profiles) => profiles[0])
+    return client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
   } else {
     const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
     return response.json()
