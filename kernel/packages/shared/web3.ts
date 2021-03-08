@@ -158,7 +158,7 @@ export async function fetchENSOwnersContains(url: string, name: string, maxResul
 
   try {
     const response = await queryGraph(url, query, variables)
-    return response.nfts.length > 0 ? response.nfts.map((nft: any) => nft.owner.address as string) : []
+    return response.nfts.map((nft: any) => nft.owner.address as string)
   } catch (error) {
     defaultLogger.error(`Error querying graph`, error)
     throw error

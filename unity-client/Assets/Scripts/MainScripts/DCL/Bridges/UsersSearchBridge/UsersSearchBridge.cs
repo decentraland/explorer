@@ -33,7 +33,13 @@ public class UsersSearchBridge : MonoBehaviour, IUsersSearchBridge
     public void SetENSOwnerQueryResult(string payload)
     {
         ResultPayload result = Utils.SafeFromJson<ResultPayload>(payload);
-        OnSearchResult?.Invoke(result.searchInput, result.success? result.profiles : null);
+        
+        UserProfileModel[] profiles = null;
+        if (result.success && result.profiles.Length > 0)
+        {
+            profiles = result.profiles;
+        }
+        OnSearchResult?.Invoke(result.searchInput, profiles);
     }
 
     [Serializable]

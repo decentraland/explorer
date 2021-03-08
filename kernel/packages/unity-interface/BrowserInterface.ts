@@ -13,7 +13,7 @@ import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar, Profile, ProfileType } from 'shared/profiles/types'
+import { Avatar } from 'shared/profiles/types'
 import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
@@ -29,7 +29,7 @@ import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { fetchENSOwner, fetchENSOwnersContains, getAppNetwork } from 'shared/web3'
+import { fetchENSOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
@@ -52,7 +52,7 @@ import { isGuest } from '../shared/ethereum/provider'
 import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 
 declare const DCL: any
 
@@ -378,38 +378,12 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
   }
 
-  public SearchENSOwner(data: { name: string; maxResults: number }) {
-    let profilesPromise
-
-    if (/^0x[a-fA-F0-9]{40}$/.test(data.name)) {
-      profilesPromise = ProfileAsPromise(data.name, undefined, ProfileType.DEPLOYED).then((profile) => {
-        return [profile]
-      })
-    } else {
-      profilesPromise = new Promise((resolve, reject) => {
-        (async () => {
-          try {
-            const net = await getAppNetwork()
-            const owners = await fetchENSOwnersContains(ethereumConfigurations[net].names, data.name, data.maxResults)
-            const profiles: Profile[] = []
-            for (let userId of owners) {
-              await ProfileAsPromise(userId, undefined, ProfileType.DEPLOYED).then((profile) => {
-                profiles.push(profile)
-              })
-            }
-            resolve(profiles)
-          } catch (error) {
-            reject(error)
-          }
-        })()
-        .catch(error => defaultLogger.error(error))
-      })
-    }
+  public SearchENSOwner(data: { name: string; maxResults?: number }) {
+    const profilesPromise = fetchENSOwnerProfile(data.name, data.maxResults)
 
     profilesPromise
       .then((profiles) => {
-        // tslint:disable-next-line
-        unityInterface.SetENSOwnerQueryResult(data.name, profiles as any)
+        unityInterface.SetENSOwnerQueryResult(data.name, profiles)
       })
       .catch((error) => {
         unityInterface.SetENSOwnerQueryResult(data.name, undefined)
