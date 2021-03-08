@@ -113,11 +113,18 @@ function* initialProfileLoad() {
 
   let profile = undefined
 
-  try {
-    profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
-  } catch (e) {
-    ReportFatalError(UNEXPECTED_ERROR)
-    throw e
+  let retryCount: number = 0
+
+  while (!profile) {
+    try {
+      profile = yield ProfileAsPromise(userId, undefined, getProfileType(identity))
+    } catch (e) {
+      retryCount++
+      if (retryCount > 5) {
+        ReportFatalError(UNEXPECTED_ERROR)
+      }
+      throw e
+    }
   }
 
   if (!PREVIEW) {
