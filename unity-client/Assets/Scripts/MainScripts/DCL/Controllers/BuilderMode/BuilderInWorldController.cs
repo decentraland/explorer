@@ -96,7 +96,7 @@ public class BuilderInWorldController : MonoBehaviour
         BuilderInWorldNFTController.i.OnNFTUsageChange -= OnNFTUsageChange;
         CleanItems();
     }
-
+    
     private void Update()
     {
         if (!isBuilderInWorldActivated) return;
