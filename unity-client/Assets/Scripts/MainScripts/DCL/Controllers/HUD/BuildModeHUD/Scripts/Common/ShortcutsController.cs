@@ -12,7 +12,7 @@ public class ShortcutsController : IShortcutsController
 {
     public event System.Action OnCloseClick;
 
-    private IShortcutsView publishPopupView;
+    internal IShortcutsView publishPopupView;
 
     public void Initialize(IShortcutsView publishPopupView)
     {

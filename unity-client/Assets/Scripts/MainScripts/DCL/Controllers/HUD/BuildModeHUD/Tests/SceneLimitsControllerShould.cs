@@ -1,7 +1,6 @@
 using DCL.Controllers;
 using NSubstitute;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Tests.BuildModeHUDControllers
 {
