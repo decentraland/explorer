@@ -18,8 +18,8 @@ public interface ISceneLimitsController
 
 public class SceneLimitsController : ISceneLimitsController
 {
-    private ISceneLimitsView sceneLimitsView;
-    private ParcelScene currentParcelScene;
+    internal ISceneLimitsView sceneLimitsView;
+    internal ParcelScene currentParcelScene;
 
     public void Initialize(ISceneLimitsView sceneLimitsView)
     {
@@ -64,6 +64,9 @@ public class SceneLimitsController : ISceneLimitsController
 
     public void UpdateInfo()
     {
+        if (currentParcelScene == null)
+            return;
+
         if (IsParcelSceneSquare(currentParcelScene))
         {
             int size = (int)Math.Sqrt(currentParcelScene.sceneData.parcels.Length);
