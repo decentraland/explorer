@@ -255,19 +255,6 @@ export function* handleFetchProfile(action: ProfileRequestAction): any {
 
   const passport: Profile = yield call(processServerProfile, userId, profile)
 
-  if (passport.avatar?.bodyShape) {
-    // These mappings are necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
-    const mappedBodyShape = yield call(mapUrnToLegacyId, passport.avatar.bodyShape)
-    if (mappedBodyShape) {
-      passport.avatar.bodyShape = mappedBodyShape
-    }
-  }
-
-  if (passport.avatar?.wearables) {
-    const mappedWearables = yield call(mapUrnsToLegacyId, passport.avatar.wearables)
-    passport.avatar.wearables = mappedWearables
-  }
-
   const shouldUseV2: boolean = yield select(isFeatureEnabled, FeatureFlags.WEARABLES_V2, false)
 
   if (!ALL_WEARABLES && WORLD_EXPLORER && !shouldUseV2) {
@@ -330,12 +317,27 @@ export async function profileServerRequest(userId: string) {
   const catalystUrl = getCatalystServer(state)
   const client = new CatalystClient(catalystUrl, 'EXPLORER')
   const shouldUseV2: boolean = WORLD_EXPLORER && isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
+  let profile: any
   if (shouldUseV2) {
-    return client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
+    profile = await client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
   } else {
     const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
-    return response.json()
+    profile = await response.json()
   }
+  // These mappings are necessary because the renderer still has some hardcoded legacy ids. After the migration is successful and the flag is removed, the renderer can update the ids and we can remove this translation
+  const avatar = profile?.avatars[0]?.avatar
+  if (avatar?.bodyShape) {
+    const mappedBodyShape = await mapUrnToLegacyId(avatar.bodyShape)
+    if (mappedBodyShape) {
+      avatar.bodyShape = mappedBodyShape
+    }
+  }
+
+  if (avatar?.wearables) {
+    const mappedWearables = await mapUrnsToLegacyId(avatar.wearables)
+    avatar.wearables = mappedWearables
+  }
+  return profile
 }
 
 function* handleRandomAsSuccess(action: ProfileRandomAction): any {
