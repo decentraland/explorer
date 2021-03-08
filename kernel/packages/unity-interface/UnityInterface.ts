@@ -18,7 +18,8 @@ import {
   Wearable,
   KernelConfigForRenderer,
   RealmsInfoForRenderer,
-  ContentMapping
+  ContentMapping,
+  Profile
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -28,6 +29,7 @@ import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from 'dcl-ecs-quests/src/types'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -158,12 +160,12 @@ export class UnityInterface {
   }
 
   public CreateGlobalScene(data: {
-    id: string;
-    name: string;
-    baseUrl: string,
-    contents: Array<ContentMapping>,
-    icon?: string,
-    isPortableExperience: boolean,
+    id: string
+    name: string
+    baseUrl: string
+    contents: Array<ContentMapping>
+    icon?: string
+    isPortableExperience: boolean
   }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
@@ -431,6 +433,22 @@ export class UnityInterface {
 
   public SendPublishSceneResult(result: DeploymentResult) {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
+  }
+
+  public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
+    if (!profiles) {
+      this.SendMessageToUnity('Bridges', 'SetENSOwnerQueryResult', JSON.stringify({ searchInput, success: false }))
+      return
+    }
+    const profilesForRenderer: ProfileForRenderer[] = []
+    for (let profile of profiles) {
+      profilesForRenderer.push(profileToRendererFormat(profile))
+    }
+    this.SendMessageToUnity(
+      'Bridges',
+      'SetENSOwnerQueryResult',
+      JSON.stringify({ searchInput, success: true, profiles: profilesForRenderer })
+    )
   }
 
   // *********************************************************************************

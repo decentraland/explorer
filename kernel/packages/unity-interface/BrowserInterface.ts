@@ -13,7 +13,7 @@ import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar } from 'shared/profiles/types'
+import { Avatar, Profile, ProfileType } from 'shared/profiles/types'
 import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
@@ -29,7 +29,7 @@ import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { fetchOwner, getAppNetwork } from 'shared/web3'
+import { fetchENSOwner, fetchENSOwnersContains, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
@@ -52,6 +52,7 @@ import { isGuest } from '../shared/ethereum/provider'
 import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 
 declare const DCL: any
 
@@ -358,7 +359,7 @@ export class BrowserInterface {
     if (!found) {
       // if user profile was not found on server -> no connected web3, check if it's a claimed name
       const net = await getAppNetwork()
-      const address = await fetchOwner(ethereumConfigurations[net].names, userId)
+      const address = await fetchENSOwner(ethereumConfigurations[net].names, userId)
       if (address) {
         // if an address was found for the name -> set as user id & add that instead
         userId = address
@@ -375,6 +376,43 @@ export class BrowserInterface {
 
     globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+  }
+
+  public SearchENSOwner(data: { name: string; maxResults: number }) {
+    let profilesPromise
+
+    if (/^0x[a-fA-F0-9]{40}$/.test(data.name)) {
+      profilesPromise = ProfileAsPromise(data.name, undefined, ProfileType.DEPLOYED).then((profile) => {
+        return [profile]
+      })
+    } else {
+      profilesPromise = new Promise((resolve, reject) => {
+        ;(async () => {
+          try {
+            const net = await getAppNetwork()
+            const owners = await fetchENSOwnersContains(ethereumConfigurations[net].names, data.name, data.maxResults)
+            const profiles: Profile[] = []
+            for (let userId of owners) {
+              await ProfileAsPromise(userId, undefined, ProfileType.DEPLOYED).then((profile) => {
+                profiles.push(profile)
+              })
+            }
+            resolve(profiles)
+          } catch (error) {
+            reject(error)
+          }
+        })()
+      })
+    }
+
+    profilesPromise
+      .then((profiles) => {
+        unityInterface.SetENSOwnerQueryResult(data.name, profiles as any)
+      })
+      .catch((error) => {
+        unityInterface.SetENSOwnerQueryResult(data.name, undefined)
+        defaultLogger.error(error)
+      })
   }
 
   public async JumpIn(data: WorldPosition) {

@@ -117,10 +117,10 @@ query GetNameByBeneficiary($beneficiary: String) {
   return []
 }
 
-export async function fetchOwner(url: string, name: string) {
+export async function fetchENSOwner(url: string, name: string) {
   const query = `
     query GetOwner($name: String!) {
-      nfts(first: 1, where: { searchText: $name }) {
+      nfts(first: 1, where: { searchText: $name, category: ens  }) {
         owner{
           address
         }
@@ -132,6 +132,27 @@ export async function fetchOwner(url: string, name: string) {
   try {
     const resp = await queryGraph(url, query, variables)
     return resp.nfts.length === 1 ? (resp.nfts[0].owner.address as string) : null
+  } catch (error) {
+    defaultLogger.error(`Error querying graph`, error)
+    throw error
+  }
+}
+
+export async function fetchENSOwnersContains(url: string, name: string, maxResults: number) {
+  const query = `
+    query GetOwner($name: String!) {
+      nfts(first: ${maxResults}, where: { searchText_contains: $name, category: ens }) {
+        owner{
+          address
+        }
+      }
+    }`
+
+  const variables = { name: name.toLowerCase() }
+
+  try {
+    const resp = await queryGraph(url, query, variables)
+    return resp.nfts.length > 0 ? resp.nfts.map((nft: any) => nft.owner.address as string) : null
   } catch (error) {
     defaultLogger.error(`Error querying graph`, error)
     throw error
