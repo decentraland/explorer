@@ -21,11 +21,11 @@ public class QuickBarController : IQuickBarController
     public event Action<int> OnQuickBarShortcutSelected;
     public event Action<CatalogItem> OnCatalogItemSelected;
 
-    private IQuickBarView quickBarView;
-    private ISceneCatalogController sceneCatalogController;
+    internal IQuickBarView quickBarView;
+    internal ISceneCatalogController sceneCatalogController;
 
-    private CatalogItem[] quickBarShortcutsCatalogItems = new CatalogItem[AMOUNT_OF_QUICK_SLOTS];
-    private int lastIndexDroped = -1;
+    internal CatalogItem[] quickBarShortcutsCatalogItems = new CatalogItem[AMOUNT_OF_QUICK_SLOTS];
+    internal int lastIndexDroped = -1;
 
     const int AMOUNT_OF_QUICK_SLOTS = 9;
 
