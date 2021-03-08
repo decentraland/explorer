@@ -13,8 +13,8 @@ public interface ITooltipController
 
 public class TooltipController : ITooltipController
 {
-    private ITooltipView view;
-    private Coroutine changeAlphaCoroutine;
+    internal ITooltipView view;
+    internal Coroutine changeAlphaCoroutine;
 
     public void Initialize(ITooltipView view)
     {
