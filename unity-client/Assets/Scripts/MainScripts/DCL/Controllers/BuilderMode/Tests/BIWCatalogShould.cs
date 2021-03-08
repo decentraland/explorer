@@ -54,7 +54,7 @@ public class BIWCatalogShould
         CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
         adapter.SetContent(item);
 
-        CatalogAssetGroupAdapter groupAdatper = new CatalogAssetGroupAdapter();
+        CatalogAssetGroupAdapter groupAdatper = new GameObject().AddComponent<CatalogAssetGroupAdapter>();
         groupAdatper.AddAdapter(adapter);
 
         CatalogGroupListView catalogGroupListView = new GameObject().AddComponent<CatalogGroupListView>();
@@ -88,7 +88,7 @@ public class BIWCatalogShould
 
         CatalogItem item = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
 
-        FavoritesController favoritesController = new FavoritesController(new CatalogGroupListView());
+        FavoritesController favoritesController = new FavoritesController(new GameObject().AddComponent<CatalogGroupListView>());
         favoritesController.ToggleFavoriteState(item, null);
         Assert.IsTrue(item.IsFavorite());
 
