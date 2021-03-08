@@ -26,6 +26,10 @@ public class UsersSearchBridge : MonoBehaviour, IUsersSearchBridge
         i = this;
     }
 
+    /// <summary>
+    /// Called by kernel when a query for ENS owners has finished
+    /// </summary>
+    /// <param name="payload">query result sent by kernel</param>
     public void SetENSOwnerQueryResult(string payload)
     {
         ResultPayload result = Utils.SafeFromJson<ResultPayload>(payload);
