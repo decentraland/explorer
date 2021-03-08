@@ -17,8 +17,8 @@ public class PublishBtnController : IPublishBtnController
 {
     public event Action OnClick;
 
-    private IPublishBtnView publishBtnView;
-    private ITooltipController tooltipController;
+    internal IPublishBtnView publishBtnView;
+    internal ITooltipController tooltipController;
 
     public void Initialize(IPublishBtnView publishBtnView, ITooltipController tooltipController)
     {
