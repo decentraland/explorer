@@ -8,7 +8,7 @@ public interface IPublishPopupController
 
 public class PublishPopupController : IPublishPopupController
 {
-    private IPublishPopupView publishPopupView;
+    internal IPublishPopupView publishPopupView;
 
     public void Initialize(IPublishPopupView publishPopupView)
     {
