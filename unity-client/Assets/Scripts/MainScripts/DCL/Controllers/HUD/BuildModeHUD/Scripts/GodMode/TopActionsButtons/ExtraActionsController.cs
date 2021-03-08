@@ -40,7 +40,8 @@ public class ExtraActionsController : IExtraActionsController
 
     public void SetActive(bool isActive)
     {
-        extraActionsView.SetActive(isActive);
+        if (extraActionsView != null)
+            extraActionsView.SetActive(isActive);
     }
 
     public void ControlsClicked()

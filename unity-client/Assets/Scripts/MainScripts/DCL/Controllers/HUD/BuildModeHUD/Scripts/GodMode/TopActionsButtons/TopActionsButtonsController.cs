@@ -44,8 +44,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     public IExtraActionsController extraActionsController { get; private set; }
 
-    private ITopActionsButtonsView topActionsButtonsView;
-    private ITooltipController tooltipController;
+    internal ITopActionsButtonsView topActionsButtonsView;
+    internal ITooltipController tooltipController;
 
     public void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController)
     {
