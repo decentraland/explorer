@@ -64,17 +64,26 @@ function resizeCanvas(module: any) {
   // the targetHeight is set to an arbitrary high value
   let assumeUnlimitedResolution: boolean = targetHeight > 2000
   let finalHeight
+  let finalWidth
 
   if (assumeUnlimitedResolution) {
     targetHeight = window.innerHeight * devicePixelRatio
     finalHeight = targetHeight
+    finalWidth = window.innerWidth * devicePixelRatio
   } else {
-    let browserBarHeight = (window.outerHeight - window.innerHeight) * devicePixelRatio
-    finalHeight = targetHeight - browserBarHeight
+    // We calculate width using height as reference
+    const screenWidth = screen.width * devicePixelRatio
+    const screenHeight = screen.height * devicePixelRatio
+    const targetWidth = targetHeight * (screenWidth / screenHeight)
+
+    const pixelRatioH = targetHeight / screenHeight
+    const pixelRatioW = targetWidth / screenWidth
+
+    finalHeight = window.innerHeight * devicePixelRatio * pixelRatioH
+    finalWidth = window.innerWidth * devicePixelRatio * pixelRatioW
   }
 
-  let ratio = finalHeight / module.canvas.height
-  module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
+  module.setCanvasSize(finalWidth, finalHeight)
 }
 
 export class UnityInterface {
