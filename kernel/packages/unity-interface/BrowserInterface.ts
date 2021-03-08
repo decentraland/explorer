@@ -387,7 +387,7 @@ export class BrowserInterface {
       })
     } else {
       profilesPromise = new Promise((resolve, reject) => {
-        ;(async () => {
+        (async () => {
           try {
             const net = await getAppNetwork()
             const owners = await fetchENSOwnersContains(ethereumConfigurations[net].names, data.name, data.maxResults)
@@ -402,11 +402,13 @@ export class BrowserInterface {
             reject(error)
           }
         })()
+        .catch(error => defaultLogger.error(error))
       })
     }
 
     profilesPromise
       .then((profiles) => {
+        // tslint:disable-next-line
         unityInterface.SetENSOwnerQueryResult(data.name, profiles as any)
       })
       .catch((error) => {
