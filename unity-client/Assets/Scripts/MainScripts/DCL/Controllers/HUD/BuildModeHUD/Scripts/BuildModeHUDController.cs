@@ -403,7 +403,7 @@ public class BuildModeHUDController : IHUD
     {
         if (view == null)
             return;
-        else
+        else if (view.viewGO != null)
             UnityEngine.Object.Destroy(view.viewGO);
     }
 

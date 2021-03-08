@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class FavoritesController 
 {
@@ -10,6 +8,9 @@ public class FavoritesController
 
     public FavoritesController(CatalogGroupListView catalogGroupListView)
     {
+        if (catalogGroupListView == null)
+            return;
+
         catalogGroupListView.OnCatalogItemFavorite += ToggleFavoriteState;
     }
 
