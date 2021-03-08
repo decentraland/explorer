@@ -127,6 +127,10 @@ namespace DCL
              ABConverter.Client.DumpAsset("QmS9eDwvcEpyYXChz6pFpyWyfyajiXbt6KA4CxQa3JKPGC",
                                             "models/FloorBaseGrass_01/FloorBaseGrass_01.glb",
                                             "QmXMzPLZNx5EHiYi3tK9MT5g9HqjAqgyAoZUu2LfAXJcSM");
+
+            // ABConverter.Client.DumpAsset("QmdpLKUsDaUaFRALCvXLPfvpKwFQPBjZGxVeWv1RSsVev3",
+            //                             "models/roulette/TominoyaVersion/roulette_table_tominoya_lod.gltf",
+            //                             "QmSshWUuwpkStJphmGoT4QwvEVqg2gAEiGdoz8eE7eT5Lq");
          }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]

@@ -39,9 +39,6 @@ namespace UnityGLTF.Loader
             {
                 Debug.LogError($"Buffer file not found ({pathToLoad}) -- {fileToLoad}");
 
-                if(DCL.DataStore.i.ABConversorRunning && !DCL.DataStore.i.ABConversorGLTFMissingDependencies.Contains(fileToLoad))
-                    DCL.DataStore.i.ABConversorGLTFMissingDependencies.Add(fileToLoad);
-
                 yield break;
             }
 
@@ -67,9 +64,6 @@ namespace UnityGLTF.Loader
             if (!File.Exists(pathToLoad))
             {
                 Debug.LogError("Buffer file not found -- " + fileToLoad);
-
-                if(DCL.DataStore.i.ABConversorRunning && !DCL.DataStore.i.ABConversorGLTFMissingDependencies.Contains(fileToLoad))
-                    DCL.DataStore.i.ABConversorGLTFMissingDependencies.Add(fileToLoad);
 
                 return;
             }

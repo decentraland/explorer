@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -11,6 +12,8 @@ using UnityEngine.Networking;
 using UnityGLTF;
 using UnityGLTF.Cache;
 using DCL;
+using GLTF;
+using GLTF.Schema;
 
 namespace DCL.ABConverter
 {
@@ -50,7 +53,7 @@ namespace DCL.ABConverter
 
             private float startTime;
             private int totalAssets;
-            public int skippedAssets;
+            private int skippedAssets;
 
             private Environment env;
             private static Logger log = new Logger("ABConverter.Core");
@@ -82,12 +85,10 @@ namespace DCL.ABConverter
             /// <param name="rawContents">A list detailing assets to be dumped</param>
             /// <param name="OnFinish">End callback with the proper ErrorCode</param>
             /// <param name="sceneCid">The asset scene ID in case any dependency is missing</param>
-            public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null, string sceneCid = null)
+            public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
             {
                 OnFinish -= CleanAndExit;
                 OnFinish += CleanAndExit;
-
-                DataStore.i.ABConversorRunning = true;
 
                 startTime = Time.realtimeSinceStartup;
 
@@ -110,44 +111,6 @@ namespace DCL.ABConverter
                         if (!GLTFImporter.finishedImporting && Time.realtimeSinceStartup - timer < 60) return;
 
                         env.assetDatabase.Refresh();
-
-                        if (assetsAlreadyDumped && DataStore.i.ABConversorGLTFMissingDependencies.Count > 0 && sceneCid != null)
-                        {
-                            Debug.Log("Core.Convert(): Missing dependencies detected: " + DataStore.i.ABConversorGLTFMissingDependencies.Count);
-
-                            if (string.IsNullOrEmpty(sceneCid))
-                            {
-                                Debug.Log("Core.Convert(): Scene ID missing... as the missing dependencies cannot be downloaded the conversion is aborted.");
-                                EditorApplication.update -= UpdateLoop;
-                                return;
-                            }
-
-                            // Add missing dependencies to the rawContents collection
-                            var listContents = rawContents.ToList();
-                            foreach (string missingDep in DataStore.i.ABConversorGLTFMissingDependencies)
-                            {
-                                Debug.Log($"Core.Convert(): Adding missing dependency {missingDep} to rawContents...");
-
-                                // 1. Create mapping pairs with the known files, searching the hash in the scene's mappings
-                                ContentServerUtils.MappingsAPIData parcelInfoApiData = ABConverter.Utils.GetSceneMappingsData(env.webRequest, settings.tld, sceneCid);
-
-                                // 2. Add the new files to rawContents
-                                // TODO: full path in content server contains relative paths like 'models/texture.png' but inside GLTFSceneImporter we just read 'texture.png'.
-                                // We should implement a solution without using the .Contains(), to avoid problems with files in different paths but with the same filename
-                                listContents.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(missingDep)).ToArray());
-                            }
-
-                            rawContents = listContents.ToArray();
-
-                            DataStore.i.ABConversorGLTFMissingDependencies.Clear();
-                            assetsAlreadyDumped = false;
-                            EditorApplication.update -= UpdateLoop;
-
-                            // re-trigger conversion
-                            Convert(rawContents, OnFinish, sceneCid);
-
-                            return;
-                        }
 
                         if (!assetsAlreadyDumped)
                         {
@@ -203,12 +166,88 @@ namespace DCL.ABConverter
                         OnFinish: (skippedAssetsCount) =>
                         {
                             this.skippedAssets = skippedAssetsCount;
-                            DataStore.i.ABConversorRunning = false;
+
+                            if(this.skippedAssets > 0)
+                                state.lastErrorCode = ErrorCodes.ASSET_BUNDLE_BUILD_FAIL;
+
                             OnFinish?.Invoke(state.lastErrorCode);
                         }));
                 }
 
                 EditorApplication.update += UpdateLoop;
+            }
+
+            /// <summary>
+            ///
+            /// </summary>
+            /// <param name="assetHash">The asset's content server hash</param>
+            /// <param name="assetFilename">The asset's content server file name</param>
+            /// <param name="sceneCid">The asset scene ID</param>
+            /// <param name="mappingPairsList">The reference of a list where the dependency mapping pairs will be added</param>
+            public void GetAssetDependenciesMappingPairs(string assetHash, string assetFilename, string sceneCid,  ref List<ContentServerUtils.MappingPair> mappingPairsList)
+            {
+                // 1. Get all dependencies
+                List<AssetPath> gltfPaths = ABConverter.Utils.GetPathsFromPairs(finalDownloadedPath, new []
+                    {
+                        new ContentServerUtils.MappingPair
+                        {
+                            file = assetFilename,
+                            hash = assetHash
+                        }
+                    }, Config.gltfExtensions);
+
+                string path = DownloadAsset(gltfPaths[0]);
+
+                if (string.IsNullOrEmpty(path))
+                {
+                    Debug.Log("Core - GetAssetDependenciesMappingPairs() - Invalid target asset data! aborting dependencies population");
+                    return;
+                }
+
+                // 2. Search for dependencies hashes in scene mappings and add them to the collection
+                Debug.Log($"Core - GetAssetDependenciesMappingPairs() -> path: {path}," +
+                          $"\n file: {gltfPaths[0].file}," +
+                          $"\n hash: {gltfPaths[0].hash}," +
+                          $"\n pair: {gltfPaths[0].pair}, " +
+                          $"\n basePath: {gltfPaths[0].basePath}," +
+                          $"\n finalPath: {gltfPaths[0].finalPath}," +
+                          $"\n finalMetaPath: {gltfPaths[0].finalMetaPath}");
+
+                using (var stream = File.OpenRead(path))
+                {
+                    GLTFRoot gLTFRoot;
+                    GLTFParser.ParseJson(stream, out gLTFRoot);
+
+                    ContentServerUtils.MappingsAPIData parcelInfoApiData = ABConverter.Utils.GetSceneMappingsData(env.webRequest, settings.tld, sceneCid);
+
+                    if (gLTFRoot.Buffers != null)
+                    {
+                        foreach (var asset in gLTFRoot.Buffers)
+                        {
+                            if (string.IsNullOrEmpty(asset.Uri)) continue;
+
+                            Debug.Log("Core - GetAssetDependenciesMappingPairs - Buffers -> uri: " + asset.Uri + " -> name: " + asset.Name);
+
+                            // TODO: Avoid duplicated references with same hash (maybe a dictionary can solve it)
+                            // mappingPairsList.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(asset.Uri)).ToArray());
+                            mappingPairsList.Add(parcelInfoApiData.data[0].content.contents.First(x => x.file.Contains(asset.Uri)));
+                        }
+                    }
+
+                    if (gLTFRoot.Images != null)
+                    {
+                        foreach (var asset in gLTFRoot.Images)
+                        {
+                            if (string.IsNullOrEmpty(asset.Uri)) continue;
+
+                            Debug.Log("Core - GetAssetDependenciesMappingPairs - Images -> uri: " + asset.Uri + " -> name: " + asset.Name);
+
+                            // TODO: Avoid duplicated references with same hash (maybe a dictionary can solve it)
+                            // mappingPairsList.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(asset.Uri)).ToArray());
+                            mappingPairsList.Add(parcelInfoApiData.data[0].content.contents.First(x => x.file.Contains(asset.Uri)));
+                        }
+                    }
+                }
             }
 
             /// <summary>
@@ -305,12 +344,24 @@ namespace DCL.ABConverter
                 //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
                 foreach (var texturePath in texturePaths)
                 {
+                    // Debug.Log("Core - DumpGltf() - injecting texture in PersistentAssetCache -> " + texturePath.finalPath);
                     RetrieveAndInjectTexture(gltfPath, texturePath);
                 }
 
                 foreach (var bufferPath in bufferPaths)
                 {
-                    RetrieveAndInjectBuffer(gltfPath, bufferPath);
+                    // Debug.Log("Core - DumpGltf() - injecting buffer in PersistentAssetCache -> " + bufferPath.finalPath);
+                    RetrieveAndInjectBuffer(gltfPath, bufferPath); // TODO: this adds buffers that will be used in the future by the GLTFSceneImporter
+                }
+
+                Debug.Log("Core - DumpGltf() - Finished injecting. Reading PersistentAssetCache entries: ");
+                foreach (var imageCache in PersistentAssetCache.ImageCacheByUri)
+                {
+                    Debug.Log("Core - DumpGltf() - PersistentAssetCache image: key: " + imageCache.Key + " -> value: " + imageCache.Value);
+                }
+                foreach (var streamCache in PersistentAssetCache.StreamCacheByUri)
+                {
+                    Debug.Log("Core - DumpGltf() - PersistentAssetCache stream: key: " + streamCache.Key + " -> value: " + streamCache.Value);
                 }
 
                 log.Verbose("About to load " + gltfPath.hash);
@@ -492,6 +543,7 @@ namespace DCL.ABConverter
 
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
+                Debug.Log("Core - RetrieveAndInjectTexture() - Adding image to PersistentAssetCache: uri: " + relativePath + "; idSuffix: " + gltfPath.finalPath);
                 PersistentAssetCache.AddImage(relativePath, gltfPath.finalPath, t2d);
             }
 
@@ -513,6 +565,7 @@ namespace DCL.ABConverter
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
                 //              consume the asset bundle dependencies instead of trying to create new streams.
+                Debug.Log("Core - RetrieveAndInjectBuffer() - Adding buffer to PersistentAssetCache: uri: " + relativePath + "; idSuffix: " + gltfPath.finalPath);
                 PersistentAssetCache.AddBuffer(relativePath, gltfPath.finalPath, stream);
             }
 
@@ -644,6 +697,7 @@ namespace DCL.ABConverter
             {
                 foreach (var content in pairs)
                 {
+                    Debug.Log("Core - PopulateLowercaseMappings() -> " + content.file + " -> " + content.hash);
                     string hashLower = content.hash.ToLowerInvariant();
 
                     if (!hashLowercaseToHashProper.ContainsKey(hashLower))

@@ -32,7 +32,7 @@ namespace DCL.ABConverter
             if (gltfs.Length == 0)
             {
                 Debug.Log("Visual Test Detection: no instantiated GLTFs...");
-                OnFinish?.Invoke(0);
+                OnFinish?.Invoke(1);
                 yield break;
             }
 

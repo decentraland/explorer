@@ -223,16 +223,29 @@ namespace DCL.ABConverter
             EnsureEnvironment();
 
             if (settings == null)
-                settings = new Settings();
+            {
+                settings = new Settings()
+                {
+                    skipAlreadyBuiltBundles = false
+                };
+            }
 
             var core = new ABConverter.Core(env, settings);
-            core.Convert(new [] {
-                new ContentServerUtils.MappingPair
-                {
-                    file = assetFilename,
-                    hash = assetHash
-                }
-            }, null, sceneCid);
+
+            List<ContentServerUtils.MappingPair> rawContents = new List<ContentServerUtils.MappingPair>();
+            rawContents.Add(new ContentServerUtils.MappingPair
+            {
+                file = assetFilename,
+                hash = assetHash
+            });
+
+            // If the asset is a GLTF we add the dependencies to the rawContents to be downloaded
+            if (assetFilename.Contains(".glb") || assetFilename.Contains(".gltf") || assetFilename.Contains(".GLB") || assetFilename.Contains(".GLTF"))
+            {
+                core.GetAssetDependenciesMappingPairs(assetHash, assetFilename, sceneCid, ref rawContents);
+            }
+
+            core.Convert(rawContents.ToArray(), null);
 
             return core.state;
         }
