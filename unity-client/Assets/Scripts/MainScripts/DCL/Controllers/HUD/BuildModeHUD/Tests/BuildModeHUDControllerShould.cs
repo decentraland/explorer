@@ -73,13 +73,13 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void CreateParentViewCorrectly()
+        public void CreateMainViewCorrectly()
         {
             // Arrange
             buildModeHUDController.view = null;
 
             // Act
-            buildModeHUDController.CreateParentView(Substitute.For<IBuildModeHUDView>());
+            buildModeHUDController.CreateMainView(Substitute.For<IBuildModeHUDView>());
 
             // Assert
             Assert.NotNull(buildModeHUDController.view, "The view is null!");
