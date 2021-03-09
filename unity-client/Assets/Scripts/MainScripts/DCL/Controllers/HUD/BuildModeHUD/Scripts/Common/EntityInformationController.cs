@@ -162,7 +162,6 @@ public class EntityInformationController : IEntityInformationController
         if (string.IsNullOrEmpty(url))
             return;
 
-        string newLoadedThumbnailURL = url;
         var newLoadedThumbnailPromise = new AssetPromise_Texture(url);
         newLoadedThumbnailPromise.OnSuccessEvent += SetThumbnail;
         newLoadedThumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading: {url}"); };
