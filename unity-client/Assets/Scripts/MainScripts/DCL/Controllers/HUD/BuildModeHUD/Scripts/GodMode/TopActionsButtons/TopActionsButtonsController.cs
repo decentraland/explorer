@@ -28,6 +28,7 @@ public interface ITopActionsButtonsController
     void LogOutClicked();
     void TooltipPointerEntered(BaseEventData eventData, string tooltipText);
     void TooltipPointerExited();
+    void SetExtraActionsActive(bool isActive);
 }
 
 public class TopActionsButtonsController : ITopActionsButtonsController
@@ -154,5 +155,10 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public void TooltipPointerExited()
     {
         tooltipController.HideTooltip();
+    }
+
+    public void SetExtraActionsActive(bool isActive)
+    {
+        extraActionsController.SetActive(isActive);
     }
 }

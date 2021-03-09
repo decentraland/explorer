@@ -177,7 +177,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.SetVisibilityOfExtraBtns(isVisible);
 
             // Assert
-            testControllers.topActionsButtonsController.extraActionsController.Received(1).SetActive(isVisible);
+            testControllers.topActionsButtonsController.Received(1).SetExtraActionsActive(isVisible);
         }
 
         [Test]

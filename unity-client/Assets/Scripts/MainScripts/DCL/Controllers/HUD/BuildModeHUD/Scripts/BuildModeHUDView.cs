@@ -148,7 +148,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
 
     public void SetVisibilityOfExtraBtns(bool isVisible)
     {
-        controllers.topActionsButtonsController.extraActionsController.SetActive(isVisible);
+        controllers.topActionsButtonsController.SetExtraActionsActive(isVisible);
     }
 
     public void SetFirstPersonView()
