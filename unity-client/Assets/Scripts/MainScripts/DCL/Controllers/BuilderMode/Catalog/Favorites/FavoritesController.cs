@@ -14,6 +14,12 @@ public class FavoritesController
         catalogGroupListView.OnCatalogItemFavorite += ToggleFavoriteState;
     }
 
+    public void Dispose()
+    {
+        if (catalogGroupListView != null)
+            catalogGroupListView.OnCatalogItemFavorite -= ToggleFavoriteState;
+    }
+
     public List<CatalogItem> GetFavorites()
     {
         return favoritesCatalogItems;

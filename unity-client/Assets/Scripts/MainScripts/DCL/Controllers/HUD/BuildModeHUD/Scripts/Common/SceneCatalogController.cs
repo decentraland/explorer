@@ -115,6 +115,8 @@ public class SceneCatalogController : ISceneCatalogController
 
         quickBarController.OnQuickBarShortcutSelected -= QuickBarInput;
         quickBarController.OnCatalogItemSelected -= CatalogItemSelected;
+
+        favoritesController.Dispose();
     }
 
     public void AssetsPackFilter(bool isOn)
