@@ -77,11 +77,13 @@ public class QuickBarController : IQuickBarController
     public void SceneObjectDropped(BaseEventData data)
     {
         CatalogItemAdapter adapter = sceneCatalogController.GetLastCatalogItemDragged();
-        CatalogItem catalogItem = adapter.GetContent();
 
-        if (adapter.thumbnailImg.enabled)
+        if (adapter != null &&
+            adapter.thumbnailImg != null &&
+            adapter.thumbnailImg.enabled)
         {
             Texture texture = adapter.thumbnailImg.texture;
+            CatalogItem catalogItem = adapter.GetContent();
             SetQuickBarShortcut(catalogItem, lastIndexDroped, texture);
         }
     }
