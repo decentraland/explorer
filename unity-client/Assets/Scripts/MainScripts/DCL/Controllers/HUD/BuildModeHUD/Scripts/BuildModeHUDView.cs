@@ -26,7 +26,7 @@ public interface IBuildModeHUDView
 
 public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
 {
-    public GameObject viewGO => gameObject;
+    public GameObject viewGO => !isDestroyed ? gameObject : null;
     public SceneCatalogView sceneCatalog => sceneCatalogView;
     public EntityInformationView entityInformation => entityInformationView;
     public bool isShowHideAnimatorVisible => showHideAnimator.isVisible;
@@ -53,6 +53,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
     [SerializeField] internal InspectorView inspectorView;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
 
+    private bool isDestroyed = false;
     internal BuildModeHUDInitializationModel controllers;
 
     private const string VIEW_PATH = "BuildModeHUD";
@@ -85,6 +86,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
 
     private void OnDestroy()
     {
+        isDestroyed = true;
         controllers.tooltipController.Dispose();
         controllers.quickBarController.Dispose();
         controllers.sceneCatalogController.Dispose();
