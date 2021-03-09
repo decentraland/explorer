@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public interface IEntityInformationView
 {
     DCLBuilderInWorldEntity currentEntity { get; set; }
-    bool isEnable { get; set; }
     AttributeXYZ position { get; }
     AttributeXYZ rotation { get; }
     AttributeXYZ scale { get; }
@@ -64,7 +63,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
     [SerializeField] internal Button basicInfoTogglekButton;
 
     public DCLBuilderInWorldEntity currentEntity { get; set; }
-    public bool isEnable { get; set; } = false;
     public AttributeXYZ position => positionAttribute;
     public AttributeXYZ rotation => rotationAttribute;
     public AttributeXYZ scale => scaleAttribute;
@@ -111,9 +109,6 @@ public class EntityInformationView : MonoBehaviour, IEntityInformationView
 
     private void LateUpdate()
     {
-        if (!isEnable)
-            return;
-
         if (currentEntity == null)
             return;
 

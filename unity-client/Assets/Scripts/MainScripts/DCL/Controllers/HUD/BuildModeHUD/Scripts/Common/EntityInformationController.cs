@@ -210,13 +210,11 @@ public class EntityInformationController : IEntityInformationController
     public void Enable()
     {
         entityInformationView.SetActive(true);
-        entityInformationView.isEnable = true;
     }
 
     public void Disable()
     {
         entityInformationView.SetActive(false);
-        entityInformationView.isEnable = false;
         EntityDeselected();
         entityInformationView.SetCurrentEntity(null);
     }

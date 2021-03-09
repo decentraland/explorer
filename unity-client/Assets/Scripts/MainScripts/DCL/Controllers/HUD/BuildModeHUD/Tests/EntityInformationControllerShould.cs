@@ -233,14 +233,12 @@ namespace Tests.BuildModeHUDControllers
         {
             // Arrange
             entityInformationController.entityInformationView.SetActive(false);
-            entityInformationController.entityInformationView.isEnable = false;
 
             // Act
             entityInformationController.Enable();
 
             // Assert
             entityInformationController.entityInformationView.Received(1).SetActive(true);
-            Assert.IsTrue(entityInformationController.entityInformationView.isEnable, "entityInformationView enable property is false!");
         }
 
         [Test]
@@ -248,7 +246,6 @@ namespace Tests.BuildModeHUDControllers
         {
             // Arrange
             entityInformationController.entityInformationView.SetActive(true);
-            entityInformationController.entityInformationView.isEnable = true;
 
             // Act
             entityInformationController.Disable();
