@@ -1,15 +1,12 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public interface IDragAndDropSceneObjectView
 {
     event Action OnDrop;
 
-    void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
     void Drop();
-    void RemoveEventTrigger(EventTriggerType eventType);
 }
 
 public class DragAndDropSceneObjectView : MonoBehaviour, IDragAndDropSceneObjectView
@@ -30,24 +27,11 @@ public class DragAndDropSceneObjectView : MonoBehaviour, IDragAndDropSceneObject
 
     private void Awake()
     {
-        ConfigureEventTrigger(EventTriggerType.Drop, (eventData) => Drop());
+        BuilderInWorldUtils.ConfigureEventTrigger(dragAndDropEventTrigger, EventTriggerType.Drop, (eventData) => Drop());
     }
     private void OnDestroy()
     {
-        RemoveEventTrigger(EventTriggerType.Drop);
-    }
-
-    public void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(call);
-        dragAndDropEventTrigger.triggers.Add(entry);
-    }
-
-    public void RemoveEventTrigger(EventTriggerType eventType)
-    {
-        dragAndDropEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
+        BuilderInWorldUtils.RemoveEventTrigger(dragAndDropEventTrigger, EventTriggerType.Drop);
     }
 
     public void Drop()

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,11 +9,9 @@ public interface IInspectorBtnView
     event Action OnInspectorButtonClick;
     event Action<BaseEventData, string> OnShowTooltip;
 
-    void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
     void OnPointerClick(DCLAction_Trigger action);
     void OnPointerEnter(PointerEventData eventData);
     void OnPointerExit();
-    void RemoveEventTrigger(EventTriggerType eventType);
 }
 
 public class InspectorBtnView : MonoBehaviour, IInspectorBtnView
@@ -44,29 +41,16 @@ public class InspectorBtnView : MonoBehaviour, IInspectorBtnView
     {
         mainButton.onClick.AddListener(() => OnPointerClick(dummyActionTrigger));
         toggleOpenEntityListInputAction.OnTriggered += OnPointerClick;
-        ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
-        ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
+        BuilderInWorldUtils.ConfigureEventTrigger(inspectorButtonEventTrigger, EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
+        BuilderInWorldUtils.ConfigureEventTrigger(inspectorButtonEventTrigger, EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }
 
     private void OnDestroy()
     {
         mainButton.onClick.RemoveAllListeners();
         toggleOpenEntityListInputAction.OnTriggered -= OnPointerClick;
-        RemoveEventTrigger(EventTriggerType.PointerEnter);
-        RemoveEventTrigger(EventTriggerType.PointerExit);
-    }
-
-    public void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(call);
-        inspectorButtonEventTrigger.triggers.Add(entry);
-    }
-
-    public void RemoveEventTrigger(EventTriggerType eventType)
-    {
-        inspectorButtonEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
+        BuilderInWorldUtils.RemoveEventTrigger(inspectorButtonEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(inspectorButtonEventTrigger, EventTriggerType.PointerExit);
     }
 
     public void OnPointerClick(DCLAction_Trigger action)

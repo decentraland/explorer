@@ -1,8 +1,6 @@
 using NSubstitute;
 using NUnit.Framework;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Tests.BuildModeHUDViews
 {
@@ -20,76 +18,6 @@ namespace Tests.BuildModeHUDViews
         public void TearDown()
         {
             Object.Destroy(topActionsButtonsView.gameObject);
-        }
-
-        [Test]
-        [TestCase(EventTriggerType.PointerEnter)]
-        [TestCase(EventTriggerType.PointerExit)]
-        public void ConfigureAllEventTriggersCorrectly(EventTriggerType eventType)
-        {
-            TestEventTriggerConfiguration(topActionsButtonsView.changeCameraModeEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.translateEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.rotateEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.scaleEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.resetEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.duplicateEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.deleteEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.moreActionsEventTrigger, eventType);
-            TestEventTriggerConfiguration(topActionsButtonsView.logoutEventTrigger, eventType);
-        }
-
-        private void TestEventTriggerConfiguration(EventTrigger eventTrigger, EventTriggerType eventType)
-        {
-            // Arrange
-            bool triggerActionCalled = false;
-            if (eventTrigger != null)
-                eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
-
-            // Act
-            topActionsButtonsView.ConfigureEventTrigger(eventTrigger, eventType, (eventData) =>
-            {
-                triggerActionCalled = true;
-            });
-            eventTrigger.triggers.First(x => x.eventID == eventType).callback.Invoke(null);
-
-            // Assert
-            Assert.IsTrue(
-                eventTrigger.triggers.Count(x => x.eventID == eventType) == 1,
-                "The number of configured event triggers does not match!");
-            Assert.IsTrue(triggerActionCalled, "The trigger action has not been called!");
-        }
-
-        [Test]
-        [TestCase(EventTriggerType.PointerEnter)]
-        [TestCase(EventTriggerType.PointerExit)]
-        public void RemoveAllEventTriggersCorrectly(EventTriggerType eventType)
-        {
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.changeCameraModeEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.translateEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.rotateEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.scaleEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.resetEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.duplicateEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.deleteEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.moreActionsEventTrigger, eventType);
-            TestEventTriggerRemovingCorrectly(topActionsButtonsView.logoutEventTrigger, eventType);
-        }
-
-        private void TestEventTriggerRemovingCorrectly(EventTrigger eventTrigger, EventTriggerType eventType)
-        {
-            // Arrange
-            EventTrigger.Entry newTrigger = new EventTrigger.Entry();
-            newTrigger.eventID = eventType;
-            newTrigger.callback.AddListener(null);
-            eventTrigger.triggers.Add(newTrigger);
-
-            // Act
-            topActionsButtonsView.RemoveEventTrigger(eventTrigger, eventType);
-
-            // Assert
-            Assert.IsTrue(
-                eventTrigger.triggers.Count(x => x.eventID == eventType) == 0,
-                "The number of configured event triggers does not match!");
         }
 
         [Test]

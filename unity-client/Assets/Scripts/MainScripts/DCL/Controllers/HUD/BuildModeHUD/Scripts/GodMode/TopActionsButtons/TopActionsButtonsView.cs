@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -27,7 +26,6 @@ public interface ITopActionsButtonsView
                                         OnMoreActionsPointerEnter,
                                         OnLogoutPointerEnter;
 
-    void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call);
     void ConfigureExtraActions(IExtraActionsController extraActionsController);
     void OnChangeModeClick(DCLAction_Trigger action);
     void OnDeleteClick(DCLAction_Trigger action);
@@ -38,7 +36,6 @@ public interface ITopActionsButtonsView
     void OnRotateClick(DCLAction_Trigger action);
     void OnScaleClick(DCLAction_Trigger action);
     void OnTranslateClick(DCLAction_Trigger action);
-    void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType);
 }
 
 public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
@@ -134,92 +131,92 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         logOutBtn.onClick.AddListener(() => OnLogOutClick(dummyActionTrigger));
         extraBtn.onClick.AddListener(() => OnExtraClick(dummyActionTrigger));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             changeCameraModeEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnChangeCameraModePointerEnter?.Invoke(eventData, changeCameraModeTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             changeCameraModeEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             translateEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnTranslatePointerEnter?.Invoke(eventData, translateTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             translateEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             rotateEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnRotatePointerEnter?.Invoke(eventData, rotateTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             rotateEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             scaleEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnScalePointerEnter?.Invoke(eventData, scaleTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             scaleEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             resetEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnResetPointerEnter?.Invoke(eventData, resetTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             resetEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             duplicateEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnDuplicatePointerEnter?.Invoke(eventData, duplicateTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             duplicateEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             deleteEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnDeletePointerEnter?.Invoke(eventData, deleteTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             deleteEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             moreActionsEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnMoreActionsPointerEnter?.Invoke(eventData, moreActionsTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             moreActionsEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             logoutEventTrigger,
             EventTriggerType.PointerEnter,
             (eventData) => OnLogoutPointerEnter?.Invoke(eventData, logoutTooltipText));
 
-        ConfigureEventTrigger(
+        BuilderInWorldUtils.ConfigureEventTrigger(
             logoutEventTrigger,
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
@@ -245,24 +242,24 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         logOutBtn.onClick.RemoveAllListeners();
         extraBtn.onClick.RemoveAllListeners();
 
-        RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(translateEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(translateEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(rotateEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(rotateEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(scaleEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(scaleEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(resetEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(resetEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(duplicateEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(duplicateEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(deleteEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(deleteEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerExit);
-        RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerEnter);
-        RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(translateEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(translateEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(rotateEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(rotateEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(scaleEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(scaleEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(resetEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(resetEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(duplicateEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(duplicateEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(deleteEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(deleteEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(moreActionsEventTrigger, EventTriggerType.PointerExit);
+        BuilderInWorldUtils.RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerExit);
 
         toggleChangeCameraInputAction.OnTriggered -= OnChangeModeClick;
         toggleTranslateInputAction.OnTriggered -= OnTranslateClick;
@@ -274,19 +271,6 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
 
         if (extraActionsController != null)
             extraActionsController.Dispose();
-    }
-
-    public void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(call);
-        eventTrigger.triggers.Add(entry);
-    }
-
-    public void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
-    {
-        eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }
 
     public void ConfigureExtraActions(IExtraActionsController extraActionsController)

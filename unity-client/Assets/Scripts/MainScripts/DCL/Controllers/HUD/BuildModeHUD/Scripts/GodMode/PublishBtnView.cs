@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,11 +9,9 @@ public interface IPublishBtnView
     event Action OnPublishButtonClick;
     event Action<BaseEventData, string> OnShowTooltip;
 
-    void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
     void OnPointerClick();
     void OnPointerEnter(PointerEventData eventData);
     void OnPointerExit();
-    void RemoveEventTrigger(EventTriggerType eventType);
     void SetInteractable(bool isInteractable);
 }
 
@@ -41,28 +38,15 @@ public class PublishBtnView : MonoBehaviour, IPublishBtnView
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
-        ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
-        ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
+        BuilderInWorldUtils.ConfigureEventTrigger(publishButtonEventTrigger, EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
+        BuilderInWorldUtils.ConfigureEventTrigger(publishButtonEventTrigger, EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }
 
     private void OnDestroy()
     {
         mainButton.onClick.RemoveListener(OnPointerClick);
-        RemoveEventTrigger(EventTriggerType.PointerEnter);
-        RemoveEventTrigger(EventTriggerType.PointerExit);
-    }
-
-    public void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(call);
-        publishButtonEventTrigger.triggers.Add(entry);
-    }
-
-    public void RemoveEventTrigger(EventTriggerType eventType)
-    {
-        publishButtonEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
+        BuilderInWorldUtils.RemoveEventTrigger(publishButtonEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(publishButtonEventTrigger, EventTriggerType.PointerExit);
     }
 
     public void OnPointerClick()

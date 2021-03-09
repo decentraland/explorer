@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,11 +9,9 @@ public interface IFirstPersonModeView
     event Action OnHideTooltip;
     event Action<BaseEventData, string> OnShowTooltip;
 
-    void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
     void OnPointerClick();
     void OnPointerEnter(PointerEventData eventData);
     void OnPointerExit();
-    void RemoveEventTrigger(EventTriggerType eventType);
 }
 
 public class FirstPersonModeView : MonoBehaviour, IFirstPersonModeView
@@ -40,28 +37,15 @@ public class FirstPersonModeView : MonoBehaviour, IFirstPersonModeView
     private void Awake()
     {
         mainButton.onClick.AddListener(OnPointerClick);
-        ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
-        ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
+        BuilderInWorldUtils.ConfigureEventTrigger(changeModeEventTrigger, EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
+        BuilderInWorldUtils.ConfigureEventTrigger(changeModeEventTrigger, EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }
 
     private void OnDestroy()
     {
         mainButton.onClick.RemoveListener(OnPointerClick);
-        RemoveEventTrigger(EventTriggerType.PointerEnter);
-        RemoveEventTrigger(EventTriggerType.PointerExit);
-    }
-
-    public void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(call);
-        changeModeEventTrigger.triggers.Add(entry);
-    }
-
-    public void RemoveEventTrigger(EventTriggerType eventType)
-    {
-        changeModeEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
+        BuilderInWorldUtils.RemoveEventTrigger(changeModeEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(changeModeEventTrigger, EventTriggerType.PointerExit);
     }
 
     public void OnPointerClick()

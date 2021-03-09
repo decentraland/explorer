@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -19,50 +18,6 @@ namespace Tests.BuildModeHUDViews
         public void TearDown()
         {
             Object.Destroy(firstPersonModeView.gameObject);
-        }
-
-        [Test]
-        [TestCase(EventTriggerType.PointerEnter)]
-        [TestCase(EventTriggerType.PointerExit)]
-        public void ConfigureEventTriggerCorrectly(EventTriggerType eventType)
-        {
-            // Arrange
-            bool triggerActionCalled = false;
-            if (firstPersonModeView.changeModeEventTrigger != null)
-                firstPersonModeView.changeModeEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
-
-            // Act
-            firstPersonModeView.ConfigureEventTrigger(eventType, (eventData) =>
-            {
-                triggerActionCalled = true;
-            });
-            firstPersonModeView.changeModeEventTrigger.triggers.First(x => x.eventID == eventType).callback.Invoke(null);
-
-            // Assert
-            Assert.IsTrue(
-                firstPersonModeView.changeModeEventTrigger.triggers.Count(x => x.eventID == eventType) == 1,
-                "The number of configured event triggers does not match!");
-            Assert.IsTrue(triggerActionCalled, "The trigger action has not been called!");
-        }
-
-        [Test]
-        [TestCase(EventTriggerType.PointerEnter)]
-        [TestCase(EventTriggerType.PointerExit)]
-        public void RemoveEventTriggerCorrectly(EventTriggerType eventType)
-        {
-            // Arrange
-            EventTrigger.Entry newTrigger = new EventTrigger.Entry();
-            newTrigger.eventID = eventType;
-            newTrigger.callback.AddListener(null);
-            firstPersonModeView.changeModeEventTrigger.triggers.Add(newTrigger);
-
-            // Act
-            firstPersonModeView.RemoveEventTrigger(eventType);
-
-            // Assert
-            Assert.IsTrue(
-                firstPersonModeView.changeModeEventTrigger.triggers.Count(x => x.eventID == eventType) == 0,
-                "The number of configured event triggers does not match!");
         }
 
         [Test]

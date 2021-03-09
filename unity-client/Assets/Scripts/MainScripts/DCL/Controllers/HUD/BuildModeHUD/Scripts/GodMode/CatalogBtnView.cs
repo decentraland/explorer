@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,11 +9,9 @@ public interface ICatalogBtnView
     event Action OnHideTooltip;
     event Action<BaseEventData, string> OnShowTooltip;
 
-    void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
     void OnPointerClick(DCLAction_Trigger action);
     void OnPointerEnter(PointerEventData eventData);
     void OnPointerExit();
-    void RemoveEventTrigger(EventTriggerType eventType);
 }
 
 public class CatalogBtnView : MonoBehaviour, ICatalogBtnView
@@ -44,29 +41,16 @@ public class CatalogBtnView : MonoBehaviour, ICatalogBtnView
     {
         mainButton.onClick.AddListener(() => OnPointerClick(dummyActionTrigger));
         toggleCatalogInputAction.OnTriggered += OnPointerClick;
-        ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
-        ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
+        BuilderInWorldUtils.ConfigureEventTrigger(catalogButtonEventTrigger, EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
+        BuilderInWorldUtils.ConfigureEventTrigger(catalogButtonEventTrigger, EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }
 
     private void OnDestroy()
     {
         mainButton.onClick.RemoveAllListeners();
         toggleCatalogInputAction.OnTriggered -= OnPointerClick;
-        RemoveEventTrigger(EventTriggerType.PointerEnter);
-        RemoveEventTrigger(EventTriggerType.PointerExit);
-    }
-
-    public void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = eventType;
-        entry.callback.AddListener(call);
-        catalogButtonEventTrigger.triggers.Add(entry);
-    }
-
-    public void RemoveEventTrigger(EventTriggerType eventType)
-    {
-        catalogButtonEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
+        BuilderInWorldUtils.RemoveEventTrigger(catalogButtonEventTrigger, EventTriggerType.PointerEnter);
+        BuilderInWorldUtils.RemoveEventTrigger(catalogButtonEventTrigger, EventTriggerType.PointerExit);
     }
 
     public void OnPointerClick(DCLAction_Trigger action)
