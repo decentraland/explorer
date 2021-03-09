@@ -31,6 +31,9 @@ public interface IEntityInformationController
 
 public class EntityInformationController : IEntityInformationController
 {
+    private const string LEFT_TEXT_FORMAT = "ENTITIES: {0}\nBODIES:{1}\nTIRS:{2}";
+    private const string RIGHT_TEXT_FORMAT = "TEXTURES: {0}\nMATERIALS:{1}\nGEOMETRIES:{2}";
+
     public event Action<Vector3> OnPositionChange;
     public event Action<Vector3> OnRotationChange;
     public event Action<Vector3> OnScaleChange;
@@ -197,13 +200,8 @@ public class EntityInformationController : IEntityInformationController
             return;
         }
 
-        string leftText = $"ENTITIES: {catalogItem.metrics.entities}\n" +
-                          $"BODIES: {catalogItem.metrics.bodies}\n" +
-                          $"TRIS: {catalogItem.metrics.triangles}";
-
-        string rightText = $"TEXTURES: {catalogItem.metrics.textures}\n" +
-                           $"MATERIALS: {catalogItem.metrics.materials}\n" +
-                           $"GEOMETRIES: {catalogItem.metrics.meshes}";
+        string leftText = string.Format(LEFT_TEXT_FORMAT, catalogItem.metrics.entities, catalogItem.metrics.bodies, catalogItem.metrics.triangles);
+        string rightText = string.Format(RIGHT_TEXT_FORMAT, catalogItem.metrics.textures, catalogItem.metrics.materials, catalogItem.metrics.meshes);
 
         entityInformationView.SeEntityLimitsLeftText(leftText);
         entityInformationView.SeEntityLimitsRightText(rightText);
