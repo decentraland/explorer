@@ -17,6 +17,7 @@ namespace DCL.ABConverter
         static readonly string baselinePath = VisualTestHelpers.baselineImagesPath;
         static readonly string testImagesPath = VisualTestHelpers.testImagesPath;
         static readonly float snapshotCamOffset = 3;
+        static int skippedAssets = 0;
 
         public static IEnumerator TestConvertedAssets(Environment env = null, Action<int> OnFinish = null)
         {
@@ -26,6 +27,7 @@ namespace DCL.ABConverter
 
             VisualTestHelpers.baselineImagesPath += "ABConverter/";
             VisualTestHelpers.testImagesPath += "ABConverter/";
+            skippedAssets = 0;
 
             var gltfs = LoadAndInstantiateAllGltfAssets();
 
@@ -70,8 +72,6 @@ namespace DCL.ABConverter
             {
                 go.SetActive(false);
             }
-
-            int skippedAssets = 0;
 
             foreach (GameObject go in abs)
             {
@@ -183,7 +183,7 @@ namespace DCL.ABConverter
 
                 if (req.isHttpError || req.isNetworkError)
                 {
-                    Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
+                    Debug.Log("Visual Test Detection: Failed to download dependency asset: " + hash);
                     continue;
                 }
 
@@ -211,6 +211,7 @@ namespace DCL.ABConverter
                 if (req.isHttpError || req.isNetworkError)
                 {
                     Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
+                    skippedAssets++;
                     continue;
                 }
 

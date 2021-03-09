@@ -196,6 +196,7 @@ namespace DCL.ABConverter
                         }
                     }, Config.gltfExtensions);
 
+                // TODO: Download this file in another place or do something to avoid Unity trying to import the asset (adding more errors before starting the whole conversion)
                 string path = DownloadAsset(gltfPaths[0]);
 
                 if (string.IsNullOrEmpty(path))
