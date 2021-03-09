@@ -13,21 +13,24 @@ namespace Tests.BuildModeHUDControllers
         [SetUp]
         public void SetUp()
         {
-            buildModeHUDController = new BuildModeHUDController(
-                Substitute.For<IBuildModeHUDView>(),
-                Substitute.For<ITooltipController>(),
-                Substitute.For<ISceneCatalogController>(),
-                Substitute.For<IQuickBarController>(),
-                Substitute.For<IEntityInformationController>(),
-                Substitute.For<IFirstPersonModeController>(),
-                Substitute.For<IShortcutsController>(),
-                Substitute.For<IPublishPopupController>(),
-                Substitute.For<IDragAndDropSceneObjectController>(),
-                Substitute.For<IPublishBtnController>(),
-                Substitute.For<IInspectorBtnController>(),
-                Substitute.For<ICatalogBtnController>(),
-                Substitute.For<IInspectorController>(),
-                Substitute.For<ITopActionsButtonsController>());
+            BuildModeHUDInitializationModel testControllers = new BuildModeHUDInitializationModel
+            {
+                tooltipController = Substitute.For<ITooltipController>(),
+                sceneCatalogController = Substitute.For<ISceneCatalogController>(),
+                quickBarController = Substitute.For<IQuickBarController>(),
+                entityInformationController = Substitute.For<IEntityInformationController>(),
+                firstPersonModeController = Substitute.For<IFirstPersonModeController>(),
+                shortcutsController = Substitute.For<IShortcutsController>(),
+                publishPopupController = Substitute.For<IPublishPopupController>(),
+                dragAndDropSceneObjectController = Substitute.For<IDragAndDropSceneObjectController>(),
+                publishBtnController = Substitute.For<IPublishBtnController>(),
+                inspectorBtnController = Substitute.For<IInspectorBtnController>(),
+                catalogBtnController = Substitute.For<ICatalogBtnController>(),
+                inspectorController = Substitute.For<IInspectorController>(),
+                topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
+            };
+
+            buildModeHUDController = new BuildModeHUDController(Substitute.For<IBuildModeHUDView>(), testControllers);
         }
 
         [TearDown]
@@ -39,37 +42,37 @@ namespace Tests.BuildModeHUDControllers
         public void CreateBuildModeControllersCorrectly()
         {
             // Arrange
-            buildModeHUDController.tooltipController = null;
-            buildModeHUDController.sceneCatalogController = null;
-            buildModeHUDController.quickBarController = null;
-            buildModeHUDController.entityInformationController = null;
-            buildModeHUDController.firstPersonModeController = null;
-            buildModeHUDController.shortcutsController = null;
-            buildModeHUDController.publishPopupController = null;
-            buildModeHUDController.dragAndDropSceneObjectController = null;
-            buildModeHUDController.publishBtnController = null;
-            buildModeHUDController.inspectorBtnController = null;
-            buildModeHUDController.catalogBtnController = null;
-            buildModeHUDController.inspectorController = null;
-            buildModeHUDController.topActionsButtonsController = null;
+            buildModeHUDController.controllers.tooltipController = null;
+            buildModeHUDController.controllers.sceneCatalogController = null;
+            buildModeHUDController.controllers.quickBarController = null;
+            buildModeHUDController.controllers.entityInformationController = null;
+            buildModeHUDController.controllers.firstPersonModeController = null;
+            buildModeHUDController.controllers.shortcutsController = null;
+            buildModeHUDController.controllers.publishPopupController = null;
+            buildModeHUDController.controllers.dragAndDropSceneObjectController = null;
+            buildModeHUDController.controllers.publishBtnController = null;
+            buildModeHUDController.controllers.inspectorBtnController = null;
+            buildModeHUDController.controllers.catalogBtnController = null;
+            buildModeHUDController.controllers.inspectorController = null;
+            buildModeHUDController.controllers.topActionsButtonsController = null;
 
             // Act
             buildModeHUDController.CreateBuildModeControllers();
 
             // Assert
-            Assert.NotNull(buildModeHUDController.tooltipController, "The tooltipController is null!");
-            Assert.NotNull(buildModeHUDController.sceneCatalogController, "The sceneCatalogController is null!");
-            Assert.NotNull(buildModeHUDController.quickBarController, "The quickBarController is null!");
-            Assert.NotNull(buildModeHUDController.entityInformationController, "The entityInformationController is null!");
-            Assert.NotNull(buildModeHUDController.firstPersonModeController, "The firstPersonModeController is null!");
-            Assert.NotNull(buildModeHUDController.shortcutsController, "The shortcutsController is null!");
-            Assert.NotNull(buildModeHUDController.publishPopupController, "The publishPopupController is null!");
-            Assert.NotNull(buildModeHUDController.dragAndDropSceneObjectController, "The dragAndDropSceneObjectController is null!");
-            Assert.NotNull(buildModeHUDController.publishBtnController, "The publishBtnController is null!");
-            Assert.NotNull(buildModeHUDController.inspectorBtnController, "The inspectorBtnController is null!");
-            Assert.NotNull(buildModeHUDController.catalogBtnController, "The catalogBtnController is null!");
-            Assert.NotNull(buildModeHUDController.inspectorController, "The inspectorController is null!");
-            Assert.NotNull(buildModeHUDController.topActionsButtonsController, "The topActionsButtonsController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.tooltipController, "The tooltipController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.sceneCatalogController, "The sceneCatalogController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.quickBarController, "The quickBarController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.entityInformationController, "The entityInformationController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.firstPersonModeController, "The firstPersonModeController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.shortcutsController, "The shortcutsController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.publishPopupController, "The publishPopupController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.dragAndDropSceneObjectController, "The dragAndDropSceneObjectController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.publishBtnController, "The publishBtnController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.inspectorBtnController, "The inspectorBtnController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.catalogBtnController, "The catalogBtnController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.inspectorController, "The inspectorController is null!");
+            Assert.NotNull(buildModeHUDController.controllers.topActionsButtonsController, "The topActionsButtonsController is null!");
         }
 
         [Test]
@@ -83,20 +86,7 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             Assert.NotNull(buildModeHUDController.view, "The view is null!");
-            buildModeHUDController.view.Received(1).Initialize(
-                buildModeHUDController.tooltipController,
-                buildModeHUDController.sceneCatalogController,
-                buildModeHUDController.quickBarController,
-                buildModeHUDController.entityInformationController,
-                buildModeHUDController.firstPersonModeController,
-                buildModeHUDController.shortcutsController,
-                buildModeHUDController.publishPopupController,
-                buildModeHUDController.dragAndDropSceneObjectController,
-                buildModeHUDController.publishBtnController,
-                buildModeHUDController.inspectorBtnController,
-                buildModeHUDController.catalogBtnController,
-                buildModeHUDController.inspectorController,
-                buildModeHUDController.topActionsButtonsController);
+            buildModeHUDController.view.Received(1).Initialize(buildModeHUDController.controllers);
         }
 
         [Test]
@@ -132,7 +122,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.SetParcelScene(testParcelScene);
 
             // Assert
-            buildModeHUDController.inspectorController.sceneLimitsController.Received(1).SetParcelScene(testParcelScene);
+            buildModeHUDController.controllers.inspectorController.sceneLimitsController.Received(1).SetParcelScene(testParcelScene);
         }
 
         [Test]
@@ -207,14 +197,14 @@ namespace Tests.BuildModeHUDControllers
         public void ChangeVisibilityOfCatalogCorrectly()
         {
             // Arrange
-            buildModeHUDController.isCatalogOpen = buildModeHUDController.sceneCatalogController.IsCatalogOpen();
+            buildModeHUDController.isCatalogOpen = buildModeHUDController.controllers.sceneCatalogController.IsCatalogOpen();
 
             // Act
             buildModeHUDController.ChangeVisibilityOfCatalog();
 
             // Assert
             Assert.AreEqual(
-                !buildModeHUDController.sceneCatalogController.IsCatalogOpen(), 
+                !buildModeHUDController.controllers.sceneCatalogController.IsCatalogOpen(), 
                 buildModeHUDController.isCatalogOpen, 
                 "The isCatalogOpen does not match!");
         }
@@ -226,7 +216,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.UpdateSceneLimitInfo();
 
             // Assert
-            buildModeHUDController.inspectorController.sceneLimitsController.Received(1).UpdateInfo();
+            buildModeHUDController.controllers.inspectorController.sceneLimitsController.Received(1).UpdateInfo();
         }
 
         [Test]
@@ -290,7 +280,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.EntityInformationSetEntity(testEntity, testScene);
 
             // Assert
-            buildModeHUDController.entityInformationController.Received(1).SetEntity(testEntity, testScene);
+            buildModeHUDController.controllers.entityInformationController.Received(1).SetEntity(testEntity, testScene);
         }
 
         [Test]
@@ -300,7 +290,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.ShowEntityInformation();
 
             // Assert
-            buildModeHUDController.entityInformationController.Received(1).Enable();
+            buildModeHUDController.controllers.entityInformationController.Received(1).Enable();
         }
 
         [Test]
@@ -310,7 +300,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.HideEntityInformation();
 
             // Assert
-            buildModeHUDController.entityInformationController.Received(1).Disable();
+            buildModeHUDController.controllers.entityInformationController.Received(1).Disable();
         }
 
         [Test]
@@ -326,7 +316,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.SetEntityList(testEntityList);
 
             // Assert
-            buildModeHUDController.inspectorController.Received(1).SetEntityList(testEntityList);
+            buildModeHUDController.controllers.inspectorController.Received(1).SetEntityList(testEntityList);
         }
 
         [Test]
@@ -346,11 +336,11 @@ namespace Tests.BuildModeHUDControllers
             if (buildModeHUDController.isEntityListVisible)
             {
                 Assert.IsTrue(isEntityListVisible, "isEntityListVisible is false!");
-                buildModeHUDController.inspectorController.Received(1).OpenEntityList();
+                buildModeHUDController.controllers.inspectorController.Received(1).OpenEntityList();
             }
             else
             {
-                buildModeHUDController.inspectorController.Received(1).CloseList();
+                buildModeHUDController.controllers.inspectorController.Received(1).CloseList();
             }
         }
 
@@ -361,7 +351,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.ClearEntityList();
 
             // Assert
-            buildModeHUDController.inspectorController.Received(1).ClearList();
+            buildModeHUDController.controllers.inspectorController.Received(1).ClearList();
         }
 
         [Test]

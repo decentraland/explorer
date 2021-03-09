@@ -7,52 +7,30 @@ namespace Tests.BuildModeHUDViews
     public class BuildModeHUDViewShould
     {
         private BuildModeHUDView buildModeHUDView;
-        ITooltipController tooltipController;
-        ISceneCatalogController sceneCatalogController;
-        IQuickBarController quickBarController;
-        IEntityInformationController entityInformationController;
-        IFirstPersonModeController firstPersonModeController;
-        IShortcutsController shortcutsController;
-        IPublishPopupController publishPopupController;
-        IDragAndDropSceneObjectController dragAndDropSceneObjectController;
-        IPublishBtnController publishBtnController;
-        IInspectorBtnController inspectorBtnController;
-        ICatalogBtnController catalogBtnController;
-        IInspectorController inspectorController;
-        ITopActionsButtonsController topActionsButtonsController;
+        private BuildModeHUDInitializationModel testControllers;
 
         [SetUp]
         public void SetUp()
         {
-            buildModeHUDView = BuildModeHUDView.Create();
-            tooltipController = Substitute.For<ITooltipController>();
-            sceneCatalogController = Substitute.For<ISceneCatalogController>();
-            quickBarController = Substitute.For<IQuickBarController>();
-            entityInformationController = Substitute.For<IEntityInformationController>();
-            firstPersonModeController = Substitute.For<IFirstPersonModeController>();
-            shortcutsController = Substitute.For<IShortcutsController>();
-            publishPopupController = Substitute.For<IPublishPopupController>();
-            dragAndDropSceneObjectController = Substitute.For<IDragAndDropSceneObjectController>();
-            publishBtnController = Substitute.For<IPublishBtnController>();
-            inspectorBtnController = Substitute.For<IInspectorBtnController>();
-            catalogBtnController = Substitute.For<ICatalogBtnController>();
-            inspectorController = Substitute.For<IInspectorController>();
-            topActionsButtonsController = Substitute.For<ITopActionsButtonsController>();
+            testControllers = new BuildModeHUDInitializationModel
+            {
+                tooltipController = Substitute.For<ITooltipController>(),
+                sceneCatalogController = Substitute.For<ISceneCatalogController>(),
+                quickBarController = Substitute.For<IQuickBarController>(),
+                entityInformationController = Substitute.For<IEntityInformationController>(),
+                firstPersonModeController = Substitute.For<IFirstPersonModeController>(),
+                shortcutsController = Substitute.For<IShortcutsController>(),
+                publishPopupController = Substitute.For<IPublishPopupController>(),
+                dragAndDropSceneObjectController = Substitute.For<IDragAndDropSceneObjectController>(),
+                publishBtnController = Substitute.For<IPublishBtnController>(),
+                inspectorBtnController = Substitute.For<IInspectorBtnController>(),
+                catalogBtnController = Substitute.For<ICatalogBtnController>(),
+                inspectorController = Substitute.For<IInspectorController>(),
+                topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
+            };
 
-            buildModeHUDView.Initialize(
-                tooltipController,
-                sceneCatalogController,
-                quickBarController,
-                entityInformationController,
-                firstPersonModeController,
-                shortcutsController,
-                publishPopupController,
-                dragAndDropSceneObjectController,
-                publishBtnController,
-                inspectorBtnController,
-                catalogBtnController,
-                inspectorController,
-                topActionsButtonsController);
+            buildModeHUDView = BuildModeHUDView.Create();
+            buildModeHUDView.Initialize(testControllers);
         }
 
         [TearDown]
@@ -65,32 +43,32 @@ namespace Tests.BuildModeHUDViews
         public void InitializeCorrectly()
         {
             // Assert
-            Assert.AreEqual(tooltipController, buildModeHUDView.tooltipController, "The tooltipController does not match!");
-            tooltipController.Received(1).Initialize(buildModeHUDView.tooltipView);
-            Assert.AreEqual(sceneCatalogController, buildModeHUDView.sceneCatalogController, "The sceneCatalogController does not match!");
-            sceneCatalogController.Received(1).Initialize(buildModeHUDView.sceneCatalogView, quickBarController);
-            Assert.AreEqual(quickBarController, buildModeHUDView.quickBarController, "The quickBarController does not match!");
-            quickBarController.Received(1).Initialize(buildModeHUDView.quickBarView, sceneCatalogController);
-            Assert.AreEqual(entityInformationController, buildModeHUDView.entityInformationController, "The entityInformationController does not match!");
-            entityInformationController.Received(1).Initialize(buildModeHUDView.entityInformationView);
-            Assert.AreEqual(firstPersonModeController, buildModeHUDView.firstPersonModeController, "The firstPersonModeController does not match!");
-            firstPersonModeController.Received(1).Initialize(buildModeHUDView.firstPersonModeView, tooltipController);
-            Assert.AreEqual(shortcutsController, buildModeHUDView.shortcutsController, "The shortcutsController does not match!");
-            shortcutsController.Received(1).Initialize(buildModeHUDView.shortcutsView);
-            Assert.AreEqual(publishPopupController, buildModeHUDView.publishPopupController, "The publishPopupController does not match!");
-            publishPopupController.Received(1).Initialize(buildModeHUDView.publishPopupView);
-            Assert.AreEqual(dragAndDropSceneObjectController, buildModeHUDView.dragAndDropSceneObjectController, "The dragAndDropSceneObjectController does not match!");
-            dragAndDropSceneObjectController.Received(1).Initialize(buildModeHUDView.dragAndDropSceneObjectView);
-            Assert.AreEqual(publishBtnController, buildModeHUDView.publishBtnController, "The publishBtnController does not match!");
-            publishBtnController.Received(1).Initialize(buildModeHUDView.publishBtnView, tooltipController);
-            Assert.AreEqual(inspectorBtnController, buildModeHUDView.inspectorBtnController, "The inspectorBtnController does not match!");
-            inspectorBtnController.Received(1).Initialize(buildModeHUDView.inspectorBtnView, tooltipController);
-            Assert.AreEqual(catalogBtnController, buildModeHUDView.catalogBtnController, "The catalogBtnController does not match!");
-            catalogBtnController.Received(1).Initialize(buildModeHUDView.catalogBtnView, tooltipController);
-            Assert.AreEqual(inspectorController, buildModeHUDView.inspectorController, "The inspectorController does not match!");
-            inspectorController.Received(1).Initialize(buildModeHUDView.inspectorView);
-            Assert.AreEqual(topActionsButtonsController, buildModeHUDView.topActionsButtonsController, "The topActionsButtonsController does not match!");
-            topActionsButtonsController.Received(1).Initialize(buildModeHUDView.topActionsButtonsView, tooltipController);
+            Assert.AreEqual(testControllers.tooltipController, buildModeHUDView.controllers.tooltipController, "The tooltipController does not match!");
+            testControllers.tooltipController.Received(1).Initialize(buildModeHUDView.tooltipView);
+            Assert.AreEqual(testControllers.sceneCatalogController, buildModeHUDView.controllers.sceneCatalogController, "The sceneCatalogController does not match!");
+            testControllers.sceneCatalogController.Received(1).Initialize(buildModeHUDView.sceneCatalogView, testControllers.quickBarController);
+            Assert.AreEqual(testControllers.quickBarController, buildModeHUDView.controllers.quickBarController, "The quickBarController does not match!");
+            testControllers.quickBarController.Received(1).Initialize(buildModeHUDView.quickBarView, testControllers.sceneCatalogController);
+            Assert.AreEqual(testControllers.entityInformationController, buildModeHUDView.controllers.entityInformationController, "The entityInformationController does not match!");
+            testControllers.entityInformationController.Received(1).Initialize(buildModeHUDView.entityInformationView);
+            Assert.AreEqual(testControllers.firstPersonModeController, buildModeHUDView.controllers.firstPersonModeController, "The firstPersonModeController does not match!");
+            testControllers.firstPersonModeController.Received(1).Initialize(buildModeHUDView.firstPersonModeView, testControllers.tooltipController);
+            Assert.AreEqual(testControllers.shortcutsController, buildModeHUDView.controllers.shortcutsController, "The shortcutsController does not match!");
+            testControllers.shortcutsController.Received(1).Initialize(buildModeHUDView.shortcutsView);
+            Assert.AreEqual(testControllers.publishPopupController, buildModeHUDView.controllers.publishPopupController, "The publishPopupController does not match!");
+            testControllers.publishPopupController.Received(1).Initialize(buildModeHUDView.publishPopupView);
+            Assert.AreEqual(testControllers.dragAndDropSceneObjectController, buildModeHUDView.controllers.dragAndDropSceneObjectController, "The dragAndDropSceneObjectController does not match!");
+            testControllers.dragAndDropSceneObjectController.Received(1).Initialize(buildModeHUDView.dragAndDropSceneObjectView);
+            Assert.AreEqual(testControllers.publishBtnController, buildModeHUDView.controllers.publishBtnController, "The publishBtnController does not match!");
+            testControllers.publishBtnController.Received(1).Initialize(buildModeHUDView.publishBtnView, testControllers.tooltipController);
+            Assert.AreEqual(testControllers.inspectorBtnController, buildModeHUDView.controllers.inspectorBtnController, "The inspectorBtnController does not match!");
+            testControllers.inspectorBtnController.Received(1).Initialize(buildModeHUDView.inspectorBtnView, testControllers.tooltipController);
+            Assert.AreEqual(testControllers.catalogBtnController, buildModeHUDView.controllers.catalogBtnController, "The catalogBtnController does not match!");
+            testControllers.catalogBtnController.Received(1).Initialize(buildModeHUDView.catalogBtnView, testControllers.tooltipController);
+            Assert.AreEqual(testControllers.inspectorController, buildModeHUDView.controllers.inspectorController, "The inspectorController does not match!");
+            testControllers.inspectorController.Received(1).Initialize(buildModeHUDView.inspectorView);
+            Assert.AreEqual(testControllers.topActionsButtonsController, buildModeHUDView.controllers.topActionsButtonsController, "The topActionsButtonsController does not match!");
+            testControllers.topActionsButtonsController.Received(1).Initialize(buildModeHUDView.topActionsButtonsView, testControllers.tooltipController);
         }
 
         [Test]
@@ -100,7 +78,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.PublishStart();
 
             // Assert
-            publishPopupController.Received(1).PublishStart();
+            testControllers.publishPopupController.Received(1).PublishStart();
         }
 
         [Test]
@@ -113,7 +91,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.PublishEnd(testText);
 
             // Assert
-            publishPopupController.Received(1).PublishEnd(testText);
+            testControllers.publishPopupController.Received(1).PublishEnd(testText);
         }
 
         [Test]
@@ -125,7 +103,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.SetPublishBtnAvailability(isAvailable);
 
             // Assert
-            publishBtnController.Received(1).SetInteractable(isAvailable);
+            testControllers.publishBtnController.Received(1).SetInteractable(isAvailable);
         }
 
         [Test]
@@ -135,7 +113,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.RefreshCatalogAssetPack();
 
             // Assert
-            sceneCatalogController.Received(1).RefreshAssetPack();
+            testControllers.sceneCatalogController.Received(1).RefreshAssetPack();
         }
 
         [Test]
@@ -145,7 +123,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.RefreshCatalogContent();
 
             // Assert
-            sceneCatalogController.Received(1).RefreshCatalog();
+            testControllers.sceneCatalogController.Received(1).RefreshCatalog();
         }
 
         [Test]
@@ -158,9 +136,9 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             if (isVisible)
-                sceneCatalogController.Received(1).OpenCatalog();
+                testControllers.sceneCatalogController.Received(1).OpenCatalog();
             else
-                sceneCatalogController.Received(1).CloseCatalog();
+                testControllers.sceneCatalogController.Received(1).CloseCatalog();
         }
 
         [Test]
@@ -173,9 +151,9 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             if (isVisible)
-                inspectorController.sceneLimitsController.Received(1).Enable();
+                testControllers.inspectorController.sceneLimitsController.Received(1).Enable();
             else
-                inspectorController.sceneLimitsController.Received(1).Disable();
+                testControllers.inspectorController.sceneLimitsController.Received(1).Disable();
         }
 
         [Test]
@@ -187,7 +165,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.SetVisibilityOfControls(isVisible);
 
             // Assert
-            shortcutsController.Received(1).SetActive(isVisible);
+            testControllers.shortcutsController.Received(1).SetActive(isVisible);
         }
 
         [Test]
@@ -199,7 +177,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.SetVisibilityOfExtraBtns(isVisible);
 
             // Assert
-            topActionsButtonsController.extraActionsController.Received(1).SetActive(isVisible);
+            testControllers.topActionsButtonsController.extraActionsController.Received(1).SetActive(isVisible);
         }
 
         [Test]
@@ -224,7 +202,7 @@ namespace Tests.BuildModeHUDViews
             buildModeHUDView.HideToolTip();
 
             // Assert
-            tooltipController.Received(1).HideTooltip();
+            testControllers.tooltipController.Received(1).HideTooltip();
         }
 
         [Test]

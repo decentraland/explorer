@@ -9,20 +9,7 @@ public interface IBuildModeHUDView
 
     void AnimatorShow(bool isVisible);
     void HideToolTip();
-    void Initialize(
-        ITooltipController tooltipController, 
-        ISceneCatalogController sceneCatalogController, 
-        IQuickBarController quickBarController, 
-        IEntityInformationController entityInformationController, 
-        IFirstPersonModeController firstPersonModeController, 
-        IShortcutsController shortcutsController, 
-        IPublishPopupController publishPopupController, 
-        IDragAndDropSceneObjectController dragAndDropSceneObjectController, 
-        IPublishBtnController publishBtnController, 
-        IInspectorBtnController inspectorBtnController, 
-        ICatalogBtnController catalogBtnController, 
-        IInspectorController inspectorController, 
-        ITopActionsButtonsController topActionsButtonsController);
+    void Initialize(BuildModeHUDInitializationModel controllers);
     void PublishEnd(string message);
     void PublishStart();
     void RefreshCatalogAssetPack();
@@ -53,31 +40,20 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
 
     [Header("UI Modules")]
     [SerializeField] internal TooltipView tooltipView;
-    internal ITooltipController tooltipController;
     [SerializeField] internal QuickBarView quickBarView;
-    internal IQuickBarController quickBarController;
     [SerializeField] internal SceneCatalogView sceneCatalogView;
-    internal ISceneCatalogController sceneCatalogController;
     [SerializeField] internal EntityInformationView entityInformationView;
-    internal IEntityInformationController entityInformationController;
     [SerializeField] internal FirstPersonModeView firstPersonModeView;
-    internal IFirstPersonModeController firstPersonModeController;
     [SerializeField] internal ShortcutsView shortcutsView;
-    internal IShortcutsController shortcutsController;
     [SerializeField] internal PublishPopupView publishPopupView;
-    internal IPublishPopupController publishPopupController;
     [SerializeField] internal DragAndDropSceneObjectView dragAndDropSceneObjectView;
-    internal IDragAndDropSceneObjectController dragAndDropSceneObjectController;
     [SerializeField] internal PublishBtnView publishBtnView;
-    internal IPublishBtnController publishBtnController;
     [SerializeField] internal InspectorBtnView inspectorBtnView;
-    internal IInspectorBtnController inspectorBtnController;
     [SerializeField] internal CatalogBtnView catalogBtnView;
-    internal ICatalogBtnController catalogBtnController;
     [SerializeField] internal InspectorView inspectorView;
-    internal IInspectorController inspectorController;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
-    internal ITopActionsButtonsController topActionsButtonsController;
+
+    internal BuildModeHUDInitializationModel controllers;
 
     private const string VIEW_PATH = "BuildModeHUD";
 
@@ -89,127 +65,90 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         return view;
     }
 
-    public void Initialize(
-        ITooltipController tooltipController,
-        ISceneCatalogController sceneCatalogController,
-        IQuickBarController quickBarController,
-        IEntityInformationController entityInformationController,
-        IFirstPersonModeController firstPersonModeController,
-        IShortcutsController shortcutsController,
-        IPublishPopupController publishPopupController,
-        IDragAndDropSceneObjectController dragAndDropSceneObjectController,
-        IPublishBtnController publishBtnController,
-        IInspectorBtnController inspectorBtnController,
-        ICatalogBtnController catalogBtnController,
-        IInspectorController inspectorController,
-        ITopActionsButtonsController topActionsButtonsController)
+    public void Initialize(BuildModeHUDInitializationModel controllers)
     {
-        this.tooltipController = tooltipController;
-        this.tooltipController.Initialize(tooltipView);
-
-        this.sceneCatalogController = sceneCatalogController;
-        this.sceneCatalogController.Initialize(sceneCatalogView, quickBarController);
-
-        this.quickBarController = quickBarController;
-        this.quickBarController.Initialize(quickBarView, sceneCatalogController);
-
-        this.entityInformationController = entityInformationController;
-        this.entityInformationController.Initialize(entityInformationView);
-
-        this.firstPersonModeController = firstPersonModeController;
-        this.firstPersonModeController.Initialize(firstPersonModeView, tooltipController);
-
-        this.shortcutsController = shortcutsController;
-        this.shortcutsController.Initialize(shortcutsView);
-
-        this.publishPopupController = publishPopupController;
-        this.publishPopupController.Initialize(publishPopupView);
-
-        this.dragAndDropSceneObjectController = dragAndDropSceneObjectController;
-        this.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView);
-
-        this.publishBtnController = publishBtnController;
-        this.publishBtnController.Initialize(publishBtnView, tooltipController);
-
-        this.inspectorBtnController = inspectorBtnController;
-        this.inspectorBtnController.Initialize(inspectorBtnView, tooltipController);
-
-        this.catalogBtnController = catalogBtnController;
-        this.catalogBtnController.Initialize(catalogBtnView, tooltipController);
-
-        this.inspectorController = inspectorController;
-        this.inspectorController.Initialize(inspectorView);
-
-        this.topActionsButtonsController = topActionsButtonsController;
-        this.topActionsButtonsController.Initialize(topActionsButtonsView, tooltipController);
+        this.controllers = controllers;
+        this.controllers.tooltipController.Initialize(tooltipView);
+        this.controllers.sceneCatalogController.Initialize(sceneCatalogView, this.controllers.quickBarController);
+        this.controllers.quickBarController.Initialize(quickBarView, this.controllers.sceneCatalogController);
+        this.controllers.entityInformationController.Initialize(entityInformationView);
+        this.controllers.firstPersonModeController.Initialize(firstPersonModeView, this.controllers.tooltipController);
+        this.controllers.shortcutsController.Initialize(shortcutsView);
+        this.controllers.publishPopupController.Initialize(publishPopupView);
+        this.controllers.dragAndDropSceneObjectController.Initialize(dragAndDropSceneObjectView);
+        this.controllers.publishBtnController.Initialize(publishBtnView, this.controllers.tooltipController);
+        this.controllers.inspectorBtnController.Initialize(inspectorBtnView, this.controllers.tooltipController);
+        this.controllers.catalogBtnController.Initialize(catalogBtnView, this.controllers.tooltipController);
+        this.controllers.inspectorController.Initialize(inspectorView);
+        this.controllers.topActionsButtonsController.Initialize(topActionsButtonsView, this.controllers.tooltipController);
     }
 
     private void OnDestroy()
     {
-        tooltipController.Dispose();
-        quickBarController.Dispose();
-        sceneCatalogController.Dispose();
-        entityInformationController.Dispose();
-        firstPersonModeController.Dispose();
-        shortcutsController.Dispose();
-        publishPopupController.Dispose();
-        dragAndDropSceneObjectController.Dispose();
-        publishBtnController.Dispose();
-        inspectorBtnController.Dispose();
-        catalogBtnController.Dispose();
-        inspectorController.Dispose();
-        topActionsButtonsController.Dispose();
+        controllers.tooltipController.Dispose();
+        controllers.quickBarController.Dispose();
+        controllers.sceneCatalogController.Dispose();
+        controllers.entityInformationController.Dispose();
+        controllers.firstPersonModeController.Dispose();
+        controllers.shortcutsController.Dispose();
+        controllers.publishPopupController.Dispose();
+        controllers.dragAndDropSceneObjectController.Dispose();
+        controllers.publishBtnController.Dispose();
+        controllers.inspectorBtnController.Dispose();
+        controllers.catalogBtnController.Dispose();
+        controllers.inspectorController.Dispose();
+        controllers.topActionsButtonsController.Dispose();
     }
 
     public void PublishStart()
     {
-        publishPopupController.PublishStart();
+        controllers.publishPopupController.PublishStart();
     }
 
     public void PublishEnd(string message)
     {
-        publishPopupController.PublishEnd(message);
+        controllers.publishPopupController.PublishEnd(message);
     }
 
     public void SetPublishBtnAvailability(bool isAvailable)
     {
-        publishBtnController.SetInteractable(isAvailable);
+        controllers.publishBtnController.SetInteractable(isAvailable);
     }
 
     public void RefreshCatalogAssetPack()
     {
-        sceneCatalogController.RefreshAssetPack();
+        controllers.sceneCatalogController.RefreshAssetPack();
     }
 
     public void RefreshCatalogContent()
     {
-        sceneCatalogController.RefreshCatalog();
+        controllers.sceneCatalogController.RefreshCatalog();
     }
 
     public void SetVisibilityOfCatalog(bool isVisible)
     {
         if (isVisible)
-            sceneCatalogController.OpenCatalog();
+            controllers.sceneCatalogController.OpenCatalog();
         else
-            sceneCatalogController.CloseCatalog();
+            controllers.sceneCatalogController.CloseCatalog();
     }
 
     public void SetVisibilityOfSceneInfo(bool isVisible)
     {
         if (isVisible)
-            inspectorController.sceneLimitsController.Enable();
+            controllers.inspectorController.sceneLimitsController.Enable();
         else
-            inspectorController.sceneLimitsController.Disable();
+            controllers.inspectorController.sceneLimitsController.Disable();
     }
 
     public void SetVisibilityOfControls(bool isVisible)
     {
-        shortcutsController.SetActive(isVisible);
+        controllers.shortcutsController.SetActive(isVisible);
     }
 
     public void SetVisibilityOfExtraBtns(bool isVisible)
     {
-        topActionsButtonsController.extraActionsController.SetActive(isVisible);
+        controllers.topActionsButtonsController.extraActionsController.SetActive(isVisible);
     }
 
     public void SetFirstPersonView()
@@ -228,7 +167,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
 
     public void HideToolTip()
     {
-        tooltipController.HideTooltip();
+        controllers.tooltipController.HideTooltip();
     }
 
     public void SetActive(bool isActive)

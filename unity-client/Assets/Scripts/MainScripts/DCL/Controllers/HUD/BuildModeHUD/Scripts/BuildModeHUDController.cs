@@ -38,19 +38,7 @@ public class BuildModeHUDController : IHUD
                   isSceneLimitInfoVisibile = false,
                   isCatalogOpen = false;
 
-    internal ITooltipController tooltipController;
-    internal ISceneCatalogController sceneCatalogController;
-    internal IQuickBarController quickBarController;
-    internal IEntityInformationController entityInformationController;
-    internal IFirstPersonModeController firstPersonModeController;
-    internal IShortcutsController shortcutsController;
-    internal IPublishPopupController publishPopupController;
-    internal IDragAndDropSceneObjectController dragAndDropSceneObjectController;
-    internal IPublishBtnController publishBtnController;
-    internal IInspectorBtnController inspectorBtnController;
-    internal ICatalogBtnController catalogBtnController;
-    internal IInspectorController inspectorController;
-    internal ITopActionsButtonsController topActionsButtonsController;
+    internal BuildModeHUDInitializationModel controllers;
     internal CatalogItemDropController catalogItemDropController;
 
     public BuildModeHUDController()
@@ -70,55 +58,33 @@ public class BuildModeHUDController : IHUD
         ConfigureCatalogItemDropController();
     }
 
-    public BuildModeHUDController(
-        IBuildModeHUDView buildModeHUDView,
-        ITooltipController tooltipController,
-        ISceneCatalogController sceneCatalogController,
-        IQuickBarController quickBarController,
-        IEntityInformationController entityInformationController,
-        IFirstPersonModeController firstPersonModeController,
-        IShortcutsController shortcutsController,
-        IPublishPopupController publishPopupController,
-        IDragAndDropSceneObjectController dragAndDropSceneObjectController,
-        IPublishBtnController publishBtnController,
-        IInspectorBtnController inspectorBtnController,
-        ICatalogBtnController catalogBtnController,
-        IInspectorController inspectorController,
-        ITopActionsButtonsController topActionsButtonsController)
+    public BuildModeHUDController(IBuildModeHUDView buildModeHUDView, BuildModeHUDInitializationModel controllers)
     {
-        this.tooltipController = tooltipController;
-        this.sceneCatalogController = sceneCatalogController;
-        this.quickBarController = quickBarController;
-        this.entityInformationController = entityInformationController;
-        this.firstPersonModeController = firstPersonModeController;
-        this.shortcutsController = shortcutsController;
-        this.publishPopupController = publishPopupController;
-        this.dragAndDropSceneObjectController = dragAndDropSceneObjectController;
-        this.publishBtnController = publishBtnController;
-        this.inspectorBtnController = inspectorBtnController;
-        this.catalogBtnController = catalogBtnController;
-        this.inspectorController = inspectorController;
-        this.topActionsButtonsController = topActionsButtonsController;
-        this.catalogItemDropController = new CatalogItemDropController();
+        this.controllers = controllers;
+        catalogItemDropController = new CatalogItemDropController();
 
         CreateMainView(buildModeHUDView);
     }
 
     internal void CreateBuildModeControllers()
     {
-        tooltipController = new TooltipController();
-        sceneCatalogController = new SceneCatalogController();
-        quickBarController = new QuickBarController();
-        entityInformationController = new EntityInformationController();
-        firstPersonModeController = new FirstPersonModeController();
-        shortcutsController = new ShortcutsController();
-        publishPopupController = new PublishPopupController();
-        dragAndDropSceneObjectController = new DragAndDropSceneObjectController();
-        publishBtnController = new PublishBtnController();
-        inspectorBtnController = new InspectorBtnController();
-        catalogBtnController = new CatalogBtnController();
-        inspectorController = new InspectorController();
-        topActionsButtonsController = new TopActionsButtonsController();
+        controllers = new BuildModeHUDInitializationModel
+        {
+            tooltipController = new TooltipController(),
+            sceneCatalogController = new SceneCatalogController(),
+            quickBarController = new QuickBarController(),
+            entityInformationController = new EntityInformationController(),
+            firstPersonModeController = new FirstPersonModeController(),
+            shortcutsController = new ShortcutsController(),
+            publishPopupController = new PublishPopupController(),
+            dragAndDropSceneObjectController = new DragAndDropSceneObjectController(),
+            publishBtnController = new PublishBtnController(),
+            inspectorBtnController = new InspectorBtnController(),
+            catalogBtnController = new CatalogBtnController(),
+            inspectorController = new InspectorController(),
+            topActionsButtonsController = new TopActionsButtonsController()
+        };
+
         catalogItemDropController = new CatalogItemDropController();
     }
 
@@ -129,93 +95,80 @@ public class BuildModeHUDController : IHUD
         if (view.viewGO != null)
             view.viewGO.SetActive(false);
 
-        view.Initialize(
-            tooltipController,
-            sceneCatalogController,
-            quickBarController,
-            entityInformationController,
-            firstPersonModeController,
-            shortcutsController,
-            publishPopupController,
-            dragAndDropSceneObjectController,
-            publishBtnController,
-            inspectorBtnController,
-            catalogBtnController,
-            inspectorController,
-            topActionsButtonsController);
+        view.Initialize(controllers);
     }
 
     private void ConfigureSceneCatalogController()
     {
-        sceneCatalogController.OnHideCatalogClicked += ChangeVisibilityOfCatalog;
-        sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
-        sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
-        sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
+        controllers.sceneCatalogController.OnHideCatalogClicked += ChangeVisibilityOfCatalog;
+        controllers.sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
+        controllers.sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
+        controllers.sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
     }
 
     private void ConfigureEntityInformationController()
     {
-        entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
-        entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
-        entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
-        entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
-        entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
+        controllers.entityInformationController.OnPositionChange += (x) => OnSelectedObjectPositionChange?.Invoke(x);
+        controllers.entityInformationController.OnRotationChange += (x) => OnSelectedObjectRotationChange?.Invoke(x);
+        controllers.entityInformationController.OnScaleChange += (x) => OnSelectedObjectScaleChange?.Invoke(x);
+        controllers.entityInformationController.OnNameChange += (entity, newName) => OnEntityRename?.Invoke(entity, newName);
+        controllers.entityInformationController.OnSmartItemComponentUpdate += (entity) => OnEntitySmartItemComponentUpdate?.Invoke(entity);
     }
 
     private void ConfigureFirstPersonModeController()
     {
-        firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
+        controllers.firstPersonModeController.OnClick += () => OnChangeModeAction?.Invoke();
     }
 
     private void ConfigureShortcutsController()
     {
-        shortcutsController.OnCloseClick += ChangeVisibilityOfControls;
+        controllers.shortcutsController.OnCloseClick += ChangeVisibilityOfControls;
     }
 
     private void ConfigureDragAndDropSceneObjectController()
     {
-        dragAndDropSceneObjectController.OnDrop += () => SceneObjectDroppedInView();
+        controllers.dragAndDropSceneObjectController.OnDrop += () => SceneObjectDroppedInView();
     }
 
     private void ConfigurePublishBtnController()
     {
-        publishBtnController.OnClick += () => OnPublishAction?.Invoke();
+        controllers.publishBtnController.OnClick += () => OnPublishAction?.Invoke();
     }
 
     private void ConfigureInspectorBtnController()
     {
-        inspectorBtnController.OnClick += () => ChangeVisibilityOfEntityList();
+        controllers.inspectorBtnController.OnClick += () => ChangeVisibilityOfEntityList();
     }
 
     private void ConfigureCatalogBtnController()
     {
-        catalogBtnController.OnClick += ChangeVisibilityOfCatalog;
+        controllers.catalogBtnController.OnClick += ChangeVisibilityOfCatalog;
     }
 
     private void ConfigureInspectorController()
     {
-        inspectorController.OnEntityClick += (x) => OnEntityClick(x);
-        inspectorController.OnEntityDelete += (x) => OnEntityDelete(x);
-        inspectorController.OnEntityLock += (x) => OnEntityLock(x);
-        inspectorController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
-        inspectorController.OnEntityRename += (entity, newName) => OnEntityRename(entity, newName);
-        inspectorController.SetCloseButtonsAction(ChangeVisibilityOfEntityList);
+        controllers.inspectorController.OnEntityClick += (x) => OnEntityClick(x);
+        controllers.inspectorController.OnEntityDelete += (x) => OnEntityDelete(x);
+        controllers.inspectorController.OnEntityLock += (x) => OnEntityLock(x);
+        controllers.inspectorController.OnEntityChangeVisibility += (x) => OnEntityChangeVisibility(x);
+        controllers.inspectorController.OnEntityRename += (entity, newName) => OnEntityRename(entity, newName);
+        controllers.inspectorController.SetCloseButtonsAction(ChangeVisibilityOfEntityList);
     }
 
     private void ConfigureTopActionsButtonsController()
     {
-        topActionsButtonsController.OnChangeModeClick += () => OnChangeModeAction?.Invoke();
-        topActionsButtonsController.OnExtraClick += ChangeVisibilityOfExtraBtns;
-        topActionsButtonsController.OnTranslateClick += () => OnTranslateSelectedAction?.Invoke();
-        topActionsButtonsController.OnRotateClick += () => OnRotateSelectedAction?.Invoke();
-        topActionsButtonsController.OnScaleClick += () => OnScaleSelectedAction?.Invoke();
-        topActionsButtonsController.OnResetClick += () => OnResetAction?.Invoke();
-        topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectedAction?.Invoke();
-        topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectedAction?.Invoke();
-        topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
-        topActionsButtonsController.extraActionsController.OnControlsClick += ChangeVisibilityOfControls;
-        topActionsButtonsController.extraActionsController.OnHideUIClick += ChangeVisibilityOfUI;
-        topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
+        controllers.topActionsButtonsController.OnChangeModeClick += () => OnChangeModeAction?.Invoke();
+        controllers.topActionsButtonsController.OnExtraClick += ChangeVisibilityOfExtraBtns;
+        controllers.topActionsButtonsController.OnTranslateClick += () => OnTranslateSelectedAction?.Invoke();
+        controllers.topActionsButtonsController.OnRotateClick += () => OnRotateSelectedAction?.Invoke();
+        controllers.topActionsButtonsController.OnScaleClick += () => OnScaleSelectedAction?.Invoke();
+        controllers.topActionsButtonsController.OnResetClick += () => OnResetAction?.Invoke();
+        controllers.topActionsButtonsController.OnDuplicateClick += () => OnDuplicateSelectedAction?.Invoke();
+        controllers.topActionsButtonsController.OnDeleteClick += () => OnDeleteSelectedAction?.Invoke();
+        controllers.topActionsButtonsController.OnLogOutClick += () => OnLogoutAction?.Invoke();
+        controllers.topActionsButtonsController.extraActionsController.OnControlsClick += ChangeVisibilityOfControls;
+        controllers.topActionsButtonsController.extraActionsController.OnHideUIClick += ChangeVisibilityOfUI;
+        controllers.topActionsButtonsController.extraActionsController.OnTutorialClick += () => OnTutorialAction?.Invoke();
     }
 
     private void ConfigureCatalogItemDropController()
@@ -236,7 +189,7 @@ public class BuildModeHUDController : IHUD
 
     public void SetParcelScene(ParcelScene parcelScene)
     {
-        inspectorController.sceneLimitsController.SetParcelScene(parcelScene);
+        controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene);
     }
 
     public void SetPublishBtnAvailability(bool isAvailable)
@@ -273,7 +226,7 @@ public class BuildModeHUDController : IHUD
 
     public void ChangeVisibilityOfCatalog()
     {
-        isCatalogOpen = !sceneCatalogController.IsCatalogOpen();
+        isCatalogOpen = !controllers.sceneCatalogController.IsCatalogOpen();
         SetVisibilityOfCatalog(isCatalogOpen);
     }
 
@@ -289,7 +242,7 @@ public class BuildModeHUDController : IHUD
 
     public void UpdateSceneLimitInfo()
     {
-        inspectorController.sceneLimitsController.UpdateInfo();
+        controllers.inspectorController.sceneLimitsController.UpdateInfo();
     }
 
     public void ChangeVisibilityOfSceneInfo(bool shouldBeVisibile)
@@ -322,24 +275,24 @@ public class BuildModeHUDController : IHUD
 
     public void EntityInformationSetEntity(DCLBuilderInWorldEntity entity,ParcelScene scene)
     {
-        entityInformationController.SetEntity(entity, scene);
+        controllers.entityInformationController.SetEntity(entity, scene);
     }
 
     public void ShowEntityInformation()
     {
-        entityInformationController.Enable();
+        controllers.entityInformationController.Enable();
     }
 
     public void HideEntityInformation()
     {
-        entityInformationController.Disable();
+        controllers.entityInformationController.Disable();
     }
 
     #endregion
 
     public void SetEntityList(List<DCLBuilderInWorldEntity> entityList)
     {
-        inspectorController.SetEntityList(entityList);
+        controllers.inspectorController.SetEntityList(entityList);
 
         if (view.entityInformation != null)
             view.entityInformation.smartItemListView.SetEntityList(entityList);
@@ -351,17 +304,17 @@ public class BuildModeHUDController : IHUD
         if (isEntityListVisible)
         {
             OnEntityListVisible?.Invoke();
-            inspectorController.OpenEntityList();
+            controllers.inspectorController.OpenEntityList();
         }
         else
         {
-            inspectorController.CloseList();
+            controllers.inspectorController.CloseList();
         }
     }
 
     public void ClearEntityList()
     {
-        inspectorController.ClearList();
+        controllers.inspectorController.ClearList();
     }
 
     public void ChangeVisibilityOfControls()
