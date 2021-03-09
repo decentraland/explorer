@@ -68,15 +68,15 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
             });
         }
 
-        quickBar1InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(0);
-        quickBar2InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(1);
-        quickBar3InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(2);
-        quickBar4InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(3);
-        quickBar5InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(4);
-        quickBar6InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(5);
-        quickBar7InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(6);
-        quickBar8InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(7);
-        quickBar9InputAction.OnTriggered += (action) => OnQuickBarInputTriggedered(8);
+        quickBar1InputAction.OnTriggered += OnQuickBar1InputTriggedered;
+        quickBar2InputAction.OnTriggered += OnQuickBar2InputTriggedered;
+        quickBar3InputAction.OnTriggered += OnQuickBar3InputTriggedered;
+        quickBar4InputAction.OnTriggered += OnQuickBar4InputTriggedered;
+        quickBar5InputAction.OnTriggered += OnQuickBar5InputTriggedered;
+        quickBar6InputAction.OnTriggered += OnQuickBar6InputTriggedered;
+        quickBar7InputAction.OnTriggered += OnQuickBar7InputTriggedered;
+        quickBar8InputAction.OnTriggered += OnQuickBar8InputTriggedered;
+        quickBar9InputAction.OnTriggered += OnQuickBar9InputTriggedered;
     }
 
     private void OnDestroy()
@@ -84,7 +84,7 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
         for (int i = 0; i < shortcutsButtons.Length; i++)
         {
             int buttonIndex = i;
-            shortcutsButtons[buttonIndex].onClick.RemoveListener(() => QuickBarObjectSelected(buttonIndex));
+            shortcutsButtons[buttonIndex].onClick.RemoveAllListeners();
         }
 
         for (int i = 0; i < shortcutsEventTriggers.Length; i++)
@@ -93,15 +93,15 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
             RemoveEventTrigger(triggerIndex, EventTriggerType.Drop);
         }
 
-        quickBar1InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(0);
-        quickBar2InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(1);
-        quickBar3InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(2);
-        quickBar4InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(3);
-        quickBar5InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(4);
-        quickBar6InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(5);
-        quickBar7InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(6);
-        quickBar8InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(7);
-        quickBar9InputAction.OnTriggered -= (action) => OnQuickBarInputTriggedered(8);
+        quickBar1InputAction.OnTriggered -= OnQuickBar1InputTriggedered;
+        quickBar2InputAction.OnTriggered -= OnQuickBar2InputTriggedered;
+        quickBar3InputAction.OnTriggered -= OnQuickBar3InputTriggedered;
+        quickBar4InputAction.OnTriggered -= OnQuickBar4InputTriggedered;
+        quickBar5InputAction.OnTriggered -= OnQuickBar5InputTriggedered;
+        quickBar6InputAction.OnTriggered -= OnQuickBar6InputTriggedered;
+        quickBar7InputAction.OnTriggered -= OnQuickBar7InputTriggedered;
+        quickBar8InputAction.OnTriggered -= OnQuickBar8InputTriggedered;
+        quickBar9InputAction.OnTriggered -= OnQuickBar9InputTriggedered;
     }
 
     public void ConfigureEventTrigger(int index, EventTriggerType eventType, UnityAction<BaseEventData> call)
@@ -139,6 +139,51 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
 
         if (shortcutsImgs[shortcutIndex] != null && texture != null)
             shortcutsImgs[shortcutIndex].SetTexture(texture);
+    }
+
+    private void OnQuickBar1InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(0);
+    }
+
+    private void OnQuickBar2InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(1);
+    }
+
+    private void OnQuickBar3InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(2);
+    }
+
+    private void OnQuickBar4InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(3);
+    }
+
+    private void OnQuickBar5InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(4);
+    }
+
+    private void OnQuickBar6InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(5);
+    }
+
+    private void OnQuickBar7InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(6);
+    }
+
+    private void OnQuickBar8InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(7);
+    }
+
+    private void OnQuickBar9InputTriggedered(DCLAction_Trigger action)
+    {
+        OnQuickBarInputTriggedered(8);
     }
 
     public void OnQuickBarInputTriggedered(int index)

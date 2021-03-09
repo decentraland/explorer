@@ -11,7 +11,7 @@ public interface IInspectorBtnView
     event Action<BaseEventData, string> OnShowTooltip;
 
     void ConfigureEventTrigger(EventTriggerType eventType, UnityAction<BaseEventData> call);
-    void OnPointerClick();
+    void OnPointerClick(DCLAction_Trigger action);
     void OnPointerEnter(PointerEventData eventData);
     void OnPointerExit();
     void RemoveEventTrigger(EventTriggerType eventType);
@@ -28,6 +28,8 @@ public class InspectorBtnView : MonoBehaviour, IInspectorBtnView
     [SerializeField] internal EventTrigger inspectorButtonEventTrigger;
     [SerializeField] internal InputAction_Trigger toggleOpenEntityListInputAction;
 
+    private DCLAction_Trigger dummyActionTrigger = new DCLAction_Trigger();
+
     private const string VIEW_PATH = "GodMode/Inspector/InspectorBtnView";
 
     internal static InspectorBtnView Create()
@@ -40,16 +42,16 @@ public class InspectorBtnView : MonoBehaviour, IInspectorBtnView
 
     private void Awake()
     {
-        mainButton.onClick.AddListener(OnPointerClick);
-        toggleOpenEntityListInputAction.OnTriggered += (action) => OnPointerClick();
+        mainButton.onClick.AddListener(() => OnPointerClick(dummyActionTrigger));
+        toggleOpenEntityListInputAction.OnTriggered += OnPointerClick;
         ConfigureEventTrigger(EventTriggerType.PointerEnter, (eventData) => OnPointerEnter((PointerEventData)eventData));
         ConfigureEventTrigger(EventTriggerType.PointerExit, (eventData) => OnPointerExit());
     }
 
     private void OnDestroy()
     {
-        mainButton.onClick.RemoveListener(OnPointerClick);
-        toggleOpenEntityListInputAction.OnTriggered -= (action) => OnPointerClick();
+        mainButton.onClick.RemoveAllListeners();
+        toggleOpenEntityListInputAction.OnTriggered -= OnPointerClick;
         RemoveEventTrigger(EventTriggerType.PointerEnter);
         RemoveEventTrigger(EventTriggerType.PointerExit);
     }
@@ -67,7 +69,7 @@ public class InspectorBtnView : MonoBehaviour, IInspectorBtnView
         inspectorButtonEventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }
 
-    public void OnPointerClick()
+    public void OnPointerClick(DCLAction_Trigger action)
     {
         OnInspectorButtonClick?.Invoke();
     }

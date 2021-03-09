@@ -42,7 +42,7 @@ namespace Tests.BuildModeHUDViews
             extraActionsView.OnControlsClicked += () => isClicked = true;
 
             // Act
-            extraActionsView.OnControlsClick();
+            extraActionsView.OnControlsClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(isClicked, "isClicked is false!");
@@ -56,7 +56,7 @@ namespace Tests.BuildModeHUDViews
             extraActionsView.OnHideUIClicked += () => isClicked = true;
 
             // Act
-            extraActionsView.OnHideUIClick();
+            extraActionsView.OnHideUIClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(isClicked, "isClicked is false!");

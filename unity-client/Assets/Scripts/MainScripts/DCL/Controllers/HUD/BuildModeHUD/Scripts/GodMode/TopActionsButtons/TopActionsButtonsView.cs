@@ -29,15 +29,15 @@ public interface ITopActionsButtonsView
 
     void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call);
     void ConfigureExtraActions(IExtraActionsController extraActionsController);
-    void OnChangeModeClick();
-    void OnDeleteClick();
-    void OnDuplicateClick();
-    void OnExtraClick();
-    void OnLogOutClick();
-    void OnResetClick();
-    void OnRotateClick();
-    void OnScaleClick();
-    void OnTranslateClick();
+    void OnChangeModeClick(DCLAction_Trigger action);
+    void OnDeleteClick(DCLAction_Trigger action);
+    void OnDuplicateClick(DCLAction_Trigger action);
+    void OnExtraClick(DCLAction_Trigger action);
+    void OnLogOutClick(DCLAction_Trigger action);
+    void OnResetClick(DCLAction_Trigger action);
+    void OnRotateClick(DCLAction_Trigger action);
+    void OnScaleClick(DCLAction_Trigger action);
+    void OnTranslateClick(DCLAction_Trigger action);
     void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType);
 }
 
@@ -109,6 +109,7 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
     [Header("Sub-Views")]
     [SerializeField] internal ExtraActionsView extraActionsView;
 
+    private DCLAction_Trigger dummyActionTrigger = new DCLAction_Trigger();
     internal IExtraActionsController extraActionsController;
 
     private const string VIEW_PATH = "GodMode/TopActionsButtons/TopActionsButtonsView";
@@ -123,15 +124,15 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
 
     private void Awake()
     {
-        changeModeBtn.onClick.AddListener(OnChangeModeClick);
-        translateBtn.onClick.AddListener(OnTranslateClick);
-        rotateBtn.onClick.AddListener(OnRotateClick);
-        scaleBtn.onClick.AddListener(OnScaleClick);
-        resetBtn.onClick.AddListener(OnResetClick);
-        duplicateBtn.onClick.AddListener(OnDuplicateClick);
-        deleteBtn.onClick.AddListener(OnDeleteClick);
-        logOutBtn.onClick.AddListener(OnLogOutClick);
-        extraBtn.onClick.AddListener(OnExtraClick);
+        changeModeBtn.onClick.AddListener(() => OnChangeModeClick(dummyActionTrigger));
+        translateBtn.onClick.AddListener(() => OnTranslateClick(dummyActionTrigger));
+        rotateBtn.onClick.AddListener(() => OnRotateClick(dummyActionTrigger));
+        scaleBtn.onClick.AddListener(() => OnScaleClick(dummyActionTrigger));
+        resetBtn.onClick.AddListener(() => OnResetClick(dummyActionTrigger));
+        duplicateBtn.onClick.AddListener(() => OnDuplicateClick(dummyActionTrigger));
+        deleteBtn.onClick.AddListener(() => OnDeleteClick(dummyActionTrigger));
+        logOutBtn.onClick.AddListener(() => OnLogOutClick(dummyActionTrigger));
+        extraBtn.onClick.AddListener(() => OnExtraClick(dummyActionTrigger));
 
         ConfigureEventTrigger(
             changeCameraModeEventTrigger,
@@ -223,26 +224,26 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
             EventTriggerType.PointerExit,
             (eventData) => OnPointerExit?.Invoke());
 
-        toggleChangeCameraInputAction.OnTriggered += (action) => OnChangeModeClick();
-        toggleTranslateInputAction.OnTriggered += (action) => OnTranslateClick();
-        toggleRotateInputAction.OnTriggered += (action) => OnRotateClick();
-        toggleScaleInputAction.OnTriggered += (action) => OnScaleClick();
-        toggleResetInputAction.OnTriggered += (action) => OnResetClick();
-        toggleDuplicateInputAction.OnTriggered += (action) => OnDuplicateClick();
-        toggleDeleteInputAction.OnTriggered += (action) => OnDeleteClick();
+        toggleChangeCameraInputAction.OnTriggered += OnChangeModeClick;
+        toggleTranslateInputAction.OnTriggered += OnTranslateClick;
+        toggleRotateInputAction.OnTriggered += OnRotateClick;
+        toggleScaleInputAction.OnTriggered += OnScaleClick;
+        toggleResetInputAction.OnTriggered += OnResetClick;
+        toggleDuplicateInputAction.OnTriggered += OnDuplicateClick;
+        toggleDeleteInputAction.OnTriggered += OnDeleteClick;
     }
 
     private void OnDestroy()
     {
-        changeModeBtn.onClick.RemoveListener(OnChangeModeClick);
-        translateBtn.onClick.RemoveListener(OnTranslateClick);
-        rotateBtn.onClick.RemoveListener(OnRotateClick);
-        scaleBtn.onClick.RemoveListener(OnScaleClick);
-        resetBtn.onClick.RemoveListener(OnResetClick);
-        duplicateBtn.onClick.RemoveListener(OnDuplicateClick);
-        deleteBtn.onClick.RemoveListener(OnDeleteClick);
-        logOutBtn.onClick.RemoveListener(OnLogOutClick);
-        extraBtn.onClick.RemoveListener(OnExtraClick);
+        changeModeBtn.onClick.RemoveAllListeners();
+        translateBtn.onClick.RemoveAllListeners();
+        rotateBtn.onClick.RemoveAllListeners();
+        scaleBtn.onClick.RemoveAllListeners();
+        resetBtn.onClick.RemoveAllListeners();
+        duplicateBtn.onClick.RemoveAllListeners();
+        deleteBtn.onClick.RemoveAllListeners();
+        logOutBtn.onClick.RemoveAllListeners();
+        extraBtn.onClick.RemoveAllListeners();
 
         RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerEnter);
         RemoveEventTrigger(changeCameraModeEventTrigger, EventTriggerType.PointerExit);
@@ -263,13 +264,13 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerEnter);
         RemoveEventTrigger(logoutEventTrigger, EventTriggerType.PointerExit);
 
-        toggleChangeCameraInputAction.OnTriggered -= (action) => OnChangeModeClick();
-        toggleTranslateInputAction.OnTriggered -= (action) => OnTranslateClick();
-        toggleRotateInputAction.OnTriggered -= (action) => OnRotateClick();
-        toggleScaleInputAction.OnTriggered -= (action) => OnScaleClick();
-        toggleResetInputAction.OnTriggered -= (action) => OnResetClick();
-        toggleDuplicateInputAction.OnTriggered -= (action) => OnDuplicateClick();
-        toggleDeleteInputAction.OnTriggered -= (action) => OnDeleteClick();
+        toggleChangeCameraInputAction.OnTriggered -= OnChangeModeClick;
+        toggleTranslateInputAction.OnTriggered -= OnTranslateClick;
+        toggleRotateInputAction.OnTriggered -= OnRotateClick;
+        toggleScaleInputAction.OnTriggered -= OnScaleClick;
+        toggleResetInputAction.OnTriggered -= OnResetClick;
+        toggleDuplicateInputAction.OnTriggered -= OnDuplicateClick;
+        toggleDeleteInputAction.OnTriggered -= OnDeleteClick;
 
         if (extraActionsController != null)
             extraActionsController.Dispose();
@@ -294,47 +295,47 @@ public class TopActionsButtonsView : MonoBehaviour, ITopActionsButtonsView
         this.extraActionsController.Initialize(extraActionsView);
     }
 
-    public void OnChangeModeClick()
+    public void OnChangeModeClick(DCLAction_Trigger action)
     {
         OnChangeModeClicked?.Invoke();
     }
 
-    public void OnExtraClick()
+    public void OnExtraClick(DCLAction_Trigger action)
     {
         OnExtraClicked?.Invoke();
     }
 
-    public void OnTranslateClick()
+    public void OnTranslateClick(DCLAction_Trigger action)
     {
         OnTranslateClicked?.Invoke();
     }
 
-    public void OnRotateClick()
+    public void OnRotateClick(DCLAction_Trigger action)
     {
         OnRotateClicked?.Invoke();
     }
 
-    public void OnScaleClick()
+    public void OnScaleClick(DCLAction_Trigger action)
     {
         OnScaleClicked?.Invoke();
     }
 
-    public void OnResetClick()
+    public void OnResetClick(DCLAction_Trigger action)
     {
         OnResetClicked?.Invoke();
     }
 
-    public void OnDuplicateClick()
+    public void OnDuplicateClick(DCLAction_Trigger action)
     {
         OnDuplicateClicked?.Invoke();
     }
 
-    public void OnDeleteClick()
+    public void OnDeleteClick(DCLAction_Trigger action)
     {
         OnDeleteClicked?.Invoke();
     }
 
-    public void OnLogOutClick()
+    public void OnLogOutClick(DCLAction_Trigger action)
     {
         OnLogOutClicked?.Invoke();
     }

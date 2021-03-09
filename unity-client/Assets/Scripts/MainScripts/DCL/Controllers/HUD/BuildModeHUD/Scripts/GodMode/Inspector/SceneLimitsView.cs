@@ -22,11 +22,13 @@ public interface ISceneLimitsView
     void SetRightDescText(string text);
     void SetTitleText(string text);
     void SetUpdateCallback(UnityAction call);
-    void ToggleSceneLimitsInfo();
+    void ToggleSceneLimitsInfo(DCLAction_Trigger action);
 }
 
 public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
 {
+    private const int FRAMES_BETWEEN_UPDATES = 15;
+
     public Color lfColor => lowFillColor;
     public Color mfColor => mediumFillColor;
     public Color hfColor => highFillColor;
@@ -57,8 +59,8 @@ public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
 
     public bool isBodyActived => sceneLimitsBodyGO.activeSelf;
 
+    private DCLAction_Trigger dummyActionTrigger = new DCLAction_Trigger();
     internal UnityAction updateInfoAction;
-    private const int FRAMES_BETWEEN_UPDATES = 15;
 
     private const string VIEW_PATH = "GodMode/Inspector/SceneLimitsView";
 
@@ -72,8 +74,8 @@ public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
 
     private void Awake()
     {
-        toggleSceneInfoInputAction.OnTriggered += (action) => ToggleSceneLimitsInfo();
-        toggleButton.onClick.AddListener(ToggleSceneLimitsInfo);
+        toggleSceneInfoInputAction.OnTriggered += ToggleSceneLimitsInfo;
+        toggleButton.onClick.AddListener(() => ToggleSceneLimitsInfo(dummyActionTrigger));
     }
 
     private void Update()
@@ -84,8 +86,8 @@ public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
 
     private void OnDestroy()
     {
-        toggleSceneInfoInputAction.OnTriggered -= (action) => ToggleSceneLimitsInfo();
-        toggleButton.onClick.RemoveListener(ToggleSceneLimitsInfo);
+        toggleSceneInfoInputAction.OnTriggered -= ToggleSceneLimitsInfo;
+        toggleButton.onClick.RemoveAllListeners();
     }
 
     public void SetUpdateCallback(UnityAction call)
@@ -93,7 +95,7 @@ public class SceneLimitsView : MonoBehaviour, ISceneLimitsView
         updateInfoAction = call;
     }
 
-    public void ToggleSceneLimitsInfo()
+    public void ToggleSceneLimitsInfo(DCLAction_Trigger action)
     {
         OnToggleSceneLimitsInfo?.Invoke();
     }

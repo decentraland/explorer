@@ -116,7 +116,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnChangeModeClicked += () => modeIsChanged = true;
 
             // Act
-            topActionsButtonsView.OnChangeModeClick();
+            topActionsButtonsView.OnChangeModeClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(modeIsChanged, "modeIsChanged is false!");
@@ -130,7 +130,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnExtraClicked += () => extraClicked = true;
 
             // Act
-            topActionsButtonsView.OnExtraClick();
+            topActionsButtonsView.OnExtraClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(extraClicked, "extraClicked is false!");
@@ -144,7 +144,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnTranslateClicked += () => translateClicked = true;
 
             // Act
-            topActionsButtonsView.OnTranslateClick();
+            topActionsButtonsView.OnTranslateClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(translateClicked, "translateClicked is false!");
@@ -158,7 +158,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnRotateClicked += () => rotateClicked = true;
 
             // Act
-            topActionsButtonsView.OnRotateClick();
+            topActionsButtonsView.OnRotateClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(rotateClicked, "rotateClicked is false!");
@@ -172,7 +172,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnScaleClicked += () => scaleClicked = true;
 
             // Act
-            topActionsButtonsView.OnScaleClick();
+            topActionsButtonsView.OnScaleClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(scaleClicked, "scaleClicked is false!");
@@ -186,7 +186,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnResetClicked += () => resetClicked = true;
 
             // Act
-            topActionsButtonsView.OnResetClick();
+            topActionsButtonsView.OnResetClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(resetClicked, "resetClicked is false!");
@@ -200,7 +200,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnDuplicateClicked += () => duplicateClicked = true;
 
             // Act
-            topActionsButtonsView.OnDuplicateClick();
+            topActionsButtonsView.OnDuplicateClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(duplicateClicked, "duplicateClicked is false!");
@@ -214,7 +214,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnDeleteClicked += () => deleteClicked = true;
 
             // Act
-            topActionsButtonsView.OnDeleteClick();
+            topActionsButtonsView.OnDeleteClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(deleteClicked, "deleteClicked is false!");
@@ -228,7 +228,7 @@ namespace Tests.BuildModeHUDViews
             topActionsButtonsView.OnLogOutClicked += () => logoutClicked = true;
 
             // Act
-            topActionsButtonsView.OnLogOutClick();
+            topActionsButtonsView.OnLogOutClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(logoutClicked, "logoutClicked is false!");

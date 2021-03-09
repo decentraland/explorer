@@ -73,7 +73,7 @@ namespace Tests.BuildModeHUDViews
             inspectorBtnView.OnInspectorButtonClick += () => isClicked = true;
 
             // Act
-            inspectorBtnView.OnPointerClick();
+            inspectorBtnView.OnPointerClick(new DCLAction_Trigger());
 
             // Assert
             Assert.IsTrue(isClicked, "isClicked is false!");

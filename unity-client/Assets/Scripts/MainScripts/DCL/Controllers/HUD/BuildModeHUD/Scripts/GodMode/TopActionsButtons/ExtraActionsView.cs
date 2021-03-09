@@ -8,8 +8,8 @@ public interface IExtraActionsView
                  OnHideUIClicked,
                  OnTutorialClicked;
 
-    void OnControlsClick();
-    void OnHideUIClick();
+    void OnControlsClick(DCLAction_Trigger action);
+    void OnHideUIClick(DCLAction_Trigger action);
     void OnTutorialClick();
     void SetActive(bool isActive);
 }
@@ -29,6 +29,8 @@ public class ExtraActionsView : MonoBehaviour, IExtraActionsView
     [SerializeField] internal InputAction_Trigger toggleUIVisibilityInputAction;
     [SerializeField] internal InputAction_Trigger toggleControlsVisibilityInputAction;
 
+    private DCLAction_Trigger dummyActionTrigger = new DCLAction_Trigger();
+
     private const string VIEW_PATH = "GodMode/TopActionsButtons/ExtraActionsView";
 
     internal static ExtraActionsView Create()
@@ -41,22 +43,22 @@ public class ExtraActionsView : MonoBehaviour, IExtraActionsView
 
     private void Awake()
     {
-        hideUIBtn.onClick.AddListener(OnHideUIClick);
-        controlsBtn.onClick.AddListener(OnControlsClick);
+        hideUIBtn.onClick.AddListener(() => OnHideUIClick(dummyActionTrigger));
+        controlsBtn.onClick.AddListener(() => OnControlsClick(dummyActionTrigger));
         tutorialBtn.onClick.AddListener(OnTutorialClick);
 
-        toggleUIVisibilityInputAction.OnTriggered += (action) => OnHideUIClick();
-        toggleControlsVisibilityInputAction.OnTriggered += (action) => OnControlsClick();
+        toggleUIVisibilityInputAction.OnTriggered += OnHideUIClick;
+        toggleControlsVisibilityInputAction.OnTriggered += OnControlsClick;
     }
 
     private void OnDestroy()
     {
-        hideUIBtn.onClick.RemoveListener(OnHideUIClick);
-        controlsBtn.onClick.RemoveListener(OnControlsClick);
+        hideUIBtn.onClick.RemoveAllListeners();
+        controlsBtn.onClick.RemoveAllListeners();
         tutorialBtn.onClick.RemoveListener(OnTutorialClick);
 
-        toggleUIVisibilityInputAction.OnTriggered -= (action) => OnHideUIClick();
-        toggleControlsVisibilityInputAction.OnTriggered -= (action) => OnControlsClick();
+        toggleUIVisibilityInputAction.OnTriggered -= OnHideUIClick;
+        toggleControlsVisibilityInputAction.OnTriggered -= OnControlsClick;
     }
 
     public void SetActive(bool isActive)
@@ -64,12 +66,12 @@ public class ExtraActionsView : MonoBehaviour, IExtraActionsView
         gameObject.SetActive(isActive);
     }
 
-    public void OnControlsClick()
+    public void OnControlsClick(DCLAction_Trigger action)
     {
         OnControlsClicked?.Invoke();
     }
 
-    public void OnHideUIClick()
+    public void OnHideUIClick(DCLAction_Trigger action)
     {
         OnHideUIClicked?.Invoke();
     }
