@@ -36,6 +36,8 @@ public interface ISceneCatalogController
 
 public class SceneCatalogController : ISceneCatalogController
 {
+    internal const string FAVORITE_NAME = "Favorites";
+
     public event Action OnHideCatalogClicked;
     public event Action<CatalogItem> OnCatalogItemSelected;
     public event Action OnResumeInput;
@@ -43,11 +45,10 @@ public class SceneCatalogController : ISceneCatalogController
 
     internal ISceneCatalogView sceneCatalogView;
     internal IQuickBarController quickBarController;
-    private FavoritesController favoritesController;
+    internal FavoritesController favoritesController;
     internal List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
     internal bool isShowingAssetPacks = false;
-    private bool isFilterByAssetPacks = true;
-    internal const string FAVORITE_NAME = "Favorites";
+    internal bool isFilterByAssetPacks = true;
 
     public void Initialize(ISceneCatalogView sceneCatalogView, IQuickBarController quickBarController)
     {

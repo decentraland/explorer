@@ -18,6 +18,8 @@ public interface IQuickBarController
 
 public class QuickBarController : IQuickBarController
 {
+    const int AMOUNT_OF_QUICK_SLOTS = 9;
+
     public event Action<int> OnQuickBarShortcutSelected;
     public event Action<CatalogItem> OnCatalogItemSelected;
 
@@ -26,8 +28,6 @@ public class QuickBarController : IQuickBarController
 
     internal CatalogItem[] quickBarShortcutsCatalogItems = new CatalogItem[AMOUNT_OF_QUICK_SLOTS];
     internal int lastIndexDroped = -1;
-
-    const int AMOUNT_OF_QUICK_SLOTS = 9;
 
     public void Initialize(IQuickBarView quickBarView, ISceneCatalogController sceneCatalogController)
     {
