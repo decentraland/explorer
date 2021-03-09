@@ -2,6 +2,7 @@ using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DCL.Huds.QuestsPanel
 {
@@ -17,12 +18,13 @@ namespace DCL.Huds.QuestsPanel
 
     public class QuestsPanelHUDView : MonoBehaviour, IQuestsPanelHUDView
     {
-        internal static int ENTRIES_PER_FRAME {get; set;} = 5;
+        internal static int ENTRIES_PER_FRAME { get; set; } = 5;
         private const string VIEW_PATH = "QuestsPanelHUD";
 
         [SerializeField] private RectTransform questsContainer;
         [SerializeField] private GameObject questPrefab;
         [SerializeField] internal QuestsPanelPopup questPopup;
+        [SerializeField] private Button closeButton;
 
         private static BaseDictionary<string, QuestModel> quests => DataStore.i.Quests.quests;
 
@@ -43,6 +45,7 @@ namespace DCL.Huds.QuestsPanel
         public void Awake()
         {
             questPopup.gameObject.SetActive(false);
+            closeButton.onClick.AddListener(() => DataStore.i.HUDs.questsPanelVisible.Set(false));
         }
 
         public void RequestAddOrUpdateQuest(string questId)
@@ -61,7 +64,7 @@ namespace DCL.Huds.QuestsPanel
                 return;
             }
 
-            if(!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
+            if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
             {
                 questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsPanelEntry>();
                 questEntry.OnReadMoreClicked += ShowQuestPopup;
@@ -76,13 +79,13 @@ namespace DCL.Huds.QuestsPanel
         {
             questsToBeAdded.Remove(questId);
 
-            if(!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
+            if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
                 return;
 
             questEntries.Remove(questId);
             Destroy(questEntry.gameObject);
 
-            if(currentQuestInPopup == questId)
+            if (currentQuestInPopup == questId)
                 questPopup.Close();
         }
 
@@ -105,6 +108,10 @@ namespace DCL.Huds.QuestsPanel
                 return;
             }
 
+            Vector3 pos = questPopup.transform.position;
+            pos.y = questEntries[questId].readMorePosition.y;
+            questPopup.transform.position = pos;
+
             currentQuestInPopup = questId;
             questPopup.Populate(quest);
             questPopup.Show();
@@ -126,16 +133,10 @@ namespace DCL.Huds.QuestsPanel
             }
         }
 
-        public void SetVisibility(bool active)
-        {
-            gameObject.SetActive(active);
-        }
+        public void SetVisibility(bool active) { gameObject.SetActive(active); }
 
         public bool isVisible => gameObject.activeSelf;
 
-        public void Dispose()
-        {
-            Destroy(gameObject);
-        }
+        public void Dispose() { Destroy(gameObject); }
     }
 }
