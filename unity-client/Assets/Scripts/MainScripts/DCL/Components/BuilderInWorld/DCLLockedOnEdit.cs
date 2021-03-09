@@ -20,7 +20,7 @@ public class DCLLockedOnEdit : BaseDisposable
         
         public override BaseModel GetDataFromJSON(string json)
         {
-            return Utils.SafeFromJson < Model > (json);
+            return Utils.SafeFromJson <Model> (json);
         }
     }
 
