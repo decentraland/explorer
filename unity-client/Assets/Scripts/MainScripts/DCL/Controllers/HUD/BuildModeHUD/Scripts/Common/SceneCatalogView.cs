@@ -139,7 +139,7 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
     public void CloseCatalog()
     {
         if (gameObject.activeSelf)
-            StartCoroutine(CloseCatalogAfterOneFrame());
+            CoroutineStarter.Start(CloseCatalogAfterOneFrame());
     }
 
     internal IEnumerator CloseCatalogAfterOneFrame()
