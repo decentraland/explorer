@@ -63,6 +63,7 @@ internal class SectionsController : IDisposable
         if (section != null)
         {
             section.SetViewContainer(sectionsParent);
+            SubscribeEvents(section);
         }
 
         loadedSections.Add(id, section);
@@ -93,7 +94,6 @@ internal class SectionsController : IDisposable
         if (currentOpenSection != null)
         {
             currentOpenSection.SetVisible(false);
-            UnSubscribeEvents(currentOpenSection);
             OnSectionHide?.Invoke(currentOpenSection);
         }
 
@@ -102,7 +102,6 @@ internal class SectionsController : IDisposable
         if (currentOpenSection != null)
         {
             currentOpenSection.SetVisible(true);
-            SubscribeEvents(currentOpenSection);
             OnSectionShow?.Invoke(currentOpenSection);
         }
 
@@ -146,21 +145,5 @@ internal class SectionsController : IDisposable
         {
             updateSceneDataRequester.OnRequestUpdateSceneData += OnUpdateSceneDataRequested;
         }        
-    }
-    
-    private void UnSubscribeEvents(SectionBase sectionBase)
-    {
-        if (sectionBase is ISectionOpenSectionRequester openSectionRequester)
-        {
-            openSectionRequester.OnRequestOpenSection -= OpenSection;
-        }
-        if (sectionBase is ISectionHideContextMenuRequester hideContextMenuRequester)
-        {
-            hideContextMenuRequester.OnRequestContextMenuHide -= OnHideContextMenuRequested;
-        }        
-        if (sectionBase is ISectionUpdateSceneDataRequester updateSceneDataRequester)
-        {
-            updateSceneDataRequester.OnRequestUpdateSceneData -= OnUpdateSceneDataRequested;
-        }
     }
 }
