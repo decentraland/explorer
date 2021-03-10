@@ -43,6 +43,7 @@ export class EthereumConnector {
     if (type === null) {
       this.result = {
         chainId: this.getChainId(),
+        providerType: ProviderType.INJECTED,
         account: null,
         provider: EthereumConnector.createWeb3xWebsocketProvider()
       }
