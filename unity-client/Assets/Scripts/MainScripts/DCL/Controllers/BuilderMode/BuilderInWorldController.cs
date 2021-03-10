@@ -27,12 +27,15 @@ public class BuilderInWorldController : MonoBehaviour
     public bool activeFeature = false;
     public bool bypassLandOwnershipCheck = false;
 
+    [Header("DesignVariables")]
+    [SerializeField]
+    private float distanceToDisableBuilderInWorld = 45f;
+
     [Header("Scene References")]
     public GameObject cameraParentGO;
 
     public GameObject cursorGO;
     public InputController inputController;
-    public PlayerAvatarController avatarRenderer;
     public GameObject[] groundVisualsGO;
 
     [Header("Prefab References")]
@@ -72,6 +75,7 @@ public class BuilderInWorldController : MonoBehaviour
     private bool catalogAdded = false;
     private bool sceneReady = false;
     private Material previousSkyBoxMaterial;
+    private Vector3 parcelUnityMiddlePoint;
 
     private void Awake()
     {
@@ -127,7 +131,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (checkerInsideSceneOptimizationCounter >= 60)
         {
-            if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
+            if (Vector3.Distance(DCLCharacterController.i.characterPosition.unityPosition,parcelUnityMiddlePoint) >= distanceToDisableBuilderInWorld)
                 ExitEditMode();
             checkerInsideSceneOptimizationCounter = 0;
         }
@@ -388,7 +392,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
-
+        parcelUnityMiddlePoint = BuilderInWorldUtils.CalculateUnityMiddlePoint(sceneToEdit);
+        
         if (HUDController.i.builderInWorldMainHud != null)
         {
             HUDController.i.builderInWorldMainHud.SetVisibility(true);
@@ -429,16 +434,12 @@ public class BuilderInWorldController : MonoBehaviour
         outlinerController.CancelAllOutlines();
 
         cursorGO.SetActive(true);
-        builderInWorldEntityHandler.ExitFromEditMode();
-
+ 
         sceneToEdit.SetEditMode(false);
-        biwModeController.ExitEditMode();
 
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
 
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
-
-        avatarRenderer.SetAvatarVisibility(true);
 
         if (HUDController.i.builderInWorldMainHud != null)
         {

@@ -267,10 +267,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeFeature: 0
   bypassLandOwnershipCheck: 0
+  distanceToDisableBuilderInWorld: 45
   cameraParentGO: {fileID: 0}
   cursorGO: {fileID: 0}
   inputController: {fileID: 0}
-  avatarRenderer: {fileID: 0}
   groundVisualsGO: []
   outlinerController: {fileID: 4993453681677180110}
   bIWInputHandler: {fileID: 6563051222090226857}
@@ -539,7 +539,6 @@ MonoBehaviour:
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
   actionController: {fileID: 1208871512032110241}
-  builderInWorldBridge: {fileID: 0}
   scaleSpeed: 0.25
   rotationSpeed: 0.5
   distanceFromCameraForNewEntitties: 5
@@ -1593,22 +1592,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxDistanceToSelectEntities: 9999
   snapFactor: 1
-  snapRotationDegresFactor: 0.5
+  snapRotationDegresFactor: 0.174533
   snapScaleFactor: 0.5
   snapDistanceToActivateMovement: 1
   builderInWorldEntityHandler: {fileID: 1676156629805984034}
   actionController: {fileID: 1208871512032110241}
-  builderInWorldBridge: {fileID: 0}
   distanceEagleCamera: 20
+  snapDragFactor: 0.5
   freeCameraController: {fileID: 0}
+  cameraController: {fileID: 0}
+  lookAtT: {fileID: 1208871513090114763}
+  mouseCatcher: {fileID: 0}
+  avatarRenderer: {fileID: 0}
   gizmoManager: {fileID: 1208871511615770936}
   voxelController: {fileID: 1208871512657624392}
   builderInputWrapper: {fileID: 1208871511405416592}
   outlinerController: {fileID: 4993453681677180110}
-  buildModeController: {fileID: 1208871511274338203}
-  cameraController: {fileID: 0}
-  lookAtT: {fileID: 1208871513090114763}
-  mouseCatcher: {fileID: 0}
   focusOnSelectedEntitiesInputAction: {fileID: 11400000, guid: 746094ad79f2853439fc98abd3963fb8,
     type: 2}
   squareMultiSelectionInputAction: {fileID: 11400000, guid: 5126f09bb1e0d404294e71443813b65c,

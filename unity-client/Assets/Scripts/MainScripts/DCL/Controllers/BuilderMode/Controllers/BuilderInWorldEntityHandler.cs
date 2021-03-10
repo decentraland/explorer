@@ -237,10 +237,10 @@ public class BuilderInWorldEntityHandler : BIWController
         if (!selectedEntities.Contains(entity))
             return;
 
-        if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-        {
-            DestroyLastCreatedEntities();
-        }
+        // if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
+        // {
+        //     DestroyLastCreatedEntities();
+        // }
 
         DCL.Environment.i.world.sceneBoundsChecker.EvaluateEntityPosition(entity.rootEntity);
         DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(entity.rootEntity);

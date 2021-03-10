@@ -81,7 +81,9 @@ namespace UnityGLTF.Loader
                 if ((int)www.responseCode >= 400)
                 {
                     Debug.LogError($"{www.responseCode} - {www.url}");
-                    if (retryCont < RETRY_AMOUNTS)
+                    
+                    //Note (Adrian): 504 code correspond with timeout, if we get a timeout we try again
+                    if (retryCont < RETRY_AMOUNTS && www.responseCode == 504)
                     {
                         retryCont++;
                         retry = true;

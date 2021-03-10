@@ -188,7 +188,7 @@ public class EntityInformationController : MonoBehaviour
         {
             Vector3 positionConverted = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position, parcelScene);
             Vector3 currentRotation = entity.gameObject.transform.rotation.eulerAngles;
-            Vector3 currentScale = entity.gameObject.transform.localScale;
+            Vector3 currentScale = entity.gameObject.transform.lossyScale;
 
             var newEuler = currentRotation;
 
