@@ -74,6 +74,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     private bool catalogAdded = false;
     private bool sceneReady = false;
+    private bool isInit = false;
     private Material previousSkyBoxMaterial;
     private Vector3 parcelUnityMiddlePoint;
 
@@ -124,7 +125,7 @@ public class BuilderInWorldController : MonoBehaviour
         BuilderInWorldNFTController.i.OnNFTUsageChange -= OnNFTUsageChange;
         CleanItems();
     }
-
+    
     private void Update()
     {
         if (!isBuilderInWorldActivated) return;
