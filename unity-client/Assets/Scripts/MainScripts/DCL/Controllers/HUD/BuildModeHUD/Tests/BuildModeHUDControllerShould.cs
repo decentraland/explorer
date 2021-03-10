@@ -30,7 +30,8 @@ namespace Tests.BuildModeHUDControllers
                 topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
             };
 
-            buildModeHUDController = new BuildModeHUDController(Substitute.For<IBuildModeHUDView>(), testControllers);
+            buildModeHUDController = new BuildModeHUDController();
+            buildModeHUDController.Initialize(Substitute.For<IBuildModeHUDView>(), testControllers);
         }
 
         [TearDown]
@@ -82,7 +83,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.view = null;
 
             // Act
-            buildModeHUDController.CreateMainView(Substitute.For<IBuildModeHUDView>());
+            buildModeHUDController.ConfigureMainView(Substitute.For<IBuildModeHUDView>());
 
             // Assert
             Assert.NotNull(buildModeHUDController.view, "The view is null!");
