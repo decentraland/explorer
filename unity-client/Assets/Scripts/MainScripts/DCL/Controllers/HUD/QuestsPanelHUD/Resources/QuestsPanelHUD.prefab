@@ -301,7 +301,7 @@ MonoBehaviour:
     m_Top: 2
     m_Bottom: 0
   m_ChildAlignment: 1
-  m_Spacing: 20
+  m_Spacing: 10
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -568,7 +568,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 505, y: -33}
-  m_SizeDelta: {x: 30, y: 30}
+  m_SizeDelta: {x: 34, y: 34}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6734847841036001413
 CanvasRenderer:
@@ -1047,7 +1047,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -16, y: -16}
+  m_SizeDelta: {x: -18, y: -18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4620607169625740403
 CanvasRenderer:
@@ -1204,7 +1204,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3062341430891480548}
   m_HandleRect: {fileID: 2657555371672734945}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1495,7 +1495,7 @@ PrefabInstance:
     - target: {fileID: 8207199501176509305, guid: 49eaaf30e8891e64492f14c5d00dd127,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: -8
+      value: -12
       objectReference: {fileID: 0}
     - target: {fileID: 8207199501176509305, guid: 49eaaf30e8891e64492f14c5d00dd127,
         type: 3}
