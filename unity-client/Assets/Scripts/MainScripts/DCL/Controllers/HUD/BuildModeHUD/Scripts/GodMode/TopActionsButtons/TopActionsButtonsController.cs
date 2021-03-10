@@ -3,15 +3,15 @@ using UnityEngine.EventSystems;
 
 public interface ITopActionsButtonsController
 {
-    event Action OnChangeModeClick,
-                 OnExtraClick,
-                 OnTranslateClick,
-                 OnRotateClick,
-                 OnScaleClick,
-                 OnResetClick,
-                 OnDuplicateClick,
-                 OnDeleteClick,
-                 OnLogOutClick;
+    event Action OnChangeModeClick;
+    event Action OnExtraClick;
+    event Action OnTranslateClick;
+    event Action OnRotateClick;
+    event Action OnScaleClick;
+    event Action OnResetClick;
+    event Action OnDuplicateClick;
+    event Action OnDeleteClick;
+    event Action OnLogOutClick;
 
     IExtraActionsController extraActionsController { get; }
 
@@ -33,15 +33,15 @@ public interface ITopActionsButtonsController
 
 public class TopActionsButtonsController : ITopActionsButtonsController
 {
-    public event Action OnChangeModeClick,
-                        OnExtraClick,
-                        OnTranslateClick,
-                        OnRotateClick,
-                        OnScaleClick,
-                        OnResetClick,
-                        OnDuplicateClick,
-                        OnDeleteClick,
-                        OnLogOutClick;
+    public event Action OnChangeModeClick;
+    public event Action OnExtraClick;
+    public event Action OnTranslateClick;
+    public event Action OnRotateClick;
+    public event Action OnScaleClick;
+    public event Action OnResetClick;
+    public event Action OnDuplicateClick;
+    public event Action OnDeleteClick;
+    public event Action OnLogOutClick;
 
     public IExtraActionsController extraActionsController { get; private set; }
 
