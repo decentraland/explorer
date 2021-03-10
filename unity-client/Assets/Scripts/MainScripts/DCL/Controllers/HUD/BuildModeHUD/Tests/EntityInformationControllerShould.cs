@@ -74,7 +74,7 @@ namespace Tests.BuildModeHUDControllers
         public void NameChangedCorrectly()
         {
             // Arrange
-            DCLBuilderInWorldEntity testEntity = new GameObject().AddComponent<DCLBuilderInWorldEntity>();
+            DCLBuilderInWorldEntity testEntity = new GameObject("_DCLBuilderInWorldEntity").AddComponent<DCLBuilderInWorldEntity>();
             string testText = "Test text";
             DCLBuilderInWorldEntity returnedEntity = null;
             string returnedText = "";
@@ -142,8 +142,8 @@ namespace Tests.BuildModeHUDControllers
         public void SetEntityCorrectly()
         {
             // Arrange
-            DCLBuilderInWorldEntity testEntity = new GameObject().AddComponent<DCLBuilderInWorldEntity>();
-            ParcelScene testScene = new GameObject().AddComponent<ParcelScene>();
+            DCLBuilderInWorldEntity testEntity = new GameObject("_DCLBuilderInWorldEntity").AddComponent<DCLBuilderInWorldEntity>();
+            ParcelScene testScene = new GameObject("_ParcelScene").AddComponent<ParcelScene>();
 
             // Act
             entityInformationController.SetEntity(testEntity, testScene);
@@ -188,7 +188,7 @@ namespace Tests.BuildModeHUDControllers
         public void UpdateEntityNameCorrectly()
         {
             // Arrange
-            DCLBuilderInWorldEntity testEntity = new GameObject().AddComponent<DCLBuilderInWorldEntity>();
+            DCLBuilderInWorldEntity testEntity = new GameObject("_DCLBuilderInWorldEntity").AddComponent<DCLBuilderInWorldEntity>();
             entityInformationController.isChangingName = false;
 
             // Act
@@ -258,7 +258,7 @@ namespace Tests.BuildModeHUDControllers
         public void UpdateInfoCorrectly()
         {
             // Arrange
-            DCLBuilderInWorldEntity testEntity = new GameObject().AddComponent<DCLBuilderInWorldEntity>();
+            DCLBuilderInWorldEntity testEntity = new GameObject("_DCLBuilderInWorldEntity").AddComponent<DCLBuilderInWorldEntity>();
 
             // Act
             entityInformationController.UpdateInfo(testEntity);

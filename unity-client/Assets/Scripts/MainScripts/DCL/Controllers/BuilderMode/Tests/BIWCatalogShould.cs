@@ -15,7 +15,7 @@ public class BIWCatalogShould
     protected IEnumerator SetUp()
     {
         BIWCatalogManager.Init();
-        gameObjectToUse = new GameObject();
+        gameObjectToUse = new GameObject("_TestObject");
         gameObjectToUse.AddComponent<AssetCatalogBridge>();
         yield return null;
     }
@@ -54,10 +54,10 @@ public class BIWCatalogShould
         CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
         adapter.SetContent(item);
 
-        CatalogAssetGroupAdapter groupAdatper = new GameObject().AddComponent<CatalogAssetGroupAdapter>();
+        CatalogAssetGroupAdapter groupAdatper = new GameObject("_CatalogAssetGroupAdapter").AddComponent<CatalogAssetGroupAdapter>();
         groupAdatper.AddAdapter(adapter);
 
-        CatalogGroupListView catalogGroupListView = new GameObject().AddComponent<CatalogGroupListView>();
+        CatalogGroupListView catalogGroupListView = new GameObject("_CatalogGroupListView").AddComponent<CatalogGroupListView>();
         catalogGroupListView.AddAdapter(groupAdatper);
         catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
         SceneCatalogView sceneCatalogView = SceneCatalogView.Create();
@@ -88,7 +88,7 @@ public class BIWCatalogShould
 
         CatalogItem item = DataStore.i.builderInWorld.catalogItemDict.GetValues()[0];
 
-        FavoritesController favoritesController = new FavoritesController(new GameObject().AddComponent<CatalogGroupListView>());
+        FavoritesController favoritesController = new FavoritesController(new GameObject("_FavoritesController").AddComponent<CatalogGroupListView>());
         favoritesController.ToggleFavoriteState(item, null);
         Assert.IsTrue(item.IsFavorite());
 

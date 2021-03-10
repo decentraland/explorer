@@ -40,7 +40,7 @@ namespace Tests.BuildModeHUDControllers
         {
             // Arrange
             PointerEventData testEventData = new PointerEventData(null);
-            testEventData.pointerEnter = new GameObject();
+            testEventData.pointerEnter = new GameObject("_PointerEnterGO");
             RectTransform testRT = testEventData.pointerEnter.AddComponent<RectTransform>();
             tooltipController.changeAlphaCoroutine = null;
 

@@ -76,13 +76,13 @@ namespace Tests.BuildModeHUDControllers
             quickBarController.quickBarShortcutsCatalogItems[2] = new CatalogItem {};
 
             string testCatalogItemId = "testId";
-            CatalogItemAdapter testCatalogAdapter = new GameObject().AddComponent<CatalogItemAdapter>();
-            testCatalogAdapter.smartItemGO = new GameObject();
-            testCatalogAdapter.lockedGO = new GameObject();
+            CatalogItemAdapter testCatalogAdapter = new GameObject("_CatalogItemAdapter").AddComponent<CatalogItemAdapter>();
+            testCatalogAdapter.smartItemGO = new GameObject("_SmartItemGO");
+            testCatalogAdapter.lockedGO = new GameObject("_LockedGO");
             testCatalogAdapter.SetContent(new CatalogItem { id = testCatalogItemId });
 
             Asset_Texture testTexture = new Asset_Texture();
-            testCatalogAdapter.thumbnailImg = new GameObject().AddComponent<RawImage>();
+            testCatalogAdapter.thumbnailImg = new GameObject("_RawImage").AddComponent<RawImage>();
             testCatalogAdapter.thumbnailImg.texture = testTexture.texture;
             testCatalogAdapter.thumbnailImg.enabled = true;
             quickBarController.sceneCatalogController.GetLastCatalogItemDragged().ReturnsForAnyArgs(testCatalogAdapter);

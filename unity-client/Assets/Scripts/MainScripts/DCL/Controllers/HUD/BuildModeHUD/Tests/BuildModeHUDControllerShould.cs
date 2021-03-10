@@ -116,7 +116,7 @@ namespace Tests.BuildModeHUDControllers
         public void SetParcelSceneCorrectly()
         {
             // Arrange
-            ParcelScene testParcelScene = new GameObject().AddComponent<ParcelScene>();
+            ParcelScene testParcelScene = new GameObject("_ParcelScene").AddComponent<ParcelScene>();
 
             // Act
             buildModeHUDController.SetParcelScene(testParcelScene);
@@ -273,8 +273,8 @@ namespace Tests.BuildModeHUDControllers
         public void EntityInformationSetEntityCorrectly()
         {
             // Arrange
-            DCLBuilderInWorldEntity testEntity = new GameObject().AddComponent<DCLBuilderInWorldEntity>();
-            ParcelScene testScene = new GameObject().AddComponent<ParcelScene>();
+            DCLBuilderInWorldEntity testEntity = new GameObject("_DCLBuilderInWorldEntity").AddComponent<DCLBuilderInWorldEntity>();
+            ParcelScene testScene = new GameObject("_ParcelScene").AddComponent<ParcelScene>();
 
             // Act
             buildModeHUDController.EntityInformationSetEntity(testEntity, testScene);
@@ -308,9 +308,9 @@ namespace Tests.BuildModeHUDControllers
         {
             // Arrange
             List<DCLBuilderInWorldEntity> testEntityList = new List<DCLBuilderInWorldEntity>();
-            testEntityList.Add(new GameObject().AddComponent<DCLBuilderInWorldEntity>());
-            testEntityList.Add(new GameObject().AddComponent<DCLBuilderInWorldEntity>());
-            testEntityList.Add(new GameObject().AddComponent<DCLBuilderInWorldEntity>());
+            testEntityList.Add(new GameObject("_DCLBuilderInWorldEntity1").AddComponent<DCLBuilderInWorldEntity>());
+            testEntityList.Add(new GameObject("_DCLBuilderInWorldEntity2").AddComponent<DCLBuilderInWorldEntity>());
+            testEntityList.Add(new GameObject("_DCLBuilderInWorldEntity3").AddComponent<DCLBuilderInWorldEntity>());
 
             // Act
             buildModeHUDController.SetEntityList(testEntityList);
