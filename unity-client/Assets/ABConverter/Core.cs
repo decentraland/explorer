@@ -196,7 +196,9 @@ namespace DCL.ABConverter
                         }
                     }, Config.gltfExtensions);
 
-                // TODO: Download this file in another place or do something to avoid Unity trying to import the asset (adding more errors before starting the whole conversion)
+                // Disable editor assets auto-import temporarily to avoid Unity trying to import the GLTF on its own, when we know dependencies haven't been downloaded yet
+                AssetDatabase.StartAssetEditing();
+
                 string path = DownloadAsset(gltfPaths[0]);
 
                 if (string.IsNullOrEmpty(path))
@@ -249,6 +251,10 @@ namespace DCL.ABConverter
                         }
                     }
                 }
+
+                // Remove unneeded file and re-enable editor assets auto-import
+                File.Delete(path);
+                AssetDatabase.StopAssetEditing();
             }
 
             /// <summary>
