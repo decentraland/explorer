@@ -2,6 +2,7 @@ using DCL;
 using DCL.Components;
 using DCL.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,6 +14,7 @@ using Environment = DCL.Environment;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using DCL.Controllers;
+using UnityEngine.Networking;
 
 public static partial class BuilderInWorldUtils
 {
@@ -31,8 +33,8 @@ public static partial class BuilderInWorldUtils
         int q = Mathf.RoundToInt(n / m); 
   
         // 1st possible closest number 
-        float n1 = m * q; 
-  
+        float n1 = m * q;
+        
         // 2nd possible closest number 
         float n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1)); 
   
@@ -307,5 +309,44 @@ public static partial class BuilderInWorldUtils
         original.offsetMin = rectTransformToCopy.offsetMin;
         original.sizeDelta = rectTransformToCopy.sizeDelta;
         original.pivot = rectTransformToCopy.pivot;
+    }
+    
+    public static IEnumerator MakeGetCall(string url, Action<string> functionToCall)
+    {
+        UnityWebRequest www = UnityWebRequest.Get(url);
+        UnityWebRequestAsyncOperation www2 = www.SendWebRequest();
+
+        bool retry = true;
+        int retryCont = 0;
+        while (retry)
+        {
+            retry = false;
+            while (!www2.isDone)
+            {
+                yield return null;
+            }
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+                if (retryCont < BuilderInWorldSettings.RETRY_AMOUNTS)
+                {
+                    retry = true;
+                    retryCont++;
+                }
+                else
+                {
+                    yield break;
+                }
+            }
+            else
+            {
+                if (functionToCall != null)
+                {
+                    byte[] byteArray = www.downloadHandler.data;
+                    string result = System.Text.Encoding.UTF8.GetString(byteArray);
+                    functionToCall?.Invoke(result);
+                }
+            }
+        }
     }
 }

@@ -54,12 +54,9 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
         {
             if (snapObjectAlreadyMoved)
             {
-
                 Vector3 objectPosition = snapGO.transform.position;
                 Vector3 eulerRotation =  snapGO.transform.rotation.eulerAngles;
 
-                // eulerRotation = BuilderInWorldUtils.SnapFilterEulerAngles(eulerRotation, snapRotationDegresFactor);
-                
                 float currentSnapFactor = snapFactor;
 
                 objectPosition.x = Mathf.RoundToInt(objectPosition.x / currentSnapFactor) * currentSnapFactor;
@@ -70,13 +67,11 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
                 Quaternion destinationRotation = Quaternion.AngleAxis(currentYRotationAdded, Vector3.up);
                 editionGO.transform.rotation = initialRotation * destinationRotation;
                 editionGO.transform.position = objectPosition;
-
             }
             else if (Vector3.Distance(snapGO.transform.position, editionGO.transform.position) >= snapDistanceToActivateMovement)
             {
                 BuilderInWorldUtils.CopyGameObjectStatus(editionGO, snapGO, false);
-
-
+                
                 snapObjectAlreadyMoved = true;
                 SetEditObjectParent();
             }

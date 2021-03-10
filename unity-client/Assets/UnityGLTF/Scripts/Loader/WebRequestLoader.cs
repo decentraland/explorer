@@ -82,8 +82,8 @@ namespace UnityGLTF.Loader
                 {
                     Debug.LogError($"{www.responseCode} - {www.url}");
                     
-                    //Note (Adrian): 504 code correspond with timeout, if we get a timeout we try again
-                    if (retryCont < RETRY_AMOUNTS && www.responseCode == 504)
+                    //Note (Adrian): 500 to 600 codes are reserved codes to Server error responses, so if we have an error from server, we retry
+                    if (retryCont < RETRY_AMOUNTS && www.responseCode >= 500 &&  www.responseCode < 600)
                     {
                         retryCont++;
                         retry = true;

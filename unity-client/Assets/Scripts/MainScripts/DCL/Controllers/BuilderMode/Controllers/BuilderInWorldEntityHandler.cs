@@ -230,12 +230,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (!selectedEntities.Contains(entity))
             return;
-
-        // if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
-        // {
-        //     DestroyLastCreatedEntities();
-        // }
-
+        
         entity.Deselect();
 
         outlinerController.CancelEntityOutline(entity);

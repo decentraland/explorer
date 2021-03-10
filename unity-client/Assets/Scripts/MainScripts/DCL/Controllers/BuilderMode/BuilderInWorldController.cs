@@ -85,28 +85,8 @@ public class BuilderInWorldController : MonoBehaviour
 
     void Start()
     {
-        KernelConfig.i.EnsureConfigInitialized().Then(config => activeFeature = config.features.enableBuilderInWorld);
+        KernelConfig.i.EnsureConfigInitialized().Then(config =>  EnableFeature(config.features.enableBuilderInWorld));
         KernelConfig.i.OnChange += OnKernelConfigChanged;
-
-        InitGameObjects();
-
-        HUDConfiguration hudConfig = new HUDConfiguration();
-        hudConfig.active = true;
-        hudConfig.visible = false;
-        HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_MAIN);
-        HUDController.i.CreateHudElement<BuilderInWorldInititalHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_INITIAL);
-
-        HUDController.i.builderInWorldInititalHud.OnEnterEditMode += TryStartEnterEditMode;
-        HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
-        HUDController.i.builderInWorldMainHud.OnLogoutAction += ExitEditMode;
-
-        InitControllers();
-
-        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
-
-        ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
-        BuilderInWorldNFTController.i.Initialize();
-        BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
     }
 
     private void OnDestroy()
@@ -156,6 +136,8 @@ public class BuilderInWorldController : MonoBehaviour
     private void EnableFeature(bool enable)
     {
         activeFeature = enable;
+        if(enable)
+            Init();
     }
 
     private void CatalogReceived(string catalogJson)
@@ -170,6 +152,34 @@ public class BuilderInWorldController : MonoBehaviour
         if (HUDController.i.builderInWorldMainHud != null)
             HUDController.i.builderInWorldMainHud.RefreshCatalogContent();
         StartEditMode();
+    }
+
+    public void Init()
+    {
+        if(isInit)
+            return;
+
+        isInit = true;
+        
+        InitGameObjects();
+
+        HUDConfiguration hudConfig = new HUDConfiguration();
+        hudConfig.active = true;
+        hudConfig.visible = false;
+        HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_MAIN);
+        HUDController.i.CreateHudElement<BuilderInWorldInititalHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_INITIAL);
+
+        HUDController.i.builderInWorldInititalHud.OnEnterEditMode += TryStartEnterEditMode;
+        HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
+        HUDController.i.builderInWorldMainHud.OnLogoutAction += ExitEditMode;
+
+        InitControllers();
+
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
+
+        CoroutineStarter.Start(BuilderInWorldUtils.MakeGetCall(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived));
+        BuilderInWorldNFTController.i.Initialize();
+        BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
     }
 
     public void InitGameObjects()

@@ -307,7 +307,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         
         if (IsEntityAVoxel())
             SetEntityAsVoxel();
-
+        
         HandleAnimation();
 
         if(isNFT)

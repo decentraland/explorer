@@ -235,8 +235,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             {
                 destination = currentPoint - dragStartedPoint + editionGO.transform.position;
             }
-            
-            // editionGO.transform.position += direction;
+
             editionGO.transform.position = destination;
             dragStartedPoint = currentPoint;
         }
@@ -404,7 +403,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         gizmoManager.HideGizmo();
         RenderSettings.fog = true;
         avatarRenderer.SetAvatarVisibility(true);
-     
     }
 
     public override void StartMultiSelection()
