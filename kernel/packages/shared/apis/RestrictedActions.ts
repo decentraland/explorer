@@ -89,7 +89,7 @@ export class RestrictedActions extends ExposableAPI {
   }
 
   private isPositionValid(position: Vector3) {
-    return isWorldPositionInsideParcels(this.getSceneData().scene.parcels, position)
+    return this.parcelIdentity.isPortableExperience || isWorldPositionInsideParcels(this.getSceneData().scene.parcels, position)
   }
 }
 

@@ -85,7 +85,8 @@ export async function getPortableExperienceFromS3Bucket(sceneUrn: string) {
         sceneUrn: sceneUrn,
         baseUrl: baseUrl,
         mappings: mappingsResponse.contents,
-        sceneJsonData: scene
+        sceneJsonData: scene,
+        mappingsResponse: mappingsResponse
       })
     } else {
       throw new Error('Could not load scene.json')
@@ -100,8 +101,9 @@ export async function getLoadablePortableExperience(data: {
   baseUrl: string
   mappings: ContentMapping[]
   sceneJsonData: SceneJsonData
+  mappingsResponse: MappingsResponse
 }): Promise<EnvironmentData<LoadablePortableExperienceScene>> {
-  const { sceneUrn, baseUrl, mappings, sceneJsonData } = data
+  const { sceneUrn, baseUrl, mappings, sceneJsonData, mappingsResponse } = data
 
   const sceneJsons = mappings.filter((land) => land.file === 'scene.json')
   if (!sceneJsons.length) {
@@ -128,7 +130,14 @@ export async function getLoadablePortableExperience(data: {
       baseUrl: baseUrl,
       baseUrlBundles: '',
       contents: mappings,
-      icon: sceneJsonData.display?.favicon
+      icon: sceneJsonData.display?.favicon,
+      land: {
+        baseUrl: baseUrl,
+        baseUrlBundles: '',
+        cid: sceneUrn,
+        sceneJsonData: sceneJsonData,
+        mappingsResponse: mappingsResponse
+      }
     }
   }
 }
