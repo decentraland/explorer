@@ -394,7 +394,7 @@ public class BuilderInWorldController : MonoBehaviour
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
         parcelUnityMiddlePoint = BuilderInWorldUtils.CalculateUnityMiddlePoint(sceneToEdit);
-        
+
         if (HUDController.i.builderInWorldMainHud != null)
         {
             HUDController.i.builderInWorldMainHud.SetVisibility(true);

@@ -130,8 +130,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
-        SaveOriginalMaterialAndSetEditMaterials();
-        DCL.Environment.i.world.sceneBoundsChecker.AddPersistent(rootEntity);
+        SetEditMaterial();
     }
 
     public void Deselect()
@@ -141,8 +140,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = false;
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
-
-        DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
+        
         SetOriginalMaterials();
     }
 
@@ -179,6 +177,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
 
         associatedCatalogItem = null;
+        DCL.Environment.i.world.sceneBoundsChecker.EvaluateEntityPosition(rootEntity);
         DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         OnDelete?.Invoke(this);
     }
@@ -323,6 +322,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
+        SaveOriginalMaterial();
+        
         DCL.Environment.i.world.sceneBoundsChecker.AddPersistent(rootEntity);
     }
 
@@ -397,13 +398,15 @@ public class DCLBuilderInWorldEntity : EditableEntity
         gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
     }
 
-    void SaveOriginalMaterialAndSetEditMaterials()
+    void SaveOriginalMaterial()
     {
         if (rootEntity.meshesInfo == null ||
             rootEntity.meshesInfo.renderers == null ||
-            rootEntity.meshesInfo.renderers.Length < 1) return;
+            rootEntity.meshesInfo.renderers.Length < 1)
+            return;
 
-        if (isNFT) return;
+        if (isNFT)
+            return;
 
         int totalMaterials = 0;
         foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
@@ -412,6 +415,30 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (!isNFT || (isNFT && originalMaterials == null))
             originalMaterials = new Material[totalMaterials];
 
+        int matCont = 0;
+        foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
+        {
+            for (int i = 0; i < renderer.sharedMaterials.Length; i++)
+            {
+                if (isNFT && matCont == 0)
+                {
+                    matCont++;
+                    continue;
+                }
+                originalMaterials[matCont] = renderer.materials[i];
+                matCont++;
+            }
+        }
+    }
+
+    void SetEditMaterial()
+    {
+        if (rootEntity.meshesInfo == null ||
+            rootEntity.meshesInfo.renderers == null ||
+            rootEntity.meshesInfo.renderers.Length < 1) return;
+
+        if (isNFT) return;
+        
         int matCont = 0;
         foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
         {
@@ -425,9 +452,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
                     matCont++;
                     continue;
                 }
-
-                if (renderer.materials[i] != editMaterial)
-                    originalMaterials[matCont] = renderer.materials[i];
 
                 materials[i] = editMaterial;
                 matCont++;
@@ -444,10 +468,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void OnShapeUpdate(DecentralandEntity decentralandEntity)
     {
-        if (IsSelected)
-            SaveOriginalMaterialAndSetEditMaterials();
-
         ShapeInit();
+        
+        if (IsSelected)
+            SetEditMaterial();
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
