@@ -1112,9 +1112,9 @@ MonoBehaviour:
   allWearables: 0
   testWearables: 0
   enableTutorial: 0
-  builderInWorld: 1
+  builderInWorld: 0
   soloScene: 1
-  questsEnabled: 0
+  questsEnabled: 1
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
