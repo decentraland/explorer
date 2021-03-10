@@ -32,11 +32,11 @@ public class BuildModeHUDController : IHUD
 
     internal IBuildModeHUDView view;
 
-    internal bool areExtraButtonsVisible = false,
-                  isControlsVisible = false, 
-                  isEntityListVisible = false, 
-                  isSceneLimitInfoVisibile = false,
-                  isCatalogOpen = false;
+    internal bool areExtraButtonsVisible = false;
+    internal bool isControlsVisible = false;
+    internal bool isEntityListVisible = false;
+    internal bool isSceneLimitInfoVisibile = false;
+    internal bool isCatalogOpen = false;
 
     internal BuildModeHUDInitializationModel controllers;
     internal CatalogItemDropController catalogItemDropController;
