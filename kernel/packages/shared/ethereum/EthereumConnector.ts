@@ -1,9 +1,10 @@
 import { Eth } from 'web3x/eth'
 import { WebSocketProvider } from 'eth-connect'
 import { LegacyProviderAdapter } from 'web3x/providers'
-import { ETHEREUM_NETWORK, ethereumConfigurations } from '../../config'
 import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
-import { ChainId, connection, ConnectionResponse, ProviderType } from 'decentraland-connect'
+import { connection, ConnectionResponse, ProviderType } from 'decentraland-connect'
+import { ChainId } from '@dcl/schemas'
+import { ETHEREUM_NETWORK, ethereumConfigurations } from '../../config'
 
 export class EthereumConnector {
   private type: ProviderType | null = null
