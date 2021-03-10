@@ -36,13 +36,17 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
 
     private void Awake()
     {
-        var TEMPcontroller = new BuilderProjectsPanelController(this);
-
         closeButton.onClick.AddListener(() => OnClosePressed?.Invoke());
         createSceneButton.onClick.AddListener(() => OnCreateScenePressed?.Invoke());
         importSceneButton.onClick.AddListener(() => OnImportScenePressed?.Invoke());
 
         contextMenu.Hide();
+    }
+
+    private void Start()
+    {
+        var TEMPcontroller = new BuilderProjectsPanelController(this);
+
     }
 
     private void SubmenuScenesDirty()
