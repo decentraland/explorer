@@ -1,5 +1,6 @@
 using DCL.Controllers;
 using NSubstitute;
+using NSubstitute.Extensions;
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,8 +31,9 @@ namespace Tests.BuildModeHUDControllers
                 topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
             };
 
-            buildModeHUDController = new BuildModeHUDController();
-            buildModeHUDController.Initialize(Substitute.For<IBuildModeHUDView>(), testControllers);
+            buildModeHUDController = Substitute.ForPartsOf<BuildModeHUDController>();
+            buildModeHUDController.Configure().CreateView().Returns(info => Substitute.For<IBuildModeHUDView>());
+            buildModeHUDController.Initialize(testControllers);
         }
 
         [TearDown]
@@ -83,7 +85,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.view = null;
 
             // Act
-            buildModeHUDController.ConfigureMainView(Substitute.For<IBuildModeHUDView>());
+            buildModeHUDController.CreateMainView();
 
             // Assert
             Assert.NotNull(buildModeHUDController.view, "The view is null!");
@@ -205,8 +207,8 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             Assert.AreEqual(
-                !buildModeHUDController.controllers.sceneCatalogController.IsCatalogOpen(), 
-                buildModeHUDController.isCatalogOpen, 
+                !buildModeHUDController.controllers.sceneCatalogController.IsCatalogOpen(),
+                buildModeHUDController.isCatalogOpen,
                 "The isCatalogOpen does not match!");
         }
 

@@ -44,7 +44,7 @@ public class BuildModeHUDController : IHUD
     public void Initialize()
     {
         CreateBuildModeControllers();
-        ConfigureMainView(BuildModeHUDView.Create());
+        CreateMainView();
         ConfigureSceneCatalogController();
         ConfigureEntityInformationController();
         ConfigureFirstPersonModeController();
@@ -58,12 +58,12 @@ public class BuildModeHUDController : IHUD
         ConfigureCatalogItemDropController();
     }
 
-    public void Initialize(IBuildModeHUDView buildModeHUDView, BuildModeHUDInitializationModel controllers)
+    public void Initialize(BuildModeHUDInitializationModel controllers)
     {
         this.controllers = controllers;
         catalogItemDropController = new CatalogItemDropController();
         
-        ConfigureMainView(buildModeHUDView);
+        CreateMainView();
     }
 
     internal void CreateBuildModeControllers()
@@ -88,9 +88,9 @@ public class BuildModeHUDController : IHUD
         catalogItemDropController = new CatalogItemDropController();
     }
 
-    internal void ConfigureMainView(IBuildModeHUDView newView)
+    internal void CreateMainView()
     {
-        view = newView;
+        view = CreateView();
         
         if (view.viewGO != null)
             view.viewGO.SetActive(false);
@@ -377,4 +377,6 @@ public class BuildModeHUDController : IHUD
     {
         catalogItemDropController.CatalogitemDropped();
     }
+
+    internal virtual IBuildModeHUDView CreateView() => BuildModeHUDView.Create();
 }
