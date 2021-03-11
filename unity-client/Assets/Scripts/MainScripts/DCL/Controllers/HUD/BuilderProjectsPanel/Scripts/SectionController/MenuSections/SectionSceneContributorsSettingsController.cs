@@ -65,16 +65,10 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
             
             if (string.IsNullOrEmpty(userId))
                 continue;
-            
-            UserProfile profile = UserProfileController.userProfilesCatalog.Get(userId);
-            if (profile != null)
-            {
-                view.AddUser(profile);
-            }
-            else
-            {
-                Debug.Log($"PROFILE NOT FOUND!!!! {userId}");
-            }
+
+            var userView = view.AddUser(userId);
+            UserProfileFetcher.i.FetchProfile(userId)
+                              .Then(userProfile => userView.SetUserProfile(userProfile));
         }
         usersSearchPromptController.SetUsersInRolList(sceneCardView.sceneData.contributors);
         view.SetEmptyList(false);

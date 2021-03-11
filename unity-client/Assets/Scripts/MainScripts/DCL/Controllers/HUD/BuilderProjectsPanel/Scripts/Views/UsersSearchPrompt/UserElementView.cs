@@ -134,6 +134,15 @@ internal class UserElementView : MonoBehaviour, ISearchable, ISortable<UserEleme
         }
     }
 
+    public void ClearThumbnail()
+    {
+        if (profile != null)
+        {
+            profile.OnFaceSnapshotReadyEvent -= SetThumbnail;
+        }
+        userThumbnail.texture = null;
+    }
+
     private void SetHighlighted()
     {
         highLight.gameObject.SetActive(true);

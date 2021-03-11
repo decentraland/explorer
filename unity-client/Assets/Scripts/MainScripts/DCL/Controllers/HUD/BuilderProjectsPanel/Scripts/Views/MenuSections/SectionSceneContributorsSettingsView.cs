@@ -55,21 +55,23 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
         labelContributor.text = string.Format(contributorLabelFormat, count);
     }
 
-    public void AddUser(UserProfile profile)
+    public UserElementView AddUser(string userId)
     {
-        if (!userElementViews.TryGetValue(profile.userId, out UserElementView view))
+        if (!userElementViews.TryGetValue(userId, out UserElementView view))
         {
             view = GetView();
-            view.SetUserProfile(profile);
+            view.SetUserName(userId);
+            view.SetUserId(userId);
             view.SetAlwaysHighlighted(false);
             view.SetIsAdded(true);
             view.SetActive(true);
         }
         
-        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(profile.userId);
+        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
         view.SetBlocked(isBlocked);
+        return view;
     }
-
+    
     void PoolView(UserElementView view)
     {
         view.SetActive(false);
@@ -87,6 +89,7 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
         else
         {
             userView = Instantiate(userElementView, usersContainer);
+            userView.ClearThumbnail();
         }
 
         return userView;
