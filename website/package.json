@@ -28,7 +28,7 @@
     ]
   },
   "dependencies": {
-    "decentraland-dapps": "^9.6.2",
+    "decentraland-dapps": "^9.7.0",
     "decentraland-kernel": "^1.0.0-20201110235712.commit-d953141",
     "md5-file": "^5.0.0",
     "react": "^16.13.1",
