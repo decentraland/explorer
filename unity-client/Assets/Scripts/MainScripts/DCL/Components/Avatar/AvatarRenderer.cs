@@ -10,6 +10,12 @@ namespace DCL
 {
     public class AvatarRenderer : MonoBehaviour
     {
+        public enum VisualCue
+        {
+            CleanedUp,
+            Loaded
+        }
+
         private const int MAX_RETRIES = 5;
 
         public Material defaultMaterial;
@@ -17,11 +23,9 @@ namespace DCL
         public Material eyebrowMaterial;
         public Material mouthMaterial;
 
-        public bool useFx = false;
-        public GameObject fxSpawnPrefab;
-
         private AvatarModel model;
 
+        public event Action<VisualCue> OnVisualCue;
         public event Action OnSuccessEvent;
         public event Action OnFailEvent;
 
@@ -117,6 +121,7 @@ namespace DCL
 
             CatalogController.RemoveWearablesInUse(wearablesInUse);
             wearablesInUse.Clear();
+            OnVisualCue?.Invoke(VisualCue.CleanedUp);
         }
 
         void CleanUpUnusedItems()
@@ -314,13 +319,9 @@ namespace DCL
 
             yield return new WaitUntil(() => eyebrowsController.isReady && eyesController.isReady && mouthController.isReady);
 
-            if (useFx && (bodyIsDirty || wearablesIsDirty))
+            if (bodyIsDirty || wearablesIsDirty)
             {
-                var particles = Instantiate(fxSpawnPrefab);
-                var particlesFollow = particles.AddComponent<FollowObject>();
-                particles.transform.position += transform.position;
-                particlesFollow.target = transform;
-                particlesFollow.offset = fxSpawnPrefab.transform.position;
+                OnVisualCue?.Invoke(VisualCue.Loaded);
             }
 
             bodyShapeController.SetActiveParts(unusedCategories.Contains(Categories.LOWER_BODY), unusedCategories.Contains(Categories.UPPER_BODY), unusedCategories.Contains(Categories.FEET));
