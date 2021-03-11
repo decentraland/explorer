@@ -142,8 +142,8 @@ internal class UserElementView : MonoBehaviour, ISearchable, ISortable<UserEleme
 
     private void SetNormal()
     {
-        highLight.gameObject.SetActive(true);
-        buttonsContainer.SetActive(true);
+        highLight.gameObject.SetActive(false);
+        buttonsContainer.SetActive(false);
     }
 
     int ISortable<UserElementView>.Compare(string sortType, bool isDescendingOrder, UserElementView other)

@@ -19,6 +19,7 @@ internal interface ISceneData
     bool isMatureContent { get; }
     bool allowVoiceChat { get; }
     string description { get; }
+    string[] contributors { get; }
 }
 
 [Serializable]
@@ -40,6 +41,7 @@ internal class SceneData : ISceneData
     public bool isMatureContent;
     public bool allowVoiceChat;
     public string description;
+    public string[] contributors;
 
     Vector2Int ISceneData.coords => coords;
     Vector2Int ISceneData.size => size;
@@ -57,4 +59,5 @@ internal class SceneData : ISceneData
     bool ISceneData.isMatureContent => isMatureContent;
     bool ISceneData.allowVoiceChat => allowVoiceChat;
     string ISceneData.description => description;
+    string[] ISceneData.contributors => contributors;
 }

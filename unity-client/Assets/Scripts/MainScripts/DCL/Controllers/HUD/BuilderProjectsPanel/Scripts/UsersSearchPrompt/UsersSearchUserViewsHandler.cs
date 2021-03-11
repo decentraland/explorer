@@ -12,7 +12,7 @@ internal class UsersSearchUserViewsHandler : IDisposable
     private readonly UserElementView userElementViewBase;
     private readonly Transform elementsParent;
     
-    private List<string> usersInRolList;
+    private string[] usersInRolList;
     
     public int userElementViewCount => userElementViews.Count;
 
@@ -87,7 +87,7 @@ internal class UsersSearchUserViewsHandler : IDisposable
         }
     }
 
-    public void SetUsersInRolList(List<string> usersId)
+    public void SetUsersInRolList(string[] usersId)
     {
         usersInRolList = usersId;
         foreach (KeyValuePair<string, UserElementView> keyValuePair in userElementViews)

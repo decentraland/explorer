@@ -52,7 +52,7 @@ internal class UsersSearchPromptController: IDisposable
         view.Hide();
     }
 
-    public void SetUsersInRolList(List<string> usersId)
+    public void SetUsersInRolList(string[] usersId)
     {
         userViewsHandler.SetUsersInRolList(usersId);
     }

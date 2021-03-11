@@ -20,4 +20,5 @@ public struct BuilderProjectsPanelSceneDataMock
     public bool isMatureContent;
     public bool allowVoiceChat;
     public string description;
+    public string[] contributors;
 }

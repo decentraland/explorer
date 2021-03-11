@@ -48,7 +48,36 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     {
         view.SetActive(false);
     }
+    
     void ISelectSceneListener.OnSelectScene(SceneCardView sceneCardView)
     {
+        if (sceneCardView.sceneData.contributors == null || sceneCardView.sceneData.contributors.Length == 0)
+        {
+            view.SetEmptyList(true);
+            view.SetContributorsCount(0);
+            return;
+        }
+
+        string userId;
+        for (int i = 0; i < sceneCardView.sceneData.contributors.Length; i++)
+        {
+            userId = sceneCardView.sceneData.contributors[i];
+            
+            if (string.IsNullOrEmpty(userId))
+                continue;
+            
+            UserProfile profile = UserProfileController.userProfilesCatalog.Get(userId);
+            if (profile != null)
+            {
+                view.AddUser(profile);
+            }
+            else
+            {
+                Debug.Log($"PROFILE NOT FOUND!!!! {userId}");
+            }
+        }
+        usersSearchPromptController.SetUsersInRolList(sceneCardView.sceneData.contributors);
+        view.SetEmptyList(false);
+        view.SetContributorsCount(sceneCardView.sceneData.contributors.Length);
     }
 }

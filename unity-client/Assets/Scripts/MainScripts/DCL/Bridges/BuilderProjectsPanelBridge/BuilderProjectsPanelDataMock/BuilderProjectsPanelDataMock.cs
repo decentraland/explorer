@@ -112,6 +112,22 @@ public class BuilderProjectsPanelDataMock
             new [] { "ALLOW_TO_TRIGGER_AVATAR_EMOTE", "ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE" }
         };
 
+        // string[][] contributors =
+        // {
+        //     null, new []{"0x6bb7a5acab90a40161ee43b094460ba621dfb47f","0x9db59920d3776c2d8a3aa0cbd7b16d81fcab0a2b"},
+        //     new []{"0x51777c0b8dba8b4dfe8a1c3d0a1edaa5b139b4e0"}, 
+        //     new []{"0x51777c0b8dba8b4dfe8a1c3d0a1edaa5b139b4e0","0x9db59920d3776c2d8a3aa0cbd7b16d81fcab0a2b"}, 
+        //     new []{"0x6bb7a5acab90a40161ee43b094460ba621dfb47f", "0xe100cf9c1d7a96a7790cb54b86658572c755ab2f"},
+        //     new []{"0x6bb7a5acab90a40161ee43b094460ba621dfb47f", "0xe100cf9c1d7a96a7790cb54b86658572c755ab2f",
+        //         "0x51777c0b8dba8b4dfe8a1c3d0a1edaa5b139b4e0", "0x9db59920d3776c2d8a3aa0cbd7b16d81fcab0a2b"}
+        // };
+        
+        string[][] contributors =
+        {
+            new []{"0x6bb7a5acab90a40161ee43b094460ba621dfb47f", "0xe100cf9c1d7a96a7790cb54b86658572c755ab2f",
+                "0x51777c0b8dba8b4dfe8a1c3d0a1edaa5b139b4e0", "0x9db59920d3776c2d8a3aa0cbd7b16d81fcab0a2b"}
+        };
+
         for (int i = 0; i < deployedCount; i++)
         {
             int role = Random.Range(0, 3);
@@ -133,7 +149,8 @@ public class BuilderProjectsPanelDataMock
                 allowVoiceChat = Random.Range(0, 1) == 1,
                 isMatureContent = Random.Range(0, 5) < 1,
                 requiredPermissions = permissions[Random.Range(0,permissions.Length)],
-                description = Random.Range(0, 1) == 1? "Some description" : ""
+                description = Random.Range(0, 1) == 1? "Some description" : "",
+                contributors = contributors[Random.Range(0,contributors.Length)],
             });
         }
         for (int i = 0; i < projectCount; i++)
@@ -156,7 +173,8 @@ public class BuilderProjectsPanelDataMock
                 allowVoiceChat = Random.Range(0, 1) == 1,
                 isMatureContent = Random.Range(0, 5) < 1,
                 requiredPermissions = permissions[Random.Range(0,permissions.Length)],
-                description = Random.Range(0, 1) == 1? "Some description" : ""
+                description = Random.Range(0, 1) == 1? "Some description" : "",
+                contributors = contributors[Random.Range(0,contributors.Length)],
             });
         }
     }
