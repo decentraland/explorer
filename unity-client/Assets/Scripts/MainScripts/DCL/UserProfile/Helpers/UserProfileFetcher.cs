@@ -5,10 +5,8 @@ using DCL.Interface;
 
 public class UserProfileFetcher : IDisposable
 {
-    public static UserProfileFetcher i => instance ?? (instance = new UserProfileFetcher());
-    private static UserProfileFetcher instance;
-
     private readonly Dictionary<string, List<Promise<UserProfile>>> pendingPromises = new Dictionary<string, List<Promise<UserProfile>>>();
+    private bool isSubscribedToCatalog = false;
 
     /// <summary>
     /// Look for profile in userProfilesCatalog or request kernel for a profile if not available
@@ -26,6 +24,7 @@ public class UserProfileFetcher : IDisposable
 
         if (!pendingPromises.TryGetValue(userId, out List<Promise<UserProfile>> promisesForUserId))
         {
+            SubscribeToCatalogIfNeeded();
             promisesForUserId = new List<Promise<UserProfile>>();
             pendingPromises.Add(userId, promisesForUserId);
             WebInterface.RequestUserProfile(userId);
@@ -35,14 +34,19 @@ public class UserProfileFetcher : IDisposable
         return promise;
     }
     
-    public UserProfileFetcher()
-    {
-        UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
-    }
-
     public void Dispose()
     {
-        UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
+        if (isSubscribedToCatalog)
+            UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
+    }
+
+    private void SubscribeToCatalogIfNeeded()
+    {
+        if (isSubscribedToCatalog)
+            return;
+
+        isSubscribedToCatalog = true;
+        UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
     }
 
     private void OnProfileAddedToCatalog(string userId, UserProfile profile)
