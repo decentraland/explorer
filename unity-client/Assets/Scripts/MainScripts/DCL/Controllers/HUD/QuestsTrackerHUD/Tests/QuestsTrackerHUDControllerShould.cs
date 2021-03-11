@@ -278,7 +278,7 @@ namespace Tests.QuestsTrackerHUD
             yield return null; //wait for all the instantiation/destruction of items to be done by unity
 
             Assert.AreEqual( "questName", hudView.currentEntries[MOCK_QUEST_ID].questTitle.text);
-            Assert.AreEqual( $"sectionName1 - 0,0%", hudView.currentEntries[MOCK_QUEST_ID].sectionTitle.text);
+            Assert.AreEqual( $"sectionName1 - {0:0.0}%", hudView.currentEntries[MOCK_QUEST_ID].sectionTitle.text);
             Assert.AreEqual( 0, hudView.currentEntries[MOCK_QUEST_ID].progress.fillAmount);
             Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].tasksContainer.childCount);
 
@@ -319,7 +319,7 @@ namespace Tests.QuestsTrackerHUD
             yield return null; //wait for all the instantiation/destruction of items to be done by unity
 
             Assert.AreEqual( "questName", hudView.currentEntries[MOCK_QUEST_ID].questTitle.text);
-            Assert.AreEqual( $"sectionName1 - 0,0%", hudView.currentEntries[MOCK_QUEST_ID].sectionTitle.text);
+            Assert.AreEqual( $"sectionName1 - {0:0.0}%", hudView.currentEntries[MOCK_QUEST_ID].sectionTitle.text);
             Assert.AreEqual( 0, hudView.currentEntries[MOCK_QUEST_ID].progress.fillAmount);
             Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].tasksContainer.childCount);
 
