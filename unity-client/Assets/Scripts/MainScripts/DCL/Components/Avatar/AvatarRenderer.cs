@@ -316,7 +316,11 @@ namespace DCL
 
             if (useFx && (bodyIsDirty || wearablesIsDirty))
             {
-                Instantiate(fxSpawnPrefab).transform.position += transform.position;
+                var particles = Instantiate(fxSpawnPrefab);
+                var particlesFollow = particles.AddComponent<FollowObject>();
+                particles.transform.position += transform.position;
+                particlesFollow.target = transform;
+                particlesFollow.offset = fxSpawnPrefab.transform.position;
             }
 
             bodyShapeController.SetActiveParts(unusedCategories.Contains(Categories.LOWER_BODY), unusedCategories.Contains(Categories.UPPER_BODY), unusedCategories.Contains(Categories.FEET));

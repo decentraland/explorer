@@ -4,10 +4,8 @@ using UnityEngine;
 
 public class FollowObject : MonoBehaviour
 {
+    public Vector3 offset;
     public Transform target;
 
-    void LateUpdate()
-    {
-        transform.position = target.position;
-    }
+    void LateUpdate() { transform.position = target.position + offset; }
 }
