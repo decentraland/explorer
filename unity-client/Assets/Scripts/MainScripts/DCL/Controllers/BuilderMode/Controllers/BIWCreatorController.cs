@@ -33,7 +33,7 @@ public class BIWCreatorController : BIWController
 
     private InputAction_Trigger.Triggered createLastSceneObjectDelegate;
 
-    private readonly Dictionary<string, GameObject> loadingGameObjectsDict = new Dictionary<string, GameObject>();
+    private readonly Dictionary<string, GameObject> loadingGameObjects = new Dictionary<string, GameObject>();
 
     private void Start()
     {
@@ -51,11 +51,11 @@ public class BIWCreatorController : BIWController
     
     public void Clean()
     {
-        foreach (GameObject gameObject in loadingGameObjectsDict.Values)
+        foreach (GameObject gameObject in loadingGameObjects.Values)
         {
             GameObject.Destroy(gameObject);
         }
-        loadingGameObjectsDict.Clear();
+        loadingGameObjects.Clear();
     }
 
     public override void Init()
@@ -164,15 +164,15 @@ public class BIWCreatorController : BIWController
     {
         entity.rootEntity.OnShapeUpdated += OnRealShapeLoaded;
         GameObject loadingPlaceHolder = GameObject.Instantiate(loadingObjectPrefab, entity.gameObject.transform);
-        loadingGameObjectsDict.Add(entity.rootEntity.entityId, loadingPlaceHolder);
+        loadingGameObjects.Add(entity.rootEntity.entityId, loadingPlaceHolder);
     }
     
     private void OnRealShapeLoaded(DecentralandEntity entity)
     {
         entity.OnShapeUpdated -= OnRealShapeLoaded;
 
-        GameObject loadingPlaceHolder = loadingGameObjectsDict[entity.entityId];
-        loadingGameObjectsDict.Remove(entity.entityId);
+        GameObject loadingPlaceHolder = loadingGameObjects[entity.entityId];
+        loadingGameObjects.Remove(entity.entityId);
         GameObject.Destroy(loadingPlaceHolder);
     }
     

@@ -5,8 +5,8 @@ namespace DCL.Configuration
 
     public static class BuilderInWorldSettings
     {
-        public static string BASE_URL_CATALOG =             "https://builder-api.decentraland.org/v1/storage/contents/";
-        public static string BASE_URL_ASSETS_PACK =         "https://builder-api.decentraland.org/v1/assetPacks";
+        public static string BASE_URL_CATALOG = "https://builder-api.decentraland.org/v1/storage/contents/";
+        public static string BASE_URL_ASSETS_PACK = "https://builder-api.decentraland.org/v1/assetPacks";
         public static string BASE_URL_ASSETS_PACK_CONTENT = "https://builder-api.decentraland.org/v1/storage/assetPacks/";
 
         public static int SELECTION_LAYER = LayerMask.NameToLayer("Selection");

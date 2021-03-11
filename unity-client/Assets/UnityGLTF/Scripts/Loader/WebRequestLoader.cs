@@ -96,7 +96,7 @@ namespace UnityGLTF.Loader
 
                 if (www.downloadedBytes > int.MaxValue)
                 {
-                    Debug.LogError("Stream is larger than can be copied into byte array");
+                    Debug.LogError("Stream is too big for a byte array");
                     yield break;
                 }
             }

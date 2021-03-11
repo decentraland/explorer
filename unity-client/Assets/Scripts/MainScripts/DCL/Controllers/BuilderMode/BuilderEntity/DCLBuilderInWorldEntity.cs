@@ -346,27 +346,27 @@ public class DCLBuilderInWorldEntity : EditableEntity
             DefaultAnimationSample(0);
         }
     }
-    
+
     private void DefaultAnimationStop()
     {
-        if (meshAnimations != null)
+        if (meshAnimations == null)
+            return;
+        
+        for (int i = 0; i < meshAnimations.Length; i++)
         {
-            for (int i = 0; i < meshAnimations.Length; i++)
-            {
-                meshAnimations[i].Stop();
-            }
+            meshAnimations[i].Stop();
         }
     }
 
     private void DefaultAnimationSample(float time)
     {
-        if (meshAnimations != null)
+        if (meshAnimations == null)
+            return;
+        
+        for (int i = 0; i < meshAnimations.Length; i++)
         {
-            for (int i = 0; i < meshAnimations.Length; i++)
-            {
-                meshAnimations[i].Stop();
-                meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, time);
-            }
+            meshAnimations[i].Stop();
+            meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, time);
         }
     }
 
