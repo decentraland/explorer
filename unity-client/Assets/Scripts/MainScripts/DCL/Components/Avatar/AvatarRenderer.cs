@@ -18,7 +18,6 @@ namespace DCL
         public Material mouthMaterial;
 
         public bool useFx = false;
-        public GameObject fxChangeWearablePrefab;
         public GameObject fxSpawnPrefab;
 
         private AvatarModel model;
@@ -318,7 +317,6 @@ namespace DCL
             if (useFx && (bodyIsDirty || wearablesIsDirty))
             {
                 Instantiate(fxSpawnPrefab).transform.position += transform.position;
-                Instantiate(fxChangeWearablePrefab).transform.position += transform.position;
             }
 
             bodyShapeController.SetActiveParts(unusedCategories.Contains(Categories.LOWER_BODY), unusedCategories.Contains(Categories.UPPER_BODY), unusedCategories.Contains(Categories.FEET));

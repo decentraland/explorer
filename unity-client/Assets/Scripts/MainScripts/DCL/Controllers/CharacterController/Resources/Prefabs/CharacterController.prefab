@@ -162,9 +162,7 @@ MonoBehaviour:
   eyebrowMaterial: {fileID: 2100000, guid: db9e974bee285614b8ea2d8832d1a563, type: 2}
   mouthMaterial: {fileID: 2100000, guid: aa8f029bd537edb44b72b4737ca9b81d, type: 2}
   useFx: 1
-  fxChangeWearablePrefab: {fileID: 5176108183135982478, guid: 519485bde70494ec39ff527893b93d54,
-    type: 3}
-  fxSpawnPrefab: {fileID: 4461659837953358430, guid: a409a73da0b844cf28dfb4e8066f3fdd,
+  fxSpawnPrefab: {fileID: 6770550120539757041, guid: 672039325d1b74c9aab6155bf97154bd,
     type: 3}
 --- !u!1 &4323503760844960451
 GameObject:
