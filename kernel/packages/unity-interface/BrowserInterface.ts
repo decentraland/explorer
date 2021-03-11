@@ -13,7 +13,7 @@ import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar } from 'shared/profiles/types'
+import { Avatar, ProfileType } from 'shared/profiles/types'
 import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
@@ -53,6 +53,8 @@ import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
 declare const DCL: any
 
@@ -503,6 +505,12 @@ export class BrowserInterface {
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
     return !array || array.length === 0 ? undefined : array
+  }
+
+  public RequestUserProfile(userIdPayload: { value: string }) {
+    ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
+      .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
+      .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
   }
 }
 
