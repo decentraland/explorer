@@ -27,12 +27,16 @@ public class BuilderInWorldController : MonoBehaviour
     public bool activeFeature = false;
     public bool bypassLandOwnershipCheck = false;
 
+    [Header("DesignVariables")]
+    [SerializeField]
+    private float distanceToDisableBuilderInWorld = 45f;
+
     [Header("Scene References")]
     public GameObject cameraParentGO;
 
     public GameObject cursorGO;
     public InputController inputController;
-    public PlayerAvatarController avatarRenderer;
+    public GameObject[] groundVisualsGO;
 
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
@@ -51,6 +55,9 @@ public class BuilderInWorldController : MonoBehaviour
 
     private ParcelScene sceneToEdit;
 
+    [Header("Project References")]
+    public Material skyBoxMaterial;
+
     [HideInInspector]
     public bool isBuilderInWorldActivated = false;
 
@@ -68,6 +75,8 @@ public class BuilderInWorldController : MonoBehaviour
     private bool catalogAdded = false;
     private bool sceneReady = false;
     private bool isInit = false;
+    private Material previousSkyBoxMaterial;
+    private Vector3 parcelUnityMiddlePoint;
 
     private void Awake()
     {
@@ -103,7 +112,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         if (checkerInsideSceneOptimizationCounter >= 60)
         {
-            if (!sceneToEdit.IsInsideSceneBoundaries(DCLCharacterController.i.characterPosition))
+            if (Vector3.Distance(DCLCharacterController.i.characterPosition.unityPosition,parcelUnityMiddlePoint) >= distanceToDisableBuilderInWorld)
                 ExitEditMode();
             checkerInsideSceneOptimizationCounter = 0;
         }
@@ -159,6 +168,7 @@ public class BuilderInWorldController : MonoBehaviour
         hudConfig.visible = false;
         HUDController.i.CreateHudElement<BuildModeHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_MAIN);
         HUDController.i.CreateHudElement<BuilderInWorldInititalHUDController>(hudConfig, HUDController.HUDElementID.BUILDER_IN_WORLD_INITIAL);
+        HUDController.i.builderInWorldMainHud.Initialize();
 
         HUDController.i.builderInWorldInititalHud.OnEnterEditMode += TryStartEnterEditMode;
         HUDController.i.builderInWorldMainHud.OnTutorialAction += StartTutorial;
@@ -168,7 +178,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
-        ExternalCallsController.i.GetContentAsString(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived);
+        CoroutineStarter.Start(BuilderInWorldUtils.MakeGetCall(BuilderInWorldSettings.BASE_URL_ASSETS_PACK, CatalogReceived));
         BuilderInWorldNFTController.i.Initialize();
         BuilderInWorldNFTController.i.OnNFTUsageChange += OnNFTUsageChange;
     }
@@ -394,6 +404,7 @@ public class BuilderInWorldController : MonoBehaviour
 
         sceneToEdit.SetEditMode(true);
         cursorGO.SetActive(false);
+        parcelUnityMiddlePoint = BuilderInWorldUtils.CalculateUnityMiddlePoint(sceneToEdit);
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
@@ -414,6 +425,13 @@ public class BuilderInWorldController : MonoBehaviour
             SetupNewScene();
 
         isBuilderInWorldActivated = true;
+
+        foreach (var groundVisual in groundVisualsGO)
+        {
+            groundVisual.SetActive(false);
+        }
+        previousSkyBoxMaterial = RenderSettings.skybox;
+        RenderSettings.skybox = skyBoxMaterial;
     }
 
     public void ExitEditMode()
@@ -428,16 +446,12 @@ public class BuilderInWorldController : MonoBehaviour
         outlinerController.CancelAllOutlines();
 
         cursorGO.SetActive(true);
-        builderInWorldEntityHandler.ExitFromEditMode();
-
+ 
         sceneToEdit.SetEditMode(false);
-        biwModeController.ExitEditMode();
 
         DCLCharacterController.OnPositionSet -= ExitAfterCharacterTeleport;
 
         builderInWorldBridge.ExitKernelEditMode(sceneToEdit);
-
-        avatarRenderer.SetAvatarVisibility(true);
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
@@ -447,8 +461,14 @@ public class BuilderInWorldController : MonoBehaviour
 
         Environment.i.world.sceneController.DeactivateBuilderInWorldEditScene();
         ExitBiwControllers();
+        
+        foreach (var groundVisual in groundVisualsGO)
+        {
+            groundVisual.SetActive(true);
+        }
 
         isBuilderInWorldActivated = false;
+        RenderSettings.skybox = previousSkyBoxMaterial;
     }
 
     public void StartBiwControllers()
