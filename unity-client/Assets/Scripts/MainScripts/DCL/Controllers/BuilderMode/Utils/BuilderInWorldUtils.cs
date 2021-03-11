@@ -15,6 +15,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using DCL.Controllers;
 using UnityEngine.Networking;
+using UnityEngine.Events;
 
 public static partial class BuilderInWorldUtils
 {
@@ -348,5 +349,18 @@ public static partial class BuilderInWorldUtils
                 }
             }
         }
+    }
+
+    public static void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
+    {
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = eventType;
+        entry.callback.AddListener(call);
+        eventTrigger.triggers.Add(entry);
+    }
+
+    public static void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
+    {
+        eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }
 }
