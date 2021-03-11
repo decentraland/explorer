@@ -26,12 +26,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         Vector3 toPosition = Vector3.zero;
         Vector3 direction = toPosition - fromPosition;
 
-        bool groundLayerFound = false;
-
-        if (Physics.Raycast(fromPosition,direction, out hit, BuilderInWorldGodMode.RAYCAST_MAX_DISTANCE, godMode.groundLayer))
-        {
-            groundLayerFound = true;
-        }
+        bool groundLayerFound = Physics.Raycast(fromPosition,direction, out hit, BuilderInWorldGodMode.RAYCAST_MAX_DISTANCE, godMode.groundLayer);
 
         UnityEngine.Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
 
@@ -47,8 +42,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
     public void SceneReferences()
     {
         BuilderInWorldController builderInWorldController = Resources.FindObjectsOfTypeAll<BuilderInWorldController>()[0];
-
-        Assert.IsNotNull(builderInWorldController.avatarRenderer,"References on the builder-in-world prefab are null, check them all!");
+        
         Assert.IsNotNull(builderInWorldController.cursorGO, "References on the builder-in-world prefab are null, check them all!");
         Assert.IsNotNull(builderInWorldController.inputController, "References on the builder-in-world prefab are null, check them all!");
         Assert.IsNotNull(builderInWorldController.cameraParentGO, "References on the builder-in-world prefab are null, check them all!");
@@ -56,7 +50,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
 
         BuilderInWorldGodMode godMode = builderInWorldController.GetComponentInChildren<BuilderInWorldGodMode>();
 
-
+        Assert.IsNotNull(godMode.avatarRenderer,"References on the builder-in-world prefab are null, check them all!");
         Assert.IsNotNull(godMode.mouseCatcher, "References on the builder-in-world god mode are null, check them all!");
         Assert.IsNotNull(godMode.cameraController, "References on the builder-in-world god mode are null, check them all!");
         Assert.IsNotNull(godMode.freeCameraController, "References on the builder-in-world god mode are null, check them all!");
@@ -82,7 +76,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         Assert.IsTrue(biwEntity.entityUniqueId == scene.sceneData.id + scene.entities[entityId].entityId, "Entity id is not created correctly, this can lead to weird behaviour");
 
         SmartItemComponent.Model model = new SmartItemComponent.Model();
-        string jsonModel = JsonUtility.ToJson(model);
+        string jsonModel = JsonConvert.SerializeObject(model);
         scene.EntityComponentCreateOrUpdateFromUnity(entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
         Assert.IsTrue(biwEntity.HasSmartItemComponent());
@@ -94,7 +88,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         Assert.IsNotNull(dclName);
 
         string newName = "TestingName";
-        dclName.ForceSetNewName(newName);
+        dclName.SetNewName(newName);
         Assert.AreEqual(newName, biwEntity.GetDescriptiveName());
 
 
@@ -148,18 +142,18 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         {
             //Note (Adrian): We can't wait to set the component 1 frame in production, so we set it like production
             smartItemComponent = ((SmartItemComponent)baseComponent);
-            smartItemComponent.SetModel(model);
+            smartItemComponent.UpdateFromModel(model);
         }
         else
         {
             Assert.Fail("Smart Compoenent not found");
         }
 
-        Assert.AreEqual(testInt, smartItemComponent.model.values[intKey]);
-        Assert.AreEqual(testFloat, smartItemComponent.model.values[testFloatKey]);
-        Assert.AreEqual(testString, smartItemComponent.model.values[stringKey]);
+        Assert.AreEqual(testInt, smartItemComponent.GetValues()[intKey]);
+        Assert.AreEqual(testFloat, smartItemComponent.GetValues()[testFloatKey]);
+        Assert.AreEqual(testString, smartItemComponent.GetValues()[stringKey]);
 
-        Dictionary<object, object> onClickDictFromComponent = (Dictionary<object, object>)smartItemComponent.model.values[onClickKey];
+        Dictionary<object, object> onClickDictFromComponent = (Dictionary<object, object>)smartItemComponent.GetValues()[onClickKey];
         Assert.AreEqual(testFloat, onClickDictFromComponent[testFloatKey]);
     }
 

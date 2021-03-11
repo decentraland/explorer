@@ -32,6 +32,7 @@ namespace DCL.Huds.QuestsPanel
         internal readonly Dictionary<string, QuestsPanelEntry> questEntries =  new Dictionary<string, QuestsPanelEntry>();
         private bool layoutRebuildRequested = false;
         internal readonly List<string> questsToBeAdded = new List<string>();
+        private bool isDestroyed = false;
 
         internal static QuestsPanelHUDView Create()
         {
@@ -137,6 +138,12 @@ namespace DCL.Huds.QuestsPanel
 
         public bool isVisible => gameObject.activeSelf;
 
-        public void Dispose() { Destroy(gameObject); }
+        public void Dispose()
+        {
+            if (!isDestroyed)
+                Destroy(gameObject);
+        }
+
+        private void OnDestroy() { isDestroyed = true; }
     }
 }
