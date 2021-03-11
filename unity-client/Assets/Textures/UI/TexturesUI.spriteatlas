@@ -168,6 +168,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: dcdf9cf86d2644e82b7712af42584c7c, type: 3}
   - {fileID: 21300000, guid: 87bf14092660947eb9909d5772886279, type: 3}
   - {fileID: 21300000, guid: 314ecf09e6e7447d9aa0421d996754cc, type: 3}
+  - {fileID: 21300000, guid: 1c63e329c16184c1bb493ada5f85c91b, type: 3}
   - {fileID: 21300000, guid: e36f3569fbdef4c609c33f7a1cebace5, type: 3}
   - {fileID: 21300000, guid: 247c07994d33848d5be25ccac8f0538d, type: 3}
   - {fileID: 21300000, guid: 604176a988cdc416ca612d5e95156254, type: 3}
@@ -208,6 +209,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: fe4a00db663ed4d3abe06167ea5b3317, type: 3}
   - {fileID: 21300000, guid: 07a400eb205264a4f9e2aad5d599b4a3, type: 3}
   - {fileID: 21300000, guid: 64b96cebc797f4e75ad10e05ff68466f, type: 3}
+  - {fileID: 21300000, guid: b1fdbdeb128d64657bb427b7c93fbab4, type: 3}
   - {fileID: 21300000, guid: f2ec09fb4873a47c88fb58023134399a, type: 3}
   - {fileID: 21300000, guid: a3a66afb0cf6d49da8b0b2b18f7b20d0, type: 3}
   - {fileID: 21300000, guid: 90be4f1cf715b4378954ea0510aeb9ba, type: 3}
@@ -355,6 +357,7 @@ SpriteAtlas:
   - EmailHeader
   - DecentralandLogo
   - RejectButtonHover
+  - ContainerOutlineRadius12
   - Ellipse128
   - MessageIcon
   - FriendsIcon
@@ -395,6 +398,7 @@ SpriteAtlas:
   - Compass
   - BackpackIconNew
   - ChatIcon
+  - RectRadiusStroke16
   - PlayerIconStroke
   - ContainerRadius8
   - ManaContainer
