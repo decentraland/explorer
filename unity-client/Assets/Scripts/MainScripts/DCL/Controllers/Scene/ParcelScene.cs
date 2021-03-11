@@ -565,7 +565,7 @@ namespace DCL.Controllers
             }
 
             BaseComponent newComponent = null;
-            IRuntimeComponentFactory factory = ownerController.componentFactory;
+            IPoolableComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
@@ -578,14 +578,12 @@ namespace DCL.Controllers
                 }
 
                 OnPointerEvent.Model model = (OnPointerEvent.Model) data;
-
                 type = model.type;
 
                 if (!entity.uuidComponents.ContainsKey(type))
                 {
                     //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
                     var go = new GameObject("UUID Component");
-                    go.transform.SetParent(entity.gameObject.transform, false);
 
                     switch (type)
                     {
@@ -599,6 +597,8 @@ namespace DCL.Controllers
                             newComponent = go.GetOrCreateComponent<OnPointerUp>();
                             break;
                     }
+
+                    go.transform.SetParent(entity.gameObject.transform, false);
 
                     if (newComponent != null)
                     {
@@ -693,7 +693,7 @@ namespace DCL.Controllers
             }
 
             BaseComponent newComponent = null;
-            IRuntimeComponentFactory factory = ownerController.componentFactory;
+            IPoolableComponentFactory factory = ownerController.componentFactory;
             Assert.IsNotNull(factory, "Factory is null?");
 
             // HACK: (Zak) will be removed when we separate each
@@ -845,79 +845,79 @@ namespace DCL.Controllers
             {
                 case CLASS_ID.BOX_SHAPE:
                 {
-                    newComponent = new BoxShape(this);
+                    newComponent = new BoxShape();
                     break;
                 }
 
                 case CLASS_ID.SPHERE_SHAPE:
                 {
-                    newComponent = new SphereShape(this);
+                    newComponent = new SphereShape();
                     break;
                 }
 
                 case CLASS_ID.CONE_SHAPE:
                 {
-                    newComponent = new ConeShape(this);
+                    newComponent = new ConeShape();
                     break;
                 }
 
                 case CLASS_ID.CYLINDER_SHAPE:
                 {
-                    newComponent = new CylinderShape(this);
+                    newComponent = new CylinderShape();
                     break;
                 }
 
                 case CLASS_ID.PLANE_SHAPE:
                 {
-                    newComponent = new PlaneShape(this);
+                    newComponent = new PlaneShape();
                     break;
                 }
 
                 case CLASS_ID.GLTF_SHAPE:
                 {
-                    newComponent = new GLTFShape(this);
+                    newComponent = new GLTFShape();
                     break;
                 }
 
                 case CLASS_ID.NFT_SHAPE:
                 {
-                    newComponent = new NFTShape(this);
+                    newComponent = new NFTShape();
                     break;
                 }
 
                 case CLASS_ID.OBJ_SHAPE:
                 {
-                    newComponent = new OBJShape(this);
+                    newComponent = new OBJShape();
                     break;
                 }
 
                 case CLASS_ID.BASIC_MATERIAL:
                 {
-                    newComponent = new BasicMaterial(this);
+                    newComponent = new BasicMaterial();
                     break;
                 }
 
                 case CLASS_ID.PBR_MATERIAL:
                 {
-                    newComponent = new PBRMaterial(this);
+                    newComponent = new PBRMaterial();
                     break;
                 }
 
                 case CLASS_ID.AUDIO_CLIP:
                 {
-                    newComponent = new DCLAudioClip(this);
+                    newComponent = new DCLAudioClip();
                     break;
                 }
 
                 case CLASS_ID.TEXTURE:
                 {
-                    newComponent = new DCLTexture(this);
+                    newComponent = new DCLTexture();
                     break;
                 }
 
                 case CLASS_ID.UI_INPUT_TEXT_SHAPE:
                 {
-                    newComponent = new UIInputText(this);
+                    newComponent = new UIInputText();
                     break;
                 }
 
@@ -926,7 +926,7 @@ namespace DCL.Controllers
                 {
                     if (GetSharedComponent<UIScreenSpace>() == null)
                     {
-                        newComponent = new UIScreenSpace(this);
+                        newComponent = new UIScreenSpace();
                     }
 
                     break;
@@ -934,67 +934,67 @@ namespace DCL.Controllers
 
                 case CLASS_ID.UI_CONTAINER_RECT:
                 {
-                    newComponent = new UIContainerRect(this);
+                    newComponent = new UIContainerRect();
                     break;
                 }
 
                 case CLASS_ID.UI_SLIDER_SHAPE:
                 {
-                    newComponent = new UIScrollRect(this);
+                    newComponent = new UIScrollRect();
                     break;
                 }
 
                 case CLASS_ID.UI_CONTAINER_STACK:
                 {
-                    newComponent = new UIContainerStack(this);
+                    newComponent = new UIContainerStack();
                     break;
                 }
 
                 case CLASS_ID.UI_IMAGE_SHAPE:
                 {
-                    newComponent = new UIImage(this);
+                    newComponent = new UIImage();
                     break;
                 }
 
                 case CLASS_ID.UI_TEXT_SHAPE:
                 {
-                    newComponent = new UIText(this);
+                    newComponent = new UIText();
                     break;
                 }
 
                 case CLASS_ID.VIDEO_CLIP:
                 {
-                    newComponent = new DCLVideoClip(this);
+                    newComponent = new DCLVideoClip();
                     break;
                 }
 
                 case CLASS_ID.VIDEO_TEXTURE:
                 {
-                    newComponent = new DCLVideoTexture(this);
+                    newComponent = new DCLVideoTexture();
                     break;
                 }
 
                 case CLASS_ID.FONT:
                 {
-                    newComponent = new DCLFont(this);
+                    newComponent = new DCLFont();
                     break;
                 }
 
                 case CLASS_ID.NAME:
                 {
-                    newComponent = new DCLName(this);
+                    newComponent = new DCLName();
                     break;
                 }
 
                 case CLASS_ID.LOCKED_ON_EDIT:
                 {
-                    newComponent = new DCLLockedOnEdit(this);
+                    newComponent = new DCLLockedOnEdit();
                     break;
                 }
 
                 case CLASS_ID.VISIBLE_ON_EDIT:
                 {
-                    newComponent = new DCLVisibleOnEdit(this);
+                    newComponent = new DCLVisibleOnEdit();
                     break;
                 }
 
@@ -1005,6 +1005,7 @@ namespace DCL.Controllers
 
             if (newComponent != null)
             {
+                newComponent.scene = this;
                 newComponent.id = id;
                 disposableComponents.Add(id, newComponent);
                 OnAddSharedComponent?.Invoke(id, newComponent);
@@ -1105,7 +1106,7 @@ namespace DCL.Controllers
             if (newComponent != null && newComponent.isRoutineRunning)
                 yieldInstruction = newComponent.yieldInstruction;
         }
-        
+
         public BaseDisposable SharedComponentUpdate(string id, BaseModel model)
         {
             if (disposableComponents.TryGetValue(id, out BaseDisposable disposableComponent))

@@ -26,7 +26,7 @@ namespace DCL.Components
         private Model previousModel;
         private Model cachedModel;
 
-        public ParametrizedShape(IParcelScene scene) : base(scene)
+        public ParametrizedShape()
         {
             OnAttach += OnShapeAttached;
             OnDetach += OnShapeDetached;
@@ -34,13 +34,13 @@ namespace DCL.Components
 
         public override void UpdateFromModel(BaseModel newModel)
         {
-            cachedModel = (Model)newModel;
+            cachedModel = (Model) newModel;
             base.UpdateFromModel(newModel);
         }
 
         void UpdateRenderer(DecentralandEntity entity, Model model = null)
         {
-            if(model == null)
+            if (model == null)
                 model = (T) this.model;
             if (visibilityDirty)
             {
@@ -117,13 +117,14 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(BaseModel newModelRaw)
         {
-            var newModel = (T)newModelRaw;
+            var newModel = (T) newModelRaw;
 
             if (previousModel != null)
             {
                 visibilityDirty = newModel.visible != previousModel.visible;
                 collisionsDirty = newModel.withCollisions != previousModel.withCollisions || newModel.isPointerBlocker != previousModel.isPointerBlocker;
             }
+
             bool shouldGenerateMesh = ShouldGenerateNewMesh(newModel);
 
             //NOTE(Brian): Only generate meshes here if they already are attached to something.
@@ -145,12 +146,13 @@ namespace DCL.Components
                         collisionsDirty = cachedCollisionDirty;
 
                         var entity = iterator.Current;
-                        UpdateRenderer(entity,newModel);
+                        UpdateRenderer(entity, newModel);
 
                         entity.OnShapeUpdated?.Invoke(entity);
                     }
                 }
             }
+
             previousModel = newModel;
             return null;
         }

@@ -19,8 +19,8 @@ namespace DCL
         bool deferredMessagesDecoding { get; set; }
         bool prewarmSceneMessagesPool { get; set; }
         bool prewarmEntitiesPool { get; set; }
-        IRuntimeComponentFactory componentFactory { get; }
-        void Initialize(IRuntimeComponentFactory componentFactory);
+        IPoolableComponentFactory componentFactory { get; }
+        void Initialize(IPoolableComponentFactory componentFactory);
         void Start();
         void Dispose();
         void Update();
@@ -60,13 +60,13 @@ namespace DCL
     {
         public static bool VERBOSE = false;
 
-        public IRuntimeComponentFactory componentFactory { get; private set; }
+        public IPoolableComponentFactory componentFactory { get; private set; }
 
         public bool enabled { get; set; } = true;
 
         private Coroutine deferredDecodingCoroutine;
 
-        public void Initialize(IRuntimeComponentFactory componentFactory)
+        public void Initialize(IPoolableComponentFactory componentFactory)
         {
             sceneSortDirty = true;
             positionDirty = true;

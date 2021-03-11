@@ -15,7 +15,7 @@ namespace DCL
     {
         public static Main i { get; private set; }
 
-        public RuntimeComponentFactory componentFactory;
+        public PoolableComponentFactory componentFactory;
 
         public DebugConfig debugConfig;
 

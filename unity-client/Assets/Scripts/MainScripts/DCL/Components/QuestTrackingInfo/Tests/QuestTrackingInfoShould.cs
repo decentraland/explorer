@@ -20,7 +20,7 @@ public class QuestTrackingInfoShould : IntegrationTestSuite
         (
             sceneController: new SceneController(),
             state: new WorldState(),
-            componentFactory: RuntimeComponentFactory.Create()
+            componentFactory: PoolableComponentFactory.Create()
         );
     }
 

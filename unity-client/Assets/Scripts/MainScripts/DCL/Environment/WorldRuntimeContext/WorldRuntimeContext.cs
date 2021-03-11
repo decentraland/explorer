@@ -13,14 +13,14 @@ namespace DCL
         public readonly IPointerEventsController pointerEventsController;
         public readonly ISceneBoundsChecker sceneBoundsChecker;
         public readonly IWorldBlockersController blockersController;
-        public readonly IRuntimeComponentFactory componentFactory;
+        public readonly IPoolableComponentFactory componentFactory;
 
         public WorldRuntimeContext(IWorldState state,
             ISceneController sceneController,
             IPointerEventsController pointerEventsController,
             ISceneBoundsChecker sceneBoundsChecker,
             IWorldBlockersController blockersController,
-            IRuntimeComponentFactory componentFactory)
+            IPoolableComponentFactory componentFactory)
         {
             this.state = state;
             this.sceneController = sceneController;
