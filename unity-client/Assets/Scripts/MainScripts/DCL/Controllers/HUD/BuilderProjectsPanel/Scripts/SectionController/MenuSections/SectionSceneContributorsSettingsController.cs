@@ -11,6 +11,7 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
 
     private readonly SectionSceneContributorsSettingsView view;
     private readonly UsersSearchPromptController usersSearchPromptController;
+    private readonly UserProfileFetcher profileFetcher = new UserProfileFetcher();
 
     private ISceneData sceneData;
 
@@ -32,6 +33,7 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     public override void Dispose()
     {
         Object.Destroy(view.gameObject);
+        profileFetcher.Dispose();
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -67,8 +69,8 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
                 continue;
 
             var userView = view.AddUser(userId);
-            UserProfileFetcher.i.FetchProfile(userId)
-                              .Then(userProfile => userView.SetUserProfile(userProfile));
+            profileFetcher.FetchProfile(userId)
+                          .Then(userProfile => userView.SetUserProfile(userProfile));
         }
         usersSearchPromptController.SetUsersInRolList(sceneCardView.sceneData.contributors);
         view.SetEmptyList(false);
