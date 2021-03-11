@@ -83,8 +83,9 @@ export class RestrictedActions extends ExposableAPI {
   }
 
   private hasPermission(permission: Permission) {
-    if (this.parcelIdentity.isPortableExperience)
+    if (this.parcelIdentity.isPortableExperience) {
       return true
+    }
 
     const json = this.getSceneData()
     const list = json.requiredPermissions || []
