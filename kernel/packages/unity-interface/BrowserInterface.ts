@@ -29,7 +29,7 @@ import { sendMessage } from 'shared/chat/actions'
 import { updateFriendship, updateUserData } from 'shared/friends/actions'
 import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { fetchOwner, getAppNetwork } from 'shared/web3'
+import { fetchENSOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
 import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
@@ -40,7 +40,6 @@ import { unityInterface } from './UnityInterface'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
-
 import { GIFProcessor } from 'gif-processor/processor'
 import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
@@ -50,8 +49,10 @@ import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import Html from 'shared/Html'
 import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
 import { isGuest } from '../shared/ethereum/provider'
+import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
+import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
 
 declare const DCL: any
 
@@ -358,7 +359,7 @@ export class BrowserInterface {
     if (!found) {
       // if user profile was not found on server -> no connected web3, check if it's a claimed name
       const net = await getAppNetwork()
-      const address = await fetchOwner(ethereumConfigurations[net].names, userId)
+      const address = await fetchENSOwner(ethereumConfigurations[net].names, userId)
       if (address) {
         // if an address was found for the name -> set as user id & add that instead
         userId = address
@@ -375,6 +376,19 @@ export class BrowserInterface {
 
     globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+  }
+
+  public SearchENSOwner(data: { name: string; maxResults?: number }) {
+    const profilesPromise = fetchENSOwnerProfile(data.name, data.maxResults)
+
+    profilesPromise
+      .then((profiles) => {
+        unityInterface.SetENSOwnerQueryResult(data.name, profiles)
+      })
+      .catch((error) => {
+        unityInterface.SetENSOwnerQueryResult(data.name, undefined)
+        defaultLogger.error(error)
+      })
   }
 
   public async JumpIn(data: WorldPosition) {
@@ -464,6 +478,10 @@ export class BrowserInterface {
     } else {
       globalThis.globalStore.dispatch(unmutePlayers(data.usersId))
     }
+  }
+
+  public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
+    await killPortableExperienceScene(data.portableExperienceId)
   }
 
   public RequestWearables(data: {

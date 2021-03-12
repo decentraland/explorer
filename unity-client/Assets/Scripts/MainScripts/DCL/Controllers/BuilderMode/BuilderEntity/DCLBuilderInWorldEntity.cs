@@ -74,6 +74,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     private bool isShapeComponentSet = false;
 
+    private Animation[] meshAnimations;
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -108,6 +109,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (associatedCatalogItem != null)
             return associatedCatalogItem;
 
+        if (rootEntity == null)
+            return null;
+
         IAssetCatalogReferenceHolder catalogHolder = rootEntity.TryGetComponent<IAssetCatalogReferenceHolder>();
         if (catalogHolder == null)
             return null;
@@ -129,8 +133,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         IsSelected = true;
         originalParent = rootEntity.gameObject.transform.parent;
-        SaveOriginalMaterialAndSetEditMaterials();
-        DCL.Environment.i.world.sceneBoundsChecker.AddPersistent(rootEntity);
+        SetEditMaterial();
     }
 
     public void Deselect()
@@ -141,7 +144,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
         
-        DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         SetOriginalMaterials();
     }
 
@@ -165,30 +167,32 @@ public class DCLBuilderInWorldEntity : EditableEntity
         Deselect();
         DestroyColliders();
 
-        if(isNFT)
+        if (isNFT)
         {
             foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
             {
-                if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NFT_SHAPE)
+                if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
                 {
-                    BuilderInWorldNFTController.i.StopUsingNFT(((NFTShape.Model)keyValuePairBaseDisposable.Value.GetModel()).assetId);
+                    BuilderInWorldNFTController.i.StopUsingNFT(((NFTShape.Model) keyValuePairBaseDisposable.Value.GetModel()).assetId);
                     break;
                 }
             }
         }
 
+        associatedCatalogItem = null;
+        DCL.Environment.i.world.sceneBoundsChecker.EvaluateEntityPosition(rootEntity);
         DCL.Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(rootEntity);
         OnDelete?.Invoke(this);
     }
 
     public void DestroyColliders()
-    {   
+    {
         foreach (List<GameObject> entityColliderGameObject in collidersGameObjectDictionary.Values)
         {
-            for(int i = entityColliderGameObject.Count-1; i > 0;i--)
+            for (int i = entityColliderGameObject.Count - 1; i > 0; i--)
             {
                 Destroy(entityColliderGameObject[i]);
-            }      
+            }
         }
 
         collidersGameObjectDictionary.Clear();
@@ -200,6 +204,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool HasSmartItemComponent()
     {
+        if (rootEntity == null)
+            return false;
+
         return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
     }
 
@@ -226,11 +233,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
                 return ((DCLLockedOnEdit.Model) keyValuePairBaseDisposable.Value.GetModel()).isLocked;
             }
         }
+
         return isFloor;
     }
 
@@ -240,7 +248,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
         {
-            if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.LOCKED_ON_EDIT)
+            if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
                 ((DCLLockedOnEdit) keyValuePairBaseDisposable.Value).SetIsLocked(isLocked);
                 foundComponent = true;
@@ -249,9 +257,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (!foundComponent)
         {
-            DCLLockedOnEdit entityLocked = (DCLLockedOnEdit)rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
+            ParcelScene scene = rootEntity.scene as ParcelScene;
+            DCLLockedOnEdit entityLocked = (DCLLockedOnEdit) scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.LOCKED_ON_EDIT));
             entityLocked.SetIsLocked(isLocked);
-            rootEntity.scene.SharedComponentAttach(rootEntity.entityId, entityLocked.id);
+            scene.SharedComponentAttach(rootEntity.entityId, entityLocked.id);
         }
     }
 
@@ -261,25 +270,26 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public void SetDescriptiveName(string newName)
     {
-
         if (rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent))
         {
-           ((DCLName) nameComponent).ForceSetNewName(newName);
+           ((DCLName) nameComponent).SetNewName(newName);
         }
         else
         {
-            DCLName name = (DCLName) rootEntity.scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
-            name.ForceSetNewName(newName);
-            rootEntity.scene.SharedComponentAttach(rootEntity.entityId, name.id);
+            ParcelScene scene = rootEntity.scene as ParcelScene;
+            DCLName name = (DCLName) scene.SharedComponentCreate(Guid.NewGuid().ToString(), Convert.ToInt32(CLASS_ID.NAME));
+            name.SetNewName(newName);
+            scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
+
         onStatusUpdate?.Invoke(this);
     }
 
     public string GetDescriptiveName()
     {
-        if (rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent))
+        if (rootEntity!= null && rootEntity.TryGetSharedComponent(CLASS_ID.NAME, out BaseDisposable nameComponent))
         {
-            return ((DCLName.Model)nameComponent.GetModel()).value;
+            return ((DCLName.Model) nameComponent.GetModel()).value;
         }
 
         return "";
@@ -300,13 +310,17 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (isFloor)
             IsLocked = true;
+        
         if (IsEntityAVoxel())
             SetEntityAsVoxel();
+        
+        HandleAnimation();
+
         if(isNFT)
         {
             foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
             {
-                if (keyValuePairBaseDisposable.Value.GetClassId() == (int)CLASS_ID.NFT_SHAPE)
+                if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
                 {
                     BuilderInWorldNFTController.i.UseNFT(((NFTShape.Model) keyValuePairBaseDisposable.Value.GetModel()).assetId);
                     break;
@@ -314,8 +328,48 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
+        SaveOriginalMaterial();
+        
         DCL.Environment.i.world.sceneBoundsChecker.AddPersistent(rootEntity);
     }
+
+    private void HandleAnimation()
+    {
+        // We don't want animation to be running on editor
+        meshAnimations = GetComponentsInChildren<Animation>();
+        if (HasSmartItemComponent())
+        {
+            DefaultAnimationStop();
+        }
+        else
+        {
+            DefaultAnimationSample(0);
+        }
+    }
+
+    private void DefaultAnimationStop()
+    {
+        if (meshAnimations == null)
+            return;
+        
+        for (int i = 0; i < meshAnimations.Length; i++)
+        {
+            meshAnimations[i].Stop();
+        }
+    }
+
+    private void DefaultAnimationSample(float time)
+    {
+        if (meshAnimations == null)
+            return;
+        
+        for (int i = 0; i < meshAnimations.Length; i++)
+        {
+            meshAnimations[i].Stop();
+            meshAnimations[i].clip?.SampleAnimation(meshAnimations[i].gameObject, time);
+        }
+    }
+
 
     void SetOriginalMaterials()
     {
@@ -350,19 +404,47 @@ public class DCLBuilderInWorldEntity : EditableEntity
         gameObject.tag = BuilderInWorldSettings.VOXEL_TAG;
     }
 
-    void SaveOriginalMaterialAndSetEditMaterials()
+    void SaveOriginalMaterial()
     {
-        if (rootEntity.meshesInfo.renderers == null && rootEntity.meshesInfo.renderers.Length < 1) return;
+        if (rootEntity.meshesInfo == null ||
+            rootEntity.meshesInfo.renderers == null ||
+            rootEntity.meshesInfo.renderers.Length < 1)
+            return;
 
-        if (isNFT) return;
+        if (isNFT)
+            return;
 
         int totalMaterials = 0;
         foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
             totalMaterials += renderer.materials.Length;
 
-        if(!isNFT || (isNFT && originalMaterials == null))
+        if (!isNFT || (isNFT && originalMaterials == null))
             originalMaterials = new Material[totalMaterials];
 
+        int matCont = 0;
+        foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
+        {
+            for (int i = 0; i < renderer.sharedMaterials.Length; i++)
+            {
+                if (isNFT && matCont == 0)
+                {
+                    matCont++;
+                    continue;
+                }
+                originalMaterials[matCont] = renderer.materials[i];
+                matCont++;
+            }
+        }
+    }
+
+    void SetEditMaterial()
+    {
+        if (rootEntity.meshesInfo == null ||
+            rootEntity.meshesInfo.renderers == null ||
+            rootEntity.meshesInfo.renderers.Length < 1) return;
+
+        if (isNFT) return;
+        
         int matCont = 0;
         foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
         {
@@ -376,9 +458,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
                     matCont++;
                     continue;
                 }
-
-                if (renderer.materials[i] != editMaterial)
-                    originalMaterials[matCont] = renderer.materials[i];
 
                 materials[i] = editMaterial;
                 matCont++;
@@ -395,10 +474,10 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     void OnShapeUpdate(DecentralandEntity decentralandEntity)
     {
-        if (IsSelected)
-            SaveOriginalMaterialAndSetEditMaterials();
-
         ShapeInit();
+        
+        if (IsSelected)
+            SetEditMaterial();
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
@@ -427,7 +506,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         for (int i = 0; i < meshInfo.renderers.Length; i++)
         {
             GameObject entityColliderChildren = new GameObject(entity.entityId);
-            entityColliderChildren.layer = BuilderInWorldSettings.COLLIDER_SELECTION_LAYER;      
+            entityColliderChildren.layer = BuilderInWorldSettings.COLLIDER_SELECTION_LAYER;
 
             Transform t = entityColliderChildren.transform;
             t.SetParent(meshInfo.renderers[i].transform);
@@ -440,7 +519,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
                 Mesh meshColliderForSkinnedMesh = new Mesh();
                 (meshInfo.renderers[i] as SkinnedMeshRenderer).BakeMesh(meshColliderForSkinnedMesh);
                 meshCollider.sharedMesh = meshColliderForSkinnedMesh;
-                t.localScale = new Vector3(1 / entity.gameObject.transform.lossyScale.x, 1 / entity.gameObject.transform.lossyScale.y, 1 / entity.gameObject.transform.lossyScale.z);
+                t.localScale = new Vector3(1 / meshInfo.renderers[i].gameObject.transform.lossyScale.x, 1 / meshInfo.renderers[i].gameObject.transform.lossyScale.y, 1 / meshInfo.renderers[i].gameObject.transform.lossyScale.z);
             }
             else
             {
@@ -455,7 +534,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
                 if (collidersGameObjectDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId))
                     collidersGameObjectDictionary.Remove(entity.scene.sceneData.id + entity.entityId);
 
-            
 
                 collidersGameObjectDictionary.Add(entity.scene.sceneData.id + entity.entityId, colliderList);
 
@@ -463,17 +541,18 @@ public class DCLBuilderInWorldEntity : EditableEntity
             }
         }
 
-        if(!isNFT)
+        if (!isNFT)
             collidersGameObjectDictionary.Add(entity.scene.sceneData.id + entity.entityId, colliderList);
     }
 
-    bool IsEntityNFT()
+    public bool IsEntityNFT()
     {
         foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
                 return true;
         }
+
         return false;
     }
 

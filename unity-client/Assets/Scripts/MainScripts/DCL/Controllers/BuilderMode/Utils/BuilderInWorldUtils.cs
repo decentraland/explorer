@@ -2,6 +2,7 @@ using DCL;
 using DCL.Components;
 using DCL.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -12,16 +13,85 @@ using static ProtocolV2;
 using Environment = DCL.Environment;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using DCL.Controllers;
+using UnityEngine.Networking;
+using UnityEngine.Events;
 
 public static partial class BuilderInWorldUtils
 {
+    public static Vector3 SnapFilterEulerAngles(Vector3 vectorToFilter, float degrees)
+    {
+        vectorToFilter.x = ClosestNumber(vectorToFilter.x, degrees);
+        vectorToFilter.y = ClosestNumber(vectorToFilter.y, degrees);
+        vectorToFilter.z = ClosestNumber(vectorToFilter.z, degrees);
+
+        return vectorToFilter;
+    }
+    
+    static float ClosestNumber(float n, float m) 
+    { 
+        // find the quotient 
+        int q = Mathf.RoundToInt(n / m); 
+  
+        // 1st possible closest number 
+        float n1 = m * q;
+        
+        // 2nd possible closest number 
+        float n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1)); 
+  
+        // if true, then n1 is the required closest number 
+        if (Math.Abs(n - n1) < Math.Abs(n - n2)) 
+            return n1; 
+  
+        // else n2 is the required closest number 
+        return n2; 
+    } 
+    
+    public static Vector3 CalculateUnityMiddlePoint(ParcelScene parcelScene)
+    {
+        Vector3 position;
+
+        float totalX = 0f;
+        float totalY = 0f;
+        float totalZ = 0f;
+
+        int minX = int.MaxValue;
+        int minY = int.MaxValue;
+        int maxX = int.MinValue;
+        int maxY = int.MinValue;
+
+        foreach (Vector2Int vector in parcelScene.sceneData.parcels)
+        {
+            totalX += vector.x;
+            totalZ += vector.y;
+            if (vector.x < minX) minX = vector.x;
+            if (vector.y < minY) minY = vector.y;
+            if (vector.x > maxX) maxX = vector.x;
+            if (vector.y > maxY) maxY = vector.y;
+        }
+
+        float centerX = totalX / parcelScene.sceneData.parcels.Length;
+        float centerZ = totalZ / parcelScene.sceneData.parcels.Length;
+
+        position.x = centerX;
+        position.y = totalY;
+        position.z = centerZ;
+
+        position = WorldStateUtils.ConvertScenePositionToUnityPosition(parcelScene);
+
+        position.x += ParcelSettings.PARCEL_SIZE / 2;
+        position.z += ParcelSettings.PARCEL_SIZE / 2;
+
+        return position;
+    }
+    
     public static CatalogItem CreateFloorSceneObject()
     {
         CatalogItem floorSceneObject = new CatalogItem();
         floorSceneObject.id = BuilderInWorldSettings.FLOOR_ID;
 
         floorSceneObject.model = BuilderInWorldSettings.FLOOR_MODEL;
-        floorSceneObject.name  = BuilderInWorldSettings.FLOOR_NAME;
+        floorSceneObject.name = BuilderInWorldSettings.FLOOR_NAME;
 
         floorSceneObject.contents = new Dictionary<string, string>();
 
@@ -33,14 +103,15 @@ public static partial class BuilderInWorldUtils
         return floorSceneObject;
     }
 
-    public static Dictionary<string,string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
+    public static Dictionary<string, string> ConvertMappingsToDictionary(ContentServerUtils.MappingPair[] contents)
     {
         Dictionary<string, string> mappingDict = new Dictionary<string, string>();
 
-        foreach(ContentServerUtils.MappingPair mappingPair in contents)
+        foreach (ContentServerUtils.MappingPair mappingPair in contents)
         {
             mappingDict.Add(mappingPair.file, mappingPair.hash);
         }
+
         return mappingDict;
     }
 
@@ -149,7 +220,7 @@ public static partial class BuilderInWorldUtils
             {
                 EntityData.TransformComponent entityComponentModel = new EntityData.TransformComponent();
 
-                entityComponentModel.position = Environment.i.world.state.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
+                entityComponentModel.position = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position, entity.scene);
                 entityComponentModel.rotation = entity.gameObject.transform.localRotation.eulerAngles;
                 entityComponentModel.scale = entity.gameObject.transform.localScale;
 
@@ -170,7 +241,7 @@ public static partial class BuilderInWorldUtils
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {
                 EntityData.NFTComponent nFTComponent = new EntityData.NFTComponent();
-                NFTShape.Model model = (NFTShape.Model)keyValuePair.Value.GetModel();
+                NFTShape.Model model = (NFTShape.Model) keyValuePair.Value.GetModel();
 
                 nFTComponent.id = keyValuePair.Value.id;
                 nFTComponent.color = new ColorRepresentation(model.color);
@@ -200,6 +271,21 @@ public static partial class BuilderInWorldUtils
         return JsonConvert.DeserializeObject<EntityData>(json);
     }
 
+    public static List<DCLBuilderInWorldEntity> RemoveGroundEntities(List<DCLBuilderInWorldEntity> entityList)
+    {
+        List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();
+
+        foreach (DCLBuilderInWorldEntity entity in entityList)
+        {
+            if (entity.isFloor)
+                continue;
+
+            newList.Add(entity);
+        }
+
+        return newList;
+    }
+
     public static List<DCLBuilderInWorldEntity> FilterEntitiesBySmartItemComponentAndActions(List<DCLBuilderInWorldEntity> entityList)
     {
         List<DCLBuilderInWorldEntity> newList = new List<DCLBuilderInWorldEntity>();
@@ -224,5 +310,57 @@ public static partial class BuilderInWorldUtils
         original.offsetMin = rectTransformToCopy.offsetMin;
         original.sizeDelta = rectTransformToCopy.sizeDelta;
         original.pivot = rectTransformToCopy.pivot;
+    }
+    
+    public static IEnumerator MakeGetCall(string url, Action<string> functionToCall)
+    {
+        UnityWebRequest www = UnityWebRequest.Get(url);
+        UnityWebRequestAsyncOperation www2 = www.SendWebRequest();
+
+        bool retry = true;
+        int retryCont = 0;
+        while (retry)
+        {
+            retry = false;
+            while (!www2.isDone)
+            {
+                yield return null;
+            }
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+                if (retryCont < BuilderInWorldSettings.RETRY_AMOUNTS)
+                {
+                    retry = true;
+                    retryCont++;
+                }
+                else
+                {
+                    yield break;
+                }
+            }
+            else
+            {
+                if (functionToCall != null)
+                {
+                    byte[] byteArray = www.downloadHandler.data;
+                    string result = System.Text.Encoding.UTF8.GetString(byteArray);
+                    functionToCall?.Invoke(result);
+                }
+            }
+        }
+    }
+
+    public static void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)
+    {
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = eventType;
+        entry.callback.AddListener(call);
+        eventTrigger.triggers.Add(entry);
+    }
+
+    public static void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
+    {
+        eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
     }
 }

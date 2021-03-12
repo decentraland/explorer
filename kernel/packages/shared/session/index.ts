@@ -1,8 +1,7 @@
 import { setLoadingScreenVisible } from 'unity-interface/dcl'
+import { ProviderType } from 'decentraland-connect'
 
 import { disconnect, sendToMordor } from 'shared/comms'
-import { bringDownClientAndShowError } from 'shared/loading/ReportFatalError'
-import { NEW_LOGIN } from 'shared/loading/types'
 import { RootState, StoreContainer } from 'shared/store/rootTypes'
 
 import { getCurrentIdentity, hasWallet as hasWalletSelector } from './selectors'
@@ -14,7 +13,6 @@ import {
   saveToLocalStorage
 } from 'atomicHelpers/localStorage'
 import { StoredSession } from './types'
-import { ProviderType } from '../ethereum/ProviderType'
 
 declare const globalThis: StoreContainer
 
@@ -60,7 +58,7 @@ export const getLastSessionWithoutWallet: () => StoredSession | null = () => {
   }
 }
 
-export const getLastSessionByProvider = (provider: ProviderType): StoredSession | null => {
+export const getLastSessionByProvider = (provider: ProviderType | null): StoredSession | null => {
   const sessions: StoredSession[] = getKeysFromLocalStorage()
     .filter((k) => k.indexOf(SESSION_KEY_PREFIX) === 0)
     .map((id) => getFromLocalStorage(id))
@@ -99,12 +97,6 @@ export class Session {
 
   async redirectToSignUp() {
     window.location.search += '&show_wallet=1'
-  }
-
-  disable() {
-    bringDownClientAndShowError(NEW_LOGIN)
-    sendToMordor()
-    disconnect()
   }
 }
 
