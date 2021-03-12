@@ -51,7 +51,7 @@ namespace DCL
             //             more scalable.
 
             // World context systems
-            model.world.sceneController.Initialize(model.world.componentFactory);
+            model.world.sceneController.Initialize();
             model.world.pointerEventsController.Initialize();
             model.world.state.Initialize();
             model.world.blockersController.InitializeWithDefaultDependencies(

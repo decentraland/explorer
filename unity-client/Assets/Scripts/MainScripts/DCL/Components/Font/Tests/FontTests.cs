@@ -23,7 +23,7 @@ namespace Tests
             (
                 sceneController: new SceneController(),
                 state: new WorldState(),
-                componentFactory: PoolableComponentFactory.Create()
+                componentFactory: new RuntimeComponentFactory()
             );
         }
 

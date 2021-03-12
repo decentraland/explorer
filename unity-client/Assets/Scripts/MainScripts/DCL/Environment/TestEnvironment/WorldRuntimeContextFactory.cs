@@ -16,7 +16,7 @@ namespace DCL.Tests
             IPointerEventsController pointerEventsController = null,
             ISceneBoundsChecker sceneBoundsChecker = null,
             IWorldBlockersController worldBlockersController = null,
-            IPoolableComponentFactory componentFactory = null)
+            IRuntimeComponentFactory componentFactory = null)
         {
             return new WorldRuntimeContext(
                 state: state ?? Substitute.For<IWorldState>(),
@@ -24,7 +24,7 @@ namespace DCL.Tests
                 pointerEventsController: pointerEventsController ?? Substitute.For<IPointerEventsController>(),
                 sceneBoundsChecker: sceneBoundsChecker ?? Substitute.For<ISceneBoundsChecker>(),
                 blockersController: worldBlockersController ?? Substitute.For<IWorldBlockersController>(),
-                componentFactory: componentFactory ?? Substitute.For<IPoolableComponentFactory>());
+                componentFactory: componentFactory ?? Substitute.For<IRuntimeComponentFactory>());
         }
     }
 }

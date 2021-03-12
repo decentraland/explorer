@@ -65,7 +65,7 @@ namespace DCL
                 pointerEventsController: new PointerEventsController(),
                 sceneBoundsChecker: new SceneBoundsChecker(),
                 blockersController: new WorldBlockersController(),
-                componentFactory: componentFactory);
+                componentFactory: new RuntimeComponentFactory(componentFactory));
         }
 
         private void Start()

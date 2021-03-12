@@ -8,17 +8,23 @@ using UnityEngine;
 
 namespace DCL
 {
-    public class RuntimeComponentFactory
+    public interface IRuntimeComponentFactory
+    {
+        IComponent CreateComponent(int classId, object model);
+    }
+
+    public class RuntimeComponentFactory : IRuntimeComponentFactory
     {
         private delegate IComponent ComponentBuilder(int classId, object model);
 
         private Dictionary<int, ComponentBuilder> builders = new Dictionary<int, ComponentBuilder>();
 
-        private PoolableComponentFactory poolableComponentFactory;
+        public IPoolableComponentFactory poolableComponentFactory { get; private set; }
 
-        public RuntimeComponentFactory(PoolableComponentFactory poolableComponentFactory)
+        public RuntimeComponentFactory(IPoolableComponentFactory poolableComponentFactory = null)
         {
-            this.poolableComponentFactory = poolableComponentFactory;
+            this.poolableComponentFactory = poolableComponentFactory ?? PoolableComponentFactory.Create();
+            poolableComponentFactory.PrewarmPools();
 
             // Shapes
             builders.Add((int) CLASS_ID.BOX_SHAPE, CreateComponent<BoxShape>);
