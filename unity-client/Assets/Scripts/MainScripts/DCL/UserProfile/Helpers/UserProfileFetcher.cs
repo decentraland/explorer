@@ -36,8 +36,7 @@ public class UserProfileFetcher : IDisposable
     
     public void Dispose()
     {
-        if (isSubscribedToCatalog)
-            UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
+        UnSubscribeToCatalogIfNeeded();
     }
 
     private void SubscribeToCatalogIfNeeded()
@@ -47,6 +46,15 @@ public class UserProfileFetcher : IDisposable
 
         isSubscribedToCatalog = true;
         UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
+    }
+    
+    private void UnSubscribeToCatalogIfNeeded()
+    {
+        if (!isSubscribedToCatalog)
+            return;
+
+        isSubscribedToCatalog = false;
+        UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
     }
 
     private void OnProfileAddedToCatalog(string userId, UserProfile profile)
@@ -65,5 +73,10 @@ public class UserProfileFetcher : IDisposable
         }
 
         pendingPromises.Remove(userId);
+        
+        if (pendingPromises.Count == 0)
+        {
+            UnSubscribeToCatalogIfNeeded();
+        }
     }
 }
