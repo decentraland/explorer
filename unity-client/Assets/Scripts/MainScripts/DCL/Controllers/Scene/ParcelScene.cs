@@ -14,9 +14,9 @@ namespace DCL.Controllers
     {
         Transform GetSceneTransform();
         Dictionary<string, DecentralandEntity> entities { get; }
-        Dictionary<string, BaseDisposable> disposableComponents { get; }
+        Dictionary<string, ISharedComponent> disposableComponents { get; }
         T GetSharedComponent<T>() where T : class;
-        BaseDisposable GetSharedComponent(string id);
+        ISharedComponent GetSharedComponent(string id);
         event System.Action<DecentralandEntity> OnEntityAdded;
         event System.Action<DecentralandEntity> OnEntityRemoved;
         LoadParcelScenesMessage.UnityParcelScene sceneData { get; }
@@ -33,7 +33,7 @@ namespace DCL.Controllers
     {
         public static bool VERBOSE = false;
         public Dictionary<string, DecentralandEntity> entities { get; private set; } = new Dictionary<string, DecentralandEntity>();
-        public Dictionary<string, BaseDisposable> disposableComponents { get; private set; } = new Dictionary<string, BaseDisposable>();
+        public Dictionary<string, ISharedComponent> disposableComponents { get; private set; } = new Dictionary<string, ISharedComponent>();
         public LoadParcelScenesMessage.UnityParcelScene sceneData { get; protected set; }
 
         public HashSet<Vector2Int> parcels = new HashSet<Vector2Int>();
@@ -45,6 +45,9 @@ namespace DCL.Controllers
         public event System.Action<IComponent> OnComponentAdded;
         public event System.Action<IComponent> OnComponentRemoved;
         public event System.Action OnChanged;
+        public event System.Action<LoadParcelScenesMessage.UnityParcelScene> OnSetData;
+        public event System.Action<string, IComponent> OnAddSharedComponent;
+
 
         public ContentProvider contentProvider { get; protected set; }
 
@@ -105,8 +108,6 @@ namespace DCL.Controllers
             return isEditModeActive;
         }
 
-        public event System.Action<LoadParcelScenesMessage.UnityParcelScene> OnSetData;
-        public event System.Action<string, BaseDisposable> OnAddSharedComponent;
 
         public virtual void SetData(LoadParcelScenesMessage.UnityParcelScene data)
         {
@@ -469,12 +470,9 @@ namespace DCL.Controllers
                 return;
             }
 
-            BaseDisposable disposableComponent;
-
-            if (disposableComponents.TryGetValue(id, out disposableComponent)
-                && disposableComponent != null)
+            if (disposableComponents.TryGetValue(id, out ISharedComponent sharedComponent))
             {
-                disposableComponent.AttachTo(decentralandEntity);
+                sharedComponent.AttachTo(decentralandEntity);
             }
         }
 
@@ -577,13 +575,10 @@ namespace DCL.Controllers
 
                 if (newComponent != null)
                 {
-                    newComponent.scene = this;
-                    newComponent.entity = entity;
-
                     entity.components.Add(classId, newComponent);
                     OnComponentAdded?.Invoke(newComponent);
 
-                    newComponent.Initialize();
+                    newComponent.Initialize(this, entity);
                     newComponent.UpdateFromJSON((string) data);
                 }
             }
@@ -694,16 +689,13 @@ namespace DCL.Controllers
 
                 if (newComponent != null)
                 {
-                    newComponent.scene = this;
-                    newComponent.entity = entity;
-
                     // NOTE(Brian): We use GetClassId() here because the UUID components
                     //              change ID when their type gets resolved.
                     entity.components.Add((CLASS_ID_COMPONENT) newComponent.GetClassId(), newComponent);
 
                     OnComponentAdded?.Invoke(newComponent);
 
-                    newComponent.Initialize();
+                    newComponent.Initialize(this, entity);
                     newComponent.UpdateFromJSON(data);
                 }
             }
@@ -775,9 +767,9 @@ namespace DCL.Controllers
             return targetComponent as IEntityComponent;
         }
 
-        public BaseDisposable SharedComponentCreate(string id, int classId)
+        public ISharedComponent SharedComponentCreate(string id, int classId)
         {
-            if (disposableComponents.TryGetValue(id, out BaseDisposable component))
+            if (disposableComponents.TryGetValue(id, out ISharedComponent component))
                 return component;
 
             if (classId == (int) CLASS_ID.UI_SCREEN_SPACE_SHAPE || classId == (int) CLASS_ID.UI_FULLSCREEN_SHAPE)
@@ -787,28 +779,26 @@ namespace DCL.Controllers
             }
 
             var factory = Environment.i.world.componentFactory;
-            BaseDisposable newComponent = factory.CreateComponent(classId) as BaseDisposable;
+            ISharedComponent newComponent = factory.CreateComponent(classId) as ISharedComponent;
 
             if (newComponent == null)
                 return null;
 
-            newComponent.scene = this;
-            newComponent.id = id;
             disposableComponents.Add(id, newComponent);
             OnAddSharedComponent?.Invoke(id, newComponent);
+
+            newComponent.Initialize(this, id);
 
             return newComponent;
         }
 
         public void SharedComponentDispose(string id)
         {
-            BaseDisposable disposableComponent;
-
-            if (disposableComponents.TryGetValue(id, out disposableComponent))
+            if (disposableComponents.TryGetValue(id, out ISharedComponent sharedComponent))
             {
-                disposableComponent?.Dispose();
+                sharedComponent?.Dispose();
                 disposableComponents.Remove(id);
-                OnComponentRemoved?.Invoke(disposableComponent);
+                OnComponentRemoved?.Invoke(sharedComponent);
             }
         }
 
@@ -886,54 +876,53 @@ namespace DCL.Controllers
         public void SharedComponentUpdate(string id, string json, out CleanableYieldInstruction yieldInstruction)
         {
             ProfilingEvents.OnMessageDecodeStart?.Invoke("ComponentUpdated");
-            BaseDisposable newComponent = SharedComponentUpdate(id, json);
+            ISharedComponent newComponent = SharedComponentUpdate(id, json);
             ProfilingEvents.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
 
             yieldInstruction = null;
 
-            if (newComponent != null && newComponent.isRoutineRunning)
-                yieldInstruction = newComponent.yieldInstruction;
+            if (!(newComponent is IDelayedComponent delayedComponent))
+                return;
+
+            if (delayedComponent.isRoutineRunning)
+                yieldInstruction = delayedComponent.yieldInstruction;
         }
 
-        public BaseDisposable SharedComponentUpdate(string id, BaseModel model)
+        public ISharedComponent SharedComponentUpdate(string id, BaseModel model)
         {
-            if (disposableComponents.TryGetValue(id, out BaseDisposable disposableComponent))
+            if (disposableComponents.TryGetValue(id, out ISharedComponent sharedComponent))
             {
-                disposableComponent.UpdateFromModel(model);
-                return disposableComponent;
+                sharedComponent.UpdateFromModel(model);
+                return sharedComponent;
+            }
+
+            if (gameObject == null)
+            {
+                Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
             }
             else
             {
-                if (gameObject == null)
-                {
-                    Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
-                }
-                else
-                {
-                    Debug.LogError($"Unknown disposableComponent {id}", gameObject);
-                }
+                Debug.LogError($"Unknown disposableComponent {id}", gameObject);
             }
 
             return null;
         }
 
-        public BaseDisposable SharedComponentUpdate(string id, string json)
+        public ISharedComponent SharedComponentUpdate(string id, string json)
         {
-            if (disposableComponents.TryGetValue(id, out BaseDisposable disposableComponent))
+            if (disposableComponents.TryGetValue(id, out ISharedComponent disposableComponent))
             {
                 disposableComponent.UpdateFromJSON(json);
                 return disposableComponent;
             }
+
+            if (gameObject == null)
+            {
+                Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
+            }
             else
             {
-                if (gameObject == null)
-                {
-                    Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
-                }
-                else
-                {
-                    Debug.LogError($"Unknown disposableComponent {id}", gameObject);
-                }
+                Debug.LogError($"Unknown disposableComponent {id}", gameObject);
             }
 
             return null;
@@ -946,11 +935,9 @@ namespace DCL.Controllers
         }
 
 
-        public BaseDisposable GetSharedComponent(string componentId)
+        public ISharedComponent GetSharedComponent(string componentId)
         {
-            BaseDisposable result;
-
-            if (!disposableComponents.TryGetValue(componentId, out result))
+            if (!disposableComponents.TryGetValue(componentId, out ISharedComponent result))
             {
                 return null;
             }
@@ -1037,7 +1024,7 @@ namespace DCL.Controllers
 
                             Debug.Log($"Waiting for: {component.ToString()}");
 
-                            foreach (var entity in component.attachedEntities)
+                            foreach (var entity in component.GetAttachedEntities())
                             {
                                 var loader = LoadableShape.GetLoaderForEntity(entity);
 
