@@ -7,17 +7,17 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public interface IDelayedComponent : IComponent
+    public interface IDelayedComponent : IComponent, ICleanable
     {
         WaitForComponentUpdate yieldInstruction { get; }
         Coroutine routine { get; }
         bool isRoutineRunning { get; }
     }
 
-    public interface IEntityComponent : IComponent
+    public interface IEntityComponent : IComponent, ICleanable
     {
         DecentralandEntity entity { get; }
-        Transform transform { get; }
+        Transform GetTransform();
         void Initialize(IParcelScene scene, DecentralandEntity entity);
     }
 
@@ -29,9 +29,10 @@ namespace DCL.Components
         void DetachFromEveryEntity();
         void Initialize(IParcelScene scene, string id);
         HashSet<DecentralandEntity> GetAttachedEntities();
+        void CallWhenReady(Action<ISharedComponent> callback);
     }
 
-    public interface IComponent : ICleanable
+    public interface IComponent
     {
         IParcelScene scene { get; }
         string componentName { get; }
@@ -76,8 +77,6 @@ namespace DCL.Components
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 
         public IParcelScene scene { get; set; }
-
-        public string id { get; set; }
 
         public DecentralandEntity entity { get; set; }
 
@@ -146,5 +145,7 @@ namespace DCL.Components
         }
 
         public abstract int GetClassId();
+
+        public Transform GetTransform() => transform;
     }
 }

@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-
     public class OnPointerEventColliders : MonoBehaviour
     {
         public const string COLLIDER_NAME = "OnPointerEventCollider";
 
-        [System.NonSerialized] public int refCount;
+        [System.NonSerialized]
+        public int refCount;
 
         Collider[] pointerEventColliders;
         Dictionary<Collider, string> colliderNames = new Dictionary<Collider, string>();
@@ -25,9 +25,11 @@ namespace DCL.Components
         }
 
         private DecentralandEntity ownerEntity;
+
         public void Initialize(DecentralandEntity entity)
         {
-            if (entity == null || entity.meshesInfo == null) return;
+            if (entity == null || entity.meshesInfo == null)
+                return;
 
             Renderer[] rendererList = entity.meshesInfo.renderers;
 

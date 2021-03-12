@@ -214,7 +214,7 @@ public static partial class BuilderInWorldUtils
         builderInWorldEntityData.entityId = entity.entityId;
 
 
-        foreach (KeyValuePair<CLASS_ID_COMPONENT, IComponent> keyValuePair in entity.components)
+        foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> keyValuePair in entity.components)
         {
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
@@ -236,7 +236,7 @@ public static partial class BuilderInWorldUtils
             }
         }
 
-        foreach (KeyValuePair<Type, IComponent> keyValuePair in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePair in entity.GetSharedComponents())
         {
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {

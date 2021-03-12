@@ -31,17 +31,17 @@ namespace DCL.Controllers
             DCLTransform.model.rotation = entity.gameObject.transform.rotation;
             DCLTransform.model.scale = entity.gameObject.transform.lossyScale;
 
-            foreach (KeyValuePair<CLASS_ID_COMPONENT, IComponent> component in entity.components)
+            foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> component in entity.components)
             {
                 scene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, component.Key, DCLTransform.model);
             }
 
-            foreach (KeyValuePair<System.Type, IComponent> component in entity.GetSharedComponents())
+            foreach (KeyValuePair<System.Type, ISharedComponent> component in entity.GetSharedComponents())
             {
-                BaseDisposable baseDisposable = scene.SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
+                ISharedComponent sharedComponent = scene.SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
                 string jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(component.Value.GetModel());
-                baseDisposable.UpdateFromJSON(jsonModel);
-                scene.SharedComponentAttach(newEntity.entityId, baseDisposable.id);
+                sharedComponent.UpdateFromJSON(jsonModel);
+                scene.SharedComponentAttach(newEntity.entityId, sharedComponent.id);
             }
 
             //NOTE: (Adrian) Evaluate if all created components should be handle as equals instead of different

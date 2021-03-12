@@ -67,7 +67,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID.LOCKED_ON_EDIT;
 
 
-        foreach (KeyValuePair<Type, IComponent> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
@@ -84,7 +84,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID.NAME;
 
 
-        foreach (KeyValuePair<Type, IComponent> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
@@ -117,7 +117,8 @@ public class BuilderInWorldBridge : MonoBehaviour
     public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
     {
         List<ComponentPayload> list = new List<ComponentPayload>();
-        foreach (KeyValuePair<CLASS_ID_COMPONENT, IComponent> keyValuePair in entity.components)
+
+        foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> keyValuePair in entity.components)
         {
             ComponentPayload componentPayLoad = new ComponentPayload();
             componentPayLoad.componentId = Convert.ToInt32(keyValuePair.Key);
@@ -140,7 +141,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             list.Add(componentPayLoad);
         }
 
-        foreach (KeyValuePair<Type, IComponent> keyValuePairBaseDisposable in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.GetSharedComponents())
         {
             ComponentPayload componentPayLoad = new ComponentPayload();
 

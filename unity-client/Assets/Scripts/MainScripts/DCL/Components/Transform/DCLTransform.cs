@@ -31,15 +31,14 @@ namespace DCL.Components
         public bool isRoutineRunning { get; } = false;
         public string componentName { get; } = "Transform";
 
-        public DecentralandEntity entity { get; set; }
-        public string id { get; set; }
-        public IParcelScene scene { get; set; }
+        public IParcelScene scene { get; private set; }
+        public DecentralandEntity entity { get; private set; }
+        public Transform GetTransform() => null;
 
-        public Transform transform { get; private set; }
-
-        public void Initialize()
+        public void Initialize(IParcelScene scene, DecentralandEntity entity)
         {
-            transform = null;
+            this.scene = scene;
+            this.entity = entity;
         }
 
         public void UpdateFromJSON(string json)
