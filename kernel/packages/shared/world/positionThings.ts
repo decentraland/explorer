@@ -218,7 +218,6 @@ export function getLandBase(land: ILand): { x: number; y: number } {
   }
 }
 
-
 export function isInsideWorldLimits(x: number, y: number) {
   for (let range of parcelLimits.validWorldRanges) {
     if (x >= range.x.from && x <= range.x.to &&
