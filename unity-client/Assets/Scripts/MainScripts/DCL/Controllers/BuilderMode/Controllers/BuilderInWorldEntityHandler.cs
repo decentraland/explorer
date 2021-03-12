@@ -21,6 +21,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     [Header("Prefab References")]
     public BIWOutlinerController outlinerController;
+
     public BuilderInWorldController buildModeController;
     public BIWModeController biwModeController;
     public ActionController actionController;
@@ -98,14 +99,14 @@ public class BuilderInWorldEntityHandler : BIWController
         if (hudController == null)
             return;
 
-       hudController.OnEntityDelete -= DeleteSingleEntity;
-       hudController.OnDuplicateSelectedAction -= DuplicateSelectedEntitiesInput;
-       hudController.OnDeleteSelectedAction -= DeleteSelectedEntitiesInput;
-       hudController.OnEntityClick -= ChangeEntitySelectionFromList;
-       hudController.OnEntityLock -= ChangeEntityLockStatus;
-       hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-       hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
-       hudController.OnEntityRename -= SetEntityName;
+        hudController.OnEntityDelete -= DeleteSingleEntity;
+        hudController.OnDuplicateSelectedAction -= DuplicateSelectedEntitiesInput;
+        hudController.OnDeleteSelectedAction -= DeleteSelectedEntitiesInput;
+        hudController.OnEntityClick -= ChangeEntitySelectionFromList;
+        hudController.OnEntityLock -= ChangeEntityLockStatus;
+        hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
+        hudController.OnEntityChangeVisibility -= ChangeEntityVisibilityStatus;
+        hudController.OnEntityRename -= SetEntityName;
     }
 
     protected override void FrameUpdate()
@@ -230,15 +231,15 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (!selectedEntities.Contains(entity))
             return;
-        
+
         entity.Deselect();
 
         outlinerController.CancelEntityOutline(entity);
         selectedEntities.Remove(entity);
         currentActiveMode?.EntityDeselected(entity);
         if (selectedEntities.Count <= 0 &&
-           hudController != null)
-           hudController.HideEntityInformation();
+            hudController != null)
+            hudController.HideEntityInformation();
     }
 
     public void DeselectEntities()
@@ -355,8 +356,8 @@ public class BuilderInWorldEntityHandler : BIWController
 
         if (HUDController.i.builderInWorldMainHud != null)
         {
-           hudController.ShowEntityInformation();
-           hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
+            hudController.ShowEntityInformation();
+            hudController.EntityInformationSetEntity(entityEditable, sceneToEdit);
         }
 
         outlinerController.CancelAllOutlines();
@@ -430,7 +431,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public DecentralandEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
     {
-        DecentralandEntity entity = sceneToEdit.DuplicateEntity(entityToDuplicate.rootEntity);
+        DecentralandEntity entity = SceneUtils.DuplicateEntity(sceneToEdit, entityToDuplicate.rootEntity);
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
@@ -499,7 +500,7 @@ public class BuilderInWorldEntityHandler : BIWController
         parcelScene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.TRANSFORM, DCLTransform.model);
 
         DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(newEntity, true);
-       hudController?.UpdateSceneLimitInfo();
+        hudController?.UpdateSceneLimitInfo();
 
         EntityListChanged();
         return convertedEntity;
@@ -534,7 +535,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (HUDController.i.builderInWorldMainHud == null)
             return;
-       hudController.SetEntityList(GetEntitiesInCurrentScene());
+        hudController.SetEntityList(GetEntitiesInCurrentScene());
     }
 
     List<DCLBuilderInWorldEntity> GetEntitiesInCurrentScene()
@@ -646,9 +647,9 @@ public class BuilderInWorldEntityHandler : BIWController
         entityToDelete.Delete();
         string idToRemove = entityToDelete.rootEntity.entityId;
         Destroy(entityToDelete);
-        if(sceneToEdit.entities.ContainsKey(idToRemove))
+        if (sceneToEdit.entities.ContainsKey(idToRemove))
             sceneToEdit.RemoveEntity(idToRemove, true);
-       hudController?.RefreshCatalogAssetPack();
+        hudController?.RefreshCatalogAssetPack();
         EntityListChanged();
         builderInWorldBridge?.RemoveEntityOnKernel(idToRemove, sceneToEdit);
     }
@@ -790,6 +791,7 @@ public class BuilderInWorldEntityHandler : BIWController
                 break;
             }
         }
+
         return areAllIn;
     }
 }

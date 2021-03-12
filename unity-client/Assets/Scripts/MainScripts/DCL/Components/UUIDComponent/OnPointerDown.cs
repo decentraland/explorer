@@ -1,6 +1,7 @@
 using DCL.Interface;
-using UnityEngine;
 using DCL.Helpers;
+using DCL.Models;
+using Ray = UnityEngine.Ray;
 
 namespace DCL.Components
 {
@@ -23,6 +24,11 @@ namespace DCL.Components
         protected bool ShouldReportEvent(WebInterface.ACTION_BUTTON buttonId, HitInfo hit)
         {
             return IsVisible() && IsAtHoverDistance(hit.distance) && (model.button == "ANY" || buttonId.ToString() == model.button);
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID_COMPONENT.UUID_ON_DOWN;
         }
     }
 }

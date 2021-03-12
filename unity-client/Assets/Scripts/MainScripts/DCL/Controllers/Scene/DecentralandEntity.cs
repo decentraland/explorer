@@ -17,11 +17,7 @@ namespace DCL.Models
         public Dictionary<string, DecentralandEntity> children = new Dictionary<string, DecentralandEntity>();
         public DecentralandEntity parent;
 
-        public Dictionary<CLASS_ID_COMPONENT, BaseComponent> components = new Dictionary<CLASS_ID_COMPONENT, BaseComponent>();
-
-        // HACK: (Zak) will be removed when we separate each
-        // uuid component as a different class id
-        public Dictionary<string, UUIDComponent> uuidComponents = new Dictionary<string, UUIDComponent>();
+        public Dictionary<CLASS_ID_COMPONENT, IComponent> components = new Dictionary<CLASS_ID_COMPONENT, IComponent>();
 
         public GameObject gameObject;
         public string entityId;
@@ -29,7 +25,6 @@ namespace DCL.Models
         public GameObject meshRootGameObject => meshesInfo.meshRootGameObject;
         public Renderer[] renderers => meshesInfo.renderers;
 
-        public System.Action<MonoBehaviour> OnComponentUpdated;
         public System.Action<DecentralandEntity> OnShapeUpdated;
         public System.Action<DCLName.Model> OnNameChange;
         public System.Action<DecentralandEntity> OnRemoved;
@@ -38,7 +33,7 @@ namespace DCL.Models
         public System.Action<DecentralandEntity> OnMeshesInfoCleaned;
 
         public System.Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
-        Dictionary<System.Type, BaseDisposable> sharedComponents = new Dictionary<System.Type, BaseDisposable>();
+        Dictionary<System.Type, IComponent> sharedComponents = new Dictionary<System.Type, IComponent>();
 
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
@@ -52,7 +47,7 @@ namespace DCL.Models
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
         }
 
-        public Dictionary<System.Type, BaseDisposable> GetSharedComponents()
+        public Dictionary<System.Type, IComponent> GetSharedComponents()
         {
             return sharedComponents;
         }
@@ -123,10 +118,16 @@ namespace DCL.Models
 
             foreach (var kvp in components)
             {
-                if (kvp.Value == null || kvp.Value.poolableObject == null)
+                if (kvp.Value == null)
                     continue;
 
-                kvp.Value.poolableObject.Release();
+                if (!(kvp.Value is BaseComponent baseComponent))
+                    continue;
+
+                if (baseComponent.poolableObject == null)
+                    continue;
+
+                baseComponent.poolableObject.Release();
             }
 
             components.Clear();
@@ -169,15 +170,15 @@ namespace DCL.Models
 
         public void RemoveSharedComponent(System.Type targetType, bool triggerDetaching = true)
         {
-            if (sharedComponents.TryGetValue(targetType, out BaseDisposable component))
+            if (sharedComponents.TryGetValue(targetType, out IComponent component))
             {
                 if (component == null)
                     return;
 
                 sharedComponents.Remove(targetType);
 
-                if (triggerDetaching)
-                    component.DetachFrom(this, targetType);
+                if (triggerDetaching && component is BaseDisposable disposable)
+                    disposable.DetachFrom(this, targetType);
             }
         }
 
@@ -200,14 +201,14 @@ namespace DCL.Models
             return null;
         }
 
-        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out BaseComponent component)
+        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out IComponent component)
         {
             return components.TryGetValue(componentId, out component);
         }
 
-        public bool TryGetSharedComponent(CLASS_ID componentId, out BaseDisposable component)
+        public bool TryGetSharedComponent(CLASS_ID componentId, out IComponent component)
         {
-            foreach (KeyValuePair<Type, BaseDisposable> keyValuePairBaseDisposable in sharedComponents)
+            foreach (KeyValuePair<Type, IComponent> keyValuePairBaseDisposable in sharedComponents)
             {
                 if (keyValuePairBaseDisposable.Value.GetClassId() == (int) componentId)
                 {
@@ -220,11 +221,10 @@ namespace DCL.Models
             return false;
         }
 
-        public BaseDisposable GetSharedComponent(System.Type targetType)
+        public IComponent GetSharedComponent(System.Type targetType)
         {
-            BaseDisposable component;
+            IComponent component;
             sharedComponents.TryGetValue(targetType, out component);
-
             return component;
         }
     }

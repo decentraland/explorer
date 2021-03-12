@@ -44,7 +44,7 @@ namespace DCL
         {
             if (model == null)
                 return;
-            currentPlayerInfoCardId.Set(((AvatarModel)model).id);
+            currentPlayerInfoCardId.Set(((AvatarModel) model).id);
         }
 
         public void OnDestroy()
@@ -72,12 +72,16 @@ namespace DCL
 
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
-            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
-            {
-                type = OnPointerDown.NAME,
-                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
-                hoverText = "view profile"
-            });
+            onPointerDown.scene = scene;
+            onPointerDown.entity = entity;
+            onPointerDown.UpdateFromModel(
+                new OnPointerDown.Model()
+                {
+                    type = OnPointerDown.NAME,
+                    button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
+                    hoverText = "view profile"
+                }
+            );
 
             CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
             CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
@@ -176,8 +180,8 @@ namespace DCL
                 entity = null;
             }
 
-            var model = (AvatarModel)this.model;
-            if(model != null)
+            var model = (AvatarModel) this.model;
+            if (model != null)
                 avatarUserInfo.userId = model.id;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
         }

@@ -186,7 +186,7 @@ namespace DCL.Helpers
         }
 
         public static Coroutine SharedComponentUpdate<T, K>(T component, K model = null)
-            where T : BaseDisposable
+            where T : IComponent
             where K : class, new()
         {
             if (model == null)
@@ -197,7 +197,10 @@ namespace DCL.Helpers
             ParcelScene scene = component.scene as ParcelScene;
             scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(model));
 
-            return component.routine;
+            if (component is IDelayedComponent delayedComponent)
+                return delayedComponent.routine;
+
+            return null;
         }
 
         public static T SharedComponentCreate<T, K>(ParcelScene scene, CLASS_ID id, K model = null)

@@ -23,19 +23,21 @@ namespace DCL.Components
 
         public OnPointerEventColliders pointerEventColliders { get; private set; }
 
-        public override void Setup(IParcelScene scene, DecentralandEntity entity, UUIDComponent.Model model)
+        public override void Initialize()
         {
-            if (entity == null) return;
+            if (entity == null)
+            {
+                Debug.LogError("entity == null? This should never happen.");
+                return;
+            }
 
-            this.entity = entity;
-            this.scene = scene;
+            base.Initialize();
 
-            if (model == null)
-                this.model = new OnPointerEvent.Model();
-            else
-                this.model = (OnPointerEvent.Model) model;
-
-            Initialize();
+            // Create OnPointerEventCollider child
+            pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
+            pointerEventColliders.Initialize(entity);
+            pointerEventColliders.refCount++;
+            hoverCanvasController = InteractionHoverCanvasController.i;
 
             entity.OnShapeUpdated -= OnComponentUpdated;
             entity.OnShapeUpdated += OnComponentUpdated;
@@ -59,15 +61,6 @@ namespace DCL.Components
                 default:
                     return WebInterface.ACTION_BUTTON.ANY;
             }
-        }
-
-        public void Initialize()
-        {
-            // Create OnPointerEventCollider child
-            pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
-            pointerEventColliders.Initialize(entity);
-            pointerEventColliders.refCount++;
-            hoverCanvasController = InteractionHoverCanvasController.i;
         }
 
         public bool IsVisible()
