@@ -78,7 +78,7 @@ public class BuilderProjectsPanelDataMock
         SendFetchProjects();
     }
 
-    public void SendSceneUpdate(string id, string name, string description, string[] requiredPermissions, bool isMatureContent, bool allowVoiceChat)
+    public void SendSceneDataUpdate(string id, string name, string description, string[] requiredPermissions, bool isMatureContent, bool allowVoiceChat)
     {
         if (!projects.TryGetValue(id, out BuilderProjectsPanelSceneDataMock project))
         {
@@ -90,6 +90,17 @@ public class BuilderProjectsPanelDataMock
         project.requiredPermissions = requiredPermissions;
         project.isMatureContent = isMatureContent;
         project.allowVoiceChat = allowVoiceChat;
+        projects[project.id] = project;
+        SendFetchProjects();
+    }
+
+    public void SendSceneContributorsUpdate(string id, string[] contributors)
+    {
+        if (!projects.TryGetValue(id, out BuilderProjectsPanelSceneDataMock project))
+        {
+            return;
+        }
+        project.contributors = contributors;
         projects[project.id] = project;
         SendFetchProjects();
     }

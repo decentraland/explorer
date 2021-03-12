@@ -12,10 +12,10 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
 
     private ISceneData sceneData;
     
-    private readonly SceneUpdatePayload sceneUpdatePayload = new SceneUpdatePayload();
+    private readonly SceneDataUpdatePayload sceneDataUpdatePayload = new SceneDataUpdatePayload();
     private readonly SectionSceneGeneralSettingsView view;
 
-    public event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
+    public event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
 
     public SectionSceneGeneralSettingsController() : this(
         Object.Instantiate(Resources.Load<SectionSceneGeneralSettingsView>(VIEW_PREFAB_PATH))
@@ -74,10 +74,10 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
 
     void OnApplyChanges()
     {
-        sceneUpdatePayload.name = view.GetName();
-        sceneUpdatePayload.description = view.GetDescription();
-        sceneUpdatePayload.allowVoiceChat = view.GetAllowVoiceChat();
-        sceneUpdatePayload.isMatureContent = view.GetMatureContent();
+        sceneDataUpdatePayload.name = view.GetName();
+        sceneDataUpdatePayload.description = view.GetDescription();
+        sceneDataUpdatePayload.allowVoiceChat = view.GetAllowVoiceChat();
+        sceneDataUpdatePayload.isMatureContent = view.GetMatureContent();
 
         string[] permissions = null;
         if (view.GetAllowMovePlayer() && view.GetAllowTriggerEmotes())
@@ -92,7 +92,7 @@ internal class SectionSceneGeneralSettingsController : SectionBase, ISelectScene
         {
             permissions = new [] { PERMISSION_TRIGGER_EMOTES };
         }
-        sceneUpdatePayload.requiredPermissions = permissions;
-        OnRequestUpdateSceneData?.Invoke(sceneData.id, sceneUpdatePayload);
+        sceneDataUpdatePayload.requiredPermissions = permissions;
+        OnRequestUpdateSceneData?.Invoke(sceneData.id, sceneDataUpdatePayload);
     }
 }

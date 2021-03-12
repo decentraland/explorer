@@ -4,17 +4,21 @@ using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-internal class SectionSceneContributorsSettingsController : SectionBase, ISelectSceneListener, ISectionUpdateSceneDataRequester
+internal class SectionSceneContributorsSettingsController : SectionBase, ISelectSceneListener, 
+                                                            ISectionUpdateSceneDataRequester, ISectionUpdateSceneContributorsRequester
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionSceneContributorsSettingsView";
     
-    public event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
+    public event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
+    public event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
 
     private readonly SectionSceneContributorsSettingsView view;
     private readonly UsersSearchPromptController usersSearchPromptController;
     private readonly UserProfileFetcher profileFetcher = new UserProfileFetcher();
+    private readonly SceneContributorsUpdatePayload contributorsUpdatePayload = new SceneContributorsUpdatePayload();
 
     private List<string> contributors = new List<string>();
+    private string sceneId;
 
     public SectionSceneContributorsSettingsController() : this(
         Object.Instantiate(Resources.Load<SectionSceneContributorsSettingsView>(VIEW_PREFAB_PATH)),
@@ -57,6 +61,8 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     
     void ISelectSceneListener.OnSelectScene(SceneCardView sceneCardView)
     {
+        sceneId = sceneCardView.sceneData.id;
+        
         if (sceneCardView.sceneData.contributors == null || sceneCardView.sceneData.contributors.Length == 0)
         {
             if (contributors.Count > 0)
@@ -111,7 +117,8 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
         usersSearchPromptController.SetUsersInRolList(contributors);
         view.SetEmptyList(false);
         view.SetContributorsCount(contributors.Count);
-        //TODO: send message
+        contributorsUpdatePayload.contributors = contributors.ToArray();
+        OnRequestUpdateSceneContributors?.Invoke(sceneId, contributorsUpdatePayload);
     }
     
     void OnRemoveUserPressed(string userId)
@@ -123,6 +130,7 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
         usersSearchPromptController.SetUsersInRolList(contributors);
         view.SetEmptyList(contributors.Count == 0);
         view.SetContributorsCount(contributors.Count);
-        //TODO: send message
+        contributorsUpdatePayload.contributors = contributors.ToArray();
+        OnRequestUpdateSceneContributors?.Invoke(sceneId, contributorsUpdatePayload);
     }
 }

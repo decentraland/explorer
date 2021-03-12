@@ -12,7 +12,8 @@ internal class SectionsController : IDisposable
     public event Action<SectionBase> OnSectionHide;
     public event Action OnRequestContextMenuHide;
     public event Action<SectionId> OnOpenSectionId;
-    public event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
+    public event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
+    public event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -127,9 +128,14 @@ internal class SectionsController : IDisposable
         OnRequestContextMenuHide?.Invoke();
     }
 
-    private void OnUpdateSceneDataRequested(string id, SceneUpdatePayload updatePayload)
+    private void OnUpdateSceneDataRequested(string id, SceneDataUpdatePayload payload)
     {
-        OnRequestUpdateSceneData?.Invoke(id, updatePayload);
+        OnRequestUpdateSceneData?.Invoke(id, payload);
+    }
+    
+    private void OnUpdateSceneContributorsRequested(string id, SceneContributorsUpdatePayload payload)
+    {
+        OnRequestUpdateSceneContributors?.Invoke(id, payload);
     }
 
     private void SubscribeEvents(SectionBase sectionBase)
@@ -145,6 +151,10 @@ internal class SectionsController : IDisposable
         if (sectionBase is ISectionUpdateSceneDataRequester updateSceneDataRequester)
         {
             updateSceneDataRequester.OnRequestUpdateSceneData += OnUpdateSceneDataRequested;
-        }        
+        }       
+        if (sectionBase is ISectionUpdateSceneContributorsRequester updateSceneContributorsRequester)
+        {
+            updateSceneContributorsRequester.OnRequestUpdateSceneContributors += OnUpdateSceneContributorsRequested;
+        }   
     }
 }

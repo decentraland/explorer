@@ -15,8 +15,6 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
     [SerializeField] internal TextMeshProUGUI labelContributor;
 
     public event Action OnSearchUserButtonPressed;
-    public event Action<string> OnRemoveUser;
-    public event Action<string> OnAddUser;
 
     private readonly Dictionary<string, UserElementView> userElementViews = new Dictionary<string, UserElementView>();
     private readonly Queue<UserElementView> userElementViewsPool = new Queue<UserElementView>();
@@ -114,22 +112,6 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
             userView = Instantiate(userElementView, usersContainer);
         }
         userView.ClearThumbnail();
-        
-        userView.OnAddPressed -= OnAddUserPressed;
-        userView.OnRemovePressed -= OnRemoveUserPressed;
-        userView.OnAddPressed += OnAddUserPressed;
-        userView.OnRemovePressed += OnRemoveUserPressed;
-
         return userView;
-    }
-
-    void OnAddUserPressed(string userId)
-    {
-        OnAddUser?.Invoke(userId);
-    }
-    
-    void OnRemoveUserPressed(string userId)
-    {
-        OnRemoveUser?.Invoke(userId);
     }
 }

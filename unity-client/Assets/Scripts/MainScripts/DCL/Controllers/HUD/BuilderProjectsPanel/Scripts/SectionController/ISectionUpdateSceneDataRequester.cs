@@ -2,5 +2,5 @@ using System;
 
 internal interface ISectionUpdateSceneDataRequester
 {
-    event Action<string, SceneUpdatePayload> OnRequestUpdateSceneData;
+    event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
 }

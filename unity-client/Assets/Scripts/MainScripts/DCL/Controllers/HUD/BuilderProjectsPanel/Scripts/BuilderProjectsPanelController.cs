@@ -16,6 +16,7 @@ public class BuilderProjectsPanelController : IDisposable
     internal readonly LeftMenuHandler leftMenuHandler;
     internal readonly LeftMenuSettingsViewHandler leftMenuSettingsViewHandler;
 
+
     public BuilderProjectsPanelController() : this(
         Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel")))
     {
@@ -28,6 +29,7 @@ public class BuilderProjectsPanelController : IDisposable
             bridge.OnProjectsSet -= OnProjectsUpdated;
         }
         sectionsController.OnRequestUpdateSceneData -= OnRequestUpdateSceneData;
+        sectionsController.OnRequestUpdateSceneContributors -= OnRequestUpdateSceneContributors;
 
         leftMenuSettingsViewHandler.Dispose();
         sectionsHandler.Dispose();
@@ -62,6 +64,7 @@ public class BuilderProjectsPanelController : IDisposable
             bridge.OnProjectsSet += OnProjectsUpdated;
             bridge.SendFetchProjects();
             sectionsController.OnRequestUpdateSceneData += OnRequestUpdateSceneData;
+            sectionsController.OnRequestUpdateSceneContributors += OnRequestUpdateSceneContributors;
         }
 
         leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(scenesViewController, view.settingsViewReferences);
@@ -98,8 +101,13 @@ public class BuilderProjectsPanelController : IDisposable
         }
     }
 
-    void OnRequestUpdateSceneData(string id, SceneUpdatePayload updatePayload)
+    void OnRequestUpdateSceneData(string id, SceneDataUpdatePayload dataUpdatePayload)
     {
-        bridge?.SendSceneUpdate(id, updatePayload);
+        bridge?.SendSceneDataUpdate(id, dataUpdatePayload);
+    }
+
+    void OnRequestUpdateSceneContributors(string id, SceneContributorsUpdatePayload payload)
+    {
+        bridge?.SendSceneContributorsUpdate(id, payload);
     }
 }
