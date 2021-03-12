@@ -57,6 +57,7 @@ namespace DCL
             model.world.blockersController.InitializeWithDefaultDependencies(
                 model.world.state);
             model.world.sceneBoundsChecker.Start();
+            model.world.componentFactory.Initialize();
 
             // Platform systems
             model.platform.memoryManager.Initialize();

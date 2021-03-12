@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using DCL.Components;
 using DCL.Controllers;
@@ -11,6 +12,7 @@ namespace DCL
     public interface IRuntimeComponentFactory
     {
         IComponent CreateComponent(int classId, object model);
+        void Initialize();
     }
 
     public class RuntimeComponentFactory : IRuntimeComponentFactory
@@ -21,10 +23,20 @@ namespace DCL
 
         public IPoolableComponentFactory poolableComponentFactory { get; private set; }
 
+        public void Initialize()
+        {
+            CoroutineStarter.Start(InitializeCoroutine());
+        }
+
+        IEnumerator InitializeCoroutine()
+        {
+            yield return null;
+            poolableComponentFactory.PrewarmPools();
+        }
+
         public RuntimeComponentFactory(IPoolableComponentFactory poolableComponentFactory = null)
         {
             this.poolableComponentFactory = poolableComponentFactory ?? PoolableComponentFactory.Create();
-            poolableComponentFactory.PrewarmPools();
 
             // Shapes
             builders.Add((int) CLASS_ID.BOX_SHAPE, CreateComponent<BoxShape>);
@@ -35,6 +47,10 @@ namespace DCL
             builders.Add((int) CLASS_ID.GLTF_SHAPE, CreateComponent<GLTFShape>);
             builders.Add((int) CLASS_ID.NFT_SHAPE, CreateComponent<NFTShape>);
             builders.Add((int) CLASS_ID.OBJ_SHAPE, CreateComponent<OBJShape>);
+            builders.Add((int) CLASS_ID_COMPONENT.TEXT_SHAPE, CreatePoolableComponent);
+
+            builders.Add((int) CLASS_ID_COMPONENT.BILLBOARD, CreatePoolableComponent);
+            builders.Add((int) CLASS_ID_COMPONENT.SMART_ITEM, CreatePoolableComponent);
 
             // Materials
             builders.Add((int) CLASS_ID.BASIC_MATERIAL, CreateComponent<BasicMaterial>);

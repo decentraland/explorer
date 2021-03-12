@@ -23,13 +23,6 @@ namespace DCL.Components
         public UIScreenSpace()
         {
             DCLCharacterController.OnCharacterMoved += OnCharacterMoved;
-
-            //Only no-dcl scenes are listening the the global visibility event
-            if (!scene.isPersistent)
-            {
-                CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
-            }
-
             model = new Model();
         }
 
@@ -186,6 +179,7 @@ namespace DCL.Components
             if (!scene.isPersistent)
             {
                 UpdateCanvasVisibility();
+                CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
             }
         }
     }
