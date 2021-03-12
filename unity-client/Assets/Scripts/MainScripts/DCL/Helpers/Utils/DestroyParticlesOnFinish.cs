@@ -6,7 +6,7 @@ public class DestroyParticlesOnFinish : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (particles && !particles.IsAlive())
+        if (particles != null && !particles.IsAlive())
         {
             Destroy(gameObject);
         }
