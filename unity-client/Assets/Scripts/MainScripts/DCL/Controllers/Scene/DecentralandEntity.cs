@@ -17,7 +17,8 @@ namespace DCL.Models
         public Dictionary<string, DecentralandEntity> children = new Dictionary<string, DecentralandEntity>();
         public DecentralandEntity parent;
 
-        public Dictionary<CLASS_ID_COMPONENT, IComponent> components = new Dictionary<CLASS_ID_COMPONENT, IComponent>();
+        public Dictionary<CLASS_ID_COMPONENT, IEntityComponent> components = new Dictionary<CLASS_ID_COMPONENT, IEntityComponent>();
+        Dictionary<System.Type, ISharedComponent> sharedComponents = new Dictionary<System.Type, ISharedComponent>();
 
         public GameObject gameObject;
         public string entityId;
@@ -33,7 +34,6 @@ namespace DCL.Models
         public System.Action<DecentralandEntity> OnMeshesInfoCleaned;
 
         public System.Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
-        Dictionary<System.Type, IComponent> sharedComponents = new Dictionary<System.Type, IComponent>();
 
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
@@ -47,7 +47,7 @@ namespace DCL.Models
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
         }
 
-        public Dictionary<System.Type, IComponent> GetSharedComponents()
+        public Dictionary<System.Type, ISharedComponent> GetSharedComponents()
         {
             return sharedComponents;
         }
@@ -170,20 +170,22 @@ namespace DCL.Models
 
         public void RemoveSharedComponent(System.Type targetType, bool triggerDetaching = true)
         {
-            if (sharedComponents.TryGetValue(targetType, out IComponent component))
+            if (sharedComponents.TryGetValue(targetType, out ISharedComponent component))
             {
                 if (component == null)
                     return;
 
                 sharedComponents.Remove(targetType);
 
-                if (triggerDetaching && component is BaseDisposable disposable)
-                    disposable.DetachFrom(this, targetType);
+                if (triggerDetaching)
+                    component.DetachFrom(this, targetType);
             }
         }
 
         /// <summary>
-        /// This function is designed to get interfaces implemented by diverse components, If you want to get the component itselft please use TryGetBaseComponent or TryGetSharedComponent
+        /// This function is designed to get interfaces implemented by diverse components.
+        ///
+        /// If you want to get the component itself please use TryGetBaseComponent or TryGetSharedComponent.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -191,24 +193,26 @@ namespace DCL.Models
         {
             //Note (Adrian): If you are going to call this function frequently, please refactor it to avoid using LinQ for perfomance reasons.
             T component = components.Values.FirstOrDefault(x => x is T) as T;
+
             if (component != null)
                 return component;
 
             component = sharedComponents.Values.FirstOrDefault(x => x is T) as T;
+
             if (component != null)
                 return component;
 
             return null;
         }
 
-        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out IComponent component)
+        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out IEntityComponent component)
         {
             return components.TryGetValue(componentId, out component);
         }
 
-        public bool TryGetSharedComponent(CLASS_ID componentId, out IComponent component)
+        public bool TryGetSharedComponent(CLASS_ID componentId, out ISharedComponent component)
         {
-            foreach (KeyValuePair<Type, IComponent> keyValuePairBaseDisposable in sharedComponents)
+            foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in sharedComponents)
             {
                 if (keyValuePairBaseDisposable.Value.GetClassId() == (int) componentId)
                 {
@@ -221,11 +225,14 @@ namespace DCL.Models
             return false;
         }
 
-        public IComponent GetSharedComponent(System.Type targetType)
+        public ISharedComponent GetSharedComponent(System.Type targetType)
         {
-            IComponent component;
-            sharedComponents.TryGetValue(targetType, out component);
-            return component;
+            if (sharedComponents.TryGetValue(targetType, out ISharedComponent component))
+            {
+                return component;
+            }
+
+            return null;
         }
     }
 }

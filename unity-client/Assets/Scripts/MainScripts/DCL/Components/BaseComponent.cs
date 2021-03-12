@@ -2,6 +2,7 @@ using DCL.Controllers;
 using DCL.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Components
@@ -15,14 +16,24 @@ namespace DCL.Components
 
     public interface IEntityComponent : IComponent
     {
-        DecentralandEntity entity { get; set; }
+        DecentralandEntity entity { get; }
         Transform transform { get; }
+        void Initialize(IParcelScene scene, DecentralandEntity entity);
+    }
+
+    public interface ISharedComponent : IComponent, IDisposable
+    {
+        string id { get; }
+        void AttachTo(DecentralandEntity entity, Type overridenAttachedType = null);
+        void DetachFrom(DecentralandEntity entity, Type overridenAttachedType = null);
+        void DetachFromEveryEntity();
+        void Initialize(IParcelScene scene, string id);
+        HashSet<DecentralandEntity> GetAttachedEntities();
     }
 
     public interface IComponent : ICleanable
     {
-        string id { get; set; }
-        IParcelScene scene { get; set; }
+        IParcelScene scene { get; }
         string componentName { get; }
         void UpdateFromJSON(string json);
         void UpdateFromModel(BaseModel model);
@@ -31,7 +42,6 @@ namespace DCL.Components
         bool IsValid();
         BaseModel GetModel();
         int GetClassId();
-        void Initialize();
     }
 
     /// <summary>
@@ -81,8 +91,10 @@ namespace DCL.Components
         {
         }
 
-        public virtual void Initialize()
+        public virtual void Initialize(IParcelScene scene, DecentralandEntity entity)
         {
+            this.scene = scene;
+            this.entity = entity;
             transform.SetParent(entity.gameObject.transform, false);
         }
 

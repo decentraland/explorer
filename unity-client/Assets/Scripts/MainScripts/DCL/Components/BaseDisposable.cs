@@ -7,16 +7,18 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public abstract class BaseDisposable : IDelayedComponent
+    public abstract class BaseDisposable : IDelayedComponent, ISharedComponent
     {
         public virtual string componentName => GetType().Name;
-        public string id { get; set; }
-        public IParcelScene scene { get; set; }
+        public string id { get; private set; }
+        public IParcelScene scene { get; private set; }
 
         public abstract int GetClassId();
 
-        public virtual void Initialize()
+        public virtual void Initialize(IParcelScene scene, string id)
         {
+            this.scene = scene;
+            this.id = id;
         }
 
         ComponentUpdateHandler updateHandler;
@@ -31,6 +33,11 @@ namespace DCL.Components
         public HashSet<DecentralandEntity> attachedEntities = new HashSet<DecentralandEntity>();
 
         protected BaseModel model;
+
+        public HashSet<DecentralandEntity> GetAttachedEntities()
+        {
+            return attachedEntities;
+        }
 
         public virtual void UpdateFromJSON(string json)
         {
