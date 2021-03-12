@@ -48,19 +48,19 @@ export namespace parcelLimits {
   export const validWorldRanges = [
     {
       x: { from: -150, to: 150 },
-      y: { from: -150, to: 150 },
+      y: { from: -150, to: 150 }
     },
     {
       x: { from: 62, to: 163 },
-      y: { from: 151, to: 158 },
+      y: { from: 151, to: 158 }
     },
     {
       x: { from: 151, to: 162 },
-      y: { from: 144, to: 150 },
+      y: { from: 144, to: 150 }
     },
     {
       x: { from: 151, to: 163 },
-      y: { from: 59, to: 143 },
+      y: { from: 59, to: 143 }
     }
   ]
 
