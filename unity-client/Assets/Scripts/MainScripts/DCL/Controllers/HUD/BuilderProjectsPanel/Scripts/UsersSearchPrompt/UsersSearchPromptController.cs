@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 internal class UsersSearchPromptController: IDisposable
 {
+    public event Action<string> OnRemoveUser;
+    public event Action<string> OnAddUser;
+    
     private readonly UsersSearchPromptView view;
     
     private readonly SearchHandler<UserElementView> searchHandler = new SearchHandler<UserElementView>();
@@ -20,6 +23,8 @@ internal class UsersSearchPromptController: IDisposable
         searchHandler.OnSearchChanged += OnSearchResult;
         view.OnSearchText += OnSearchText;
         view.OnShouldHide += OnShouldHidePrompt;
+        userViewsHandler.OnAddUser += OnAddUserPressed;
+        userViewsHandler.OnRemoveUser += OnRemoveUserPressed;
     }
     
     public void Dispose()
@@ -28,6 +33,8 @@ internal class UsersSearchPromptController: IDisposable
         searchHandler.OnSearchChanged -= OnSearchResult;
         view.OnSearchText -= OnSearchText;
         view.OnShouldHide -= OnShouldHidePrompt;
+        userViewsHandler.OnAddUser -= OnAddUserPressed;
+        userViewsHandler.OnRemoveUser -= OnRemoveUserPressed;
 
         friendsHandler.Dispose();
         userViewsHandler.Dispose();
@@ -52,7 +59,7 @@ internal class UsersSearchPromptController: IDisposable
         view.Hide();
     }
 
-    public void SetUsersInRolList(string[] usersId)
+    public void SetUsersInRolList(List<string> usersId)
     {
         userViewsHandler.SetUsersInRolList(usersId);
     }
@@ -96,5 +103,15 @@ internal class UsersSearchPromptController: IDisposable
         userViewsHandler.SetUserViewsList(profiles);
         view.SetFriendListEmpty(userViewsHandler.userElementViewCount == 0);
         searchHandler.SetSearchableList(userViewsHandler.GetUserElementViews());
+    }
+    
+    private void OnAddUserPressed(string userId)
+    {
+        OnAddUser?.Invoke(userId);
+    }
+    
+    private void OnRemoveUserPressed(string userId)
+    {
+        OnRemoveUser?.Invoke(userId);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -13,7 +14,7 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     private readonly UsersSearchPromptController usersSearchPromptController;
     private readonly UserProfileFetcher profileFetcher = new UserProfileFetcher();
 
-    private ISceneData sceneData;
+    private List<string> contributors = new List<string>();
 
     public SectionSceneContributorsSettingsController() : this(
         Object.Instantiate(Resources.Load<SectionSceneContributorsSettingsView>(VIEW_PREFAB_PATH)),
@@ -27,13 +28,16 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
         this.view = view;
         usersSearchPromptController = new UsersSearchPromptController(view.GetSearchPromptView(), friendsController);
 
-        view.OnAddUserPressed += () => usersSearchPromptController.Show();
+        view.OnSearchUserButtonPressed += () => usersSearchPromptController.Show();
+        usersSearchPromptController.OnAddUser += OnAddUserPressed;
+        usersSearchPromptController.OnRemoveUser += OnRemoveUserPressed;
     }
 
     public override void Dispose()
     {
         Object.Destroy(view.gameObject);
         profileFetcher.Dispose();
+        usersSearchPromptController.Dispose();
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -55,25 +59,70 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     {
         if (sceneCardView.sceneData.contributors == null || sceneCardView.sceneData.contributors.Length == 0)
         {
+            if (contributors.Count > 0)
+                contributors.Clear();
+            
             view.SetEmptyList(true);
             view.SetContributorsCount(0);
             return;
         }
 
-        string userId;
-        for (int i = 0; i < sceneCardView.sceneData.contributors.Length; i++)
+        var newContributors = new List<string>(sceneCardView.sceneData.contributors);
+        for (int i = 0; i < newContributors.Count; i++)
         {
-            userId = sceneCardView.sceneData.contributors[i];
-            
-            if (string.IsNullOrEmpty(userId))
-                continue;
-
-            var userView = view.AddUser(userId);
-            profileFetcher.FetchProfile(userId)
-                          .Then(userProfile => userView.SetUserProfile(userProfile));
+            AddContributor(newContributors[i]);
+            contributors.Remove(newContributors[i]);
         }
-        usersSearchPromptController.SetUsersInRolList(sceneCardView.sceneData.contributors);
+        
+        for (int i = 0; i < contributors.Count; i++)
+        {
+            view.RemoveUser(contributors[i]);
+        }
+        
+        contributors = newContributors;
+
+        usersSearchPromptController.SetUsersInRolList(contributors);
         view.SetEmptyList(false);
-        view.SetContributorsCount(sceneCardView.sceneData.contributors.Length);
+        view.SetContributorsCount(contributors.Count);
+    }
+
+    void AddContributor(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+            return;
+
+        var userView = view.AddUser(userId);
+        profileFetcher.FetchProfile(userId)
+                      .Then(userProfile => userView.SetUserProfile(userProfile));
+
+        userView.OnAddPressed -= OnAddUserPressed;
+        userView.OnRemovePressed -= OnRemoveUserPressed;
+        userView.OnAddPressed += OnAddUserPressed;
+        userView.OnRemovePressed += OnRemoveUserPressed;
+    }
+
+    void OnAddUserPressed(string userId)
+    {
+        if (contributors.Contains(userId))
+            return;
+
+        contributors.Add(userId);
+        AddContributor(userId);
+        usersSearchPromptController.SetUsersInRolList(contributors);
+        view.SetEmptyList(false);
+        view.SetContributorsCount(contributors.Count);
+        //TODO: send message
+    }
+    
+    void OnRemoveUserPressed(string userId)
+    {
+        if (!contributors.Remove(userId))
+            return;
+
+        view.RemoveUser(userId);
+        usersSearchPromptController.SetUsersInRolList(contributors);
+        view.SetEmptyList(contributors.Count == 0);
+        view.SetContributorsCount(contributors.Count);
+        //TODO: send message
     }
 }

@@ -6,13 +6,16 @@ using Object = UnityEngine.Object;
 
 internal class UsersSearchUserViewsHandler : IDisposable
 {
+    public event Action<string> OnRemoveUser;
+    public event Action<string> OnAddUser;
+    
     private readonly Dictionary<string, UserElementView> userElementViews = new Dictionary<string, UserElementView>();
     private readonly Queue<UserElementView> viewPool = new Queue<UserElementView>();
 
     private readonly UserElementView userElementViewBase;
     private readonly Transform elementsParent;
     
-    private string[] usersInRolList;
+    private List<string> usersInRolList;
     
     public int userElementViewCount => userElementViews.Count;
 
@@ -87,7 +90,7 @@ internal class UsersSearchUserViewsHandler : IDisposable
         }
     }
 
-    public void SetUsersInRolList(string[] usersId)
+    public void SetUsersInRolList(List<string> usersId)
     {
         usersInRolList = usersId;
         foreach (KeyValuePair<string, UserElementView> keyValuePair in userElementViews)
@@ -119,7 +122,23 @@ internal class UsersSearchUserViewsHandler : IDisposable
         {
             userView = Object.Instantiate(userElementViewBase, elementsParent);
         }
+        userView.ClearThumbnail();
+        
+        userView.OnAddPressed -= OnAddUserPressed;
+        userView.OnRemovePressed -= OnRemoveUserPressed;
+        userView.OnAddPressed += OnAddUserPressed;
+        userView.OnRemovePressed += OnRemoveUserPressed;
 
         return userView;
+    }
+    
+    void OnAddUserPressed(string userId)
+    {
+        OnAddUser?.Invoke(userId);
+    }
+    
+    void OnRemoveUserPressed(string userId)
+    {
+        OnRemoveUser?.Invoke(userId);
     }
 }
