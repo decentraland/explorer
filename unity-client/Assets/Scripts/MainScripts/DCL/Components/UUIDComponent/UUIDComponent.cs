@@ -29,6 +29,21 @@ namespace DCL
             {
                 return Utils.SafeFromJson<Model>(json);
             }
+
+            public CLASS_ID_COMPONENT GetClassIdFromType()
+            {
+                switch (type)
+                {
+                    case OnPointerDown.NAME:
+                        return CLASS_ID_COMPONENT.UUID_ON_DOWN;
+                    case OnPointerUp.NAME:
+                        return CLASS_ID_COMPONENT.UUID_ON_UP;
+                    case OnClick.NAME:
+                        return CLASS_ID_COMPONENT.UUID_ON_CLICK;
+                }
+
+                return CLASS_ID_COMPONENT.UUID_CALLBACK;
+            }
         }
 
         private void Awake()

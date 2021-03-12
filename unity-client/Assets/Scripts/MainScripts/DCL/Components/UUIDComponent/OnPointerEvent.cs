@@ -27,6 +27,7 @@ namespace DCL.Components
         {
             base.Initialize(scene, entity);
 
+            model = new Model();
             // Create OnPointerEventCollider child
             hoverCanvasController = InteractionHoverCanvasController.i;
 
