@@ -1,6 +1,7 @@
 using DCL.Interface;
-using UnityEngine;
 using DCL.Helpers;
+using DCL.Models;
+using Ray = UnityEngine.Ray;
 
 namespace DCL.Components
 {
@@ -21,6 +22,11 @@ namespace DCL.Components
 
                 DCL.Interface.WebInterface.ReportOnPointerUpEvent(buttonId, scene.sceneData.id, model.uuid, entity.entityId, meshName, ray, hit.point, hit.normal, hit.distance, isHitInfoValid);
             }
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID_COMPONENT.UUID_ON_UP;
         }
     }
 }

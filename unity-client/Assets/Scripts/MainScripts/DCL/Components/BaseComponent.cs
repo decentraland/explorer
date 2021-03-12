@@ -6,19 +6,32 @@ using UnityEngine;
 
 namespace DCL.Components
 {
+    public interface IDelayedComponent : IComponent
+    {
+        WaitForComponentUpdate yieldInstruction { get; }
+        Coroutine routine { get; }
+        bool isRoutineRunning { get; }
+    }
+
+    public interface IEntityComponent : IComponent
+    {
+        DecentralandEntity entity { get; set; }
+        Transform transform { get; }
+    }
+
     public interface IComponent : ICleanable
     {
-        bool isRoutineRunning { get; }
-        Coroutine routine { get; }
+        string id { get; set; }
+        IParcelScene scene { get; set; }
         string componentName { get; }
         void UpdateFromJSON(string json);
         void UpdateFromModel(BaseModel model);
         IEnumerator ApplyChanges(BaseModel model);
         void RaiseOnAppliedChanges();
-        ComponentUpdateHandler CreateUpdateHandler();
         bool IsValid();
         BaseModel GetModel();
         int GetClassId();
+        void Initialize();
     }
 
     /// <summary>
@@ -27,9 +40,9 @@ namespace DCL.Components
     /// </summary>
     public class WaitForComponentUpdate : CleanableYieldInstruction
     {
-        public IComponent component;
+        public IDelayedComponent component;
 
-        public WaitForComponentUpdate(IComponent component)
+        public WaitForComponentUpdate(IDelayedComponent component)
         {
             this.component = component;
         }
@@ -45,17 +58,18 @@ namespace DCL.Components
         }
     }
 
-    public abstract class BaseComponent : MonoBehaviour, IComponent, IPoolLifecycleHandler, IPoolableObjectContainer
+    public abstract class BaseComponent : MonoBehaviour, IEntityComponent, IDelayedComponent, IPoolLifecycleHandler, IPoolableObjectContainer
     {
         protected ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;
         public Coroutine routine => updateHandler.routine;
         public bool isRoutineRunning => updateHandler.isRoutineRunning;
 
-        public IParcelScene scene;
+        public IParcelScene scene { get; set; }
 
-        [NonSerialized]
-        public DecentralandEntity entity;
+        public string id { get; set; }
+
+        public DecentralandEntity entity { get; set; }
 
         public PoolableObject poolableObject { get; set; }
 
@@ -65,6 +79,11 @@ namespace DCL.Components
 
         public void RaiseOnAppliedChanges()
         {
+        }
+
+        public virtual void Initialize()
+        {
+            transform.SetParent(entity.gameObject.transform, false);
         }
 
         public virtual void UpdateFromJSON(string json)
@@ -88,7 +107,7 @@ namespace DCL.Components
 
         public virtual BaseModel GetModel() => model;
 
-        public virtual ComponentUpdateHandler CreateUpdateHandler()
+        protected virtual ComponentUpdateHandler CreateUpdateHandler()
         {
             return new ComponentUpdateHandler(this);
         }

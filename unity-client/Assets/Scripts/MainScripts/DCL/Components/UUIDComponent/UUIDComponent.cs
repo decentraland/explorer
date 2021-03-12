@@ -27,17 +27,13 @@ namespace DCL
 
             public override BaseModel GetDataFromJSON(string json)
             {
-                return Utils.SafeFromJson<Model>(json); 
+                return Utils.SafeFromJson<Model>(json);
             }
         }
 
         private void Awake()
         {
             model = new Model();
-        }
-
-        public virtual void Setup(IParcelScene scene, DecentralandEntity entity, UUIDComponent.Model model)
-        {
         }
 
         public void RemoveFromEntity(DecentralandEntity entity, string type)
@@ -74,11 +70,7 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            Model model = (Model) newModel;
-            if (!string.IsNullOrEmpty(model.uuid))
-            {
-                Setup(scene, entity, model);
-            }
+            this.model = newModel;
             return null;
         }
 

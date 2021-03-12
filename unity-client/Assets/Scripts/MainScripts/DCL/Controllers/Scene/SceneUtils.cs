@@ -1,0 +1,56 @@
+﻿using System.Collections.Generic;
+using DCL.Components;
+using DCL.Models;
+
+namespace DCL.Controllers
+{
+    public static class SceneUtils
+    {
+        public static DecentralandEntity DuplicateEntity(ParcelScene scene, DecentralandEntity entity)
+        {
+            if (!scene.entities.ContainsKey(entity.entityId)) return null;
+
+            DecentralandEntity newEntity = scene.CreateEntity(System.Guid.NewGuid().ToString());
+
+            if (entity.children.Count > 0)
+            {
+                using (var iterator = entity.children.GetEnumerator())
+                {
+                    while (iterator.MoveNext())
+                    {
+                        DecentralandEntity childDuplicate = DuplicateEntity(scene, iterator.Current.Value);
+                        childDuplicate.SetParent(newEntity);
+                    }
+                }
+            }
+
+            if (entity.parent != null)
+                scene.SetEntityParent(newEntity.entityId, entity.parent.entityId);
+
+            DCLTransform.model.position = WorldStateUtils.ConvertUnityToScenePosition(entity.gameObject.transform.position);
+            DCLTransform.model.rotation = entity.gameObject.transform.rotation;
+            DCLTransform.model.scale = entity.gameObject.transform.lossyScale;
+
+            foreach (KeyValuePair<CLASS_ID_COMPONENT, IComponent> component in entity.components)
+            {
+                scene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, component.Key, DCLTransform.model);
+            }
+
+            foreach (KeyValuePair<System.Type, IComponent> component in entity.GetSharedComponents())
+            {
+                BaseDisposable baseDisposable = scene.SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
+                string jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(component.Value.GetModel());
+                baseDisposable.UpdateFromJSON(jsonModel);
+                scene.SharedComponentAttach(newEntity.entityId, baseDisposable.id);
+            }
+
+            //NOTE: (Adrian) Evaluate if all created components should be handle as equals instead of different
+            // foreach (KeyValuePair<string, UUIDComponent> component in entity.uuidComponents)
+            // {
+            //     scene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.GetModel());
+            // }
+
+            return newEntity;
+        }
+    }
+}

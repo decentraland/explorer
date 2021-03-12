@@ -11,7 +11,8 @@ namespace DCL
 {
     public interface IRuntimeComponentFactory
     {
-        IComponent CreateComponent(int classId, object model);
+        IComponent CreateComponent(int classId);
+        IComponent CreateComponentUUID(int classId, object data);
         void Initialize();
     }
 
@@ -37,6 +38,9 @@ namespace DCL
         public RuntimeComponentFactory(IPoolableComponentFactory poolableComponentFactory = null)
         {
             this.poolableComponentFactory = poolableComponentFactory ?? PoolableComponentFactory.Create();
+
+            // Transform
+            builders.Add((int) CLASS_ID_COMPONENT.TRANSFORM, CreateComponent<DCLTransform>);
 
             // Shapes
             builders.Add((int) CLASS_ID.BOX_SHAPE, CreateComponent<BoxShape>);
@@ -132,7 +136,7 @@ namespace DCL
             return newComponent;
         }
 
-        public IComponent CreateComponent(int classId, object model)
+        public IComponent CreateComponent(int classId)
         {
             if (!builders.ContainsKey(classId))
             {
@@ -140,6 +144,20 @@ namespace DCL
                 return null;
             }
 
+            IComponent newComponent = builders[classId](classId, null);
+
+            return newComponent;
+        }
+
+        public IComponent CreateComponentUUID(int classId, object data)
+        {
+            if (!builders.ContainsKey(classId))
+            {
+                Debug.LogError($"Unknown classId");
+                return null;
+            }
+
+            UUIDComponent.Model model = JsonUtility.FromJson<UUIDComponent.Model>(data as string);
             IComponent newComponent = builders[classId](classId, model);
 
             return newComponent;

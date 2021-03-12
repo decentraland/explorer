@@ -7,13 +7,17 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public abstract class BaseDisposable : IComponent
+    public abstract class BaseDisposable : IDelayedComponent
     {
         public virtual string componentName => GetType().Name;
-        public string id;
+        public string id { get; set; }
         public IParcelScene scene { get; set; }
 
         public abstract int GetClassId();
+
+        public virtual void Initialize()
+        {
+        }
 
         ComponentUpdateHandler updateHandler;
         public WaitForComponentUpdate yieldInstruction => updateHandler.yieldInstruction;

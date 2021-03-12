@@ -37,11 +37,11 @@ public class ActionEventAdapter : MonoBehaviour
 
     void SelectedEntity(int number)
     {
-        if (!filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
+        if (!filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IComponent component))
             return;
 
         selectedEntity = filteredList[number];
-        selectedComponent = (SmartItemComponent)baseComponent;
+        selectedComponent = (SmartItemComponent) component;
         GenerateActionDropdownContent(filteredList[number].GetSmartItemActions());
 
         GenerateParametersFromSelectedOption();
@@ -64,7 +64,6 @@ public class ActionEventAdapter : MonoBehaviour
                 selectedAction = action;
                 break;
             }
-
         }
 
         smartItemListView.SetEntityList(entityList);
