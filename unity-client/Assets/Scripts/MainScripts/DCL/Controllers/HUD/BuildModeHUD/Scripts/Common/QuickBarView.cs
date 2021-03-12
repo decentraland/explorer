@@ -228,6 +228,7 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
 
         draggedSlot.SetEmpty();
         draggedSlot.SetActive(false);
+        QuickBarObjectSelected(triggerIndex);
     }
 
     public void CancelCurrentDragging()

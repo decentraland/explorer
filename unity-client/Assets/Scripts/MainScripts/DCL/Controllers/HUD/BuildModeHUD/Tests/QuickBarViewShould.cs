@@ -161,7 +161,9 @@ namespace Tests.BuildModeHUDViews
         {
             // Arrange
             int testIndex = 0;
+            int returnedIndex = -1;
             quickBarView.shortcutsImgs[0].SetTexture(new Texture2D(10, 10));
+            quickBarView.OnQuickBarObjectSelected += (index) => { returnedIndex = index; };
 
 
             // Act
@@ -170,6 +172,7 @@ namespace Tests.BuildModeHUDViews
             // Assert
             Assert.IsFalse(quickBarView.draggedSlot.image.isActiveAndEnabled, "The draggedSlot image is active!");
             Assert.IsFalse(quickBarView.draggedSlot.isActiveAndEnabled, "The draggedSlot is active!");
+            Assert.AreEqual(testIndex, returnedIndex, "The selected index does not match!");
         }
 
         [Test]
