@@ -512,12 +512,6 @@ export class BrowserInterface {
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
     return !array || array.length === 0 ? undefined : array
   }
-
-  public RequestUserProfile(userIdPayload: { value: string }) {
-    ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
-      .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
-      .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
-  }
 }
 
 export let browserInterface: BrowserInterface = new BrowserInterface()
