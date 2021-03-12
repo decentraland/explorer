@@ -138,7 +138,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
         scene.EntityComponentCreateOrUpdateFromUnity(entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
-        if (scene.entities[entityId].TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IComponent baseComponent))
+        if (scene.entities[entityId].TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent baseComponent))
         {
             //Note (Adrian): We can't wait to set the component 1 frame in production, so we set it like production
             smartItemComponent = ((SmartItemComponent) baseComponent);

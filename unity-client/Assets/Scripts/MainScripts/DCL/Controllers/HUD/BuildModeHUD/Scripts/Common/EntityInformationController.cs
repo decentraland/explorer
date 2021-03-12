@@ -138,7 +138,7 @@ public class EntityInformationController : IEntityInformationController
 
         if (entity.HasSmartItemComponent())
         {
-            if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IComponent baseComponent))
+            if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent baseComponent))
                 entityInformationView.smartItemList.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent) baseComponent).GetValues());
         }
         else
@@ -223,7 +223,7 @@ public class EntityInformationController : IEntityInformationController
         if (entityInformationView.currentEntity == null)
             return;
 
-        if (entityInformationView.currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IComponent component))
+        if (entityInformationView.currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent component))
         {
             SmartItemComponent smartItemComponent = (SmartItemComponent) component;
             OnSmartItemComponentUpdate?.Invoke(entityInformationView.currentEntity);

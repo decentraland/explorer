@@ -135,7 +135,7 @@ namespace DCL.Components
             }
         }
 
-        public virtual void CallWhenReady(Action<BaseDisposable> callback)
+        public virtual void CallWhenReady(Action<ISharedComponent> callback)
         {
             //By default there's no initialization process and we call back as soon as we get the suscription
             callback.Invoke(this);

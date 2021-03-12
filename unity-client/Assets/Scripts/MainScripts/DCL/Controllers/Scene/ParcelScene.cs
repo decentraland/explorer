@@ -46,7 +46,7 @@ namespace DCL.Controllers
         public event System.Action<IComponent> OnComponentRemoved;
         public event System.Action OnChanged;
         public event System.Action<LoadParcelScenesMessage.UnityParcelScene> OnSetData;
-        public event System.Action<string, IComponent> OnAddSharedComponent;
+        public event System.Action<string, ISharedComponent> OnAddSharedComponent;
 
 
         public ContentProvider contentProvider { get; protected set; }
@@ -827,7 +827,7 @@ namespace DCL.Controllers
             if (component == null)
                 return;
 
-            var monoBehaviour = component.transform.GetComponent<T>();
+            var monoBehaviour = component.GetTransform().GetComponent<T>();
 
             if (monoBehaviour != null)
             {

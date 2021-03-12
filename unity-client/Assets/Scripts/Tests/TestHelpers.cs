@@ -186,7 +186,7 @@ namespace DCL.Helpers
         }
 
         public static Coroutine SharedComponentUpdate<T, K>(T component, K model = null)
-            where T : IComponent
+            where T : ISharedComponent
             where K : class, new()
         {
             if (model == null)

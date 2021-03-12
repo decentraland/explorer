@@ -214,7 +214,7 @@ public class BIWCreatorController : BIWController
         sceneToEdit.EntityComponentCreateOrUpdateFromUnity(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
         //Note (Adrian): We can't wait to set the component 1 frame, so we set it
-        if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IComponent component))
+        if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent component))
             ((SmartItemComponent) component).UpdateFromModel(model);
     }
 

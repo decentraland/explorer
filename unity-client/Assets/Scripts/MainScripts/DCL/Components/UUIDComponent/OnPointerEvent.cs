@@ -23,24 +23,26 @@ namespace DCL.Components
 
         public OnPointerEventColliders pointerEventColliders { get; private set; }
 
-        public override void Initialize()
+        public override void Initialize(IParcelScene scene, DecentralandEntity entity)
         {
-            if (entity == null)
-            {
-                Debug.LogError("entity == null? This should never happen.");
-                return;
-            }
-
-            base.Initialize();
+            base.Initialize(scene, entity);
 
             // Create OnPointerEventCollider child
-            pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
-            pointerEventColliders.Initialize(entity);
-            pointerEventColliders.refCount++;
             hoverCanvasController = InteractionHoverCanvasController.i;
 
-            entity.OnShapeUpdated -= OnComponentUpdated;
-            entity.OnShapeUpdated += OnComponentUpdated;
+            SetEventColliders(entity);
+
+            entity.OnShapeUpdated -= SetEventColliders;
+            entity.OnShapeUpdated += SetEventColliders;
+        }
+
+        void SetEventColliders(DecentralandEntity entity)
+        {
+            pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
+            pointerEventColliders.Initialize(entity);
+
+            //TODO(Brian): Check if this is a bug because it can be called many times on shape update
+            pointerEventColliders.refCount++;
         }
 
         public string GetMeshName(Collider collider)
@@ -78,11 +80,6 @@ namespace DCL.Components
             return isVisible;
         }
 
-        void OnComponentUpdated(DecentralandEntity e)
-        {
-            Initialize();
-        }
-
         public void SetHoverState(bool hoverState)
         {
             if (!enableInteractionHoverFeedback || !enabled) return;
@@ -110,7 +107,7 @@ namespace DCL.Components
         void OnDestroy()
         {
             if (entity != null)
-                entity.OnShapeUpdated -= OnComponentUpdated;
+                entity.OnShapeUpdated -= SetEventColliders;
 
             if (pointerEventColliders != null)
             {

@@ -37,8 +37,10 @@ public class ActionEventAdapter : MonoBehaviour
 
     void SelectedEntity(int number)
     {
-        if (!filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IComponent component))
+        if (!filteredList[number].rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent component))
+        {
             return;
+        }
 
         selectedEntity = filteredList[number];
         selectedComponent = (SmartItemComponent) component;
