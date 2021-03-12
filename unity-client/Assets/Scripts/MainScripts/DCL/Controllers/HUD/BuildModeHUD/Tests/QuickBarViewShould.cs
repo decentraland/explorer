@@ -1,4 +1,3 @@
-using DCL;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,7 +9,11 @@ namespace Tests.BuildModeHUDViews
         private QuickBarView quickBarView;
 
         [SetUp]
-        public void SetUp() { quickBarView = QuickBarView.Create(); }
+        public void SetUp()
+        {
+            quickBarView = QuickBarView.Create();
+            quickBarView.generalCanvas = new GameObject().AddComponent<Canvas>();
+        }
 
         [TearDown]
         public void TearDown() { Object.Destroy(quickBarView.gameObject); }
@@ -115,6 +118,58 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             Assert.AreEqual(indexToDrop, triggeredIndex, "The triggered index does not match!");
+        }
+
+        [Test]
+        public void BeginDragSlotCorrectly()
+        {
+            // Arrange
+            int testIndex = 0;
+            quickBarView.lastIndexToBeginDrag = -1;
+            quickBarView.shortcutsImgs[0].SetTexture(new Texture2D(10, 10));
+
+
+            // Act
+            quickBarView.BeginDragSlot(testIndex);
+
+            // Assert
+            Assert.AreEqual(testIndex, quickBarView.lastIndexToBeginDrag, "The lastIndexToBeginDrag does not match!");
+            Assert.IsTrue(quickBarView.draggedSlot.isActiveAndEnabled, "The draggedSlot is not active!");
+            Assert.IsTrue(quickBarView.draggedSlot.image.isActiveAndEnabled, "The draggedSlot image is not active!");
+        }
+
+        [Test]
+        public void DragSlotCorrectly()
+        {
+            // Arrange
+            PointerEventData testEventData = new PointerEventData(null);
+            testEventData.position = new Vector2(5, 3);
+            int testIndex = 0;
+            quickBarView.draggedSlot.slotTransform.position = Vector3.zero;
+            quickBarView.shortcutsImgs[0].SetTexture(new Texture2D(10, 10));
+
+
+            // Act
+            quickBarView.DragSlot(testEventData, testIndex);
+
+            // Assert
+            Assert.AreEqual(testEventData.position, (Vector2)quickBarView.draggedSlot.slotTransform.position, "The draggedSlot position does not match!");
+        }
+
+        [Test]
+        public void EndDragSlotCorrectly()
+        {
+            // Arrange
+            int testIndex = 0;
+            quickBarView.shortcutsImgs[0].SetTexture(new Texture2D(10, 10));
+
+
+            // Act
+            quickBarView.EndDragSlot(testIndex);
+
+            // Assert
+            Assert.IsFalse(quickBarView.draggedSlot.image.isActiveAndEnabled, "The draggedSlot image is active!");
+            Assert.IsFalse(quickBarView.draggedSlot.isActiveAndEnabled, "The draggedSlot is active!");
         }
 
         [Test]

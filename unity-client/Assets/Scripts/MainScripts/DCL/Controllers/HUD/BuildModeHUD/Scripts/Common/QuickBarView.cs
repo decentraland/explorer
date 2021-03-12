@@ -20,7 +20,6 @@ public interface IQuickBarView
     void SetIndexToDrop(int index);
     void SetTextureToShortcut(int shortcutIndex, Texture texture);
     void SetShortcutAsEmpty(int shortcutIndex);
-    void CreateSlotToDrag();
     void BeginDragSlot(int triggerIndex);
     void DragSlot(BaseEventData eventData, int triggerIndex);
     void EndDragSlot(int triggerIndex);
@@ -192,16 +191,15 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
 
     public void OnQuickBarInputTriggedered(int index) { OnQuickBarInputTriggered?.Invoke(index); }
 
-    public void CreateSlotToDrag()
+    internal void CreateSlotToDrag()
     {
-        if (generalCanvas == null)
+        if (shortcutsImgs.Length == 0)
             return;
 
-        draggedSlot = Instantiate(shortcutsImgs[0], generalCanvas.transform);
-        draggedSlot.name = "_DraggedQuickBarSlot";
+        draggedSlot = Instantiate(shortcutsImgs[0], generalCanvas != null ? generalCanvas.transform : null);
         draggedSlot.EnableDragMode();
         draggedSlot.SetEmpty();
-        draggedSlot.gameObject.SetActive(false);
+        draggedSlot.SetActive(false);
     }
 
     public void BeginDragSlot(int triggerIndex)
@@ -211,7 +209,7 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
 
         lastIndexToBeginDrag = triggerIndex;
         SetIndexToBeginDrag(triggerIndex);
-        draggedSlot.gameObject.SetActive(true);
+        draggedSlot.SetActive(true);
         draggedSlot.SetTexture(shortcutsImgs[triggerIndex].image.texture);
     }
 
@@ -220,7 +218,7 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
         if (draggedSlot == null || shortcutsImgs[triggerIndex].isEmpty)
             return;
 
-        draggedSlot.transform.position = ((PointerEventData)eventData).position;
+        draggedSlot.slotTransform.position = ((PointerEventData)eventData).position;
     }
 
     public void EndDragSlot(int triggerIndex)
@@ -229,7 +227,7 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
             return;
 
         draggedSlot.SetEmpty();
-        draggedSlot.gameObject.SetActive(false);
+        draggedSlot.SetActive(false);
     }
 
     public void CancelCurrentDragging()
@@ -239,7 +237,7 @@ public class QuickBarView : MonoBehaviour, IQuickBarView
         if (draggedSlot != null)
         {
             draggedSlot.SetEmpty();
-            draggedSlot.gameObject.SetActive(false);
+            draggedSlot.SetActive(false);
         }
     }
 }

@@ -9,6 +9,7 @@ public class QuickBarSlot : MonoBehaviour
     [SerializeField] internal CanvasGroup canvasGroup;
 
     public bool isEmpty => !image.enabled;
+    public Transform slotTransform => transform;
 
     public void SetTexture(Texture texture)
     {
@@ -24,4 +25,6 @@ public class QuickBarSlot : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
         canvasGroup.alpha = 0.6f;
     }
+
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 }
