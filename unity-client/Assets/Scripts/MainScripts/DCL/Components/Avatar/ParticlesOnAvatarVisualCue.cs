@@ -7,6 +7,7 @@ public class ParticlesOnAvatarVisualCue : MonoBehaviour
 {
     [SerializeField] private AvatarRenderer.VisualCue avatarVisualCue;
     [SerializeField] private GameObject particlePrefab;
+    [SerializeField] private bool followAvatar;
 
     private AvatarRenderer avatarRenderer;
     private void Awake()
@@ -21,7 +22,14 @@ public class ParticlesOnAvatarVisualCue : MonoBehaviour
     {
         if (cue == avatarVisualCue && particlePrefab != null)
         {
-            Instantiate(particlePrefab).transform.position += avatarRenderer.transform.position;
+            var particles = Instantiate(particlePrefab);
+            particles.transform.position += avatarRenderer.transform.position;
+            if (followAvatar)
+            {
+                FollowObject particlesFollow = particles.AddComponent<FollowObject>();
+                particlesFollow.target = avatarRenderer.transform;
+                particlesFollow.offset = particlePrefab.transform.position;
+            }
         }
     }
 
