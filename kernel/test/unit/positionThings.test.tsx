@@ -98,16 +98,20 @@ describe('pickWorldSpawnPoint unit tests', function () {
     })
   })
 
+})
+
+describe('isInsideWorldLimits unit tests', function () {
+
   it('valid positions outside main region are recognized properly', () => {
     expect(isInsideWorldLimits(63, 155)).to.be.true
     expect(isInsideWorldLimits(160, 147)).to.be.true
-    expect(isInsideWorldLimits(162, 70)).to.be.true
+    expect(isInsideWorldLimits(163, 70)).to.be.true
   })
 
   it('invalid positions outside main region are recognized properly', () => {
     expect(isInsideWorldLimits(50, 155)).to.be.false
-    expect(isInsideWorldLimits(120, 147)).to.be.false
-    expect(isInsideWorldLimits(120, 70)).to.be.false
+    expect(isInsideWorldLimits(160, 10)).to.be.false
+    expect(isInsideWorldLimits(163, 40)).to.be.false
   })
 
 })
