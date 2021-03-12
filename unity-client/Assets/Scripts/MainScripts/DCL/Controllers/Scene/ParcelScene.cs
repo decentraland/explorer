@@ -564,14 +564,16 @@ namespace DCL.Controllers
             // }
             // else
             // {
+            if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
+            {
+                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data as string);
+                classId = model.GetClassIdFromType();
+            }
+
             if (!entity.components.ContainsKey(classId))
             {
                 var factory = Environment.i.world.componentFactory;
-
-                if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
-                    newComponent = factory.CreateComponentUUID((int) classId, data) as IEntityComponent;
-                else
-                    newComponent = factory.CreateComponent((int) classId) as IEntityComponent;
+                newComponent = factory.CreateComponent((int) classId) as IEntityComponent;
 
                 if (newComponent != null)
                 {
@@ -579,12 +581,20 @@ namespace DCL.Controllers
                     OnComponentAdded?.Invoke(newComponent);
 
                     newComponent.Initialize(this, entity);
-                    newComponent.UpdateFromJSON((string) data);
+
+                    if (data is string json)
+                    {
+                        newComponent.UpdateFromJSON(json);
+                    }
+                    else
+                    {
+                        newComponent.UpdateFromModel(data as BaseModel);
+                    }
                 }
             }
             else
             {
-                newComponent = EntityComponentUpdate(entity, classId, (string) data);
+                newComponent = EntityComponentUpdate(entity, classId, data as string);
             }
             // }
 
@@ -678,20 +688,20 @@ namespace DCL.Controllers
             // }
             // else
             // {
+            if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
+            {
+                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data);
+                classId = model.GetClassIdFromType();
+            }
+
             if (!entity.components.ContainsKey(classId))
             {
                 var factory = Environment.i.world.componentFactory;
-
-                if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
-                    newComponent = factory.CreateComponentUUID((int) classId, data) as IEntityComponent;
-                else
-                    newComponent = factory.CreateComponent((int) classId) as IEntityComponent;
+                newComponent = factory.CreateComponent((int) classId) as IEntityComponent;
 
                 if (newComponent != null)
                 {
-                    // NOTE(Brian): We use GetClassId() here because the UUID components
-                    //              change ID when their type gets resolved.
-                    entity.components.Add((CLASS_ID_COMPONENT) newComponent.GetClassId(), newComponent);
+                    entity.components.Add(classId, newComponent);
 
                     OnComponentAdded?.Invoke(newComponent);
 
