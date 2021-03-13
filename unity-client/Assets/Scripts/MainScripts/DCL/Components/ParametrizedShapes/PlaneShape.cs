@@ -13,10 +13,16 @@ namespace DCL.Components
             public float[] uvs;
             public float width = 1f; // Plane
             public float height = 1f; // Plane
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public PlaneShape(IParcelScene scene) : base(scene)
         {
+            model = new Model();
         }
 
         public override int GetClassId()
@@ -26,8 +32,9 @@ namespace DCL.Components
 
         public override Mesh GenerateGeometry()
         {
-            Mesh mesh = PrimitiveMeshBuilder.BuildPlane(1f);
+            var model = (Model) this.model;
 
+            Mesh mesh = PrimitiveMeshBuilder.BuildPlane(1f);
             if (model.uvs != null && model.uvs.Length > 0)
             {
                 mesh.uv = Utils.FloatArrayToV2List(model.uvs);
@@ -36,31 +43,32 @@ namespace DCL.Components
             return mesh;
         }
 
-        protected override bool ShouldGenerateNewMesh(BaseShape.Model newModel)
+        protected override bool ShouldGenerateNewMesh(BaseShape.Model previousModel)
         {
             if (currentMesh == null)
                 return true;
 
-            Model newPlaneModel = newModel as Model;
+            PlaneShape.Model newPlaneModel = (PlaneShape.Model) this.model;
+            PlaneShape.Model oldPlaneModel = (PlaneShape.Model) previousModel;
 
-            if (newPlaneModel.uvs != null && model.uvs != null)
+            if (newPlaneModel.uvs != null && oldPlaneModel.uvs != null)
             {
-                if (newPlaneModel.uvs.Length != model.uvs.Length)
+                if (newPlaneModel.uvs.Length != oldPlaneModel.uvs.Length)
                     return true;
 
                 for (int i = 0; i < newPlaneModel.uvs.Length; i++)
                 {
-                    if (newPlaneModel.uvs[i] != model.uvs[i])
+                    if (newPlaneModel.uvs[i] != oldPlaneModel.uvs[i])
                         return true;
                 }
             }
             else
             {
-                if (newPlaneModel.uvs != model.uvs)
+                if (newPlaneModel.uvs != oldPlaneModel.uvs)
                     return true;
             }
 
-            return newPlaneModel.width != model.width || newPlaneModel.height != model.height;
+            return newPlaneModel.width != oldPlaneModel.width || newPlaneModel.height != oldPlaneModel.height;
         }
     }
 }

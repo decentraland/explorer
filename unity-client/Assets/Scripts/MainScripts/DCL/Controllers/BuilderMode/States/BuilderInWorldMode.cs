@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class BuilderInWorldMode : MonoBehaviour
 {
+    [Header("Design variables")]
+    public float maxDistanceToSelectEntities = 50;
 
     [Header("Snap variables")]
     public float snapFactor = 1f;
@@ -17,7 +19,6 @@ public class BuilderInWorldMode : MonoBehaviour
     [Header("Prefab references")]
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public ActionController actionController;
-    public BuilderInWorldBridge builderInWorldBridge;
 
     public event System.Action OnInputDone;
     public event System.Action<BuildInWorldCompleteAction> OnActionGenerated;
@@ -53,6 +54,7 @@ public class BuilderInWorldMode : MonoBehaviour
     {
         gameObject.SetActive(false);
         isModeActive = false;
+        builderInWorldEntityHandler.DeselectEntities();
     }
 
     public virtual void SetSnapActive(bool isActive)
@@ -64,6 +66,11 @@ public class BuilderInWorldMode : MonoBehaviour
     {
         isMultiSelectionActive = true;
 
+    }
+
+    public virtual Vector3 GetPointerPosition()
+    {
+        return Input.mousePosition;
     }
 
     public virtual void EndMultiSelection()
