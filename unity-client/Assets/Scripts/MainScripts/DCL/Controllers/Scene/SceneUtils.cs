@@ -33,7 +33,7 @@ namespace DCL.Controllers
 
             foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> component in entity.components)
             {
-                scene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, component.Key, DCLTransform.model);
+                scene.EntityComponentCreateOrUpdateWithModel(newEntity.entityId, component.Key, DCLTransform.model);
             }
 
             foreach (KeyValuePair<System.Type, ISharedComponent> component in entity.sharedComponents)
@@ -43,12 +43,6 @@ namespace DCL.Controllers
                 sharedComponent.UpdateFromJSON(jsonModel);
                 scene.SharedComponentAttach(newEntity.entityId, sharedComponent.id);
             }
-
-            //NOTE: (Adrian) Evaluate if all created components should be handle as equals instead of different
-            // foreach (KeyValuePair<string, UUIDComponent> component in entity.uuidComponents)
-            // {
-            //     scene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.GetModel());
-            // }
 
             return newEntity;
         }
