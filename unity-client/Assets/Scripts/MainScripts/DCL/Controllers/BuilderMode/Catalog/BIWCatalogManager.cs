@@ -1,10 +1,8 @@
 using DCL;
 using DCL.Configuration;
 using DCL.Helpers.NFT;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public static class BIWCatalogManager
 {
