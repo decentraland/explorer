@@ -29,7 +29,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public VoxelController voxelController;
     public BuilderInWorldInputWrapper builderInputWrapper;
     public BIWOutlinerController outlinerController;
-
     [Header("InputActions")]
     [SerializeField]
     internal InputAction_Trigger focusOnSelectedEntitiesInputAction;

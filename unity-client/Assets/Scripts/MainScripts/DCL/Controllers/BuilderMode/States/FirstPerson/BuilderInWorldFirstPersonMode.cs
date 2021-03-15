@@ -71,7 +71,6 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
             else if (Vector3.Distance(snapGO.transform.position, editionGO.transform.position) >= snapDistanceToActivateMovement)
             {
                 BuilderInWorldUtils.CopyGameObjectStatus(editionGO, snapGO, false);
-
                 snapObjectAlreadyMoved = true;
                 SetEditObjectParent();
             }

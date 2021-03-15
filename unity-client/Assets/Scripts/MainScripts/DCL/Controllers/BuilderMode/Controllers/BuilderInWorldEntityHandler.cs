@@ -220,7 +220,6 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (!selectedEntities.Contains(entity))
             return;
-
         entity.Deselect();
 
         outlinerController.CancelEntityOutline(entity);
