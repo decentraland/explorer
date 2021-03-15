@@ -40,8 +40,22 @@ namespace Builder.MeshLoadIndicator
         {
             indicatorsAvailable = new Queue<DCLBuilderMeshLoadIndicator>();
             indicatorsInUse = new List<DCLBuilderMeshLoadIndicator>();
+        }
 
-            indicatorsAvailable.Enqueue(baseIndicator);
+        public void Dispose()
+        {
+            if (indicatorsAvailable == null || indicatorsInUse == null)
+                return;
+
+            foreach (DCLBuilderMeshLoadIndicator indicator in indicatorsAvailable)
+            {
+                Destroy(indicator.gameObject);
+            }
+
+            foreach (DCLBuilderMeshLoadIndicator indicator in indicatorsInUse)
+            {
+                Destroy(indicator.gameObject);
+            }
         }
 
         private void OnEntityAdded(DCLBuilderEntity entity)

@@ -40,6 +40,8 @@ public class BIWFloorHandler : BIWController
             GameObject.Destroy(gameObject);
         }
         floorPlaceHolderDict.Clear();
+
+        dclBuilderMeshLoadIndicatorController.Dispose();
     }
 
     public bool ExistsFloorPlaceHolderForEntity(string entityId) { return floorPlaceHolderDict.ContainsKey(entityId); }
