@@ -155,7 +155,11 @@ namespace DCL.ABConverter
                 // NOTE(Brian): If no gameObjects are found, we assume they are dependency assets (textures, etc).
                 if (guids.Length == 0)
                 {
-                    dependencyAbs.Add(hash);
+                    // We need to avoid adding dependencies that are NOT converted to ABs (like .bin files)
+                    if (AssetDatabase.FindAssets("t:Texture", new[] { path }).Length != 0)
+                    {
+                        dependencyAbs.Add(hash);   
+                    }
                 }
                 else
                 {
