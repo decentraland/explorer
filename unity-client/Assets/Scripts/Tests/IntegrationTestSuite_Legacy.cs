@@ -107,12 +107,12 @@ public class IntegrationTestSuite_Legacy
                 DCLCharacterController.i.characterController.enabled = true;
         }
 
+        Environment.Dispose();
+
         yield return TearDown_Memory();
 
         if (MapRenderer.i != null)
             MapRenderer.i.Cleanup();
-
-        Environment.Dispose();
 
         yield return testSceneIntegrityChecker?.TestSceneSnapshot();
     }
