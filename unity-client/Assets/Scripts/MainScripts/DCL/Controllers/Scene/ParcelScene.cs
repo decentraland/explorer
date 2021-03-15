@@ -487,83 +487,8 @@ namespace DCL.Controllers
                 return null;
             }
 
-            // if (classId == CLASS_ID_COMPONENT.TRANSFORM)
-            // {
-            //     if (!(data is DCLTransform.Model))
-            //     {
-            //         Debug.LogError("Data is not a DCLTransform.Model type!");
-            //         return null;
-            //     }
-            //
-            //     DCLTransform.Model modelRecovered = (DCLTransform.Model) data;
-            //
-            //     if (!entity.components.ContainsKey(classId))
-            //         entity.components.Add(classId, null);
-            //
-            //
-            //     if (entity.OnTransformChange != null)
-            //     {
-            //         entity.OnTransformChange.Invoke(modelRecovered);
-            //     }
-            //     else
-            //     {
-            //         entity.gameObject.transform.localPosition = modelRecovered.position;
-            //         entity.gameObject.transform.localRotation = modelRecovered.rotation;
-            //         entity.gameObject.transform.localScale = modelRecovered.scale;
-            //
-            //         Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
-            //     }
-            //
-            //     Environment.i.platform.physicsSyncController.MarkDirty();
-            //     Environment.i.platform.cullingController.MarkDirty();
-            //     return null;
-            // }
-
             IEntityComponent newComponent = null;
 
-            // if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
-            // {
-            //     string type = "";
-            //     if (!(data is OnPointerEvent.Model))
-            //     {
-            //         Debug.LogError("Data is not a DCLTransform.Model type!");
-            //         return null;
-            //     }
-            //
-            //     OnPointerEvent.Model model = (OnPointerEvent.Model) data;
-            //     type = model.type;
-            //
-            //     if (!entity.uuidComponents.ContainsKey(type))
-            //     {
-            //         newComponent = Environment.i.world.componentFactory.CreateComponent((int) classId, model) as BaseComponent;
-            //
-            //         if (newComponent != null)
-            //         {
-            //             newComponent.transform.SetParent(entity.gameObject.transform, false);
-            //             UUIDComponent uuidComponent = newComponent as UUIDComponent;
-            //
-            //             if (uuidComponent != null)
-            //             {
-            //                 uuidComponent.Setup(this, entity, model);
-            //                 entity.uuidComponents.Add(type, uuidComponent);
-            //             }
-            //             else
-            //             {
-            //                 Debug.LogError("uuidComponent is not of UUIDComponent type!");
-            //             }
-            //         }
-            //         else
-            //         {
-            //             Debug.LogError("EntityComponentCreateOrUpdate: Invalid UUID type!");
-            //         }
-            //     }
-            //     else
-            //     {
-            //         newComponent = EntityUUIDComponentUpdate(entity, type, model);
-            //     }
-            // }
-            // else
-            // {
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
                 OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data as string);
@@ -596,7 +521,6 @@ namespace DCL.Controllers
             {
                 newComponent = EntityComponentUpdate(entity, classId, data as string);
             }
-            // }
 
             OnChanged?.Invoke();
             Environment.i.platform.physicsSyncController.MarkDirty();
@@ -617,77 +541,8 @@ namespace DCL.Controllers
                 return null;
             }
 
-            // if (classId == CLASS_ID_COMPONENT.TRANSFORM)
-            // {
-            //     MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
-            //
-            //     if (!entity.components.ContainsKey(classId))
-            //     {
-            //         entity.components.Add(classId, null);
-            //     }
-            //
-            //     if (entity.OnTransformChange != null)
-            //     {
-            //         entity.OnTransformChange.Invoke(DCLTransform.model);
-            //     }
-            //     else
-            //     {
-            //         entity.gameObject.transform.localPosition = DCLTransform.model.position;
-            //         entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
-            //         entity.gameObject.transform.localScale = DCLTransform.model.scale;
-            //
-            //         Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
-            //     }
-            //
-            //     Environment.i.platform.physicsSyncController.MarkDirty();
-            //     Environment.i.platform.cullingController.MarkDirty();
-            //     return null;
-            // }
-
             IEntityComponent newComponent = null;
 
-            // HACK: (Zak) will be removed when we separate each
-            // uuid component as a different class id
-            // if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
-            // {
-            //     string type = "";
-            //
-            //     OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data);
-            //
-            //     type = model.type;
-            //
-            //     if (!entity.uuidComponents.ContainsKey(type))
-            //     {
-            //         newComponent = Environment.i.world.componentFactory.CreateComponent((int) classId, model) as BaseComponent;
-            //
-            //         if (newComponent != null)
-            //         {
-            //             newComponent.gameObject.transform.SetParent(entity.gameObject.transform, false);
-            //
-            //             UUIDComponent uuidComponent = newComponent as UUIDComponent;
-            //
-            //             if (uuidComponent != null)
-            //             {
-            //                 uuidComponent.Setup(this, entity, model);
-            //                 entity.uuidComponents.Add(type, uuidComponent);
-            //             }
-            //             else
-            //             {
-            //                 Debug.LogError("uuidComponent is not of UUIDComponent type!");
-            //             }
-            //         }
-            //         else
-            //         {
-            //             Debug.LogError("EntityComponentCreateOrUpdate: Invalid UUID type!");
-            //         }
-            //     }
-            //     else
-            //     {
-            //         newComponent = EntityUUIDComponentUpdate(entity, type, model);
-            //     }
-            // }
-            // else
-            // {
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
                 OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data);
@@ -713,7 +568,6 @@ namespace DCL.Controllers
             {
                 newComponent = EntityComponentUpdate(entity, classId, data);
             }
-            // }
 
             if (newComponent != null)
             {
@@ -732,28 +586,6 @@ namespace DCL.Controllers
             Environment.i.platform.cullingController.MarkDirty();
             return newComponent;
         }
-
-        // HACK: (Zak) will be removed when we separate each
-        // uuid component as a different class id
-        // public UUIDComponent EntityUUIDComponentUpdate(DecentralandEntity entity, string type, UUIDComponent.Model model)
-        // {
-        //     if (entity == null)
-        //     {
-        //         Debug.LogError($"Can't update the {type} uuid component of a nonexistent entity!", this);
-        //         return null;
-        //     }
-        //
-        //     if (!entity.uuidComponents.ContainsKey(type))
-        //     {
-        //         Debug.LogError($"Entity {entity.entityId} doesn't have a {type} uuid component to update!", this);
-        //         return null;
-        //     }
-        //
-        //     UUIDComponent targetComponent = entity.uuidComponents[type];
-        //     targetComponent.Setup(this, entity, model);
-        //
-        //     return targetComponent;
-        // }
 
         // The EntityComponentUpdate() parameters differ from other similar methods because there is no EntityComponentUpdate protocol message yet.
         public IEntityComponent EntityComponentUpdate(DecentralandEntity entity, CLASS_ID_COMPONENT classId,
@@ -845,20 +677,6 @@ namespace DCL.Controllers
             }
         }
 
-        // // HACK: (Zak) will be removed when we separate each
-        // // uuid component as a different class id
-        // private void RemoveUUIDComponentType<T>(DecentralandEntity entity, string type)
-        //     where T : UUIDComponent
-        // {
-        //     var component = entity.uuidComponents[type].GetComponent<T>();
-        //
-        //     if (component != null)
-        //     {
-        //         Utils.SafeDestroy(component);
-        //         entity.uuidComponents.Remove(type);
-        //     }
-        // }
-
         private void RemoveEntityComponent(DecentralandEntity entity, string componentName)
         {
             switch (componentName)
@@ -871,15 +689,6 @@ namespace DCL.Controllers
                     }
 
                     return;
-                // case OnClick.NAME:
-                //     RemoveUUIDComponentType<OnClick>(entity, componentName);
-                //     return;
-                // case OnPointerDown.NAME:
-                //     RemoveUUIDComponentType<OnPointerDown>(entity, componentName);
-                //     return;
-                // case OnPointerUp.NAME:
-                //     RemoveUUIDComponentType<OnPointerUp>(entity, componentName);
-                //     return;
             }
         }
 
