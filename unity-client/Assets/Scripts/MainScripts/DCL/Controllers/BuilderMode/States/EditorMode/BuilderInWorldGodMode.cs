@@ -23,13 +23,13 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public Transform lookAtT;
     public MouseCatcher mouseCatcher;
     public PlayerAvatarController avatarRenderer;
-    
+
     [Header("Prefab References")]
     public DCLBuilderGizmoManager gizmoManager;
     public VoxelController voxelController;
     public BuilderInWorldInputWrapper builderInputWrapper;
     public BIWOutlinerController outlinerController;
-    
+
     [Header("InputActions")]
     [SerializeField]
     internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
@@ -122,7 +122,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
                 foreach (DCLBuilderInWorldEntity entity in allEntities)
                 {
-                    if (entity.isVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected) continue;
+                    if (entity.isVoxel && !isVoxelBoundMultiSelection && isTypeOfBoundSelectionSelected)
+                        continue;
                     if (entity.rootEntity.meshRootGameObject && entity.rootEntity.meshesInfo.renderers.Length > 0)
                     {
                         if (BuilderInWorldUtils.IsWithInSelectionBounds(entity.rootEntity.meshesInfo.mergedBounds.center, lastMousePosition, Input.mousePosition))
@@ -227,8 +228,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
             if (isSnapActive)
             {
-                currentPoint.x = Mathf.Round(currentPoint.x/snapDragFactor)*snapDragFactor;
-                currentPoint.z = Mathf.Round(currentPoint.z/snapDragFactor)*snapDragFactor;
+                currentPoint.x = Mathf.Round(currentPoint.x / snapDragFactor) * snapDragFactor;
+                currentPoint.z = Mathf.Round(currentPoint.z / snapDragFactor) * snapDragFactor;
                 destination = currentPoint;
             }
             else
@@ -276,7 +277,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     void StarDraggingSelectedEntities()
     {
         if (!builderInWorldEntityHandler.IsPointerInSelectedEntity() ||
-            gizmoManager.HasAxisHover())
+            gizmoManager.HasAxisHover() ||
+            voxelController.IsActive())
             return;
 
         if (gizmoManager.isActiveAndEnabled)
@@ -336,15 +338,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
     #region Voxel
 
-    public void ActivateVoxelMode()
-    {
-        voxelController.SetActiveMode(true);
-    }
+    public void ActivateVoxelMode() { voxelController.SetActiveMode(true); }
 
-    public void DesactivateVoxelMode()
-    {
-        voxelController.SetActiveMode(false);
-    }
+    public void DesactivateVoxelMode() { voxelController.SetActiveMode(false); }
 
     #endregion
 
@@ -364,18 +360,18 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         Environment.i.world.sceneController.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
 
-        RenderSettings.fog = false;
         gizmoManager.HideGizmo();
         editionGO.transform.SetParent(null);
         avatarRenderer.SetAvatarVisibility(false);
+
+        if (HUDController.i.builderInWorldMainHud != null)
+            HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
     }
 
     public void ActivateCamera(ParcelScene parcelScene)
     {
         freeCameraController.gameObject.SetActive(true);
-
         SetLookAtObject(parcelScene);
-
 
         // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player position and the camera
         Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;
@@ -396,7 +392,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         mouseCatcher.enabled = true;
         Utils.LockCursor();
         cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
-
 
         Environment.i.world.sceneController.ReIntegrateIsolatedScene();
 
@@ -435,10 +430,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    public override Vector3 GetCreatedEntityPoint()
-    {
-        return GetFloorPointAtMouse(Input.mousePosition);
-    }
+    public override Vector3 GetCreatedEntityPoint() { return GetFloorPointAtMouse(Input.mousePosition); }
 
     public override void SelectedEntity(DCLBuilderInWorldEntity selectedEntity)
     {
@@ -561,10 +553,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    public void FocusGameObject(List<DCLBuilderInWorldEntity> entitiesToFocus)
-    {
-        freeCameraController.FocusOnEntities(entitiesToFocus);
-    }
+    public void FocusGameObject(List<DCLBuilderInWorldEntity> entitiesToFocus) { freeCameraController.FocusOnEntities(entitiesToFocus); }
 
     void OnGizmosTransformStart(string gizmoType)
     {
@@ -597,10 +586,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    void ShowGizmos()
-    {
-        gizmoManager.ShowGizmo();
-    }
+    void ShowGizmos() { gizmoManager.ShowGizmo(); }
 
     void SetLookAtObject(ParcelScene parcelScene)
     {
@@ -622,10 +608,11 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
                 destination.x = Mathf.Round(destination.x / snapDragFactor) * snapDragFactor;
                 destination.z = Mathf.Round(destination.z / snapDragFactor) * snapDragFactor;
             }
-            
+
             editionGO.transform.position = destination;
-            
-            if (selectedEntities.Count > 0 && selectedEntities[0].isNFT) editionGO.transform.position += Vector3.up * 2f;
+
+            if (selectedEntities.Count > 0 && selectedEntities[0].isNFT)
+                editionGO.transform.position += Vector3.up * 2f;
         }
     }
 

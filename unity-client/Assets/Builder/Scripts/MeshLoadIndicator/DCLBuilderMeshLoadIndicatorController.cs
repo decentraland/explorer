@@ -13,13 +13,7 @@ namespace Builder.MeshLoadIndicator
         private bool isGameObjectActive = false;
         private bool isPreviewMode = false;
 
-        private void Awake()
-        {
-            indicatorsAvailable = new Queue<DCLBuilderMeshLoadIndicator>();
-            indicatorsInUse = new List<DCLBuilderMeshLoadIndicator>();
-
-            indicatorsAvailable.Enqueue(baseIndicator);
-        }
+        private void Awake() { Init(); }
 
         private void OnEnable()
         {
@@ -42,6 +36,14 @@ namespace Builder.MeshLoadIndicator
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
         }
 
+        public void Init()
+        {
+            indicatorsAvailable = new Queue<DCLBuilderMeshLoadIndicator>();
+            indicatorsInUse = new List<DCLBuilderMeshLoadIndicator>();
+
+            indicatorsAvailable.Enqueue(baseIndicator);
+        }
+
         private void OnEntityAdded(DCLBuilderEntity entity)
         {
             if (!entity.HasShape() && !isPreviewMode)
@@ -58,10 +60,7 @@ namespace Builder.MeshLoadIndicator
             }
         }
 
-        private void OnResetBuilderScene()
-        {
-            HideAllIndicators();
-        }
+        private void OnResetBuilderScene() { HideAllIndicators(); }
 
         private void OnPreviewModeChanged(bool isPreview)
         {

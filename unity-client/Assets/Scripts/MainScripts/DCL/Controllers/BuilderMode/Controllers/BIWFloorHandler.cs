@@ -6,10 +6,14 @@ using DCL.Controllers;
 using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BIWFloorHandler : BIWController
 {
+    [Header("Design Variables")]
+    public float secondsToTimeOut = 10f;
+
     [Header("Prefab References")]
     public ActionController actionController;
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
@@ -25,15 +29,9 @@ public class BIWFloorHandler : BIWController
     private CatalogItem lastFloorCalalogItemUsed;
     private readonly Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
 
-    private void Start()
-    {
-        meshLoadIndicator.SetCamera(Camera.main);
-    }
+    private void Start() { meshLoadIndicator.SetCamera(Camera.main); }
 
-    private void OnDestroy()
-    {
-        Clean();
-    }
+    private void OnDestroy() { Clean(); }
 
     public void Clean()
     {
@@ -43,6 +41,8 @@ public class BIWFloorHandler : BIWController
         }
         floorPlaceHolderDict.Clear();
     }
+
+    public bool ExistsFloorPlaceHolderForEntity(string entityId) { return floorPlaceHolderDict.ContainsKey(entityId); }
 
     public void ChangeFloor(CatalogItem newFloorObject)
     {
@@ -72,10 +72,7 @@ public class BIWFloorHandler : BIWController
         return null;
     }
 
-    public bool IsCatalogItemFloor(CatalogItem floorSceneObject)
-    {
-        return string.Equals(floorSceneObject.category, BuilderInWorldSettings.FLOOR_CATEGORY);
-    }
+    public bool IsCatalogItemFloor(CatalogItem floorSceneObject) { return string.Equals(floorSceneObject.category, BuilderInWorldSettings.FLOOR_CATEGORY); }
 
     public void CreateDefaultFloor()
     {
@@ -90,7 +87,7 @@ public class BIWFloorHandler : BIWController
 
         foreach (Vector2Int parcel in parcelsPoints)
         {
-            DCLBuilderInWorldEntity decentralandEntity = biwCreatorController.CreateSceneObject(floorSceneObject, false, true);
+            DCLBuilderInWorldEntity decentralandEntity = biwCreatorController.CreateCatalogItem(floorSceneObject, false, true);
             decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
             decentralandEntity.transform.position = WorldStateUtils.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
             dclBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
@@ -98,6 +95,7 @@ public class BIWFloorHandler : BIWController
             GameObject floorPlaceHolder = GameObject.Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
             floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
             builderInWorldBridge?.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
+            CoroutineStarter.Start(FloorTimeOut(decentralandEntity.rootEntity.entityId));
         }
 
         builderInWorldEntityHandler.DeselectEntities();
@@ -107,10 +105,24 @@ public class BIWFloorHandler : BIWController
     private void OnFloorLoaded(DecentralandEntity entity)
     {
         entity.OnShapeUpdated -= OnFloorLoaded;
-        dclBuilderMeshLoadIndicatorController.HideIndicator(entity.entityId);
+        RemovePlaceHolder(entity.entityId);
+    }
 
-        GameObject floorPlaceHolder = floorPlaceHolderDict[entity.entityId];
-        floorPlaceHolderDict.Remove(entity.entityId);
+    private void RemovePlaceHolder(string entityId)
+    {
+        if (!floorPlaceHolderDict.ContainsKey(entityId))
+            return;
+
+        GameObject floorPlaceHolder = floorPlaceHolderDict[entityId];
+        floorPlaceHolderDict.Remove(entityId);
         GameObject.Destroy(floorPlaceHolder);
+        dclBuilderMeshLoadIndicatorController.HideIndicator(entityId);
+    }
+
+    private IEnumerator FloorTimeOut(string entityId)
+    {
+        yield return new WaitForSeconds(secondsToTimeOut);
+        RemovePlaceHolder(entityId);
+        Debug.Log("Floor loading timeout " + entityId);
     }
 }
