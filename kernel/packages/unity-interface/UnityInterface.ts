@@ -18,7 +18,8 @@ import {
   Wearable,
   KernelConfigForRenderer,
   RealmsInfoForRenderer,
-  ContentMapping
+  ContentMapping,
+  Profile
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
@@ -28,6 +29,7 @@ import { renderStateObservable } from '../shared/world/worldState'
 import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
 import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
 import { QuestForRenderer } from 'dcl-ecs-quests/src/types'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -60,14 +62,30 @@ function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
 export let targetHeight: number = 1080
 
 function resizeCanvas(module: any) {
-  if (targetHeight > 2000) {
+  // When renderer is configured with unlimited resolution,
+  // the targetHeight is set to an arbitrary high value
+  let assumeUnlimitedResolution: boolean = targetHeight > 2000
+  let finalHeight
+  let finalWidth
+
+  if (assumeUnlimitedResolution) {
     targetHeight = window.innerHeight * devicePixelRatio
+    finalHeight = targetHeight
+    finalWidth = window.innerWidth * devicePixelRatio
+  } else {
+    // We calculate width using height as reference
+    const screenWidth = screen.width * devicePixelRatio
+    const screenHeight = screen.height * devicePixelRatio
+    const targetWidth = targetHeight * (screenWidth / screenHeight)
+
+    const pixelRatioH = targetHeight / screenHeight
+    const pixelRatioW = targetWidth / screenWidth
+
+    finalHeight = window.innerHeight * devicePixelRatio * pixelRatioH
+    finalWidth = window.innerWidth * devicePixelRatio * pixelRatioW
   }
 
-  let desiredHeight = targetHeight
-
-  let ratio = desiredHeight / module.canvas.height
-  module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
+  module.setCanvasSize(finalWidth, finalHeight)
 }
 
 export class UnityInterface {
@@ -158,12 +176,12 @@ export class UnityInterface {
   }
 
   public CreateGlobalScene(data: {
-    id: string;
-    name: string;
-    baseUrl: string,
-    contents: Array<ContentMapping>,
-    icon?: string,
-    isPortableExperience: boolean,
+    id: string
+    name: string
+    baseUrl: string
+    contents: Array<ContentMapping>
+    icon?: string
+    isPortableExperience: boolean
   }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
@@ -431,6 +449,22 @@ export class UnityInterface {
 
   public SendPublishSceneResult(result: DeploymentResult) {
     this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
+  }
+
+  public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
+    if (!profiles) {
+      this.SendMessageToUnity('Bridges', 'SetENSOwnerQueryResult', JSON.stringify({ searchInput, success: false }))
+      return
+    }
+    const profilesForRenderer: ProfileForRenderer[] = []
+    for (let profile of profiles) {
+      profilesForRenderer.push(profileToRendererFormat(profile))
+    }
+    this.SendMessageToUnity(
+      'Bridges',
+      'SetENSOwnerQueryResult',
+      JSON.stringify({ searchInput, success: true, profiles: profilesForRenderer })
+    )
   }
 
   // *********************************************************************************
