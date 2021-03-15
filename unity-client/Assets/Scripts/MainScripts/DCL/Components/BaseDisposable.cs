@@ -41,7 +41,6 @@ namespace DCL.Components
 
         public BaseDisposable()
         {
-            //this.scene = scene;
             updateHandler = CreateUpdateHandler();
         }
 
