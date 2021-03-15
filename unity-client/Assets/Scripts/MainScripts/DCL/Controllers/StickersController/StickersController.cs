@@ -9,7 +9,10 @@ public class StickersController : MonoBehaviour
         if (!stickersFactory.TryGet(id, out GameObject prefab))
             return;
 
-        var emoteGameObject = Instantiate(prefab);
-        emoteGameObject.AddComponent<>()
+        GameObject emoteGameObject = Instantiate(prefab);
+        emoteGameObject.transform.position += transform.position;
+        FollowObject emoteFollow = emoteGameObject.AddComponent<FollowObject>();
+        emoteFollow.target = transform;
+        emoteFollow.offset = prefab.transform.position;
     }
 }
