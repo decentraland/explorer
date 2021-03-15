@@ -121,8 +121,7 @@ namespace DCL.Helpers
             return scene.EntityComponentCreateOrUpdate(
                 entity.entityId,
                 (CLASS_ID_COMPONENT) componentClassId,
-                data
-                , out _) as T;
+                data) as T;
         }
 
         public static Coroutine EntityComponentUpdate<T, K>(T component, K model = null)
@@ -255,7 +254,7 @@ namespace DCL.Helpers
                 entity.entityId,
                 CLASS_ID_COMPONENT.TRANSFORM,
                 System.Convert.ToBase64String(pB_Transform.ToByteArray())
-                , out CleanableYieldInstruction routine);
+            );
         }
 
         public static TextShape InstantiateEntityWithTextShape(ParcelScene scene, Vector3 position, TextShape.Model model)
