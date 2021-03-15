@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using DCL.Models;
+using Ray = UnityEngine.Ray;
 
 namespace DCL
 {
@@ -435,6 +437,14 @@ namespace DCL
                 && !AreCollidersFromSameEntity(potentialBlockerHit, targetOnClickHit); // Does potential blocker belong to other entity rather than target entity?
         }
 
+        bool EntityHasPointerEvent(DecentralandEntity entity)
+        {
+            return entity.components.ContainsKey(Models.CLASS_ID_COMPONENT.UUID_CALLBACK) ||
+                   entity.components.ContainsKey(Models.CLASS_ID_COMPONENT.UUID_ON_UP) ||
+                   entity.components.ContainsKey(Models.CLASS_ID_COMPONENT.UUID_ON_DOWN) ||
+                   entity.components.ContainsKey(Models.CLASS_ID_COMPONENT.UUID_ON_CLICK);
+        }
+
         bool AreCollidersFromSameEntity(RaycastHitInfo hitInfoA, RaycastHitInfo hitInfoB)
         {
             CollidersManager.i.GetColliderInfo(hitInfoA.hit.collider, out ColliderInfo colliderInfoA);
@@ -443,8 +453,8 @@ namespace DCL
             var entityA = colliderInfoA.entity;
             var entityB = colliderInfoB.entity;
 
-            bool entityAHasEvent = entityA != null && entityA.components.ContainsKey(Models.CLASS_ID_COMPONENT.UUID_CALLBACK);
-            bool entityBHasEvent = entityB != null && entityB.components.ContainsKey(Models.CLASS_ID_COMPONENT.UUID_CALLBACK);
+            bool entityAHasEvent = entityA != null && EntityHasPointerEvent(entityA);
+            bool entityBHasEvent = entityB != null && EntityHasPointerEvent(entityB);
 
             // If both entities has OnClick/PointerEvent component
             if (entityAHasEvent && entityBHasEvent)

@@ -106,8 +106,6 @@ namespace DCL.Helpers
                 ? (int) inferredId
                 : (int) classId;
 
-            string componentInstanceId = GetComponentUniqueId(scene, typeof(T).Name, componentClassId, entity.entityId);
-
             string data;
 
             if (classId == CLASS_ID_COMPONENT.TRANSFORM)

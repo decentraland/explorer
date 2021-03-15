@@ -566,7 +566,7 @@ namespace DCL.Controllers
             // {
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
-                UUIDComponent.Model model = JsonUtility.FromJson<UUIDComponent.Model>(data as string);
+                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data as string);
                 classId = model.GetClassIdFromType();
             }
 
@@ -690,7 +690,7 @@ namespace DCL.Controllers
             // {
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
-                UUIDComponent.Model model = JsonUtility.FromJson<UUIDComponent.Model>(data);
+                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data);
                 classId = model.GetClassIdFromType();
             }
 

@@ -545,6 +545,8 @@ namespace Tests
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
 
+            Debug.Log("Starting... 1");
+
             yield return TestHelpers.ExpectMessageToKernel(
                 targetEventType,
                 sceneEvent,
@@ -570,6 +572,7 @@ namespace Tests
                     return true;
                 });
 
+            Debug.Log("Starting... 2 " + eventTriggered);
             Assert.IsTrue(eventTriggered);
         }
 

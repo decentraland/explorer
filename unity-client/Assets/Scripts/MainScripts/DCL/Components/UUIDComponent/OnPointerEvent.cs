@@ -1,3 +1,4 @@
+using System.Collections;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Interface;
@@ -6,19 +7,24 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-    public class OnPointerEvent : UUIDComponent<OnPointerEvent.Model>
+    public class OnPointerEvent : UUIDComponent
     {
         public static bool enableInteractionHoverFeedback = true;
 
         InteractionHoverCanvasController hoverCanvasController;
 
         [System.Serializable]
-        new public class Model : UUIDComponent.Model
+        public new class Model : UUIDComponent.Model
         {
             public string button = WebInterface.ACTION_BUTTON.ANY.ToString();
             public string hoverText = "Interact";
             public float distance = 10f;
             public bool showFeedback = true;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public OnPointerEventColliders pointerEventColliders { get; private set; }
@@ -27,7 +33,8 @@ namespace DCL.Components
         {
             base.Initialize(scene, entity);
 
-            model = new Model();
+            model = new OnPointerEvent.Model();
+
             // Create OnPointerEventCollider child
             hoverCanvasController = InteractionHoverCanvasController.i;
 
@@ -53,6 +60,8 @@ namespace DCL.Components
 
         public WebInterface.ACTION_BUTTON GetActionButton()
         {
+            Model model = this.model as Model;
+
             switch (model.button)
             {
                 case "PRIMARY":
@@ -85,6 +94,8 @@ namespace DCL.Components
         {
             if (!enableInteractionHoverFeedback || !enabled) return;
 
+            Model model = this.model as Model;
+
             hoverCanvasController.enabled = model.showFeedback;
             if (model.showFeedback)
             {
@@ -97,12 +108,20 @@ namespace DCL.Components
 
         public bool IsAtHoverDistance(Transform other)
         {
+            Model model = this.model as Model;
             return model != null && other != null && Vector3.Distance(other.position, transform.position) <= model.distance;
         }
 
         public bool IsAtHoverDistance(float distance)
         {
+            Model model = this.model as Model;
             return distance <= model.distance;
+        }
+
+        public override IEnumerator ApplyChanges(BaseModel newModel)
+        {
+            this.model = newModel ?? new OnPointerEvent.Model();
+            return null;
         }
 
         void OnDestroy()

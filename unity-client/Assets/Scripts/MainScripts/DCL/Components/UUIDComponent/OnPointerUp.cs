@@ -13,6 +13,8 @@ namespace DCL.Components
         {
             if (!enabled || !IsVisible()) return;
 
+            OnPointerEvent.Model model = this.model as OnPointerEvent.Model;
+
             if (IsAtHoverDistance(hit.distance) && (model.button == "ANY" || buttonId.ToString() == model.button))
             {
                 string meshName = null;

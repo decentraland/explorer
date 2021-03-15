@@ -13,6 +13,8 @@ namespace DCL.Components
         {
             if (!enabled || !IsVisible()) return;
 
+            Model model = this.model as OnPointerEvent.Model;
+
             if (ShouldReportEvent(buttonId, hit))
             {
                 string meshName = GetMeshName(hit.collider);
@@ -23,6 +25,7 @@ namespace DCL.Components
 
         protected bool ShouldReportEvent(WebInterface.ACTION_BUTTON buttonId, HitInfo hit)
         {
+            Model model = this.model as OnPointerEvent.Model;
             return IsVisible() && IsAtHoverDistance(hit.distance) && (model.button == "ANY" || buttonId.ToString() == model.button);
         }
 
