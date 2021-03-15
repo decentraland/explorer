@@ -77,7 +77,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
 
         SmartItemComponent.Model model = new SmartItemComponent.Model();
         string jsonModel = JsonConvert.SerializeObject(model);
-        scene.EntityComponentCreateOrUpdateFromUnity(entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+        scene.EntityComponentCreateOrUpdateWithModel(entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
         Assert.IsTrue(biwEntity.HasSmartItemComponent());
 
@@ -136,7 +136,7 @@ public class BuilderInWorldShould : IntegrationTestSuite_Legacy
         TestHelpers.CreateSceneEntity(scene, entityId);
         SmartItemComponent smartItemComponent = null;
         //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
-        scene.EntityComponentCreateOrUpdateFromUnity(entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+        scene.EntityComponentCreateOrUpdateWithModel(entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
 
         if (scene.entities[entityId].TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent baseComponent))
         {

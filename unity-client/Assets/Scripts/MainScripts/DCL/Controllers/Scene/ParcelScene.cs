@@ -477,7 +477,7 @@ namespace DCL.Controllers
         }
 
 
-        public IEntityComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, object data)
+        public IEntityComponent EntityComponentCreateOrUpdateWithModel(string entityId, CLASS_ID_COMPONENT classId, object data)
         {
             DecentralandEntity entity = GetEntityForUpdate(entityId);
 
@@ -522,6 +522,9 @@ namespace DCL.Controllers
                 newComponent = EntityComponentUpdate(entity, classId, data as string);
             }
 
+            if (newComponent != null && newComponent is IOutOfSceneBoundariesHandler)
+                Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
+
             OnChanged?.Invoke();
             Environment.i.platform.physicsSyncController.MarkDirty();
             Environment.i.platform.cullingController.MarkDirty();
@@ -529,62 +532,9 @@ namespace DCL.Controllers
         }
 
 
-        public IEntityComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
+        public IEntityComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data)
         {
-            yieldInstruction = null;
-
-            DecentralandEntity entity = GetEntityForUpdate(entityId);
-
-            if (entity == null)
-            {
-                Debug.LogError($"scene '{sceneData.id}': Can't create entity component if the entity {entityId} doesn't exist!");
-                return null;
-            }
-
-            IEntityComponent newComponent = null;
-
-            if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
-            {
-                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data);
-                classId = model.GetClassIdFromType();
-            }
-
-            if (!entity.components.ContainsKey(classId))
-            {
-                var factory = Environment.i.world.componentFactory;
-                newComponent = factory.CreateComponent((int) classId) as IEntityComponent;
-
-                if (newComponent != null)
-                {
-                    entity.components.Add(classId, newComponent);
-
-                    OnComponentAdded?.Invoke(newComponent);
-
-                    newComponent.Initialize(this, entity);
-                    newComponent.UpdateFromJSON(data);
-                }
-            }
-            else
-            {
-                newComponent = EntityComponentUpdate(entity, classId, data);
-            }
-
-            if (newComponent != null)
-            {
-                if (newComponent is IOutOfSceneBoundariesHandler)
-                    Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
-
-                if (newComponent is IDelayedComponent delayedComponent)
-                {
-                    if (delayedComponent.isRoutineRunning)
-                        yieldInstruction = delayedComponent.yieldInstruction;
-                }
-            }
-
-            OnChanged?.Invoke();
-            Environment.i.platform.physicsSyncController.MarkDirty();
-            Environment.i.platform.cullingController.MarkDirty();
-            return newComponent;
+            return EntityComponentCreateOrUpdateWithModel(entityId, classId, data);
         }
 
         // The EntityComponentUpdate() parameters differ from other similar methods because there is no EntityComponentUpdate protocol message yet.
@@ -690,21 +640,6 @@ namespace DCL.Controllers
 
                     return;
             }
-        }
-
-        public void SharedComponentUpdate(string id, string json, out CleanableYieldInstruction yieldInstruction)
-        {
-            ProfilingEvents.OnMessageDecodeStart?.Invoke("ComponentUpdated");
-            ISharedComponent newComponent = SharedComponentUpdate(id, json);
-            ProfilingEvents.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
-
-            yieldInstruction = null;
-
-            if (!(newComponent is IDelayedComponent delayedComponent))
-                return;
-
-            if (delayedComponent.isRoutineRunning)
-                yieldInstruction = delayedComponent.yieldInstruction;
         }
 
         public ISharedComponent SharedComponentUpdate(string id, BaseModel model)
