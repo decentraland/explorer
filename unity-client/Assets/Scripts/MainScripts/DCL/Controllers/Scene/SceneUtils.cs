@@ -6,11 +6,11 @@ namespace DCL.Controllers
 {
     public static class SceneUtils
     {
-        public static DecentralandEntity DuplicateEntity(ParcelScene scene, DecentralandEntity entity)
+        public static IDCLEntity DuplicateEntity(ParcelScene scene, IDCLEntity entity)
         {
             if (!scene.entities.ContainsKey(entity.entityId)) return null;
 
-            DecentralandEntity newEntity = scene.CreateEntity(System.Guid.NewGuid().ToString());
+            IDCLEntity newEntity = scene.CreateEntity(System.Guid.NewGuid().ToString());
 
             if (entity.children.Count > 0)
             {
@@ -18,7 +18,7 @@ namespace DCL.Controllers
                 {
                     while (iterator.MoveNext())
                     {
-                        DecentralandEntity childDuplicate = DuplicateEntity(scene, iterator.Current.Value);
+                        IDCLEntity childDuplicate = DuplicateEntity(scene, iterator.Current.Value);
                         childDuplicate.SetParent(newEntity);
                     }
                 }
@@ -36,7 +36,7 @@ namespace DCL.Controllers
                 scene.EntityComponentCreateOrUpdateFromUnity(newEntity.entityId, component.Key, DCLTransform.model);
             }
 
-            foreach (KeyValuePair<System.Type, ISharedComponent> component in entity.GetSharedComponents())
+            foreach (KeyValuePair<System.Type, ISharedComponent> component in entity.sharedComponents)
             {
                 ISharedComponent sharedComponent = scene.SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
                 string jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(component.Value.GetModel());

@@ -95,8 +95,6 @@ public class IntegrationTestSuite_Legacy
     {
         yield return null;
 
-        Environment.Dispose();
-
         if (runtimeGameObjectsRoot != null)
             Object.Destroy(runtimeGameObjectsRoot.gameObject);
 
@@ -113,6 +111,8 @@ public class IntegrationTestSuite_Legacy
 
         if (MapRenderer.i != null)
             MapRenderer.i.Cleanup();
+
+        Environment.Dispose();
 
         yield return testSceneIntegrityChecker?.TestSceneSnapshot();
     }

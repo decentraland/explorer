@@ -23,7 +23,7 @@ namespace DCL.Components
 
         public OnPointerEventColliders pointerEventColliders { get; private set; }
 
-        public override void Initialize(IParcelScene scene, DecentralandEntity entity)
+        public override void Initialize(IParcelScene scene, IDCLEntity entity)
         {
             base.Initialize(scene, entity);
 
@@ -37,7 +37,7 @@ namespace DCL.Components
             entity.OnShapeUpdated += SetEventColliders;
         }
 
-        void SetEventColliders(DecentralandEntity entity)
+        void SetEventColliders(IDCLEntity entity)
         {
             pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
             pointerEventColliders.Initialize(entity);

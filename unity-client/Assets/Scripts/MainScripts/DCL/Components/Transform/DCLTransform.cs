@@ -32,10 +32,10 @@ namespace DCL.Components
         public string componentName { get; } = "Transform";
 
         public IParcelScene scene { get; private set; }
-        public DecentralandEntity entity { get; private set; }
+        public IDCLEntity entity { get; private set; }
         public Transform GetTransform() => null;
 
-        public void Initialize(IParcelScene scene, DecentralandEntity entity)
+        public void Initialize(IParcelScene scene, IDCLEntity entity)
         {
             this.scene = scene;
             this.entity = entity;

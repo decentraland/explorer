@@ -12,6 +12,7 @@ public class BIWFloorHandler : BIWController
 {
     [Header("Prefab References")]
     public ActionController actionController;
+
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public DCLBuilderMeshLoadIndicatorController dclBuilderMeshLoadIndicatorController;
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
@@ -41,6 +42,7 @@ public class BIWFloorHandler : BIWController
         {
             GameObject.Destroy(gameObject);
         }
+
         floorPlaceHolderDict.Clear();
     }
 
@@ -69,6 +71,7 @@ public class BIWFloorHandler : BIWController
                 return entity.GetCatalogItemAssociated();
             }
         }
+
         return null;
     }
 
@@ -90,21 +93,21 @@ public class BIWFloorHandler : BIWController
 
         foreach (Vector2Int parcel in parcelsPoints)
         {
-            DCLBuilderInWorldEntity decentralandEntity = biwCreatorController.CreateSceneObject(floorSceneObject, false, true);
-            decentralandEntity.rootEntity.OnShapeUpdated += OnFloorLoaded;
-            decentralandEntity.transform.position = WorldStateUtils.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
-            dclBuilderMeshLoadIndicatorController.ShowIndicator(decentralandEntity.rootEntity.gameObject.transform.position, decentralandEntity.rootEntity.entityId);
+            DCLBuilderInWorldEntity entity = biwCreatorController.CreateSceneObject(floorSceneObject, false, true);
+            entity.rootEntity.OnShapeUpdated += OnFloorLoaded;
+            entity.transform.position = WorldStateUtils.ConvertPointInSceneToUnityPosition(initialPosition, parcel);
+            dclBuilderMeshLoadIndicatorController.ShowIndicator(entity.rootEntity.gameObject.transform.position, entity.rootEntity.entityId);
 
-            GameObject floorPlaceHolder = GameObject.Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
-            floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
-            builderInWorldBridge?.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
+            GameObject floorPlaceHolder = GameObject.Instantiate(floorPrefab, entity.rootEntity.gameObject.transform.position, Quaternion.identity);
+            floorPlaceHolderDict.Add(entity.rootEntity.entityId, floorPlaceHolder);
+            builderInWorldBridge?.EntityTransformReport(entity.rootEntity, sceneToEdit);
         }
 
         builderInWorldEntityHandler.DeselectEntities();
         lastFloorCalalogItemUsed = floorSceneObject;
     }
 
-    private void OnFloorLoaded(DecentralandEntity entity)
+    private void OnFloorLoaded(IDCLEntity entity)
     {
         entity.OnShapeUpdated -= OnFloorLoaded;
         dclBuilderMeshLoadIndicatorController.HideIndicator(entity.entityId);

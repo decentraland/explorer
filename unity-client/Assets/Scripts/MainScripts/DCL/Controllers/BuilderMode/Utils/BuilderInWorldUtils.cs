@@ -208,7 +208,7 @@ public static partial class BuilderInWorldUtils
         return IsPointerOverUIElement(Input.mousePosition);
     }
 
-    public static string ConvertEntityToJSON(DecentralandEntity entity)
+    public static string ConvertEntityToJSON(IDCLEntity entity)
     {
         EntityData builderInWorldEntityData = new EntityData();
         builderInWorldEntityData.entityId = entity.entityId;
@@ -236,7 +236,7 @@ public static partial class BuilderInWorldUtils
             }
         }
 
-        foreach (KeyValuePair<Type, ISharedComponent> keyValuePair in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePair in entity.sharedComponents)
         {
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {

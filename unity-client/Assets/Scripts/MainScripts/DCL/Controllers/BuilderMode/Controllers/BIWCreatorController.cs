@@ -170,7 +170,7 @@ public class BIWCreatorController : BIWController
         loadingGameObjects.Add(entity.rootEntity.entityId, loadingPlaceHolder);
     }
 
-    private void OnRealShapeLoaded(DecentralandEntity entity)
+    private void OnRealShapeLoaded(IDCLEntity entity)
     {
         entity.OnShapeUpdated -= OnRealShapeLoaded;
 

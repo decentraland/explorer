@@ -334,9 +334,9 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public void Select(DecentralandEntity decentralandEntity)
+    public void Select(IDCLEntity entity)
     {
-        DCLBuilderInWorldEntity entityEditable = GetConvertedEntity(decentralandEntity);
+        DCLBuilderInWorldEntity entityEditable = GetConvertedEntity(entity);
         if (entityEditable == null) return;
 
         SelectEntity(entityEditable);
@@ -395,12 +395,12 @@ public class BuilderInWorldEntityHandler : BIWController
             return null;
     }
 
-    public DCLBuilderInWorldEntity GetConvertedEntity(DecentralandEntity decentralandEntity)
+    public DCLBuilderInWorldEntity GetConvertedEntity(IDCLEntity entity)
     {
-        if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(decentralandEntity)))
-            return convertedEntities[GetConvertedUniqueKeyForEntity(decentralandEntity)];
-        else
-            return null;
+        if (convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entity)))
+            return convertedEntities[GetConvertedUniqueKeyForEntity(entity)];
+
+        return null;
     }
 
     public void DuplicateSelectedEntities()
@@ -416,7 +416,7 @@ public class BuilderInWorldEntityHandler : BIWController
             if (selectedEntities[i].isNFT)
                 continue;
 
-            DecentralandEntity entityDuplicated = DuplicateEntity(selectedEntities[i]);
+            var entityDuplicated = DuplicateEntity(selectedEntities[i]);
             BuilderInWorldEntityAction builderInWorldEntityAction = new BuilderInWorldEntityAction(entityDuplicated, entityDuplicated.entityId, BuilderInWorldUtils.ConvertEntityToJSON(entityDuplicated));
             entityActionList.Add(builderInWorldEntityAction);
         }
@@ -429,9 +429,9 @@ public class BuilderInWorldEntityHandler : BIWController
         actionController.AddAction(buildAction);
     }
 
-    public DecentralandEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
+    public IDCLEntity DuplicateEntity(DCLBuilderInWorldEntity entityToDuplicate)
     {
-        DecentralandEntity entity = SceneUtils.DuplicateEntity(sceneToEdit, entityToDuplicate.rootEntity);
+        IDCLEntity entity = SceneUtils.DuplicateEntity(sceneToEdit, entityToDuplicate.rootEntity);
 
         BuilderInWorldUtils.CopyGameObjectStatus(entityToDuplicate.gameObject, entity.gameObject, false, false);
         SetupEntityToEdit(entity);
@@ -441,11 +441,11 @@ public class BuilderInWorldEntityHandler : BIWController
         return entity;
     }
 
-    public DecentralandEntity CreateEntityFromJSON(string entityJson)
+    public IDCLEntity CreateEntityFromJSON(string entityJson)
     {
         EntityData data = BuilderInWorldUtils.ConvertJSONToEntityData(entityJson);
 
-        DecentralandEntity newEntity = sceneToEdit.CreateEntity(data.entityId);
+        IDCLEntity newEntity = sceneToEdit.CreateEntity(data.entityId);
 
 
         if (data.transformComponent != null)
@@ -486,7 +486,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public DCLBuilderInWorldEntity CreateEmptyEntity(ParcelScene parcelScene, Vector3 entryPoint, Vector3 editionGOPosition)
     {
-        DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
+        IDCLEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
         DCLTransform.model.position = WorldStateUtils.ConvertUnityToScenePosition(entryPoint, parcelScene);
 
@@ -508,7 +508,7 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private void SetupAllEntities()
     {
-        foreach (DecentralandEntity entity in sceneToEdit.entities.Values)
+        foreach (IDCLEntity entity in sceneToEdit.entities.Values)
         {
             SetupEntityToEdit(entity);
         }
@@ -550,7 +550,7 @@ public class BuilderInWorldEntityHandler : BIWController
         return currentEntitiesInScene;
     }
 
-    DCLBuilderInWorldEntity SetupEntityToEdit(DecentralandEntity entity, bool hasBeenCreated = false)
+    DCLBuilderInWorldEntity SetupEntityToEdit(IDCLEntity entity, bool hasBeenCreated = false)
     {
         if (!convertedEntities.ContainsKey(GetConvertedUniqueKeyForEntity(entity)))
         {
@@ -707,12 +707,12 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    private void RemoveConvertedEntity(DecentralandEntity entity)
+    private void RemoveConvertedEntity(IDCLEntity entity)
     {
         convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
     }
 
-    public void NotifyEntityIsCreated(DecentralandEntity entity)
+    public void NotifyEntityIsCreated(IDCLEntity entity)
     {
         builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit);
     }
@@ -762,7 +762,7 @@ public class BuilderInWorldEntityHandler : BIWController
         return sceneToEdit.sceneData.id + entityID;
     }
 
-    private string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)
+    private string GetConvertedUniqueKeyForEntity(IDCLEntity entity)
     {
         return entity.scene.sceneData.id + entity.entityId;
     }

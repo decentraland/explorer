@@ -15,21 +15,24 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 {
     [Header("Editor Design")]
     public float distanceEagleCamera = 20f;
+
     public float snapDragFactor = 5f;
 
     [Header("Scenes References")]
     public FreeCameraMovement freeCameraController;
+
     public CameraController cameraController;
     public Transform lookAtT;
     public MouseCatcher mouseCatcher;
     public PlayerAvatarController avatarRenderer;
-    
+
     [Header("Prefab References")]
     public DCLBuilderGizmoManager gizmoManager;
+
     public VoxelController voxelController;
     public BuilderInWorldInputWrapper builderInputWrapper;
     public BIWOutlinerController outlinerController;
-    
+
     [Header("InputActions")]
     [SerializeField]
     internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
@@ -227,8 +230,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
             if (isSnapActive)
             {
-                currentPoint.x = Mathf.Round(currentPoint.x/snapDragFactor)*snapDragFactor;
-                currentPoint.z = Mathf.Round(currentPoint.z/snapDragFactor)*snapDragFactor;
+                currentPoint.x = Mathf.Round(currentPoint.x / snapDragFactor) * snapDragFactor;
+                currentPoint.z = Mathf.Round(currentPoint.z / snapDragFactor) * snapDragFactor;
                 destination = currentPoint;
             }
             else
@@ -507,7 +510,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    public void LookAtEntity(DecentralandEntity entity)
+    public void LookAtEntity(IDCLEntity entity)
     {
         Vector3 pointToLook = entity.gameObject.transform.position;
         if (entity.meshRootGameObject && entity.meshesInfo.renderers.Length > 0)
@@ -622,9 +625,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
                 destination.x = Mathf.Round(destination.x / snapDragFactor) * snapDragFactor;
                 destination.z = Mathf.Round(destination.z / snapDragFactor) * snapDragFactor;
             }
-            
+
             editionGO.transform.position = destination;
-            
+
             if (selectedEntities.Count > 0 && selectedEntities[0].isNFT) editionGO.transform.position += Vector3.up * 2f;
         }
     }

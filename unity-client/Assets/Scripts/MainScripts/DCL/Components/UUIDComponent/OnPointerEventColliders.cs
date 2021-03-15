@@ -24,9 +24,9 @@ namespace DCL.Components
             return null;
         }
 
-        private DecentralandEntity ownerEntity;
+        private IDCLEntity ownerEntity;
 
-        public void Initialize(DecentralandEntity entity)
+        public void Initialize(IDCLEntity entity)
         {
             if (entity == null || entity.meshesInfo == null)
                 return;

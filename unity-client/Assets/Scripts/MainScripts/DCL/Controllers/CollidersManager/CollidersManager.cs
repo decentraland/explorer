@@ -9,7 +9,7 @@ namespace DCL
     public class CollidersManager : Singleton<CollidersManager>
     {
         private Dictionary<Collider, ColliderInfo> colliderInfo = new Dictionary<Collider, ColliderInfo>();
-        private Dictionary<DecentralandEntity, List<Collider>> collidersByEntity = new Dictionary<DecentralandEntity, List<Collider>>();
+        private Dictionary<IDCLEntity, List<Collider>> collidersByEntity = new Dictionary<IDCLEntity, List<Collider>>();
         private static CollidersManager instance = null;
 
         public static void Release()
@@ -43,7 +43,7 @@ namespace DCL
                 colliderInfo.Remove(collider);
         }
 
-        public void AddOrUpdateEntityCollider(DecentralandEntity entity, Collider collider)
+        public void AddOrUpdateEntityCollider(IDCLEntity entity, Collider collider)
         {
             if (!collidersByEntity.ContainsKey(entity))
                 collidersByEntity.Add(entity, new List<Collider>());
@@ -100,12 +100,12 @@ namespace DCL
             return false;
         }
 
-        public void ConfigureColliders(DecentralandEntity entity, bool hasCollision = true, bool filterByColliderName = true)
+        public void ConfigureColliders(IDCLEntity entity, bool hasCollision = true, bool filterByColliderName = true)
         {
             ConfigureColliders(entity.meshRootGameObject, hasCollision, filterByColliderName, entity);
         }
 
-        public void ConfigureColliders(GameObject meshGameObject, bool hasCollision, bool filterByColliderName = false, DecentralandEntity entity = null, int colliderLayer = -1)
+        public void ConfigureColliders(GameObject meshGameObject, bool hasCollision, bool filterByColliderName = false, IDCLEntity entity = null, int colliderLayer = -1)
         {
             if (meshGameObject == null) return;
 

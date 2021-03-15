@@ -39,7 +39,7 @@ namespace Tests
 
         public IEnumerator CreateAndLoadAudioClip(bool waitForLoading = true)
         {
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.CreateAudioSourceWithClipForEntity(entity);
@@ -126,7 +126,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator AudioIsLooped()
         {
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.LoadAudioClip(scene, "1", DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/short_effect.ogg", false, true, 1);
@@ -144,7 +144,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator AudioIsNotLooped()
         {
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.LoadAudioClip(scene, "1", DCL.Helpers.Utils.GetTestsAssetsPath() + "/Audio/short_effect.ogg", false, true, 1);
@@ -174,7 +174,7 @@ namespace Tests
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.CreateAudioSourceWithClipForEntity(entity);
@@ -197,7 +197,7 @@ namespace Tests
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.CreateAudioSourceWithClipForEntity(entity);
@@ -220,7 +220,7 @@ namespace Tests
             // Set current scene with this scene's id
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.CreateAudioSourceWithClipForEntity(entity);
@@ -246,7 +246,7 @@ namespace Tests
             // Set current scene as a different one
             CommonScriptableObjects.sceneID.Set("unexistent-scene");
 
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             yield return null;
 
             yield return TestHelpers.CreateAudioSourceWithClipForEntity(entity);
@@ -266,15 +266,15 @@ namespace Tests
         [UnityTest]
         public IEnumerator AudioStreamComponentCreation()
         {
-            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            var entity = TestHelpers.CreateSceneEntity(scene);
             DCLAudioStream.Model model = new DCLAudioStream.Model()
             {
                 url = "https://audio.dcl.guru/radio/8110/radio.mp3",
                 playing = false,
                 volume = 1f
             };
-            DCLAudioStream component = TestHelpers.EntityComponentCreate<DCLAudioStream, DCLAudioStream.Model>(scene, entity,model );
-            
+            DCLAudioStream component = TestHelpers.EntityComponentCreate<DCLAudioStream, DCLAudioStream.Model>(scene, entity, model);
+
             yield return component.routine;
             Assert.IsFalse(component.GetModel().playing);
 
@@ -282,10 +282,10 @@ namespace Tests
             component.UpdateFromModel(model);
             yield return component.routine;
             Assert.IsTrue(component.GetModel().playing);
-            
+
             model.playing = false;
             component.UpdateFromModel(model);
-            yield return component.routine; 
+            yield return component.routine;
             Assert.IsFalse(component.GetModel().playing);
         }
 
