@@ -612,7 +612,7 @@ namespace DCL.Controllers
             return disposableComponents.Values.FirstOrDefault(x => x is T) as T;
         }
 
-        private void RemoveComponentType<T>(DecentralandEntity entity, CLASS_ID_COMPONENT classId)
+        private void RemoveComponentType<T>(IDCLEntity entity, CLASS_ID_COMPONENT classId)
             where T : MonoBehaviour
         {
             var component = entity.components[classId] as IEntityComponent;
