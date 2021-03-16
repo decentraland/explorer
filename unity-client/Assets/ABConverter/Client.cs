@@ -240,7 +240,7 @@ namespace DCL.ABConverter
             });
 
             // If the asset is a GLTF we add the dependencies to the rawContents to be downloaded
-            if (assetFilename.Contains(".glb") || assetFilename.Contains(".gltf") || assetFilename.Contains(".GLB") || assetFilename.Contains(".GLTF"))
+            if (assetFilename.toLower().Contains(".glb") || assetFilename.toLower().Contains(".gltf"))
             {
                 core.GetAssetDependenciesMappingPairs(assetHash, assetFilename, sceneCid, ref rawContents);
             }
