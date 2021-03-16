@@ -364,8 +364,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         editionGO.transform.SetParent(null);
         avatarRenderer.SetAvatarVisibility(false);
 
-        if (HUDController.i.builderInWorldMainHud != null)
-            HUDController.i.builderInWorldMainHud.ActivateGodModeUI();
+        HUDController.i.builderInWorldMainHud?.ActivateGodModeUI();
     }
 
     public void ActivateCamera(ParcelScene parcelScene)

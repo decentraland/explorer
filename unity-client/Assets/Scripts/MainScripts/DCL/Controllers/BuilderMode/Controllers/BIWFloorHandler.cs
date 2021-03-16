@@ -125,6 +125,6 @@ public class BIWFloorHandler : BIWController
     {
         yield return new WaitForSeconds(secondsToTimeOut);
         RemovePlaceHolder(entityId);
-        Debug.Log("Floor loading timeout " + entityId);
+        Debug.LogError("Floor loading timeout " + entityId);
     }
 }
