@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,8 +18,16 @@ public class DynamicScrollSensitivity : MonoBehaviour
     public float minSensitivity = 10f;
     [Tooltip("Max value for the calculated scroll sensitivity.")]
     public float maxSensitivity = 100f;
+    [Tooltip("True to recalculate each time the game object is enabled.")]
+    public bool recalculateOnEnable = true;
 
-    private void Awake() { RecalculateSensitivity(); }
+    private Coroutine recalculateCoroutine = null;
+
+    private void OnEnable()
+    {
+        if (recalculateOnEnable)
+            RecalculateSensitivity();
+    }
 
     /// <summary>
     /// Recalculate the scroll sensitivity value depending on the current height of the content container.
@@ -26,6 +35,20 @@ public class DynamicScrollSensitivity : MonoBehaviour
     [ContextMenu("Recalculate Sensitivity")]
     public void RecalculateSensitivity()
     {
+        if (recalculateCoroutine != null)
+        {
+            CoroutineStarter.Stop(recalculateCoroutine);
+            recalculateCoroutine = null;
+        }
+
+        recalculateCoroutine = CoroutineStarter.Start(RecalculateCoroutine());
+    }
+
+    private IEnumerator RecalculateCoroutine()
+    {
+        // We need to wait for a frame for having available the correct height of the contentContainer after the OnEnable event
+        yield return null;
+
         float newSensitivity = contentContainer.rect.height * minSensitivity / viewport.rect.height;
         mainScrollRect.scrollSensitivity = Mathf.Clamp(newSensitivity, minSensitivity, maxSensitivity);
     }

@@ -912,6 +912,7 @@ MonoBehaviour:
   contentPanelTransform: {fileID: 2634397279653339128}
   entityListAdapter: {fileID: 432930780331652289, guid: 34e6f7de66a823040945e7e3b317df87,
     type: 3}
+  dynamicScrollSensitivity: {fileID: 6107345409022938915}
 --- !u!114 &2634397280309248038
 MonoBehaviour:
   m_ObjectHideFlags: 0

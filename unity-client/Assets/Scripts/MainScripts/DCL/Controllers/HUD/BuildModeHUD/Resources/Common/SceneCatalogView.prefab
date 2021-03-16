@@ -213,6 +213,7 @@ MonoBehaviour:
   contentPanelTransform: {fileID: 5040136038075063804}
   categoryListView: {fileID: 8458830412122484609}
   assetPackListView: {fileID: 9164274516667144591}
+  dynamicScrollSensitivity: {fileID: 6645175378169081571}
   categoryContentTransform: {fileID: 7402181836938702467}
   categoryAssetPackItemAdapterPrefab: {fileID: 8282728358854756999, guid: 19ecd202db4931d42b0fb9a9b83a96c9,
     type: 3}
@@ -2776,6 +2777,7 @@ MonoBehaviour:
   generalCanvas: {fileID: 0}
   categoryItemAdapterPrefab: {fileID: 751415691112004589, guid: 6bcacb01925475b49b2fd03bfe1fd433,
     type: 3}
+  dynamicScrollSensitivity: {fileID: 8779995592463396033}
 --- !u!114 &8779995592463396033
 MonoBehaviour:
   m_ObjectHideFlags: 0
