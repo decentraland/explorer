@@ -29,6 +29,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     public VoxelController voxelController;
     public BuilderInWorldInputWrapper builderInputWrapper;
     public BIWOutlinerController outlinerController;
+
     [Header("InputActions")]
     [SerializeField]
     internal InputAction_Trigger focusOnSelectedEntitiesInputAction;
@@ -354,7 +355,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
             ActivateCamera(scene);
 
         if (gizmoManager.GetSelectedGizmo() == DCL.Components.DCLGizmos.Gizmo.NONE)
-            gizmoManager.SetGizmoType("MOVE");
+            gizmoManager.SetGizmoType(BuilderInWorldSettings.TRANSLATE_GIZMO_NAME);
         mouseCatcher.enabled = false;
         Environment.i.world.sceneController.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
@@ -382,7 +383,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         cameraController.SetCameraMode(CameraMode.ModeId.BuildingToolGodMode);
 
         gizmoManager.InitializeGizmos(Camera.main, freeCameraController.transform);
-        gizmoManager.SetAllGizmosInPosition(cameraPosition);
+        gizmoManager.ForceRelativeScaleRatio();
     }
 
     public override void Deactivate()
@@ -520,7 +521,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         if (isModeActive && !isPlacingNewObject)
         {
-            gizmoManager.SetGizmoType("MOVE");
+            gizmoManager.SetGizmoType(BuilderInWorldSettings.TRANSLATE_GIZMO_NAME);
             if (selectedEntities.Count > 0)
                 ShowGizmos();
             else
@@ -532,7 +533,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         if (isModeActive && !isPlacingNewObject)
         {
-            gizmoManager.SetGizmoType("ROTATE");
+            gizmoManager.SetGizmoType(BuilderInWorldSettings.ROTATE_GIZMO_NAME);
             if (selectedEntities.Count > 0)
                 ShowGizmos();
             else
@@ -544,7 +545,7 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     {
         if (isModeActive && !isPlacingNewObject)
         {
-            gizmoManager.SetGizmoType("SCALE");
+            gizmoManager.SetGizmoType(BuilderInWorldSettings.SCLAE_GIZMO_NAME);
             if (selectedEntities.Count > 0)
                 ShowGizmos();
             else
@@ -571,15 +572,15 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
 
         switch (gizmoType)
         {
-            case "MOVE":
+            case BuilderInWorldSettings.TRANSLATE_GIZMO_NAME:
 
                 ActionFinish(BuildInWorldCompleteAction.ActionType.MOVE);
                 break;
-            case "ROTATE":
+            case BuilderInWorldSettings.ROTATE_GIZMO_NAME:
 
                 ActionFinish(BuildInWorldCompleteAction.ActionType.ROTATE);
                 break;
-            case "SCALE":
+            case BuilderInWorldSettings.SCLAE_GIZMO_NAME:
                 ActionFinish(BuildInWorldCompleteAction.ActionType.SCALE);
                 break;
         }
