@@ -44,8 +44,8 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
         if (favImg != null)
             favImg.color = catalogItem.IsFavorite() ? onFavoriteColor : offFavoriteColor;
 
-
-        backgroundImg.color = catalogItem.IsSmartItem() ? smartItemColor : normalColor;
+        if (backgroundImg != null)
+            backgroundImg.color = catalogItem.IsSmartItem() ? smartItemColor : normalColor;
         smartItemGO.SetActive(catalogItem.IsSmartItem());
 
         GetThumbnail();
