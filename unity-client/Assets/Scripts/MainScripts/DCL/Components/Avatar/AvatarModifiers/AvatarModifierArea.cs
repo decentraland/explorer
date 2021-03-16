@@ -13,7 +13,7 @@ public class AvatarModifierArea : BaseComponent
     [Serializable]
     public class Model : BaseModel
     {
-        // TODO:
+        // TODO: Change to TriggerArea and handle deserialization with subclasses
         public BoxTriggerArea area;
         public string[] modifiers;
         
@@ -46,8 +46,8 @@ public class AvatarModifierArea : BaseComponent
 
         // Clean up
         RemoveAllModifiers();
-        OnAvatarExit = null;
         OnAvatarEnter = null;
+        OnAvatarExit = null;
 
         ApplyCurrentModel();
 
@@ -57,11 +57,11 @@ public class AvatarModifierArea : BaseComponent
     private void OnDestroy()
     {
         var toRemove = new HashSet<GameObject>();
-        if (avatarsInArea != null)
+        if(avatarsInArea != null)
             toRemove.UnionWith(avatarsInArea);
 
         var currentInArea = DetectAllAvatarsInArea();
-        if (currentInArea != null)
+        if(currentInArea != null)
             toRemove.UnionWith(currentInArea);
 
         RemoveAllModifiers(toRemove);
@@ -79,10 +79,10 @@ public class AvatarModifierArea : BaseComponent
         if (AreSetEquals(avatarsInArea, newAvatarsInArea))
             return;
 
-        if (avatarsInArea == null)
+        if(avatarsInArea == null)
             avatarsInArea = new HashSet<GameObject>();
 
-        if (newAvatarsInArea == null)
+        if(newAvatarsInArea == null)
             newAvatarsInArea = new HashSet<GameObject>();
 
         // Call event for avatars that just entered the area
