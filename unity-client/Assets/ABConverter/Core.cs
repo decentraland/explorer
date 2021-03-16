@@ -19,10 +19,11 @@ namespace DCL.ABConverter
         {
             public enum ErrorCodes
             {
-                SUCCESS = 0,
-                UNDEFINED = 1,
-                SCENE_LIST_NULL = 2,
-                ASSET_BUNDLE_BUILD_FAIL = 3,
+                SUCCESS,
+                UNDEFINED,
+                SCENE_LIST_NULL,
+                ASSET_BUNDLE_BUILD_FAIL,
+                SOME_ASSET_BUNDLES_SKIPPED
             }
 
             public class State
@@ -164,8 +165,8 @@ namespace DCL.ABConverter
                         {
                             this.skippedAssets = skippedAssetsCount;
 
-                            if(this.skippedAssets > 0)
-                                state.lastErrorCode = ErrorCodes.ASSET_BUNDLE_BUILD_FAIL;
+                            if (this.skippedAssets > 0)
+                                state.lastErrorCode = ErrorCodes.SOME_ASSET_BUNDLES_SKIPPED;
 
                             OnFinish?.Invoke(state.lastErrorCode);
                         }));
