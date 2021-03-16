@@ -201,7 +201,7 @@ namespace DCL.ABConverter
         /// </summary>
         /// <param name="assetHash">The asset's content server hash</param>
         /// <param name="assetFilename">The asset's content server file name</param>
-        /// <param name="sceneCid">The asset scene ID needed in case any dependency is missing</param>
+        /// <param name="sceneCid">The asset scene ID</param>
         /// <param name="settings">Any conversion settings object, if its null, a new one will be created</param>
         /// <returns>A state context object useful for tracking the conversion progress</returns>
         public static Core.State ConvertAssetToAssetBundle(string assetHash, string assetFilename, string sceneCid, Settings settings = null)
@@ -309,7 +309,7 @@ namespace DCL.ABConverter
         /// </summary>
         /// <param name="assetHash">The asset's content server hash</param>
         /// <param name="assetFilename">The asset's content server file name</param>
-        /// <param name="sceneCid">The asset scene ID needed in case any dependency is missing</param>
+        /// <param name="sceneCid">The asset scene ID</param>
         /// <param name="settings">Conversion settings</param>
         /// <returns>A state context object useful for tracking the conversion progress</returns>
         public static Core.State DumpAsset(string assetHash, string assetFilename, string sceneCid, Settings settings = null)

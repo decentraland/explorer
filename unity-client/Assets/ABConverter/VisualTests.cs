@@ -19,6 +19,10 @@ namespace DCL.ABConverter
         static readonly float snapshotCamOffset = 3;
         static int skippedAssets = 0;
 
+        /// <summary>
+        /// Instantiate all locally-converted GLTFs in both formats (GLTF and Asset Bundle) and
+        /// compare them visually. If a visual test fails, the AB is deleted to avoid uploading it
+        /// </summary>
         public static IEnumerator TestConvertedAssets(Environment env = null, Action<int> OnFinish = null)
         {
             Debug.Log("Visual Test Detection: Starting converted assets testing...");
@@ -49,7 +53,7 @@ namespace DCL.ABConverter
             {
                 go.SetActive(true);
 
-                // unify all child renderer bounds and use that to position the camera
+                // unify all child renderer bounds and use that to position the snapshot camera
                 var mergedBounds = Helpers.Utils.BuildMergedBounds(go.GetComponentsInChildren<Renderer>());
                 Vector3 cameraPosition = new Vector3(mergedBounds.min.x - snapshotCamOffset, mergedBounds.max.y + snapshotCamOffset, mergedBounds.min.z - snapshotCamOffset);
 
@@ -118,6 +122,9 @@ namespace DCL.ABConverter
             OnFinish?.Invoke(skippedAssets);
         }
 
+        /// <summary>
+        /// Instantiate all local GLTFs found in the "_Downloaded" directory
+        /// </summary>
         public static GameObject[] LoadAndInstantiateAllGltfAssets()
         {
             var assets = AssetDatabase.FindAssets($"t:GameObject", new[] {"Assets/_Downloaded"});
@@ -135,6 +142,10 @@ namespace DCL.ABConverter
             return importedGLTFs.ToArray();
         }
 
+        /// <summary>
+        /// Search for local GLTFs in "_Downloaded" and use those hashes to find their corresponding
+        /// Asset Bundle files, then instantiate those ABs in the Unity scene
+        /// </summary>
         public static GameObject[] LoadAndInstantiateAllAssetBundles()
         {
             Caching.ClearCache();

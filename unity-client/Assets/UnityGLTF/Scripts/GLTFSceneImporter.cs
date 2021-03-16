@@ -2494,10 +2494,22 @@ namespace UnityGLTF
             {
                 source = PersistentAssetCache.GetImage(image.Uri, id);
                 _assetCache.ImageCache[sourceId] = source.Texture;
+                    
+                if (_assetCache.ImageCache[sourceId] == null)
+                {
+                    Debug.Log($"GLTFSceneImporter - ConstructTexture - null tex detected for {sourceId} / {image.Uri} / {id}, applying invalid-tex texture...");
+                    _assetCache.ImageCache[sourceId] = Texture2D.redTexture;
+                }
             }
             else
             {
                 yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
+                
+                if (_assetCache.ImageCache[sourceId] == null)
+                {
+                    Debug.Log($"GLTFSceneImporter - ConstructTexture - null tex detected for {sourceId} / {image.Uri} / {id}, applying invalid-tex texture...");
+                    _assetCache.ImageCache[sourceId] = Texture2D.redTexture;
+                }
 
                 if (addImagesToPersistentCaching)
                 {

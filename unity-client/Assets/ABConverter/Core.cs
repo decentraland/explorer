@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -11,7 +10,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityGLTF;
 using UnityGLTF.Cache;
-using DCL;
 using GLTF;
 using GLTF.Schema;
 
@@ -84,7 +82,6 @@ namespace DCL.ABConverter
             /// </summary>
             /// <param name="rawContents">A list detailing assets to be dumped</param>
             /// <param name="OnFinish">End callback with the proper ErrorCode</param>
-            /// <param name="sceneCid">The asset scene ID in case any dependency is missing</param>
             public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
             {
                 OnFinish -= CleanAndExit;
@@ -203,12 +200,11 @@ namespace DCL.ABConverter
 
                 if (string.IsNullOrEmpty(path))
                 {
-                    Debug.Log("Core - GetAssetDependenciesMappingPairs() - Invalid target asset data! aborting dependencies population");
+                    log.Error("Core - GetAssetDependenciesMappingPairs() - Invalid target asset data! aborting dependencies population");
                     return;
                 }
-
-                // 2. Search for dependencies hashes in scene mappings and add them to the collection
-                Debug.Log($"Core - GetAssetDependenciesMappingPairs() -> path: {path}," +
+                
+                log.Info($"Core - GetAssetDependenciesMappingPairs() -> path: {path}," +
                           $"\n file: {gltfPaths[0].file}," +
                           $"\n hash: {gltfPaths[0].hash}," +
                           $"\n pair: {gltfPaths[0].pair}, " +
@@ -216,6 +212,7 @@ namespace DCL.ABConverter
                           $"\n finalPath: {gltfPaths[0].finalPath}," +
                           $"\n finalMetaPath: {gltfPaths[0].finalMetaPath}");
 
+                // 2. Search for dependencies hashes in scene mappings and add them to the collection
                 using (var stream = File.OpenRead(path))
                 {
                     GLTFRoot gLTFRoot;
@@ -231,7 +228,7 @@ namespace DCL.ABConverter
 
                             mappingPairsList.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(asset.Uri)).ToArray());
                             
-                            Debug.Log("Core - GetAssetDependenciesMappingPairs - Buffers -> Searching for... uri: " + asset.Uri + " -> name: " + asset.Name);
+                            log.Info("Core - GetAssetDependenciesMappingPairs - Buffers -> Searching for... uri: " + asset.Uri + " -> name: " + asset.Name);
                         }
                     }
 
@@ -242,12 +239,12 @@ namespace DCL.ABConverter
                             if (string.IsNullOrEmpty(asset.Uri)) continue;
                             mappingPairsList.AddRange(parcelInfoApiData.data[0].content.contents.Where(x => x.file.Contains(asset.Uri)).ToArray());
                             
-                            Debug.Log("Core - GetAssetDependenciesMappingPairs - Images -> uri: " + asset.Uri + " -> name: " + asset.Name);
+                            log.Info("Core - GetAssetDependenciesMappingPairs - Images -> uri: " + asset.Uri + " -> name: " + asset.Name);
                         }
                     }
                 }
 
-                // Remove unneeded file and re-enable editor assets auto-import
+                // 3. Remove temporary GLTF file and re-enable editor assets auto-import
                 File.Delete(path);
                 AssetDatabase.StopAssetEditing();
             }
@@ -346,25 +343,13 @@ namespace DCL.ABConverter
                 //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
                 foreach (var texturePath in texturePaths)
                 {
-                    // Debug.Log("Core - DumpGltf() - injecting texture in PersistentAssetCache -> " + texturePath.finalPath);
                     RetrieveAndInjectTexture(gltfPath, texturePath);
                 }
 
                 foreach (var bufferPath in bufferPaths)
                 {
-                    // Debug.Log("Core - DumpGltf() - injecting buffer in PersistentAssetCache -> " + bufferPath.finalPath);
                     RetrieveAndInjectBuffer(gltfPath, bufferPath); // TODO: this adds buffers that will be used in the future by the GLTFSceneImporter
                 }
-
-                // Debug.Log("Core - DumpGltf() - Finished injecting. Reading PersistentAssetCache entries: ");
-                // foreach (var imageCache in PersistentAssetCache.ImageCacheByUri)
-                // {
-                //     Debug.Log("Core - DumpGltf() - PersistentAssetCache image: key: " + imageCache.Key + " -> value: " + imageCache.Value);
-                // }
-                // foreach (var streamCache in PersistentAssetCache.StreamCacheByUri)
-                // {
-                //     Debug.Log("Core - DumpGltf() - PersistentAssetCache stream: key: " + streamCache.Key + " -> value: " + streamCache.Value);
-                // }
 
                 log.Verbose("About to load " + gltfPath.hash);
 
@@ -545,7 +530,6 @@ namespace DCL.ABConverter
 
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
-                // Debug.Log("Core - RetrieveAndInjectTexture() - Adding image to PersistentAssetCache: uri: " + relativePath + "; idSuffix: " + gltfPath.finalPath);
                 PersistentAssetCache.AddImage(relativePath, gltfPath.finalPath, t2d);
             }
 
@@ -567,7 +551,6 @@ namespace DCL.ABConverter
 
                 // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
                 //              consume the asset bundle dependencies instead of trying to create new streams.
-                // Debug.Log("Core - RetrieveAndInjectBuffer() - Adding buffer to PersistentAssetCache: uri: " + relativePath + "; idSuffix: " + gltfPath.finalPath);
                 PersistentAssetCache.AddBuffer(relativePath, gltfPath.finalPath, stream);
             }
 
@@ -699,7 +682,6 @@ namespace DCL.ABConverter
             {
                 foreach (var content in pairs)
                 {
-                    // Debug.Log("Core - PopulateLowercaseMappings() -> " + content.file + " -> " + content.hash);
                     string hashLower = content.hash.ToLowerInvariant();
 
                     if (!hashLowercaseToHashProper.ContainsKey(hashLower))
