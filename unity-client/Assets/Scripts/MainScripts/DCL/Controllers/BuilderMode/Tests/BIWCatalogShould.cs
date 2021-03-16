@@ -55,10 +55,10 @@ public class BIWCatalogShould
         adapter.SetContent(item);
 
         CatalogAssetGroupAdapter groupAdatper = new GameObject("_CatalogAssetGroupAdapter").AddComponent<CatalogAssetGroupAdapter>();
-        groupAdatper.AddAdapter(adapter);
+        groupAdatper.SubscribeToEvents(adapter);
 
         CatalogGroupListView catalogGroupListView = new GameObject("_CatalogGroupListView").AddComponent<CatalogGroupListView>();
-        catalogGroupListView.AddAdapter(groupAdatper);
+        catalogGroupListView.SubscribeToEvents(groupAdatper);
         catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
         SceneCatalogView sceneCatalogView = SceneCatalogView.Create();
         sceneCatalogView.catalogGroupListView = catalogGroupListView;
