@@ -47,7 +47,7 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
 
     void LateUpdate()
     {
-        if (selectedEntities.Count <= 0 || isMultiSelectionActive)
+        if (selectedEntities.Count == 0 || isMultiSelectionActive)
             return;
 
         if (isSnapActive)
@@ -197,7 +197,7 @@ public class BuilderInWorldFirstPersonMode : BuilderInWorldMode
     public override void CheckInputSelectedEntities()
     {
         base.CheckInputSelectedEntities();
-        if (selectedEntities.Count <= 0)
+        if (selectedEntities.Count == 0)
             return;
 
         if (isModeActive && shouldRotate)

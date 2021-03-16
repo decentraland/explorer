@@ -344,7 +344,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     private void DefaultAnimationSample(float time)
     {
-        if (meshAnimations == null || meshAnimations.Length <= 0)
+        if (meshAnimations == null || meshAnimations.Length == 0)
             return;
 
         for (int i = 0; i < meshAnimations.Length; i++)
@@ -393,7 +393,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         if (rootEntity.meshesInfo == null ||
             rootEntity.meshesInfo.renderers == null ||
-            rootEntity.meshesInfo.renderers.Length < 1)
+            rootEntity.meshesInfo.renderers.Length == 0)
             return;
 
         if (isNFT)
@@ -541,13 +541,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return false;
     }
 
-    bool IsEntityAFloor()
-    {
-        if (GetCatalogItemAssociated()?.category == BuilderInWorldSettings.FLOOR_CATEGORY)
-            return true;
-
-        return false;
-    }
+    bool IsEntityAFloor() { return GetCatalogItemAssociated()?.category == BuilderInWorldSettings.FLOOR_CATEGORY; }
 
     bool IsEntityAVoxel()
     {

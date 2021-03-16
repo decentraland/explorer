@@ -112,7 +112,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         base.FrameUpdate();
 
-        if (selectedEntities.Count <= 0)
+        if (selectedEntities.Count == 0)
             return;
         if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY)
             return;
