@@ -114,12 +114,6 @@ namespace DCL
             ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Tominoya Casino")]
-        public static void DumpTominoyaCasino()
-        {
-            ABConverter.Client.DumpScene("QmSshWUuwpkStJphmGoT4QwvEVqg2gAEiGdoz8eE7eT5Lq");
-        }
-
          [MenuItem("Decentraland/Asset Bundle Builder/Dump Single Asset")]
          public static void DumpSingleAsset()
          {
