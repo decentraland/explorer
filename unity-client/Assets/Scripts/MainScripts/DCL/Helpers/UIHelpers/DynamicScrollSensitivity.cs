@@ -29,18 +29,14 @@ public class DynamicScrollSensitivity : MonoBehaviour
             RecalculateSensitivity();
     }
 
+    private void OnDestroy() { KillCurrentCoroutine(); }
+
     /// <summary>
     /// Recalculate the scroll sensitivity value depending on the current height of the content container.
     /// </summary>
-    [ContextMenu("Recalculate Sensitivity")]
     public void RecalculateSensitivity()
     {
-        if (recalculateCoroutine != null)
-        {
-            CoroutineStarter.Stop(recalculateCoroutine);
-            recalculateCoroutine = null;
-        }
-
+        KillCurrentCoroutine();
         recalculateCoroutine = CoroutineStarter.Start(RecalculateCoroutine());
     }
 
@@ -51,5 +47,14 @@ public class DynamicScrollSensitivity : MonoBehaviour
 
         float newSensitivity = contentContainer.rect.height * minSensitivity / viewport.rect.height;
         mainScrollRect.scrollSensitivity = Mathf.Clamp(newSensitivity, minSensitivity, maxSensitivity);
+    }
+
+    private void KillCurrentCoroutine()
+    {
+        if (recalculateCoroutine == null)
+            return;
+
+        CoroutineStarter.Stop(recalculateCoroutine);
+        recalculateCoroutine = null;
     }
 }
