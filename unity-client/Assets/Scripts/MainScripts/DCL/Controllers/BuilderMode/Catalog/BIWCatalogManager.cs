@@ -55,7 +55,11 @@ public static class BIWCatalogManager
 
         Dictionary<string, CatalogItemPack> assetPackDic = new Dictionary<string, CatalogItemPack>();
 
-        assetPackDic.Add(BuilderInWorldSettings.ASSETS_COLLECTIBLES, DataStore.i.builderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES]);
+        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+            assetPackDic.Add(BuilderInWorldSettings.ASSETS_COLLECTIBLES, DataStore.i.builderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES]);
+        else
+            CreateNewCollectiblePack();
+
         foreach (CatalogItemPack catalogAssetPack in assetPacks)
         {
             foreach (CatalogItem catalogItem in catalogAssetPack.assets)
@@ -119,9 +123,7 @@ public static class BIWCatalogManager
 
         if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
         {
-            collectiblesItemPack = GetNewCollectiblePack();
-
-            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+            collectiblesItemPack = CreateNewCollectiblePack();
         }
         else
         {
@@ -144,13 +146,15 @@ public static class BIWCatalogManager
         }
     }
 
-    private static CatalogItemPack GetNewCollectiblePack()
+    private static CatalogItemPack CreateNewCollectiblePack()
     {
         CatalogItemPack collectiblesItemPack = new CatalogItemPack();
         collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
         collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
         collectiblesItemPack.assets = new List<CatalogItem>();
-        return  collectiblesItemPack;
+        if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(collectiblesItemPack.id))
+            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+        return collectiblesItemPack;
     }
 
     public static CatalogItemPack CreateCatalogItemPack(SceneAssetPack sceneAssetPack)
