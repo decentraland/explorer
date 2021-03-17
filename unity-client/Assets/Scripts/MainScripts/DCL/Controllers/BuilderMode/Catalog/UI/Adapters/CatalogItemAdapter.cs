@@ -35,6 +35,8 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
     private string loadedThumbnailURL;
     private AssetPromise_Texture loadedThumbnailPromise;
 
+    private const float ADAPTER_DRAGGING_SIZE_SCALE = 0.75f;
+
     public CatalogItem GetContent() { return catalogItem; }
 
     public void SetContent(CatalogItem catalogItem)
@@ -86,7 +88,7 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
         RectTransform newAdapterRT = GetComponent<RectTransform>();
         canvasGroup.blocksRaycasts = false;
         canvasGroup.alpha = 0.6f;
-        newAdapterRT.sizeDelta = sizeDelta * 0.75f;
+        newAdapterRT.sizeDelta = sizeDelta * ADAPTER_DRAGGING_SIZE_SCALE;
     }
 
     public void SetFavorite(bool isOn)

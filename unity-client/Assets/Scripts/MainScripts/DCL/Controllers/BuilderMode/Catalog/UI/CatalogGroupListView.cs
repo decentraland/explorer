@@ -39,7 +39,7 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<CatalogItem
     {
         if (contentPanelTransform == null ||
             contentPanelTransform.transform == null ||
-            contentPanelTransform.transform.childCount <= 0)
+            contentPanelTransform.transform.childCount == 0)
             return;
 
         for (int i = 0; i < contentPanelTransform.transform.childCount; i++)
