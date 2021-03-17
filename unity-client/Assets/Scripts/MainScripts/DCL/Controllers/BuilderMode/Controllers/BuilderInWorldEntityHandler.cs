@@ -134,11 +134,20 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public ParcelScene GetParcelSceneToEdit() { return sceneToEdit; }
+    public ParcelScene GetParcelSceneToEdit()
+    {
+        return sceneToEdit;
+    }
 
-    public List<DCLBuilderInWorldEntity> GetSelectedEntityList() { return selectedEntities; }
+    public List<DCLBuilderInWorldEntity> GetSelectedEntityList()
+    {
+        return selectedEntities;
+    }
 
-    public bool IsAnyEntitySelected() { return selectedEntities.Count > 0; }
+    public bool IsAnyEntitySelected()
+    {
+        return selectedEntities.Count > 0;
+    }
 
     public void SetActiveMode(BuilderInWorldMode buildMode)
     {
@@ -146,7 +155,10 @@ public class BuilderInWorldEntityHandler : BIWController
         DeselectEntities();
     }
 
-    public void SetMultiSelectionActive(bool isActive) { isMultiSelectionActive = isActive; }
+    public void SetMultiSelectionActive(bool isActive)
+    {
+        isMultiSelectionActive = isActive;
+    }
 
     public override void EnterEditMode(ParcelScene sceneToEdit)
     {
@@ -221,7 +233,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         if (!selectedEntities.Contains(entity))
             return;
-        
+
         entity.Deselect();
 
         outlinerController.CancelEntityOutline(entity);
@@ -576,7 +588,10 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public string GetNewNameForEntity(CatalogItem sceneObject) { return GetNewNameForEntity(sceneObject.name); }
+    public string GetNewNameForEntity(CatalogItem sceneObject)
+    {
+        return GetNewNameForEntity(sceneObject.name);
+    }
 
     public string GetNewNameForEntity(string name)
     {
@@ -616,7 +631,10 @@ public class BuilderInWorldEntityHandler : BIWController
         DeleteEntity(entity, true);
     }
 
-    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete) { DeleteEntity(entityToDelete, true); }
+    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete)
+    {
+        DeleteEntity(entityToDelete, true);
+    }
 
     public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete, bool checkSelection = true)
     {
@@ -696,11 +714,20 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    private void RemoveConvertedEntity(DecentralandEntity entity) { convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity)); }
+    private void RemoveConvertedEntity(DecentralandEntity entity)
+    {
+        convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
+    }
 
-    public void NotifyEntityIsCreated(DecentralandEntity entity) { builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit); }
+    public void NotifyEntityIsCreated(DecentralandEntity entity)
+    {
+        builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit);
+    }
 
-    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate) { builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit); }
+    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate)
+    {
+        builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
+    }
 
     public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName)
     {
@@ -737,9 +764,15 @@ public class BuilderInWorldEntityHandler : BIWController
         builderInWorldBridge.ChangeEntityLockStatus(entityToApply, sceneToEdit);
     }
 
-    private string GetConvertedUniqueKeyForEntity(string entityID) { return sceneToEdit.sceneData.id + entityID; }
+    private string GetConvertedUniqueKeyForEntity(string entityID)
+    {
+        return sceneToEdit.sceneData.id + entityID;
+    }
 
-    private string GetConvertedUniqueKeyForEntity(DecentralandEntity entity) { return entity.scene.sceneData.id + entity.entityId; }
+    private string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)
+    {
+        return entity.scene.sceneData.id + entity.entityId;
+    }
 
     private bool AreAllSelectedEntitiesInsideBoundaries()
     {
