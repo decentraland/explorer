@@ -1,3 +1,4 @@
+using System;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Models;
@@ -6,12 +7,9 @@ using UnityEngine;
 
 namespace DCL.Components
 {
-
-    public class OnPointerEventColliders : MonoBehaviour
+    public class OnPointerEventColliders : IDisposable
     {
         public const string COLLIDER_NAME = "OnPointerEventCollider";
-
-        [System.NonSerialized] public int refCount;
 
         Collider[] pointerEventColliders;
         Dictionary<Collider, string> colliderNames = new Dictionary<Collider, string>();
@@ -25,17 +23,23 @@ namespace DCL.Components
         }
 
         private DecentralandEntity ownerEntity;
-        public void Initialize(DecentralandEntity entity)
+
+        public OnPointerEventColliders(DecentralandEntity ownerEntity)
         {
+            this.ownerEntity = ownerEntity;
+        }
+
+        public void UpdateColliders()
+        {
+            var entity = ownerEntity;
+
             if (entity == null || entity.meshesInfo == null) return;
 
             Renderer[] rendererList = entity.meshesInfo.renderers;
 
             if (rendererList == null || rendererList.Length == 0) return;
 
-            this.ownerEntity = entity;
-
-            DestroyOnPointerEventColliders();
+            DestroyColliders();
 
             pointerEventColliders = new Collider[rendererList.Length];
 
@@ -70,12 +74,7 @@ namespace DCL.Components
             return meshCollider;
         }
 
-        void OnDestroy()
-        {
-            DestroyOnPointerEventColliders();
-        }
-
-        void DestroyOnPointerEventColliders()
+        void DestroyColliders()
         {
             if (pointerEventColliders == null)
                 return;
@@ -85,8 +84,16 @@ namespace DCL.Components
                 Collider collider = pointerEventColliders[i];
 
                 if (collider != null)
-                    Destroy(collider.gameObject);
+                {
+                    CollidersManager.i.RemoveEntityCollider(ownerEntity, collider);
+                    UnityEngine.Object.Destroy(collider.gameObject);
+                }
             }
+        }
+
+        public void Dispose()
+        {
+            DestroyColliders();
         }
     }
 }

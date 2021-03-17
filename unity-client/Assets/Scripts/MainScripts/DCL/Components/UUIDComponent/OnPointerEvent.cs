@@ -35,7 +35,11 @@ namespace DCL.Components
             else
                 this.model = (OnPointerEvent.Model) model;
 
-            Initialize();
+            pointerEventColliders = new OnPointerEventColliders(entity);
+
+            UpdateColliders();
+
+            hoverCanvasController = InteractionHoverCanvasController.i;
 
             entity.OnShapeUpdated -= OnComponentUpdated;
             entity.OnShapeUpdated += OnComponentUpdated;
@@ -61,13 +65,18 @@ namespace DCL.Components
             }
         }
 
-        public void Initialize()
+        private bool initialized = false;
+
+        public void UpdateColliders()
         {
-            // Create OnPointerEventCollider child
-            pointerEventColliders = Utils.GetOrCreateComponent<OnPointerEventColliders>(this.gameObject);
-            pointerEventColliders.Initialize(entity);
-            pointerEventColliders.refCount++;
-            hoverCanvasController = InteractionHoverCanvasController.i;
+            if (entity.meshesInfo?.renderers?.Length == 0)
+                return;
+
+            if (initialized)
+                return;
+
+            initialized = true;
+            pointerEventColliders.UpdateColliders();
         }
 
         public bool IsVisible()
@@ -87,7 +96,7 @@ namespace DCL.Components
 
         void OnComponentUpdated(DecentralandEntity e)
         {
-            Initialize();
+            UpdateColliders();
         }
 
         public void SetHoverState(bool hoverState)
@@ -95,6 +104,7 @@ namespace DCL.Components
             if (!enableInteractionHoverFeedback || !enabled) return;
 
             hoverCanvasController.enabled = model.showFeedback;
+
             if (model.showFeedback)
             {
                 if (hoverState)
@@ -119,15 +129,7 @@ namespace DCL.Components
             if (entity != null)
                 entity.OnShapeUpdated -= OnComponentUpdated;
 
-            if (pointerEventColliders != null)
-            {
-                pointerEventColliders.refCount--;
-
-                if (pointerEventColliders.refCount <= 0)
-                {
-                    Destroy(pointerEventColliders);
-                }
-            }
+            pointerEventColliders?.Dispose();
         }
     }
 }
