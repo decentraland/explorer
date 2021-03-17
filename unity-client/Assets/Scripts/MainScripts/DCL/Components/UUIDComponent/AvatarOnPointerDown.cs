@@ -19,6 +19,18 @@ namespace DCL.Components
             CommonScriptableObjects.playerInfoCardVisibleState.OnChange -= ReEnableOnInfoCardClosed;
         }
 
+        /// <summary>
+        /// This method is called from AvatarShape.
+        ///
+        /// TODO: Improve this flow!!
+        /// </summary>
+        /// <param name="model"></param>
+        public void Initialize(Model model)
+        {
+            this.model = model;
+            base.Initialize(scene, entity);
+        }
+
         public override void Report(WebInterface.ACTION_BUTTON buttonId, Ray ray, HitInfo hit)
         {
             if (!enabled) return;

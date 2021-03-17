@@ -74,7 +74,7 @@ namespace DCL
 
             onPointerDown.scene = scene;
             onPointerDown.entity = entity;
-            onPointerDown.UpdateFromModel(
+            onPointerDown.Initialize(
                 new OnPointerDown.Model()
                 {
                     type = OnPointerDown.NAME,

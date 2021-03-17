@@ -11,8 +11,6 @@ namespace DCL.Components
     {
         public static bool enableInteractionHoverFeedback = true;
 
-        InteractionHoverCanvasController hoverCanvasController;
-
         [System.Serializable]
         public new class Model : UUIDComponent.Model
         {
@@ -33,10 +31,8 @@ namespace DCL.Components
         {
             base.Initialize(scene, entity);
 
-            model = new OnPointerEvent.Model();
-
-            // Create OnPointerEventCollider child
-            hoverCanvasController = InteractionHoverCanvasController.i;
+            if (model == null)
+                model = new OnPointerEvent.Model();
 
             SetEventColliders(entity);
 
@@ -55,6 +51,9 @@ namespace DCL.Components
 
         public string GetMeshName(Collider collider)
         {
+            if (pointerEventColliders == null)
+                return "";
+
             return pointerEventColliders.GetMeshName(collider);
         }
 
@@ -96,7 +95,10 @@ namespace DCL.Components
 
             Model model = this.model as Model;
 
+            var hoverCanvasController = InteractionHoverCanvasController.i;
+
             hoverCanvasController.enabled = model.showFeedback;
+
             if (model.showFeedback)
             {
                 if (hoverState)

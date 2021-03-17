@@ -98,7 +98,9 @@ namespace DCL.Components
         {
             this.scene = scene;
             this.entity = entity;
-            transform.SetParent(entity.gameObject.transform, false);
+
+            if (transform.parent != entity.gameObject.transform)
+                transform.SetParent(entity.gameObject.transform, false);
         }
 
         public virtual void UpdateFromJSON(string json)
