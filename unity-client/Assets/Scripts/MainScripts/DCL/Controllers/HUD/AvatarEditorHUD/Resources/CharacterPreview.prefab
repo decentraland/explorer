@@ -329,6 +329,7 @@ GameObject:
   - component: {fileID: 6705057966129581724}
   - component: {fileID: 2150367651614698250}
   - component: {fileID: 8922715421469685814}
+  - component: {fileID: 6105339469105395615}
   m_Layer: 15
   m_Name: AvatarRenderer
   m_TagString: Untagged
@@ -401,11 +402,22 @@ MonoBehaviour:
   eyeMaterial: {fileID: 2100000, guid: fcfa021e0982c0840aaefe7411340f7f, type: 2}
   eyebrowMaterial: {fileID: 2100000, guid: db9e974bee285614b8ea2d8832d1a563, type: 2}
   mouthMaterial: {fileID: 2100000, guid: aa8f029bd537edb44b72b4737ca9b81d, type: 2}
-  useFx: 0
-  fxChangeWearablePrefab: {fileID: 5176108183135982478, guid: 519485bde70494ec39ff527893b93d54,
+--- !u!114 &6105339469105395615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6856622359626919856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db6ff00d1a714d87855d414bc38f47c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  avatarVisualCue: 1
+  particlePrefab: {fileID: 5114449133412005470, guid: c77cccdcae12c4c1f99c2650f57b339a,
     type: 3}
-  fxSpawnPrefab: {fileID: 4461659837953358430, guid: a409a73da0b844cf28dfb4e8066f3fdd,
-    type: 3}
+  followAvatar: 0
 --- !u!1 &7113636141788214316
 GameObject:
   m_ObjectHideFlags: 0

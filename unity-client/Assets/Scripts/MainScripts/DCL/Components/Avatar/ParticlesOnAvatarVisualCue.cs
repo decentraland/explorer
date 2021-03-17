@@ -23,7 +23,7 @@ public class ParticlesOnAvatarVisualCue : MonoBehaviour
         if (cue == avatarVisualCue && particlePrefab != null)
         {
             var particles = Instantiate(particlePrefab);
-            particles.transform.position += avatarRenderer.transform.position;
+            particles.transform.position = avatarRenderer.transform.position + particlePrefab.transform.position;
             if (followAvatar)
             {
                 FollowObject particlesFollow = particles.AddComponent<FollowObject>();
