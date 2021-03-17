@@ -153,7 +153,8 @@ export function* handleWearablesRequest(action: WearablesRequest) {
 }
 
 function* fetchWearablesV2(filters: WearablesRequestFilters) {
-  const catalystUrl = yield select(getCatalystServer)
+  // const catalystUrl = yield select(getCatalystServer)
+  const catalystUrl = 'https://peer-testing.decentraland.org'
   const downloadUrl = yield select(getFetchContentServer)
   const client: CatalystClient = new CatalystClient(catalystUrl, 'EXPLORER')
 

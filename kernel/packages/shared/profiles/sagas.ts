@@ -315,10 +315,11 @@ function* populateFaceIfNecessary(profile: any, resolution: string) {
 export async function profileServerRequest(userId: string) {
   const state = globalThis.globalStore.getState()
   const catalystUrl = getCatalystServer(state)
-  const client = new CatalystClient(catalystUrl, 'EXPLORER')
   const shouldUseV2: boolean = WORLD_EXPLORER && isFeatureEnabled(state, FeatureFlags.WEARABLES_V2, false)
   let profile: any
   if (shouldUseV2) {
+    // const client = new CatalystClient(catalystUrl, 'EXPLORER')
+    const client = new CatalystClient('https://peer-testing.decentraland.org', 'EXPLORER')
     profile = await client.fetchProfiles([userId]).then((profiles) => profiles[0] ?? { avatars: [] })
   } else {
     const response = await fetch(`${catalystUrl}/lambdas/profile/${userId}`)
