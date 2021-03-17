@@ -71,7 +71,6 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            Debug.Log("Updating model to: " + newModel);
             this.model = newModel ?? new UUIDComponent.Model();
             return null;
         }
