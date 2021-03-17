@@ -33,6 +33,8 @@ namespace DCL
         internal AvatarAnimatorLegacy animator;
         internal StickersController stickersController;
 
+        private long lastStickerTimestamp = -1;
+
         internal bool isLoading = false;
 
         private Coroutine loadCoroutine;
@@ -339,6 +341,11 @@ namespace DCL
 
             SetWearableBones();
             UpdateExpressions(model.expressionTriggerId, model.expressionTriggerTimestamp);
+            if (lastStickerTimestamp != model.stickerTriggerTimestamp && model.stickerTriggerId != null)
+            {
+                lastStickerTimestamp = model.stickerTriggerTimestamp;
+                stickersController?.PlayEmote(model.stickerTriggerId);
+            }
 
             if (loadSoftFailed)
             {

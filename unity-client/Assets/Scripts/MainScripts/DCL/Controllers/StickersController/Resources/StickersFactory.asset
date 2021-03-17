@@ -16,3 +16,6 @@ MonoBehaviour:
   - id: clap
     stickerPrefab: {fileID: 17480524672133614, guid: d6a67b16335e547f7bb76da7e850651e,
       type: 3}
+  - id: heart
+    stickerPrefab: {fileID: 8322741589490567795, guid: a2ac01cf19c5b4d00acf9f777d831fe3,
+      type: 3}
