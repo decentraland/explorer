@@ -134,20 +134,11 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public ParcelScene GetParcelSceneToEdit()
-    {
-        return sceneToEdit;
-    }
+    public ParcelScene GetParcelSceneToEdit() { return sceneToEdit; }
 
-    public List<DCLBuilderInWorldEntity> GetSelectedEntityList()
-    {
-        return selectedEntities;
-    }
+    public List<DCLBuilderInWorldEntity> GetSelectedEntityList() { return selectedEntities; }
 
-    public bool IsAnyEntitySelected()
-    {
-        return selectedEntities.Count > 0;
-    }
+    public bool IsAnyEntitySelected() { return selectedEntities.Count > 0; }
 
     public void SetActiveMode(BuilderInWorldMode buildMode)
     {
