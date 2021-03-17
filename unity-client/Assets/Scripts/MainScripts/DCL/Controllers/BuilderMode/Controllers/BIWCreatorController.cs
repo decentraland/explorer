@@ -167,7 +167,10 @@ public class BIWCreatorController : BIWController
 
     #region LoadingObjects
 
-    public bool ExistsLoadingGameObjectForEntity(string entityId) { return loadingGameObjects.ContainsKey(entityId); }
+    public bool ExistsLoadingGameObjectForEntity(string entityId)
+    {
+        return loadingGameObjects.ContainsKey(entityId);
+    }
 
     private void CreateLoadingObject(DCLBuilderInWorldEntity entity)
     {
@@ -208,10 +211,7 @@ public class BIWCreatorController : BIWController
         SmartItemComponent.Model model = new SmartItemComponent.Model();
         model.values = new Dictionary<object, object>();
 
-        string jsonModel = JsonUtility.ToJson(model);
-
-        //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
-        sceneToEdit.EntityComponentCreateOrUpdateWithModel(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+        sceneToEdit.EntityComponentCreateOrUpdateWithModel(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, model);
 
         //Note (Adrian): We can't wait to set the component 1 frame, so we set it
         if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent component))

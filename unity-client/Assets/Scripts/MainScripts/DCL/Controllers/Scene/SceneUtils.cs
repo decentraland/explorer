@@ -33,14 +33,13 @@ namespace DCL.Controllers
 
             foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> component in entity.components)
             {
-                scene.EntityComponentCreateOrUpdateWithModel(newEntity.entityId, component.Key, DCLTransform.model);
+                scene.EntityComponentCreateOrUpdateWithModel(newEntity.entityId, component.Key, component.Value.GetModel());
             }
 
             foreach (KeyValuePair<System.Type, ISharedComponent> component in entity.GetSharedComponents())
             {
                 ISharedComponent sharedComponent = scene.SharedComponentCreate(System.Guid.NewGuid().ToString(), component.Value.GetClassId());
-                string jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(component.Value.GetModel());
-                sharedComponent.UpdateFromJSON(jsonModel);
+                sharedComponent.UpdateFromModel(component.Value.GetModel());
                 scene.SharedComponentAttach(newEntity.entityId, sharedComponent.id);
             }
 

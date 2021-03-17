@@ -14,10 +14,14 @@ namespace DCL.Components
         bool isRoutineRunning { get; }
     }
 
-    public interface IEntityComponent : IComponent, ICleanable
+    public interface IMonoBehaviour
+    {
+        Transform GetTransform();
+    }
+
+    public interface IEntityComponent : IComponent, ICleanable, IMonoBehaviour
     {
         DecentralandEntity entity { get; }
-        Transform GetTransform();
         void Initialize(IParcelScene scene, DecentralandEntity entity);
     }
 
