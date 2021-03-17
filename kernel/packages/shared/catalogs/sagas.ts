@@ -36,7 +36,6 @@ import { isFeatureEnabled } from 'shared/meta/selectors'
 import { FeatureFlags } from 'shared/meta/types'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
 import { parseUrn } from '@dcl/urn-resolver'
-import { getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
 export const WRONG_FILTERS_ERROR =
@@ -154,7 +153,7 @@ export function* handleWearablesRequest(action: WearablesRequest) {
 
 function* fetchWearablesV2(filters: WearablesRequestFilters) {
   const catalystUrl = 'https://peer-testing.decentraland.org'
-  const downloadUrl = yield select(getFetchContentServer)
+  const downloadUrl = 'https://peer-testing.decentraland.org/lambdas/contentv2'
   const client: CatalystClient = new CatalystClient(catalystUrl, 'EXPLORER')
 
   const result: any[] = []
