@@ -28,6 +28,7 @@ namespace DCL.Models
         public MeshesInfo meshesInfo;
         public GameObject meshRootGameObject => meshesInfo.meshRootGameObject;
         public Renderer[] renderers => meshesInfo.renderers;
+        public bool isInsideBoundaries { private set; get; }
 
         public System.Action<MonoBehaviour> OnComponentUpdated;
         public System.Action<DecentralandEntity> OnShapeUpdated;
@@ -52,10 +53,7 @@ namespace DCL.Models
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
         }
 
-        public Dictionary<System.Type, BaseDisposable> GetSharedComponents()
-        {
-            return sharedComponents;
-        }
+        public Dictionary<System.Type, BaseDisposable> GetSharedComponents() { return sharedComponents; }
 
         private void AddChild(DecentralandEntity entity)
         {
@@ -106,15 +104,13 @@ namespace DCL.Models
             }
         }
 
-        public void ResetRelease()
-        {
-            isReleased = false;
-        }
+        public void ResetRelease() { isReleased = false; }
 
         public void Cleanup()
         {
             // Don't do anything if this object was already released
-            if (isReleased) return;
+            if (isReleased)
+                return;
 
             OnRemoved?.Invoke(this);
 
@@ -200,10 +196,7 @@ namespace DCL.Models
             return null;
         }
 
-        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out BaseComponent component)
-        {
-            return components.TryGetValue(componentId, out component);
-        }
+        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out BaseComponent component) { return components.TryGetValue(componentId, out component); }
 
         public bool TryGetSharedComponent(CLASS_ID componentId, out BaseDisposable component)
         {
@@ -227,5 +220,7 @@ namespace DCL.Models
 
             return component;
         }
+
+        public void SetBoundsCheckerStatus(bool isInsideBoundaries) { this.isInsideBoundaries = isInsideBoundaries; }
     }
 }

@@ -1,13 +1,12 @@
 using DCL;
-using DCL.Models;
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
-using System.Collections;
+using DCL.Models;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using DCL.Configuration;
-using System;
 
 public class DCLBuilderInWorldEntity : EditableEntity
 {
@@ -87,6 +86,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         rootEntity = entity;
         rootEntity.OnShapeUpdated += OnShapeUpdate;
         rootEntity.OnNameChange += OnNameUpdate;
+        DCL.Environment.i.world.sceneBoundsChecker.OnEntityMeshBoundsEvaluated += OnBoundsCheckerUpdate;
 
         this.editMaterial = editMaterial;
         isVoxel = false;
@@ -156,6 +156,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         rootEntity.OnShapeUpdated -= OnShapeUpdate;
         rootEntity.OnNameChange -= OnNameUpdate;
+        DCL.Environment.i.world.sceneBoundsChecker.OnEntityMeshBoundsEvaluated -= OnBoundsCheckerUpdate;
 
         Deselect();
         DestroyColliders();
@@ -462,6 +463,14 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (IsSelected)
             SetEditMaterial();
+    }
+
+    void OnBoundsCheckerUpdate(DecentralandEntity entity)
+    {
+        if (entity.entityId != rootEntity.entityId)
+            return;
+
+        onStatusUpdate?.Invoke(this);
     }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
