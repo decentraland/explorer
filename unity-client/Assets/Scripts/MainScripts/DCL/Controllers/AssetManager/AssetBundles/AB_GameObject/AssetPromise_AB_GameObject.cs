@@ -47,7 +47,7 @@ namespace DCL
 
         protected override void OnReuse(Action OnSuccess)
         {
-            asset.Show(OnSuccess);
+            asset.Show(true, OnSuccess);
         }
 
         protected override void OnAfterLoadOrReuse()
@@ -72,7 +72,10 @@ namespace DCL
             }
 
             if (asset != null)
+            {
+                asset.CancelShow();
                 UnityEngine.Object.Destroy(asset.container);
+            }
 
             AssetPromiseKeeper_AB.i.Forget(subPromise);
         }
