@@ -28,20 +28,20 @@ namespace DCL.Models
         public MeshesInfo meshesInfo;
         public GameObject meshRootGameObject => meshesInfo.meshRootGameObject;
         public Renderer[] renderers => meshesInfo.renderers;
+
+        public Action<MonoBehaviour> OnComponentUpdated;
+        public Action<DecentralandEntity> OnShapeUpdated;
+        public Action<DCLName.Model> OnNameChange;
+        public Action<DecentralandEntity> OnRemoved;
+        public Action<DCLTransform.Model> OnTransformChange;
+        public Action<DecentralandEntity> OnMeshesInfoUpdated;
+        public Action<DecentralandEntity> OnMeshesInfoCleaned;
+
+        public Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
+        Dictionary<Type, BaseDisposable> sharedComponents = new Dictionary<Type, BaseDisposable>();
+
         public bool isInsideBoundaries { private set; get; }
-
-        public System.Action<MonoBehaviour> OnComponentUpdated;
-        public System.Action<DecentralandEntity> OnShapeUpdated;
-        public System.Action<DCLName.Model> OnNameChange;
-        public System.Action<DecentralandEntity> OnRemoved;
-        public System.Action<DCLTransform.Model> OnTransformChange;
-        public System.Action<DecentralandEntity> OnMeshesInfoUpdated;
-        public System.Action<DecentralandEntity> OnMeshesInfoCleaned;
-
-        public System.Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
-        Dictionary<System.Type, BaseDisposable> sharedComponents = new Dictionary<System.Type, BaseDisposable>();
-
-        public event System.Action<bool> OnEntityBoundsCheckerStatusChanged;
+        public event Action<bool> OnEntityBoundsCheckerStatusChanged;
 
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
@@ -55,7 +55,7 @@ namespace DCL.Models
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
         }
 
-        public Dictionary<System.Type, BaseDisposable> GetSharedComponents() { return sharedComponents; }
+        public Dictionary<Type, BaseDisposable> GetSharedComponents() { return sharedComponents; }
 
         private void AddChild(DecentralandEntity entity)
         {
@@ -153,7 +153,7 @@ namespace DCL.Models
             isReleased = true;
         }
 
-        public void AddSharedComponent(System.Type componentType, BaseDisposable component)
+        public void AddSharedComponent(Type componentType, BaseDisposable component)
         {
             if (component == null)
             {
@@ -165,7 +165,7 @@ namespace DCL.Models
             sharedComponents.Add(componentType, component);
         }
 
-        public void RemoveSharedComponent(System.Type targetType, bool triggerDetaching = true)
+        public void RemoveSharedComponent(Type targetType, bool triggerDetaching = true)
         {
             if (sharedComponents.TryGetValue(targetType, out BaseDisposable component))
             {
@@ -215,7 +215,7 @@ namespace DCL.Models
             return false;
         }
 
-        public BaseDisposable GetSharedComponent(System.Type targetType)
+        public BaseDisposable GetSharedComponent(Type targetType)
         {
             BaseDisposable component;
             sharedComponents.TryGetValue(targetType, out component);
