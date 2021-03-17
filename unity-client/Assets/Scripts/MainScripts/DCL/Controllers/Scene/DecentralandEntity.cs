@@ -41,6 +41,8 @@ namespace DCL.Models
         public System.Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
         Dictionary<System.Type, BaseDisposable> sharedComponents = new Dictionary<System.Type, BaseDisposable>();
 
+        public event System.Action<bool> OnEntityBoundsCheckerStatusChanged;
+
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
         bool isReleased = false;
@@ -221,6 +223,10 @@ namespace DCL.Models
             return component;
         }
 
-        public void SetBoundsCheckerStatus(bool isInsideBoundaries) { this.isInsideBoundaries = isInsideBoundaries; }
+        public void SetBoundsCheckerStatus(bool isInsideBoundaries)
+        {
+            this.isInsideBoundaries = isInsideBoundaries;
+            OnEntityBoundsCheckerStatusChanged?.Invoke(isInsideBoundaries);
+        }
     }
 }

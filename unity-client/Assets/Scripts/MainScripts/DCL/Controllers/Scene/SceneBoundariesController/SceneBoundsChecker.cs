@@ -20,8 +20,6 @@ namespace DCL.Controllers
 
     public interface ISceneBoundsChecker
     {
-        event System.Action<DecentralandEntity> OnEntityMeshBoundsEvaluated;
-
         float timeBetweenChecks { get; set; }
         bool enabled { get; }
         int entitiesToCheckCount { get; }
@@ -50,7 +48,6 @@ namespace DCL.Controllers
 
     public class SceneBoundsChecker : ISceneBoundsChecker
     {
-        public event System.Action<DecentralandEntity> OnEntityMeshBoundsEvaluated;
         public bool enabled => entitiesCheckRoutine != null;
 
         public float timeBetweenChecks { get; set; } = 1f;
@@ -238,7 +235,6 @@ namespace DCL.Controllers
         {
             bool isInsideBoundaries = IsEntityInsideSceneBoundaries(entity);
             entity.SetBoundsCheckerStatus(isInsideBoundaries);
-            OnEntityMeshBoundsEvaluated?.Invoke(entity);
 
             UpdateEntityMeshesValidState(entity.meshesInfo, isInsideBoundaries);
             UpdateEntityCollidersValidState(entity.meshesInfo, isInsideBoundaries);
