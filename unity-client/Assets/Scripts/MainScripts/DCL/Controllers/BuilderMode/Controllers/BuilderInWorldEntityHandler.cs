@@ -673,7 +673,7 @@ public class BuilderInWorldEntityHandler : BIWController
         {
             if (entity.rootEntity.scene == sceneToEdit)
             {
-                if (!entity.rootEntity.isInsideBoundaries)
+                if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
                 {
                     entitiesToRemove.Add(entity);
                 }
@@ -743,7 +743,7 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         foreach (DCLBuilderInWorldEntity entity in selectedEntities)
         {
-            if (!entity.rootEntity.isInsideBoundaries)
+            if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 return false;
             }
@@ -757,7 +757,7 @@ public class BuilderInWorldEntityHandler : BIWController
         bool areAllIn = true;
         foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-            if (!entity.rootEntity.isInsideBoundaries)
+            if (!DCL.Environment.i.world.sceneBoundsChecker.IsEntityInsideSceneBoundaries(entity.rootEntity))
             {
                 areAllIn = false;
                 break;
