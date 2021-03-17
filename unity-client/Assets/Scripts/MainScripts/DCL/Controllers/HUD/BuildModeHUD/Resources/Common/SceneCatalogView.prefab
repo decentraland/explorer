@@ -1582,8 +1582,10 @@ MonoBehaviour:
   mainScrollRect: {fileID: 893499464091778053}
   viewport: {fileID: 6356494600647465261}
   contentContainer: {fileID: 7402181836938702467}
-  minSensitivity: 10
-  maxSensitivity: 100
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!114 &893499464091778053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2793,8 +2795,10 @@ MonoBehaviour:
   mainScrollRect: {fileID: 9164274516264469573}
   viewport: {fileID: 9164274516162771192}
   contentContainer: {fileID: 9164274517067509940}
-  minSensitivity: 10
-  maxSensitivity: 100
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!114 &9164274516264469573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3267,8 +3271,10 @@ MonoBehaviour:
   mainScrollRect: {fileID: 9164274516667144584}
   viewport: {fileID: 9164274516810160086}
   contentContainer: {fileID: 5040136038075063804}
-  minSensitivity: 10
-  maxSensitivity: 100
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!114 &9164274516667144584
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -957,8 +957,10 @@ MonoBehaviour:
   mainScrollRect: {fileID: 2634397280309248037}
   viewport: {fileID: 2634397279601165678}
   contentContainer: {fileID: 2634397279653339128}
-  minSensitivity: 10
-  maxSensitivity: 100
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!114 &2634397280309248037
 MonoBehaviour:
   m_ObjectHideFlags: 0

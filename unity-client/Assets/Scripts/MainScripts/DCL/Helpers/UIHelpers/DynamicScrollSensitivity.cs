@@ -15,9 +15,11 @@ public class DynamicScrollSensitivity : MonoBehaviour
     [Tooltip("Transform that will contain all the items of the viewport.")]
     public RectTransform contentContainer;
     [Tooltip("Min value for the calculated scroll sensitivity.")]
-    public float minSensitivity = 10f;
+    public float minSensitivity = 5f;
     [Tooltip("Max value for the calculated scroll sensitivity.")]
-    public float maxSensitivity = 100f;
+    public float maxSensitivity = 50f;
+    [Tooltip("Multiplier applied to the sensitivity value (sensitivityMultiplier = 1 for not applying).")]
+    public float sensitivityMultiplier = 0.5f;
     [Tooltip("True to recalculate each time the game object is enabled.")]
     public bool recalculateOnEnable = true;
 
@@ -45,7 +47,7 @@ public class DynamicScrollSensitivity : MonoBehaviour
         // We need to wait for a frame for having available the correct height of the contentContainer after the OnEnable event
         yield return null;
 
-        float newSensitivity = contentContainer.rect.height * minSensitivity / viewport.rect.height;
+        float newSensitivity = (contentContainer.rect.height * minSensitivity / viewport.rect.height) * sensitivityMultiplier;
         mainScrollRect.scrollSensitivity = Mathf.Clamp(newSensitivity, minSensitivity, maxSensitivity);
     }
 
