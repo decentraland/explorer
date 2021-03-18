@@ -131,6 +131,19 @@ export type LoadableParcelScene = {
   land?: ILand
 }
 
+/** THIS INTERFACE CANNOT CHANGE, IT IS USED IN THE UNITY BUILD */
+export type LoadablePortableExperienceScene = {
+  id: string
+  name: string
+  basePosition: { x: number; y: number }
+  parcels: Array<{ x: number; y: number }>
+  contents: Array<ContentMapping>
+  baseUrl: string
+  baseUrlBundles: string
+  land?: IPortableExperience
+  icon?: string
+}
+
 export const BillboardModes = {
   BILLBOARDMODE_NONE: 0,
   BILLBOARDMODE_X: 1,
@@ -211,6 +224,16 @@ export type SceneJsonData = {
   source?: SceneSource
   spawnPoints?: SceneSpawnPoint[]
   requiredPermissions?: string[] | undefined
+  featureToggles?: { [key: string]: string }
+}
+
+export type SceneFeatureToggle = {
+  name: string
+  default: 'enabled' | 'disabled'
+}
+
+export class SceneFeatureToggles {
+  static readonly VOICE_CHAT: SceneFeatureToggle = { name: 'voiceChat', default: 'enabled' }
 }
 
 export type EnvironmentData<T> = {
@@ -232,6 +255,14 @@ export interface ILand {
   sceneJsonData: SceneJsonData
   baseUrl: string
   baseUrlBundles: string
+  mappingsResponse: MappingsResponse
+}
+
+export interface IPortableExperience {
+  cid: string
+  baseUrl: string
+  baseUrlBundles: string
+  sceneJsonData: SceneJsonData
   mappingsResponse: MappingsResponse
 }
 
@@ -384,7 +415,8 @@ export type Notification = {
 export enum RenderProfile {
   DEFAULT = 0,
   HALLOWEEN = 1,
-  XMAS = 2
+  XMAS = 2,
+  NIGHT = 3
 }
 
 export enum HUDElementID {
@@ -393,7 +425,7 @@ export enum HUDElementID {
   PROFILE_HUD = 2,
   NOTIFICATION = 3,
   AVATAR_EDITOR = 4,
-  SETTINGS = 5,
+  SETTINGS_PANEL = 5,
   EXPRESSIONS = 6,
   PLAYER_INFO_CARD = 7,
   AIRDROPPING = 8,
@@ -410,7 +442,11 @@ export enum HUDElementID {
   HELP_AND_SUPPORT_HUD = 20,
   EMAIL_PROMPT = 21,
   USERS_AROUND_LIST_HUD = 22,
-  GRAPHIC_CARD_WARNING = 23
+  GRAPHIC_CARD_WARNING = 23,
+  BUILD_MODE = 24,
+  QUESTS_PANEL = 26,
+  QUESTS_TRACKER = 27,
+  QUESTS_NOTIFICATIONS = 28
 }
 
 export type HUDConfiguration = {
@@ -427,13 +463,11 @@ export type CatalystNode = {
 }
 
 export type GraphResponse = {
-  data: {
-    nfts: {
-      ens: {
-        subdomain: string
-      }
-    }[]
-  }
+  nfts: {
+    ens: {
+      subdomain: string
+    }
+  }[]
 }
 
 export type AnalyticsContainer = { analytics: SegmentAnalytics.AnalyticsJS }
@@ -524,6 +558,9 @@ export type KernelConfigForRenderer = {
   profiles: {
     nameValidRegex: string
     nameValidCharacterRegex: string
+  }
+  features: {
+    enableBuilderInWorld: boolean
   }
   gifSupported: boolean
 }

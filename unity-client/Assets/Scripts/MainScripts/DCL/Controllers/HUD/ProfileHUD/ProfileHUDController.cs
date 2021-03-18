@@ -12,7 +12,7 @@ public class ProfileHUDController : IHUD
         public bool connectedWallet;
     }
 
-    private const string URL_CLAIM_NAME = "https://avatars.decentraland.org/claim";
+    private const string URL_CLAIM_NAME = "https://builder.decentraland.org/claim-name";
     private const string URL_MANA_INFO = "https://docs.decentraland.org/examples/get-a-wallet";
     private const string URL_MANA_PURCHASE = "https://market.decentraland.org/settings";
     private const string URL_TERMS_OF_USE = "https://decentraland.org/terms";
@@ -29,11 +29,14 @@ public class ProfileHUDController : IHUD
 
     public RectTransform backpackTooltipReference { get => view.backpackTooltipReference; }
 
+    public event Action OnOpen;
+    public event Action OnClose;
+
     public ProfileHUDController()
     {
         mouseCatcher = InitialSceneReferences.i?.mouseCatcher;
 
-     
+
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ProfileHUD")).GetComponent<ProfileHUDView>();
         view.name = "_ProfileHUD";
 
@@ -52,6 +55,8 @@ public class ProfileHUDController : IHUD
         view.buttonTermsOfServiceForNonConnectedWallets.onPointerDown += () => WebInterface.OpenURL(URL_TERMS_OF_USE);
         view.buttonPrivacyPolicyForNonConnectedWallets.onPointerDown += () => WebInterface.OpenURL(URL_PRIVACY_POLICY);
         view.inputName.onSubmit.AddListener(UpdateProfileName);
+        view.OnOpen += () => { WebInterface.RequestOwnProfileUpdate(); OnOpen?.Invoke(); };
+        view.OnClose += () => OnClose?.Invoke();
 
         manaCounterView = view.GetComponentInChildren<ManaCounterView>(true);
         if (manaCounterView)

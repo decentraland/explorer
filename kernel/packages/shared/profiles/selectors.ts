@@ -1,10 +1,6 @@
 import { Profile, ProfileStatus, ProfileUserInfo, RootProfileState } from './types'
-import { RootDaoState } from '../dao/types'
-import { Wearable } from 'shared/catalogs/types'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { RootSessionState } from 'shared/session/types'
-
-export const getProfileDownloadServer = (store: RootDaoState) => store.dao.profileServer
 
 export const getProfileStatusAndData = (
   store: RootProfileState,
@@ -61,17 +57,9 @@ export const getEthereumAddress = (store: RootProfileState, userId: string): str
   getProfileValueIfOkOrLoading(
     store,
     userId,
-    (info) => (info.data as Profile).ethAddress,
+    (info) => (info.data as Profile).userId,
     () => undefined
   )
-
-export const getInventory = (store: RootProfileState, userId: string): Wearable[] | null =>
-  store.profiles &&
-  store.profiles.userInventory &&
-  store.profiles.userInventory[userId] &&
-  store.profiles.userInventory[userId].status === 'ok'
-    ? ((store.profiles.userInventory[userId] as any).data as Wearable[])
-    : null
 
 function getProfileValueIfOkOrLoading<T>(
   store: RootProfileState,

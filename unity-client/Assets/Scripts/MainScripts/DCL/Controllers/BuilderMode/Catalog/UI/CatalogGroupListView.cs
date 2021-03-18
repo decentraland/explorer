@@ -1,58 +1,117 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CatalogGroupListView : ListView<Dictionary<string, List<SceneObject>>>
+public class CatalogGroupListView : ListView<Dictionary<string, List<CatalogItem>>>
 {
-
+    public Canvas generalCanvas;
     public CatalogAssetGroupAdapter categoryItemAdapterPrefab;
-    public System.Action<SceneObject> OnSceneObjectClicked;
-    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
-    public System.Action<SceneObject, CatalogItemAdapter, BaseEventData> OnAdapterStartDragging;
-    public System.Action<PointerEventData> OnAdapterDrag, OnAdapterEndDrag;
+    public DynamicScrollSensitivity dynamicScrollSensitivity;
+
+    public System.Action<CatalogItem> OnCatalogItemClicked;
+    public System.Action<CatalogItem, CatalogItemAdapter> OnCatalogItemFavorite;
+    public System.Action<PointerEventData, CatalogItemAdapter> OnPointerEnterInAdapter;
+    public System.Action<PointerEventData, CatalogItemAdapter> OnPointerExitInAdapter;
+
+    public event System.Action OnResumeInput;
+    public event System.Action OnStopInput;
+
+    private GameObject draggedObject;
+    private CatalogItemAdapter catalogItemAdapterDragged;
 
     public override void AddAdapters()
     {
         base.AddAdapters();
 
-        foreach (Dictionary<string, List<SceneObject>> assetPackGroups in contentList)
+        if (contentList == null)
+            return;
+
+        foreach (Dictionary<string, List<CatalogItem>> assetPackGroups in contentList)
         {
-            foreach (KeyValuePair<string, List<SceneObject>> assetPackGroup in assetPackGroups)
+            foreach (KeyValuePair<string, List<CatalogItem>> assetPackGroup in assetPackGroups)
             {
                 CatalogAssetGroupAdapter adapter = Instantiate(categoryItemAdapterPrefab, contentPanelTransform).GetComponent<CatalogAssetGroupAdapter>();
                 adapter.SetContent(assetPackGroup.Key, assetPackGroup.Value);
-                adapter.OnSceneObjectClicked += SceneObjectSelected;
-                adapter.OnSceneObjectFavorite += SceneObjectFavorite;
-                adapter.OnAdapterStartDragging += AdapterStartDragging;
-                adapter.OnAdapterDrag += OnDrag;
-                adapter.OnAdapterEndDrag += OnEndDrag;
+                SubscribeToEvents(adapter);
             }
-        }         
+        }
+
+        if (dynamicScrollSensitivity != null)
+            dynamicScrollSensitivity.RecalculateSensitivity();
     }
 
-    void OnDrag(PointerEventData eventData)
+    public override void RemoveAdapters()
     {
-        OnAdapterDrag?.Invoke(eventData);
+        if (contentPanelTransform == null ||
+            contentPanelTransform.transform == null ||
+            contentPanelTransform.transform.childCount == 0)
+            return;
+
+        for (int i = 0; i < contentPanelTransform.transform.childCount; i++)
+        {
+            CatalogAssetGroupAdapter toRemove = contentPanelTransform.transform.GetChild(i).GetComponent<CatalogAssetGroupAdapter>();
+            if (toRemove != null)
+            {
+                UnsubscribeToEvents(toRemove);
+                Destroy(toRemove.gameObject);
+            }
+        }
     }
 
-    void OnEndDrag(PointerEventData eventData)
+    public void SubscribeToEvents(CatalogAssetGroupAdapter adapter)
     {
-        OnAdapterEndDrag?.Invoke(eventData);
+        adapter.OnCatalogItemClicked += CatalogItemSelected;
+        adapter.OnCatalogItemFavorite += CatalogItemFavorite;
+        adapter.OnAdapterStartDragging += AdapterStartDragging;
+        adapter.OnAdapterDrag += OnDrag;
+        adapter.OnAdapterEndDrag += OnEndDrag;
+        adapter.OnPointerEnterInAdapter += OnPointerEnter;
+        adapter.OnPointerExitInAdapter += OnPointerExit;
     }
 
-    void AdapterStartDragging(SceneObject sceneObjectClicked, CatalogItemAdapter adapter, BaseEventData data)
+    public void UnsubscribeToEvents(CatalogAssetGroupAdapter adapter)
     {
-        OnAdapterStartDragging?.Invoke(sceneObjectClicked, adapter, data);
+        adapter.OnCatalogItemClicked -= CatalogItemSelected;
+        adapter.OnCatalogItemFavorite -= CatalogItemFavorite;
+        adapter.OnAdapterStartDragging -= AdapterStartDragging;
+        adapter.OnAdapterDrag -= OnDrag;
+        adapter.OnAdapterEndDrag -= OnEndDrag;
+        adapter.OnPointerEnterInAdapter -= OnPointerEnter;
+        adapter.OnPointerExitInAdapter -= OnPointerExit;
     }
 
-    void SceneObjectSelected(SceneObject sceneObject)
+    private void OnDrag(PointerEventData data) { draggedObject.transform.position = data.position; }
+
+    private void AdapterStartDragging(CatalogItem catalogItemClicked, CatalogItemAdapter adapter, BaseEventData data)
     {
-        OnSceneObjectClicked?.Invoke(sceneObject);
+        PointerEventData eventData = data as PointerEventData;
+
+        if (draggedObject == null)
+            draggedObject = Instantiate(adapter.gameObject, generalCanvas.transform);
+
+        CatalogItemAdapter newAdapter = draggedObject.GetComponent<CatalogItemAdapter>();
+
+        RectTransform adapterRT = adapter.GetComponent<RectTransform>();
+        newAdapter.SetContent(adapter.GetContent());
+        newAdapter.EnableDragMode(adapterRT.sizeDelta);
+        catalogItemAdapterDragged = newAdapter;
+
+        OnStopInput?.Invoke();
     }
 
-    void SceneObjectFavorite(SceneObject sceneObject,CatalogItemAdapter adapter)
+    private void OnEndDrag(PointerEventData data)
     {
-        OnSceneObjectFavorite?.Invoke(sceneObject, adapter);
+        OnResumeInput?.Invoke();
+        Destroy(draggedObject);
     }
+
+    public CatalogItemAdapter GetLastCatalogItemDragged() { return catalogItemAdapterDragged; }
+
+    private void CatalogItemSelected(CatalogItem sceneObject) { OnCatalogItemClicked?.Invoke(sceneObject); }
+
+    private void CatalogItemFavorite(CatalogItem sceneObject, CatalogItemAdapter adapter) { OnCatalogItemFavorite?.Invoke(sceneObject, adapter); }
+
+    private void OnPointerEnter(PointerEventData eventData, CatalogItemAdapter adapter) { OnPointerEnterInAdapter?.Invoke(eventData, adapter); }
+
+    private void OnPointerExit(PointerEventData eventData, CatalogItemAdapter adapter) { OnPointerExitInAdapter?.Invoke(eventData, adapter); }
 }

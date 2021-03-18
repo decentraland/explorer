@@ -1,7 +1,8 @@
 import { Profile } from './types'
-import { getFetchProfileServer, getFetchContentServer } from 'shared/dao/selectors'
+import { getFetchContentServer } from 'shared/dao/selectors'
 import { Store } from 'redux'
 import { createFakeName } from './utils/fakeName'
+import { profileServerRequest } from './sagas'
 
 declare const window: Window & { globalStore: Store }
 
@@ -11,17 +12,12 @@ function randomBetween(min: number, max: number) {
 
 export async function generateRandomUserProfile(userId: string): Promise<Profile> {
   const _number = randomBetween(1, 160)
-  const profileUrl = `${getFetchProfileServer(window.globalStore.getState())}/default${_number}`
 
   let profile: any | undefined = undefined
   try {
-    const response = await fetch(profileUrl)
-
-    if (response.ok) {
-      const profiles: { avatars: object[] } = await response.json()
-      if (profiles.avatars.length !== 0) {
-        profile = profiles.avatars[0]
-      }
+    const profiles: { avatars: object[] } = await profileServerRequest(`default${_number}`)
+    if (profiles.avatars.length !== 0) {
+      profile = profiles.avatars[0]
     }
   } catch (e) {
     // in case something fails keep going and use backup profile

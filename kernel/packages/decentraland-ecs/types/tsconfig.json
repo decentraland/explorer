@@ -25,7 +25,9 @@
       "@decentraland/web3-provider",
       "@decentraland/EnvironmentAPI",
       "@decentraland/ParcelIdentity",
-      "@decentraland/RestrictedActions"
+      "@decentraland/PortableExperiences",
+      "@decentraland/RestrictedActions",
+      "@decentraland/SignedFetch"
     ],
     "typeRoots": [
       "."

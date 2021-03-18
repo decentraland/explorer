@@ -2,7 +2,7 @@ declare var window: Window & { Rollbar: any }
 import { action } from 'typesafe-actions'
 import {
   COMMS_COULD_NOT_BE_ESTABLISHED,
-  errorMessage,
+  fatalError,
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
   MOBILE_NOT_SUPPORTED,
@@ -45,7 +45,7 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       : event === NETWORK_MISMATCH
       ? 'networkmismatch'
       : 'fatal'
-  globalThis.globalStore && globalThis.globalStore.dispatch(errorMessage(targetError))
+  globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
   Html.showErrorModal(targetError)
   aborted = true
 }
@@ -77,6 +77,19 @@ export function ReportSceneError(message: string, error: any) {
     position: new URLSearchParams(location.search).get('position')
   }
   queueTrackingEvent('scene_error', eventData)
+  if (window.Rollbar) {
+    window.Rollbar.error(message, eventData)
+  }
+}
+
+export function ReportRendererInterfaceError(message: string, error: any) {
+  const eventData = {
+    error,
+    message,
+    rendererInterface: true,
+    position: new URLSearchParams(location.search).get('position')
+  }
+  queueTrackingEvent('renderer_interface_error', eventData)
   if (window.Rollbar) {
     window.Rollbar.error(message, eventData)
   }

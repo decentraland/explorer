@@ -65,7 +65,7 @@ namespace DCL.Interface
                 public string sceneId;
             }
 
-            public StartStatefulMode(string sceneId) : base("StartStatefulMode", new Payload() { sceneId = sceneId })
+            public StartStatefulMode(string sceneId) : base("StartStatefulMode", new Payload() {sceneId = sceneId})
             {
             }
         }
@@ -79,7 +79,7 @@ namespace DCL.Interface
                 public string sceneId;
             }
 
-            public StopStatefulMode(string sceneId) : base("StopStatefulMode", new Payload() { sceneId = sceneId })
+            public StopStatefulMode(string sceneId) : base("StopStatefulMode", new Payload() {sceneId = sceneId})
             {
             }
         }
@@ -93,7 +93,7 @@ namespace DCL.Interface
                 public string sceneId;
             }
 
-            public SceneReady(string sceneId) : base("SceneReady", new Payload() { sceneId = sceneId })
+            public SceneReady(string sceneId) : base("SceneReady", new Payload() {sceneId = sceneId})
             {
             }
         }
@@ -543,6 +543,34 @@ namespace DCL.Interface
             public string value;
         }
 
+        [System.Serializable]
+        public class KillPortableExperiencePayload
+        {
+            public string portableExperienceId;
+        }
+
+        [System.Serializable]
+        public class WearablesRequestFiltersPayload
+        {
+            public string ownedByUser;
+            public string[] wearableIds;
+            public string[] collectionIds;
+        }
+
+        [System.Serializable]
+        public class RequestWearablesPayload
+        {
+            public WearablesRequestFiltersPayload filters;
+            public string context;
+        }
+
+        [System.Serializable]
+        public class SearchENSOwnerPayload
+        {
+            public string name;
+            public int maxResults;
+        }
+
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -622,6 +650,9 @@ namespace DCL.Interface
         private static StoreSceneStateEvent storeSceneState = new StoreSceneStateEvent();
         private static CloseUserAvatarPayload closeUserAvatarPayload = new CloseUserAvatarPayload();
         private static StringPayload stringPayload = new StringPayload();
+        private static KillPortableExperiencePayload killPortableExperiencePayload = new KillPortableExperiencePayload();
+        private static RequestWearablesPayload requestWearablesPayload = new RequestWearablesPayload();
+        private static SearchENSOwnerPayload searchEnsOwnerPayload = new SearchENSOwnerPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -712,7 +743,7 @@ namespace DCL.Interface
 
         public static void ReportGlobalPointerDownEvent(ACTION_BUTTON buttonId, Ray ray, Vector3 point, Vector3 normal, float distance, string sceneId, string entityId = null, string meshName = null, bool isHitInfoValid = false)
         {
-            SetPointerEventPayload((OnPointerEventPayload)onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
+            SetPointerEventPayload((OnPointerEventPayload) onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
             onGlobalPointerEventPayload.type = OnGlobalPointerEventPayload.InputEventType.DOWN;
 
             onGlobalPointerEvent.payload = onGlobalPointerEventPayload;
@@ -722,7 +753,7 @@ namespace DCL.Interface
 
         public static void ReportGlobalPointerUpEvent(ACTION_BUTTON buttonId, Ray ray, Vector3 point, Vector3 normal, float distance, string sceneId, string entityId = null, string meshName = null, bool isHitInfoValid = false)
         {
-            SetPointerEventPayload((OnPointerEventPayload)onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
+            SetPointerEventPayload((OnPointerEventPayload) onGlobalPointerEventPayload, buttonId, entityId, meshName, ray, point, normal, distance, isHitInfoValid);
             onGlobalPointerEventPayload.type = OnGlobalPointerEventPayload.InputEventType.UP;
 
             onGlobalPointerEvent.payload = onGlobalPointerEventPayload;
@@ -744,7 +775,7 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "uuidEvent", onPointerDownEvent);
         }
 
-        public static void ReportOnPointerUpEvent(ACTION_BUTTON buttonId, string sceneId, string uuid, string entityId, string meshName, Ray ray, Vector3 point, Vector3 normal, float distance, bool isHitInfoValid)
+        public static void ReportOnPointerUpEvent(ACTION_BUTTON buttonId, string sceneId, string uuid, string entityId, string meshName, Ray ray, Vector3 point, Vector3 normal, float distance)
         {
             if (string.IsNullOrEmpty(uuid))
             {
@@ -897,6 +928,11 @@ namespace DCL.Interface
             public string newUnverifiedName;
         }
 
+        public static void RequestOwnProfileUpdate()
+        {
+            SendMessage("RequestOwnProfileUpdate");
+        }
+
         public static void SendSaveAvatar(AvatarModel avatar, Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot, bool isSignUpFlow = false)
         {
             var payload = new SaveAvatarPayload()
@@ -923,12 +959,12 @@ namespace DCL.Interface
 
         public static void SendUserAcceptedCollectibles(string airdropId)
         {
-            SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload { id = airdropId });
+            SendMessage("UserAcceptedCollectibles", new UserAcceptedCollectiblesPayload {id = airdropId});
         }
 
         public static void SaveUserTutorialStep(int newTutorialStep)
         {
-            SendMessage("SaveUserTutorialStep", new TutorialStepPayload() { tutorialStep = newTutorialStep });
+            SendMessage("SaveUserTutorialStep", new TutorialStepPayload() {tutorialStep = newTutorialStep});
         }
 
         public static void SendPerformanceReport(string encodedFrameTimesInMS, bool usingFPSCap)
@@ -977,7 +1013,7 @@ namespace DCL.Interface
 
         public static void OpenURL(string url)
         {
-            SendMessage("OpenWebURL", new OpenURLPayload { url = url });
+            SendMessage("OpenWebURL", new OpenURLPayload {url = url});
         }
 
         public static void SendReportScene(string sceneID)
@@ -1154,6 +1190,44 @@ namespace DCL.Interface
         {
             closeUserAvatarPayload.isSignUpFlow = isSignUpFlow;
             SendMessage("CloseUserAvatar", closeUserAvatarPayload);
+        }
+
+        public static void KillPortableExperience(string portableExperienceId)
+        {
+            killPortableExperiencePayload.portableExperienceId = portableExperienceId;
+            SendMessage("KillPortableExperience", killPortableExperiencePayload);
+        }
+
+        public static void RequestWearables(
+            string ownedByUser,
+            string[] wearableIds,
+            string[] collectionIds,
+            string context)
+        {
+            requestWearablesPayload.filters = new WearablesRequestFiltersPayload
+            {
+                ownedByUser = ownedByUser,
+                wearableIds = wearableIds,
+                collectionIds = collectionIds
+            };
+
+            requestWearablesPayload.context = context;
+
+            SendMessage("RequestWearables", requestWearablesPayload);
+        }
+
+        public static void SearchENSOwner(string name, int maxResults)
+        {
+            searchEnsOwnerPayload.name = name;
+            searchEnsOwnerPayload.maxResults = maxResults;
+
+            SendMessage("SearchENSOwner", searchEnsOwnerPayload);
+        }
+
+        public static void RequestUserProfile(string userId)
+        {
+            stringPayload.value = userId;
+            SendMessage("RequestUserProfile", stringPayload);
         }
     }
 }

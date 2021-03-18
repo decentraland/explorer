@@ -8,7 +8,7 @@ global.enableWeb3 = window.enableWeb3
 
 import { initializeUnity } from 'unity-interface/initializer'
 import { loadPreviewScene } from 'unity-interface/dcl'
-import { DEBUG_WS_MESSAGES, FORCE_RENDERING_STYLE } from 'config'
+import { DEBUG_WS_MESSAGES, FORCE_RENDERING_STYLE, QUESTS_ENABLED } from 'config'
 import defaultLogger from 'shared/logger'
 import { ILand, HUDElementID } from 'shared/types'
 import { pickWorldSpawnpoint } from 'shared/world/positionThings'
@@ -88,11 +88,14 @@ initializeUnity(container)
     const i = (await ret.instancedJS).unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.AIRDROPPING, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: QUESTS_ENABLED, visible: true })
 
     global.globalStore.dispatch(signalRendererInitialized())
 

@@ -45,12 +45,30 @@ export namespace parcelLimits {
   export const minParcelX = -150
   export const minParcelZ = -150
 
-  export const minLandCoordinateX = -150
-  export const minLandCoordinateY = -150
-  export const maxLandCoordinateX = 150
-  export const maxLandCoordinateY = 150
-}
+  export const validWorldRanges = [
+    {
+      x: { from: -150, to: 150 },
+      y: { from: -150, to: 150 }
+    },
+    {
+      x: { from: 62, to: 163 },
+      y: { from: 151, to: 158 }
+    },
+    {
+      x: { from: 151, to: 162 },
+      y: { from: 144, to: 150 }
+    },
+    {
+      x: { from: 151, to: 163 },
+      y: { from: 59, to: 143 }
+    }
+  ]
 
+  export const descriptiveValidWorldRanges = validWorldRanges
+    .map(range => `(X from ${range.x.from} to ${range.x.to}, and Y from ${range.y.from} to ${range.y.to})`)
+    .join(' or ')
+
+}
 export namespace playerConfigurations {
   export const gravity = -0.2
   export const height = 1.6
@@ -93,19 +111,16 @@ export const USE_LOCAL_COMMS = location.search.includes('LOCAL_COMMS') || PREVIE
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
 export const COMMS_PROFILE_TIMEOUT = 10000
 
-export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
 export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
-export const FETCH_META_CONTENT_SERVICE = qs.FETCH_META_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
-export const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || 'content-assets-as-bundle.decentraland.org'
 export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
 export const REALM = qs.realm
 
 export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
 
-export const VOICE_CHAT_ENABLED_FLAG = location.search.includes('VOICE_CHAT_ENABLED')
+export const ENABLE_BUILDER_IN_WORLD = location.search.includes('ENABLE_BUILDER_IN_WORLD')
 
 export const AUTO_CHANGE_REALM = location.search.includes('AUTO_CHANGE_REALM')
 
@@ -124,11 +139,9 @@ export const DEBUG_SCENE_LOG = DEBUG || location.search.includes('DEBUG_SCENE_LO
 
 export const INIT_PRE_LOAD = location.search.includes('INIT_PRE_LOAD')
 
-export const AWS = location.search.includes('AWS')
 export const NO_MOTD = location.search.includes('NO_MOTD')
 export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
 
-export const DISABLE_AUTH = location.search.includes('DISABLE_AUTH') || DEBUG
 export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
 export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
 export const SHOW_FPS_COUNTER = location.search.includes('SHOW_FPS_COUNTER') || DEBUG
@@ -143,7 +156,11 @@ export const FORCE_RENDERING_STYLE = qs.FORCE_RENDERING_STYLE
 
 export const TEST_WEARABLES_OVERRIDE = location.search.includes('TEST_WEARABLES')
 
+export const QUESTS_ENABLED = location.search.includes('QUESTS_ENABLED')
+
 const META_CONFIG_URL = qs.META_CONFIG_URL
+
+const QUESTS_SERVER_URL = qs.QUESTS_SERVER_URL ?? 'https://quests-api.decentraland.io'
 
 export namespace commConfigurations {
   export const debug = true
@@ -277,12 +294,16 @@ export function getServerConfigurations() {
   const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
+  const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
+  const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
 
   return {
     contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
     wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
+    explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
+    questsUrl: QUESTS_SERVER_URL,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // ** TODO - unused, remove - moliva - 03/07/2020

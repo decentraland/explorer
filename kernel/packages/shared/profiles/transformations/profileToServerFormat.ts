@@ -1,20 +1,18 @@
 import { analizeColorPart, stripAlpha } from './analizeColorPart'
 import { isValidBodyShape } from './isValidBodyShape'
-import { Profile } from '../types'
+import { Profile, Snapshots } from '../types'
+import { WearableId } from 'decentraland-ecs/src'
 
-export function ensureServerFormat(profile: Profile) {
+export function ensureServerFormat(profile: Profile): ServerFormatProfile {
   const { avatar } = profile
   const eyes = stripAlpha(analizeColorPart(avatar, 'eyeColor', 'eyes'))
   const hair = stripAlpha(analizeColorPart(avatar, 'hairColor', 'hair'))
   const skin = stripAlpha(analizeColorPart(avatar, 'skin', 'skinColor'))
-  if (
+  const invalidWearables =
     !avatar.wearables ||
     !Array.isArray(avatar.wearables) ||
-    !avatar.wearables.reduce(
-      (prev: boolean, next: any) => prev && typeof next === 'string' && next.startsWith('dcl://'),
-      true
-    )
-  ) {
+    !avatar.wearables.reduce((prev: boolean, next: any) => prev && typeof next === 'string', true)
+  if (invalidWearables) {
     throw new Error('Invalid Wearables array! Received: ' + JSON.stringify(avatar))
   }
   if (!avatar.snapshots || !avatar.snapshots.face || !avatar.snapshots.body) {
@@ -23,6 +21,7 @@ export function ensureServerFormat(profile: Profile) {
   if (!avatar.bodyShape || !isValidBodyShape(avatar.bodyShape)) {
     throw new Error('Invalid BodyShape! Received: ' + JSON.stringify(avatar))
   }
+
   return {
     ...profile,
     avatar: {
@@ -40,4 +39,23 @@ export function buildServerMetadata(profile: Profile) {
   const newProfile = ensureServerFormat(profile)
   const metadata = { avatars: [newProfile] }
   return metadata
+}
+
+type ServerFormatProfile = Omit<Profile, 'avatar'> & {
+  avatar: ServerProfileAvatar
+}
+
+type Color3 = {
+  r: number
+  g: number
+  b: number
+}
+
+type ServerProfileAvatar = {
+  bodyShape: WearableId
+  eyes: { color: Color3 }
+  hair: { color: Color3 }
+  skin: { color: Color3 }
+  wearables: WearableId[]
+  snapshots: Snapshots
 }

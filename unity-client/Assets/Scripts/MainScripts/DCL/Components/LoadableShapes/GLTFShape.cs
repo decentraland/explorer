@@ -7,13 +7,13 @@ namespace DCL.Components
     {
         public override string componentName => "GLTF Shape";
 
-        public GLTFShape(ParcelScene scene) : base(scene)
+        public GLTFShape()
         {
         }
 
         public override int GetClassId()
         {
-            return (int)CLASS_ID.GLTF_SHAPE;
+            return (int) CLASS_ID.GLTF_SHAPE;
         }
 
         public override string ToString()

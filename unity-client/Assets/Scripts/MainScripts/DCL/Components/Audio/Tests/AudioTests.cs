@@ -11,7 +11,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class AudioTests : TestsBase
+    public class AudioTests : IntegrationTestSuite_Legacy
     {
         protected override IEnumerator TearDown()
         {
@@ -106,9 +106,9 @@ namespace Tests
             yield return audioClip.routine;
 
             // 2. Check configured values
-            Assert.IsTrue(audioClip.model.loop);
-            Assert.IsFalse(audioClip.model.shouldTryToLoad);
-            Assert.AreEqual(0.8f, audioClip.model.volume);
+            Assert.IsTrue(audioClip.isLoop);
+            Assert.IsFalse(audioClip.shouldTryLoad);
+            Assert.AreEqual(0.8f, audioClip.volume);
 
             // 3. Update component with missing values
             componentModel = new DCLAudioClip.Model { };
@@ -118,9 +118,9 @@ namespace Tests
             yield return audioClip.routine;
 
             // 4. Check defaulted values
-            Assert.IsFalse(audioClip.model.loop);
-            Assert.IsTrue(audioClip.model.shouldTryToLoad);
-            Assert.AreEqual(1f, audioClip.model.volume);
+            Assert.IsFalse(audioClip.isLoop);
+            Assert.IsTrue(audioClip.shouldTryLoad);
+            Assert.AreEqual(1f, audioClip.volume);
         }
 
         [UnityTest]
@@ -133,10 +133,12 @@ namespace Tests
 
             yield return TestHelpers.CreateAudioSource(scene, entity.entityId, "1", true, loop: true);
 
-            yield return new WaitForSeconds((scene.GetSharedComponent("1") as DCLAudioClip).audioClip.length + 0.1f);
-
             DCLAudioSource dclAudioSource = entity.components.Values.FirstOrDefault(x => x is DCLAudioSource) as DCLAudioSource;
-            Assert.AreNotEqual(0, dclAudioSource.playTime);
+            float initTime = dclAudioSource.audioSource.clip.length - 0.05f;
+            dclAudioSource.audioSource.time = initTime;
+            yield return new WaitForSeconds(0.1f);
+
+            Assert.IsTrue(dclAudioSource.playTime > 0 && dclAudioSource.playTime < initTime);
         }
 
         [UnityTest]
@@ -149,9 +151,10 @@ namespace Tests
 
             yield return TestHelpers.CreateAudioSource(scene, entity.entityId, "1", true, loop: false);
 
-            yield return new WaitForSeconds((scene.GetSharedComponent("1") as DCLAudioClip).audioClip.length + 0.1f);
-
             DCLAudioSource dclAudioSource = entity.components.Values.FirstOrDefault(x => x is DCLAudioSource) as DCLAudioSource;
+            dclAudioSource.audioSource.time = dclAudioSource.audioSource.clip.length - 0.05f;
+            yield return new WaitForSeconds(0.1f);
+
             Assert.AreEqual(0, dclAudioSource.playTime);
         }
 
@@ -205,7 +208,7 @@ namespace Tests
             AudioSource unityAudioSource = dclAudioSource.GetComponentInChildren<AudioSource>();
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.model.volume);
+            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.volume);
         }
 
         [UnityTest]
@@ -257,7 +260,33 @@ namespace Tests
             CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
 
             // Check the volume
-            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.model.volume);
+            Assert.AreEqual(unityAudioSource.volume, dclAudioSource.volume);
+        }
+
+        [UnityTest]
+        public IEnumerator AudioStreamComponentCreation()
+        {
+            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            DCLAudioStream.Model model = new DCLAudioStream.Model()
+            {
+                url = "https://audio.dcl.guru/radio/8110/radio.mp3",
+                playing = false,
+                volume = 1f
+            };
+            DCLAudioStream component = TestHelpers.EntityComponentCreate<DCLAudioStream, DCLAudioStream.Model>(scene, entity,model );
+            
+            yield return component.routine;
+            Assert.IsFalse(component.GetModel().playing);
+
+            model.playing = true;
+            component.UpdateFromModel(model);
+            yield return component.routine;
+            Assert.IsTrue(component.GetModel().playing);
+            
+            model.playing = false;
+            component.UpdateFromModel(model);
+            yield return component.routine; 
+            Assert.IsFalse(component.GetModel().playing);
         }
 
         [Test]

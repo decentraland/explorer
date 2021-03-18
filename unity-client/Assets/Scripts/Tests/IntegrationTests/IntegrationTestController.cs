@@ -5,6 +5,7 @@ using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
 using System.Collections;
+using DCL.Controllers;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -15,7 +16,7 @@ public class IntegrationTestController : MonoBehaviour
 
     public IEnumerator Initialize()
     {
-        var sceneController = TestHelpers.InitializeSceneController();
+        var sceneController = Environment.i.world.sceneController;
         DCLCharacterController.i.gravity = 0;
         DCLCharacterController.i.Teleport(JsonConvert.SerializeObject(new
         {
@@ -43,7 +44,7 @@ public class IntegrationTestController : MonoBehaviour
 
         yield return new WaitForAllMessagesProcessed();
 
-        var scene = sceneController.loadedScenes[sceneName];
+        ParcelScene scene = Environment.i.world.state.GetScene(sceneName) as ParcelScene;
 
         //NOTE(Brian): This is making my eyes bleed.
         sceneController.SendSceneMessage(
@@ -78,14 +79,14 @@ public class IntegrationTestController : MonoBehaviour
         Assert.IsTrue(scene.entities[entityId].meshRootGameObject == null, "meshGameObject must be null");
 
         // 1st message
-        TestHelpers.CreateAndSetShape(scene, entityId, CLASS_ID.BOX_SHAPE, "{}");
+        TestHelpers.CreateAndSetShape(scene as ParcelScene, entityId, CLASS_ID.BOX_SHAPE, "{}");
 
         {
             scene.EntityComponentCreateOrUpdate(
                 entityId,
                 CLASS_ID_COMPONENT.TRANSFORM,
                 "{\"tag\":\"transform\",\"position\":{\"x\":0,\"y\":0,\"z\":0},\"rotation\":{\"x\":0,\"y\":0,\"z\":0,\"w\":1},\"scale\":{\"x\":1,\"y\":1,\"z\":1}}"
-                , out CleanableYieldInstruction routine);
+            );
         }
 
 
@@ -96,7 +97,7 @@ public class IntegrationTestController : MonoBehaviour
                 entityId,
                 CLASS_ID_COMPONENT.TRANSFORM,
                 "{\"tag\":\"transform\",\"position\":{\"x\":6,\"y\":0,\"z\":5},\"rotation\":{\"x\":0,\"y\":0.39134957508996265,\"z\":0,\"w\":0.9202420931897769},\"scale\":{\"x\":1,\"y\":1,\"z\":1}}"
-                , out CleanableYieldInstruction routine);
+            );
         }
 
         TestHelpers.InstantiateEntityWithTextShape(scene, new Vector3(10, 10, 10),
@@ -105,8 +106,7 @@ public class IntegrationTestController : MonoBehaviour
 
     public IEnumerator Verify()
     {
-        var sceneController = FindObjectOfType<SceneController>();
-        var scene = sceneController.loadedScenes[sceneName];
+        var scene = Environment.i.world.state.GetScene(sceneName) as ParcelScene;
         var cube = scene.entities[entityId];
 
         Assert.IsTrue(cube != null);

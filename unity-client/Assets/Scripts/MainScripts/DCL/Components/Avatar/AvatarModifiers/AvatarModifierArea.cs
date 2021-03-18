@@ -4,26 +4,31 @@ using DCL.Components;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using UnityEngine;
+using DCL.Models;
 
 public class AvatarModifierArea : BaseComponent
 {
     [Serializable]
-    public class Model
+    public class Model : BaseModel
     {
         // TODO: Change to TriggerArea and handle deserialization with subclasses
         public BoxTriggerArea area;
         public string[] modifiers;
-
+        
+        public override BaseModel GetDataFromJSON(string json)
+        {
+            return Utils.SafeFromJson<Model>(json);
+        }
     }
 
-    [HideInInspector]
-    public Model model = new Model();
+    private Model cachedModel = new Model();
 
     private HashSet<GameObject> avatarsInArea = new HashSet<GameObject>();
     private event Action<GameObject> OnAvatarEnter;
     private event Action<GameObject> OnAvatarExit;
-    private readonly Dictionary<string, AvatarModifier> modifiers;
+    internal readonly Dictionary<string, AvatarModifier> modifiers;
 
     public AvatarModifierArea()
     {
@@ -33,14 +38,10 @@ public class AvatarModifierArea : BaseComponent
             { "HIDE_AVATARS", new HideAvatarsModifier() },
             { "DISABLE_PASSPORTS", new DisablePassportModifier() }
         };
+        model = new Model();
     }
 
-    public override object GetModel()
-    {
-        return model;
-    }
-
-    public override IEnumerator ApplyChanges(string newJson)
+    public override IEnumerator ApplyChanges(BaseModel newModel)
     {
 
         // Clean up
@@ -48,30 +49,27 @@ public class AvatarModifierArea : BaseComponent
         OnAvatarEnter = null;
         OnAvatarExit = null;
 
-        // Update
-        model = SceneController.i.SafeFromJson<Model>(newJson);
-        if (model.modifiers != null)
-        {
-            // Add all listeners
-            foreach (string modifierKey in model.modifiers)
-            {
-                AvatarModifier modifier = this.modifiers[modifierKey];
-                OnAvatarEnter += modifier.ApplyModifier;
-                OnAvatarExit += modifier.RemoveModifier;
-            }
-        }
+        ApplyCurrentModel();
 
-        yield break;
+        return null;
     }
 
     private void OnDestroy()
     {
-        RemoveAllModifiers();
+        var toRemove = new HashSet<GameObject>();
+        if(avatarsInArea != null)
+            toRemove.UnionWith(avatarsInArea);
+
+        var currentInArea = DetectAllAvatarsInArea();
+        if(currentInArea != null)
+            toRemove.UnionWith(currentInArea);
+
+        RemoveAllModifiers(toRemove);
     }
 
     private void Update()
     {
-        if (model?.area == null)
+        if (cachedModel?.area == null)
         {
             return;
         }
@@ -122,17 +120,21 @@ public class AvatarModifierArea : BaseComponent
 
         Vector3 center = entity.gameObject.transform.position;
         Quaternion rotation = entity.gameObject.transform.rotation;
-        return model.area.DetectAvatars(center, rotation);
+        return cachedModel.area?.DetectAvatars(center, rotation);
     }
 
     private void RemoveAllModifiers()
     {
-        if (model?.area == null)
+        RemoveAllModifiers(DetectAllAvatarsInArea());
+    }
+
+    private void RemoveAllModifiers(HashSet<GameObject> avatars)
+    {
+        if (cachedModel?.area == null)
         {
             return;
         }
 
-        HashSet<GameObject> avatars = DetectAllAvatarsInArea();
         if (avatars != null)
         {
             foreach (GameObject avatar in avatars)
@@ -142,4 +144,25 @@ public class AvatarModifierArea : BaseComponent
         }
     }
 
+    private void ApplyCurrentModel()
+    {
+        cachedModel = (Model)this.model;
+        if (cachedModel.modifiers != null)
+        {
+            // Add all listeners
+            foreach (string modifierKey in cachedModel.modifiers)
+            {
+                if (!modifiers.TryGetValue(modifierKey, out AvatarModifier modifier))
+                    continue;
+
+                OnAvatarEnter += modifier.ApplyModifier;
+                OnAvatarExit += modifier.RemoveModifier;
+            }
+        }
+    }
+
+    public override int GetClassId()
+    {
+        return (int) CLASS_ID_COMPONENT.AVATAR_MODIFIER_AREA;
+    }
 }

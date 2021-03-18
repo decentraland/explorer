@@ -43,9 +43,8 @@ export type Realm = {
 export type DaoState = {
   initialized: boolean
   candidatesFetched: boolean
-  profileServer: string
   fetchContentServer: string
-  fetchMetaContentServer: string
+  catalystServer: string
   updateContentServer: string
   commsServer: string
   resizeService: string
@@ -62,7 +61,14 @@ export type RootDaoState = {
   dao: DaoState
 }
 
-export type CommsState = 'initial' | 'connecting' | 'connected' | 'error' | 'realm-full' | 'reconnection-error'
+export type CommsState =
+  | 'initial'
+  | 'connecting'
+  | 'connected'
+  | 'error'
+  | 'realm-full'
+  | 'reconnection-error'
+  | 'id-taken'
 
 export type CommsStatus = {
   status: CommsState

@@ -14,9 +14,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public event Action<string, long> OnAvatarExpressionSet;
 
     public string userId => model.userId;
+    public string ethAddress => model.ethAddress;
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
+    public UserProfileModel.ParcelsWithAccess[] parcelsWithAccess => model.parcelsWithAccess;
     public List<string> blocked => model.blocked != null ? model.blocked : new List<string>();
     public List<string> muted => model.muted ?? new List<string>();
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
@@ -35,7 +37,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        inventory.Clear();
         faceSnapshot = null;
 
         if (newModel == null)
@@ -45,6 +46,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         }
 
         model.userId = newModel.userId;
+        model.ethAddress = newModel.ethAddress;
+        model.parcelsWithAccess = newModel.parcelsWithAccess;
         model.tutorialStep = newModel.tutorialStep;
         model.hasClaimedName = newModel.hasClaimedName;
         model.name = newModel.name;
@@ -59,7 +62,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
         if (model.inventory != null)
         {
-            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+            SetInventory(model.inventory);
         }
 
         if (downloadAssets && model.snapshots != null)
@@ -124,6 +127,12 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
         OnAvatarExpressionSet?.Invoke(id, timestamp);
+    }
+
+    public void SetInventory(string[] inventoryIds)
+    {
+        inventory.Clear();
+        inventory = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
     }
 
     public string[] GetInventoryItemsIds()

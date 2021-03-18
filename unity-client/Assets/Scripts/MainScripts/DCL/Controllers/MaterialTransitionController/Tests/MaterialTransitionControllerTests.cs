@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class MaterialTransitionControllerTests : TestsBase
+    public class MaterialTransitionControllerTests : IntegrationTestSuite_Legacy
     {
         [UnityTest]
         [Category("Explicit")]
@@ -122,7 +122,7 @@ namespace Tests
                         Assert.IsTrue(c.placeholder == null,
                             "placeholder must be null because we're not using holograms with parametric shapes.");
 
-                        yield return new WaitForSeconds(2f);
+                        yield return new WaitForSeconds(0.5f);
 
                         Assert.IsTrue(c == null, "MaterialTransitionController should be destroyed by now!");
 

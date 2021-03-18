@@ -8,10 +8,12 @@ namespace DCL.Rendering
     [System.Serializable]
     public class CullingControllerSettings
     {
-        [NonSerialized] public float maxTimeBudget = 4 / 1000f;
+        [NonSerialized]
+        public float maxTimeBudget = 4 / 1000f;
+
         public bool enableObjectCulling = true;
         public bool enableShadowCulling = true;
-        public bool enableAnimationCulling = true;
+        public bool enableAnimationCulling = false;
 
         public float enableAnimationCullingDistance = 7.5f;
 
@@ -25,7 +27,8 @@ namespace DCL.Rendering
                 emissiveSizeThreshold = 2.5f,
                 opaqueSizeThreshold = 6,
                 shadowRendererSizeThreshold = 10,
-                shadowMapProjectionSizeThreshold = 4
+                shadowMapProjectionSizeThreshold = 4,
+                maxShadowDistanceForAvatars = 20,
             };
 
         public CullingControllerProfile skinnedRendererProfile =
@@ -37,6 +40,7 @@ namespace DCL.Rendering
                 opaqueSizeThreshold = 6,
                 shadowRendererSizeThreshold = 5,
                 shadowMapProjectionSizeThreshold = 4,
+                maxShadowDistanceForAvatars = 20,
             };
 
         /// <summary>

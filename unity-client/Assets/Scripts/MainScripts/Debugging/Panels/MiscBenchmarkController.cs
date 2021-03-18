@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using DCL.Controllers;
 using UnityEngine;
 
 namespace DCL
@@ -82,6 +83,8 @@ namespace DCL
             statsPanel.SetCellText(0, (int) Rows.MESSAGE_BUSES, MESSAGES_BUSES_TEXT);
         }
 
+        private Coroutine updateCoroutine;
+
         public void StartProfiling()
         {
             if (enabled)
@@ -94,7 +97,7 @@ namespace DCL
                 Init();
             }
 
-            SceneController.i.StartCoroutine(RefreshProfilingData());
+            updateCoroutine = CoroutineStarter.Start(RefreshProfilingData());
             enabled = true;
         }
 
@@ -105,7 +108,7 @@ namespace DCL
                 return;
             }
 
-            SceneController.i.StopCoroutine(RefreshProfilingData());
+            CoroutineStarter.Stop(updateCoroutine);
             enabled = false;
         }
 
@@ -113,7 +116,9 @@ namespace DCL
 
         void Update()
         {
-            int messagesProcessedLastFrame = lastPendingMessages - Environment.i.messagingControllersManager.pendingMessagesCount;
+            MessagingControllersManager messagingManager = Environment.i.messaging.manager as MessagingControllersManager;
+
+            int messagesProcessedLastFrame = lastPendingMessages - messagingManager.pendingMessagesCount;
 
             if (messagesProcessedLastFrame > 0)
             {
@@ -122,7 +127,7 @@ namespace DCL
                 statsPanel.SetCellText(1, (int) Rows.MESSAGES_PER_SECOND_REAL, (mps / sampleCount).ToString(CultureInfo.InvariantCulture));
             }
 
-            lastPendingMessages = Environment.i.messagingControllersManager.pendingMessagesCount;
+            lastPendingMessages = messagingManager.pendingMessagesCount;
         }
 
 
@@ -137,24 +142,27 @@ namespace DCL
                 int materialCount = 0;
                 int meshesCount = 0;
 
-                foreach (var v in SceneController.i.loadedScenes)
+                var loadedScenes = Environment.i.world.state.loadedScenes;
+
+                foreach (var v in loadedScenes)
                 {
-                    if (v.Value.metricsController != null)
+                    ParcelScene scene = v.Value as ParcelScene;
+                    if (scene.metricsController != null)
                     {
-                        meshesCount += v.Value.metricsController.GetModel().meshes;
-                        materialCount += v.Value.metricsController.GetModel().materials;
+                        meshesCount += scene.metricsController.GetModel().meshes;
+                        materialCount += scene.metricsController.GetModel().materials;
                     }
 
-                    sharedCount += v.Value.disposableComponents.Count;
+                    sharedCount += scene.disposableComponents.Count;
 
-                    foreach (var e in v.Value.disposableComponents)
+                    foreach (var e in scene.disposableComponents)
                     {
-                        sharedAttachCount += e.Value.attachedEntities.Count;
+                        sharedAttachCount += e.Value.GetAttachedEntities().Count;
                     }
 
-                    entityCount += v.Value.entities.Count;
+                    entityCount += scene.entities.Count;
 
-                    foreach (var e in v.Value.entities)
+                    foreach (var e in scene.entities)
                     {
                         componentCount += e.Value.components.Count;
                     }
@@ -173,7 +181,9 @@ namespace DCL
                 Dictionary<string, int> pendingMessagesCount = new Dictionary<string, int>();
                 Dictionary<string, int> messagesReplaced = new Dictionary<string, int>();
 
-                using (var controllersIter = Environment.i.messagingControllersManager.messagingControllers.GetEnumerator())
+                MessagingControllersManager messagingManager = Environment.i.messaging.manager as MessagingControllersManager;
+
+                using (var controllersIter = messagingManager.messagingControllers.GetEnumerator())
                 {
                     while (controllersIter.MoveNext())
                     {

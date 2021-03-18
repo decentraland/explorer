@@ -6,47 +6,66 @@ using DCL.Helpers;
 using System;
 using DCL;
 using UnityEngine.EventSystems;
+using DCL.Configuration;
 
-public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandler,IDragHandler
+public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public RawImage thumbnailImg;
-    public Image favImg;
+    public Image backgroundImg;
     public CanvasGroup canvasGroup;
+    public GameObject lockedGO;
+
+    [Header("Smart Items")]
+    public GameObject smartItemGO;
+    public Color smartItemColor, normalColor;
+
+    [Header("Favorites")]
     public Color offFavoriteColor, onFavoriteColor;
+    public Image favImg;
 
-    public System.Action<SceneObject> OnSceneObjectClicked;
-    public System.Action<SceneObject, CatalogItemAdapter> OnSceneObjectFavorite;
-    public System.Action<SceneObject, CatalogItemAdapter,BaseEventData> OnAdapterStartDrag;
+    public System.Action<CatalogItem> OnCatalogItemClicked;
+    public System.Action<CatalogItem, CatalogItemAdapter> OnCatalogItemFavorite;
+    public System.Action<CatalogItem, CatalogItemAdapter, BaseEventData> OnAdapterStartDrag;
     public System.Action<PointerEventData> OnAdapterDrag, OnAdapterEndDrag;
+    public System.Action<PointerEventData, CatalogItemAdapter> OnPointerEnterInAdapter;
+    public System.Action<PointerEventData, CatalogItemAdapter> OnPointerExitInAdapter;
 
-    SceneObject sceneObject;
+    private CatalogItem catalogItem;
 
-    string loadedThumbnailURL;
-    AssetPromise_Texture loadedThumbnailPromise;
+    private string loadedThumbnailURL;
+    private AssetPromise_Texture loadedThumbnailPromise;
 
+    private const float ADAPTER_DRAGGING_SIZE_SCALE = 0.75f;
 
-    public SceneObject GetContent()
+    public CatalogItem GetContent() { return catalogItem; }
+
+    public void SetContent(CatalogItem catalogItem)
     {
-        return sceneObject;
-    }
+        this.catalogItem = catalogItem;
 
-    public void SetContent(SceneObject sceneObject)
-    {
-        this.sceneObject = sceneObject;
+        if (favImg != null)
+            favImg.color = catalogItem.IsFavorite() ? onFavoriteColor : offFavoriteColor;
 
-        if(sceneObject.isFavorite) favImg.color = onFavoriteColor;
-        else favImg.color = offFavoriteColor;
+        if (backgroundImg != null)
+            backgroundImg.color = catalogItem.IsSmartItem() ? smartItemColor : normalColor;
+        smartItemGO.SetActive(catalogItem.IsSmartItem());
+
         GetThumbnail();
+
+        lockedGO.gameObject.SetActive(false);
+
+        if (catalogItem.IsNFT() && BuilderInWorldNFTController.i.IsNFTInUse(catalogItem.id))
+            lockedGO.gameObject.SetActive(true);
     }
 
     private void GetThumbnail()
     {
-        var url = sceneObject?.ComposeThumbnailUrl();
+        var url = catalogItem?.GetThumbnailUrl();
 
         if (url == loadedThumbnailURL)
             return;
 
-        if (sceneObject == null || string.IsNullOrEmpty(url))
+        if (catalogItem == null || string.IsNullOrEmpty(url))
             return;
 
         string newLoadedThumbnailURL = url;
@@ -69,8 +88,9 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         RectTransform newAdapterRT = GetComponent<RectTransform>();
         canvasGroup.blocksRaycasts = false;
         canvasGroup.alpha = 0.6f;
-        newAdapterRT.sizeDelta = sizeDelta* 0.75f;
+        newAdapterRT.sizeDelta = sizeDelta * ADAPTER_DRAGGING_SIZE_SCALE;
     }
+
     public void SetFavorite(bool isOn)
     {
         if (isOn)
@@ -79,20 +99,14 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
             favImg.color = offFavoriteColor;
     }
 
-    public void AdapterStartDragging(BaseEventData baseEventData)
-    {
-        OnAdapterStartDrag?.Invoke(sceneObject,this, baseEventData);
-    }
+    public void AdapterStartDragging(BaseEventData baseEventData) { OnAdapterStartDrag?.Invoke(catalogItem, this, baseEventData); }
 
-    public void FavoriteIconClicked()
-    {
-        
-        OnSceneObjectFavorite?.Invoke(sceneObject, this);
-    }
+    public void FavoriteIconClicked() { OnCatalogItemFavorite?.Invoke(catalogItem, this); }
 
     public void SceneObjectClicked()
     {
-        OnSceneObjectClicked?.Invoke(sceneObject);
+        if (!lockedGO.gameObject.activeSelf)
+            OnCatalogItemClicked?.Invoke(catalogItem);
     }
 
     public void SetThumbnail(Asset_Texture texture)
@@ -105,19 +119,13 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler,IEndDragHandl
         }
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        AdapterStartDragging(eventData);
-    }
+    public void OnBeginDrag(PointerEventData eventData) { AdapterStartDragging(eventData); }
 
-    public void OnDrag(PointerEventData eventData)
-    {
-        OnAdapterDrag?.Invoke(eventData);
-    }
+    public void OnDrag(PointerEventData eventData) { OnAdapterDrag?.Invoke(eventData); }
 
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        
-        OnAdapterEndDrag?.Invoke(eventData);
-    }
+    public void OnEndDrag(PointerEventData eventData) { OnAdapterEndDrag?.Invoke(eventData); }
+
+    public void OnPointerEnter(PointerEventData eventData) { OnPointerEnterInAdapter?.Invoke(eventData, this); }
+
+    public void OnPointerExit(PointerEventData eventData) { OnPointerExitInAdapter?.Invoke(eventData, this); }
 }

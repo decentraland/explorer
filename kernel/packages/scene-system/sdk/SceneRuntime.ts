@@ -165,10 +165,10 @@ export abstract class SceneRuntime extends Script {
       const mappingName = bootstrapData.main
       const mapping = bootstrapData.mappings.find(($) => $.file === mappingName)
       const url = resolveMapping(mapping && mapping.hash, mappingName, bootstrapData.baseUrl)
-      const html = await fetch(url)
+      const codeRequest = await fetch(url)
 
-      if (html.ok) {
-        return [bootstrapData, await html.text()] as const
+      if (codeRequest.ok) {
+        return [bootstrapData, await codeRequest.text()] as const
       } else {
         throw new Error(`SDK: Error while loading ${url} (${mappingName} -> ${mapping})`)
       }
@@ -231,7 +231,7 @@ export abstract class SceneRuntime extends Script {
       const fullData = sceneData.data as LoadableParcelScene
       const sceneId = fullData.id
 
-      let loadingModules: Record<string, IFuture<void>> = {}
+      const loadingModules: Record<string, IFuture<void>> = {}
 
       const dcl: DecentralandInterface = {
         DEBUG: true,
@@ -426,7 +426,8 @@ export abstract class SceneRuntime extends Script {
         },
 
         loadModule: async (_moduleName) => {
-          loadingModules[_moduleName] = future()
+          const loadingModule: IFuture<void> = future()
+          loadingModules[_moduleName] = loadingModule
 
           try {
             const moduleToLoad = _moduleName.replace(/^@decentraland\//, '')
@@ -452,7 +453,7 @@ export abstract class SceneRuntime extends Script {
               methods: methods.map((name) => ({ name }))
             }
           } finally {
-            loadingModules[_moduleName].resolve()
+            loadingModule.resolve()
           }
         },
         callRpc: async (rpcHandle: string, methodName: string, args: any[]) => {
@@ -519,8 +520,6 @@ export abstract class SceneRuntime extends Script {
             `Timed out loading modules!. The scene ${sceneId} may not work correctly. Modules not loaded: ${modulesNotLoaded}`
           )
         }
-
-        loadingModules = {}
 
         this.events.push(this.initMessagesFinished())
 

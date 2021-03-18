@@ -51,19 +51,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avatarName: {fileID: 7565885611704955074}
   avatarRenderer: {fileID: 7373291436495039860}
+  avatarCollider: {fileID: 7755590202629118220}
   avatarMovementController: {fileID: 122622683908687435}
   onPointerDown: {fileID: 3865137627712764486}
-  model:
-    id: 
-    name: 
-    bodyShape: 
-    skinColor: {r: 0, g: 0, b: 0, a: 0}
-    hairColor: {r: 0, g: 0, b: 0, a: 0}
-    eyeColor: {r: 0, g: 0, b: 0, a: 0}
-    wearables: []
-    expressionTriggerId: 
-    expressionTriggerTimestamp: -1
-    talking: 0
   everythingIsLoaded: 0
 --- !u!114 &122622683908687435
 MonoBehaviour:
@@ -141,6 +131,9 @@ MonoBehaviour:
   eyeMaterial: {fileID: 2100000, guid: fcfa021e0982c0840aaefe7411340f7f, type: 2}
   eyebrowMaterial: {fileID: 2100000, guid: db9e974bee285614b8ea2d8832d1a563, type: 2}
   mouthMaterial: {fileID: 2100000, guid: aa8f029bd537edb44b72b4737ca9b81d, type: 2}
+  useFx: 1
+  fxSpawnPrefab: {fileID: 6770550120539757041, guid: 672039325d1b74c9aab6155bf97154bd,
+    type: 3}
 --- !u!114 &6790643881566083082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,133 +163,10 @@ MonoBehaviour:
     isGrounded: 1
     expressionTriggerId: 
     expressionTriggerTimestamp: 0
+    deltaTime: 0
   target: {fileID: 2842120016485600253}
-  walkBlendtreeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0.00044631958
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.070767246
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.67525685
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.9299866
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  runBlendtreeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.67064095
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.93293583
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  idleBlendtreeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.08866989
-      value: 0
-      inSlope: -0.029007528
-      outSlope: 0
-      tangentMode: 65
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.09491654
-    - serializedVersion: 3
-      time: 0.99554443
-      value: 0
-      inSlope: -0
-      outSlope: 0
-      tangentMode: 5
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  runMinSpeed: 6
+  walkMinSpeed: 0.1
 --- !u!1 &5854254909640412467
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,9 +211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c895124a3dad9421bbeaf89ace0a198c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model:
-    type: onPointerDown
-    uuid: pointerDown
   collider: {fileID: 1314168606903342224}
 --- !u!65 &1314168606903342224
 BoxCollider:
@@ -374,7 +241,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6301578636949877838
 Transform:
   m_ObjectHideFlags: 0

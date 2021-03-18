@@ -1,5 +1,6 @@
 ﻿using DCL;
 using DCL.Components;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
@@ -8,13 +9,13 @@ public class EntityMaterialUpdateTestController : MonoBehaviour
 {
     void Start()
     {
-        var sceneController = FindObjectOfType<SceneController>();
+        var sceneController = Environment.i.world.sceneController;
         var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
 
         sceneController.UnloadAllScenes();
         sceneController.LoadParcelScenes(scenesToLoad);
 
-        var scene = sceneController.loadedScenes["0,0"];
+        var scene = Environment.i.world.state.loadedScenes["0,0"] as ParcelScene;
 
         DCLTexture dclAtlasTexture = TestHelpers.CreateDCLTexture(
             scene,

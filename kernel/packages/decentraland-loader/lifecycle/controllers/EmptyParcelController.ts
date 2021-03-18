@@ -11,7 +11,7 @@ export class EmptyParcelController {
   constructor(
     public options: {
       contentServer: string
-      metaContentServer: string
+      catalystServer: string
       metaContentService: string
       contentServerBundles: string
       worldConfig: WorldConfig
@@ -34,7 +34,7 @@ export class EmptyParcelController {
       return
     }
 
-    this.emptyScenesPromise = jsonFetch(this.baseUrl + 'index.json').then((scenes) => {
+    this.emptyScenesPromise = jsonFetch(this.baseUrl + 'mappings.json').then((scenes) => {
       this.emptySceneNames = Object.keys(scenes)
       this.emptyScenes = scenes
       return this.emptyScenes

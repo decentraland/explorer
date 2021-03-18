@@ -1,4 +1,4 @@
-using DCL.Controllers;
+﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
@@ -8,7 +8,6 @@ namespace DCL.Components
 {
     public abstract class ParametrizedShape<T> : BaseShape where T : BaseShape.Model, new()
     {
-        public T model = new T();
         bool visibilityDirty = false;
         bool collisionsDirty = false;
 
@@ -24,15 +23,26 @@ namespace DCL.Components
         }
 
         public Mesh currentMesh { get; protected set; }
+        private Model previousModel;
+        private Model cachedModel;
 
-        public ParametrizedShape(ParcelScene scene) : base(scene)
+        public ParametrizedShape()
         {
             OnAttach += OnShapeAttached;
             OnDetach += OnShapeDetached;
         }
 
-        void UpdateRenderer(DecentralandEntity entity)
+        public override void UpdateFromModel(BaseModel newModel)
         {
+            cachedModel = (Model) newModel;
+            base.UpdateFromModel(newModel);
+        }
+
+        void UpdateRenderer(DecentralandEntity entity, Model model = null)
+        {
+            if (model == null)
+                model = (T) this.model;
+
             if (visibilityDirty)
             {
                 ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
@@ -63,7 +73,7 @@ namespace DCL.Components
 
             MeshFilter meshFilter = entity.meshRootGameObject.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = entity.meshRootGameObject.AddComponent<MeshRenderer>();
-            entity.meshesInfo.renderers = new Renderer[] { meshRenderer };
+            entity.meshesInfo.renderers = new Renderer[] {meshRenderer};
             entity.meshesInfo.currentShape = this;
 
             meshFilter.sharedMesh = currentMesh;
@@ -106,18 +116,17 @@ namespace DCL.Components
             entity.meshesInfo.CleanReferences();
         }
 
-        public override object GetModel()
+        public override IEnumerator ApplyChanges(BaseModel newModelRaw)
         {
-            return model;
-        }
+            var newModel = (T) newModelRaw;
 
-        public override IEnumerator ApplyChanges(string newJson)
-        {
-            var newModel = SceneController.i.SafeFromJson<T>(newJson);
-            visibilityDirty = newModel.visible != model.visible;
-            collisionsDirty = newModel.withCollisions != model.withCollisions || newModel.isPointerBlocker != model.isPointerBlocker;
-            bool shouldGenerateMesh = ShouldGenerateNewMesh(newModel);
-            model = newModel;
+            if (previousModel != null)
+            {
+                visibilityDirty = newModel.visible != previousModel.visible;
+                collisionsDirty = newModel.withCollisions != previousModel.withCollisions || newModel.isPointerBlocker != previousModel.isPointerBlocker;
+            }
+
+            bool shouldGenerateMesh = ShouldGenerateNewMesh(previousModel);
 
             //NOTE(Brian): Only generate meshes here if they already are attached to something.
             //             Otherwise, the mesh will be created on the OnShapeAttached.
@@ -132,20 +141,20 @@ namespace DCL.Components
                     bool cachedCollisionDirty = collisionsDirty;
                     while (iterator.MoveNext())
                     {
-
                         //NOTE(Alex): Since UpdateRenderer updates the dirty flags as well we have to make sure every entity
                         //            gets updated accordingly to the original flags.
                         visibilityDirty = cachedVisibilityDirty;
                         collisionsDirty = cachedCollisionDirty;
 
                         var entity = iterator.Current;
-                        UpdateRenderer(entity);
+                        UpdateRenderer(entity, newModel);
 
                         entity.OnShapeUpdated?.Invoke(entity);
                     }
                 }
             }
 
+            previousModel = newModel;
             return null;
         }
 
@@ -158,12 +167,12 @@ namespace DCL.Components
 
         public override bool IsVisible()
         {
-            return model.visible;
+            return cachedModel.visible;
         }
 
         public override bool HasCollisions()
         {
-            return model.withCollisions;
+            return cachedModel.withCollisions;
         }
 
         protected virtual bool ShouldGenerateNewMesh(BaseShape.Model newModel)

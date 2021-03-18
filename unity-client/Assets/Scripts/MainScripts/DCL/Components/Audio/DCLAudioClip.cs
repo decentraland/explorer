@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DCL.Components
@@ -10,7 +11,7 @@ namespace DCL.Components
     public class DCLAudioClip : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string url;
             public bool loop = false;
@@ -18,10 +19,15 @@ namespace DCL.Components
 
             [Range(0f, 1f)]
             public double volume = 1f;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
-        public Model model;
         public AudioClip audioClip;
+        private bool isDisposed = false;
 
         public enum LoadState
         {
@@ -34,16 +40,22 @@ namespace DCL.Components
         public LoadState loadingState { get; private set; }
         public event Action<DCLAudioClip> OnLoadingFinished;
 
-        public DCLAudioClip(ParcelScene scene) : base(scene)
+        public DCLAudioClip()
         {
             model = new Model();
 
             loadingState = LoadState.IDLE;
         }
 
+        public double volume => ((Model) model).volume;
+
+        public bool isLoop => ((Model) model).loop;
+
+        public bool shouldTryLoad => ((Model) model).shouldTryToLoad;
+
         public override int GetClassId()
         {
-            return (int)CLASS_ID.AUDIO_CLIP;
+            return (int) CLASS_ID.AUDIO_CLIP;
         }
 
         void OnComplete(AudioClip clip)
@@ -80,7 +92,7 @@ namespace DCL.Components
                 && loadingState != LoadState.LOADING_COMPLETED)
             {
                 loadingState = LoadState.LOADING_IN_PROGRESS;
-
+                Model model = (Model) this.model;
                 if (scene.contentProvider.HasContentsUrl(model.url))
                 {
                     yield return Utils.FetchAudioClip(scene.contentProvider.GetContentsUrl(model.url),
@@ -98,16 +110,17 @@ namespace DCL.Components
                 loadingState = LoadState.IDLE;
             }
         }
-        public override object GetModel()
-        {
-            return model;
-        }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
+            //TODO: Analyze if we can catch this upstream and stop the IEnumerator
+            if (isDisposed)
+                yield break;
+
+            Model model = (Model) newModel;
 
             if (!string.IsNullOrEmpty(model.url))
             {
@@ -126,6 +139,7 @@ namespace DCL.Components
 
         public override void Dispose()
         {
+            isDisposed = true;
             Utils.SafeDestroy(audioClip);
             base.Dispose();
         }

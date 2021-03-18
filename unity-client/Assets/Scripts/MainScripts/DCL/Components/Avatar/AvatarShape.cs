@@ -4,6 +4,7 @@ using DCL.Interface;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 
@@ -17,12 +18,15 @@ namespace DCL
 
         public AvatarName avatarName;
         public AvatarRenderer avatarRenderer;
+        public Collider avatarCollider;
         public AvatarMovementController avatarMovementController;
-        [SerializeField] private AvatarOnPointerDown onPointerDown;
+
+        [SerializeField]
+        private AvatarOnPointerDown onPointerDown;
+
         private StringVariable currentPlayerInfoCardId;
 
-        private string currentSerialization = "";
-        public AvatarModel model = new AvatarModel();
+        private AvatarModel oldModel = new AvatarModel();
 
         public bool everythingIsLoaded;
 
@@ -32,12 +36,15 @@ namespace DCL
 
         private void Awake()
         {
+            model = new AvatarModel();
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
         }
 
         private void PlayerClicked()
         {
-            currentPlayerInfoCardId.Set(model?.id);
+            if (model == null)
+                return;
+            currentPlayerInfoCardId.Set(((AvatarModel) model).id);
         }
 
         public void OnDestroy()
@@ -48,23 +55,11 @@ namespace DCL
                 poolableObject.pool.RemoveFromPool(poolableObject);
         }
 
-        public override object GetModel()
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            return model;
-        }
-
-        public override IEnumerator ApplyChanges(string newJson)
-        {
-            //NOTE(Brian): Horrible fix to the double ApplyChanges call, as its breaking the needed logic.
-            if (newJson == "{}")
-                yield break;
-
-            if (currentSerialization == newJson)
-                yield break;
-
             DisablePassport();
 
-            model = SceneController.i.SafeFromJson<AvatarModel>(newJson);
+            var model = (AvatarModel) newModel;
 
             everythingIsLoaded = false;
 
@@ -77,15 +72,18 @@ namespace DCL
 
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
-            onPointerDown.Setup(scene, entity, new OnPointerDown.Model()
-            {
-                type = OnPointerDown.NAME,
-                button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
-                hoverText = "view profile"
-            });
+            onPointerDown.Initialize(
+                new OnPointerDown.Model()
+                {
+                    type = OnPointerDown.NAME,
+                    button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
+                    hoverText = "view profile"
+                },
+                entity
+            );
 
-            DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= PrecisionAdjust;
-            DCLCharacterController.i.characterPosition.OnPrecisionAdjust += PrecisionAdjust;
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
+            CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
 
             entity.OnTransformChange -= avatarMovementController.OnTransformChanged;
             entity.OnTransformChange += avatarMovementController.OnTransformChanged;
@@ -108,11 +106,13 @@ namespace DCL
 
             avatarUserInfo.userId = model.id;
             avatarUserInfo.userName = model.name;
-            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.position;
+            avatarUserInfo.worldPosition = lastAvatarPosition != null ? lastAvatarPosition.Value : entity.gameObject.transform.localPosition;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
 
             avatarName.SetName(model.name);
             avatarName.SetTalking(model.talking);
+
+            avatarCollider.gameObject.SetActive(true);
 
             everythingIsLoaded = true;
             OnAvatarShapeUpdated?.Invoke(entity, this);
@@ -122,25 +122,31 @@ namespace DCL
 
         public void DisablePassport()
         {
+            if (onPointerDown.collider == null)
+                return;
+
             onPointerDown.collider.enabled = false;
         }
 
         public void EnablePassport()
         {
+            if (onPointerDown.collider == null)
+                return;
+
             onPointerDown.collider.enabled = true;
         }
 
-        private void PrecisionAdjust(DCLCharacterPosition obj)
+        private void OnWorldReposition(Vector3 current, Vector3 previous)
         {
             avatarUserInfo.worldPosition = entity.gameObject.transform.position;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo);
         }
 
-
         private void OnEntityTransformChanged(DCLTransform.Model updatedModel)
         {
             lastAvatarPosition = updatedModel.position;
 
+            var model = (AvatarModel) this.model;
             avatarUserInfo.userId = model.id;
             avatarUserInfo.userName = model.name;
             avatarUserInfo.worldPosition = updatedModel.position;
@@ -153,7 +159,7 @@ namespace DCL
 
             everythingIsLoaded = false;
             initializedPosition = false;
-            currentSerialization = "";
+            oldModel = new AvatarModel();
             model = new AvatarModel();
             lastAvatarPosition = null;
             avatarName.SetName(String.Empty);
@@ -171,7 +177,7 @@ namespace DCL
             }
 
             onPointerDown.OnPointerDownReport -= PlayerClicked;
-            DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= PrecisionAdjust;
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
 
             if (entity != null)
             {
@@ -179,8 +185,15 @@ namespace DCL
                 entity = null;
             }
 
-            avatarUserInfo.userId = model.id;
+            var model = (AvatarModel) this.model;
+            if (model != null)
+                avatarUserInfo.userId = model.id;
             MinimapMetadataController.i?.UpdateMinimapUserInformation(avatarUserInfo, true);
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID_COMPONENT.AVATAR_SHAPE;
         }
     }
 }

@@ -12,7 +12,7 @@ public class VoxelController : MonoBehaviour
     public BuilderInWorldInputWrapper builderInputWrapper;
     public BuilderInWorldController buildModeController;
     public BuilderInWorldGodMode buildEditorMode;
-    public OutlinerController outlinerController;
+    public BIWOutlinerController outlinerController;
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public FreeCameraMovement freeCameraMovement;
     public ActionController actionController;
@@ -127,7 +127,7 @@ public class VoxelController : MonoBehaviour
                 builderInWorldEntityHandler.SelectEntity(voxelEntity);
             }
         }
-        buildModeController.SetOutlineCheckActive(true);
+        outlinerController.SetOutlineCheckActive(true);
         outlinerController.CancelAllOutlines();
     }
 
@@ -230,7 +230,7 @@ public class VoxelController : MonoBehaviour
             }
 
             BuildInWorldCompleteAction buildAction = new BuildInWorldCompleteAction();
-            buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATED;
+            buildAction.actionType = BuildInWorldCompleteAction.ActionType.CREATE;
 
             List<BuilderInWorldEntityAction> entityActionList = new List<BuilderInWorldEntityAction>();
 
@@ -254,7 +254,7 @@ public class VoxelController : MonoBehaviour
             }
             else
             {
-                buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATED);
+                buildAction.CreateActionType(entityActionList, BuildInWorldCompleteAction.ActionType.CREATE);
                 actionController.AddAction(buildAction);
             }
 

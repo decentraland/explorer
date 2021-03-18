@@ -12,6 +12,7 @@ public class MinimapHUDController : IHUD
 
     public MinimapHUDModel model { get; private set; } = new MinimapHUDModel();
     public RectTransform minimapTooltipReference { get => view.minimapTooltipReference; }
+    public RectTransform usersAroundTooltipReference { get => view.usersAroundTooltipReference; }
 
     public MinimapHUDController() : this(new MinimapHUDModel())
     {
@@ -34,12 +35,23 @@ public class MinimapHUDController : IHUD
 
         CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChange;
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange -= ChangeVisibilityForBuilderInWorld;
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
     }
 
     private void OnPlayerCoordsChange(Vector2Int current, Vector2Int previous)
     {
         UpdatePlayerPosition(current);
-        UpdateSceneName(MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y)?.name);
+
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
+        MinimapMetadata.MinimapSceneInfo sceneInfo = MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y);
+        UpdateSceneName(sceneInfo?.name);
+
+        // NOTE: in some cases playerCoords OnChange is triggered before kernel's message with the scene info arrives.
+        // so in that scenario we subscribe to MinimapMetadata event to wait for the scene info.
+        if (sceneInfo == null)
+        {
+            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnOnSceneInfoUpdated;
+        }
     }
 
     public void UpdateData(MinimapHUDModel model)
@@ -110,5 +122,14 @@ public class MinimapHUDController : IHUD
     {
         view.usersAroundListHudButton.gameObject.SetActive(true);
         controller.SetButtonView(view.usersAroundListHudButton);
+    }
+
+    private void OnOnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
+    {
+        if (sceneInfo.parcels.Contains(CommonScriptableObjects.playerCoords.Get()))
+        {
+            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
+            UpdateSceneName(sceneInfo.name);
+        }
     }
 }

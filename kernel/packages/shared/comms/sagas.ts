@@ -2,7 +2,7 @@ import { put, takeEvery, select, call, takeLatest } from 'redux-saga/effects'
 
 import { STATIC_WORLD } from 'config'
 
-import { establishingComms } from 'shared/loading/types'
+import { establishingComms, FATAL_ERROR } from 'shared/loading/types'
 import { USER_AUTHENTIFIED } from 'shared/session/actions'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { setWorldContext } from 'shared/protocol/actions'
@@ -15,6 +15,7 @@ import { createLogger } from 'shared/logger'
 
 import {
   connect,
+  disconnect,
   updatePeerVoicePlaying,
   updateVoiceCommunicatorMute,
   updateVoiceCommunicatorVolume,
@@ -38,6 +39,9 @@ import { unityInterface } from 'unity-interface/UnityInterface'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { userAuthentified } from 'shared/session'
+import { sceneObservable } from 'shared/world/sceneState'
+import { SceneFeatureToggles } from 'shared/types'
+import { isFeatureToggleEnabled } from 'shared/selectors'
 
 const DEBUG = false
 const logger = createLogger('comms: ')
@@ -57,7 +61,30 @@ export function* commsSaga() {
     yield takeEvery(VOICE_RECORDING_UPDATE, updatePlayerVoiceRecording)
     yield takeEvery(SET_VOICE_VOLUME, updateVoiceChatVolume)
     yield takeEvery(SET_VOICE_MUTE, updateVoiceChatMute)
+    yield listenToWhetherSceneSupportsVoiceChat()
   }
+
+  yield takeEvery(FATAL_ERROR, bringDownComms)
+}
+
+function* bringDownComms() {
+  disconnect()
+}
+
+function* listenToWhetherSceneSupportsVoiceChat() {
+  sceneObservable.add(({ previousScene, newScene }) => {
+    const previouslyEnabled = previousScene
+      ? isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, previousScene.sceneJsonData)
+      : undefined
+    const nowEnabled = isFeatureToggleEnabled(SceneFeatureToggles.VOICE_CHAT, newScene.sceneJsonData)
+    if (previouslyEnabled !== nowEnabled) {
+      unityInterface.SetVoiceChatEnabledByScene(nowEnabled)
+      if (!nowEnabled) {
+        // We want to stop any potential recordings when a user enters a new scene
+        updateVoiceRecordingStatus(false)
+      }
+    }
+  })
 }
 
 function* establishCommunications() {

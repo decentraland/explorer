@@ -1,5 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using DCL.Controllers;
+using DCL.Helpers;
+using DCL.Models;
 using TMPro;
 using UnityEngine;
 
@@ -8,7 +11,7 @@ namespace DCL.Components
     public class TextShape : BaseComponent
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public bool billboard;
 
@@ -51,42 +54,47 @@ namespace DCL.Components
             public float outlineWidth = 0f;
 
             public Color outlineColor = Color.white;
+            
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
-        public Model model;
         public TextMeshPro text;
         public RectTransform rectTransform;
+        private Model cachedModel;
+
+        private void Awake()
+        {
+            model = new Model();
+        }
 
         public void Update()
         {
-            if (model.billboard && Camera.main != null)
+            if (cachedModel.billboard && Camera.main != null)
             {
                 transform.forward = Camera.main.transform.forward;
             }
         }
 
-        public override object GetModel()
+        new public Model GetModel()
         {
-            return model;
+            return cachedModel;
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             if (rectTransform == null) yield break;
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
-
-            rectTransform.sizeDelta = new Vector2(model.width, model.height);
-
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
+            Model model = (Model) newModel;
+            cachedModel = model;
+            PrepareRectTransform();
 
             yield return ApplyModelChanges(scene, text, model);
         }
 
-        public static IEnumerator ApplyModelChanges(ParcelScene scene, TMP_Text text, Model model)
+        public static IEnumerator ApplyModelChanges(IParcelScene scene, TMP_Text text, Model model)
         {
             if (!string.IsNullOrEmpty(model.font))
             {
@@ -96,7 +104,7 @@ namespace DCL.Components
             text.text = model.value;
 
             text.color = new Color(model.color.r, model.color.g, model.color.b, model.visible ? model.opacity : 0);
-            text.fontSize = (int)model.fontSize;
+            text.fontSize = (int) model.fontSize;
             text.richText = true;
             text.overflowMode = TextOverflowModes.Overflow;
             text.enableAutoSizing = model.fontAutoSize;
@@ -104,10 +112,10 @@ namespace DCL.Components
             text.margin =
                 new Vector4
                 (
-                    (int)model.paddingLeft,
-                    (int)model.paddingTop,
-                    (int)model.paddingRight,
-                    (int)model.paddingBottom
+                    (int) model.paddingLeft,
+                    (int) model.paddingTop,
+                    (int) model.paddingRight,
+                    (int) model.paddingBottom
                 );
 
             text.alignment = GetAlignment(model.vTextAlign, model.hTextAlign);
@@ -187,6 +195,37 @@ namespace DCL.Components
                             return TextAlignmentOptions.Center;
                     }
             }
+        }
+
+        private void ApplyCurrentModel()
+        {
+            ApplyModelChanges(scene, text, cachedModel);
+        }
+
+        private void PrepareRectTransform()
+        {
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.offsetMax = Vector2.zero;
+
+            // NOTE: previously width and height weren't working (setting sizeDelta before anchors and offset result in
+            // sizeDelta being reset to 0,0)
+            // to fix textWrapping and avoid backwards compatibility issues as result of the size being properly set (like text alignment)
+            // we only set it if textWrapping is enabled.
+            if (cachedModel.textWrapping)
+            {
+                rectTransform.sizeDelta = new Vector2(cachedModel.width, cachedModel.height);
+            }
+            else
+            {
+                rectTransform.sizeDelta = Vector2.zero;
+            }
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.UI_TEXT_SHAPE;
         }
     }
 }

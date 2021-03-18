@@ -192,8 +192,8 @@ public class FriendsHUDController : IHUD
         //NOTE(Brian): If friends tab is already active, update and save this value instantly
         if (view.friendsList.gameObject.activeInHierarchy)
         {
-            PlayerPrefs.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, friendsController.friendCount);
-            PlayerPrefs.Save();
+            PlayerPrefsUtils.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, friendsController.friendCount);
+            PlayerPrefsUtils.Save();
         }
 
         var pendingFriendRequestsSO = NotificationScriptableObjects.pendingFriendRequests;
@@ -301,6 +301,8 @@ public class FriendsHUDController : IHUD
         }
         else
         {
+            OnFriendsClosed?.Invoke();
+
             AudioScriptableObjects.dialogClose.Play(true);
         }
     }

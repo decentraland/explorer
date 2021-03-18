@@ -10,68 +10,78 @@ using UnityEngine.Assertions;
 
 namespace DCL.Controllers
 {
-    public class ParcelScene : MonoBehaviour
+    public interface IParcelScene
+    {
+        Transform GetSceneTransform();
+        Dictionary<string, DecentralandEntity> entities { get; }
+        Dictionary<string, ISharedComponent> disposableComponents { get; }
+        T GetSharedComponent<T>() where T : class;
+        ISharedComponent GetSharedComponent(string id);
+        event System.Action<DecentralandEntity> OnEntityAdded;
+        event System.Action<DecentralandEntity> OnEntityRemoved;
+        LoadParcelScenesMessage.UnityParcelScene sceneData { get; }
+        ContentProvider contentProvider { get; }
+        bool isPersistent { get; }
+        bool isTestScene { get; }
+        bool IsInsideSceneBoundaries(DCLCharacterPosition charPosition);
+        bool IsInsideSceneBoundaries(Bounds objectBounds);
+        bool IsInsideSceneBoundaries(Vector2Int gridPosition, float height = 0f);
+        bool IsInsideSceneBoundaries(Vector3 worldPosition, float height = 0f);
+    }
+
+    public class ParcelScene : MonoBehaviour, IParcelScene
     {
         public static bool VERBOSE = false;
-
-        public enum State
-        {
-            NOT_READY,
-            WAITING_FOR_INIT_MESSAGES,
-            WAITING_FOR_COMPONENTS,
-            READY,
-        }
-
-        public Dictionary<string, DecentralandEntity> entities = new Dictionary<string, DecentralandEntity>();
-        public Dictionary<string, BaseDisposable> disposableComponents = new Dictionary<string, BaseDisposable>();
+        public Dictionary<string, DecentralandEntity> entities { get; private set; } = new Dictionary<string, DecentralandEntity>();
+        public Dictionary<string, ISharedComponent> disposableComponents { get; private set; } = new Dictionary<string, ISharedComponent>();
         public LoadParcelScenesMessage.UnityParcelScene sceneData { get; protected set; }
+
         public HashSet<Vector2Int> parcels = new HashSet<Vector2Int>();
         public SceneController ownerController;
         public SceneMetricsController metricsController;
-        public UIScreenSpace uiScreenSpace;
 
         public event System.Action<DecentralandEntity> OnEntityAdded;
         public event System.Action<DecentralandEntity> OnEntityRemoved;
-        public event System.Action<ParcelScene> OnSceneReady;
-        public event System.Action<ParcelScene> OnStateRefreshed;
+        public event System.Action<IComponent> OnComponentAdded;
+        public event System.Action<IComponent> OnComponentRemoved;
+        public event System.Action OnChanged;
+        public event System.Action<LoadParcelScenesMessage.UnityParcelScene> OnSetData;
+        public event System.Action<string, ISharedComponent> OnAddSharedComponent;
 
-        public ContentProvider contentProvider;
-        public int disposableNotReadyCount => disposableNotReady.Count;
 
-        [System.NonSerialized] public bool isTestScene = false;
+        public ContentProvider contentProvider { get; protected set; }
 
-        [System.NonSerialized] public bool isPersistent = false;
+        public bool isTestScene { get; set; } = false;
+        public bool isPersistent { get; set; } = false;
 
-        [System.NonSerialized] public bool unloadWithDistance = true;
+        [System.NonSerialized]
+        public string sceneName;
 
-        public bool isReady => state == State.READY;
+        [System.NonSerialized]
+        public bool unloadWithDistance = true;
 
-        readonly List<string> disposableNotReady = new List<string>();
-        bool isReleased = false, isEditModeActive = false;
+        bool isEditModeActive = false;
 
         SceneDebugPlane sceneDebugPlane = null;
 
-        State stateValue = State.NOT_READY;
+        public SceneLifecycleHandler sceneLifecycleHandler;
 
-        public State state
-        {
-            get { return stateValue; }
-            set
-            {
-                stateValue = value;
-                OnStateRefreshed?.Invoke(this);
-            }
-        }
+        public bool isReleased { get; private set; }
+
 
         public void Awake()
         {
-            state = State.NOT_READY;
-
-            if (DCLCharacterController.i)
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust += OnPrecisionAdjust;
+            CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
 
             metricsController = new SceneMetricsController(this);
             metricsController.Enable();
+
+            sceneLifecycleHandler = new SceneLifecycleHandler(this);
+        }
+
+        private void OnDestroy()
+        {
+            CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
         }
 
         void OnDisable()
@@ -81,37 +91,12 @@ namespace DCL.Controllers
 
         private void Update()
         {
-            if (state == State.READY && CommonScriptableObjects.rendererState.Get())
+            if (sceneLifecycleHandler.state == SceneLifecycleHandler.State.READY && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
         }
 
         protected virtual string prettyName => sceneData.basePosition.ToString();
 
-        protected void RefreshName()
-        {
-#if UNITY_EDITOR
-            switch (state)
-            {
-                case State.NOT_READY:
-                    this.name = gameObject.name = $"scene:{prettyName} - not ready...";
-                    break;
-                case State.WAITING_FOR_INIT_MESSAGES:
-                    this.name = gameObject.name = $"scene:{prettyName} - waiting for init messages...";
-                    break;
-                case State.WAITING_FOR_COMPONENTS:
-
-                    if (disposableComponents != null && disposableComponents.Count > 0)
-                        this.name = gameObject.name = $"scene:{prettyName} - left to ready:{disposableComponents.Count - disposableNotReadyCount}/{disposableComponents.Count}";
-                    else
-                        this.name = gameObject.name = $"scene:{prettyName} - no components. waiting...";
-
-                    break;
-                case State.READY:
-                    this.name = gameObject.name = $"scene:{prettyName} - ready!";
-                    break;
-            }
-#endif
-        }
 
         public void SetEditMode(bool isActive)
         {
@@ -123,6 +108,7 @@ namespace DCL.Controllers
             return isEditModeActive;
         }
 
+
         public virtual void SetData(LoadParcelScenesMessage.UnityParcelScene data)
         {
             this.sceneData = data;
@@ -132,9 +118,6 @@ namespace DCL.Controllers
             contentProvider.contents = data.contents;
             contentProvider.BakeHashes();
 
-            state = State.WAITING_FOR_INIT_MESSAGES;
-            RefreshName();
-
             parcels.Clear();
             for (int i = 0; i < sceneData.parcels.Length; i++)
             {
@@ -142,24 +125,15 @@ namespace DCL.Controllers
             }
 
             if (DCLCharacterController.i != null)
-                gameObject.transform.position = DCLCharacterController.i.characterPosition.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
+                gameObject.transform.position = PositionUtils.WorldToUnityPosition(Utils.GridToWorldPosition(data.basePosition.x, data.basePosition.y));
 
-#if UNITY_EDITOR
-            //NOTE(Brian): Don't generate parcel blockers if debugScenes is active and is not the desired scene.
-            if (SceneController.i.debugScenes && SceneController.i.debugSceneCoords != data.basePosition)
-            {
-                SetSceneReady();
-                return;
-            }
-#endif
-
-            if (isTestScene)
-                SetSceneReady();
+            OnSetData?.Invoke(data);
         }
 
-        void OnPrecisionAdjust(DCLCharacterPosition position)
+        void OnWorldReposition(Vector3 current, Vector3 previous)
         {
-            gameObject.transform.position = position.WorldToUnityPosition(Utils.GridToWorldPosition(sceneData.basePosition.x, sceneData.basePosition.y));
+            Vector3 sceneWorldPos = Utils.GridToWorldPosition(sceneData.basePosition.x, sceneData.basePosition.y);
+            gameObject.transform.position = PositionUtils.WorldToUnityPosition(sceneWorldPos);
         }
 
         public virtual void SetUpdateData(LoadParcelScenesMessage.UnityParcelScene data)
@@ -200,9 +174,6 @@ namespace DCL.Controllers
 
             DisposeAllSceneComponents();
 
-            if (DCLCharacterController.i)
-                DCLCharacterController.i.characterPosition.OnPrecisionAdjust -= OnPrecisionAdjust;
-
             if (immediate) //!CommonScriptableObjects.rendererState.Get())
             {
                 RemoveAllEntitiesImmediate();
@@ -237,8 +208,8 @@ namespace DCL.Controllers
 
         public bool IsInsideSceneBoundaries(Bounds objectBounds)
         {
-            if (!IsInsideSceneBoundaries(objectBounds.min + CommonScriptableObjects.playerUnityToWorldOffset, objectBounds.max.y)) return false;
-            if (!IsInsideSceneBoundaries(objectBounds.max + CommonScriptableObjects.playerUnityToWorldOffset, objectBounds.max.y)) return false;
+            if (!IsInsideSceneBoundaries(objectBounds.min + CommonScriptableObjects.worldOffset, objectBounds.max.y)) return false;
+            if (!IsInsideSceneBoundaries(objectBounds.max + CommonScriptableObjects.worldOffset, objectBounds.max.y)) return false;
 
             return true;
         }
@@ -248,7 +219,9 @@ namespace DCL.Controllers
             if (parcels.Count == 0) return false;
 
             float heightLimit = metricsController.GetLimits().sceneHeight;
-            if (height > heightLimit) return false;
+
+            if (height > heightLimit)
+                return false;
 
             return parcels.Contains(gridPosition);
         }
@@ -295,11 +268,13 @@ namespace DCL.Controllers
             return false;
         }
 
+        public Transform GetSceneTransform()
+        {
+            return transform;
+        }
+
         public DecentralandEntity CreateEntity(string id)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("CreateEntity");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("CreateEntity");
-
             if (entities.ContainsKey(id))
             {
                 return entities[id];
@@ -308,10 +283,12 @@ namespace DCL.Controllers
             var newEntity = new DecentralandEntity();
             newEntity.entityId = id;
 
-            SceneController.i.EnsureEntityPool();
+            Environment.i.world.sceneController.EnsureEntityPool();
 
             // As we know that the pool already exists, we just get one gameobject from it
             PoolableObject po = PoolManager.i.Get(SceneController.EMPTY_GO_POOL_NAME);
+
+            newEntity.meshesInfo.innerGameObject = po.gameObject;
             newEntity.gameObject = po.gameObject;
 
 #if UNITY_EDITOR
@@ -323,8 +300,8 @@ namespace DCL.Controllers
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 
-            if (SceneController.i.useBoundariesChecker)
-                newEntity.OnShapeUpdated += SceneController.i.boundariesChecker.AddEntityToBeChecked;
+            if (Environment.i.world.sceneBoundsChecker.enabled)
+                newEntity.OnShapeUpdated += Environment.i.world.sceneBoundsChecker.AddEntityToBeChecked;
 
             entities.Add(id, newEntity);
 
@@ -333,54 +310,8 @@ namespace DCL.Controllers
             return newEntity;
         }
 
-        public DecentralandEntity DuplicateEntity(DecentralandEntity decentralandEntity)
-        {
-            if (!entities.ContainsKey(decentralandEntity.entityId)) return null;
-
-            DecentralandEntity duplicatedEntity = CreateEntity(System.Guid.NewGuid().ToString());
-
-            if (decentralandEntity.children.Count > 0)
-            {
-                using (var iterator = decentralandEntity.children.GetEnumerator())
-                {
-                    while (iterator.MoveNext())
-                    {
-                        DecentralandEntity childDuplicate = DuplicateEntity(iterator.Current.Value);
-                        childDuplicate.SetParent(duplicatedEntity);
-                    }
-                }
-            }
-
-            if (decentralandEntity.parent != null) SetEntityParent(duplicatedEntity.entityId, decentralandEntity.parent.entityId);
-
-            DCLTransform.model.position = SceneController.i.ConvertUnityToScenePosition(decentralandEntity.gameObject.transform.position);
-            DCLTransform.model.rotation = decentralandEntity.gameObject.transform.rotation;
-            DCLTransform.model.scale = decentralandEntity.gameObject.transform.lossyScale;
-
-            foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> component in decentralandEntity.components)
-            {
-                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, component.Key, DCLTransform.model);
-            }
-
-            foreach (KeyValuePair<System.Type, BaseDisposable> component in decentralandEntity.GetSharedComponents())
-            {
-                SharedComponentAttach(duplicatedEntity.entityId, component.Value.id);
-            }
-
-            //TODO: (Adrian) Evaluate if all created components should be handle as equals instead of different
-            foreach (KeyValuePair<string, UUIDComponent> component in decentralandEntity.uuidComponents)
-            {
-                EntityComponentCreateOrUpdateFromUnity(duplicatedEntity.entityId, CLASS_ID_COMPONENT.UUID_CALLBACK, component.Value.model);
-            }
-
-            return duplicatedEntity;
-        }
-
         public void RemoveEntity(string id, bool removeImmediatelyFromEntitiesList = true)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("RemoveEntity");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("RemoveEntity");
-
             if (entities.ContainsKey(id))
             {
                 DecentralandEntity entity = entities[id];
@@ -414,10 +345,10 @@ namespace DCL.Controllers
 
             OnEntityRemoved?.Invoke(entity);
 
-            if (SceneController.i.useBoundariesChecker)
+            if (Environment.i.world.sceneBoundsChecker.enabled)
             {
-                entity.OnShapeUpdated -= SceneController.i.boundariesChecker.AddEntityToBeChecked;
-                SceneController.i.boundariesChecker.RemoveEntityToBeChecked(entity);
+                entity.OnShapeUpdated -= Environment.i.world.sceneBoundsChecker.AddEntityToBeChecked;
+                Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(entity);
             }
 
             if (removeImmediatelyFromEntitiesList)
@@ -428,7 +359,7 @@ namespace DCL.Controllers
             }
             else
             {
-                Environment.i.parcelScenesCleaner.MarkForCleanup(entity);
+                Environment.i.platform.parcelScenesCleaner.MarkForCleanup(entity);
             }
         }
 
@@ -448,7 +379,7 @@ namespace DCL.Controllers
                         if (instant)
                             rootEntities.Add(iterator.Current.Value);
                         else
-                            Environment.i.parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
+                            Environment.i.platform.parcelScenesCleaner.MarkRootEntityForCleanup(this, iterator.Current.Value);
                     }
                 }
             }
@@ -475,9 +406,6 @@ namespace DCL.Controllers
 
         public void SetEntityParent(string entityId, string parentId)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("SetEntityParent");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("SetEntityParent");
-
             if (entityId == parentId)
             {
                 return;
@@ -493,20 +421,20 @@ namespace DCL.Controllers
                 // In this case, the entity will attached to the first person camera
                 // On first person mode, the entity will rotate with the camera. On third person mode, the entity will rotate with the avatar
                 me.SetParent(DCLCharacterController.i.firstPersonCameraReference);
-                SceneController.i.boundariesChecker.AddPersistent(me);
+                Environment.i.world.sceneBoundsChecker.AddPersistent(me);
             }
             else if (parentId == "AvatarEntityReference" || parentId == "AvatarPositionEntityReference") // AvatarPositionEntityReference is for compatibility purposes
             {
                 // In this case, the entity will be attached to the avatar
                 // It will simply rotate with the avatar, regardless of where the camera is pointing
                 me.SetParent(DCLCharacterController.i.avatarReference);
-                SceneController.i.boundariesChecker.AddPersistent(me);
+                Environment.i.world.sceneBoundsChecker.AddPersistent(me);
             }
             else
             {
                 if (me.parent == DCLCharacterController.i.firstPersonCameraReference || me.parent == DCLCharacterController.i.avatarReference)
                 {
-                    SceneController.i.boundariesChecker.RemoveEntityToBeChecked(me);
+                    Environment.i.world.sceneBoundsChecker.RemoveEntityToBeChecked(me);
                 }
 
                 if (parentId == "0")
@@ -526,8 +454,8 @@ namespace DCL.Controllers
                 }
             }
 
-            Environment.i.cullingController.MarkDirty();
-            Environment.i.physicsSyncController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
+            Environment.i.platform.physicsSyncController.MarkDirty();
         }
 
         /**
@@ -535,9 +463,6 @@ namespace DCL.Controllers
           */
         public void SharedComponentAttach(string entityId, string id)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("AttachEntityComponent");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("AttachEntityComponent");
-
             DecentralandEntity decentralandEntity = GetEntityForUpdate(entityId);
 
             if (decentralandEntity == null)
@@ -545,21 +470,15 @@ namespace DCL.Controllers
                 return;
             }
 
-            BaseDisposable disposableComponent;
-
-            if (disposableComponents.TryGetValue(id, out disposableComponent)
-                && disposableComponent != null)
+            if (disposableComponents.TryGetValue(id, out ISharedComponent sharedComponent))
             {
-                disposableComponent.AttachTo(decentralandEntity);
+                sharedComponent.AttachTo(decentralandEntity);
             }
         }
 
 
-        public BaseComponent EntityComponentCreateOrUpdateFromUnity(string entityId, CLASS_ID_COMPONENT classId, object data)
+        public IEntityComponent EntityComponentCreateOrUpdateWithModel(string entityId, CLASS_ID_COMPONENT classId, object data)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("UpdateEntityComponent");
-
             DecentralandEntity entity = GetEntityForUpdate(entityId);
 
             if (entity == null)
@@ -568,265 +487,58 @@ namespace DCL.Controllers
                 return null;
             }
 
-
-            if (classId == CLASS_ID_COMPONENT.TRANSFORM)
-            {
-                if (!(data is DCLTransform.Model))
-                {
-                    Debug.LogError("Data is not a DCLTransform.Model type!");
-                    return null;
-                }
-
-                DCLTransform.Model modelRecovered = (DCLTransform.Model) data;
-
-                if (!entity.components.ContainsKey(classId))
-                    entity.components.Add(classId, null);
-
-
-                if (entity.OnTransformChange != null)
-                {
-                    entity.OnTransformChange.Invoke(modelRecovered);
-                }
-                else
-                {
-                    entity.gameObject.transform.localPosition = modelRecovered.position;
-                    entity.gameObject.transform.localRotation = modelRecovered.rotation;
-                    entity.gameObject.transform.localScale = modelRecovered.scale;
-
-                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
-                }
-
-                Environment.i.physicsSyncController.MarkDirty();
-                Environment.i.cullingController.MarkDirty();
-                return null;
-            }
-
-            BaseComponent newComponent = null;
-            DCLComponentFactory factory = ownerController.componentFactory;
-            Assert.IsNotNull(factory, "Factory is null?");
+            IEntityComponent newComponent = null;
 
             if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
             {
-                string type = "";
-                if (!(data is OnPointerEvent.Model))
+                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data as string);
+                classId = model.GetClassIdFromType();
+            }
+
+            if (!entity.components.ContainsKey(classId))
+            {
+                var factory = Environment.i.world.componentFactory;
+                newComponent = factory.CreateComponent((int) classId) as IEntityComponent;
+
+                if (newComponent != null)
                 {
-                    Debug.LogError("Data is not a DCLTransform.Model type!");
-                    return null;
-                }
+                    entity.components.Add(classId, newComponent);
+                    OnComponentAdded?.Invoke(newComponent);
 
-                OnPointerEvent.Model model = (OnPointerEvent.Model) data;
+                    newComponent.Initialize(this, entity);
 
-                type = model.type;
-
-                if (!entity.uuidComponents.ContainsKey(type))
-                {
-                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
-                    var go = new GameObject("UUID Component");
-                    go.transform.SetParent(entity.gameObject.transform, false);
-
-                    switch (type)
+                    if (data is string json)
                     {
-                        case OnClick.NAME:
-                            newComponent = go.GetOrCreateComponent<OnClick>();
-                            break;
-                        case OnPointerDown.NAME:
-                            newComponent = go.GetOrCreateComponent<OnPointerDown>();
-                            break;
-                        case OnPointerUp.NAME:
-                            newComponent = go.GetOrCreateComponent<OnPointerUp>();
-                            break;
-                    }
-
-                    if (newComponent != null)
-                    {
-                        UUIDComponent uuidComponent = newComponent as UUIDComponent;
-
-                        if (uuidComponent != null)
-                        {
-                            uuidComponent.Setup(this, entity, model);
-                            entity.uuidComponents.Add(type, uuidComponent);
-                        }
-                        else
-                        {
-                            Debug.LogError("uuidComponent is not of UUIDComponent type!");
-                        }
+                        newComponent.UpdateFromJSON(json);
                     }
                     else
                     {
-                        Debug.LogError("EntityComponentCreateOrUpdate: Invalid UUID type!");
+                        newComponent.UpdateFromModel(data as BaseModel);
                     }
-                }
-                else
-                {
-                    newComponent = EntityUUIDComponentUpdate(entity, type, model);
-                }
-            }
-
-            Environment.i.physicsSyncController.MarkDirty();
-            Environment.i.cullingController.MarkDirty();
-            return newComponent;
-        }
-
-        public BaseComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data, out CleanableYieldInstruction yieldInstruction)
-        {
-            yieldInstruction = null;
-
-            SceneController.i.OnMessageDecodeStart?.Invoke("UpdateEntityComponent");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("UpdateEntityComponent");
-
-            DecentralandEntity entity = GetEntityForUpdate(entityId);
-
-            if (entity == null)
-            {
-                Debug.LogError($"scene '{sceneData.id}': Can't create entity component if the entity {entityId} doesn't exist!");
-                return null;
-            }
-
-            if (classId == CLASS_ID_COMPONENT.TRANSFORM)
-            {
-                MessageDecoder.DecodeTransform(data, ref DCLTransform.model);
-
-                if (!entity.components.ContainsKey(classId))
-                {
-                    entity.components.Add(classId, null);
-                }
-
-                if (entity.OnTransformChange != null)
-                {
-                    entity.OnTransformChange.Invoke(DCLTransform.model);
-                }
-                else
-                {
-                    entity.gameObject.transform.localPosition = DCLTransform.model.position;
-                    entity.gameObject.transform.localRotation = DCLTransform.model.rotation;
-                    entity.gameObject.transform.localScale = DCLTransform.model.scale;
-
-                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
-                }
-
-                Environment.i.physicsSyncController.MarkDirty();
-                Environment.i.cullingController.MarkDirty();
-                return null;
-            }
-
-            BaseComponent newComponent = null;
-            DCLComponentFactory factory = ownerController.componentFactory;
-            Assert.IsNotNull(factory, "Factory is null?");
-
-            // HACK: (Zak) will be removed when we separate each
-            // uuid component as a different class id
-            if (classId == CLASS_ID_COMPONENT.UUID_CALLBACK)
-            {
-                string type = "";
-
-                OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data);
-
-                type = model.type;
-
-                if (!entity.uuidComponents.ContainsKey(type))
-                {
-                    //NOTE(Brian): We have to contain it in a gameObject or it will be pooled with the components attached.
-                    var go = new GameObject("UUID Component");
-                    go.transform.SetParent(entity.gameObject.transform, false);
-
-                    switch (type)
-                    {
-                        case OnClick.NAME:
-                            newComponent = go.GetOrCreateComponent<OnClick>();
-                            break;
-                        case OnPointerDown.NAME:
-                            newComponent = go.GetOrCreateComponent<OnPointerDown>();
-                            break;
-                        case OnPointerUp.NAME:
-                            newComponent = go.GetOrCreateComponent<OnPointerUp>();
-                            break;
-                    }
-
-                    if (newComponent != null)
-                    {
-                        UUIDComponent uuidComponent = newComponent as UUIDComponent;
-
-                        if (uuidComponent != null)
-                        {
-                            uuidComponent.Setup(this, entity, model);
-                            entity.uuidComponents.Add(type, uuidComponent);
-                        }
-                        else
-                        {
-                            Debug.LogError("uuidComponent is not of UUIDComponent type!");
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("EntityComponentCreateOrUpdate: Invalid UUID type!");
-                    }
-                }
-                else
-                {
-                    newComponent = EntityUUIDComponentUpdate(entity, type, model);
                 }
             }
             else
             {
-                if (!entity.components.ContainsKey(classId))
-                {
-                    newComponent = factory.CreateItemFromId<BaseComponent>(classId);
-
-                    if (newComponent != null)
-                    {
-                        newComponent.scene = this;
-                        newComponent.entity = entity;
-
-                        entity.components.Add(classId, newComponent);
-
-                        newComponent.transform.SetParent(entity.gameObject.transform, false);
-                        newComponent.UpdateFromJSON(data);
-                    }
-                }
-                else
-                {
-                    newComponent = EntityComponentUpdate(entity, classId, data);
-                }
+                newComponent = EntityComponentUpdate(entity, classId, data as string);
             }
 
-            if (newComponent != null)
-            {
-                if (newComponent is IOutOfSceneBoundariesHandler)
-                    SceneController.i.boundariesChecker?.AddEntityToBeChecked(entity);
+            if (newComponent != null && newComponent is IOutOfSceneBoundariesHandler)
+                Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
 
-                if (newComponent.isRoutineRunning)
-                    yieldInstruction = newComponent.yieldInstruction;
-            }
-
-            Environment.i.physicsSyncController.MarkDirty();
-            Environment.i.cullingController.MarkDirty();
+            OnChanged?.Invoke();
+            Environment.i.platform.physicsSyncController.MarkDirty();
+            Environment.i.platform.cullingController.MarkDirty();
             return newComponent;
         }
 
-        // HACK: (Zak) will be removed when we separate each
-        // uuid component as a different class id
-        public UUIDComponent EntityUUIDComponentUpdate(DecentralandEntity entity, string type, UUIDComponent.Model model)
+
+        public IEntityComponent EntityComponentCreateOrUpdate(string entityId, CLASS_ID_COMPONENT classId, string data)
         {
-            if (entity == null)
-            {
-                Debug.LogError($"Can't update the {type} uuid component of a nonexistent entity!", this);
-                return null;
-            }
-
-            if (!entity.uuidComponents.ContainsKey(type))
-            {
-                Debug.LogError($"Entity {entity.entityId} doesn't have a {type} uuid component to update!", this);
-                return null;
-            }
-
-            UUIDComponent targetComponent = entity.uuidComponents[type];
-            targetComponent.Setup(this, entity, model);
-
-            return targetComponent;
+            return EntityComponentCreateOrUpdateWithModel(entityId, classId, data);
         }
 
         // The EntityComponentUpdate() parameters differ from other similar methods because there is no EntityComponentUpdate protocol message yet.
-        public BaseComponent EntityComponentUpdate(DecentralandEntity entity, CLASS_ID_COMPONENT classId,
+        public IEntityComponent EntityComponentUpdate(DecentralandEntity entity, CLASS_ID_COMPONENT classId,
             string componentJson)
         {
             if (entity == null)
@@ -841,213 +553,49 @@ namespace DCL.Controllers
                 return null;
             }
 
-            BaseComponent targetComponent = entity.components[classId];
+            IComponent targetComponent = entity.components[classId];
             targetComponent.UpdateFromJSON(componentJson);
 
-            return targetComponent;
+            return targetComponent as IEntityComponent;
         }
 
-        public BaseDisposable SharedComponentCreate(string id, int classId)
+        public ISharedComponent SharedComponentCreate(string id, int classId)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("ComponentCreated");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentCreated");
+            if (disposableComponents.TryGetValue(id, out ISharedComponent component))
+                return component;
 
-            BaseDisposable disposableComponent;
-
-            if (disposableComponents.TryGetValue(id, out disposableComponent))
+            if (classId == (int) CLASS_ID.UI_SCREEN_SPACE_SHAPE || classId == (int) CLASS_ID.UI_FULLSCREEN_SHAPE)
             {
-                return disposableComponent;
+                if (GetSharedComponent<UIScreenSpace>() != null)
+                    return null;
             }
 
-            BaseDisposable newComponent = null;
+            var factory = Environment.i.world.componentFactory;
+            ISharedComponent newComponent = factory.CreateComponent(classId) as ISharedComponent;
 
-            switch ((CLASS_ID) classId)
-            {
-                case CLASS_ID.BOX_SHAPE:
-                {
-                    newComponent = new BoxShape(this);
-                    break;
-                }
+            if (newComponent == null)
+                return null;
 
-                case CLASS_ID.SPHERE_SHAPE:
-                {
-                    newComponent = new SphereShape(this);
-                    break;
-                }
+            disposableComponents.Add(id, newComponent);
+            OnAddSharedComponent?.Invoke(id, newComponent);
 
-                case CLASS_ID.CONE_SHAPE:
-                {
-                    newComponent = new ConeShape(this);
-                    break;
-                }
-
-                case CLASS_ID.CYLINDER_SHAPE:
-                {
-                    newComponent = new CylinderShape(this);
-                    break;
-                }
-
-                case CLASS_ID.PLANE_SHAPE:
-                {
-                    newComponent = new PlaneShape(this);
-                    break;
-                }
-
-                case CLASS_ID.GLTF_SHAPE:
-                {
-                    newComponent = new GLTFShape(this);
-                    break;
-                }
-
-                case CLASS_ID.NFT_SHAPE:
-                {
-                    newComponent = new NFTShape(this);
-                    break;
-                }
-
-                case CLASS_ID.OBJ_SHAPE:
-                {
-                    newComponent = new OBJShape(this);
-                    break;
-                }
-
-                case CLASS_ID.BASIC_MATERIAL:
-                {
-                    newComponent = new BasicMaterial(this);
-                    break;
-                }
-
-                case CLASS_ID.PBR_MATERIAL:
-                {
-                    newComponent = new PBRMaterial(this);
-                    break;
-                }
-
-                case CLASS_ID.AUDIO_CLIP:
-                {
-                    newComponent = new DCLAudioClip(this);
-                    break;
-                }
-
-                case CLASS_ID.TEXTURE:
-                {
-                    newComponent = new DCLTexture(this);
-                    break;
-                }
-
-                case CLASS_ID.UI_INPUT_TEXT_SHAPE:
-                {
-                    newComponent = new UIInputText(this);
-                    break;
-                }
-
-                case CLASS_ID.UI_FULLSCREEN_SHAPE:
-                case CLASS_ID.UI_SCREEN_SPACE_SHAPE:
-                {
-                    if (uiScreenSpace == null)
-                    {
-                        newComponent = new UIScreenSpace(this);
-                    }
-
-                    break;
-                }
-
-                case CLASS_ID.UI_CONTAINER_RECT:
-                {
-                    newComponent = new UIContainerRect(this);
-                    break;
-                }
-
-                case CLASS_ID.UI_SLIDER_SHAPE:
-                {
-                    newComponent = new UIScrollRect(this);
-                    break;
-                }
-
-                case CLASS_ID.UI_CONTAINER_STACK:
-                {
-                    newComponent = new UIContainerStack(this);
-                    break;
-                }
-
-                case CLASS_ID.UI_IMAGE_SHAPE:
-                {
-                    newComponent = new UIImage(this);
-                    break;
-                }
-
-                case CLASS_ID.UI_TEXT_SHAPE:
-                {
-                    newComponent = new UIText(this);
-                    break;
-                }
-
-                case CLASS_ID.VIDEO_CLIP:
-                {
-                    newComponent = new DCLVideoClip(this);
-                    break;
-                }
-
-                case CLASS_ID.VIDEO_TEXTURE:
-                {
-                    newComponent = new DCLVideoTexture(this);
-                    break;
-                }
-
-                case CLASS_ID.FONT:
-                {
-                    newComponent = new DCLFont(this);
-                    break;
-                }
-
-                case CLASS_ID.NAME:
-                {
-                    newComponent = new DCLName(this);
-                    break;
-                }
-                default:
-                    Debug.LogError($"Unknown classId");
-                    break;
-            }
-
-            if (newComponent != null)
-            {
-                newComponent.id = id;
-                disposableComponents.Add(id, newComponent);
-
-                if (state != State.READY)
-                {
-                    disposableNotReady.Add(id);
-                }
-            }
+            newComponent.Initialize(this, id);
 
             return newComponent;
         }
 
         public void SharedComponentDispose(string id)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("ComponentDisposed");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentDisposed");
-
-            BaseDisposable disposableComponent;
-
-            if (disposableComponents.TryGetValue(id, out disposableComponent))
+            if (disposableComponents.TryGetValue(id, out ISharedComponent sharedComponent))
             {
-                if (disposableComponent != null)
-                {
-                    disposableComponent.Dispose();
-                }
-
+                sharedComponent?.Dispose();
                 disposableComponents.Remove(id);
+                OnComponentRemoved?.Invoke(sharedComponent);
             }
         }
 
         public void EntityComponentRemove(string entityId, string name)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("ComponentRemoved");
-
-            SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentRemoved");
-
             DecentralandEntity decentralandEntity = GetEntityForUpdate(entityId);
             if (decentralandEntity == null)
             {
@@ -1057,28 +605,25 @@ namespace DCL.Controllers
             RemoveEntityComponent(decentralandEntity, name);
         }
 
+        public T GetSharedComponent<T>()
+            where T : class
+        {
+            return disposableComponents.Values.FirstOrDefault(x => x is T) as T;
+        }
+
         private void RemoveComponentType<T>(DecentralandEntity entity, CLASS_ID_COMPONENT classId)
             where T : MonoBehaviour
         {
-            var component = entity.components[classId].GetComponent<T>();
+            var component = entity.components[classId] as IEntityComponent;
 
-            if (component != null)
+            if (component == null)
+                return;
+
+            var monoBehaviour = component.GetTransform().GetComponent<T>();
+
+            if (monoBehaviour != null)
             {
-                Utils.SafeDestroy(component);
-            }
-        }
-
-        // HACK: (Zak) will be removed when we separate each
-        // uuid component as a different class id
-        private void RemoveUUIDComponentType<T>(DecentralandEntity entity, string type)
-            where T : UUIDComponent
-        {
-            var component = entity.uuidComponents[type].GetComponent<T>();
-
-            if (component != null)
-            {
-                Utils.SafeDestroy(component);
-                entity.uuidComponents.Remove(type);
+                Utils.SafeDestroy(monoBehaviour);
             }
         }
 
@@ -1087,56 +632,51 @@ namespace DCL.Controllers
             switch (componentName)
             {
                 case "shape":
-                    if (entity.meshesInfo.currentShape != null)
+
+                    if (entity.meshesInfo.currentShape is BaseShape baseShape)
                     {
-                        entity.meshesInfo.currentShape.DetachFrom(entity);
+                        baseShape.DetachFrom(entity);
                     }
 
-                    return;
-                case OnClick.NAME:
-                    RemoveUUIDComponentType<OnClick>(entity, componentName);
-                    return;
-                case OnPointerDown.NAME:
-                    RemoveUUIDComponentType<OnPointerDown>(entity, componentName);
-                    return;
-                case OnPointerUp.NAME:
-                    RemoveUUIDComponentType<OnPointerUp>(entity, componentName);
                     return;
             }
         }
 
-        public void SharedComponentUpdate(string id, string json, out CleanableYieldInstruction yieldInstruction)
+        public ISharedComponent SharedComponentUpdate(string id, BaseModel model)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("ComponentUpdated");
-            BaseDisposable newComponent = SharedComponentUpdate(id, json);
-            SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
+            if (disposableComponents.TryGetValue(id, out ISharedComponent sharedComponent))
+            {
+                sharedComponent.UpdateFromModel(model);
+                return sharedComponent;
+            }
 
-            yieldInstruction = null;
+            if (gameObject == null)
+            {
+                Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
+            }
+            else
+            {
+                Debug.LogError($"Unknown disposableComponent {id}", gameObject);
+            }
 
-            if (newComponent != null && newComponent.isRoutineRunning)
-                yieldInstruction = newComponent.yieldInstruction;
+            return null;
         }
 
-        public BaseDisposable SharedComponentUpdate(string id, string json)
+        public ISharedComponent SharedComponentUpdate(string id, string json)
         {
-            SceneController.i.OnMessageDecodeStart?.Invoke("ComponentUpdated");
-            SceneController.i.OnMessageDecodeEnds?.Invoke("ComponentUpdated");
-
-            if (disposableComponents.TryGetValue(id, out BaseDisposable disposableComponent))
+            if (disposableComponents.TryGetValue(id, out ISharedComponent disposableComponent))
             {
                 disposableComponent.UpdateFromJSON(json);
                 return disposableComponent;
             }
+
+            if (gameObject == null)
+            {
+                Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
+            }
             else
             {
-                if (gameObject == null)
-                {
-                    Debug.LogError($"Unknown disposableComponent {id} -- scene has been destroyed?");
-                }
-                else
-                {
-                    Debug.LogError($"Unknown disposableComponent {id}", gameObject);
-                }
+                Debug.LogError($"Unknown disposableComponent {id}", gameObject);
             }
 
             return null;
@@ -1149,11 +689,9 @@ namespace DCL.Controllers
         }
 
 
-        public BaseDisposable GetSharedComponent(string componentId)
+        public ISharedComponent GetSharedComponent(string componentId)
         {
-            BaseDisposable result;
-
-            if (!disposableComponents.TryGetValue(componentId, out result))
+            if (!disposableComponents.TryGetValue(componentId, out ISharedComponent result))
             {
                 return null;
             }
@@ -1187,95 +725,52 @@ namespace DCL.Controllers
             return decentralandEntity;
         }
 
-        private void OnDisposableReady(BaseDisposable disposable)
-        {
-            if (isReleased)
-                return;
-
-            disposableNotReady.Remove(disposable.id);
-
-            if (VERBOSE)
-            {
-                Debug.Log($"{sceneData.basePosition} Disposable objects left... {disposableNotReady.Count}");
-            }
-
-            if (disposableNotReady.Count == 0)
-            {
-                SetSceneReady();
-            }
-
-            OnStateRefreshed?.Invoke(this);
-            RefreshName();
-        }
-
-        public void SetInitMessagesDone()
-        {
-            if (isReleased)
-                return;
-
-            if (state == State.READY)
-            {
-                Debug.LogWarning($"Init messages done after ready?! {sceneData.basePosition}", gameObject);
-                return;
-            }
-
-            state = State.WAITING_FOR_COMPONENTS;
-            RefreshName();
-
-            if (disposableNotReadyCount > 0)
-            {
-                //NOTE(Brian): Here, we have to split the iterations. If not, we will get repeated calls of
-                //             SetSceneReady(), as the disposableNotReady count is 1 and gets to 0
-                //             in each OnDisposableReady() call.
-
-                using (var iterator = disposableComponents.GetEnumerator())
-                {
-                    while (iterator.MoveNext())
-                    {
-                        disposableComponents[iterator.Current.Value.id].CallWhenReady(OnDisposableReady);
-                    }
-                }
-            }
-            else
-            {
-                SetSceneReady();
-            }
-        }
-
-        private void SetSceneReady()
-        {
-            if (state == State.READY)
-                return;
-
-            if (VERBOSE)
-                Debug.Log($"{sceneData.basePosition} Scene Ready!");
-
-            state = State.READY;
-
-            SceneController.i.SendSceneReady(sceneData.id);
-            RefreshName();
-
-            OnSceneReady?.Invoke(this);
-        }
-
         private void DisposeAllSceneComponents()
         {
             List<string> allDisposableComponents = disposableComponents.Select(x => x.Key).ToList();
             foreach (string id in allDisposableComponents)
             {
-                Environment.i.parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
+                Environment.i.platform.parcelScenesCleaner.MarkDisposableComponentForCleanup(this, id);
             }
         }
 
+        public string GetStateString()
+        {
+            string baseState = isPersistent ? "global-scene" : "scene";
+            switch (sceneLifecycleHandler.state)
+            {
+                case SceneLifecycleHandler.State.NOT_READY:
+                    return $"{baseState}:{prettyName} - not ready...";
+                case SceneLifecycleHandler.State.WAITING_FOR_INIT_MESSAGES:
+                    return $"{baseState}:{prettyName} - waiting for init messages...";
+                case SceneLifecycleHandler.State.WAITING_FOR_COMPONENTS:
+                    if (disposableComponents != null && disposableComponents.Count > 0)
+                        return $"{baseState}:{prettyName} - left to ready:{disposableComponents.Count - sceneLifecycleHandler.disposableNotReadyCount}/{disposableComponents.Count}";
+                    else
+                        return $"{baseState}:{prettyName} - no components. waiting...";
+                case SceneLifecycleHandler.State.READY:
+                    return $"{baseState}:{prettyName} - ready!";
+            }
+
+            return $"scene:{prettyName} - no state?";
+        }
+
+        public void RefreshName()
+        {
 #if UNITY_EDITOR
+            gameObject.name = GetStateString();
+#endif
+        }
+
+
         [ContextMenu("Get Waiting Components Debug Info")]
         public void GetWaitingComponentsDebugInfo()
         {
-            switch (state)
+            switch (sceneLifecycleHandler.state)
             {
-                case State.WAITING_FOR_COMPONENTS:
+                case SceneLifecycleHandler.State.WAITING_FOR_COMPONENTS:
 
-                    foreach (string componentId in disposableNotReady)
+                    foreach (string componentId in sceneLifecycleHandler.disposableNotReady)
                     {
                         if (disposableComponents.ContainsKey(componentId))
                         {
@@ -1283,7 +778,7 @@ namespace DCL.Controllers
 
                             Debug.Log($"Waiting for: {component.ToString()}");
 
-                            foreach (var entity in component.attachedEntities)
+                            foreach (var entity in component.GetAttachedEntities())
                             {
                                 var loader = LoadableShape.GetLoaderForEntity(entity);
 
@@ -1306,10 +801,9 @@ namespace DCL.Controllers
                     break;
 
                 default:
-                    Debug.Log("This scene is not waiting for any components. Its current state is " + state);
+                    Debug.Log("This scene is not waiting for any components. Its current state is " + sceneLifecycleHandler.state);
                     break;
             }
         }
-#endif
     }
 }

@@ -13,17 +13,19 @@ import {
   experienceStarted,
   FAILED_FETCHING_UNITY,
   NOT_INVITED,
+  setLoadingScreen,
   setLoadingWaitTutorial
 } from 'shared/loading/types'
 import { worldToGrid } from '../atomicHelpers/parcelScenePositions'
-import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR } from '../config/index'
+import { DEBUG_PM, HAS_INITIAL_POSITION_MARK, NO_MOTD, OPEN_AVATAR_EDITOR, QUESTS_ENABLED } from '../config/index'
 import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/renderer/actions'
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
-import { setLoadingScreenVisible, startUnitySceneWorkers } from '../unity-interface/dcl'
+import { startUnitySceneWorkers } from '../unity-interface/dcl'
 import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
 import {
+  ensureRendererEnabled,
   foregroundObservable,
   isForeground,
   renderStateObservable
@@ -48,7 +50,8 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
     HUDElementID.TASKBAR,
     { active: true, visible: true },
     {
-      enableVoiceChat: voiceChatEnabled
+      enableVoiceChat: voiceChatEnabled,
+      enableQuestPanel: QUESTS_ENABLED
     }
   )
   i.ConfigureHUDElement(HUDElementID.WORLD_CHAT_WINDOW, { active: true, visible: true })
@@ -88,6 +91,8 @@ namespace webApp {
 
   export async function loadUnity({ instancedJS }: InitializeUnityResult) {
     const i = (await instancedJS).unityInterface
+    const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
+    const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: true })
@@ -95,7 +100,7 @@ namespace webApp {
       active: true,
       visible: OPEN_AVATAR_EDITOR
     })
-    i.ConfigureHUDElement(HUDElementID.SETTINGS, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.EXPRESSIONS, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PLAYER_INFO_CARD, {
       active: true,
@@ -107,6 +112,9 @@ namespace webApp {
     i.ConfigureHUDElement(HUDElementID.OPEN_EXTERNAL_URL_PROMPT, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_PANEL, { active: QUESTS_ENABLED, visible: false })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_TRACKER, { active: QUESTS_ENABLED, visible: true })
+    i.ConfigureHUDElement(HUDElementID.QUESTS_NOTIFICATIONS, { active: QUESTS_ENABLED, visible: true })
 
     //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
     //             so ensuring meta configuration is initialized in this stage is a must
@@ -129,25 +137,18 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
 
-        const observer = renderStateObservable.add((isRendering) => {
-          if (isRendering) {
-            renderStateObservable.remove(observer)
-            globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
-
-            globalThis.globalStore.dispatch(experienceStarted())
-
-            setLoadingScreenVisible(false)
-
-            Html.switchGameContainer(true)
-
-            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
-          }
+        ensureRendererEnabled().then(() => {
+          globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
+          globalThis.globalStore.dispatch(experienceStarted())
+          globalThis.globalStore.dispatch(setLoadingScreen(false))
+          Html.switchGameContainer(true)
         })
 
         EnsureProfile(identity.address)
           .then((profile) => {
             i.ConfigureEmailPrompt(profile.tutorialStep)
             i.ConfigureTutorial(profile.tutorialStep, HAS_INITIAL_POSITION_MARK)
+            i.ConfigureHUDElement(HUDElementID.GRAPHIC_CARD_WARNING, { active: true, visible: true })
           })
           .catch((e) => logger.error(`error getting profile ${e}`))
       })
@@ -167,13 +168,7 @@ namespace webApp {
 
     await ensureMetaConfigurationInitialized()
 
-    let worldConfig: WorldConfig = globalThis.globalStore.getState().meta.config.world!
-
-    if (worldConfig.renderProfile) {
-      i.SetRenderProfile(worldConfig.renderProfile)
-    } else {
-      i.SetRenderProfile(RenderProfile.DEFAULT)
-    }
+    i.SetRenderProfile(renderProfile)
 
     if (isForeground()) {
       i.ReportFocusOn()
@@ -211,6 +206,12 @@ namespace webApp {
       }
 
       console['error'](error)
+      if (error.message && error.message.includes('The error you provided does not contain a stack trace')) {
+        // This error is something that react causes only on development, with unhandled promises and strange errors with no stack trace (i.e, matrix errors).
+        // Some libraries (i.e, matrix client) don't handle promises well and we shouldn't crash the explorer because of that
+        return
+      }
+
       ReportFatalError(error.message)
     }
     return true

@@ -11,7 +11,7 @@ import { resolveUrl } from 'atomicHelpers/parseUrl'
 import { DEBUG, parcelLimits, getServerConfigurations, ENABLE_EMPTY_SCENES, LOS, PIN_CATALYST } from 'config'
 
 import { ILand } from 'shared/types'
-import { getFetchContentServer, getFetchMetaContentServer, getFetchMetaContentService } from 'shared/dao/selectors'
+import { getFetchContentServer, getCatalystServer, getFetchMetaContentService } from 'shared/dao/selectors'
 import defaultLogger from 'shared/logger'
 import { StoreContainer } from 'shared/store/rootTypes'
 
@@ -60,11 +60,11 @@ export class LifecycleManager extends TransportBasedServer {
     return theFuture
   }
 
-  getSceneIds(sceneIds: string[]): Promise<string | null>[] {
+  getSceneIds(parcels: string[]): Promise<string | null>[] {
     const futures: IFuture<string>[] = []
     const missing: string[] = []
 
-    for (let id of sceneIds) {
+    for (let id of parcels) {
       let theFuture = this.positionToRequest.get(id)
 
       if (!theFuture) {
@@ -80,6 +80,18 @@ export class LifecycleManager extends TransportBasedServer {
     this.notify('Scene.idRequest', { sceneIds: missing })
     return futures
   }
+
+  async reloadScene(sceneId: string) {
+    const landFuture = this.sceneIdToRequest.get(sceneId)
+    if (landFuture) {
+      const land = await landFuture
+      const parcels = land.sceneJsonData.scene.parcels
+      for (let parcel of parcels) {
+        this.positionToRequest.delete(parcel)
+      }
+      this.notify('Scene.reload', { sceneId })
+    }
+  }
 }
 
 let server: LifecycleManager
@@ -94,7 +106,7 @@ export async function initParcelSceneWorker() {
   server.enable()
 
   const state = globalThis.globalStore.getState()
-  const localServer = resolveUrl(`${document.location.protocol}//${document.location.hostname}:${8080}`, '/local-ipfs')
+  const localServer = resolveUrl(`${location.protocol}//${location.hostname}:${8080}`, '/local-ipfs')
 
   // NOTE(Brian): In branch urls we can't just use location.source - the value returned doesn't include
   //              the branch full path! With this, we ensure the /branch/<branch-name> is included in the root url.
@@ -103,7 +115,7 @@ export async function initParcelSceneWorker() {
 
   server.notify('Lifecycle.initialize', {
     contentServer: DEBUG ? localServer : getFetchContentServer(state),
-    metaContentServer: DEBUG ? localServer : getFetchMetaContentServer(state),
+    catalystServer: DEBUG ? localServer : getCatalystServer(state),
     metaContentService: DEBUG ? localServer : getFetchMetaContentService(state),
     contentServerBundles: DEBUG || PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/',
     rootUrl: fullRootUrl,

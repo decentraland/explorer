@@ -7,7 +7,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class LoadableShapesMiscTests : TestsBase
+public class LoadableShapesMiscTests : IntegrationTestSuite_Legacy
 {
     [UnityTest]
     public IEnumerator OBJShapeUpdate()
@@ -52,14 +52,14 @@ public class LoadableShapesMiscTests : TestsBase
 
         // Set its shape as a BOX
         var componentId = TestHelpers.CreateAndSetShape(scene, entityId, CLASS_ID.BOX_SHAPE, "{}");
-        yield return scene.GetSharedComponent(componentId).routine;
+        yield return ((scene.GetSharedComponent(componentId)) as IDelayedComponent).routine;
 
         var meshName = entity.meshRootGameObject.GetComponent<MeshFilter>().mesh.name;
         Assert.AreEqual("DCL Box Instance", meshName);
 
         // Update its shape to a cylinder
         TestHelpers.CreateAndSetShape(scene, entityId, CLASS_ID.CYLINDER_SHAPE, "{}");
-        yield return scene.GetSharedComponent(componentId).routine;
+        yield return (scene.GetSharedComponent(componentId) as IDelayedComponent).routine;
 
         Assert.IsTrue(entity.meshRootGameObject != null, "meshGameObject should not be null");
 
@@ -94,7 +94,7 @@ public class LoadableShapesMiscTests : TestsBase
 
         // Update its shape to a sphere
         TestHelpers.CreateAndSetShape(scene, entityId, CLASS_ID.SPHERE_SHAPE, "{}");
-        yield return scene.GetSharedComponent(componentId).routine;
+        yield return (scene.GetSharedComponent(componentId) as IDelayedComponent).routine;
 
         yield return null;
 

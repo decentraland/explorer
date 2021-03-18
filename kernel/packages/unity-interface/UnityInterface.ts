@@ -17,12 +17,19 @@ import {
   BuilderConfiguration,
   Wearable,
   KernelConfigForRenderer,
-  RealmsInfoForRenderer
+  RealmsInfoForRenderer,
+  ContentMapping,
+  Profile
 } from 'shared/types'
 import { nativeMsgBridge } from './nativeMessagesBridge'
 import { HotSceneInfo } from 'shared/social/hotScenes'
 import { defaultLogger } from 'shared/logger'
 import { setDelightedSurveyEnabled } from './delightedSurvey'
+import { renderStateObservable } from '../shared/world/worldState'
+import { DeploymentResult } from '../shared/apis/SceneStateStorageController/types'
+import { ReportRendererInterfaceError } from 'shared/loading/ReportFatalError'
+import { QuestForRenderer } from 'dcl-ecs-quests/src/types'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
 const MINIMAP_CHUNK_SIZE = 100
 
@@ -55,14 +62,30 @@ function fillMouseEventDataWrapper(eventStruct: any, e: any, target: any) {
 export let targetHeight: number = 1080
 
 function resizeCanvas(module: any) {
-  if (targetHeight > 2000) {
+  // When renderer is configured with unlimited resolution,
+  // the targetHeight is set to an arbitrary high value
+  let assumeUnlimitedResolution: boolean = targetHeight > 2000
+  let finalHeight
+  let finalWidth
+
+  if (assumeUnlimitedResolution) {
     targetHeight = window.innerHeight * devicePixelRatio
+    finalHeight = targetHeight
+    finalWidth = window.innerWidth * devicePixelRatio
+  } else {
+    // We calculate width using height as reference
+    const screenWidth = screen.width * devicePixelRatio
+    const screenHeight = screen.height * devicePixelRatio
+    const targetWidth = targetHeight * (screenWidth / screenHeight)
+
+    const pixelRatioH = targetHeight / screenHeight
+    const pixelRatioW = targetWidth / screenWidth
+
+    finalHeight = window.innerHeight * devicePixelRatio * pixelRatioH
+    finalWidth = window.innerWidth * devicePixelRatio * pixelRatioW
   }
 
-  let desiredHeight = targetHeight
-
-  let ratio = desiredHeight / module.canvas.height
-  module.setCanvasSize(module.canvas.width * ratio, module.canvas.height * ratio)
+  module.setCanvasSize(finalWidth, finalHeight)
 }
 
 export class UnityInterface {
@@ -129,29 +152,44 @@ export class UnityInterface {
   }
 
   public SendGenericMessage(object: string, method: string, payload: string) {
-    this.gameInstance.SendMessage(object, method, payload)
+    this.SendMessageToUnity(object, method, payload)
   }
 
   public SetDebug() {
-    this.gameInstance.SendMessage('SceneController', 'SetDebug')
+    this.SendMessageToUnity('Main', 'SetDebug')
   }
 
   public LoadProfile(profile: ProfileForRenderer) {
-    this.gameInstance.SendMessage('SceneController', 'LoadProfile', JSON.stringify(profile))
+    this.SendMessageToUnity('Main', 'LoadProfile', JSON.stringify(profile))
   }
 
   public SetRenderProfile(id: RenderProfile) {
-    this.gameInstance.SendMessage('SceneController', 'SetRenderProfile', JSON.stringify({ id: id }))
+    this.SendMessageToUnity('Main', 'SetRenderProfile', JSON.stringify({ id: id }))
   }
 
-  public CreateUIScene(data: { id: string; baseUrl: string }) {
+  public DumpScenesLoadInfo() {
+    this.SendMessageToUnity('Main', 'DumpScenesLoadInfo')
+  }
+
+  public DumpRendererLockersInfo() {
+    this.SendMessageToUnity('Main', 'DumpRendererLockersInfo')
+  }
+
+  public CreateGlobalScene(data: {
+    id: string
+    name: string
+    baseUrl: string
+    contents: Array<ContentMapping>
+    icon?: string
+    isPortableExperience: boolean
+  }) {
     /**
      * UI Scenes are scenes that does not check any limit or boundary. The
      * position is fixed at 0,0 and they are universe-wide. An example of this
      * kind of scenes is the Avatar scene. All the avatars are just GLTFs in
      * a scene.
      */
-    this.gameInstance.SendMessage('SceneController', 'CreateUIScene', JSON.stringify(data))
+    this.SendMessageToUnity('Main', 'CreateGlobalScene', JSON.stringify(data))
   }
 
   /** Sends the camera position & target to the engine */
@@ -163,9 +201,9 @@ export class UnityInterface {
     const theY = y <= 0 ? 2 : y
 
     TeleportController.ensureTeleportAnimation()
-    this.gameInstance.SendMessage('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
+    this.SendMessageToUnity('CharacterController', 'Teleport', JSON.stringify({ x, y: theY, z }))
     if (cameraTarget || rotateIfTargetIsNotSet) {
-      this.gameInstance.SendMessage('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
+      this.SendMessageToUnity('CameraController', 'SetRotation', JSON.stringify({ x, y: theY, z, cameraTarget }))
     }
   }
 
@@ -176,58 +214,59 @@ export class UnityInterface {
       throw new Error('Only one scene at a time!')
     }
 
-    this.gameInstance.SendMessage('SceneController', 'LoadParcelScenes', JSON.stringify(parcelsToLoad[0]))
+    this.SendMessageToUnity('Main', 'LoadParcelScenes', JSON.stringify(parcelsToLoad[0]))
   }
 
   public UpdateParcelScenes(parcelsToLoad: LoadableParcelScene[]) {
     if (parcelsToLoad.length > 1) {
       throw new Error('Only one scene at a time!')
     }
-    this.gameInstance.SendMessage('SceneController', 'UpdateParcelScenes', JSON.stringify(parcelsToLoad[0]))
+    this.SendMessageToUnity('Main', 'UpdateParcelScenes', JSON.stringify(parcelsToLoad[0]))
   }
 
   public UnloadScene(sceneId: string) {
-    this.gameInstance.SendMessage('SceneController', 'UnloadScene', sceneId)
+    this.SendMessageToUnity('Main', 'UnloadScene', sceneId)
   }
 
   public SendSceneMessage(messages: string) {
-    this.gameInstance.SendMessage(`SceneController`, `SendSceneMessage`, messages)
+    this.SendMessageToUnity(`SceneController`, `SendSceneMessage`, messages)
   }
 
   public SetSceneDebugPanel() {
-    this.gameInstance.SendMessage('SceneController', 'SetSceneDebugPanel')
+    this.SendMessageToUnity('Main', 'SetSceneDebugPanel')
   }
 
   public ShowFPSPanel() {
-    this.gameInstance.SendMessage('SceneController', 'ShowFPSPanel')
+    this.SendMessageToUnity('Main', 'ShowFPSPanel')
   }
 
   public HideFPSPanel() {
-    this.gameInstance.SendMessage('SceneController', 'HideFPSPanel')
+    this.SendMessageToUnity('Main', 'HideFPSPanel')
   }
 
   public SetEngineDebugPanel() {
-    this.gameInstance.SendMessage('SceneController', 'SetEngineDebugPanel')
+    this.SendMessageToUnity('Main', 'SetEngineDebugPanel')
   }
 
   public SetDisableAssetBundles() {
-    this.gameInstance.SendMessage('SceneController', 'SetDisableAssetBundles')
+    this.SendMessageToUnity('Main', 'SetDisableAssetBundles')
   }
 
   public ActivateRendering() {
-    this.gameInstance.SendMessage('SceneController', 'ActivateRendering')
+    this.SendMessageToUnity('Main', 'ActivateRendering')
   }
 
   public DeactivateRendering() {
-    this.gameInstance.SendMessage('SceneController', 'DeactivateRendering')
+    renderStateObservable.notifyObservers(false)
+    this.SendMessageToUnity('Main', 'DeactivateRendering')
   }
 
   public ReportFocusOn() {
-    this.gameInstance.SendMessage('Bridges', 'ReportFocusOn')
+    this.SendMessageToUnity('Bridges', 'ReportFocusOn')
   }
 
   public ReportFocusOff() {
-    this.gameInstance.SendMessage('Bridges', 'ReportFocusOff')
+    this.SendMessageToUnity('Bridges', 'ReportFocusOff')
   }
 
   public UnlockCursor() {
@@ -235,33 +274,35 @@ export class UnityInterface {
   }
 
   public SetCursorState(locked: boolean) {
-    this.gameInstance.SendMessage('MouseCatcher', 'UnlockCursorBrowser', locked ? 1 : 0)
+    this.SendMessageToUnity('Bridges', 'UnlockCursorBrowser', locked ? 1 : 0)
   }
 
   public SetBuilderReady() {
-    this.gameInstance.SendMessage('SceneController', 'BuilderReady')
+    this.SendMessageToUnity('Main', 'BuilderReady')
   }
 
   public AddUserProfileToCatalog(peerProfile: ProfileForRenderer) {
-    this.gameInstance.SendMessage('SceneController', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
+    this.SendMessageToUnity('Main', 'AddUserProfileToCatalog', JSON.stringify(peerProfile))
   }
 
-  public AddWearablesToCatalog(wearables: Wearable[]) {
-    for (const wearable of wearables) {
-      this.gameInstance.SendMessage('SceneController', 'AddWearableToCatalog', JSON.stringify(wearable))
-    }
+  public AddWearablesToCatalog(wearables: Wearable[], context?: string) {
+    this.SendMessageToUnity('Main', 'AddWearablesToCatalog', JSON.stringify({ wearables, context }))
+  }
+
+  public WearablesRequestFailed(error: string, context: string | undefined) {
+    this.SendMessageToUnity('Main', 'WearablesRequestFailed', JSON.stringify({ error, context }))
   }
 
   public RemoveWearablesFromCatalog(wearableIds: string[]) {
-    this.gameInstance.SendMessage('SceneController', 'RemoveWearablesFromCatalog', JSON.stringify(wearableIds))
+    this.SendMessageToUnity('Main', 'RemoveWearablesFromCatalog', JSON.stringify(wearableIds))
   }
 
   public ClearWearableCatalog() {
-    this.gameInstance.SendMessage('SceneController', 'ClearWearableCatalog')
+    this.SendMessageToUnity('Main', 'ClearWearableCatalog')
   }
 
   public ShowNotification(notification: Notification) {
-    this.gameInstance.SendMessage('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
+    this.SendMessageToUnity('HUDController', 'ShowNotificationFromJson', JSON.stringify(notification))
   }
 
   public ConfigureHUDElement(
@@ -269,7 +310,7 @@ export class UnityInterface {
     configuration: HUDConfiguration,
     extraPayload: any | null = null
   ) {
-    this.gameInstance.SendMessage(
+    this.SendMessageToUnity(
       'HUDController',
       `ConfigureHUDElement`,
       JSON.stringify({
@@ -281,22 +322,26 @@ export class UnityInterface {
   }
 
   public ShowWelcomeNotification() {
-    this.gameInstance.SendMessage('HUDController', 'ShowWelcomeNotification')
+    this.SendMessageToUnity('HUDController', 'ShowWelcomeNotification')
   }
 
   public TriggerSelfUserExpression(expressionId: string) {
-    this.gameInstance.SendMessage('HUDController', 'TriggerSelfUserExpression', expressionId)
+    this.SendMessageToUnity('HUDController', 'TriggerSelfUserExpression', expressionId)
   }
 
   public UpdateMinimapSceneInformation(info: MinimapSceneInfo[]) {
     for (let i = 0; i < info.length; i += MINIMAP_CHUNK_SIZE) {
       const chunk = info.slice(i, i + MINIMAP_CHUNK_SIZE)
-      this.gameInstance.SendMessage('SceneController', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
+      this.SendMessageToUnity('Main', 'UpdateMinimapSceneInformation', JSON.stringify(chunk))
     }
   }
 
   public SetTutorialEnabled(fromDeepLink: boolean) {
-    this.gameInstance.SendMessage('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
+    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabled', JSON.stringify(fromDeepLink))
+  }
+
+  public SetTutorialEnabledForUsersThatAlreadyDidTheTutorial() {
+    this.SendMessageToUnity('TutorialController', 'SetTutorialEnabledForUsersThatAlreadyDidTheTutorial')
   }
 
   public TriggerAirdropDisplay(data: AirdropInfo) {
@@ -304,27 +349,27 @@ export class UnityInterface {
   }
 
   public AddMessageToChatWindow(message: ChatMessage) {
-    this.gameInstance.SendMessage('SceneController', 'AddMessageToChatWindow', JSON.stringify(message))
+    this.SendMessageToUnity('Main', 'AddMessageToChatWindow', JSON.stringify(message))
   }
 
   public InitializeFriends(initializationMessage: FriendsInitializationMessage) {
-    this.gameInstance.SendMessage('SceneController', 'InitializeFriends', JSON.stringify(initializationMessage))
+    this.SendMessageToUnity('Main', 'InitializeFriends', JSON.stringify(initializationMessage))
   }
 
   public UpdateFriendshipStatus(updateMessage: FriendshipUpdateStatusMessage) {
-    this.gameInstance.SendMessage('SceneController', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
+    this.SendMessageToUnity('Main', 'UpdateFriendshipStatus', JSON.stringify(updateMessage))
   }
 
   public UpdateUserPresence(status: UpdateUserStatusMessage) {
-    this.gameInstance.SendMessage('SceneController', 'UpdateUserPresence', JSON.stringify(status))
+    this.SendMessageToUnity('Main', 'UpdateUserPresence', JSON.stringify(status))
   }
 
   public FriendNotFound(queryString: string) {
-    this.gameInstance.SendMessage('SceneController', 'FriendNotFound', JSON.stringify(queryString))
+    this.SendMessageToUnity('Main', 'FriendNotFound', JSON.stringify(queryString))
   }
 
   public RequestTeleport(teleportData: {}) {
-    this.gameInstance.SendMessage('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
+    this.SendMessageToUnity('HUDController', 'RequestTeleport', JSON.stringify(teleportData))
   }
 
   public UpdateHotScenesList(info: HotSceneInfo[]) {
@@ -336,20 +381,16 @@ export class UnityInterface {
 
     for (let i = 0; i < chunks.length; i++) {
       const payload = { chunkIndex: i, chunksCount: chunks.length, scenesInfo: chunks[i] }
-      this.gameInstance.SendMessage('SceneController', 'UpdateHotScenesList', JSON.stringify(payload))
+      this.SendMessageToUnity('Main', 'UpdateHotScenesList', JSON.stringify(payload))
     }
   }
 
   public SendGIFPointers(id: string, width: number, height: number, pointers: number[], frameDelays: number[]) {
-    this.gameInstance.SendMessage(
-      'SceneController',
-      'UpdateGIFPointers',
-      JSON.stringify({ id, width, height, pointers, frameDelays })
-    )
+    this.SendMessageToUnity('Main', 'UpdateGIFPointers', JSON.stringify({ id, width, height, pointers, frameDelays }))
   }
 
   public SendGIFFetchFailure(id: string) {
-    this.gameInstance.SendMessage('SceneController', 'FailGIFFetch', id)
+    this.SendMessageToUnity('Main', 'FailGIFFetch', id)
   }
 
   public ConfigureEmailPrompt(tutorialStep: number) {
@@ -367,42 +408,75 @@ export class UnityInterface {
       if (RESET_TUTORIAL || (tutorialStep & tutorialCompletedFlag) === 0) {
         this.SetTutorialEnabled(fromDeepLink)
       } else {
+        this.SetTutorialEnabledForUsersThatAlreadyDidTheTutorial()
         setDelightedSurveyEnabled(true)
       }
     }
   }
 
   public UpdateBalanceOfMANA(balance: string) {
-    this.gameInstance.SendMessage('HUDController', 'UpdateBalanceOfMANA', balance)
+    this.SendMessageToUnity('HUDController', 'UpdateBalanceOfMANA', balance)
   }
 
   public SetPlayerTalking(talking: boolean) {
-    this.gameInstance.SendMessage('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
+    this.SendMessageToUnity('HUDController', 'SetPlayerTalking', JSON.stringify(talking))
   }
 
   public ShowAvatarEditorInSignIn() {
-    this.gameInstance.SendMessage('HUDController', 'ShowAvatarEditorInSignUp')
-    this.gameInstance.SendMessage('SceneController', 'ForceActivateRendering')
+    this.SendMessageToUnity('HUDController', 'ShowAvatarEditorInSignUp')
+    this.SendMessageToUnity('Main', 'ForceActivateRendering')
   }
 
   public SetUserTalking(userId: string, talking: boolean) {
-    this.gameInstance.SendMessage(
-      'HUDController',
-      'SetUserTalking',
-      JSON.stringify({ userId: userId, talking: talking })
-    )
+    this.SendMessageToUnity('HUDController', 'SetUserTalking', JSON.stringify({ userId: userId, talking: talking }))
   }
 
   public SetUsersMuted(usersId: string[], muted: boolean) {
-    this.gameInstance.SendMessage('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
+    this.SendMessageToUnity('HUDController', 'SetUsersMuted', JSON.stringify({ usersId: usersId, muted: muted }))
+  }
+
+  public SetVoiceChatEnabledByScene(enabled: boolean) {
+    this.SendMessageToUnity('HUDController', 'SetVoiceChatEnabledByScene', enabled ? 1 : 0)
   }
 
   public SetKernelConfiguration(config: KernelConfigForRenderer) {
-    this.gameInstance.SendMessage('Bridges', 'SetKernelConfiguration', JSON.stringify(config))
+    this.SendMessageToUnity('Bridges', 'SetKernelConfiguration', JSON.stringify(config))
   }
 
   public UpdateRealmsInfo(realmsInfo: Partial<RealmsInfoForRenderer>) {
-    this.gameInstance.SendMessage('Bridges', 'UpdateRealmsInfo', JSON.stringify(realmsInfo))
+    this.SendMessageToUnity('Bridges', 'UpdateRealmsInfo', JSON.stringify(realmsInfo))
+  }
+
+  public SendPublishSceneResult(result: DeploymentResult) {
+    this.SendMessageToUnity('Main', 'PublishSceneResult', JSON.stringify(result))
+  }
+
+  public SetENSOwnerQueryResult(searchInput: string, profiles: Profile[] | undefined) {
+    if (!profiles) {
+      this.SendMessageToUnity('Bridges', 'SetENSOwnerQueryResult', JSON.stringify({ searchInput, success: false }))
+      return
+    }
+    const profilesForRenderer: ProfileForRenderer[] = []
+    for (let profile of profiles) {
+      profilesForRenderer.push(profileToRendererFormat(profile))
+    }
+    this.SendMessageToUnity(
+      'Bridges',
+      'SetENSOwnerQueryResult',
+      JSON.stringify({ searchInput, success: true, profiles: profilesForRenderer })
+    )
+  }
+
+  // *********************************************************************************
+  // ************** Quests messages **************
+  // *********************************************************************************
+
+  InitQuestsInfo(rendererQuests: QuestForRenderer[]) {
+    this.SendMessageToUnity('Bridges', 'InitializeQuests', JSON.stringify(rendererQuests))
+  }
+
+  UpdateQuestProgress(rendererQuest: QuestForRenderer) {
+    this.SendMessageToUnity('Bridges', 'UpdateQuestProgress', JSON.stringify(rendererQuest))
   }
 
   // *********************************************************************************
@@ -411,7 +485,7 @@ export class UnityInterface {
   // @internal
 
   public SendBuilderMessage(method: string, payload: string = '') {
-    this.gameInstance.SendMessage(`BuilderController`, method, payload)
+    this.SendMessageToUnity(`BuilderController`, method, payload)
   }
 
   public SelectGizmoBuilder(type: string) {
@@ -485,6 +559,45 @@ export class UnityInterface {
     window.setTimeout(() => {
       resizeCanvas(_gameInstance.Module)
     }, 100)
+  }
+
+  // NOTE: we override wasm's setThrew function before sending message to unity and restore it to it's
+  // original function after message is sent. If an exception is thrown during SendMessage we assume that it's related
+  // to the code executed by the SendMessage on unity's side.
+  private SendMessageToUnity(object: string, method: string, payload: any = undefined) {
+    // "this.Module" is not present when using remote websocket renderer, so we just send the message to unity without doing any override.
+    if (!this.Module) {
+      this.gameInstance.SendMessage(object, method, payload)
+      return
+    }
+
+    const originalSetThrew = this.Module['setThrew']
+    const unityModule = this.Module
+    let isError = false
+
+    function overrideSetThrew() {
+      unityModule['setThrew'] = function () {
+        isError = true
+        return originalSetThrew.apply(this, arguments)
+      }
+    }
+
+    function restoreSetThrew() {
+      unityModule['setThrew'] = originalSetThrew
+    }
+
+    overrideSetThrew()
+    try {
+      this.gameInstance.SendMessage(object, method, payload)
+    } finally {
+      restoreSetThrew()
+    }
+
+    if (isError) {
+      const error = `Error while sending Message to Unity. Object: ${object}. Method: ${method}. Payload: ${payload}.`
+      defaultLogger.error(error)
+      ReportRendererInterfaceError(error, error)
+    }
   }
 }
 

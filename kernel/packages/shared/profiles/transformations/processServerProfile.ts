@@ -1,7 +1,5 @@
 import { Profile } from '../types'
-import { WearableId } from 'shared/catalogs/types'
 import { colorString } from './colorString'
-import { ALL_WEARABLES } from 'config'
 import { filterInvalidNameCharacters } from '../utils/names'
 import { createFakeName } from '../utils/fakeName'
 
@@ -20,21 +18,13 @@ export const deprecatedWearables = [
 export function dropDeprecatedWearables(wearableId: string): boolean {
   return deprecatedWearables.indexOf(wearableId) === -1
 }
-export function noExclusiveMismatches(inventory: WearableId[]) {
-  return function (wearableId: WearableId) {
-    if (ALL_WEARABLES) {
-      return true
-    }
-    return wearableId.startsWith('dcl://base-avatars') || inventory.indexOf(wearableId) !== -1
-  }
-}
 
 export function calculateDisplayName(userId: string, profile: any): string {
-  if (profile.name && profile.hasClaimedName) {
+  if (profile && profile.name && profile.hasClaimedName) {
     return profile.name
   }
 
-  if (profile.unclaimedName) {
+  if (profile && profile.unclaimedName) {
     return `${filterInvalidNameCharacters(profile.unclaimedName)}#${userId.slice(-4)}`
   }
 
@@ -42,10 +32,7 @@ export function calculateDisplayName(userId: string, profile: any): string {
 }
 export function processServerProfile(userId: string, receivedProfile: any): Profile {
   const name = calculateDisplayName(userId, receivedProfile)
-  const wearables = receivedProfile.avatar.wearables
-    .map(fixWearableIds)
-    .filter(dropDeprecatedWearables)
-    .filter(noExclusiveMismatches(receivedProfile.inventory))
+  const wearables = receivedProfile.avatar.wearables.map(fixWearableIds).filter(dropDeprecatedWearables)
   const snapshots = receivedProfile.avatar ? receivedProfile.avatar.snapshots : {}
   const eyeColor = flattenColorIfNecessary(receivedProfile.avatar.eyes.color)
   const hairColor = flattenColorIfNecessary(receivedProfile.avatar.hair.color)
@@ -57,7 +44,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
     hasClaimedName:
       typeof receivedProfile.hasClaimedName === 'undefined' ? !!receivedProfile.name : receivedProfile.hasClaimedName,
     description: receivedProfile.description || '',
-    ethAddress: userId || 'noeth',
+    ethAddress: receivedProfile.ethAddress || 'noeth',
     version: receivedProfile.version ?? receivedProfile.avatar.version ?? 1,
     avatar: {
       eyeColor: colorString(eyeColor),
@@ -67,7 +54,6 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
       wearables,
       snapshots
     },
-    inventory: receivedProfile.inventory || [],
     blocked: receivedProfile.blocked,
     muted: receivedProfile.muted,
     tutorialStep: receivedProfile.tutorialStep || 0,
@@ -77,7 +63,7 @@ export function processServerProfile(userId: string, receivedProfile: any): Prof
 }
 
 /**
- * Flattens the object with a color field to avoid having two nested color fields when profile comess messed from server.
+ * Flattens the object with a color field to avoid having two nested color fields when profile comes messed from server.
  *
  * @param objectWithColor object to flatten if need be
  */

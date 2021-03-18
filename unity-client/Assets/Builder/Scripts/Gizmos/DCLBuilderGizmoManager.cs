@@ -19,7 +19,6 @@ namespace Builder.Gizmos
         public bool isTransformingObject { private set; get; }
         public DCLBuilderGizmo activeGizmo { private set; get; }
 
-
         private SnapInfo snapInfo = new SnapInfo();
 
         private bool isGameObjectActive = false;
@@ -73,6 +72,8 @@ namespace Builder.Gizmos
             isTransformingObject = false;
         }
 
+        public bool HasAxisHover() { return hoveredAxis != null; }
+
         private void SetAxisHover(DCLBuilderGizmoAxis axis)
         {
             if (hoveredAxis != null && hoveredAxis != axis)
@@ -86,7 +87,7 @@ namespace Builder.Gizmos
             hoveredAxis = axis;
         }
 
-        public void SetAllGizmosInPosition(Vector3 position)
+        public void ForceRelativeScaleRatio()
         {
             for (int i = 0; i < gizmos.Length; i++)
             {
@@ -103,18 +104,19 @@ namespace Builder.Gizmos
             }
         }
 
-        public void HideGizmo()
+        public void HideGizmo(bool setInactiveGizmos = false)
         {
             if (activeGizmo != null)
             {
                 activeGizmo.gameObject.SetActive(false);
             }
+            if (setInactiveGizmos)
+            {
+                SetGizmoType(DCL.Components.DCLGizmos.Gizmo.NONE);
+            }
         }
 
-        private bool IsGizmoActive()
-        {
-            return activeGizmo != null;
-        }
+        private bool IsGizmoActive() { return activeGizmo != null; }
 
         private bool RaycastHit(Ray ray, out Vector3 hitPoint)
         {
@@ -195,10 +197,7 @@ namespace Builder.Gizmos
             }
         }
 
-        public void InitializeGizmos(Camera camera)
-        {
-            InitializeGizmos(camera, camera.transform);
-        }
+        public void InitializeGizmos(Camera camera) { InitializeGizmos(camera, camera.transform); }
 
         public void InitializeGizmos(Camera camera, Transform cameraTransform)
         {
@@ -215,15 +214,9 @@ namespace Builder.Gizmos
             }
         }
 
-        private void OnCameraZoomChanged(Camera camera, float zoom)
-        {
-            InitializeGizmos(camera);
-        }
+        private void OnCameraZoomChanged(Camera camera, float zoom) { InitializeGizmos(camera); }
 
-        private void OnSetGridResolution(float position, float rotation, float scale)
-        {
-            SetSnapFactor(position, rotation, scale);
-        }
+        private void OnSetGridResolution(float position, float rotation, float scale) { SetSnapFactor(position, rotation, scale); }
 
         public void SetSelectedEntities(Transform selectionParent, List<EditableEntity> entities)
         {
@@ -231,10 +224,7 @@ namespace Builder.Gizmos
             selectedEntitiesParent = selectionParent;
             GizmoStatusUpdate();
         }
-        private void OnGizmosAxisPressed(DCLBuilderGizmoAxis pressedAxis)
-        {
-            OnBeginDrag(pressedAxis);
-        }
+        private void OnGizmosAxisPressed(DCLBuilderGizmoAxis pressedAxis) { OnBeginDrag(pressedAxis); }
 
         private void OnMouseUp(int buttonId, Vector3 mousePosition)
         {

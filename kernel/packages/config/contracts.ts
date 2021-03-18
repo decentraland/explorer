@@ -107,7 +107,20 @@ export const contracts = {
     'CZMercenaryMTZ': '0xc3ca6c364b854fd0a653a43f8344f8c22ddfdd26',
     'WonderzoneSteampunk': '0xb96697fa4a3361ba35b774a42c58daccaad1b8e1',
     'DCNiftyblocksmith': '0x102daabd1e9d294d4436ec4c521dce7b1f15499e',
-    'Halloween2020Collection': '0xfeb52cbf71b9adac957c6f948a6cf9980ac8c907'
+    'Halloween2020Collection': '0xfeb52cbf71b9adac957c6f948a6cf9980ac8c907',
+    'Xmas2020Collection': '0xecf073f91101ce5628669c487aee8f5822a101b1',
+    'MemeDontBuyThis': '0x1a57f6afc902d25792c53b8f19b7e17ef84222d5',
+    'ReleaseTheKraken': '0xffc5043d9a00865d089d5eefa5b3d1625aec6763',
+    '3LAUBasics': '0xe1ecb4e5130f493551c7d6df96ad19e5b431a0a9',
+    'XmashUp2020': '0xdd9c7bc159dacb19c9f6b9d7e23948c87aa2397f',
+    'MLLiondance': '0x0b1c6c75d511fae05e7dc696f4cf14129a9c43c9',
+    'AtariLaunch': '0x4c290f486bae507719c562b6b524bdb71a2570c9',
+    'ERC20Predicate': '0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf',
+    'RootChainManagerProxy': '0xA0c68C638235ee32657e8f720a23ceC1bFc77C77',
+    'RootChainProxy': '0x86E4Dc95c7FBdBf52e33D563BbDB00823894C287',
+    'RTFKTXAtari': '0x6b47e7066c7db71aa04a1d5872496fe05c4c331f',
+    'RACBasics': '0x68e139552c4077ce5c9ab929c7e18ca721ffff00',
+    'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',
@@ -124,5 +137,20 @@ export const contracts = {
     'MANAMiniMeToken': '0xfb2712a1246f712b889692c7ce55fec25c06bc33',
     'LANDMiniMeToken': '0x576c4577aAd561EA79acbd49215a0cC1473BfCCA',
     'EstateMiniMeToken': '0x2b98C125733035cDE09d311F988845808EE270E6'
+  },
+  'goerli': {
+    'MANAToken': '0xe7fDae84ACaba2A5Ba817B6E6D8A2d415DBFEdbe',
+    'ERC20Predicate': '0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34',
+    'RootChainManagerProxy': '0xbbd7cbfa79faee899eaf900f13c9065bf03b1a74',
+    'RootChainProxy': '0x2890ba17efe978480615e330ecb65333b880928e'
+  },
+  'matic': {
+    'MANAToken': '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4',
+    'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
+  },
+  'mumbai': {
+    'MetaTxForwarder': '0xBF6755A83C0dCDBB2933A96EA778E00b717d7004',
+    'MANAToken': '0x882Da5967c435eA5cC6b09150d55E8304B838f45',
+    'ChildChainManagerProxy': '0xb5505a6d998549090530911180f38aC5130101c6'
   }
 }

@@ -16,8 +16,10 @@ namespace DCL.Components
         internal static bool isTest = false;
 #endif
 
+        private const float OUTOFSCENE_TEX_UPDATE_INTERVAL = 1.5f;
+
         [System.Serializable]
-        new public class Model
+        new public class Model : BaseModel
         {
             public string videoClipId;
             public bool playing = false;
@@ -27,9 +29,12 @@ namespace DCL.Components
             public float seek = -1;
             public BabylonWrapMode wrap = BabylonWrapMode.CLAMP;
             public FilterMode samplingMode = FilterMode.Bilinear;
-        }
 
-        new protected internal Model model;
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
+        }
 
         internal WebVideoPlayer texturePlayer;
         private Coroutine texturePlayerUpdateRoutine;
@@ -38,18 +43,26 @@ namespace DCL.Components
         private bool isPlayStateDirty = false;
         internal bool isVisible = false;
 
+        private bool isPlayerInScene = true;
+        private float currUpdateIntervalTime = OUTOFSCENE_TEX_UPDATE_INTERVAL;
+
         internal Dictionary<string, MaterialInfo> attachedMaterials = new Dictionary<string, MaterialInfo>();
 
-        public DCLVideoTexture(ParcelScene scene) : base(scene)
+        public DCLVideoTexture()
         {
             model = new Model();
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            //If the scene creates and destroy the component before our renderer has been turned on bad things happen!
+            //TODO: Analyze if we can catch this upstream and stop the IEnumerator
+            if (isDisposed)
+                yield break;
+
+            var model = (Model) newModel;
 
             unitySamplingMode = model.samplingMode;
 
@@ -69,6 +82,7 @@ namespace DCL.Components
             if (texturePlayer == null)
             {
                 DCLVideoClip dclVideoClip = scene.GetSharedComponent(model.videoClipId) as DCLVideoClip;
+
                 if (dclVideoClip == null)
                 {
                     Debug.LogError("Wrong video clip type when playing VideoTexture!!");
@@ -79,8 +93,11 @@ namespace DCL.Components
                 texturePlayer = new WebVideoPlayer(videoId, dclVideoClip.GetUrl(), dclVideoClip.isStream);
                 texturePlayerUpdateRoutine = CoroutineStarter.Start(VideoTextureUpdate());
                 CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChanged;
+                CommonScriptableObjects.sceneID.OnChange += OnSceneIDChanged;
                 scene.OnEntityRemoved += OnEntityRemoved;
                 Settings.i.OnGeneralSettingsChanged += OnSettingsChanged;
+
+                OnSceneIDChanged(CommonScriptableObjects.sceneID.Get(), null);
             }
 
             // NOTE: create texture for testing cause real texture will only be created on web platform
@@ -118,16 +135,15 @@ namespace DCL.Components
                 {
                     texturePlayer.SetTime(model.seek);
                     model.seek = -1;
+
+                    // Applying seek is not immediate
+                    yield return null;
                 }
 
                 if (model.playing)
-                {
                     texturePlayer.Play();
-                }
-                else if (texturePlayer.playing)
-                {
+                else
                     texturePlayer.Pause();
-                }
 
                 if (baseVolume != model.volume)
                 {
@@ -138,6 +154,11 @@ namespace DCL.Components
                 texturePlayer.SetPlaybackRate(model.playbackRate);
                 texturePlayer.SetLoop(model.loop);
             }
+        }
+
+        public float GetVolume()
+        {
+            return ((Model) model).volume;
         }
 
         private bool HasTexturePropertiesChanged()
@@ -163,8 +184,13 @@ namespace DCL.Components
                     isPlayStateDirty = false;
                 }
 
-                if (texturePlayer != null && !isTest)
+                if (!isPlayerInScene && currUpdateIntervalTime < OUTOFSCENE_TEX_UPDATE_INTERVAL)
                 {
+                    currUpdateIntervalTime += Time.unscaledDeltaTime;
+                }
+                else if (texturePlayer != null && !isTest)
+                {
+                    currUpdateIntervalTime = 0;
                     texturePlayer.UpdateWebVideoTexture();
                 }
 
@@ -229,12 +255,17 @@ namespace DCL.Components
             if (scene == null) return false;
             if (string.IsNullOrEmpty(currentSceneId)) return false;
 
-            return scene.sceneData.id == currentSceneId;
+            return (scene.sceneData.id == currentSceneId) || (scene is GlobalScene globalScene && globalScene.isPortableExperience);
         }
 
         private void OnPlayerCoordsChanged(Vector2Int coords, Vector2Int prevCoords)
         {
             isPlayStateDirty = true;
+        }
+
+        private void OnSceneIDChanged(string current, string previous)
+        {
+            isPlayerInScene = IsPlayerInSameSceneAsComponent(current);
         }
 
         public override void AttachTo(PBRMaterial material)
@@ -329,6 +360,7 @@ namespace DCL.Components
         {
             Settings.i.OnGeneralSettingsChanged -= OnSettingsChanged;
             CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChanged;
+            CommonScriptableObjects.sceneID.OnChange -= OnSceneIDChanged;
             if (scene != null) scene.OnEntityRemoved -= OnEntityRemoved;
             if (texturePlayerUpdateRoutine != null)
             {
@@ -439,7 +471,7 @@ namespace DCL.Components
 
             bool MaterialInfo.IsVisible()
             {
-                if (!shape.model.visible) return false;
+                if (!((UIShape.Model) shape.GetModel()).visible) return false;
                 return IsParentVisible(shape);
             }
 

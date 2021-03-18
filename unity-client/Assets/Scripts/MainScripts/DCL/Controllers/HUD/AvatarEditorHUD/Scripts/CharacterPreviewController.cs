@@ -1,6 +1,7 @@
 using DCL;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterPreviewController : MonoBehaviour
@@ -45,15 +46,20 @@ public class CharacterPreviewController : MonoBehaviour
 
     private Coroutine updateModelRoutine;
 
+    private bool avatarLoadFailed = false;
+
     private void Awake()
     {
-        cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
+        cameraFocusLookUp = new Dictionary<CameraFocus, Transform>()
         {
             {CameraFocus.DefaultEditing, defaultEditingTemplate},
             {CameraFocus.FaceEditing, faceEditingTemplate},
             {CameraFocus.FaceSnapshot, faceSnapshotTemplate},
             {CameraFocus.BodySnapshot, bodySnapshotTemplate},
         };
+        var cullingSettings = DCL.Environment.i.platform.cullingController.GetSettingsCopy();
+        cullingSettings.ignoredLayersMask |= 1 << CHARACTER_PREVIEW_LAYER;
+        DCL.Environment.i.platform.cullingController.SetSettings(cullingSettings);
     }
 
     public void UpdateModel(AvatarModel newModel, Action onDone)
@@ -69,15 +75,15 @@ public class CharacterPreviewController : MonoBehaviour
     private IEnumerator UpdateModelRoutine(AvatarModel newModel, Action onDone)
     {
         bool avatarDone = false;
-        bool avatarFailed = false;
+        avatarLoadFailed = false;
 
         ResetRenderersLayer();
 
-        avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarFailed = true);
+        avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarLoadFailed = true);
 
-        yield return new DCL.WaitUntil(() => avatarDone || avatarFailed);
+        yield return new DCL.WaitUntil(() => avatarDone || avatarLoadFailed);
 
-        if (avatarDone && avatarRenderer != null)
+        if (avatarRenderer != null)
         {
             SetLayerRecursively(avatarRenderer.gameObject, CHARACTER_PREVIEW_LAYER);
         }
@@ -99,13 +105,20 @@ public class CharacterPreviewController : MonoBehaviour
         SetLayerRecursively(avatarRenderer.gameObject, CHARACTER_DEFAULT_LAYER);
     }
 
-    public void TakeSnapshots(OnSnapshotsReady callback)
+    public void TakeSnapshots(OnSnapshotsReady onSuccess, Action onFailed)
     {
-        StartCoroutine(TakeSnapshots_Routine(callback));
+        if (avatarLoadFailed)
+        {
+            onFailed?.Invoke();
+            return;
+        }
+        StartCoroutine(TakeSnapshots_Routine(onSuccess));
     }
 
     private IEnumerator TakeSnapshots_Routine(OnSnapshotsReady callback)
     {
+        DCL.Environment.i.platform.cullingController.Stop();
+
         var current = camera.targetTexture;
         camera.targetTexture = null;
         var avatarAnimator = avatarRenderer.gameObject.GetComponent<AvatarAnimatorLegacy>();
@@ -125,6 +138,8 @@ public class CharacterPreviewController : MonoBehaviour
         SetFocus(CameraFocus.DefaultEditing, false);
 
         camera.targetTexture = current;
+
+        DCL.Environment.i.platform.cullingController.Start();
         callback?.Invoke(face, face128, face256, body);
     }
 

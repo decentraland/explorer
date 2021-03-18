@@ -1,6 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DCL;
+using DCL.Components;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -8,11 +9,11 @@ using WaitUntil = DCL.WaitUntil;
 
 namespace AvatarShape_Tests
 {
-    public class WearableControllerShould : TestsBase
+    public class WearableControllerShould : IntegrationTestSuite_Legacy
     {
         private const string SUNGLASSES_ID = "dcl://base-avatars/black_sun_glasses";
 
-        private WearableDictionary catalog;
+        private BaseDictionary<string, WearableItem> catalog;
         private Transform wearableHolder;
         private List<WearableController> toCleanUp = new List<WearableController>();
 
@@ -20,7 +21,7 @@ namespace AvatarShape_Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
 
             toCleanUp.Clear();
             wearableHolder = CreateTestGameObject("_Holder").transform;
@@ -30,7 +31,8 @@ namespace AvatarShape_Tests
         public IEnumerator LoadSuccessfully()
         {
             //Arrange
-            WearableController wearable = new WearableController(catalog.GetOrDefault(SUNGLASSES_ID));
+            catalog.TryGetValue(SUNGLASSES_ID, out WearableItem wearableItem);
+            WearableController wearable = new WearableController(wearableItem);
             toCleanUp.Add(wearable);
 
             //Act
@@ -63,8 +65,11 @@ namespace AvatarShape_Tests
             //Act
             bool succeeded = false;
             bool failed = false;
+            RendereableAssetLoadHelper.LoadingType cacheLoadingType = RendereableAssetLoadHelper.loadingType;
+            RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.ASSET_BUNDLE_ONLY;
             wearable.Load(WearableLiterals.BodyShapes.FEMALE, wearableHolder, x => succeeded = true, x => failed = true);
             yield return new WaitUntil(() => succeeded || failed);
+            RendereableAssetLoadHelper.loadingType = cacheLoadingType;
 
             //Assert
             Assert.IsFalse(succeeded);
@@ -82,7 +87,8 @@ namespace AvatarShape_Tests
             {
                 skinnedMeshRenderer.bones[i] = CreateTestGameObject($"_rootBone_{i}").transform;
             }
-            WearableController wearable = new WearableController(catalog.GetOrDefault(SUNGLASSES_ID));
+            catalog.TryGetValue(SUNGLASSES_ID, out WearableItem wereableItem);
+            WearableController wearable = new WearableController(wereableItem);
             toCleanUp.Add(wearable);
             wearable.Load(WearableLiterals.BodyShapes.FEMALE, wearableHolder, null, null);
             yield return new WaitUntil(() => wearable.isReady);
@@ -103,7 +109,8 @@ namespace AvatarShape_Tests
         public IEnumerator UpdateVisibilityProperly_True()
         {
             //Arrange
-            WearableController wearable = new WearableController(catalog.GetOrDefault(SUNGLASSES_ID));
+            catalog.TryGetValue(SUNGLASSES_ID, out WearableItem wereableItem);
+            WearableController wearable = new WearableController(wereableItem);
             toCleanUp.Add(wearable);
             wearable.Load(WearableLiterals.BodyShapes.FEMALE, wearableHolder, null, null);
             yield return new WaitUntil(() => wearable.isReady);
@@ -121,7 +128,8 @@ namespace AvatarShape_Tests
         public IEnumerator UpdateVisibilityProperly_False()
         {
             //Arrange
-            WearableController wearable = new WearableController(catalog.GetOrDefault(SUNGLASSES_ID));
+            catalog.TryGetValue(SUNGLASSES_ID, out WearableItem wereableItem);
+            WearableController wearable = new WearableController(wereableItem);
             toCleanUp.Add(wearable);
             wearable.Load(WearableLiterals.BodyShapes.FEMALE, wearableHolder, null, null);
             yield return new WaitUntil(() => wearable.isReady);

@@ -8,16 +8,17 @@ namespace DCL.Components
 
     {
         public UIShape<ReferencesContainerType, ModelType> uiShapeOwner;
-        public UIShapeUpdateHandler(IComponent owner) : base(owner)
+
+        public UIShapeUpdateHandler(IDelayedComponent owner) : base(owner)
         {
             uiShapeOwner = owner as UIShape<ReferencesContainerType, ModelType>;
         }
 
-        public override IEnumerator ApplyChangesWrapper(string newJson)
+        public override IEnumerator ApplyChangesWrapper(BaseModel newModel)
         {
-            uiShapeOwner.PreApplyChanges(newJson);
+            uiShapeOwner.PreApplyChanges(newModel);
 
-            var enumerator = base.ApplyChangesWrapper(newJson);
+            var enumerator = base.ApplyChangesWrapper(newModel);
 
             if (enumerator != null)
             {

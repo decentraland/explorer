@@ -8,11 +8,11 @@ using WaitUntil = DCL.WaitUntil;
 
 namespace AvatarShape_Tests
 {
-    public class FacialFeatureControllerShould : TestsBase
+    public class FacialFeatureControllerShould : IntegrationTestSuite_Legacy
     {
         private const string EYES_ID = "dcl://base-avatars/f_eyes_01";
         private const string DRACULA_MOUTH_ID = "dcl://base-avatars/dracula_mouth";
-        private WearableDictionary catalog;
+        private BaseDictionary<string, WearableItem> catalog;
         private IBodyShapeController bodyShapeController;
 
         [UnitySetUp]
@@ -22,14 +22,15 @@ namespace AvatarShape_Tests
             bodyShapeController = Substitute.For<IBodyShapeController>();
             bodyShapeController.bodyShapeId.Returns(WearableLiterals.BodyShapes.FEMALE);
 
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
         }
 
         [UnityTest]
         public IEnumerator LoadProperly()
         {
             //Arrange
-            FacialFeatureController controller = new FacialFeatureController(catalog.GetOrDefault(EYES_ID), new Material(Shader.Find("DCL/Toon Shader")));
+            catalog.TryGetValue(EYES_ID, out WearableItem wereableItem);
+            FacialFeatureController controller = new FacialFeatureController(wereableItem, new Material(Shader.Find("DCL/Toon Shader")));
 
             //Act
             controller.Load(bodyShapeController, Color.red);
@@ -100,7 +101,8 @@ namespace AvatarShape_Tests
         public IEnumerator LoadMouthWithMaskProperly()
         {
             //Arrange
-            FacialFeatureController controller = new FacialFeatureController(catalog.GetOrDefault(DRACULA_MOUTH_ID), new Material(Shader.Find("DCL/Unlit Cutout Tinted")));
+            catalog.TryGetValue(DRACULA_MOUTH_ID, out WearableItem wereableItem);
+            FacialFeatureController controller = new FacialFeatureController(wereableItem, new Material(Shader.Find("DCL/Unlit Cutout Tinted")));
 
             //Act
             controller.Load(bodyShapeController, Color.red);

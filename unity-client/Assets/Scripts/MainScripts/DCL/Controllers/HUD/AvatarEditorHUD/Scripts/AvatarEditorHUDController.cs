@@ -1,3 +1,4 @@
+using DCL;
 using DCL.Helpers;
 using DCL.Interface;
 using System;
@@ -11,9 +12,11 @@ public class AvatarEditorHUDController : IHUD
     protected static readonly string[] categoriesThatMustHaveSelection = { Categories.BODY_SHAPE, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH };
     protected static readonly string[] categoriesToRandomize = { Categories.HAIR, Categories.EYES, Categories.EYEBROWS, Categories.MOUTH, Categories.FACIAL, Categories.HAIR, Categories.UPPER_BODY, Categories.LOWER_BODY, Categories.FEET };
 
-    [NonSerialized] public bool bypassUpdateAvatarPreview = false;
+    [NonSerialized]
+    public bool bypassUpdateAvatarPreview = false;
+
     private UserProfile userProfile;
-    private WearableDictionary catalog;
+    private BaseDictionary<string, WearableItem> catalog;
     bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
     protected readonly AvatarEditorHUDModel model = new AvatarEditorHUDModel();
@@ -25,13 +28,6 @@ public class AvatarEditorHUDController : IHUD
 
     public AvatarEditorHUDView view;
 
-    private bool isSignUpFlow = false;
-    public bool IsSignUpFlowValue
-    {
-        get => isSignUpFlow;
-        set => isSignUpFlow = value;
-    }
-
     public event Action OnOpen;
     public event Action OnClose;
 
@@ -39,7 +35,7 @@ public class AvatarEditorHUDController : IHUD
     {
     }
 
-    public void Initialize(UserProfile userProfile, WearableDictionary catalog, bool bypassUpdateAvatarPreview = false)
+    public void Initialize(UserProfile userProfile, BaseDictionary<string, WearableItem> catalog, bool bypassUpdateAvatarPreview = false)
     {
         this.userProfile = userProfile;
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
@@ -47,7 +43,7 @@ public class AvatarEditorHUDController : IHUD
         view = AvatarEditorHUDView.Create(this);
 
         view.OnToggleActionTriggered += ToggleVisibility;
-        view.OnCloseActionTriggered += Hide;
+        view.OnCloseActionTriggered += DiscardAndClose;
 
         skinColorList = Resources.Load<ColorList>("SkinTone");
         hairColorList = Resources.Load<ColorList>("HairColor");
@@ -60,7 +56,7 @@ public class AvatarEditorHUDController : IHUD
         this.userProfile.OnUpdate += LoadUserProfile;
     }
 
-    public void SetCatalog(WearableDictionary catalog)
+    public void SetCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         if (this.catalog != null)
         {
@@ -75,7 +71,7 @@ public class AvatarEditorHUDController : IHUD
         this.catalog.OnRemoved += RemoveWearable;
     }
 
-    public void LoadUserProfile(UserProfile userProfile)
+    private void LoadUserProfile(UserProfile userProfile)
     {
         LoadUserProfile(userProfile, false);
     }
@@ -97,7 +93,7 @@ public class AvatarEditorHUDController : IHUD
         if (userProfile.avatar == null || string.IsNullOrEmpty(userProfile.avatar.bodyShape))
             return;
 
-        var bodyShape = CatalogController.wearableCatalog.Get(userProfile.avatar.bodyShape);
+        CatalogController.wearableCatalog.TryGetValue(userProfile.avatar.bodyShape, out var bodyShape);
 
         if (bodyShape == null)
         {
@@ -119,7 +115,7 @@ public class AvatarEditorHUDController : IHUD
 
         for (var i = 0; i < wearablesCount; i++)
         {
-            var wearable = CatalogController.wearableCatalog.Get(userProfile.avatar.wearables[i]);
+            CatalogController.wearableCatalog.TryGetValue(userProfile.avatar.wearables[i], out var wearable);
             if (wearable == null)
             {
                 Debug.LogError($"Couldn't find wearable with ID {userProfile.avatar.wearables[i]}");
@@ -146,7 +142,7 @@ public class AvatarEditorHUDController : IHUD
                 var defaultItemId = WearableLiterals.DefaultWearables.GetDefaultWearable(model.bodyShape.id, category);
                 if (defaultItemId != null)
                 {
-                    wearable = CatalogController.wearableCatalog.Get(defaultItemId);
+                    CatalogController.wearableCatalog.TryGetValue(defaultItemId, out wearable);
                 }
                 else
                 {
@@ -163,7 +159,7 @@ public class AvatarEditorHUDController : IHUD
 
     public void WearableClicked(string wearableId)
     {
-        var wearable = CatalogController.wearableCatalog.Get(wearableId);
+        CatalogController.wearableCatalog.TryGetValue(wearableId, out var wearable);
         if (wearable == null) return;
 
         if (wearable.category == Categories.BODY_SHAPE)
@@ -280,7 +276,8 @@ public class AvatarEditorHUDController : IHUD
         var defaultWearables = WearableLiterals.DefaultWearables.GetDefaultWearables(bodyShape.id);
         for (var i = 0; i < defaultWearables.Length; i++)
         {
-            EquipWearable(catalog.Get(defaultWearables[i]));
+            if (catalog.TryGetValue(defaultWearables[i], out var wearable))
+                EquipWearable(wearable);
         }
     }
 
@@ -316,11 +313,11 @@ public class AvatarEditorHUDController : IHUD
         model.wearables.Clear();
     }
 
-    private void ProcessCatalog(WearableDictionary catalog)
+    private void ProcessCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         wearablesByCategory.Clear();
         view.RemoveAllWearables();
-        using (var iterator = catalog.GetEnumerator())
+        using (var iterator = catalog.Get().GetEnumerator())
         {
             while (iterator.MoveNext())
             {
@@ -428,7 +425,7 @@ public class AvatarEditorHUDController : IHUD
 
         if (!visible && view.isOpen)
         {
-            DCL.Environment.i.messagingControllersManager.paused = false;
+            DCL.Environment.i.messaging.manager.paused = false;
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.inWorld;
             currentRenderProfile.avatarProfile.Apply();
             if (prevMouseLockState)
@@ -440,7 +437,7 @@ public class AvatarEditorHUDController : IHUD
         }
         else if (visible && !view.isOpen)
         {
-            DCL.Environment.i.messagingControllersManager.paused = IsSignUpFlowValue;
+            DCL.Environment.i.messaging.manager.paused = DataStore.i.isSignUpFlow.Get();
             currentRenderProfile.avatarProfile.currentProfile = currentRenderProfile.avatarProfile.avatarEditor;
             currentRenderProfile.avatarProfile.Apply();
 
@@ -456,7 +453,7 @@ public class AvatarEditorHUDController : IHUD
     public void Dispose()
     {
         view.OnToggleActionTriggered -= ToggleVisibility;
-        view.OnCloseActionTriggered -= Hide;
+        view.OnCloseActionTriggered -= DiscardAndClose;
 
         CleanUp();
     }
@@ -481,16 +478,16 @@ public class AvatarEditorHUDController : IHUD
     public void SaveAvatar(Texture2D faceSnapshot, Texture2D face128Snapshot, Texture2D face256Snapshot, Texture2D bodySnapshot)
     {
         var avatarModel = model.ToAvatarModel();
-        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot, IsSignUpFlowValue);
+        WebInterface.SendSaveAvatar(avatarModel, faceSnapshot, face128Snapshot, face256Snapshot, bodySnapshot, DataStore.i.isSignUpFlow.Get());
         userProfile.OverrideAvatar(avatarModel, face256Snapshot);
 
         SetVisibility(false);
-        IsSignUpFlowValue = false;
+        DataStore.i.isSignUpFlow.Set(false);
     }
 
     public void DiscardAndClose()
     {
-        if (!IsSignUpFlowValue)
+        if (!DataStore.i.isSignUpFlow.Get())
             LoadUserProfile(userProfile);
         else
             WebInterface.SendCloseUserAvatar(true);
@@ -514,10 +511,5 @@ public class AvatarEditorHUDController : IHUD
     public void ToggleVisibility()
     {
         SetVisibility(!view.isOpen);
-    }
-
-    public void Hide()
-    {
-        SetVisibility(false);
     }
 }
