@@ -4,12 +4,10 @@ using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-internal class SectionSceneContributorsSettingsController : SectionBase, ISelectSceneListener, 
-                                                            ISectionUpdateSceneDataRequester, ISectionUpdateSceneContributorsRequester
+internal class SectionSceneContributorsSettingsController : SectionBase, ISelectSceneListener, ISectionUpdateSceneContributorsRequester
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionSceneContributorsSettingsView";
     
-    public event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
     public event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
 
     private readonly SectionSceneContributorsSettingsView view;
