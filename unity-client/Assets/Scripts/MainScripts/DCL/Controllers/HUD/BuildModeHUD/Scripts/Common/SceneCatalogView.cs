@@ -8,10 +8,10 @@ public interface ISceneCatalogView
 {
     CatalogAssetPackListView catalogAssetPackList { get; }
     CatalogGroupListView catalogGroupList { get; }
-    TMP_InputField searchInput { get; }
     Toggle category { get; }
     Toggle favorites { get; }
     Toggle assetPack { get; }
+    IBIWSearchBarView searchBarView { get; }
 
     event Action OnHideCatalogClicked;
     event Action OnSceneCatalogBack;
@@ -29,10 +29,10 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 {
     public CatalogAssetPackListView catalogAssetPackList => catalogAssetPackListView;
     public CatalogGroupListView catalogGroupList => catalogGroupListView;
-    public TMP_InputField searchInput => searchInputField;
     public Toggle category => categoryToggle;
     public Toggle favorites => favoritesToggle;
     public Toggle assetPack => assetPackToggle;
+    public IBIWSearchBarView searchBarView  => biwSearchBarView;
 
     public event Action OnHideCatalogClicked;
     public event Action OnSceneCatalogBack;
@@ -48,6 +48,7 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
     [SerializeField] internal Button hideCatalogBtn;
     [SerializeField] internal Button backgBtn;
     [SerializeField] internal Button toggleCatalogBtn;
+    [SerializeField] internal BIWSearchBarView biwSearchBarView;
 
     [Header("Catalog RectTransforms")]
     [SerializeField] internal RectTransform panelRT;
@@ -116,25 +117,13 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         isCatalogExpanded = !isCatalogExpanded;
     }
 
-    public void OnHideCatalogClick()
-    {
-        OnHideCatalogClicked?.Invoke();
-    }
+    public void OnHideCatalogClick() { OnHideCatalogClicked?.Invoke(); }
 
-    public void Back()
-    {
-        OnSceneCatalogBack?.Invoke();
-    }
+    public void Back() { OnSceneCatalogBack?.Invoke(); }
 
-    public void SetCatalogTitle(string text)
-    {
-        catalogTitleTxt.text = text;
-    }
+    public void SetCatalogTitle(string text) { catalogTitleTxt.text = text; }
 
-    public bool IsCatalogOpen()
-    {
-        return gameObject.activeSelf;
-    }
+    public bool IsCatalogOpen() { return gameObject.activeSelf; }
 
     public void CloseCatalog()
     {
@@ -148,8 +137,5 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         gameObject.SetActive(false);
     }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 }

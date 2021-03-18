@@ -67,6 +67,18 @@ public static class BuilderInWorldTestHelper
         }
     }
 
+    public static void CreateTestSmartItemCatalogLocalSingleObject()
+    {
+        AssetCatalogBridge.ClearCatalog();
+        string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/smartItemSceneObjectCatalog.json";
+
+        if (File.Exists(jsonPath))
+        {
+            string jsonValue = File.ReadAllText(jsonPath);
+            AssetCatalogBridge.i.AddFullSceneObjectCatalog(jsonValue);
+        }
+    }
+
     public static void CreateNFT()
     {
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/nftAsset.json";
