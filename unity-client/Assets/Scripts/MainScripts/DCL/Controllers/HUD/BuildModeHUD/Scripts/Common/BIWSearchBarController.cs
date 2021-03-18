@@ -6,6 +6,7 @@ using UnityEngine;
 
 public interface IBIWSearchBarController
 {
+    bool IsFilterActive();
     void Dispose();
     List<Dictionary<string, List<CatalogItem>>> FilterAssets(string nameToFilter);
 }
@@ -19,7 +20,7 @@ public class BIWSearchBarController : IBIWSearchBarController
     private IBIWSearchBarView view;
 
     private bool isSmartItemFilterActive = false;
-
+    private bool isFilterActive = false;
     public BIWSearchBarController(ISceneCatalogView catalogView)
     {
         this.view = catalogView.searchBarView;
@@ -36,6 +37,8 @@ public class BIWSearchBarController : IBIWSearchBarController
             view.searchInput?.onValueChanged.RemoveListener(OnSearchInputChanged);
     }
 
+    public bool IsFilterActive() { return isFilterActive; }
+
     public void OnSearchInputChanged(string currentSearchInput)
     {
         if (string.IsNullOrEmpty(currentSearchInput))
@@ -46,7 +49,7 @@ public class BIWSearchBarController : IBIWSearchBarController
 
         if (currentSearchInput.Length <= 1)
             return;
-
+        isFilterActive = true;
         FilterAssets(currentSearchInput);
         OnFilterChange?.Invoke(filterObjects);
     }
@@ -57,6 +60,8 @@ public class BIWSearchBarController : IBIWSearchBarController
         filterObjects.Clear();
         view.SetSmartItemPressStatus(false);
         view.SetEmptyFilter();
+
+        isFilterActive = false;
     }
 
     public void ChangeSmartItemFilter()
@@ -67,7 +72,11 @@ public class BIWSearchBarController : IBIWSearchBarController
         if (isSmartItemFilterActive)
             FilterSmartItem();
         else
+        {
+            isFilterActive = false;
             OnFilterRemove?.Invoke();
+        }
+
     }
 
     public void FilterSmartItem()

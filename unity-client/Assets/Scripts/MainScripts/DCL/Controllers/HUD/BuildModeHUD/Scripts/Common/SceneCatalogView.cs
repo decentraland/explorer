@@ -23,6 +23,7 @@ public interface ISceneCatalogView
     void SetCatalogTitle(string text);
     void ToggleCatalogExpanse();
     void SetActive(bool isActive);
+    void SetBackBtnSprite(bool isBackSprite);
 }
 
 public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
@@ -36,6 +37,10 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 
     public event Action OnHideCatalogClicked;
     public event Action OnSceneCatalogBack;
+
+    [Header("Design")]
+    [SerializeField] internal Sprite mainCatalogBackBtnSprite;
+    [SerializeField] internal Sprite backCatalogBackBtnSprite;
 
     [Header("Prefab References")]
     [SerializeField] internal TextMeshProUGUI catalogTitleTxt;
@@ -118,6 +123,8 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
     }
 
     public void OnHideCatalogClick() { OnHideCatalogClicked?.Invoke(); }
+
+    public void SetBackBtnSprite(bool isBackSprite) { backgBtn.image.sprite = isBackSprite ? backCatalogBackBtnSprite : mainCatalogBackBtnSprite; }
 
     public void Back() { OnSceneCatalogBack?.Invoke(); }
 

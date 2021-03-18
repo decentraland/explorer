@@ -233,6 +233,7 @@ public class SceneCatalogController : ISceneCatalogController
             else
                 ShowCategories();
 
+            sceneCatalogView.SetBackBtnSprite(false);
             biwSearchBarController.FreeFilters();
         }
     }
@@ -279,6 +280,8 @@ public class SceneCatalogController : ISceneCatalogController
 
         if (sceneCatalogView.catalogGroupList != null)
             sceneCatalogView.catalogGroupList.gameObject.SetActive(true);
+
+        sceneCatalogView.SetBackBtnSprite(true);
     }
 
     public void OpenCatalog()
