@@ -6,6 +6,8 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<CatalogItem
 {
     public Canvas generalCanvas;
     public CatalogAssetGroupAdapter categoryItemAdapterPrefab;
+    public DynamicScrollSensitivity dynamicScrollSensitivity;
+
     public System.Action<CatalogItem> OnCatalogItemClicked;
     public System.Action<CatalogItem, CatalogItemAdapter> OnCatalogItemFavorite;
     public System.Action<PointerEventData, CatalogItemAdapter> OnPointerEnterInAdapter;
@@ -33,6 +35,9 @@ public class CatalogGroupListView : ListView<Dictionary<string, List<CatalogItem
                 SubscribeToEvents(adapter);
             }
         }
+
+        if (dynamicScrollSensitivity != null)
+            dynamicScrollSensitivity.RecalculateSensitivity();
     }
 
     public override void RemoveAdapters()
