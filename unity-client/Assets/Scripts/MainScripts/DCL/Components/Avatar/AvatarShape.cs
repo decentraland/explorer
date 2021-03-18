@@ -72,19 +72,15 @@ namespace DCL
 
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
-            if (onPointerDown != null)
-            {
-                onPointerDown.scene = scene;
-                onPointerDown.entity = entity;
-                onPointerDown.Initialize(
-                    new OnPointerDown.Model()
-                    {
-                        type = OnPointerDown.NAME,
-                        button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
-                        hoverText = "view profile"
-                    }
-                );
-            }
+            onPointerDown.Initialize(
+                new OnPointerDown.Model()
+                {
+                    type = OnPointerDown.NAME,
+                    button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
+                    hoverText = "view profile"
+                },
+                entity
+            );
 
             CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
             CommonScriptableObjects.worldOffset.OnChange += OnWorldReposition;
