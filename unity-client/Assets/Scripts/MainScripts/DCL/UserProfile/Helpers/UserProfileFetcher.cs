@@ -6,7 +6,6 @@ using DCL.Interface;
 public class UserProfileFetcher : IDisposable
 {
     private readonly Dictionary<string, List<Promise<UserProfile>>> pendingPromises = new Dictionary<string, List<Promise<UserProfile>>>();
-    private bool isSubscribedToCatalog = false;
 
     /// <summary>
     /// Look for profile in userProfilesCatalog or request kernel for a profile if not available
@@ -24,7 +23,6 @@ public class UserProfileFetcher : IDisposable
 
         if (!pendingPromises.TryGetValue(userId, out List<Promise<UserProfile>> promisesForUserId))
         {
-            SubscribeToCatalogIfNeeded();
             promisesForUserId = new List<Promise<UserProfile>>();
             pendingPromises.Add(userId, promisesForUserId);
             WebInterface.RequestUserProfile(userId);
@@ -33,20 +31,15 @@ public class UserProfileFetcher : IDisposable
         promisesForUserId.Add(promise);
         return promise;
     }
-    
-    public void Dispose()
+
+    public UserProfileFetcher()
     {
-        if (isSubscribedToCatalog)
-            UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
+        UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
     }
 
-    private void SubscribeToCatalogIfNeeded()
+    public void Dispose()
     {
-        if (isSubscribedToCatalog)
-            return;
-
-        isSubscribedToCatalog = true;
-        UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
+        UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
     }
 
     private void OnProfileAddedToCatalog(string userId, UserProfile profile)
