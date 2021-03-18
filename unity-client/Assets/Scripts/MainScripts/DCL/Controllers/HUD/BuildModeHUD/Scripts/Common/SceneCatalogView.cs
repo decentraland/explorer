@@ -19,6 +19,7 @@ public interface ISceneCatalogView
     void Back();
     void CloseCatalog();
     bool IsCatalogOpen();
+    bool IsCatalogExpanded();
     void OnHideCatalogClick();
     void SetCatalogTitle(string text);
     void ToggleCatalogExpanse();
@@ -116,25 +117,15 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         isCatalogExpanded = !isCatalogExpanded;
     }
 
-    public void OnHideCatalogClick()
-    {
-        OnHideCatalogClicked?.Invoke();
-    }
+    public void OnHideCatalogClick() { OnHideCatalogClicked?.Invoke(); }
 
-    public void Back()
-    {
-        OnSceneCatalogBack?.Invoke();
-    }
+    public void Back() { OnSceneCatalogBack?.Invoke(); }
 
-    public void SetCatalogTitle(string text)
-    {
-        catalogTitleTxt.text = text;
-    }
+    public void SetCatalogTitle(string text) { catalogTitleTxt.text = text; }
 
-    public bool IsCatalogOpen()
-    {
-        return gameObject.activeSelf;
-    }
+    public bool IsCatalogOpen() { return gameObject.activeSelf; }
+
+    public bool IsCatalogExpanded() { return isCatalogExpanded; }
 
     public void CloseCatalog()
     {
@@ -148,8 +139,5 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         gameObject.SetActive(false);
     }
 
-    public void SetActive(bool isActive)
-    {
-        gameObject.SetActive(isActive);
-    }
+    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
 }

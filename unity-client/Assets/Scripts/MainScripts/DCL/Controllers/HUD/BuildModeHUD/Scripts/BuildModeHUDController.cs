@@ -184,7 +184,13 @@ public class BuildModeHUDController : IHUD
 
     public void RefreshCatalogContent() { view.RefreshCatalogContent(); }
 
-    public void CatalogItemSelected(CatalogItem catalogItem) { OnCatalogItemSelected?.Invoke(catalogItem); }
+    public void CatalogItemSelected(CatalogItem catalogItem)
+    {
+        OnCatalogItemSelected?.Invoke(catalogItem);
+
+        if (controllers.sceneCatalogController.IsCatalogExpanded())
+            controllers.sceneCatalogController.ToggleCatalogExpanse();
+    }
 
     public void SetVisibilityOfCatalog(bool isVisible)
     {

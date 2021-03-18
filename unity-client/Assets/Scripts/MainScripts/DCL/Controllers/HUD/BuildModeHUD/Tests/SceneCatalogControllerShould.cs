@@ -20,10 +20,7 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            sceneCatalogController.Dispose();
-        }
+        public void TearDown() { sceneCatalogController.Dispose(); }
 
         [Test]
         public void ToggleCatalogExpanseCorrectly()
@@ -168,6 +165,16 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             sceneCatalogController.sceneCatalogView.Received(1).IsCatalogOpen();
+        }
+
+        [Test]
+        public void CheckIfCatalogIsExpandedCorrectly()
+        {
+            // Act
+            sceneCatalogController.IsCatalogExpanded();
+
+            // Assert
+            sceneCatalogController.sceneCatalogView.Received(1).IsCatalogExpanded();
         }
 
         [Test]
