@@ -2,6 +2,7 @@ using DCL.Controllers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BuildModeHUDController : IHUD
 {
@@ -40,6 +41,8 @@ public class BuildModeHUDController : IHUD
 
     internal BuildModeHUDInitializationModel controllers;
     internal CatalogItemDropController catalogItemDropController;
+
+    internal static readonly Vector3 catalogItemTooltipOffset = new Vector3 (0, 25, 0);
 
     public void Initialize()
     {
@@ -104,6 +107,8 @@ public class BuildModeHUDController : IHUD
         controllers.sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
         controllers.sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
         controllers.sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
+        controllers.sceneCatalogController.OnPointerEnterInCatalogItemAdapter += ShowTooltipForCatalogItemAdapter;
+        controllers.sceneCatalogController.OnPointerExitInCatalogItemAdapter += (x, y) => controllers.tooltipController.HideTooltip();
     }
 
     private void ConfigureEntityInformationController()
@@ -168,6 +173,12 @@ public class BuildModeHUDController : IHUD
     public void SetPublishBtnAvailability(bool isAvailable) { view.SetPublishBtnAvailability(isAvailable); }
 
     #region Catalog
+
+    private void ShowTooltipForCatalogItemAdapter(PointerEventData data, CatalogItemAdapter adapter)
+    {
+        controllers.tooltipController.SetTooltipText(adapter.GetContent().name);
+        controllers.tooltipController.ShowTooltip(data, catalogItemTooltipOffset);
+    }
 
     public void RefreshCatalogAssetPack() { view.RefreshCatalogAssetPack(); }
 
