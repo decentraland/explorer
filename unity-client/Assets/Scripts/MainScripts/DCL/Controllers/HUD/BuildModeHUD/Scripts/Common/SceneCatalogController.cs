@@ -2,6 +2,7 @@ using DCL.Configuration;
 using DCL.Helpers;
 using System;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public interface ISceneCatalogController
 {
@@ -9,7 +10,8 @@ public interface ISceneCatalogController
     event Action<CatalogItem> OnCatalogItemSelected;
     event Action OnResumeInput;
     event Action OnStopInput;
-
+    event Action<PointerEventData, CatalogItemAdapter> OnPointerEnterInCatalogItemAdapter;
+    event Action<PointerEventData, CatalogItemAdapter> OnPointerExitInCatalogItemAdapter;
     void Initialize(ISceneCatalogView view, IQuickBarController quickBarController);
     void Dispose();
     void AssetsPackFilter(bool isOn);
@@ -40,6 +42,8 @@ public class SceneCatalogController : ISceneCatalogController
     public event Action<CatalogItem> OnCatalogItemSelected;
     public event Action OnResumeInput;
     public event Action OnStopInput;
+    public event Action<PointerEventData, CatalogItemAdapter> OnPointerEnterInCatalogItemAdapter;
+    public event Action<PointerEventData, CatalogItemAdapter> OnPointerExitInCatalogItemAdapter;
 
     internal ISceneCatalogView sceneCatalogView;
     internal IQuickBarController quickBarController;
@@ -64,6 +68,8 @@ public class SceneCatalogController : ISceneCatalogController
             sceneCatalogView.catalogGroupList.OnCatalogItemClicked += CatalogItemSelected;
             sceneCatalogView.catalogGroupList.OnResumeInput += ResumeInput;
             sceneCatalogView.catalogGroupList.OnStopInput += StopInput;
+            sceneCatalogView.catalogGroupList.OnPointerEnterInAdapter += OnPointerEnter;
+            sceneCatalogView.catalogGroupList.OnPointerExitInAdapter += OnPointerExit;
         }
 
         if (sceneCatalogView.category != null)
@@ -95,6 +101,8 @@ public class SceneCatalogController : ISceneCatalogController
             sceneCatalogView.catalogGroupList.OnCatalogItemClicked -= CatalogItemSelected;
             sceneCatalogView.catalogGroupList.OnResumeInput -= ResumeInput;
             sceneCatalogView.catalogGroupList.OnStopInput -= StopInput;
+            sceneCatalogView.catalogGroupList.OnPointerEnterInAdapter -= OnPointerEnter;
+            sceneCatalogView.catalogGroupList.OnPointerExitInAdapter -= OnPointerExit;
         }
 
         if (sceneCatalogView.category != null)
@@ -175,6 +183,10 @@ public class SceneCatalogController : ISceneCatalogController
     public void ResumeInput() { OnResumeInput?.Invoke(); }
 
     public void StopInput() { OnStopInput?.Invoke(); }
+
+    private void OnPointerEnter(PointerEventData eventData, CatalogItemAdapter adapter) { OnPointerEnterInCatalogItemAdapter?.Invoke(eventData, adapter); }
+
+    private void OnPointerExit(PointerEventData eventData, CatalogItemAdapter adapter) { OnPointerExitInCatalogItemAdapter?.Invoke(eventData, adapter); }
 
     public void HideCatalogClicked() { OnHideCatalogClicked?.Invoke(); }
 
