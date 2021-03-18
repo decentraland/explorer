@@ -45,7 +45,7 @@ namespace DCL
 
         public void RemoveEntityCollider(DecentralandEntity entity, Collider collider)
         {
-            if (entity == null || !collidersByEntity.ContainsKey(entity))
+            if (entity == null || collider == null || !collidersByEntity.ContainsKey(entity))
                 return;
 
             collidersByEntity[entity].Remove(collider);
@@ -73,7 +73,7 @@ namespace DCL
             entity.OnCleanupEvent += OnEntityCleanUpEvent;
         }
 
-        public void RemoveAllEntityColliders(DecentralandEntity entity)
+        void RemoveAllEntityColliders(DecentralandEntity entity)
         {
             if (collidersByEntity.ContainsKey(entity))
             {
@@ -109,14 +109,12 @@ namespace DCL
             return false;
         }
 
-        public void ConfigureColliders(DecentralandEntity entity, bool hasCollision = true, bool filterByColliderName = true)
-        {
-            ConfigureColliders(entity.meshRootGameObject, hasCollision, filterByColliderName, entity);
-        }
+        public void ConfigureColliders(DecentralandEntity entity, bool hasCollision = true, bool filterByColliderName = true) { ConfigureColliders(entity.meshRootGameObject, hasCollision, filterByColliderName, entity); }
 
         public void ConfigureColliders(GameObject meshGameObject, bool hasCollision, bool filterByColliderName = false, DecentralandEntity entity = null, int colliderLayer = -1)
         {
-            if (meshGameObject == null) return;
+            if (meshGameObject == null)
+                return;
 
             if (entity != null)
                 entity.meshesInfo.colliders.Clear();
@@ -130,11 +128,13 @@ namespace DCL
 
             for (int i = 0; i < meshFilters.Length; i++)
             {
-                if (meshFilters[i].gameObject.layer == onClickLayer) continue;
+                if (meshFilters[i].gameObject.layer == onClickLayer)
+                    continue;
 
                 if (filterByColliderName)
                 {
-                    if (!meshFilters[i].transform.parent.name.ToLower().Contains("_collider")) continue;
+                    if (!meshFilters[i].transform.parent.name.ToLower().Contains("_collider"))
+                        continue;
 
                     // we remove the Renderer of the '_collider' object, as its true renderer is in another castle
                     Object.Destroy(meshFilters[i].GetComponent<Renderer>());

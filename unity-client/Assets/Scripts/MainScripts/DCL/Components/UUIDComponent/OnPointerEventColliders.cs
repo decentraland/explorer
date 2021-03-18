@@ -11,6 +11,9 @@ namespace DCL.Components
     {
         public const string COLLIDER_NAME = "OnPointerEventCollider";
 
+        [System.NonSerialized]
+        public int refCount;
+
         Collider[] pointerEventColliders;
         Dictionary<Collider, string> colliderNames = new Dictionary<Collider, string>();
 
@@ -24,22 +27,19 @@ namespace DCL.Components
 
         private DecentralandEntity ownerEntity;
 
-        public OnPointerEventColliders(DecentralandEntity ownerEntity)
+        public void Initialize(DecentralandEntity entity)
         {
-            this.ownerEntity = ownerEntity;
-        }
-
-        public void UpdateColliders()
-        {
-            var entity = ownerEntity;
-
-            if (entity == null || entity.meshesInfo == null) return;
+            if (entity == null || entity.meshesInfo == null)
+                return;
 
             Renderer[] rendererList = entity.meshesInfo.renderers;
 
-            if (rendererList == null || rendererList.Length == 0) return;
+            if (rendererList == null || rendererList.Length == 0)
+                return;
 
-            DestroyColliders();
+            this.ownerEntity = entity;
+
+            DestroyOnPointerEventColliders();
 
             pointerEventColliders = new Collider[rendererList.Length];
 
@@ -74,7 +74,9 @@ namespace DCL.Components
             return meshCollider;
         }
 
-        void DestroyColliders()
+        public void Dispose() { DestroyOnPointerEventColliders(); }
+
+        void DestroyOnPointerEventColliders()
         {
             if (pointerEventColliders == null)
                 return;
@@ -84,16 +86,8 @@ namespace DCL.Components
                 Collider collider = pointerEventColliders[i];
 
                 if (collider != null)
-                {
-                    CollidersManager.i.RemoveEntityCollider(ownerEntity, collider);
-                    UnityEngine.Object.Destroy(collider.gameObject);
-                }
+                    GameObject.Destroy(collider.gameObject);
             }
-        }
-
-        public void Dispose()
-        {
-            DestroyColliders();
         }
     }
 }

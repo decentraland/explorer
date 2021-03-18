@@ -63,25 +63,13 @@ namespace DCL.Controllers
 
         private ISceneBoundsFeedbackStyle feedbackStyle;
 
-        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null)
-        {
-            this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple();
-        }
+        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null) { this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple(); }
 
-        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle)
-        {
-            this.feedbackStyle = feedbackStyle;
-        }
+        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle) { this.feedbackStyle = feedbackStyle; }
 
-        public ISceneBoundsFeedbackStyle GetFeedbackStyle()
-        {
-            return feedbackStyle;
-        }
+        public ISceneBoundsFeedbackStyle GetFeedbackStyle() { return feedbackStyle; }
 
-        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo)
-        {
-            return feedbackStyle.GetOriginalMaterials(meshesInfo);
-        }
+        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo) { return feedbackStyle.GetOriginalMaterials(meshesInfo); }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         IEnumerator CheckEntities()
@@ -104,7 +92,8 @@ namespace DCL.Controllers
                     {
                         while (iterator.MoveNext())
                         {
-                            if (messagingManager.timeBudgetCounter <= 0f) break;
+                            if (messagingManager.timeBudgetCounter <= 0f)
+                                break;
 
                             float startTime = Time.realtimeSinceStartup;
 
@@ -179,21 +168,20 @@ namespace DCL.Controllers
         /// Returns whether an entity was added to be consistently checked
         /// </summary>
         ///
-        public bool WasAddedAsPersistent(DecentralandEntity entity)
-        {
-            return persistentEntities.Contains(entity);
-        }
+        public bool WasAddedAsPersistent(DecentralandEntity entity) { return persistentEntities.Contains(entity); }
 
         public void RemoveEntityToBeChecked(DecentralandEntity entity)
         {
-            if (!enabled) return;
+            if (!enabled)
+                return;
 
             OnRemoveEntity(entity);
         }
 
         public void EvaluateEntityPosition(DecentralandEntity entity)
         {
-            if (entity == null || entity.scene == null || entity.gameObject == null) return;
+            if (entity == null || entity.scene == null || entity.gameObject == null)
+                return;
 
             // Recursively evaluate entity children as well, we need to check this up front because this entity may not have meshes of its own, but the children may.
             if (entity.children.Count > 0)
@@ -228,7 +216,8 @@ namespace DCL.Controllers
 
         public bool IsEntityInsideSceneBoundaries(DecentralandEntity entity)
         {
-            if (entity.meshesInfo == null || entity.meshesInfo.meshRootGameObject == null || entity.meshesInfo.mergedBounds == null) return false;
+            if (entity.meshesInfo == null || entity.meshesInfo.meshRootGameObject == null || entity.meshesInfo.mergedBounds == null)
+                return false;
 
             // 1st check (full mesh AABB)
             bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.mergedBounds);
@@ -257,7 +246,7 @@ namespace DCL.Controllers
             {
                 if (entity.meshesInfo.renderers[i] == null)
                     continue;
-                
+
                 if (!entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.renderers[i].bounds))
                 {
                     feedbackStyle.OnRendererExitBounds(entity.meshesInfo.renderers[i]);
@@ -268,10 +257,7 @@ namespace DCL.Controllers
             return true;
         }
 
-        protected void UpdateEntityMeshesValidState(MeshesInfo meshesInfo, bool isInsideBoundaries)
-        {
-            feedbackStyle.ApplyFeedback(meshesInfo, isInsideBoundaries);
-        }
+        protected void UpdateEntityMeshesValidState(MeshesInfo meshesInfo, bool isInsideBoundaries) { feedbackStyle.ApplyFeedback(meshesInfo, isInsideBoundaries); }
 
         protected void UpdateEntityCollidersValidState(MeshesInfo meshesInfo, bool isInsideBoundaries)
         {
@@ -279,12 +265,13 @@ namespace DCL.Controllers
                 return;
 
             int collidersCount = meshesInfo.colliders.Count;
-            if(collidersCount <= 0)
-                 return;
-            
+
+            if (collidersCount == 0)
+                return;
+
             if (meshesInfo.colliders[0] == null)
                 return;
-            
+
             if (collidersCount > 0 && isInsideBoundaries != meshesInfo.colliders[0].enabled && meshesInfo.currentShape.HasCollisions())
             {
                 for (int i = 0; i < collidersCount; i++)
@@ -305,10 +292,7 @@ namespace DCL.Controllers
             }
         }
 
-        protected void OnAddEntity(DecentralandEntity entity)
-        {
-            entitiesToCheck.Add(entity);
-        }
+        protected void OnAddEntity(DecentralandEntity entity) { entitiesToCheck.Add(entity); }
 
         protected void OnRemoveEntity(DecentralandEntity entity)
         {
