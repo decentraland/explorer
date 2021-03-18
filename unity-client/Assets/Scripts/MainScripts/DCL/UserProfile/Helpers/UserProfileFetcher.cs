@@ -23,9 +23,6 @@ public class UserProfileFetcher : IDisposable
 
         if (!pendingPromises.TryGetValue(userId, out List<Promise<UserProfile>> promisesForUserId))
         {
-            UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;
-            UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
-            
             promisesForUserId = new List<Promise<UserProfile>>();
             pendingPromises.Add(userId, promisesForUserId);
             WebInterface.RequestUserProfile(userId);
@@ -34,7 +31,12 @@ public class UserProfileFetcher : IDisposable
         promisesForUserId.Add(promise);
         return promise;
     }
-    
+
+    public UserProfileFetcher()
+    {
+        UserProfileController.userProfilesCatalog.OnAdded += OnProfileAddedToCatalog;
+    }
+
     public void Dispose()
     {
         UserProfileController.userProfilesCatalog.OnAdded -= OnProfileAddedToCatalog;

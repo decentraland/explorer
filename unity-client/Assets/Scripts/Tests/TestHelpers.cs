@@ -98,11 +98,13 @@ namespace DCL.Helpers
             where T : BaseComponent
             where K : new()
         {
-            int componentClassId = classId == CLASS_ID_COMPONENT.NONE
-                ? (int) scene.ownerController.componentFactory.GetIdForType<T>()
-                : (int) classId;
+            var factory = Environment.i.world.componentFactory as RuntimeComponentFactory;
+            IPoolableComponentFactory poolableFactory = factory.poolableComponentFactory;
+            int inferredId = (int) poolableFactory.GetIdForType<T>();
 
-            string componentInstanceId = GetComponentUniqueId(scene, typeof(T).Name, componentClassId, entity.entityId);
+            int componentClassId = classId == CLASS_ID_COMPONENT.NONE
+                ? (int) inferredId
+                : (int) classId;
 
             string data;
 
@@ -119,8 +121,7 @@ namespace DCL.Helpers
             return scene.EntityComponentCreateOrUpdate(
                 entity.entityId,
                 (CLASS_ID_COMPONENT) componentClassId,
-                data
-                , out _) as T;
+                data) as T;
         }
 
         public static Coroutine EntityComponentUpdate<T, K>(T component, K model = null)
@@ -132,7 +133,11 @@ namespace DCL.Helpers
                 model = new K();
             }
 
-            CLASS_ID_COMPONENT classId = Environment.i.world.sceneController.componentFactory.GetIdForType<T>();
+            var factory = Environment.i.world.componentFactory as RuntimeComponentFactory;
+            IPoolableComponentFactory poolableFactory = factory.poolableComponentFactory;
+            int inferredId = (int) poolableFactory.GetIdForType<T>();
+
+            CLASS_ID_COMPONENT classId = (CLASS_ID_COMPONENT) inferredId;
 
             ParcelScene scene = component.scene as ParcelScene;
             scene.EntityComponentUpdate(component.entity, classId, JsonUtility.ToJson(model));
@@ -176,9 +181,9 @@ namespace DCL.Helpers
 
             return component.routine;
         }
-        
+
         public static Coroutine SharedComponentUpdate<T, K>(T component, K model = null)
-            where T : BaseDisposable
+            where T : ISharedComponent
             where K : class, new()
         {
             if (model == null)
@@ -189,7 +194,10 @@ namespace DCL.Helpers
             ParcelScene scene = component.scene as ParcelScene;
             scene.SharedComponentUpdate(component.id, JsonUtility.ToJson(model));
 
-            return component.routine;
+            if (component is IDelayedComponent delayedComponent)
+                return delayedComponent.routine;
+
+            return null;
         }
 
         public static T SharedComponentCreate<T, K>(ParcelScene scene, CLASS_ID id, K model = null)
@@ -246,7 +254,7 @@ namespace DCL.Helpers
                 entity.entityId,
                 CLASS_ID_COMPONENT.TRANSFORM,
                 System.Convert.ToBase64String(pB_Transform.ToByteArray())
-                , out CleanableYieldInstruction routine);
+            );
         }
 
         public static TextShape InstantiateEntityWithTextShape(ParcelScene scene, Vector3 position, TextShape.Model model)
@@ -711,7 +719,9 @@ namespace DCL.Helpers
                 yield return component.routine;
             }
 
-            int id = (int) scene.ownerController.componentFactory.GetIdForType<TComponent>();
+            var factory = Environment.i.world.componentFactory as RuntimeComponentFactory;
+            IPoolableComponentFactory poolableFactory = factory.poolableComponentFactory;
+            int id = (int) poolableFactory.GetIdForType<TComponent>();
 
             scene.EntityComponentUpdate(e, (CLASS_ID_COMPONENT) id, "{}");
 
@@ -895,7 +905,7 @@ namespace DCL.Helpers
             };
 
             ParcelScene scene = entity.scene as ParcelScene;
-            
+
             var onClickComponent = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity, onClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
             yield return onClickComponent.routine;
 

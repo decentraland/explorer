@@ -277,7 +277,8 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
     void StarDraggingSelectedEntities()
     {
         if (!builderInWorldEntityHandler.IsPointerInSelectedEntity() ||
-            gizmoManager.HasAxisHover())
+            gizmoManager.HasAxisHover() ||
+            voxelController.IsActive())
             return;
 
         if (gizmoManager.isActiveAndEnabled)
@@ -359,18 +360,17 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         Environment.i.world.sceneController.IsolateScene(sceneToEdit);
         Utils.UnlockCursor();
 
-        RenderSettings.fog = false;
         gizmoManager.HideGizmo();
         editionGO.transform.SetParent(null);
         avatarRenderer.SetAvatarVisibility(false);
+
+        HUDController.i.builderInWorldMainHud?.ActivateGodModeUI();
     }
 
     public void ActivateCamera(ParcelScene parcelScene)
     {
         freeCameraController.gameObject.SetActive(true);
-
         SetLookAtObject(parcelScene);
-
 
         // NOTE(Adrian): Take into account that right now to get the relative scale of the gizmos, we set the gizmos in the player position and the camera
         Vector3 cameraPosition = DCLCharacterController.i.characterPosition.unityPosition;
@@ -391,7 +391,6 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         mouseCatcher.enabled = true;
         Utils.LockCursor();
         cameraController.SetCameraMode(CameraMode.ModeId.FirstPerson);
-
 
         Environment.i.world.sceneController.ReIntegrateIsolatedScene();
 
@@ -517,43 +516,52 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         freeCameraController.SmoothLookAt(pointToLook);
     }
 
+    #region Gizmos
+
     public void TranslateMode()
     {
-        if (isModeActive && !isPlacingNewObject)
+        if (!isModeActive && isPlacingNewObject)
+            return;
+        if (selectedEntities.Count > 0 && gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.TRANSLATE_GIZMO_NAME)
         {
             gizmoManager.SetGizmoType(BuilderInWorldSettings.TRANSLATE_GIZMO_NAME);
-            if (selectedEntities.Count > 0)
-                ShowGizmos();
-            else
-                gizmoManager.HideGizmo();
+            gizmoManager.ShowGizmo();
+        }
+        else
+        {
+            gizmoManager.HideGizmo(true);
         }
     }
 
     public void RotateMode()
     {
-        if (isModeActive && !isPlacingNewObject)
+        if (!isModeActive && isPlacingNewObject)
+            return;
+        if (selectedEntities.Count > 0 && gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.ROTATE_GIZMO_NAME)
         {
             gizmoManager.SetGizmoType(BuilderInWorldSettings.ROTATE_GIZMO_NAME);
-            if (selectedEntities.Count > 0)
-                ShowGizmos();
-            else
-                gizmoManager.HideGizmo();
+            gizmoManager.ShowGizmo();
+        }
+        else
+        {
+            gizmoManager.HideGizmo(true);
         }
     }
 
     public void ScaleMode()
     {
-        if (isModeActive && !isPlacingNewObject)
+        if (!isModeActive && isPlacingNewObject)
+            return;
+        if (selectedEntities.Count > 0 && gizmoManager.GetSelectedGizmo() != BuilderInWorldSettings.SCLAE_GIZMO_NAME)
         {
             gizmoManager.SetGizmoType(BuilderInWorldSettings.SCLAE_GIZMO_NAME);
-            if (selectedEntities.Count > 0)
-                ShowGizmos();
-            else
-                gizmoManager.HideGizmo();
+            gizmoManager.ShowGizmo();
+        }
+        else
+        {
+            gizmoManager.HideGizmo(true);
         }
     }
-
-    public void FocusGameObject(List<DCLBuilderInWorldEntity> entitiesToFocus) { freeCameraController.FocusOnEntities(entitiesToFocus); }
 
     void OnGizmosTransformStart(string gizmoType)
     {
@@ -586,7 +594,9 @@ public class BuilderInWorldGodMode : BuilderInWorldMode
         }
     }
 
-    void ShowGizmos() { gizmoManager.ShowGizmo(); }
+    #endregion
+
+    public void FocusGameObject(List<DCLBuilderInWorldEntity> entitiesToFocus) { freeCameraController.FocusOnEntities(entitiesToFocus); }
 
     void SetLookAtObject(ParcelScene parcelScene)
     {
