@@ -163,8 +163,6 @@ namespace DCL
                    newHoveredEvent.IsAtHoverDistance(distance) &&
                    newHoveredEvent.IsVisible() &&
                    AreSameEntity(newHoveredEvent, colliderInfo);
-            // (IsAvatarPointerEvent(newHoveredEvent) ||
-            //  (newHoveredEvent.IsVisible() && AreSameEntity(newHoveredEvent, colliderInfo)));
         }
 
         private void ResolveGenericRaycastHandlers(IRaycastPointerHandler raycastHandlerTarget)
