@@ -279,7 +279,8 @@ namespace DCL.Controllers
                 return;
 
             int collidersCount = meshesInfo.colliders.Count;
-            if (collidersCount <= 0)
+            
+            if (collidersCount == 0)
                 return;
 
             if (meshesInfo.colliders[0] == null)

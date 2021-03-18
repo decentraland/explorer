@@ -113,8 +113,10 @@ public class BuilderInWorldEntityHandler : BIWController
     {
         base.FrameUpdate();
 
-        if (selectedEntities.Count <= 0) return;
-        if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY) return;
+        if (selectedEntities.Count == 0)
+            return;
+        if ((DCLTime.realtimeSinceStartup - lastTransformReportTime) <= BuilderInWorldSettings.ENTITY_POSITION_REPORTING_DELAY)
+            return;
 
         ReportTransform();
     }
@@ -132,20 +134,11 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public ParcelScene GetParcelSceneToEdit()
-    {
-        return sceneToEdit;
-    }
+    public ParcelScene GetParcelSceneToEdit() { return sceneToEdit; }
 
-    public List<DCLBuilderInWorldEntity> GetSelectedEntityList()
-    {
-        return selectedEntities;
-    }
+    public List<DCLBuilderInWorldEntity> GetSelectedEntityList() { return selectedEntities; }
 
-    public bool IsAnyEntitySelected()
-    {
-        return selectedEntities.Count > 0;
-    }
+    public bool IsAnyEntitySelected() { return selectedEntities.Count > 0; }
 
     public void SetActiveMode(BuilderInWorldMode buildMode)
     {
@@ -244,7 +237,8 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public void DeselectEntities()
     {
-        if (selectedEntities.Count <= 0) return;
+        if (selectedEntities.Count <= 0)
+            return;
 
         int amountToDeselect = selectedEntities.Count;
         for (int i = 0; i < amountToDeselect; i++)
@@ -344,9 +338,11 @@ public class BuilderInWorldEntityHandler : BIWController
 
     public bool SelectEntity(DCLBuilderInWorldEntity entityEditable)
     {
-        if (entityEditable.IsLocked) return false;
+        if (entityEditable.IsLocked)
+            return false;
 
-        if (entityEditable.IsSelected) return false;
+        if (entityEditable.IsSelected)
+            return false;
 
         entityEditable.Select();
 
@@ -381,7 +377,8 @@ public class BuilderInWorldEntityHandler : BIWController
         List<DCLBuilderInWorldEntity> entities = new List<DCLBuilderInWorldEntity>();
         foreach (DCLBuilderInWorldEntity entity in convertedEntities.Values)
         {
-            if (entity.rootEntity.scene == sceneToEdit) entities.Add(entity);
+            if (entity.rootEntity.scene == sceneToEdit)
+                entities.Add(entity);
         }
 
         return entities;

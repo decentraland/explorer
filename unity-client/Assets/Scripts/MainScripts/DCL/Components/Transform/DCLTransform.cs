@@ -24,16 +24,16 @@ namespace DCL.Components
 
         public static Model model = new Model();
 
-        public void Cleanup()
-        {
-        }
-
         public bool isRoutineRunning { get; } = false;
-        public string componentName { get; } = "Transform";
 
+        public string componentName { get; } = "Transform";
         public IParcelScene scene { get; private set; }
         public IDCLEntity entity { get; private set; }
         public Transform GetTransform() => null;
+
+        public void Cleanup()
+        {
+        }
 
         public void Initialize(IParcelScene scene, IDCLEntity entity)
         {

@@ -72,15 +72,14 @@ namespace DCL
 
             yield return new WaitUntil(() => avatarDone || avatarFailed);
 
-            onPointerDown.scene = scene;
-            onPointerDown.entity = entity;
-            onPointerDown.UpdateFromModel(
+            onPointerDown.Initialize(
                 new OnPointerDown.Model()
                 {
                     type = OnPointerDown.NAME,
                     button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
                     hoverText = "view profile"
-                }
+                },
+                entity
             );
 
             CommonScriptableObjects.worldOffset.OnChange -= OnWorldReposition;
@@ -123,11 +122,17 @@ namespace DCL
 
         public void DisablePassport()
         {
+            if (onPointerDown.collider == null)
+                return;
+
             onPointerDown.collider.enabled = false;
         }
 
         public void EnablePassport()
         {
+            if (onPointerDown.collider == null)
+                return;
+
             onPointerDown.collider.enabled = true;
         }
 

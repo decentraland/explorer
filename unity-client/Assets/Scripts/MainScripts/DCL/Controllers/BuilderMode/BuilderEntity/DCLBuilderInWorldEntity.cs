@@ -13,7 +13,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
 
-
     public event System.Action<DCLBuilderInWorldEntity> onStatusUpdate;
     public event System.Action<DCLBuilderInWorldEntity> OnDelete;
 
@@ -124,10 +123,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return null;
     }
 
-    public bool HasShape()
-    {
-        return isShapeComponentSet;
-    }
+    public bool HasShape() { return isShapeComponentSet; }
 
     public void Select()
     {
@@ -138,7 +134,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public void Deselect()
     {
-        if (!IsSelected) return;
+        if (!IsSelected)
+            return;
 
         IsSelected = false;
         if (rootEntity.gameObject != null)
@@ -154,10 +151,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         onStatusUpdate?.Invoke(this);
     }
 
-    public void ToggleLockStatus()
-    {
-        IsLocked = !IsLocked;
-    }
+    public void ToggleLockStatus() { IsLocked = !IsLocked; }
 
     public void Delete()
     {
@@ -210,20 +204,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return rootEntity.components.ContainsKey(CLASS_ID_COMPONENT.SMART_ITEM);
     }
 
-    public bool HasSmartItemActions()
-    {
-        return GetCatalogItemAssociated().HasActions();
-    }
+    public bool HasSmartItemActions() { return GetCatalogItemAssociated().HasActions(); }
 
-    public SmartItemParameter[] GetSmartItemParameters()
-    {
-        return GetCatalogItemAssociated().parameters;
-    }
+    public SmartItemParameter[] GetSmartItemParameters() { return GetCatalogItemAssociated().parameters; }
 
-    public SmartItemAction[] GetSmartItemActions()
-    {
-        return GetCatalogItemAssociated().actions;
-    }
+    public SmartItemAction[] GetSmartItemActions() { return GetCatalogItemAssociated().actions; }
 
     #endregion
 
@@ -336,7 +321,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     private void HandleAnimation()
     {
         // We don't want animation to be running on editor
-        meshAnimations = GetComponentsInChildren<Animation>();
+        meshAnimations = rootEntity.gameObject.GetComponentsInChildren<Animation>();
         if (HasSmartItemComponent())
         {
             DefaultAnimationStop();
@@ -360,7 +345,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     private void DefaultAnimationSample(float time)
     {
-        if (meshAnimations == null)
+        if (meshAnimations == null || meshAnimations.Length == 0)
             return;
 
         for (int i = 0; i < meshAnimations.Length; i++)
@@ -370,11 +355,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
-
     void SetOriginalMaterials()
     {
-        if (rootEntity.meshesInfo.renderers == null) return;
-        if (isNFT) return;
+        if (rootEntity.meshesInfo.renderers == null)
+            return;
+        if (isNFT)
+            return;
 
         int matCont = 0;
         foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
@@ -408,7 +394,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         if (rootEntity.meshesInfo == null ||
             rootEntity.meshesInfo.renderers == null ||
-            rootEntity.meshesInfo.renderers.Length < 1)
+            rootEntity.meshesInfo.renderers.Length == 0)
             return;
 
         if (isNFT)
@@ -442,9 +428,11 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         if (rootEntity.meshesInfo == null ||
             rootEntity.meshesInfo.renderers == null ||
-            rootEntity.meshesInfo.renderers.Length < 1) return;
+            rootEntity.meshesInfo.renderers.Length < 1)
+            return;
 
-        if (isNFT) return;
+        if (isNFT)
+            return;
 
         int matCont = 0;
         foreach (Renderer renderer in rootEntity.meshesInfo.renderers)
@@ -468,10 +456,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
-    void OnNameUpdate(DCLName.Model model)
-    {
-        onStatusUpdate?.Invoke(this);
-    }
+    void OnNameUpdate(DCLName.Model model) { onStatusUpdate?.Invoke(this); }
 
     void OnShapeUpdate(IDCLEntity entity)
     {
@@ -489,7 +474,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
             !meshInfo.currentShape.IsVisible())
             return;
 
-        if (collidersGameObjectDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId) && !isNFT) return;
+        if (collidersGameObjectDictionary.ContainsKey(entity.scene.sceneData.id + entity.entityId) && !isNFT)
+            return;
 
         if (entity.children.Count > 0)
         {
@@ -557,24 +543,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         return false;
     }
 
-    bool IsEntityAFloor()
-    {
-        if (rootEntity.meshesInfo?.currentShape == null)
-            return false;
-        if (rootEntity.meshesInfo.renderers?.Length <= 0)
-            return false;
-        if (rootEntity.meshesInfo.mergedBounds.size.y >= 0.02f)
-            return false;
-        if (rootEntity.gameObject.transform.position.y >= 0.05f)
-            return false;
-
-        if (Mathf.Abs(rootEntity.meshesInfo.mergedBounds.extents.x - 8) > 0.001f)
-            return false;
-        if (Mathf.Abs(rootEntity.meshesInfo.mergedBounds.extents.z - 8) > 0.001f)
-            return false;
-
-        return true;
-    }
+    bool IsEntityAFloor() { return GetCatalogItemAssociated()?.category == BuilderInWorldSettings.FLOOR_CATEGORY; }
 
     bool IsEntityAVoxel()
     {

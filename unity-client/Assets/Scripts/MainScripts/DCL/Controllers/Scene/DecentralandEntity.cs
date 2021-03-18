@@ -59,7 +59,6 @@ namespace DCL.Models
         public IDCLEntity parent { get; private set; }
 
         public Dictionary<CLASS_ID_COMPONENT, IEntityComponent> components { get; private set; } = new Dictionary<CLASS_ID_COMPONENT, IEntityComponent>();
-
         public Dictionary<System.Type, ISharedComponent> sharedComponents { get; private set; } = new Dictionary<System.Type, ISharedComponent>();
 
         public GameObject gameObject { get; set; }
@@ -87,6 +86,11 @@ namespace DCL.Models
             OnShapeUpdated += (entity) => meshesInfo.UpdateRenderersCollection();
             meshesInfo.OnUpdated += () => OnMeshesInfoUpdated?.Invoke(this);
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
+        }
+
+        public Dictionary<System.Type, ISharedComponent> GetSharedComponents()
+        {
+            return sharedComponents;
         }
 
         public void AddChild(IDCLEntity entity)

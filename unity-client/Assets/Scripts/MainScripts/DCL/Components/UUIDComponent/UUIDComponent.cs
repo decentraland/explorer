@@ -37,41 +37,8 @@ namespace DCL
             }
         }
 
-        public void RemoveFromEntity(DecentralandEntity entity, string type)
-        {
-            switch (type)
-            {
-                case OnClick.NAME:
-                    RemoveComponent<OnClick>(entity);
-                    break;
-                case OnPointerDown.NAME:
-                    RemoveComponent<OnPointerDown>(entity);
-                    break;
-                case OnPointerUp.NAME:
-                    RemoveComponent<OnPointerUp>(entity);
-                    break;
-            }
-
-            Debug.LogWarning($"Cannot remove UUIDComponent of type '{type}'.");
-        }
-
-        protected virtual void RemoveComponent<T>(DecentralandEntity entity) where T : UUIDComponent
-        {
-            var currentComponent = entity.gameObject.GetComponent<T>();
-
-            if (currentComponent != null)
-            {
-#if UNITY_EDITOR
-                UnityEngine.Object.DestroyImmediate(currentComponent);
-#else
-                UnityEngine.Object.Destroy(currentComponent);
-#endif
-            }
-        }
-
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            Debug.Log("Updating model to: " + newModel);
             this.model = newModel ?? new UUIDComponent.Model();
             return null;
         }

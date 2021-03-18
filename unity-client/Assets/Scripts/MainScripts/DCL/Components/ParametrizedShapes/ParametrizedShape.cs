@@ -42,6 +42,7 @@ namespace DCL.Components
         {
             if (model == null)
                 model = (T) this.model;
+
             if (visibilityDirty)
             {
                 ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
@@ -125,7 +126,7 @@ namespace DCL.Components
                 collisionsDirty = newModel.withCollisions != previousModel.withCollisions || newModel.isPointerBlocker != previousModel.isPointerBlocker;
             }
 
-            bool shouldGenerateMesh = ShouldGenerateNewMesh(newModel);
+            bool shouldGenerateMesh = ShouldGenerateNewMesh(previousModel);
 
             //NOTE(Brian): Only generate meshes here if they already are attached to something.
             //             Otherwise, the mesh will be created on the OnShapeAttached.

@@ -12,6 +12,9 @@ using UnityEngine.Serialization;
 
 public class BIWCreatorController : BIWController
 {
+    [Header("Design Variables")]
+    public float secondsToTimeOut = 10f;
+
     [Header("Prefab references")]
     public BIWModeController biwModeController;
 
@@ -38,7 +41,7 @@ public class BIWCreatorController : BIWController
 
     private void Start()
     {
-        createLastSceneObjectDelegate = (action) => CreateLastSceneObject();
+        createLastSceneObjectDelegate = (action) => CreateLastCatalogItem();
         toggleCreateLastSceneObjectInputAction.OnTriggered += createLastSceneObjectDelegate;
     }
 
@@ -114,7 +117,7 @@ public class BIWCreatorController : BIWController
         return true;
     }
 
-    public DCLBuilderInWorldEntity CreateSceneObject(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false)
+    public DCLBuilderInWorldEntity CreateCatalogItem(CatalogItem catalogItem, bool autoSelect = true, bool isFloor = false)
     {
         if (catalogItem.IsNFT() && BuilderInWorldNFTController.i.IsNFTInUse(catalogItem.id))
             return null;
@@ -124,9 +127,10 @@ public class BIWCreatorController : BIWController
         //Note (Adrian): This is a workaround until the mapping is handle by kernel
         AddSceneMappings(catalogItem);
 
-        Vector3 startPoint = biwModeController.GetModeCreationEntryPoint();
+        Vector3 startPosition = biwModeController.GetModeCreationEntryPoint();
+        Vector3 editionPosition = biwModeController.GetCurrentEditionPosition();
 
-        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPoint, biwModeController.GetCurrentEditionPosition());
+        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPosition, editionPosition);
         entity.isFloor = isFloor;
 
         AddShape(catalogItem, entity);
@@ -163,20 +167,39 @@ public class BIWCreatorController : BIWController
 
     #region LoadingObjects
 
+    public bool ExistsLoadingGameObjectForEntity(string entityId)
+    {
+        return loadingGameObjects.ContainsKey(entityId);
+    }
+
     private void CreateLoadingObject(DCLBuilderInWorldEntity entity)
     {
         entity.rootEntity.OnShapeUpdated += OnRealShapeLoaded;
         GameObject loadingPlaceHolder = GameObject.Instantiate(loadingObjectPrefab, entity.gameObject.transform);
         loadingGameObjects.Add(entity.rootEntity.entityId, loadingPlaceHolder);
+        CoroutineStarter.Start(LoadingObjectTimeout(entity.rootEntity.entityId));
     }
 
     private void OnRealShapeLoaded(IDCLEntity entity)
     {
         entity.OnShapeUpdated -= OnRealShapeLoaded;
 
-        GameObject loadingPlaceHolder = loadingGameObjects[entity.entityId];
-        loadingGameObjects.Remove(entity.entityId);
+        RemoveLoadingObject(entity.entityId);
+    }
+
+    private void RemoveLoadingObject(string entityId)
+    {
+        if (!loadingGameObjects.ContainsKey(entityId))
+            return;
+        GameObject loadingPlaceHolder = loadingGameObjects[entityId];
+        loadingGameObjects.Remove(entityId);
         GameObject.Destroy(loadingPlaceHolder);
+    }
+
+    private IEnumerator LoadingObjectTimeout(string entityId)
+    {
+        yield return new WaitForSeconds(secondsToTimeOut);
+        RemoveLoadingObject(entityId);
     }
 
     #endregion
@@ -188,10 +211,7 @@ public class BIWCreatorController : BIWController
         SmartItemComponent.Model model = new SmartItemComponent.Model();
         model.values = new Dictionary<object, object>();
 
-        string jsonModel = JsonUtility.ToJson(model);
-
-        //Note (Adrian): This shouldn't work this way, we should have a function to create the component from Model directly
-        sceneToEdit.EntityComponentCreateOrUpdateWithModel(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, jsonModel);
+        sceneToEdit.EntityComponentCreateOrUpdateWithModel(entity.rootEntity.entityId, CLASS_ID_COMPONENT.SMART_ITEM, model);
 
         //Note (Adrian): We can't wait to set the component 1 frame, so we set it
         if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent component))
@@ -270,7 +290,7 @@ public class BIWCreatorController : BIWController
         DCL.Environment.i.world.sceneController.UpdateParcelScenesExecute(data);
     }
 
-    private void CreateLastSceneObject()
+    public void CreateLastCatalogItem()
     {
         if (lastCatalogItemCreated != null)
         {
@@ -289,7 +309,7 @@ public class BIWCreatorController : BIWController
         }
         else
         {
-            CreateSceneObject(catalogItem);
+            CreateCatalogItem(catalogItem);
         }
     }
 }

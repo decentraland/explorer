@@ -14,10 +14,14 @@ namespace DCL.Components
         bool isRoutineRunning { get; }
     }
 
-    public interface IEntityComponent : IComponent, ICleanable
+    public interface IMonoBehaviour
+    {
+        Transform GetTransform();
+    }
+
+    public interface IEntityComponent : IComponent, ICleanable, IMonoBehaviour
     {
         IDCLEntity entity { get; }
-        Transform GetTransform();
         void Initialize(IParcelScene scene, IDCLEntity entity);
     }
 
@@ -94,7 +98,9 @@ namespace DCL.Components
         {
             this.scene = scene;
             this.entity = entity;
-            transform.SetParent(entity.gameObject.transform, false);
+
+            if (transform.parent != entity.gameObject.transform)
+                transform.SetParent(entity.gameObject.transform, false);
         }
 
         public virtual void UpdateFromJSON(string json)
