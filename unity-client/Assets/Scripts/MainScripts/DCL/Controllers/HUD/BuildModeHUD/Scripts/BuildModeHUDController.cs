@@ -105,7 +105,8 @@ public class BuildModeHUDController : IHUD
     {
         controllers.sceneCatalogController.OnHideCatalogClicked += ChangeVisibilityOfCatalog;
         controllers.sceneCatalogController.OnCatalogItemSelected += CatalogItemSelected;
-        controllers.sceneCatalogController.OnStopInput += () => OnStopInput?.Invoke();
+        controllers.sceneCatalogController.OnStopInput += StopInput;
+
         controllers.sceneCatalogController.OnResumeInput += () => OnResumeInput?.Invoke();
         controllers.sceneCatalogController.OnPointerEnterInCatalogItemAdapter += ShowTooltipForCatalogItemAdapter;
         controllers.sceneCatalogController.OnPointerExitInCatalogItemAdapter += (x, y) => controllers.tooltipController.HideTooltip();
@@ -184,12 +185,20 @@ public class BuildModeHUDController : IHUD
 
     public void RefreshCatalogContent() { view.RefreshCatalogContent(); }
 
-    public void CatalogItemSelected(CatalogItem catalogItem)
+    public void StopInput()
     {
-        OnCatalogItemSelected?.Invoke(catalogItem);
-
         if (controllers.sceneCatalogController.IsCatalogExpanded())
             controllers.sceneCatalogController.ToggleCatalogExpanse();
+
+        OnStopInput?.Invoke();
+    }
+
+    public void CatalogItemSelected(CatalogItem catalogItem)
+    {
+        if (controllers.sceneCatalogController.IsCatalogExpanded())
+            controllers.sceneCatalogController.ToggleCatalogExpanse();
+
+        OnCatalogItemSelected?.Invoke(catalogItem);
     }
 
     public void SetVisibilityOfCatalog(bool isVisible)
