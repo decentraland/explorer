@@ -4,15 +4,19 @@ using UnityEngine.UI;
 
 public class EntityListAdapter : MonoBehaviour
 {
-    public Color entitySelectedColor, entityUnselectedColor;
-    public Color iconsSelectedColor, iconsUnselectedColor;
+    public Color entitySelectedColor;
+    public Color entityUnselectedColor;
+    public Color iconsSelectedColor;
+    public Color iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
     public TMP_InputField nameInputField;
-    public Image selectedImg, lockImg, showImg;
+    public Image selectedImg;
+    public Button unlockButton;
+    public Button lockButton;
+    public Image showImg;
     public System.Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     public System.Action<DCLBuilderInWorldEntity, string> OnEntityRename;
     DCLBuilderInWorldEntity currentEntity;
-
 
     private void OnDestroy()
     {
@@ -25,7 +29,7 @@ public class EntityListAdapter : MonoBehaviour
 
     public void SetContent(DCLBuilderInWorldEntity decentrelandEntity)
     {
-        if(currentEntity != null)
+        if (currentEntity != null)
         {
             currentEntity.onStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
@@ -37,25 +41,13 @@ public class EntityListAdapter : MonoBehaviour
         SetInfo(decentrelandEntity);
     }
 
-    public void SelectOrDeselect()
-    {
-        OnActionInvoked?.Invoke(EntityAction.SELECT,currentEntity, this);
-    }
+    public void SelectOrDeselect() { OnActionInvoked?.Invoke(EntityAction.SELECT, currentEntity, this); }
 
-    public void ShowOrHide()
-    {
-         OnActionInvoked?.Invoke(EntityAction.SHOW, currentEntity, this);
-    }
+    public void ShowOrHide() { OnActionInvoked?.Invoke(EntityAction.SHOW, currentEntity, this); }
 
-    public void LockOrUnlock()
-    {
-        OnActionInvoked?.Invoke(EntityAction.LOCK, currentEntity, this);
-    }
+    public void LockOrUnlock() { OnActionInvoked?.Invoke(EntityAction.LOCK, currentEntity, this); }
 
-    public void DeleteEntity()
-    {
-        OnActionInvoked?.Invoke(EntityAction.DELETE, currentEntity, this);
-    }
+    public void DeleteEntity() { OnActionInvoked?.Invoke(EntityAction.DELETE, currentEntity, this); }
 
     void SetInfo(DCLBuilderInWorldEntity entityToEdit)
     {
@@ -80,11 +72,8 @@ public class EntityListAdapter : MonoBehaviour
             else
                 showImg.color = iconsUnselectedColor;
 
-            if (entityToEdit.IsLocked)
-                lockImg.color = iconsSelectedColor;
-            else
-                lockImg.color = iconsUnselectedColor;
-
+            unlockButton.gameObject.SetActive(!entityToEdit.IsLocked);
+            lockButton.gameObject.SetActive(entityToEdit.IsLocked);
 
             if (entityToEdit.IsSelected)
                 selectedImg.color = entitySelectedColor;
@@ -93,10 +82,7 @@ public class EntityListAdapter : MonoBehaviour
         }
     }
 
-    public void Rename(string newName)
-    {
-        OnEntityRename?.Invoke(currentEntity, newName);
-    }
+    public void Rename(string newName) { OnEntityRename?.Invoke(currentEntity, newName); }
 
     void DeleteAdapter(DCLBuilderInWorldEntity entityToEdit)
     {
