@@ -56,7 +56,7 @@ public class GLTFShape_Tests : IntegrationTestSuite_Legacy
 
         sceneAssetPack.assets.Add(sceneObject);
 
-        AssetCatalogBridge.AddSceneAssetPackToCatalog(sceneAssetPack);
+        AssetCatalogBridge.i.AddSceneAssetPackToCatalog(sceneAssetPack);
 
         TestHelpers.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
             new
@@ -73,7 +73,7 @@ public class GLTFShape_Tests : IntegrationTestSuite_Legacy
 
 
         LoadWrapper_GLTF gltfWrapper = (LoadWrapper_GLTF) gltfShape;
-        ContentProvider customContentProvider = AssetCatalogBridge.GetContentProviderForAssetIdInSceneObjectCatalog(mockupAssetId);
+        ContentProvider customContentProvider = AssetCatalogBridge.i.GetContentProviderForAssetIdInSceneObjectCatalog(mockupAssetId);
         Assert.AreEqual(customContentProvider.baseUrl, gltfWrapper.customContentProvider.baseUrl);
         Assert.AreEqual(mockupKey, gltfWrapper.customContentProvider.contents[0].file);
         Assert.AreEqual(mockupValue, gltfWrapper.customContentProvider.contents[0].hash);
