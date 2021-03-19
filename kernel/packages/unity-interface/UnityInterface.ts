@@ -87,8 +87,8 @@ export class UnityInterface {
         canvas.width = canvas.parentElement.clientWidth
         canvas.height = canvas.parentElement.clientHeight
       } else {
-        //TODO(Brian): Here we save the original pixel ratio, but we aren't listening to changes
-        //             We may have to listen them for some devices?
+        // TODO(Brian): Here we save the original pixel ratio, but we aren't listening to changes
+        //              We may have to listen them for some devices?
         originalPixelRatio = devicePixelRatio
       }
     }
