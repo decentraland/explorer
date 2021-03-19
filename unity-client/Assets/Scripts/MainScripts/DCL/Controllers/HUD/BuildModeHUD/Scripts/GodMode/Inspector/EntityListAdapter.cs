@@ -7,7 +7,7 @@ public class EntityListAdapter : MonoBehaviour
 {
     public Color entitySelectedColor;
     public Color entityUnselectedColor;
-    public Color entityInsideOdBoundsColor;
+    public Color entityInsideOfBoundsColor;
     public Color entityOutOfBoundsColor;
     public Color iconsSelectedColor;
     public Color iconsUnselectedColor;
@@ -18,7 +18,6 @@ public class EntityListAdapter : MonoBehaviour
     public Button lockButton;
     public Image showImg;
     public TextMeshProUGUI nameInputField_Text;
-    public Image showImg;
     public System.Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     public System.Action<DCLBuilderInWorldEntity, string> OnEntityRename;
     DCLBuilderInWorldEntity currentEntity;
@@ -113,6 +112,6 @@ public class EntityListAdapter : MonoBehaviour
         if (currentEntity.rootEntity.entityId != entity.entityId)
             return;
 
-        nameInputField_Text.color = isInsideBoundaries ? entityInsideOdBoundsColor : entityOutOfBoundsColor;
+        nameInputField_Text.color = isInsideBoundaries ? entityInsideOfBoundsColor : entityOutOfBoundsColor;
     }
 }
