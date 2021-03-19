@@ -26,7 +26,7 @@ public class BIWSearchBarShould : MonoBehaviour
     [TearDown]
     public void TearDown()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         BIWCatalogManager.ClearCatalog();
         BIWCatalogManager.Dispose();
         sceneCatalogController.Dispose();

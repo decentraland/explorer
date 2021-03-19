@@ -248,7 +248,7 @@ public class SceneCatalogController : ISceneCatalogController
                 ShowCategories();
 
             sceneCatalogView.SetBackBtnSprite(false);
-            biwSearchBarController.FreeFilters();
+            biwSearchBarController.ReleaseFilters();
         }
     }
 

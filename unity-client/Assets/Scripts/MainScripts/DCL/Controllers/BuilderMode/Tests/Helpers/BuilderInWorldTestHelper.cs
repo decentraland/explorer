@@ -42,7 +42,7 @@ public static class BuilderInWorldTestHelper
 
     public static void CreateTestCatalogLocalMultipleFloorObjects()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/multipleSceneObjectsCatalog.json";
 
         if (File.Exists(jsonPath))
@@ -54,7 +54,7 @@ public static class BuilderInWorldTestHelper
 
     public static void CreateTestCatalogLocalSingleObject()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/sceneObjectCatalog.json";
 
         if (File.Exists(jsonPath))
@@ -66,7 +66,7 @@ public static class BuilderInWorldTestHelper
 
     public static void CreateTestSmartItemCatalogLocalSingleObject()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         string jsonPath = Utils.GetTestAssetsPathRaw() + "/BuilderInWorldCatalog/smartItemSceneObjectCatalog.json";
 
         if (File.Exists(jsonPath))

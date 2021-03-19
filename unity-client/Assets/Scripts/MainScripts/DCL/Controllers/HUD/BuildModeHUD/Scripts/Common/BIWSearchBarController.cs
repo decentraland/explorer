@@ -61,7 +61,7 @@ public class BIWSearchBarController : IBIWSearchBarController
         OnFilterChange?.Invoke(filterObjects);
     }
 
-    public void FreeFilters()
+    public void ReleaseFilters()
     {
         isSmartItemFilterActive = false;
         filterObjects.Clear();

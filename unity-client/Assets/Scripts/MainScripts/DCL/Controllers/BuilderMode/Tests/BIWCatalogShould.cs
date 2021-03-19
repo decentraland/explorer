@@ -118,7 +118,7 @@ public class BIWCatalogShould
     [UnityTearDown]
     protected IEnumerator TearDown()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         BIWCatalogManager.ClearCatalog();
         BIWCatalogManager.Dispose();
         if (gameObjectToUse != null)
