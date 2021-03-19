@@ -3,6 +3,7 @@ using DCL.Models;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 namespace DCL.Controllers
 {
@@ -20,6 +21,8 @@ namespace DCL.Controllers
 
     public interface ISceneBoundsChecker
     {
+        event Action<DecentralandEntity, bool> OnEntityBoundsCheckerStatusChanged;
+
         float timeBetweenChecks { get; set; }
         bool enabled { get; }
         int entitiesToCheckCount { get; }
@@ -48,6 +51,8 @@ namespace DCL.Controllers
 
     public class SceneBoundsChecker : ISceneBoundsChecker
     {
+        public event Action<DecentralandEntity, bool> OnEntityBoundsCheckerStatusChanged;
+
         public bool enabled => entitiesCheckRoutine != null;
 
         public float timeBetweenChecks { get; set; } = 1f;
@@ -234,7 +239,7 @@ namespace DCL.Controllers
         void EvaluateMeshBounds(DecentralandEntity entity)
         {
             bool isInsideBoundaries = IsEntityInsideSceneBoundaries(entity);
-            entity.SetBoundsCheckerStatus(isInsideBoundaries);
+            OnEntityBoundsCheckerStatusChanged?.Invoke(entity, isInsideBoundaries);
 
             UpdateEntityMeshesValidState(entity.meshesInfo, isInsideBoundaries);
             UpdateEntityCollidersValidState(entity.meshesInfo, isInsideBoundaries);

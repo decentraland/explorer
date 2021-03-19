@@ -32,10 +32,8 @@ namespace DCL.Models
         public System.Action<DCLTransform.Model> OnTransformChange;
         public System.Action<DecentralandEntity> OnMeshesInfoUpdated;
         public System.Action<DecentralandEntity> OnMeshesInfoCleaned;
-        public event Action<bool> OnEntityBoundsCheckerStatusChanged;
 
         public System.Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
-        public bool isInsideBoundaries { private set; get; }
 
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
@@ -227,12 +225,6 @@ namespace DCL.Models
             }
 
             return null;
-        }
-
-        public void SetBoundsCheckerStatus(bool isInsideBoundaries)
-        {
-            this.isInsideBoundaries = isInsideBoundaries;
-            OnEntityBoundsCheckerStatusChanged?.Invoke(isInsideBoundaries);
         }
     }
 }

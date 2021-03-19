@@ -25,6 +25,7 @@ public class EntityListAdapter : MonoBehaviour
         {
             currentEntity.onStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
+            DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= ChangeEntityBoundsCheckerStatus;
         }
     }
 
@@ -34,10 +35,12 @@ public class EntityListAdapter : MonoBehaviour
         {
             currentEntity.onStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
+            DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= ChangeEntityBoundsCheckerStatus;
         }
         currentEntity = decentrelandEntity;
         currentEntity.onStatusUpdate += SetInfo;
         currentEntity.OnDelete += DeleteAdapter;
+        DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged += ChangeEntityBoundsCheckerStatus;
 
         SetInfo(decentrelandEntity);
     }
@@ -83,8 +86,6 @@ public class EntityListAdapter : MonoBehaviour
                 selectedImg.color = entitySelectedColor;
             else
                 selectedImg.color = entityUnselectedColor;
-
-            nameInputField_Text.color = entityToEdit.rootEntity.isInsideBoundaries ? entityInsideOdBoundsColor : entityOutOfBoundsColor;
         }
     }
 
@@ -95,5 +96,13 @@ public class EntityListAdapter : MonoBehaviour
         if (this != null)
             if (entityToEdit.entityUniqueId == currentEntity.entityUniqueId)
                 Destroy(gameObject);
+    }
+
+    private void ChangeEntityBoundsCheckerStatus(DCL.Models.DecentralandEntity entity, bool isInsideBoundaries)
+    {
+        if (currentEntity.rootEntity.entityId != entity.entityId)
+            return;
+
+        nameInputField_Text.color = isInsideBoundaries ? entityInsideOdBoundsColor : entityOutOfBoundsColor;
     }
 }

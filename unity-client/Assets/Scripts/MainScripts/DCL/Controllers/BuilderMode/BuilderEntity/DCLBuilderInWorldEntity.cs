@@ -86,7 +86,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         rootEntity = entity;
         rootEntity.OnShapeUpdated += OnShapeUpdate;
         rootEntity.OnNameChange += OnNameUpdate;
-        rootEntity.OnEntityBoundsCheckerStatusChanged += OnBoundsCheckerUpdate;
 
         this.editMaterial = editMaterial;
         isVoxel = false;
@@ -157,7 +156,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         rootEntity.OnShapeUpdated -= OnShapeUpdate;
         rootEntity.OnNameChange -= OnNameUpdate;
-        rootEntity.OnEntityBoundsCheckerStatusChanged -= OnBoundsCheckerUpdate;
 
         Deselect();
         DestroyColliders();
@@ -466,8 +464,6 @@ public class DCLBuilderInWorldEntity : EditableEntity
         if (IsSelected)
             SetEditMaterial();
     }
-
-    void OnBoundsCheckerUpdate(bool isInsideBoundaries) { onStatusUpdate?.Invoke(this); }
 
     void CreateCollidersForEntity(DecentralandEntity entity)
     {
