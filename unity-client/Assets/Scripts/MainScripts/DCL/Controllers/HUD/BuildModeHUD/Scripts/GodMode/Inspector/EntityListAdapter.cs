@@ -38,6 +38,7 @@ public class EntityListAdapter : MonoBehaviour
         currentEntity.onStatusUpdate += SetInfo;
         currentEntity.OnDelete += DeleteAdapter;
 
+        AllowNameEdition(false);
         SetInfo(decentrelandEntity);
     }
 
@@ -76,13 +77,21 @@ public class EntityListAdapter : MonoBehaviour
             lockButton.gameObject.SetActive(entityToEdit.IsLocked);
 
             if (entityToEdit.IsSelected)
+            {
+                AllowNameEdition(true);
                 selectedImg.color = entitySelectedColor;
+            }
             else
+            {
+                AllowNameEdition(false);
                 selectedImg.color = entityUnselectedColor;
+            }
         }
     }
 
     public void Rename(string newName) { OnEntityRename?.Invoke(currentEntity, newName); }
+
+    public void AllowNameEdition(bool isAllowed) { nameInputField.enabled = isAllowed; }
 
     void DeleteAdapter(DCLBuilderInWorldEntity entityToEdit)
     {
