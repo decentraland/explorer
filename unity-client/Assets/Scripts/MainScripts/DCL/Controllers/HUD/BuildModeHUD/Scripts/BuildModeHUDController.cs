@@ -187,18 +187,18 @@ public class BuildModeHUDController : IHUD
 
     public void StopInput()
     {
+        OnStopInput?.Invoke();
+
         if (controllers.sceneCatalogController.IsCatalogExpanded())
             controllers.sceneCatalogController.ToggleCatalogExpanse();
-
-        OnStopInput?.Invoke();
     }
 
     public void CatalogItemSelected(CatalogItem catalogItem)
     {
+        OnCatalogItemSelected?.Invoke(catalogItem);
+
         if (controllers.sceneCatalogController.IsCatalogExpanded())
             controllers.sceneCatalogController.ToggleCatalogExpanse();
-
-        OnCatalogItemSelected?.Invoke(catalogItem);
     }
 
     public void SetVisibilityOfCatalog(bool isVisible)
