@@ -18,8 +18,6 @@ public interface ISceneCatalogController
     void CategoryFilter(bool isOn);
     void FavoritesFilter(bool isOn);
     void ToggleCatalogExpanse();
-    void OnSearchInputChanged(string currentSearchInput);
-    List<Dictionary<string, List<CatalogItem>>> FilterAssets(string nameToFilter);
     void QuickBarInput(int quickBarSlot);
     void ShowFavorites();
     void CatalogItemSelected(CatalogItem catalogItem);
@@ -51,7 +49,7 @@ public class SceneCatalogController : ISceneCatalogController
     internal ISceneCatalogView sceneCatalogView;
     internal IQuickBarController quickBarController;
     internal FavoritesController favoritesController;
-    internal List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
+    internal BIWSearchBarController biwSearchBarController;
     internal bool isShowingAssetPacks = false;
     internal bool isFilterByAssetPacks = true;
 
@@ -60,6 +58,8 @@ public class SceneCatalogController : ISceneCatalogController
         this.sceneCatalogView = sceneCatalogView;
         this.quickBarController = quickBarController;
         favoritesController = new FavoritesController(sceneCatalogView.catalogGroupList);
+        biwSearchBarController = new BIWSearchBarController();
+        biwSearchBarController.Initialize(sceneCatalogView);
 
         sceneCatalogView.OnHideCatalogClicked += HideCatalogClicked;
 
@@ -75,9 +75,6 @@ public class SceneCatalogController : ISceneCatalogController
             sceneCatalogView.catalogGroupList.OnPointerExitInAdapter += OnPointerExit;
         }
 
-        if (sceneCatalogView.searchInput != null)
-            sceneCatalogView.searchInput.onValueChanged.AddListener(OnSearchInputChanged);
-
         if (sceneCatalogView.category != null)
             sceneCatalogView.category.onValueChanged.AddListener(CategoryFilter);
 
@@ -90,6 +87,9 @@ public class SceneCatalogController : ISceneCatalogController
         sceneCatalogView.OnSceneCatalogBack += SceneCatalogBack;
         quickBarController.OnQuickBarShortcutSelected += QuickBarInput;
         quickBarController.OnCatalogItemSelected += CatalogItemSelected;
+
+        biwSearchBarController.OnFilterChange += AssetsFiltered;
+        biwSearchBarController.OnFilterRemove += FilterRemoved;
     }
 
     public void Dispose()
@@ -108,9 +108,6 @@ public class SceneCatalogController : ISceneCatalogController
             sceneCatalogView.catalogGroupList.OnPointerExitInAdapter -= OnPointerExit;
         }
 
-        if (sceneCatalogView.searchInput != null)
-            sceneCatalogView.searchInput.onValueChanged.RemoveListener(OnSearchInputChanged);
-
         if (sceneCatalogView.category != null)
             sceneCatalogView.category.onValueChanged.RemoveListener(CategoryFilter);
 
@@ -125,8 +122,21 @@ public class SceneCatalogController : ISceneCatalogController
         quickBarController.OnQuickBarShortcutSelected -= QuickBarInput;
         quickBarController.OnCatalogItemSelected -= CatalogItemSelected;
 
+        biwSearchBarController.OnFilterChange -= AssetsFiltered;
+        biwSearchBarController.OnFilterRemove -= FilterRemoved;
+
         favoritesController.Dispose();
+        biwSearchBarController.Dispose();
     }
+
+    public void AssetsFiltered(List<Dictionary<string, List<CatalogItem>>> filterObjects)
+    {
+        ShowCatalogContent();
+        if (sceneCatalogView.catalogGroupList != null)
+            sceneCatalogView.catalogGroupList.SetContent(filterObjects);
+    }
+
+    public void FilterRemoved() { ShowAssetsPacks(); }
 
     public void AssetsPackFilter(bool isOn)
     {
@@ -155,56 +165,6 @@ public class SceneCatalogController : ISceneCatalogController
     }
 
     public void ToggleCatalogExpanse() { sceneCatalogView.ToggleCatalogExpanse(); }
-
-    public void OnSearchInputChanged(string currentSearchInput)
-    {
-        if (string.IsNullOrEmpty(currentSearchInput))
-        {
-            ShowAssetsPacks();
-        }
-        else
-        {
-            ShowCatalogContent();
-            FilterAssets(currentSearchInput);
-            sceneCatalogView.catalogGroupList.SetContent(filterObjects);
-        }
-    }
-
-    public List<Dictionary<string, List<CatalogItem>>> FilterAssets(string nameToFilter)
-    {
-        filterObjects.Clear();
-        foreach (CatalogItemPack assetPack in BIWCatalogManager.GetCatalogItemPackList())
-        {
-            foreach (CatalogItem catalogItem in assetPack.assets)
-            {
-                if (catalogItem.category.Contains(nameToFilter) || catalogItem.tags.Contains(nameToFilter) || catalogItem.name.Contains(nameToFilter))
-                {
-                    bool foundCategory = false;
-                    foreach (Dictionary<string, List<CatalogItem>> groupedSceneObjects in filterObjects)
-                    {
-                        if (groupedSceneObjects.ContainsKey(catalogItem.category))
-                        {
-                            foundCategory = true;
-                            if (!groupedSceneObjects[catalogItem.category].Contains(catalogItem))
-                                groupedSceneObjects[catalogItem.category].Add(catalogItem);
-                        }
-                    }
-                    if (!foundCategory)
-                    {
-                        AddNewSceneObjectCategoryToFilter(catalogItem);
-                    }
-                }
-            }
-        }
-        return filterObjects;
-    }
-
-    internal void AddNewSceneObjectCategoryToFilter(CatalogItem catalogItem)
-    {
-        Dictionary<string, List<CatalogItem>> groupedCatalogItems = new Dictionary<string, List<CatalogItem>>();
-        groupedCatalogItems.Add(catalogItem.category, new List<CatalogItem>() { catalogItem });
-        filterObjects.Add(groupedCatalogItems);
-    }
 
     public void QuickBarInput(int quickBarSlot) { quickBarController.QuickBarObjectSelected(quickBarSlot); }
 
@@ -287,6 +247,9 @@ public class SceneCatalogController : ISceneCatalogController
                 ShowAssetsPacks();
             else
                 ShowCategories();
+
+            sceneCatalogView.SetBackBtnSprite(false);
+            biwSearchBarController.ReleaseFilters();
         }
     }
 
@@ -334,6 +297,8 @@ public class SceneCatalogController : ISceneCatalogController
 
         if (sceneCatalogView.catalogGroupList != null)
             sceneCatalogView.catalogGroupList.gameObject.SetActive(true);
+
+        sceneCatalogView.SetBackBtnSprite(true);
     }
 
     public void OpenCatalog()

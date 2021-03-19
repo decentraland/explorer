@@ -8,10 +8,10 @@ public interface ISceneCatalogView
 {
     CatalogAssetPackListView catalogAssetPackList { get; }
     CatalogGroupListView catalogGroupList { get; }
-    TMP_InputField searchInput { get; }
     Toggle category { get; }
     Toggle favorites { get; }
     Toggle assetPack { get; }
+    IBIWSearchBarView searchBarView { get; }
 
     event Action OnHideCatalogClicked;
     event Action OnSceneCatalogBack;
@@ -24,19 +24,24 @@ public interface ISceneCatalogView
     void SetCatalogTitle(string text);
     void ToggleCatalogExpanse();
     void SetActive(bool isActive);
+    void SetBackBtnSprite(bool isBackSprite);
 }
 
 public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 {
     public CatalogAssetPackListView catalogAssetPackList => catalogAssetPackListView;
     public CatalogGroupListView catalogGroupList => catalogGroupListView;
-    public TMP_InputField searchInput => searchInputField;
     public Toggle category => categoryToggle;
     public Toggle favorites => favoritesToggle;
     public Toggle assetPack => assetPackToggle;
+    public IBIWSearchBarView searchBarView  => biwSearchBarView;
 
     public event Action OnHideCatalogClicked;
     public event Action OnSceneCatalogBack;
+
+    [Header("Design")]
+    [SerializeField] internal Sprite mainCatalogBackBtnSprite;
+    [SerializeField] internal Sprite backCatalogBackBtnSprite;
 
     [Header("Prefab References")]
     [SerializeField] internal TextMeshProUGUI catalogTitleTxt;
@@ -49,6 +54,7 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
     [SerializeField] internal Button hideCatalogBtn;
     [SerializeField] internal Button backgBtn;
     [SerializeField] internal Button toggleCatalogBtn;
+    [SerializeField] internal BIWSearchBarView biwSearchBarView;
 
     [Header("Catalog RectTransforms")]
     [SerializeField] internal RectTransform panelRT;
@@ -119,12 +125,14 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
 
     public void OnHideCatalogClick() { OnHideCatalogClicked?.Invoke(); }
 
+    public void SetBackBtnSprite(bool isBackSprite) { backgBtn.image.sprite = isBackSprite ? backCatalogBackBtnSprite : mainCatalogBackBtnSprite; }
+
     public void Back() { OnSceneCatalogBack?.Invoke(); }
 
     public void SetCatalogTitle(string text) { catalogTitleTxt.text = text; }
 
     public bool IsCatalogOpen() { return gameObject.activeSelf; }
-
+    
     public bool IsCatalogExpanded() { return isCatalogExpanded; }
 
     public void CloseCatalog()

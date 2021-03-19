@@ -33,22 +33,6 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void AddNewSceneObjectCategoryToFilterCorrectly()
-        {
-            // Arrange
-            string testCategory = "testCategory";
-            CatalogItem testCatalogItem = new CatalogItem { category = testCategory };
-            sceneCatalogController.filterObjects.Clear();
-
-            // Act
-            sceneCatalogController.AddNewSceneObjectCategoryToFilter(testCatalogItem);
-
-            // Assert
-            Assert.AreEqual(1, sceneCatalogController.filterObjects.Count, "The number of filter objects does not match!");
-            Assert.IsTrue(sceneCatalogController.filterObjects[0].ContainsKey(testCategory), "The test category has not been found in the filter objects!");
-        }
-
-        [Test]
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
