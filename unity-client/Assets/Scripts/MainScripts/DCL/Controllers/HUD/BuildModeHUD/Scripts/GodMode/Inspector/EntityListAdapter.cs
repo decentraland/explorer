@@ -1,3 +1,4 @@
+using DCL.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,6 +7,8 @@ public class EntityListAdapter : MonoBehaviour
 {
     public Color entitySelectedColor;
     public Color entityUnselectedColor;
+    public Color entityInsideOdBoundsColor;
+    public Color entityOutOfBoundsColor;
     public Color iconsSelectedColor;
     public Color iconsUnselectedColor;
     public TextMeshProUGUI nameTxt;
@@ -13,6 +16,8 @@ public class EntityListAdapter : MonoBehaviour
     public Image selectedImg;
     public Button unlockButton;
     public Button lockButton;
+    public Image showImg;
+    public TextMeshProUGUI nameInputField_Text;
     public Image showImg;
     public System.Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     public System.Action<DCLBuilderInWorldEntity, string> OnEntityRename;
@@ -24,6 +29,7 @@ public class EntityListAdapter : MonoBehaviour
         {
             currentEntity.onStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
+            DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= ChangeEntityBoundsCheckerStatus;
         }
     }
 
@@ -33,10 +39,12 @@ public class EntityListAdapter : MonoBehaviour
         {
             currentEntity.onStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
+            DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= ChangeEntityBoundsCheckerStatus;
         }
         currentEntity = decentrelandEntity;
         currentEntity.onStatusUpdate += SetInfo;
         currentEntity.OnDelete += DeleteAdapter;
+        DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged += ChangeEntityBoundsCheckerStatus;
 
         AllowNameEdition(false);
         SetInfo(decentrelandEntity);
@@ -98,5 +106,13 @@ public class EntityListAdapter : MonoBehaviour
         if (this != null)
             if (entityToEdit.entityUniqueId == currentEntity.entityUniqueId)
                 Destroy(gameObject);
+    }
+
+    private void ChangeEntityBoundsCheckerStatus(DCL.Models.DecentralandEntity entity, bool isInsideBoundaries)
+    {
+        if (currentEntity.rootEntity.entityId != entity.entityId)
+            return;
+
+        nameInputField_Text.color = isInsideBoundaries ? entityInsideOdBoundsColor : entityOutOfBoundsColor;
     }
 }
