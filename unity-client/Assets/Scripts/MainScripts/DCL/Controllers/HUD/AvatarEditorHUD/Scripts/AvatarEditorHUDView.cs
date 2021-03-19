@@ -21,10 +21,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         public CharacterPreviewController.CameraFocus focus = CharacterPreviewController.CameraFocus.DefaultEditing;
 
         //To remove when we refactor this to avoid ToggleGroup issues when quitting application
-        public void Initialize()
-        {
-            Application.quitting += () => toggle.onValueChanged.RemoveAllListeners();
-        }
+        public void Initialize() { Application.quitting += () => toggle.onValueChanged.RemoveAllListeners(); }
     }
 
     [System.Serializable]
@@ -89,15 +86,9 @@ public class AvatarEditorHUDView : MonoBehaviour
         closeAction.OnTriggered -= CloseAction_OnTriggered;
     }
 
-    private void ToggleAction_OnTriggered(DCLAction_Trigger action)
-    {
-        OnToggleActionTriggered?.Invoke();
-    }
+    private void ToggleAction_OnTriggered(DCLAction_Trigger action) { OnToggleActionTriggered?.Invoke(); }
 
-    private void CloseAction_OnTriggered(DCLAction_Trigger action)
-    {
-        OnCloseActionTriggered?.Invoke();
-    }
+    private void CloseAction_OnTriggered(DCLAction_Trigger action) { OnCloseActionTriggered?.Invoke(); }
 
     private void Initialize(AvatarEditorHUDController controller)
     {
@@ -206,20 +197,11 @@ public class AvatarEditorHUDView : MonoBehaviour
         collectiblesItemSelector.Unselect(wearable.id);
     }
 
-    public void SelectHairColor(Color hairColor)
-    {
-        hairColorSelector.Select(hairColor);
-    }
+    public void SelectHairColor(Color hairColor) { hairColorSelector.Select(hairColor); }
 
-    public void SelectSkinColor(Color skinColor)
-    {
-        skinColorSelector.Select(skinColor);
-    }
+    public void SelectSkinColor(Color skinColor) { skinColorSelector.Select(skinColor); }
 
-    public void SelectEyeColor(Color eyesColor)
-    {
-        eyeColorSelector.Select(eyesColor);
-    }
+    public void SelectEyeColor(Color eyesColor) { eyeColorSelector.Select(eyesColor); }
 
     public void SetColors(List<Color> skinColors, List<Color> hairColors, List<Color> eyeColors)
     {
@@ -243,7 +225,8 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void UpdateAvatarPreview(AvatarModel avatarModel)
     {
-        if (avatarModel?.wearables == null) return;
+        if (avatarModel?.wearables == null)
+            return;
 
         SetLoadingPanel(true);
         doneButton.interactable = false;
@@ -267,7 +250,8 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void AddWearable(WearableItem wearableItem, int amount)
     {
-        if (wearableItem == null) return;
+        if (wearableItem == null)
+            return;
 
         if (!selectorsByCategory.ContainsKey(wearableItem.category))
         {
@@ -284,7 +268,8 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void RemoveWearable(WearableItem wearableItem)
     {
-        if (wearableItem == null) return;
+        if (wearableItem == null)
+            return;
 
         if (!selectorsByCategory.ContainsKey(wearableItem.category))
         {
@@ -322,10 +307,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         characterPreviewController.TakeSnapshots(OnSnapshotsReady, OnSnapshotsFailed);
     }
 
-    private void OnExitButton()
-    {
-        OnCloseActionTriggered?.Invoke();
-    }
+    private void OnExitButton() { OnCloseActionTriggered?.Invoke(); }
 
     private void OnSnapshotsReady(Texture2D face, Texture2D face128, Texture2D face256, Texture2D body)
     {
@@ -343,6 +325,9 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void SetVisibility(bool visible)
     {
+        if (Camera.main != null)
+            Camera.main.enabled = !visible;
+
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
@@ -383,9 +368,12 @@ public class AvatarEditorHUDView : MonoBehaviour
             collectiblesItemSelector.OnSellClicked -= controller.SellCollectible;
         }
 
-        if (skinColorSelector != null) skinColorSelector.OnColorChanged -= controller.SkinColorClicked;
-        if (eyeColorSelector != null) eyeColorSelector.OnColorChanged -= controller.EyesColorClicked;
-        if (hairColorSelector != null) hairColorSelector.OnColorChanged -= controller.HairColorClicked;
+        if (skinColorSelector != null)
+            skinColorSelector.OnColorChanged -= controller.SkinColorClicked;
+        if (eyeColorSelector != null)
+            eyeColorSelector.OnColorChanged -= controller.EyesColorClicked;
+        if (hairColorSelector != null)
+            hairColorSelector.OnColorChanged -= controller.HairColorClicked;
 
         if (this != null)
             Destroy(gameObject);
