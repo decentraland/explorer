@@ -57,7 +57,9 @@ public class SceneCatalogController : ISceneCatalogController
         this.sceneCatalogView = sceneCatalogView;
         this.quickBarController = quickBarController;
         favoritesController = new FavoritesController(sceneCatalogView.catalogGroupList);
-        biwSearchBarController = new BIWSearchBarController(sceneCatalogView);
+        biwSearchBarController = new BIWSearchBarController();
+        biwSearchBarController.Initialize(sceneCatalogView);
+
         sceneCatalogView.OnHideCatalogClicked += HideCatalogClicked;
 
         if (sceneCatalogView.catalogAssetPackList != null)

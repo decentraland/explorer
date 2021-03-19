@@ -6,6 +6,8 @@ using UnityEngine;
 
 public interface IBIWSearchBarController
 {
+    event Action<List<Dictionary<string, List<CatalogItem>>>> OnFilterChange;
+    event Action OnFilterRemove;
     bool IsFilterActive();
     void Dispose();
     List<Dictionary<string, List<CatalogItem>>> FilterAssets(string nameToFilter);
@@ -15,15 +17,17 @@ public class BIWSearchBarController : IBIWSearchBarController
 {
     public event Action<List<Dictionary<string, List<CatalogItem>>>> OnFilterChange;
     public event Action OnFilterRemove;
+
     internal List<Dictionary<string, List<CatalogItem>>> filterObjects = new List<Dictionary<string, List<CatalogItem>>>();
 
     private IBIWSearchBarView view;
 
     private bool isSmartItemFilterActive = false;
     private bool isFilterActive = false;
-    public BIWSearchBarController(ISceneCatalogView catalogView)
+
+    public void Initialize(ISceneCatalogView sceneCatalogView)
     {
-        this.view = catalogView.searchBarView;
+        this.view = sceneCatalogView.searchBarView;
         if (this.view.searchInput != null)
             this.view.searchInput.onValueChanged.AddListener(OnSearchInputChanged);
 
@@ -34,7 +38,10 @@ public class BIWSearchBarController : IBIWSearchBarController
     public void Dispose()
     {
         if (view.searchInput != null)
-            view.searchInput?.onValueChanged.RemoveListener(OnSearchInputChanged);
+            view.searchInput.onValueChanged.RemoveListener(OnSearchInputChanged);
+
+        if (view.smartItemBtn != null)
+            view.smartItemBtn.onClick.RemoveListener(ChangeSmartItemFilter);
     }
 
     public bool IsFilterActive() { return isFilterActive; }
