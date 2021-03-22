@@ -14,9 +14,7 @@ using UnityGLTF;
 using static DCL.ContentServerUtils;
 using Utils = DCL.Helpers.Utils;
 
-namespace DCL.ABConverter
-{
-}
+namespace DCL.ABConverter { }
 
 namespace DCL
 {
@@ -40,16 +38,10 @@ namespace DCL
         }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Default Empty Parcels")]
-        public static void DumpEmptyParcels_Default()
-        {
-            DumpEmptyParcels();
-        }
+        public static void DumpEmptyParcels_Default() { DumpEmptyParcels(); }
 
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Halloween Empty Parcels")]
-        public static void DumpEmptyParcels_Halloween()
-        {
-            DumpEmptyParcels("empty-scenes-halloween");
-        }
+        public static void DumpEmptyParcels_Halloween() { DumpEmptyParcels("empty-scenes-halloween"); }
 
         public static void DumpEmptyParcels(string folderName = "empty-scenes")
         {
@@ -188,21 +180,21 @@ namespace DCL
             ABConverter.Client.DumpArea(new Vector2Int(-110, -110), new Vector2Int(1, 1));
         }
 
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump Single Asset")]
+        public static void DumpSingleAsset()
+        {
+            // TODO: Make an editor window to setup these values from editor (for other dump-modes as well)
+            ABConverter.Client.DumpAsset("QmS9eDwvcEpyYXChz6pFpyWyfyajiXbt6KA4CxQa3JKPGC",
+                "models/FloorBaseGrass_01/FloorBaseGrass_01.glb",
+                "QmXMzPLZNx5EHiYi3tK9MT5g9HqjAqgyAoZUu2LfAXJcSM");
+        }
+
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org -6,30")]
         public static void DumpOrg()
         {
             ABConverter.Client.DumpArea(new Vector2Int(-6, 30), new Vector2Int(15, 15));
         }
         
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Single Asset")]
-        public static void DumpSingleAsset()
-        {
-         // TODO: Make an editor window to setup these values from editor (for other dump-modes as well)
-         ABConverter.Client.DumpAsset("QmS9eDwvcEpyYXChz6pFpyWyfyajiXbt6KA4CxQa3JKPGC",
-                                        "models/FloorBaseGrass_01/FloorBaseGrass_01.glb",
-                                        "QmXMzPLZNx5EHiYi3tK9MT5g9HqjAqgyAoZUu2LfAXJcSM");
-        }
-
         [MenuItem("Decentraland/Asset Bundle Builder/Dump Org 0,0")]
         public static void DumpCenterPlaza()
         {
@@ -254,9 +246,7 @@ namespace DCL
             UnityWebRequest w = UnityWebRequest.Get(url);
             w.SendWebRequest();
 
-            while (!w.isDone)
-            {
-            }
+            while (!w.isDone) { }
 
             if (!w.WebRequestSucceded())
             {
