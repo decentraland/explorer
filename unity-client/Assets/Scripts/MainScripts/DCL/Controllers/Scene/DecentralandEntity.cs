@@ -151,7 +151,7 @@ namespace DCL.Models
             isReleased = true;
         }
 
-        public void AddSharedComponent(System.Type componentType, BaseDisposable component)
+        public void AddSharedComponent(Type componentType, BaseDisposable component)
         {
             if (component == null)
             {
@@ -163,7 +163,7 @@ namespace DCL.Models
             sharedComponents.Add(componentType, component);
         }
 
-        public void RemoveSharedComponent(System.Type targetType, bool triggerDetaching = true)
+        public void RemoveSharedComponent(Type targetType, bool triggerDetaching = true)
         {
             if (sharedComponents.TryGetValue(targetType, out ISharedComponent component))
             {

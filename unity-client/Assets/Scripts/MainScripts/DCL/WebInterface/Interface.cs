@@ -1115,5 +1115,11 @@ namespace DCL.Interface
 
             SendMessage("SearchENSOwner", searchEnsOwnerPayload);
         }
+
+        public static void RequestUserProfile(string userId)
+        {
+            stringPayload.value = userId;
+            SendMessage("RequestUserProfile", stringPayload);
+        }
     }
 }

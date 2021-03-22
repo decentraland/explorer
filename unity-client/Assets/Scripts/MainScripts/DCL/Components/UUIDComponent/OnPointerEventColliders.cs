@@ -36,7 +36,7 @@ namespace DCL.Components
 
             if (lastShape == shape)
                 return;
-
+            
             this.ownerEntity = entity;
             lastShape = shape;
 
