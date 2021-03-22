@@ -102,7 +102,8 @@ namespace DCL.Components
             material.SetFloat(_AlphaClip, 1);
             material.SetFloat(_Cutoff, model.alphaTest);
             material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
-            foreach (DecentralandEntity decentralandEntity in attachedEntities)
+
+            foreach (IDCLEntity decentralandEntity in attachedEntities)
             {
                 InitMaterial(decentralandEntity.meshRootGameObject);
             }

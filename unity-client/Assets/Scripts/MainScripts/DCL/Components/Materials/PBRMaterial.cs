@@ -127,7 +127,7 @@ namespace DCL.Components
             SetMaterialTexture(ShaderUtils.AlphaTexture, model.alphaTexture, alphaDCLTexture);
             SetMaterialTexture(ShaderUtils.BumpMap, model.bumpTexture, bumpDCLTexture);
 
-            foreach (DecentralandEntity decentralandEntity in attachedEntities)
+            foreach (IDCLEntity decentralandEntity in attachedEntities)
             {
                 InitMaterial(decentralandEntity.meshRootGameObject);
             }

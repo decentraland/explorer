@@ -73,7 +73,7 @@ namespace DCL
             entity.OnCleanupEvent += OnEntityCleanUpEvent;
         }
 
-        void RemoveAllEntityColliders(DecentralandEntity entity)
+        void RemoveAllEntityColliders(IDCLEntity entity)
         {
             if (collidersByEntity.ContainsKey(entity))
             {
@@ -91,7 +91,7 @@ namespace DCL
         {
             dispatcher.OnCleanupEvent -= OnEntityCleanUpEvent;
 
-            RemoveAllEntityColliders((DecentralandEntity) dispatcher);
+            RemoveAllEntityColliders((IDCLEntity) dispatcher);
         }
 
         public bool GetColliderInfo(Collider collider, out ColliderInfo info)
