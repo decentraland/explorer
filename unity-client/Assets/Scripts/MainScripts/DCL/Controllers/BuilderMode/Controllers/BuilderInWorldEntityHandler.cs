@@ -57,6 +57,8 @@ public class BuilderInWorldEntityHandler : BIWController
 
     private BuildModeHUDController hudController;
 
+    public Action OnEntityUnlocked;
+
     private void Start()
     {
         hideSelectedEntitiesDelegate = (action) => ChangeShowStateSelectedEntities();
@@ -735,6 +737,10 @@ public class BuilderInWorldEntityHandler : BIWController
             DeselectEntity(entityToApply);
 
         builderInWorldBridge.ChangeEntityLockStatus(entityToApply, sceneToEdit);
+
+        if (!entityToApply.IsLocked)
+            OnEntityUnlocked?.Invoke();
+
     }
 
     private string GetConvertedUniqueKeyForEntity(string entityID) { return sceneToEdit.sceneData.id + entityID; }

@@ -30,7 +30,7 @@ public class BIWCreatorController : BIWController
 
     public Action OnInputDone;
 
-    //Note(Adrian): This is for tutorial purposes
+    //Note(Adrian): This is for tutorial purposes - Note(Mordi): ...and for audio.
     public Action OnSceneObjectPlaced;
 
     private CatalogItem lastCatalogItemCreated;

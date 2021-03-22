@@ -3,6 +3,7 @@ using DCL.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BIWInputHandler : BIWController
 {
@@ -39,6 +40,8 @@ public class BIWInputHandler : BIWController
     private bool isMultiSelectionActive = false;
 
     private float nexTimeToReceiveInput;
+
+    public Action OnEndMultiSelection;
 
     void Start()
     {
@@ -140,6 +143,8 @@ public class BIWInputHandler : BIWController
         builderInWorldEntityHandler.SetMultiSelectionActive(isMultiSelectionActive);
         biwModeController.EndMultiSelection();
         outlinerController.CancelUnselectedOutlines();
+
+        OnEndMultiSelection?.Invoke();
     }
 
     private void MouseClick(int buttonID, Vector3 position)
