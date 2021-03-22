@@ -88,10 +88,7 @@ namespace DCL.Models
             meshesInfo.OnCleanup += () => OnMeshesInfoCleaned?.Invoke(this);
         }
 
-        public Dictionary<System.Type, ISharedComponent> GetSharedComponents()
-        {
-            return sharedComponents;
-        }
+        public Dictionary<System.Type, ISharedComponent> GetSharedComponents() { return sharedComponents; }
 
         public void AddChild(IDCLEntity entity)
         {
@@ -142,15 +139,13 @@ namespace DCL.Models
             }
         }
 
-        public void ResetRelease()
-        {
-            isReleased = false;
-        }
+        public void ResetRelease() { isReleased = false; }
 
         public void Cleanup()
         {
             // Don't do anything if this object was already released
-            if (isReleased) return;
+            if (isReleased)
+                return;
 
             OnRemoved?.Invoke(this);
 
@@ -209,7 +204,7 @@ namespace DCL.Models
             sharedComponents.Add(componentType, component);
         }
 
-        public void RemoveSharedComponent(System.Type targetType, bool triggerDetaching = true)
+        public void RemoveSharedComponent(Type targetType, bool triggerDetaching = true)
         {
             if (sharedComponents.TryGetValue(targetType, out ISharedComponent component))
             {
@@ -246,10 +241,7 @@ namespace DCL.Models
             return null;
         }
 
-        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out IEntityComponent component)
-        {
-            return components.TryGetValue(componentId, out component);
-        }
+        public bool TryGetBaseComponent(CLASS_ID_COMPONENT componentId, out IEntityComponent component) { return components.TryGetValue(componentId, out component); }
 
         public bool TryGetSharedComponent(CLASS_ID componentId, out ISharedComponent component)
         {

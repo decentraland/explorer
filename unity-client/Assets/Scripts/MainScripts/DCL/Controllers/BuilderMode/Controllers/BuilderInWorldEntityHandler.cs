@@ -146,10 +146,7 @@ public class BuilderInWorldEntityHandler : BIWController
         DeselectEntities();
     }
 
-    public void SetMultiSelectionActive(bool isActive)
-    {
-        isMultiSelectionActive = isActive;
-    }
+    public void SetMultiSelectionActive(bool isActive) { isMultiSelectionActive = isActive; }
 
     public override void EnterEditMode(ParcelScene sceneToEdit)
     {
@@ -578,10 +575,7 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public string GetNewNameForEntity(CatalogItem sceneObject)
-    {
-        return GetNewNameForEntity(sceneObject.name);
-    }
+    public string GetNewNameForEntity(CatalogItem sceneObject) { return GetNewNameForEntity(sceneObject.name); }
 
     public string GetNewNameForEntity(string name)
     {
@@ -621,10 +615,7 @@ public class BuilderInWorldEntityHandler : BIWController
         DeleteEntity(entity, true);
     }
 
-    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete)
-    {
-        DeleteEntity(entityToDelete, true);
-    }
+    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete) { DeleteEntity(entityToDelete, true); }
 
     public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete, bool checkSelection = true)
     {
@@ -714,10 +705,7 @@ public class BuilderInWorldEntityHandler : BIWController
         builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit);
     }
 
-    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate)
-    {
-        builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
-    }
+    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate) { builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit); }
 
     public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName)
     {
@@ -754,10 +742,7 @@ public class BuilderInWorldEntityHandler : BIWController
         builderInWorldBridge.ChangeEntityLockStatus(entityToApply, sceneToEdit);
     }
 
-    private string GetConvertedUniqueKeyForEntity(string entityID)
-    {
-        return sceneToEdit.sceneData.id + entityID;
-    }
+    private string GetConvertedUniqueKeyForEntity(string entityID) { return sceneToEdit.sceneData.id + entityID; }
 
     private string GetConvertedUniqueKeyForEntity(IDCLEntity entity)
     {

@@ -39,10 +39,7 @@ namespace DCL.Components
             return attachedEntities;
         }
 
-        public virtual void UpdateFromJSON(string json)
-        {
-            UpdateFromModel(model.GetDataFromJSON(json));
-        }
+        public virtual void UpdateFromJSON(string json) { UpdateFromModel(model.GetDataFromJSON(json)); }
 
         public virtual void UpdateFromModel(BaseModel newModel)
         {
@@ -50,15 +47,9 @@ namespace DCL.Components
             updateHandler.ApplyChangesIfModified(model);
         }
 
-        public BaseDisposable()
-        {
-            updateHandler = CreateUpdateHandler();
-        }
+        public BaseDisposable() { updateHandler = CreateUpdateHandler(); }
 
-        public virtual void RaiseOnAppliedChanges()
-        {
-            OnAppliedChanges?.Invoke(this);
-        }
+        public virtual void RaiseOnAppliedChanges() { OnAppliedChanges?.Invoke(this); }
 
         public virtual void AttachTo(IDCLEntity entity, System.Type overridenAttachedType = null)
         {
@@ -84,7 +75,8 @@ namespace DCL.Components
 
         public virtual void DetachFrom(IDCLEntity entity, System.Type overridenAttachedType = null)
         {
-            if (!attachedEntities.Contains(entity)) return;
+            if (!attachedEntities.Contains(entity))
+                return;
 
             entity.OnRemoved -= OnEntityRemoved;
 
@@ -108,24 +100,15 @@ namespace DCL.Components
             }
         }
 
-        public virtual void Dispose()
-        {
-            DetachFromEveryEntity();
-        }
+        public virtual void Dispose() { DetachFromEveryEntity(); }
 
         public virtual BaseModel GetModel() => model;
 
         public abstract IEnumerator ApplyChanges(BaseModel model);
 
-        public virtual ComponentUpdateHandler CreateUpdateHandler()
-        {
-            return new ComponentUpdateHandler(this);
-        }
+        public virtual ComponentUpdateHandler CreateUpdateHandler() { return new ComponentUpdateHandler(this); }
 
-        public bool IsValid()
-        {
-            return true;
-        }
+        public bool IsValid() { return true; }
 
         public void Cleanup()
         {

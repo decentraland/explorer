@@ -3,6 +3,7 @@ using DCL.Models;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 namespace DCL.Controllers
 {
@@ -20,6 +21,8 @@ namespace DCL.Controllers
 
     public interface ISceneBoundsChecker
     {
+        event Action<DecentralandEntity, bool> OnEntityBoundsCheckerStatusChanged;
+
         float timeBetweenChecks { get; set; }
         bool enabled { get; }
         int entitiesToCheckCount { get; }
@@ -48,6 +51,8 @@ namespace DCL.Controllers
 
     public class SceneBoundsChecker : ISceneBoundsChecker
     {
+        public event Action<DecentralandEntity, bool> OnEntityBoundsCheckerStatusChanged;
+
         public bool enabled => entitiesCheckRoutine != null;
 
         public float timeBetweenChecks { get; set; } = 1f;
@@ -63,25 +68,13 @@ namespace DCL.Controllers
 
         private ISceneBoundsFeedbackStyle feedbackStyle;
 
-        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null)
-        {
-            this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple();
-        }
+        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null) { this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple(); }
 
-        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle)
-        {
-            this.feedbackStyle = feedbackStyle;
-        }
+        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle) { this.feedbackStyle = feedbackStyle; }
 
-        public ISceneBoundsFeedbackStyle GetFeedbackStyle()
-        {
-            return feedbackStyle;
-        }
+        public ISceneBoundsFeedbackStyle GetFeedbackStyle() { return feedbackStyle; }
 
-        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo)
-        {
-            return feedbackStyle.GetOriginalMaterials(meshesInfo);
-        }
+        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo) { return feedbackStyle.GetOriginalMaterials(meshesInfo); }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         IEnumerator CheckEntities()
@@ -104,7 +97,8 @@ namespace DCL.Controllers
                     {
                         while (iterator.MoveNext())
                         {
-                            if (messagingManager.timeBudgetCounter <= 0f) break;
+                            if (messagingManager.timeBudgetCounter <= 0f)
+                                break;
 
                             float startTime = Time.realtimeSinceStartup;
 
@@ -186,14 +180,16 @@ namespace DCL.Controllers
 
         public void RemoveEntityToBeChecked(IDCLEntity entity)
         {
-            if (!enabled) return;
+            if (!enabled)
+                return;
 
             OnRemoveEntity(entity);
         }
 
         public void EvaluateEntityPosition(IDCLEntity entity)
         {
-            if (entity == null || entity.scene == null || entity.gameObject == null) return;
+            if (entity == null || entity.scene == null || entity.gameObject == null)
+                return;
 
             // Recursively evaluate entity children as well, we need to check this up front because this entity may not have meshes of its own, but the children may.
             if (entity.children.Count > 0)
@@ -228,7 +224,8 @@ namespace DCL.Controllers
 
         public bool IsEntityInsideSceneBoundaries(IDCLEntity entity)
         {
-            if (entity.meshesInfo == null || entity.meshesInfo.meshRootGameObject == null || entity.meshesInfo.mergedBounds == null) return false;
+            if (entity.meshesInfo == null || entity.meshesInfo.meshRootGameObject == null || entity.meshesInfo.mergedBounds == null)
+                return false;
 
             // 1st check (full mesh AABB)
             bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.mergedBounds);
@@ -245,6 +242,7 @@ namespace DCL.Controllers
         void EvaluateMeshBounds(IDCLEntity entity)
         {
             bool isInsideBoundaries = IsEntityInsideSceneBoundaries(entity);
+            OnEntityBoundsCheckerStatusChanged?.Invoke(entity, isInsideBoundaries);
 
             UpdateEntityMeshesValidState(entity.meshesInfo, isInsideBoundaries);
             UpdateEntityCollidersValidState(entity.meshesInfo, isInsideBoundaries);
@@ -268,10 +266,7 @@ namespace DCL.Controllers
             return true;
         }
 
-        protected void UpdateEntityMeshesValidState(MeshesInfo meshesInfo, bool isInsideBoundaries)
-        {
-            feedbackStyle.ApplyFeedback(meshesInfo, isInsideBoundaries);
-        }
+        protected void UpdateEntityMeshesValidState(MeshesInfo meshesInfo, bool isInsideBoundaries) { feedbackStyle.ApplyFeedback(meshesInfo, isInsideBoundaries); }
 
         protected void UpdateEntityCollidersValidState(MeshesInfo meshesInfo, bool isInsideBoundaries)
         {
@@ -279,7 +274,7 @@ namespace DCL.Controllers
                 return;
 
             int collidersCount = meshesInfo.colliders.Count;
-            
+
             if (collidersCount == 0)
                 return;
 
