@@ -74,6 +74,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
     private bool isShapeComponentSet = false;
 
     private Animation[] meshAnimations;
+
+    private Vector3 currentRotation;
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -96,6 +98,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsVisible = rootEntity.gameObject.activeSelf;
 
         isShapeComponentSet = false;
+        InitRotation();
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
@@ -140,7 +143,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = false;
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
-        
+
         SetOriginalMaterials();
     }
 
@@ -193,6 +196,22 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
     #region Components
+
+    #region Transfrom
+
+    public void AddRotation(Vector3 newRotation) { currentRotation += newRotation; }
+
+    public void SetRotation(Vector3 newRotation) { currentRotation = newRotation; }
+
+    public Vector3 GetEulerRotation() { return currentRotation; }
+
+    public void InitRotation()
+    {
+        //TODO : We need to implement the initial rotation from the transform component instead of getting the current rotation
+        currentRotation = rootEntity.gameObject.transform.eulerAngles;
+    }
+
+    #endregion
 
     #region SmartItem
 
