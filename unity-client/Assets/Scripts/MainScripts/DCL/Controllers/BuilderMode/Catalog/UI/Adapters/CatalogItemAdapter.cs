@@ -1,12 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using DCL.Helpers;
-using System;
 using DCL;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using DCL.Configuration;
+using UnityEngine.UI;
 
 public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -14,13 +9,16 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
     public Image backgroundImg;
     public CanvasGroup canvasGroup;
     public GameObject lockedGO;
+    public GameObject loadingGO;
 
     [Header("Smart Items")]
     public GameObject smartItemGO;
-    public Color smartItemColor, normalColor;
+    public Color smartItemColor;
+    public Color normalColor;
 
     [Header("Favorites")]
-    public Color offFavoriteColor, onFavoriteColor;
+    public Color offFavoriteColor;
+    public Color onFavoriteColor;
     public Image favImg;
 
     public System.Action<CatalogItem> OnCatalogItemClicked;
@@ -60,6 +58,7 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
 
     private void GetThumbnail()
     {
+        SetLoadingActive(true);
         var url = catalogItem?.GetThumbnailUrl();
 
         if (url == loadedThumbnailURL)
@@ -73,7 +72,11 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
 
 
         newLoadedThumbnailPromise.OnSuccessEvent += SetThumbnail;
-        newLoadedThumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading: {url}"); };
+        newLoadedThumbnailPromise.OnFailEvent += x =>
+        {
+            Debug.Log($"Error downloading: {url}");
+            SetLoadingActive(false);
+        };
 
         AssetPromiseKeeper_Texture.i.Keep(newLoadedThumbnailPromise);
 
@@ -81,6 +84,14 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
         AssetPromiseKeeper_Texture.i.Forget(loadedThumbnailPromise);
         loadedThumbnailPromise = newLoadedThumbnailPromise;
         loadedThumbnailURL = newLoadedThumbnailURL;
+    }
+
+    private void SetLoadingActive(bool isActive)
+    {
+        if (loadingGO == null)
+            return;
+
+        loadingGO.SetActive(isActive);
     }
 
     public void EnableDragMode(Vector2 sizeDelta)
@@ -117,6 +128,8 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
             thumbnailImg.texture = texture.texture;
             favImg.gameObject.SetActive(true);
         }
+
+        SetLoadingActive(false);
     }
 
     public void OnBeginDrag(PointerEventData eventData) { AdapterStartDragging(eventData); }
