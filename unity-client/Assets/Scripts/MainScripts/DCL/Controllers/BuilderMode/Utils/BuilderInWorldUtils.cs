@@ -27,26 +27,26 @@ public static partial class BuilderInWorldUtils
 
         return vectorToFilter;
     }
-    
-    static float ClosestNumber(float n, float m) 
-    { 
+
+    static float ClosestNumber(float n, float m)
+    {
         // find the quotient 
-        int q = Mathf.RoundToInt(n / m); 
-  
+        int q = Mathf.RoundToInt(n / m);
+
         // 1st possible closest number 
         float n1 = m * q;
-        
+
         // 2nd possible closest number 
-        float n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1)); 
-  
+        float n2 = (n * m) > 0 ? (m * (q + 1)) : (m * (q - 1));
+
         // if true, then n1 is the required closest number 
-        if (Math.Abs(n - n1) < Math.Abs(n - n2)) 
-            return n1; 
-  
+        if (Math.Abs(n - n1) < Math.Abs(n - n2))
+            return n1;
+
         // else n2 is the required closest number 
-        return n2; 
-    } 
-    
+        return n2;
+    }
+
     public static Vector3 CalculateUnityMiddlePoint(ParcelScene parcelScene)
     {
         Vector3 position;
@@ -64,10 +64,14 @@ public static partial class BuilderInWorldUtils
         {
             totalX += vector.x;
             totalZ += vector.y;
-            if (vector.x < minX) minX = vector.x;
-            if (vector.y < minY) minY = vector.y;
-            if (vector.x > maxX) maxX = vector.x;
-            if (vector.y > maxY) maxY = vector.y;
+            if (vector.x < minX)
+                minX = vector.x;
+            if (vector.y < minY)
+                minY = vector.y;
+            if (vector.x > maxX)
+                maxX = vector.x;
+            if (vector.y > maxY)
+                maxY = vector.y;
         }
 
         float centerX = totalX / parcelScene.sceneData.parcels.Length;
@@ -84,7 +88,7 @@ public static partial class BuilderInWorldUtils
 
         return position;
     }
-    
+
     public static CatalogItem CreateFloorSceneObject()
     {
         CatalogItem floorSceneObject = new CatalogItem();
@@ -160,10 +164,7 @@ public static partial class BuilderInWorldUtils
         return bounds;
     }
 
-    public static bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition)
-    {
-        return IsWithInSelectionBounds(transform.position, lastClickMousePosition, mousePosition);
-    }
+    public static bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition) { return IsWithInSelectionBounds(transform.position, lastClickMousePosition, mousePosition); }
 
     public static bool IsWithInSelectionBounds(Vector3 point, Vector3 lastClickMousePosition, Vector3 mousePosition)
     {
@@ -203,10 +204,7 @@ public static partial class BuilderInWorldUtils
         return results.Count > 2;
     }
 
-    public static bool IsPointerOverUIElement()
-    {
-        return IsPointerOverUIElement(Input.mousePosition);
-    }
+    public static bool IsPointerOverUIElement() { return IsPointerOverUIElement(Input.mousePosition); }
 
     public static string ConvertEntityToJSON(DecentralandEntity entity)
     {
@@ -214,7 +212,7 @@ public static partial class BuilderInWorldUtils
         builderInWorldEntityData.entityId = entity.entityId;
 
 
-        foreach (KeyValuePair<CLASS_ID_COMPONENT, BaseComponent> keyValuePair in entity.components)
+        foreach (KeyValuePair<CLASS_ID_COMPONENT, IEntityComponent> keyValuePair in entity.components)
         {
             if (keyValuePair.Key == CLASS_ID_COMPONENT.TRANSFORM)
             {
@@ -236,7 +234,7 @@ public static partial class BuilderInWorldUtils
             }
         }
 
-        foreach (KeyValuePair<Type, BaseDisposable> keyValuePair in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePair in entity.GetSharedComponents())
         {
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {
@@ -266,10 +264,7 @@ public static partial class BuilderInWorldUtils
         return JsonConvert.SerializeObject(builderInWorldEntityData);
     }
 
-    public static EntityData ConvertJSONToEntityData(string json)
-    {
-        return JsonConvert.DeserializeObject<EntityData>(json);
-    }
+    public static EntityData ConvertJSONToEntityData(string json) { return JsonConvert.DeserializeObject<EntityData>(json); }
 
     public static List<DCLBuilderInWorldEntity> RemoveGroundEntities(List<DCLBuilderInWorldEntity> entityList)
     {
@@ -311,7 +306,7 @@ public static partial class BuilderInWorldUtils
         original.sizeDelta = rectTransformToCopy.sizeDelta;
         original.pivot = rectTransformToCopy.pivot;
     }
-    
+
     public static IEnumerator MakeGetCall(string url, Action<string> functionToCall)
     {
         UnityWebRequest www = UnityWebRequest.Get(url);
@@ -326,6 +321,7 @@ public static partial class BuilderInWorldUtils
             {
                 yield return null;
             }
+
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
@@ -359,8 +355,5 @@ public static partial class BuilderInWorldUtils
         eventTrigger.triggers.Add(entry);
     }
 
-    public static void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
-    {
-        eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
-    }
+    public static void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType) { eventTrigger.triggers.RemoveAll(x => x.eventID == eventType); }
 }

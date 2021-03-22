@@ -1,10 +1,8 @@
 using DCL;
 using DCL.Configuration;
 using DCL.Helpers.NFT;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public static class BIWCatalogManager
 {
@@ -38,7 +36,17 @@ public static class BIWCatalogManager
 
     public static List<CatalogItemPack> GetCatalogItemPackList()
     {
-        return DataStore.i.builderInWorld.catalogItemPackDict.GetValues();
+        var assetPacks = DataStore.i.builderInWorld.catalogItemPackDict.GetValues();
+
+        foreach (CatalogItemPack catalogAssetPack in assetPacks)
+        {
+            foreach (CatalogItem catalogItem in catalogAssetPack.assets)
+            {
+                catalogItem.categoryName = catalogItem.category;
+            }
+        }
+
+        return assetPacks;
     }
 
     public static List<CatalogItemPack> GetCatalogItemPacksFilteredByCategories()
@@ -47,10 +55,17 @@ public static class BIWCatalogManager
 
         Dictionary<string, CatalogItemPack> assetPackDic = new Dictionary<string, CatalogItemPack>();
 
+        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
+            assetPackDic.Add(BuilderInWorldSettings.ASSETS_COLLECTIBLES, DataStore.i.builderInWorld.catalogItemPackDict[BuilderInWorldSettings.ASSETS_COLLECTIBLES]);
+        else
+            CreateNewCollectiblePack();
+
         foreach (CatalogItemPack catalogAssetPack in assetPacks)
         {
             foreach (CatalogItem catalogItem in catalogAssetPack.assets)
             {
+                if (catalogItem.IsNFT())
+                    continue;
                 if (!assetPackDic.ContainsKey(catalogItem.category))
                 {
                     CatalogItemPack categoryAssetPack = new CatalogItemPack();
@@ -83,7 +98,7 @@ public static class BIWCatalogManager
 
     public static void AddSceneObject(SceneObject sceneObject)
     {
-        if (DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(sceneObject.id))
+        if (DataStore.i.builderInWorld.catalogItemDict.ContainsKey(sceneObject.id))
             return;
 
         CatalogItem catalogItem = CreateCatalogItem(sceneObject);
@@ -108,12 +123,7 @@ public static class BIWCatalogManager
 
         if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(BuilderInWorldSettings.ASSETS_COLLECTIBLES))
         {
-            collectiblesItemPack = new CatalogItemPack();
-            collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
-            collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
-            collectiblesItemPack.assets = new List<CatalogItem>();
-
-            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+            collectiblesItemPack = CreateNewCollectiblePack();
         }
         else
         {
@@ -129,11 +139,22 @@ public static class BIWCatalogManager
         foreach (NFTInfo info in nftList)
         {
             CatalogItem catalogItem = CreateCatalogItem(info);
-            if(!DataStore.i.builderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
+            if (!DataStore.i.builderInWorld.catalogItemDict.ContainsKey(catalogItem.id))
                 DataStore.i.builderInWorld.catalogItemDict.Add(catalogItem.id, catalogItem);
 
             collectiblesItemPack.assets.Add(catalogItem);
         }
+    }
+
+    private static CatalogItemPack CreateNewCollectiblePack()
+    {
+        CatalogItemPack collectiblesItemPack = new CatalogItemPack();
+        collectiblesItemPack.id = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+        collectiblesItemPack.title = BuilderInWorldSettings.ASSETS_COLLECTIBLES;
+        collectiblesItemPack.assets = new List<CatalogItem>();
+        if (!DataStore.i.builderInWorld.catalogItemPackDict.ContainsKey(collectiblesItemPack.id))
+            DataStore.i.builderInWorld.catalogItemPackDict.Add(collectiblesItemPack.id, collectiblesItemPack);
+        return collectiblesItemPack;
     }
 
     public static CatalogItemPack CreateCatalogItemPack(SceneAssetPack sceneAssetPack)
