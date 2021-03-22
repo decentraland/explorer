@@ -89,7 +89,7 @@ public class EntityInformationController : IEntityInformationController
 
     public void RotationChanged(Vector3 rot)
     {
-        currentEntity.SetRotation(rot);
+        currentEntity?.SetRotation(rot);
         OnRotationChange?.Invoke(rot);
     }
 
