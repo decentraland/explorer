@@ -85,6 +85,7 @@ Varyings LitPassVertex(Attributes input)
     Varyings output = (Varyings)0;
 
     UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
@@ -129,7 +130,17 @@ Varyings LitPassVertex(Attributes input)
 // Used in Standard (Physically Based) shader
 half4 LitPassFragment(Varyings input) : SV_Target
 {
+    UNITY_SETUP_INSTANCE_ID(input);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+    
+#if defined(_PARALLAXMAP)
+#if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
+    half3 viewDirTS = input.viewDirTS;
+#else
+    half3 viewDirTS = GetViewDirectionTangentSpace(input.tangentWS, input.normalWS, input.viewDirWS);
+#endif
+    ApplyPerPixelDisplacement(viewDirTS, input.uv);
+#endif
 
     SurfaceData surfaceData;
     InitializeStandardLitSurfaceData(input.uvAlbedoNormal.xy, input.uvAlbedoNormal.zw, input.uvAlbedoNormal.xy, input.uvAlbedoNormal.zw, surfaceData);
