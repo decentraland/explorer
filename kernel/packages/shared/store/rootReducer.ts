@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux'
 
 import { profileReducer } from '../profiles/reducer'
+import { catalogsReducer } from '../catalogs/reducer'
 import { rendererReducer } from '../renderer/reducer'
 import { protocolReducer } from '../protocol/reducer'
 import { loadingReducer } from '../loading/reducer'
@@ -11,6 +12,7 @@ import { chatReducer } from '../chat/reducer'
 import { commsReducer } from '../comms/reducer'
 import { friendsReducer } from '../friends/reducer'
 import { sessionReducer } from '../session/reducer'
+import { questsReducer } from '../quests/reducer'
 
 export const reducers = combineReducers({
   atlas: atlasReducer,
@@ -19,9 +21,11 @@ export const reducers = combineReducers({
   session: sessionReducer,
   loading: loadingReducer,
   profiles: profileReducer,
+  catalogs: catalogsReducer,
   renderer: rendererReducer,
   protocol: protocolReducer,
   dao: daoReducer,
   comms: commsReducer,
-  meta: metaReducer
+  meta: metaReducer,
+  quests: questsReducer
 })

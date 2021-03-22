@@ -6,6 +6,7 @@ public class RenderingController : MonoBehaviour
 {
     public static float firstActivationTime { get; private set; }
     private bool firstActivationTimeHasBeenSet = false;
+    private bool VERBOSE = false;
 
     public CompositeLock renderingActivatedAckLock = new CompositeLock();
 
@@ -42,6 +43,16 @@ public class RenderingController : MonoBehaviour
     [ContextMenu("Enable Rendering")]
     public void ActivateRendering()
     {
+        ActivateRendering(forceActivate: false);
+    }
+
+    public void ForceActivateRendering()
+    {
+        ActivateRendering(forceActivate: true);
+    }
+
+    public void ActivateRendering(bool forceActivate)
+    {
         if (CommonScriptableObjects.rendererState.Get())
             return;
 
@@ -51,7 +62,7 @@ public class RenderingController : MonoBehaviour
             firstActivationTimeHasBeenSet = true;
         }
 
-        if (!renderingActivatedAckLock.isUnlocked)
+        if (!forceActivate && !renderingActivatedAckLock.isUnlocked)
         {
             renderingActivatedAckLock.OnAllLocksRemoved -= ActivateRendering_Internal;
             renderingActivatedAckLock.OnAllLocksRemoved += ActivateRendering_Internal;
@@ -79,11 +90,19 @@ public class RenderingController : MonoBehaviour
 
     private void AddLock(object id)
     {
+        if (CommonScriptableObjects.rendererState.Get()) return;
+
+        if (VERBOSE)
+            Debug.Log("Add lock: " + id);
+
         renderingActivatedAckLock.AddLock(id);
     }
 
     private void RemoveLock(object id)
     {
+        if (VERBOSE)
+            Debug.Log("remove lock: " + id);
+
         renderingActivatedAckLock.RemoveLock(id);
     }
 }

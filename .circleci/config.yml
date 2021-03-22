@@ -4,6 +4,7 @@ references:
   .workspace_root: &workspace_root /tmp/explorer
   .workspace_kernel: &workspace_kernel /tmp/explorer/kernel
   .workspace_unity: &workspace_unity /tmp/explorer/unity-client
+  .workspace_website: &workspace_website /tmp/explorer/website
 
   .attach_root: &attach_root
     attach_workspace:
@@ -21,6 +22,11 @@ references:
     docker:
       - <<: *image_kernel
     working_directory: *workspace_kernel
+
+  .base_website_env: &base_website_env
+    docker:
+      - <<: *image_kernel
+    working_directory: *workspace_website
 
   .all_branches_and_tags: &all_branches_and_tags
     filters:
@@ -75,13 +81,14 @@ jobs:
             - .git
             - .circleci
             - kernel
+            - website
             - unity-client
 
   run-unity-tests:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build:2019.4
+      - image: decentraland/renderer-build:2019-4-19f1
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -91,15 +98,15 @@ jobs:
       - run:
           name: Get the hash of source files
           command: |
-            find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
-      - restore_cache:
-          name: Restore decentraland-renderer if exists
-          keys:
-            - unity-build-{{ checksum "../.unitysources-checksum" }}
+            find Assets -type f \( -not -path '*Plugins*' \) \( -iname \*.unity -o -iname \*.cs -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       - restore_cache:
           name: Restore test results if they exist
           keys:
             - unity-tests-{{ checksum "../.unitysources-checksum" }}
+      - restore_cache:
+          name: Restore library if exists
+          keys:
+            - library-2019-4-19-{{ .Branch }}
       - run:
           name: Run tests
           command: |
@@ -110,6 +117,7 @@ jobs:
                 bash test-ci.sh
                 exit $?
             fi;
+          no_output_timeout: 30m
       - save_cache:
           name: Store test results
           key: unity-tests-{{ checksum "../.unitysources-checksum" }}
@@ -127,7 +135,7 @@ jobs:
     <<: *working_directory_unity
     resource_class: xlarge
     docker:
-      - image: decentraland/renderer-build:2019.4
+      - image: decentraland/renderer-build:2019-4-19f1
         environment:
           BUILD_TARGET: WebGL
           BUILD_PATH: /tmp/explorer/unity-client/Builds/unity
@@ -137,11 +145,15 @@ jobs:
       - run:
           name: Get the hash of source files
           command: |
-            find Assets -type f \( -iname \*.unity -o -iname \*.cs -o -iname \*.fbx -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
+            find Assets -type f \( -iname \*.unity -o -iname \*.cs -o -iname \*.fbx -o -iname \*.meta -o -iname \*.xml -o -iname \*.shader -o -iname \*.prefab -o -iname \*.yml -o -iname \*.mat -o -iname \*.json -o -iname \*.js -o -iname \*.jspre  -o -iname \*.jslib  -o -iname \*.hlsl  -o -iname \*.asmdef  -o -iname \*.csproj  -o -iname \*.spriteatlas  \) \( -exec md5sum "$PWD"/{} \; \) | sort > ../.unitysources-checksum
       - restore_cache:
           name: Restore decentraland-renderer if exists
           keys:
             - unity-build-{{ checksum "../.unitysources-checksum" }}
+      - restore_cache:
+          name: Restore library if exists
+          keys:
+            - library-2019-4-19-{{ .Branch }}
       - run:
           name: Build decentraland-renderer
           command: |
@@ -160,6 +172,11 @@ jobs:
           key: unity-build-{{ checksum "../.unitysources-checksum" }}
           paths:
             - /tmp/explorer/unity-client/Builds/
+      - save_cache:
+          name: Store library
+          key: library-2019-4-19-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /tmp/explorer/unity-client/Library
       - store_artifacts:
           name: Store logs
           path: /tmp/buildlog.txt
@@ -269,6 +286,45 @@ jobs:
             - kernel/static
             - kernel/dist
 
+  build-website:
+    <<: *base_website_env
+    steps:
+      - <<: *attach_root
+      - run:
+          name: "installing"
+          command: npm ci
+      - run:
+          name: "remove decentraland-kernel"
+          command: rm -rf node_modules/decentraland-kernel || true
+      - run:
+          name: "copy fresh decentraland-kernel"
+          command: cp -r /tmp/explorer/kernel/static node_modules/decentraland-kernel
+      - run:
+          name: "post install script"
+          command: sh scripts/post-install.sh
+      - run:
+          name: "add PUBLIC_URL to .env (ignore master, staging, release)"
+          command: |
+            if [[ "$CIRCLE_BRANCH" =~ ^(master|staging|release)$ ]]; then
+              echo "skipped";
+            else
+              echo "PUBLIC_URL=\"https://play.decentraland.zone/branch/${CIRCLE_BRANCH}\"" >> .env;
+            fi
+      - run:
+          name: "show .env"
+          command: cat .env
+      - run:
+          name: "testing"
+          command: npm test -- --watchAll=false
+      - run:
+          name: "building"
+          command: npm run build
+      # persist to workspace to use in downstream jobs
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - website/build
+
   package:
     <<: *working_directory_root
     docker:
@@ -330,7 +386,7 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) under subfolder if tests pass and branch is not master
-          command: aws s3 sync static s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
+          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/branch/${CIRCLE_BRANCH} --acl public-read
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -349,7 +405,7 @@ jobs:
             aws configure set aws_access_key_id ${AWS_DEV_ACCESS_KEY_ID} && aws configure set aws_secret_access_key ${AWS_DEV_SECRET_ACCESS_KEY}
       - run:
           name: Deploy to S3 (.zone) if tests pass and branch is master
-          command: aws s3 sync static s3://explorer.decentraland.zone/ --acl public-read
+          command: aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.zone/ --acl public-read
       - run:
           name: Invalidate cloudfront cache .zone
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E297VXIBZFXIXE --paths "/*"
@@ -369,7 +425,7 @@ jobs:
       - run:
           name: Deploy to .today
           command: |
-            aws s3 sync static s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
+            aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.today/ --exclude "tags/*" --acl public-read
       - run:
           name: Invalidate cloudfront cache .today
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E315GYHDRD7XX6 --paths "/*"
@@ -389,7 +445,7 @@ jobs:
       - run:
           name: Deploy to .org
           command: |
-            aws s3 sync static s3://explorer.decentraland.org/ --exclude "tags/*" --acl public-read
+            aws s3 sync /tmp/explorer/website/build s3://explorer.decentraland.org/ --exclude "tags/*" --acl public-read
       - run:
           name: Invalidate cloudfront cache .org
           command: aws configure set preview.cloudfront true && aws configure set preview.create-invalidation true && aws cloudfront create-invalidation --distribution-id E253JP8V3Y9YUI --paths "/*"
@@ -424,6 +480,11 @@ workflows:
             - build-kernel
             - build-unity
 
+      - build-website:
+          <<: *all_branches_and_tags
+          requires:
+            - package
+
       - publish-renderer:
           requires:
             - package
@@ -455,24 +516,28 @@ workflows:
       - deploy-dev:
           requires:
             - package
+            - "build-website"
           filters:
             branches:
               only: master
       - deploy-stg:
           requires:
             - package
+            - "build-website"
           filters:
             branches:
               only: staging
       - deploy-prd:
           requires:
             - package
+            - "build-website"
           filters:
             branches:
               only: release
       - deploy-on-pr:
           requires:
             - package
+            - "build-website"
           filters:
             branches:
               ignore:

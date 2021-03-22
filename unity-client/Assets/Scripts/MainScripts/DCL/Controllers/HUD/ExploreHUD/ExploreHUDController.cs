@@ -5,14 +5,15 @@ using DCL.Interface;
 
 public class ExploreHUDController : IHUD
 {
-    internal ExploreHUDView view;
+    internal static bool isTest = false;
 
+    internal ExploreHUDView view;
     internal InputAction_Trigger toggleExploreTrigger;
 
-    ExploreMiniMapDataController miniMapDataController;
     FriendTrackerController friendsController;
 
     public event Action OnToggleTriggered;
+    public event Action OnOpen;
     public event Action OnClose;
 
     public ExploreHUDController()
@@ -24,7 +25,7 @@ public class ExploreHUDController : IHUD
         toggleExploreTrigger = Resources.Load<InputAction_Trigger>("ToggleExploreHud");
         toggleExploreTrigger.OnTriggered += OnToggleActionTriggered;
 
-        view.closeButton.onPointerDown += () =>
+        view.OnCloseButtonPressed += () =>
         {
             if (view.IsVisible())
             {
@@ -34,18 +35,15 @@ public class ExploreHUDController : IHUD
 
         view.gotoMagicButton.OnGotoMagicPressed += GoToMagic;
         view.togglePopupButton.onPointerDown += () => toggleExploreTrigger.RaiseOnTriggered();
-        BaseSceneCellView.OnJumpIn += OnJumpIn;
+        HotSceneCellView.OnJumpIn += OnJumpIn;
     }
 
-    public void Initialize(IFriendsController friendsController, bool newTaskbarIsEnabled)
+    public void Initialize(IFriendsController friendsController)
     {
         this.friendsController = new FriendTrackerController(friendsController, view.friendColors);
-        miniMapDataController = new ExploreMiniMapDataController();
 
-        view.Initialize(miniMapDataController, this.friendsController);
-
-        if (newTaskbarIsEnabled)
-            view.togglePopupButton.gameObject.SetActive(false);
+        view.Initialize(this.friendsController);
+        view.togglePopupButton.gameObject.SetActive(false);
     }
 
     public void SetVisibility(bool visible)
@@ -59,6 +57,7 @@ public class ExploreHUDController : IHUD
         {
             Utils.UnlockCursor();
             view.RefreshData();
+            OnOpen?.Invoke();
         }
         else if (!visible && view.IsActive())
         {
@@ -67,25 +66,21 @@ public class ExploreHUDController : IHUD
 
         view.SetVisibility(visible);
 
-        if (HUDAudioPlayer.i != null)
+        if (visible)
         {
-            if (visible)
-            {
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
-                HUDAudioPlayer.i.ResetListItemAppearPitch();
-            }
-            else
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            AudioScriptableObjects.dialogOpen.Play(true);
+            AudioScriptableObjects.listItemAppear.ResetPitch();
         }
+        else
+            AudioScriptableObjects.dialogClose.Play(true);
     }
 
     public void Dispose()
     {
-        miniMapDataController?.Dispose();
         friendsController?.Dispose();
 
         toggleExploreTrigger.OnTriggered -= OnToggleActionTriggered;
-        BaseSceneCellView.OnJumpIn -= OnJumpIn;
+        HotSceneCellView.OnJumpIn -= OnJumpIn;
 
         if (view != null)
         {

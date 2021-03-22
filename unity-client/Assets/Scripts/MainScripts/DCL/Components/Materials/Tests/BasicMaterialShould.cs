@@ -1,19 +1,20 @@
-﻿using System.Collections;
+using System.Collections;
 using DCL;
 using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
-using UnityEngine.Assertions;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
+using Assert = UnityEngine.Assertions.Assert;
 
-public class BasicMaterialShould : TestsBase
+public class BasicMaterialShould : IntegrationTestSuite_Legacy
 {
     [UnitySetUp]
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        SceneController.i.useBoundariesChecker = false;
+        Environment.i.world.sceneBoundsChecker.Stop();
     }
 
     [UnityTest]
@@ -249,7 +250,7 @@ public class BasicMaterialShould : TestsBase
         yield return basicMaterialComponent.routine;
 
         // 2. Check configured values
-        Assert.AreEqual(1f, basicMaterialComponent.model.alphaTest);
+        Assert.AreEqual(1f, basicMaterialComponent.GetModel().alphaTest);
 
         // 3. Update component with missing values
 
@@ -258,6 +259,34 @@ public class BasicMaterialShould : TestsBase
         yield return basicMaterialComponent.routine;
 
         // 4. Check defaulted values
-        Assert.AreEqual(0.5f, basicMaterialComponent.model.alphaTest);
+        Assert.AreEqual(0.5f, basicMaterialComponent.GetModel().alphaTest);
+    }
+
+    [UnityTest]
+    public IEnumerator ProcessCastShadowProperty_True()
+    {
+        BasicMaterial basicMaterialComponent = TestHelpers.CreateEntityWithBasicMaterial(scene, new BasicMaterial.Model
+        {
+            alphaTest = 1f,
+            castShadows = true
+        }, out DecentralandEntity entity);
+        yield return basicMaterialComponent.routine;
+
+        Assert.AreEqual(true, basicMaterialComponent.GetModel().castShadows);
+        Assert.AreEqual(ShadowCastingMode.On, entity.meshRootGameObject.GetComponent<MeshRenderer>().shadowCastingMode);
+    }
+
+    [UnityTest]
+    public IEnumerator ProcessCastShadowProperty_False()
+    {
+        BasicMaterial basicMaterialComponent = TestHelpers.CreateEntityWithBasicMaterial(scene, new BasicMaterial.Model
+        {
+            alphaTest = 1f,
+            castShadows = false
+        }, out DecentralandEntity entity);
+        yield return basicMaterialComponent.routine;
+
+        Assert.AreEqual(false, basicMaterialComponent.GetModel().castShadows);
+        Assert.AreEqual(ShadowCastingMode.Off, entity.meshRootGameObject.GetComponent<MeshRenderer>().shadowCastingMode);
     }
 }

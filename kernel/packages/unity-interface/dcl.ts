@@ -1,27 +1,39 @@
 import { TeleportController } from 'shared/world/TeleportController'
-import { DEBUG, EDITOR, ENGINE_DEBUG_PANEL, SCENE_DEBUG_PANEL, SHOW_FPS_COUNTER, NO_ASSET_BUNDLES, ENABLE_NEW_TASKBAR } from 'config'
+import {
+  DEBUG,
+  EDITOR,
+  ENGINE_DEBUG_PANEL,
+  NO_ASSET_BUNDLES,
+  PREVIEW,
+  SCENE_DEBUG_PANEL,
+  SHOW_FPS_COUNTER
+} from 'config'
 import { aborted } from 'shared/loading/ReportFatalError'
-import { loadingScenes, teleportTriggered } from 'shared/loading/types'
+import { loadingScenes, setLoadingScreen, teleportTriggered } from 'shared/loading/types'
 import { defaultLogger } from 'shared/logger'
-import { ILand, SceneJsonData, LoadableParcelScene, MappingsResponse } from 'shared/types'
+import { ILand, LoadableParcelScene, MappingsResponse, SceneJsonData } from 'shared/types'
 import {
   enableParcelSceneLoading,
+  getParcelSceneID,
   loadParcelScene,
-  stopParcelSceneWorker,
-  getParcelSceneID
+  stopParcelSceneWorker
 } from 'shared/world/parcelSceneManager'
 import { teleportObservable } from 'shared/world/positionThings'
-import { SceneWorker, hudWorkerUrl } from 'shared/world/SceneWorker'
-import { worldRunningObservable } from 'shared/world/worldState'
+import { SceneWorker } from 'shared/world/SceneWorker'
+import { hudWorkerUrl } from 'shared/world/SceneSystemWorker'
+import { renderStateObservable } from 'shared/world/worldState'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { ILandToLoadableParcelScene, ILandToLoadableParcelSceneUpdate } from 'shared/selectors'
 import { UnityParcelScene } from './UnityParcelScene'
-
 import { loginCompleted } from 'shared/ethereum/provider'
 import { UnityInterface, unityInterface } from './UnityInterface'
 import { BrowserInterface, browserInterface } from './BrowserInterface'
 import { UnityScene } from './UnityScene'
 import { ensureUiApis } from 'shared/world/uiSceneInitializer'
+import Html from '../shared/Html'
+import { WebSocketTransport } from 'decentraland-rpc'
+import { kernelConfigForRenderer } from './kernelConfigForRenderer'
+import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 
 declare const globalThis: UnityInterfaceContainer &
   BrowserInterfaceContainer &
@@ -49,18 +61,8 @@ export let gameInstance!: GameInstance
 export let isTheFirstLoading = true
 
 export function setLoadingScreenVisible(shouldShow: boolean) {
-  document.getElementById('overlay')!.style.display = shouldShow ? 'block' : 'none'
-  document.getElementById('load-messages-wrapper')!.style.display = shouldShow ? 'flex' : 'none'
-  document.getElementById('progress-bar')!.style.display = shouldShow ? 'block' : 'none'
-  const loadingAudio = document.getElementById('loading-audio') as HTMLMediaElement
-
-  if (shouldShow) {
-    loadingAudio?.play().catch((e) => {
-      /*Ignored. If this fails is not critical*/
-    })
-  } else {
-    loadingAudio?.pause()
-  }
+  globalThis.globalStore.dispatch(setLoadingScreen(shouldShow))
+  Html.setLoadingScreen(shouldShow)
 
   if (!shouldShow && !EDITOR) {
     isTheFirstLoading = false
@@ -92,11 +94,11 @@ function debuggingDecorator(_gameInstance: GameInstance) {
 export async function initializeEngine(_gameInstance: GameInstance) {
   gameInstance = debuggingDecorator(_gameInstance)
 
-  setLoadingScreenVisible(true)
-
   unityInterface.Init(_gameInstance)
 
   unityInterface.DeactivateRendering()
+
+  unityInterface.SetKernelConfiguration(kernelConfigForRenderer())
 
   if (DEBUG) {
     unityInterface.SetDebug()
@@ -114,16 +116,12 @@ export async function initializeEngine(_gameInstance: GameInstance) {
     unityInterface.ShowFPSPanel()
   }
 
-  if (ENABLE_NEW_TASKBAR) {
-    unityInterface.EnableNewTaskbar() /* NOTE(Santi): This is temporal, until we remove the old taskbar */
-  }
-
   if (ENGINE_DEBUG_PANEL) {
     unityInterface.SetEngineDebugPanel()
   }
 
   if (!EDITOR) {
-    await startGlobalScene(unityInterface)
+    await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
   }
 
   return {
@@ -139,25 +137,33 @@ export async function initializeEngine(_gameInstance: GameInstance) {
   }
 }
 
-export async function startGlobalScene(unityInterface: UnityInterface) {
-  const sceneId = 'dcl-ui-scene'
-
+export async function startGlobalScene(
+  unityInterface: UnityInterface,
+  cid: string,
+  title: string,
+  fileContentUrl: string
+) {
   const scene = new UnityScene({
-    sceneId,
-    name: 'ui',
+    sceneId: cid,
+    name: title,
     baseUrl: location.origin,
-    main: hudWorkerUrl,
+    main: fileContentUrl,
     useFPSThrottling: false,
     data: {},
     mappings: []
   })
 
-  const worker = loadParcelScene(scene)
-  worker.persistent = true
+  const worker = loadParcelScene(scene, undefined, true)
 
   await ensureUiApis(worker)
 
-  unityInterface.CreateUIScene({ id: getParcelSceneID(scene), baseUrl: scene.data.baseUrl })
+  unityInterface.CreateGlobalScene({
+    id: getParcelSceneID(scene),
+    name: scene.data.name,
+    baseUrl: scene.data.baseUrl,
+    isPortableExperience: false,
+    contents: []
+  })
 }
 
 export async function startUnitySceneWorkers() {
@@ -200,13 +206,13 @@ export async function startUnitySceneWorkers() {
 // Builder functions
 let currentLoadedScene: SceneWorker | null
 
-export async function loadPreviewScene() {
+export async function loadPreviewScene(ws?: string): Promise<ILand> {
   const result = await fetch('/scene.json?nocache=' + Math.random())
 
   let lastId: string | null = null
 
   if (currentLoadedScene) {
-    lastId = currentLoadedScene.parcelScene.data.sceneId
+    lastId = currentLoadedScene.getSceneId()
     stopParcelSceneWorker(currentLoadedScene)
   }
 
@@ -227,7 +233,14 @@ export async function loadPreviewScene() {
     }
 
     const parcelScene = new UnityParcelScene(ILandToLoadableParcelScene(defaultScene))
-    currentLoadedScene = loadParcelScene(parcelScene)
+
+    let transport: undefined | ScriptingTransport = undefined
+
+    if (ws) {
+      transport = WebSocketTransport(new WebSocket(ws, ['dcl-scene']))
+    }
+
+    currentLoadedScene = loadParcelScene(parcelScene, transport)
 
     const target: LoadableParcelScene = { ...ILandToLoadableParcelScene(defaultScene).data }
     delete target.land
@@ -264,11 +277,10 @@ export function loadBuilderScene(sceneData: ILand) {
 export function unloadCurrentBuilderScene() {
   if (currentLoadedScene) {
     unityInterface.DeactivateRendering()
-    const parcelScene = currentLoadedScene.parcelScene as UnityParcelScene
-    parcelScene.emit('builderSceneUnloaded', {})
+    currentLoadedScene.emit('builderSceneUnloaded', {})
 
     stopParcelSceneWorker(currentLoadedScene)
-    unityInterface.SendBuilderMessage('UnloadBuilderScene', parcelScene.data.sceneId)
+    unityInterface.SendBuilderMessage('UnloadBuilderScene', currentLoadedScene.getSceneId())
     currentLoadedScene = null
   }
 }
@@ -287,9 +299,11 @@ teleportObservable.add((position: { x: number; y: number; text?: string }) => {
   globalThis.globalStore.dispatch(teleportTriggered(position.text || `Teleporting to ${position.x}, ${position.y}`))
 })
 
-worldRunningObservable.add(async (isRunning) => {
+renderStateObservable.add(async (isRunning) => {
   if (isRunning) {
-    await loginCompleted
+    if (PREVIEW) {
+      await loginCompleted
+    }
     setLoadingScreenVisible(false)
   }
 })

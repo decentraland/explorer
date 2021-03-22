@@ -3,6 +3,7 @@ using DCL.Helpers;
 using DCL.Models;
 using NUnit.Framework;
 using System.Collections;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -51,7 +52,7 @@ namespace Tests
             Assert.AreEqual(0, uiTextShape.referencesContainer.text.margin.w);
 
             // Update UITextShape
-            yield return TestHelpers.SharedComponentUpdate(uiTextShape,
+            yield return TestHelpers.SharedComponentUpdate<UIText>(uiTextShape,
                 new UIText.Model
                 {
                     isPointerBlocker = true,
@@ -83,7 +84,7 @@ namespace Tests
             Assert.AreEqual(50f, uiTextShape.childHookRectTransform.rect.height);
             Assert.AreEqual("hello world", uiTextShape.referencesContainer.text.text);
             Assert.IsTrue(uiTextShape.referencesContainer.text.enabled);
-            Assert.AreEqual(new Color(0f, 1f, 0f, 1f), uiTextShape.referencesContainer.text.color);
+            Assert.AreEqual(new Color(0f, 1f, 0f, 0.5f), uiTextShape.referencesContainer.text.color);
             Assert.AreEqual(35f, uiTextShape.referencesContainer.text.fontSize);
             Assert.AreEqual(3, uiTextShape.referencesContainer.text.maxVisibleLines);
             Assert.AreEqual(0.1f, uiTextShape.referencesContainer.text.lineSpacing);
@@ -99,6 +100,17 @@ namespace Tests
             Assert.AreEqual(10f, uiTextShape.referencesContainer.text.margin.y);
             Assert.AreEqual(30f, uiTextShape.referencesContainer.text.margin.z);
             Assert.AreEqual(20f, uiTextShape.referencesContainer.text.margin.w);
+            
+            yield return TestHelpers.SharedComponentUpdate<UIText>(uiTextShape,
+                new UIText.Model
+                {
+
+                    positionX = new UIValue(80),
+                    positionY = new UIValue(80),
+                });
+                
+            Assert.AreEqual(80f, uiTextShape.model.positionX.value);
+            Assert.AreEqual(80f, uiTextShape.model.positionY.value);
         }
 
         [UnityTest]

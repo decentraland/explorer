@@ -2,6 +2,7 @@ using DCL.Interface;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using UnityEngine;
 
 public class PrivateChatWindowHUDController : IHUD
@@ -103,13 +104,11 @@ public class PrivateChatWindowHUDController : IHUD
             MarkUserChatMessagesAsRead(conversationUserId);
             view.chatHudView.scrollRect.verticalNormalizedPosition = 0;
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         else
         {
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 
@@ -172,8 +171,8 @@ public class PrivateChatWindowHUDController : IHUD
             }
         }
 
-        PlayerPrefs.SetString(PLAYER_PREFS_LAST_READ_CHAT_MESSAGES, JsonConvert.SerializeObject(lastReadChatMessagesList));
-        PlayerPrefs.Save();
+        PlayerPrefsUtils.SetString(PLAYER_PREFS_LAST_READ_CHAT_MESSAGES, JsonConvert.SerializeObject(lastReadChatMessagesList));
+        PlayerPrefsUtils.Save();
     }
 
     private void LoadLatestReadChatMessagesStatus()

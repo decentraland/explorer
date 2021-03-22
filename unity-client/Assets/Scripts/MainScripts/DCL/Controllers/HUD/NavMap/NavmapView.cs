@@ -27,6 +27,7 @@ namespace DCL
         bool cursorLockedBeforeOpening = true;
 
         public static bool isOpen { private set; get; } = false;
+        public static event System.Action<bool> OnToggle;
 
         void Start()
         {
@@ -56,9 +57,7 @@ namespace DCL
             MapRenderer.OnParcelClicked += TriggerToast;
             MapRenderer.OnParcelHold += TriggerToast;
             MapRenderer.OnParcelHoldCancel += () => { toastView.OnCloseClick(); };
-
-            MinimapHUDView.OnUpdateData += UpdateCurrentSceneData;
-            MinimapHUDView.OnOpenNavmapClicked += () => ToggleNavMap();
+            CommonScriptableObjects.playerCoords.OnChange += UpdateCurrentSceneData;
 
             Initialize();
         }
@@ -71,9 +70,9 @@ namespace DCL
 
         private void OnDestroy()
         {
-            MinimapHUDView.OnUpdateData -= UpdateCurrentSceneData;
             MapRenderer.OnParcelClicked -= TriggerToast;
             MapRenderer.OnParcelHold -= TriggerToast;
+            CommonScriptableObjects.playerCoords.OnChange -= UpdateCurrentSceneData;
         }
 
         internal void ToggleNavMap(bool ignoreCursorLock = false)
@@ -108,8 +107,10 @@ namespace DCL
                 // Center map
                 MapRenderer.i.atlas.CenterToTile(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition));
 
-                if (HUDAudioPlayer.i != null)
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+                // Set shorter interval of time for populated scenes markers fetch
+                MapRenderer.i.usersPositionMarkerController?.SetUpdateMode(MapGlobalUsersPositionMarkerController.UpdateMode.FOREGROUND);
+
+                AudioScriptableObjects.dialogOpen.Play(true);
             }
             else
             {
@@ -129,15 +130,20 @@ namespace DCL
 
                 MapRenderer.i.UpdateRendering(Utils.WorldToGridPositionUnclamped(CommonScriptableObjects.playerWorldPosition.Get()));
 
-                if (HUDAudioPlayer.i != null)
-                    HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+                // Set longer interval of time for populated scenes markers fetch
+                MapRenderer.i.usersPositionMarkerController?.SetUpdateMode(MapGlobalUsersPositionMarkerController.UpdateMode.BACKGROUND); 
+
+                AudioScriptableObjects.dialogClose.Play(true);
             }
+
+            OnToggle?.Invoke(isOpen);
         }
 
-        void UpdateCurrentSceneData(MinimapHUDModel model)
+        void UpdateCurrentSceneData(Vector2Int current, Vector2Int previous)
         {
-            currentSceneNameText.text = string.IsNullOrEmpty(model.sceneName) ? "Unnamed" : model.sceneName;
-            currentSceneCoordsText.text = model.playerPosition;
+            const string format = "{0},{1}";
+            currentSceneCoordsText.text = string.Format(format, current.x, current.y);
+            currentSceneNameText.text = MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y)?.name ?? "Unnamed";
         }
 
         void TriggerToast(int cursorTileX, int cursorTileY)

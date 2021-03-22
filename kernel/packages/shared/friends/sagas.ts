@@ -13,14 +13,13 @@ import {
   Realm as SocialRealm
 } from 'dcl-social-client'
 
-import { DEBUG_PM, INIT_PRE_LOAD, getServerConfigurations } from 'config'
+import { DEBUG_PM, INIT_PRE_LOAD, getServerConfigurations, WORLD_EXPLORER } from 'config'
 
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { deepEqual } from 'atomicHelpers/deepEqual'
 
 import { createLogger } from 'shared/logger'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
 import {
   ChatMessage,
   NotificationType,
@@ -30,10 +29,10 @@ import {
   HUDElementID
 } from 'shared/types'
 import { StoreContainer } from 'shared/store/rootTypes'
-import { getRealm } from 'shared/dao/selectors'
+import { getRealm, getUpdateProfileServer } from 'shared/dao/selectors'
 import { Realm } from 'shared/dao/types'
 import { lastPlayerPosition, positionObservable } from 'shared/world/positionThings'
-import { ensureRenderer } from 'shared/profiles/sagas'
+import { ensureRenderer } from 'shared/renderer/sagas'
 import { ADDED_PROFILE_TO_CATALOG } from 'shared/profiles/actions'
 import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
 import { INIT_CATALYST_REALM, SET_CATALYST_REALM, SetCatalystRealm, InitCatalystRealm } from 'shared/dao/actions'
@@ -51,9 +50,10 @@ import {
   updatePrivateMessagingState,
   updateUserData
 } from 'shared/friends/actions'
-import { ensureWorldRunning } from 'shared/world/worldState'
+import { ensureRendererEnabled } from 'shared/world/worldState'
 import { ensureRealmInitialized } from 'shared/dao/sagas'
 import { unityInterface } from 'unity-interface/UnityInterface'
+import { ensureFriendProfile } from './ensureFriendProfile'
 
 declare const globalThis: StoreContainer
 
@@ -73,7 +73,10 @@ const presenceMap: Record<string, PresenceMemoization | undefined> = {}
 const CLOCK_SERVICE_URL = 'https://worldtimeapi.org/api/timezone/Etc/UTC'
 
 export function* friendsSaga() {
-  yield takeEvery(USER_AUTHENTIFIED, initializeSaga)
+  if (WORLD_EXPLORER) {
+    // We don't want to initialize the friends & chat feature if we are on preview or builder mode
+    yield takeEvery(USER_AUTHENTIFIED, initializeSaga)
+  }
 }
 
 function* initializeSaga() {
@@ -84,12 +87,13 @@ function* initializeSaga() {
 
     if (!INIT_PRE_LOAD) {
       // wait until initial load finishes and world is running
-      yield ensureWorldRunning()
+      yield ensureRendererEnabled()
     }
 
     const identity = yield select(getCurrentIdentity)
     try {
-      yield call(initializePrivateMessaging, getServerConfigurations().synapseUrl, identity)
+      const { synapseUrl } = getServerConfigurations()
+      yield call(initializePrivateMessaging, synapseUrl, identity)
     } catch (e) {
       logger.error(`error initializing private messaging`, e)
 
@@ -97,7 +101,7 @@ function* initializeSaga() {
 
       unityInterface.ConfigureHUDElement(HUDElementID.FRIENDS, { active: false, visible: false })
 
-      yield ensureWorldRunning()
+      yield ensureRendererEnabled()
 
       unityInterface.ShowNotification({
         type: NotificationType.GENERIC,
@@ -111,13 +115,16 @@ function* initializeSaga() {
 
 function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdentity) {
   const { address: ethAddress } = identity
-  let timestamp
+  let timestamp: number
 
-  try {
-    const response = yield fetch(CLOCK_SERVICE_URL)
-    const { datetime } = yield response.json()
-    timestamp = new Date(datetime).getTime()
-  } catch (e) {
+  // Try to fetch time from the catalyst server
+  timestamp = yield fetchTimeFromCatalystServer()
+
+  // If that fails, use the global time API
+  timestamp = timestamp ?? (yield fetchTimeFromClockService())
+
+  // If that fails, fall back to local time
+  if (!timestamp) {
     logger.warn(`Failed to fetch global time. Will fall back to local time`)
     timestamp = Date.now()
   }
@@ -219,7 +226,7 @@ function* initializePrivateMessaging(synapseUrl: string, identity: ExplorerIdent
     globalThis.globalStore.dispatch(updateUserData(userId, socialId))
 
     // ensure user profile is initialized and send to renderer
-    await ProfileAsPromise(userId)
+    await ensureFriendProfile(userId)
 
     // add to friendRequests & update renderer
     globalThis.globalStore.dispatch(updateFriendship(action, userId, true))
@@ -308,7 +315,7 @@ function* initializeFriends(client: SocialAPI) {
 
   const profileIds = Object.values(socialInfo).map((socialData) => socialData.userId)
 
-  const profiles = yield Promise.all(profileIds.map((userId) => ProfileAsPromise(userId)))
+  const profiles = yield Promise.all(profileIds.map((userId) => ensureFriendProfile(userId)))
   DEBUG && logger.info(`profiles`, profiles)
 
   for (const userId of profileIds) {
@@ -450,7 +457,7 @@ function* initializeStatusUpdateInterval(client: SocialAPI) {
     sendOwnStatusIfNecessary({ worldPosition: { x, y, z }, realm, timestamp: Date.now() })
   })
 
-  const handleSetCatalystRealm = (action: SetCatalystRealm & InitCatalystRealm) => {
+  const handleSetCatalystRealm = (action: SetCatalystRealm | InitCatalystRealm) => {
     const realm = action.payload
 
     sendOwnStatusIfNecessary({ worldPosition: lastPlayerPosition.clone(), realm, timestamp: Date.now() })
@@ -627,7 +634,7 @@ function* handleUpdateFriendship({ payload, meta }: UpdateFriendship) {
     }
   } catch (e) {
     if (e instanceof UnknownUsersError) {
-      const profile = yield ProfileAsPromise(userId)
+      const profile = yield ensureFriendProfile(userId)
       const id = profile?.name ? profile.name : `with address '${userId}'`
       showErrorNotification(`User ${id} must log in at least once before befriending them`)
     }
@@ -702,4 +709,27 @@ function toSocialData(socialIds: string[]) {
       socialId
     }))
     .filter(({ userId }) => !!userId) as SocialData[]
+}
+
+function* fetchTimeFromCatalystServer() {
+  try {
+    const contentServer = getUpdateProfileServer(globalThis.globalStore.getState())
+    const response = yield fetch(`${contentServer}/status`)
+    if (response.ok) {
+      const { currentTime } = yield response.json()
+      return currentTime
+    }
+  } catch (e) {
+    logger.warn(`Failed to fetch time from catalyst server`, e)
+  }
+}
+
+function* fetchTimeFromClockService() {
+  try {
+    const response = yield fetch(CLOCK_SERVICE_URL)
+    const { datetime } = yield response.json()
+    return new Date(datetime).getTime()
+  } catch (e) {
+    logger.warn(`Failed to fetch time from clock service`)
+  }
 }

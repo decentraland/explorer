@@ -4,11 +4,10 @@ import { call, fork, put, select, take, takeEvery, race, takeLatest } from 'redu
 import { parcelLimits } from 'config'
 import { fetchSceneJson } from '../../decentraland-loader/lifecycle/utils/fetchSceneJson'
 import { fetchSceneIds } from '../../decentraland-loader/lifecycle/utils/fetchSceneIds'
-import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData, getThumbnailUrlFromJsonData } from 'shared/selectors'
+import { getOwnerNameFromJsonData, getSceneDescriptionFromJsonData, getThumbnailUrlFromJsonDataAndContent } from 'shared/selectors'
 import defaultLogger from '../logger'
 import { lastPlayerPosition } from '../world/positionThings'
 import {
-  districtData,
   fetchDataFromSceneJsonFailure,
   fetchDataFromSceneJsonSuccess,
   marketData,
@@ -39,17 +38,14 @@ import { PARCEL_LOADING_STARTED } from 'shared/renderer/types'
 import { getPois } from '../meta/selectors'
 import { META_CONFIGURATION_INITIALIZED } from '../meta/actions'
 import { retrieve, store } from 'shared/cache'
+import { getUpdateProfileServer } from 'shared/dao/selectors'
+import { Store } from 'redux'
+import { RootDaoState } from 'shared/dao/types'
 
 declare const window: {
   unityInterface: {
     UpdateMinimapSceneInformation: (data: MinimapSceneInfo[]) => void
   }
-}
-
-const districts = {
-  id: 'districts',
-  url: 'https://api.decentraland.org/v1/districts',
-  build: districtData
 }
 
 const tiles = {
@@ -58,7 +54,7 @@ const tiles = {
   build: marketData
 }
 
-type MarketplaceConfig = typeof districts | typeof tiles
+type MarketplaceConfig = typeof tiles
 
 type CachedMarketplaceTiles = { version: string; data: string }
 
@@ -193,6 +189,7 @@ function* reportScenesFromTilesAction(action: ReportScenesFromTile) {
 }
 
 function* reportScenes(sceneIds: string[]): any {
+  const store: Store<RootDaoState> = (window as any)['globalStore']
   yield call(waitForPoiTilesInitialization)
   const pois = yield select(getPoiTiles)
 
@@ -222,7 +219,7 @@ function* reportScenes(sceneIds: string[]): any {
       minimapSceneInfoResult.push({
         owner: getOwnerNameFromJsonData(scene.sceneJsonData),
         description: getSceneDescriptionFromJsonData(scene.sceneJsonData),
-        previewImageUrl: getThumbnailUrlFromJsonData(scene.sceneJsonData),
+        previewImageUrl: getThumbnailUrlFromJsonDataAndContent(scene.sceneJsonData, scene.contents, getUpdateProfileServer(store.getState())),
         name: scene.name,
         type: scene.type,
         parcels,

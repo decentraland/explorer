@@ -1,17 +1,11 @@
 using System;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityGLTF.Cache;
 using Object = UnityEngine.Object;
 
 namespace DCL
 {
-    public interface ITexture : IDisposable
-    {
-        Texture2D texture { get; }
-        int width { get; }
-        int height { get; }
-    }
-
     public class Asset_Texture : Asset, ITexture
     {
         public Texture2D texture { get; set; }
@@ -32,6 +26,7 @@ namespace DCL
         public override void Cleanup()
         {
             OnCleanup?.Invoke();
+            PersistentAssetCache.RemoveImage(texture);
             Object.Destroy(texture);
         }
 

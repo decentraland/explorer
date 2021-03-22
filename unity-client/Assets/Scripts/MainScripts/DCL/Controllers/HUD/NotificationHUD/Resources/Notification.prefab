@@ -66,9 +66,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Message
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 70f3d6b07a517476dbd2b89cf148f858, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -93,12 +92,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 12
+  m_fontSize: 13
   m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 12
-  m_fontSizeMax: 12
+  m_fontSizeMax: 13
   m_fontStyle: 0
   m_textAlignment: 513
   m_characterSpacing: 0
@@ -413,8 +412,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -8.6, y: 4.4}
-  m_SizeDelta: {x: 94, y: 30}
+  m_AnchoredPosition: {x: -14.5, y: 4.4}
+  m_SizeDelta: {x: 88.102905, y: 28}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1328279504026387991
 CanvasRenderer:
@@ -437,13 +436,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.1764706, b: 0.33333334, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b0ffc37da7dc04fcfb5ab734d242a524, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0b63c85aaf7c44493a7613587a1a8a4f, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -452,7 +451,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!114 &4097556812860640395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -508,8 +507,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extraClickSound: 0
-  playHoverSound: 1
+  playHover: 1
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &7620855262146842723
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,13 +569,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.17254902, g: 0.16078432, b: 0.16078432, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c3ac725bfb2c648fd84e392f6237fe1d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0b8573ead118a4e798b4fa5d8c93fe8c, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -583,7 +584,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!1 &8928345438768931761
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,7 +620,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -8, y: -12}
+  m_SizeDelta: {x: -8, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3884729346768368
 CanvasRenderer:
@@ -651,8 +652,7 @@ MonoBehaviour:
   m_text: retry
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 26b03903800224f718b64e9afbc91b61, type: 2}
-  m_sharedMaterial: {fileID: -6892909264025736228, guid: 26b03903800224f718b64e9afbc91b61,
-    type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: cbef7abfd5b4443bf9d5c298a464b5a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -677,12 +677,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 11
+  m_fontSize: 12
   m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 10
-  m_fontSizeMax: 11
+  m_fontSizeMax: 12
   m_fontStyle: 16
   m_textAlignment: 514
   m_characterSpacing: 0

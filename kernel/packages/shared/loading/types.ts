@@ -14,7 +14,7 @@ export const loadingTips = [
     image: 'images/decentraland-connect/loadingtips/Land.png'
   },
   {
-    text: `Decentraland is made up of over 90,000 LANDs: virtual spaces backed by cryptographic tokens. Only LANDowners can determine the content that sits on their LAND.`,
+    text: `Decentraland is made up of over 90,000 LANDs: virtual spaces backed by cryptographic tokens. Only LAND owners can determine the content that sits on their LAND.`,
     image: 'images/decentraland-connect/loadingtips/LandImg.png'
   },
   {
@@ -91,6 +91,16 @@ export const NEW_LOGIN = 'New login'
 export const newLogin = () => action(NEW_LOGIN)
 export const NETWORK_MISMATCH = 'Network mismatch'
 export const networkMismatch = () => action(NETWORK_MISMATCH)
+export const FATAL_ERROR = 'fatal error'
+export const fatalError = (type: string) => action(FATAL_ERROR, { type })
+export const SET_ERROR_TLD = 'TLD network error'
+export const setTLDError = (values: any) => action(SET_ERROR_TLD, values)
+
+export const SET_LOADING_SCREEN = 'setting loading screen'
+export const setLoadingScreen = (show: boolean) => action(SET_LOADING_SCREEN, { show })
+
+export const SET_LOADING_WAIT_TUTORIAL = '[LOADING] waiting tutorial'
+export const setLoadingWaitTutorial = (waiting: boolean) => action(SET_LOADING_WAIT_TUTORIAL, { waiting })
 
 export const ExecutionLifecycleNotifications = {
   notStarted,

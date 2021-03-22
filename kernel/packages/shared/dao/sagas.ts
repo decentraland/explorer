@@ -1,5 +1,4 @@
 import {
-  WEB3_INITIALIZED,
   catalystRealmInitialized,
   initCatalystRealm,
   setCatalystCandidates,
@@ -22,26 +21,28 @@ import { WORLD_EXPLORER, REALM, getDefaultTLD, PIN_CATALYST } from 'config'
 import { waitForMetaConfigurationInitialization } from '../meta/sagas'
 import { Candidate, Realm, ServerConnectionStatus } from './types'
 import {
-  fecthCatalystRealms,
+  fetchCatalystRealms,
   fetchCatalystStatuses,
   pickCatalystRealm,
   getRealmFromString,
   ping,
   commsStatusUrl
 } from '.'
-import { getAddedServers, getContentWhitelist } from 'shared/meta/selectors'
+import { getAddedServers, getCatalystNodesEndpoint, getContentWhitelist } from 'shared/meta/selectors'
 import { getAllCatalystCandidates, isRealmInitialized } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
 import defaultLogger from '../logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { CATALYST_COULD_NOT_LOAD } from 'shared/loading/types'
+import { META_CONFIGURATION_INITIALIZED } from 'shared/meta/actions'
+import { checkTldVsWeb3Network, registerProviderNetChanges } from 'shared/web3'
 
 const CACHE_KEY = 'realm'
 const CATALYST_CANDIDATES_KEY = CACHE_KEY + '-' + SET_CATALYST_CANDIDATES
 const CACHE_TLD_KEY = 'tld'
 
 export function* daoSaga(): any {
-  yield takeEvery(WEB3_INITIALIZED, loadCatalystRealms)
+  yield takeEvery(META_CONFIGURATION_INITIALIZED, loadCatalystRealms)
 
   yield takeEvery([INIT_CATALYST_REALM, SET_CATALYST_REALM], cacheCatalystRealm)
   yield takeEvery([SET_CATALYST_CANDIDATES, SET_ADDED_CATALYST_CANDIDATES], cacheCatalystCandidates)
@@ -58,6 +59,11 @@ export function* daoSaga(): any {
  */
 function* loadCatalystRealms() {
   yield call(waitForMetaConfigurationInitialization)
+  if (WORLD_EXPLORER && (yield checkTldVsWeb3Network())) {
+    return
+  }
+
+  registerProviderNetChanges()
 
   if (WORLD_EXPLORER) {
     const cachedRealm: Realm | undefined = getFromLocalStorage(CACHE_KEY)
@@ -101,22 +107,26 @@ function* loadCatalystRealms() {
 
     yield put(initCatalystRealm(realm!))
   } else {
-    yield put(setCatalystCandidates([]))
-    yield put(setAddedCatalystCandidates([]))
-    yield put(setContentWhitelist([]))
-    yield put(
-      initCatalystRealm({
-        domain: window.location.origin,
-        catalystName: 'localhost',
-        layer: 'stub',
-        lighthouseVersion: '0.1'
-      })
-    )
+    yield initLocalCatalyst()
   }
 
   yield put(catalystRealmInitialized())
 
   defaultLogger.info(`Using Catalyst configuration: `, yield select((state) => state.dao))
+}
+
+function* initLocalCatalyst() {
+  yield put(setCatalystCandidates([]))
+  yield put(setAddedCatalystCandidates([]))
+  yield put(setContentWhitelist([]))
+  yield put(
+    initCatalystRealm({
+      domain: window.location.origin,
+      catalystName: 'localhost',
+      layer: 'stub',
+      lighthouseVersion: '0.1'
+    })
+  )
 }
 
 export function* selectRealm() {
@@ -137,11 +147,12 @@ function getConfiguredRealm(candidates: Candidate[]) {
 
 function* initializeCatalystCandidates() {
   yield put(catalystRealmsScanRequested())
-  const candidates: Candidate[] = yield call(fecthCatalystRealms)
+  const catalystsNodesEndpointURL = yield select(getCatalystNodesEndpoint)
+  const candidates: Candidate[] = yield call(fetchCatalystRealms, catalystsNodesEndpointURL)
 
   yield put(setCatalystCandidates(candidates))
 
-  const added: string[] = yield select(getAddedServers)
+  const added: string[] = PIN_CATALYST ? [] : yield select(getAddedServers)
   const addedCandidates: Candidate[] = yield call(
     fetchCatalystStatuses,
     added.map((url) => ({ domain: url }))
@@ -151,7 +162,7 @@ function* initializeCatalystCandidates() {
 
   const allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
 
-  const whitelist: string[] = yield select(getContentWhitelist)
+  const whitelist: string[] = PIN_CATALYST ? [] : yield select(getContentWhitelist)
   let whitelistedCandidates = allCandidates.filter((candidate) => whitelist.includes(candidate.domain))
   if (whitelistedCandidates.length === 0) {
     // if intersection is empty (no whitelisted or not in our candidate set) => whitelist all candidates
@@ -164,6 +175,7 @@ function* initializeCatalystCandidates() {
 
 async function checkValidRealm(realm: Realm) {
   return (
+    realm &&
     realm.domain &&
     realm.catalystName &&
     realm.layer &&
@@ -172,7 +184,7 @@ async function checkValidRealm(realm: Realm) {
 }
 
 function* cacheCatalystRealm(action: InitCatalystRealm | SetCatalystRealm) {
-  saveToLocalStorage(CACHE_KEY, action.payload)
+  return saveToLocalStorage(CACHE_KEY, action.payload)
 }
 
 function* cacheCatalystCandidates(action: SetCatalystCandidates | SetAddedCatalystCandidates) {

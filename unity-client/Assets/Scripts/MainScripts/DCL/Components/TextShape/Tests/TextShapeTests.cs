@@ -9,16 +9,8 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class TextShapeTests : TestsBase
+    public class TextShapeTests : IntegrationTestSuite_Legacy
     {
-        [UnitySetUp]
-        protected override IEnumerator SetUp()
-        {
-            yield return SetUp_SceneController();
-            yield return null;
-            yield return SetUp_SceneIntegrityChecker();
-        }
-
         [UnityTest]
         public IEnumerator TestCreate()
         {
@@ -118,11 +110,11 @@ namespace Tests
             yield return textShapeComponent.routine;
 
             // 2. Check configured values
-            Assert.AreEqual(Color.green, textShapeComponent.model.color);
-            Assert.AreEqual(0.25f, textShapeComponent.model.width);
-            Assert.AreEqual(3, textShapeComponent.model.lineCount);
-            Assert.IsTrue(textShapeComponent.model.fontAutoSize);
-            Assert.AreEqual(Color.red, textShapeComponent.model.shadowColor);
+            Assert.AreEqual(Color.green, textShapeComponent.GetModel().color);
+            Assert.AreEqual(0.25f, textShapeComponent.GetModel().width);
+            Assert.AreEqual(3, textShapeComponent.GetModel().lineCount);
+            Assert.IsTrue(textShapeComponent.GetModel().fontAutoSize);
+            Assert.AreEqual(Color.red, textShapeComponent.GetModel().shadowColor);
 
             // 3. Update component with missing values
             scene.EntityComponentUpdate(scene.entities[entityId], CLASS_ID_COMPONENT.TEXT_SHAPE,
@@ -131,11 +123,61 @@ namespace Tests
             yield return textShapeComponent.routine;
 
             // 4. Check defaulted values
-            Assert.AreEqual(Color.white, textShapeComponent.model.color);
-            Assert.AreEqual(1f, textShapeComponent.model.width);
-            Assert.AreEqual(0, textShapeComponent.model.lineCount);
-            Assert.IsFalse(textShapeComponent.model.fontAutoSize);
-            Assert.AreEqual(new Color(1, 1, 1), textShapeComponent.model.shadowColor);
+            Assert.AreEqual(Color.white, textShapeComponent.GetModel().color);
+            Assert.AreEqual(1f, textShapeComponent.GetModel().width);
+            Assert.AreEqual(0, textShapeComponent.GetModel().lineCount);
+            Assert.IsFalse(textShapeComponent.GetModel().fontAutoSize);
+            Assert.AreEqual(new Color(1, 1, 1), textShapeComponent.GetModel().shadowColor);
+        }
+
+        [UnityTest]
+        [TestCase(0, ExpectedResult = null)]
+        [TestCase(0.3f, ExpectedResult = null)]
+        [TestCase(1, ExpectedResult = null)]
+        public IEnumerator OpacityIsProcessedCorrectly(float opacity)
+        {
+            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            TextShape textShapeComponent = TestHelpers.EntityComponentCreate<TextShape, TextShape.Model>(scene, entity, new TextShape.Model { value = "Hello test", opacity = opacity});
+
+            yield return textShapeComponent.routine;
+
+            TextMeshPro tmpro = textShapeComponent.gameObject.GetComponentInChildren<TextMeshPro>();
+
+            Assert.NotNull(tmpro);
+            Assert.AreEqual(opacity, textShapeComponent.GetModel().opacity);
+            Assert.AreEqual(tmpro.color.a, opacity);
+        }
+
+        [UnityTest]
+        public IEnumerator VisibleTrueIsProcessedCorrectly()
+        {
+            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            TextShape textShapeComponent = TestHelpers.EntityComponentCreate<TextShape, TextShape.Model>(scene, entity, new TextShape.Model { value = "Hello test", opacity = 0.3f, visible = true});
+
+            yield return textShapeComponent.routine;
+
+            TextMeshPro tmpro = textShapeComponent.gameObject.GetComponentInChildren<TextMeshPro>();
+
+            Assert.NotNull(tmpro);
+            Assert.AreEqual(0.3f, textShapeComponent.GetModel().opacity);
+            Assert.IsTrue(textShapeComponent.GetModel().visible);
+            Assert.AreEqual(tmpro.color.a, 0.3f);
+        }
+
+        [UnityTest]
+        public IEnumerator VisibleFalseIsProcessedCorrectly()
+        {
+            DecentralandEntity entity = TestHelpers.CreateSceneEntity(scene);
+            TextShape textShapeComponent = TestHelpers.EntityComponentCreate<TextShape, TextShape.Model>(scene, entity, new TextShape.Model { value = "Hello test", opacity = 0.3f, visible = false});
+
+            yield return textShapeComponent.routine;
+
+            TextMeshPro tmpro = textShapeComponent.gameObject.GetComponentInChildren<TextMeshPro>();
+
+            Assert.NotNull(tmpro);
+            Assert.AreEqual(0.3f, textShapeComponent.GetModel().opacity);
+            Assert.IsFalse(textShapeComponent.GetModel().visible);
+            Assert.AreEqual(tmpro.color.a, 0f);
         }
     }
 }

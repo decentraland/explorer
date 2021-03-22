@@ -152,6 +152,41 @@ public class WearableItem : Item
         return baseUrl + thumbnail;
     }
 
+    public static HashSet<string> CompoundHidesList(string bodyShapeId, List<WearableItem> wearables)
+    {
+        HashSet<string> result = new HashSet<string>();
+        //Last wearable added has priority over the rest
+        for (int i = wearables.Count - 1; i >= 0; i--)
+        {
+            var wearableItem = wearables[i];
+
+            if (result.Contains(wearableItem.category)) //Skip hidden elements to avoid two elements hiding each other
+                continue;
+
+            var wearableHidesList = wearableItem.GetHidesList(bodyShapeId);
+            if (wearableHidesList != null)
+            {
+                result.UnionWith(wearableHidesList);
+            }
+        }
+
+        return result;
+    }
+
+}
+
+[System.Serializable]
+public class WearablesRequestResponse
+{
+    public WearableItem[] wearables;
+    public string context;
+}
+
+[System.Serializable]
+public class WearablesRequestFailed
+{
+    public string error;
+    public string context;
 }
 
 [System.Serializable]

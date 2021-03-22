@@ -1,26 +1,24 @@
-using DCL.SettingsHUD;
 using DCL.HelpAndSupportHUD;
+using DCL.SettingsPanelHUD;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
-using AvatarShape_Tests;
+using UnityEngine.TestTools;
 
-public class TaskbarHUDShould : TestsBase
+public class TaskbarHUDShould : IntegrationTestSuite_Legacy
 {
     private TaskbarHUDController controller;
     private TaskbarHUDView view;
 
-    private FriendsController_Mock friendsController = new FriendsController_Mock();
-    private ChatController_Mock chatController = new ChatController_Mock();
+    private readonly FriendsController_Mock friendsController = new FriendsController_Mock();
+    private readonly ChatController_Mock chatController = new ChatController_Mock();
 
     private GameObject userProfileGO;
-    private UserProfile userProfile;
     private PrivateChatWindowHUDController privateChatController;
     private FriendsHUDController friendsHudController;
     private WorldChatWindowHUDController worldChatWindowController;
-    private SettingsHUDController settingsHudController;
+    private SettingsPanelHUDController settingsPanelHudController;
     private HelpAndSupportHUDController helpAndSupportHUDController;
-    private AvatarEditorHUDController avatarEditorHUDController;
     private ExploreHUDController exploreHUDController;
 
     protected override bool justSceneSetUp => true;
@@ -29,23 +27,17 @@ public class TaskbarHUDShould : TestsBase
     {
         yield return base.SetUp();
 
-        UserProfile ownProfile = UserProfile.GetOwnUserProfile();
         CommonScriptableObjects.rendererState.Set(true);
 
-        var ownProfileModel = new UserProfileModel();
-        ownProfileModel.userId = "my-user-id";
-        ownProfileModel.name = "NO_USER";
-        ownProfile.UpdateData(ownProfileModel, false);
-
         userProfileGO = new GameObject();
-        userProfile = userProfileGO.AddComponent<UserProfileController>().ownUserProfile;
 
         controller = new TaskbarHUDController();
-        controller.Initialize(null, chatController, null, true);
+        controller.Initialize(null, chatController, null, null, null);
         view = controller.view;
 
         Assert.IsTrue(view != null, "Taskbar view is null?");
         Assert.IsTrue(view.moreButton.gameObject.activeSelf, "More button is not actived?");
+        Assert.IsTrue(CommonScriptableObjects.isTaskbarHUDInitialized, "Taskbar controller is not initialized?");
     }
 
     protected override IEnumerator TearDown()
@@ -55,9 +47,8 @@ public class TaskbarHUDShould : TestsBase
         privateChatController?.Dispose();
         worldChatWindowController?.Dispose();
         friendsHudController?.Dispose();
-        settingsHudController?.Dispose();
+        settingsPanelHudController?.Dispose();
         helpAndSupportHUDController?.Dispose();
-        avatarEditorHUDController?.Dispose();
         exploreHUDController?.Dispose();
 
         controller.Dispose();
@@ -93,11 +84,10 @@ public class TaskbarHUDShould : TestsBase
     [Test]
     public void AddSettingsWindowProperly()
     {
-        settingsHudController = new SettingsHUDController();
-        controller.AddSettingsWindow(settingsHudController);
+        settingsPanelHudController = new SettingsPanelHUDController();
+        controller.AddSettingsWindow(settingsPanelHudController);
 
-        Assert.IsTrue(settingsHudController.view.gameObject.activeSelf, "Settings window is disabled!");
-        Assert.IsTrue(view.separatorMark.activeSelf, "Separator mark is disabled!");
+        Assert.IsTrue(settingsPanelHudController.view.gameObject.activeSelf, "Settings window is disabled!");
     }
 
     [Test]
@@ -107,24 +97,13 @@ public class TaskbarHUDShould : TestsBase
         controller.AddHelpAndSupportWindow(helpAndSupportHUDController);
 
         Assert.IsTrue(helpAndSupportHUDController.view.gameObject.activeSelf, "Help and Support window is disabled!");
-        Assert.IsTrue(view.separatorMark.activeSelf, "Separator mark is disabled!");
-    }
-
-    [Test]
-    public void AddBackpackWindowProperly()
-    {
-        avatarEditorHUDController = new AvatarEditorHUDController();
-        avatarEditorHUDController.Initialize(userProfile, AvatarTestHelpers.CreateTestCatalogLocal());
-        controller.AddBackpackWindow(avatarEditorHUDController);
-
-        Assert.IsTrue(avatarEditorHUDController.view.gameObject.activeSelf, "Backpack window is disabled!");
     }
 
     [Test]
     public void AddExploreWindowProperly()
     {
         exploreHUDController = new ExploreHUDController();
-        exploreHUDController.Initialize(friendsController, false);
+        exploreHUDController.Initialize(friendsController);
         controller.AddExploreWindow(exploreHUDController);
 
         Assert.IsTrue(exploreHUDController.view.gameObject.activeSelf, "Explore window is disabled!");
@@ -135,7 +114,7 @@ public class TaskbarHUDShould : TestsBase
     {
         controller.AddControlsMoreOption();
 
-        Assert.IsTrue(view.moreMenu.controlsButton.IsActive(), "Controls more button is disabled!");
+        Assert.IsTrue(view.moreMenu.controlsButton.mainButton.IsActive(), "Controls more button is disabled!");
     }
 
     [Test]
@@ -217,7 +196,7 @@ public class TaskbarHUDShould : TestsBase
     [Test]
     public void ToggleBarVisibilityProperly()
     {
-        view.moreMenu.collapseBarButton.onClick.Invoke();
+        view.moreMenu.collapseBarButton.mainButton.onClick.Invoke();
 
         Assert.IsFalse(view.isBarVisible, "The bar should not be visible!");
         Assert.IsFalse(view.moreMenu.collapseIcon.activeSelf, "The collapse icon should not be actived!");
@@ -225,12 +204,48 @@ public class TaskbarHUDShould : TestsBase
         Assert.IsTrue(view.moreMenu.expandIcon.activeSelf, "The expand icon should be actived!");
         Assert.IsTrue(view.moreMenu.expandText.activeSelf, "The expand text should be actived!");
 
-        view.moreMenu.collapseBarButton.onClick.Invoke();
+        view.moreMenu.collapseBarButton.mainButton.onClick.Invoke();
 
         Assert.IsTrue(view.isBarVisible, "The bar should be visible!");
         Assert.IsTrue(view.moreMenu.collapseIcon.activeSelf, "The collapse icon should be actived!");
         Assert.IsTrue(view.moreMenu.collapseText.activeSelf, "The collapse text should be actived!");
         Assert.IsFalse(view.moreMenu.expandIcon.activeSelf, "The expand icon should not be actived!");
         Assert.IsFalse(view.moreMenu.expandText.activeSelf, "The expand text should not be actived!");
+    }
+
+    [Test]
+    public void AddPortableExperienceItemProperly()
+    {
+        // Arrange
+        string testPEId = "test-pe";
+
+        // Act
+        view.AddPortableExperienceElement(testPEId, "Test PE", "");
+
+        // Assert
+        Assert.IsTrue(view.portableExperiencesDiv.activeSelf, "The Portable Experiences Div should be actived!");
+        var newPE = view.rightButtonsContainer.GetComponentInChildren<PortableExperienceTaskbarItem>();
+        Assert.IsNotNull(newPE, "There should exists a PortableExperienceTaskbarItem as child!");
+        Assert.AreEqual(0, newPE.gameObject.transform.GetSiblingIndex(), "The sibling index for the new Portable Experience should be 0!");
+        Assert.IsTrue(view.activePortableExperienceItems.ContainsKey(testPEId), "The activePortableExperienceItems dictionary should contains the new PE added!");
+        Assert.IsTrue(view.activePortableExperiencesPoolables.ContainsKey(testPEId), "The activePortableExperiencesPoolables dictionary should contains the new PE added!");
+    }
+
+    [Test]
+    public void RemovePortableExperienceItemProperly()
+    {
+        // Arrange
+        string testPEId = "test-pe";
+
+        // Act
+        view.AddPortableExperienceElement(testPEId, "Test PE", "");
+        view.RemovePortableExperienceElement(testPEId);
+
+        // Assert
+        Assert.IsFalse(view.portableExperiencesDiv.activeSelf, "The Portable Experiences Div should not be actived!");
+        var newPE = view.rightButtonsContainer.GetComponentInChildren<PortableExperienceTaskbarItem>();
+        Assert.IsNull(newPE, "There should not exists a PortableExperienceTaskbarItem as child!");
+        Assert.IsFalse(view.activePortableExperienceItems.ContainsKey(testPEId), "The activePortableExperienceItems dictionary should not contains the new PE added!");
+        Assert.IsFalse(view.activePortableExperiencesPoolables.ContainsKey(testPEId), "The activePortableExperiencesPoolables dictionary should not contains the new PE added!");
     }
 }

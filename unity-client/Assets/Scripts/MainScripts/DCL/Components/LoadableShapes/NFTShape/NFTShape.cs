@@ -1,4 +1,4 @@
-﻿using DCL.Controllers;
+using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
@@ -12,13 +12,23 @@ namespace DCL.Components
         {
             public Color color = new Color(0.6404918f, 0.611472f, 0.8584906f); // "light purple" default, same as in explorer
             public int style = 0;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public override string componentName => "NFT Shape";
-        LoadWrapper_NFT loadableShape;
 
-        public NFTShape(ParcelScene scene) : base(scene)
+        public NFTShape()
         {
+            model = new Model();
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.NFT_SHAPE;
         }
 
         protected override void AttachShape(DecentralandEntity entity)
@@ -40,7 +50,7 @@ namespace DCL.Components
 
             entity.OnShapeUpdated += UpdateBackgroundColor;
 
-            LoadWrapper_NFT loadableShape = GetOrAddLoaderForEntity<LoadWrapper_NFT>(entity);
+            var loadableShape = GetOrAddLoaderForEntity<LoadWrapper_NFT>(entity);
 
             loadableShape.entity = entity;
             loadableShape.component = this;
@@ -68,10 +78,10 @@ namespace DCL.Components
 
         void UpdateBackgroundColor(DecentralandEntity entity)
         {
-            if (model.color == previousModel.color) return;
+            if (previousModel is NFTShape.Model && model.color == previousModel.color) return;
 
-            loadableShape = GetLoaderForEntity(entity) as LoadWrapper_NFT;
-            loadableShape.loaderController.UpdateBackgroundColor(model.color);
+            var loadableShape = GetLoaderForEntity(entity) as LoadWrapper_NFT;
+            loadableShape?.loaderController.UpdateBackgroundColor(model.color);
         }
 
         public override string ToString()

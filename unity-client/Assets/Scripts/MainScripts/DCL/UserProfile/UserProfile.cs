@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL;
@@ -10,21 +10,24 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 {
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     public event Action<UserProfile> OnUpdate;
-    public event Action<Sprite> OnFaceSnapshotReadyEvent;
+    public event Action<Texture2D> OnFaceSnapshotReadyEvent;
     public event Action<string, long> OnAvatarExpressionSet;
 
     public string userId => model.userId;
+    public string ethAddress => model.ethAddress;
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
-    public List<string> blocked => model.blocked;
+    public UserProfileModel.ParcelsWithAccess[] parcelsWithAccess => model.parcelsWithAccess;
+    public List<string> blocked => model.blocked != null ? model.blocked : new List<string>();
+    public List<string> muted => model.muted ?? new List<string>();
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
     public bool hasClaimedName => model.hasClaimedName;
     public AvatarModel avatar => model.avatar;
     public int tutorialStep => model.tutorialStep;
     internal Dictionary<string, int> inventory = new Dictionary<string, int>();
 
-    public Sprite faceSnapshot { get; private set; }
+    public Texture2D faceSnapshot { get; private set; }
     private AssetPromise_Texture thumbnailPromise;
 
     internal UserProfileModel model = new UserProfileModel() //Empty initialization to avoid nullchecks
@@ -34,7 +37,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void UpdateData(UserProfileModel newModel, bool downloadAssets = true)
     {
-        inventory.Clear();
         faceSnapshot = null;
 
         if (newModel == null)
@@ -44,6 +46,8 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         }
 
         model.userId = newModel.userId;
+        model.ethAddress = newModel.ethAddress;
+        model.parcelsWithAccess = newModel.parcelsWithAccess;
         model.tutorialStep = newModel.tutorialStep;
         model.hasClaimedName = newModel.hasClaimedName;
         model.name = newModel.name;
@@ -54,10 +58,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
         model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
+        model.muted = newModel.muted;
 
         if (model.inventory != null)
         {
-            inventory = model.inventory.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+            SetInventory(model.inventory);
         }
 
         if (downloadAssets && model.snapshots != null)
@@ -90,13 +95,13 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             Destroy(faceSnapshot);
 
         if (texture != null)
-            faceSnapshot = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
+            faceSnapshot = texture.texture;
 
         OnUpdate?.Invoke(this);
         OnFaceSnapshotReadyEvent?.Invoke(faceSnapshot);
     }
 
-    public void OverrideAvatar(AvatarModel newModel, Sprite faceSnapshot)
+    public void OverrideAvatar(AvatarModel newModel, Texture2D newFaceSnapshot)
     {
         if (model?.snapshots != null)
         {
@@ -110,7 +115,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         }
 
         model.avatar.CopyFrom(newModel);
-        this.faceSnapshot = faceSnapshot;
+        this.faceSnapshot = newFaceSnapshot;
         OnUpdate?.Invoke(this);
     }
 
@@ -122,6 +127,12 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
         OnAvatarExpressionSet?.Invoke(id, timestamp);
+    }
+
+    public void SetInventory(string[] inventoryIds)
+    {
+        inventory.Clear();
+        inventory = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
     }
 
     public string[] GetInventoryItemsIds()

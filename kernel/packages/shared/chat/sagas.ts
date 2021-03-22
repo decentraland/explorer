@@ -1,4 +1,4 @@
-import { takeEvery, put } from 'redux-saga/effects'
+import { takeEvery, put, select } from 'redux-saga/effects'
 import { PayloadAction } from 'typesafe-actions'
 import { Vector3Component } from 'atomicHelpers/landHelpers'
 import { UnityInterfaceContainer } from 'unity-interface/dcl'
@@ -15,27 +15,22 @@ import { ChatMessageType, ChatMessage } from 'shared/types'
 import { EXPERIENCE_STARTED } from 'shared/loading/types'
 import { queueTrackingEvent } from 'shared/analytics'
 import { sendPublicChatMessage } from 'shared/comms'
-import {
-  getCurrentUser,
-  peerMap,
-  findPeerByName,
-  removeFromMutedUsers,
-  avatarMessageObservable,
-  addToMutedUsers
-} from 'shared/comms/peers'
+import { peerMap, avatarMessageObservable } from 'shared/comms/peers'
 import { parseParcelPosition, worldToGrid } from 'atomicHelpers/parcelScenePositions'
 import { TeleportController } from 'shared/world/TeleportController'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
 import defaultLogger from 'shared/logger'
 import { catalystRealmConnected, changeRealm, changeToCrowdedRealm } from 'shared/dao'
 import { isValidExpression, expressionExplainer, validExpressions } from 'shared/apis/expressionExplainer'
-import { StoreContainer } from 'shared/store/rootTypes'
+import { RootState, StoreContainer } from 'shared/store/rootTypes'
 import { SHOW_FPS_COUNTER } from 'config'
 import { AvatarMessage, AvatarMessageType } from 'shared/comms/interface/types'
 import { sampleDropData } from 'shared/airdrops/sampleDrop'
-import { findProfileByName } from 'shared/profiles/selectors'
+import { findProfileByName, getCurrentUserProfile, getProfile } from 'shared/profiles/selectors'
 import { isFriend } from 'shared/friends/selectors'
 import { fetchHotScenes } from 'shared/social/hotScenes'
+import { getCurrentUserId } from 'shared/session/selectors'
+import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 
 declare const globalThis: UnityInterfaceContainer & StoreContainer
 
@@ -128,15 +123,14 @@ function* handleSendMessage(action: SendMessage) {
     }
   } else {
     // If the message was not a command ("/cmdname"), then send message through wire
-    const currentUser = getCurrentUser()
-    if (!currentUser) throw new Error('cannotGetCurrentUser')
-    if (!currentUser.profile) throw new Error('profileNotInitialized')
+    const currentUserId = yield select(getCurrentUserId)
+    if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
     entry = {
       messageType: ChatMessageType.PUBLIC,
       messageId: uuid(),
       timestamp: Date.now(),
-      sender: currentUser.userId || currentUser.profile.userId || 'unknown',
+      sender: currentUserId,
       body: message
     }
 
@@ -275,12 +269,13 @@ function initChatCommands() {
     const users = [...peerMap.entries()]
 
     const strings = users
-      .filter(([_, value]) => !!(value && value.user && value.user.profile && value.user.profile.name))
+      .filter(([_, value]) => !!(value && value.user && value.user.userId))
       .filter(([uuid]) => userPose[uuid])
       .map(function ([uuid, value]) {
+        const name = getProfile(getGlobalState(), value.user?.userId!)?.name ?? 'unknown'
         const pos = { x: 0, y: 0 }
         worldToGrid(userPose[uuid], pos)
-        return `  ${value.user!.profile!.name}: ${pos.x}, ${pos.y}`
+        return `  ${name}: ${pos.x}, ${pos.y}`
       })
       .join('\n')
 
@@ -308,53 +303,14 @@ function initChatCommands() {
   })
 
   addChatCommand('getname', 'Gets your username', (message) => {
-    const currentUser = getCurrentUser()
-    if (!currentUser) throw new Error('cannotGetCurrentUser')
-    if (!currentUser.profile) throw new Error('profileNotInitialized')
+    const currentUserProfile = getCurrentUserProfile(getGlobalState())
+    if (!currentUserProfile) throw new Error('profileNotInitialized')
     return {
       messageId: uuid(),
       messageType: ChatMessageType.SYSTEM,
       sender: 'Decentraland',
       timestamp: Date.now(),
-      body: `Your Display Name is ${currentUser.profile.name}.`
-    }
-  })
-
-  addChatCommand('mute', 'Mute [username]', (message) => {
-    const username = message
-    const currentUser = getCurrentUser()
-    if (!currentUser) throw new Error('cannotGetCurrentUser')
-
-    const user = findPeerByName(username)
-    if (user && user.userId) {
-      // Cannot mute yourself
-      if (username === currentUser.userId) {
-        return {
-          messageId: uuid(),
-          messageType: ChatMessageType.SYSTEM,
-          sender: 'Decentraland',
-          timestamp: Date.now(),
-          body: `You cannot mute yourself.`
-        }
-      }
-
-      addToMutedUsers(user.userId)
-
-      return {
-        messageId: uuid(),
-        messageType: ChatMessageType.SYSTEM,
-        sender: 'Decentraland',
-        timestamp: Date.now(),
-        body: `You muted user ${username}.`
-      }
-    } else {
-      return {
-        messageId: uuid(),
-        messageType: ChatMessageType.SYSTEM,
-        sender: 'Decentraland',
-        timestamp: Date.now(),
-        body: `User not found ${JSON.stringify(username)}.`
-      }
+      body: `Your Display Name is ${currentUserProfile.name}.`
     }
   })
 
@@ -383,7 +339,7 @@ function initChatCommands() {
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: `You start ${expressionExplainer[expression]}`
+        body: expressionExplainer[expression]
       }
     }
   )
@@ -391,10 +347,10 @@ function initChatCommands() {
   let whisperFn = (expression: string) => {
     const [userName, message] = parseWhisperExpression(expression)
 
-    const currentUser = getCurrentUser()
-    if (!currentUser) throw new Error('cannotGetCurrentUser')
+    const currentUserId = getCurrentUserId(getGlobalState())
+    if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findProfileByName(globalThis.globalStore.getState(), userName)
+    const user = findProfileByName(getGlobalState(), userName)
 
     if (!user || !user.userId) {
       return {
@@ -422,7 +378,7 @@ function initChatCommands() {
     return {
       messageId: uuid(),
       messageType: ChatMessageType.PRIVATE,
-      sender: currentUser.userId,
+      sender: currentUserId,
       recipient: user.userId,
       timestamp: Date.now(),
       body: message
@@ -445,33 +401,36 @@ function initChatCommands() {
     }
   })
 
-  addChatCommand('unmute', 'Unmute [username]', (message) => {
-    const username = message
-    const currentUser = getCurrentUser()
-    if (!currentUser) throw new Error('cannotGetCurrentUser')
+  function performSocialActionOnPlayer(
+    username: string,
+    actionBuilder: (usersId: string[]) => { type: string; payload: { playersId: string[] } },
+    actionName: 'mute' | 'block' | 'unmute' | 'unblock'
+  ) {
+    let pastTense: string = actionName === 'mute' || actionName === 'unmute' ? actionName + 'd' : actionName + 'ed'
+    const currentUserId = getCurrentUserId(getGlobalState())
+    if (!currentUserId) throw new Error('cannotGetCurrentUser')
 
-    const user = findPeerByName(username)
-
+    const user = findProfileByName(getGlobalState(), username)
     if (user && user.userId) {
-      // Cannot unmute or mute yourself
-      if (username === currentUser.userId) {
+      // Cannot mute yourself
+      if (username === currentUserId) {
         return {
           messageId: uuid(),
           messageType: ChatMessageType.SYSTEM,
           sender: 'Decentraland',
           timestamp: Date.now(),
-          body: `You cannot mute or unmute yourself.`
+          body: `You cannot ${actionName} yourself.`
         }
       }
 
-      removeFromMutedUsers(user.userId)
+      globalThis.globalStore.dispatch(actionBuilder([user.userId]))
 
       return {
         messageId: uuid(),
         messageType: ChatMessageType.SYSTEM,
         sender: 'Decentraland',
         timestamp: Date.now(),
-        body: `You unmuted user ${username}.`
+        body: `You ${pastTense} user ${username}.`
       }
     } else {
       return {
@@ -482,6 +441,22 @@ function initChatCommands() {
         body: `User not found ${JSON.stringify(username)}.`
       }
     }
+  }
+
+  addChatCommand('mute', 'Mute [username]', (message) => {
+    return performSocialActionOnPlayer(message, mutePlayers, 'mute')
+  })
+
+  addChatCommand('unmute', 'Unmute [username]', (message) => {
+    return performSocialActionOnPlayer(message, unmutePlayers, 'unmute')
+  })
+
+  addChatCommand('block', 'Block [username]', (message) => {
+    return performSocialActionOnPlayer(message, blockPlayers, 'block')
+  })
+
+  addChatCommand('unblock', 'Unblock [username]', (message) => {
+    return performSocialActionOnPlayer(message, unblockPlayers, 'unblock')
   })
 
   addChatCommand('help', 'Show a list of commands', (message) => {
@@ -507,10 +482,10 @@ function initChatCommands() {
       ($) => {
         let body = ''
         $.slice(0, 5).forEach((sceneInfo) => {
-          const count = sceneInfo.realmsInfo.reduce((a, b) => a + b.usersCount, 0)
+          const count = sceneInfo.realms.reduce((a, b) => a + b.usersCount, 0)
           body += `${count} ${count > 1 ? 'users' : 'user'} @ ${
             sceneInfo.name.length < 20 ? sceneInfo.name : sceneInfo.name.substring(0, 20) + '...'
-          } ${sceneInfo.baseCoord} ${sceneInfo.realmsInfo.reduce(
+          } ${sceneInfo.baseCoords.x},${sceneInfo.baseCoords.y} ${sceneInfo.realms.reduce(
             (a, b) => a + `\n\t realm: ${b.serverName}-${b.layer} users: ${b.usersCount}`,
             ''
           )}\n`
@@ -530,6 +505,10 @@ function initChatCommands() {
       body: 'Looking for other players...'
     }
   })
+}
+
+function getGlobalState(): RootState {
+  return globalThis.globalStore.getState()
 }
 
 function parseWhisperExpression(expression: string) {

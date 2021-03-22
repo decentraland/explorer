@@ -2,14 +2,15 @@ using UnityEngine;
 using DCL.Interface;
 using DCL.Helpers;
 using System.Collections;
-using DCL.Tutorial;
 
 public class EmailPromptHUDController : IHUD
 {
-    const float POPUP_DELAY = 60;
+    const float POPUP_DELAY = 300;
+    const int EMAIL_PROMPT_PROFILE_FLAG = 128;
 
     EmailPromptHUDView view;
 
+    bool alreadyDisplayed = false;
     bool isPopupRoutineRunning = false;
     Coroutine showPopupDelayedRoutine;
 
@@ -20,6 +21,8 @@ public class EmailPromptHUDController : IHUD
 
         view.OnDismiss += OnDismiss;
         view.OnSendEmail += OnSendEmail;
+        CommonScriptableObjects.tutorialActive.OnChange += TutorialActive_OnChange;
+        CommonScriptableObjects.motdActive.OnChange += MotdActive_OnChange;
 
         view.gameObject.SetActive(false);
     }
@@ -29,43 +32,59 @@ public class EmailPromptHUDController : IHUD
         if (visible)
         {
             Utils.UnlockCursor();
+            alreadyDisplayed = true;
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
             WebInterface.ReportAnalyticsEvent("open email popup");
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
+            AudioScriptableObjects.fadeIn.Play(true);
         }
         else
         {
             view.showHideAnimator.Hide();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
+            AudioScriptableObjects.fadeOut.Play(true);
         }
+
+        CommonScriptableObjects.emailPromptActive.Set(visible);
     }
 
     public void Dispose()
     {
         if (view != null)
         {
+            view.OnDismiss -= OnDismiss;
+            view.OnSendEmail -= OnSendEmail;
+
             GameObject.Destroy(view.gameObject);
         }
         if (showPopupDelayedRoutine != null)
         {
             StopPopupRoutine();
         }
+
+        CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
+        CommonScriptableObjects.motdActive.OnChange -= MotdActive_OnChange;
     }
 
     public void SetEnable(bool enable)
     {
-        if (enable && !isPopupRoutineRunning)
+        if (enable && !isPopupRoutineRunning && !alreadyDisplayed)
         {
             StartPopupRoutine();
         }
         else if (!enable && isPopupRoutineRunning)
         {
             StopPopupRoutine();
+        }
+    }
+
+    void ResetPopupDelayed()
+    {
+        if (isPopupRoutineRunning)
+        {
+            StopPopupRoutine();
+            StartPopupRoutine();
         }
     }
 
@@ -88,6 +107,8 @@ public class EmailPromptHUDController : IHUD
     {
         isPopupRoutineRunning = true;
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+        yield return new WaitUntil(() => !CommonScriptableObjects.tutorialActive.Get());
+        yield return new WaitUntil(() => !CommonScriptableObjects.motdActive.Get());
         yield return WaitForSecondsCache.Get(seconds);
         yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
         SetVisibility(true);
@@ -117,6 +138,18 @@ public class EmailPromptHUDController : IHUD
 
     void SetEmailFlag()
     {
-        TutorialController.i.SetStepCompleted(TutorialController.TutorialStep.EmailRequested);
+        WebInterface.SaveUserTutorialStep(UserProfile.GetOwnUserProfile().tutorialStep | EMAIL_PROMPT_PROFILE_FLAG);
+    }
+
+    private void TutorialActive_OnChange(bool current, bool previous)
+    {
+        if (current)
+            ResetPopupDelayed();
+    }
+
+    private void MotdActive_OnChange(bool current, bool previous)
+    {
+        if (current)
+            ResetPopupDelayed();
     }
 }

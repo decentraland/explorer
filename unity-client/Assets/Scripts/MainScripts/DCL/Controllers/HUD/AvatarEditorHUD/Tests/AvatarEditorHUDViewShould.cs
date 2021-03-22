@@ -8,11 +8,11 @@ using UnityEngine.TestTools;
 
 namespace AvatarEditorHUD_Tests
 {
-    public class AvatarEditorHUDViewShould : TestsBase
+    public class AvatarEditorHUDViewShould : IntegrationTestSuite_Legacy
     {
         private UserProfile userProfile;
         private AvatarEditorHUDController_Mock controller;
-        private WearableDictionary catalog;
+        private BaseDictionary<string, WearableItem> catalog;
 
         protected override bool justSceneSetUp => true;
 
@@ -49,18 +49,14 @@ namespace AvatarEditorHUD_Tests
                 }
             }, false);
 
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             controller = new AvatarEditorHUDController_Mock();
             controller.Initialize(userProfile, catalog);
         }
 
         [Test]
         [TestCase("dcl://base-avatars/f_african_leggins", WearableLiterals.BodyShapes.FEMALE)]
-        [TestCase("dcl://base-avatars/f_mouth_00", WearableLiterals.BodyShapes.FEMALE)]
-        [TestCase("dcl://base-avatars/blue_bandana", WearableLiterals.BodyShapes.FEMALE)]
         [TestCase("dcl://base-avatars/eyebrows_02", WearableLiterals.BodyShapes.MALE)]
-        [TestCase("dcl://base-avatars/m_mountainshoes.glb", WearableLiterals.BodyShapes.MALE)]
-        [TestCase("dcl://base-avatars/moptop", WearableLiterals.BodyShapes.MALE)]
         public void Activate_CompatibleWithBodyShape_ItemToggle(string wearableId, string bodyShape)
         {
             userProfile.UpdateData(new UserProfileModel()
@@ -88,11 +84,7 @@ namespace AvatarEditorHUD_Tests
 
         [Test]
         [TestCase("dcl://base-avatars/f_african_leggins", WearableLiterals.BodyShapes.MALE)]
-        [TestCase("dcl://base-avatars/f_mouth_00", WearableLiterals.BodyShapes.MALE)]
-        [TestCase("dcl://base-avatars/bee_t_shirt", WearableLiterals.BodyShapes.MALE)]
         [TestCase("dcl://base-avatars/eyebrows_02", WearableLiterals.BodyShapes.FEMALE)]
-        [TestCase("dcl://base-avatars/m_mountainshoes.glb", WearableLiterals.BodyShapes.FEMALE)]
-        [TestCase("dcl://base-avatars/moptop", WearableLiterals.BodyShapes.FEMALE)]
         public void NotCreate_IncompatibleWithBodyShape_ItemToggle(string wearableId, string bodyShape)
         {
             userProfile.UpdateData(new UserProfileModel()
@@ -130,11 +122,10 @@ namespace AvatarEditorHUD_Tests
         }
 
         [Test]
-        [TestCase("dcl://halloween_2019/zombie_suit_upper_body")]
-        [TestCase("dcl://halloween_2019/vampire_upper_body")]
         [TestCase("dcl://halloween_2019/sad_clown_upper_body")]
         public void Add_Exclusives_ToCollectibles(string wearableId)
         {
+            userProfile.SetInventory(new[] { wearableId });
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
@@ -143,8 +134,7 @@ namespace AvatarEditorHUD_Tests
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
-                },
-                inventory = new[] {wearableId}
+                }
             }, false);
 
             Assert.IsTrue(controller.myView.collectiblesItemSelector.itemToggles.ContainsKey(wearableId));
@@ -186,6 +176,7 @@ namespace AvatarEditorHUD_Tests
         public void NotShowAmmountIfOnlyOneItemIsPossesed()
         {
             var wearableId = "dcl://halloween_2019/sad_clown_upper_body";
+            userProfile.SetInventory(new[] { wearableId });
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
@@ -194,8 +185,7 @@ namespace AvatarEditorHUD_Tests
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
-                },
-                inventory = new[] {wearableId}
+                }
             }, false);
 
             Assert.IsFalse(controller.myView.collectiblesItemSelector.itemToggles[wearableId].amountContainer.gameObject.activeSelf);
@@ -209,6 +199,7 @@ namespace AvatarEditorHUD_Tests
         public void ShowAndUpdateAmount(int amount)
         {
             var wearableId = "dcl://halloween_2019/sad_clown_upper_body";
+            userProfile.SetInventory(Enumerable.Repeat(wearableId, amount).ToArray());
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
@@ -217,8 +208,7 @@ namespace AvatarEditorHUD_Tests
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
-                },
-                inventory = Enumerable.Repeat(wearableId, amount).ToArray()
+                }
             }, false);
 
             var itemToggle = controller.myView.selectorsByCategory[WearableLiterals.Categories.UPPER_BODY].itemToggles[wearableId];
@@ -235,6 +225,7 @@ namespace AvatarEditorHUD_Tests
         public void ShowAndUpdateAmountInCollectibleTab(int amount)
         {
             var wearableId = "dcl://halloween_2019/sad_clown_upper_body";
+            userProfile.SetInventory(Enumerable.Repeat(wearableId, amount).ToArray());
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
@@ -243,8 +234,7 @@ namespace AvatarEditorHUD_Tests
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
-                },
-                inventory = Enumerable.Repeat(wearableId, amount).ToArray()
+                }
             }, false);
 
             var itemToggle = controller.myView.collectiblesItemSelector.itemToggles[wearableId];
@@ -273,6 +263,7 @@ namespace AvatarEditorHUD_Tests
                 i18n = new[] {new i18n() {code = "en", text = "Dummy Item"}}
             };
 
+            userProfile.SetInventory(new[] { dummyItem.id });
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
@@ -281,8 +272,7 @@ namespace AvatarEditorHUD_Tests
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
                     wearables = new List<string>() { },
-                },
-                inventory = new[] {dummyItem.id}
+                }
             }, false);
 
             catalog.Remove(dummyItem.id);

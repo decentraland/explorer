@@ -23,6 +23,7 @@ public class ChatHUDView : MonoBehaviour
     public GameObject messageHoverPanel;
     public TextMeshProUGUI messageHoverText;
     public UserContextMenu contextMenu;
+    public UserContextConfirmationDialog confirmationDialog;
 
     [NonSerialized] public List<ChatEntry> entries = new List<ChatEntry>();
     [NonSerialized] public List<DateSeparatorEntry> dateSeparators = new List<DateSeparatorEntry>();
@@ -45,6 +46,8 @@ public class ChatHUDView : MonoBehaviour
         this.controller = controller;
         this.OnSendMessage += OnSendMessage;
         inputField.onSubmit.AddListener(OnInputFieldSubmit);
+        inputField.onSelect.AddListener(OnInputFieldSelect);
+        inputField.onDeselect.AddListener(OnInputFieldDeselect);
     }
 
     private void OnInputFieldSubmit(string message)
@@ -71,6 +74,16 @@ public class ChatHUDView : MonoBehaviour
             currentMessage.body = string.Empty;
 
         OnSendMessage?.Invoke(currentMessage);
+    }
+
+    private void OnInputFieldSelect(string message)
+    {
+        AudioScriptableObjects.inputFieldFocus.Play(true);
+    }
+
+    private void OnInputFieldDeselect(string message)
+    {
+        AudioScriptableObjects.inputFieldUnfocus.Play(true);
     }
 
     public void ResetInputField()
@@ -116,6 +129,11 @@ public class ChatHUDView : MonoBehaviour
                 entry.SetFadeout(false);
             }
         }
+
+        if (enabled)
+        {
+            confirmationDialog.Hide();
+        }
     }
 
     public virtual void AddEntry(ChatEntry.Model chatEntryModel, bool setScrollPositionToBottom = false)
@@ -151,21 +169,14 @@ public class ChatHUDView : MonoBehaviour
 
     private void OnOpenContextMenu(ChatEntry chatEntry)
     {
-        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(chatEntry.model.senderId);
-
-        contextMenu.Initialize(
-            chatEntry.model.senderId,
-            chatEntry.model.senderName,
-            isBlocked);
-
         contextMenu.transform.position = chatEntry.contextMenuPositionReference.position;
         contextMenu.transform.parent = this.transform;
-        contextMenu.Show();
+        contextMenu.Show(chatEntry.model.senderId);
     }
 
     protected virtual void OnMessageTriggerHover(ChatEntry chatEntry)
     {
-        if (contextMenu.isVisible)
+        if (contextMenu == null || contextMenu.isVisible)
             return;
 
         messageHoverText.text = chatEntry.messageLocalDateTime;

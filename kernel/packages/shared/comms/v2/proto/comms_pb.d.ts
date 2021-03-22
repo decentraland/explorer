@@ -27,6 +27,21 @@ export class CommsMessage extends jspb.Message {
   getSceneData(): SceneData | undefined;
   setSceneData(value?: SceneData): void;
 
+  hasVoiceData(): boolean;
+  clearVoiceData(): void;
+  getVoiceData(): VoiceData | undefined;
+  setVoiceData(value?: VoiceData): void;
+
+  hasProfileRequestData(): boolean;
+  clearProfileRequestData(): void;
+  getProfileRequestData(): ProfileRequestData | undefined;
+  setProfileRequestData(value?: ProfileRequestData): void;
+
+  hasProfileResponseData(): boolean;
+  clearProfileResponseData(): void;
+  getProfileResponseData(): ProfileResponseData | undefined;
+  setProfileResponseData(value?: ProfileResponseData): void;
+
   getDataCase(): CommsMessage.DataCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CommsMessage.AsObject;
@@ -45,6 +60,9 @@ export namespace CommsMessage {
     profileData?: ProfileData.AsObject,
     chatData?: ChatData.AsObject,
     sceneData?: SceneData.AsObject,
+    voiceData?: VoiceData.AsObject,
+    profileRequestData?: ProfileRequestData.AsObject,
+    profileResponseData?: ProfileResponseData.AsObject,
   }
 
   export enum DataCase {
@@ -53,6 +71,9 @@ export namespace CommsMessage {
     PROFILE_DATA = 3,
     CHAT_DATA = 4,
     SCENE_DATA = 5,
+    VOICE_DATA = 6,
+    PROFILE_REQUEST_DATA = 7,
+    PROFILE_RESPONSE_DATA = 8,
   }
 }
 
@@ -78,6 +99,9 @@ export class PositionData extends jspb.Message {
   getRotationW(): number;
   setRotationW(value: number): void;
 
+  getImmediate(): boolean;
+  setImmediate(value: boolean): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): PositionData.AsObject;
   static toObject(includeInstance: boolean, msg: PositionData): PositionData.AsObject;
@@ -97,6 +121,7 @@ export namespace PositionData {
     rotationY: number,
     rotationZ: number,
     rotationW: number,
+    immediate: boolean,
   }
 }
 
@@ -106,6 +131,9 @@ export class ProfileData extends jspb.Message {
 
   getUserId(): string;
   setUserId(value: string): void;
+
+  getProfileType(): ProfileData.ProfileTypeMap[keyof ProfileData.ProfileTypeMap];
+  setProfileType(value: ProfileData.ProfileTypeMap[keyof ProfileData.ProfileTypeMap]): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ProfileData.AsObject;
@@ -121,6 +149,58 @@ export namespace ProfileData {
   export type AsObject = {
     profileVersion: string,
     userId: string,
+    profileType: ProfileData.ProfileTypeMap[keyof ProfileData.ProfileTypeMap],
+  }
+
+  export interface ProfileTypeMap {
+    DEPLOYED: 0;
+    LOCAL: 1;
+  }
+
+  export const ProfileType: ProfileTypeMap;
+}
+
+export class ProfileRequestData extends jspb.Message {
+  getProfileVersion(): string;
+  setProfileVersion(value: string): void;
+
+  getUserId(): string;
+  setUserId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProfileRequestData.AsObject;
+  static toObject(includeInstance: boolean, msg: ProfileRequestData): ProfileRequestData.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProfileRequestData, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProfileRequestData;
+  static deserializeBinaryFromReader(message: ProfileRequestData, reader: jspb.BinaryReader): ProfileRequestData;
+}
+
+export namespace ProfileRequestData {
+  export type AsObject = {
+    profileVersion: string,
+    userId: string,
+  }
+}
+
+export class ProfileResponseData extends jspb.Message {
+  getSerializedProfile(): string;
+  setSerializedProfile(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProfileResponseData.AsObject;
+  static toObject(includeInstance: boolean, msg: ProfileResponseData): ProfileResponseData.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProfileResponseData, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProfileResponseData;
+  static deserializeBinaryFromReader(message: ProfileResponseData, reader: jspb.BinaryReader): ProfileResponseData;
+}
+
+export namespace ProfileResponseData {
+  export type AsObject = {
+    serializedProfile: string,
   }
 }
 
@@ -169,6 +249,32 @@ export namespace SceneData {
   export type AsObject = {
     sceneId: string,
     text: string,
+  }
+}
+
+export class VoiceData extends jspb.Message {
+  getEncodedSamples(): Uint8Array | string;
+  getEncodedSamples_asU8(): Uint8Array;
+  getEncodedSamples_asB64(): string;
+  setEncodedSamples(value: Uint8Array | string): void;
+
+  getIndex(): number;
+  setIndex(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VoiceData.AsObject;
+  static toObject(includeInstance: boolean, msg: VoiceData): VoiceData.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: VoiceData, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VoiceData;
+  static deserializeBinaryFromReader(message: VoiceData, reader: jspb.BinaryReader): VoiceData;
+}
+
+export namespace VoiceData {
+  export type AsObject = {
+    encodedSamples: Uint8Array | string,
+    index: number,
   }
 }
 

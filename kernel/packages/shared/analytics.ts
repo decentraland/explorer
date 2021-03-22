@@ -1,7 +1,7 @@
 import { DEBUG_ANALYTICS, getTLD } from 'config'
 
 import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
-import { Vector2, ReadOnlyVector3, Vector3 } from 'decentraland-ecs/src'
+import { ReadOnlyVector3, Vector2, Vector3 } from 'decentraland-ecs/src'
 import { defaultLogger } from 'shared/logger'
 
 import { avatarMessageObservable } from './comms/peers'
@@ -64,14 +64,28 @@ export async function initialize(segmentKey: string): Promise<void> {
   }
 }
 
+function baseAnalyticsIdentifierContext() {
+  return {
+    explorer_commit_hash: (window as any)['VERSION']
+  }
+}
+
 export function identifyUser(id: string) {
   if (window.analytics) {
-    window.analytics.identify(id)
+    window.analytics.identify(id, baseAnalyticsIdentifierContext())
+  }
+}
+
+export function identifyEmail(email: string, userId?: string) {
+  if (userId) {
+    window.analytics.identify(userId, { email, ...baseAnalyticsIdentifierContext() })
+  } else {
+    window.analytics.identify({ email, ...baseAnalyticsIdentifierContext() })
   }
 }
 
 export function queueTrackingEvent(eventName: string, eventData: any) {
-  const data = { ...eventData, time: new Date().toISOString(), sessionId }
+  const data = { ...eventData, time: new Date().toISOString(), sessionId, version: (window as any)['VERSION'] }
 
   if (DEBUG_ANALYTICS) {
     defaultLogger.info(`Tracking event "${eventName}": `, data)
@@ -104,9 +118,21 @@ function track({ name, data }: SegmentEvent) {
   })
 }
 
+const TRACEABLE_AVATAR_EVENTS = [
+  AvatarMessageType.ADD_FRIEND,
+  AvatarMessageType.USER_DATA,
+  AvatarMessageType.USER_EXPRESSION,
+  AvatarMessageType.USER_REMOVED,
+  AvatarMessageType.SET_LOCAL_UUID,
+  AvatarMessageType.USER_MUTED,
+  AvatarMessageType.USER_UNMUTED,
+  AvatarMessageType.USER_BLOCKED,
+  AvatarMessageType.USER_UNBLOCKED
+]
+
 function hookObservables() {
   avatarMessageObservable.add(({ type, ...data }) => {
-    if (type === AvatarMessageType.USER_VISIBLE || type === AvatarMessageType.USER_POSE) {
+    if (!TRACEABLE_AVATAR_EVENTS.includes(type)) {
       return
     }
 

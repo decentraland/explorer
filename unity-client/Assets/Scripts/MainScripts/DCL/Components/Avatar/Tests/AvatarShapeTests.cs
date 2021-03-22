@@ -3,12 +3,14 @@ using DCL;
 using DCL.Helpers;
 using NUnit.Framework;
 using System.Collections;
+using DCL.Components;
+using DCL.Interface;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class AvatarShapeTests : TestsBase
+    public class AvatarShapeTests : IntegrationTestSuite_Legacy
     {
 
         void AssertMaterialsAreCorrect(Transform root)
@@ -30,8 +32,8 @@ namespace Tests
         [UnityTest]
         public IEnumerator DestroyWhileLoading()
         {
-            AvatarTestHelpers.CreateTestCatalog();
-            AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Abortit", "TestAvatar.json");
+            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Abortit", "TestAvatar.json");
 
             GameObject goEntity = avatar.entity.gameObject;
 
@@ -46,10 +48,35 @@ namespace Tests
         [UnityTest]
         [Category("Explicit")]
         [Explicit("Test too slow")]
+        public IEnumerator InterpolatePosition()
+        {
+            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Abortitus", "TestAvatar.json");
+
+            // We must wait for the AvatarShape to finish or the OnTransformChanged event is not used
+            yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
+
+            Assert.AreEqual(0f, avatar.entity.gameObject.transform.position.x);
+            Assert.AreEqual(0f, avatar.entity.gameObject.transform.position.z);
+
+            // Update position to the other end of the parcel
+            var transformModel = new DCLTransform.Model { position = new Vector3(15, 2, 15) };
+
+            TestHelpers.SetEntityTransform(scene, avatar.entity, transformModel);
+
+            yield return null;
+
+            Assert.AreNotEqual(15f, avatar.entity.gameObject.transform.position.x);
+            Assert.AreNotEqual(15f, avatar.entity.gameObject.transform.position.z);
+        }
+
+        [UnityTest]
+        [Category("Explicit")]
+        [Explicit("Test too slow")]
         public IEnumerator MaterialsSetCorrectly()
         {
-            AvatarTestHelpers.CreateTestCatalog();
-            AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Joan Darteis", "TestAvatar.json");
+            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Joan Darteis", "TestAvatar.json");
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
 
             AssertMaterialsAreCorrect(avatar.transform);
@@ -61,8 +88,8 @@ namespace Tests
         [Explicit("Test too slow")]
         public IEnumerator NameBackgroundHasCorrectSize()
         {
-            AvatarTestHelpers.CreateTestCatalog();
-            AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Maiqel Yacson", "TestAvatar.json");
+            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Maiqel Yacson", "TestAvatar.json");
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
 
             avatar.transform.position = new Vector3(13, 0, 4);
@@ -78,9 +105,9 @@ namespace Tests
         public IEnumerator WhenTwoAvatarsLoadAtTheSameTimeTheyHaveProperMaterials()
         {
             //NOTE(Brian): Avatars must be equal to share their meshes.
-            AvatarTestHelpers.CreateTestCatalog();
-            AvatarShape avatar = AvatarTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar.json");
-            AvatarShape avatar2 = AvatarTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar2.json");
+            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar.json");
+            AvatarShape avatar2 = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar2.json");
 
             avatar.transform.position = new Vector3(-5, 0, 0);
             avatar2.transform.position = new Vector3(5, 0, 0);

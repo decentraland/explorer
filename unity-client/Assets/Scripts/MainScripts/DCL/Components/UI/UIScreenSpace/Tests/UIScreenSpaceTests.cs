@@ -106,25 +106,6 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator TestConstrainedPanelMaskAppliesToParcelsUI()
-        {
-            scene.isPersistent = false;
-            yield return null;
-
-            // Create UIScreenSpaceShape
-            UIScreenSpace screenSpaceShape =
-                TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
-                    CLASS_ID.UI_SCREEN_SPACE_SHAPE);
-
-            yield return screenSpaceShape.routine;
-
-            Assert.IsFalse(scene.isPersistent);
-            Assert.IsTrue(screenSpaceShape.childHookRectTransform.GetComponent<UnityEngine.UI.RectMask2D>() != null);
-
-            screenSpaceShape.Dispose();
-        }
-
-        [UnityTest]
         public IEnumerator TestConstrainedPanelMaskDoesntApplyToDecentralandUI()
         {
             scene.isPersistent = true;
@@ -143,7 +124,7 @@ namespace Tests
 
             // UIScreenSpace.InitializeCanvas is not awaited by screenSpaceShape.routine
             // todo fix it properly
-            yield return new WaitForSeconds(0.2f);
+            yield return null;
 
             screenSpaceShape.Dispose();
         }

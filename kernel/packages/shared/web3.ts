@@ -1,86 +1,69 @@
-import { ethereumConfigurations } from 'config'
+import { getNetworkFromTLD, getTLD, setNetwork } from 'config'
 import { Address } from 'web3x/address'
-import { Eth } from 'web3x/eth'
-import { WebsocketProvider } from 'web3x/providers'
-import { ETHEREUM_NETWORK, getTLD } from '../config'
+import { ETHEREUM_NETWORK } from '../config'
 import { decentralandConfigurations } from '../config/index'
-import { queueTrackingEvent } from './analytics'
 import { Catalyst } from './dao/contracts/Catalyst'
-import { ERC721 } from './dao/contracts/ERC721'
-import { getNetwork, getUserAccount } from './ethereum/EthereumService'
-import { awaitWeb3Approval } from './ethereum/provider'
+import { getNetwork } from './ethereum/EthereumService'
+import { createEthWhenNotConnectedToWeb3 } from './ethereum/provider'
 import { defaultLogger } from './logger'
 import { CatalystNode, GraphResponse } from './types'
 import { retry } from '../atomicHelpers/retry'
+import { NETWORK_MISMATCH, setTLDError } from './loading/types'
+import { ReportFatalError } from './loading/ReportFatalError'
+import { StoreContainer } from './store/rootTypes'
+import { getNetworkFromTLDOrWeb3 } from 'atomicHelpers/getNetworkFromTLDOrWeb3'
+import { Fetcher } from 'dcl-catalyst-commons'
+import Html from './Html'
 
-async function getAddress(): Promise<string | undefined> {
-  try {
-    await awaitWeb3Approval()
-    return await getUserAccount()
-  } catch (e) {
-    defaultLogger.info(e)
-  }
-}
+declare const globalThis: StoreContainer
 
-export function getNetworkFromTLD(): ETHEREUM_NETWORK | null {
-  const tld = getTLD()
-  if (tld === 'zone') {
-    return ETHEREUM_NETWORK.ROPSTEN
-  }
-
-  if (tld === 'today' || tld === 'org') {
-    return ETHEREUM_NETWORK.MAINNET
-  }
-
-  // if localhost
-  return null
+declare var window: Window & {
+  ethereum: any
 }
 
 export async function getAppNetwork(): Promise<ETHEREUM_NETWORK> {
   const web3Network = await getNetwork()
   const web3net = web3Network === '1' ? ETHEREUM_NETWORK.MAINNET : ETHEREUM_NETWORK.ROPSTEN
-  defaultLogger.info('Using ETH network: ', web3net)
   return web3net
 }
 
-export async function initWeb3(): Promise<void> {
-  const address = await getAddress()
+export async function checkTldVsWeb3Network() {
+  try {
+    const web3Net = await getAppNetwork()
 
-  if (address) {
-    defaultLogger.log(`Identifying address ${address}`)
-    queueTrackingEvent('Use web3 address', { address })
-  }
-}
-
-export async function hasClaimedName(address: string) {
-  const dclNameContract = Address.fromString(decentralandConfigurations.DCLRegistrar)
-  let eth = Eth.fromCurrentProvider()
-
-  if (!eth) {
-    const net = await getAppNetwork()
-    const provider = new WebsocketProvider(ethereumConfigurations[net].wss)
-
-    eth = new Eth(provider)
-  }
-  const contract = new ERC721(eth, dclNameContract)
-  const balance = (await contract.methods.balanceOf(Address.fromString(address)).call()) as any
-  if ((typeof balance === 'number' && balance > 0) || (typeof balance === 'string' && parseInt(balance, 10) > 0)) {
-    return true
-  } else {
+    return checkTldVsNetwork(web3Net)
+  } catch (e) {
+    // If we have an exception here, most likely it is that we didn't have a provider configured for request manager. Not critical.
     return false
   }
 }
 
-export async function fetchCatalystNodes(): Promise<CatalystNode[]> {
-  const contractAddress = Address.fromString(decentralandConfigurations.dao)
-  let eth = Eth.fromCurrentProvider()
+export function checkTldVsNetwork(web3Net: ETHEREUM_NETWORK) {
+  const tld = getTLD()
+  const tldNet = getNetworkFromTLD()
 
-  if (!eth) {
-    const net = await getAppNetwork()
-    const provider = new WebsocketProvider(ethereumConfigurations[net].wss)
-
-    eth = new Eth(provider)
+  if (tld === 'localhost') {
+    // localhost => allow any network
+    return false
   }
+
+  if (tldNet !== web3Net) {
+    globalThis.globalStore.dispatch(setTLDError({ tld, web3Net, tldNet }))
+    Html.updateTLDInfo(tld, web3Net, tldNet as string)
+    ReportFatalError(NETWORK_MISMATCH)
+    return true
+  }
+
+  return false
+}
+
+export async function fetchCatalystNodesFromDAO(): Promise<CatalystNode[]> {
+  if (!decentralandConfigurations.dao) {
+    await setNetwork(getNetworkFromTLDOrWeb3())
+  }
+
+  const contractAddress = Address.fromString(decentralandConfigurations.dao)
+  const eth = createEthWhenNotConnectedToWeb3()
 
   const contract = new Catalyst(eth, contractAddress)
 
@@ -127,17 +110,17 @@ query GetNameByBeneficiary($beneficiary: String) {
 
   try {
     const jsonResponse: GraphResponse = await queryGraph(theGraphBaseUrl, query, variables)
-    return jsonResponse.data.nfts.map((nft) => nft.ens.subdomain)
+    return jsonResponse.nfts.map((nft) => nft.ens.subdomain)
   } catch (e) {
     // do nothing
   }
   return []
 }
 
-export async function fetchOwner(url: string, name: string) {
+export async function fetchENSOwner(url: string, name: string) {
   const query = `
     query GetOwner($name: String!) {
-      nfts(first: 1, where: { searchText: $name }) {
+      nfts(first: 1, where: { searchText: $name, category: ens  }) {
         owner{
           address
         }
@@ -148,7 +131,34 @@ export async function fetchOwner(url: string, name: string) {
 
   try {
     const resp = await queryGraph(url, query, variables)
-    return resp.data.nfts.length === 1 ? (resp.data.nfts[0].owner.address as string) : null
+    return resp.nfts.length === 1 ? (resp.nfts[0].owner.address as string) : null
+  } catch (error) {
+    defaultLogger.error(`Error querying graph`, error)
+    throw error
+  }
+}
+
+/**
+ * Fetch owners of ENS (names) that contains string "name"
+ * @param url query url
+ * @param name string to query
+ * @param maxResults max results expected (The Graph support up to 1000)
+ */
+export async function fetchENSOwnersContains(url: string, name: string, maxResults: number) {
+  const query = `
+    query GetOwner($name: String!, $maxResults: Int!) {
+      nfts(first: $maxResults, where: { searchText_contains: $name, category: ens }) {
+        owner{
+          address
+        }
+      }
+    }`
+
+  const variables = { name: name.toLowerCase(), maxResults }
+
+  try {
+    const response = await queryGraph(url, query, variables)
+    return response.nfts.map((nft: any) => nft.owner.address as string)
   } catch (error) {
     defaultLogger.error(`Error querying graph`, error)
     throw error
@@ -156,20 +166,15 @@ export async function fetchOwner(url: string, name: string) {
 }
 
 async function queryGraph(url: string, query: string, variables: any, totalAttempts: number = 5) {
-  const opts = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables })
-  }
+  const fetcher = new Fetcher()
+  return fetcher.queryGraph(url, query, variables, { attempts: totalAttempts })
+}
 
-  for (let attempt = 0; attempt < totalAttempts; attempt++) {
-    try {
-      const res = await fetch(url, opts)
-      return res.json()
-    } catch (error) {
-      defaultLogger.warn(`Could not query graph. Attempt ${attempt} of ${totalAttempts}.`, error)
-    }
+/**
+ * Register to any change in the configuration of the wallet to reload the app and avoid wallet changes in-game.
+ */
+export function registerProviderNetChanges() {
+  if (window.ethereum && typeof window.ethereum.on === 'function') {
+    window.ethereum.on('chainChanged', () => location.reload())
   }
-
-  throw new Error(`Error while querying graph url=${url}, query=${query}, variables=${JSON.stringify(variables)}`)
 }

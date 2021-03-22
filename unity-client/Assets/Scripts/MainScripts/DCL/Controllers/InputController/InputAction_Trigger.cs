@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// An instantaneous action which dispatches an event as soon as the input is read
+/// </summary>
 [CreateAssetMenu(fileName = "InputAction_Trigger", menuName = "InputActions/Trigger")]
 public class InputAction_Trigger : ScriptableObject
 {
@@ -8,6 +11,9 @@ public class InputAction_Trigger : ScriptableObject
 
     [SerializeField] internal DCLAction_Trigger dclAction;
     public DCLAction_Trigger GetDCLAction() => dclAction;
+
+    [SerializeField] internal BooleanVariable blockTrigger;
+    public BooleanVariable isTriggerBlocked { get => blockTrigger; set => blockTrigger = value; }
 
     private int triggeredInFrame = -1;
 

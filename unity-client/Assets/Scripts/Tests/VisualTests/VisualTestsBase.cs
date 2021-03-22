@@ -3,8 +3,9 @@ using UnityEngine;
 using DCL;
 using DCL.Helpers;
 
-public class VisualTestsBase : TestsBase
+public class VisualTestsBase : IntegrationTestSuite_Legacy
 {
+    protected override string TEST_SCENE_NAME => "MainVisualTest";
     protected override bool enableSceneIntegrityChecker => false;
 
     protected override IEnumerator SetUp()
@@ -17,7 +18,11 @@ public class VisualTestsBase : TestsBase
         yield return InitScene();
         yield return null;
 
-        SceneController.i.useBoundariesChecker = false;
+        //TODO(Brian): This is to wait for SceneController.Awake(). We should remove this
+        //             When the entry point is refactored.
+        RenderProfileManifest.i.Initialize(RenderProfileManifest.i.testProfile);
+
+        Environment.i.world.sceneBoundsChecker.Stop();
 
         base.SetUp_Renderer();
 
@@ -31,33 +36,5 @@ public class VisualTestsBase : TestsBase
         TestHelpers.SetCharacterPosition(new Vector3(0, 2f, 0f));
 
         yield return null;
-    }
-
-    protected override IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true, bool spawnTestScene = true, bool spawnUIScene = true, bool debugMode = false, bool reloadUnityScene = true)
-    {
-        yield return InitUnityScene("MainVisualTest");
-
-        if (debugMode)
-            SceneController.i.SetDebug();
-
-        sceneController = TestHelpers.InitializeSceneController(usesWebServer);
-
-        AssetPromiseKeeper_GLTF.i.Cleanup();
-
-        yield return null;
-
-        if (spawnTestScene)
-        {
-            scene = sceneController.CreateTestScene();
-            yield return null;
-        }
-
-        if (spawnCharController)
-        {
-            if (DCLCharacterController.i == null)
-            {
-                GameObject.Instantiate(Resources.Load("Prefabs/CharacterController"));
-            }
-        }
     }
 }

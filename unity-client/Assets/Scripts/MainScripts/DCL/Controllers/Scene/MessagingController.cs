@@ -7,33 +7,6 @@ using UnityEngine.Profiling;
 
 namespace DCL
 {
-    public class CleanableYieldInstruction : CustomYieldInstruction, ICleanable
-    {
-        public virtual void Cleanup()
-        {
-        }
-
-        public override bool keepWaiting
-        {
-            get { return false; }
-        }
-    }
-
-    public interface IMessageQueueHandler
-    {
-        void EnqueueSceneMessage(MessagingBus.QueuedSceneMessage_Scene message);
-        Queue<MessagingBus.QueuedSceneMessage_Scene> sceneMessagesPool { get; }
-    }
-
-    public interface IMessageProcessHandler
-    {
-        bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction);
-        void LoadParcelScenesExecute(string decentralandSceneJSON);
-        void UnloadParcelSceneExecute(string sceneKey);
-        void UnloadAllScenes();
-        void UpdateParcelScenesExecute(string sceneKey);
-    }
-
     public class MessagingController : IDisposable
     {
         const char SEPARATOR = '_';
@@ -118,19 +91,19 @@ namespace DCL
             }
         }
 
-        public void ForceEnqueue(MessagingBusType busType, MessagingBus.QueuedSceneMessage queuedMessage)
+        public void ForceEnqueue(MessagingBusType busType, QueuedSceneMessage queuedMessage)
         {
             messagingBuses[busType].Enqueue(queuedMessage);
         }
 
-        public void Enqueue(ParcelScene scene, MessagingBus.QueuedSceneMessage_Scene queuedMessage, out MessagingBusType busType)
+        public void Enqueue(bool isUiBus, QueuedSceneMessage_Scene queuedMessage, out MessagingBusType busType)
         {
             busType = MessagingBusType.NONE;
 
             QueueMode queueMode = QueueMode.Reliable;
 
             // If current scene is the Global Scene, the bus id should be UI
-            if (scene && scene is GlobalScene)
+            if (isUiBus)
                 busType = MessagingBusType.UI;
             else if (currentQueueState == QueueState.Init)
                 busType = MessagingBusType.INIT;

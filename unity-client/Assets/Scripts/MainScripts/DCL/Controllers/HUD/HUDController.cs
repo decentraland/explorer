@@ -1,5 +1,11 @@
+using System;
+using DCL;
 using DCL.HelpAndSupportHUD;
-using DCL.SettingsHUD;
+using DCL.Huds.QuestsNotifications;
+using DCL.Huds.QuestsPanel;
+using DCL.Huds.QuestsTracker;
+using DCL.QuestsController;
+using DCL.SettingsPanelHUD;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,7 +19,13 @@ public class HUDController : MonoBehaviour
     public static HUDController i { get; private set; }
 
     private InputAction_Trigger toggleUIVisibilityTrigger;
-    private bool newTaskbarIsEnabled = false; // NOTE(Santi): This is temporal, until we remove the old taskbar
+
+    private readonly Notification.Model hiddenUINotification = new Notification.Model()
+    {
+        timer = 3,
+        type = NotificationFactory.Type.UI_HIDDEN,
+        groupID = "UIHiddenNotification"
+    };
 
     private void Awake()
     {
@@ -21,9 +33,12 @@ public class HUDController : MonoBehaviour
 
         toggleUIVisibilityTrigger = Resources.Load<InputAction_Trigger>(TOGGLE_UI_VISIBILITY_ASSET_NAME);
         toggleUIVisibilityTrigger.OnTriggered += ToggleUIVisibility_OnTriggered;
+
+        CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenOnOnChange;
+        UserContextMenu.OnOpenPrivateChatRequest += OpenPrivateChatWindow;
     }
 
-    public Legacy.AvatarHUDController avatarHud_Legacy => GetHUDElement(HUDElementID.AVATAR) as Legacy.AvatarHUDController;
+    public ProfileHUDController profileHud => GetHUDElement(HUDElementID.PROFILE_HUD) as ProfileHUDController;
 
     public NotificationHUDController notificationHud =>
         GetHUDElement(HUDElementID.NOTIFICATION) as NotificationHUDController;
@@ -33,7 +48,7 @@ public class HUDController : MonoBehaviour
     public AvatarEditorHUDController avatarEditorHud =>
         GetHUDElement(HUDElementID.AVATAR_EDITOR) as AvatarEditorHUDController;
 
-    public SettingsHUDController settingsHud => GetHUDElement(HUDElementID.SETTINGS) as SettingsHUDController;
+    public SettingsPanelHUDController settingsPanelHud => GetHUDElement(HUDElementID.SETTINGS_PANEL) as SettingsPanelHUDController;
 
     public ExpressionsHUDController expressionsHud =>
         GetHUDElement(HUDElementID.EXPRESSIONS) as ExpressionsHUDController;
@@ -70,12 +85,20 @@ public class HUDController : MonoBehaviour
 
     public HelpAndSupportHUDController helpAndSupportHud => GetHUDElement(HUDElementID.HELP_AND_SUPPORT_HUD) as HelpAndSupportHUDController;
 
-    public ManaHUDController manaHud => GetHUDElement(HUDElementID.MANA_HUD) as ManaHUDController;
+    public UsersAroundListHUDController usersAroundListHud => GetHUDElement(HUDElementID.USERS_AROUND_LIST_HUD) as UsersAroundListHUDController;
+
+    public BuildModeHUDController builderInWorldMainHud => GetHUDElement(HUDElementID.BUILDER_IN_WORLD_MAIN) as BuildModeHUDController;
+
+    public BuilderInWorldInititalHUDController builderInWorldInititalHud => GetHUDElement(HUDElementID.BUILDER_IN_WORLD_INITIAL) as BuilderInWorldInititalHUDController;
+
+    public QuestsPanelHUDController questsPanelHUD => GetHUDElement(HUDElementID.QUESTS_PANEL) as QuestsPanelHUDController;
+    public QuestsTrackerHUDController questsTrackerHUD => GetHUDElement(HUDElementID.QUESTS_TRACKER) as QuestsTrackerHUDController;
+    public QuestsNotificationsHUDController questsNotificationsHUD => GetHUDElement(HUDElementID.QUESTS_NOTIFICATIONS) as QuestsNotificationsHUDController;
 
     public Dictionary<HUDElementID, IHUD> hudElements { get; private set; } = new Dictionary<HUDElementID, IHUD>();
 
     private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
-    private WearableDictionary wearableCatalog => CatalogController.wearableCatalog;
+    private BaseDictionary<string, WearableItem> wearableCatalog => CatalogController.wearableCatalog;
 
     private void ShowAvatarEditor()
     {
@@ -84,7 +107,7 @@ public class HUDController : MonoBehaviour
 
     private void ShowSettings()
     {
-        settingsHud?.SetVisibility(true);
+        settingsPanelHud?.SetVisibility(true);
     }
 
     private void ShowControls()
@@ -99,25 +122,36 @@ public class HUDController : MonoBehaviour
                                        EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null &&
                                        (!worldChatWindowHud.view.chatHudView.inputField.isFocused || !worldChatWindowHud.view.isInPreview);
 
-        if (anyInputFieldIsSelected || settingsHud.view.isOpen || avatarEditorHud.view.isOpen || DCL.NavmapView.isOpen)
+        if (anyInputFieldIsSelected ||
+            settingsPanelHud.view.isOpen ||
+            avatarEditorHud.view.isOpen ||
+            DCL.NavmapView.isOpen ||
+            CommonScriptableObjects.tutorialActive)
             return;
 
         CommonScriptableObjects.allUIHidden.Set(!CommonScriptableObjects.allUIHidden.Get());
     }
 
-    private void OwnUserProfileUpdated(UserProfile profile)
+    private void AllUIHiddenOnOnChange(bool current, bool previous)
     {
-        UpdateAvatarHUD();
+        if (current)
+        {
+            NotificationsController.i?.ShowNotification(hiddenUINotification);
+        }
+        else
+        {
+            NotificationsController.i?.DismissAllNotifications(hiddenUINotification.groupID);
+        }
     }
 
     public enum HUDElementID
     {
         NONE = 0,
         MINIMAP = 1,
-        AVATAR = 2,
+        PROFILE_HUD = 2,
         NOTIFICATION = 3,
         AVATAR_EDITOR = 4,
-        SETTINGS = 5,
+        SETTINGS_PANEL = 5,
         EXPRESSIONS = 6,
         PLAYER_INFO_CARD = 7,
         AIRDROPPING = 8,
@@ -131,11 +165,17 @@ public class HUDController : MonoBehaviour
         NFT_INFO_DIALOG = 16,
         TELEPORT_DIALOG = 17,
         CONTROLS_HUD = 18,
-        EMAIL_PROMPT = 19,
-        EXPLORE_HUD = 20,
-        MANA_HUD = 21,
-        HELP_AND_SUPPORT_HUD = 22,
-        COUNT = 23
+        EXPLORE_HUD = 19,
+        HELP_AND_SUPPORT_HUD = 20,
+        EMAIL_PROMPT = 21,
+        USERS_AROUND_LIST_HUD = 22,
+        GRAPHIC_CARD_WARNING = 23,
+        BUILDER_IN_WORLD_MAIN = 24,
+        BUILDER_IN_WORLD_INITIAL = 25,
+        QUESTS_PANEL = 26,
+        QUESTS_TRACKER = 27,
+        QUESTS_NOTIFICATIONS = 28,
+        COUNT = 29
     }
 
     [System.Serializable]
@@ -174,17 +214,11 @@ public class HUDController : MonoBehaviour
             case HUDElementID.MINIMAP:
                 CreateHudElement<MinimapHUDController>(configuration, hudElementId);
                 break;
-            case HUDElementID.AVATAR:
-                CreateHudElement<Legacy.AvatarHUDController>(configuration, hudElementId);
-
-                if (avatarHud_Legacy != null)
+            case HUDElementID.PROFILE_HUD:
+                CreateHudElement<ProfileHUDController>(configuration, hudElementId);
+                if (profileHud != null)
                 {
-                    avatarHud_Legacy.Initialize();
-                    avatarHud_Legacy.OnEditAvatarPressed += ShowAvatarEditor;
-                    avatarHud_Legacy.OnSettingsPressed += ShowSettings;
-                    avatarHud_Legacy.OnControlsPressed += ShowControls;
-                    ownUserProfile.OnUpdate += OwnUserProfileUpdated;
-                    OwnUserProfileUpdated(ownUserProfile);
+                    profileHud?.AddBackpackWindow(avatarEditorHud);
                 }
 
                 break;
@@ -194,10 +228,16 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement<AvatarEditorHUDController>(configuration, hudElementId);
-                avatarEditorHud?.Initialize(ownUserProfile, wearableCatalog);
+                if (avatarEditorHud != null)
+                {
+                    avatarEditorHud.Initialize(ownUserProfile, wearableCatalog);
+                }
+
                 break;
-            case HUDElementID.SETTINGS:
-                CreateHudElement<SettingsHUDController>(configuration, hudElementId);
+            case HUDElementID.SETTINGS_PANEL:
+                CreateHudElement<SettingsPanelHUDController>(configuration, hudElementId);
+                if (settingsPanelHud != null)
+                    settingsPanelHud.Initialize();
                 break;
             case HUDElementID.EXPRESSIONS:
                 CreateHudElement<ExpressionsHUDController>(configuration, hudElementId);
@@ -277,13 +317,28 @@ public class HUDController : MonoBehaviour
 
                     if (taskbarHud != null)
                     {
-                        taskbarHud.Initialize(DCL.InitialSceneReferences.i?.mouseCatcher, ChatController.i,
-                            FriendsController.i, newTaskbarIsEnabled);
+                        taskbarHud.Initialize(
+                            InitialSceneReferences.i?.mouseCatcher,
+                            ChatController.i,
+                            FriendsController.i,
+                            DCL.Environment.i.world.sceneController,
+                            DCL.Environment.i.world.state);
                         taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
                         taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+                        taskbarHud.AddBuilderInWorldWindow(builderInWorldInititalHud);
 
-                        taskbarHud.AddSettingsWindow(settingsHud);
-                        taskbarHud.AddBackpackWindow(avatarEditorHud);
+
+                        if (!string.IsNullOrEmpty(extraPayload))
+                        {
+                            var config = JsonUtility.FromJson<TaskbarHUDController.Configuration>(extraPayload);
+                            if (config.enableVoiceChat)
+                            {
+                                taskbarHud.OnAddVoiceChat();
+                            }
+                            taskbarHud.SetQuestsPanelStatus(config.enableQuestPanel);
+                        }
+
+                        taskbarHud.AddSettingsWindow(settingsPanelHud);
                     }
                 }
                 else
@@ -294,7 +349,7 @@ public class HUDController : MonoBehaviour
                 break;
             case HUDElementID.MESSAGE_OF_THE_DAY:
                 CreateHudElement<WelcomeHUDController>(configuration, hudElementId);
-                messageOfTheDayHud?.Initialize(ownUserProfile.hasConnectedWeb3);
+                messageOfTheDayHud?.Initialize(JsonUtility.FromJson<MessageOfTheDayConfig>(extraPayload));
                 break;
             case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
                 CreateHudElement<ExternalUrlPromptHUDController>(configuration, hudElementId);
@@ -314,22 +369,55 @@ public class HUDController : MonoBehaviour
                 {
                     CreateHudElement<EmailPromptHUDController>(configuration, hudElementId);
                 }
+
                 emailPromptHud?.SetEnable(configuration.active);
                 break;
             case HUDElementID.EXPLORE_HUD:
                 CreateHudElement<ExploreHUDController>(configuration, hudElementId);
                 if (exploreHud != null)
                 {
-                    exploreHud.Initialize(FriendsController.i, newTaskbarIsEnabled);
+                    exploreHud.Initialize(FriendsController.i);
                     taskbarHud?.AddExploreWindow(exploreHud);
                 }
-                break;
-            case HUDElementID.MANA_HUD:
-                CreateHudElement<ManaHUDController>(configuration, hudElementId);
+
                 break;
             case HUDElementID.HELP_AND_SUPPORT_HUD:
                 CreateHudElement<HelpAndSupportHUDController>(configuration, hudElementId);
                 taskbarHud?.AddHelpAndSupportWindow(helpAndSupportHud);
+                break;
+            case HUDElementID.USERS_AROUND_LIST_HUD:
+                CreateHudElement<UsersAroundListHUDController>(configuration, hudElementId);
+                if (usersAroundListHud != null)
+                {
+                    minimapHud?.AddUsersAroundIndicator(usersAroundListHud);
+                }
+
+                break;
+            case HUDElementID.GRAPHIC_CARD_WARNING:
+                CreateHudElement<GraphicCardWarningHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.BUILDER_IN_WORLD_MAIN:
+                CreateHudElement<BuildModeHUDController>(configuration, hudElementId);
+                if (configuration.active)
+                    builderInWorldMainHud.Initialize();
+                break;
+            case HUDElementID.BUILDER_IN_WORLD_INITIAL:
+                CreateHudElement<BuilderInWorldInititalHUDController>(configuration, hudElementId);
+                break;
+            case HUDElementID.QUESTS_PANEL:
+                CreateHudElement<QuestsPanelHUDController>(configuration, hudElementId);
+                if(configuration.active)
+                    questsPanelHUD.Initialize(QuestsController.i);
+                break;
+            case HUDElementID.QUESTS_TRACKER:
+                CreateHudElement<QuestsTrackerHUDController>(configuration, hudElementId);
+                if(configuration.active)
+                    questsTrackerHUD.Initialize(QuestsController.i);
+                break;
+            case HUDElementID.QUESTS_NOTIFICATIONS:
+                CreateHudElement<QuestsNotificationsHUDController>(configuration, hudElementId);
+                if(configuration.active)
+                    questsNotificationsHUD.Initialize(QuestsController.i);
                 break;
         }
 
@@ -384,17 +472,9 @@ public class HUDController : MonoBehaviour
         hudElements[id].SetVisibility(config.visible);
     }
 
-    public void ShowNewWearablesNotification(string wearableCountString)
-    {
-        if (int.TryParse(wearableCountString, out int wearableCount))
-        {
-            avatarHud_Legacy.SetNewWearablesNotification(wearableCount);
-        }
-    }
-
     public void TriggerSelfUserExpression(string id)
     {
-        expressionsHud?.ExpressionCalled(id);
+        UserProfile.GetOwnUserProfile().SetAvatarExpression(id);
     }
 
     public void AirdroppingRequest(string payload)
@@ -409,14 +489,27 @@ public class HUDController : MonoBehaviour
         termsOfServiceHud?.ShowTermsOfService(model);
     }
 
-    private void UpdateAvatarHUD()
+    public void SetPlayerTalking(string talking)
     {
-        avatarHud_Legacy?.UpdateData(new Legacy.AvatarHUDModel()
-        {
-            name = ownUserProfile.userName,
-            mail = ownUserProfile.email,
-            avatarPic = ownUserProfile.faceSnapshot
-        });
+        taskbarHud?.SetVoiceChatRecording("true".Equals(talking));
+    }
+
+    public void SetVoiceChatEnabledByScene(int enabledPayload)
+    {
+        bool isEnabled = enabledPayload != 0;
+        taskbarHud?.SetVoiceChatEnabledByScene(isEnabled);
+    }
+
+    public void SetUserTalking(string payload)
+    {
+        var model = JsonUtility.FromJson<UserTalkingModel>(payload);
+        usersAroundListHud?.SetUserRecording(model.userId, model.talking);
+    }
+
+    public void SetUsersMuted(string payload)
+    {
+        var model = JsonUtility.FromJson<UserMutedModel>(payload);
+        usersAroundListHud?.SetUsersMuted(model.usersId, model.muted);
     }
 
     public void RequestTeleport(string teleportDataJson)
@@ -426,7 +519,16 @@ public class HUDController : MonoBehaviour
 
     public void UpdateBalanceOfMANA(string balance)
     {
-        manaHud?.SetBalance(balance);
+        profileHud?.SetManaBalance(balance);
+    }
+
+    public void ShowAvatarEditorInSignUp()
+    {
+        if (avatarEditorHud != null)
+        {
+            DataStore.i.isSignUpFlow.Set(true);
+            ShowAvatarEditor();
+        }
     }
 
     private void OnDestroy()
@@ -437,16 +539,7 @@ public class HUDController : MonoBehaviour
     public void Cleanup()
     {
         toggleUIVisibilityTrigger.OnTriggered -= ToggleUIVisibility_OnTriggered;
-
-        if (ownUserProfile != null)
-            ownUserProfile.OnUpdate -= OwnUserProfileUpdated;
-
-        if (avatarHud_Legacy != null)
-        {
-            avatarHud_Legacy.OnEditAvatarPressed -= ShowAvatarEditor;
-            avatarHud_Legacy.OnSettingsPressed -= ShowSettings;
-            avatarHud_Legacy.OnControlsPressed -= ShowControls;
-        }
+        CommonScriptableObjects.allUIHidden.OnChange -= AllUIHiddenOnOnChange;
 
         if (worldChatWindowHud != null)
         {
@@ -463,6 +556,8 @@ public class HUDController : MonoBehaviour
         if (taskbarHud != null)
             taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
 
+        UserContextMenu.OnOpenPrivateChatRequest -= OpenPrivateChatWindow;
+
         foreach (var kvp in hudElements)
         {
             kvp.Value?.Dispose();
@@ -470,6 +565,7 @@ public class HUDController : MonoBehaviour
 
         hudElements.Clear();
     }
+
 
     public IHUD GetHUDElement(HUDElementID id)
     {
@@ -499,10 +595,4 @@ public class HUDController : MonoBehaviour
         Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif
-
-    // NOTE(Santi): This is temporal, until we remove the old taskbar
-    public void EnableNewTaskbar()
-    {
-        newTaskbarIsEnabled = true;
-    }
 }

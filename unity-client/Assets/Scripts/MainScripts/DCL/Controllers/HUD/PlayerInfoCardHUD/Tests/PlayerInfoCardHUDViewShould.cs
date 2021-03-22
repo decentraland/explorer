@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Linq;
 
-public class PlayerInfoCardHUDViewShould : TestsBase
+public class PlayerInfoCardHUDViewShould : IntegrationTestSuite_Legacy
 {
     private PlayerInfoCardHUDView view;
     private UserProfile userProfile;
@@ -147,7 +147,10 @@ public class PlayerInfoCardHUDViewShould : TestsBase
             tags = new string[] { },
             category = WearableLiterals.Categories.UPPER_BODY
         };
+
+        CatalogController.wearableCatalog.Remove(rarity);
         CatalogController.wearableCatalog.Add(rarity, wearable);
+
         return wearable;
     }
 }

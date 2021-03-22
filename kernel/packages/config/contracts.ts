@@ -30,7 +30,8 @@ export const contracts = {
     'AdapterFeeCollector': '0x5DC888024cB599CfDdb9E6483ED6bAe1fA9e9D18',
     'AdapterConverter': '0x2782eb28Dcb1eF4E7632273cd4e347e130Ce4646',
     'POIAllowlist': '0x5DC4a5C214f2161F0D5595a6dDd9352409aE3Ab4',
-    'NAMEDenylist': '0x20c6f1e86eba703a14414a0cbc1b55c89dba7a0f'
+    'NAMEDenylist': '0x20c6f1e86eba703a14414a0cbc1b55c89dba7a0f',
+    'CollectionsV2Factory': '0x16d8bac5b67a6b782a9081377bec413bc5bb56a6'
   },
   'mainnet': {
     'MANAToken': '0x0f5d2fb29fb7d3cfee444a200298f468908cc942',
@@ -89,7 +90,37 @@ export const contracts = {
     'BurningStore': '0x0822d44c2e2f96d4cccad80610134861802b2cca',
     'BaseList': '0x21b6EFf834d7cc8c12A5Ec924939aa521F0FE83F',
     'POIAllowListProxy': '0x0ef15a1c7a49429a36cb46d4da8c53119242b54e',
-    'NameDenyListProxy': '0x0c4c90a4f29872a2e9ef4c4be3d419792bca9a36'
+    'NameDenyListProxy': '0x0c4c90a4f29872a2e9ef4c4be3d419792bca9a36',
+    'BinanceUsCollection': '0xa8ee490e4c4da48cc1653502c1a77479d4d818de',
+    'PMDreamverseEminence': '0x09305998a531fade369ebe30adf868c96a34e813',
+    'CybermikeCyberSoldier': '0x24d538a6265b006d4b53c45ba91af5ef60dca6cb',
+    'DCMeta': '0xe7a64f6a239ed7f5bf18caa1ce2920d0c1278129',
+    'WZWonderbot': '0x5df4602e7f38a91ea7724fc167f0c67f61604b1e',
+    'DGFall2020': '0x7038e9d2c6f5f84469a84cf9bc5f4909bb6ac5e0',
+    'MFSammichgamer': '0x30d3387ff3de2a21bef7032f82d00ff7739e403c',
+    'SugarclubYumi': '0xb5d14052d1e2bce2a2d7459d0379256e632b855d',
+    'EtheremonWearables': '0x54266bcf2ffa841af934f003d144957d5934f3ab',
+    'MLPekingopera': '0x60d8271c501501c4b8cd9ed5343ac59d1b79d993',
+    'ChinaFlying': '0x90958d4531258ca11d18396d4174a007edbc2b42',
+    'TechTribalMarc0matic': '0x480a0f4e360e8964e68858dd231c2922f1df45ef',
+    'DigitalAlchemy': '0x5cf39e64392c615fd8086838883958752a11b486',
+    'CZMercenaryMTZ': '0xc3ca6c364b854fd0a653a43f8344f8c22ddfdd26',
+    'WonderzoneSteampunk': '0xb96697fa4a3361ba35b774a42c58daccaad1b8e1',
+    'DCNiftyblocksmith': '0x102daabd1e9d294d4436ec4c521dce7b1f15499e',
+    'Halloween2020Collection': '0xfeb52cbf71b9adac957c6f948a6cf9980ac8c907',
+    'Xmas2020Collection': '0xecf073f91101ce5628669c487aee8f5822a101b1',
+    'MemeDontBuyThis': '0x1a57f6afc902d25792c53b8f19b7e17ef84222d5',
+    'ReleaseTheKraken': '0xffc5043d9a00865d089d5eefa5b3d1625aec6763',
+    '3LAUBasics': '0xe1ecb4e5130f493551c7d6df96ad19e5b431a0a9',
+    'XmashUp2020': '0xdd9c7bc159dacb19c9f6b9d7e23948c87aa2397f',
+    'MLLiondance': '0x0b1c6c75d511fae05e7dc696f4cf14129a9c43c9',
+    'AtariLaunch': '0x4c290f486bae507719c562b6b524bdb71a2570c9',
+    'ERC20Predicate': '0x40ec5B33f54e0E8A33A975908C5BA1c14e5BbbDf',
+    'RootChainManagerProxy': '0xA0c68C638235ee32657e8f720a23ceC1bFc77C77',
+    'RootChainProxy': '0x86E4Dc95c7FBdBf52e33D563BbDB00823894C287',
+    'RTFKTXAtari': '0x6b47e7066c7db71aa04a1d5872496fe05c4c331f',
+    'RACBasics': '0x68e139552c4077ce5c9ab929c7e18ca721ffff00',
+    'WinklevossCapital': '0xc82a864a94db3550bc71fcb4ce07228bcec21f1a'
   },
   'kovan': {
     'MANAToken': '0x230fc362413d9e862326c2c7084610a5a2fdf78a',
@@ -106,5 +137,20 @@ export const contracts = {
     'MANAMiniMeToken': '0xfb2712a1246f712b889692c7ce55fec25c06bc33',
     'LANDMiniMeToken': '0x576c4577aAd561EA79acbd49215a0cC1473BfCCA',
     'EstateMiniMeToken': '0x2b98C125733035cDE09d311F988845808EE270E6'
+  },
+  'goerli': {
+    'MANAToken': '0xe7fDae84ACaba2A5Ba817B6E6D8A2d415DBFEdbe',
+    'ERC20Predicate': '0xdD6596F2029e6233DEFfaCa316e6A95217d4Dc34',
+    'RootChainManagerProxy': '0xbbd7cbfa79faee899eaf900f13c9065bf03b1a74',
+    'RootChainProxy': '0x2890ba17efe978480615e330ecb65333b880928e'
+  },
+  'matic': {
+    'MANAToken': '0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4',
+    'ChildChainManagerProxy': '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
+  },
+  'mumbai': {
+    'MetaTxForwarder': '0xBF6755A83C0dCDBB2933A96EA778E00b717d7004',
+    'MANAToken': '0x882Da5967c435eA5cC6b09150d55E8304B838f45',
+    'ChildChainManagerProxy': '0xb5505a6d998549090530911180f38aC5130101c6'
   }
 }

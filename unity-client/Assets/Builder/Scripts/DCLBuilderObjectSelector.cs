@@ -12,11 +12,11 @@ namespace Builder
         public DCLBuilderRaycast builderRaycast;
         public DCLBuilderGizmoManager gizmosManager;
 
-        public delegate void EntitySelectedDelegate(DCLBuilderEntity entity, string gizmoType);
+        public delegate void EntitySelectedDelegate(EditableEntity entity, string gizmoType);
 
-        public delegate void EntityDeselectedDelegate(DCLBuilderEntity entity);
+        public delegate void EntityDeselectedDelegate(EditableEntity entity);
 
-        public delegate void EntitySelectedListChangedDelegate(Transform selectionParent, List<DCLBuilderEntity> selectedEntities);
+        public delegate void EntitySelectedListChangedDelegate(Transform selectionParent, List<EditableEntity> selectedEntities);
 
         public static event EntitySelectedDelegate OnMarkObjectSelected;
         public static event EntitySelectedDelegate OnSelectedObject;
@@ -29,7 +29,7 @@ namespace Builder
         public Transform selectedEntitiesParent { private set; get; }
 
         private Dictionary<string, DCLBuilderEntity> entities = new Dictionary<string, DCLBuilderEntity>();
-        private List<DCLBuilderEntity> selectedEntities = new List<DCLBuilderEntity>();
+        private List<EditableEntity> selectedEntities = new List<EditableEntity>();
         private EntityPressedInfo lastPressedEntityInfo = new EntityPressedInfo();
         private bool isDirty = false;
         private bool isSelectionTransformed = false;
@@ -38,7 +38,6 @@ namespace Builder
 
         private bool isGameObjectActive = false;
 
-        private SceneBoundariesChecker boundariesChecker;
         private ParcelScene currentScene;
 
         private void Awake()
@@ -215,13 +214,12 @@ namespace Builder
 
         private void OnSceneChanged(ParcelScene scene)
         {
-            boundariesChecker = DCL.SceneController.i.boundariesChecker;
             currentScene = scene;
         }
 
         private void OnBuilderSelectEntity(string[] entitiesId)
         {
-            List<DCLBuilderEntity> entitiesToDeselect = new List<DCLBuilderEntity>(selectedEntities);
+            List<EditableEntity> entitiesToDeselect = new List<EditableEntity>(selectedEntities);
 
             for (int i = 0; i < entitiesId.Length; i++)
             {
@@ -309,7 +307,7 @@ namespace Builder
             isDirty = true;
         }
 
-        private void Deselect(DCLBuilderEntity entity)
+        private void Deselect(EditableEntity entity)
         {
             if (entity != null)
             {
@@ -412,7 +410,7 @@ namespace Builder
             entityTransform.SetParent(selectedEntitiesParent, true);
         }
 
-        private void SelectionParentRemoveEntity(DCLBuilderEntity entity)
+        private void SelectionParentRemoveEntity(EditableEntity entity)
         {
             SelectionParentRemoveEntity(entity.transform);
         }

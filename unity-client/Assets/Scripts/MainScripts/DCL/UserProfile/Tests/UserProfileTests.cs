@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Tests
 {
-    public class UserProfileTests : TestsBase
+    public class UserProfileTests : IntegrationTestSuite_Legacy
     {
         [Test]
         public void UserProfile_Creation()
@@ -97,19 +97,17 @@ namespace Tests
 
         [Test]
         [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
         [TestCase(5)]
-        [TestCase(10)]
         public void UserProfile_GetItemAmount(int amount)
         {
             var userProfile = ScriptableObject.CreateInstance<UserProfile>();
             var model = new UserProfileModel();
-            model.inventory = new string[amount];
+            var inventory = new string[amount];
             for (int i = 0; i < amount; i++)
             {
-                model.inventory[i] = "nft";
+                inventory[i] = "nft";
             }
+            userProfile.SetInventory(inventory);
             userProfile.UpdateData(model);
 
             Assert.AreEqual(amount, userProfile.GetItemAmount("nft"));

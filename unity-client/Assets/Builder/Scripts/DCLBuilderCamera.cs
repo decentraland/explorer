@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DCL.Controllers;
 using DCL.Models;
 using Builder.Gizmos;
@@ -7,11 +7,11 @@ namespace Builder
 {
     public class DCLBuilderCamera : MonoBehaviour
     {
-
         public static System.Action<Camera, float> OnCameraZoomChanged;
 
         [Header("References")]
         public Transform pitchPivot;
+
         public Transform yawPivot;
         public Transform rootPivot;
         public Camera builderCamera;
@@ -19,19 +19,24 @@ namespace Builder
         [Space()]
         [Header("Input Settings")]
         public float rotationSpeed = 5f;
+
         [Header("Pitch")]
         public float pitchAmount = 10f;
+
         public float pitchAngleMin = 0f;
         public float pitchAngleMax = 89f;
+
         [Header("Yaw")]
         public float yawAmount = 10f;
+
         [Header("Pan")]
         public float panSpeed = 5f;
+
         public float panAmount = 0.2f;
+
         [Header("Zoom")]
-        public float zoomMin = 1f;
-        public float zoomMax = 60f;
         public float zoomSpeed = 15f;
+
         public float zoomAmount = 5f;
 
         private float pitchCurrent = 0;
@@ -43,7 +48,9 @@ namespace Builder
         private float zoomCurrent = 0;
         private float zoomTarget = 0;
 
-        private float zoomDefault = 0;
+        private float zoomDefault = DCLBuilderConfig.config.camera.zoomDefault;
+        private float zoomMin = DCLBuilderConfig.config.camera.zoomMin;
+        private float zoomMax = DCLBuilderConfig.config.camera.zoomMax;
 
         private bool isObjectBeingDrag = false;
 
@@ -54,7 +61,7 @@ namespace Builder
 
         private void Awake()
         {
-            zoomDefault = zoomCurrent = zoomTarget = Mathf.Clamp(builderCamera.transform.localPosition.z, -zoomMax, -zoomMin);
+            zoomCurrent = zoomTarget = -zoomDefault;
             pitchCurrent = pitchTarget = pitchPivot.localEulerAngles.x;
             yawCurrent = yawTarget = yawPivot.localEulerAngles.y;
 
@@ -73,6 +80,7 @@ namespace Builder
             {
                 yawCurrent = yawTarget;
             }
+
             yawPivot.localRotation = Quaternion.Euler(0, yawCurrent, 0);
 
             pitchCurrent += (pitchTarget - pitchCurrent) * Time.deltaTime * rotationSpeed;
@@ -80,6 +88,7 @@ namespace Builder
             {
                 pitchCurrent = pitchTarget;
             }
+
             pitchPivot.localRotation = Quaternion.Euler(pitchCurrent, 0, 0);
 
             float zoomPrev = zoomCurrent;
@@ -93,6 +102,7 @@ namespace Builder
                 panCurrent = panCurrent + panOffset.normalized * sqDist * panSpeed * Time.deltaTime;
                 rootPivot.localPosition = panCurrent;
             }
+
             if (zoomPrev != zoomCurrent)
             {
                 OnCameraZoomChanged?.Invoke(builderCamera, zoomCurrent);
@@ -114,7 +124,9 @@ namespace Builder
                 DCLBuilderObjectDragger.OnDraggingObjectEnd += OnDragObjectEnd;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectStart += OnGizmoTransformObjectStart;
                 DCLBuilderGizmoManager.OnGizmoTransformObjectEnd += OnGizmoTransformObjectEnd;
+                DCLBuilderConfig.OnConfigChanged += OnConfigChanged;
             }
+
             isGameObjectActive = true;
         }
 
@@ -132,6 +144,7 @@ namespace Builder
             DCLBuilderObjectDragger.OnDraggingObjectEnd -= OnDragObjectEnd;
             DCLBuilderGizmoManager.OnGizmoTransformObjectStart -= OnGizmoTransformObjectStart;
             DCLBuilderGizmoManager.OnGizmoTransformObjectEnd -= OnGizmoTransformObjectEnd;
+            DCLBuilderConfig.OnConfigChanged -= OnConfigChanged;
         }
 
         private void OnMouseDrag(int buttonId, Vector3 mousePosition, float axisX, float axisY)
@@ -231,7 +244,7 @@ namespace Builder
 
         private void OnResetCameraZoom()
         {
-            zoomCurrent = zoomTarget = zoomDefault;
+            zoomCurrent = zoomTarget = -zoomDefault;
             builderCamera.transform.position.Set(0, 0, zoomCurrent);
             OnCameraZoomChanged?.Invoke(builderCamera, zoomCurrent);
         }
@@ -241,7 +254,7 @@ namespace Builder
             return !isObjectBeingDrag;
         }
 
-        private void CalcSceneBoundaries(ParcelScene scene)
+        private void CalcSceneBoundaries(IParcelScene scene)
         {
             sceneBoundaryMin = Vector2.zero;
             sceneBoundaryMax = Vector2.zero;
@@ -273,6 +286,14 @@ namespace Builder
         private void OnPreviewModeChanged(bool isPreview)
         {
             gameObject.SetActive(!isPreview);
+        }
+
+        private void OnConfigChanged(BuilderConfig config)
+        {
+            zoomMin = config.camera.zoomMin;
+            zoomMax = config.camera.zoomMax;
+            zoomDefault = config.camera.zoomDefault;
+            zoomCurrent = zoomTarget = -zoomDefault;
         }
     }
 }

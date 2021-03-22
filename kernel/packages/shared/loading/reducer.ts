@@ -1,14 +1,18 @@
 import { AnyAction } from 'redux'
 import { SCENE_FAIL, SCENE_LOAD, SCENE_START, UPDATE_STATUS_MESSAGE } from './actions'
 import {
-  EXPERIENCE_STARTED,
+  FATAL_ERROR,
   ExecutionLifecycleEvent,
   ExecutionLifecycleEventsList,
+  EXPERIENCE_STARTED,
   loadingTips,
   NOT_STARTED,
   ROTATE_HELP_TEXT,
-  TELEPORT_TRIGGERED,
-  SUBSYSTEMS_EVENTS
+  SET_ERROR_TLD,
+  SET_LOADING_SCREEN,
+  SET_LOADING_WAIT_TUTORIAL,
+  SUBSYSTEMS_EVENTS,
+  TELEPORT_TRIGGERED
 } from './types'
 
 export type LoadingState = {
@@ -19,6 +23,18 @@ export type LoadingState = {
   subsystemsLoad: number
   loadPercentage: number
   initialLoad: boolean
+  showLoadingScreen: boolean
+  waitingTutorial?: boolean
+  error: string | null
+  tldError: {
+    tld: string
+    web3Net: string
+    tldNet: string
+  } | null
+}
+
+export type RootLoadingState = {
+  loading: LoadingState
 }
 
 export function loadingReducer(state?: LoadingState, action?: AnyAction) {
@@ -30,7 +46,10 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
       message: '',
       loadPercentage: 0,
       subsystemsLoad: 0,
-      initialLoad: true
+      initialLoad: true,
+      showLoadingScreen: false,
+      error: null,
+      tldError: null
     }
   }
   if (!action) {
@@ -56,7 +75,7 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
     return newState
   }
   if (action.type === TELEPORT_TRIGGERED) {
-    return { ...state, helpText: action.payload }
+    return { ...state, helpText: 0, message: action.payload }
   }
   if (action.type === ROTATE_HELP_TEXT) {
     const newValue = state.helpText + 1
@@ -64,6 +83,18 @@ export function loadingReducer(state?: LoadingState, action?: AnyAction) {
   }
   if (action.type === UPDATE_STATUS_MESSAGE) {
     return { ...state, message: action.payload.message, loadPercentage: action.payload.loadPercentage }
+  }
+  if (action.type === SET_LOADING_SCREEN) {
+    return { ...state, showLoadingScreen: action.payload.show }
+  }
+  if (action.type === SET_LOADING_WAIT_TUTORIAL) {
+    return { ...state, waitingTutorial: action.payload.waiting }
+  }
+  if (action.type === FATAL_ERROR) {
+    return { ...state, error: action.payload.type }
+  }
+  if (action.type === SET_ERROR_TLD) {
+    return { ...state, error: 'networkmismatch', tldError: action.payload }
   }
   return state
 }

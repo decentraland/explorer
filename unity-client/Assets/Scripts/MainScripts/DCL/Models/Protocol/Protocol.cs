@@ -1,7 +1,6 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using DCL.Interface;
 using UnityEngine;
-
 
 namespace DCL.Models
 {
@@ -10,6 +9,9 @@ namespace DCL.Models
         NONE = 0,
         TRANSFORM = 1,
         UUID_CALLBACK = 8,
+        UUID_ON_CLICK = 9,
+        UUID_ON_DOWN = 10,
+        UUID_ON_UP = 11,
         TEXT_SHAPE = 21,
         AVATAR_SHAPE = 56,
         ANIMATOR = 33,
@@ -17,7 +19,9 @@ namespace DCL.Models
         GIZMOS = 203,
         BILLBOARD = 32,
         SMART_ITEM = 204,
-        AUDIO_STREAM = 202
+        AUDIO_STREAM = 202,
+        AVATAR_MODIFIER_AREA = 205,
+        QUEST_TRACKING_INFORMATION = 1417815519 // This corresponds with dcl-ecs-quests
     }
 
     public enum CLASS_ID
@@ -57,25 +61,24 @@ namespace DCL.Models
         VIDEO_CLIP = 70,
         VIDEO_TEXTURE = 71,
 
-        AUDIO_CLIP = 200
+        AUDIO_CLIP = 200,
+
+        NAME = 300,
+        LOCKED_ON_EDIT = 301,
+        VISIBLE_ON_EDIT = 302
     }
 
     public static class Protocol
     {
         [System.Serializable]
-        public struct SceneReady
-        {
-        }
+        public struct SceneReady { }
 
         [System.Serializable]
         public struct CreateEntity
         {
             public string entityId;
 
-            public static CreateEntity FromPB(PB_CreateEntity pbPayload)
-            {
-                return new CreateEntity() {entityId = pbPayload.Id};
-            }
+            public static CreateEntity FromPB(PB_CreateEntity pbPayload) { return new CreateEntity() { entityId = pbPayload.Id }; }
         }
 
         [System.Serializable]
@@ -83,10 +86,7 @@ namespace DCL.Models
         {
             public string entityId;
 
-            public static RemoveEntity FromPB(PB_RemoveEntity pbPayload)
-            {
-                return new RemoveEntity() {entityId = pbPayload.Id};
-            }
+            public static RemoveEntity FromPB(PB_RemoveEntity pbPayload) { return new RemoveEntity() { entityId = pbPayload.Id }; }
         }
 
         [System.Serializable]
@@ -95,10 +95,7 @@ namespace DCL.Models
             public string entityId;
             public string parentId;
 
-            public static SetEntityParent FromPB(PB_SetEntityParent pbPayload)
-            {
-                return new SetEntityParent() {entityId = pbPayload.EntityId, parentId = pbPayload.ParentId};
-            }
+            public static SetEntityParent FromPB(PB_SetEntityParent pbPayload) { return new SetEntityParent() { entityId = pbPayload.EntityId, parentId = pbPayload.ParentId }; }
         }
 
         [System.Serializable]
@@ -108,10 +105,7 @@ namespace DCL.Models
             public int classId;
             public string json;
 
-            public static EntityComponentCreateOrUpdate FromPB(PB_UpdateEntityComponent pbPayload)
-            {
-                return new EntityComponentCreateOrUpdate() {entityId = pbPayload.EntityId, classId = pbPayload.ClassId, json = pbPayload.Data};
-            }
+            public static EntityComponentCreateOrUpdate FromPB(PB_UpdateEntityComponent pbPayload) { return new EntityComponentCreateOrUpdate() { entityId = pbPayload.EntityId, classId = pbPayload.ClassId, json = pbPayload.Data }; }
         }
 
         [System.Serializable]
@@ -120,10 +114,7 @@ namespace DCL.Models
             public string entityId;
             public string name;
 
-            public static EntityComponentDestroy FromPB(PB_ComponentRemoved pbPayload)
-            {
-                return new EntityComponentDestroy() {entityId = pbPayload.EntityId, name = pbPayload.Name};
-            }
+            public static EntityComponentDestroy FromPB(PB_ComponentRemoved pbPayload) { return new EntityComponentDestroy() { entityId = pbPayload.EntityId, name = pbPayload.Name }; }
         }
 
         [System.Serializable]
@@ -133,10 +124,7 @@ namespace DCL.Models
             public string id;
             public string name;
 
-            public static SharedComponentAttach FromPB(PB_AttachEntityComponent pbPayload)
-            {
-                return new SharedComponentAttach() {entityId = pbPayload.EntityId, id = pbPayload.Id, name = pbPayload.Name};
-            }
+            public static SharedComponentAttach FromPB(PB_AttachEntityComponent pbPayload) { return new SharedComponentAttach() { entityId = pbPayload.EntityId, id = pbPayload.Id, name = pbPayload.Name }; }
         }
 
         [System.Serializable]
@@ -146,10 +134,7 @@ namespace DCL.Models
             public int classId;
             public string name;
 
-            public static SharedComponentCreate FromPB(PB_ComponentCreated pbPayload)
-            {
-                return new SharedComponentCreate() {id = pbPayload.Id, classId = pbPayload.Classid, name = pbPayload.Name};
-            }
+            public static SharedComponentCreate FromPB(PB_ComponentCreated pbPayload) { return new SharedComponentCreate() { id = pbPayload.Id, classId = pbPayload.Classid, name = pbPayload.Name }; }
         }
 
         [System.Serializable]
@@ -157,10 +142,7 @@ namespace DCL.Models
         {
             public string id;
 
-            public static SharedComponentDispose FromPB(PB_ComponentDisposed pbPayload)
-            {
-                return new SharedComponentDispose() {id = pbPayload.Id};
-            }
+            public static SharedComponentDispose FromPB(PB_ComponentDisposed pbPayload) { return new SharedComponentDispose() { id = pbPayload.Id }; }
         }
 
         [System.Serializable]
@@ -169,37 +151,24 @@ namespace DCL.Models
             public string componentId;
             public string json;
 
-            public static SharedComponentUpdate FromPB(PB_ComponentUpdated pbPayload)
-            {
-                return new SharedComponentUpdate() {componentId = pbPayload.Id, json = pbPayload.Json};
-            }
-        }
-
-
-        [System.Serializable]
-        public struct ParcelSceneLoad
-        {
+            public static SharedComponentUpdate FromPB(PB_ComponentUpdated pbPayload) { return new SharedComponentUpdate() { componentId = pbPayload.Id, json = pbPayload.Json }; }
         }
 
         [System.Serializable]
-        public struct ParcelSceneUpdate
-        {
-        }
+        public struct ParcelSceneLoad { }
 
         [System.Serializable]
-        public struct ParcelSceneUnload
-        {
-        }
+        public struct ParcelSceneUpdate { }
+
+        [System.Serializable]
+        public struct ParcelSceneUnload { }
 
         [System.Serializable]
         public struct OpenExternalUrl
         {
             public string url;
 
-            public static OpenExternalUrl FromPB(PB_OpenExternalUrl pbPayload)
-            {
-                return new OpenExternalUrl() {url = pbPayload.Url};
-            }
+            public static OpenExternalUrl FromPB(PB_OpenExternalUrl pbPayload) { return new OpenExternalUrl() { url = pbPayload.Url }; }
         }
 
         [System.Serializable]
@@ -209,10 +178,7 @@ namespace DCL.Models
             public string comment;
             public string tokenId;
 
-            public static OpenNftDialog FromPB(PB_OpenNFTDialog pbPayload)
-            {
-                return new OpenNftDialog() {contactAddress = pbPayload.AssetContractAddress, comment = pbPayload.Comment, tokenId = pbPayload.TokenId};
-            }
+            public static OpenNftDialog FromPB(PB_OpenNFTDialog pbPayload) { return new OpenNftDialog() { contactAddress = pbPayload.AssetContractAddress, comment = pbPayload.Comment, tokenId = pbPayload.TokenId }; }
         }
 
         [System.Serializable]
@@ -285,8 +251,8 @@ namespace DCL.Models
         }
     }
 
-//-----------------------------------------------------
-// Raycast
+    //-----------------------------------------------------
+    // Raycast
     [System.Serializable]
     public class Ray
     {

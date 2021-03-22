@@ -5,7 +5,7 @@ import { defaultLogger } from 'shared/logger'
 import { RPCSendableMessage } from 'shared/types'
 import { getERC20 } from './ERC20'
 import { getERC721 } from './ERC721'
-import { requestManager, getUserAccount as getUserAccountPrime } from './provider'
+import { requestManager, getUserAccount as getUserAccountPrime, awaitApproval } from './provider'
 
 export interface MessageDict {
   [key: string]: string
@@ -39,6 +39,7 @@ const whitelist = [
   'web3_clientVersion',
   'eth_getTransactionCount',
   'eth_getBlockByNumber',
+  'eth_requestAccounts', // TODO: implement error-proof solution https://github.com/decentraland/explorer/issues/2156
   'eth_signTypedData_v4'
 ]
 
@@ -47,6 +48,7 @@ function isWhitelistedRPC(msg: RPCSendableMessage) {
 }
 
 export async function getUserAccount(): Promise<string | undefined> {
+  await awaitApproval()
   return getUserAccountPrime()
 }
 
@@ -240,7 +242,7 @@ export async function convertMessageToObject(message: string): Promise<MessageDi
   // First, split the string parts into nested array
   const arr = parsedMessage
     .split('\n')
-    .map(m => m.split(':'))
+    .map((m) => m.split(':'))
     .map(([key, value]) => [key, value.trim()])
 
   // convert the array into object of type MessageDict

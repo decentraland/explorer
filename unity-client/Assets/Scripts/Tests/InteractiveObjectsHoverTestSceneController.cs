@@ -41,7 +41,7 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
         };
         var onClickComponent = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity, onClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
 
-        scene.SetInitMessagesDone();
+        scene.sceneLifecycleHandler.SetInitMessagesDone();
 
         OnPointerEvent.enableInteractionHoverFeedback = true;
     }
@@ -49,13 +49,11 @@ public class InteractiveObjectsHoverTestSceneController : MonoBehaviour
     protected virtual IEnumerator InitScene()
     {
         DCL.Configuration.EnvironmentSettings.DEBUG = true;
-        SceneController.i.SetDebug();
-
-        TestHelpers.InitializeSceneController(false);
+        Environment.i.platform.debugController.SetDebug();
 
         yield return new WaitForSeconds(0.01f);
 
-        scene = SceneController.i.CreateTestScene();
+        scene = Environment.i.world.sceneController.CreateTestScene() as ParcelScene;
         yield return null;
     }
 }

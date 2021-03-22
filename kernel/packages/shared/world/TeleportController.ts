@@ -1,9 +1,8 @@
 import { parcelLimits } from 'config'
 
-import { teleportObservable, lastPlayerPosition } from 'shared/world/positionThings'
+import { lastPlayerPosition, teleportObservable, isInsideWorldLimits } from 'shared/world/positionThings'
 import { POIs } from 'shared/comms/POIs'
-import { fetchLayerUsersParcels } from 'shared/comms'
-import { ParcelArray, countParcelsCloseTo } from 'shared/comms/interface/utils'
+import { countParcelsCloseTo, ParcelArray } from 'shared/comms/interface/utils'
 import defaultLogger from 'shared/logger'
 import { ensureUnityInterface } from 'shared/renderer'
 
@@ -12,6 +11,11 @@ import { worldToGrid } from 'atomicHelpers/parcelScenePositions'
 
 import { StoreContainer } from '../store/rootTypes'
 import { WORLD_EXPLORER } from '../../config/index'
+import { isInitialLoading, isWaitingTutorial } from '../loading/selectors'
+import Html from '../Html'
+import { isLoginStageCompleted, isSignUp } from '../session/selectors'
+import { getCommsServer, getRealm } from 'shared/dao/selectors'
+import { LayerUserInfo } from 'shared/dao/types'
 
 declare const globalThis: StoreContainer
 
@@ -68,25 +72,22 @@ export const CAMPAIGN_PARCEL_SEQUENCE = [
 
 export class TeleportController {
   public static ensureTeleportAnimation() {
-    document
-      .getElementById('gameContainer')!
-      .setAttribute(
-        'style',
-        'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-      )
-    document.body.setAttribute(
-      'style',
-      'background: #151419 url(images/teleport.gif) no-repeat center !important; background-size: 194px 257px !important;'
-    )
+    if (
+      !isInitialLoading(globalThis.globalStore.getState()) &&
+      isLoginStageCompleted(globalThis.globalStore.getState())
+    ) {
+      Html.showTeleportAnimation()
+    }
   }
 
   public static stopTeleportAnimation() {
-    document.getElementById('gameContainer')!.setAttribute('style', 'background: #151419')
-    document.body.setAttribute('style', 'background: #151419')
-    if (WORLD_EXPLORER) {
-      ensureUnityInterface()
-        .then((unity) => unity.ShowWelcomeNotification())
-        .catch(defaultLogger.error)
+    if (!isSignUp(globalThis.globalStore.getState()) && !isWaitingTutorial(globalThis.globalStore.getState())) {
+      Html.hideTeleportAnimation()
+      if (WORLD_EXPLORER) {
+        ensureUnityInterface()
+          .then((unity) => unity.ShowWelcomeNotification())
+          .catch(defaultLogger.error)
+      }
     }
   }
 
@@ -104,7 +105,7 @@ export class TeleportController {
       const currentParcel = worldToGrid(lastPlayerPosition)
 
       usersParcels = usersParcels.filter(
-        (it) => isInsideParcelLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
+        (it) => isInsideWorldLimits(it[0], it[1]) && currentParcel.x !== it[0] && currentParcel.y !== it[1]
       )
 
       if (usersParcels.length > 0) {
@@ -150,7 +151,7 @@ export class TeleportController {
   public static goTo(x: number, y: number, teleportMessage?: string): { message: string; success: boolean } {
     const tpMessage: string = teleportMessage ? teleportMessage : `Teleporting to ${x}, ${y}...`
 
-    if (isInsideParcelLimits(x, y)) {
+    if (isInsideWorldLimits(x, y)) {
       teleportObservable.notifyObservers({
         x: x,
         y: y,
@@ -161,17 +162,23 @@ export class TeleportController {
 
       return { message: tpMessage, success: true }
     } else {
-      const errorMessage = `Coordinates are outside of the boundaries. Limits are from ${parcelLimits.minLandCoordinateX} to ${parcelLimits.maxLandCoordinateX} for X and ${parcelLimits.minLandCoordinateY} to ${parcelLimits.maxLandCoordinateY} for Y`
+      const errorMessage = `Coordinates are outside of the boundaries. Valid ranges are: ${parcelLimits.descriptiveValidWorldRanges}.`
       return { message: errorMessage, success: false }
     }
   }
 }
 
-function isInsideParcelLimits(x: number, y: number) {
-  return (
-    x > parcelLimits.minLandCoordinateX &&
-    x <= parcelLimits.maxLandCoordinateX &&
-    y > parcelLimits.minLandCoordinateY &&
-    y <= parcelLimits.maxLandCoordinateY
-  )
+async function fetchLayerUsersParcels(): Promise<ParcelArray[]> {
+  const realm = getRealm(globalThis.globalStore.getState())
+  const commsUrl = getCommsServer(globalThis.globalStore.getState())
+
+  if (realm && realm.layer && commsUrl) {
+    const layerUsersResponse = await fetch(`${commsUrl}/layers/${realm.layer}/users`)
+    if (layerUsersResponse.ok) {
+      const layerUsers: LayerUserInfo[] = await layerUsersResponse.json()
+      return layerUsers.filter((it) => it.parcel).map((it) => it.parcel!)
+    }
+  }
+
+  return []
 }

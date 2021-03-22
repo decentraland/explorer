@@ -11,7 +11,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class PhysicsCast_Tests : TestsBase
+public class PhysicsCast_Tests : IntegrationTestSuite_Legacy
 {
     const int ENTITIES_COUNT = 3;
     PB_RayQuery raycastQuery;
@@ -24,8 +24,7 @@ public class PhysicsCast_Tests : TestsBase
     protected override IEnumerator SetUp()
     {
         yield return base.SetUp();
-        PointerEventsController.i.Initialize(isTesting: true);
-        SceneController.i.useBoundariesChecker = false;
+        Environment.i.world.sceneBoundsChecker.Stop();
     }
 
     private void ConfigureRaycastQuery(string queryType)
@@ -218,7 +217,14 @@ public class PhysicsCast_Tests : TestsBase
         Assert.IsTrue(eventTriggered);
     }
 
-    private IEnumerator SendRaycastQueryMessage<T, T2>(WebInterface.SceneEvent<T> sceneEvent, T response, System.Func<WebInterface.SceneEvent<T>, bool> OnSuccess) where T2 : WebInterface.RaycastHitInfo where T : WebInterface.RaycastResponse<T2>
+    private IEnumerator SendRaycastQueryMessage<T, T2>
+    (
+        WebInterface.SceneEvent<T> sceneEvent,
+        T response,
+        System.Func<WebInterface.SceneEvent<T>, bool> OnMessageReceived
+    )
+        where T2 : WebInterface.RaycastHitInfo
+        where T : WebInterface.RaycastResponse<T2>
     {
         string targetEventType = "SceneEvent";
 
@@ -226,7 +232,9 @@ public class PhysicsCast_Tests : TestsBase
         sceneEvent.payload = response;
         sceneEvent.eventType = "raycastResponse";
 
-        yield return TestHelpers.WaitForEventFromEngine<WebInterface.SceneEvent<T>>(targetEventType, sceneEvent,
+        yield return TestHelpers.ExpectMessageToKernel(
+            targetEventType,
+            sceneEvent,
             () =>
             {
                 // Note (Zak): we send several times the same message to ensure it's
@@ -235,7 +243,7 @@ public class PhysicsCast_Tests : TestsBase
                 sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
                 sceneController.SendSceneMessage(System.Convert.ToBase64String(sendSceneMessage.ToByteArray()));
             },
-            OnSuccess);
+            OnMessageReceived);
     }
 
     private bool AreSceneEventsEqual<T, T2>(WebInterface.SceneEvent<T> s1, WebInterface.SceneEvent<T> s2) where T2 : WebInterface.RaycastHitInfo where T : WebInterface.RaycastResponse<T2>
@@ -264,6 +272,4 @@ public class PhysicsCast_Tests : TestsBase
                r1.payload.ray.direction == r2.payload.ray.direction &&
                r1.payload.ray.origin == r2.payload.ray.origin;
     }
-
-
 }

@@ -1,44 +1,30 @@
 import { Observable } from 'decentraland-ecs/src'
 import { UUID, PeerInformation, AvatarMessage, UserInformation, AvatarMessageType, Pose } from './interface/types'
-import { getFromLocalStorage, saveToLocalStorage, removeFromLocalStorage } from 'atomicHelpers/localStorage'
-
-export const getUserProfile = () => getFromLocalStorage('dcl-profile') || {}
-export const removeUserProfile = () => removeFromLocalStorage('dcl-profile')
-export const getBlockedUsers: () => Set<string> = () => new Set(getFromLocalStorage('dcl-blocked-users') || [])
-export const getMutedUsers: () => Set<string> = () => new Set(getFromLocalStorage('dcl-muted-users') || [])
-export const isMuted = (name: string) => getMutedUsers().has(name)
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import defaultLogger from 'shared/logger'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { getProfileType } from 'shared/profiles/getProfileType'
 
 export const peerMap = new Map<UUID, PeerInformation>()
 export const avatarMessageObservable = new Observable<AvatarMessage>()
 
 export let localProfileUUID: UUID | null = null
-
-export function findPeerByName(displayName: string): UserInformation | null {
-  for (let [, peer] of peerMap) {
-    if (peer.user && peer.user.profile && peer.user.profile.name === displayName) {
-      return peer.user
-    }
-  }
-  return null
-}
-
 /**
  * @param uuid the UUID used by the communication engine
  */
-export function setLocalProfile(uuid: UUID, user: UserInformation = {}) {
+export function setLocalInformationForComms(uuid: UUID, user: UserInformation = {}) {
   if (typeof (uuid as any) !== 'string') throw new Error('Did not receive a valid UUID')
 
   if (localProfileUUID) {
     removeById(localProfileUUID)
   }
 
-  const profile = {
+  const peerInformation = {
     uuid,
-    user,
-    flags: {}
+    user
   }
 
-  peerMap.set(uuid, profile)
+  peerMap.set(uuid, peerInformation)
 
   localProfileUUID = uuid
 
@@ -47,7 +33,7 @@ export function setLocalProfile(uuid: UUID, user: UserInformation = {}) {
     uuid
   })
 
-  return profile
+  return peerInformation
 }
 
 /**
@@ -73,14 +59,6 @@ export function removeById(uuid: UUID) {
 export function getCurrentPeer(): Readonly<PeerInformation> | null {
   if (!localProfileUUID) return null
   return peerMap.get(localProfileUUID) || null
-}
-
-/**
- * This function is used to get the current user's information. The result is read-only.
- */
-export function getCurrentUser(): Readonly<UserInformation> | null {
-  const user = getUserProfile()
-  return user || null
 }
 
 /**
@@ -112,8 +90,7 @@ export function setUpID(uuid: UUID): PeerInformation | null {
 
   if (!peerMap.has(uuid)) {
     peer = {
-      uuid,
-      flags: {}
+      uuid
     }
 
     peerMap.set(uuid, peer)
@@ -128,19 +105,34 @@ export function receiveUserData(uuid: string, data: Partial<UserInformation>) {
   const peerData = setUpID(uuid)
   if (peerData) {
     const userData = peerData.user || (peerData.user = peerData.user || {})
-
-    const profileChanged = (data.version && userData.version !== data.version) || (!userData.profile && data.profile)
+    const profileChanged = data.version && userData.version !== data.version
 
     if (profileChanged) {
       Object.assign(userData, data)
+      ;(async () => {
+        const profile = await ProfileAsPromise(data.userId!, data.version, getProfileType(data.identity))
 
-      avatarMessageObservable.notifyObservers({
-        type: AvatarMessageType.USER_DATA,
-        uuid,
-        data
+        if (profile) {
+          avatarMessageObservable.notifyObservers({
+            type: AvatarMessageType.USER_DATA,
+            uuid,
+            data,
+            profile: profileToRendererFormat(profile, { identity: userData.identity })
+          })
+        }
+      })().catch((e) => {
+        defaultLogger.error('Error requesting profile for user', uuid, userData, e)
       })
     }
   }
+}
+
+export function receiveUserTalking(uuid: string, talking: boolean) {
+  avatarMessageObservable.notifyObservers({
+    type: AvatarMessageType.USER_TALKING,
+    uuid,
+    talking
+  })
 }
 
 export function receiveUserPose(uuid: string, pose: Pose) {
@@ -161,66 +153,4 @@ export function receiveUserVisible(uuid: string, visible: boolean) {
     uuid,
     visible
   })
-}
-
-export function addToBlockedUsers(uuid: string): Set<string> {
-  const blockedUsers = getBlockedUsers()
-
-  if (!blockedUsers.has(uuid)) {
-    const updatedSet = blockedUsers.add(uuid)
-    saveToLocalStorage('dcl-blocked-users', Array.from(updatedSet))
-
-    avatarMessageObservable.notifyObservers({
-      type: AvatarMessageType.USER_BLOCKED,
-      uuid
-    })
-
-    return updatedSet
-  }
-
-  return blockedUsers
-}
-
-export function removeFromBlockedUsers(uuid: string): Set<string> {
-  const blockedUsers = getBlockedUsers()
-  blockedUsers.delete(uuid)
-  saveToLocalStorage('dcl-blocked-users', Array.from(blockedUsers))
-
-  avatarMessageObservable.notifyObservers({
-    type: AvatarMessageType.USER_UNBLOCKED,
-    uuid
-  })
-
-  return blockedUsers
-}
-
-export function addToMutedUsers(uuid: string): Set<string> {
-  const mutedUsers = getMutedUsers()
-
-  if (!mutedUsers.has(uuid)) {
-    const updatedSet = mutedUsers.add(uuid)
-    saveToLocalStorage('dcl-muted-users', Array.from(updatedSet))
-
-    avatarMessageObservable.notifyObservers({
-      type: AvatarMessageType.USER_MUTED,
-      uuid
-    })
-
-    return updatedSet
-  }
-
-  return mutedUsers
-}
-
-export function removeFromMutedUsers(uuid: string): Set<string> {
-  const mutedUsers = getMutedUsers()
-  mutedUsers.delete(uuid)
-  saveToLocalStorage('dcl-muted-users', Array.from(mutedUsers))
-
-  avatarMessageObservable.notifyObservers({
-    type: AvatarMessageType.USER_UNMUTED,
-    uuid
-  })
-
-  return mutedUsers
 }

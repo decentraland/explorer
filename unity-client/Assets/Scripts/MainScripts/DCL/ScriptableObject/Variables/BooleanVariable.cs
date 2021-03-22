@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "BooleanVariable", menuName = "BooleanVariable")]
-public class BooleanVariable : BaseVariable<bool>
+[CreateAssetMenu(fileName = "BooleanVariable", menuName = "Variables/BooleanVariable")]
+public class BooleanVariable : BaseVariableAsset<bool>
 {
     public override bool Equals(bool other)
     {

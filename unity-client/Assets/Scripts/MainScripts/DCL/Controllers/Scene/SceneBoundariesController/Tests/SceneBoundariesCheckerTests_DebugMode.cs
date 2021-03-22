@@ -1,36 +1,90 @@
 using NUnit.Framework;
 using System.Collections;
+using DCL;
+using DCL.Components;
+using DCL.Controllers;
+using DCL.Helpers;
+using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace SceneBoundariesCheckerTests
 {
-    public class SceneBoundariesCheckerTests_DebugMode : TestsBase
+    public class SceneBoundariesCheckerTests_DebugMode : IntegrationTestSuite_Legacy
     {
         protected override bool enableSceneIntegrityChecker => false;
+        protected override bool justSceneSetUp => true;
 
-        [UnitySetUp]
         protected override IEnumerator SetUp()
         {
-            yield return SetUp_SceneController(debugMode: true);
+            yield return base.SetUp();
+
             yield return SetUp_CharacterController();
 
-            sceneController.boundariesChecker.timeBetweenChecks = 0f;
+            Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
+            Environment.i.world.sceneBoundsChecker.timeBetweenChecks = 0f;
+
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.enabled);
+            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker);
+        }
+
+        [UnityTest]
+        public IEnumerator ResetMaterialCorrectlyWhenInvalidEntitiesAreRemoved()
+        {
+            var entity = TestHelpers.CreateSceneEntity(scene);
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model {position = new Vector3(8, 1, 8)});
+            TestHelpers.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb"
+                }));
+
+            LoadWrapper gltfShape = GLTFShape.GetLoaderForEntity(entity);
+            yield return new WaitUntil(() => gltfShape.alreadyLoaded);
+
+            yield return null;
+
+            SBC_Asserts.AssertMeshIsValid(entity.meshesInfo);
+            // Move object to surpass the scene boundaries
+            TestHelpers.SetEntityTransform(scene, entity, new DCLTransform.Model {position = new Vector3(18, 1, 18)});
+
+            yield return null;
+
+            SBC_Asserts.AssertMeshIsInvalid(entity.meshesInfo);
+
+            TestHelpers.RemoveSceneEntity(scene, entity.entityId);
+
+            Environment.i.platform.parcelScenesCleaner.ForceCleanup();
+
+            yield return null;
+
+            var entity2 = TestHelpers.CreateSceneEntity(scene);
+
+            TestHelpers.SetEntityTransform(scene, entity2, new DCLTransform.Model {position = new Vector3(8, 1, 8)});
+            TestHelpers.CreateAndSetShape(scene, entity2.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = Utils.GetTestsAssetsPath() + "/GLB/PalmTree_01.glb"
+                }));
+
+            LoadWrapper gltfShape2 = GLTFShape.GetLoaderForEntity(entity2);
+
+            yield return new WaitUntil(() => gltfShape2.alreadyLoaded);
+            yield return null;
+
+            SBC_Asserts.AssertMeshIsValid(entity2.meshesInfo);
         }
 
         [UnityTest]
         public IEnumerator PShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.PShapeIsInvalidatedWhenStartingOutOfBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
         public IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.GLTFShapeIsInvalidatedWhenStartingOutOfBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
@@ -38,25 +92,19 @@ namespace SceneBoundariesCheckerTests
         [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.NFTShapeIsInvalidatedWhenStartingOutOfBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
         public IEnumerator PShapeIsInvalidatedWhenLeavingBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.PShapeIsInvalidatedWhenLeavingBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
         public IEnumerator GLTFShapeIsInvalidatedWhenLeavingBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.GLTFShapeIsInvalidatedWhenLeavingBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
@@ -64,17 +112,13 @@ namespace SceneBoundariesCheckerTests
         [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenLeavingBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.NFTShapeIsInvalidatedWhenLeavingBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
         public IEnumerator PShapeIsResetWhenReenteringBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.PShapeIsResetWhenReenteringBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
@@ -82,40 +126,31 @@ namespace SceneBoundariesCheckerTests
         [Category("Explicit")]
         public IEnumerator NFTShapeIsResetWhenReenteringBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.NFTShapeIsResetWhenReenteringBounds(scene);
-            sceneController.isDebugMode = false;
         }
 
         [UnityTest]
         public IEnumerator ChildShapeIsEvaluatedDebugMode()
         {
-            yield return InitScene(false, true, true, true, debugMode: true);
             yield return SBC_Asserts.ChildShapeIsEvaluated(scene);
         }
 
         [UnityTest]
         public IEnumerator ChildShapeIsEvaluatedOnShapelessParentDebugMode()
         {
-            yield return InitScene(false, true, true, true, debugMode: true);
-
             yield return SBC_Asserts.ChildShapeIsEvaluatedOnShapelessParent(scene);
         }
 
         [UnityTest]
         public IEnumerator HeightIsEvaluatedDebugMode()
         {
-            yield return InitScene(false, true, true, true, debugMode: true);
-
             yield return SBC_Asserts.HeightIsEvaluated(scene);
         }
 
         [UnityTest]
         public IEnumerator GLTFShapeIsResetWhenReenteringBoundsDebugMode()
         {
-            sceneController.isDebugMode = true;
             yield return SBC_Asserts.GLTFShapeIsResetWhenReenteringBounds(scene);
-            sceneController.isDebugMode = false;
         }
     }
 }

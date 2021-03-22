@@ -1,0 +1,28 @@
+.popup-container .popup.walletSelectorPopup {
+  padding: 64px 45px;
+}
+
+.walletSelector {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+  color: #333;
+}
+
+h2.walletSelectorTitle {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 30px;
+  margin-top: 0;
+  margin-bottom: 45px;
+}
+
+.walletButtonContainer {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  min-width: 400px;
+  min-height: 170px;
+}

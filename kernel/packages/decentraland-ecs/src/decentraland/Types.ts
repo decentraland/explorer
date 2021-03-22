@@ -328,6 +328,12 @@ export interface IEvents {
     type: string
     [key: string]: any
   }
+
+  // @internal
+  stateEvent: {
+    type: string
+    payload: any
+  }
 }
 
 /** @public */
@@ -415,7 +421,6 @@ export type ProfileForRenderer = {
   description: string
   email: string
   avatar: AvatarForRenderer
-  inventory: WearableId[]
   snapshots: {
     face: string
     body: string
@@ -424,6 +429,18 @@ export type ProfileForRenderer = {
   hasConnectedWeb3: boolean
   updatedAt?: number
   createdAt?: number
+  parcelsWithAccess?: ParcelsWithAccess
+}
+
+export type ParcelsWithAccess = {
+  x: number
+  y: number
+  role: LandRole
+}[]
+
+export enum LandRole {
+  OWNER = 'owner',
+  OPERATOR = 'operator'
 }
 
 /**

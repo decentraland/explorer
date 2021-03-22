@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class ControlsHUDTest : TestsBase
+    public class ControlsHUDTest : IntegrationTestSuite_Legacy
     {
         private ControlsHUDController controller;
 
@@ -12,6 +12,12 @@ namespace Tests
         {
             yield return base.SetUp();
             controller = new ControlsHUDController();
+        }
+
+        protected override IEnumerator TearDown()
+        {
+            controller.Dispose();
+            yield return base.TearDown();
         }
 
         [UnityTest]

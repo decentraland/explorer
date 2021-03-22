@@ -21,24 +21,20 @@ public class UISizeFitter : MonoBehaviour
     {
         if (canvasChildHookRT == null)
         {
-            RectMask2D constrainedPanelMask = GetComponentInParent<RectMask2D>();
-
-            if(constrainedPanelMask != null)
-            {
-                canvasChildHookRT = constrainedPanelMask.GetComponent<RectTransform>();
-                return;
-            }
-
-            canvasChildHookRT = GetComponentInParent<Canvas>()?.GetComponent<RectTransform>();
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas)
+                canvasChildHookRT = canvas.GetComponent<RectTransform>();
+            else
+                canvasChildHookRT = GetComponentInParent<RectTransform>();
         }
     }
 
     public void FitSizeToChildren(bool adjustWidth = true, bool adjustHeight = true)
     {
         UIReferencesContainer[] containers = GetComponentsInChildren<UIReferencesContainer>();
-        
+
         EnsureCanvasChildHookRectTransform();
-        
+
         RectTransform rt = transform as RectTransform;
 
         if (rt == null || canvasChildHookRT == null || containers == null || containers.Length == 0)

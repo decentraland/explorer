@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using DCL.Interface;
 using DCL.Helpers;
+using Environment = DCL.Environment;
 
 public class ExternalUrlPromptHUDController : IHUD
 {
@@ -18,8 +19,8 @@ public class ExternalUrlPromptHUDController : IHUD
         view.name = "_ExternalUrlPromptHUD";
         view.content.SetActive(false);
 
-        if (SceneController.i)
-            SceneController.i.OnOpenExternalUrlRequest += ProcessOpenUrlRequest;
+        if (Environment.i != null)
+            Environment.i.world.sceneController.OnOpenExternalUrlRequest += ProcessOpenUrlRequest;
     }
 
     public void SetVisibility(bool visible)
@@ -31,19 +32,20 @@ public class ExternalUrlPromptHUDController : IHUD
             view.content.SetActive(true);
             view.showHideAnimator.Show();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         else
         {
             view.showHideAnimator.Hide();
+
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 
     public void Dispose()
     {
-        if (SceneController.i)
-            SceneController.i.OnOpenExternalUrlRequest -= ProcessOpenUrlRequest;
+        if (Environment.i != null)
+            Environment.i.world.sceneController.OnOpenExternalUrlRequest -= ProcessOpenUrlRequest;
 
         trustedDomains.Clear();
 
@@ -81,6 +83,7 @@ public class ExternalUrlPromptHUDController : IHUD
                         OpenUrl(url);
                         break;
                 }
+
                 SetVisibility(false);
             });
         }

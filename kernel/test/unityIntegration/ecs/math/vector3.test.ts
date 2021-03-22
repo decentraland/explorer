@@ -18,7 +18,7 @@ function vector3ToString(vec: Vector3) {
   return `(${x}, ${y}, ${z})`
 }
 
-describe.skip('ECS Vector3 tests', () => {
+describe('ECS Vector3 tests', () => {
   it('vector3.rotate', () => {
     expect(vector3ToString(new Vector3(1, 1, 1).rotate(Quaternion.Euler(45, 60, 90)))).to.eq(
       results.rotatedWithQuat01,

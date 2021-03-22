@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,13 +14,14 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         public string realm;
         public string realmServerName;
         public string realmLayerName;
-        public Sprite avatarImage;
+        public Texture2D avatarImage;
         public bool blocked;
 
-        public event System.Action<Sprite> OnSpriteUpdateEvent;
-        public void OnSpriteUpdate(Sprite sprite)
+        public event System.Action<Texture2D> OnTextureUpdateEvent;
+        public void OnSpriteUpdate(Texture2D texture)
         {
-            OnSpriteUpdateEvent?.Invoke(sprite);
+            avatarImage = texture;
+            OnTextureUpdateEvent?.Invoke(texture);
         }
     }
 
@@ -30,10 +32,11 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public Transform menuPositionReference;
 
     [SerializeField] protected internal TextMeshProUGUI playerNameText;
-    [SerializeField] protected internal Image playerImage;
+    [SerializeField] protected internal RawImage playerImage;
     [SerializeField] protected internal Button menuButton;
     [SerializeField] protected internal Image backgroundImage;
     [SerializeField] protected internal Sprite hoveredBackgroundSprite;
+    [SerializeField] protected internal AudioEvent audioEventHover;
     protected internal Sprite unhoveredBackgroundSprite;
 
     public event System.Action<FriendEntryBase> OnMenuToggle;
@@ -50,8 +53,8 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
         backgroundImage.sprite = hoveredBackgroundSprite;
         menuButton.gameObject.SetActive(true);
 
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.buttonHover);
+        if (audioEventHover != null)
+            audioEventHover.Play(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -63,8 +66,11 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
     protected virtual void OnDisable()
     {
         OnPointerExit(null);
+    }
 
-        model.OnSpriteUpdateEvent -= OnAvatarImageChange;
+    protected void OnDestroy()
+    {
+        model.OnTextureUpdateEvent -= OnAvatarImageChange;
     }
 
     public virtual void Populate(Model model)
@@ -76,19 +82,18 @@ public class FriendEntryBase : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (model.avatarImage == null)
         {
-            model.OnSpriteUpdateEvent -= OnAvatarImageChange;
-            model.OnSpriteUpdateEvent += OnAvatarImageChange;
+            model.OnTextureUpdateEvent -= OnAvatarImageChange;
+            model.OnTextureUpdateEvent += OnAvatarImageChange;
         }
 
-        if (model.avatarImage != playerImage.sprite)
-            playerImage.sprite = model.avatarImage;
+        if (model.avatarImage != playerImage.texture)
+            OnAvatarImageChange(model.avatarImage);
 
         playerBlockedImage.enabled = model.blocked;
     }
 
-    private void OnAvatarImageChange(Sprite sprite)
+    private void OnAvatarImageChange(Texture2D texture)
     {
-        playerImage.sprite = sprite;
-        model.avatarImage = sprite;
+        playerImage.texture = texture;
     }
 }

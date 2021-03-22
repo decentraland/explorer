@@ -11,13 +11,12 @@ import {
 } from './actions'
 import { DaoState, Candidate, Realm, ServerConnectionStatus } from './types'
 import {
-  FETCH_PROFILE_SERVICE,
   FETCH_CONTENT_SERVICE,
   UPDATE_CONTENT_SERVICE,
   COMMS_SERVICE,
-  FETCH_META_CONTENT_SERVICE,
   RESIZE_SERVICE,
-  PIN_CATALYST
+  PIN_CATALYST,
+  HOTSCENES_SERVICE
 } from 'config'
 
 export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
@@ -25,12 +24,13 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
     return {
       initialized: false,
       candidatesFetched: false,
-      profileServer: '',
       fetchContentServer: '',
-      fetchMetaContentServer: '',
+      catalystServer: '',
       updateContentServer: '',
       commsServer: '',
       resizeService: '',
+      hotScenesService: '',
+      exploreRealmsService: '',
       realm: undefined,
       candidates: [],
       addedCandidates: [],
@@ -88,7 +88,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         candidates: state.candidates.map((it) => {
-          if (it.catalystName === action.payload.catalystName && it.layer.name === action.payload.layer) {
+          if (it && it.catalystName === action.payload.catalystName && it.layer.name === action.payload.layer) {
             return { ...it, layer: { ...it.layer, usersCount: it.layer.maxUsers } }
           } else {
             return it
@@ -99,7 +99,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
       return {
         ...state,
         candidates: state.candidates.map((it) => {
-          if (it.catalystName === action.payload.catalystName) {
+          if (it && it.catalystName === action.payload.catalystName) {
             return {
               ...it,
               status: ServerConnectionStatus.UNREACHABLE,
@@ -117,12 +117,13 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
 function realmProperties(realm: Realm, configOverride: boolean = true): Partial<DaoState> {
   const domain = realm.domain
   return {
-    profileServer: FETCH_PROFILE_SERVICE && configOverride ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     fetchContentServer: FETCH_CONTENT_SERVICE && configOverride ? FETCH_CONTENT_SERVICE : domain + '/lambdas/contentv2',
-    fetchMetaContentServer: FETCH_META_CONTENT_SERVICE && configOverride ? FETCH_META_CONTENT_SERVICE : domain,
+    catalystServer: domain,
     updateContentServer: UPDATE_CONTENT_SERVICE && configOverride ? UPDATE_CONTENT_SERVICE : domain + '/content',
     commsServer: COMMS_SERVICE && configOverride ? COMMS_SERVICE : domain + '/comms',
     resizeService: RESIZE_SERVICE && configOverride ? RESIZE_SERVICE : domain + '/lambdas/images',
+    hotScenesService: HOTSCENES_SERVICE && configOverride ? HOTSCENES_SERVICE : domain + '/lambdas/explore/hot-scenes',
+    exploreRealmsService: domain + '/lambdas/explore/realms',
     realm
   }
 }
@@ -178,7 +179,6 @@ function ensureProfileDao(state: Partial<DaoState>, daoCandidates: Candidate[]) 
 
   return {
     ...state,
-    profileServer: FETCH_PROFILE_SERVICE ? FETCH_PROFILE_SERVICE : domain + '/lambdas/profile',
     updateContentServer: UPDATE_CONTENT_SERVICE ? UPDATE_CONTENT_SERVICE : domain + '/content'
   }
 }

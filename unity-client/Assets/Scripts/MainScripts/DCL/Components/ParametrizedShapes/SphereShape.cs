@@ -1,5 +1,6 @@
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Models;
 using UnityEngine;
 
 namespace DCL.Components
@@ -9,10 +10,20 @@ namespace DCL.Components
         [System.Serializable]
         new public class Model : BaseShape.Model
         {
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
-        public SphereShape(ParcelScene scene) : base(scene)
+        public SphereShape()
         {
+            model = new Model();
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.SPHERE_SHAPE;
         }
 
         public static Mesh mesh = null;
@@ -24,6 +35,7 @@ namespace DCL.Components
             {
                 mesh = PrimitiveMeshBuilder.BuildSphere(1f);
             }
+
             meshUses++;
 
             return mesh;

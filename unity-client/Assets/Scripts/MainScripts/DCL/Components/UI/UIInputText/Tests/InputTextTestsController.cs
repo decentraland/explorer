@@ -8,16 +8,16 @@ namespace DCL
 {
     public class InputTextTestsController : MonoBehaviour
     {
-        protected SceneController sceneController;
+        protected ISceneController sceneController;
         protected ParcelScene scene;
 
-        protected IEnumerator InitScene(bool usesWebServer = false, bool spawnCharController = true)
+        protected IEnumerator InitScene(bool spawnCharController = true)
         {
-            sceneController = TestHelpers.InitializeSceneController(usesWebServer);
+            sceneController = Environment.i.world.sceneController;
 
             yield return new WaitForSeconds(0.01f);
 
-            scene = sceneController.CreateTestScene();
+            scene = sceneController.CreateTestScene() as ParcelScene;
 
             yield return new WaitForSeconds(0.01f);
 

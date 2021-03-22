@@ -1,0 +1,58 @@
+.eth-beginners-guide {
+  color: #333;
+  background-image: url('../../images/login/pattern.svg');
+  background-position: top center;
+}
+
+.eth-beginners-guide h2 {
+  font-size: 32px;
+}
+
+.eth-beginners-guide .eth-accordion-title::before,
+.eth-beginners-guide .eth-accordion-title::after,
+.eth-beginners-guide .eth-accordion-title h3 {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.eth-beginners-guide .eth-accordion-title h3 a,
+.eth-beginners-guide .eth-accordion-title h3 b {
+  font-weight: 800;
+  color: #ff2d55;
+}
+
+.eth-beginners-guide p,
+.eth-beginners-guide ul,
+.eth-beginners-guide li {
+  font-weight: 300;
+}
+
+.eth-beginners-guide li {
+  margin: 1em 0;
+}
+
+.eth-beginners-guide li p {
+  margin: 0.5em 0;
+}
+
+.eth-beginners-guide a,
+.eth-beginners-guide a:hover,
+.eth-beginners-guide b {
+  color: #ff2d55;
+}
+
+.eth-beginners-guide .eth-accordion,
+.eth-beginners-guide .eth-accordion-description {
+  font-size: 26px;
+}
+
+.eth-beginners-guide .eth-accordion-description > div {
+  padding-top: 25px;
+}
+
+@media only screen and (max-width: 991px) {
+  .eth-beginners-guide .eth-content {
+    padding: 25px 2em 50px;
+  }
+}

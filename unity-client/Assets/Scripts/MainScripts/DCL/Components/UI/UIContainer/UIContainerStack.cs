@@ -19,6 +19,11 @@ namespace DCL.Components
             public bool adaptWidth = true;
             public bool adaptHeight = true;
             public float spacing = 0;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public enum StackOrientation
@@ -33,8 +38,14 @@ namespace DCL.Components
 
         HorizontalOrVerticalLayoutGroup layoutGroup;
 
-        public UIContainerStack(ParcelScene scene) : base(scene)
+        public UIContainerStack()
         {
+            model = new Model();
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.UI_CONTAINER_STACK;
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)
@@ -47,7 +58,7 @@ namespace DCL.Components
         {
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             referencesContainer.image.color = new Color(model.color.r, model.color.g, model.color.b, model.color.a);
 
@@ -80,7 +91,7 @@ namespace DCL.Components
             UIShape childComponent = updatedComponent as UIShape;
             Assert.IsTrue(childComponent != null, "This should never happen!!!!");
 
-            if (childComponent.model.parentComponent != id)
+            if (((UIShape.Model) childComponent.GetModel()).parentComponent != id)
             {
                 RefreshAll();
                 return;

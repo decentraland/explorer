@@ -1,74 +1,173 @@
+using System;
+using System.Collections;
 using DCL.Helpers;
 using DCL.Interface;
 using UnityEngine;
 
+/// <summary>
+/// Model with the configuration for a Message of the Day
+/// </summary>
+[Serializable]
+public class MessageOfTheDayConfig
+{
+    /// <summary>
+    /// Model with the configuration for each button in the Message of the Day
+    /// </summary>
+    [Serializable]
+    public class Button
+    {
+        public string caption;
+        public string action; //global chat action to perform
+        public Color tint;
+    }
+
+    public string background_banner;
+    public int endUnixTimestamp;
+    public string title;
+    public string body;
+    public Button[] buttons;
+}
+
+
 public class WelcomeHUDController : IHUD
 {
-    internal WelcomeHUDView view;
+    const float POPUP_DELAY = 2;
 
-    public System.Action OnConfirmed;
-    public System.Action OnDismissed;
+    internal IWelcomeHUDView view;
+    private MessageOfTheDayConfig config = null;
+    private Coroutine showPopupDelayedRoutine;
+    private bool isPopupRoutineRunning = false;
 
-    bool hasWallet;
-    public void Initialize(bool hasWallet)
+    internal virtual IWelcomeHUDView CreateView() => WelcomeHUDView.CreateView();
+
+    public WelcomeHUDController()
     {
-        this.hasWallet = hasWallet;
-        view = WelcomeHUDView.CreateView(hasWallet);
-        view.Initialize(OnConfirmPressed, OnClosePressed);
+        view = CreateView();
+        view.SetVisible(false);
 
-        Utils.UnlockCursor();
+        CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
+        CommonScriptableObjects.tutorialActive.OnChange += TutorialActive_OnChange;
+
+        CommonScriptableObjects.emailPromptActive.OnChange -= EmailPromptActive_OnChange;
+        CommonScriptableObjects.emailPromptActive.OnChange += EmailPromptActive_OnChange;
+    }
+
+    public void Initialize(MessageOfTheDayConfig config)
+    {
+        this.config = config;
+
+        if (!isPopupRoutineRunning)
+            StartPopupRoutine();
+        else
+            ResetPopupDelayed();
     }
 
     internal void Close()
     {
         SetVisibility(false);
-        Utils.LockCursor();
     }
 
-    void OnConfirmPressed()
+    internal virtual void OnConfirmPressed(int buttonIndex)
     {
         Close();
 
-        if (hasWallet)
+        if (config?.buttons != null && buttonIndex >= 0 && buttonIndex < config?.buttons.Length)
         {
-            OnConfirmed?.Invoke();
-            WebInterface.ReportMotdClicked();
-        }
-        else
-        {
-            OnDismissed?.Invoke();
+            string action = config.buttons[buttonIndex].action;
+            SendAction(action);
         }
     }
 
     void OnClosePressed()
     {
         Close();
-        OnDismissed?.Invoke();
     }
 
     public void Dispose()
     {
-        if (view != null)
-            Object.Destroy(view.gameObject);
+        CommonScriptableObjects.tutorialActive.OnChange -= TutorialActive_OnChange;
+        CommonScriptableObjects.emailPromptActive.OnChange -= EmailPromptActive_OnChange;
+
+        view?.DisposeSelf();
     }
 
     public void SetVisibility(bool visible)
     {
-        HUDAudioPlayer.Sound soundToPlay;
-
-        view.gameObject.SetActive(visible);
+        view.SetVisible(visible);
         if (visible)
         {
             Utils.UnlockCursor();
-            soundToPlay = HUDAudioPlayer.Sound.dialogAppear;
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         else
         {
-            Utils.LockCursor();
-            soundToPlay = HUDAudioPlayer.Sound.dialogClose;
+            AudioScriptableObjects.dialogClose.Play(true);
         }
 
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(soundToPlay);
+        CommonScriptableObjects.motdActive.Set(visible);
+    }
+
+    internal virtual void SendAction(string action)
+    {
+        if (string.IsNullOrEmpty(action))
+            return;
+
+        WebInterface.SendChatMessage(new ChatMessage
+        {
+            messageType = ChatMessage.Type.NONE,
+            recipient = string.Empty,
+            body = action,
+        });
+    }
+
+    void StartPopupRoutine()
+    {
+        showPopupDelayedRoutine = CoroutineStarter.Start(ShowPopupDelayed(POPUP_DELAY));
+    }
+
+    void StopPopupRoutine()
+    {
+        if (showPopupDelayedRoutine != null)
+        {
+            CoroutineStarter.Stop(showPopupDelayedRoutine);
+            showPopupDelayedRoutine = null;
+        }
+        isPopupRoutineRunning = false;
+    }
+
+    private IEnumerator ShowPopupDelayed(float seconds)
+    {
+        isPopupRoutineRunning = true;
+        view.Initialize(OnConfirmPressed, OnClosePressed, config);
+
+        yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+        yield return new WaitUntil(() => !CommonScriptableObjects.tutorialActive.Get());
+        yield return new WaitUntil(() => !CommonScriptableObjects.emailPromptActive.Get());
+        yield return WaitForSecondsCache.Get(seconds);
+        yield return new WaitUntil(() => CommonScriptableObjects.rendererState.Get());
+
+        SetVisibility(true);
+        isPopupRoutineRunning = false;
+    }
+
+    void ResetPopupDelayed()
+    {
+        if (isPopupRoutineRunning)
+        {
+            StopPopupRoutine();
+            StartPopupRoutine();
+        }
+    }
+
+    private void TutorialActive_OnChange(bool current, bool previous)
+    {
+        if (current)
+            ResetPopupDelayed();
+    }
+
+    private void EmailPromptActive_OnChange(bool current, bool previous)
+    {
+        if (current)
+            ResetPopupDelayed();
     }
 }

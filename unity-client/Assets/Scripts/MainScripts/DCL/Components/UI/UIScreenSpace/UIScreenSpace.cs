@@ -4,6 +4,7 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,19 +15,20 @@ namespace DCL.Components
         static bool VERBOSE = false;
 
         public Canvas canvas;
+        public GraphicRaycaster graphicRaycaster;
 
         private DCLCharacterPosition currentCharacterPosition;
         private CanvasGroup canvasGroup;
 
-        public UIScreenSpace(ParcelScene scene) : base(scene)
+        public UIScreenSpace()
         {
             DCLCharacterController.OnCharacterMoved += OnCharacterMoved;
+            model = new Model();
+        }
 
-            //Only no-dcl scenes are listening the the global visibility event
-            if (!scene.isPersistent)
-            {
-                CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
-            }
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.UI_SCREEN_SPACE_SHAPE;
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)
@@ -39,15 +41,16 @@ namespace DCL.Components
         {
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        private bool initialized = false;
+
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            var model = (Model) newModel;
 
-            if (scene.uiScreenSpace == null)
+            if (!initialized)
             {
-                scene.uiScreenSpace = this;
-
                 InitializeCanvas();
+                initialized = true;
             }
             else if (DCLCharacterController.i != null)
             {
@@ -93,6 +96,8 @@ namespace DCL.Components
         {
             if (canvas != null && scene != null)
             {
+                var model = (Model) this.model;
+
                 bool isInsideSceneBounds = scene.IsInsideSceneBoundaries(Utils.WorldToGridPosition(currentCharacterPosition.worldPosition));
                 bool shouldBeVisible = scene.isPersistent || (model.visible && isInsideSceneBounds && !CommonScriptableObjects.allUIHidden.Get());
                 canvasGroup.alpha = shouldBeVisible ? 1f : 0f;
@@ -109,7 +114,7 @@ namespace DCL.Components
 
             GameObject canvasGameObject = new GameObject("UIScreenSpace");
             canvasGameObject.layer = LayerMask.NameToLayer("UI");
-            canvasGameObject.transform.SetParent(scene.transform);
+            canvasGameObject.transform.SetParent(scene.GetSceneTransform());
             canvasGameObject.transform.ResetLocalTRS();
 
             // Canvas
@@ -123,34 +128,32 @@ namespace DCL.Components
             canvasScaler.matchWidthOrHeight = 1f; // Match height, recommended for landscape projects
 
             // Graphics Raycaster (for allowing touch/click input on the ui components)
-            canvasGameObject.AddComponent<GraphicRaycaster>();
+            graphicRaycaster = canvasGameObject.AddComponent<GraphicRaycaster>();
 
-            if (scene.isPersistent)
-            {
-                childHookRectTransform = canvas.GetComponent<RectTransform>();
+            canvas.sortingOrder = -1;
 
-                // we make sure DCL UI renders above every parcel UI
-                canvas.sortingOrder = 1;
-            }
-            else
-            {
-                canvas.sortingOrder = -1;
+            // We create a middleman-gameobject to change the size of the parcel-devs accessible canvas, to have its bottom limit at the taskbar height, etc.
+            GameObject resizedPanel = new GameObject("ResizeUIArea");
 
-                // "Constrained" panel mask (to avoid rendering parcels UI on the viewport's top 10%)
-                GameObject constrainedPanel = new GameObject("ConstrainedPanel");
-                constrainedPanel.AddComponent<RectMask2D>();
-                childHookRectTransform = constrainedPanel.GetComponent<RectTransform>();
-                childHookRectTransform.SetParent(canvas.transform);
-                childHookRectTransform.ResetLocalTRS();
+            resizedPanel.AddComponent<CanvasRenderer>();
+            childHookRectTransform = resizedPanel.AddComponent<RectTransform>();
+            childHookRectTransform.SetParent(canvas.transform);
+            childHookRectTransform.ResetLocalTRS();
 
-                float canvasHeight = canvasScaler.referenceResolution.y;
+            childHookRectTransform.anchorMin = Vector2.zero;
+            childHookRectTransform.anchorMax = new Vector2(1, 0);
 
-                childHookRectTransform.anchorMin = Vector2.zero;
-                childHookRectTransform.anchorMax = new Vector2(1, 0);
-                childHookRectTransform.pivot = new Vector2(0.5f, 0f);
-                // We scale the panel downwards to release the viewport's top 10%
-                childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - (canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100));
-            }
+            // We scale the panel downwards to subtract the viewport's top 10%
+            float canvasHeight = canvasScaler.referenceResolution.y;
+            childHookRectTransform.pivot = new Vector2(0.5f, 0f);
+            float canvasSubtraction = canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100;
+            childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);
+
+            // We scale the panel upwards to subtract the viewport's bottom 5% for Decentraland's taskbar
+            canvasHeight = childHookRectTransform.sizeDelta.y;
+            childHookRectTransform.pivot = new Vector2(0.5f, 1f);
+            childHookRectTransform.anchoredPosition = new Vector3(0, canvasHeight, 0f);
+            childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction / 2);
 
             // Canvas group
             canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
@@ -176,6 +179,7 @@ namespace DCL.Components
             if (!scene.isPersistent)
             {
                 UpdateCanvasVisibility();
+                CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
             }
         }
     }

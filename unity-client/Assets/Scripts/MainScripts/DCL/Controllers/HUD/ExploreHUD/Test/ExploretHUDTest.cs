@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Tests
 {
-    public class ExploreHUDShould : TestsBase
+    public class ExploreHUDShould : IntegrationTestSuite_Legacy
     {
         private ExploreHUDController controller;
         private FriendsController_Mock friendsController;
@@ -19,12 +19,13 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+            ExploreHUDController.isTest = true;
 
             SetupUserProfileController();
 
             friendsController = new FriendsController_Mock();
             controller = new ExploreHUDController();
-            controller.Initialize(friendsController, false);
+            controller.Initialize(friendsController);
         }
 
         protected override IEnumerator TearDown()
@@ -58,7 +59,6 @@ namespace Tests
 
             SimulateFriendsUpdate();
             SimulateHotSceneUpdate();
-            SimulateMinimapUpdate();
 
             yield return null;
 
@@ -172,6 +172,7 @@ namespace Tests
                             usersMax = 50
                         }
                     },
+                    parcels = new Vector2Int[]{ BASECOORD_FIRST_CELL, BASECOORD_FIRST_CELL + new Vector2Int(0,1)},
                     usersTotalCount = 12
                 },
 
@@ -187,6 +188,7 @@ namespace Tests
                             usersMax = 50
                         }
                     },
+                    parcels = new Vector2Int[]{ BASECOORD_SECOND_CELL },
                     usersTotalCount = 1
                 },
 
@@ -202,6 +204,9 @@ namespace Tests
                             usersMax = 50
                         }
                     },
+                    parcels = new Vector2Int[]{ BASECOORD_TEMPTATION,
+                                    BASECOORD_TEMPTATION + new Vector2Int(0,1),
+                                    BASECOORD_TEMPTATION + new Vector2Int(0,2)},
                     usersTotalCount = 100
                 }
              };
@@ -218,49 +223,13 @@ namespace Tests
             HotScenesController.i.UpdateHotScenesList(json);
         }
 
-        void SimulateMinimapUpdate()
-        {
-            var scenes = new MinimapMetadata.MinimapSceneInfo[]{
-                new MinimapMetadata.MinimapSceneInfo(){
-                    name = "Temptation",
-                    description = "It was great...",
-                    isPOI = true,
-                    parcels = new List<Vector2Int>(){ BASECOORD_TEMPTATION,
-                                                    BASECOORD_TEMPTATION + new Vector2Int(0,1),
-                                                    BASECOORD_TEMPTATION + new Vector2Int(0,2)}
-                },
-                new MinimapMetadata.MinimapSceneInfo(){
-                    name = "First Cell",
-                    description = "",
-                    isPOI = true,
-                    parcels = new List<Vector2Int>(){ BASECOORD_FIRST_CELL, BASECOORD_FIRST_CELL + new Vector2Int(0,1)}
-                } ,
-               new MinimapMetadata.MinimapSceneInfo(){
-                    name = "The one in the middle!",
-                    description = "",
-                    isPOI = true,
-                    parcels = new List<Vector2Int>(){ BASECOORD_SECOND_CELL }
-                }
-            };
-
-            string json = "[";
-            for (int i = 0; i < scenes.Length; i++)
-            {
-                json += JsonUtility.ToJson(scenes[i]);
-                if (i != scenes.Length - 1) json += ",";
-            }
-            json += "]";
-
-            MinimapMetadataController.i.UpdateMinimapSceneInformation(json);
-        }
-
         Dictionary<Vector2Int, HotSceneCellView> GetActiveCells()
         {
             Dictionary<Vector2Int, HotSceneCellView> ret = new Dictionary<Vector2Int, HotSceneCellView>();
             var cells = GameObject.FindObjectsOfType<HotSceneCellView>();
             for (int i = 0; i < cells.Length; i++)
             {
-                ret.Add(((IMapDataView)cells[i]).GetBaseCoord(), cells[i]);
+                ret.Add(cells[i].mapInfoHandler.baseCoord, cells[i]);
             }
             return ret;
         }

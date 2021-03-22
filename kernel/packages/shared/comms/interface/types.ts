@@ -1,5 +1,6 @@
 import { ProfileForRenderer } from 'decentraland-ecs/src'
-import { AuthIdentity } from 'dcl-crypto'
+import { Profile, ProfileType } from 'shared/profiles/types'
+import { ExplorerIdentity } from 'shared/session/types'
 
 export enum AvatarMessageType {
   // Networking related messages
@@ -9,6 +10,7 @@ export enum AvatarMessageType {
   USER_EXPRESSION = 'USER_EXPRESSION',
   USER_REMOVED = 'USER_REMOVED',
   SET_LOCAL_UUID = 'SET_LOCAL_UUID',
+  USER_TALKING = 'USER_TALKING',
 
   // Actions related messages
   USER_MUTED = 'USER_MUTED',
@@ -16,8 +18,7 @@ export enum AvatarMessageType {
   USER_BLOCKED = 'USER_BLOCKED',
   USER_UNBLOCKED = 'USER_UNBLOCKED',
 
-  ADD_FRIEND = 'ADD_FRIEND',
-  SHOW_WINDOW = 'SHOW_WINDOW'
+  ADD_FRIEND = 'ADD_FRIEND'
 }
 
 export type ReceiveUserExpressionMessage = {
@@ -31,12 +32,19 @@ export type ReceiveUserDataMessage = {
   type: AvatarMessageType.USER_DATA
   uuid: string
   data: Partial<UserInformation>
+  profile: ProfileForRenderer
 }
 
 export type ReceiveUserVisibleMessage = {
   type: AvatarMessageType.USER_VISIBLE
   uuid: string
   visible: boolean
+}
+
+export type ReceiveUserTalkingMessage = {
+  type: AvatarMessageType.USER_TALKING
+  uuid: string
+  talking: boolean
 }
 
 export type ReceiveUserPoseMessage = {
@@ -57,7 +65,7 @@ export type UserMessage = {
     | AvatarMessageType.USER_UNBLOCKED
     | AvatarMessageType.USER_MUTED
     | AvatarMessageType.USER_UNMUTED
-    | AvatarMessageType.SHOW_WINDOW
+    | AvatarMessageType.USER_TALKING
   uuid: string
 }
 
@@ -68,6 +76,7 @@ export type AvatarMessage =
   | ReceiveUserExpressionMessage
   | UserRemovedMessage
   | UserMessage
+  | ReceiveUserTalkingMessage
 
 export type UUID = string
 
@@ -80,36 +89,30 @@ export type PeerInformation = {
    */
   uuid: UUID
 
-  flags: {
-    muted?: boolean
-  }
-
   user?: UserInformation
 }
 
 export type UserInformation = {
   userId?: string
   version?: number
-  status?: string
   pose?: Pose
   expression?: AvatarExpression
-  profile?: ProfileForRenderer
-  identity?: AuthIdentity
+  identity?: ExplorerIdentity
 }
 
 export type AvatarExpression = {
-  expressionType?: string
-  expressionTimestamp?: number
+  expressionType: string
+  expressionTimestamp: number
 }
 
-// The order is [X,Y,Z,Qx,Qy,Qz,Qw]
-export type Pose = [number, number, number, number, number, number, number]
+// The order is [X,Y,Z,Qx,Qy,Qz,Qw,immediate]
+export type Pose = [number, number, number, number, number, number, number, boolean]
 
 export type PoseInformation = {
   v: Pose
 }
 
-export type PackageType = 'profile' | 'chat' | 'position'
+export type PackageType = 'profile' | 'chat' | 'position' | 'voice' | 'profileRequest' | 'profileResponse'
 
 export type Package<T> = {
   type: PackageType
@@ -120,6 +123,7 @@ export type Package<T> = {
 export type ProfileVersion = {
   version: string
   user: string // TODO - to remove with new login flow - moliva - 22/12/2019
+  type: ProfileType
 }
 
 export type ChatMessage = {
@@ -127,13 +131,22 @@ export type ChatMessage = {
   text: string
 }
 
+export type VoiceFragment = {
+  index: number
+  encoded: Uint8Array
+}
+
+export type ProfileRequest = {
+  userId: string
+  version?: string
+}
+
+export type ProfileResponse = {
+  profile: Profile
+}
+
 export type BusMessage = ChatMessage
 
-export class IdTakenError extends Error {
-  constructor(message: string) {
-    super(message)
-  }
-}
 export class ConnectionEstablishmentError extends Error {
   constructor(message: string) {
     super(message)

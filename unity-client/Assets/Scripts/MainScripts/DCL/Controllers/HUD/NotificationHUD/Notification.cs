@@ -38,8 +38,7 @@ public class Notification : MonoBehaviour
         if (actionButton != null)
             actionButton.onClick.AddListener(Dismiss);
 
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.notification);
+        AudioScriptableObjects.notification.Play(true);
     }
 
     private void OnDisable()
@@ -130,11 +129,16 @@ public class Notification : MonoBehaviour
         }
     }
 
-    public void Dismiss()
+    protected virtual void Dismiss()
+    {
+        Dismiss(false);
+    }
+
+    public void Dismiss(bool instant)
     {
         StopTimer();
 
-        if (showHideAnimator != null)
+        if (!instant && showHideAnimator != null)
         {
             showHideAnimator.OnWillFinishHide -= DismissInternal;
             showHideAnimator.OnWillFinishHide += DismissInternal;

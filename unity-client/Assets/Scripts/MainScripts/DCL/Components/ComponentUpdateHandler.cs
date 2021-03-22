@@ -8,38 +8,30 @@ namespace DCL
 {
     public class ComponentUpdateHandler
     {
-        protected Queue<string> queue = new Queue<string>();
+        protected Queue<BaseModel> queue = new Queue<BaseModel>();
         public Coroutine routine { get; protected set; }
 
         public WaitForComponentUpdate yieldInstruction;
-        public string oldSerialization { get; protected set; }
 
         public IComponent owner;
 
-        public bool isRoutineRunning
-        {
-            get { return routine != null; }
-        }
+        public bool isRoutineRunning { get { return routine != null; } }
 
 #if UNITY_EDITOR
         bool applyChangesRunning = false;
 #endif
-        public ComponentUpdateHandler(IComponent owner)
+        public ComponentUpdateHandler(IDelayedComponent owner)
         {
             this.owner = owner;
             this.routine = null;
+
             yieldInstruction = new WaitForComponentUpdate(owner);
         }
 
-        public void ApplyChangesIfModified(string newSerialization)
-        {
-            HandleUpdate(newSerialization);
-        }
+        public void ApplyChangesIfModified(BaseModel model) { HandleUpdate(model); }
 
-        protected void HandleUpdate(string newSerialization)
+        protected void HandleUpdate(BaseModel newSerialization)
         {
-            if (newSerialization == oldSerialization) return;
-
             queue.Enqueue(newSerialization);
 
             if (!isRoutineRunning)
@@ -51,8 +43,6 @@ namespace DCL
                     routine = CoroutineStarter.Start(enumerator);
                 }
             }
-
-            oldSerialization = newSerialization;
         }
 
         public void Stop()
@@ -70,7 +60,6 @@ namespace DCL
         {
             Stop();
 
-            oldSerialization = null;
             queue.Clear();
         }
 
@@ -78,9 +67,9 @@ namespace DCL
         {
             while (queue.Count > 0)
             {
-                string json = queue.Dequeue();
+                BaseModel model = queue.Dequeue();
 
-                IEnumerator updateRoutine = ApplyChangesWrapper(json);
+                IEnumerator updateRoutine = ApplyChangesWrapper(model);
 
                 if (updateRoutine != null)
                 {
@@ -93,19 +82,20 @@ namespace DCL
             routine = null;
         }
 
-
-        public virtual IEnumerator ApplyChangesWrapper(string newJson)
+        public virtual IEnumerator ApplyChangesWrapper(BaseModel model)
         {
 #if UNITY_EDITOR
             Assert.IsFalse(applyChangesRunning, "ApplyChanges routine was interrupted when it shouldn't!");
             applyChangesRunning = true;
 #endif
-
-            var enumerator = owner.ApplyChanges(newJson);
-
-            if (enumerator != null)
+            if (owner.IsValid())
             {
-                yield return enumerator;
+                var enumerator = owner.ApplyChanges(model);
+
+                if (enumerator != null)
+                {
+                    yield return enumerator;
+                }
             }
 #if UNITY_EDITOR
             applyChangesRunning = false;

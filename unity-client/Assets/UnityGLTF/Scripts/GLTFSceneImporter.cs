@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 #if !WINDOWS_UWP
@@ -201,7 +202,7 @@ namespace UnityGLTF
 
         public void Dispose()
         {
-            //NOTE(Brian): If the coroutine is interrupted and the local streaming list contains something, 
+            //NOTE(Brian): If the coroutine is interrupted and the local streaming list contains something,
             //             we must clean the static list or other GLTFSceneImporter instances might get stuck.
             int streamingImagesLocalListCount = streamingImagesLocalList.Count;
 
@@ -414,7 +415,7 @@ namespace UnityGLTF
         }
 
         /// <summary>
-        /// Initializes the top-level created node by adding an instantiated GLTF object component to it, 
+        /// Initializes the top-level created node by adding an instantiated GLTF object component to it,
         /// so that it can cleanup after itself properly when destroyed
         /// </summary>
         private void InitializeGltfTopLevelObject()
@@ -689,7 +690,7 @@ namespace UnityGLTF
                     {
                         yield return _loader.LoadStream(buffer.Uri);
                         bufferDataStream = _loader.LoadedStream;
-                        PersistentAssetCache.AddBuffer(buffer.Uri, id, new RefCountedStreamData(buffer.Uri, bufferDataStream));
+                        PersistentAssetCache.AddBuffer(buffer.Uri, id, bufferDataStream);
                     }
                 }
 
@@ -707,9 +708,9 @@ namespace UnityGLTF
                 Stream stream = null;
                 if (image.Uri == null)
                 {
-                    //NOTE(Zak): This fixes current issues of concurrent texture loading, 
-                    //           but it's possible that it would happen again in the future. 
-                    //           If that happens, we'll have implement some locking behavior for concurrent 
+                    //NOTE(Zak): This fixes current issues of concurrent texture loading,
+                    //           but it's possible that it would happen again in the future.
+                    //           If that happens, we'll have implement some locking behavior for concurrent
                     //           import calls.
 
                     //NOTE(Brian): We can't yield between the stream creation and the stream.Read because
@@ -775,10 +776,22 @@ namespace UnityGLTF
 
         protected virtual IEnumerator ConstructUnityTexture(Stream stream, bool markGpuOnly, bool linear, GLTFImage image, int imageCacheIndex)
         {
+            if (stream == null)
+                yield break;
+
             if (stream is MemoryStream)
             {
                 using (MemoryStream memoryStream = stream as MemoryStream)
                 {
+                    yield return ConstructUnityTexture(memoryStream.ToArray(), false, linear, image, imageCacheIndex);
+                }
+            }
+
+            if (stream is FileStream fileStream)
+            {
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    fileStream.CopyTo(memoryStream);
                     yield return ConstructUnityTexture(memoryStream.ToArray(), false, linear, image, imageCacheIndex);
                 }
             }
@@ -1040,7 +1053,10 @@ namespace UnityGLTF
                                 var quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w).ToUnityQuaternionConvert();
 
                                 return new float[] {quaternion.x, quaternion.y, quaternion.z, quaternion.w};
-                            });
+                            },
+                            // NOTE(Brian): Unity makes some conversion to eulers on AnimationClip.SetCurve
+                            // that breaks the keyframe optimization.
+                            optimizeKeyframes: false);
 
                         break;
 
@@ -1078,7 +1094,8 @@ namespace UnityGLTF
             NumericArray output,
             InterpolationType mode,
             Type curveType,
-            ValuesConvertion getConvertedValues)
+            ValuesConvertion getConvertedValues,
+            bool optimizeKeyframes = true)
         {
             var channelCount = propertyNames.Length;
             var frameCount = input.AsFloats.Length;
@@ -1128,8 +1145,6 @@ namespace UnityGLTF
 
             for (var ci = 0; ci < channelCount; ++ci)
             {
-                var name = propertyNames[ci];
-
                 // For cubic spline interpolation, the inTangents and outTangents are already explicitly defined.
                 // For the rest, set them appropriately.
                 if (mode != InterpolationType.CUBICSPLINE)
@@ -1138,12 +1153,33 @@ namespace UnityGLTF
                         SetTangentMode(keyframes[ci], i, mode);
                 }
 
-                var optimizedKeyframes = OptimizeKeyFrames(keyframes[ci]);
+                if (!optimizeKeyframes)
+                {
+                    // copy all key frames data to animation curve and add it to the clip
+                    AnimationCurve curve = new AnimationCurve(keyframes[ci]);
+                    clip.SetCurve(relativePath, curveType, propertyNames[ci], curve);
+                }
+            }
 
-                // copy all key frames data to animation curve and add it to the clip
-                AnimationCurve curve = new AnimationCurve(optimizedKeyframes);
+            if (optimizeKeyframes)
+            {
+                for (var ci = 0; ci < channelCount; ++ci)
+                {
+                    keyframes[ci] = OptimizeKeyFrames(keyframes[ci]);
+                }
 
-                clip.SetCurve(relativePath, curveType, propertyNames[ci], curve);
+                // Setting the curves by the keyframe length order fixes weird index overrun issue:
+                // https://forum.unity.com/threads/animationutility-seteditorcurve-cant-add-curve-with-one-keyfram.247372/
+                var orderedKeyframes = keyframes.OrderBy(x => { return x.Length; }).ToArray();
+
+                foreach (var keyframeCollection in orderedKeyframes)
+                {
+                    int index = Array.IndexOf(keyframes, keyframeCollection);
+
+                    // copy all key frames data to animation curve and add it to the clip
+                    AnimationCurve curve = new AnimationCurve(keyframeCollection);
+                    clip.SetCurve(relativePath, curveType, propertyNames[index], curve);
+                }
             }
         }
 
@@ -1771,7 +1807,7 @@ namespace UnityGLTF
                 usedMaterials.Add(material);
             }
 
-            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(renderer, material);
+            DCL.Helpers.SRPBatchingHelper.OptimizeMaterial(material);
 
             if (matController != null)
             {
@@ -2123,6 +2159,21 @@ namespace UnityGLTF
                 mesh.RecalculateNormals();
             }
 
+            if (ShouldYieldOnTimeout())
+            {
+                yield return YieldOnTimeout();
+            }
+
+// Disable it in runtime so this optimization only takes place in
+// asset bundle converter time.
+#if UNITY_EDITOR
+            mesh.Optimize();
+
+            if (ShouldYieldOnTimeout())
+            {
+                yield return YieldOnTimeout();
+            }
+#endif
             if (!KeepCPUCopyOfMesh)
             {
                 mesh.UploadMeshData(true);
@@ -2198,6 +2249,13 @@ namespace UnityGLTF
                     _assetCache.TextureCache[textureId.Id].CachedTexture.IncreaseRefCount();
 
                     mrMapper.BaseColorTexCoord = pbr.BaseColorTexture.TexCoord;
+                    ExtTextureTransformExtension ext = GetTextureTransform(pbr.BaseColorTexture);
+                    if (ext != null)
+                    {
+                        mrMapper.BaseColorXOffset = ext.Offset;
+                        mrMapper.BaseColorXScale = ext.Scale;
+                        //TODO: Implement UVs multichannel for ext.TexCoord;
+                    }
                 }
 
                 mrMapper.MetallicFactor = pbr.MetallicFactor;
@@ -2231,6 +2289,13 @@ namespace UnityGLTF
                     sgMapper.DiffuseTexture = _assetCache.TextureCache[textureId.Id].CachedTexture.Texture;
                     _assetCache.TextureCache[textureId.Id].CachedTexture.IncreaseRefCount();
                     sgMapper.DiffuseTexCoord = specGloss.DiffuseTexture.TexCoord;
+                    ExtTextureTransformExtension ext = GetTextureTransform(specGloss.DiffuseTexture);
+                    if (ext != null)
+                    {
+                        sgMapper.DiffuseXOffset = ext.Offset;
+                        sgMapper.DiffuseXScale = ext.Scale;
+                        //TODO: Implement UVs multichannel for ext.TexCoord;
+                    }
                 }
 
                 sgMapper.SpecularFactor = specGloss.SpecularFactor;
@@ -2321,7 +2386,7 @@ namespace UnityGLTF
                     continue;
                 }
 
-                //TODO(Brian): Remove old material here if the material won't be used. 
+                //TODO(Brian): Remove old material here if the material won't be used.
                 //             (We can use Resources.UnloadUnusedAssets too, but I hate to rely on this)
                 if (!PersistentAssetCache.MaterialCacheByCRC.ContainsKey(materialCRC))
                 {
@@ -2430,92 +2495,107 @@ namespace UnityGLTF
         {
             yield return new WaitUntil(() => _assetCache.TextureCache[textureIndex] != null);
 
-            if (_assetCache.TextureCache[textureIndex].CachedTexture == null)
+            if (_assetCache.TextureCache[textureIndex].CachedTexture != null)
+                yield break;
+
+            int sourceId = GetTextureSourceId(texture);
+            GLTFImage image = _gltfRoot.Images[sourceId];
+
+            RefCountedTextureData source = null;
+
+            if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
             {
-                int sourceId = GetTextureSourceId(texture);
-                GLTFImage image = _gltfRoot.Images[sourceId];
-
-                RefCountedTextureData source = null;
-
-                if (image.Uri != null && PersistentAssetCache.HasImage(image.Uri, id))
+                source = PersistentAssetCache.GetImage(image.Uri, id);
+                _assetCache.ImageCache[sourceId] = source.Texture;
+                    
+                if (_assetCache.ImageCache[sourceId] == null)
                 {
-                    source = PersistentAssetCache.GetImage(image.Uri, id);
-                    _assetCache.ImageCache[sourceId] = source.Texture;
+                    Debug.Log($"GLTFSceneImporter - ConstructTexture - null tex detected for {sourceId} / {image.Uri} / {id}, applying invalid-tex texture...");
+                    _assetCache.ImageCache[sourceId] = Texture2D.redTexture;
+                }
+            }
+            else
+            {
+                yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
+                
+                if (_assetCache.ImageCache[sourceId] == null)
+                {
+                    Debug.Log($"GLTFSceneImporter - ConstructTexture - null tex detected for {sourceId} / {image.Uri} / {id}, applying invalid-tex texture...");
+                    _assetCache.ImageCache[sourceId] = Texture2D.redTexture;
+                }
+
+                if (addImagesToPersistentCaching)
+                {
+                    source = PersistentAssetCache.AddImage(image.Uri, id, _assetCache.ImageCache[sourceId]);
                 }
                 else
                 {
-                    yield return ConstructImage(image, sourceId, markGpuOnly, isLinear);
-                    source = new RefCountedTextureData(image.Uri, _assetCache.ImageCache[sourceId]);
+                    source = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), _assetCache.ImageCache[sourceId]);
+                }
+            }
 
-                    if (image.Uri != null && addImagesToPersistentCaching)
-                    {
-                        PersistentAssetCache.AddImage(image.Uri, id, source);
-                    }
+            var desiredFilterMode = FilterMode.Bilinear;
+            var desiredWrapMode = TextureWrapMode.Repeat;
+
+            if (texture.Sampler != null)
+            {
+                var sampler = texture.Sampler.Value;
+                switch (sampler.MinFilter)
+                {
+                    case MinFilterMode.Nearest:
+                    case MinFilterMode.NearestMipmapNearest:
+                    case MinFilterMode.NearestMipmapLinear:
+                        desiredFilterMode = FilterMode.Point;
+                        break;
+                    case MinFilterMode.Linear:
+                    case MinFilterMode.LinearMipmapNearest:
+                    case MinFilterMode.LinearMipmapLinear:
+                        desiredFilterMode = FilterMode.Bilinear;
+                        break;
+                    default:
+                        Debug.LogWarning("Unsupported Sampler.MinFilter: " + sampler.MinFilter);
+                        break;
                 }
 
-                var desiredFilterMode = FilterMode.Bilinear;
-                var desiredWrapMode = TextureWrapMode.Repeat;
-
-                if (texture.Sampler != null)
+                switch (sampler.WrapS)
                 {
-                    var sampler = texture.Sampler.Value;
-                    switch (sampler.MinFilter)
-                    {
-                        case MinFilterMode.Nearest:
-                        case MinFilterMode.NearestMipmapNearest:
-                        case MinFilterMode.NearestMipmapLinear:
-                            desiredFilterMode = FilterMode.Point;
-                            break;
-                        case MinFilterMode.Linear:
-                        case MinFilterMode.LinearMipmapNearest:
-                        case MinFilterMode.LinearMipmapLinear:
-                            desiredFilterMode = FilterMode.Bilinear;
-                            break;
-                        default:
-                            Debug.LogWarning("Unsupported Sampler.MinFilter: " + sampler.MinFilter);
-                            break;
-                    }
-
-                    switch (sampler.WrapS)
-                    {
-                        case GLTF.Schema.WrapMode.ClampToEdge:
-                            desiredWrapMode = TextureWrapMode.Clamp;
-                            break;
-                        case GLTF.Schema.WrapMode.Repeat:
-                        default:
-                            desiredWrapMode = TextureWrapMode.Repeat;
-                            break;
-                    }
+                    case GLTF.Schema.WrapMode.ClampToEdge:
+                        desiredWrapMode = TextureWrapMode.Clamp;
+                        break;
+                    case GLTF.Schema.WrapMode.Repeat:
+                    default:
+                        desiredWrapMode = TextureWrapMode.Repeat;
+                        break;
                 }
+            }
 
-                if (markGpuOnly || (source.Texture.filterMode == desiredFilterMode && source.Texture.wrapMode == desiredWrapMode))
+            if (markGpuOnly || (source.Texture.filterMode == desiredFilterMode && source.Texture.wrapMode == desiredWrapMode))
+            {
+                _assetCache.TextureCache[textureIndex].CachedTexture = source;
+
+                if (markGpuOnly)
                 {
-                    _assetCache.TextureCache[textureIndex].CachedTexture = source;
-
-                    if (markGpuOnly)
-                    {
-                        Debug.LogWarning("Ignoring sampler");
-                    }
+                    Debug.LogWarning("Ignoring sampler");
                 }
-                else
+            }
+            else
+            {
+                if (source.Texture.isReadable)
                 {
-                    if (source.Texture.isReadable)
-                    {
-                        var unityTexture = Object.Instantiate(source.Texture);
-                        unityTexture.filterMode = desiredFilterMode;
-                        unityTexture.wrapMode = desiredWrapMode;
+                    var unityTexture = Object.Instantiate(source.Texture);
+                    unityTexture.filterMode = desiredFilterMode;
+                    unityTexture.wrapMode = desiredWrapMode;
 
 #if !UNITY_EDITOR
-                        // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
-                        unityTexture.Apply(false, true);
+                    // NOTE(Brian): This breaks importing in edit mode, so only enable it for runtime.
+                    unityTexture.Apply(false, true);
 #endif
-                        _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(image.Uri, unityTexture);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
-                        _assetCache.TextureCache[textureIndex].CachedTexture = source;
-                    }
+                    _assetCache.TextureCache[textureIndex].CachedTexture = new RefCountedTextureData(PersistentAssetCache.GetCacheId(image.Uri, id), unityTexture);
+                }
+                else
+                {
+                    Debug.LogWarning("Skipping instantiation of non-readable texture: " + image.Uri);
+                    _assetCache.TextureCache[textureIndex].CachedTexture = source;
                 }
             }
         }
@@ -2545,7 +2625,7 @@ namespace UnityGLTF
             };
         }
 
-        protected virtual void ApplyTextureTransform(TextureInfo def, Material mat, string texName)
+        protected virtual ExtTextureTransformExtension GetTextureTransform(TextureInfo def)
         {
             IExtension extension;
             if (_gltfRoot.ExtensionsUsed != null &&
@@ -2553,15 +2633,11 @@ namespace UnityGLTF
                 def.Extensions != null &&
                 def.Extensions.TryGetValue(ExtTextureTransformExtensionFactory.EXTENSION_NAME, out extension))
             {
-                ExtTextureTransformExtension ext = (ExtTextureTransformExtension) extension;
-
-                Vector2 temp = ext.Offset;
-                temp = new Vector2(temp.x, -temp.y);
-                mat.SetTextureOffset(texName, temp);
-                mat.SetTextureScale(texName, ext.Scale);
+                return (ExtTextureTransformExtension) extension;
             }
-        }
 
+            return null;
+        }
 
         /// <summary>
         ///  Get the absolute path to a gltf uri reference.
@@ -2588,6 +2664,11 @@ namespace UnityGLTF
             return partialPath;
         }
 
+        public static Vector2 GLTFOffsetToUnitySpace(Vector2 offset, float textureYScale)
+        {
+            return new Vector2(offset.x, 1 - textureYScale - offset.y);
+        }
+        
         /// <summary>
         /// 
         /// </summary>

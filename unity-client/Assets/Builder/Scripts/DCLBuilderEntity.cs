@@ -3,17 +3,19 @@ using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
+using DCL;
 using UnityEngine;
+using Environment = DCL.Environment;
 
 namespace Builder
 {
-    public class DCLBuilderEntity : MonoBehaviour
+    public class DCLBuilderEntity : EditableEntity
     {
         public static Action<DCLBuilderEntity> OnEntityShapeUpdated;
         public static Action<DCLBuilderEntity> OnEntityTransformUpdated;
         public static Action<DCLBuilderEntity> OnEntityAddedWithTransform;
 
-        public DecentralandEntity rootEntity { protected set; get; }
+
         public bool hasGizmoComponent
         {
             get
@@ -67,12 +69,15 @@ namespace Builder
             entity.OnRemoved -= OnEntityRemoved;
             entity.OnRemoved += OnEntityRemoved;
 
+            AvatarShape.OnAvatarShapeUpdated -= OnAvatarShapeUpdated;
+            AvatarShape.OnAvatarShapeUpdated += OnAvatarShapeUpdated;
+
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
             DCLBuilderBridge.OnPreviewModeChanged += OnPreviewModeChanged;
 
             //builder evaluate boundaries by itself
-            if (DCL.SceneController.i.useBoundariesChecker)
-                entity.OnShapeUpdated -= DCL.SceneController.i.boundariesChecker.EvaluateEntityPosition;
+            if (Environment.i.world.sceneBoundsChecker.enabled)
+                entity.OnShapeUpdated -= Environment.i.world.sceneBoundsChecker.EvaluateEntityPosition;
 
             gameObject.transform.localScale = Vector3.zero;
 
@@ -95,10 +100,11 @@ namespace Builder
             {
                 return rootEntity.scene.IsInsideSceneBoundaries(Utils.BuildMergedBounds(rootEntity.meshesInfo.renderers));
             }
+
             return true;
         }
 
-        public void SetSelectLayer()
+        public override void SetSelectLayer()
         {
             if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.renderers == null)
             {
@@ -117,7 +123,7 @@ namespace Builder
             }
         }
 
-        public void SetDefaultLayer()
+        public override void SetDefaultLayer()
         {
             if (rootEntity.meshesInfo == null || rootEntity.meshesInfo.renderers == null)
             {
@@ -164,6 +170,7 @@ namespace Builder
             rootEntity.OnShapeUpdated -= OnShapeUpdated;
             rootEntity.OnTransformChange -= OnTransformUpdated;
             DCLBuilderBridge.OnPreviewModeChanged -= OnPreviewModeChanged;
+            AvatarShape.OnAvatarShapeUpdated -= OnAvatarShapeUpdated;
             DestroyColliders();
         }
 
@@ -229,6 +236,16 @@ namespace Builder
             }
         }
 
+        private void OnAvatarShapeUpdated(DecentralandEntity entity, AvatarShape avatarShape)
+        {
+            if (rootEntity != entity)
+            {
+                return;
+            }
+
+            OnShapeUpdated(rootEntity);
+        }
+
         private void OnPreviewModeChanged(bool isPreview)
         {
             if (!hasSmartItemComponent)
@@ -255,7 +272,7 @@ namespace Builder
             }
         }
 
-        private void CreateColliders(DecentralandEntity.MeshesInfo meshInfo)
+        private void CreateColliders(MeshesInfo meshInfo)
         {
             meshColliders = new DCLBuilderSelectionCollider[meshInfo.renderers.Length];
             for (int i = 0; i < meshInfo.renderers.Length; i++)
@@ -282,6 +299,7 @@ namespace Builder
                 gameObject.transform.localScale = scale;
                 yield return null;
             }
+
             gameObject.transform.localScale = scaleTarget;
             isScalingAnimation = false;
             ProcessEntityShape(rootEntity);
@@ -299,6 +317,7 @@ namespace Builder
                         Destroy(meshColliders[i].gameObject);
                     }
                 }
+
                 meshColliders = null;
             }
         }

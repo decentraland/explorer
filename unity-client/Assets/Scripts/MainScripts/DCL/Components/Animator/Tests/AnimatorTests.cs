@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class AnimatorTests : TestsBase
+    public class AnimatorTests : IntegrationTestSuite_Legacy
     {
         [UnityTest]
         public IEnumerator CreateAnimationComponent()
@@ -57,7 +57,7 @@ namespace Tests
             animator = entity.gameObject.GetComponentInChildren<DCLAnimator>();
 
             Assert.IsTrue(animator.GetStateByString("clip01") != null, "dclAnimator.GetStateByString fail!");
-            Assert.IsTrue(animator.model.states[0].clip != null, "dclAnimator clipReference is null!");
+            Assert.IsTrue(animator.GetModel().states[0].clip != null, "dclAnimator clipReference is null!");
         }
 
         [UnityTest]
@@ -102,7 +102,7 @@ namespace Tests
 
             animator.animComponent.cullingType = AnimationCullingType.AlwaysAnimate;
 
-            yield return new WaitForSeconds(1.5f);
+            yield return null;
 
             Animation animation = entity.gameObject.GetComponentInChildren<Animation>();
             foreach (AnimationState animState in animation)
@@ -170,7 +170,7 @@ namespace Tests
 
             animator.animComponent.cullingType = AnimationCullingType.AlwaysAnimate;
 
-            yield return new WaitForSeconds(1.5f);
+            yield return null;
 
             Animation animation = entity.gameObject.GetComponentInChildren<Animation>();
 
@@ -365,7 +365,7 @@ namespace Tests
             animatorModel.states[0].playing = true;
             yield return TestHelpers.EntityComponentUpdate(animator, animatorModel);
 
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(0.1f);
 
             Assert.IsFalse(animatedGameObject.localScale == originalScale);
             Assert.IsFalse(animatedGameObject.localPosition == originalPos);

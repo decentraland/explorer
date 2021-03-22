@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DCL;
+using DCL.Configuration;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,6 +24,8 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
     private string loadedThumbnailURL;
     private AssetPromise_Texture loadedThumbnailPromise;
+
+    private AvatarEditorHUDView view;
 
     //Todo change this for a confirmation popup or implement it in a more elegant way
     public static Func<WearableItem, List<WearableItem>> getEquippedWearablesReplacedByFunc;
@@ -48,6 +51,9 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
         base.Awake();
         thumbnail.sprite = null;
         warningPanel.SetActive(false);
+
+        if (!EnvironmentSettings.RUNNING_TESTS)
+            view = GetComponentInParent<AvatarEditorHUDView>();
     }
 
     protected override void OnClick()
@@ -92,8 +98,11 @@ public class ItemToggle : UIButton, IPointerEnterHandler, IPointerExitHandler
 
         thumbnail.sprite = ThumbnailsManager.CreateSpriteFromTexture(texture.texture);
 
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.listItemAppear);
+        if (view != null)
+        {
+            if (view.avatarEditorCanvas.enabled)
+                AudioScriptableObjects.listItemAppear.Play(true);
+        }
     }
 
     private void OnEnable()

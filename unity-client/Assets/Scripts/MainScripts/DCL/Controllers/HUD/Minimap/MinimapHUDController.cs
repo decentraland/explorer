@@ -11,6 +11,8 @@ public class MinimapHUDController : IHUD
     private StringVariable currentSceneId => CommonScriptableObjects.sceneID;
 
     public MinimapHUDModel model { get; private set; } = new MinimapHUDModel();
+    public RectTransform minimapTooltipReference { get => view.minimapTooltipReference; }
+    public RectTransform usersAroundTooltipReference { get => view.usersAroundTooltipReference; }
 
     public MinimapHUDController() : this(new MinimapHUDModel())
     {
@@ -19,6 +21,7 @@ public class MinimapHUDController : IHUD
     public MinimapHUDController(MinimapHUDModel model)
     {
         CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChange;
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange += ChangeVisibilityForBuilderInWorld;
         minimapZoom.Set(1f);
 
         view = MinimapHUDView.Create(this);
@@ -31,12 +34,24 @@ public class MinimapHUDController : IHUD
             UnityEngine.Object.Destroy(view.gameObject);
 
         CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChange;
+        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange -= ChangeVisibilityForBuilderInWorld;
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
     }
 
     private void OnPlayerCoordsChange(Vector2Int current, Vector2Int previous)
     {
         UpdatePlayerPosition(current);
-        UpdateSceneName(MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y)?.name);
+
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
+        MinimapMetadata.MinimapSceneInfo sceneInfo = MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y);
+        UpdateSceneName(sceneInfo?.name);
+
+        // NOTE: in some cases playerCoords OnChange is triggered before kernel's message with the scene info arrives.
+        // so in that scenario we subscribe to MinimapMetadata event to wait for the scene info.
+        if (sceneInfo == null)
+        {
+            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnOnSceneInfoUpdated;
+        }
     }
 
     public void UpdateData(MinimapHUDModel model)
@@ -88,8 +103,33 @@ public class MinimapHUDController : IHUD
             WebInterface.SendReportScene(currentSceneId);
     }
 
+    public void ChangeVisibilityForBuilderInWorld(bool current, bool previus)
+    {
+        SetVisibility(current);
+    }
+
     public void SetVisibility(bool visible)
     {
         view.SetVisibility(visible);
+    }
+
+    /// <summary>
+    /// Enable user's around button/indicator that shows the amount of users around player
+    /// and toggle the list of players' visibility when pressed
+    /// </summary>
+    /// <param name="controller">Controller for the players' list HUD</param>
+    public void AddUsersAroundIndicator(UsersAroundListHUDController controller)
+    {
+        view.usersAroundListHudButton.gameObject.SetActive(true);
+        controller.SetButtonView(view.usersAroundListHudButton);
+    }
+
+    private void OnOnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
+    {
+        if (sceneInfo.parcels.Contains(CommonScriptableObjects.playerCoords.Get()))
+        {
+            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
+            UpdateSceneName(sceneInfo.name);
+        }
     }
 }

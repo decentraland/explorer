@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// An on/off action that triggers Start when the input is read and Finished when the input has gone
+/// </summary>
 [CreateAssetMenu(fileName = "InputAction_Hold", menuName = "InputActions/Hold")]
 public class InputAction_Hold : ScriptableObject
 {
@@ -14,13 +17,13 @@ public class InputAction_Hold : ScriptableObject
 
     public bool isOn { get; private set; }
 
-    internal void RaiseOnStarted()
+    public void RaiseOnStarted()
     {
         isOn = true;
         OnStarted?.Invoke(dclAction);
     }
 
-    internal void RaiseOnFinished()
+    public void RaiseOnFinished()
     {
         isOn = false;
         OnFinished?.Invoke(dclAction);

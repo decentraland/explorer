@@ -14,13 +14,12 @@ public class WearableController
 
     public readonly WearableItem wearable;
     protected RendereableAssetLoadHelper loader;
-    private readonly string bodyShapeId;
 
     public string id => wearable.id;
     public string category => wearable.category;
 
     public GameObject assetContainer => loader?.loadedAsset;
-    public bool isReady => loader != null && loader.isFinished;
+    public bool isReady => loader != null && loader.isFinished && assetContainer != null;
 
     protected Renderer[] assetRenderers;
 
@@ -28,28 +27,21 @@ public class WearableController
 
     public bool boneRetargetingDirty = false;
 
-    protected HashSet<string> hiddenList;
+    internal string lastMainFileLoaded = null;
 
-    public WearableController(WearableItem wearableItem, string bodyShapeId)
+    public WearableController(WearableItem wearableItem)
     {
         this.wearable = wearableItem;
-        this.bodyShapeId = bodyShapeId;
-    }
-
-    public void SetHiddenList(HashSet<string> hiddenList)
-    {
-        this.hiddenList = hiddenList;
     }
 
     protected WearableController(WearableController original)
     {
         wearable = original.wearable;
         loader = original.loader;
-        bodyShapeId = original.bodyShapeId;
         assetRenderers = original.assetRenderers;
     }
 
-    public virtual void Load(Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
+    public virtual void Load(string bodyShapeId, Transform parent, Action<WearableController> onSuccess, Action<WearableController> onFail)
     {
         if (isReady)
             return;
@@ -57,6 +49,13 @@ public class WearableController
         boneRetargetingDirty = true;
 
         var representation = wearable.GetRepresentation(bodyShapeId);
+
+        if (representation == null)
+        {
+            onFail?.Invoke(this);
+            return;
+        }
+
         var provider = wearable.GetContentProvider(bodyShapeId);
 
         loader = new RendereableAssetLoadHelper(provider, wearable.baseUrlBundles);
@@ -69,15 +68,34 @@ public class WearableController
 
         assetRenderers = null;
 
-        loader.OnSuccessEvent += (x) =>
+        void OnSuccessWrapper(GameObject gameObject)
         {
-            assetRenderers = x.GetComponentsInChildren<Renderer>();
-            PrepareWearable(x);
-            onSuccess.Invoke(this);
-        };
+            if (loader != null)
+            {
+                loader.OnSuccessEvent -= OnSuccessWrapper;
+            }
+            assetRenderers = gameObject.GetComponentsInChildren<Renderer>();
+            PrepareWearable(gameObject);
+            onSuccess?.Invoke(this);
+        }
 
-        loader.OnFailEvent += () => onFail.Invoke(this);
+        loader.OnSuccessEvent += OnSuccessWrapper;
 
+        void OnFailEventWrapper()
+        {
+            if (loader != null)
+            {
+                loader.OnFailEvent -= OnFailEventWrapper;
+                loader.ClearEvents();
+                lastMainFileLoaded = null;
+                loader = null;
+            }
+            onFail?.Invoke(this);
+        }
+
+        loader.OnFailEvent += OnFailEventWrapper;
+
+        lastMainFileLoaded = representation.mainFile;
         loader.Load(representation.mainFile);
     }
 
@@ -124,7 +142,7 @@ public class WearableController
 
     public void SetAnimatorBones(SkinnedMeshRenderer skinnedMeshRenderer)
     {
-        if (!boneRetargetingDirty) return;
+        if (!boneRetargetingDirty || assetContainer == null) return;
 
         SkinnedMeshRenderer[] skinnedRenderers = assetContainer.GetComponentsInChildren<SkinnedMeshRenderer>();
 
@@ -145,11 +163,14 @@ public class WearableController
 
         if (loader != null)
         {
+            loader.ClearEvents();
             loader.Unload();
+            loader = null;
+            lastMainFileLoaded = null;
         }
     }
 
-    public void SetAssetRenderersEnabled(bool active)
+    public virtual void SetAssetRenderersEnabled(bool active)
     {
         for (var i = 0; i < assetRenderers.Length; i++)
         {
@@ -173,8 +194,16 @@ public class WearableController
     {
     }
 
-    public virtual void UpdateVisibility()
+    public virtual void UpdateVisibility(HashSet<string> hiddenList)
     {
         SetAssetRenderersEnabled(!hiddenList.Contains(wearable.category));
+    }
+
+    public bool IsLoadedForBodyShape(string bodyShapeId)
+    {
+        if (loader == null || !isReady || lastMainFileLoaded == null)
+            return false;
+
+        return wearable.representations.FirstOrDefault(x => x.bodyShapes.Contains(bodyShapeId))?.mainFile == lastMainFileLoaded;
     }
 }

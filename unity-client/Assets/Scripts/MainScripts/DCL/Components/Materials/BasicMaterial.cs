@@ -2,35 +2,57 @@ using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace DCL.Components
 {
     public class BasicMaterial : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string texture;
 
             // value that defines if a pixel is visible or invisible (no transparency gradients)
-            [Range(0f, 1f)] public float alphaTest = 0.5f;
+            [Range(0f, 1f)]
+            public float alphaTest = 0.5f;
+
+            public bool castShadows = true;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
-        public Model model = new Model();
         public Material material;
 
         private DCLTexture dclTexture = null;
 
         private static readonly int _BaseMap = Shader.PropertyToID("_BaseMap");
         private static readonly int _AlphaClip = Shader.PropertyToID("_AlphaClip");
+        private static readonly int _Cutoff = Shader.PropertyToID("_Cutoff");
+        private static readonly int _ZWrite = Shader.PropertyToID("_ZWrite");
 
-        public BasicMaterial(ParcelScene scene) : base(scene)
+        public BasicMaterial()
         {
             material = new Material(Utils.EnsureResourcesMaterial("Materials/BasicShapeMaterial"));
 
             OnAttach += OnMaterialAttached;
             OnDetach += OnMaterialDetached;
+            model = new Model();
+        }
+
+        new public Model GetModel()
+        {
+            return (Model) model;
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.BASIC_MATERIAL;
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)
@@ -42,7 +64,7 @@ namespace DCL.Components
             base.AttachTo(entity);
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             if (material == null)
             {
@@ -53,7 +75,7 @@ namespace DCL.Components
             material.name = "BasicMaterial_" + id;
 #endif
 
-            model = SceneController.i.SafeFromJson<Model>(newJson);
+            Model model = (Model) newModel;
 
             if (!string.IsNullOrEmpty(model.texture))
             {
@@ -76,10 +98,14 @@ namespace DCL.Components
             }
 
             material.EnableKeyword("_ALPHATEST_ON");
-            material.SetInt("_ZWrite", 1);
+            material.SetInt(_ZWrite, 1);
             material.SetFloat(_AlphaClip, 1);
-            material.SetFloat("_Cutoff", model.alphaTest);
+            material.SetFloat(_Cutoff, model.alphaTest);
             material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
+            foreach (DecentralandEntity decentralandEntity in attachedEntities)
+            {
+                InitMaterial(decentralandEntity.meshRootGameObject);
+            }
         }
 
         void OnMaterialAttached(DecentralandEntity entity)
@@ -102,8 +128,13 @@ namespace DCL.Components
                 return;
 
             var meshRenderer = meshGameObject.GetComponent<MeshRenderer>();
+            if (meshRenderer == null)
+                return;
 
-            if (meshRenderer != null && meshRenderer.sharedMaterial != material)
+            Model model = (Model) this.model;
+
+            meshRenderer.shadowCastingMode = model.castShadows ? ShadowCastingMode.On : ShadowCastingMode.Off;
+            if (meshRenderer.sharedMaterial != material)
             {
                 MaterialTransitionController
                     matTransition = meshGameObject.GetComponent<MaterialTransitionController>();
@@ -114,7 +145,7 @@ namespace DCL.Components
                     matTransition.PopulateTargetRendererWithMaterial(matTransition.finalMaterials);
                 }
 
-                SRPBatchingHelper.OptimizeMaterial(meshRenderer, material);
+                SRPBatchingHelper.OptimizeMaterial(material);
                 meshRenderer.sharedMaterial = material;
             }
         }

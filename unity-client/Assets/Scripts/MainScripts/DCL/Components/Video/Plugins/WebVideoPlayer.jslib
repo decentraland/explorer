@@ -136,13 +136,26 @@ var WebVideoPlayer = {
     }
   },
 
-  WebVideoPlayerPlay: function (videoId) {
+  WebVideoPlayerPlay: function (videoId, startTime) {
     try {
       const videoData = videos[Pointer_stringify(videoId)];
       if (videoData.hlsInstance !== undefined) {
         videoData.hlsInstance.attachMedia(videoData.video);
       }
-      videoData.video.play();
+
+      const playPromise = videoData.video.play();
+      if (playPromise !== undefined) {
+          playPromise.then(function () {
+            // Playback starts with no problem
+            if (startTime !== -1) {
+              videoData.video.currentTime = startTime
+            }
+          })
+          .catch(function (error) {
+            // Playback cancelled before the video finished loading (e.g. when teleporting)
+            // we mustn't report this error as it's harmless and affects our metrics
+          });
+        }
     } catch (err) {
       // Exception!
     }
@@ -203,11 +216,8 @@ var WebVideoPlayer = {
     const videoData = videos[Pointer_stringify(videoId)];
     const vid = videoData.video;
 
-    if (second == 0) {
-      const playbackRate = vid.playbackRate;
-      vid.pause();
-      vid.load();
-      vid.play();
+    if (second === 0) {
+      vid.currentTime = 0;
     } else if (vid.seekable && vid.seekable.length > 0) {
       vid.currentTime = second;
     }

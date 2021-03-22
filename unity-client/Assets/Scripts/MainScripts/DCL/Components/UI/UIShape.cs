@@ -1,6 +1,8 @@
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Models;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -41,6 +43,10 @@ namespace DCL.Components
         {
             if (type == Unit.PIXELS) return value;
 
+            // Prevent division by zero
+            if (parentSize <= Mathf.Epsilon)
+                parentSize = 1;
+
             return value / 100 * parentSize;
         }
     }
@@ -49,7 +55,7 @@ namespace DCL.Components
         where ReferencesContainerType : UIReferencesContainer
         where ModelType : UIShape.Model
     {
-        public UIShape(ParcelScene scene) : base(scene)
+        public UIShape()
         {
         }
 
@@ -76,9 +82,9 @@ namespace DCL.Components
         /// <summary>
         /// This is called by UIShapeUpdateHandler before calling ApplyChanges.
         /// </summary>
-        public void PreApplyChanges(string newJson)
+        public void PreApplyChanges(BaseModel newModel)
         {
-            model = SceneController.i.SafeFromJson<ModelType>(newJson);
+            model = (ModelType) newModel;
 
             raiseOnAttached = false;
             firstApplyChangesCall = false;
@@ -134,7 +140,7 @@ namespace DCL.Components
     public class UIShape : BaseDisposable
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public string name;
             public string parentComponent;
@@ -148,6 +154,11 @@ namespace DCL.Components
             public UIValue positionY = new UIValue(0f);
             public bool isPointerBlocker = true;
             public string onClick;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
         public override string componentName => GetDebugName();
@@ -155,15 +166,21 @@ namespace DCL.Components
         public UIReferencesContainer referencesContainer;
         public RectTransform childHookRectTransform;
 
-        public Model model = new Model();
         public UIShape parentUIComponent { get; protected set; }
 
-        public UIShape(ParcelScene scene) : base(scene)
+        public UIShape()
         {
+            model = new Model();
+        }
+
+        public override int GetClassId()
+        {
+            return (int) CLASS_ID.UI_IMAGE_SHAPE;
         }
 
         public string GetDebugName()
         {
+            Model model = (Model) this.model;
             if (string.IsNullOrEmpty(model.name))
             {
                 return GetType().Name;
@@ -174,13 +191,14 @@ namespace DCL.Components
             }
         }
 
-        public override IEnumerator ApplyChanges(string newJson)
+        public override IEnumerator ApplyChanges(BaseModel newJson)
         {
             return null;
         }
 
         internal T InstantiateUIGameObject<T>(string prefabPath) where T : UIReferencesContainer
         {
+            Model model = (Model) this.model;
             GameObject uiGameObject = null;
             bool targetParentExists = !string.IsNullOrEmpty(model.parentComponent) &&
                                       scene.disposableComponents.ContainsKey(model.parentComponent);
@@ -193,12 +211,12 @@ namespace DCL.Components
                 }
                 else
                 {
-                    parentUIComponent = scene.uiScreenSpace as UIShape;
+                    parentUIComponent = scene.GetSharedComponent<UIScreenSpace>();
                 }
             }
             else
             {
-                parentUIComponent = scene.uiScreenSpace as UIShape;
+                parentUIComponent = scene.GetSharedComponent<UIScreenSpace>();
             }
 
             uiGameObject =
@@ -246,6 +264,8 @@ namespace DCL.Components
                 parentTransform = referencesContainer.GetComponentInParent<RectTransform>();
             }
 
+            Model model = (Model) this.model;
+
             referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 model.width.GetScaledValue(parentTransform.rect.width));
             referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
@@ -264,11 +284,13 @@ namespace DCL.Components
             Utils.ForceRebuildLayoutImmediate(parentTransform);
             referencesContainer.layoutElement.ignoreLayout = true;
 
+            Model model = (Model) this.model;
             // Reposition
             Vector3 position = Vector3.zero;
             position.x = model.positionX.GetScaledValue(parentTransform.rect.width);
             position.y = model.positionY.GetScaledValue(parentTransform.rect.height);
 
+            position = Utils.Sanitize(position);
             referencesContainer.layoutElementRT.localPosition += position;
         }
 
@@ -342,7 +364,7 @@ namespace DCL.Components
             }
             else
             {
-                parentUIComponent = scene.uiScreenSpace as UIShape;
+                parentUIComponent = scene.GetSharedComponent<UIScreenSpace>();
             }
 
             targetTransform.SetParent(parentUIComponent.childHookRectTransform, false);
@@ -368,6 +390,7 @@ namespace DCL.Components
 
         protected void ConfigureAlignment(LayoutGroup layout)
         {
+            Model model = (Model) this.model;
             switch (model.vAlign)
             {
                 case "top":
@@ -436,7 +459,12 @@ namespace DCL.Components
             base.Dispose();
         }
 
-        public virtual void OnChildAttached(UIShape parentComponent, UIShape childComponent) { }
-        public virtual void OnChildDetached(UIShape parentComponent, UIShape childComponent) { }
+        public virtual void OnChildAttached(UIShape parentComponent, UIShape childComponent)
+        {
+        }
+
+        public virtual void OnChildDetached(UIShape parentComponent, UIShape childComponent)
+        {
+        }
     }
 }

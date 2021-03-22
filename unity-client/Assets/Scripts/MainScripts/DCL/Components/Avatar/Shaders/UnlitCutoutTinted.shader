@@ -1,6 +1,7 @@
 ﻿Shader "DCL/Unlit Cutout Tinted" {
 Properties {
     _BaseMap ("Base (RGB) Trans (A)", 2D) = "white" {}
+    _TintMask ("Mask for tint (Monochannel) (1 == no tint, 0 == tint)", 2D) = "black" {}
     _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
     _BaseColor ("Color", Color) = (0,0,0,0)
 }
@@ -22,7 +23,6 @@ SubShader {
             struct appdata_t {
                 float4 vertex : POSITION;
                 float2 texcoord : TEXCOORD0;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
  
             struct v2f {
@@ -33,14 +33,17 @@ SubShader {
             };
  
             sampler2D _BaseMap;
-            float4 _BaseMap_ST;
-            fixed _Cutoff;
-            fixed4 _BaseColor;
- 
+            sampler2D _TintMask;
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _BaseMap_ST;
+                fixed _Cutoff;
+                fixed4 _BaseColor;
+            CBUFFER_END
+            
             v2f vert (appdata_t v)
             {
                 v2f o;
-                UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.texcoord = TRANSFORM_TEX(v.texcoord, _BaseMap);
@@ -50,7 +53,10 @@ SubShader {
  
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_BaseMap, i.texcoord) * _BaseColor;
+                fixed4 col = tex2D(_BaseMap, i.texcoord);
+
+                col *= lerp(float4(1,1,1,1), _BaseColor, (1.0 - tex2D(_TintMask, i.texcoord).r));
+
                 clip(col.a - _Cutoff);
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

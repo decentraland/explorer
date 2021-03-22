@@ -4,6 +4,7 @@
 import { WebWorkerTransport } from 'decentraland-rpc'
 
 import defaultLogger from 'shared/logger'
+import { WorldConfig } from 'shared/meta/types'
 import { ILand, InstancedSpawnPoint } from 'shared/types'
 
 import { SceneDataDownloadManager, TileIdPair } from './controllers/download'
@@ -38,18 +39,22 @@ let downloadManager: SceneDataDownloadManager
     'Lifecycle.initialize',
     (options: {
       contentServer: string
-      metaContentServer: string
+      catalystServer: string
       metaContentService: string
       contentServerBundles: string
+      rootUrl: string
       lineOfSightRadius: number
       secureRadius: number
       emptyScenes: boolean
+      worldConfig: WorldConfig
     }) => {
       downloadManager = new SceneDataDownloadManager({
         contentServer: options.contentServer,
-        metaContentServer: options.metaContentServer,
+        catalystServer: options.catalystServer,
         metaContentService: options.metaContentService,
-        contentServerBundles: options.contentServerBundles
+        contentServerBundles: options.contentServerBundles,
+        worldConfig: options.worldConfig,
+        rootUrl: options.rootUrl
       })
       parcelController = new ParcelLifeCycleController({
         lineOfSightRadius: options.lineOfSightRadius,
@@ -101,6 +106,10 @@ let downloadManager: SceneDataDownloadManager
             data: scene[1]
           })
         }
+      })
+
+      connector.on('Scene.reload', (data: { sceneId: string }) => {
+        sceneController.reloadScene(data.sceneId)
       })
 
       connector.on('Scene.prefetchDone', (opt: { sceneId: string }) => {

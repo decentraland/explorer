@@ -1,14 +1,26 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 internal class ExploreHUDView : MonoBehaviour
 {
+    public event UnityAction OnCloseButtonPressed;
+
     [SerializeField] internal HighlightScenesController highlightScenesController;
     [SerializeField] internal ShowHideAnimator popup;
     [SerializeField] internal Button_OnPointerDown closeButton;
     [SerializeField] internal GotoMagicButton gotoMagicButton;
     [SerializeField] internal Button_OnPointerDown togglePopupButton;
     [SerializeField] internal Color[] friendColors = null;
+    [SerializeField] internal InputAction_Trigger closeAction;
+
+    private InputAction_Trigger.Triggered closeActionDelegate;
+
+    private void Awake()
+    {
+        closeActionDelegate = (x) => RaiseOnClose();
+        closeButton.onPointerDown += RaiseOnClose;
+    }
 
     public void SetVisibility(bool visible)
     {
@@ -24,7 +36,6 @@ internal class ExploreHUDView : MonoBehaviour
         {
             popup.Hide();
         }
-
     }
 
     public bool IsVisible()
@@ -42,8 +53,23 @@ internal class ExploreHUDView : MonoBehaviour
         highlightScenesController.RefreshIfNeeded();
     }
 
-    public void Initialize(ExploreMiniMapDataController mapDataController, FriendTrackerController friendsController)
+    public void Initialize(FriendTrackerController friendsController)
     {
-        highlightScenesController.Initialize(mapDataController, friendsController);
+        highlightScenesController.Initialize(friendsController);
+    }
+
+    private void RaiseOnClose()
+    {
+        OnCloseButtonPressed?.Invoke();
+    }
+
+    private void OnEnable()
+    {
+        closeAction.OnTriggered += closeActionDelegate;
+    }
+
+    private void OnDisable()
+    {
+        closeAction.OnTriggered -= closeActionDelegate;
     }
 }

@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace Tests
 {
-    public class UUIDComponentTests : TestsBase
+    public class UUIDComponentTests : IntegrationTestSuite_Legacy
     {
         protected override bool enableSceneIntegrityChecker => false;
 
@@ -20,8 +20,7 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            PointerEventsController.i.Initialize(isTesting: true);
-            SceneController.i.useBoundariesChecker = false;
+            Environment.i.world.sceneBoundsChecker.Stop();
 
             // Set character position and camera rotation
             DCLCharacterController.i.PauseGravity();
@@ -509,9 +508,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnClickEventIsTriggered()
         {
-            DecentralandEntity entity;
-            BoxShape shape;
-            InstantiateEntityWithShape(out entity, out shape);
+            InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
@@ -520,13 +517,18 @@ namespace Tests
             yield return shape.routine;
 
             string onPointerId = "pointerevent-1";
-            var OnClickComponentModel = new OnClick.Model()
+            var OnClickComponentModel = new OnPointerEvent.Model()
             {
                 type = OnClick.NAME,
                 uuid = onPointerId
             };
-            var component = TestHelpers.EntityComponentCreate<OnClick, OnClick.Model>(scene, entity,
-                OnClickComponentModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+
+            var component = TestHelpers.EntityComponentCreate<OnClick, OnPointerEvent.Model>(
+                scene,
+                entity,
+                OnClickComponentModel,
+                CLASS_ID_COMPONENT.UUID_CALLBACK
+            );
 
             Assert.IsTrue(component != null);
 
@@ -543,17 +545,29 @@ namespace Tests
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
-                () => { InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
-                (pointerEvent) =>
+            yield return TestHelpers.ExpectMessageToKernel(
+                targetEventType,
+                sceneEvent,
+                () =>
                 {
-                    if (pointerEvent.eventType == sceneEvent.eventType && pointerEvent.payload.uuid == sceneEvent.payload.uuid)
-                    {
-                        eventTriggered = true;
+                    InputController_Legacy.i.RaiseEvent(
+                        WebInterface.ACTION_BUTTON.POINTER,
+                        DCL.InputController_Legacy.EVENT.BUTTON_DOWN,
+                        true);
+                },
+                (eventObj) =>
+                {
+                    if (eventTriggered)
                         return true;
-                    }
 
-                    return false;
+                    if (eventObj.eventType != sceneEvent.eventType)
+                        return false;
+
+                    if (eventObj.payload.uuid != sceneEvent.payload.uuid)
+                        return false;
+
+                    eventTriggered = true;
+                    return true;
                 });
 
             Assert.IsTrue(eventTriggered);
@@ -562,9 +576,7 @@ namespace Tests
         [UnityTest]
         public IEnumerator OnPointerDownEventIsTriggered()
         {
-            DecentralandEntity entity;
-            BoxShape shape;
-            InstantiateEntityWithShape(out entity, out shape);
+            InstantiateEntityWithShape(out DecentralandEntity entity, out BoxShape shape);
             TestHelpers.SetEntityTransform(scene, entity, new Vector3(9f, 1.5f, 11.0f), Quaternion.identity, new Vector3(5, 5, 5));
 
             cameraController.SetRotation(0, 0, 0, new Vector3(1, 0, 0));
@@ -573,7 +585,7 @@ namespace Tests
             yield return shape.routine;
 
             string onPointerId = "pointerevent-1";
-            var OnPointerDownModel = new OnPointerDown.Model()
+            var OnPointerDownModel = new OnPointerEvent.Model()
             {
                 type = OnPointerDown.NAME,
                 uuid = onPointerId
@@ -598,10 +610,13 @@ namespace Tests
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
+                    if (eventTriggered)
+                        return true;
+
                     //Debug.Log($"triggered? \npointerEvent {JsonUtility.ToJson(pointerEvent, true)}\nsceneEvent {JsonUtility.ToJson(sceneEvent, true)}");
 
                     if (pointerEvent.eventType == sceneEvent.eventType &&
@@ -659,10 +674,13 @@ namespace Tests
 
             DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true); },
                 (pointerEvent) =>
                 {
+                    if (eventTriggered)
+                        return true;
+
                     if (pointerEvent.eventType == sceneEvent.eventType &&
                         pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
                         pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
@@ -714,52 +732,56 @@ namespace Tests
             sceneEvent.sceneId = scene.sceneData.id;
             sceneEvent.payload = onPointerUpEvent;
             sceneEvent.eventType = "uuidEvent";
-            bool eventTriggered = false;
 
+            bool eventTriggered1 = false;
             DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
 
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true); },
                 (pointerEvent) =>
                 {
+                    if (eventTriggered1)
+                        return true;
+
                     if (pointerEvent.eventType == sceneEvent.eventType &&
                         pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
                         pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
                     {
-                        eventTriggered = true;
+                        eventTriggered1 = true;
                         return true;
                     }
 
                     return false;
                 });
 
-            Assert.IsTrue(eventTriggered);
+            Assert.IsTrue(eventTriggered1);
 
             // turn shape invisible
-            TestHelpers.UpdateShape(scene, shape.id, JsonConvert.SerializeObject(
-                new
-                {
-                    visible = false
-                }));
-
+            TestHelpers.UpdateShape(scene, shape.id, JsonConvert.SerializeObject(new {visible = false}));
             DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true);
-            eventTriggered = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
-                () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_UP, true); },
-                (pointerEvent) =>
+
+            var pointerUpReceived = false;
+
+            void MsgFromEngineCallback(string eventType, string eventPayload)
+            {
+                if (string.IsNullOrEmpty(eventPayload) || eventType != targetEventType)
+                    return;
+
+                var pointerEvent = JsonUtility.FromJson<WebInterface.SceneEvent<WebInterface.OnPointerUpEvent>>(eventPayload);
+                if (pointerEvent.eventType == sceneEvent.eventType
+                    && pointerEvent.payload.uuid == sceneEvent.payload.uuid
+                    && pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
                 {
-                    if (pointerEvent.eventType == sceneEvent.eventType &&
-                        pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
-                        pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
-                    {
-                        eventTriggered = true;
-                        return true;
-                    }
+                    pointerUpReceived = true;
+                }
+            }
 
-                    return false;
-                });
+            // Hook up to web interface engine message reporting
+            WebInterface.OnMessageFromEngine += MsgFromEngineCallback;
+            InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, InputController_Legacy.EVENT.BUTTON_UP, true);
+            WebInterface.OnMessageFromEngine -= MsgFromEngineCallback;
 
-            Assert.IsFalse(eventTriggered);
+            Assert.IsFalse(pointerUpReceived);
         }
 
         [UnityTest]
@@ -814,7 +836,7 @@ namespace Tests
 
             // Check if target entity is hit behind other entity
             bool targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -839,7 +861,7 @@ namespace Tests
 
             // Check if target entity is hit in front of the camera without being blocked
             targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -916,7 +938,7 @@ namespace Tests
 
             // Check the target entity is not hit behind the 'isPointerBlocker' shape
             bool targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -940,7 +962,7 @@ namespace Tests
 
             // Check the target entity is hit behind the 'isPointerBlocker' shape now
             targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -1009,7 +1031,7 @@ namespace Tests
 
             // Check if target entity is triggered by hitting the parent entity
             bool targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -1033,7 +1055,7 @@ namespace Tests
 
             // Check if target entity is triggered when hit directly
             targetEntityHit = false;
-            yield return TestHelpers.WaitForEventFromEngine(targetEventType, sceneEvent,
+            yield return TestHelpers.ExpectMessageToKernel(targetEventType, sceneEvent,
                 () => { DCL.InputController_Legacy.i.RaiseEvent(WebInterface.ACTION_BUTTON.POINTER, DCL.InputController_Legacy.EVENT.BUTTON_DOWN, true); },
                 (pointerEvent) =>
                 {
@@ -1080,7 +1102,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvasController = PointerEventsController.i.interactionHoverCanvasController;
+            var hoverCanvasController = InteractionHoverCanvasController.i;
             Assert.IsNotNull(hoverCanvasController);
             Assert.IsTrue(hoverCanvasController.canvas.enabled);
 
@@ -1133,7 +1155,7 @@ namespace Tests
 
             yield return null;
 
-            var hoverCanvas = PointerEventsController.i.GetComponentInChildren<InteractionHoverCanvasController>().canvas;
+            var hoverCanvas = InteractionHoverCanvasController.i.canvas;
             Assert.IsNotNull(hoverCanvas);
 
             Assert.IsTrue(hoverCanvas.enabled);

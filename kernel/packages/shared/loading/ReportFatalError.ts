@@ -1,14 +1,19 @@
+declare var window: Window & { Rollbar: any }
 import { action } from 'typesafe-actions'
 import {
-  ExecutionLifecycleEvent,
   COMMS_COULD_NOT_BE_ESTABLISHED,
-  NOT_INVITED,
-  NO_WEBGL_COULD_BE_CREATED,
+  fatalError,
+  ExecutionLifecycleEvent,
+  ExecutionLifecycleEventsList,
   MOBILE_NOT_SUPPORTED,
+  NETWORK_MISMATCH,
   NEW_LOGIN,
-  NETWORK_MISMATCH
+  NO_WEBGL_COULD_BE_CREATED,
+  NOT_INVITED
 } from './types'
 import { StoreContainer } from 'shared/store/rootTypes'
+import Html from '../Html'
+import { queueTrackingEvent } from '../analytics'
 
 declare const globalThis: StoreContainer
 
@@ -21,8 +26,8 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
   const body = document.body
   const container = document.getElementById('gameContainer')
   container!.setAttribute('style', 'display: none !important')
-  const progressBar = document.getElementById('progress-bar')
-  progressBar!.setAttribute('style', 'display: none !important')
+
+  Html.hideProgressBar()
 
   body.setAttribute('style', 'background-image: none !important;')
 
@@ -40,12 +45,52 @@ export function bringDownClientAndShowError(event: ExecutionLifecycleEvent) {
       : event === NETWORK_MISMATCH
       ? 'networkmismatch'
       : 'fatal'
-
-  document.getElementById('error-' + targetError)!.setAttribute('style', 'display: block !important')
+  globalThis.globalStore && globalThis.globalStore.dispatch(fatalError(targetError))
+  Html.showErrorModal(targetError)
   aborted = true
 }
 
-export function ReportFatalError(event: ExecutionLifecycleEvent) {
+export type FatalErrorInfo = {
+  type: string
+  message: string
+  stack?: string
+  sagaStack?: string
+  filename?: string
+}
+
+export function ReportFatalError(event: ExecutionLifecycleEvent, errorInfo?: FatalErrorInfo) {
   bringDownClientAndShowError(event)
-  globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
+  if (ExecutionLifecycleEventsList.includes(event)) {
+    return globalThis.globalStore && globalThis.globalStore.dispatch(action(event))
+  }
+  queueTrackingEvent('generic_error', {
+    message: event,
+    errorInfo
+  })
+}
+
+export function ReportSceneError(message: string, error: any) {
+  const eventData = {
+    error,
+    scene: true,
+    message,
+    position: new URLSearchParams(location.search).get('position')
+  }
+  queueTrackingEvent('scene_error', eventData)
+  if (window.Rollbar) {
+    window.Rollbar.error(message, eventData)
+  }
+}
+
+export function ReportRendererInterfaceError(message: string, error: any) {
+  const eventData = {
+    error,
+    message,
+    rendererInterface: true,
+    position: new URLSearchParams(location.search).get('position')
+  }
+  queueTrackingEvent('renderer_interface_error', eventData)
+  if (window.Rollbar) {
+    window.Rollbar.error(message, eventData)
+  }
 }

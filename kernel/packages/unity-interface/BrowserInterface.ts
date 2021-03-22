@@ -1,43 +1,61 @@
 import { uuid } from 'decentraland-ecs/src'
-import { persistCurrentUser, sendPublicChatMessage } from 'shared/comms'
+import { sendPublicChatMessage } from 'shared/comms'
 import { AvatarMessageType } from 'shared/comms/interface/types'
-import { avatarMessageObservable, getUserProfile } from 'shared/comms/peers'
-import { getProfile, hasConnectedWeb3 } from 'shared/profiles/selectors'
+import { avatarMessageObservable } from 'shared/comms/peers'
+import { hasConnectedWeb3 } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
 import { reportScenesAroundParcel } from 'shared/atlas/actions'
-import { playerConfigurations, ethereumConfigurations, decentralandConfigurations } from 'config'
-import { ReadOnlyQuaternion, ReadOnlyVector3, Vector3, Quaternion } from '../decentraland-ecs/src/decentraland/math'
+import { decentralandConfigurations, ethereumConfigurations, playerConfigurations, WORLD_EXPLORER } from 'config'
+import { Quaternion, ReadOnlyQuaternion, ReadOnlyVector3, Vector3 } from '../decentraland-ecs/src/decentraland/math'
 import { IEventNames } from '../decentraland-ecs/src/decentraland/Types'
 import { sceneLifeCycleObservable } from '../decentraland-loader/lifecycle/controllers/scene'
-import { queueTrackingEvent } from 'shared/analytics'
+import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
-import { saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar, Profile } from 'shared/profiles/types'
-import { getPerformanceInfo } from 'shared/session/getPerformanceInfo'
-import { ChatMessage, FriendshipUpdateStatusMessage, FriendshipAction, WorldPosition } from 'shared/types'
-import { getSceneWorkerBySceneID } from 'shared/world/parcelSceneManager'
+import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
+import { Avatar, ProfileType } from 'shared/profiles/types'
+import {
+  ChatMessage,
+  FriendshipUpdateStatusMessage,
+  FriendshipAction,
+  WorldPosition,
+  LoadableParcelScene
+} from 'shared/types'
+import { getSceneWorkerBySceneID, setNewParcelScene, stopParcelSceneWorker } from 'shared/world/parcelSceneManager'
+import { getPerformanceInfo, getRawPerformanceInfo } from 'shared/session/getPerformanceInfo'
 import { positionObservable } from 'shared/world/positionThings'
-import { worldRunningObservable } from 'shared/world/worldState'
-import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+import { renderStateObservable } from 'shared/world/worldState'
 import { sendMessage } from 'shared/chat/actions'
-import { updateUserData, updateFriendship } from 'shared/friends/actions'
-import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
-import { changeRealm, catalystRealmConnected, candidatesFetched } from 'shared/dao'
+import { updateFriendship, updateUserData } from 'shared/friends/actions'
+import { candidatesFetched, catalystRealmConnected, changeRealm } from 'shared/dao'
 import { notifyStatusThroughChat } from 'shared/comms/chat'
-import { getAppNetwork, fetchOwner } from 'shared/web3'
+import { fetchENSOwner, getAppNetwork } from 'shared/web3'
 import { updateStatusMessage } from 'shared/loading/actions'
-import { UnityParcelScene } from './UnityParcelScene'
+import { blockPlayers, mutePlayers, unblockPlayers, unmutePlayers } from 'shared/social/actions'
 import { setAudioStream } from './audioStream'
-import { logout } from 'shared/session/actions'
+import { changeSignUpStage, logout, redirectToSignUp, signUpCancel, signUpSetProfile } from 'shared/session/actions'
 import { getIdentity, hasWallet } from 'shared/session'
 import { StoreContainer } from 'shared/store/rootTypes'
 import { unityInterface } from './UnityInterface'
+import { setDelightedSurveyEnabled } from './delightedSurvey'
 import { IFuture } from 'fp-future'
 import { reportHotScenes } from 'shared/social/hotScenes'
-
 import { GIFProcessor } from 'gif-processor/processor'
+import { setVoiceChatRecording, setVoicePolicy, setVoiceVolume, toggleVoiceChatRecording } from 'shared/comms/actions'
 import { getERC20Balance } from 'shared/ethereum/EthereumService'
+import { StatefulWorker } from 'shared/world/StatefulWorker'
+import { getCurrentUserId } from 'shared/session/selectors'
+import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
+import Html from 'shared/Html'
+import { reloadScene } from 'decentraland-loader/lifecycle/utils/reloadScene'
+import { isGuest } from '../shared/ethereum/provider'
+import { killPortableExperienceScene } from './portableExperiencesUtils'
+import { wearablesRequest } from 'shared/catalogs/actions'
+import { WearablesRequestFilters } from 'shared/catalogs/types'
+import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
+
 declare const DCL: any
 
 declare const globalThis: StoreContainer
@@ -54,18 +72,32 @@ const positionEvent = {
   quaternion: Quaternion.Identity,
   rotation: Vector3.Zero(),
   playerHeight: playerConfigurations.height,
-  mousePosition: Vector3.Zero()
+  mousePosition: Vector3.Zero(),
+  immediate: false // By default the renderer lerps avatars position
 }
 
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
 
   /** Triggered when the camera moves */
-  public ReportPosition(data: { position: ReadOnlyVector3; rotation: ReadOnlyQuaternion; playerHeight?: number }) {
+  public ReportPosition(data: {
+    position: ReadOnlyVector3
+    rotation: ReadOnlyQuaternion
+    playerHeight?: number
+    immediate?: boolean
+  }) {
     positionEvent.position.set(data.position.x, data.position.y, data.position.z)
     positionEvent.quaternion.set(data.rotation.x, data.rotation.y, data.rotation.z, data.rotation.w)
     positionEvent.rotation.copyFrom(positionEvent.quaternion.eulerAngles)
     positionEvent.playerHeight = data.playerHeight || playerConfigurations.height
+
+    // By default the renderer lerps avatars position
+    positionEvent.immediate = false
+
+    if (data.immediate !== undefined) {
+      positionEvent.immediate = data.immediate
+    }
+
     positionObservable.notifyObservers(positionEvent)
   }
 
@@ -78,8 +110,7 @@ export class BrowserInterface {
   public SceneEvent(data: { sceneId: string; eventType: string; payload: any }) {
     const scene = getSceneWorkerBySceneID(data.sceneId)
     if (scene) {
-      const parcelScene = scene.parcelScene as UnityParcelScene
-      parcelScene.emit(data.eventType as IEventNames, data.payload)
+      scene.emit(data.eventType as IEventNames, data.payload)
     } else {
       if (data.eventType !== 'metricsUpdate') {
         defaultLogger.error(`SceneEvent: Scene ${data.sceneId} not found`, data)
@@ -96,16 +127,19 @@ export class BrowserInterface {
     queueTrackingEvent('hiccup report', data)
   }
 
-  public PerformanceReport(samples: string) {
-    const perfReport = getPerformanceInfo(samples)
+  public PerformanceReport(data: { samples: string; fpsIsCapped: boolean }) {
+    const perfReport = getPerformanceInfo(data)
     queueTrackingEvent('performance report', perfReport)
+
+    const rawPerfReport = getRawPerformanceInfo(data)
+    queueTrackingEvent('raw perf report', rawPerfReport)
   }
 
   public PreloadFinished(data: { sceneId: string }) {
     // stub. there is no code about this in unity side yet
   }
 
-  public Track(data: { name: string, properties: ({ key: string, value: string }[] | null) }) {
+  public Track(data: { name: string; properties: { key: string; value: string }[] | null }) {
     const properties: Record<string, string> = {}
     if (data.properties) {
       for (const property of data.properties) {
@@ -157,31 +191,60 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(logout())
   }
 
+  public RedirectToSignUp() {
+    globalThis.globalStore.dispatch(redirectToSignUp())
+  }
+
   public SaveUserInterests(interests: string[]) {
     if (!interests) {
       return
     }
     const unique = new Set<string>(interests)
-    const profile: Profile = getUserProfile().profile as Profile
-    globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, interests: Array.from(unique) }))
+
+    globalThis.globalStore.dispatch(saveProfileRequest({ interests: Array.from(unique) }))
   }
 
-  public SaveUserAvatar(changes: { face: string; face128: string; face256: string; body: string; avatar: Avatar }) {
+  public SaveUserAvatar(changes: {
+    face: string
+    face128: string
+    face256: string
+    body: string
+    avatar: Avatar
+    isSignUpFlow?: boolean
+  }) {
     const { face, face128, face256, body, avatar } = changes
-    const profile: Profile = getUserProfile().profile as Profile
-    const updated = { ...profile, avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
-    globalThis.globalStore.dispatch(saveProfileRequest(updated))
+    const update = { avatar: { ...avatar, snapshots: { face, face128, face256, body } } }
+    if (!changes.isSignUpFlow) {
+      globalThis.globalStore.dispatch(saveProfileRequest(update))
+    } else {
+      globalThis.globalStore.dispatch(signUpSetProfile(update))
+      globalThis.globalStore.dispatch(changeSignUpStage('passport'))
+      Html.switchGameContainer(false)
+      unityInterface.DeactivateRendering()
+    }
+  }
+
+  public RequestOwnProfileUpdate() {
+    const userId = getCurrentUserId(globalThis.globalStore.getState())
+    if (!isGuest() && userId) {
+      globalThis.globalStore.dispatch(profileRequest(userId))
+    }
+  }
+
+  public SaveUserUnverifiedName(changes: { newUnverifiedName: string }) {
+    globalThis.globalStore.dispatch(saveProfileRequest({ unclaimedName: changes.newUnverifiedName }))
+  }
+
+  public CloseUserAvatar(isSignUpFlow = false) {
+    if (isSignUpFlow) {
+      unityInterface.DeactivateRendering()
+      globalThis.globalStore.dispatch(signUpCancel())
+    }
   }
 
   public SaveUserTutorialStep(data: { tutorialStep: number }) {
-    const profile: Profile = getUserProfile().profile as Profile
-    profile.tutorialStep = data.tutorialStep
-    globalThis.globalStore.dispatch(saveProfileRequest(profile))
-
-    persistCurrentUser({
-      version: profile.version,
-      profile: profileToRendererFormat(profile, getIdentity())
-    })
+    const update = { tutorialStep: data.tutorialStep }
+    globalThis.globalStore.dispatch(saveProfileRequest(update))
   }
 
   public ControlEvent({ eventType, payload }: { eventType: string; payload: any }) {
@@ -193,8 +256,24 @@ export class BrowserInterface {
       }
       case 'ActivateRenderingACK': {
         if (!aborted) {
-          worldRunningObservable.notifyObservers(true)
+          renderStateObservable.notifyObservers(true)
         }
+        break
+      }
+      case 'StartStatefulMode': {
+        const { sceneId } = payload
+        const worker = getSceneWorkerBySceneID(sceneId)!
+        unityInterface.UnloadScene(sceneId) // Maybe unity should do it by itself?
+        const parcelScene = worker.getParcelScene()
+        stopParcelSceneWorker(worker)
+        const data = parcelScene.data.data as LoadableParcelScene
+        unityInterface.LoadParcelScenes([data]) // Maybe unity should do it by itself?
+        setNewParcelScene(sceneId, new StatefulWorker(parcelScene))
+        break
+      }
+      case 'StopStatefulMode': {
+        const { sceneId } = payload
+        reloadScene(sceneId).catch((error) => defaultLogger.warn(`Failed to stop stateful mode`, error))
         break
       }
       default: {
@@ -217,8 +296,8 @@ export class BrowserInterface {
     // It's disabled because of security reasons.
   }
 
-  public EditAvatarClicked() {
-    // We used to call delightedSurvey() here
+  public SetDelightedSurveyEnabled(data: { enabled: boolean }) {
+    setDelightedSurveyEnabled(data.enabled)
   }
 
   public ReportScene(sceneId: string) {
@@ -230,43 +309,17 @@ export class BrowserInterface {
   }
 
   public BlockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
-
-    if (profile) {
-      let blocked: string[] = [data.userId]
-
-      if (profile.blocked) {
-        for (let blockedUser of profile.blocked) {
-          if (blockedUser === data.userId) {
-            return
-          }
-        }
-
-        // Merge the existing array and any previously blocked users
-        blocked = [...profile.blocked, ...blocked]
-      }
-
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
-    }
+    globalThis.globalStore.dispatch(blockPlayers([data.userId]))
   }
 
   public UnblockPlayer(data: { userId: string }) {
-    const profile = getProfile(globalThis.globalStore.getState(), getIdentity().address)
-
-    if (profile) {
-      const blocked = profile.blocked ? profile.blocked.filter((id) => id !== data.userId) : []
-      globalThis.globalStore.dispatch(saveProfileRequest({ ...profile, blocked }))
-    }
+    globalThis.globalStore.dispatch(unblockPlayers([data.userId]))
   }
 
   public ReportUserEmail(data: { userEmail: string }) {
-    const profile = getUserProfile().profile
-    if (profile) {
-      if (hasWallet()) {
-        window.analytics.identify(profile.userId, { email: data.userEmail })
-      } else {
-        window.analytics.identify({ email: data.userEmail })
-      }
+    const userId = getCurrentUserId(globalThis.globalStore.getState())
+    if (userId) {
+      identifyEmail(data.userEmail, hasWallet() ? userId : undefined)
     }
   }
 
@@ -282,20 +335,33 @@ export class BrowserInterface {
     globalThis.globalStore.dispatch(sendMessage(data.message))
   }
 
+  public SetVoiceChatRecording(recordingMessage: { recording: boolean }) {
+    globalThis.globalStore.dispatch(setVoiceChatRecording(recordingMessage.recording))
+  }
+
+  public ToggleVoiceChatRecording() {
+    globalThis.globalStore.dispatch(toggleVoiceChatRecording())
+  }
+
+  public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
+    globalThis.globalStore.dispatch(setVoiceVolume(settingsMessage.voiceChatVolume))
+    globalThis.globalStore.dispatch(setVoicePolicy(settingsMessage.voiceChatAllowCategory))
+  }
+
   public async UpdateFriendshipStatus(message: FriendshipUpdateStatusMessage) {
     let { userId, action } = message
 
     // TODO - fix this hack: search should come from another message and method should only exec correct updates (userId, action) - moliva - 01/05/2020
     let found = false
     if (action === FriendshipAction.REQUESTED_TO) {
-      await ProfileAsPromise(userId) // ensure profile
+      await ensureFriendProfile(userId)
       found = hasConnectedWeb3(globalThis.globalStore.getState(), userId)
     }
 
     if (!found) {
       // if user profile was not found on server -> no connected web3, check if it's a claimed name
       const net = await getAppNetwork()
-      const address = await fetchOwner(ethereumConfigurations[net].names, userId)
+      const address = await fetchENSOwner(ethereumConfigurations[net].names, userId)
       if (address) {
         // if an address was found for the name -> set as user id & add that instead
         userId = address
@@ -312,6 +378,19 @@ export class BrowserInterface {
 
     globalThis.globalStore.dispatch(updateUserData(userId.toLowerCase(), toSocialId(userId)))
     globalThis.globalStore.dispatch(updateFriendship(action, userId.toLowerCase(), false))
+  }
+
+  public SearchENSOwner(data: { name: string; maxResults?: number }) {
+    const profilesPromise = fetchENSOwnerProfile(data.name, data.maxResults)
+
+    profilesPromise
+      .then((profiles) => {
+        unityInterface.SetENSOwnerQueryResult(data.name, profiles)
+      })
+      .catch((error) => {
+        unityInterface.SetENSOwnerQueryResult(data.name, undefined)
+        defaultLogger.error(error)
+      })
   }
 
   public async JumpIn(data: WorldPosition) {
@@ -356,9 +435,11 @@ export class BrowserInterface {
   }
 
   public FetchHotScenes() {
-    reportHotScenes().catch((e: any) => {
-      return defaultLogger.error('FetchHotScenes error', e)
-    })
+    if (WORLD_EXPLORER) {
+      reportHotScenes().catch((e: any) => {
+        return defaultLogger.error('FetchHotScenes error', e)
+      })
+    }
   }
 
   public SetBaseResolution(data: { baseResolution: number }) {
@@ -366,14 +447,6 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
-    // tslint:disable-next-line
-    const isSupported = (typeof OffscreenCanvas !== "undefined") && (typeof OffscreenCanvasRenderingContext2D === "function")
-
-    if (!isSupported) {
-      unityInterface.RejectGIFProcessingRequest()
-      return
-    }
-
     if (!DCL.gifProcessor) {
       DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
@@ -381,10 +454,16 @@ export class BrowserInterface {
     DCL.gifProcessor.ProcessGIF(data)
   }
 
+  public DeleteGIF(data: { value: string }) {
+    if (DCL.gifProcessor) {
+      DCL.gifProcessor.DeleteGIF(data.value)
+    }
+  }
+
   public async FetchBalanceOfMANA() {
     const identity = getIdentity()
 
-    if (!identity.hasConnectedWeb3) {
+    if (!identity?.hasConnectedWeb3) {
       return
     }
 
@@ -393,6 +472,45 @@ export class BrowserInterface {
       this.lastBalanceOfMana = balance
       unityInterface.UpdateBalanceOfMANA(`${balance}`)
     }
+  }
+
+  public SetMuteUsers(data: { usersId: string[]; mute: boolean }) {
+    if (data.mute) {
+      globalThis.globalStore.dispatch(mutePlayers(data.usersId))
+    } else {
+      globalThis.globalStore.dispatch(unmutePlayers(data.usersId))
+    }
+  }
+
+  public async KillPortableExperience(data: { portableExperienceId: string }): Promise<void> {
+    await killPortableExperienceScene(data.portableExperienceId)
+  }
+
+  public RequestWearables(data: {
+    filters: {
+      ownedByUser: string | null
+      wearableIds?: string[] | null
+      collectionIds?: string[] | null
+    }
+    context?: string
+  }) {
+    const { filters, context } = data
+    const newFilters: WearablesRequestFilters = {
+      ownedByUser: filters.ownedByUser ?? undefined,
+      wearableIds: this.arrayCleanup(filters.wearableIds),
+      collectionIds: this.arrayCleanup(filters.collectionIds)
+    }
+    globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
+  }
+
+  public RequestUserProfile(userIdPayload: { value: string }) {
+    ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
+      .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
+      .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
+  }
+
+  private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
+    return !array || array.length === 0 ? undefined : array
   }
 }
 

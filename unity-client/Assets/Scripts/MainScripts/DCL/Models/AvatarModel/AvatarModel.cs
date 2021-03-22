@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+using DCL.Helpers;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public class AvatarModel
+public class AvatarModel : BaseModel
 {
     public string id;
     public string name;
@@ -14,7 +15,8 @@ public class AvatarModel
     public List<string> wearables = new List<string>();
     public string expressionTriggerId = null;
     public long expressionTriggerTimestamp = -1;
-
+    public bool talking = false;
+    
     public bool Equals(AvatarModel other)
     {
         bool wearablesAreEqual = wearables.All(other.wearables.Contains) && wearables.Count == other.wearables.Count;
@@ -25,6 +27,8 @@ public class AvatarModel
                skinColor == other.skinColor &&
                hairColor == other.hairColor &&
                eyeColor == other.eyeColor &&
+               expressionTriggerId == other.expressionTriggerId &&
+               expressionTriggerTimestamp == other.expressionTriggerTimestamp &&
                wearablesAreEqual;
     }
 
@@ -40,5 +44,10 @@ public class AvatarModel
         expressionTriggerId = other.expressionTriggerId;
         expressionTriggerTimestamp = other.expressionTriggerTimestamp;
         wearables = new List<string>(other.wearables);
+    }
+
+    public override BaseModel GetDataFromJSON(string json)
+    {
+        return Utils.SafeFromJson<AvatarModel>(json);
     }
 }

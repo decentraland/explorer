@@ -7,6 +7,9 @@ public class ControlsHUDController : IHUD
 
     private bool prevMouseLockState = false;
 
+    public event System.Action OnControlsOpened;
+    public event System.Action OnControlsClosed;
+
     public ControlsHUDController()
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ControlsHUD")).GetComponent<ControlsHUDView>();
@@ -15,6 +18,12 @@ public class ControlsHUDController : IHUD
 
         view.onToggleActionTriggered += ToggleVisibility;
         view.onCloseActionTriggered += Hide;
+
+        if (!DCL.Configuration.EnvironmentSettings.RUNNING_TESTS)
+        {
+            KernelConfig.i.EnsureConfigInitialized().Then(config => OnKernelConfigChanged(config, null));
+            KernelConfig.i.OnChange += OnKernelConfigChanged;
+        }
     }
 
     public void SetVisibility(bool visible)
@@ -30,9 +39,9 @@ public class ControlsHUDController : IHUD
             }
 
             view.showHideAnimator.Hide();
+            OnControlsClosed?.Invoke();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeOut);
+            AudioScriptableObjects.fadeOut.Play(true);
         }
         else if (!IsVisible() && visible)
         {
@@ -40,8 +49,8 @@ public class ControlsHUDController : IHUD
             Utils.UnlockCursor();
             view.gameObject.SetActive(true);
             view.showHideAnimator.Show();
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.fadeIn);
+            OnControlsOpened?.Invoke();
+            AudioScriptableObjects.fadeIn.Play(true);
         }
     }
 
@@ -50,6 +59,11 @@ public class ControlsHUDController : IHUD
         if (view)
         {
             Object.Destroy(view.gameObject);
+        }
+
+        if (!DCL.Configuration.EnvironmentSettings.RUNNING_TESTS)
+        {
+            KernelConfig.i.OnChange -= OnKernelConfigChanged;
         }
     }
 
@@ -71,5 +85,10 @@ public class ControlsHUDController : IHUD
         if (!restorePointerLockStatus)
             prevMouseLockState = false;
         SetVisibility(false);
+    }
+
+    private void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
+    {
+        view?.voiceChatButton.SetActive(current.comms.voiceChatEnabled);
     }
 }

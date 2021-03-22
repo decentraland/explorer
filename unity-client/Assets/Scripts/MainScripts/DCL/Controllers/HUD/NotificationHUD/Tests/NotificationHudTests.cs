@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class NotificationHudTests : TestsBase
+    public class NotificationHudTests : IntegrationTestSuite_Legacy
     {
         private NotificationHUDController controller;
 
@@ -103,7 +103,7 @@ namespace Tests
             {
                 type = NotificationFactory.Type.GENERIC,
                 message = "text",
-                timer = 3,
+                timer = 0.25f,
                 scene = ""
             };
 
@@ -114,7 +114,7 @@ namespace Tests
             Assert.AreEqual(notifications.Length, 1);
             Assert.AreEqual(controller.model.notifications.Count, 1);
 
-            yield return new DCL.WaitUntil(() => notifications.Length == 0, 4);
+            yield return new DCL.WaitUntil(() => notifications.Length == 0, 0.5f);
 
             notifications = GameObject.FindObjectsOfType<Notification>();
             Assert.AreEqual(notifications.Length, 0);

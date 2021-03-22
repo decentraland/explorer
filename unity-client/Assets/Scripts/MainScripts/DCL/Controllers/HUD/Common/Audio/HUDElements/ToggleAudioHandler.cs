@@ -2,40 +2,41 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class ToggleAudioHandler : MonoBehaviour, IPointerDownHandler
 {
-    HUDAudioPlayer audioPlayer;
     Toggle toggle;
 
-    void Start()
+    void Awake()
     {
-        audioPlayer = HUDAudioPlayer.i;
         toggle = GetComponent<Toggle>();
+        toggle.onValueChanged.AddListener(OnValueChanged);
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (audioPlayer != null &&
-            toggle != null &&
-            toggle.interactable)
+        if (toggle != null)
         {
-            audioPlayer.Play(HUDAudioPlayer.Sound.buttonClick);
+            if (toggle.interactable)
+            {
+                AudioScriptableObjects.buttonClick.Play(true);
+            }
         }
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public void OnValueChanged(bool isOn)
     {
-        if (audioPlayer != null &&
-            toggle != null &&
-            toggle.interactable)
+        if (toggle != null)
         {
-            if (toggle.isOn)
+            if (toggle.interactable)
             {
-                audioPlayer.Play(HUDAudioPlayer.Sound.disable);
-            }
-            else
-            {
-                audioPlayer.Play(HUDAudioPlayer.Sound.enable);
+                if (isOn)
+                {
+                    AudioScriptableObjects.enable.Play(true);
+                }
+                else
+                {
+                    AudioScriptableObjects.disable.Play(true);
+                }
             }
         }
     }

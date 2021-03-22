@@ -1,6 +1,8 @@
 import { Profile } from './types'
-import { getFetchProfileServer, getFetchContentServer } from 'shared/dao/selectors'
+import { getFetchContentServer } from 'shared/dao/selectors'
 import { Store } from 'redux'
+import { createFakeName } from './utils/fakeName'
+import { profileServerRequest } from './sagas'
 
 declare const window: Window & { globalStore: Store }
 
@@ -10,17 +12,12 @@ function randomBetween(min: number, max: number) {
 
 export async function generateRandomUserProfile(userId: string): Promise<Profile> {
   const _number = randomBetween(1, 160)
-  const profileUrl = `${getFetchProfileServer(window.globalStore.getState())}/default${_number}`
 
   let profile: any | undefined = undefined
   try {
-    const response = await fetch(profileUrl)
-
-    if (response.ok) {
-      const profiles: { avatars: object[] } = await response.json()
-      if (profiles.avatars.length !== 0) {
-        profile = profiles.avatars[0]
-      }
+    const profiles: { avatars: object[] } = await profileServerRequest(`default${_number}`)
+    if (profiles.avatars.length !== 0) {
+      profile = profiles.avatars[0]
     }
   } catch (e) {
     // in case something fails keep going and use backup profile
@@ -30,8 +27,10 @@ export async function generateRandomUserProfile(userId: string): Promise<Profile
     profile = backupProfile(getFetchContentServer(window.globalStore.getState()), userId)
   }
 
-  profile.name = 'Guest-' + userId.substr(2, 6)
+  profile.unclaimedName = createFakeName()
+  profile.hasClaimedName = false
   profile.tutorialStep = 0
+  profile.version = -1 // We signal random user profiles with -1
 
   return profile
 }
@@ -78,7 +77,7 @@ export function backupProfile(contentServerUrl: string, userId: string) {
         'dcl://base-avatars/f_eyebrows_00',
         'dcl://base-avatars/f_mouth_00'
       ],
-      version: 0,
+      version: -1,
       snapshots: {
         face: `${contentServerUrl}/contents/QmZbyGxDnZ4PaMVX7kpA2NuGTrmnpwTJ8heKKTSCk4GRJL`,
         body: `${contentServerUrl}/contents/QmaQvcBWg57Eqf5E9R3Ts1ttPKKLhKueqdyhshaLS1tu2g`

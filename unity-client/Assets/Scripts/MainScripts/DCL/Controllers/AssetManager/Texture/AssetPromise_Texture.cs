@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections;
 using DCL.Helpers;
+using UnityEngine.Networking;
 
 namespace DCL
 {
@@ -9,15 +9,17 @@ namespace DCL
     {
         const TextureWrapMode DEFAULT_WRAP_MODE = TextureWrapMode.Clamp;
         const FilterMode DEFAULT_FILTER_MODE = FilterMode.Bilinear;
+        private const string PLAIN_BASE64_PROTOCOL = "data:text/plain;base64,";
 
         string url;
         string idWithTexSettings;
         string idWithDefaultTexSettings;
         TextureWrapMode wrapMode;
         FilterMode filterMode;
-        Coroutine loadCoroutine;
         bool storeDefaultTextureInAdvance = false;
         bool storeTexAsNonReadable = false;
+
+        UnityWebRequest webRequest = null;
 
         public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE, bool storeDefaultTextureInAdvance = false, bool storeTexAsNonReadable = true)
         {
@@ -45,40 +47,48 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
-            ClearLoadCoroutine();
+            if (webRequest != null)
+            {
+                webRequest.Abort();
+            }
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
         {
-            ClearLoadCoroutine();
-
             // Reuse the already-stored default texture, we duplicate it and set the needed config afterwards in AddToLibrary()
             if (library.Contains(idWithDefaultTexSettings) && !UsesDefaultWrapAndFilterMode())
-                OnSuccess?.Invoke();
-            else
-                loadCoroutine = CoroutineStarter.Start(DownloadAndStore(OnSuccess, OnFail));
-        }
-
-        IEnumerator DownloadAndStore(Action OnSuccess, Action OnFail)
-        {
-            if (!string.IsNullOrEmpty(url))
             {
-                yield return Utils.FetchTexture(url, (tex) =>
+                OnSuccess?.Invoke();
+                return;
+            }
+
+            if (!url.StartsWith(PLAIN_BASE64_PROTOCOL))
+            {
+                webRequest = UnityWebRequestTexture.GetTexture(url);
+                webRequest.SendWebRequest().completed += (asyncOp) =>
                 {
-                    if (asset != null)
+                    bool success = webRequest != null && webRequest.WebRequestSucceded() && asset != null;
+                    if (success)
                     {
-                        asset.texture = tex;
+                        asset.texture = DownloadHandlerTexture.GetContent(webRequest);
                         OnSuccess?.Invoke();
                     }
                     else
                     {
                         OnFail?.Invoke();
                     }
-                }, (errorMessage) => OnFail?.Invoke());
+                    webRequest?.Dispose();
+                    webRequest = null;
+                };
             }
             else
             {
-                OnFail?.Invoke();
+                //For Base64 protocols we just take the bytes and create the texture
+                //to avoid Unity's web request issue with large URLs
+                byte[] decodedTexture = Convert.FromBase64String(url.Substring(PLAIN_BASE64_PROTOCOL.Length));
+                asset.texture = new Texture2D(1,1);
+                asset.texture.LoadImage(decodedTexture);
+                OnSuccess?.Invoke();
             }
         }
 
@@ -134,15 +144,6 @@ namespace DCL
         public bool UsesDefaultWrapAndFilterMode()
         {
             return wrapMode == DEFAULT_WRAP_MODE && filterMode == DEFAULT_FILTER_MODE;
-        }
-
-        void ClearLoadCoroutine()
-        {
-            if (loadCoroutine != null)
-            {
-                CoroutineStarter.Stop(loadCoroutine);
-                loadCoroutine = null;
-            }
         }
     }
 }

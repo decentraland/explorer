@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class PoolManagerTests : TestsBase
+    public class PoolManagerTests : IntegrationTestSuite_Legacy
     {
         public class PooledObjectInstantiator : IPooledObjectInstantiator
         {
@@ -19,6 +19,13 @@ namespace Tests
             {
                 return original != null;
             }
+        }
+
+        [Test]
+        public void PoolManagerShouldHandleNullArgsGracefully()
+        {
+            var thisShouldBeNull = PoolManager.i.GetPoolable(null);
+            Assert.IsTrue(thisShouldBeNull == null);
         }
 
         [UnityTest]

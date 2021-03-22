@@ -2,8 +2,10 @@ using DCL;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using DCL.Models;
 using Unity.PerformanceTesting;
 using UnityEngine;
+using QueueMode = DCL.QueueMode;
 
 namespace MessagingBusTest
 {
@@ -12,11 +14,10 @@ namespace MessagingBusTest
         private const string SEND_SCENE_MESSAGE = "SceneController.SendSceneMessage";
         private const int SEND_SCENE_UNUSED_CHARS = 3;
         protected string[] dataAsJson;
-        protected LinkedList<MessagingBus.QueuedSceneMessage_Scene> queuedMessages = new LinkedList<MessagingBus.QueuedSceneMessage_Scene>();
+        protected LinkedList<QueuedSceneMessage_Scene> queuedMessages = new LinkedList<QueuedSceneMessage_Scene>();
         protected string dataSource = "../TestResources/SceneMessages/SceneMessagesDump.RealData.txt";
         protected IMessageProcessHandler dummyHandler = new DummyMessageHandler();
-
-        protected IEnumerator<MessagingBus.QueuedSceneMessage_Scene> nextQueueMessage;
+        protected IEnumerator<QueuedSceneMessage_Scene> nextQueueMessage;
 
         // protected MessagingBus bus;
         protected MessagingController controller;
@@ -85,7 +86,7 @@ namespace MessagingBusTest
         private void EnqueueNextMessage()
         {
             var queuedMessage = GetNextSceneMessage();
-            controller.Enqueue(null, queuedMessage, out _);
+            controller.Enqueue(false, queuedMessage, out _);
         }
 
         private string SceneMessagesPath()
@@ -130,7 +131,7 @@ namespace MessagingBusTest
             }
         }
 
-        public MessagingBus.QueuedSceneMessage_Scene GetNextSceneMessage()
+        public QueuedSceneMessage_Scene GetNextSceneMessage()
         {
             var currentMessage = nextQueueMessage.Current;
             while (currentMessage == null)
@@ -146,7 +147,7 @@ namespace MessagingBusTest
             return currentMessage;
         }
 
-        public static MessagingBus.QueuedSceneMessage_Scene ParseRawIntoQueuedMessage(string raw)
+        public static QueuedSceneMessage_Scene ParseRawIntoQueuedMessage(string raw)
         {
             if (!SceneMessageUtilities.DecodePayloadChunk(raw, out string sceneId, out string message, out string tag))
             {
@@ -155,30 +156,58 @@ namespace MessagingBusTest
 
             return SceneMessageUtilities.DecodeSceneMessage(sceneId, message, tag);
         }
-    }
 
-    internal class DummyMessageHandler : IMessageProcessHandler
-    {
-        public void LoadParcelScenesExecute(string decentralandSceneJSON)
+        [Test]
+        public void LossyMessageIsReplaced()
         {
+            string entityId = "entity";
+            MessagingBus bus = new MessagingBus(MessagingBusType.SYSTEM, new DummyMessageHandler(), null);
+
+            bus.Enqueue(new QueuedSceneMessage_Scene
+            {
+                payload = new Protocol.CreateEntity {entityId = entityId},
+                message = QueuedSceneMessage.Type.SCENE_MESSAGE.ToString(),
+                tag = "entity_1"
+            }, QueueMode.Lossy);
+            bus.Enqueue(new QueuedSceneMessage_Scene
+            {
+                payload = new Protocol.CreateEntity {entityId = entityId},
+                message = QueuedSceneMessage.Type.SCENE_MESSAGE.ToString(),
+                tag = "entity_1"
+            }, QueueMode.Lossy);
+
+            Assert.AreEqual(1, bus.unreliableMessagesReplaced);
+            Assert.AreEqual(1, bus.pendingMessagesCount);
         }
 
-        public bool ProcessMessage(MessagingBus.QueuedSceneMessage_Scene msgObject, out CleanableYieldInstruction yieldInstruction)
+        [Test]
+        public void RemoveEntityShouldClearLossyMessages()
         {
-            yieldInstruction = null;
-            return true;
-        }
+            string entityId = "entity";
+            MessagingBus bus = new MessagingBus(MessagingBusType.SYSTEM, new DummyMessageHandler(), null);
 
-        public void UnloadAllScenes()
-        {
-        }
+            bus.Enqueue(new QueuedSceneMessage_Scene
+            {
+                payload = new Protocol.CreateEntity {entityId = entityId},
+                message = QueuedSceneMessage.Type.SCENE_MESSAGE.ToString(),
+                tag = "entity_1"
+            }, QueueMode.Lossy);
+            bus.Enqueue(new QueuedSceneMessage_Scene
+            {
+                payload = new Protocol.RemoveEntity() {entityId = entityId},
+                type = QueuedSceneMessage.Type.SCENE_MESSAGE,
+                method = MessagingTypes.ENTITY_DESTROY,
+                message = QueuedSceneMessage.Type.SCENE_MESSAGE.ToString(),
+            });
+            bus.Enqueue(new QueuedSceneMessage_Scene
+            {
+                payload = new Protocol.CreateEntity {entityId = entityId},
+                message = QueuedSceneMessage.Type.SCENE_MESSAGE.ToString(),
+                tag = "entity_1"
+            }, QueueMode.Lossy);
 
-        public void UnloadParcelSceneExecute(string sceneKey)
-        {
-        }
-
-        public void UpdateParcelScenesExecute(string sceneKey)
-        {
+            Assert.AreEqual(0, bus.unreliableMessagesReplaced);
+            Assert.AreEqual(3, bus.pendingMessagesCount);
         }
     }
 }

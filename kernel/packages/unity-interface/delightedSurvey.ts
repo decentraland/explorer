@@ -1,33 +1,52 @@
-import { getUserProfile } from 'shared/comms/peers';
-import { defaultLogger } from 'shared/logger';
-import { Profile } from 'shared/profiles/types';
-import { globalThis, isTheFirstLoading } from './dcl';
+import { setTimeout } from 'timers'
+import { defaultLogger } from 'shared/logger'
+import { getCurrentUserProfile } from 'shared/profiles/selectors'
+import { StoreContainer } from 'shared/store/rootTypes'
+import { ensureRendererEnabled } from 'shared/world/worldState'
 
-export function delightedSurvey() {
-  // tslint:disable-next-line:strict-type-predicates
-  if (typeof globalThis === 'undefined' || typeof globalThis !== 'object') {
-    return;
+const TIMEOUT_MS = 10 * 60 * 1000
+
+declare const globalThis: StoreContainer & { analytics: any; delighted: any }
+
+let timer: NodeJS.Timeout | null = null
+
+export function setDelightedSurveyEnabled(enabled: boolean) {
+  if (enabled && !timer) {
+    timer = setTimeout(delightedSurvey, TIMEOUT_MS)
+  } else if (!enabled && timer) {
+    clearTimeout(timer)
+    timer = null
   }
-  const { analytics, delighted } = globalThis;
-  if (!analytics || !delighted) {
-    return;
-  }
-  const profile = getUserProfile().profile as Profile | null;
-  if (!isTheFirstLoading && profile) {
-    const payload = {
-      email: profile.email || profile.ethAddress + '@dcl.gg',
-      name: profile.name || 'Guest',
-      properties: {
-        ethAddress: profile.ethAddress,
-        anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
+}
+
+function delightedSurvey() {
+  ensureRendererEnabled()
+    .then(() => {
+      // tslint:disable-next-line:strict-type-predicates
+      if (typeof globalThis === 'undefined' || typeof globalThis !== 'object') {
+        return
       }
-    };
+      const { analytics, delighted } = globalThis
+      if (!analytics || !delighted) {
+        return
+      }
+      const profile = getCurrentUserProfile(globalThis.globalStore.getState())
+      if (profile) {
+        const payload = {
+          email: profile.userId + '@dcl.gg',
+          name: profile.name || 'Guest',
+          properties: {
+            userId: profile.userId,
+            anonymous_id: analytics && analytics.user ? analytics.user().anonymousId() : null
+          }
+        }
 
-    try {
-      delighted.survey(payload);
-    }
-    catch (error) {
-      defaultLogger.error('Delighted error: ' + error.message, error);
-    }
-  }
+        try {
+          delighted.survey(payload)
+        } catch (error) {
+          defaultLogger.error('Delighted error: ' + error.message, error)
+        }
+      }
+    })
+    .catch()
 }

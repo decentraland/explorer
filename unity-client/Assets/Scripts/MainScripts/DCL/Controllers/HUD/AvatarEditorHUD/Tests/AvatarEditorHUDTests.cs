@@ -15,11 +15,11 @@ namespace AvatarEditorHUD_Tests
         public string[] myCategoriesToRandomize => categoriesToRandomize;
     }
 
-    public class WearableItemsShould : TestsBase
+    public class WearableItemsShould : IntegrationTestSuite_Legacy
     {
         private UserProfile userProfile;
         private AvatarEditorHUDController_Mock controller;
-        private WearableDictionary catalog;
+        private BaseDictionary<string, WearableItem> catalog;
 
         protected override bool justSceneSetUp => true;
 
@@ -41,7 +41,7 @@ namespace AvatarEditorHUD_Tests
                 }
             }, false);
 
-            catalog = AvatarTestHelpers.CreateTestCatalogLocal();
+            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             controller = new AvatarEditorHUDController_Mock();
             controller.Initialize(userProfile, catalog);
         }

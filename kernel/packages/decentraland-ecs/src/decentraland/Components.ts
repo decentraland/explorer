@@ -6,7 +6,10 @@ import { IEvents } from './Types'
 import { ActionButton } from './Input'
 
 /** @public */
-export type TranformConstructorArgs = {
+export type TranformConstructorArgs = TransformConstructorArgs
+
+/** @public */
+export type TransformConstructorArgs = {
   position?: Vector3
   rotation?: Quaternion
   scale?: Vector3
@@ -63,7 +66,39 @@ export enum CLASS_ID {
   AUDIO_SOURCE = 201,
   AUDIO_STREAM = 202,
   GIZMOS = 203,
-  SMART_ITEM = 204
+  SMART_ITEM = 204,
+  AVATAR_MODIFIER_AREA = 205,
+
+  // For state sync only
+  NAME = 300,
+  LOCKED_ON_EDIT = 301,
+  VISIBLE_ON_EDIT = 302
+}
+
+export enum AvatarModifiers {
+  HIDE_AVATARS = 'HIDE_AVATARS',
+  DISABLE_PASSPORTS = 'DISABLE_PASSPORTS'
+}
+
+export type Area = { box: Vector3 }
+
+/**
+ * Define an area where avatars can be modified in some way
+ * @public
+ */
+@Component('engine.avatarModifierArea', CLASS_ID.AVATAR_MODIFIER_AREA)
+export class AvatarModifierArea extends ObservableComponent {
+  @ObservableComponent.field
+  area!: Area
+
+  @ObservableComponent.field
+  modifiers!: AvatarModifiers[]
+
+  constructor(args: { area: Area; modifiers: AvatarModifiers[] }) {
+    super()
+    this.area = args.area
+    this.modifiers = args.modifiers
+  }
 }
 
 /**
@@ -80,7 +115,7 @@ export class Transform extends ObservableComponent {
   @ObservableComponent.field
   scale!: Vector3
 
-  constructor(args: TranformConstructorArgs = {}) {
+  constructor(args: TransformConstructorArgs = {}) {
     super()
     this.position = args.position || Vector3.Zero()
     this.rotation = args.rotation || Quaternion.Identity
@@ -281,7 +316,7 @@ export class CylinderShape extends Shape {
    * The radius of the top of the cylinder. Defaults to 0.
    */
   @ObservableComponent.field
-  radiusTop: number = 0
+  radiusTop: number = 1
 
   /**
    * The radius of the base of the cylinder. Defaults to 1.
@@ -359,7 +394,8 @@ export enum PictureFrameStyle {
   Wood_Slim,
   Wood_Wide,
   Wood_Twigs,
-  Canvas
+  Canvas,
+  None
 }
 
 /** @public */
@@ -530,7 +566,7 @@ export enum Fonts {
  * @public
  */
 @Component('engine.text', CLASS_ID.TEXT_SHAPE)
-export class TextShape extends Shape {
+export class TextShape extends ObservableComponent {
   @ObservableComponent.field
   outlineWidth: number = 0
 
@@ -611,6 +647,9 @@ export class TextShape extends Shape {
 
   @ObservableComponent.field
   billboard: boolean = false
+
+  @ObservableComponent.field
+  visible: boolean = true
 
   constructor(value?: string) {
     super()
@@ -750,7 +789,7 @@ export class Material extends ObservableComponent {
    * Emissive texture.
    */
   @ObservableComponent.component
-  emissiveTexture?: Texture
+  emissiveTexture?: Texture | VideoTexture
 
   /**
    * Stores surface normal data used to displace a mesh in a texture.
@@ -765,11 +804,10 @@ export class Material extends ObservableComponent {
   refractionTexture?: Texture
 
   /**
-   * If sets to true, disables all the lights affecting the material.
-   * Defaults to false.
+   * Allow the material to cast shadows over other objects
    */
   @ObservableComponent.field
-  disableLighting?: boolean
+  castShadows?: boolean = true
 
   /**
    * Sets the transparency mode of the material.
@@ -804,6 +842,12 @@ export class BasicMaterial extends ObservableComponent {
    */
   @ObservableComponent.field
   alphaTest: number = 0.5
+
+  /**
+   * Allow the material to cast shadows over other objects
+   */
+  @ObservableComponent.field
+  castShadows?: boolean = true
 }
 
 /**
@@ -838,10 +882,10 @@ export class OnUUIDEvent<T extends keyof IEvents> extends ObservableComponent {
       })
 
       Object.defineProperty(target, propertyKey.toString(), {
-        get: function() {
+        get: function () {
           return this[componentSymbol]
         },
-        set: function(value) {
+        set: function (value) {
           const oldValue = this[componentSymbol]
 
           if (value) {
@@ -990,6 +1034,7 @@ export class VideoTexture extends ObservableComponent {
 
   constructor(videoClip: VideoClip, opts?: Partial<Pick<VideoTexture, 'samplingMode' | 'wrap'>>) {
     super()
+
     if (!(videoClip instanceof VideoClip)) {
       throw new Error(`Trying to create VideoTexture(VideoClip) with an invalid VideoClip`)
     }
@@ -1013,6 +1058,7 @@ export class VideoTexture extends ObservableComponent {
 
   reset() {
     this.seekTime(0)
+    this.pause()
   }
 
   seekTime(seconds: number) {
@@ -1022,12 +1068,13 @@ export class VideoTexture extends ObservableComponent {
   }
 
   toJSON() {
-    if (this.seek < 0) {
-      return super.toJSON()
+    if (this.seek >= 0) {
+      // the seek value was changed/used
+      const ret = JSON.parse(JSON.stringify(super.toJSON()))
+      this.seek = -1
+      return ret
     }
 
-    const ret = JSON.parse(JSON.stringify(super.toJSON()))
-    this.seek = -1
-    return ret
+    return super.toJSON()
   }
 }

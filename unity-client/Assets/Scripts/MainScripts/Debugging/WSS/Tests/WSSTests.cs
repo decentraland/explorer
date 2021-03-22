@@ -5,38 +5,32 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 using WebSocketSharp;
+using Environment = DCL.Environment;
 
 namespace Tests
 {
     [Explicit]
-    public class WSSTests : TestsBase
+    public class WSSTests : IntegrationTestSuite
     {
         protected override IEnumerator SetUp()
         {
-            yield break;
-        }
-
-        protected override IEnumerator TearDown()
-        {
+            Environment.SetupWithBuilders();
             yield break;
         }
 
         [UnityTest]
         public IEnumerator BasicConnectionTest()
         {
-            yield return InitScene();
-
             GameObject wssControllerGO = new GameObject("WSS Controller");
 
             WSSController wssController = wssControllerGO.AddComponent<WSSController>();
-            wssController.sceneController = sceneController;
             DCLCharacterController.i.gravity = 0;
 
             yield return new WaitForSeconds(1.0f);
 
             Assert.IsTrue(wssController.isServerReady);
 
-            using (WebSocketSharp.WebSocket ws = new WebSocket("ws://localhost:5000/dcl"))
+            using (WebSocket ws = new WebSocket("ws://localhost:5000/dcl"))
             {
                 try
                 {
@@ -97,9 +91,9 @@ namespace Tests
 
                 yield return null;
 
-                Assert.IsTrue(sceneController.loadedScenes.ContainsKey(loadedSceneID),
+                Assert.IsTrue(DCL.Environment.i.world.state.loadedScenes.ContainsKey(loadedSceneID),
                     "Expected loadedScene not found!");
-                Assert.IsTrue(sceneController.loadedScenes[loadedSceneID] != null,
+                Assert.IsTrue(DCL.Environment.i.world.state.loadedScenes[loadedSceneID] != null,
                     "Expected loadedScene found but was null!!!");
             }
 

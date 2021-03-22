@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using DCL.Configuration;
+using UnityEngine;
 
 namespace Builder.Gizmos
 {
@@ -10,13 +11,13 @@ namespace Builder.Gizmos
         [SerializeField] protected DCLBuilderGizmoAxis axisZ;
 
         public bool initialized { get; private set; }
-
         protected float snapFactor = 0;
 
         protected bool worldOrientedGizmos = true;
         private Transform targetTransform = null;
 
         protected Camera builderCamera;
+        protected Transform cameraHolderTransform;
 
         private Vector3 relativeScaleRatio;
         protected bool startDragging = false;
@@ -27,20 +28,20 @@ namespace Builder.Gizmos
         public abstract void SetSnapFactor(DCLBuilderGizmoManager.SnapInfo snapInfo);
         public abstract void TransformEntity(Transform targetTransform, DCLBuilderGizmoAxis axis, float axisValue);
 
-        public virtual void Initialize(Camera camera)
+        public virtual void Initialize(Camera camera, Transform cameraHolderTransform)
         {
             initialized = true;
-            relativeScaleRatio = transform.localScale / GetCameraPlaneDistance(camera, transform.position);
+            relativeScaleRatio = transform.localScale / GetCameraPlaneDistance(cameraHolderTransform, transform.position);
             builderCamera = camera;
+            this.cameraHolderTransform = cameraHolderTransform;
             axisX.SetGizmo(this);
             axisY.SetGizmo(this);
             axisZ.SetGizmo(this);
         }
 
-        public string GetGizmoType()
-        {
-            return gizmoType;
-        }
+        public void ForceRelativeScaleRatio() { relativeScaleRatio = new Vector3(BuilderInWorldSettings.GIZMOS_RELATIVE_SCALE_RATIO, BuilderInWorldSettings.GIZMOS_RELATIVE_SCALE_RATIO, BuilderInWorldSettings.GIZMOS_RELATIVE_SCALE_RATIO); }
+
+        public string GetGizmoType() { return gizmoType; }
 
         public virtual void SetTargetTransform(Transform entityTransform)
         {
@@ -80,10 +81,7 @@ namespace Builder.Gizmos
             }
         }
 
-        public virtual void OnEndDrag()
-        {
-            activeAxis.SetColorDefault();
-        }
+        public virtual void OnEndDrag() { activeAxis.SetColorDefault(); }
 
         public virtual bool RaycastHit(Ray ray, out Vector3 hitPoint)
         {
@@ -100,10 +98,7 @@ namespace Builder.Gizmos
             return Vector3.Distance(activeAxis.transform.position, hitPoint) * sign;
         }
 
-        protected virtual void SetPreviousAxisValue(float axisValue, float transformValue)
-        {
-            prevAxisValue = axisValue - transformValue;
-        }
+        protected virtual void SetPreviousAxisValue(float axisValue, float transformValue) { prevAxisValue = axisValue - transformValue; }
 
         private void SetPositionToTarget()
         {
@@ -122,14 +117,14 @@ namespace Builder.Gizmos
             SetPositionToTarget();
             if (builderCamera)
             {
-                float dist = GetCameraPlaneDistance(builderCamera, transform.position);
+                float dist = GetCameraPlaneDistance(cameraHolderTransform, transform.position);
                 transform.localScale = relativeScaleRatio * dist;
             }
         }
 
-        private static float GetCameraPlaneDistance(Camera camera, Vector3 objectPosition)
+        private static float GetCameraPlaneDistance(Transform cameraTransform, Vector3 objectPosition)
         {
-            Plane plane = new Plane(camera.transform.forward, camera.transform.position);
+            Plane plane = new Plane(cameraTransform.forward, cameraTransform.position);
             return plane.GetDistanceToPoint(objectPosition);
         }
     }

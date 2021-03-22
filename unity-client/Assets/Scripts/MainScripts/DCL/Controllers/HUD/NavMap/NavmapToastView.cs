@@ -9,21 +9,23 @@ namespace DCL
 {
     public class NavmapToastView : MonoBehaviour
     {
+        private static readonly int triggerLoadingComplete = Animator.StringToHash("LoadingComplete");
+
         [SerializeField] internal TextMeshProUGUI sceneTitleText;
         [SerializeField] internal TextMeshProUGUI sceneOwnerText;
         [SerializeField] internal TextMeshProUGUI sceneLocationText;
-        [SerializeField] internal TextMeshProUGUI sceneDescriptionText;
         [SerializeField] internal RectTransform toastContainer;
         [SerializeField] internal GameObject scenePreviewContainer;
         [SerializeField] internal RawImageFillParent scenePreviewImage;
-        [SerializeField] internal GameObject scenePreviewLoadingSpinner;
         [SerializeField] internal Sprite scenePreviewFailImage;
+        [SerializeField] internal Animator toastAnimator;
 
         [SerializeField] internal Button goToButton;
-        [SerializeField] internal Button closeButton;
         Vector2Int location;
         RectTransform rectTransform;
         MinimapMetadata minimapMetadata;
+
+        AssetPromise_Texture texturePromise = null;
 
         public System.Action OnGotoClicked;
 
@@ -38,7 +40,6 @@ namespace DCL
             rectTransform = transform as RectTransform;
 
             goToButton.onClick.AddListener(OnGotoClick);
-            closeButton.onClick.AddListener(OnCloseClick);
 
             minimapMetadata.OnSceneInfoUpdated += OnMapMetadataInfoUpdated;
         }
@@ -46,18 +47,22 @@ namespace DCL
         private void OnDestroy()
         {
             minimapMetadata.OnSceneInfoUpdated -= OnMapMetadataInfoUpdated;
+            if (texturePromise != null)
+            {
+                AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                texturePromise = null;
+            }
         }
 
         public void Populate(Vector2Int coordinates, MinimapMetadata.MinimapSceneInfo sceneInfo)
         {
-            if (HUDAudioPlayer.i != null && !gameObject.activeSelf)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            if (!gameObject.activeSelf)
+                AudioScriptableObjects.dialogOpen.Play(true);
 
             bool sceneInfoExists = sceneInfo != null;
 
-            MapRenderer.i.showCursorCoords = false;
-
             gameObject.SetActive(true);
+            scenePreviewImage.gameObject.SetActive(false);
             location = coordinates;
 
             PositionToast(coordinates);
@@ -65,27 +70,42 @@ namespace DCL
             sceneLocationText.text = $"{coordinates.x}, {coordinates.y}";
 
             sceneOwnerText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.owner));
-            sceneDescriptionText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.description));
-            sceneTitleText.transform.parent.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.name)); scenePreviewImage.gameObject.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
-            scenePreviewContainer.SetActive(sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl));
-            scenePreviewLoadingSpinner.SetActive(false);
+            sceneTitleText.text = "Untitled Scene";
+
+            bool useDefaultThumbnail =
+                !sceneInfoExists || (sceneInfoExists && string.IsNullOrEmpty(sceneInfo.previewImageUrl));
+
+            if (useDefaultThumbnail)
+            {
+                DisplayThumbnail(scenePreviewFailImage.texture);
+                currentImageUrl = "";
+            }
 
             if (sceneInfoExists)
             {
                 sceneTitleText.text = sceneInfo.name;
                 sceneOwnerText.text = $"Created by: {sceneInfo.owner}";
-                sceneDescriptionText.text = sceneInfo.description;
 
-                if (currentImageUrl == sceneInfo.previewImageUrl) return;
+                if (currentImageUrl == sceneInfo.previewImageUrl)
+                {
+                    DisplayThumbnail(texturePromise.asset.texture);
+                    return;
+                }
 
-                if (currentImage != null)
-                    Destroy(currentImage);
+                if (texturePromise != null)
+                {
+                    AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+                    texturePromise = null;
+                }
 
-                if (downloadCoroutine != null)
-                    CoroutineStarter.Stop(downloadCoroutine);
 
-                if (sceneInfoExists && !string.IsNullOrEmpty(sceneInfo.previewImageUrl))
-                    downloadCoroutine = CoroutineStarter.Start(Download(sceneInfo.previewImageUrl));
+                if (!string.IsNullOrEmpty(sceneInfo.previewImageUrl))
+                {
+                    texturePromise = new AssetPromise_Texture(sceneInfo.previewImageUrl, storeTexAsNonReadable: false);
+                    texturePromise.OnSuccessEvent += (textureAsset) => { DisplayThumbnail(textureAsset.texture); };
+                    texturePromise.OnFailEvent += (textureAsset) => { DisplayThumbnail(scenePreviewFailImage.texture); };
+                    AssetPromiseKeeper_Texture.i.Keep(texturePromise);
+                }
 
                 currentImageUrl = sceneInfoExists ? sceneInfo.previewImageUrl : "";
             }
@@ -132,10 +152,9 @@ namespace DCL
 
         public void OnCloseClick()
         {
-            if (HUDAudioPlayer.i != null && gameObject.activeSelf)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            if (gameObject.activeSelf)
+                AudioScriptableObjects.dialogClose.Play(true);
 
-            MapRenderer.i.showCursorCoords = true;
             gameObject.SetActive(false);
         }
 
@@ -149,30 +168,11 @@ namespace DCL
         }
 
         string currentImageUrl;
-        Texture2D currentImage;
-        Coroutine downloadCoroutine;
 
-        private IEnumerator Download(string url)
+        private void DisplayThumbnail(Texture2D texture)
         {
-            scenePreviewLoadingSpinner.SetActive(true);
-            scenePreviewImage.texture = null;
-
-            UnityWebRequest www = UnityWebRequestTexture.GetTexture(url);
-
-            yield return www.SendWebRequest();
-
-            if (!www.isNetworkError && !www.isHttpError)
-            {
-                currentImage = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                currentImage.Compress(false);
-                scenePreviewImage.texture = currentImage;
-            }
-            else
-            {
-                Debug.Log($"Error downloading: {url} {www.error}");
-                scenePreviewImage.texture = scenePreviewFailImage.texture;
-            }
-            scenePreviewLoadingSpinner.SetActive(false);
+            scenePreviewImage.texture = texture;
+            toastAnimator.SetTrigger(triggerLoadingComplete);
         }
     }
 }

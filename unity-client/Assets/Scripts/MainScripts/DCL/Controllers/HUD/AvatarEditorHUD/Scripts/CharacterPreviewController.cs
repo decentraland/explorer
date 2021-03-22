@@ -1,6 +1,7 @@
 using DCL;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterPreviewController : MonoBehaviour
@@ -22,7 +23,7 @@ public class CharacterPreviewController : MonoBehaviour
     private static int CHARACTER_PREVIEW_LAYER => LayerMask.NameToLayer("CharacterPreview");
     private static int CHARACTER_DEFAULT_LAYER => LayerMask.NameToLayer("Default");
 
-    public delegate void OnSnapshotsReady(Sprite face, Sprite face128, Sprite face256, Sprite body);
+    public delegate void OnSnapshotsReady(Texture2D face, Texture2D face128, Texture2D face256, Texture2D body);
 
     public enum CameraFocus
     {
@@ -45,15 +46,20 @@ public class CharacterPreviewController : MonoBehaviour
 
     private Coroutine updateModelRoutine;
 
+    private bool avatarLoadFailed = false;
+
     private void Awake()
     {
-        cameraFocusLookUp = new System.Collections.Generic.Dictionary<CameraFocus, Transform>()
+        cameraFocusLookUp = new Dictionary<CameraFocus, Transform>()
         {
             {CameraFocus.DefaultEditing, defaultEditingTemplate},
             {CameraFocus.FaceEditing, faceEditingTemplate},
             {CameraFocus.FaceSnapshot, faceSnapshotTemplate},
             {CameraFocus.BodySnapshot, bodySnapshotTemplate},
         };
+        var cullingSettings = DCL.Environment.i.platform.cullingController.GetSettingsCopy();
+        cullingSettings.ignoredLayersMask |= 1 << CHARACTER_PREVIEW_LAYER;
+        DCL.Environment.i.platform.cullingController.SetSettings(cullingSettings);
     }
 
     public void UpdateModel(AvatarModel newModel, Action onDone)
@@ -69,15 +75,15 @@ public class CharacterPreviewController : MonoBehaviour
     private IEnumerator UpdateModelRoutine(AvatarModel newModel, Action onDone)
     {
         bool avatarDone = false;
-        bool avatarFailed = false;
+        avatarLoadFailed = false;
 
         ResetRenderersLayer();
 
-        avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarFailed = true);
+        avatarRenderer.ApplyModel(newModel, () => avatarDone = true, () => avatarLoadFailed = true);
 
-        yield return new DCL.WaitUntil(() => avatarDone || avatarFailed);
+        yield return new DCL.WaitUntil(() => avatarDone || avatarLoadFailed);
 
-        if (avatarDone && avatarRenderer != null)
+        if (avatarRenderer != null)
         {
             SetLayerRecursively(avatarRenderer.gameObject, CHARACTER_PREVIEW_LAYER);
         }
@@ -99,13 +105,20 @@ public class CharacterPreviewController : MonoBehaviour
         SetLayerRecursively(avatarRenderer.gameObject, CHARACTER_DEFAULT_LAYER);
     }
 
-    public void TakeSnapshots(OnSnapshotsReady callback)
+    public void TakeSnapshots(OnSnapshotsReady onSuccess, Action onFailed)
     {
-        StartCoroutine(TakeSnapshots_Routine(callback));
+        if (avatarLoadFailed)
+        {
+            onFailed?.Invoke();
+            return;
+        }
+        StartCoroutine(TakeSnapshots_Routine(onSuccess));
     }
 
     private IEnumerator TakeSnapshots_Routine(OnSnapshotsReady callback)
     {
+        DCL.Environment.i.platform.cullingController.Stop();
+
         var current = camera.targetTexture;
         camera.targetTexture = null;
         var avatarAnimator = avatarRenderer.gameObject.GetComponent<AvatarAnimatorLegacy>();
@@ -113,22 +126,24 @@ public class CharacterPreviewController : MonoBehaviour
         SetFocus(CameraFocus.FaceSnapshot, false);
         avatarAnimator.Reset();
         yield return null;
-        Sprite face = Snapshot(SNAPSHOT_FACE_WIDTH_RES, SNAPSHOT_FACE_HEIGHT_RES);
-        Sprite face128 = Snapshot(SNAPSHOT_FACE_128_WIDTH_RES, SNAPSHOT_FACE_128_HEIGHT_RES);
-        Sprite face256 = Snapshot(SNAPSHOT_FACE_256_WIDTH_RES, SNAPSHOT_FACE_256_HEIGHT_RES);
+        Texture2D face = Snapshot(SNAPSHOT_FACE_WIDTH_RES, SNAPSHOT_FACE_HEIGHT_RES);
+        Texture2D face128 = Snapshot(SNAPSHOT_FACE_128_WIDTH_RES, SNAPSHOT_FACE_128_HEIGHT_RES);
+        Texture2D face256 = Snapshot(SNAPSHOT_FACE_256_WIDTH_RES, SNAPSHOT_FACE_256_HEIGHT_RES);
 
         SetFocus(CameraFocus.BodySnapshot, false);
         avatarAnimator.Reset();
         yield return null;
-        Sprite body = Snapshot(SNAPSHOT_BODY_WIDTH_RES, SNAPSHOT_BODY_HEIGHT_RES);
+        Texture2D body = Snapshot(SNAPSHOT_BODY_WIDTH_RES, SNAPSHOT_BODY_HEIGHT_RES);
 
         SetFocus(CameraFocus.DefaultEditing, false);
 
         camera.targetTexture = current;
+
+        DCL.Environment.i.platform.cullingController.Start();
         callback?.Invoke(face, face128, face256, body);
     }
 
-    private Sprite Snapshot(int width, int height)
+    private Texture2D Snapshot(int width, int height)
     {
         RenderTexture rt = new RenderTexture(width * SUPERSAMPLING, height * SUPERSAMPLING, 32);
         camera.targetTexture = rt;
@@ -138,7 +153,7 @@ public class CharacterPreviewController : MonoBehaviour
         screenShot.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         screenShot.Apply();
 
-        return Sprite.Create(screenShot, new Rect(0, 0, screenShot.width, screenShot.height), Vector2.zero);
+        return screenShot;
     }
 
     private Coroutine cameraTransitionCoroutine;

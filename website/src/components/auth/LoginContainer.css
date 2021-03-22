@@ -1,0 +1,111 @@
+.LoginContainer {
+  background-color: white;
+  position: absolute;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.LoginContainer * {
+  box-sizing: content-box;
+}
+
+.LoginContainer button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.LoginContainer main {
+  background-size: cover;
+  background-color: white;
+  background-position: bottom center;
+  background-image: url("../../images/login/background-secondary@1x.jpg");
+  background-image: url("../../images/login/background-secondary@1x.jpg"),
+    url("https://decentraland.org/images/background-secondary@blur.jpg"),
+    url("https://decentraland.org/images/background@blur.jpg");
+  background-image: -webkit-image-set(
+      url("../../images/login/background-secondary@1x.jpg") 1x,
+      url("../../images/login/background-secondary@2x.jpg") 2x,
+      url("../../images/login/background-secondary@3x.jpg") 3x
+    ),
+    url("https://decentraland.org/images/background-secondary@blur.jpg"),
+    url("https://decentraland.org/images/background@blur.jpg");
+  background-image: image-set(
+      url("../../images/login/background-secondary@1x.jpg") 1x,
+      url("../../images/login/background-secondary@2x.jpg") 2x,
+      url("../../images/login/background-secondary@3x.jpg") 3x
+    ),
+    url("https://decentraland.org/images/background-secondary@blur.jpg"),
+    url("https://decentraland.org/images/background@blur.jpg");
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  align-items: center;
+  display: flex;
+}
+
+.LoginContainer.FullPage main {
+  height: auto;
+  min-height: 640px;
+  background-size: 100%, 100%, auto;
+  background-color: transparent;
+  background-position: top center, top center, bottom center;
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-image: url("../../images/login/background@1x.jpg"), url('../../images/login/pattern.svg');
+  background-image: url("../../images/login/background@1x.jpg"),
+    url("https://decentraland.org/images/background@blur.jpg"),
+    url('../../images/login/pattern.svg');
+  background-image: -webkit-image-set(
+      url("../../images/login/background@1x.jpg") 1x,
+      url("../../images/login/background@2x.jpg") 2x,
+      url("../../images/login/background@3x.jpg") 3x
+    ),
+    url("https://decentraland.org/images/background@blur.jpg"),
+    url('../../images/login/pattern.svg');
+  background-image: image-set(
+      url("../../images/login/background@1x.jpg") 1x,
+      url("../../images/login/background@2x.jpg") 2x,
+      url("../../images/login/background@3x.jpg") 3x
+    ),
+    url("https://decentraland.org/images/background@blur.jpg"),
+    url('../../images/login/pattern.svg');
+  overflow: visible;
+  align-items: flex-start;
+}
+
+.eth-login-popup {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eth-login-popup .eth-avatars {
+  align-items: flex-start;
+}
+
+.eth-login-popup .eth-login {
+  align-items: flex-start;
+  min-height: 480px;
+  margin: 0 auto;
+}
+
+@media only screen and (max-width: 991px) {
+  .LoginContainer.FullPage main {
+    background-size: cover;
+  }
+
+  .eth-login-popup .eth-login {
+    min-height: auto;
+  }
+}

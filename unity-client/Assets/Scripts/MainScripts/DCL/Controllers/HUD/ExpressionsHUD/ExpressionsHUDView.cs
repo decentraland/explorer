@@ -20,7 +20,7 @@ public class ExpressionsHUDView : MonoBehaviour
     [SerializeField] internal Button_OnPointerDown[] hideContentButtons;
     [SerializeField] internal RectTransform content;
     [SerializeField] internal InputAction_Trigger openExpressionsAction;
-    [SerializeField] internal Image avatarPic;
+    [SerializeField] internal RawImage avatarPic;
 
     public static ExpressionsHUDView Create()
     {
@@ -59,11 +59,11 @@ public class ExpressionsHUDView : MonoBehaviour
         }
     }
 
-    public void UpdateAvatarSprite(Sprite avatarSprite)
+    public void UpdateAvatarSprite(Texture2D avatarTexture)
     {
-        if (avatarSprite == null) return;
+        if (avatarTexture == null) return;
 
-        avatarPic.sprite = avatarSprite;
+        avatarPic.texture = avatarTexture;
     }
 
     internal void ToggleContent()
@@ -82,16 +82,14 @@ public class ExpressionsHUDView : MonoBehaviour
     {
         content.gameObject.SetActive(true);
         DCL.Helpers.Utils.UnlockCursor();
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+        AudioScriptableObjects.dialogOpen.Play(true);
     }
 
     internal void HideContent()
     {
         content.gameObject.SetActive(false);
         DCL.Helpers.Utils.LockCursor();
-        if (HUDAudioPlayer.i != null)
-            HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+        AudioScriptableObjects.dialogClose.Play(true);
     }
 
     public bool IsContentVisible()

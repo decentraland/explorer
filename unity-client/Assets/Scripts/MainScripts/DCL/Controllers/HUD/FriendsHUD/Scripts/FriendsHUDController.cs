@@ -6,7 +6,6 @@ using UnityEngine;
 public class FriendsHUDController : IHUD
 {
     internal const string PLAYER_PREFS_SEEN_FRIEND_COUNT = "SeenFriendsCount";
-    internal const string CURRENT_PLAYER_ID = "CurrentPlayerInfoCardId";
     public FriendsHUDView view
     {
         get;
@@ -15,6 +14,8 @@ public class FriendsHUDController : IHUD
 
     IFriendsController friendsController;
     public event System.Action<string> OnPressWhisper;
+    public event System.Action OnFriendsOpened;
+    public event System.Action OnFriendsClosed;
 
     UserProfile ownUserProfile;
 
@@ -34,13 +35,8 @@ public class FriendsHUDController : IHUD
         view.friendRequestsList.OnCancelConfirmation += Entry_OnRequestCancelled;
         view.friendRequestsList.OnRejectConfirmation += Entry_OnRequestRejected;
         view.friendRequestsList.OnFriendRequestSent += Entry_OnRequestSent;
-        view.friendRequestsList.contextMenuPanel.OnBlock += Entry_OnBlock;
-        view.friendRequestsList.contextMenuPanel.OnPassport += Entry_OnPassport;
 
         view.friendsList.OnWhisper += Entry_OnWhisper;
-        view.friendsList.contextMenuPanel.OnBlock += Entry_OnBlock;
-        view.friendsList.contextMenuPanel.OnPassport += Entry_OnPassport;
-        view.friendsList.contextMenuPanel.OnReport += Entry_OnReport;
 
         view.friendsList.OnDeleteConfirmation += Entry_OnDelete;
 
@@ -165,7 +161,7 @@ public class FriendsHUDController : IHUD
                 break;
             case FriendshipAction.APPROVED:
                 view.friendRequestsList.RemoveEntry(userId);
-                view.friendsList.CreateOrUpdateEntry(userId, friendEntryModel);
+                view.friendsList.CreateOrUpdateEntryDeferred(userId, friendEntryModel);
                 break;
             case FriendshipAction.REJECTED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
@@ -179,7 +175,7 @@ public class FriendsHUDController : IHUD
                 view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, true);
                 break;
             case FriendshipAction.REQUESTED_TO:
-                view.friendRequestsList.CreateOrUpdateEntry(userId, friendEntryModel, false);
+                view.friendRequestsList.CreateOrUpdateEntry(userId,  friendEntryModel, false);
                 break;
             case FriendshipAction.DELETED:
                 userProfile.OnFaceSnapshotReadyEvent -= friendEntryModel.OnSpriteUpdate;
@@ -196,8 +192,8 @@ public class FriendsHUDController : IHUD
         //NOTE(Brian): If friends tab is already active, update and save this value instantly
         if (view.friendsList.gameObject.activeInHierarchy)
         {
-            PlayerPrefs.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, friendsController.friendCount);
-            PlayerPrefs.Save();
+            PlayerPrefsUtils.SetInt(PLAYER_PREFS_SEEN_FRIEND_COUNT, friendsController.friendCount);
+            PlayerPrefsUtils.Save();
         }
 
         var pendingFriendRequestsSO = NotificationScriptableObjects.pendingFriendRequests;
@@ -228,25 +224,6 @@ public class FriendsHUDController : IHUD
     private void Entry_OnWhisper(FriendEntry entry)
     {
         OnPressWhisper?.Invoke(entry.userId);
-    }
-
-    private void Entry_OnReport(string userId)
-    {
-        WebInterface.SendReportPlayer(userId);
-    }
-
-    private void Entry_OnPassport(string userId)
-    {
-        var currentPlayerId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
-        currentPlayerId.Set(userId);
-    }
-
-    private void Entry_OnBlock(string userId, bool blockUser)
-    {
-        if (blockUser)
-            WebInterface.SendBlockPlayer(userId);
-        else
-            WebInterface.SendUnblockPlayer(userId);
     }
 
     private void Entry_OnDelete(string userId)
@@ -318,13 +295,15 @@ public class FriendsHUDController : IHUD
             if (view.friendsButton.interactable)
                 view.friendsButton.onClick.Invoke();
 
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogAppear);
+            OnFriendsOpened?.Invoke();
+
+            AudioScriptableObjects.dialogOpen.Play(true);
         }
         else
         {
-            if (HUDAudioPlayer.i != null)
-                HUDAudioPlayer.i.Play(HUDAudioPlayer.Sound.dialogClose);
+            OnFriendsClosed?.Invoke();
+
+            AudioScriptableObjects.dialogClose.Play(true);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DCL;
 using DCL.Helpers;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public static class AvatarUtils
     public static int _EyesTexture = Shader.PropertyToID("_EyesTexture");
     public static int _EyeTint = Shader.PropertyToID("_EyeTint");
     public static int _IrisMask = Shader.PropertyToID("_IrisMask");
+    public static int _TintMask = Shader.PropertyToID("_TintMask");
 
     /// <summary>
     /// This will search all the transform hierachy for sharedMaterials filtered by name, and call a map function on them.
@@ -59,8 +61,6 @@ public static class AvatarUtils
         Color colorToChange,
         string shaderId = "_BaseColor")
     {
-        Renderer[] renderers = transformRoot.GetComponentsInChildren<Renderer>();
-
         int _Color = Shader.PropertyToID(shaderId);
 
         MapSharedMaterialsRecursively(
@@ -72,24 +72,6 @@ public static class AvatarUtils
             },
             materialsContainingThisName);
     }
-
-    /// <summary>
-    /// This will search all the transform hierachy for all renderers,
-    /// and replace all of its materials containing the specified name by the new one.
-    /// </summary>
-    /// <param name="transformRoot">Transform where to start the traversal</param>
-    /// <param name="replaceThemWith">material to replace them</param>
-    /// <param name="materialsContainingThisName">name to filter in materials</param>
-    public static void ReplaceMaterialsWithName(Transform transformRoot,
-        Material replaceThemWith,
-        string materialsContainingThisName = null)
-    {
-        MapSharedMaterialsRecursively(
-            transformRoot,
-            (mat) => { return replaceThemWith; },
-            materialsContainingThisName);
-    }
-
 
     /// <summary>
     /// This will search all the transform hierachy for all renderers,
@@ -111,25 +93,33 @@ public static class AvatarUtils
                 Material copy = new Material(replaceThemWith);
 
                 Texture _MatCap = null;
+                Texture _GMatCap = null;
+                Texture _FMatCap = null;
 
-                if (replaceThemWith.HasProperty("_MatCap"))
-                    _MatCap = replaceThemWith.GetTexture("_MatCap");
+                if (replaceThemWith.HasProperty(ShaderUtils.MatCap))
+                    _MatCap = replaceThemWith.GetTexture(ShaderUtils.MatCap);
+
+                if (replaceThemWith.HasProperty(ShaderUtils.GlossMatCap))
+                    _GMatCap = replaceThemWith.GetTexture(ShaderUtils.GlossMatCap);
+
+                if (replaceThemWith.HasProperty(ShaderUtils.FresnelMatCap))
+                    _FMatCap = replaceThemWith.GetTexture(ShaderUtils.FresnelMatCap);
 
                 //NOTE(Brian): This method has a bug, if the material being copied lacks a property of the source material,
                 //             the source material property will get erased. It can't be added back and even the material inspector crashes.
                 //             Check the comment in Lit.shader.
                 copy.CopyPropertiesFromMaterial(mat);
 
+                if (_GMatCap != null)
+                    copy.SetTexture(ShaderUtils.GlossMatCap, _GMatCap);
+
+                if (_FMatCap != null)
+                    copy.SetTexture(ShaderUtils.FresnelMatCap, _FMatCap);
+
                 if (_MatCap != null)
-                    copy.SetTexture("_MatCap", _MatCap);
+                    copy.SetTexture(ShaderUtils.MatCap, _MatCap);
 
-                if (copy.HasProperty(ShaderUtils._ZWrite))
-                {
-                    int zWrite = (int) copy.GetFloat(ShaderUtils._ZWrite);
-
-                    if (zWrite == 0)
-                        copy.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
-                }
+                SRPBatchingHelper.OptimizeMaterial(copy);
 
                 result.Add(copy);
                 return copy;

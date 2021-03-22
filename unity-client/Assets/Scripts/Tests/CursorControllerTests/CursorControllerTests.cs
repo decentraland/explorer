@@ -1,6 +1,7 @@
 using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
+using DCL;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections;
@@ -9,13 +10,14 @@ using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class CursorControllerTests : TestsBase
+    public class CursorControllerTests : IntegrationTestSuite_Legacy
     {
         protected override bool enableSceneIntegrityChecker => false;
 
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+            Environment.i.world.sceneController.SortScenesByDistance();
             sceneInitialized = false;
         }
 
@@ -147,7 +149,9 @@ namespace Tests
             TestHelpers.UpdateShape(scene, shape.id, JsonConvert.SerializeObject(
                 new
                 {
-                    visible = false
+                    visible = false,
+                    withCollisions = false,
+                    isPointerBlocker = false
                 }));
 
             yield return null;
@@ -217,6 +221,67 @@ namespace Tests
 
             // Check if target entity is triggered when looked at directly
             Assert.AreEqual(cursorController.cursorImage.sprite, cursorController.hoverCursor);
+        }
+
+        [UnityTest]
+        public IEnumerator OnPointerHoverFeedbackIsBlockedByUI()
+        {
+            DecentralandEntity entity;
+            BoxShape shape;
+
+            shape = TestHelpers.InstantiateEntityWithShape<BoxShape, BoxShape.Model>(
+                scene,
+                DCL.Models.CLASS_ID.BOX_SHAPE,
+                Vector3.zero,
+                out entity,
+                new BoxShape.Model() { });
+
+            TestHelpers.SetEntityTransform(scene, entity, new Vector3(8, 2, 10), Quaternion.identity, new Vector3(3, 3, 3));
+            yield return shape.routine;
+
+            var onPointerDownModel = new OnPointerDown.Model()
+            {
+                type = OnPointerDown.NAME,
+                uuid = "pointerevent-1"
+            };
+            var component = TestHelpers.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
+                onPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+            Assert.IsTrue(component != null);
+
+            yield return null;
+
+            DCLCharacterController.i.SetPosition(new Vector3(8, 1, 7f));
+
+            var cameraController = GameObject.FindObjectOfType<CameraController>();
+
+            // Rotate camera towards the interactive object
+            cameraController.SetRotation(45, 0, 0);
+
+            yield return null;
+
+            var hoverCanvasController = InteractionHoverCanvasController.i;
+            Assert.IsNotNull(hoverCanvasController);
+
+            // Check hover feedback is enabled
+            Assert.IsTrue(hoverCanvasController.canvas.enabled);
+
+            // Put UI in the middle
+            UIScreenSpace screenSpaceShape =
+                TestHelpers.SharedComponentCreate<UIScreenSpace, UIScreenSpace.Model>(scene,
+                    CLASS_ID.UI_SCREEN_SPACE_SHAPE);
+            yield return screenSpaceShape.routine;
+
+            UIContainerRect uiContainerRectShape =
+                TestHelpers.SharedComponentCreate<UIContainerRect, UIContainerRect.Model>(scene,
+                    CLASS_ID.UI_CONTAINER_RECT);
+            yield return uiContainerRectShape.routine;
+
+            yield return null;
+
+            // Check hover feedback is no longer enabled
+            Assert.IsFalse(hoverCanvasController.canvas.enabled);
+
+            DCLCharacterController.i.ResumeGravity();
         }
     }
 }

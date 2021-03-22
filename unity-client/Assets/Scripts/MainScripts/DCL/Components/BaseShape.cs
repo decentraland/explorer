@@ -1,22 +1,34 @@
 using DCL.Configuration;
 using DCL.Controllers;
+using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
 
 namespace DCL.Components
 {
-    public abstract class BaseShape : BaseDisposable
+    public abstract class BaseShape : BaseDisposable, IShape
     {
         [System.Serializable]
-        public class Model
+        public class Model : BaseModel
         {
             public bool withCollisions = true;
             public bool isPointerBlocker = true;
             public bool visible = true;
+
+            public override BaseModel GetDataFromJSON(string json)
+            {
+                return Utils.SafeFromJson<Model>(json);
+            }
         }
 
-        public BaseShape(ParcelScene scene) : base(scene)
+        public BaseShape()
         {
+            model = new Model();
+        }
+
+        new public Model GetModel()
+        {
+            return (Model) model;
         }
 
         public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)

@@ -1,14 +1,5 @@
 import { contracts as contractInfo } from './contracts'
 const queryString = require('query-string')
-declare var window: any
-
-export const performanceConfigurations = [
-  { antialiasing: true, downsampling: 0, shadows: true },
-  { antialiasing: false, downsampling: 1, shadows: true },
-  { antialiasing: false, downsampling: 1, shadows: false },
-  { antialiasing: false, downsampling: 1, shadows: true },
-  { antialiasing: false, downsampling: 2, shadows: false }
-]
 
 export const NETWORK_HZ = 10
 
@@ -54,12 +45,30 @@ export namespace parcelLimits {
   export const minParcelX = -150
   export const minParcelZ = -150
 
-  export const minLandCoordinateX = -150
-  export const minLandCoordinateY = -150
-  export const maxLandCoordinateX = 150
-  export const maxLandCoordinateY = 150
-}
+  export const validWorldRanges = [
+    {
+      x: { from: -150, to: 150 },
+      y: { from: -150, to: 150 }
+    },
+    {
+      x: { from: 62, to: 163 },
+      y: { from: 151, to: 158 }
+    },
+    {
+      x: { from: 151, to: 162 },
+      y: { from: 144, to: 150 }
+    },
+    {
+      x: { from: 151, to: 163 },
+      y: { from: 59, to: 143 }
+    }
+  ]
 
+  export const descriptiveValidWorldRanges = validWorldRanges
+    .map(range => `(X from ${range.x.from} to ${range.x.to}, and Y from ${range.y.from} to ${range.y.to})`)
+    .join(' or ')
+
+}
 export namespace playerConfigurations {
   export const gravity = -0.2
   export const height = 1.6
@@ -86,64 +95,72 @@ export const PREVIEW: boolean = !!(global as any).preview
 export const EDITOR: boolean = !!(global as any).isEditor
 export const WORLD_EXPLORER = !EDITOR && !PREVIEW
 
-export const OPEN_AVATAR_EDITOR = location.search.indexOf('OPEN_AVATAR_EDITOR') !== -1 && WORLD_EXPLORER
+export const OPEN_AVATAR_EDITOR = location.search.includes('OPEN_AVATAR_EDITOR') && WORLD_EXPLORER
 
-export const STATIC_WORLD = location.search.indexOf('STATIC_WORLD') !== -1 || !!(global as any).staticWorld || EDITOR
+export const STATIC_WORLD = location.search.includes('STATIC_WORLD') || !!(global as any).staticWorld || EDITOR
 
 // Development
-export const ENABLE_WEB3 = location.search.indexOf('ENABLE_WEB3') !== -1 || !!(global as any).enableWeb3
-export const ENV_OVERRIDE = location.search.indexOf('ENV') !== -1
-export const GIF_WORKERS = location.search.indexOf('GIF_WORKERS') !== -1
+export const ENABLE_WEB3 = location.search.includes('ENABLE_WEB3') || !!(global as any).enableWeb3
+export const ENV_OVERRIDE = location.search.includes('ENV')
+export const GIF_WORKERS = location.search.includes('GIF_WORKERS')
 
 const qs = queryString.parse(location.search)
 
 // Comms
-export const USE_LOCAL_COMMS = location.search.indexOf('LOCAL_COMMS') !== -1 || PREVIEW
+export const USE_LOCAL_COMMS = location.search.includes('LOCAL_COMMS') || PREVIEW
 export const COMMS = USE_LOCAL_COMMS ? 'v1-local' : qs.COMMS ? qs.COMMS : 'v2-p2p' // by default
+export const COMMS_PROFILE_TIMEOUT = 10000
 
-export const FETCH_PROFILE_SERVICE = qs.FETCH_PROFILE_SERVICE
 export const UPDATE_CONTENT_SERVICE = qs.UPDATE_CONTENT_SERVICE
 export const FETCH_CONTENT_SERVICE = qs.FETCH_CONTENT_SERVICE
-export const FETCH_META_CONTENT_SERVICE = qs.FETCH_META_CONTENT_SERVICE
 export const COMMS_SERVICE = qs.COMMS_SERVICE
 export const RESIZE_SERVICE = qs.RESIZE_SERVICE
+export const HOTSCENES_SERVICE = qs.HOTSCENES_SERVICE
 export const REALM = qs.realm
 
-export const AUTO_CHANGE_REALM = location.search.indexOf('AUTO_CHANGE_REALM') !== -1
+export const VOICE_CHAT_DISABLED_FLAG = location.search.includes('VOICE_CHAT_DISABLED')
+
+export const ENABLE_BUILDER_IN_WORLD = location.search.includes('ENABLE_BUILDER_IN_WORLD')
+
+export const AUTO_CHANGE_REALM = location.search.includes('AUTO_CHANGE_REALM')
 
 export const LOS = qs.LOS
 
-export const DEBUG = location.search.indexOf('DEBUG_MODE') !== -1 || !!(global as any).mocha || PREVIEW || EDITOR
-export const DEBUG_ANALYTICS = location.search.indexOf('DEBUG_ANALYTICS') !== -1
-export const DEBUG_MOBILE = location.search.indexOf('DEBUG_MOBILE') !== -1
-export const DEBUG_MESSAGES = location.search.indexOf('DEBUG_MESSAGES') !== -1
-export const DEBUG_MESSAGES_QUEUE_PERF = location.search.indexOf('DEBUG_MESSAGES_QUEUE_PERF') !== -1
-export const DEBUG_WS_MESSAGES = location.search.indexOf('DEBUG_WS_MESSAGES') !== -1
-export const DEBUG_REDUX = location.search.indexOf('DEBUG_REDUX') !== -1
-export const DEBUG_LOGIN = location.search.indexOf('DEBUG_LOGIN') !== -1
-export const DEBUG_PM = location.search.indexOf('DEBUG_PM') !== -1
-export const DEBUG_SCENE_LOG = location.search.indexOf('DEBUG_SCENE_LOG') !== -1
+export const DEBUG = location.search.includes('DEBUG_MODE') || !!(global as any).mocha || PREVIEW || EDITOR
+export const DEBUG_ANALYTICS = location.search.includes('DEBUG_ANALYTICS')
+export const DEBUG_MOBILE = location.search.includes('DEBUG_MOBILE')
+export const DEBUG_MESSAGES = location.search.includes('DEBUG_MESSAGES')
+export const DEBUG_MESSAGES_QUEUE_PERF = location.search.includes('DEBUG_MESSAGES_QUEUE_PERF')
+export const DEBUG_WS_MESSAGES = location.search.includes('DEBUG_WS_MESSAGES')
+export const DEBUG_REDUX = location.search.includes('DEBUG_REDUX')
+export const DEBUG_LOGIN = location.search.includes('DEBUG_LOGIN')
+export const DEBUG_PM = location.search.includes('DEBUG_PM')
+export const DEBUG_SCENE_LOG = DEBUG || location.search.includes('DEBUG_SCENE_LOG')
 
-export const INIT_PRE_LOAD = location.search.indexOf('INIT_PRE_LOAD') !== -1
+export const INIT_PRE_LOAD = location.search.includes('INIT_PRE_LOAD')
 
-export const AWS = location.search.indexOf('AWS') !== -1
-export const NO_MOTD = location.search.indexOf('NO_MOTD') !== -1
-export const RESET_TUTORIAL = location.search.indexOf('RESET_TUTORIAL') !== -1
+export const NO_MOTD = location.search.includes('NO_MOTD')
+export const RESET_TUTORIAL = location.search.includes('RESET_TUTORIAL')
 
-export const DISABLE_AUTH = location.search.indexOf('DISABLE_AUTH') !== -1 || DEBUG
-export const ENGINE_DEBUG_PANEL = location.search.indexOf('ENGINE_DEBUG_PANEL') !== -1
-export const SCENE_DEBUG_PANEL = location.search.indexOf('SCENE_DEBUG_PANEL') !== -1 && !ENGINE_DEBUG_PANEL
-export const SHOW_FPS_COUNTER = location.search.indexOf('SHOW_FPS_COUNTER') !== -1 || DEBUG
-export const HAS_INITIAL_POSITION_MARK = location.search.indexOf('position') !== -1
-export const NO_ASSET_BUNDLES = location.search.indexOf('NO_ASSET_BUNDLES') !== -1
+export const ENGINE_DEBUG_PANEL = location.search.includes('ENGINE_DEBUG_PANEL')
+export const SCENE_DEBUG_PANEL = location.search.includes('SCENE_DEBUG_PANEL') && !ENGINE_DEBUG_PANEL
+export const SHOW_FPS_COUNTER = location.search.includes('SHOW_FPS_COUNTER') || DEBUG
+export const HAS_INITIAL_POSITION_MARK = location.search.includes('position')
+export const NO_ASSET_BUNDLES = location.search.includes('NO_ASSET_BUNDLES')
 export const WSS_ENABLED = qs.ws !== undefined
-export const FORCE_SEND_MESSAGE = location.search.indexOf('FORCE_SEND_MESSAGE') !== -1
+export const FORCE_SEND_MESSAGE = location.search.includes('FORCE_SEND_MESSAGE')
 
-export const ENABLE_EXPLORE_HUD = location.search.indexOf('ENABLE_EXPLORE_HUD') !== -1
-export const ENABLE_MANA_HUD = location.search.indexOf('ENABLE_MANA_HUD') !== -1
-export const ENABLE_NEW_TASKBAR = location.search.indexOf('ENABLE_NEW_TASKBAR') !== -1 /* NOTE(Santi): This is temporal, until we remove the old taskbar */
+export const PIN_CATALYST = qs.CATALYST ? addHttpsIfNoProtocolIsSet(qs.CATALYST) : undefined
 
-export const PIN_CATALYST = qs.PIN_CATALYST
+export const FORCE_RENDERING_STYLE = qs.FORCE_RENDERING_STYLE
+
+export const TEST_WEARABLES_OVERRIDE = location.search.includes('TEST_WEARABLES')
+
+export const QUESTS_ENABLED = location.search.includes('QUESTS_ENABLED')
+
+const META_CONFIG_URL = qs.META_CONFIG_URL
+
+const QUESTS_SERVER_URL = qs.QUESTS_SERVER_URL ?? 'https://quests-api.decentraland.io'
 
 export namespace commConfigurations {
   export const debug = true
@@ -176,6 +193,8 @@ export namespace commConfigurations {
       username: 'usernamedcl'
     }
   ]
+
+  export const voiceChatUseHRTF = location.search.includes('VOICE_CHAT_USE_HRTF')
 }
 export const loginConfig = {
   org: {
@@ -205,11 +224,9 @@ let network: ETHEREUM_NETWORK | null = null
 
 export function getTLD() {
   if (ENV_OVERRIDE) {
-    return window.location.search.match(/ENV=(\w+)/)[1]
+    return location.search.match(/ENV=(\w+)/)![1]
   }
-  if (window) {
-    return window.location.hostname.match(/(\w+)$/)[0]
-  }
+  return location.hostname.match(/(\w+)$/)![0]
 }
 
 export const knownTLDs = ['zone', 'org', 'today']
@@ -233,18 +250,41 @@ export function getDefaultTLD() {
 }
 
 export function getExclusiveServer() {
-  if (window.location.search.match(/TEST_WEARABLES/)) {
+  const url = new URL(location.toString())
+  if (url.searchParams.has('TEST_WEARABLES')) {
+    const value = url.searchParams.get('TEST_WEARABLES')
+    if (value) {
+      try {
+        return new URL(value).toString()
+      } catch (e) {
+        return `https://${value}/index.json`
+      }
+    }
     return 'https://dcl-wearables-dev.now.sh/index.json'
   }
   return 'https://wearable-api.decentraland.org/v2/collections'
 }
 
-export const ALL_WEARABLES = location.search.indexOf('ALL_WEARABLES') !== -1 && getDefaultTLD() !== 'org'
-
+export const ALL_WEARABLES = location.search.includes('ALL_WEARABLES') && getDefaultTLD() !== 'org'
+export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
+export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
 
 export function getWearablesSafeURL() {
   return 'https://content.decentraland.org'
+}
+
+export function getNetworkFromTLD(tld: string = getTLD()): ETHEREUM_NETWORK | null {
+  if (tld === 'zone') {
+    return ETHEREUM_NETWORK.ROPSTEN
+  }
+
+  if (tld === 'today' || tld === 'org') {
+    return ETHEREUM_NETWORK.MAINNET
+  }
+
+  // if localhost
+  return null
 }
 
 export function getServerConfigurations() {
@@ -253,11 +293,17 @@ export function getServerConfigurations() {
 
   const synapseUrl = TLDDefault === 'zone' ? `https://matrix.decentraland.zone` : `https://decentraland.modular.im`
 
+  const metaConfigBaseUrl = META_CONFIG_URL || `https://config.decentraland.${notToday}/explorer.json`
+  const metaFeatureFlagsBaseUrl = `https://feature-flags.decentraland.${notToday}/explorer.json`
+  const ASSET_BUNDLES_DOMAIN = qs.ASSET_BUNDLES_DOMAIN || `content-assets-as-bundle.decentraland.${TLDDefault}`
+
   return {
-    contentAsBundle: `https://content-assets-as-bundle.decentraland.org`,
-    wearablesApi: `https://wearable-api.decentraland.org/v2`,
-    explorerConfiguration: `https://explorer-config.decentraland.${notToday}/configuration.json`,
+    contentAsBundle: `https://${ASSET_BUNDLES_DOMAIN}`,
+    wearablesApi: `https://${WEARABLE_API_DOMAIN}/${WEARABLE_API_PATH_PREFIX}`,
+    explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
+    explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
     synapseUrl,
+    questsUrl: QUESTS_SERVER_URL,
     fallbackResizeServiceUrl: `${PIN_CATALYST ?? 'https://peer.decentraland.' + notToday}/lambdas/images`,
     avatar: {
       snapshotStorage: `https://avatars-storage.decentraland.${TLDDefault}/`, // ** TODO - unused, remove - moliva - 03/07/2020
@@ -326,3 +372,27 @@ export namespace ethereumConfigurations {
 }
 
 export const isRunningTest: boolean = (global as any)['isRunningTests'] === true
+
+// @todo replace before merge
+export const WALLET_API_KEYS = new Map<ETHEREUM_NETWORK, Map<string, string>>([
+  [ETHEREUM_NETWORK.ROPSTEN, new Map([['Fortmatic', 'pk_test_198DDD3CA646DE2F']])],
+  [ETHEREUM_NETWORK.MAINNET, new Map([['Fortmatic', 'pk_live_D7297F51E9776DD2']])]
+])
+
+export const genericAvatarSnapshots: Record<string, string> = {
+  face: '/images/avatar_snapshot_default.png',
+  body: '/images/image_not_found.png',
+  face256: '/images/avatar_snapshot_default256.png',
+  face128: '/images/avatar_snapshot_default128.png'
+}
+
+export function getCatalystNodesDefaultURL() {
+  return `https://peer.decentraland.${getDefaultTLD()}/lambdas/contracts/servers`
+}
+
+function addHttpsIfNoProtocolIsSet(domain: string): string {
+  if (!domain.startsWith('http')) {
+    return `https://${domain}`
+  }
+  return domain
+}

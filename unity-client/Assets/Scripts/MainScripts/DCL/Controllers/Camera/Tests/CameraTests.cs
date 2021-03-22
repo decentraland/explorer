@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace CameraController_Test
 {
-    public class CameraControllerShould : TestsBase
+    public class CameraControllerShould : IntegrationTestSuite_Legacy
     {
         protected override bool enableSceneIntegrityChecker => false;
 
@@ -61,14 +61,13 @@ namespace CameraController_Test
         {
             RenderingController renderingController = GameObject.FindObjectOfType<RenderingController>();
             renderingController.DeactivateRendering();
-            Assert.IsFalse(cameraController.cameraTransform.gameObject.activeSelf);
+            Assert.IsFalse(cameraController.camera.enabled);
 
             yield return null;
 
             renderingController.renderingActivatedAckLock.RemoveAllLocks();
             renderingController.ActivateRendering();
-            Assert.IsTrue(cameraController.cameraTransform.gameObject.activeSelf);
-            yield break;
+            Assert.IsTrue(cameraController.camera.enabled);
         }
     }
 }
