@@ -325,9 +325,6 @@ public class AvatarEditorHUDView : MonoBehaviour
 
     public void SetVisibility(bool visible)
     {
-        if (Camera.main != null)
-            Camera.main.enabled = !visible;
-
         characterPreviewController.camera.enabled = visible;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
