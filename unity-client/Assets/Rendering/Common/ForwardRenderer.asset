@@ -1,5 +1,27 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-981180908113067146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af2ff9cd9f2df7e4e85570d14a4bdf9d, type: 3}
+  m_Name: NewDCLScreenSpaceAmbientOcclusion
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_Shader: {fileID: 4800000, guid: 424079210a480e041936a7bb25fbd521, type: 3}
+  m_Settings:
+    Downsample: 1
+    Source: 1
+    NormalSamples: 2
+    Intensity: 1.25
+    DirectLightingStrength: 0.5
+    Radius: 0.5
+    SampleCount: 4
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13,8 +35,8 @@ MonoBehaviour:
   m_Name: ForwardRenderer
   m_EditorClassIdentifier: 
   m_RendererFeatures:
-  - {fileID: 2430926494106206046}
-  m_RendererFeatureMap: 5e3f494cc462bc21
+  - {fileID: -981180908113067146}
+  m_RendererFeatureMap: 7683869f292562f2
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
