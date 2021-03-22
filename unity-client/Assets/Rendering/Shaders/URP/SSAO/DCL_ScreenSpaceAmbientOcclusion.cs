@@ -137,6 +137,7 @@ namespace DCL.Rendering.Universal
                 m_Shader = Shader.Find(k_ShaderName);
                 if (m_Shader == null)
                 {
+                    Debug.LogError("Can't find shader for SSAO!!!");
                     return false;
                 }
             }
