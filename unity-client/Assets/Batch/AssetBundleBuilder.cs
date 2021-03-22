@@ -263,7 +263,7 @@ namespace DCL
             //             This way we save the big Shader.Parse and gpu compiling performance overhead and make
             //             the bundles a bit lighter.
 
-            //             This shader bundle doesn't need to be really used, as we are going to use the 
+            //             This shader bundle doesn't need to be really used, as we are going to use the
             //             embedded one, so we are going to delete it after the generation ended.
             var mainShader = Shader.Find("DCL/LWRP/Lit");
             AssetBundleBuilderUtils.MarkForAssetBundleBuild(mainShader, MAIN_SHADER_AB_NAME);
@@ -604,7 +604,7 @@ namespace DCL
 
                 //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
                 //             consume the asset bundle dependencies instead of trying to create new textures.
-                PersistentAssetCache.AddImage(relativePath, gltfHash, new RefCountedTextureData(relativePath, t2d));
+                PersistentAssetCache.AddImage(relativePath, gltfMappingPair.hash, new RefCountedTextureData(relativePath, t2d));
             }
         }
 
