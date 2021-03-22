@@ -21,7 +21,7 @@ namespace DCL.Controllers
 
     public interface ISceneBoundsChecker
     {
-        event Action<DecentralandEntity, bool> OnEntityBoundsCheckerStatusChanged;
+        event Action<IDCLEntity, bool> OnEntityBoundsCheckerStatusChanged;
 
         float timeBetweenChecks { get; set; }
         bool enabled { get; }
@@ -51,7 +51,7 @@ namespace DCL.Controllers
 
     public class SceneBoundsChecker : ISceneBoundsChecker
     {
-        public event Action<DecentralandEntity, bool> OnEntityBoundsCheckerStatusChanged;
+        public event Action<IDCLEntity, bool> OnEntityBoundsCheckerStatusChanged;
 
         public bool enabled => entitiesCheckRoutine != null;
 
@@ -68,13 +68,25 @@ namespace DCL.Controllers
 
         private ISceneBoundsFeedbackStyle feedbackStyle;
 
-        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null) { this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple(); }
+        public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null)
+        {
+            this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple();
+        }
 
-        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle) { this.feedbackStyle = feedbackStyle; }
+        public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle)
+        {
+            this.feedbackStyle = feedbackStyle;
+        }
 
-        public ISceneBoundsFeedbackStyle GetFeedbackStyle() { return feedbackStyle; }
+        public ISceneBoundsFeedbackStyle GetFeedbackStyle()
+        {
+            return feedbackStyle;
+        }
 
-        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo) { return feedbackStyle.GetOriginalMaterials(meshesInfo); }
+        public List<Material> GetOriginalMaterials(MeshesInfo meshesInfo)
+        {
+            return feedbackStyle.GetOriginalMaterials(meshesInfo);
+        }
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         IEnumerator CheckEntities()
@@ -266,7 +278,10 @@ namespace DCL.Controllers
             return true;
         }
 
-        protected void UpdateEntityMeshesValidState(MeshesInfo meshesInfo, bool isInsideBoundaries) { feedbackStyle.ApplyFeedback(meshesInfo, isInsideBoundaries); }
+        protected void UpdateEntityMeshesValidState(MeshesInfo meshesInfo, bool isInsideBoundaries)
+        {
+            feedbackStyle.ApplyFeedback(meshesInfo, isInsideBoundaries);
+        }
 
         protected void UpdateEntityCollidersValidState(MeshesInfo meshesInfo, bool isInsideBoundaries)
         {
