@@ -37,7 +37,7 @@ Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
             output.uv = input.uv;
 
             // Add a small epsilon to avoid artifacts when reconstructing the normals
-            output.uv -= 0.0039 * 10;
+            //output.uv -= 0.0039 * 10;
 
             return output;
         }
