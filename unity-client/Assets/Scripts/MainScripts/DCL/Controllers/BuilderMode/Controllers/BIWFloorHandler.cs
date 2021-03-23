@@ -100,12 +100,18 @@ public class BIWFloorHandler : BIWController
 
             GameObject floorPlaceHolder = GameObject.Instantiate(floorPrefab, decentralandEntity.rootEntity.gameObject.transform.position, Quaternion.identity);
             floorPlaceHolderDict.Add(decentralandEntity.rootEntity.entityId, floorPlaceHolder);
+            decentralandEntity.OnShapeFinishLoading += OnShapeLoadFinish;
             builderInWorldBridge?.EntityTransformReport(decentralandEntity.rootEntity, sceneToEdit);
-            CoroutineStarter.Start(FloorTimeOut(decentralandEntity.rootEntity.entityId));
         }
 
         builderInWorldEntityHandler.DeselectEntities();
         lastFloorCalalogItemUsed = floorSceneObject;
+    }
+
+    private void OnShapeLoadFinish(DCLBuilderInWorldEntity entity)
+    {
+        entity.OnShapeFinishLoading -= OnShapeLoadFinish;
+        RemovePlaceHolder(entity.rootEntity.entityId);
     }
 
     private void OnFloorLoaded(DecentralandEntity entity)
@@ -127,12 +133,5 @@ public class BIWFloorHandler : BIWController
         floorPlaceHolderDict.Remove(entityId);
         GameObject.Destroy(floorPlaceHolder);
         dclBuilderMeshLoadIndicatorController.HideIndicator(entityId);
-    }
-
-    private IEnumerator FloorTimeOut(string entityId)
-    {
-        yield return new WaitForSeconds(secondsToTimeOut);
-        RemovePlaceHolder(entityId);
-        Debug.LogError("Floor loading timeout " + entityId);
     }
 }
