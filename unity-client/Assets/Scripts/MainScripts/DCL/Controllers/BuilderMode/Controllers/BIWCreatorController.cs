@@ -185,7 +185,7 @@ public class BIWCreatorController : BIWController
         }
     }
 
-    private void RemoveLoadingObject(string entityId)
+    public void RemoveLoadingObject(string entityId)
     {
         if (!loadingGameObjects.ContainsKey(entityId))
             return;
@@ -237,10 +237,9 @@ public class BIWCreatorController : BIWController
             nftShape.model.color = new Color(0.6404918f, 0.611472f, 0.8584906f);
             nftShape.model.src = catalogItem.model;
             nftShape.model.assetId = catalogItem.id;
-            nftShape.CallWhenReady(OnShapeLoadFinish);
-
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, nftShape.id);
 
+            nftShape.CallWhenReady(OnShapeLoadFinish);
         }
         else
         {
@@ -248,8 +247,9 @@ public class BIWCreatorController : BIWController
             gltfComponent.model = new LoadableShape.Model();
             gltfComponent.model.src = catalogItem.model;
             gltfComponent.model.assetId = catalogItem.id;
-            gltfComponent.CallWhenReady(OnShapeLoadFinish);
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, gltfComponent.id);
+
+            gltfComponent.CallWhenReady(OnShapeLoadFinish);
 
         }
 
