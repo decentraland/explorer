@@ -132,6 +132,7 @@ public class BIWCreatorController : BIWController
 
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPosition, editionPosition);
         entity.isFloor = isFloor;
+        entity.SetRotation(Vector3.zero);
 
         AddShape(catalogItem, entity);
 
@@ -167,10 +168,7 @@ public class BIWCreatorController : BIWController
 
     #region LoadingObjects
 
-    public bool ExistsLoadingGameObjectForEntity(string entityId)
-    {
-        return loadingGameObjects.ContainsKey(entityId);
-    }
+    public bool ExistsLoadingGameObjectForEntity(string entityId) { return loadingGameObjects.ContainsKey(entityId); }
 
     private void CreateLoadingObject(DCLBuilderInWorldEntity entity)
     {
