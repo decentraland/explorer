@@ -1,4 +1,4 @@
-Shader "Hidden/DCL/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
+Shader "Hidden/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
 {
     HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
@@ -37,7 +37,7 @@ Shader "Hidden/DCL/Universal Render Pipeline/ScreenSpaceAmbientOcclusion"
             output.uv = input.uv;
 
             // Add a small epsilon to avoid artifacts when reconstructing the normals
-            //output.uv += 1.0e-6;
+            //output.uv += 1.0e-6 + .005;
 
             return output;
         }
