@@ -37,7 +37,7 @@ public class BIWCreatorController : BIWController
 
     private InputAction_Trigger.Triggered createLastSceneObjectDelegate;
 
-    private readonly Dictionary<string, GameObject> loadingGameObjects = new Dictionary<string, GameObject>();
+    private readonly Dictionary<string, BIWLoadingPlaceHolder> loadingGameObjects = new Dictionary<string, BIWLoadingPlaceHolder>();
 
     private void Start()
     {
@@ -55,9 +55,9 @@ public class BIWCreatorController : BIWController
 
     public void Clean()
     {
-        foreach (GameObject gameObject in loadingGameObjects.Values)
+        foreach (BIWLoadingPlaceHolder placeHolder in loadingGameObjects.Values)
         {
-            GameObject.Destroy(gameObject);
+            GameObject.Destroy(placeHolder.gameObject);
         }
 
         loadingGameObjects.Clear();
@@ -172,7 +172,7 @@ public class BIWCreatorController : BIWController
     private void CreateLoadingObject(DCLBuilderInWorldEntity entity)
     {
         entity.rootEntity.OnShapeUpdated += OnRealShapeLoaded;
-        GameObject loadingPlaceHolder = GameObject.Instantiate(loadingObjectPrefab, entity.gameObject.transform);
+        BIWLoadingPlaceHolder loadingPlaceHolder = GameObject.Instantiate(loadingObjectPrefab, entity.gameObject.transform).GetComponent<BIWLoadingPlaceHolder>();
         loadingGameObjects.Add(entity.rootEntity.entityId, loadingPlaceHolder);
         CoroutineStarter.Start(LoadingObjectTimeout(entity.rootEntity.entityId));
     }
@@ -188,9 +188,9 @@ public class BIWCreatorController : BIWController
     {
         if (!loadingGameObjects.ContainsKey(entityId))
             return;
-        GameObject loadingPlaceHolder = loadingGameObjects[entityId];
+        BIWLoadingPlaceHolder loadingPlaceHolder = loadingGameObjects[entityId];
         loadingGameObjects.Remove(entityId);
-        GameObject.Destroy(loadingPlaceHolder);
+        loadingPlaceHolder.DestroyAfterAnimation();
     }
 
     private IEnumerator LoadingObjectTimeout(string entityId)

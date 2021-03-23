@@ -1,3 +1,4 @@
+using DCL;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,12 +14,14 @@ public class EntityListAdapter : MonoBehaviour
     public TMP_InputField nameInputField;
     public TextMeshProUGUI nameInputField_Text;
     public Image selectedImg;
+    public RawImage entitytTumbailImg;
     public Button unlockButton;
     public Button lockButton;
     public Image showImg;
     public System.Action<EntityAction, DCLBuilderInWorldEntity, EntityListAdapter> OnActionInvoked;
     public System.Action<DCLBuilderInWorldEntity, string> OnEntityRename;
     DCLBuilderInWorldEntity currentEntity;
+    internal AssetPromise_Texture loadedThumbnailPromise;
 
     private void OnDestroy()
     {
@@ -45,6 +48,10 @@ public class EntityListAdapter : MonoBehaviour
 
         AllowNameEdition(false);
         SetInfo(decentrelandEntity);
+
+        entitytTumbailImg.enabled = false;
+        CatalogItem entitySceneObject = decentrelandEntity.GetCatalogItemAssociated();
+        GetThumbnail(entitySceneObject);
     }
 
     public void SelectOrDeselect() { OnActionInvoked?.Invoke(EntityAction.SELECT, currentEntity, this); }
@@ -86,6 +93,32 @@ public class EntityListAdapter : MonoBehaviour
                 selectedImg.color = entityUnselectedColor;
             }
         }
+    }
+
+    internal void GetThumbnail(CatalogItem catalogItem)
+    {
+        if (catalogItem == null)
+            return;
+
+        var url = catalogItem.thumbnailURL;
+
+        if (string.IsNullOrEmpty(url))
+            return;
+
+        var newLoadedThumbnailPromise = new AssetPromise_Texture(url);
+        newLoadedThumbnailPromise.OnSuccessEvent += SetThumbnail;
+        newLoadedThumbnailPromise.OnFailEvent += x => { Debug.Log($"Error downloading: {url}"); };
+        AssetPromiseKeeper_Texture.i.Keep(newLoadedThumbnailPromise);
+        AssetPromiseKeeper_Texture.i.Forget(loadedThumbnailPromise);
+        loadedThumbnailPromise = newLoadedThumbnailPromise;
+    }
+
+    internal void SetThumbnail(Asset_Texture texture)
+    {
+        if (entitytTumbailImg == null)
+            return;
+        entitytTumbailImg.enabled = true;
+        entitytTumbailImg.texture = texture.texture;
     }
 
     public void Rename(string newName) { OnEntityRename?.Invoke(currentEntity, newName); }
