@@ -44,6 +44,7 @@ public class BIWCreatorShould : IntegrationTestSuite_Legacy
         foreach (DCLBuilderInWorldEntity entity in entityHandler.GetAllEntitiesFromCurrentScene())
         {
             Assert.IsTrue(entity.GetCatalogItemAssociated().id == item.id);
+            Assert.AreEqual(Vector3.zero, entity.GetEulerRotation());
         }
     }
 
