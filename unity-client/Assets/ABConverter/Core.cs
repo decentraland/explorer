@@ -454,8 +454,7 @@ namespace DCL.ABConverter
                     texImporter.crunchedCompression = true;
                     texImporter.textureCompression = TextureImporterCompression.CompressedHQ;
                     
-                    // previously -> string assetPath = hash + "/" + hash + fileExt;
-                    ReduceTextureSizeIfNeeded(assetPath.basePath, 512);
+                    ReduceTextureSizeIfNeeded(assetPath.hash + "/" + assetPath.hash + Path.GetExtension(assetPath.file), 512);
                 }
                 else
                 {

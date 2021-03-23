@@ -87,15 +87,15 @@ namespace DCL
             core.Convert(mappings.ToArray());
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump Base Wearables")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables")]
         public static void DumpBaseAvatars()
         {
-            var avatarItemList = GetAvatarMappingList("https://dcl-wearables.now.sh/index.json");
+            var avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections");
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
             builder.Convert(ExtractMappingPairs(avatarItemList).ToArray());
         }
         
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (Only bodies)")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Body-Wearables")]
         public static void DumpAllBodiesWearables()
         {
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
@@ -110,7 +110,7 @@ namespace DCL
             DumpWearableQueue(builder, itemQueue, GLTFImporter_OnBodyWearableLoad);
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (Non bodies)")]
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Non-Body-Wearables")]
         public static void DumpAllNonBodiesWearables()
         {
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
@@ -250,12 +250,12 @@ namespace DCL
 
             if (!w.WebRequestSucceded())
             {
-                Debug.LogWarning($"Request error! Wearables couldn't be fetched! -- {w.error}");
+                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
                 return null;
             }
 
             var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
-
+            
             foreach (var collection in avatarApiData.data)
             {
                 foreach (var wearable in collection.wearables)
