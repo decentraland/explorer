@@ -451,7 +451,6 @@ public class BuilderInWorldController : MonoBehaviour
     public void ExitEditMode()
     {
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
-        biwFloorHandler.RemoveAllPlaceHolders();
         initialLoadingController.Hide(true);
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);

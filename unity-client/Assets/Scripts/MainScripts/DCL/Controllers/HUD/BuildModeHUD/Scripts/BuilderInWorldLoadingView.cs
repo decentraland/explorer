@@ -23,7 +23,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     [SerializeField] internal float timeBetweenTips = 3f;
     [SerializeField] internal TMP_Text tipsText;
     [SerializeField] internal Button cancelButton;
-    [SerializeField] internal float minVisibilityTime = 2f;
+    [SerializeField] internal float minVisibilityTime = 1.5f;
 
     public event System.Action OnCancelLoading;
 

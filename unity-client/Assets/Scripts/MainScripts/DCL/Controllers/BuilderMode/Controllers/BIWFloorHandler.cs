@@ -38,12 +38,7 @@ public class BIWFloorHandler : BIWController
 
     public void Clean()
     {
-        foreach (GameObject gameObject in floorPlaceHolderDict.Values)
-        {
-            GameObject.Destroy(gameObject);
-        }
-        floorPlaceHolderDict.Clear();
-
+        RemoveAllPlaceHolders();
         dclBuilderMeshLoadIndicatorController.Dispose();
     }
 
@@ -135,13 +130,20 @@ public class BIWFloorHandler : BIWController
         dclBuilderMeshLoadIndicatorController.HideIndicator(entityId);
     }
 
-    public void RemoveAllPlaceHolders()
+    private void RemoveAllPlaceHolders()
     {
         foreach (GameObject gameObject in floorPlaceHolderDict.Values)
         {
             GameObject.Destroy(gameObject);
         }
         floorPlaceHolderDict.Clear();
+    }
+
+    public override void ExitEditMode()
+    {
+        base.ExitEditMode();
+
+        RemoveAllPlaceHolders();
         dclBuilderMeshLoadIndicatorController.HideAllIndicators();
     }
 }

@@ -513,6 +513,7 @@ MonoBehaviour:
   timeBetweenTips: 3
   tipsText: {fileID: 2990530343117790431}
   cancelButton: {fileID: 7058324031334657894}
+  minVisibilityTime: 1.5
 --- !u!1 &4697527156341959461
 GameObject:
   m_ObjectHideFlags: 0
