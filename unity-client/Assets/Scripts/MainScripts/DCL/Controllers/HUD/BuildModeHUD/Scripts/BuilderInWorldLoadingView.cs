@@ -9,7 +9,7 @@ public interface IBuilderInWorldLoadingView
     event System.Action OnCancelLoading;
 
     void Show(bool showTips = true);
-    void Hide();
+    void Hide(bool forzeHidding = false);
     void StartTipsCarousel();
     void StopTipsCarousel();
     void CancelLoading();
@@ -54,12 +54,12 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
             tipsText.text = string.Empty;
     }
 
-    public void Hide()
+    public void Hide(bool forzeHidding = false)
     {
         if (hideCoroutine != null)
             CoroutineStarter.Stop(hideCoroutine);
 
-        hideCoroutine = CoroutineStarter.Start(TryToHideCoroutine());
+        hideCoroutine = CoroutineStarter.Start(TryToHideCoroutine(forzeHidding));
     }
 
     public void StartTipsCarousel()
@@ -77,9 +77,9 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         tipsCoroutine = null;
     }
 
-    internal IEnumerator TryToHideCoroutine()
+    internal IEnumerator TryToHideCoroutine(bool forzeHidding)
     {
-        while ((Time.realtimeSinceStartup - showTime) < minVisibilityTime)
+        while (!forzeHidding && (Time.realtimeSinceStartup - showTime) < minVisibilityTime)
         {
             yield return null;
         }

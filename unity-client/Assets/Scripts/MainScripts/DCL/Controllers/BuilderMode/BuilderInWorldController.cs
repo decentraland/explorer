@@ -451,10 +451,12 @@ public class BuilderInWorldController : MonoBehaviour
     public void ExitEditMode()
     {
         biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
-        initialLoadingController.Hide();
+        biwFloorHandler.RemoveAllPlaceHolders();
+        initialLoadingController.Hide(true);
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
+        inputController.isInputActive = true;
         inputController.isBuildModeActivate = false;
         snapGO.transform.SetParent(transform);
 

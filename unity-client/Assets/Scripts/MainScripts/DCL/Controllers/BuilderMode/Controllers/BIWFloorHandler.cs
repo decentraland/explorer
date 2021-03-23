@@ -134,4 +134,14 @@ public class BIWFloorHandler : BIWController
         GameObject.Destroy(floorPlaceHolder);
         dclBuilderMeshLoadIndicatorController.HideIndicator(entityId);
     }
+
+    public void RemoveAllPlaceHolders()
+    {
+        foreach (GameObject gameObject in floorPlaceHolderDict.Values)
+        {
+            GameObject.Destroy(gameObject);
+        }
+        floorPlaceHolderDict.Clear();
+        dclBuilderMeshLoadIndicatorController.HideAllIndicators();
+    }
 }

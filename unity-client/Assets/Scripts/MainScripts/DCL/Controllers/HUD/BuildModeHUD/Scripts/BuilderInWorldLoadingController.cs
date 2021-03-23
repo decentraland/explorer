@@ -5,7 +5,7 @@ public interface IBuilderInWorldLoadingController
     void Initialize(IBuilderInWorldLoadingView initialLoadingView);
     void Dispose();
     void Show(bool showTips = true);
-    void Hide();
+    void Hide(bool forzeHidding = false);
     void CancelLoading();
 }
 
@@ -29,7 +29,7 @@ public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
 
     public void Show(bool showTips = true) { initialLoadingView.Show(showTips); }
 
-    public void Hide() { initialLoadingView.Hide(); }
+    public void Hide(bool forzeHidding = false) { initialLoadingView.Hide(forzeHidding); }
 
     public void CancelLoading() { OnCancelLoading?.Invoke(); }
 }
