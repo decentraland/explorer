@@ -29,7 +29,6 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
     public System.Action<PointerEventData, CatalogItemAdapter> OnPointerExitInAdapter;
 
     private CatalogItem catalogItem;
-
     private string loadedThumbnailURL;
     private AssetPromise_Texture loadedThumbnailPromise;
 
@@ -59,31 +58,41 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
     private void GetThumbnail()
     {
         SetLoadingActive(true);
-        var url = catalogItem?.GetThumbnailUrl();
 
-        if (url == loadedThumbnailURL)
+        if (catalogItem == null)
             return;
 
-        if (catalogItem == null || string.IsNullOrEmpty(url))
+        var url = catalogItem.GetThumbnailUrl();
+
+        if (string.IsNullOrEmpty(url) || url == loadedThumbnailURL)
             return;
 
-        string newLoadedThumbnailURL = url;
-        var newLoadedThumbnailPromise =  new AssetPromise_Texture(url);
+        ClearThumbnailPromise();
+        loadedThumbnailPromise = new AssetPromise_Texture(url);
 
+        loadedThumbnailPromise.OnSuccessEvent += x =>
+        {
+            loadedThumbnailURL = url;
+            SetThumbnail(x);
+        };
 
-        newLoadedThumbnailPromise.OnSuccessEvent += SetThumbnail;
-        newLoadedThumbnailPromise.OnFailEvent += x =>
+        loadedThumbnailPromise.OnFailEvent += x =>
         {
             Debug.Log($"Error downloading: {url}");
             SetLoadingActive(false);
         };
 
-        AssetPromiseKeeper_Texture.i.Keep(newLoadedThumbnailPromise);
+        AssetPromiseKeeper_Texture.i.Keep(loadedThumbnailPromise);
+    }
 
-
-        AssetPromiseKeeper_Texture.i.Forget(loadedThumbnailPromise);
-        loadedThumbnailPromise = newLoadedThumbnailPromise;
-        loadedThumbnailURL = newLoadedThumbnailURL;
+    private void ClearThumbnailPromise()
+    {
+        if (loadedThumbnailPromise != null)
+        {
+            loadedThumbnailPromise.ClearEvents();
+            AssetPromiseKeeper_Texture.i.Forget(loadedThumbnailPromise);
+            loadedThumbnailPromise = null;
+        }
     }
 
     private void SetLoadingActive(bool isActive)
@@ -141,4 +150,6 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
     public void OnPointerEnter(PointerEventData eventData) { OnPointerEnterInAdapter?.Invoke(eventData, this); }
 
     public void OnPointerExit(PointerEventData eventData) { OnPointerExitInAdapter?.Invoke(eventData, this); }
+
+    private void OnDestroy() { ClearThumbnailPromise(); }
 }
