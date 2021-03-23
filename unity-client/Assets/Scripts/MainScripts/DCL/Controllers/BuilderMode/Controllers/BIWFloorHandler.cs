@@ -26,6 +26,9 @@ public class BIWFloorHandler : BIWController
     [Header("Prefabs")]
     public GameObject floorPrefab;
 
+    public event Action OnAllParcelsFloorLoaded;
+    private int numberOfParcelsLoaded;
+
     private CatalogItem lastFloorCalalogItemUsed;
     private readonly Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
 
@@ -86,6 +89,7 @@ public class BIWFloorHandler : BIWController
     {
         Vector3 initialPosition = new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
         Vector2Int[] parcelsPoints = sceneToEdit.sceneData.parcels;
+        numberOfParcelsLoaded = 0;
 
         foreach (Vector2Int parcel in parcelsPoints)
         {
@@ -108,6 +112,10 @@ public class BIWFloorHandler : BIWController
     {
         entity.OnShapeUpdated -= OnFloorLoaded;
         RemovePlaceHolder(entity.entityId);
+
+        numberOfParcelsLoaded++;
+        if (numberOfParcelsLoaded >= sceneToEdit.sceneData.parcels.Count())
+            OnAllParcelsFloorLoaded?.Invoke();
     }
 
     private void RemovePlaceHolder(string entityId)

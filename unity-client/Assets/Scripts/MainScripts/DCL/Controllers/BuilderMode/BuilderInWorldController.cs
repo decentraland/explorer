@@ -396,7 +396,6 @@ public class BuilderInWorldController : MonoBehaviour
 
         ParcelSettings.VISUAL_LOADING_ENABLED = false;
 
-        inputController.isInputActive = true;
         inputController.isBuildModeActivate = true;
 
         FindSceneToEdit();
@@ -421,7 +420,16 @@ public class BuilderInWorldController : MonoBehaviour
         Environment.i.world.sceneController.ActivateBuilderInWorldEditScene();
 
         if (IsNewScene())
+        {
             SetupNewScene();
+            biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
+            biwFloorHandler.OnAllParcelsFloorLoaded += OnAllParcelsFloorLoaded;
+        }
+        else
+        {
+            initialLoadingController.Hide();
+            inputController.isInputActive = true;
+        }
 
         isBuilderInWorldActivated = true;
 
@@ -431,12 +439,20 @@ public class BuilderInWorldController : MonoBehaviour
         }
         previousSkyBoxMaterial = RenderSettings.skybox;
         RenderSettings.skybox = skyBoxMaterial;
+    }
 
+    private void OnAllParcelsFloorLoaded()
+    {
+        biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
         initialLoadingController.Hide();
+        inputController.isInputActive = true;
     }
 
     public void ExitEditMode()
     {
+        biwFloorHandler.OnAllParcelsFloorLoaded -= OnAllParcelsFloorLoaded;
+        initialLoadingController.Hide();
+
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
         inputController.isBuildModeActivate = false;

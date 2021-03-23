@@ -23,10 +23,13 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     [SerializeField] internal float timeBetweenTips = 3f;
     [SerializeField] internal TMP_Text tipsText;
     [SerializeField] internal Button cancelButton;
+    [SerializeField] internal float minVisibilityTime = 2f;
 
     public event System.Action OnCancelLoading;
 
     internal Coroutine tipsCoroutine;
+    internal Coroutine hideCoroutine;
+    internal float showTime = 0f;
 
     internal static BuilderInWorldLoadingView Create()
     {
@@ -43,6 +46,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     public void Show(bool showTips = true)
     {
         gameObject.SetActive(true);
+        showTime = Time.realtimeSinceStartup;
 
         if (showTips && loadingTips.Count > 0)
             StartTipsCarousel();
@@ -52,8 +56,10 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 
     public void Hide()
     {
-        StopTipsCarousel();
-        gameObject.SetActive(false);
+        if (hideCoroutine != null)
+            CoroutineStarter.Stop(hideCoroutine);
+
+        hideCoroutine = CoroutineStarter.Start(TryToHideCoroutine());
     }
 
     public void StartTipsCarousel()
@@ -69,6 +75,17 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 
         CoroutineStarter.Stop(tipsCoroutine);
         tipsCoroutine = null;
+    }
+
+    internal IEnumerator TryToHideCoroutine()
+    {
+        while ((Time.realtimeSinceStartup - showTime) < minVisibilityTime)
+        {
+            yield return null;
+        }
+
+        StopTipsCarousel();
+        gameObject.SetActive(false);
     }
 
     internal IEnumerator ShowRandomTipsCoroutine()
