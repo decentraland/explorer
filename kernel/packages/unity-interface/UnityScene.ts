@@ -72,7 +72,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
       const action = actions[i]
       try {
         nativeMsgBridge.SendNativeMessage(sceneId, action)
-      } catch(e) {
+      } catch (e) {
         this.logger.error(e)
       }
     }

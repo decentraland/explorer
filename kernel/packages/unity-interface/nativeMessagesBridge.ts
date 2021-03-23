@@ -212,8 +212,9 @@ export class NativeMessagesBridge {
   }
 
   entityComponentCreateOrUpdate(payload: UpdateEntityComponentPayload) {
-    if (payload.json.length > 49000)
-      throw new Error("Component payload cannot exceed 49.000 bytes")
+    if (payload.json.length > 49000) {
+      throw new Error("Component payload cannot exceed 49.000 bytes")      
+    }
     this.setEntityId(payload.entityId)
     this.callEntityComponentCreateOrUpdate(payload.classId, payload.json)
   }
