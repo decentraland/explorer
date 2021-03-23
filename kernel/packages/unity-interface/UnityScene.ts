@@ -73,6 +73,9 @@ export class UnityScene<T> implements ParcelSceneAPI {
       try{
         nativeMsgBridge.SendNativeMessage(sceneId, action)
       }
+      catch(e){
+        this.logger.error(e)
+      }
     }
   }
 
