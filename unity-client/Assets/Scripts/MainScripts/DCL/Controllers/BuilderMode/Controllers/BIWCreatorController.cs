@@ -133,6 +133,9 @@ public class BIWCreatorController : BIWController
         DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPosition, editionPosition);
         entity.isFloor = isFloor;
 
+        if (!isFloor)
+            CreateLoadingObject(entity);
+
         AddShape(catalogItem, entity);
 
         AddEntityNameComponent(catalogItem, entity);
@@ -159,6 +162,7 @@ public class BIWCreatorController : BIWController
 
         lastCatalogItemCreated = catalogItem;
 
+        entity.OnShapeFinishLoading += OnShapeLoadFinish;
         builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
         OnInputDone?.Invoke();
         OnSceneObjectPlaced?.Invoke();
@@ -175,14 +179,10 @@ public class BIWCreatorController : BIWController
         loadingGameObjects.Add(entity.rootEntity.entityId, loadingPlaceHolder);
     }
 
-    private void OnShapeLoadFinish(ISharedComponent component)
+    private void OnShapeLoadFinish(DCLBuilderInWorldEntity entity)
     {
-        var entities = component.GetAttachedEntities();
-
-        foreach (DecentralandEntity decentralandEntity in entities)
-        {
-            RemoveLoadingObject(decentralandEntity.entityId);
-        }
+        entity.OnShapeFinishLoading -= OnShapeLoadFinish;
+        RemoveLoadingObject(entity.rootEntity.entityId);
     }
 
     public void RemoveLoadingObject(string entityId)
@@ -239,7 +239,7 @@ public class BIWCreatorController : BIWController
             nftShape.model.assetId = catalogItem.id;
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, nftShape.id);
 
-            nftShape.CallWhenReady(OnShapeLoadFinish);
+            nftShape.CallWhenReady(entity.ShapeLoadFinish);
         }
         else
         {
@@ -249,11 +249,8 @@ public class BIWCreatorController : BIWController
             gltfComponent.model.assetId = catalogItem.id;
             sceneToEdit.SharedComponentAttach(entity.rootEntity.entityId, gltfComponent.id);
 
-            gltfComponent.CallWhenReady(OnShapeLoadFinish);
-
+            gltfComponent.CallWhenReady(entity.ShapeLoadFinish);
         }
-
-        CreateLoadingObject(entity);
     }
 
     #endregion
