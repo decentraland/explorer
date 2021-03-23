@@ -120,6 +120,7 @@ float RawToLinearDepth(float rawDepth)
             return ((_ProjectionParams.z - _ProjectionParams.y) * (rawDepth) + _ProjectionParams.y);
         #endif
     #else
+    
         return LinearEyeDepth(rawDepth, _ZBufferParams);
     #endif
 }
