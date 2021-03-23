@@ -21,7 +21,10 @@ public class AvatarEditorHUDView : MonoBehaviour
         public CharacterPreviewController.CameraFocus focus = CharacterPreviewController.CameraFocus.DefaultEditing;
 
         //To remove when we refactor this to avoid ToggleGroup issues when quitting application
-        public void Initialize() { Application.quitting += () => toggle.onValueChanged.RemoveAllListeners(); }
+        public void Initialize()
+        {
+            Application.quitting += () => toggle.onValueChanged.RemoveAllListeners();
+        }
     }
 
     [System.Serializable]
@@ -31,30 +34,69 @@ public class AvatarEditorHUDView : MonoBehaviour
         public ItemSelector selector;
     }
 
-    [SerializeField] internal InputAction_Trigger toggleAction;
-    [SerializeField] internal InputAction_Trigger closeAction;
-    [SerializeField] internal Canvas avatarEditorCanvas;
-    [SerializeField] internal CanvasGroup avatarEditorCanvasGroup;
-    [SerializeField] internal AvatarEditorNavigationInfo[] navigationInfos;
-    [SerializeField] internal AvatarEditorWearableFilter[] wearableGridPairs;
-    [SerializeField] internal AvatarEditorNavigationInfo collectiblesNavigationInfo;
-    [SerializeField] internal ItemSelector collectiblesItemSelector;
-    [SerializeField] internal ColorSelector skinColorSelector;
-    [SerializeField] internal ColorSelector eyeColorSelector;
-    [SerializeField] internal ColorSelector hairColorSelector;
-    [SerializeField] internal GameObject characterPreviewPrefab;
-    [SerializeField] internal PreviewCameraRotation characterPreviewRotation;
-    [SerializeField] internal GameObject loadingPanel;
-    [SerializeField] internal Button randomizeButton;
-    [SerializeField] internal Button doneButton;
-    [SerializeField] internal Button exitButton;
+    [SerializeField]
+    internal InputAction_Trigger toggleAction;
 
-    [Header("Collectibles")] [SerializeField]
+    [SerializeField]
+    internal InputAction_Trigger closeAction;
+
+    [SerializeField]
+    internal Canvas avatarEditorCanvas;
+
+    [SerializeField]
+    internal CanvasGroup avatarEditorCanvasGroup;
+
+    [SerializeField]
+    internal AvatarEditorNavigationInfo[] navigationInfos;
+
+    [SerializeField]
+    internal AvatarEditorWearableFilter[] wearableGridPairs;
+
+    [SerializeField]
+    internal AvatarEditorNavigationInfo collectiblesNavigationInfo;
+
+    [SerializeField]
+    internal ItemSelector collectiblesItemSelector;
+
+    [SerializeField]
+    internal ColorSelector skinColorSelector;
+
+    [SerializeField]
+    internal ColorSelector eyeColorSelector;
+
+    [SerializeField]
+    internal ColorSelector hairColorSelector;
+
+    [SerializeField]
+    internal GameObject characterPreviewPrefab;
+
+    [SerializeField]
+    internal PreviewCameraRotation characterPreviewRotation;
+
+    [SerializeField]
+    internal GameObject loadingPanel;
+
+    [SerializeField]
+    internal Button randomizeButton;
+
+    [SerializeField]
+    internal Button doneButton;
+
+    [SerializeField]
+    internal Button exitButton;
+
+    [Header("Collectibles")]
+    [SerializeField]
     internal GameObject web3Container;
 
-    [SerializeField] internal Button web3GoToMarketplaceButton;
-    [SerializeField] internal GameObject noWeb3Container;
-    [SerializeField] internal Button noWeb3GoToMarketplaceButton;
+    [SerializeField]
+    internal Button web3GoToMarketplaceButton;
+
+    [SerializeField]
+    internal GameObject noWeb3Container;
+
+    [SerializeField]
+    internal Button noWeb3GoToMarketplaceButton;
 
     internal static CharacterPreviewController characterPreviewController;
     private AvatarEditorHUDController controller;
@@ -86,9 +128,15 @@ public class AvatarEditorHUDView : MonoBehaviour
         closeAction.OnTriggered -= CloseAction_OnTriggered;
     }
 
-    private void ToggleAction_OnTriggered(DCLAction_Trigger action) { OnToggleActionTriggered?.Invoke(); }
+    private void ToggleAction_OnTriggered(DCLAction_Trigger action)
+    {
+        OnToggleActionTriggered?.Invoke();
+    }
 
-    private void CloseAction_OnTriggered(DCLAction_Trigger action) { OnCloseActionTriggered?.Invoke(); }
+    private void CloseAction_OnTriggered(DCLAction_Trigger action)
+    {
+        OnCloseActionTriggered?.Invoke();
+    }
 
     private void Initialize(AvatarEditorHUDController controller)
     {
@@ -107,6 +155,7 @@ public class AvatarEditorHUDView : MonoBehaviour
         web3GoToMarketplaceButton.onClick.AddListener(controller.GoToMarketplace);
         noWeb3GoToMarketplaceButton.onClick.AddListener(controller.GoToMarketplace);
 
+        avatarEditorCanvas.worldCamera = Camera.main;
         characterPreviewController.camera.enabled = false;
     }
 
@@ -197,11 +246,20 @@ public class AvatarEditorHUDView : MonoBehaviour
         collectiblesItemSelector.Unselect(wearable.id);
     }
 
-    public void SelectHairColor(Color hairColor) { hairColorSelector.Select(hairColor); }
+    public void SelectHairColor(Color hairColor)
+    {
+        hairColorSelector.Select(hairColor);
+    }
 
-    public void SelectSkinColor(Color skinColor) { skinColorSelector.Select(skinColor); }
+    public void SelectSkinColor(Color skinColor)
+    {
+        skinColorSelector.Select(skinColor);
+    }
 
-    public void SelectEyeColor(Color eyesColor) { eyeColorSelector.Select(eyesColor); }
+    public void SelectEyeColor(Color eyesColor)
+    {
+        eyeColorSelector.Select(eyesColor);
+    }
 
     public void SetColors(List<Color> skinColors, List<Color> hairColors, List<Color> eyeColors)
     {
@@ -307,7 +365,10 @@ public class AvatarEditorHUDView : MonoBehaviour
         characterPreviewController.TakeSnapshots(OnSnapshotsReady, OnSnapshotsFailed);
     }
 
-    private void OnExitButton() { OnCloseActionTriggered?.Invoke(); }
+    private void OnExitButton()
+    {
+        OnCloseActionTriggered?.Invoke();
+    }
 
     private void OnSnapshotsReady(Texture2D face, Texture2D face128, Texture2D face256, Texture2D body)
     {
@@ -326,6 +387,8 @@ public class AvatarEditorHUDView : MonoBehaviour
     public void SetVisibility(bool visible)
     {
         characterPreviewController.camera.enabled = visible;
+        avatarEditorCanvas.worldCamera = Camera.main;
+        avatarEditorCanvas.planeDistance = 1;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
 
