@@ -73,4 +73,14 @@ public class BuilderProjectsPanelBridge : MonoBehaviour
     {
         dataMocker?.SendSceneContributorsUpdate(id, payload.contributors);
     }
+    
+    public void SendSceneAdminsUpdate(string id, SceneAdminsUpdatePayload payload)
+    {
+        dataMocker?.SendSceneAdminsUpdate(id, payload.admins);
+    }
+    
+    public void SendSceneBannedUsersUpdate(string id, SceneBannedUsersUpdatePayload payload)
+    {
+        dataMocker?.SendSceneBannedUsersUpdate(id, payload.bannedUsers);
+    }
 }

@@ -6,9 +6,9 @@ internal class UsersSearchPromptView : MonoBehaviour, IDisposable
     public event Action<string> OnSearchText; 
     public event Action OnShouldHide; 
     
-    [SerializeField] private SearchInputField searchInputField;
+    [SerializeField] internal SearchInputField searchInputField;
     [SerializeField] private GameObject emptyListGO;
-    [SerializeField] private Transform friendListParent;
+    [SerializeField] internal Transform friendListParent;
     [SerializeField] private UserElementView userElementBase;
     [SerializeField] private ShowHideAnimator showHideAnimator;
 
@@ -76,6 +76,21 @@ internal class UsersSearchPromptView : MonoBehaviour, IDisposable
     public void Hide()
     {
         showHideAnimator.Hide();
+    }
+
+    public void SetIdleSearchTime(float idleSearchTime)
+    {
+        searchInputField.SetIdleSearchTime(idleSearchTime);
+    }
+
+    public void ShowSearchSpinner()
+    {
+        searchInputField.ShowSearchSpinner();
+    }
+    
+    public void ShowClearButton()
+    {
+        searchInputField.ShowSearchClearButton();
     }
 
     private void OnSearch(string value)

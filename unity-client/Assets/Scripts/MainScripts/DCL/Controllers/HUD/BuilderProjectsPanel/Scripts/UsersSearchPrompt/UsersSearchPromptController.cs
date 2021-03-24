@@ -1,26 +1,29 @@
 using System;
 using System.Collections.Generic;
+using DCL.Helpers;
+using UnityEngine;
 
 internal class UsersSearchPromptController: IDisposable
 {
+    private const int MAX_USERS_RESULT = 10;
+    
     public event Action<string> OnRemoveUser;
     public event Action<string> OnAddUser;
     
     private readonly UsersSearchPromptView view;
+    internal readonly UsersSearchUserViewsHandler userViewsHandler;
+    private readonly UsersSearcher usersSearcher;
+
+    internal Promise<UserProfileModel[]> usersSearchPromise = null;
     
-    private readonly SearchHandler<UserElementView> searchHandler = new SearchHandler<UserElementView>();
-    private readonly UsersSearchFriendsHandler friendsHandler;
-    private readonly UsersSearchUserViewsHandler userViewsHandler;
-    
-    public UsersSearchPromptController(UsersSearchPromptView promptView, IFriendsController friendsController)
+    public UsersSearchPromptController(UsersSearchPromptView promptView)
     {
         view = promptView;
+        view.SetIdleSearchTime(1.5f);
         
-        friendsHandler = new UsersSearchFriendsHandler(friendsController);
         userViewsHandler = new UsersSearchUserViewsHandler(view.GetUsersBaseElement(), view.GetUserElementsParent());
+        usersSearcher = new UsersSearcher();
 
-        friendsHandler.OnFriendRemoved += OnFriendRemoved;
-        searchHandler.OnSearchChanged += OnSearchResult;
         view.OnSearchText += OnSearchText;
         view.OnShouldHide += OnShouldHidePrompt;
         userViewsHandler.OnAddUser += OnAddUserPressed;
@@ -29,14 +32,12 @@ internal class UsersSearchPromptController: IDisposable
     
     public void Dispose()
     {
-        friendsHandler.OnFriendRemoved -= OnFriendRemoved;
-        searchHandler.OnSearchChanged -= OnSearchResult;
         view.OnSearchText -= OnSearchText;
         view.OnShouldHide -= OnShouldHidePrompt;
         userViewsHandler.OnAddUser -= OnAddUserPressed;
         userViewsHandler.OnRemoveUser -= OnRemoveUserPressed;
 
-        friendsHandler.Dispose();
+        usersSearchPromise?.Dispose();
         userViewsHandler.Dispose();
         view.Dispose();
     }
@@ -44,19 +45,14 @@ internal class UsersSearchPromptController: IDisposable
     public void Show()
     {
         view.ClearSearch();
-        view.SetFriendListEmpty(userViewsHandler.userElementViewCount == 0);
-        
-        if (friendsHandler.isFriendlistDirty)
-        {
-            friendsHandler.GetFriendList().Then(OnFriendList);
-        }
-        
+        view.SetFriendListEmpty(true);
         view.Show();
     }
 
     public void Hide()
     {
         view.Hide();
+        usersSearchPromise?.Dispose();
     }
 
     public void SetUsersInRolList(List<string> usersId)
@@ -66,7 +62,24 @@ internal class UsersSearchPromptController: IDisposable
 
     private void OnSearchText(string searchText)
     {
-        searchHandler.NotifySearchChanged(searchText);
+        usersSearchPromise?.Dispose();
+
+        view.ShowSearchSpinner();
+        usersSearchPromise = usersSearcher.SearchUser(searchText, MAX_USERS_RESULT);
+        usersSearchPromise.Then(
+            result =>
+            {
+                view.ShowClearButton();
+                if (result == null || result.Length == 0)
+                {
+                    view.SetFriendListEmpty(true);
+                }
+                else
+                {
+                    view.SetFriendListEmpty(false);
+                    userViewsHandler.SetUserViewsList(result);
+                }
+            });
     }
 
     private void OnShouldHidePrompt()
@@ -74,37 +87,6 @@ internal class UsersSearchPromptController: IDisposable
         Hide();
     }
 
-    private void OnSearchResult(List<UserElementView> viewsList)
-    {
-        userViewsHandler.SetVisibleList(viewsList);
-    }
-
-    private void OnFriendRemoved(string userId)
-    {
-        userViewsHandler.RemoveUserView(userId);
-    }
-
-    private void OnFriendList(Dictionary<string, FriendsController.UserStatus> friendsDictionary)
-    {
-        List<UserProfile> profiles = new List<UserProfile>();
-        
-        foreach (KeyValuePair<string, FriendsController.UserStatus> keyValuePair in friendsDictionary)
-        {
-            if (keyValuePair.Value.friendshipStatus != FriendshipStatus.FRIEND)
-                continue;
-                    
-            UserProfile profile = UserProfileController.userProfilesCatalog.Get(keyValuePair.Key);
-            if (profile)
-            {
-                profiles.Add(profile);
-            }
-        }
-        
-        userViewsHandler.SetUserViewsList(profiles);
-        view.SetFriendListEmpty(userViewsHandler.userElementViewCount == 0);
-        searchHandler.SetSearchableList(userViewsHandler.GetUserElementViews());
-    }
-    
     private void OnAddUserPressed(string userId)
     {
         OnAddUser?.Invoke(userId);

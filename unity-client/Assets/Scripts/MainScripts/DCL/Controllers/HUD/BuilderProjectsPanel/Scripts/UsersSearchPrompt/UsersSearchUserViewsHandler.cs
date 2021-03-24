@@ -9,7 +9,7 @@ internal class UsersSearchUserViewsHandler : IDisposable
     public event Action<string> OnRemoveUser;
     public event Action<string> OnAddUser;
     
-    private readonly Dictionary<string, UserElementView> userElementViews = new Dictionary<string, UserElementView>();
+    internal readonly Dictionary<string, UserElementView> userElementViews = new Dictionary<string, UserElementView>();
     private readonly Queue<UserElementView> viewPool = new Queue<UserElementView>();
 
     private readonly UserElementView userElementViewBase;
@@ -25,6 +25,7 @@ internal class UsersSearchUserViewsHandler : IDisposable
         this.elementsParent = elementsParent;
         PoolUserView(userElementViewBase);
     }
+    
     public void Dispose()
     {
         foreach (UserElementView userView in userElementViews.Values)
@@ -47,21 +48,34 @@ internal class UsersSearchUserViewsHandler : IDisposable
             profile = profiles[i];
             if (profile == null) 
                 continue;
-            
-            bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(profile.userId);
-            bool isAddedRol = usersInRolList?.Contains(profile.userId) ?? false;
 
-            if (!userElementViews.TryGetValue(profile.userId, out UserElementView userElementView))
-            {
-                userElementView = GetUserView();
-                userElementView.SetUserProfile(profile);
-                userElementView.SetAlwaysHighlighted(true);
-                userElementViews.Add(profile.userId, userElementView);
-            }
-            
-            userElementView.SetBlocked(isBlocked);
-            userElementView.SetIsAdded(isAddedRol);
+            SetUserViewList(profile.userId,
+                view =>
+                {
+                    view.SetUserProfile(profile);
+                });
         }
+    }
+    
+    public void SetUserViewsList(UserProfileModel[] profiles)
+    {
+        List<UserElementView> newUserList = new List<UserElementView>();
+        
+        UserProfileModel profile;
+        for (int i = 0; i < profiles.Length; i++)
+        {
+            profile = profiles[i];
+            if (profile == null) 
+                continue;
+            
+            var userElementView = SetUserViewList(profile.userId,
+                view =>
+                {
+                    view.SetUserProfile(profile);
+                });
+            newUserList.Add(userElementView);
+        }
+        SetVisibleList(newUserList);
     }
 
     public void RemoveUserView(string userId)
@@ -130,6 +144,24 @@ internal class UsersSearchUserViewsHandler : IDisposable
         userView.OnRemovePressed += OnRemoveUserPressed;
 
         return userView;
+    }
+    
+    private UserElementView SetUserViewList(string userId, Action<UserElementView> OnAddNewElement)
+    {
+        bool isBlocked = UserProfile.GetOwnUserProfile().blocked.Contains(userId);
+        bool isAddedRol = usersInRolList?.Contains(userId) ?? false;
+
+        if (!userElementViews.TryGetValue(userId, out UserElementView userElementView))
+        {
+            userElementView = GetUserView();
+            OnAddNewElement?.Invoke(userElementView);
+            userElementView.SetAlwaysHighlighted(true);
+            userElementViews.Add(userId, userElementView);
+        }
+        
+        userElementView.SetBlocked(isBlocked);
+        userElementView.SetIsAdded(isAddedRol);
+        return userElementView;
     }
     
     void OnAddUserPressed(string userId)

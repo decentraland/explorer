@@ -11,3 +11,13 @@ public class SceneContributorsUpdatePayload
 {
     public string[] contributors;
 }
+
+public class SceneAdminsUpdatePayload
+{
+    public string[] admins;
+}
+
+public class SceneBannedUsersUpdatePayload
+{
+    public string[] bannedUsers;
+}

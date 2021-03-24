@@ -21,4 +21,6 @@ public struct BuilderProjectsPanelSceneDataMock
     public bool allowVoiceChat;
     public string description;
     public string[] contributors;
+    public string[] admins;
+    public string[] bannedUsers;
 }

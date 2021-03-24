@@ -11,11 +11,11 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     public event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
 
     private readonly SectionSceneContributorsSettingsView view;
-    private readonly UsersSearchPromptController usersSearchPromptController;
+    private readonly FriendsSearchPromptController friendsSearchPromptController;
     private readonly UserProfileFetcher profileFetcher = new UserProfileFetcher();
     private readonly SceneContributorsUpdatePayload contributorsUpdatePayload = new SceneContributorsUpdatePayload();
 
-    private List<string> contributors = new List<string>();
+    private List<string> contributorsList = new List<string>();
     private string sceneId;
 
     public SectionSceneContributorsSettingsController() : this(
@@ -28,18 +28,18 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     public SectionSceneContributorsSettingsController(SectionSceneContributorsSettingsView view, IFriendsController friendsController)
     {
         this.view = view;
-        usersSearchPromptController = new UsersSearchPromptController(view.GetSearchPromptView(), friendsController);
+        friendsSearchPromptController = new FriendsSearchPromptController(view.GetSearchPromptView(), friendsController);
 
-        view.OnSearchUserButtonPressed += () => usersSearchPromptController.Show();
-        usersSearchPromptController.OnAddUser += OnAddUserPressed;
-        usersSearchPromptController.OnRemoveUser += OnRemoveUserPressed;
+        view.OnSearchUserButtonPressed += () => friendsSearchPromptController.Show();
+        friendsSearchPromptController.OnAddUser += OnAddUserPressed;
+        friendsSearchPromptController.OnRemoveUser += OnRemoveUserPressed;
     }
 
     public override void Dispose()
     {
         Object.Destroy(view.gameObject);
         profileFetcher.Dispose();
-        usersSearchPromptController.Dispose();
+        friendsSearchPromptController.Dispose();
     }
 
     public override void SetViewContainer(Transform viewContainer)
@@ -60,34 +60,38 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
     void ISelectSceneListener.OnSelectScene(SceneCardView sceneCardView)
     {
         sceneId = sceneCardView.sceneData.id;
-        
-        if (sceneCardView.sceneData.contributors == null || sceneCardView.sceneData.contributors.Length == 0)
+        UpdateContributors(sceneCardView.sceneData.contributors);
+    }
+
+    internal void UpdateContributors(string[] contributors)
+    {
+        if (contributors == null || contributors.Length == 0)
         {
-            if (contributors.Count > 0)
-                contributors.Clear();
+            if (contributorsList.Count > 0)
+                contributorsList.Clear();
             
             view.SetEmptyList(true);
             view.SetContributorsCount(0);
             return;
         }
 
-        var newContributors = new List<string>(sceneCardView.sceneData.contributors);
+        var newContributors = new List<string>(contributors);
         for (int i = 0; i < newContributors.Count; i++)
         {
             AddContributor(newContributors[i]);
-            contributors.Remove(newContributors[i]);
+            contributorsList.Remove(newContributors[i]);
         }
         
-        for (int i = 0; i < contributors.Count; i++)
+        for (int i = 0; i < contributorsList.Count; i++)
         {
-            view.RemoveUser(contributors[i]);
+            view.RemoveUser(contributorsList[i]);
         }
         
-        contributors = newContributors;
+        contributorsList = newContributors;
 
-        usersSearchPromptController.SetUsersInRolList(contributors);
+        friendsSearchPromptController.SetUsersInRolList(contributorsList);
         view.SetEmptyList(false);
-        view.SetContributorsCount(contributors.Count);
+        view.SetContributorsCount(contributorsList.Count);
     }
 
     void AddContributor(string userId)
@@ -107,28 +111,28 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
 
     void OnAddUserPressed(string userId)
     {
-        if (contributors.Contains(userId))
+        if (contributorsList.Contains(userId))
             return;
 
-        contributors.Add(userId);
+        contributorsList.Add(userId);
         AddContributor(userId);
-        usersSearchPromptController.SetUsersInRolList(contributors);
+        friendsSearchPromptController.SetUsersInRolList(contributorsList);
         view.SetEmptyList(false);
-        view.SetContributorsCount(contributors.Count);
-        contributorsUpdatePayload.contributors = contributors.ToArray();
+        view.SetContributorsCount(contributorsList.Count);
+        contributorsUpdatePayload.contributors = contributorsList.ToArray();
         OnRequestUpdateSceneContributors?.Invoke(sceneId, contributorsUpdatePayload);
     }
     
     void OnRemoveUserPressed(string userId)
     {
-        if (!contributors.Remove(userId))
+        if (!contributorsList.Remove(userId))
             return;
 
         view.RemoveUser(userId);
-        usersSearchPromptController.SetUsersInRolList(contributors);
-        view.SetEmptyList(contributors.Count == 0);
-        view.SetContributorsCount(contributors.Count);
-        contributorsUpdatePayload.contributors = contributors.ToArray();
+        friendsSearchPromptController.SetUsersInRolList(contributorsList);
+        view.SetEmptyList(contributorsList.Count == 0);
+        view.SetContributorsCount(contributorsList.Count);
+        contributorsUpdatePayload.contributors = contributorsList.ToArray();
         OnRequestUpdateSceneContributors?.Invoke(sceneId, contributorsUpdatePayload);
     }
 }

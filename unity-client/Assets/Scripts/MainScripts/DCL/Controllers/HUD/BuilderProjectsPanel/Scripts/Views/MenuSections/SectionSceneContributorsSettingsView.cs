@@ -16,7 +16,7 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
 
     public event Action OnSearchUserButtonPressed;
 
-    private readonly Dictionary<string, UserElementView> userElementViews = new Dictionary<string, UserElementView>();
+    internal readonly Dictionary<string, UserElementView> userElementViews = new Dictionary<string, UserElementView>();
     private readonly Queue<UserElementView> userElementViewsPool = new Queue<UserElementView>();
 
     private string contributorLabelFormat;

@@ -29,6 +29,9 @@ internal class SectionFactory : ISectionFactory
             case SectionsController.SectionId.SETTINGS_PROJECT_CONTRIBUTORS:
                 result = new SectionSceneContributorsSettingsController();
                 break;
+            case SectionsController.SectionId.SETTINGS_PROJECT_ADMIN:
+                result = new SectionSceneAdminsSettingsController();
+                break;
         }
 
         return result;

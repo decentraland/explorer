@@ -31,6 +31,11 @@ internal class SearchInputField : MonoBehaviour
         OnClear();
     }
 
+    public void SetIdleSearchTime(float idleSearchTime)
+    {
+        idleTimeToTriggerSearch = idleSearchTime;
+    }
+
     private void Awake()
     {
         inputField.onValueChanged.AddListener(OnValueChanged);
@@ -49,7 +54,7 @@ internal class SearchInputField : MonoBehaviour
         StartSearchWhileTyping();
     }
 
-    private void OnSubmit(string value)
+    internal void OnSubmit(string value)
     {
         StopSearchWhileTyping();
         SetSearchMode();

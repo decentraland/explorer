@@ -30,6 +30,8 @@ public class BuilderProjectsPanelController : IDisposable
         }
         sectionsController.OnRequestUpdateSceneData -= OnRequestUpdateSceneData;
         sectionsController.OnRequestUpdateSceneContributors -= OnRequestUpdateSceneContributors;
+        sectionsController.OnRequestUpdateSceneAdmins -= OnRequestUpdateSceneAdmins;
+        sectionsController.OnRequestUpdateSceneBannedUsers -= OnRequestUpdateSceneBannedUsers;
 
         leftMenuSettingsViewHandler.Dispose();
         sectionsHandler.Dispose();
@@ -65,6 +67,8 @@ public class BuilderProjectsPanelController : IDisposable
             bridge.SendFetchProjects();
             sectionsController.OnRequestUpdateSceneData += OnRequestUpdateSceneData;
             sectionsController.OnRequestUpdateSceneContributors += OnRequestUpdateSceneContributors;
+            sectionsController.OnRequestUpdateSceneAdmins += OnRequestUpdateSceneAdmins;
+            sectionsController.OnRequestUpdateSceneBannedUsers += OnRequestUpdateSceneBannedUsers;
         }
 
         leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(scenesViewController, view.settingsViewReferences);
@@ -109,5 +113,15 @@ public class BuilderProjectsPanelController : IDisposable
     void OnRequestUpdateSceneContributors(string id, SceneContributorsUpdatePayload payload)
     {
         bridge?.SendSceneContributorsUpdate(id, payload);
+    }
+    
+    void OnRequestUpdateSceneAdmins(string id, SceneAdminsUpdatePayload payload)
+    {
+        bridge?.SendSceneAdminsUpdate(id, payload);
+    }
+    
+    void OnRequestUpdateSceneBannedUsers(string id, SceneBannedUsersUpdatePayload payload)
+    {
+        bridge?.SendSceneBannedUsersUpdate(id, payload);
     }
 }

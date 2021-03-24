@@ -31,6 +31,7 @@ internal class UserElementView : MonoBehaviour, ISearchable, ISortable<UserEleme
     private string userId;
     private bool isDestroyed = false;
     private UserProfile profile;
+    private AssetPromise_Texture thumbnailPromise = null;
 
     private void Awake()
     {
@@ -52,6 +53,7 @@ internal class UserElementView : MonoBehaviour, ISearchable, ISortable<UserEleme
     {
         if (!isDestroyed)
         {
+            ClearThumbnail();
             Destroy(gameObject);
         }
     }
@@ -78,9 +80,32 @@ internal class UserElementView : MonoBehaviour, ISearchable, ISortable<UserEleme
         }
     }
 
+    public void SetUserProfile(UserProfileModel profileModel)
+    {
+        profile = null;
+        
+        var prevThumbnailPromise = thumbnailPromise;
+        if (profileModel.snapshots?.face256 != null)
+        {
+            thumbnailPromise = new AssetPromise_Texture(profileModel.snapshots.face256);
+            thumbnailPromise.OnSuccessEvent += (asset => SetThumbnail(asset.texture));
+            thumbnailPromise.OnFailEvent += (asset => ClearThumbnail());
+            AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
+        }
+        AssetPromiseKeeper_Texture.i.Forget(prevThumbnailPromise);
+        
+        SetUserId(profileModel.userId);
+        SetUserName(profileModel.name);
+    }
+
     public void SetParent(Transform parent)
     {
         transform.SetParent(parent);
+    }
+
+    public Transform GetParent()
+    {
+        return transform.parent;
     }
 
     public void SetActive(bool active)
@@ -139,6 +164,11 @@ internal class UserElementView : MonoBehaviour, ISearchable, ISortable<UserEleme
         if (profile != null)
         {
             profile.OnFaceSnapshotReadyEvent -= SetThumbnail;
+        }
+        if (thumbnailPromise != null)
+        {
+            AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
+            thumbnailPromise = null;
         }
         userThumbnail.texture = null;
     }
