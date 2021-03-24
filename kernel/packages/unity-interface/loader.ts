@@ -48,7 +48,7 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   // TODO: after we remove unity from this folder, remove the following
   // block and uncomment the block next to it
   {
-    const scriptUrl = new URL('DclUnityLoader.js', getRendererArtifactsRoot()).toString()
+    const scriptUrl = new URL('DCLUnityLoader.js', getRendererArtifactsRoot()).toString()
     const buildConfigPath = new URL('unity.json', getRendererArtifactsRoot()).toString()
     await injectScript(scriptUrl)
     if (typeof globalThis.UnityLoader == 'undefined') {
