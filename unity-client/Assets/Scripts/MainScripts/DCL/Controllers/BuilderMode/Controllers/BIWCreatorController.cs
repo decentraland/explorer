@@ -130,7 +130,7 @@ public class BIWCreatorController : BIWController
         Vector3 startPosition = biwModeController.GetModeCreationEntryPoint();
         Vector3 editionPosition = biwModeController.GetCurrentEditionPosition();
 
-        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPosition, editionPosition);
+        DCLBuilderInWorldEntity entity = builderInWorldEntityHandler.CreateEmptyEntity(sceneToEdit, startPosition, editionPosition, false);
         entity.isFloor = isFloor;
         entity.SetRotation(Vector3.zero);
 
@@ -164,6 +164,7 @@ public class BIWCreatorController : BIWController
         lastCatalogItemCreated = catalogItem;
 
         entity.OnShapeFinishLoading += OnShapeLoadFinish;
+        builderInWorldEntityHandler.EntityListChanged();
         builderInWorldEntityHandler.NotifyEntityIsCreated(entity.rootEntity);
         OnInputDone?.Invoke();
         OnSceneObjectPlaced?.Invoke();
