@@ -155,7 +155,6 @@ public class AvatarEditorHUDView : MonoBehaviour
         web3GoToMarketplaceButton.onClick.AddListener(controller.GoToMarketplace);
         noWeb3GoToMarketplaceButton.onClick.AddListener(controller.GoToMarketplace);
 
-        avatarEditorCanvas.worldCamera = Camera.main;
         characterPreviewController.camera.enabled = false;
     }
 
@@ -387,8 +386,6 @@ public class AvatarEditorHUDView : MonoBehaviour
     public void SetVisibility(bool visible)
     {
         characterPreviewController.camera.enabled = visible;
-        avatarEditorCanvas.worldCamera = Camera.main;
-        avatarEditorCanvas.planeDistance = 1;
         avatarEditorCanvas.enabled = visible;
         avatarEditorCanvasGroup.blocksRaycasts = visible;
 
