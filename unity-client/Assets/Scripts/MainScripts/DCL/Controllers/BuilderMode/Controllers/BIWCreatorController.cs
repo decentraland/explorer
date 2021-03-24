@@ -57,7 +57,7 @@ public class BIWCreatorController : BIWController
     {
         foreach (BIWLoadingPlaceHolder placeHolder in loadingGameObjects.Values)
         {
-            GameObject.Destroy(placeHolder.gameObject);
+            placeHolder.Disspose();
         }
 
         loadingGameObjects.Clear();
