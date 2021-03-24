@@ -27,7 +27,7 @@ public class EntityListAdapter : MonoBehaviour
     {
         if (currentEntity != null)
         {
-            currentEntity.onStatusUpdate -= SetInfo;
+            currentEntity.OnStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
             DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= ChangeEntityBoundsCheckerStatus;
         }
@@ -37,12 +37,12 @@ public class EntityListAdapter : MonoBehaviour
     {
         if (currentEntity != null)
         {
-            currentEntity.onStatusUpdate -= SetInfo;
+            currentEntity.OnStatusUpdate -= SetInfo;
             currentEntity.OnDelete -= DeleteAdapter;
             DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged -= ChangeEntityBoundsCheckerStatus;
         }
         currentEntity = decentrelandEntity;
-        currentEntity.onStatusUpdate += SetInfo;
+        currentEntity.OnStatusUpdate += SetInfo;
         currentEntity.OnDelete += DeleteAdapter;
         DCL.Environment.i.world.sceneBoundsChecker.OnEntityBoundsCheckerStatusChanged += ChangeEntityBoundsCheckerStatus;
 
