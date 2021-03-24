@@ -116,6 +116,8 @@ public class CatalogItemAdapter : MonoBehaviour, IBeginDragHandler, IEndDragHand
             thumbnailImg.enabled = true;
             thumbnailImg.texture = texture.texture;
             favImg.gameObject.SetActive(true);
+
+            AudioScriptableObjects.listItemAppear.Play();
         }
     }
 

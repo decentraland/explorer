@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioContainer: {fileID: 8626930522302334874}
   creatorController: {fileID: 2072020105617305708}
-  entityHandler: {fileID: 1676156629805984034}
+  builderInWorldModesParent: {fileID: 1208871512899340007}
 --- !u!114 &8626930522302334874
 MonoBehaviour:
   m_ObjectHideFlags: 0

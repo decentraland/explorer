@@ -101,6 +101,14 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         toggleCatalogBtn.onClick.RemoveListener(ToggleCatalogExpanse);
     }
 
+    private void OnEnable() {
+        AudioScriptableObjects.dialogOpen.Play();
+    }
+
+    private void OnDisable() {
+        AudioScriptableObjects.dialogClose.Play();
+    }
+
     public void ToggleCatalogExpanse()
     {
         if (isCatalogExpanded)
@@ -110,6 +118,7 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
             BuilderInWorldUtils.CopyRectTransform(searchBarRT, searchBarMinSizeRT);
             BuilderInWorldUtils.CopyRectTransform(assetPackRT, assetPackMinSizeRT);
             BuilderInWorldUtils.CopyRectTransform(categoryRT, assetPackMinSizeRT);
+            AudioScriptableObjects.dialogClose.Play();
         }
         else
         {
@@ -118,6 +127,7 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
             BuilderInWorldUtils.CopyRectTransform(searchBarRT, searchBarMaxSizeRT);
             BuilderInWorldUtils.CopyRectTransform(assetPackRT, assetPackMaxSizeRT);
             BuilderInWorldUtils.CopyRectTransform(categoryRT, assetPackMaxSizeRT);
+            AudioScriptableObjects.dialogOpen.Play();
         }
 
         isCatalogExpanded = !isCatalogExpanded;
@@ -147,5 +157,8 @@ public class SceneCatalogView : MonoBehaviour, ISceneCatalogView
         gameObject.SetActive(false);
     }
 
-    public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
 }

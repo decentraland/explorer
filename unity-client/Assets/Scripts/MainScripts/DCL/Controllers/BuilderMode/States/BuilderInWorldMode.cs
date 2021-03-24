@@ -3,6 +3,7 @@ using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BuilderInWorldMode : MonoBehaviour
 {
@@ -20,8 +21,10 @@ public class BuilderInWorldMode : MonoBehaviour
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public ActionController actionController;
 
-    public event System.Action OnInputDone;
-    public event System.Action<BuildInWorldCompleteAction> OnActionGenerated;
+    public event Action OnInputDone;
+    public event Action<BuildInWorldCompleteAction> OnActionGenerated;
+    public event Action OnEntityPlaced;
+    public event Action OnEntitySelected;
 
     protected GameObject editionGO, undoGO, snapGO, freeMovementGO;
 
@@ -65,7 +68,6 @@ public class BuilderInWorldMode : MonoBehaviour
     public virtual void StartMultiSelection()
     {
         isMultiSelectionActive = true;
-
     }
 
     public virtual Vector3 GetPointerPosition()
@@ -76,7 +78,6 @@ public class BuilderInWorldMode : MonoBehaviour
     public virtual void EndMultiSelection()
     {
         isMultiSelectionActive = false;
-
     }
 
     public virtual bool ShouldCancelUndoAction()
@@ -94,6 +95,8 @@ public class BuilderInWorldMode : MonoBehaviour
         CenterGameObjectToEdit();
 
         BuilderInWorldUtils.CopyGameObjectStatus(editionGO, undoGO, false, false);
+
+        OnEntitySelected?.Invoke();
     }
 
     public virtual void CenterGameObjectToEdit()
@@ -126,6 +129,8 @@ public class BuilderInWorldMode : MonoBehaviour
         if (isNewObjectPlaced)
         {
             actionController.CreateActionEntityCreated(entityDeselected.rootEntity);
+
+            OnEntityPlaced?.Invoke();
         }
 
         isNewObjectPlaced = false;

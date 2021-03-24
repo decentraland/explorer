@@ -23,6 +23,14 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
         return view;
     }
 
+    private void OnEnable() {
+        AudioScriptableObjects.dialogOpen.Play();
+    }
+
+    private void OnDisable() {
+        AudioScriptableObjects.dialogClose.Play();
+    }
+
     public void PublishStart()
     {
         gameObject.SetActive(true);

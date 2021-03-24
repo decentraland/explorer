@@ -72,6 +72,14 @@ public class InspectorView : MonoBehaviour, IInspectorView
             sceneLimitsController.Dispose();
     }
 
+    private void OnEnable() {
+        AudioScriptableObjects.dialogOpen.Play();
+    }
+
+    private void OnDisable() {
+        AudioScriptableObjects.dialogClose.Play();
+    }
+
     public void EntityActionInvoked(EntityAction action, DCLBuilderInWorldEntity entityToApply, EntityListAdapter adapter)
     {
         OnEntityActionInvoked?.Invoke(action, entityToApply, adapter);
