@@ -241,6 +241,7 @@ public class BuilderInWorldController : MonoBehaviour
         }
 
         biwFloorHandler?.Clean();
+        biwCreatorController?.Clean();
     }
 
     [ContextMenu("Activate feature")]
