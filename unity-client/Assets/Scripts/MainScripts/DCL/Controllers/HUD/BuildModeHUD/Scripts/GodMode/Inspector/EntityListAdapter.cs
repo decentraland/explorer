@@ -1,6 +1,7 @@
 using DCL;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class EntityListAdapter : MonoBehaviour
@@ -14,7 +15,7 @@ public class EntityListAdapter : MonoBehaviour
     public TMP_InputField nameInputField;
     public TextMeshProUGUI nameInputField_Text;
     public Image selectedImg;
-    public RawImage entitytTumbailImg;
+    public RawImage entityThumbnailImg;
     public Button unlockButton;
     public Button lockButton;
     public Image showImg;
@@ -49,7 +50,7 @@ public class EntityListAdapter : MonoBehaviour
         AllowNameEdition(false);
         SetInfo(decentrelandEntity);
 
-        entitytTumbailImg.enabled = false;
+        entityThumbnailImg.enabled = false;
         CatalogItem entitySceneObject = decentrelandEntity.GetCatalogItemAssociated();
         GetThumbnail(entitySceneObject);
     }
@@ -115,10 +116,10 @@ public class EntityListAdapter : MonoBehaviour
 
     internal void SetThumbnail(Asset_Texture texture)
     {
-        if (entitytTumbailImg == null)
+        if (entityThumbnailImg == null)
             return;
-        entitytTumbailImg.enabled = true;
-        entitytTumbailImg.texture = texture.texture;
+        entityThumbnailImg.enabled = true;
+        entityThumbnailImg.texture = texture.texture;
     }
 
     public void Rename(string newName) { OnEntityRename?.Invoke(currentEntity, newName); }

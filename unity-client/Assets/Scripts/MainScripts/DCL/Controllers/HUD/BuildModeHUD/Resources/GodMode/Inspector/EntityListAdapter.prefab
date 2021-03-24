@@ -518,7 +518,7 @@ GameObject:
   - component: {fileID: 7541719907382048152}
   - component: {fileID: 9155313774855832224}
   m_Layer: 0
-  m_Name: EntityThumnail
+  m_Name: EntityThumbnail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -897,7 +897,7 @@ MonoBehaviour:
   nameInputField: {fileID: 3144001738933584821}
   nameInputField_Text: {fileID: 7920033379189279600}
   selectedImg: {fileID: 8050221025963402010}
-  entitytTumbailImg: {fileID: 9155313774855832224}
+  entityThumbnailImg: {fileID: 9155313774855832224}
   unlockButton: {fileID: 4435950372000458455}
   lockButton: {fileID: 6621741414445235588}
   showImg: {fileID: 5439454521911294905}
