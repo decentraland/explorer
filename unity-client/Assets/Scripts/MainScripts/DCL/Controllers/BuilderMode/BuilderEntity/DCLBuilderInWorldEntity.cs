@@ -1,19 +1,19 @@
 using DCL;
-using DCL.Models;
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
-using System.Collections;
+using DCL.Models;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using DCL.Configuration;
-using System;
 
 public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
 
-    public event System.Action<DCLBuilderInWorldEntity> onStatusUpdate;
+    public event System.Action<DCLBuilderInWorldEntity> OnShapeFinishLoading;
+    public event System.Action<DCLBuilderInWorldEntity> OnStatusUpdate;
     public event System.Action<DCLBuilderInWorldEntity> OnDelete;
 
     private bool isLockedValue = false;
@@ -24,7 +24,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             SetIsLockedValue(value);
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -36,7 +36,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             isSelectedValue = value;
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -48,7 +48,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             isNewValue = value;
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -60,7 +60,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             isVisibleValue = value;
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -74,6 +74,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
     private bool isShapeComponentSet = false;
 
     private Animation[] meshAnimations;
+
+    private Vector3 currentRotation;
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -96,6 +98,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsVisible = rootEntity.gameObject.activeSelf;
 
         isShapeComponentSet = false;
+        InitRotation();
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
@@ -140,7 +143,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsSelected = false;
         if (rootEntity.gameObject != null)
             rootEntity.gameObject.transform.SetParent(originalParent);
-        
+
         SetOriginalMaterials();
     }
 
@@ -148,10 +151,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         rootEntity.gameObject.SetActive(!gameObject.activeSelf);
         IsVisible = gameObject.activeSelf;
-        onStatusUpdate?.Invoke(this);
+        OnStatusUpdate?.Invoke(this);
     }
 
     public void ToggleLockStatus() { IsLocked = !IsLocked; }
+
+    public void ShapeLoadFinish(ISharedComponent component) { OnShapeFinishLoading?.Invoke(this); }
 
     public void Delete()
     {
@@ -193,6 +198,22 @@ public class DCLBuilderInWorldEntity : EditableEntity
     }
 
     #region Components
+
+    #region Transfrom
+
+    public void AddRotation(Vector3 newRotation) { currentRotation += newRotation; }
+
+    public void SetRotation(Vector3 newRotation) { currentRotation = newRotation; }
+
+    public Vector3 GetEulerRotation() { return currentRotation; }
+
+    public void InitRotation()
+    {
+        //TODO : We need to implement the initial rotation from the transform component instead of getting the current rotation
+        currentRotation = rootEntity.gameObject.transform.eulerAngles;
+    }
+
+    #endregion
 
     #region SmartItem
 
@@ -267,7 +288,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
 
-        onStatusUpdate?.Invoke(this);
+        OnStatusUpdate?.Invoke(this);
     }
 
     public string GetDescriptiveName()
@@ -456,7 +477,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
-    void OnNameUpdate(DCLName.Model model) { onStatusUpdate?.Invoke(this); }
+    void OnNameUpdate(DCLName.Model model) { OnStatusUpdate?.Invoke(this); }
 
     void OnShapeUpdate(DecentralandEntity decentralandEntity)
     {

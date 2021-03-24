@@ -146,10 +146,7 @@ public class BuilderInWorldEntityHandler : BIWController
         DeselectEntities();
     }
 
-    public void SetMultiSelectionActive(bool isActive)
-    {
-        isMultiSelectionActive = isActive;
-    }
+    public void SetMultiSelectionActive(bool isActive) { isMultiSelectionActive = isActive; }
 
     public override void EnterEditMode(ParcelScene sceneToEdit)
     {
@@ -482,7 +479,7 @@ public class BuilderInWorldEntityHandler : BIWController
         return newEntity;
     }
 
-    public DCLBuilderInWorldEntity CreateEmptyEntity(ParcelScene parcelScene, Vector3 entryPoint, Vector3 editionGOPosition)
+    public DCLBuilderInWorldEntity CreateEmptyEntity(ParcelScene parcelScene, Vector3 entryPoint, Vector3 editionGOPosition, bool notifyEntityList = true)
     {
         DecentralandEntity newEntity = parcelScene.CreateEntity(Guid.NewGuid().ToString());
 
@@ -500,7 +497,8 @@ public class BuilderInWorldEntityHandler : BIWController
         DCLBuilderInWorldEntity convertedEntity = SetupEntityToEdit(newEntity, true);
         hudController?.UpdateSceneLimitInfo();
 
-        EntityListChanged();
+        if (notifyEntityList)
+            EntityListChanged();
         return convertedEntity;
     }
 
@@ -529,7 +527,7 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    void EntityListChanged()
+    public void EntityListChanged()
     {
         if (HUDController.i.builderInWorldMainHud == null)
             return;
@@ -579,10 +577,7 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    public string GetNewNameForEntity(CatalogItem sceneObject)
-    {
-        return GetNewNameForEntity(sceneObject.name);
-    }
+    public string GetNewNameForEntity(CatalogItem sceneObject) { return GetNewNameForEntity(sceneObject.name); }
 
     public string GetNewNameForEntity(string name)
     {
@@ -622,10 +617,7 @@ public class BuilderInWorldEntityHandler : BIWController
         DeleteEntity(entity, true);
     }
 
-    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete)
-    {
-        DeleteEntity(entityToDelete, true);
-    }
+    public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete) { DeleteEntity(entityToDelete, true); }
 
     public void DeleteEntity(DCLBuilderInWorldEntity entityToDelete, bool checkSelection = true)
     {
@@ -705,20 +697,11 @@ public class BuilderInWorldEntityHandler : BIWController
         }
     }
 
-    private void RemoveConvertedEntity(DecentralandEntity entity)
-    {
-        convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity));
-    }
+    private void RemoveConvertedEntity(DecentralandEntity entity) { convertedEntities.Remove(GetConvertedUniqueKeyForEntity(entity)); }
 
-    public void NotifyEntityIsCreated(DecentralandEntity entity)
-    {
-        builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit);
-    }
+    public void NotifyEntityIsCreated(DecentralandEntity entity) { builderInWorldBridge?.AddEntityOnKernel(entity, sceneToEdit); }
 
-    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate)
-    {
-        builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit);
-    }
+    public void UpdateSmartItemComponentInKernel(DCLBuilderInWorldEntity entityToUpdate) { builderInWorldBridge?.UpdateSmartItemComponent(entityToUpdate, sceneToEdit); }
 
     public void SetEntityName(DCLBuilderInWorldEntity entityToApply, string newName)
     {
@@ -755,15 +738,9 @@ public class BuilderInWorldEntityHandler : BIWController
         builderInWorldBridge.ChangeEntityLockStatus(entityToApply, sceneToEdit);
     }
 
-    private string GetConvertedUniqueKeyForEntity(string entityID)
-    {
-        return sceneToEdit.sceneData.id + entityID;
-    }
+    private string GetConvertedUniqueKeyForEntity(string entityID) { return sceneToEdit.sceneData.id + entityID; }
 
-    private string GetConvertedUniqueKeyForEntity(DecentralandEntity entity)
-    {
-        return entity.scene.sceneData.id + entity.entityId;
-    }
+    private string GetConvertedUniqueKeyForEntity(DecentralandEntity entity) { return entity.scene.sceneData.id + entity.entityId; }
 
     private bool AreAllSelectedEntitiesInsideBoundaries()
     {
