@@ -163,7 +163,9 @@ function* initializeCatalystCandidates() {
   yield put(catalystRealmsScanRequested())
   const catalystsNodesEndpointURL = yield select(getCatalystNodesEndpoint)
   const candidates: Candidate[] = yield call(fetchCatalystRealms, catalystsNodesEndpointURL)
-  const filteredCandidates: Candidate[] = yield call(filterCandidatesByCatalystVersion, candidates)
+  const filteredCandidates: Candidate[] = PIN_CATALYST
+    ? candidates
+    : yield call(filterCandidatesByCatalystVersion, candidates)
 
   yield put(setCatalystCandidates(filteredCandidates))
 
