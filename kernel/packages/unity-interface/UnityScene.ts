@@ -70,11 +70,7 @@ export class UnityScene<T> implements ParcelSceneAPI {
     const sceneId = getParcelSceneID(this)
     for (let i = 0; i < actions.length; i++) {
       const action = actions[i]
-      try {
-        nativeMsgBridge.SendNativeMessage(sceneId, action)
-      } catch (e) {
-        this.logger.error(e)
-      }
+      nativeMsgBridge.SendNativeMessage(sceneId, action)
     }
   }
 
