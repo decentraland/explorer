@@ -65,6 +65,7 @@ export class SignedFetch extends ExposableAPI {
             parcel: this.getSceneData().scene.base,
             tld: getTLD(),
             isGuest: isGuest(),
+            origin: location.origin,
             realm
           },
           (payload) => Authenticator.signPayload(identity, payload)
