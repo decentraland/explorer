@@ -82,18 +82,8 @@ public class BuilderProjectsPanelController : IDisposable
 
     void SetView()
     {
-        IDeployedSceneListener viewDeployedSceneListener = view;
-        IProjectSceneListener viewProjectSceneListener = view;
-
-        scenesViewController.OnDeployedSceneAdded += viewDeployedSceneListener.OnSceneAdded;
-        scenesViewController.OnDeployedSceneRemoved += viewDeployedSceneListener.OnSceneRemoved;
-        scenesViewController.OnDeployedScenesSet += viewDeployedSceneListener.OnSetScenes;
-        scenesViewController.OnProjectSceneAdded += viewProjectSceneListener.OnSceneAdded;
-        scenesViewController.OnProjectSceneRemoved += viewProjectSceneListener.OnSceneRemoved;
-        scenesViewController.OnProjectScenesSet += viewProjectSceneListener.OnSetScenes;
-
-        viewDeployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
-        viewProjectSceneListener.OnSetScenes(scenesViewController.projectScenes);
+        scenesViewController.AddListener((IDeployedSceneListener) view);
+        scenesViewController.AddListener((IProjectSceneListener) view);
     }
 
     void OnProjectsUpdated(string payload)

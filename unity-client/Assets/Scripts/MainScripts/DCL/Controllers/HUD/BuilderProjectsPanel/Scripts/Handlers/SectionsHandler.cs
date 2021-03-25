@@ -28,24 +28,17 @@ internal class SectionsHandler : IDisposable
     {
         if (sectionBase is IDeployedSceneListener deployedSceneListener)
         {
-            scenesViewController.OnDeployedSceneAdded += deployedSceneListener.OnSceneAdded;
-            scenesViewController.OnDeployedSceneRemoved += deployedSceneListener.OnSceneRemoved;
-            scenesViewController.OnDeployedScenesSet += deployedSceneListener.OnSetScenes;
-            deployedSceneListener.OnSetScenes(scenesViewController.deployedScenes);
+            scenesViewController.AddListener(deployedSceneListener);
         }
 
         if (sectionBase is IProjectSceneListener projectSceneListener)
         {
-            scenesViewController.OnProjectSceneAdded += projectSceneListener.OnSceneAdded;
-            scenesViewController.OnProjectSceneRemoved += projectSceneListener.OnSceneRemoved;
-            scenesViewController.OnProjectScenesSet += projectSceneListener.OnSetScenes;
-            projectSceneListener.OnSetScenes(scenesViewController.projectScenes);
+            scenesViewController.AddListener(projectSceneListener);
         }
 
         if (sectionBase is ISelectSceneListener selectSceneListener)
         {
-            scenesViewController.OnSceneSelected += selectSceneListener.OnSelectScene;
-            selectSceneListener.OnSelectScene(scenesViewController.selectedScene);
+            scenesViewController.AddListener(selectSceneListener);
         }
 
         searchBarView.SetSearchBar(sectionBase.searchHandler, sectionBase.searchBarConfig);
@@ -55,21 +48,17 @@ internal class SectionsHandler : IDisposable
     {
         if (sectionBase is IDeployedSceneListener deployedSceneListener)
         {
-            scenesViewController.OnDeployedSceneAdded -= deployedSceneListener.OnSceneAdded;
-            scenesViewController.OnDeployedSceneRemoved -= deployedSceneListener.OnSceneRemoved;
-            scenesViewController.OnDeployedScenesSet -= deployedSceneListener.OnSetScenes;
+            scenesViewController.RemoveListener(deployedSceneListener);
         }
 
         if (sectionBase is IProjectSceneListener projectSceneListener)
         {
-            scenesViewController.OnProjectSceneAdded -= projectSceneListener.OnSceneAdded;
-            scenesViewController.OnProjectSceneRemoved -= projectSceneListener.OnSceneRemoved;
-            scenesViewController.OnProjectScenesSet -= projectSceneListener.OnSetScenes;
+            scenesViewController.RemoveListener(projectSceneListener);
         }
         
         if (sectionBase is ISelectSceneListener selectSceneListener)
         {
-            scenesViewController.OnSceneSelected -= selectSceneListener.OnSelectScene;
+            scenesViewController.RemoveListener(selectSceneListener);
         }        
 
         searchBarView.SetSearchBar(null, null);

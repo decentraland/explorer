@@ -18,8 +18,8 @@ internal class ScenesViewController : IDisposable
     public event Action<SceneCardView> OnProjectSceneRemoved;
     public event Action<SceneCardView> OnSceneSelected; 
 
-    public Dictionary<string, SceneCardView> deployedScenes { private set; get; } = new Dictionary<string, SceneCardView>();
-    public Dictionary<string, SceneCardView> projectScenes { private set; get; } = new Dictionary<string, SceneCardView>();
+    private Dictionary<string, SceneCardView> deployedScenes = new Dictionary<string, SceneCardView>();
+    private Dictionary<string, SceneCardView> projectScenes = new Dictionary<string, SceneCardView>();
 
     public SceneCardView selectedScene { private set; get; }
 
@@ -112,6 +112,43 @@ internal class ScenesViewController : IDisposable
         {
             OnSceneSelected?.Invoke(sceneCardView);
         }
+    }
+
+    public void AddListener(IDeployedSceneListener listener)
+    {
+        OnDeployedSceneAdded += listener.OnSceneAdded;
+        OnDeployedSceneRemoved += listener.OnSceneRemoved;
+        OnDeployedScenesSet += listener.OnSetScenes;
+        listener.OnSetScenes(deployedScenes);
+    }
+    public void AddListener(IProjectSceneListener listener)
+    {
+        OnProjectSceneAdded += listener.OnSceneAdded;
+        OnProjectSceneRemoved += listener.OnSceneRemoved;
+        OnProjectScenesSet += listener.OnSetScenes;
+        listener.OnSetScenes(projectScenes);
+    }
+    public void AddListener(ISelectSceneListener listener)
+    {
+        OnSceneSelected += listener.OnSelectScene;
+        listener.OnSelectScene(selectedScene);
+    }
+    
+    public void RemoveListener(IDeployedSceneListener listener)
+    {
+        OnDeployedSceneAdded -= listener.OnSceneAdded;
+        OnDeployedSceneRemoved -= listener.OnSceneRemoved;
+        OnDeployedScenesSet -= listener.OnSetScenes;
+    }
+    public void RemoveListener(IProjectSceneListener listener)
+    {
+        OnProjectSceneAdded -= listener.OnSceneAdded;
+        OnProjectSceneRemoved -= listener.OnSceneRemoved;
+        OnProjectScenesSet -= listener.OnSetScenes;
+    }
+    public void RemoveListener(ISelectSceneListener listener)
+    {
+        OnSceneSelected -= listener.OnSelectScene;
     }
 
     public void Dispose()
