@@ -181,7 +181,7 @@ public class BIWCreatorController : BIWController
         loadingGameObjects.Add(entity.rootEntity.entityId, loadingPlaceHolder);
     }
 
-    private void OnShapeLoadFinish(IDCLEntity entity)
+    private void OnShapeLoadFinish(DCLBuilderInWorldEntity entity)
     {
         entity.OnShapeFinishLoading -= OnShapeLoadFinish;
         RemoveLoadingObject(entity.rootEntity.entityId);
