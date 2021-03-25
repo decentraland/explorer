@@ -28,7 +28,12 @@ import {
   ping,
   commsStatusUrl
 } from '.'
-import { getAddedServers, getCatalystNodesEndpoint, getContentWhitelist } from 'shared/meta/selectors'
+import {
+  getAddedServers,
+  getCatalystNodesEndpoint,
+  getContentWhitelist,
+  getMinCatalystVersion
+} from 'shared/meta/selectors'
 import { getAllCatalystCandidates, isRealmInitialized } from './selectors'
 import { saveToLocalStorage, getFromLocalStorage } from '../../atomicHelpers/localStorage'
 import defaultLogger from '../logger'
@@ -36,6 +41,7 @@ import { ReportFatalError } from 'shared/loading/ReportFatalError'
 import { CATALYST_COULD_NOT_LOAD } from 'shared/loading/types'
 import { META_CONFIGURATION_INITIALIZED } from 'shared/meta/actions'
 import { checkTldVsWeb3Network, registerProviderNetChanges } from 'shared/web3'
+import semver from 'semver'
 
 const CACHE_KEY = 'realm'
 const CATALYST_CANDIDATES_KEY = CACHE_KEY + '-' + SET_CATALYST_CANDIDATES
@@ -158,7 +164,12 @@ function* initializeCatalystCandidates() {
     added.map((url) => ({ domain: url }))
   )
 
-  yield put(setAddedCatalystCandidates(addedCandidates))
+  const minCatalystVersion: string | undefined = yield select(getMinCatalystVersion)
+  const finalCandidates = minCatalystVersion
+    ? addedCandidates.filter(({ catalystVersion }) => semver.gte(catalystVersion, minCatalystVersion))
+    : addedCandidates
+
+  yield put(setAddedCatalystCandidates(finalCandidates))
 
   const allCandidates: Candidate[] = yield select(getAllCatalystCandidates)
 
