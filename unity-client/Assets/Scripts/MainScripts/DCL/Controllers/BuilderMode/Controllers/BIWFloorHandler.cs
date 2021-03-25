@@ -16,6 +16,7 @@ public class BIWFloorHandler : BIWController
 
     [Header("Prefab References")]
     public ActionController actionController;
+
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public DCLBuilderMeshLoadIndicatorController dclBuilderMeshLoadIndicatorController;
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
@@ -69,6 +70,7 @@ public class BIWFloorHandler : BIWController
                 return entity.GetCatalogItemAssociated();
             }
         }
+
         return null;
     }
 
@@ -109,7 +111,7 @@ public class BIWFloorHandler : BIWController
         RemovePlaceHolder(entity.rootEntity.entityId);
     }
 
-    private void OnFloorLoaded(DecentralandEntity entity)
+    private void OnFloorLoaded(IDCLEntity entity)
     {
         entity.OnShapeUpdated -= OnFloorLoaded;
         RemovePlaceHolder(entity.entityId);
