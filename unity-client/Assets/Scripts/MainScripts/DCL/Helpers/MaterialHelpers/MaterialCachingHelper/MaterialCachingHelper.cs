@@ -35,7 +35,7 @@ namespace DCL.Helpers
         {
             if (mainShader == null)
             {
-                mainShader = Shader.Find("DCL/LWRP/Lit");
+                mainShader = Shader.Find("DCL/Universal Render Pipeline/Lit");
             }
 
             return mainShader;

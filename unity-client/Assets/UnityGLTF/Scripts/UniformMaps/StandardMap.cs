@@ -269,6 +269,7 @@ namespace UnityGLTF
                 {
                     _material.SetFloat(_Cutoff, (float)value);
                 }
+
                 _alphaCutoff = value;
             }
         }
