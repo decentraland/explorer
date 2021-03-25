@@ -31,6 +31,8 @@ namespace DCL.Helpers
                 //             Transparency needs clip space z sorting to be displayed correctly.
                 if (zWrite == 0)
                 {
+                    material.DisableKeyword("_SCREEN_SPACE_OCCLUSION");
+                    material.SetShaderPassEnabled("DepthNormals", false);
                     material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                     return;
                 }
