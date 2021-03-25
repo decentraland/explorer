@@ -17,6 +17,8 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal Button jumpInButton;
         [SerializeField] internal Animator animator;
 
+        private float progressTarget = 0;
+
         private Action jumpInDelegate;
 
         public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
@@ -32,7 +34,7 @@ namespace DCL.Huds.QuestsTracker
             });
 
             jumpInButton.gameObject.SetActive(task.progress < 1 && !string.IsNullOrEmpty(task.coordinates));
-            progress.fillAmount = task.progress;
+            progressTarget = task.progress;
             switch (task.type)
             {
                 case "single":
@@ -43,6 +45,13 @@ namespace DCL.Huds.QuestsTracker
                     SetProgressText(payload.current, payload.end);
                     break;
             }
+        }
+
+        private void Update()
+        {
+            Vector3 scale = progress.transform.localScale;
+            scale.x = Mathf.MoveTowards(scale.x, progressTarget, 0.1f);
+            progress.transform.localScale = scale;
         }
 
         internal void SetProgressText(float current, float end) { progressText.text = $"{current}/{end}"; }

@@ -28,6 +28,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal Animator containerAnimator;
 
         private AssetPromise_Texture iconPromise;
+        private float progressTarget = 0;
 
         internal QuestModel quest;
         private bool isExpanded;
@@ -49,7 +50,7 @@ namespace DCL.Huds.QuestsTracker
             SetIcon(quest.icon);
             QuestSection currentSection = quest.sections.First(x => x.progress < 1f);
             sectionTitle.text = $"{currentSection.name} - {(currentSection.progress * 100):0.0}%";
-            progress.fillAmount = currentSection.progress;
+            progressTarget = currentSection.progress;
 
             CleanUpTasksList();
             foreach (QuestTask task in currentSection.tasks)
@@ -143,6 +144,8 @@ namespace DCL.Huds.QuestsTracker
             OnLayoutRebuildRequested?.Invoke();
             Destroy(gameObject);
         }
+
+        private void Update() { progress.fillAmount = Mathf.MoveTowards(progress.fillAmount, progressTarget, 0.1f); }
 
         private void OnDestroy()
         {
