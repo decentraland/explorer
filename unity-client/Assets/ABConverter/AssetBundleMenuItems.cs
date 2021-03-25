@@ -87,8 +87,10 @@ namespace DCL
             core.Convert(mappings.ToArray());
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables")]
-        public static void DumpBaseAvatars()
+        // Do NOT use this dumping batch for deploying converted wearables ABs, use DumpAllBodiesWearables() + DumpAllNonBodiesWearables()
+        // TODO: Update this method to have those other 2 calls sequentially and end up with the _Downloads folder containing all wearables optimized
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (non-optimized)")]
+        public static void DumpAllWearables()
         {
             var avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections");
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
@@ -108,15 +110,19 @@ namespace DCL
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
-            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnBodyWearableLoad);
+            
+            var pairs = ExtractMappingPairs(avatarItemList);
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnBodyWearableLoad;
+            builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnBodyWearableLoad; }));
         }
 
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Non-Body-Wearables")]
+        // Non-body wearables conversion is optimized to remove the extra skeleton in the wearables ABs since that is
+        // only needed for the body shapes (and the WearablesController sets it up for non-bodyshapes in runtime) 
+        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Non-Body-Wearables (Optimized)")]
         public static void DumpAllNonBodiesWearables()
         {
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
                                                 .Where(x => x.category != WearableLiterals.Categories.BODY_SHAPE)
-                                                //.Where(x => x.id == "dcl://dcl_launch/dcl_earrings_earring" || x.id == "dcl://base-avatars/m_feet_soccershoes")
                                                 .ToList();
             
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
@@ -124,7 +130,10 @@ namespace DCL
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
-            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
+            
+            var pairs = ExtractMappingPairs(avatarItemList);
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnNonBodyWearableLoad;
+            builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnNonBodyWearableLoad; }));
         }
         
         private static void DumpWearableQueue(ABConverter.Core builder, Queue<WearableItem> items, System.Action<UnityGLTF.GLTFSceneImporter> OnWearableLoad)

@@ -38,7 +38,8 @@ namespace DCL.ABConverter
             if (gltfs.Length == 0)
             {
                 Debug.Log("Visual Test Detection: no instantiated GLTFs...");
-                OnFinish?.Invoke(1);
+                skippedAssets++;
+                OnFinish?.Invoke(skippedAssets);
                 yield break;
             }
 
@@ -68,7 +69,8 @@ namespace DCL.ABConverter
             if (abs.Length == 0)
             {
                 Debug.Log("Visual Test Detection: no instantiated ABs...");
-                OnFinish?.Invoke(0);
+                skippedAssets++;
+                OnFinish?.Invoke(skippedAssets);
                 yield break;
             }
 
@@ -136,6 +138,9 @@ namespace DCL.ABConverter
                 GameObject gltf = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
                 var importedGLTF = Object.Instantiate(gltf);
                 importedGLTF.name = importedGLTF.name.Replace("(Clone)", "");
+                
+                PatchSkeletonlessSkinnedMeshRenderer(importedGLTF.gameObject.GetComponentInChildren<SkinnedMeshRenderer>());
+                
                 importedGLTFs.Add(importedGLTF);
             }
 
@@ -239,6 +244,9 @@ namespace DCL.ABConverter
                     if (asset is GameObject assetAsGameObject)
                     {
                         GameObject instance = Object.Instantiate(assetAsGameObject);
+                        
+                        PatchSkeletonlessSkinnedMeshRenderer(instance.GetComponentInChildren<SkinnedMeshRenderer>());
+                        
                         results.Add(instance);
                         instance.name = instance.name.Replace("(Clone)", "");
                     }
@@ -253,6 +261,23 @@ namespace DCL.ABConverter
             }
 
             return results.ToArray();
+        }
+        
+        /// <summary>
+        /// Wearables that are not body-shapes are optimized getting rid of the skeleton, so if this
+        /// SkinnedMeshRenderer is missing its root bone, we replace the renderer to make it rendereable
+        /// for the visual tests. In runtime, WearableController.SetAnimatorBones() takes care of the
+        /// root bone setup.
+        /// </summary>
+        private static void PatchSkeletonlessSkinnedMeshRenderer(SkinnedMeshRenderer skinnedMeshRenderer)
+        {
+            if (skinnedMeshRenderer == null || skinnedMeshRenderer.rootBone != null)
+                return;
+            
+            MeshRenderer meshRenderer = skinnedMeshRenderer.gameObject.AddComponent<MeshRenderer>();
+            meshRenderer.sharedMaterials = skinnedMeshRenderer.sharedMaterials;
+                
+            Object.DestroyImmediate(skinnedMeshRenderer);
         }
     }
 }
