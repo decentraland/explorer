@@ -92,7 +92,7 @@ namespace DCL.Huds.QuestsTracker
 
             currentEntries.Remove(questId);
             lastUpdateTimestamp.Remove(questId);
-            Destroy(entry.gameObject);
+            entry.StartDestroy();
         }
 
         public void PinQuest(string questId)
@@ -125,7 +125,7 @@ namespace DCL.Huds.QuestsTracker
             if (layoutRebuildRequested)
             {
                 layoutRebuildRequested = false;
-                Utils.ForceRebuildLayoutImmediate(questsContainer);
+                questsContainer.ForceUpdateLayout( false);
             }
         }
 

@@ -8,17 +8,18 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerTask : MonoBehaviour
     {
+        private static readonly int EXPAND_ANIMATOR_TRIGGER = Animator.StringToHash("Expand");
+        private static readonly int COLLAPSE_ANIMATOR_TRIGGER = Animator.StringToHash("Collapse");
+
         [SerializeField] internal TextMeshProUGUI taskTitle;
         [SerializeField] internal Image progress;
         [SerializeField] internal TextMeshProUGUI progressText;
         [SerializeField] internal Button jumpInButton;
+        [SerializeField] internal Animator animator;
 
         private Action jumpInDelegate;
 
-        public void Awake()
-        {
-            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); });
-        }
+        public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
 
         public void Populate(QuestTask task)
         {
@@ -44,9 +45,14 @@ namespace DCL.Huds.QuestsTracker
             }
         }
 
-        internal void SetProgressText(float current, float end)
+        internal void SetProgressText(float current, float end) { progressText.text = $"{current}/{end}"; }
+
+        public void SetExpandedStatus(bool active)
         {
-            progressText.text = $"{current}/{end}";
+            if (active)
+                animator.SetTrigger(EXPAND_ANIMATOR_TRIGGER);
+            else
+                animator.SetTrigger(COLLAPSE_ANIMATOR_TRIGGER);
         }
     }
 }

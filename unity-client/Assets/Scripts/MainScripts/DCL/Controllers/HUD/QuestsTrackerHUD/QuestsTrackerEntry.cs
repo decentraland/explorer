@@ -1,5 +1,7 @@
 using DCL.Helpers;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -9,6 +11,7 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerEntry : MonoBehaviour
     {
+        private static readonly int OUT_ANIM_TRIGGER = Animator.StringToHash("Out");
         public event Action OnLayoutRebuildRequested;
 
         [SerializeField] internal TextMeshProUGUI questTitle;
@@ -22,6 +25,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal GameObject collapseIcon;
         [SerializeField] internal Toggle pinQuestToggle;
         [SerializeField] internal RawImage iconImage;
+        [SerializeField] internal Animator containerAnimator;
 
         private AssetPromise_Texture iconPromise;
 
@@ -94,6 +98,12 @@ namespace DCL.Huds.QuestsTracker
             expandIcon.SetActive(!isExpanded);
             collapseIcon.SetActive(isExpanded);
             tasksContainer.gameObject.SetActive(isExpanded);
+
+            foreach (QuestsTrackerTask task in GetComponentsInChildren<QuestsTrackerTask>())
+            {
+                task.SetExpandedStatus(newIsExpanded);
+            }
+
             OnLayoutRebuildRequested?.Invoke();
         }
 
@@ -121,6 +131,18 @@ namespace DCL.Huds.QuestsTracker
         }
 
         public void SetPinStatus(bool isPinned) { pinQuestToggle.SetIsOnWithoutNotify(isPinned); }
+
+        public void StartDestroy() { StartCoroutine(DestroyRoutine()); }
+
+        private IEnumerator DestroyRoutine()
+        {
+            containerAnimator.SetTrigger(OUT_ANIM_TRIGGER);
+            yield return null; //Wait for a frame so the animator state is updated
+            yield return WaitForSecondsCache.Get(containerAnimator.GetCurrentAnimatorStateInfo(0).length);
+
+            OnLayoutRebuildRequested?.Invoke();
+            Destroy(gameObject);
+        }
 
         private void OnDestroy()
         {

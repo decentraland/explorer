@@ -130,6 +130,7 @@ MonoBehaviour:
   progress: {fileID: 3729451173496373538}
   progressText: {fileID: 9056996428100650665}
   jumpInButton: {fileID: 2573009063786507353}
+  animator: {fileID: 4549193508197797611}
 --- !u!95 &4549193508197797611
 Animator:
   serializedVersion: 3

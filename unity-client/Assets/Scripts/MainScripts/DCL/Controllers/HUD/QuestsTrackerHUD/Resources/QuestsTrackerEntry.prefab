@@ -801,6 +801,8 @@ GameObject:
   - component: {fileID: 3528601982079130660}
   - component: {fileID: 447686899638099690}
   - component: {fileID: 4743530986226492099}
+  - component: {fileID: 4492106478571484400}
+  - component: {fileID: 4748995870383706184}
   m_Layer: 5
   m_Name: QuestsTrackerEntry
   m_TagString: Untagged
@@ -826,7 +828,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 178, y: 0}
-  m_SizeDelta: {x: 356, y: 91.394135}
+  m_SizeDelta: {x: 356, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &447686899638099690
 CanvasRenderer:
@@ -860,6 +862,46 @@ MonoBehaviour:
   collapseIcon: {fileID: 4856087641233257838}
   pinQuestToggle: {fileID: 1981296600491382650}
   iconImage: {fileID: 6919818252187400862}
+  containerAnimator: {fileID: 8676131738277437953}
+--- !u!114 &4492106478571484400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4628898101681368935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 1
+--- !u!114 &4748995870383706184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4628898101681368935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2773e84dab644bc8ca3de4a4fd2fe37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
 --- !u!1 &4787693066897795343
 GameObject:
   m_ObjectHideFlags: 0
@@ -1046,9 +1088,9 @@ RectTransform:
   m_Father: {fileID: 3528601982079130660}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 178, y: -45.697067}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 178, y: 0}
   m_SizeDelta: {x: 356, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8006880839673258021
