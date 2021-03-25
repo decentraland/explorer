@@ -51,11 +51,15 @@ public class BuilderInWorldBridge : MonoBehaviour
             //Note (Adrian): This is temporary until implement the UI
             message = "Done!\nThe scene has been published";
             OnPublishSuccess?.Invoke();
+
+            AudioScriptableObjects.confirm.Play();
         }
         else
         {
             message = publishSceneResultPayload.error;
             OnPublishError?.Invoke(publishSceneResultPayload.error);
+
+            AudioScriptableObjects.error.Play();
         }
 
         HUDController.i.builderInWorldMainHud.PublishEnd(message);

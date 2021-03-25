@@ -14,16 +14,31 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     [SerializeField]
     GameObject builderInWorldModesParent;
 
+    [SerializeField]
+    BuilderInWorldController inWorldController;
+
+    [SerializeField]
+    BuilderInWorldEntityHandler entityHandler;
+
+    [Header("Audio Events")]
+    [SerializeField]
     AudioEvent eventAssetSpawn;
+    [SerializeField]
     AudioEvent eventAssetPlace;
+    [SerializeField]
+    AudioEvent eventAssetDelete;
+    [SerializeField]
+    AudioEvent eventBuilderEnter;
+    [SerializeField]
+    AudioEvent eventBuilderExit;
 
     BuilderInWorldMode[] builderInWorldModes;
 
     private void Start() {
-        eventAssetSpawn = audioContainer.GetEvent("BuilderAssetSpawn");
-        eventAssetPlace = audioContainer.GetEvent("BuilderAssetPlace");
-
         creatorController.OnSceneObjectPlaced += OnAssetSpawn;
+        inWorldController.OnEnterEditMode += OnEnterEditMode;
+        inWorldController.OnExitEditMode += OnExitEditMode;
+        entityHandler.OnDeleteSelectedEntities += OnAssetDelete;
 
         builderInWorldModes = builderInWorldModesParent.GetComponentsInChildren<BuilderInWorldMode>(true);
         for (int i = 0; i < builderInWorldModes.Length; i++) {
@@ -49,7 +64,19 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         eventAssetPlace.Play();
     }
 
+    void OnAssetDelete() {
+        eventAssetDelete.Play();
+    }
+
     void OnAssetSelect() {
         AudioScriptableObjects.inputFieldUnfocus.Play(true);
+    }
+
+    void OnEnterEditMode() {
+        eventBuilderEnter.Play();
+    }
+
+    void OnExitEditMode() {
+        eventBuilderExit.Play();
     }
 }

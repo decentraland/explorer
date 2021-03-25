@@ -47,6 +47,13 @@ MonoBehaviour:
   audioContainer: {fileID: 8626930522302334874}
   creatorController: {fileID: 2072020105617305708}
   builderInWorldModesParent: {fileID: 1208871512899340007}
+  inWorldController: {fileID: 1208871511274338203}
+  entityHandler: {fileID: 1676156629805984034}
+  eventAssetSpawn: {fileID: 11400000, guid: 50ff649965aff034aa8227fa845ff804, type: 2}
+  eventAssetPlace: {fileID: 11400000, guid: 6be02392848c7b84e84edb760304a42a, type: 2}
+  eventAssetDelete: {fileID: 11400000, guid: 0426caa2d686a4943baa16e374f9b6bd, type: 2}
+  eventBuilderEnter: {fileID: 11400000, guid: d85bc9f8739c09a41b7744ce4c154393, type: 2}
+  eventBuilderExit: {fileID: 11400000, guid: 43c277932af173344857f28888a953d0, type: 2}
 --- !u!114 &8626930522302334874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,6 +78,9 @@ MonoBehaviour:
     array:
     - {fileID: 11400000, guid: 6be02392848c7b84e84edb760304a42a, type: 2}
     - {fileID: 11400000, guid: 50ff649965aff034aa8227fa845ff804, type: 2}
+    - {fileID: 11400000, guid: 0426caa2d686a4943baa16e374f9b6bd, type: 2}
+    - {fileID: 11400000, guid: d85bc9f8739c09a41b7744ce4c154393, type: 2}
+    - {fileID: 11400000, guid: 43c277932af173344857f28888a953d0, type: 2}
 --- !u!1 &163805072857999107
 GameObject:
   m_ObjectHideFlags: 0

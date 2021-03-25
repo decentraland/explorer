@@ -25,6 +25,12 @@ public static class AudioScriptableObjects
     private static AudioEvent buttonReleaseEvent;
     public static AudioEvent buttonRelease => CommonScriptableObjects.GetOrLoad(ref buttonReleaseEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
 
+    private static AudioEvent cancelEvent;
+    public static AudioEvent cancel => CommonScriptableObjects.GetOrLoad(ref cancelEvent, "ScriptableObjects/AudioEvents/HUDCommon/Cancel");
+
+    private static AudioEvent confirmEvent;
+    public static AudioEvent confirm => CommonScriptableObjects.GetOrLoad(ref confirmEvent, "ScriptableObjects/AudioEvents/HUDCommon/Confirm");
+
     private static AudioEvent dialogOpenEvent;
     public static AudioEvent dialogOpen => CommonScriptableObjects.GetOrLoad(ref dialogOpenEvent, "ScriptableObjects/AudioEvents/HUDCommon/DialogOpen");
 
@@ -33,6 +39,9 @@ public static class AudioScriptableObjects
 
     private static AudioEvent enableEvent;
     public static AudioEvent enable => CommonScriptableObjects.GetOrLoad(ref enableEvent, "ScriptableObjects/AudioEvents/HUDCommon/Enable");
+
+    private static AudioEvent errorEvent;
+    public static AudioEvent error => CommonScriptableObjects.GetOrLoad(ref errorEvent, "ScriptableObjects/AudioEvents/HUDCommon/Error");
 
     private static AudioEvent disableEvent;
     public static AudioEvent disable => CommonScriptableObjects.GetOrLoad(ref disableEvent, "ScriptableObjects/AudioEvents/HUDCommon/Disable");

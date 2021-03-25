@@ -36,6 +36,8 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
         gameObject.SetActive(true);
         publishingGO.SetActive(true);
         publishingFinishedGO.SetActive(false);
+
+        AudioScriptableObjects.enable.Play();
     }
 
     public void PublishEnd(string message)

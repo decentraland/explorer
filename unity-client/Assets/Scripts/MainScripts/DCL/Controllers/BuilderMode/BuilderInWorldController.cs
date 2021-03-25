@@ -78,6 +78,9 @@ public class BuilderInWorldController : MonoBehaviour
     private Material previousSkyBoxMaterial;
     private Vector3 parcelUnityMiddlePoint;
 
+    public event Action OnEnterEditMode;
+    public event Action OnExitEditMode;
+
     private void Awake() { BIWCatalogManager.Init(); }
 
     void Start()
@@ -426,6 +429,8 @@ public class BuilderInWorldController : MonoBehaviour
         }
         previousSkyBoxMaterial = RenderSettings.skybox;
         RenderSettings.skybox = skyBoxMaterial;
+
+        OnEnterEditMode?.Invoke();
     }
 
     public void ExitEditMode()
@@ -463,6 +468,8 @@ public class BuilderInWorldController : MonoBehaviour
 
         isBuilderInWorldActivated = false;
         RenderSettings.skybox = previousSkyBoxMaterial;
+
+        OnExitEditMode?.Invoke();
     }
 
     public void StartBiwControllers()

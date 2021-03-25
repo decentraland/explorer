@@ -58,6 +58,7 @@ public class BuilderInWorldEntityHandler : BIWController
     private BuildModeHUDController hudController;
 
     public Action OnEntityUnlocked;
+    public event Action OnDeleteSelectedEntities;
 
     private void Start()
     {
@@ -668,6 +669,8 @@ public class BuilderInWorldEntityHandler : BIWController
         {
             DeleteEntity(entity);
         }
+
+        OnDeleteSelectedEntities?.Invoke();
     }
 
     public void DeleteEntitiesOutsideSceneBoundaries()
