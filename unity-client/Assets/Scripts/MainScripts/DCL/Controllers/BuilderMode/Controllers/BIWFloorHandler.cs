@@ -16,6 +16,7 @@ public class BIWFloorHandler : BIWController
 
     [Header("Prefab References")]
     public ActionController actionController;
+
     public BuilderInWorldEntityHandler builderInWorldEntityHandler;
     public DCLBuilderMeshLoadIndicatorController dclBuilderMeshLoadIndicatorController;
     public DCLBuilderMeshLoadIndicator meshLoadIndicator;
@@ -26,6 +27,9 @@ public class BIWFloorHandler : BIWController
     [Header("Prefabs")]
     public GameObject floorPrefab;
 
+    public event Action OnAllParcelsFloorLoaded;
+    private int numberOfParcelsLoaded;
+
     private CatalogItem lastFloorCalalogItemUsed;
     private readonly Dictionary<string, GameObject> floorPlaceHolderDict = new Dictionary<string, GameObject>();
 
@@ -35,12 +39,7 @@ public class BIWFloorHandler : BIWController
 
     public void Clean()
     {
-        foreach (GameObject gameObject in floorPlaceHolderDict.Values)
-        {
-            GameObject.Destroy(gameObject);
-        }
-        floorPlaceHolderDict.Clear();
-
+        RemoveAllPlaceHolders();
         dclBuilderMeshLoadIndicatorController.Dispose();
     }
 
@@ -71,6 +70,7 @@ public class BIWFloorHandler : BIWController
                 return entity.GetCatalogItemAssociated();
             }
         }
+
         return null;
     }
 
@@ -86,6 +86,7 @@ public class BIWFloorHandler : BIWController
     {
         Vector3 initialPosition = new Vector3(ParcelSettings.PARCEL_SIZE / 2, 0, ParcelSettings.PARCEL_SIZE / 2);
         Vector2Int[] parcelsPoints = sceneToEdit.sceneData.parcels;
+        numberOfParcelsLoaded = 0;
 
         foreach (Vector2Int parcel in parcelsPoints)
         {
@@ -110,10 +111,14 @@ public class BIWFloorHandler : BIWController
         RemovePlaceHolder(entity.rootEntity.entityId);
     }
 
-    private void OnFloorLoaded(DecentralandEntity entity)
+    private void OnFloorLoaded(IDCLEntity entity)
     {
         entity.OnShapeUpdated -= OnFloorLoaded;
         RemovePlaceHolder(entity.entityId);
+
+        numberOfParcelsLoaded++;
+        if (numberOfParcelsLoaded >= sceneToEdit.sceneData.parcels.Count())
+            OnAllParcelsFloorLoaded?.Invoke();
     }
 
     private void RemovePlaceHolder(string entityId)
@@ -125,5 +130,22 @@ public class BIWFloorHandler : BIWController
         floorPlaceHolderDict.Remove(entityId);
         GameObject.Destroy(floorPlaceHolder);
         dclBuilderMeshLoadIndicatorController.HideIndicator(entityId);
+    }
+
+    private void RemoveAllPlaceHolders()
+    {
+        foreach (GameObject gameObject in floorPlaceHolderDict.Values)
+        {
+            GameObject.Destroy(gameObject);
+        }
+        floorPlaceHolderDict.Clear();
+    }
+
+    public override void ExitEditMode()
+    {
+        base.ExitEditMode();
+
+        RemoveAllPlaceHolders();
+        dclBuilderMeshLoadIndicatorController.HideAllIndicators();
     }
 }
