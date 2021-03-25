@@ -11,14 +11,7 @@ public class DCLVerticalLayoutGroup : VerticalLayoutGroup
 {
     public bool ignoreHorizontalAlignment;
 
-    public override void SetLayoutHorizontal()
-    {
-        ignoreHorizontalAlignment = true;
-        if (ignoreHorizontalAlignment)
-            return;
-
-        //base.SetLayoutHorizontal();
-    }
+    public override void SetLayoutHorizontal() { }
 }
 
 #if UNITY_EDITOR
