@@ -92,6 +92,7 @@ namespace DCL
         {
             var avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections");
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
+            
             builder.Convert(ExtractMappingPairs(avatarItemList).ToArray());
         }
         
@@ -103,7 +104,7 @@ namespace DCL
                                                 .ToList();
 
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
-            var settings = new ABConverter.Client.Settings(ApiTLD.NONE);
+            var settings = new ABConverter.Client.Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
@@ -119,7 +120,7 @@ namespace DCL
                                                 .ToList();
             
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
-            var settings = new ABConverter.Client.Settings(ApiTLD.NONE);
+            var settings = new ABConverter.Client.Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
