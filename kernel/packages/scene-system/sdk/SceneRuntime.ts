@@ -242,7 +242,7 @@ export abstract class SceneRuntime extends Script {
 
         openExternalUrl(url: string) {
           if (JSON.stringify(url).length > 49000) {
-            console.error("URL payload cannot exceed 49.000 bytes")
+            that.onError(new Error("URL payload cannot exceed 49.000 bytes"))
             return;
           }
 
@@ -262,7 +262,7 @@ export abstract class SceneRuntime extends Script {
             let payload = { assetContractAddress, tokenId, comment}
 
             if (JSON.stringify(payload).length > 49000) {
-              console.error("OpenNFT payload cannot exceed 49.000 bytes")
+              that.onError(new Error("OpenNFT payload cannot exceed 49.000 bytes"))
               return;
             }
 
@@ -315,7 +315,7 @@ export abstract class SceneRuntime extends Script {
         /** called after adding a component to the entity or after updating a component */
         updateEntityComponent(entityId: string, componentName: string, classId: number, json: string): void {
           if (json.length > 49000) {
-            console.error("Component payload cannot exceed 49.000 bytes")
+            that.onError(new Error("Component payload cannot exceed 49.000 bytes"))
             return;
           }
 
@@ -428,6 +428,11 @@ export abstract class SceneRuntime extends Script {
         },
 
         componentUpdated(id: string, json: string) {
+          if (json.length > 49000) {
+            that.onError(new Error("Component payload cannot exceed 49.000 bytes"))
+            return;
+          }
+
           that.events.push({
             type: 'ComponentUpdated',
             tag: id,
