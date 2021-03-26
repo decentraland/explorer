@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Reflection;
+using DCL.SettingsData;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using QualitySettings = DCL.SettingsData.QualitySettings;
 
 namespace DCL.SettingsControls
 {
@@ -15,14 +17,6 @@ namespace DCL.SettingsControls
         private object settings;
         private FieldInfo sourceField;
         private FieldInfo downsampleField;
-
-        enum QualityLevel
-        {
-            OFF,
-            LOW,
-            MID,
-            HIGH
-        }
 
         public override void Initialize()
         {
@@ -43,11 +37,9 @@ namespace DCL.SettingsControls
             downsampleField = settings.GetType().GetField("Downsample", BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        private int currentQualityLevel = 0;
-
         public override object GetStoredValue()
         {
-            return currentQualityLevel;
+            return currentQualitySetting.ssaoQuality;
         }
 
         public override void UpdateSetting(object newValue)
@@ -55,27 +47,27 @@ namespace DCL.SettingsControls
             int value = (int)newValue;
             switch ( value )
             {
-                case (int)QualityLevel.OFF:
+                case (int)QualitySettings.SSAOQualityLevel.OFF:
                     ssaoFeature.SetActive(false);
                     break;
-                case (int)QualityLevel.LOW:
+                case (int)QualitySettings.SSAOQualityLevel.LOW:
                     ssaoFeature.SetActive(true);
                     sourceField.SetValue(settings, 0);
                     downsampleField.SetValue(settings, true);
                     break;
-                case (int)QualityLevel.MID:
+                case (int)QualitySettings.SSAOQualityLevel.MID:
                     ssaoFeature.SetActive(true);
                     sourceField.SetValue(settings, 1);
                     downsampleField.SetValue(settings, true);
                     break;
-                case (int)QualityLevel.HIGH:
+                case (int)QualitySettings.SSAOQualityLevel.HIGH:
                     ssaoFeature.SetActive(true);
                     sourceField.SetValue(settings, 1);
                     downsampleField.SetValue(settings, false);
                     break;
             }
 
-            currentQualityLevel = value;
+            currentQualitySetting.ssaoQuality = (QualitySettings.SSAOQualityLevel)value;
         }
     }
 }

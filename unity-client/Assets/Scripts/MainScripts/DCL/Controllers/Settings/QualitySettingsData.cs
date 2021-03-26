@@ -46,9 +46,17 @@ namespace DCL.SettingsData
             BaseRes_Unlimited
         }
 
+        public enum SSAOQualityLevel
+        {
+            OFF,
+            LOW,
+            MID,
+            HIGH
+        }
+
         public string displayName;
 
-        [Tooltip("Base resolution level")] 
+        [Tooltip("Base resolution level")]
         public BaseResolution baseResolution;
 
         [Tooltip("Controls the global anti aliasing setting")]
@@ -69,7 +77,7 @@ namespace DCL.SettingsData
         [Tooltip("Camera Far")] [Range(40, 100)]
         public float cameraDrawDistance;
 
-        [Tooltip("Enable bloom post process")] 
+        [Tooltip("Enable bloom post process")]
         public bool bloom;
 
         [Tooltip("Enable 30 FPS capping for more stable framerate")]
@@ -87,6 +95,9 @@ namespace DCL.SettingsData
         [Tooltip("If detail object culling is ON, this slider determines the relative size of culled objects from tiny to big. Bigger values gives better performance, but more objects will be hidden.")] [Range(0, 100)]
         public float detailObjectCullingThreshold;
 
+        [Tooltip("SSAO quality level")]
+        public SSAOQualityLevel ssaoQuality;
+
         public bool Equals(QualitySettings otherSetting)
         {
             if (baseResolution != otherSetting.baseResolution) return false;
@@ -102,6 +113,7 @@ namespace DCL.SettingsData
             if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) > 0.001f) return false;
             if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
             if (Mathf.Abs(detailObjectCullingThreshold - otherSetting.detailObjectCullingThreshold) > 0.001f) return false;
+            if (ssaoQuality != otherSetting.ssaoQuality) return false;
 
             return true;
         }
