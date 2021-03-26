@@ -89,14 +89,14 @@ namespace DCL
 
         // Do NOT use this dumping batch for deploying converted wearables ABs, use DumpAllBodiesWearables() + DumpAllNonBodiesWearables()
         // TODO: Update this method to have those other 2 calls sequentially and end up with the _Downloads folder containing all wearables optimized
-        [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (non-optimized)")]
-        public static void DumpAllWearables()
-        {
-            var avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections");
-            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
-            
-            builder.Convert(ExtractMappingPairs(avatarItemList).ToArray());
-        }
+        // [MenuItem("Decentraland/Asset Bundle Builder/Dump All Wearables (non-optimized)")]
+        // public static void DumpAllWearables()
+        // {
+        //     var avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections");
+        //     var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations());
+        //     
+        //     builder.Convert(ExtractMappingPairs(avatarItemList).ToArray());
+        // }
         
         [MenuItem("Decentraland/Asset Bundle Builder/Dump All Body-Wearables")]
         public static void DumpAllBodiesWearables()

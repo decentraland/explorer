@@ -16,7 +16,6 @@ namespace DCL.ABConverter
         static readonly string abPath = Application.dataPath + "/../AssetBundles/";
         static readonly string baselinePath = VisualTestHelpers.baselineImagesPath;
         static readonly string testImagesPath = VisualTestHelpers.testImagesPath;
-        static readonly float snapshotCamOffset = 3;
         static int skippedAssets = 0;
 
         /// <summary>
@@ -53,12 +52,9 @@ namespace DCL.ABConverter
             foreach (GameObject go in gltfs)
             {
                 go.SetActive(true);
-
-                // unify all child renderer bounds and use that to position the snapshot camera
-                var mergedBounds = Helpers.Utils.BuildMergedBounds(go.GetComponentsInChildren<Renderer>());
-                Vector3 cameraPosition = new Vector3(mergedBounds.min.x - snapshotCamOffset, mergedBounds.max.y + snapshotCamOffset, mergedBounds.min.z - snapshotCamOffset);
-
-                yield return VisualTestHelpers.TakeSnapshot($"ABConverter_{go.name}.png", Camera.main, cameraPosition, mergedBounds.center);
+                
+                yield return TakeObjectSnapshot(go, $"ABConverter_{go.name}.png");
+                
                 go.SetActive(false);
             }
 
@@ -85,12 +81,8 @@ namespace DCL.ABConverter
 
                 go.SetActive(true);
 
-                // unify all child renderer bounds and use that to position the camera
-                var mergedBounds = Helpers.Utils.BuildMergedBounds(go.GetComponentsInChildren<Renderer>());
-                Vector3 cameraPosition = new Vector3(mergedBounds.min.x - snapshotCamOffset, mergedBounds.max.y + snapshotCamOffset, mergedBounds.min.z - snapshotCamOffset);
-
-                yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
-
+                yield return TakeObjectSnapshot(go, testName);
+                
                 bool result = VisualTestHelpers.TestSnapshot(
                     VisualTestHelpers.baselineImagesPath + testName,
                     VisualTestHelpers.testImagesPath + testName,
@@ -122,6 +114,24 @@ namespace DCL.ABConverter
             VisualTestHelpers.testImagesPath = testImagesPath;
 
             OnFinish?.Invoke(skippedAssets);
+        }
+
+        /// <summary>
+        /// Position camera based on renderer bounds and take snapshot
+        /// </summary>
+        private static IEnumerator TakeObjectSnapshot(GameObject targetGO, string testName)
+        {
+            // unify all child renderer bounds and use that to position the snapshot camera
+            var mergedBounds = Helpers.Utils.BuildMergedBounds(targetGO.GetComponentsInChildren<Renderer>());
+            
+            Vector3 offset = mergedBounds.extents;
+            offset.x = Mathf.Max(1, offset.x);
+            offset.y = Mathf.Max(1, offset.y);
+            offset.z = Mathf.Max(1, offset.z);
+                
+            Vector3 cameraPosition = new Vector3(mergedBounds.min.x - offset.x, mergedBounds.max.y + offset.y, mergedBounds.min.z - offset.z);
+
+            yield return VisualTestHelpers.TakeSnapshot(testName, Camera.main, cameraPosition, mergedBounds.center);
         }
 
         /// <summary>
