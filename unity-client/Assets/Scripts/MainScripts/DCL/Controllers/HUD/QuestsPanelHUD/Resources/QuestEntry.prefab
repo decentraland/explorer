@@ -781,6 +781,7 @@ MonoBehaviour:
   completedMarkInTitle: {fileID: 3326139216299930650}
   thumbnailImage: {fileID: 6166836943285977668}
   jumpInButton: {fileID: 4345263048936937877}
+  animator: {fileID: 4798744976219760345}
 --- !u!114 &3686857283893146268
 MonoBehaviour:
   m_ObjectHideFlags: 0
