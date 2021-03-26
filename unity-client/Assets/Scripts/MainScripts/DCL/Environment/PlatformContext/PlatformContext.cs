@@ -1,4 +1,4 @@
-﻿using DCL.Rendering;
+using DCL.Rendering;
 
 namespace DCL
 {
@@ -14,13 +14,15 @@ namespace DCL
         public readonly IClipboard clipboard;
         public readonly IPhysicsSyncController physicsSyncController;
         public readonly IDebugController debugController;
+        public readonly IWebRequestController webRequestController;
 
         public PlatformContext(IMemoryManager memoryManager,
             ICullingController cullingController,
             IClipboard clipboard,
             IPhysicsSyncController physicsSyncController,
             IParcelScenesCleaner parcelScenesCleaner,
-            IDebugController debugController)
+            IDebugController debugController,
+            IWebRequestController webRequestController)
         {
             this.memoryManager = memoryManager;
             this.cullingController = cullingController;
@@ -28,6 +30,7 @@ namespace DCL
             this.physicsSyncController = physicsSyncController;
             this.parcelScenesCleaner = parcelScenesCleaner;
             this.debugController = debugController;
+            this.webRequestController = webRequestController;
         }
 
         public void Dispose()
