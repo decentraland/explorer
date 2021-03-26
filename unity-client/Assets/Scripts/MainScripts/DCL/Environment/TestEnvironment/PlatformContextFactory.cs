@@ -16,17 +16,6 @@ namespace DCL.Tests
             IDebugController debugController = null,
             IWebRequestController webRequestController = null)
         {
-            IWebRequestController webRequestControllerMock = webRequestController;
-            if (webRequestControllerMock == null)
-            {
-                webRequestControllerMock = Substitute.For<IWebRequestController>();
-                webRequestControllerMock.Initialize(
-                    Substitute.For<IWebRequest>(),
-                    Substitute.For<IWebRequest>(),
-                    Substitute.For<IWebRequest>(),
-                    Substitute.For<IWebRequestAudio>());
-            }
-
             return new PlatformContext(
                 memoryManager: memoryManager ?? Substitute.For<IMemoryManager>(),
                 cullingController: cullingController ?? Substitute.For<ICullingController>(),
@@ -34,7 +23,19 @@ namespace DCL.Tests
                 physicsSyncController: physicsSyncController ?? Substitute.For<IPhysicsSyncController>(),
                 parcelScenesCleaner: parcelScenesCleaner ?? Substitute.For<ParcelScenesCleaner>(),
                 debugController: debugController ?? Substitute.For<IDebugController>(),
-                webRequestController: webRequestControllerMock);
+                webRequestController: webRequestController ?? GetWebRequestControllerMock());
+        }
+
+        private static IWebRequestController GetWebRequestControllerMock()
+        {
+            IWebRequestController webRequestControllerMock = Substitute.For<IWebRequestController>();
+            webRequestControllerMock.Initialize(
+                Substitute.For<IWebRequest>(),
+                Substitute.For<IWebRequestAssetBundle>(),
+                Substitute.For<IWebRequestTexture>(),
+                Substitute.For<IWebRequestAudio>());
+
+            return webRequestControllerMock;
         }
     }
 }
