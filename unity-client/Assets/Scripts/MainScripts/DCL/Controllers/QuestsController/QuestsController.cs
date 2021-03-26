@@ -68,8 +68,6 @@ namespace DCL.QuestsController
                 pinnedQuests.Remove(questId);
             }
 
-            parsedQuests.Select(x => JsonUtility.ToJson(x, true)).ToList().ForEach(Debug.Log);
-
             //We ignore quests without sections/tasks
             quests.Set(parsedQuests.Where(x => x.sections != null && x.sections.Length > 0).Select(x => (x.id, x)));
         }
