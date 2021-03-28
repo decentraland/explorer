@@ -177,6 +177,23 @@ public class BodyShapeController : WearableController, IBodyShapeController
             else if (parentName.Contains("mouth"))
                 mouthRenderer = r;
         }
+
+        InitializeAvatarAudioHandlers(assetContainer, animation);
+    }
+
+    private void InitializeAvatarAudioHandlers(GameObject container, Animation createdAnimation) {
+        //NOTE(Mordi): Adds audio handler for animation events, and passes in the audioContainer for the avatar
+        AvatarAnimationEventAudioHandler animationEventAudioHandler = createdAnimation.gameObject.AddComponent<AvatarAnimationEventAudioHandler>();
+        AudioContainer audioContainer = container.transform.parent.parent.GetComponentInChildren<AudioContainer>();
+        if (audioContainer != null) {
+            animationEventAudioHandler.Init(audioContainer);
+
+            //NOTE(Mordi): If this is a remote avatar, pass the animation component so we can keep track of whether it is culled (off-screen) or not
+            AvatarAudioHandlerRemote audioHandlerRemote = audioContainer.GetComponent<AvatarAudioHandlerRemote>();
+            if (audioHandlerRemote != null) {
+                audioHandlerRemote.Init(createdAnimation.gameObject);
+            }
+        }
     }
 
     public SkinnedMeshRenderer headRenderer { get; private set; }
