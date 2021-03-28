@@ -20,6 +20,9 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     [SerializeField]
     BuilderInWorldEntityHandler entityHandler;
 
+    [SerializeField]
+    BIWModeController modeController;
+
     [Header("Audio Events")]
     [SerializeField]
     AudioEvent eventAssetSpawn;
@@ -42,7 +45,7 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
 
         builderInWorldModes = builderInWorldModesParent.GetComponentsInChildren<BuilderInWorldMode>(true);
         for (int i = 0; i < builderInWorldModes.Length; i++) {
-            builderInWorldModes[i].OnEntityPlaced += OnAssetPlace;
+            builderInWorldModes[i].OnEntityDeselected += OnAssetDeselect;
             builderInWorldModes[i].OnEntitySelected += OnAssetSelect;
         }
     }
@@ -51,7 +54,7 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         creatorController.OnSceneObjectPlaced -= OnAssetSpawn;
 
         for (int i = 0; i < builderInWorldModes.Length; i++) {
-            builderInWorldModes[i].OnEntityPlaced -= OnAssetPlace;
+            builderInWorldModes[i].OnEntityDeselected -= OnAssetDeselect;
             builderInWorldModes[i].OnEntitySelected -= OnAssetSelect;
         }
     }
@@ -60,16 +63,17 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         eventAssetSpawn.Play();
     }
 
-    void OnAssetPlace() {
-        eventAssetPlace.Play();
-    }
-
     void OnAssetDelete() {
         eventAssetDelete.Play();
     }
 
     void OnAssetSelect() {
         AudioScriptableObjects.inputFieldUnfocus.Play(true);
+    }
+
+    void OnAssetDeselect(bool assetIsNew) {
+        if (assetIsNew || modeController.GetCurrentStateMode() == BIWModeController.EditModeState.FirstPerson)
+            eventAssetPlace.Play();
     }
 
     void OnEnterEditMode() {
