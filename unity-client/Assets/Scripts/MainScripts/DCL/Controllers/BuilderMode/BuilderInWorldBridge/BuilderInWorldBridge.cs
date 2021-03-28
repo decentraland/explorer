@@ -71,7 +71,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID.LOCKED_ON_EDIT;
 
 
-        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.sharedComponents)
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
@@ -88,7 +88,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         entitySingleComponentPayload.componentId = (int) CLASS_ID.NAME;
 
 
-        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.rootEntity.sharedComponents)
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NAME)
             {
@@ -118,7 +118,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         WebInterface.BuilderInWorldMessage(BuilderInWorldSettings.SCENE_EVENT_NAME, message);
     }
 
-    public void AddEntityOnKernel(DecentralandEntity entity, ParcelScene scene)
+    public void AddEntityOnKernel(IDCLEntity entity, ParcelScene scene)
     {
         List<ComponentPayload> list = new List<ComponentPayload>();
 
@@ -145,7 +145,7 @@ public class BuilderInWorldBridge : MonoBehaviour
             list.Add(componentPayLoad);
         }
 
-        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in entity.sharedComponents)
         {
             ComponentPayload componentPayLoad = new ComponentPayload();
 
@@ -175,7 +175,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         SendNewEntityToKernel(scene.sceneData.id, entity.entityId, list.ToArray());
     }
 
-    public void EntityTransformReport(DecentralandEntity entity, ParcelScene scene)
+    public void EntityTransformReport(IDCLEntity entity, ParcelScene scene)
     {
         entitySingleComponentPayload.entityId = entity.entityId;
         entitySingleComponentPayload.componentId = (int) CLASS_ID_COMPONENT.TRANSFORM;

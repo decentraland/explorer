@@ -16,9 +16,7 @@ public class BodyShapeController : WearableController, IBodyShapeController
     public string bodyShapeId => wearable.id;
     private Transform animationTarget;
 
-    public BodyShapeController(WearableItem wearableItem) : base(wearableItem)
-    {
-    }
+    public BodyShapeController(WearableItem wearableItem) : base(wearableItem) { }
 
     protected BodyShapeController(BodyShapeController original) : base(original)
     {
@@ -119,51 +117,26 @@ public class BodyShapeController : WearableController, IBodyShapeController
             "mouth");
     }
 
-    private Animation PrepareAnimation(GameObject container)
+    protected override void PrepareWearable(GameObject assetContainer)
     {
-        Animation createdAnimation = null;
+        Animation animation = null;
 
         //NOTE(Brian): Fix to support hierarchy difference between AssetBundle and GLTF wearables.
         Utils.ForwardTransformChildTraversal<Transform>((x) =>
             {
                 if (x.name.Contains("Armature"))
                 {
-                    createdAnimation = x.parent.gameObject.GetOrCreateComponent<Animation>();
+                    var armatureGO = x.parent;
+                    animation = armatureGO.gameObject.GetOrCreateComponent<Animation>();
+                    armatureGO.gameObject.GetOrCreateComponent<StickerAnimationListener>();
                     return false; //NOTE(Brian): If we return false the traversal is stopped.
                 }
 
                 return true;
             },
-            container.transform);
+            assetContainer.transform);
 
-        createdAnimation.cullingType = AnimationCullingType.BasedOnRenderers;
-
-        InitializeAvatarAudioHandlers(container, createdAnimation);
-
-        return createdAnimation;
-    }
-
-    private void InitializeAvatarAudioHandlers(GameObject container, Animation createdAnimation)
-    {
-        //NOTE(Mordi): Adds audio handler for animation events, and passes in the audioContainer for the avatar
-        AvatarAnimationEventAudioHandler animationEventAudioHandler = createdAnimation.gameObject.AddComponent<AvatarAnimationEventAudioHandler>();
-        AudioContainer audioContainer = container.transform.parent.parent.GetComponentInChildren<AudioContainer>();
-        if (audioContainer != null)
-        {
-            animationEventAudioHandler.Init(audioContainer);
-
-            //NOTE(Mordi): If this is a remote avatar, pass the animation component so we can keep track of whether it is culled (off-screen) or not
-            AvatarAudioHandlerRemote audioHandlerRemote = audioContainer.GetComponent<AvatarAudioHandlerRemote>();
-            if (audioHandlerRemote != null)
-            {
-                audioHandlerRemote.Init(createdAnimation.gameObject);
-            }
-        }
-    }
-
-    protected override void PrepareWearable(GameObject assetContainer)
-    {
-        var animation = PrepareAnimation(assetContainer);
+        animation.cullingType = AnimationCullingType.BasedOnRenderers;
 
         //We create a mock SkinnedMeshRenderer to hold the bones for the animations,
         //since any of the others SkinnedMeshRenderers in the bodyshape can be disabled arbitrarily
