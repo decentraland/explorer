@@ -18,7 +18,6 @@ public class BIWController : MonoBehaviour
     {
         this.sceneToEdit = sceneToEdit;
         isEditModeActive = true;
-        Debug.Log("Heyo");
     }
 
     public virtual void ExitEditMode()
