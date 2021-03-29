@@ -23,7 +23,6 @@ public class BIWCatalogShould
     [Test]
     public void BuilderInWorldSearch()
     {
-
         string nameToFilter = "Sandy";
         BuilderInWorldTestHelper.CreateTestCatalogLocalMultipleFloorObjects();
 
@@ -38,7 +37,7 @@ public class BIWCatalogShould
         }
 
         SceneCatalogController sceneCatalogController = new SceneCatalogController();
-        List<Dictionary<string, List<CatalogItem>>>  result = sceneCatalogController.FilterAssets(nameToFilter);
+        List<Dictionary<string, List<CatalogItem>>>  result = sceneCatalogController.biwSearchBarController.FilterAssets(nameToFilter);
 
         CatalogItem filteredItem =  result[0].Values.ToList()[0][0];
 
@@ -54,11 +53,11 @@ public class BIWCatalogShould
         CatalogItemAdapter adapter = BuilderInWorldTestHelper.CreateCatalogItemAdapter(gameObjectToUse);
         adapter.SetContent(item);
 
-        CatalogAssetGroupAdapter groupAdatper = new GameObject("_CatalogAssetGroupAdapter").AddComponent<CatalogAssetGroupAdapter>();
-        groupAdatper.AddAdapter(adapter);
+        CatalogAssetGroupAdapter groupAdapter = new GameObject("_CatalogAssetGroupAdapter").AddComponent<CatalogAssetGroupAdapter>();
+        groupAdapter.SubscribeToEvents(adapter);
 
         CatalogGroupListView catalogGroupListView = new GameObject("_CatalogGroupListView").AddComponent<CatalogGroupListView>();
-        catalogGroupListView.AddAdapter(groupAdatper);
+        catalogGroupListView.SubscribeToEvents(groupAdapter);
         catalogGroupListView.generalCanvas = Utils.GetOrCreateComponent<Canvas>(gameObjectToUse);
         SceneCatalogView sceneCatalogView = SceneCatalogView.Create();
         sceneCatalogView.catalogGroupListView = catalogGroupListView;
@@ -76,7 +75,7 @@ public class BIWCatalogShould
         {
             quickBarController.SetIndexToDrop(i);
             adapter.AdapterStartDragging(null);
-            quickBarController.SceneObjectDropped(null);
+            quickBarController.SceneObjectDroppedFromCatalog(null);
             Assert.AreEqual(item, quickBarController.QuickBarObjectSelected(i));
         }
     }
@@ -119,7 +118,7 @@ public class BIWCatalogShould
     [UnityTearDown]
     protected IEnumerator TearDown()
     {
-        AssetCatalogBridge.ClearCatalog();
+        AssetCatalogBridge.i.ClearCatalog();
         BIWCatalogManager.ClearCatalog();
         BIWCatalogManager.Dispose();
         if (gameObjectToUse != null)

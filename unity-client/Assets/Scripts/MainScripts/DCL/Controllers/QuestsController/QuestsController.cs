@@ -89,14 +89,12 @@ namespace DCL.QuestsController
             }
 
             //Alex: Edge case. Progressed quest was not included in the initialization.
-            // We invoke quests events but no sections ones.
+            // We invoke quests events but no sections or QuestCompleted one.
             if (!quests.TryGetValue(progressedQuest.id, out QuestModel oldQuest))
             {
                 quests.Add(progressedQuest.id, progressedQuest);
                 OnQuestProgressed?.Invoke(progressedQuest.id);
 
-                if (progressedQuest.isCompleted)
-                    OnQuestCompleted?.Invoke(progressedQuest.id);
                 return;
             }
 
