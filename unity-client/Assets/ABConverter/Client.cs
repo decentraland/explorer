@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DCL.Helpers;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace DCL.ABConverter
 {
@@ -317,6 +319,132 @@ namespace DCL.ABConverter
                 settings = new Settings();
 
             return ConvertAssetToAssetBundle(assetHash, assetFilename, sceneCid, settings);
+        }
+        
+        /// <summary>
+        /// Dump all bodyshape wearables normally, including their imported skeleton 
+        /// </summary>
+        public static void DumpAllBodiesWearables()
+        {
+            EnsureEnvironment();
+            
+            List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
+                                                .Where(x => x.category == WearableLiterals.Categories.BODY_SHAPE)
+                                                .ToList();
+
+            Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
+            var settings = new Settings();
+            settings.skipAlreadyBuiltBundles = false;
+            settings.deleteDownloadPathAfterFinished = false;
+            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
+            
+            var pairs = ExtractMappingPairs(avatarItemList);
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnBodyWearableLoad;
+            builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnBodyWearableLoad; }));
+        }
+
+        /// <summary>
+        /// Dump all non-bodyshape wearables, optimized to remove the skeleton for the wearables ABs since that is
+        /// only needed for the body shapes (and the WearablesController sets it up for non-bodyshapes in runtime) 
+        /// </summary>
+        public static void DumpAllNonBodiesWearables()
+        {
+            EnsureEnvironment();
+            
+            List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
+                                                .Where(x => x.category != WearableLiterals.Categories.BODY_SHAPE)
+                                                .ToList();
+            
+            Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
+            var settings = new Settings();
+            settings.skipAlreadyBuiltBundles = false;
+            settings.deleteDownloadPathAfterFinished = false;
+            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
+            
+            var pairs = ExtractMappingPairs(avatarItemList);
+            
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnNonBodyWearableLoad;
+            builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnNonBodyWearableLoad; }));
+        }
+        
+        private static void GLTFImporter_OnNonBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
+        {
+            obj.importSkeleton = false;
+            obj.maxTextureSize = 512;
+        }
+        private static void GLTFImporter_OnBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
+        {
+            obj.importSkeleton = true;
+            obj.maxTextureSize = 512;
+        }
+        
+        [System.Serializable]
+        private class WearableItemArray
+        {
+            [System.Serializable]
+            public class Collection
+            {
+                public string id;
+                public List<WearableItem> wearables;
+            }
+
+            public List<Collection> data;
+        }
+        
+        /// <summary>
+        /// Given a list of WearableItems, extracts and returns a list of MappingPairs
+        /// </summary>
+        /// <param name="wearableItems">A list of already-populated WearableItems</param>
+        /// <returns>A list of the extracted Wearables MappingPairs</returns>
+        private static List<ContentServerUtils.MappingPair> ExtractMappingPairs(List<WearableItem> wearableItems)
+        {
+            var result = new List<ContentServerUtils.MappingPair>();
+
+            foreach (var wearable in wearableItems)
+            {
+                foreach (var representation in wearable.representations)
+                {
+                    foreach (var datum in representation.contents)
+                    {
+                        result.Add(datum);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Given a base-url to fetch wearables collections, returns a list of all the WearableItems
+        /// </summary>
+        /// <param name="url">base-url to fetch the wearables collections</param>
+        /// <returns>A list of all the WearableItems found</returns>
+        private static List<WearableItem> GetAvatarMappingList(string url)
+        {
+            List<WearableItem> result = new List<WearableItem>();
+
+            UnityWebRequest w = UnityWebRequest.Get(url);
+            w.SendWebRequest();
+
+            while (!w.isDone) { }
+
+            if (!w.WebRequestSucceded())
+            {
+                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                return null;
+            }
+
+            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
+            
+            foreach (var collection in avatarApiData.data)
+            {
+                foreach (var wearable in collection.wearables)
+                {
+                    result.Add(wearable);
+                }
+            }
+
+            return result;
         }
     }
 }
