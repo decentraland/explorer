@@ -64,10 +64,14 @@ public static partial class BuilderInWorldUtils
         {
             totalX += vector.x;
             totalZ += vector.y;
-            if (vector.x < minX) minX = vector.x;
-            if (vector.y < minY) minY = vector.y;
-            if (vector.x > maxX) maxX = vector.x;
-            if (vector.y > maxY) maxY = vector.y;
+            if (vector.x < minX)
+                minX = vector.x;
+            if (vector.y < minY)
+                minY = vector.y;
+            if (vector.x > maxX)
+                maxX = vector.x;
+            if (vector.y > maxY)
+                maxY = vector.y;
         }
 
         float centerX = totalX / parcelScene.sceneData.parcels.Length;
@@ -160,10 +164,7 @@ public static partial class BuilderInWorldUtils
         return bounds;
     }
 
-    public static bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition)
-    {
-        return IsWithInSelectionBounds(transform.position, lastClickMousePosition, mousePosition);
-    }
+    public static bool IsWithInSelectionBounds(Transform transform, Vector3 lastClickMousePosition, Vector3 mousePosition) { return IsWithInSelectionBounds(transform.position, lastClickMousePosition, mousePosition); }
 
     public static bool IsWithInSelectionBounds(Vector3 point, Vector3 lastClickMousePosition, Vector3 mousePosition)
     {
@@ -203,12 +204,9 @@ public static partial class BuilderInWorldUtils
         return results.Count > 2;
     }
 
-    public static bool IsPointerOverUIElement()
-    {
-        return IsPointerOverUIElement(Input.mousePosition);
-    }
+    public static bool IsPointerOverUIElement() { return IsPointerOverUIElement(Input.mousePosition); }
 
-    public static string ConvertEntityToJSON(DecentralandEntity entity)
+    public static string ConvertEntityToJSON(IDCLEntity entity)
     {
         EntityData builderInWorldEntityData = new EntityData();
         builderInWorldEntityData.entityId = entity.entityId;
@@ -236,7 +234,7 @@ public static partial class BuilderInWorldUtils
             }
         }
 
-        foreach (KeyValuePair<Type, ISharedComponent> keyValuePair in entity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePair in entity.sharedComponents)
         {
             if (keyValuePair.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
             {
@@ -266,10 +264,7 @@ public static partial class BuilderInWorldUtils
         return JsonConvert.SerializeObject(builderInWorldEntityData);
     }
 
-    public static EntityData ConvertJSONToEntityData(string json)
-    {
-        return JsonConvert.DeserializeObject<EntityData>(json);
-    }
+    public static EntityData ConvertJSONToEntityData(string json) { return JsonConvert.DeserializeObject<EntityData>(json); }
 
     public static List<DCLBuilderInWorldEntity> RemoveGroundEntities(List<DCLBuilderInWorldEntity> entityList)
     {
@@ -360,8 +355,5 @@ public static partial class BuilderInWorldUtils
         eventTrigger.triggers.Add(entry);
     }
 
-    public static void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType)
-    {
-        eventTrigger.triggers.RemoveAll(x => x.eventID == eventType);
-    }
+    public static void RemoveEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType) { eventTrigger.triggers.RemoveAll(x => x.eventID == eventType); }
 }

@@ -21,18 +21,18 @@ namespace DCL.Components
 
     public interface IEntityComponent : IComponent, ICleanable, IMonoBehaviour
     {
-        DecentralandEntity entity { get; }
-        void Initialize(IParcelScene scene, DecentralandEntity entity);
+        IDCLEntity entity { get; }
+        void Initialize(IParcelScene scene, IDCLEntity entity);
     }
 
     public interface ISharedComponent : IComponent, IDisposable
     {
         string id { get; }
-        void AttachTo(DecentralandEntity entity, Type overridenAttachedType = null);
-        void DetachFrom(DecentralandEntity entity, Type overridenAttachedType = null);
+        void AttachTo(IDCLEntity entity, Type overridenAttachedType = null);
+        void DetachFrom(IDCLEntity entity, Type overridenAttachedType = null);
         void DetachFromEveryEntity();
         void Initialize(IParcelScene scene, string id);
-        HashSet<DecentralandEntity> GetAttachedEntities();
+        HashSet<IDCLEntity> GetAttachedEntities();
         void CallWhenReady(Action<ISharedComponent> callback);
     }
 
@@ -57,20 +57,11 @@ namespace DCL.Components
     {
         public IDelayedComponent component;
 
-        public WaitForComponentUpdate(IDelayedComponent component)
-        {
-            this.component = component;
-        }
+        public WaitForComponentUpdate(IDelayedComponent component) { this.component = component; }
 
-        public override bool keepWaiting
-        {
-            get { return component.isRoutineRunning; }
-        }
+        public override bool keepWaiting { get { return component.isRoutineRunning; } }
 
-        public override void Cleanup()
-        {
-            component.Cleanup();
-        }
+        public override void Cleanup() { component.Cleanup(); }
     }
 
     public abstract class BaseComponent : MonoBehaviour, IEntityComponent, IDelayedComponent, IPoolLifecycleHandler, IPoolableObjectContainer
@@ -82,7 +73,7 @@ namespace DCL.Components
 
         public IParcelScene scene { get; set; }
 
-        public DecentralandEntity entity { get; set; }
+        public IDCLEntity entity { get; set; }
 
         public PoolableObject poolableObject { get; set; }
 
@@ -90,11 +81,9 @@ namespace DCL.Components
 
         protected BaseModel model;
 
-        public void RaiseOnAppliedChanges()
-        {
-        }
+        public void RaiseOnAppliedChanges() { }
 
-        public virtual void Initialize(IParcelScene scene, DecentralandEntity entity)
+        public virtual void Initialize(IParcelScene scene, IDCLEntity entity)
         {
             this.scene = scene;
             this.entity = entity;
@@ -103,10 +92,7 @@ namespace DCL.Components
                 transform.SetParent(entity.gameObject.transform, false);
         }
 
-        public virtual void UpdateFromJSON(string json)
-        {
-            UpdateFromModel(model.GetDataFromJSON(json));
-        }
+        public virtual void UpdateFromJSON(string json) { UpdateFromModel(model.GetDataFromJSON(json)); }
 
         public virtual void UpdateFromModel(BaseModel newModel)
         {
@@ -124,25 +110,13 @@ namespace DCL.Components
 
         public virtual BaseModel GetModel() => model;
 
-        protected virtual ComponentUpdateHandler CreateUpdateHandler()
-        {
-            return new ComponentUpdateHandler(this);
-        }
+        protected virtual ComponentUpdateHandler CreateUpdateHandler() { return new ComponentUpdateHandler(this); }
 
-        public bool IsValid()
-        {
-            return this != null;
-        }
+        public bool IsValid() { return this != null; }
 
-        public virtual void Cleanup()
-        {
-            updateHandler.Cleanup();
-        }
+        public virtual void Cleanup() { updateHandler.Cleanup(); }
 
-        public virtual void OnPoolRelease()
-        {
-            Cleanup();
-        }
+        public virtual void OnPoolRelease() { Cleanup(); }
 
         public virtual void OnPoolGet()
         {

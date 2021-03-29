@@ -21,7 +21,7 @@ namespace DCL.Components
     {
         void Report(WebInterface.ACTION_BUTTON buttonId, Ray ray, HitInfo hit);
         PointerEventType GetEventType();
-        DecentralandEntity entity { get; }
+        IDCLEntity entity { get; }
         WebInterface.ACTION_BUTTON GetActionButton();
         void SetHoverState(bool state);
         bool IsAtHoverDistance(float distance);
@@ -33,14 +33,11 @@ namespace DCL.Components
         public static bool enableInteractionHoverFeedback = true;
         public OnPointerEventColliders eventColliders { get; private set; }
 
-        private DecentralandEntity entity;
+        private IDCLEntity entity;
 
-        public OnPointerEventHandler()
-        {
-            eventColliders = new OnPointerEventColliders();
-        }
+        public OnPointerEventHandler() { eventColliders = new OnPointerEventColliders(); }
 
-        public void SetColliders(DecentralandEntity entity)
+        public void SetColliders(IDCLEntity entity)
         {
             this.entity = entity;
             eventColliders.Initialize(entity);
@@ -48,7 +45,8 @@ namespace DCL.Components
 
         public void SetFeedbackState(bool showFeedback, bool hoverState, string button, string hoverText)
         {
-            if (!enableInteractionHoverFeedback) return;
+            if (!enableInteractionHoverFeedback)
+                return;
 
             var hoverCanvasController = InteractionHoverCanvasController.i;
 
@@ -71,10 +69,7 @@ namespace DCL.Components
             return eventColliders.GetMeshName(collider);
         }
 
-        public void Dispose()
-        {
-            eventColliders.Dispose();
-        }
+        public void Dispose() { eventColliders.Dispose(); }
     }
 
     public class OnPointerEvent : UUIDComponent, IPointerEvent
@@ -89,10 +84,7 @@ namespace DCL.Components
             public float distance = 10f;
             public bool showFeedback = true;
 
-            public override BaseModel GetDataFromJSON(string json)
-            {
-                return Utils.SafeFromJson<Model>(json);
-            }
+            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
 
             public WebInterface.ACTION_BUTTON GetActionButton()
             {
@@ -112,7 +104,7 @@ namespace DCL.Components
 
         public OnPointerEventHandler pointerEventHandler;
 
-        public override void Initialize(IParcelScene scene, DecentralandEntity entity)
+        public override void Initialize(IParcelScene scene, IDCLEntity entity)
         {
             base.Initialize(scene, entity);
 
@@ -126,10 +118,7 @@ namespace DCL.Components
             entity.OnShapeUpdated += SetEventColliders;
         }
 
-        public WebInterface.ACTION_BUTTON GetActionButton()
-        {
-            return ((Model) this.model).GetActionButton();
-        }
+        public WebInterface.ACTION_BUTTON GetActionButton() { return ((Model) this.model).GetActionButton(); }
 
         public void SetHoverState(bool hoverState)
         {
@@ -137,7 +126,7 @@ namespace DCL.Components
             pointerEventHandler.SetFeedbackState(model.showFeedback, hoverState, model.button, model.hoverText);
         }
 
-        void SetEventColliders(DecentralandEntity entity)
+        void SetEventColliders(IDCLEntity entity)
         {
             pointerEventHandler.SetColliders(entity);
         }
@@ -179,13 +168,8 @@ namespace DCL.Components
             pointerEventHandler.Dispose();
         }
 
-        public virtual void Report(WebInterface.ACTION_BUTTON buttonId, Ray ray, HitInfo hit)
-        {
-        }
+        public virtual void Report(WebInterface.ACTION_BUTTON buttonId, Ray ray, HitInfo hit) { }
 
-        public virtual PointerEventType GetEventType()
-        {
-            return PointerEventType.NONE;
-        }
+        public virtual PointerEventType GetEventType() { return PointerEventType.NONE; }
     }
 }
