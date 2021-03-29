@@ -17,22 +17,22 @@ namespace DCL
         /// </summary>
         /// <param name="url">Url where to make the request.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        /// <returns></returns>
-        DownloadHandler Get(string url, int requestAttemps = 3);
+        /// <returns>The web request with the data downloaded.</returns>
+        UnityWebRequest Get(string url, int requestAttemps = 3);
 
         /// <summary>
         /// Download data from a url (asynchronous mode).
         /// </summary>
         /// <param name="url">Url where to make the request.</param>
-        /// <param name="OnCompleted">This action will be executed if the request successfully finishes.</param>
+        /// <param name="OnCompleted">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        void GetAsync(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
+        void GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
     }
 
     public abstract class WebRequestBase : IWebRequestBase
     {
-        public DownloadHandler Get(string url, int requestAttemps = 3)
+        public UnityWebRequest Get(string url, int requestAttemps = 3)
         {
             UnityWebRequest request;
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
@@ -57,17 +57,12 @@ namespace DCL
                 }
             } while (!request.WebRequestSucceded());
 
-            DownloadHandler requestResult = request.downloadHandler;
-
-            request.disposeDownloadHandlerOnDispose = false;
-            request.Dispose();
-
-            return requestResult;
+            return request;
         }
 
-        public void GetAsync(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps = 3) { CoroutineStarter.Start(GetAsyncCoroutine(url, OnCompleted, OnFail, requestAttemps)); }
+        public void GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3) { CoroutineStarter.Start(GetAsyncCoroutine(url, OnCompleted, OnFail, requestAttemps)); }
 
-        private IEnumerator GetAsyncCoroutine(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps)
+        private IEnumerator GetAsyncCoroutine(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps)
         {
             UnityWebRequest request;
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
@@ -85,7 +80,7 @@ namespace DCL
                 }
             } while (!request.WebRequestSucceded());
 
-            OnCompleted?.Invoke(request.downloadHandler);
+            OnCompleted?.Invoke(request);
         }
 
         /// <summary>
