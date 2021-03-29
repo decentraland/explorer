@@ -160,7 +160,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
 #else
     half3 viewDirTS = GetViewDirectionTangentSpace(input.tangentWS, input.normalWS, input.viewDirWS);
 #endif
-    ApplyPerPixelDisplacement(viewDirTS, input.uv);
+    ApplyPerPixelDisplacement(viewDirTS, input.uvAlbedoNormal.xy);
 #endif
 
     SurfaceData surfaceData;
