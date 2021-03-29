@@ -1,7 +1,6 @@
 using DCL.Helpers;
 using System;
 using System.Collections;
-using System.Net.Http;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -13,54 +12,18 @@ namespace DCL
     public interface IWebRequestBase
     {
         /// <summary>
-        /// Request and download data from a url (synchronous mode).
-        /// </summary>
-        /// <param name="url">Url where to make the request.</param>
-        /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        /// <returns>The web request with the data downloaded.</returns>
-        UnityWebRequest Get(string url, int requestAttemps = 3);
-
-        /// <summary>
-        /// Download data from a url (asynchronous mode).
+        /// Download data from a url.
         /// </summary>
         /// <param name="url">Url where to make the request.</param>
         /// <param name="OnCompleted">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        UnityWebRequest GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
+        UnityWebRequest Get(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail = null, int requestAttemps = 3);
     }
 
     public abstract class WebRequestBase : IWebRequestBase
     {
-        public UnityWebRequest Get(string url, int requestAttemps = 3)
-        {
-            UnityWebRequest request;
-            int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
-
-            do
-            {
-                try
-                {
-                    request = CreateWebRequest(url);
-                    var requestOperation = request.SendWebRequest();
-                    while (!requestOperation.isDone && requestOperation.progress < 1) { }
-                }
-                catch (HttpRequestException e)
-                {
-                    throw new HttpRequestException($"{e.Message} -- ({url})", e);
-                }
-
-                remainingAttemps--;
-                if (remainingAttemps == 0)
-                {
-                    throw new HttpRequestException($"{request.error} -- ({url})");
-                }
-            } while (!request.WebRequestSucceded());
-
-            return request;
-        }
-
-        public UnityWebRequest GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3)
+        public UnityWebRequest Get(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail = null, int requestAttemps = 3)
         {
             UnityWebRequest newWebRequest = CreateWebRequest(url);
             CoroutineStarter.Start(GetAsyncCoroutine(newWebRequest, OnCompleted, OnFail, requestAttemps));

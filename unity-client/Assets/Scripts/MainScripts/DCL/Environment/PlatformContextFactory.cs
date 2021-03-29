@@ -6,13 +6,6 @@ namespace DCL
     {
         public static PlatformContext CreateDefault()
         {
-            WebRequestController newWebRequestController = new WebRequestController();
-            newWebRequestController.Initialize(
-                new WebRequest(),
-                new WebRequestAssetBundle(),
-                new WebRequestTexture(),
-                new WebRequestAudio());
-
             return new PlatformContext(
                 memoryManager: new MemoryManager(),
                 cullingController: CullingController.Create(),
@@ -20,7 +13,7 @@ namespace DCL
                 physicsSyncController: new PhysicsSyncController(),
                 parcelScenesCleaner: new ParcelScenesCleaner(),
                 debugController: new DebugController(),
-                webRequestController: newWebRequestController);
+                webRequest: WebRequestController.Create());
         }
     }
 }

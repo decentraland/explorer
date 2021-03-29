@@ -23,7 +23,7 @@ namespace DCL.Tests
                 physicsSyncController: physicsSyncController ?? Substitute.For<IPhysicsSyncController>(),
                 parcelScenesCleaner: parcelScenesCleaner ?? Substitute.For<ParcelScenesCleaner>(),
                 debugController: debugController ?? Substitute.For<IDebugController>(),
-                webRequestController: webRequestController ?? GetWebRequestControllerMock());
+                webRequest: webRequestController ?? GetWebRequestControllerMock());
         }
 
         private static IWebRequestController GetWebRequestControllerMock()

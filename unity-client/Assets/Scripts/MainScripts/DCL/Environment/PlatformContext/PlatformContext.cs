@@ -14,7 +14,7 @@ namespace DCL
         public readonly IClipboard clipboard;
         public readonly IPhysicsSyncController physicsSyncController;
         public readonly IDebugController debugController;
-        public readonly IWebRequestController webRequestController;
+        public readonly IWebRequestController webRequest;
 
         public PlatformContext(IMemoryManager memoryManager,
             ICullingController cullingController,
@@ -22,7 +22,7 @@ namespace DCL
             IPhysicsSyncController physicsSyncController,
             IParcelScenesCleaner parcelScenesCleaner,
             IDebugController debugController,
-            IWebRequestController webRequestController)
+            IWebRequestController webRequest)
         {
             this.memoryManager = memoryManager;
             this.cullingController = cullingController;
@@ -30,7 +30,7 @@ namespace DCL
             this.physicsSyncController = physicsSyncController;
             this.parcelScenesCleaner = parcelScenesCleaner;
             this.debugController = debugController;
-            this.webRequestController = webRequestController;
+            this.webRequest = webRequest;
         }
 
         public void Dispose()
