@@ -1,4 +1,3 @@
-using System;
 using UnityEngine.Networking;
 
 namespace DCL
@@ -6,11 +5,7 @@ namespace DCL
     /// <summary>
     /// Our custom implementation of the UnityWebRequest.
     /// </summary>
-    public interface IWebRequest
-    {
-        DownloadHandler Get(string url, int requestAttemps = 3);
-        void GetAsync(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
-    }
+    public interface IWebRequest : IWebRequestBase { }
 
     public class WebRequest : WebRequestBase, IWebRequest
     {

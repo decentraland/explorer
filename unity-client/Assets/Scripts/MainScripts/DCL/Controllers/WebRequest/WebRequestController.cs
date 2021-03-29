@@ -34,6 +34,8 @@ namespace DCL
 
     public class WebRequestController : IWebRequestController
     {
+        public static WebRequestController i { get; private set; }
+
         public IWebRequest webRequest { get; private set; }
         public IWebRequestAssetBundle webRequestAB { get; private set; }
         public IWebRequestTexture webRequestTexture { get; private set; }
@@ -45,6 +47,8 @@ namespace DCL
             IWebRequestTexture webRequestTexture,
             IWebRequestAudio webRequestAudio)
         {
+            i = this;
+
             this.webRequest = webRequest;
             this.webRequestAB = webRequestAB;
             this.webRequestTexture = webRequestTexture;

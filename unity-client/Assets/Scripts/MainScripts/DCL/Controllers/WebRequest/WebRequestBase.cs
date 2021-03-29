@@ -10,7 +10,7 @@ namespace DCL
     /// <summary>
     /// Base class for all our custom WebRequest implementations that will manage the core lyfecicle of the requests, including the retry system.
     /// </summary>
-    public abstract class WebRequestBase
+    public interface IWebRequestBase
     {
         /// <summary>
         /// Request and download data from a url (synchronous mode).
@@ -18,6 +18,20 @@ namespace DCL
         /// <param name="url">Url where to make the request.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <returns></returns>
+        DownloadHandler Get(string url, int requestAttemps = 3);
+
+        /// <summary>
+        /// Download data from a url (asynchronous mode).
+        /// </summary>
+        /// <param name="url">Url where to make the request.</param>
+        /// <param name="OnCompleted">This action will be executed if the request successfully finishes.</param>
+        /// <param name="OnFail">This action will be executed if the request fails.</param>
+        /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
+        void GetAsync(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
+    }
+
+    public abstract class WebRequestBase : IWebRequestBase
+    {
         public DownloadHandler Get(string url, int requestAttemps = 3)
         {
             UnityWebRequest request;
@@ -51,13 +65,6 @@ namespace DCL
             return requestResult;
         }
 
-        /// <summary>
-        /// Download data from a url (asynchronous mode).
-        /// </summary>
-        /// <param name="url">Url where to make the request.</param>
-        /// <param name="OnCompleted">This action will be executed if the request successfully finishes.</param>
-        /// <param name="OnFail">This action will be executed if the request fails.</param>
-        /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         public void GetAsync(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps = 3) { CoroutineStarter.Start(GetAsyncCoroutine(url, OnCompleted, OnFail, requestAttemps)); }
 
         private IEnumerator GetAsyncCoroutine(string url, Action<DownloadHandler> OnCompleted, Action<string> OnFail, int requestAttemps)
