@@ -11,6 +11,7 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerEntry : MonoBehaviour
     {
+        private const float DELAY_TO_DESTROY = 0.5f;
         private static readonly int OUT_ANIM_TRIGGER = Animator.StringToHash("Out");
         public event Action OnLayoutRebuildRequested;
 
@@ -138,8 +139,7 @@ namespace DCL.Huds.QuestsTracker
         private IEnumerator DestroyRoutine()
         {
             containerAnimator.SetTrigger(OUT_ANIM_TRIGGER);
-            yield return null; //Wait for a frame so the animator state is updated
-            yield return WaitForSecondsCache.Get(containerAnimator.GetCurrentAnimatorStateInfo(0).length);
+            yield return WaitForSecondsCache.Get(DELAY_TO_DESTROY);
 
             OnLayoutRebuildRequested?.Invoke();
             Destroy(gameObject);
