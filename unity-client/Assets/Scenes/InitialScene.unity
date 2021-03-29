@@ -1104,9 +1104,9 @@ MonoBehaviour:
   openBrowserWhenStart: 1
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 0
-  baseUrlCustom: ?ENABLE_BUILDER_IN_WORLD
-  environment: 4
+  baseUrlMode: 1
+  baseUrlCustom: https://play.decentraland.zone?
+  environment: 2
   startInCoords: {x: 120, y: 120}
   forceLocalComms: 0
   allWearables: 0

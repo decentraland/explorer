@@ -63,6 +63,11 @@ public class BuilderInWorldMode : MonoBehaviour
 
     public virtual void SetSnapActive(bool isActive)
     {
+        if (isActive && !isSnapActive)
+            AudioScriptableObjects.enable.Play();
+        else if (!isActive && isSnapActive)
+            AudioScriptableObjects.disable.Play();
+
         isSnapActive = isActive;
     }
 

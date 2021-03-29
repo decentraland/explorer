@@ -16,6 +16,12 @@ public static class AudioScriptableObjects
 {
     // UI events
 
+    private static AudioEvent cameraFadeInEvent;
+    public static AudioEvent cameraFadeIn => CommonScriptableObjects.GetOrLoad(ref cameraFadeInEvent, "ScriptableObjects/AudioEvents/HUDCommon/CameraFadeIn");
+
+    private static AudioEvent cameraFadeOutEvent;
+    public static AudioEvent cameraFadeOut => CommonScriptableObjects.GetOrLoad(ref cameraFadeOutEvent, "ScriptableObjects/AudioEvents/HUDCommon/CameraFadeOut");
+
     private static AudioEvent buttonHoverEvent;
     public static AudioEvent buttonHover => CommonScriptableObjects.GetOrLoad(ref buttonHoverEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonHover");
 

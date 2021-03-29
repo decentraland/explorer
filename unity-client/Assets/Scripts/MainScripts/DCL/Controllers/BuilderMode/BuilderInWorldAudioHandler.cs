@@ -42,6 +42,7 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         inWorldController.OnEnterEditMode += OnEnterEditMode;
         inWorldController.OnExitEditMode += OnExitEditMode;
         entityHandler.OnDeleteSelectedEntities += OnAssetDelete;
+        modeController.OnChangedEditModeState += OnChangedEditModeState;
 
         builderInWorldModes = builderInWorldModesParent.GetComponentsInChildren<BuilderInWorldMode>(true);
         for (int i = 0; i < builderInWorldModes.Length; i++) {
@@ -82,5 +83,20 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
 
     void OnExitEditMode() {
         eventBuilderExit.Play();
+    }
+
+    void OnChangedEditModeState(BIWModeController.EditModeState previous, BIWModeController.EditModeState current) {
+        if (previous != BIWModeController.EditModeState.Inactive) {
+            switch (current) {
+                case BIWModeController.EditModeState.FirstPerson:
+                    AudioScriptableObjects.cameraFadeIn.Play();
+                    break;
+                case BIWModeController.EditModeState.GodMode:
+                    AudioScriptableObjects.cameraFadeOut.Play();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

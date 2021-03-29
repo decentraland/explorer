@@ -29,6 +29,7 @@ public class BIWModeController : BIWController
     internal InputAction_Trigger toggleSnapModeInputAction;
 
     public Action OnInputDone;
+    public event Action<EditModeState, EditModeState> OnChangedEditModeState;
 
     private EditModeState currentEditModeState = EditModeState.Inactive;
 
@@ -151,6 +152,11 @@ public class BIWModeController : BIWController
     {
         SetSnapActive(!isSnapActive);
         InputDone();
+
+        if (isSnapActive)
+            AudioScriptableObjects.enable.Play();
+        else
+            AudioScriptableObjects.disable.Play();
     }
 
     public void SetSnapActive(bool isActive)
@@ -174,6 +180,8 @@ public class BIWModeController : BIWController
 
     public void SetBuildMode(EditModeState state)
     {
+        EditModeState previousState = currentEditModeState;
+
         if (currentActiveMode != null)
             currentActiveMode.Deactivate();
 
@@ -203,5 +211,7 @@ public class BIWModeController : BIWController
             currentActiveMode.SetSnapActive(isSnapActive);
             builderInWorldEntityHandler.SetActiveMode(currentActiveMode);
         }
+
+        OnChangedEditModeState?.Invoke(previousState, state);
     }
 }
