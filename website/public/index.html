@@ -213,13 +213,10 @@
       src="%PUBLIC_URL%/unity/Build/DCLUnityLoader.js?%REACT_APP_LOADER_VERSION%"
     ></script>
     <script>
-      console.log("UnityLoader initialized");
       var script = document.getElementById("unityLoader");
-      script.onload = () => {
-        console.log("post on load");
-      };
+      script.onload = () => {};
       var UnityLoader = UnityLoader || {
-        aoCreateUnityInstance: function (dclCanvas) {
+        instantiate: function (dclCanvas) {
           var canvas = document.createElement("canvas");
           canvas.addEventListener("contextmenu", function (e) {
             e.preventDefault();
@@ -228,7 +225,7 @@
           dclCanvas.appendChild(canvas);
 
           return new Promise((resolve) => {
-            var buildUrl = "unity/Build";
+            var buildUrl = "%PUBLIC_URL%/unity/Build";
             var loaderUrl = buildUrl + "/unity.loader.js";
             var config = {
               dataUrl: buildUrl + "/unity.data.unityweb",
@@ -236,13 +233,11 @@
               codeUrl: buildUrl + "/unity.wasm.unityweb",
               streamingAssetsUrl: "StreamingAssets",
               companyName: "Decentraland",
-              productName: "DecentralandUnityClient",
+              productName: "Decentraland World Client",
               productVersion: "0.1",
             };
 
-            createUnityInstance(canvas, config, (progress) => {
-              console.log(progress);
-            })
+            createUnityInstance(canvas, config, (progress) => {})
               .then(resolve)
               .catch((message) => {
                 alert(message);
@@ -253,7 +248,7 @@
     </script>
 
     <script>
-      var RENDERER_ARTIFACTS_ROOT = '%PUBLIC_URL%/unity/Build/'
+      var RENDERER_ARTIFACTS_ROOT = "%PUBLIC_URL%/unity/Build/";
     </script>
 
     <script src="%PUBLIC_URL%/website.js?%REACT_APP_WEBSITE_VERSION%"></script>

@@ -8,7 +8,6 @@ export type UnityLoader = {}
 export type LoadRendererResult = {
   DclRenderer: DclRenderer
   UnityLoader: UnityLoader
-  buildConfigPath: string
 }
 
 /**
@@ -26,7 +25,6 @@ function getRendererArtifactsRoot() {
 // TODO: return type DclRenderer
 async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
   const scriptUrl = new URL('index.js', baseUrl).toString()
-  const buildConfigPath = new URL('unity.json', baseUrl).toString()
   await injectScript(scriptUrl)
 
   if (typeof globalThis.UnityLoader == 'undefined') {
@@ -39,8 +37,7 @@ async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
 
   return {
     DclRenderer: globalThis.DclRenderer,
-    UnityLoader: globalThis.UnityLoader,
-    buildConfigPath
+    UnityLoader: globalThis.UnityLoader
   }
 }
 // TODO: return type DclRenderer
@@ -49,15 +46,13 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   // block and uncomment the block next to it
   {
     const scriptUrl = new URL('DCLUnityLoader.js', getRendererArtifactsRoot()).toString()
-    const buildConfigPath = new URL('unity.json', getRendererArtifactsRoot()).toString()
     await injectScript(scriptUrl)
     if (typeof globalThis.UnityLoader == 'undefined') {
       throw new Error('Error while loading the renderer from ' + scriptUrl)
     }
     return {
       DclRenderer: globalThis.DclRenderer,
-      UnityLoader: globalThis.UnityLoader,
-      buildConfigPath
+      UnityLoader: globalThis.UnityLoader
     }
   }
 

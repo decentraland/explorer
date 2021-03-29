@@ -20,11 +20,11 @@ export type InitializeUnityResult = {
 export async function initializeUnity(container: HTMLElement): Promise<InitializeUnityResult> {
   const urlParams = new URLSearchParams(document.location.search)
 
-  const { buildConfigPath } = await loadUnity(urlParams.get('renderer') || undefined)
+  await loadUnity(urlParams.get('renderer') || undefined)
 
   initShared()
 
-  globalThis.globalStore.dispatch(initializeRenderer(container, buildConfigPath))
+  globalThis.globalStore.dispatch(initializeRenderer(container))
   ;(window as any).USE_UNITY_INDEXED_DB_CACHE = USE_UNITY_INDEXED_DB_CACHE
 
   await rendererEnabled()

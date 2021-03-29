@@ -40,7 +40,6 @@ export function* rendererSaga() {
   yield takeEvery(MESSAGE_FROM_ENGINE, (action: MessageFromEngineAction) =>
     handleMessageFromEngine(_instancedJS, action)
   )
-
 }
 
 export function* ensureRenderer() {
@@ -50,7 +49,7 @@ export function* ensureRenderer() {
 }
 
 function* initializeRenderer(action: InitializeRenderer) {
-  const { container, buildConfigPath } = action.payload
+  const { container } = action.payload
 
   const qs = queryString.parse(document.location.search)
 
@@ -58,15 +57,10 @@ function* initializeRenderer(action: InitializeRenderer) {
 
   setLoadingScreenVisible(true)
 
-  let ignoreThis = buildConfigPath
-  if (ignoreThis === '') {
-    _gameInstance = null
-  }
-
   if (qs.ws) {
     _gameInstance = initializeUnityEditor(qs.ws, container)
   } else {
-    _gameInstance = yield UnityLoader.aoCreateUnityInstance(container)
+    _gameInstance = yield UnityLoader.instantiate(container)
   }
 
   yield put(waitingForRenderer())

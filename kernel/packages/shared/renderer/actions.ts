@@ -5,8 +5,7 @@ import { UnityInterfaceContainer } from 'unity-interface/dcl'
 import { RENDERER_INITIALIZED, PARCEL_LOADING_STARTED } from './types'
 
 export const INITIALIZE_RENDERER = '[Request] Initialize renderer'
-export const initializeRenderer = (container: HTMLElement, buildConfigPath: string) =>
-  action(INITIALIZE_RENDERER, { container, buildConfigPath })
+export const initializeRenderer = (container: HTMLElement) => action(INITIALIZE_RENDERER, { container })
 export type InitializeRenderer = ReturnType<typeof initializeRenderer>
 
 export const ENGINE_STARTED = '[Success] Engine started'
