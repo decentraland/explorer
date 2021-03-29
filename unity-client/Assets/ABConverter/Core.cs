@@ -473,23 +473,23 @@ namespace DCL.ABConverter
         private void ReduceTextureSizeIfNeeded(string texturePath, float maxSize)
         {
             string finalTexturePath = finalDownloadedPath + texturePath;
-
+            
             byte[] image = File.ReadAllBytes(finalTexturePath);
-
+            
             var tmpTex = new Texture2D(1, 1);
-
+            
             if (!ImageConversion.LoadImage(tmpTex, image))
                 return;
-
+            
             float factor = 1.0f;
             int width = tmpTex.width;
             int height = tmpTex.height;
-
+            
             float maxTextureSize = maxSize;
-
+            
             if (width < maxTextureSize && height < maxTextureSize)
                 return;
-
+            
             if (width >= height)
             {
                 factor = (float)maxTextureSize / width;
@@ -498,13 +498,13 @@ namespace DCL.ABConverter
             {
                 factor = (float)maxTextureSize / height;
             }
-
+            
             Texture2D dstTex = TextureHelpers.Resize(tmpTex, (int)(width * factor), (int)(height * factor));
             byte[] endTex = ImageConversion.EncodeToPNG(dstTex);
             UnityEngine.Object.DestroyImmediate(tmpTex);
-
+            
             File.WriteAllBytes(finalTexturePath, endTex);
-
+            
             AssetDatabase.ImportAsset(finalDownloadedAssetDbPath + texturePath, ImportAssetOptions.ForceUpdate);
             AssetDatabase.SaveAssets();
         }
@@ -555,9 +555,6 @@ namespace DCL.ABConverter
                 
             env.file.WriteAllBytes(outputPath, assetData);
                 
-            /*string dbPath = finalDownloadedAssetDbPath + additionalPath + hash + fileExt;
-            AssetDatabase.ImportAsset(dbPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);*/
-                
             env.assetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ImportRecursive);
 
             return outputPath;
@@ -580,19 +577,8 @@ namespace DCL.ABConverter
 
             Texture2D t2d = env.assetDatabase.LoadAssetAtPath<Texture2D>(finalPath);
 
-            if (t2d == null)
-            {
-                /*string relativePath = AssetBundleBuilderUtils.GetRelativePathTo(gltfMappingPair.file, textureMappingPair.file);
-                string assetDBOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + Path.GetExtension(gltfMappingPair.file);
-
-                string id = relativePath + "@" + assetDBOutputPath;
-
-                //NOTE(Brian): This cache will be used by the GLTF importer when seeking textures. This way the importer will
-                //             consume the asset bundle dependencies instead of trying to create new textures.
-                PersistentAssetCache.AddImage(relativePath, gltfMappingPair.hash, new RefCountedTextureData(relativePath, t2d));*/
-                    
+            if (t2d == null)    
                 return;
-            }
 
             string relativePath = ABConverter.PathUtils.GetRelativePathTo(gltfPath.file, texturePath.file);
 
@@ -618,13 +604,6 @@ namespace DCL.ABConverter
 
             Stream stream = env.file.OpenRead(finalPath);
             string relativePath = ABConverter.PathUtils.GetRelativePathTo(gltfPath.file, bufferPath.file);
-
-            /*string assetDbOutputPath = finalDownloadedAssetDbPath + gltfMappingPair.hash + "/" + gltfMappingPair.hash + fileExt;
-            string id = relativePath + "@" + assetDbOutputPath;
-
-            // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
-            //              consume the asset bundle dependencies instead of trying to create new streams.
-            PersistentAssetCache.AddBuffer(relativePath, bufferMappingPair.hash, new RefCountedStreamData(relativePath, stream));*/
                 
             // NOTE(Brian): This cache will be used by the GLTF importer when seeking streams. This way the importer will
             //              consume the asset bundle dependencies instead of trying to create new streams.

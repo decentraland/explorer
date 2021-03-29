@@ -362,7 +362,6 @@ namespace DCL.ABConverter
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
             var pairs = ExtractMappingPairs(avatarItemList);
-            
             UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnNonBodyWearableLoad;
             builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnNonBodyWearableLoad; }));
         }
