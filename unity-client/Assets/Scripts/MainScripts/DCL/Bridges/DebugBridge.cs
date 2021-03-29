@@ -60,7 +60,7 @@ namespace DCL
             RendereableAssetLoadHelper.loadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
         }
 
-        public void SetSSAO(bool enabled)
+        public void ToggleSSAO()
         {
             var urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
 
@@ -69,7 +69,7 @@ namespace DCL
 
             IList features = featuresField.GetValue(forwardRenderer) as IList;
             var ssaoFeature = features[0] as ScriptableRendererFeature;
-            ssaoFeature.SetActive(enabled);
+            ssaoFeature.SetActive(!ssaoFeature.isActive);
         }
 
         public void DumpRendererLockersInfo()
