@@ -27,7 +27,7 @@ namespace DCL
         /// <param name="OnCompleted">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        void GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
+        UnityWebRequest GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3);
     }
 
     public abstract class WebRequestBase : IWebRequestBase
@@ -43,7 +43,7 @@ namespace DCL
                 {
                     request = CreateWebRequest(url);
                     var requestOperation = request.SendWebRequest();
-                    while (!requestOperation.isDone) { }
+                    while (!requestOperation.isDone && requestOperation.progress < 1) { }
                 }
                 catch (HttpRequestException e)
                 {
@@ -60,16 +60,19 @@ namespace DCL
             return request;
         }
 
-        public void GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3) { CoroutineStarter.Start(GetAsyncCoroutine(url, OnCompleted, OnFail, requestAttemps)); }
-
-        private IEnumerator GetAsyncCoroutine(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps)
+        public UnityWebRequest GetAsync(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps = 3)
         {
-            UnityWebRequest request;
+            UnityWebRequest newWebRequest = CreateWebRequest(url);
+            CoroutineStarter.Start(GetAsyncCoroutine(newWebRequest, OnCompleted, OnFail, requestAttemps));
+            return newWebRequest;
+        }
+
+        private IEnumerator GetAsyncCoroutine(UnityWebRequest request, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps)
+        {
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
 
             do
             {
-                request = CreateWebRequest(url);
                 yield return request.SendWebRequest();
 
                 remainingAttemps--;
