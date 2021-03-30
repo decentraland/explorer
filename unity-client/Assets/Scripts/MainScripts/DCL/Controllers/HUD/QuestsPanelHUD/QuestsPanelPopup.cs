@@ -17,6 +17,9 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] internal Toggle pinQuestToggle;
         [SerializeField] internal RawImage thumbnailImage;
         [SerializeField] internal Button closePopupAreaButton;
+        [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
+        [SerializeField] internal GameObject rewardsPanel;
+        [SerializeField] internal TextMeshProUGUI rewardsAmount;
 
         private AssetPromise_Texture thumbnailPromise;
         private bool forceRebuildLayout = false;
@@ -42,18 +45,21 @@ namespace DCL.Huds.QuestsPanel
         public void Populate(QuestModel newQuest)
         {
             quest = newQuest;
-            PrepareSections(quest.sections.Length);
+            QuestSection[] availableSections = quest.sections.Where(x => x.tasks.Any(y => y.status != QuestsLiterals.Status.BLOCKED)).ToArray();
+            PrepareSections(availableSections.Length);
 
             questName.text = quest.name;
             description.text = quest.description;
             SetThumbnail(quest.thumbnail_banner);
-            for (int i = 0; i < quest.sections.Length; i++)
+            for (int i = 0; i < availableSections.Length; i++)
             {
-                sections[i].Populate(quest.sections[i]);
+                sections[i].Populate(availableSections[i]);
             }
             pinQuestToggle.SetIsOnWithoutNotify(baseCollection.Contains(quest.id));
             pinQuestToggle.gameObject.SetActive(!quest.isCompleted);
             forceRebuildLayout = true;
+
+            SetRewards(quest.rewards?.Length ?? 0);
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -138,7 +144,14 @@ namespace DCL.Huds.QuestsPanel
             {
                 forceRebuildLayout = false;
                 rectTransform.ForceUpdateLayout();
+                dynamicScrollSensitivity?.RecalculateSensitivity();
             }
+        }
+
+        private void SetRewards(int amount)
+        {
+            rewardsPanel.SetActive(amount > 0);
+            rewardsAmount.text = amount.ToString();
         }
 
         private void OnDestroy()

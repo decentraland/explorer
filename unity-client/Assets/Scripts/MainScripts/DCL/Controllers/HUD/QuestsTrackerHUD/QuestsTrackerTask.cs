@@ -1,5 +1,6 @@
 using DCL.Interface;
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,9 @@ namespace DCL.Huds.QuestsTracker
     {
         private static readonly int EXPAND_ANIMATOR_TRIGGER = Animator.StringToHash("Expand");
         private static readonly int COLLAPSE_ANIMATOR_TRIGGER = Animator.StringToHash("Collapse");
+        private static readonly int ANIMATION_TRIGGER_COMPLETED = Animator.StringToHash("Completed");
+
+        public event Action<string> OnDestroyed;
 
         [SerializeField] internal TextMeshProUGUI taskTitle;
         [SerializeField] internal Image progress;
@@ -17,14 +21,16 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal Button jumpInButton;
         [SerializeField] internal Animator animator;
 
+        private QuestTask task = null;
         private float progressTarget = 0;
-
         private Action jumpInDelegate;
 
         public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
 
-        public void Populate(QuestTask task)
+        public void Populate(QuestTask newTask)
         {
+            StopAllCoroutines();
+            task = newTask;
             taskTitle.text = task.name;
             jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage
             {
@@ -32,7 +38,9 @@ namespace DCL.Huds.QuestsTracker
                 recipient = string.Empty,
                 body = $"/goto {task.coordinates}",
             });
-
+            Vector3 scale = progress.transform.localScale;
+            scale.x =  newTask.oldProgress;
+            progress.transform.localScale = scale;
             jumpInButton.gameObject.SetActive(task.progress < 1 && !string.IsNullOrEmpty(task.coordinates));
             progressTarget = task.progress;
             switch (task.type)
@@ -47,13 +55,25 @@ namespace DCL.Huds.QuestsTracker
             }
         }
 
-        private void Update()
+        public IEnumerator ProgressAndCompleteSequence()
         {
             Vector3 scale = progress.transform.localScale;
-            if (Math.Abs(scale.x - progressTarget) < Mathf.Epsilon)
-                return;
-            scale.x = Mathf.MoveTowards(scale.x, progressTarget, 0.1f);
-            progress.transform.localScale = scale;
+            while (scale.x < progressTarget)
+            {
+                scale.x = Mathf.MoveTowards(scale.x, progressTarget, Time.deltaTime);
+                progress.transform.localScale = scale;
+                yield return null;
+            }
+            if (progressTarget < 1)
+                yield break;
+
+            yield return WaitForSecondsCache.Get(0.5f);
+            animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
+
+            yield return WaitForSecondsCache.Get(2.9f);
+
+            OnDestroyed?.Invoke(task.id);
+            Destroy(gameObject);
         }
 
         internal void SetProgressText(float current, float end) { progressText.text = $"{current}/{end}"; }
@@ -65,5 +85,6 @@ namespace DCL.Huds.QuestsTracker
             else
                 animator.SetTrigger(COLLAPSE_ANIMATOR_TRIGGER);
         }
+
     }
 }

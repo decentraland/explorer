@@ -1,3 +1,4 @@
+using System;
 using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,15 +22,19 @@ namespace DCL.Huds.QuestsPanel
         internal static int ENTRIES_PER_FRAME { get; set; } = 5;
         private const string VIEW_PATH = "QuestsPanelHUD";
 
-        [SerializeField] private RectTransform questsContainer;
+        [SerializeField] private RectTransform availableQuestsContainer;
+        [SerializeField] private RectTransform completedQuestsContainer;
+        [SerializeField] private GameObject questsContainerSeparators;
         [SerializeField] private GameObject questPrefab;
         [SerializeField] internal QuestsPanelPopup questPopup;
         [SerializeField] private Button closeButton;
+        [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
 
         private static BaseDictionary<string, QuestModel> quests => DataStore.i.Quests.quests;
 
         private string currentQuestInPopup = "";
         internal readonly Dictionary<string, QuestsPanelEntry> questEntries =  new Dictionary<string, QuestsPanelEntry>();
+        private bool orderQuestsRequested = false;
         private bool layoutRebuildRequested = false;
         internal readonly List<string> questsToBeAdded = new List<string>();
         private bool isDestroyed = false;
@@ -52,7 +57,10 @@ namespace DCL.Huds.QuestsPanel
         public void RequestAddOrUpdateQuest(string questId)
         {
             if (questsToBeAdded.Contains(questId))
+            {
+                AddOrUpdateQuest(questId);
                 return;
+            }
 
             questsToBeAdded.Add(questId);
         }
@@ -65,14 +73,26 @@ namespace DCL.Huds.QuestsPanel
                 return;
             }
 
+            //Quest has no available tasks, we remove it.
+            if (!quest.hasAvailableTasks)
+            {
+                RemoveQuest(questId);
+                return;
+            }
+
             if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
             {
-                questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsPanelEntry>();
+                questEntry = Instantiate(questPrefab).GetComponent<QuestsPanelEntry>();
                 questEntry.OnReadMoreClicked += ShowQuestPopup;
                 questEntries.Add(questId, questEntry);
             }
 
+            questEntry.transform.localScale = Vector3.one;
             questEntry.Populate(quest);
+            if (currentQuestInPopup == questId)
+                questPopup.Populate(quest);
+
+            orderQuestsRequested = true;
             layoutRebuildRequested = true;
         }
 
@@ -82,12 +102,15 @@ namespace DCL.Huds.QuestsPanel
 
             if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
                 return;
-
             questEntries.Remove(questId);
+            questEntry.Unparent();
             Destroy(questEntry.gameObject);
 
             if (currentQuestInPopup == questId)
                 questPopup.Close();
+
+            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
+            layoutRebuildRequested = true;
         }
 
         public void ClearQuests()
@@ -95,10 +118,13 @@ namespace DCL.Huds.QuestsPanel
             questPopup.Close();
             foreach (QuestsPanelEntry questEntry in questEntries.Values)
             {
+                questEntry.transform.SetParent(null);
                 Destroy(questEntry.gameObject);
             }
             questEntries.Clear();
             questsToBeAdded.Clear();
+            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
+            layoutRebuildRequested = true;
         }
 
         internal void ShowQuestPopup(string questId)
@@ -123,7 +149,14 @@ namespace DCL.Huds.QuestsPanel
             if (layoutRebuildRequested)
             {
                 layoutRebuildRequested = false;
-                Utils.ForceRebuildLayoutImmediate(questsContainer);
+                Utils.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+                dynamicScrollSensitivity?.RecalculateSensitivity();
+            }
+
+            if (orderQuestsRequested)
+            {
+                orderQuestsRequested = false;
+                OrderQuests();
             }
 
             for (int i = 0; i < ENTRIES_PER_FRAME && questsToBeAdded.Count > 0; i++)
@@ -132,6 +165,29 @@ namespace DCL.Huds.QuestsPanel
                 questsToBeAdded.RemoveAt(0);
                 AddOrUpdateQuest(questId);
             }
+        }
+
+        private void OrderQuests()
+        {
+            var questModels = questEntries.Keys.Select(x => quests.Get(x));
+
+            string[] availableIdsSorted = questModels.Where(x => !x.isCompleted).OrderBy(x => x.assignmentTime).ThenBy(x => x.id).Select(x => x.id).ToArray();
+            for (int i = 0; i < availableIdsSorted.Length; i++)
+            {
+                questEntries[availableIdsSorted[i]].transform.SetParent(availableQuestsContainer);
+                questEntries[availableIdsSorted[i]].transform.localScale = Vector3.one;
+                questEntries[availableIdsSorted[i]].transform.SetSiblingIndex(i);
+            }
+
+            string[] completedQuestsSorted = questModels.Where(x => x.isCompleted).OrderBy(x => x.completionTime).ThenBy(x => x.id).Select(x => x.id).ToArray();
+            for (int i = 0; i < completedQuestsSorted.Length; i++)
+            {
+                questEntries[completedQuestsSorted[i]].transform.SetParent(completedQuestsContainer);
+                questEntries[completedQuestsSorted[i]].transform.localScale = Vector3.one;
+                questEntries[completedQuestsSorted[i]].transform.SetSiblingIndex(i);
+            }
+
+            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
         }
 
         public void SetVisibility(bool active) { gameObject.SetActive(active); }
@@ -145,5 +201,143 @@ namespace DCL.Huds.QuestsPanel
         }
 
         private void OnDestroy() { isDestroyed = true; }
+
+        private int fakeFlowStep = 0;
+        private QuestModel defaultFakeQuest = new QuestModel
+        {
+            id = "fake",
+            assignmentTime = DateTime.MinValue,
+            completionTime = DateTime.MinValue,
+            name = "fake quest",
+            description = "my fake quest",
+            status = QuestsLiterals.Status.ON_GOING,
+            sections = new []
+            {
+                new QuestSection
+                {
+                    id = "fakeSection0",
+                    name = "fake section 0",
+                    progress = 0,
+                    tasks = new []
+                    {
+                        new QuestTask
+                        {
+                            id = "fakeTask0_0",
+                            name = "fake task 0_0",
+                            completionTime = DateTime.Now,
+                            coordinates = "0,0",
+                            progress = 0,
+                            status = QuestsLiterals.Status.ON_GOING,
+                            payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = false }),
+                            type = "single",
+                        },
+                        new QuestTask
+                        {
+                            id = "fakeTask0_1",
+                            name = "fake task 0_1",
+                            completionTime = DateTime.Now,
+                            progress = 0,
+                            status = QuestsLiterals.Status.BLOCKED,
+                            payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 10, end = 0, start = 10 }),
+                            type = "numeric",
+                        }
+                    }
+                },
+                new QuestSection
+                {
+                    id = "fakeSection1",
+                    name = "fake section 1",
+                    progress = 0,
+                    tasks = new []
+                    {
+                        new QuestTask
+                        {
+                            id = "fakeTask1_0",
+                            name = "fake task 1_0",
+                            completionTime = DateTime.Now,
+                            coordinates = "1,0",
+                            progress = 0,
+                            status = QuestsLiterals.Status.ON_GOING,
+                            payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = false }),
+                            type = "single",
+                        }
+                    }
+                }
+            },
+            rewards = new []
+            {
+                new QuestReward
+                {
+                    id = "fakeReward0",
+                    name = "fake reward 0",
+                    status = QuestsLiterals.RewardStatus.OK,
+                    imageUrl = "https://picsum.photos/200/300"
+                },
+                new QuestReward
+                {
+                    id = "fakeReward1",
+                    name = "fake reward 1",
+                    status = QuestsLiterals.RewardStatus.OK,
+                    imageUrl = "https://picsum.photos/200/301"
+                }
+            }
+        };
+        private QuestModel currentFakeQuest;
+
+        [ContextMenu("Reset")]
+        public void ResetFakeFlow() { fakeFlowStep = 0; }
+        [ContextMenu("Next Step")]
+        public void FakeFlow()
+        {
+            switch (fakeFlowStep)
+            {
+                //Add default quest
+                case 0:
+                    quests.Remove(defaultFakeQuest.id);
+                    currentFakeQuest = JsonUtility.FromJson<QuestModel>(JsonUtility.ToJson(defaultFakeQuest));
+                    break;
+                //section 0, task 0 completed
+                case 1:
+                    currentFakeQuest.sections[0].tasks[0].progress = 1;
+                    currentFakeQuest.sections[0].tasks[0].payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = true });
+                    currentFakeQuest.sections[0].tasks[1].status = QuestsLiterals.Status.ON_GOING;
+                    currentFakeQuest.sections[0].progress = 0.5f;
+                    break;
+                //section 0, task 1 1/10
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                    int progress = fakeFlowStep - 1;
+                    currentFakeQuest.sections[0].tasks[1].progress = progress / 10f;
+                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 10 - progress, end = 0, start = 10 });
+                    currentFakeQuest.sections[0].progress = currentFakeQuest.sections[0].tasks.Average(y => y.progress);
+                    break;
+                //section 0, task 1 completed
+                case 11:
+                    currentFakeQuest.sections[0].tasks[1].progress = 1f;
+                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 0, end = 0, start = 10 });
+                    currentFakeQuest.sections[0].progress = 1;
+                    currentFakeQuest.sections[1].tasks[0].status = QuestsLiterals.Status.ON_GOING;
+
+                    break;
+                //section 1, task 0 completed and quest completed
+                case 12:
+                    currentFakeQuest.sections[1].tasks[0].progress = 1;
+                    currentFakeQuest.sections[1].tasks[0].payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = true });
+                    currentFakeQuest.status = QuestsLiterals.Status.COMPLETED;
+                    currentFakeQuest.rewards[0].status = QuestsLiterals.RewardStatus.ALREADY_GIVEN;
+                    currentFakeQuest.rewards[1].status = QuestsLiterals.RewardStatus.ALREADY_GIVEN;
+                    currentFakeQuest.sections[1].progress = 1;
+                    break;
+            }
+            fakeFlowStep = (fakeFlowStep + 1) % 13;
+            QuestsController.QuestsController.i.UpdateQuestProgress(JsonUtility.FromJson<QuestModel>(JsonUtility.ToJson(currentFakeQuest)));
+        }
     }
 }

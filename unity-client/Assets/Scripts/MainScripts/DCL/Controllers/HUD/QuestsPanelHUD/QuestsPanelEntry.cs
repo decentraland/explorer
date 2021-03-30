@@ -23,16 +23,21 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] internal RawImage thumbnailImage;
         [SerializeField] internal Button jumpInButton;
         [SerializeField] internal Animator animator;
+        [SerializeField] internal GameObject rewardsPanel;
+        [SerializeField] internal TextMeshProUGUI rewardsAmount;
 
         private AssetPromise_Texture thumbnailPromise;
 
         private QuestModel quest;
+        private string currentThumbnail;
 
         internal Action readMoreDelegate;
         private static BaseCollection<string> pinnedQuests => DataStore.i.Quests.pinnedQuests;
 
         private Action jumpInDelegate;
         public Vector3 readMorePosition => readMoreButton.transform.position;
+
+        private bool isDestroyed = false;
 
         private void Awake()
         {
@@ -41,6 +46,12 @@ namespace DCL.Huds.QuestsPanel
             pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
             pinnedQuests.OnAdded += OnPinnedQuests;
             pinnedQuests.OnRemoved += OnUnpinnedQuest;
+        }
+
+        private void OnEnable()
+        {
+            if (string.IsNullOrEmpty(currentThumbnail) || (thumbnailPromise != null && thumbnailPromise.state == AssetPromiseState.FINISHED))
+                animator?.SetTrigger(LOADED_ANIM_TRIGGER);
         }
 
         public void Populate(QuestModel newQuest)
@@ -67,6 +78,8 @@ namespace DCL.Huds.QuestsPanel
             progressInTitle.fillAmount = quest.progress;
             completedProgressInTitle.gameObject.SetActive(questCompleted);
             completedMarkInTitle.gameObject.SetActive(questCompleted);
+
+            SetRewards(quest.rewards?.Length ?? 0);
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -106,21 +119,32 @@ namespace DCL.Huds.QuestsPanel
 
         internal void SetThumbnail(string thumbnailURL)
         {
+            if (thumbnailURL == currentThumbnail)
+            {
+                animator.SetTrigger(LOADED_ANIM_TRIGGER);
+                return;
+            }
+
+            currentThumbnail = thumbnailURL;
             if (thumbnailPromise != null)
             {
                 thumbnailPromise.ClearEvents();
                 AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
             }
 
-            if (string.IsNullOrEmpty(thumbnailURL))
+            if (string.IsNullOrEmpty(currentThumbnail))
             {
                 animator.SetTrigger(LOADED_ANIM_TRIGGER);
                 return;
             }
 
-            thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
+            thumbnailPromise = new AssetPromise_Texture(currentThumbnail);
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
-            thumbnailPromise.OnFailEvent += x => { Debug.LogError($"Error downloading quest panel entry thumbnail: {thumbnailURL}"); };
+            thumbnailPromise.OnFailEvent += x =>
+            {
+                animator.SetTrigger(LOADED_ANIM_TRIGGER);
+                Debug.LogError($"Error downloading quest panel entry thumbnail: {currentThumbnail}");
+            };
 
             AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
         }
@@ -129,6 +153,12 @@ namespace DCL.Huds.QuestsPanel
         {
             thumbnailImage.texture = assetTexture.texture;
             animator.SetTrigger(LOADED_ANIM_TRIGGER);
+        }
+
+        private void SetRewards(int amount)
+        {
+            rewardsPanel.SetActive(amount > 0);
+            rewardsAmount.text = amount.ToString();
         }
 
         private void OnDestroy()
@@ -140,6 +170,14 @@ namespace DCL.Huds.QuestsPanel
             }
             pinnedQuests.OnAdded -= OnUnpinnedQuest;
             pinnedQuests.OnRemoved -= OnPinnedQuests;
+            isDestroyed = true;
+        }
+
+        public void Unparent()
+        {
+            if (isDestroyed)
+                return;
+            transform.parent = null;
         }
     }
 }
