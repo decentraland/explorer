@@ -50,7 +50,8 @@ namespace DCL.Huds.QuestsTracker
             questTitle.text = quest.name;
             SetIcon(quest.icon);
             QuestSection currentSection = quest.sections.First(x => x.progress < 1f);
-            sectionTitle.text = $"{currentSection.name} - {(currentSection.progress * 100):0.0}%";
+            string separator = String.IsNullOrEmpty(currentSection.name) ? "" : " - ";
+            sectionTitle.text = $"{currentSection.name}{separator}{(currentSection.progress * 100):0.0}%";
             progressTarget = currentSection.progress;
 
             CleanUpTasksList();
