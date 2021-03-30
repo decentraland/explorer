@@ -45,6 +45,27 @@ ShaderVariantCollection:
         passType: 13
       - keywords: FOG_LINEAR
         passType: 13
+  - first: {fileID: 4800000, guid: 861f58cc229a5f449b2494095122257f, type: 3}
+    second:
+      variants:
+      - keywords: FOG_LINEAR
+        passType: 0
+      - keywords: FOG_LINEAR INSTANCING_ON
+        passType: 0
+      - keywords: FOG_LINEAR _ALPHATEST_ON
+        passType: 0
+      - keywords: FOG_LINEAR INSTANCING_ON _ALPHATEST_ON
+        passType: 0
+      - keywords: FOG_LINEAR _ALPHAPREMULTIPLY_ON _ALPHATEST_ON
+        passType: 0
+      - keywords: FOG_LINEAR INSTANCING_ON _ALPHAPREMULTIPLY_ON _ALPHATEST_ON
+        passType: 0
+      - keywords: INSTANCING_ON
+        passType: 13
+      - keywords: _ALPHATEST_ON
+        passType: 13
+      - keywords: INSTANCING_ON _ALPHATEST_ON
+        passType: 13
   - first: {fileID: 4800000, guid: 3b75227de96217540aae9be81fbd99f6, type: 3}
     second:
       variants:
