@@ -72,7 +72,6 @@ namespace DCL.Huds.QuestsTracker
             {
                 questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsTrackerEntry>();
                 questEntry.OnLayoutRebuildRequested += () => layoutRebuildRequested = true;
-                questEntry.Populate(quest);
                 currentEntries.Add(quest.id, questEntry);
             }
 

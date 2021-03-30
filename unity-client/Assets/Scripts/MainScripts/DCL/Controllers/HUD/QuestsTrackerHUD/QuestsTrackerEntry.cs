@@ -35,6 +35,8 @@ namespace DCL.Huds.QuestsTracker
         private bool isExpanded;
         private static BaseCollection<string> pinnedQuests => DataStore.i.Quests.pinnedQuests;
 
+        private readonly Dictionary<string, QuestsTrackerTask> taskEntries = new Dictionary<string, QuestsTrackerTask>();
+
         public void Awake()
         {
             pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
@@ -50,22 +52,58 @@ namespace DCL.Huds.QuestsTracker
             questTitle.text = quest.name;
             SetIcon(quest.icon);
             QuestSection currentSection = quest.sections.First(x => x.progress < 1f);
-            sectionTitle.text = $"{currentSection.name} - {(currentSection.progress * 100):0.0}%";
+            sectionTitle.text = $"{currentSection.name} - {currentSection.tasks.Count(x => x.progress >= 1)}/{currentSection.tasks.Length}";
             progressTarget = currentSection.progress;
 
-            CleanUpTasksList();
-            foreach (QuestTask task in currentSection.tasks)
+            //Initialize it with all the task and purge the list as we process the new ones.
+            List<string> taskToRemove = taskEntries.Keys.ToList();
+
+            for (int index = 0; index < currentSection.tasks.Length; index++)
             {
-                CreateTask(task);
+                QuestTask task = currentSection.tasks[index];
+                taskToRemove.Remove(task.id);
+                AddOrUpdateTask(task, index);
             }
-            expandCollapseButton.gameObject.SetActive(currentSection.tasks.Length > 0);
+
+            for (int index = 0; index < taskToRemove.Count; index++)
+            {
+                string taskId = taskToRemove[index];
+                if (taskEntries.TryGetValue(taskId, out QuestsTrackerTask taskEntry))
+                    Destroy(taskEntry.gameObject);
+                taskEntries.Remove(taskId);
+            }
+
+            expandCollapseButton.gameObject.SetActive(taskEntries.Count > 0);
             SetExpandCollapseState(true);
+            OnLayoutRebuildRequested?.Invoke();
         }
 
-        internal void CreateTask(QuestTask task)
+        internal void AddOrUpdateTask(QuestTask task, int siblingIndex)
         {
-            var taskUIEntry = Instantiate(taskPrefab, tasksContainer).GetComponent<QuestsTrackerTask>();
-            taskUIEntry.Populate(task);
+            if (taskEntries.TryGetValue(task.id, out QuestsTrackerTask taskEntry))
+            {
+                taskEntry.Populate(task);
+                if (task.progress >= 1)
+                {
+                    //TODO Replace Destroy by Task Completed Anim
+                    taskEntry.StartDestroy(() =>
+                    {
+                        taskEntries.Remove(task.id);
+                        OnLayoutRebuildRequested?.Invoke();
+                    });
+                    return;
+                }
+            }
+            else
+            {
+                if (task.progress >= 1)
+                    return;
+
+                taskEntry = Instantiate(taskPrefab, tasksContainer).GetComponent<QuestsTrackerTask>();
+                taskEntries.Add(task.id, taskEntry);
+                taskEntry.Populate(task);
+            }
+            taskEntry.transform.SetSiblingIndex(siblingIndex);
         }
 
         internal void SetIcon(string iconURL)
@@ -88,12 +126,6 @@ namespace DCL.Huds.QuestsTracker
 
         private void OnIconReady(Asset_Texture assetTexture) { iconImage.texture = assetTexture.texture; }
 
-        internal void CleanUpTasksList()
-        {
-            for (int i = tasksContainer.childCount - 1; i >= 0; i--)
-                Destroy(tasksContainer.GetChild(i).gameObject);
-        }
-
         internal void SetExpandCollapseState(bool newIsExpanded)
         {
             isExpanded = newIsExpanded;
@@ -101,9 +133,9 @@ namespace DCL.Huds.QuestsTracker
             collapseIcon.SetActive(isExpanded);
             tasksContainer.gameObject.SetActive(isExpanded);
 
-            foreach (QuestsTrackerTask task in GetComponentsInChildren<QuestsTrackerTask>())
+            foreach (QuestsTrackerTask taskEntry in taskEntries.Values)
             {
-                task.SetExpandedStatus(newIsExpanded);
+                taskEntry.SetExpandedStatus(newIsExpanded);
             }
 
             OnLayoutRebuildRequested?.Invoke();

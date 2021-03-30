@@ -1,5 +1,6 @@
 using DCL.Interface;
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +19,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal Animator animator;
 
         private float progressTarget = 0;
+        private bool targetReached => Math.Abs(progressTarget - progress.transform.localScale.x) < Mathf.Epsilon;
 
         private Action jumpInDelegate;
 
@@ -49,9 +51,12 @@ namespace DCL.Huds.QuestsTracker
 
         private void Update()
         {
-            Vector3 scale = progress.transform.localScale;
-            scale.x = Mathf.MoveTowards(scale.x, progressTarget, 0.1f);
-            progress.transform.localScale = scale;
+            if (!targetReached)
+            {
+                Vector3 scale = progress.transform.localScale;
+                scale.x = Mathf.MoveTowards(scale.x, progressTarget, 0.1f);
+                progress.transform.localScale = scale;
+            }
         }
 
         internal void SetProgressText(float current, float end) { progressText.text = $"{current}/{end}"; }
@@ -62,6 +67,20 @@ namespace DCL.Huds.QuestsTracker
                 animator.SetTrigger(EXPAND_ANIMATOR_TRIGGER);
             else
                 animator.SetTrigger(COLLAPSE_ANIMATOR_TRIGGER);
+        }
+
+        public void StartDestroy(Action onDone)
+        {
+            StopAllCoroutines();
+            StartCoroutine(DestroyRoutine(onDone));
+        }
+
+        private IEnumerator DestroyRoutine(Action onDone)
+        {
+            yield return new WaitUntil(() => targetReached);
+            yield return WaitForSecondsCache.Get(0.5f);
+            Destroy(gameObject);
+            onDone?.Invoke();
         }
     }
 }
