@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using DCL.Helpers;
 
@@ -24,6 +25,15 @@ public class QuestModel : BaseModel
     public string thumbnail_banner;
     public string icon;
     public QuestSection[] sections;
+    public DateTime assignmentTime;
+    public DateTime completionTime;
+
+    public QuestModel()
+    {
+        //TODO: remove this when kernel send this info properly
+        assignmentTime = DateTime.Now;
+        completionTime = DateTime.Now;
+    }
 
     public bool TryGetSection(string sectionId, out QuestSection section)
     {

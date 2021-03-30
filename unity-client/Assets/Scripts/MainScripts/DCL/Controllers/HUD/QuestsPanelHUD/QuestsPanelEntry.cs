@@ -27,6 +27,7 @@ namespace DCL.Huds.QuestsPanel
         private AssetPromise_Texture thumbnailPromise;
 
         private QuestModel quest;
+        private string currentThumbnail;
 
         internal Action readMoreDelegate;
         private static BaseCollection<string> pinnedQuests => DataStore.i.Quests.pinnedQuests;
@@ -106,21 +107,25 @@ namespace DCL.Huds.QuestsPanel
 
         internal void SetThumbnail(string thumbnailURL)
         {
+            if (thumbnailURL == currentThumbnail)
+                return;
+
+            currentThumbnail = thumbnailURL;
             if (thumbnailPromise != null)
             {
                 thumbnailPromise.ClearEvents();
                 AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
             }
 
-            if (string.IsNullOrEmpty(thumbnailURL))
+            if (string.IsNullOrEmpty(currentThumbnail))
             {
                 animator.SetTrigger(LOADED_ANIM_TRIGGER);
                 return;
             }
 
-            thumbnailPromise = new AssetPromise_Texture(thumbnailURL);
+            thumbnailPromise = new AssetPromise_Texture(currentThumbnail);
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
-            thumbnailPromise.OnFailEvent += x => { Debug.LogError($"Error downloading quest panel entry thumbnail: {thumbnailURL}"); };
+            thumbnailPromise.OnFailEvent += x => { Debug.LogError($"Error downloading quest panel entry thumbnail: {currentThumbnail}"); };
 
             AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
         }
