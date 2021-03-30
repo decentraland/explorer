@@ -30,6 +30,8 @@ namespace DCL
             IWebRequestAssetBundle webRequestAB,
             IWebRequestTexture webRequestTexture,
             IWebRequestAudio webRequestAudio);
+
+        void Dispose();
     }
 
     public class WebRequestController : IWebRequestController
@@ -66,6 +68,14 @@ namespace DCL
             this.assetBundle = assetBundle;
             this.texture = texture;
             this.audio = audio;
+        }
+
+        public void Dispose()
+        {
+            generic?.Dispose();
+            assetBundle?.Dispose();
+            texture?.Dispose();
+            audio?.Dispose();
         }
     }
 }

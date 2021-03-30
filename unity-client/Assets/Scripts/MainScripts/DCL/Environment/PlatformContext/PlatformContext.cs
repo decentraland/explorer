@@ -39,6 +39,7 @@ namespace DCL
             parcelScenesCleaner.Dispose();
             cullingController.Dispose();
             debugController.Dispose();
+            webRequest.Dispose();
         }
     }
 }

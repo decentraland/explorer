@@ -1,5 +1,6 @@
 using DCL.Helpers;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -17,12 +18,19 @@ namespace DCL
         /// <param name="OnSuccess">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess, Action<string> OnFail = null, int requestAttemps = 3);
+        UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3);
+
+        /// <summary>
+        /// Abort and clean all the ongoing web requests.
+        /// </summary>
+        void Dispose();
     }
 
     public abstract class WebRequestBase : IWebRequestBase
     {
-        public UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess, Action<string> OnFail = null, int requestAttemps = 3)
+        private List<UnityWebRequest> ongoingWebRequests = new List<UnityWebRequest>();
+
+        public UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3)
         {
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
             return TrySendWebRequest(url, OnSuccess, OnFail, remainingAttemps);
@@ -33,6 +41,8 @@ namespace DCL
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
 
             UnityWebRequest request = CreateWebRequest(url);
+            ongoingWebRequests.Add(request);
+
             UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
             requestOp.completed += (asyncOp) =>
             {
@@ -57,8 +67,8 @@ namespace DCL
                     OnFail?.Invoke(request.error);
                 }
 
+                ongoingWebRequests.Remove(request);
                 request?.Dispose();
-                request = null;
             };
 
             return requestOp;
@@ -70,5 +80,16 @@ namespace DCL
         /// <param name="url">Url where to make the request.</param>
         /// <returns></returns>
         protected abstract UnityWebRequest CreateWebRequest(string url);
+
+        public void Dispose()
+        {
+            foreach (var request in ongoingWebRequests)
+            {
+                request.Abort();
+                request.Dispose();
+            }
+
+            ongoingWebRequests.Clear();
+        }
     }
 }
