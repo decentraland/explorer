@@ -55,17 +55,17 @@ namespace DCL
         }
 
         public void Initialize(
-            IWebRequest webRequest,
-            IWebRequestAssetBundle webRequestAB,
-            IWebRequestTexture webRequestTexture,
-            IWebRequestAudio webRequestAudio)
+            IWebRequest generic,
+            IWebRequestAssetBundle assetBundle,
+            IWebRequestTexture texture,
+            IWebRequestAudio audio)
         {
             i = this;
 
-            this.generic = webRequest;
-            this.assetBundle = webRequestAB;
-            this.texture = webRequestTexture;
-            this.audio = webRequestAudio;
+            this.generic = generic;
+            this.assetBundle = assetBundle;
+            this.texture = texture;
+            this.audio = audio;
         }
     }
 }

@@ -1,6 +1,5 @@
 using DCL.Helpers;
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -15,38 +14,54 @@ namespace DCL
         /// Download data from a url.
         /// </summary>
         /// <param name="url">Url where to make the request.</param>
-        /// <param name="OnCompleted">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
+        /// <param name="OnSuccess">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
-        UnityWebRequest Get(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail = null, int requestAttemps = 3);
+        UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess, Action<string> OnFail = null, int requestAttemps = 3);
     }
 
     public abstract class WebRequestBase : IWebRequestBase
     {
-        public UnityWebRequest Get(string url, Action<UnityWebRequest> OnCompleted, Action<string> OnFail = null, int requestAttemps = 3)
+        public UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess, Action<string> OnFail = null, int requestAttemps = 3)
         {
-            UnityWebRequest newWebRequest = CreateWebRequest(url);
-            CoroutineStarter.Start(GetAsyncCoroutine(newWebRequest, OnCompleted, OnFail, requestAttemps));
-            return newWebRequest;
+            int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
+            return TrySendWebRequest(url, OnSuccess, OnFail, remainingAttemps);
         }
 
-        private IEnumerator GetAsyncCoroutine(UnityWebRequest request, Action<UnityWebRequest> OnCompleted, Action<string> OnFail, int requestAttemps)
+        private UnityWebRequestAsyncOperation TrySendWebRequest(string url, Action<UnityWebRequest> OnSuccess, Action<string> OnFail, int requestAttemps)
         {
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
 
-            do
+            UnityWebRequest request = CreateWebRequest(url);
+            UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
+            requestOp.completed += (asyncOp) =>
             {
-                yield return request.SendWebRequest();
-
-                remainingAttemps--;
-                if (remainingAttemps == 0)
+                if (request.WebRequestSucceded())
+                {
+                    OnSuccess?.Invoke(request);
+                }
+                else if (!request.WebRequestAborted())
+                {
+                    remainingAttemps--;
+                    if (remainingAttemps > 0)
+                    {
+                        TrySendWebRequest(url, OnSuccess, OnFail, remainingAttemps);
+                    }
+                    else
+                    {
+                        OnFail?.Invoke(request.error);
+                    }
+                }
+                else
                 {
                     OnFail?.Invoke(request.error);
-                    yield break;
                 }
-            } while (!request.WebRequestSucceded());
 
-            OnCompleted?.Invoke(request);
+                request?.Dispose();
+                request = null;
+            };
+
+            return requestOp;
         }
 
         /// <summary>
