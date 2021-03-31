@@ -7,6 +7,8 @@ using Object = UnityEngine.Object;
 
 internal class SectionDeployedScenesController : SectionBase, IDeployedSceneListener, ISectionHideContextMenuRequester
 {
+    public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionDeployedScenesView";
+    
     public event Action OnRequestContextMenuHide;
     
     public override ISectionSearchHandler searchHandler => sceneSearchHandler;
@@ -16,35 +18,39 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
     private readonly SceneSearchHandler sceneSearchHandler = new SceneSearchHandler();
     private Dictionary<string, SceneCardView> scenesViews;
 
-    public SectionDeployedScenesController()
+    public SectionDeployedScenesController(): this(
+        Object.Instantiate(Resources.Load<SectionDeployedScenesView>(VIEW_PREFAB_PATH))
+    )
     {
-        var prefab =
-            Resources.Load<SectionDeployedScenesView>("BuilderProjectsPanelMenuSections/SectionDeployedScenesView");
-        view = Object.Instantiate(prefab);
+    }
+    
+    public SectionDeployedScenesController(SectionDeployedScenesView view)
+    {
+        this.view = view;
 
-        view.scrollRect.onValueChanged.AddListener((value) => OnRequestContextMenuHide?.Invoke());
+        view.OnScrollRectValueChanged += OnRequestContextMenuHide;
         sceneSearchHandler.OnResult += OnSearchResult;
     }
 
     public override void SetViewContainer(Transform viewContainer)
     {
-        view.transform.SetParent(viewContainer);
-        view.transform.ResetLocalTRS();
+        view.SetParent(viewContainer);
     }
 
     public override void Dispose()
     {
-        Object.Destroy(view.gameObject);
+        view.OnScrollRectValueChanged -= OnRequestContextMenuHide;
+        view.Dispose();
     }
 
     protected override void OnShow()
     {
-        view.gameObject.SetActive(true);
+        view.SetActive(true);
     }
 
     protected override void OnHide()
     {
-        view.gameObject.SetActive(false);
+        view.SetActive(false);
     }
 
     void IDeployedSceneListener.OnSetScenes(Dictionary<string, SceneCardView> scenes)
@@ -67,25 +73,26 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
 
     private void OnSearchResult(List<SceneSearchInfo> searchInfoScenes)
     {
+        if (scenesViews == null)
+            return;
+
         using (var iterator = scenesViews.GetEnumerator())
         {
             while (iterator.MoveNext())
             {
                 iterator.Current.Value.SetParent(view.scenesCardContainer);
-
-                int index = searchInfoScenes.FindIndex(info => info.id == iterator.Current.Key);
-                if (index >= 0)
-                {
-                    iterator.Current.Value.gameObject.SetActive(true);
-                    iterator.Current.Value.transform.SetSiblingIndex(index);
-                }
-                else
-                {
-                    iterator.Current.Value.gameObject.SetActive(false);
-                }
+                iterator.Current.Value.gameObject.SetActive(false);
             }
         }
-        view.scrollRect.verticalNormalizedPosition = 1;
-    }
 
+        for (int i = 0; i < searchInfoScenes.Count; i++)
+        {
+            if (!scenesViews.TryGetValue(searchInfoScenes[i].id, out SceneCardView cardView))
+                continue;
+            
+            cardView.gameObject.SetActive(true);
+            cardView.transform.SetSiblingIndex(i);
+        }
+        view.ResetScrollRect();
+    }
 }

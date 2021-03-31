@@ -31,6 +31,7 @@ internal class SectionsController : IDisposable
         SETTINGS_PROJECT_GENERAL,
         SETTINGS_PROJECT_CONTRIBUTORS,
         SETTINGS_PROJECT_ADMIN,
+        SETTINGS_PROJECT_GENERAL
     }
 
     /// <summary>
