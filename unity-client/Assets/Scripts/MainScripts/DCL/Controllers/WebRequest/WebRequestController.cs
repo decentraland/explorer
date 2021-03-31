@@ -32,7 +32,12 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0);
+        UnityWebRequestAsyncOperation Get(
+            string url,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0);
 
         /// <summary>
         /// Download an Asset Bundle from a url.
@@ -42,7 +47,12 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation GetAssetBundle(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0);
+        UnityWebRequestAsyncOperation GetAssetBundle(
+            string url,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0);
 
         /// <summary>
         /// Download a texture from a url.
@@ -52,7 +62,12 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation GetTexture(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0);
+        UnityWebRequestAsyncOperation GetTexture(
+            string url,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0);
 
         /// <summary>
         /// Download an audio clip from a url.
@@ -63,7 +78,13 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation GetAudioClip(string url, AudioType audioType, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0);
+        UnityWebRequestAsyncOperation GetAudioClip(
+            string url,
+            AudioType audioType,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0);
 
         /// <summary>
         /// Abort and clean all the ongoing web requests.
@@ -155,8 +176,7 @@ namespace DCL
             string url,
             Action<UnityWebRequest> OnSuccess,
             Action<string> OnFail,
-            int requestAttemps, int timeout)
-            where T : IWebRequest
+            int requestAttemps, int timeout) where T : IWebRequest
         {
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
 
