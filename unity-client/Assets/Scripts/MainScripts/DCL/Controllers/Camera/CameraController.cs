@@ -74,14 +74,7 @@ public class CameraController : MonoBehaviour
         if (visibleState == prevVisibleState)
             return;
 
-        if (visibleState)
-        {
-            camera.enabled = false;
-        }
-        else
-        {
-            camera.enabled = true;
-        }
+        camera.enabled = !visibleState;
     }
 
     private void OnRenderingStateChanged(bool enabled, bool prevState)
