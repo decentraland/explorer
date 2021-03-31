@@ -188,10 +188,6 @@ namespace DCL
             UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
             requestOp.completed += (asyncOp) =>
             {
-                bool success = request.WebRequestSucceded();
-                bool aborted = request.WebRequestAborted();
-                bool serverError = request.WebRequestServerError();
-
                 if (request.WebRequestSucceded())
                 {
                     OnSuccess?.Invoke(request);
