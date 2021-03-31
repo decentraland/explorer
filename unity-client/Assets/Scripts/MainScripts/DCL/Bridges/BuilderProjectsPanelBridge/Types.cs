@@ -6,3 +6,8 @@ public class SceneDataUpdatePayload
     public bool isMatureContent;
     public bool allowVoiceChat;
 }
+
+public class SceneContributorsUpdatePayload
+{
+    public string[] contributors;
+}
