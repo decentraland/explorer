@@ -479,7 +479,6 @@ GameObject:
   - component: {fileID: 2770790585312731709}
   - component: {fileID: 46766232827834759}
   - component: {fileID: 8242503910523925123}
-  - component: {fileID: 3081482169695198372}
   m_Layer: 5
   m_Name: QuestsList
   m_TagString: Untagged
@@ -566,23 +565,6 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 4.7
   m_LayoutPriority: 1
---- !u!114 &3081482169695198372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3230736252165422895}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07ed50f4f9d6ef342be3904431a5e938, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainScrollRect: {fileID: 46766232827834759}
-  minSensitivity: 5
-  maxSensitivity: 50
-  sensitivityMultiplier: 0.5
-  recalculateOnEnable: 1
 --- !u!1 &4309982972340408954
 GameObject:
   m_ObjectHideFlags: 0
@@ -1132,6 +1114,7 @@ GameObject:
   - component: {fileID: 7480296608896374696}
   - component: {fileID: 4622183448067760376}
   - component: {fileID: 1549637187473597716}
+  - component: {fileID: 470867549076507343}
   m_Layer: 5
   m_Name: QuestsPanelHUD
   m_TagString: Untagged
@@ -1239,7 +1222,26 @@ MonoBehaviour:
     type: 3}
   questPopup: {fileID: 3086571990075737089}
   closeButton: {fileID: 4187908059406395967}
-  dynamicScrollSensitivity: {fileID: 3081482169695198372}
+  dynamicScrollSensitivity: {fileID: 470867549076507343}
+--- !u!114 &470867549076507343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7293833909389095258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ed50f4f9d6ef342be3904431a5e938, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainScrollRect: {fileID: 46766232827834759}
+  viewport: {fileID: 3907676170047710732}
+  contentContainer: {fileID: 3268782322294405303}
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!1 &7309313767413661861
 GameObject:
   m_ObjectHideFlags: 0

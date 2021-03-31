@@ -91,7 +91,7 @@ namespace DCL.Huds.QuestsPanel
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
             questEntry.Populate(quest);
             layoutRebuildRequested = true;
-            dynamicScrollSensitivity.RecalculateSensitivity();
+            dynamicScrollSensitivity?.RecalculateSensitivity();
         }
 
         public void RemoveQuest(string questId)
@@ -108,7 +108,7 @@ namespace DCL.Huds.QuestsPanel
                 questPopup.Close();
 
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
-            dynamicScrollSensitivity.RecalculateSensitivity();
+            dynamicScrollSensitivity?.RecalculateSensitivity();
         }
 
         public void ClearQuests()
@@ -122,7 +122,7 @@ namespace DCL.Huds.QuestsPanel
             questEntries.Clear();
             questsToBeAdded.Clear();
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
-            dynamicScrollSensitivity.RecalculateSensitivity();
+            dynamicScrollSensitivity?.RecalculateSensitivity();
         }
 
         internal void ShowQuestPopup(string questId)

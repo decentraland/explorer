@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 2310616024837110804}
   - component: {fileID: 2310616024837110795}
   - component: {fileID: 2310616024837110805}
+  - component: {fileID: 5931781803862553512}
   m_Layer: 5
   m_Name: Scroll View
   m_TagString: Untagged
@@ -165,6 +166,23 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5931781803862553512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2310616024837110807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ed50f4f9d6ef342be3904431a5e938, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainScrollRect: {fileID: 2310616024837110805}
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!1 &2310616025345409035
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,6 +298,7 @@ MonoBehaviour:
   questsContainer: {fileID: 2310616025352548241}
   questPrefab: {fileID: 4628898101681368935, guid: 15dc6d35c2943a148b64f5809a6f769f,
     type: 3}
+  dynamicScrollSensitivity: {fileID: 5931781803862553512}
 --- !u!1 &2310616025352548240
 GameObject:
   m_ObjectHideFlags: 0

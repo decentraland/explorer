@@ -508,6 +508,7 @@ GameObject:
   - component: {fileID: 4497219426189007373}
   - component: {fileID: 7588995114101380673}
   - component: {fileID: 9164412435945329228}
+  - component: {fileID: 6122559990868413987}
   m_Layer: 5
   m_Name: Tasks Scroll View
   m_TagString: Untagged
@@ -594,6 +595,23 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 1
   m_LayoutPriority: 1
+--- !u!114 &6122559990868413987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4099682998629816159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07ed50f4f9d6ef342be3904431a5e938, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainScrollRect: {fileID: 7588995114101380673}
+  minSensitivity: 5
+  maxSensitivity: 50
+  sensitivityMultiplier: 0.5
+  recalculateOnEnable: 1
 --- !u!1 &4156666867271865271
 GameObject:
   m_ObjectHideFlags: 0

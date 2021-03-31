@@ -26,6 +26,7 @@ namespace DCL.Huds.QuestsTracker
 
         [SerializeField] internal RectTransform questsContainer;
         [SerializeField] internal GameObject questPrefab;
+        [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
 
         internal readonly Dictionary<string, QuestsTrackerEntry> currentEntries = new Dictionary<string, QuestsTrackerEntry>();
         internal  readonly Dictionary<string, DateTime> lastUpdateTimestamp = new Dictionary<string, DateTime>();
@@ -125,6 +126,7 @@ namespace DCL.Huds.QuestsTracker
             {
                 layoutRebuildRequested = false;
                 questsContainer.ForceUpdateLayout( false);
+                dynamicScrollSensitivity?.RecalculateSensitivity();
             }
         }
 

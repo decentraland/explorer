@@ -17,6 +17,7 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] internal Toggle pinQuestToggle;
         [SerializeField] internal RawImage thumbnailImage;
         [SerializeField] internal Button closePopupAreaButton;
+        [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
 
         private AssetPromise_Texture thumbnailPromise;
         private bool forceRebuildLayout = false;
@@ -138,6 +139,7 @@ namespace DCL.Huds.QuestsPanel
             {
                 forceRebuildLayout = false;
                 rectTransform.ForceUpdateLayout();
+                dynamicScrollSensitivity?.RecalculateSensitivity();
             }
         }
 
