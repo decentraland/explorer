@@ -349,9 +349,9 @@ namespace DCL.ABConverter
             var settings = new Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
-            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
+            var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
-            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnBodyWearableLoad);
+            DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnBodyWearableLoad);
         }
 
         /// <summary>
@@ -370,27 +370,27 @@ namespace DCL.ABConverter
             var settings = new Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
-            var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
+            var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
-            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
+            DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
         }
         
         /// <summary>
         /// Given a list of WearableItems, each one is downloaded along with its dependencies and converted to ABs recursively
         /// (to avoid mixing same-name dependencies between wearables)
         /// </summary>
-        /// <param name="builder">an instance of the ABCore</param>
+        /// <param name="abConverterCoreController">an instance of the ABCore</param>
         /// <param name="items">an already-populated list of WearableItems</param>
         /// <param name="OnWearableLoad">an action to be bind to the OnWearableLoad event on each wearable</param>
-        private static void DumpWearableQueue(ABConverter.Core builder, Queue<WearableItem> items, System.Action<UnityGLTF.GLTFSceneImporter> OnWearableLoad)
+        private static void DumpWearableQueue(ABConverter.Core abConverterCoreController, Queue<WearableItem> items, System.Action<UnityGLTF.GLTFSceneImporter> OnWearableLoad)
         {
             if (items.Count == 0)
             {
                 AssetBundleManifest manifest;
 
-                if (builder.BuildAssetBundles(out manifest))
+                if (abConverterCoreController.BuildAssetBundles(out manifest))
                 {
-                    builder.CleanAssetBundleFolder(manifest.GetAllAssetBundles());
+                    abConverterCoreController.CleanAssetBundleFolder(manifest.GetAllAssetBundles());
                 }
 
                 return;
@@ -402,12 +402,12 @@ namespace DCL.ABConverter
             
             UnityGLTF.GLTFImporter.OnGLTFWillLoad += OnWearableLoad;
 
-            builder.Convert(pairs.ToArray(),
+            abConverterCoreController.Convert(pairs.ToArray(),
                 (err) =>
                 {
                     UnityGLTF.GLTFImporter.OnGLTFWillLoad -= OnWearableLoad;
-                    builder.CleanupWorkingFolders();
-                    DumpWearableQueue(builder, items, OnWearableLoad);
+                    abConverterCoreController.CleanupWorkingFolders();
+                    DumpWearableQueue(abConverterCoreController, items, OnWearableLoad);
                 }, false);
         }
         
