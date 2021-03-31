@@ -28,6 +28,7 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] private GameObject questPrefab;
         [SerializeField] internal QuestsPanelPopup questPopup;
         [SerializeField] private Button closeButton;
+        [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
 
         private static BaseDictionary<string, QuestModel> quests => DataStore.i.Quests.quests;
 
@@ -90,6 +91,7 @@ namespace DCL.Huds.QuestsPanel
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
             questEntry.Populate(quest);
             layoutRebuildRequested = true;
+            dynamicScrollSensitivity.RecalculateSensitivity();
         }
 
         public void RemoveQuest(string questId)
@@ -106,6 +108,7 @@ namespace DCL.Huds.QuestsPanel
                 questPopup.Close();
 
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
+            dynamicScrollSensitivity.RecalculateSensitivity();
         }
 
         public void ClearQuests()
@@ -119,6 +122,7 @@ namespace DCL.Huds.QuestsPanel
             questEntries.Clear();
             questsToBeAdded.Clear();
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
+            dynamicScrollSensitivity.RecalculateSensitivity();
         }
 
         internal void ShowQuestPopup(string questId)

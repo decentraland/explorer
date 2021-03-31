@@ -23,7 +23,6 @@ public class QuestModel : BaseModel
     public string thumbnail_entry;
     public string status;
     public string thumbnail_banner;
-    public string icon;
     public QuestSection[] sections;
     public DateTime assignmentTime = DateTime.Now; //TODO remove this once kernel send the data properly
     public DateTime completionTime = DateTime.Now; //TODO remove this once kernel send the data properly
