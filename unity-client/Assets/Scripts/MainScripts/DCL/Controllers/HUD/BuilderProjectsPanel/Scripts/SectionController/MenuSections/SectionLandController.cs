@@ -53,11 +53,13 @@ internal class SectionLandController : SectionBase, ILandsListener
     {
         view.SetEmpty(lands.Length == 0);
 
-        var toRemove = landElementViews.Values.Where(landElementView => lands.All(land => land.id != landElementView.GetId()));
-        foreach (LandElementView landElementView in toRemove)
+        List<LandElementView> toRemove = new List<LandElementView>(
+            landElementViews.Values.Where(landElementView => lands.All(land => land.id != landElementView.GetId())));
+        
+        for (int i=0; i<toRemove.Count; i++)
         {
-            landElementViews.Remove(landElementView.GetId());
-            PoolView(landElementView);
+            landElementViews.Remove(toRemove[i].GetId());
+            PoolView(toRemove[i]);
         }
         
         for (int i = 0; i < lands.Length; i++)
@@ -74,6 +76,7 @@ internal class SectionLandController : SectionBase, ILandsListener
             landElementView.SetSize(lands[i].size);
             landElementView.SetRole(lands[i].isOwner);
             landElementView.SetThumbnail(lands[i].thumbnailURL);
+            landElementView.SetIsState(lands[i].isEstate);
         }
         landSearchHandler.SetSearchableList(landElementViews.Values.Select(scene => scene.searchInfo).ToList());
     }

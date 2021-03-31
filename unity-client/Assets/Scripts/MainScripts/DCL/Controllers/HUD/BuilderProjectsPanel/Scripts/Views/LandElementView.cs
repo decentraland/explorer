@@ -1,5 +1,6 @@
 ﻿using System;
 using DCL;
+using DCL.Interface;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,8 @@ using Object = UnityEngine.Object;
 
 internal class LandElementView : MonoBehaviour, IDisposable
 {
-    const string SIZE_TEXT_FORMAT = "{0} LAND";
+    internal const string SIZE_TEXT_FORMAT = "{0} LAND";
+    private const string BUILDER_LAND_URL_FORMAT = "https://builder.decentraland.org/land/{0}";
 
     public event Action<string> OnJumpInPressed; 
     public event Action<string> OnEditorPressed; 
@@ -15,20 +17,22 @@ internal class LandElementView : MonoBehaviour, IDisposable
         
     [SerializeField] private Texture2D defaultThumbnail;
     [SerializeField] private RawImageFillParent thumbnail;
-    [SerializeField] private TextMeshProUGUI landName;
+    [SerializeField] internal TextMeshProUGUI landName;
     [SerializeField] private TextMeshProUGUI landCoords;
-    [SerializeField] private TextMeshProUGUI landSize;
-    [SerializeField] private GameObject landSizeGO;
-    [SerializeField] private GameObject roleOwner;
-    [SerializeField] private GameObject roleOperator;
-    [SerializeField] private Button buttonSettings;
-    [SerializeField] private Button buttonJumpIn;
-    [SerializeField] private Button buttonEditor;
+    [SerializeField] internal TextMeshProUGUI landSize;
+    [SerializeField] internal GameObject landSizeGO;
+    [SerializeField] internal GameObject roleOwner;
+    [SerializeField] internal GameObject roleOperator;
+    [SerializeField] internal Button buttonSettings;
+    [SerializeField] internal Button buttonJumpIn;
+    [SerializeField] internal Button buttonEditor;
 
     public LandSearchInfo searchInfo { get; } = new LandSearchInfo();
 
     private bool isDestroyed = false;
     private string landId;
+    private string landCoordinates;
+    private bool isEstate;
     private string thumbnailUrl;
     private AssetPromise_Texture thumbnailPromise;
 
@@ -37,6 +41,9 @@ internal class LandElementView : MonoBehaviour, IDisposable
         buttonSettings.onClick.AddListener(()=> OnSettingsPressed?.Invoke(landId));
         buttonJumpIn.onClick.AddListener(()=> OnJumpInPressed?.Invoke(landId));
         buttonEditor.onClick.AddListener(()=> OnEditorPressed?.Invoke(landId));
+        
+        //NOTE: for MVP we are redirecting user to Builder's page
+        OnSettingsPressed += (id) => WebInterface.OpenURL(string.Format(BUILDER_LAND_URL_FORMAT, isEstate ? landId : landCoordinates));
     }
 
     private void OnDestroy()
@@ -68,7 +75,8 @@ internal class LandElementView : MonoBehaviour, IDisposable
 
     public void SetCoords(int x, int y)
     {
-        landCoords.text = $"{x},{y}";
+        landCoordinates = $"{x},{y}";
+        landCoords.text = landCoordinates;
     }
 
     public void SetSize(int size)
@@ -85,6 +93,11 @@ internal class LandElementView : MonoBehaviour, IDisposable
         searchInfo.SetRole(isOwner);
     }
 
+    public void SetIsState(bool isEstate)
+    {
+        this.isEstate = isEstate;
+    }
+
     public Transform GetParent()
     {
         return transform.parent;
@@ -99,6 +112,8 @@ internal class LandElementView : MonoBehaviour, IDisposable
     {
         if (url == thumbnailUrl)
             return;
+
+        thumbnailUrl = url;
         
         var prevPromise = thumbnailPromise;
 
