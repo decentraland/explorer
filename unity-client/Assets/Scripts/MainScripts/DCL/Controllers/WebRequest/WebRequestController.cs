@@ -222,10 +222,7 @@ namespace DCL
             foreach (var webRequest in ongoingWebRequests)
             {
                 webRequest.Abort();
-                webRequest.Dispose();
             }
-
-            ongoingWebRequests.Clear();
         }
     }
 }
