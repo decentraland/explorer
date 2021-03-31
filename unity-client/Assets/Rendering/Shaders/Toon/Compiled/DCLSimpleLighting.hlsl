@@ -12,7 +12,7 @@ half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
     BRDFData brdfData;
 
     // NOTE: can modify alpha
-    InitializeBRDFData(surfaceData.albedo, 0, 0, 0.33, surfaceData.alpha, brdfData);
+    InitializeBRDFData(surfaceData.albedo, 0, 0, 0, surfaceData.alpha, brdfData);
 
     BRDFData brdfDataClearCoat = (BRDFData)0;
 #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
@@ -30,7 +30,7 @@ half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
 #endif
 
     #if defined(_SCREEN_SPACE_OCCLUSION)
-        const float DCL_CUSTOM_AO_TOON_FACTOR = 1.3;
+        const float DCL_CUSTOM_AO_TOON_FACTOR = 1.33;
         AmbientOcclusionFactor aoFactor = GetScreenSpaceAmbientOcclusion(inputData.normalizedScreenSpaceUV);
         surfaceData.occlusion = min(surfaceData.occlusion, aoFactor.indirectAmbientOcclusion * DCL_CUSTOM_AO_TOON_FACTOR);
     #endif
