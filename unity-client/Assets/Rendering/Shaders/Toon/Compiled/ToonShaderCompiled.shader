@@ -9,8 +9,6 @@
         [NoScaleOffset]_MatCap("Diffuse MatCap", 2D) = "white" {}
         [NoScaleOffset]_GlossMatCap("Gloss MatCap", 2D) = "white" {}
         [NoScaleOffset]_FresnelMatCap("Fresnel MatCap", 2D) = "white" {}
-        _SSSIntensity("SSS Intensity", Float) = 0
-        _SSSParams("SSSParams", Vector) = (0, 0, 0, 0)
         _Cutoff("AlphaClipThreshold", Float) = 0
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
