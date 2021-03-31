@@ -113,7 +113,7 @@ export class GIFProcessor {
       this.GLctx.texImage2D(
         this.GLctx.TEXTURE_2D,
         0,
-        this.GLctx.SRGB_EXT,
+        this.GLctx.RGBA,
         image.width,
         image.height,
         0,
