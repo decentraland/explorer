@@ -119,7 +119,7 @@ namespace DCL
             for (int j = 0; j < pointers.Length; j++)
             {
                 Texture2D newTex = Texture2D.CreateExternalTexture(width, height, TextureFormat.ARGB32,
-                    false, false, (System.IntPtr)pointers[j]);
+                    false, true, (System.IntPtr)pointers[j]);
 
                 if (newTex == null)
                 {
