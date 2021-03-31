@@ -30,10 +30,10 @@ namespace DCL.Tests
         {
             IWebRequestController webRequestControllerMock = Substitute.For<IWebRequestController>();
             webRequestControllerMock.Initialize(
-                Substitute.For<IWebRequest>(),
-                Substitute.For<IWebRequest>(),
-                Substitute.For<IWebRequest>(),
-                Substitute.For<IWebRequestAudio>());
+                genericWebRequest: Substitute.For<IWebRequest>(),
+                assetBundleWebRequest: Substitute.For<IWebRequest>(),
+                textureWebRequest: Substitute.For<IWebRequest>(),
+                audioWebRequest: Substitute.For<IWebRequestAudio>());
 
             return webRequestControllerMock;
         }

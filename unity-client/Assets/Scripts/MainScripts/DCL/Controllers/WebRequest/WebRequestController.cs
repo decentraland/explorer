@@ -14,11 +14,15 @@ namespace DCL
         /// <summary>
         /// Initialize the controller with all the request types injected.
         /// </summary>
-        /// <param name="generic"></param>
-        /// <param name="assetBundle"></param>
-        /// <param name="texture"></param>
-        /// <param name="audio"></param>
-        void Initialize(IWebRequest generic, IWebRequest assetBundle, IWebRequest texture, IWebRequestAudio audio);
+        /// <param name="genericWebRequest"></param>
+        /// <param name="assetBundleWebRequest"></param>
+        /// <param name="textureWebRequest"></param>
+        /// <param name="audioWebRequest"></param>
+        void Initialize(
+            IWebRequest genericWebRequest,
+            IWebRequest assetBundleWebRequest,
+            IWebRequest textureWebRequest,
+            IWebRequestAudio audioWebRequest);
 
         /// <summary>
         /// Download data from a url.
@@ -82,10 +86,10 @@ namespace DCL
             WebRequestController newWebRequestController = new WebRequestController();
 
             newWebRequestController.Initialize(
-                new WebRequest(),
-                new WebRequestAssetBundle(),
-                new WebRequestTexture(),
-                new WebRequestAudio());
+                genericWebRequest: new WebRequest(),
+                assetBundleWebRequest: new WebRequestAssetBundle(),
+                textureWebRequest: new WebRequestTexture(),
+                audioClipWebRequest: new WebRequestAudio());
 
             return newWebRequestController;
         }
@@ -104,19 +108,54 @@ namespace DCL
             this.audioClipWebRequest = audioClipWebRequest;
         }
 
-        public UnityWebRequestAsyncOperation Get(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0) { return SendWebRequest(genericWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout); }
+        public UnityWebRequestAsyncOperation Get(
+            string url,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0)
+        {
+            return SendWebRequest(genericWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+        }
 
-        public UnityWebRequestAsyncOperation GetAssetBundle(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0) { return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout); }
+        public UnityWebRequestAsyncOperation GetAssetBundle(
+            string url,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0)
+        {
+            return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+        }
 
-        public UnityWebRequestAsyncOperation GetTexture(string url, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0) { return SendWebRequest(textureWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout); }
+        public UnityWebRequestAsyncOperation GetTexture(
+            string url,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0)
+        {
+            return SendWebRequest(textureWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+        }
 
-        public UnityWebRequestAsyncOperation GetAudioClip(string url, AudioType audioType, Action<UnityWebRequest> OnSuccess = null, Action<string> OnFail = null, int requestAttemps = 3, int timeout = 0)
+        public UnityWebRequestAsyncOperation GetAudioClip(
+            string url,
+            AudioType audioType,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0)
         {
             audioClipWebRequest.SetAudioType(audioType);
             return SendWebRequest(audioClipWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
-        private UnityWebRequestAsyncOperation SendWebRequest<T>(T requestType, string url, Action<UnityWebRequest> OnSuccess, Action<string> OnFail, int requestAttemps, int timeout)
+        private UnityWebRequestAsyncOperation SendWebRequest<T>(
+            T requestType,
+            string url,
+            Action<UnityWebRequest> OnSuccess,
+            Action<string> OnFail,
+            int requestAttemps, int timeout)
             where T : IWebRequest
         {
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
