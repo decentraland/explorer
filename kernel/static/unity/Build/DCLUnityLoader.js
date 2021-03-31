@@ -46,7 +46,7 @@ function createUnityInstance(canvas, config, onProgress) {
   var Module = {
     canvas: canvas,
     webglContextAttributes: {
-      preserveDrawingBuffer: false
+      preserveDrawingBuffer: true
     },
     streamingAssetsUrl: 'StreamingAssets',
     downloadProgress: {},
@@ -166,6 +166,7 @@ function createUnityInstance(canvas, config, onProgress) {
       re = RegExp(re, 'i').exec(str)
       return re && re[idx]
     }
+
     for (var b = 0; b < browsers.length; ++b) {
       browserVersion = extractRe(browsers[b][0] + '[/ ](.*?)[ \\)]', ua, 1)
       if (browserVersion) {
@@ -374,6 +375,7 @@ function createUnityInstance(canvas, config, onProgress) {
             function r(e) {
               ;(this.buf_ = new Uint8Array(o)), (this.input_ = e), this.reset()
             }
+
             const i = 4096,
               o = 8224,
               s = 8191,
@@ -2256,6 +2258,7 @@ function createUnityInstance(canvas, config, onProgress) {
                 ? 16
                 : ((n = e.readBits(3)), n > 0 ? 17 + n : ((n = e.readBits(3)), n > 0 ? 8 + n : 17))
             }
+
             function i(e) {
               if (e.readBits(1)) {
                 var n = e.readBits(3)
@@ -2263,9 +2266,11 @@ function createUnityInstance(canvas, config, onProgress) {
               }
               return 0
             }
+
             function o() {
               ;(this.meta_block_length = 0), (this.input_end = 0), (this.is_uncompressed = 0), (this.is_metadata = !1)
             }
+
             function s(e) {
               var n,
                 t,
@@ -2288,6 +2293,7 @@ function createUnityInstance(canvas, config, onProgress) {
                 }
               return ++i.meta_block_length, i.input_end || i.is_metadata || (i.is_uncompressed = e.readBits(1)), i
             }
+
             function a(e, n, t) {
               var r
               return (
@@ -2299,6 +2305,7 @@ function createUnityInstance(canvas, config, onProgress) {
                 e[n].value
               )
             }
+
             function f(e, n, t, r) {
               for (var i = 0, o = H, s = 0, a = 0, f = 32768, w = [], d = 0; d < 32; d++) w.push(new N(0, 0))
               for (q(w, 0, 5, e, G); i < n && f > 0; ) {
@@ -2335,6 +2342,7 @@ function createUnityInstance(canvas, config, onProgress) {
               if (0 !== f) throw new Error('[ReadHuffmanCodeLengths] space = ' + f)
               for (; i < n; i++) t[i] = 0
             }
+
             function w(e, n, t, r) {
               var i,
                 o = 0,
@@ -2405,6 +2413,7 @@ function createUnityInstance(canvas, config, onProgress) {
               if (((o = q(n, t, k, s, e)), 0 === o)) throw new Error('[ReadHuffmanCode] BuildHuffmanTable failed: ')
               return o
             }
+
             function d(e, n, t) {
               var r, i
               return (
@@ -2413,14 +2422,17 @@ function createUnityInstance(canvas, config, onProgress) {
                 B.kBlockLengthPrefixCode[r].offset + t.readBits(i)
               )
             }
+
             function u(e, n, t) {
               var r
               return e < J ? ((t += T[e]), (t &= 3), (r = n[t] + z[e])) : (r = e - J + 1), r
             }
+
             function p(e, n) {
               for (var t = e[n], r = n; r; --r) e[r] = e[r - 1]
               e[0] = t
             }
+
             function c(e, n) {
               var t,
                 r = new Uint8Array(256)
@@ -2430,12 +2442,14 @@ function createUnityInstance(canvas, config, onProgress) {
                 ;(e[t] = r[i]), i && p(r, i)
               }
             }
+
             function h(e, n) {
               ;(this.alphabet_size = e),
                 (this.num_htrees = n),
                 (this.codes = new Array(n + n * I[(e + 31) >>> 5])),
                 (this.htrees = new Uint32Array(n))
             }
+
             function l(e, n) {
               var t,
                 r,
@@ -2459,6 +2473,7 @@ function createUnityInstance(canvas, config, onProgress) {
               }
               return n.readBits(1) && c(u, e), s
             }
+
             function b(e, n, t, r, i, o, s) {
               var f,
                 w = 2 * t,
@@ -2470,6 +2485,7 @@ function createUnityInstance(canvas, config, onProgress) {
                 (i[w + (1 & o[d])] = f),
                 ++o[d]
             }
+
             function v(e, n, t, r, i, o) {
               var s,
                 a = i + 1,
@@ -2498,11 +2514,13 @@ function createUnityInstance(canvas, config, onProgress) {
                 o.reset()
               }
             }
+
             function m(e) {
               var n = (e.bit_pos_ + 7) & -8,
                 t = e.readBits(n - e.bit_pos_)
               return 0 == t
             }
+
             function y(e) {
               var n = new U(e),
                 t = new V(n)
@@ -2510,6 +2528,7 @@ function createUnityInstance(canvas, config, onProgress) {
               var i = s(t)
               return i.meta_block_length
             }
+
             function W(e, n) {
               var t = new U(e)
               null == n && (n = y(e))
@@ -2517,6 +2536,7 @@ function createUnityInstance(canvas, config, onProgress) {
                 i = new E(r)
               return x(t, i), i.pos < i.buffer.length && (i.buffer = i.buffer.subarray(0, i.pos)), i.buffer
             }
+
             function x(e, n) {
               var t,
                 o,
@@ -2741,6 +2761,7 @@ function createUnityInstance(canvas, config, onProgress) {
               }
               n.write(c, E & p)
             }
+
             var U = e('./streams').BrotliInput,
               E = e('./streams').BrotliOutput,
               V = e('./bit_reader'),
@@ -2880,18 +2901,22 @@ function createUnityInstance(canvas, config, onProgress) {
             function r(e, n) {
               ;(this.bits = e), (this.value = n)
             }
+
             function i(e, n) {
               for (var t = 1 << (n - 1); e & t; ) t >>= 1
               return (e & (t - 1)) + t
             }
+
             function o(e, n, t, i, o) {
               do (i -= t), (e[n + i] = new r(o.bits, o.value))
               while (i > 0)
             }
+
             function s(e, n, t) {
               for (var r = 1 << (n - t); n < a && ((r -= e[n]), !(r <= 0)); ) ++n, (r <<= 1)
               return n - t
             }
+
             t.HuffmanCode = r
             const a = 15
             t.BrotliBuildHuffmanTable = function (e, n, t, f, w) {
@@ -3024,6 +3049,7 @@ function createUnityInstance(canvas, config, onProgress) {
             function r(e) {
               ;(this.buffer = e), (this.pos = 0)
             }
+
             function i(e) {
               ;(this.buffer = e), (this.pos = 0)
             }
@@ -3045,6 +3071,7 @@ function createUnityInstance(canvas, config, onProgress) {
               for (var r = 0; r < e.length; r++) this.prefix[r] = e.charCodeAt(r)
               for (var r = 0; r < t.length; r++) this.suffix[r] = t.charCodeAt(r)
             }
+
             function i(e, n) {
               return e[n] < 192
                 ? (e[n] >= 97 && e[n] <= 122 && (e[n] ^= 32), 1)
@@ -3052,6 +3079,7 @@ function createUnityInstance(canvas, config, onProgress) {
                 ? ((e[n + 1] ^= 32), 2)
                 : ((e[n + 2] ^= 5), 3)
             }
+
             var o = e('./dictionary')
             const s = 0,
               a = 1,
@@ -3221,14 +3249,17 @@ function createUnityInstance(canvas, config, onProgress) {
           },
           'node_modules/base64-js/index.js': function (e, n, t) {
             'use strict'
+
             function r(e) {
               var n = e.length
               if (n % 4 > 0) throw new Error('Invalid string. Length must be a multiple of 4')
               return '=' === e[n - 2] ? 2 : '=' === e[n - 1] ? 1 : 0
             }
+
             function i(e) {
               return (3 * e.length) / 4 - r(e)
             }
+
             function o(e) {
               var n,
                 t,
@@ -3258,13 +3289,16 @@ function createUnityInstance(canvas, config, onProgress) {
                 a
               )
             }
+
             function s(e) {
               return w[(e >> 18) & 63] + w[(e >> 12) & 63] + w[(e >> 6) & 63] + w[63 & e]
             }
+
             function a(e, n, t) {
               for (var r, i = [], o = n; o < t; o += 3) (r = (e[o] << 16) + (e[o + 1] << 8) + e[o + 2]), i.push(s(r))
               return i.join('')
             }
+
             function f(e) {
               for (var n, t = e.length, r = t % 3, i = '', o = [], s = 16383, f = 0, d = t - r; f < d; f += s)
                 o.push(a(e, f, f + s > d ? d : f + s))
