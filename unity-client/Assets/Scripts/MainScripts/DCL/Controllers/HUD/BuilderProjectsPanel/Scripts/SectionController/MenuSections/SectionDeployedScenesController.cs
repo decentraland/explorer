@@ -40,7 +40,7 @@ internal class SectionDeployedScenesController : SectionBase, IDeployedSceneList
     public override void Dispose()
     {
         view.OnScrollRectValueChanged -= OnRequestContextMenuHide;
-        Object.Destroy(view.gameObject);
+        view.Dispose();
     }
 
     protected override void OnShow()

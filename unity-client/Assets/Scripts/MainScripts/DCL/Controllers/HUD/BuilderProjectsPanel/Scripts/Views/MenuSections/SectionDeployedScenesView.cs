@@ -3,12 +3,14 @@ using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.UI;
 
-internal class SectionDeployedScenesView : MonoBehaviour
+internal class SectionDeployedScenesView : MonoBehaviour, IDisposable
 {
     public event Action OnScrollRectValueChanged;
     
     [SerializeField] public Transform scenesCardContainer;
     [SerializeField] public ScrollRect scrollRect;
+
+    private bool isDestroyed = false;
     
     public void SetParent(Transform parent)
     {
@@ -26,6 +28,14 @@ internal class SectionDeployedScenesView : MonoBehaviour
         scrollRect.verticalNormalizedPosition = 1;
     }
 
+    public void Dispose()
+    {
+        if (!isDestroyed)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Awake()
     {
         scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
@@ -33,6 +43,7 @@ internal class SectionDeployedScenesView : MonoBehaviour
 
     private void OnDestroy()
     {
+        isDestroyed = true;
         scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
     }
 
