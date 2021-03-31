@@ -16,7 +16,8 @@ import {
   messageFromEngine,
   MessageFromEngineAction,
   MESSAGE_FROM_ENGINE,
-  rendererEnabled
+  rendererEnabled,
+  ENGINE_STARTED
 } from './actions'
 import { isInitialized } from './selectors'
 
@@ -33,13 +34,15 @@ let _gameInstance: UnityGame | null = null
 
 export function* rendererSaga() {
   let _instancedJS: ReturnType<typeof initializeEngine> | null = null
-
-  const action: InitializeRenderer = yield take(INITIALIZE_RENDERER)
-  const _gameInstance = yield call(initializeRenderer, action)
-  _instancedJS = yield call(wrapEngineInstance, _gameInstance)
   yield takeEvery(MESSAGE_FROM_ENGINE, (action: MessageFromEngineAction) =>
     handleMessageFromEngine(_instancedJS, action)
   )
+
+  const action: InitializeRenderer = yield take(INITIALIZE_RENDERER)
+  const _gameInstance = yield call(initializeRenderer, action)
+
+  yield take(ENGINE_STARTED)
+  _instancedJS = yield call(wrapEngineInstance, _gameInstance)
 }
 
 export function* ensureRenderer() {

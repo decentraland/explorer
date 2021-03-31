@@ -158,13 +158,17 @@ initializeUnity(container)
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
 
     document.body.classList.remove('dcl-loading')
-    globalThis.UnityLoader.Error.handler = (error: any) => {
+
+    let originalErrorListener = globalThis.UnityLoader.errorListener
+
+    globalThis.UnityLoader.errorListener = (error: any) => {
       if (error.isSceneError) {
-        // @see packages/shared/world/SceneWorker.ts#loadSystem
+        // @see CustomWebWorkerTransport.ts
         debugger
         return
       }
 
+      originalErrorListener(error)
       console['error'](error)
       ReportFatalError(error.message)
     }
