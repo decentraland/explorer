@@ -1,6 +1,8 @@
 #ifndef DCL_SIMPLE_FRAGMENT_INCLUDED
 #define DCL_SIMPLE_FRAGMENT_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+
 half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
 {
 #ifdef _SPECULARHIGHLIGHTS_OFF
@@ -30,11 +32,11 @@ half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
 #endif
 
     #if defined(_SCREEN_SPACE_OCCLUSION)
-        const float DCL_CUSTOM_AO_TOON_FACTOR = 1.33;
+        const float DCL_CUSTOM_AO_TOON_FACTOR = 1.1;
         AmbientOcclusionFactor aoFactor = GetScreenSpaceAmbientOcclusion(inputData.normalizedScreenSpaceUV);
         surfaceData.occlusion = min(surfaceData.occlusion, aoFactor.indirectAmbientOcclusion * DCL_CUSTOM_AO_TOON_FACTOR);
+        surfaceData.occlusion = max(surfaceData.occlusion, aoFactor.directAmbientOcclusion);
     #endif
-
     half3 color = GlobalIllumination(brdfData, brdfDataClearCoat, surfaceData.clearCoatMask,
                                      inputData.bakedGI, surfaceData.occlusion,
                                      inputData.normalWS, inputData.viewDirectionWS);
@@ -42,6 +44,7 @@ half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
 #ifdef _ADDITIONAL_LIGHTS_VERTEX
     color += inputData.vertexLighting * brdfData.diffuse;
 #endif
+
 
     color += surfaceData.emission;
 
