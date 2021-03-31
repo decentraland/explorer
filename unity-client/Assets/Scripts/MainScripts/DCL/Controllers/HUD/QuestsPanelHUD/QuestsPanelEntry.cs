@@ -125,7 +125,11 @@ namespace DCL.Huds.QuestsPanel
 
             thumbnailPromise = new AssetPromise_Texture(currentThumbnail);
             thumbnailPromise.OnSuccessEvent += OnThumbnailReady;
-            thumbnailPromise.OnFailEvent += x => { Debug.LogError($"Error downloading quest panel entry thumbnail: {currentThumbnail}"); };
+            thumbnailPromise.OnFailEvent += x =>
+            {
+                animator.SetTrigger(LOADED_ANIM_TRIGGER);
+                Debug.LogError($"Error downloading quest panel entry thumbnail: {currentThumbnail}");
+            };
 
             AssetPromiseKeeper_Texture.i.Keep(thumbnailPromise);
         }
