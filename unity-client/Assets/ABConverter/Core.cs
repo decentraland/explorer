@@ -47,8 +47,6 @@ namespace DCL.ABConverter
         internal readonly string finalDownloadedPath;
         internal readonly string finalDownloadedAssetDbPath;
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
-        
-        internal bool generateAssetBundles = true; // TODO: Should we still use this ???
 
         public Client.Settings settings;
 
@@ -86,7 +84,7 @@ namespace DCL.ABConverter
         /// </summary>
         /// <param name="rawContents">A list detailing assets to be dumped</param>
         /// <param name="OnFinish">End callback with the proper ErrorCode</param>
-        public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
+        public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null, bool clearDirectoriesOnStart = true)
         {
             OnFinish -= CleanAndExit;
             OnFinish += CleanAndExit;
@@ -95,11 +93,11 @@ namespace DCL.ABConverter
 
             log.Info($"Conversion start... free space in disk: {PathUtils.GetFreeSpace()}");
             
-            InitializeDirectoryPaths(true);
+            InitializeDirectoryPaths(clearDirectoriesOnStart);
             PopulateLowercaseMappings(rawContents);
             
             float timer = Time.realtimeSinceStartup;
-            bool shouldGenerateAssetBundles = generateAssetBundles;
+            bool shouldGenerateAssetBundles = true;
             bool assetsAlreadyDumped = false;
 
             //TODO(Brian): Use async-await instead of Application.update
@@ -130,7 +128,7 @@ namespace DCL.ABConverter
 
                     EditorApplication.update -= UpdateLoop;
 
-                    if (shouldGenerateAssetBundles && this.generateAssetBundles)
+                    if (shouldGenerateAssetBundles)
                     {
                         AssetBundleManifest manifest;
 
@@ -180,7 +178,7 @@ namespace DCL.ABConverter
         }
 
         /// <summary>
-        ///
+        /// Parses a GLTF and populates a List<ContentServerUtils.MappingPair> with its dependencies 
         /// </summary>
         /// <param name="assetHash">The asset's content server hash</param>
         /// <param name="assetFilename">The asset's content server file name</param>
@@ -347,15 +345,17 @@ namespace DCL.ABConverter
             PersistentAssetCache.StreamCacheByUri.Clear();
 
             log.Verbose("Start injecting stuff into " + gltfPath.hash);
-
+            
             //NOTE(Brian): Prepare gltfs gathering its dependencies first and filling the importer's static cache.
             foreach (var texturePath in texturePaths)
             {
+                log.Verbose("Injecting texture... " + texturePath.hash + " -> " + texturePath.finalPath);
                 RetrieveAndInjectTexture(gltfPath, texturePath);
             }
 
             foreach (var bufferPath in bufferPaths)
             {
+                log.Verbose("Injecting buffer... " + bufferPath.hash + " -> " + bufferPath.finalPath);
                 RetrieveAndInjectBuffer(gltfPath, bufferPath); // TODO: this adds buffers that will be used in the future by the GLTFSceneImporter
             }
 
@@ -566,8 +566,6 @@ namespace DCL.ABConverter
         /// </summary>
         /// <param name="gltfPath">GLTF path of the gltf that will pick up the references</param>
         /// <param name="texturePath">Texture path of the texture to be injected</param>
-        
-        // private void RetrieveAndInjectTexture(MappingPair gltfMappingPair, MappingPair textureMappingPair)
         internal void RetrieveAndInjectTexture(AssetPath gltfPath, AssetPath texturePath) 
         {
             string finalPath = texturePath.finalPath;
@@ -593,8 +591,6 @@ namespace DCL.ABConverter
         /// </summary>
         /// <param name="gltfPath">GLTF path of the gltf that will pick up the references</param>
         /// <param name="bufferPath">Buffer path of the texture to be injected</param>
-        
-        // private void RetrieveAndInjectBuffer(MappingPair gltfMappingPair, MappingPair bufferMappingPair)
         internal void RetrieveAndInjectBuffer(AssetPath gltfPath, AssetPath bufferPath)
         {
             string finalPath = bufferPath.finalPath;

@@ -56,6 +56,19 @@ namespace DCL.ABConverter
                 this.baseUrl = ContentServerUtils.GetContentAPIUrlBase(tld);
             }
         }
+        
+        [System.Serializable]
+        private class WearableItemArray
+        {
+            [System.Serializable]
+            public class Collection
+            {
+                public string id;
+                public List<WearableItem> wearables;
+            }
+
+            public List<Collection> data;
+        }
 
         private static Logger log = new Logger("ABConverter.Client");
 
@@ -338,9 +351,7 @@ namespace DCL.ABConverter
             settings.deleteDownloadPathAfterFinished = false;
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
-            var pairs = ExtractMappingPairs(avatarItemList);
-            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnBodyWearableLoad;
-            builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnBodyWearableLoad; }));
+            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnBodyWearableLoad);
         }
 
         /// <summary>
@@ -361,33 +372,43 @@ namespace DCL.ABConverter
             settings.deleteDownloadPathAfterFinished = false;
             var builder = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
-            var pairs = ExtractMappingPairs(avatarItemList);
-            UnityGLTF.GLTFImporter.OnGLTFWillLoad += GLTFImporter_OnNonBodyWearableLoad;
-            builder.Convert(pairs.ToArray(), (err => { UnityGLTF.GLTFImporter.OnGLTFWillLoad -= GLTFImporter_OnNonBodyWearableLoad; }));
+            DumpWearableQueue(builder, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
         }
         
-        private static void GLTFImporter_OnNonBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
+        /// <summary>
+        /// Given a list of WearableItems, each one is downloaded along with its dependencies and converted to ABs recursively
+        /// (to avoid mixing same-name dependencies between wearables)
+        /// </summary>
+        /// <param name="builder">an instance of the ABCore</param>
+        /// <param name="items">an already-populated list of WearableItems</param>
+        /// <param name="OnWearableLoad">an action to be bind to the OnWearableLoad event on each wearable</param>
+        private static void DumpWearableQueue(ABConverter.Core builder, Queue<WearableItem> items, System.Action<UnityGLTF.GLTFSceneImporter> OnWearableLoad)
         {
-            obj.importSkeleton = false;
-            obj.maxTextureSize = 512;
-        }
-        private static void GLTFImporter_OnBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
-        {
-            obj.importSkeleton = true;
-            obj.maxTextureSize = 512;
-        }
-        
-        [System.Serializable]
-        private class WearableItemArray
-        {
-            [System.Serializable]
-            public class Collection
+            if (items.Count == 0)
             {
-                public string id;
-                public List<WearableItem> wearables;
+                AssetBundleManifest manifest;
+
+                if (builder.BuildAssetBundles(out manifest))
+                {
+                    builder.CleanAssetBundleFolder(manifest.GetAllAssetBundles());
+                }
+
+                return;
             }
 
-            public List<Collection> data;
+            Debug.Log("Building wearables... items left... " + items.Count);
+
+            var pairs = ExtractMappingPairs(new List<WearableItem>() { items.Dequeue() });
+            
+            UnityGLTF.GLTFImporter.OnGLTFWillLoad += OnWearableLoad;
+
+            builder.Convert(pairs.ToArray(),
+                (err) =>
+                {
+                    UnityGLTF.GLTFImporter.OnGLTFWillLoad -= OnWearableLoad;
+                    builder.CleanupWorkingFolders();
+                    DumpWearableQueue(builder, items, OnWearableLoad);
+                }, false);
         }
         
         /// <summary>
@@ -444,6 +465,17 @@ namespace DCL.ABConverter
             }
 
             return result;
+        }
+        
+        private static void GLTFImporter_OnNonBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
+        {
+            obj.importSkeleton = false;
+            obj.maxTextureSize = 512;
+        }
+        private static void GLTFImporter_OnBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
+        {
+            obj.importSkeleton = true;
+            obj.maxTextureSize = 512;
         }
     }
 }
