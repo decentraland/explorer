@@ -6,7 +6,7 @@ namespace DCL
     /// <summary>
     /// Our custom implementation of the UnityWebRequestMultimedia (Audio Clip).
     /// </summary>
-    public interface IWebRequestAudio : IWebRequestBase
+    public interface IWebRequestAudio : IWebRequest
     {
         /// <summary>
         /// Configure the type of the audio that will be requested.
@@ -15,12 +15,12 @@ namespace DCL
         void SetAudioType(AudioType audioType);
     }
 
-    public class WebRequestAudio : WebRequestBase, IWebRequestAudio
+    public class WebRequestAudio : IWebRequestAudio
     {
         private AudioType audioType = AudioType.UNKNOWN;
 
         public void SetAudioType(AudioType audioType) { this.audioType = audioType; }
 
-        protected override UnityWebRequest CreateWebRequest(string url) { return UnityWebRequestMultimedia.GetAudioClip(url, audioType); }
+        public UnityWebRequest CreateWebRequest(string url) { return UnityWebRequestMultimedia.GetAudioClip(url, audioType); }
     }
 }

@@ -5,10 +5,8 @@ namespace DCL
     /// <summary>
     /// Our custom implementation of the UnityWebRequest.
     /// </summary>
-    public interface IWebRequest : IWebRequestBase { }
-
-    public class WebRequest : WebRequestBase, IWebRequest
+    public class WebRequest : IWebRequest
     {
-        protected override UnityWebRequest CreateWebRequest(string url) { return UnityWebRequest.Get(url); }
+        public UnityWebRequest CreateWebRequest(string url) { return UnityWebRequest.Get(url); }
     }
 }
