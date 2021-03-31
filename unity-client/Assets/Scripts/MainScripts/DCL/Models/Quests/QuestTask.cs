@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [System.Serializable]
@@ -10,6 +11,7 @@ public class QuestTask
     public string status;
     public string coordinates;
     public float progress;
+    public DateTime completionTime = DateTime.Now;
 }
 
 [System.Serializable]

@@ -18,10 +18,7 @@ namespace DCL.Huds.QuestsPanel
         internal TaskPayload_Numeric payload;
         private Action jumpInDelegate;
 
-        public void Awake()
-        {
-            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke();});
-        }
+        public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
 
         public void Populate(QuestTask task)
         {
@@ -40,7 +37,7 @@ namespace DCL.Huds.QuestsPanel
             current.text = payload.current.ToString();
             end.text = payload.end.ToString();
 
-            ongoingProgress.fillAmount = task.progress;
+            ongoingProgress.transform.localScale = new Vector3(1, task.progress, 1);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -15,7 +16,8 @@ namespace DCL.Huds.QuestsPanel
             CleanUpTasksList();
             titleContainer.gameObject.SetActive(!string.IsNullOrEmpty(section.name));
             sectionName.text = section.name;
-            foreach (QuestTask task in section.tasks)
+            var orderedTasks = section.tasks.OrderBy(x => x.progress >= 1).ThenBy(x => x.completionTime).ToArray();
+            foreach (QuestTask task in orderedTasks)
             {
                 CreateTask(task);
             }

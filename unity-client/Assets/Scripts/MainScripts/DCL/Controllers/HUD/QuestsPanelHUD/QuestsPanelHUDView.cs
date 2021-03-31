@@ -98,12 +98,14 @@ namespace DCL.Huds.QuestsPanel
 
             if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
                 return;
-
             questEntries.Remove(questId);
+            questEntry.transform.SetParent(null);
             Destroy(questEntry.gameObject);
 
             if (currentQuestInPopup == questId)
                 questPopup.Close();
+
+            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
         }
 
         public void ClearQuests()
@@ -111,10 +113,12 @@ namespace DCL.Huds.QuestsPanel
             questPopup.Close();
             foreach (QuestsPanelEntry questEntry in questEntries.Values)
             {
+                questEntry.transform.SetParent(null);
                 Destroy(questEntry.gameObject);
             }
             questEntries.Clear();
             questsToBeAdded.Clear();
+            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
         }
 
         internal void ShowQuestPopup(string questId)

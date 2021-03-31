@@ -25,15 +25,8 @@ public class QuestModel : BaseModel
     public string thumbnail_banner;
     public string icon;
     public QuestSection[] sections;
-    public DateTime assignmentTime;
-    public DateTime completionTime;
-
-    public QuestModel()
-    {
-        //TODO: remove this when kernel send this info properly
-        assignmentTime = DateTime.Now;
-        completionTime = DateTime.Now;
-    }
+    public DateTime assignmentTime = DateTime.Now; //TODO remove this once kernel send the data properly
+    public DateTime completionTime = DateTime.Now; //TODO remove this once kernel send the data properly
 
     public bool TryGetSection(string sectionId, out QuestSection section)
     {
