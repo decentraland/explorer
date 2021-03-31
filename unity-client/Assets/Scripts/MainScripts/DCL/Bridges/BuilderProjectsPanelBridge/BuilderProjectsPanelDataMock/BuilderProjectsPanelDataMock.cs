@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -11,15 +12,23 @@ public class BuilderProjectsPanelDataMock
     private Dictionary<string, BuilderProjectsPanelSceneDataMock> projects =
         new Dictionary<string, BuilderProjectsPanelSceneDataMock>();
 
+    private BuilderProjectsPanelLandDataMock[] lands;
+
     public BuilderProjectsPanelDataMock(GameObject bridge)
     {
         this.bridge = bridge;
         GenerateMockProjects();
+        GenerateMockLands();
     }
 
     public void SendFetchProjects()
     {
         FakeResponse("OnReceivedProjects",FakeProjectsPayload());
+    }
+    
+    public void SendFetchLands()
+    {
+        FakeResponse("OnReceivedLands",FakeLandsPayload());
     }
 
     public void SendDuplicateProject(string id)
@@ -211,6 +220,63 @@ public class BuilderProjectsPanelDataMock
         }
     }
 
+    private void GenerateMockLands()
+    {
+        BuilderProjectsPanelLandDataMock.ParcelData[] RandomParcels(int randomness)
+        {
+            int parcelsCount = Random.Range(2, 5);
+            
+            BuilderProjectsPanelLandDataMock.ParcelData[] ret = new BuilderProjectsPanelLandDataMock.ParcelData[parcelsCount];
+            BuilderProjectsPanelLandDataMock.ParcelData newParcel;
+            
+            for (int i = 0; i < parcelsCount; i++)
+            {
+                newParcel = new BuilderProjectsPanelLandDataMock.ParcelData();
+                newParcel.id = $"{randomness}{i}";
+
+                do
+                {
+                    newParcel.x = Random.Range(randomness * 6, (randomness * 6) + 6);
+                    newParcel.y = Random.Range(randomness * 6, (randomness * 6) + 6);
+                } while (ret.Count(l => l != null && l.x == newParcel.x && l.y == newParcel.y) != 0);
+
+                ret[i] = newParcel;
+            }
+
+            return ret;
+        }
+        
+        int amount = Random.Range(3, 10);
+        lands = new BuilderProjectsPanelLandDataMock[amount];
+        BuilderProjectsPanelLandDataMock land;
+
+        for (int i = 0; i < amount; i++)
+        {
+            bool estate = Random.Range(0, 10) < 2;
+            bool owner = Random.Range(0, 10) < 5;
+            BuilderProjectsPanelLandDataMock.ParcelData[] parcels = estate ? RandomParcels(i) : null;
+                
+            land = new BuilderProjectsPanelLandDataMock();
+            lands[i] = land;
+            land.id = $"{i}";
+            land.description = $"description-{i}";
+            land.name  = $"Land-{i}";
+            land.size = estate ? parcels.Length : 1;
+            land.x = estate ? 0 : Random.Range(0, 100);
+            land.y = estate ? 0 : Random.Range(0, 100);
+            land.isOperator = !owner;
+            land.isOwner = owner;
+            land.isEstate = estate;
+            land.isParcel = !estate;
+            land.parcels = parcels;
+            land.thumbnailURL = Random.Range(0, 10) < 2 ? null : 
+                (estate ? 
+                    MapUtils.GetMarketPlaceThumbnailUrl(parcels.Select(p => new Vector2Int(p.x, p.y)).ToArray(), 100, 100, 50) :
+                    MapUtils.GetMarketPlaceThumbnailUrl(new[]{new Vector2Int(land.x, land.y)}, 100, 100, 50)
+                    );
+        }
+    }
+
     private string FakeProjectsPayload()
     {
         string value = "[";
@@ -219,6 +285,18 @@ public class BuilderProjectsPanelDataMock
         {
             value += JsonUtility.ToJson(projectsArray[i]);
             if (i < projectsArray.Length - 1) value += ",";
+        }
+        value += "]";
+        return value;
+    }
+    
+    private string FakeLandsPayload()
+    {
+        string value = "[";
+        for (int i = 0; i < lands.Length; i++)
+        {
+            value += JsonUtility.ToJson(lands[i]);
+            if (i < lands.Length - 1) value += ",";
         }
         value += "]";
         return value;

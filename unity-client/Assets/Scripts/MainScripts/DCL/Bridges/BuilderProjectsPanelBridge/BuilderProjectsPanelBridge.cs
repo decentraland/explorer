@@ -4,6 +4,8 @@ using UnityEngine;
 public class BuilderProjectsPanelBridge : MonoBehaviour
 {
     public event Action<string> OnProjectsSet;
+    public event Action<string> OnLandsSet; 
+    
     public static BuilderProjectsPanelBridge i { get; private set; }
     public static readonly bool mockData = true;
 
@@ -29,10 +31,20 @@ public class BuilderProjectsPanelBridge : MonoBehaviour
     {
         OnProjectsSet?.Invoke(payload);
     }
+    
+    public void OnReceivedLands(string payload)
+    {
+        OnLandsSet?.Invoke(payload);
+    }
 
     public void SendFetchProjects()
     {
         dataMocker?.SendFetchProjects();
+    }
+    
+    public void SendFetchLands()
+    {
+        dataMocker?.SendFetchLands();
     }
 
     public void SendDuplicateProject(string id)

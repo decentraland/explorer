@@ -7,7 +7,7 @@ internal abstract class SectionBase : IDisposable
     public virtual ISectionSearchHandler searchHandler { get; protected set; } = null;
     public virtual SearchBarConfig searchBarConfig { get; protected set; } = new SearchBarConfig()
     {
-        showFilterContributor = true,
+        showFilterContributor = false,
         showFilterOperator = true,
         showFilterOwner = true,
         showResultLabel = true

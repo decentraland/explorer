@@ -8,6 +8,7 @@ public class BuilderProjectsPanelController : IDisposable
     internal readonly BuilderProjectsPanelView view;
     internal readonly SectionsController sectionsController;
     internal readonly ScenesViewController scenesViewController;
+    internal readonly LandController landsController;
 
     internal BuilderProjectsPanelBridge bridge = null;
 
@@ -27,6 +28,7 @@ public class BuilderProjectsPanelController : IDisposable
         if (bridge != null)
         {
             bridge.OnProjectsSet -= OnProjectsUpdated;
+            bridge.OnLandsSet -= OnLandsUpdated;
         }
         sectionsController.OnRequestUpdateSceneData -= OnRequestUpdateSceneData;
         sectionsController.OnRequestUpdateSceneContributors -= OnRequestUpdateSceneContributors;
@@ -58,13 +60,16 @@ public class BuilderProjectsPanelController : IDisposable
 
         sectionsController = new SectionsController(view.sectionsContainer);
         scenesViewController = new ScenesViewController(view.sceneCardViewPrefab);
+        landsController = new LandController();
 
         SetView();
 
         if (bridge != null)
         {
             bridge.OnProjectsSet += OnProjectsUpdated;
+            bridge.OnLandsSet += OnLandsUpdated;
             bridge.SendFetchProjects();
+            bridge.SendFetchLands();
             sectionsController.OnRequestUpdateSceneData += OnRequestUpdateSceneData;
             sectionsController.OnRequestUpdateSceneContributors += OnRequestUpdateSceneContributors;
             sectionsController.OnRequestUpdateSceneAdmins += OnRequestUpdateSceneAdmins;
@@ -72,7 +77,7 @@ public class BuilderProjectsPanelController : IDisposable
         }
 
         leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(scenesViewController, view.settingsViewReferences);
-        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view.searchBarView);
+        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view.searchBarView, landsController);
         leftMenuHandler = new LeftMenuHandler(view, sectionsController);
         sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController,
             scenesViewController, bridge);
@@ -92,6 +97,15 @@ public class BuilderProjectsPanelController : IDisposable
         {
             var scenes = Utils.ParseJsonArray<SceneData[]>(payload);
             scenesViewController.SetScenes(scenes);
+        }
+    }
+
+    void OnLandsUpdated(string payload)
+    {
+        if (landsController != null)
+        {
+            var lands = Utils.ParseJsonArray<LandData[]>(payload);
+            landsController.SetLands(lands);
         }
     }
 
