@@ -184,7 +184,7 @@ function createUnityInstance(canvas, config, onProgress) {
       ['FreeBSD( )', 'FreeBSD'],
       ['OpenBSD( )', 'OpenBSD'],
       ['Linux|X11()', 'Linux'],
-      ['Mac OS X ([0-9_.]+)', 'macOS'],
+      ['Mac OS X (1[01][._d]+)', 'macOS'],
       ['bot|google|baidu|bing|msn|teoma|slurp|yandex', 'Search Bot']
     ]
     for (var o = 0; o < oses.length; ++o) {
