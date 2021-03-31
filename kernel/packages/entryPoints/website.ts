@@ -198,12 +198,10 @@ namespace webApp {
 
     document.body.classList.remove('dcl-loading')
 
-    let originalErrorListener = globalThis.UnityLoader.errorListener
-
-    globalThis.UnityLoader.errorListener = (error: any) => {
+    globalThis.UnityLoader.dclErrorHandler = (error: any) => {
       if (error.isSceneError) {
         ReportSceneError((error.message || 'unknown') as string, error)
-        // @see packages/shared/world/SceneWorker.ts#loadSystem
+        // @see CustomWebWorkerTransport.ts
         debugger
         return
       }
@@ -214,8 +212,6 @@ namespace webApp {
         // Some libraries (i.e, matrix client) don't handle promises well and we shouldn't crash the explorer because of that
         return
       }
-
-      originalErrorListener(error)
 
       ReportFatalError(error.message)
     }

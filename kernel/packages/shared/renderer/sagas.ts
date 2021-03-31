@@ -41,7 +41,6 @@ export function* rendererSaga() {
   const action: InitializeRenderer = yield take(INITIALIZE_RENDERER)
   const _gameInstance = yield call(initializeRenderer, action)
 
-  yield take(ENGINE_STARTED)
   _instancedJS = yield call(wrapEngineInstance, _gameInstance)
 }
 
@@ -60,11 +59,20 @@ function* initializeRenderer(action: InitializeRenderer) {
 
   setLoadingScreenVisible(true)
 
+  // Websocket path
   if (qs.ws) {
     _gameInstance = initializeUnityEditor(qs.ws, container)
-  } else {
-    _gameInstance = yield UnityLoader.instantiate(container)
+    yield put(waitingForRenderer())
+    yield take(ENGINE_STARTED)
+    return _gameInstance
   }
+
+  // We have to wait ENGINE_STARTED at the same time we fire off the async instantiate
+  // otherwise we get a race condition because ENGINE_STARTED gets fired off as soon
+  // instantiate is resolved.
+  let unityWillBeReady = UnityLoader.instantiate(container)
+  yield take(ENGINE_STARTED)
+  _gameInstance = yield unityWillBeReady
 
   yield put(waitingForRenderer())
 

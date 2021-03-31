@@ -159,16 +159,13 @@ initializeUnity(container)
 
     document.body.classList.remove('dcl-loading')
 
-    let originalErrorListener = globalThis.UnityLoader.errorListener
-
-    globalThis.UnityLoader.errorListener = (error: any) => {
+    globalThis.UnityLoader.dclErrorHandler = (error: any) => {
       if (error.isSceneError) {
         // @see CustomWebWorkerTransport.ts
         debugger
         return
       }
 
-      originalErrorListener(error)
       console['error'](error)
       ReportFatalError(error.message)
     }
