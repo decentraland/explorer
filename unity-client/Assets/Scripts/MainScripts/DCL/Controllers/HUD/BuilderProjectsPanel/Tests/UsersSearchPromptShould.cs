@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Tests
 {
-    public class UsersSearchPrompShould
+    public class UsersSearchPromptShould
     {
         private UsersSearchPromptView promptView;
 
