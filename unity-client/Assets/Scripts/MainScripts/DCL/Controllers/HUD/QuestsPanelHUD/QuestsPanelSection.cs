@@ -25,6 +25,9 @@ namespace DCL.Huds.QuestsPanel
 
         internal void CreateTask(QuestTask task)
         {
+            if (task.status == QuestLiterals.Status.BLOCKED)
+                return;
+
             GameObject prefab = factory.GetPrefab(task.type);
             if (prefab == null)
             {

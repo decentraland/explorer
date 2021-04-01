@@ -34,6 +34,7 @@ namespace DCL.Huds.QuestsPanel
 
         private string currentQuestInPopup = "";
         internal readonly Dictionary<string, QuestsPanelEntry> questEntries =  new Dictionary<string, QuestsPanelEntry>();
+        private bool orderQuestsRequested = false;
         private bool layoutRebuildRequested = false;
         internal readonly List<string> questsToBeAdded = new List<string>();
         private bool isDestroyed = false;
@@ -56,7 +57,10 @@ namespace DCL.Huds.QuestsPanel
         public void RequestAddOrUpdateQuest(string questId)
         {
             if (questsToBeAdded.Contains(questId))
+            {
+                AddOrUpdateQuest(questId);
                 return;
+            }
 
             questsToBeAdded.Add(questId);
         }
@@ -69,6 +73,13 @@ namespace DCL.Huds.QuestsPanel
                 return;
             }
 
+            //Quest has no available tasks, we remove it.
+            if (!quest.hasAvailableTasks)
+            {
+                RemoveQuest(questId);
+                return;
+            }
+
             if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
             {
                 questEntry = Instantiate(questPrefab).GetComponent<QuestsPanelEntry>();
@@ -76,22 +87,15 @@ namespace DCL.Huds.QuestsPanel
                 questEntries.Add(questId, questEntry);
             }
 
-            if (quest.isCompleted)
-            {
-                questEntry.transform.SetParent(completedQuestsContainer);
-                FindHighestQuestEntryPosition(questEntry, x => x.id != questId && x.isCompleted && quest.completionTime > x.completionTime);
-            }
-            else
-            {
-                questEntry.transform.SetParent(availableQuestsContainer);
-                FindHighestQuestEntryPosition(questEntry, x => x.id != questId && !x.isCompleted && quest.assignmentTime > x.assignmentTime);
-            }
             questEntry.transform.localScale = Vector3.one;
 
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
             questEntry.Populate(quest);
+            if (currentQuestInPopup == questId)
+                questPopup.Populate(quest);
+
+            orderQuestsRequested = true;
             layoutRebuildRequested = true;
-            dynamicScrollSensitivity?.RecalculateSensitivity();
         }
 
         public void RemoveQuest(string questId)
@@ -108,7 +112,7 @@ namespace DCL.Huds.QuestsPanel
                 questPopup.Close();
 
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
-            dynamicScrollSensitivity?.RecalculateSensitivity();
+            layoutRebuildRequested = true;
         }
 
         public void ClearQuests()
@@ -122,7 +126,7 @@ namespace DCL.Huds.QuestsPanel
             questEntries.Clear();
             questsToBeAdded.Clear();
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
-            dynamicScrollSensitivity?.RecalculateSensitivity();
+            layoutRebuildRequested = true;
         }
 
         internal void ShowQuestPopup(string questId)
@@ -148,6 +152,13 @@ namespace DCL.Huds.QuestsPanel
             {
                 layoutRebuildRequested = false;
                 Utils.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+                dynamicScrollSensitivity?.RecalculateSensitivity();
+            }
+
+            if (orderQuestsRequested)
+            {
+                orderQuestsRequested = false;
+                OrderQuests();
             }
 
             for (int i = 0; i < ENTRIES_PER_FRAME && questsToBeAdded.Count > 0; i++)
@@ -158,26 +169,25 @@ namespace DCL.Huds.QuestsPanel
             }
         }
 
-        private void FindHighestQuestEntryPosition(QuestsPanelEntry entry, Func<QuestModel, bool> queryFilter)
+        private void OrderQuests()
         {
-            int index = 0;
-            //Find the last child position that fits the query
-            using (var iterator = questEntries.GetEnumerator())
+            var questModels = questEntries.Keys.Select(x => quests.Get(x));
+
+            string[] availableIdsSorted = questModels.Where(x => !x.isCompleted).OrderBy(x => x.assignmentTime).ThenBy(x => x.id).Select(x => x.id).ToArray();
+            for (int i = 0; i < availableIdsSorted.Length; i++)
             {
-                while (iterator.MoveNext())
-                {
-                    if (!quests.TryGetValue(iterator.Current.Key, out QuestModel questDefinition))
-                        continue;
-
-                    if (!queryFilter.Invoke(questDefinition))
-                        continue;
-
-                    int newIndex = iterator.Current.Value.transform.GetSiblingIndex() + 1;
-                    if (newIndex > index)
-                        index = newIndex;
-                }
+                questEntries[availableIdsSorted[i]].transform.SetParent(availableQuestsContainer);
+                questEntries[availableIdsSorted[i]].transform.localScale = Vector3.one;
+                questEntries[availableIdsSorted[i]].transform.SetSiblingIndex(i);
             }
-            entry.transform.SetSiblingIndex(index);
+
+            string[] completedQuestsSorted = questModels.Where(x => x.isCompleted).OrderBy(x => x.assignmentTime).ThenBy(x => x.id).Select(x => x.id).ToArray();
+            for (int i = 0; i < completedQuestsSorted.Length; i++)
+            {
+                questEntries[completedQuestsSorted[i]].transform.SetParent(completedQuestsContainer);
+                questEntries[completedQuestsSorted[i]].transform.localScale = Vector3.one;
+                questEntries[completedQuestsSorted[i]].transform.SetSiblingIndex(i);
+            }
         }
 
         public void SetVisibility(bool active) { gameObject.SetActive(active); }

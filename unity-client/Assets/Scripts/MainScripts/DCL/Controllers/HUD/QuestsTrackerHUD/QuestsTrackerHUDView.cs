@@ -63,7 +63,7 @@ namespace DCL.Huds.QuestsTracker
             if (!quests.TryGetValue(questId, out QuestModel quest) )
                 return;
 
-            if (quest.isCompleted)
+            if (quest.isCompleted || !quest.hasAvailableTasks)
             {
                 RemoveEntry(questId);
                 return;

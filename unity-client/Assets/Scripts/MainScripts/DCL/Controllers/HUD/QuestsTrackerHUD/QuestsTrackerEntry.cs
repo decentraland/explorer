@@ -60,6 +60,9 @@ namespace DCL.Huds.QuestsTracker
 
             for (int index = 0; index < currentSection.tasks.Length; index++)
             {
+                if (currentSection.tasks[index].status == QuestLiterals.Status.BLOCKED)
+                    continue;
+
                 QuestTask task = currentSection.tasks[index];
                 taskToRemove.Remove(task.id);
                 AddOrUpdateTask(task, index);

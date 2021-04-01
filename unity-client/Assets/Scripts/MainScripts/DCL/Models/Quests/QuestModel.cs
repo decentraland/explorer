@@ -35,6 +35,7 @@ public class QuestModel : BaseModel
 
     public bool canBePinned => !isCompleted && status != QuestLiterals.Status.BLOCKED;
     public bool isCompleted => status == QuestLiterals.Status.COMPLETED;
+    public bool hasAvailableTasks => sections.Any(x => x.tasks.Any(y => y.status != QuestLiterals.Status.BLOCKED));
     public float progress => sections.Average(x => x.progress);
 
     public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<QuestModel>(json); }
