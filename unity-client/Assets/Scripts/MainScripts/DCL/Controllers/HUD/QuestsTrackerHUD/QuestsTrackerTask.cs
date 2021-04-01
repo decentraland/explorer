@@ -50,6 +50,8 @@ namespace DCL.Huds.QuestsTracker
         private void Update()
         {
             Vector3 scale = progress.transform.localScale;
+            if (Math.Abs(scale.x - progressTarget) < Mathf.Epsilon)
+                return;
             scale.x = Mathf.MoveTowards(scale.x, progressTarget, 0.1f);
             progress.transform.localScale = scale;
         }
