@@ -40,8 +40,8 @@ import { parseUrn } from '@dcl/urn-resolver'
 import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
 
 declare const globalThis: Window & UnityInterfaceContainer & StoreContainer
-export const WRONG_FILTERS_ERROR =
-  'You must set one and only one filter for V1. Also, the only collection name allowed is base-avatars'
+const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
+export const WRONG_FILTERS_ERROR = `You must set one and only one filter for V1. Also, the only collection id allowed is '${BASE_AVATARS_COLLECTION_ID}'`
 
 /**
  * This saga handles wearable definition fetching.
@@ -344,7 +344,7 @@ function areFiltersValid(filters: WearablesRequestFilters) {
   let ok = true
   if (filters.collectionIds) {
     filtersSet += 1
-    if (filters.collectionIds.some((name) => name !== 'base-avatars')) {
+    if (filters.collectionIds.some((id) => id !== BASE_AVATARS_COLLECTION_ID)) {
       ok = false
     }
   }
