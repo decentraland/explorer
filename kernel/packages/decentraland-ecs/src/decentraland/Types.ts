@@ -271,6 +271,20 @@ export interface IEvents {
   }
 
   /**
+   * This event gets triggered when the user enters the scene
+   */
+  onEnterScene: {
+    userId: string
+  }
+
+  /**
+   * This event gets triggered when the user leaves the scene
+   */
+  onLeftScene: {
+    userId: string
+  }
+
+  /**
    * This event gets triggered after receiving a comms message.
    */
   comms: {
