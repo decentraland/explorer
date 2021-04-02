@@ -258,7 +258,7 @@ async function mapLegacyIdToUrn(wearableId: WearableId): Promise<WearableId | un
   }
   try {
     const result = await parseUrn(wearableId)
-    if (result?.type === 'off-chain' || result?.type === 'blockchain-collection-v1') {
+    if (result?.type === 'off-chain' || result?.type === 'blockchain-collection-v1-asset') {
       return result.uri.toString()
     }
   } catch {
@@ -281,7 +281,7 @@ export async function mapUrnToLegacyId(wearableId: WearableId): Promise<Wearable
     const result = await parseUrn(wearableId)
     if (result?.type === 'off-chain') {
       return `dcl://${result.registry}/${result.id}`
-    } else if (result?.type === 'blockchain-collection-v1') {
+    } else if (result?.type === 'blockchain-collection-v1-asset') {
       return `dcl://${result.collectionName}/${result.id}`
     }
   } catch {
