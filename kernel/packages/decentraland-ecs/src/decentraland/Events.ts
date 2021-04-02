@@ -1,6 +1,6 @@
 import { EventConstructor } from '../ecs/EventManager'
 import { Observable } from '../ecs/Observable'
-import { DecentralandInterface, IEvents } from './Types'
+import { DecentralandInterface, IEvents, RaycastResponsePayload } from './Types'
 
 /**
  * @public
@@ -16,11 +16,7 @@ export class UUIDEvent<T = any> {
 @EventConstructor()
 export class RaycastResponse<T> {
   constructor(
-    public readonly payload: {
-      queryId: string
-      queryType: string
-      payload: T
-    }
+    public readonly payload: RaycastResponsePayload<T>
   ) { }
 }
 
@@ -72,11 +68,11 @@ export function _initEventObservables(dcl: DecentralandInterface) {
     internalDcl.onEvent((event) => {
       switch (event.type) {
         case 'onEnterScene': {
-          onEnterScene.notifyObservers(event.data)
+          onEnterScene.notifyObservers(event.data as IEvents['onEnterScene'])
           return
         }
         case 'onLeftScene': {
-          onLeftScene.notifyObservers(event.data)
+          onLeftScene.notifyObservers(event.data as IEvents['onLeftScene'])
           return
         }
       }

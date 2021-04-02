@@ -1,5 +1,4 @@
 import { ReadOnlyVector3, ReadOnlyQuaternion, ReadOnlyColor4 } from './math'
-import { RaycastResponse } from './Events'
 
 /** @public */
 export type ModuleDescriptor = {
@@ -129,6 +128,13 @@ export type GlobalInputEventResult = InputEventResult & {
   type: InputEventType
 }
 
+/** @public */
+export type RaycastResponsePayload<T> = {
+  queryId: string
+  queryType: string
+  payload: T
+}
+
 /**
  * @public
  */
@@ -180,7 +186,7 @@ export interface IEvents {
   /**
    * `raycastResponse` is triggered in response to a raycast query
    */
-  raycastResponse: RaycastResponse<any>
+  raycastResponse: RaycastResponsePayload<any>
 
   /**
    * `chatMessage` is triggered when the user sends a message through chat entity.
