@@ -32,7 +32,7 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation Get(
+        WebRequestAsyncOperation Get(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
@@ -47,7 +47,7 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation GetAssetBundle(
+        WebRequestAsyncOperation GetAssetBundle(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
@@ -62,7 +62,7 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation GetTexture(
+        WebRequestAsyncOperation GetTexture(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
@@ -78,7 +78,7 @@ namespace DCL
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
-        UnityWebRequestAsyncOperation GetAudioClip(
+        WebRequestAsyncOperation GetAudioClip(
             string url,
             AudioType audioType,
             Action<UnityWebRequest> OnSuccess = null,
@@ -129,7 +129,7 @@ namespace DCL
             this.audioClipWebRequest = audioClipWebRequest;
         }
 
-        public UnityWebRequestAsyncOperation Get(
+        public WebRequestAsyncOperation Get(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
@@ -139,7 +139,7 @@ namespace DCL
             return SendWebRequest(genericWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
-        public UnityWebRequestAsyncOperation GetAssetBundle(
+        public WebRequestAsyncOperation GetAssetBundle(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
@@ -149,7 +149,7 @@ namespace DCL
             return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
-        public UnityWebRequestAsyncOperation GetTexture(
+        public WebRequestAsyncOperation GetTexture(
             string url,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
@@ -159,7 +159,7 @@ namespace DCL
             return SendWebRequest(textureWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
-        public UnityWebRequestAsyncOperation GetAudioClip(
+        public WebRequestAsyncOperation GetAudioClip(
             string url,
             AudioType audioType,
             Action<UnityWebRequest> OnSuccess = null,
@@ -171,7 +171,7 @@ namespace DCL
             return SendWebRequest(audioClipWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
-        private UnityWebRequestAsyncOperation SendWebRequest<T>(
+        private WebRequestAsyncOperation SendWebRequest<T>(
             T requestType,
             string url,
             Action<UnityWebRequest> OnSuccess,
@@ -184,6 +184,7 @@ namespace DCL
             UnityWebRequest request = requestType.CreateWebRequest(url);
             request.timeout = timeout;
 
+            WebRequestAsyncOperation resultOp = new WebRequestAsyncOperation(request);
             ongoingWebRequests.Add(request);
 
             UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
@@ -191,6 +192,7 @@ namespace DCL
             {
                 if (request.WebRequestSucceded())
                 {
+                    resultOp.SetAsCompleted();
                     OnSuccess?.Invoke(request);
                     request.Dispose();
                 }
@@ -200,16 +202,18 @@ namespace DCL
                     if (remainingAttemps > 0)
                     {
                         Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
-                        requestOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                        resultOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
                     }
                     else
                     {
+                        resultOp.SetAsCompleted();
                         OnFail?.Invoke(request.error);
                         request.Dispose();
                     }
                 }
                 else
                 {
+                    resultOp.SetAsCompleted();
                     OnFail?.Invoke(request.error);
                     request.Dispose();
                 }
@@ -217,7 +221,7 @@ namespace DCL
                 ongoingWebRequests.Remove(request);
             };
 
-            return requestOp;
+            return resultOp;
         }
 
         public void Dispose()
