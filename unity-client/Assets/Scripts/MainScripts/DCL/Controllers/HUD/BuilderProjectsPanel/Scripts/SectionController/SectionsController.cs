@@ -2,10 +2,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+internal enum SectionId
+{
+    SCENES_MAIN,
+    SCENES_DEPLOYED,
+    SCENES_PROJECT,
+    LAND,
+    SETTINGS_PROJECT_GENERAL,
+    SETTINGS_PROJECT_CONTRIBUTORS,
+    SETTINGS_PROJECT_ADMIN
+}
+
+internal interface ISectionsController : IDisposable
+{
+    event Action<SectionBase> OnSectionLoaded;
+    event Action<SectionBase> OnSectionShow;
+    event Action<SectionBase> OnSectionHide;
+    event Action OnRequestContextMenuHide;
+    event Action<SectionId> OnOpenSectionId;
+    event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
+    event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
+    event Action<string, SceneAdminsUpdatePayload> OnRequestUpdateSceneAdmins;
+    event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
+    void OpenSection(SectionId id);
+}
+
 /// <summary>
 /// This class is in charge of handling open/close of the different menu sections
 /// </summary>
-internal class SectionsController : IDisposable
+internal class SectionsController : ISectionsController
 {
     public event Action<SectionBase> OnSectionLoaded;
     public event Action<SectionBase> OnSectionShow;
@@ -21,17 +46,7 @@ internal class SectionsController : IDisposable
     private Transform sectionsParent;
     private ISectionFactory sectionFactory;
     private SectionBase currentOpenSection;
-
-    public enum SectionId
-    {
-        SCENES_MAIN,
-        SCENES_DEPLOYED,
-        SCENES_PROJECT,
-        LAND,
-        SETTINGS_PROJECT_GENERAL,
-        SETTINGS_PROJECT_CONTRIBUTORS,
-        SETTINGS_PROJECT_ADMIN
-    }
+    
 
     /// <summary>
     /// Ctor

@@ -9,7 +9,7 @@ namespace Tests
     public class SectionScenesShould
     {
         private SectionScenesController sectionController;
-        private ScenesViewController scenesController;
+        private IScenesViewController scenesController;
 
         [SetUp]
         public void SetUp()

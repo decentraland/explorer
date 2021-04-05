@@ -4,11 +4,11 @@ using DCL.Helpers;
 internal class BridgeHandler : IDisposable
 {
     private readonly IBuilderProjectsPanelBridge bridge;
-    private readonly ScenesViewController scenesViewController;
-    private readonly LandController landsController;
-    private readonly SectionsController sectionsController;
+    private readonly IScenesViewController scenesViewController;
+    private readonly ILandController landsController;
+    private readonly ISectionsController sectionsController;
 
-    public BridgeHandler(IBuilderProjectsPanelBridge bridge, ScenesViewController scenesViewController, LandController landsController, SectionsController sectionsController)
+    public BridgeHandler(IBuilderProjectsPanelBridge bridge, IScenesViewController scenesViewController, ILandController landsController, ISectionsController sectionsController)
     {
         if (bridge == null)
             return;

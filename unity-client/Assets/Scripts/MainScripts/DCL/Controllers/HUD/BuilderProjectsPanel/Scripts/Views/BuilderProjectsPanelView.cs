@@ -8,7 +8,7 @@ internal interface IBuilderProjectsPanelView : IDisposable
     event Action OnBackToMainMenuPressed;
     event Action OnClosePressed;
     void SetVisible(bool visible);
-    void SetTogglOnWithoutNotify(SectionsController.SectionId sectionId);
+    void SetTogglOnWithoutNotify(SectionId sectionId);
     void SetMainLeftPanel();
     void SetProjectSettingsLeftPanel();
     SceneCardView GetCardViewPrefab();
@@ -69,7 +69,7 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IBuilderProjectsPanelVi
         }
     }
 
-    void IBuilderProjectsPanelView.SetTogglOnWithoutNotify(SectionsController.SectionId sectionId)
+    void IBuilderProjectsPanelView.SetTogglOnWithoutNotify(SectionId sectionId)
     {
         for (int i = 0; i < sectionToggles.Length; i++)
         {

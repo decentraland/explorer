@@ -2,12 +2,12 @@
 
 internal class SectionsHandler : IDisposable
 {
-    private readonly SectionsController sectionsController;
-    private readonly ScenesViewController scenesViewController;
+    private readonly ISectionsController sectionsController;
+    private readonly IScenesViewController scenesViewController;
     private readonly SearchBarView searchBarView;
-    private readonly LandController landController;
+    private readonly ILandController landController;
 
-    public SectionsHandler(SectionsController sectionsController, ScenesViewController scenesViewController, LandController landController, SearchBarView searchBarView)
+    public SectionsHandler(ISectionsController sectionsController, IScenesViewController scenesViewController, ILandController landController, SearchBarView searchBarView)
     {
         this.sectionsController = sectionsController;
         this.scenesViewController = scenesViewController;
@@ -78,6 +78,6 @@ internal class SectionsHandler : IDisposable
     
     void OnSelectScene(SceneCardView sceneCardView)
     {
-        sectionsController.OpenSection(SectionsController.SectionId.SETTINGS_PROJECT_GENERAL);
+        sectionsController.OpenSection(SectionId.SETTINGS_PROJECT_GENERAL);
     }
 }

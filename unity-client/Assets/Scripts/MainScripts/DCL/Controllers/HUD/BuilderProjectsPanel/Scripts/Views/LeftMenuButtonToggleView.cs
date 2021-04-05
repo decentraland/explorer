@@ -10,7 +10,7 @@ internal class LeftMenuButtonToggleView : MonoBehaviour, IPointerEnterHandler, I
     public static event Action<LeftMenuButtonToggleView> OnToggleOn;
 
     [Header("Action")]
-    [SerializeField] public SectionsController.SectionId openSection;
+    [SerializeField] public SectionId openSection;
 
     [Header("Settings")]
     [SerializeField] private Color colorBackgroundDefault;

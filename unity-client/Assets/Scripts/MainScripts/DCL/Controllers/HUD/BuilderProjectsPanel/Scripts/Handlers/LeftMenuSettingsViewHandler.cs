@@ -27,13 +27,13 @@ internal class LeftMenuSettingsViewHandler : IDisposable
     private const string SCENE_TITLE = "Scene settings";
 
     private readonly LeftMenuSettingsViewReferences viewReferences;
-    private readonly ScenesViewController scenesViewController;
+    private readonly IScenesViewController scenesViewController;
     private readonly Texture defaultThumbnail;
 
     private AssetPromise_Texture promiseAvatarThumbnail;
     private AssetPromise_Texture promiseSceneThumbnail;
 
-    public LeftMenuSettingsViewHandler(LeftMenuSettingsViewReferences viewReferences, ScenesViewController scenesViewController)
+    public LeftMenuSettingsViewHandler(LeftMenuSettingsViewReferences viewReferences, IScenesViewController scenesViewController)
     {
         this.viewReferences = viewReferences;
         this.scenesViewController = scenesViewController;

@@ -6,9 +6,9 @@ public class BuilderProjectsPanelController : IHUD
 {
     private readonly IBuilderProjectsPanelView view;
 
-    private SectionsController sectionsController;
-    private ScenesViewController scenesViewController;
-    private LandController landsController;
+    private ISectionsController sectionsController;
+    private IScenesViewController scenesViewController;
+    private ILandController landsController;
 
     private SectionsHandler sectionsHandler;
     private SceneContextMenuHandler sceneContextMenuHandler;
@@ -68,7 +68,7 @@ public class BuilderProjectsPanelController : IHUD
 
         SetView();
 
-        sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
+        sectionsController.OpenSection(SectionId.SCENES_MAIN);
 
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += OnVisibilityChanged;
     }

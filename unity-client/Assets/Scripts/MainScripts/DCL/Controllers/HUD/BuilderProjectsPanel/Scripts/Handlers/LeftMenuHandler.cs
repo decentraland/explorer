@@ -3,12 +3,12 @@
 internal class LeftMenuHandler : IDisposable
 {
     private readonly IBuilderProjectsPanelView view;
-    private readonly SectionsController sectionsController;
+    private readonly ISectionsController sectionsController;
 
     private bool isMainPanel = false;
-    private SectionsController.SectionId lastMainSectionId;
+    private SectionId lastMainSectionId;
 
-    public LeftMenuHandler(IBuilderProjectsPanelView view, SectionsController sectionsController)
+    public LeftMenuHandler(IBuilderProjectsPanelView view, ISectionsController sectionsController)
     {
         this.view = view;
         this.sectionsController = sectionsController;
@@ -40,14 +40,14 @@ internal class LeftMenuHandler : IDisposable
         sectionsController.OpenSection(toggle.openSection);
     }
 
-    void OnOpenSectionId(SectionsController.SectionId sectionId)
+    void OnOpenSectionId(SectionId sectionId)
     {
         view.SetTogglOnWithoutNotify(sectionId);
 
-        bool isMainPanelSection = sectionId == SectionsController.SectionId.SCENES_MAIN ||
-                                  sectionId == SectionsController.SectionId.SCENES_DEPLOYED ||
-                                  sectionId == SectionsController.SectionId.SCENES_PROJECT ||
-                                  sectionId == SectionsController.SectionId.LAND;
+        bool isMainPanelSection = sectionId == SectionId.SCENES_MAIN ||
+                                  sectionId == SectionId.SCENES_DEPLOYED ||
+                                  sectionId == SectionId.SCENES_PROJECT ||
+                                  sectionId == SectionId.LAND;
 
         if (isMainPanelSection)
         {

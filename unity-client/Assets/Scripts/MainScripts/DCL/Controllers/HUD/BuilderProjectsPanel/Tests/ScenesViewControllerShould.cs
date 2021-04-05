@@ -6,7 +6,7 @@ namespace Tests
 {
     public class ScenesViewControllerShould
     {
-        private ScenesViewController scenesViewController;
+        private IScenesViewController scenesViewController;
         private Listener_Mock listenerMock;
 
         [SetUp]
