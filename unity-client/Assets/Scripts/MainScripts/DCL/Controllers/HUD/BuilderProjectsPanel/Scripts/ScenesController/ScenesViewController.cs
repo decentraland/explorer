@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 internal interface IScenesViewController : IDisposable
@@ -45,14 +46,17 @@ internal class ScenesViewController : IScenesViewController
 
     private readonly ScenesRefreshHelper scenesRefreshHelper = new ScenesRefreshHelper();
     private readonly SceneCardView sceneCardViewPrefab;
+    private readonly Transform defaultParent;
 
     /// <summary>
     /// Ctor
     /// </summary>
     /// <param name="sceneCardViewPrefab">prefab for scene's card</param>
-    public ScenesViewController(SceneCardView sceneCardViewPrefab)
+    /// <param name="defaultParent">default parent for scene's card</param>
+    public ScenesViewController(SceneCardView sceneCardViewPrefab, Transform defaultParent = null)
     {
         this.sceneCardViewPrefab = sceneCardViewPrefab;
+        this.defaultParent = defaultParent;
     }
 
     /// <summary>
@@ -277,6 +281,7 @@ internal class ScenesViewController : IScenesViewController
     {
         SceneCardView sceneCardView = Object.Instantiate(sceneCardViewPrefab);
         sceneCardView.gameObject.SetActive(false);
+        sceneCardView.SetParent(defaultParent);
         return sceneCardView;
     }
 

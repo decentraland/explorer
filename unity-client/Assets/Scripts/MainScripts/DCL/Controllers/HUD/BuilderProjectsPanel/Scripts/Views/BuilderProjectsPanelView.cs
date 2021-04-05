@@ -13,6 +13,7 @@ internal interface IBuilderProjectsPanelView : IDisposable
     void SetProjectSettingsLeftPanel();
     SceneCardView GetCardViewPrefab();
     Transform GetSectionContainer();
+    Transform GetTransform();
     SearchBarView GetSearchBar();
     LeftMenuSettingsViewReferences GetSettingsViewReferences();
     SceneCardViewContextMenu GetSceneCardViewContextMenu();
@@ -97,6 +98,11 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IBuilderProjectsPanelVi
     Transform IBuilderProjectsPanelView.GetSectionContainer()
     {
         return sectionsContainer;
+    }
+    
+    Transform IBuilderProjectsPanelView.GetTransform()
+    {
+        return transform;
     }
 
     SearchBarView IBuilderProjectsPanelView.GetSearchBar()

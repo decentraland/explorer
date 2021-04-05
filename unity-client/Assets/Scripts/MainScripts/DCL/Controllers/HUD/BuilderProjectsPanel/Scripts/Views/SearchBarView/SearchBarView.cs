@@ -13,6 +13,8 @@ internal class SearchBarConfig
 
 internal class SearchBarView : MonoBehaviour
 {
+    private const string RESULT_FORMAT = "Results ({0})";
+
     [SerializeField] internal SearchInputField inputField;
     [SerializeField] internal Button sortButton;
     [SerializeField] internal TextMeshProUGUI sortTypeLabel;
@@ -23,7 +25,6 @@ internal class SearchBarView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI resultLabel;
     [SerializeField] internal SortDropdownView sortDropdown;
 
-    private string resultFormat;
     private bool filterOwner = false;
     private bool filterOperator = false;
     private bool filterContributor = false;
@@ -32,8 +33,6 @@ internal class SearchBarView : MonoBehaviour
 
     private void Awake()
     {
-        resultFormat = resultLabel.text;
-
         sortButton.onClick.AddListener(OnSortButtonPressed);
 
         ownerToggle.onValueChanged.AddListener(OnToggleOwner);
@@ -51,7 +50,7 @@ internal class SearchBarView : MonoBehaviour
 
     public void SetResultCount(int count)
     {
-        resultLabel.text = string.Format(resultFormat, count);
+        resultLabel.text = string.Format(RESULT_FORMAT, count);
     }
 
     public void ShowFilters(bool filterOwner, bool filterOperator, bool filterContributor)

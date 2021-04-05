@@ -31,7 +31,7 @@ public class BuilderProjectsPanelController : IHUD
     {
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange -= OnVisibilityChanged;
         view.OnClosePressed -= OnClose;
-        
+
         leftMenuSettingsViewHandler?.Dispose();
         sectionsHandler?.Dispose();
         sceneContextMenuHandler?.Dispose();
@@ -43,47 +43,61 @@ public class BuilderProjectsPanelController : IHUD
 
         view.Dispose();
     }
-    
+
     public void Initialize()
     {
-        Initialize(BuilderProjectsPanelBridge.i);
+        Initialize(BuilderProjectsPanelBridge.i,
+            new SectionsController(view.GetSectionContainer()),
+            new ScenesViewController(view.GetCardViewPrefab(), view.GetTransform()),
+            new LandController());
     }
 
-    public void Initialize(IBuilderProjectsPanelBridge bridge)
+    internal void Initialize(IBuilderProjectsPanelBridge bridge, ISectionsController sectionsController, 
+        IScenesViewController scenesViewController, ILandController landsController)
     {
         if (isInitialized)
             return;
-        
-        isInitialized = true;
-        
-        sectionsController = new SectionsController(view.GetSectionContainer());
-        scenesViewController = new ScenesViewController(view.GetCardViewPrefab());
-        landsController = new LandController();
 
+        isInitialized = true;
+
+        this.sectionsController = sectionsController;
+        this.scenesViewController = scenesViewController;
+        this.landsController = landsController;
+
+        // set listeners for sections, setup searchbar for section, handle request for opening a new section
         sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, landsController, view.GetSearchBar());
+        // handle if main panel or settings panel should be shown in current section
         leftMenuHandler = new LeftMenuHandler(view, sectionsController);
+        // handle project scene info on the left menu panel
         leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(view.GetSettingsViewReferences(), scenesViewController);
+        // handle scene's context menu options
         sceneContextMenuHandler = new SceneContextMenuHandler(view.GetSceneCardViewContextMenu(), sectionsController, scenesViewController, bridge);
+        // handle in and out bridge communications
         bridgeHandler = new BridgeHandler(bridge, scenesViewController, landsController, sectionsController);
 
         SetView();
 
-        sectionsController.OpenSection(SectionId.SCENES_MAIN);
+        //sectionsController.OpenSection(SectionId.SCENES_MAIN);
 
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += OnVisibilityChanged;
     }
-    
+
     public void SetVisibility(bool visible)
     {
         DataStore.i.HUDs.builderProjectsPanelVisible.Set(visible);
     }
 
-    private void OnVisibilityChanged(bool current, bool prev)
+    private void OnVisibilityChanged(bool isVisible, bool prev)
     {
-        if (current == prev)
+        if (isVisible == prev)
             return;
+
+        view.SetVisible(isVisible);
         
-        view.SetVisible(current);
+        if (isVisible)
+        {
+            sectionsController.OpenSection(SectionId.SCENES_MAIN);
+        }
     }
 
     private void OnClose()
