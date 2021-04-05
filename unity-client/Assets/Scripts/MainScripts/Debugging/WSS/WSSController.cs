@@ -485,6 +485,8 @@ namespace DCL
                             case "InitializeQuests":
                             case "UpdateQuestProgress":
                             case "SetENSOwnerQueryResult":
+                            case "OnReceivedProjects":
+                            case "OnReceivedLands":
                                 bridgesGameObject.SendMessage(msg.type, msg.payload);
                                 break;
                             case "SetDisableAssetBundles":

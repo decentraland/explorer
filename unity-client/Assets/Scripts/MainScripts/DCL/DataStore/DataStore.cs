@@ -33,6 +33,7 @@ namespace DCL
         public class DataStore_HUDs
         {
             public readonly BaseVariable<bool> questsPanelVisible = new BaseVariable<bool>(false);
+            public readonly BaseVariable<bool> builderProjectsPanelVisible = new BaseVariable<bool>(false);
         }
     }
 }

@@ -48,7 +48,7 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
 
     public override void Dispose()
     {
-        Object.Destroy(view.gameObject);
+        view.Dispose();
     }
 
     protected override void OnShow()

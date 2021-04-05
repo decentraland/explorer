@@ -10,6 +10,8 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
     [SerializeField] internal Transform sectionsContainer;
     [SerializeField] internal SceneCardViewContextMenu contextMenu;
     [SerializeField] internal SearchBarView searchBarView;
+    [SerializeField] internal ShowHideAnimator showHideAnimator;
+    [SerializeField] internal InputAction_Trigger closeTrigger;
 
     [Header("Left-Panel Section Buttons")]
     [SerializeField] internal LeftMenuButtonToggleView[] sectionToggles;
@@ -34,15 +36,38 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
     private int deployedScenesCount = 0;
     private int projectScenesCount = 0;
 
+    public void SetVisible(bool visible)
+    {
+        if (visible)
+        {
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+            }
+            showHideAnimator.Show();
+        }
+        else
+        {
+            showHideAnimator.Hide();
+        }
+    }
+
     private void Awake()
     {
         closeButton.onClick.AddListener(() => OnClosePressed?.Invoke());
         createSceneButton.onClick.AddListener(() => OnCreateScenePressed?.Invoke());
         importSceneButton.onClick.AddListener(() => OnImportScenePressed?.Invoke());
+        closeTrigger.OnTriggered += CloseTriggerOnOnTriggered;
 
         contextMenu.Hide();
+        gameObject.SetActive(false);
     }
-    
+
+    private void CloseTriggerOnOnTriggered(DCLAction_Trigger action)
+    {
+        OnClosePressed?.Invoke();
+    }
+
     private void SubmenuScenesDirty()
     {
         inWorldScenesToggle.gameObject.SetActive(deployedScenesCount > 0);
