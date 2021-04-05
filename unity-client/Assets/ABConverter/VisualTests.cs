@@ -96,9 +96,7 @@ namespace DCL.ABConverter
                     if (env.file.Exists(filePath))
                     {
                         env.file.Delete(filePath);
-
-                        string depMapPath = filePath + ".depmap";
-                        env.file.Delete(depMapPath);
+                        env.file.Delete(filePath + ".depmap");
                     }
 
                     skippedAssets++;
@@ -113,6 +111,7 @@ namespace DCL.ABConverter
             VisualTestHelpers.baselineImagesPath = baselinePath;
             VisualTestHelpers.testImagesPath = testImagesPath;
 
+            Debug.Log("Visual Test Detection: Finished converted assets testing...skipped assets: " + skippedAssets);
             OnFinish?.Invoke(skippedAssets);
         }
 
