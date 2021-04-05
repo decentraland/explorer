@@ -107,7 +107,7 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         content.SetActive(false);
 
-        if (fetchParcelImageOp != null && !fetchParcelImageOp.isDone)
+        if (fetchParcelImageOp != null)
             fetchParcelImageOp.Abort();
 
         if (downloadedBanner != null)
@@ -135,6 +135,7 @@ public class TeleportPromptHUDView : MonoBehaviour
 
             spinnerImage.SetActive(false);
             imageSceneThumbnail.gameObject.SetActive(true);
+            fetchParcelImageOp.Dispose();
         });
     }
 

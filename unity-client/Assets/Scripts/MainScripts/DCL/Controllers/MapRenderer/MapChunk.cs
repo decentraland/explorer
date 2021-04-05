@@ -85,17 +85,18 @@ namespace DCL
             targetImage.enabled = visible;
 
             if (!isLoadingOrLoaded)
+            {
                 loadOp = LoadChunkImage();
+                loadOp.completed += (asyncOp) => { asyncOp.Dispose(); };
+            }
         }
 
         private WebRequestAsyncOperation loadOp;
 
         private void OnDestroy()
         {
-            if (loadOp == null || loadOp.isDone)
-                return;
-
-            loadOp.Abort();
+            if (loadOp != null)
+                loadOp.Abort();
         }
     }
 }

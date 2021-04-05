@@ -39,10 +39,8 @@ namespace DCL
 
         protected override void OnCancelLoading()
         {
-            if (webRequestOp == null || webRequestOp.isDone)
-                return;
-
-            webRequestOp.Abort();
+            if (webRequestOp != null)
+                webRequestOp.Abort();
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)
@@ -62,17 +60,20 @@ namespace DCL
                     {
                         if (asset != null)
                         {
-                            asset.texture = DownloadHandlerTexture.GetContent(webRequestOp.webRequest);
+                            asset.texture = DownloadHandlerTexture.GetContent(webRequestResult);
                             OnSuccess?.Invoke();
                         }
                         else
                         {
                             OnFail?.Invoke();
                         }
+
+                        webRequestOp.Dispose();
                     },
                     (errorMsg) =>
                     {
                         OnFail?.Invoke();
+                        webRequestOp.Dispose();
                     });
             }
             else

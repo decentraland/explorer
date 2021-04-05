@@ -29,6 +29,22 @@ namespace DCL
             completed?.Invoke(this);
         }
 
-        public void Abort() { webRequest?.Abort(); }
+        public void Abort()
+        {
+            if (webRequest == null || isDone)
+                return;
+
+            webRequest.Abort();
+        }
+
+        public void Dispose()
+        {
+            Abort();
+
+            if (webRequest == null)
+                return;
+
+            webRequest.Dispose();
+        }
     }
 }

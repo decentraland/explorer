@@ -19,7 +19,7 @@ namespace DCL
         /// <param name="audioWebRequest"></param>
         void Initialize(
             IWebRequest genericWebRequest,
-            IWebRequest assetBundleWebRequest,
+            IWebRequestAssetBundle assetBundleWebRequest,
             IWebRequest textureWebRequest,
             IWebRequestAudio audioWebRequest);
 
@@ -96,7 +96,7 @@ namespace DCL
         public static WebRequestController i { get; private set; }
 
         private IWebRequest genericWebRequest;
-        private IWebRequest assetBundleWebRequest;
+        private IWebRequestAssetBundle assetBundleWebRequest;
         private IWebRequest textureWebRequest;
         private IWebRequestAudio audioClipWebRequest;
         private List<UnityWebRequest> ongoingWebRequests = new List<UnityWebRequest>();
@@ -116,7 +116,7 @@ namespace DCL
 
         public void Initialize(
             IWebRequest genericWebRequest,
-            IWebRequest assetBundleWebRequest,
+            IWebRequestAssetBundle assetBundleWebRequest,
             IWebRequest textureWebRequest,
             IWebRequestAudio audioClipWebRequest)
         {
@@ -145,6 +145,18 @@ namespace DCL
             int requestAttemps = 3,
             int timeout = 0)
         {
+            return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+        }
+
+        public WebRequestAsyncOperation GetAssetBundle(
+            string url,
+            Hash128 hash,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0)
+        {
+            assetBundleWebRequest.SetHash(hash);
             return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
@@ -191,9 +203,8 @@ namespace DCL
             {
                 if (request.WebRequestSucceded())
                 {
-                    resultOp.SetAsCompleted();
                     OnSuccess?.Invoke(request);
-                    request.Dispose();
+                    resultOp.SetAsCompleted();
                 }
                 else if (!request.WebRequestAborted() && request.WebRequestServerError())
                 {
@@ -205,16 +216,14 @@ namespace DCL
                     }
                     else
                     {
-                        resultOp.SetAsCompleted();
                         OnFail?.Invoke(request.error);
-                        request.Dispose();
+                        resultOp.SetAsCompleted();
                     }
                 }
                 else
                 {
-                    resultOp.SetAsCompleted();
                     OnFail?.Invoke(request.error);
-                    request.Dispose();
+                    resultOp.SetAsCompleted();
                 }
 
                 ongoingWebRequests.Remove(request);
@@ -228,6 +237,7 @@ namespace DCL
             foreach (var webRequest in ongoingWebRequests)
             {
                 webRequest.Abort();
+                webRequest.Dispose();
             }
         }
     }

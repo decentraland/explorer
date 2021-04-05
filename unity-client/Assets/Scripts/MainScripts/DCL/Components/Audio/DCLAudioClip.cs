@@ -94,6 +94,8 @@ namespace DCL.Components
                         OnFail);
 
                     yield return new WaitUntil(() => fetchOp.isDone);
+
+                    fetchOp.Dispose();
                 }
             }
         }
