@@ -4,11 +4,11 @@ namespace DCL
 {
     public class MapChunk_Mock : MapChunk
     {
-        public override UnityWebRequestAsyncOperation LoadChunkImage()
+        public override WebRequestAsyncOperation LoadChunkImage()
         {
             isLoadingOrLoaded = true;
 
-            return new UnityWebRequestAsyncOperation();
+            return new WebRequestAsyncOperation(null);
         }
     }
 }

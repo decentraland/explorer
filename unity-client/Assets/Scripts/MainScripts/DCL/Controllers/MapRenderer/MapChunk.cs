@@ -1,6 +1,5 @@
 using DCL.Helpers;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace DCL
@@ -21,7 +20,7 @@ namespace DCL
 
         private void Start() { targetImage.color = Color.clear; }
 
-        public virtual UnityWebRequestAsyncOperation LoadChunkImage()
+        public virtual WebRequestAsyncOperation LoadChunkImage()
         {
             isLoadingOrLoaded = true;
 
@@ -89,14 +88,14 @@ namespace DCL
                 loadOp = LoadChunkImage();
         }
 
-        private UnityWebRequestAsyncOperation loadOp;
+        private WebRequestAsyncOperation loadOp;
 
         private void OnDestroy()
         {
             if (loadOp == null || loadOp.isDone)
                 return;
 
-            loadOp.webRequest.Abort();
+            loadOp.Abort();
         }
     }
 }

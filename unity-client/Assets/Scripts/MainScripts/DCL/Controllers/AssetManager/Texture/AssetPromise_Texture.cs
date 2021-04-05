@@ -18,7 +18,7 @@ namespace DCL
         bool storeDefaultTextureInAdvance = false;
         bool storeTexAsNonReadable = false;
 
-        UnityWebRequestAsyncOperation webRequestOp = null;
+        WebRequestAsyncOperation webRequestOp = null;
 
         public AssetPromise_Texture(string textureUrl, TextureWrapMode textureWrapMode = DEFAULT_WRAP_MODE, FilterMode textureFilterMode = DEFAULT_FILTER_MODE, bool storeDefaultTextureInAdvance = false, bool storeTexAsNonReadable = true)
         {
@@ -42,7 +42,7 @@ namespace DCL
             if (webRequestOp == null || webRequestOp.isDone)
                 return;
 
-            webRequestOp.webRequest.Abort();
+            webRequestOp.Abort();
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)

@@ -1,11 +1,8 @@
-using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace DCL.Components
 {
@@ -90,7 +87,7 @@ namespace DCL.Components
                 Model model = (Model) this.model;
                 if (scene.contentProvider.HasContentsUrl(model.url))
                 {
-                    UnityWebRequestAsyncOperation fetchOp = Utils.FetchAudioClip(
+                    WebRequestAsyncOperation fetchOp = Utils.FetchAudioClip(
                         scene.contentProvider.GetContentsUrl(model.url),
                         Utils.GetAudioTypeFromUrlName(model.url),
                         OnComplete,

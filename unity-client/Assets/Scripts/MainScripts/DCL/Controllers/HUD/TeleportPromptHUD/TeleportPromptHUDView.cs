@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DCL.Helpers;
-using UnityEngine.Networking;
+using DCL;
 
 public class TeleportPromptHUDView : MonoBehaviour
 {
@@ -44,7 +44,7 @@ public class TeleportPromptHUDView : MonoBehaviour
     public event Action OnCloseEvent;
     public event Action OnTeleportEvent;
 
-    UnityWebRequestAsyncOperation fetchParcelImageOp;
+    WebRequestAsyncOperation fetchParcelImageOp;
     Texture2D downloadedBanner;
 
     private void Awake()
@@ -108,7 +108,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         content.SetActive(false);
 
         if (fetchParcelImageOp != null && !fetchParcelImageOp.isDone)
-            fetchParcelImageOp.webRequest.Abort();
+            fetchParcelImageOp.Abort();
 
         if (downloadedBanner != null)
         {

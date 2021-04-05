@@ -210,7 +210,7 @@ namespace DCL.Helpers
             return component;
         }
 
-        public static UnityWebRequestAsyncOperation FetchAudioClip(string url, AudioType audioType, Action<AudioClip> OnSuccess, Action<string> OnFail)
+        public static WebRequestAsyncOperation FetchAudioClip(string url, AudioType audioType, Action<AudioClip> OnSuccess, Action<string> OnFail)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             Action<UnityWebRequest> OnSuccessInternal =
@@ -243,7 +243,7 @@ namespace DCL.Helpers
             return WebRequestController.i.GetAudioClip(url, audioType, OnSuccessInternal, OnFailInternal);
         }
 
-        public static UnityWebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
+        public static WebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             void SuccessInternal(UnityWebRequest request)
