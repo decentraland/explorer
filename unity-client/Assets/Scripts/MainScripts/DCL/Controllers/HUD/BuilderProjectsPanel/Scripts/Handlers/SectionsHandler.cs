@@ -7,7 +7,7 @@ internal class SectionsHandler : IDisposable
     private readonly SearchBarView searchBarView;
     private readonly LandController landController;
 
-    public SectionsHandler(SectionsController sectionsController, ScenesViewController scenesViewController, SearchBarView searchBarView, LandController landController)
+    public SectionsHandler(SectionsController sectionsController, ScenesViewController scenesViewController, LandController landController, SearchBarView searchBarView)
     {
         this.sectionsController = sectionsController;
         this.scenesViewController = scenesViewController;

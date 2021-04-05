@@ -42,13 +42,7 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
 
         contextMenu.Hide();
     }
-
-    private void Start()
-    {
-        var TEMPcontroller = new BuilderProjectsPanelController(this);
-
-    }
-
+    
     private void SubmenuScenesDirty()
     {
         inWorldScenesToggle.gameObject.SetActive(deployedScenesCount > 0);

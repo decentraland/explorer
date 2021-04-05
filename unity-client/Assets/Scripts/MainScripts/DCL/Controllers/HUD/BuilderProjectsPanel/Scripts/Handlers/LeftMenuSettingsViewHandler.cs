@@ -33,10 +33,11 @@ internal class LeftMenuSettingsViewHandler : IDisposable
     private AssetPromise_Texture promiseAvatarThumbnail;
     private AssetPromise_Texture promiseSceneThumbnail;
 
-    public LeftMenuSettingsViewHandler(ScenesViewController scenesViewController, LeftMenuSettingsViewReferences viewReferences)
+    public LeftMenuSettingsViewHandler(LeftMenuSettingsViewReferences viewReferences, ScenesViewController scenesViewController)
     {
         this.viewReferences = viewReferences;
         this.scenesViewController = scenesViewController;
+        
         defaultThumbnail = viewReferences.thumbnail.texture;
 
         scenesViewController.OnSceneSelected += OnSelectScene;
@@ -118,7 +119,7 @@ internal class LeftMenuSettingsViewHandler : IDisposable
         }
     }
     
-    void OnSelectScene(SceneCardView sceneCardView)
+    private void OnSelectScene(SceneCardView sceneCardView)
     {
         SetProjectData(sceneCardView.sceneData);
     }

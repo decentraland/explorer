@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class BuilderProjectsPanelBridge : MonoBehaviour
+public class BuilderProjectsPanelBridge : MonoBehaviour, IBuilderProjectsPanelBridge
 {
     public event Action<string> OnProjectsSet;
     public event Action<string> OnLandsSet; 

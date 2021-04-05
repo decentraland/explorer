@@ -3,12 +3,12 @@
 internal class SceneContextMenuHandler : IDisposable
 {
     private readonly SceneCardViewContextMenu contextMenu;
-    private readonly BuilderProjectsPanelBridge bridge;
+    private readonly IBuilderProjectsPanelBridge bridge;
     private readonly SectionsController sectionsController;
     private readonly ScenesViewController scenesViewController;
 
     public SceneContextMenuHandler(SceneCardViewContextMenu contextMenu, SectionsController sectionsController,
-        ScenesViewController scenesViewController, BuilderProjectsPanelBridge bridge)
+        ScenesViewController scenesViewController, IBuilderProjectsPanelBridge bridge)
     {
         this.contextMenu = contextMenu;
         this.bridge = bridge;

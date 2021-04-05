@@ -5,40 +5,36 @@ using Object = UnityEngine.Object;
 
 public class BuilderProjectsPanelController : IDisposable
 {
-    internal readonly BuilderProjectsPanelView view;
-    internal readonly SectionsController sectionsController;
-    internal readonly ScenesViewController scenesViewController;
-    internal readonly LandController landsController;
+    private readonly BuilderProjectsPanelView view;
 
-    internal BuilderProjectsPanelBridge bridge = null;
+    private SectionsController sectionsController;
+    private ScenesViewController scenesViewController;
+    private LandController landsController;
 
-    internal readonly SectionsHandler sectionsHandler;
-    internal readonly SceneContextMenuHandler sceneContextMenuHandler;
-    internal readonly LeftMenuHandler leftMenuHandler;
-    internal readonly LeftMenuSettingsViewHandler leftMenuSettingsViewHandler;
+    private SectionsHandler sectionsHandler;
+    private SceneContextMenuHandler sceneContextMenuHandler;
+    private LeftMenuHandler leftMenuHandler;
+    private LeftMenuSettingsViewHandler leftMenuSettingsViewHandler;
+    private BridgeHandler bridgeHandler;
 
+    private bool isInitialized = false;
 
     public BuilderProjectsPanelController() : this(
-        Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel")))
+        Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel"))) { }
+
+    internal BuilderProjectsPanelController(BuilderProjectsPanelView view)
     {
+        this.view = view;
+        view.name = "_BuilderProjectsPanel";
     }
 
     public void Dispose()
     {
-        if (bridge != null)
-        {
-            bridge.OnProjectsSet -= OnProjectsUpdated;
-            bridge.OnLandsSet -= OnLandsUpdated;
-        }
-        sectionsController.OnRequestUpdateSceneData -= OnRequestUpdateSceneData;
-        sectionsController.OnRequestUpdateSceneContributors -= OnRequestUpdateSceneContributors;
-        sectionsController.OnRequestUpdateSceneAdmins -= OnRequestUpdateSceneAdmins;
-        sectionsController.OnRequestUpdateSceneBannedUsers -= OnRequestUpdateSceneBannedUsers;
-
         leftMenuSettingsViewHandler.Dispose();
         sectionsHandler.Dispose();
         sceneContextMenuHandler.Dispose();
         leftMenuHandler.Dispose();
+        bridgeHandler.Dispose();
 
         sectionsController.Dispose();
         scenesViewController.Dispose();
@@ -47,85 +43,39 @@ public class BuilderProjectsPanelController : IDisposable
             Object.Destroy(view.gameObject);
     }
 
-    internal BuilderProjectsPanelController(BuilderProjectsPanelView view)
+    public void Initialize()
     {
-        bridge = BuilderProjectsPanelBridge.i;
-        if (BuilderProjectsPanelBridge.mockData && bridge == null)
-        {
-            bridge = new GameObject("_BuilderProjectsPanelBridge").AddComponent<BuilderProjectsPanelBridge>();
-        }
+        Initialize(BuilderProjectsPanelBridge.i);
+    }
 
-        this.view = view;
-        view.name = "_BuilderProjectsPanel";
-
+    public void Initialize(IBuilderProjectsPanelBridge bridge)
+    {
+        if (isInitialized)
+            return;
+        
+        isInitialized = true;
+        
         sectionsController = new SectionsController(view.sectionsContainer);
         scenesViewController = new ScenesViewController(view.sceneCardViewPrefab);
         landsController = new LandController();
 
+        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, landsController, view.searchBarView);
+        leftMenuHandler = new LeftMenuHandler(view, sectionsController);
+        leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(view.settingsViewReferences, scenesViewController);
+        sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController, scenesViewController, bridge);
+        bridgeHandler = new BridgeHandler(bridge, scenesViewController, landsController, sectionsController);
+
         SetView();
 
-        if (bridge != null)
-        {
-            bridge.OnProjectsSet += OnProjectsUpdated;
-            bridge.OnLandsSet += OnLandsUpdated;
-            bridge.SendFetchProjects();
-            bridge.SendFetchLands();
-            sectionsController.OnRequestUpdateSceneData += OnRequestUpdateSceneData;
-            sectionsController.OnRequestUpdateSceneContributors += OnRequestUpdateSceneContributors;
-            sectionsController.OnRequestUpdateSceneAdmins += OnRequestUpdateSceneAdmins;
-            sectionsController.OnRequestUpdateSceneBannedUsers += OnRequestUpdateSceneBannedUsers;
-        }
-
-        leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(scenesViewController, view.settingsViewReferences);
-        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, view.searchBarView, landsController);
-        leftMenuHandler = new LeftMenuHandler(view, sectionsController);
-        sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController,
-            scenesViewController, bridge);
-
         sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
+        
+        bridge.SendFetchProjects();
+        bridge.SendFetchLands();
     }
 
-    void SetView()
+    private void SetView()
     {
         scenesViewController.AddListener((IDeployedSceneListener) view);
         scenesViewController.AddListener((IProjectSceneListener) view);
-    }
-
-    void OnProjectsUpdated(string payload)
-    {
-        if (scenesViewController != null)
-        {
-            var scenes = Utils.ParseJsonArray<SceneData[]>(payload);
-            scenesViewController.SetScenes(scenes);
-        }
-    }
-
-    void OnLandsUpdated(string payload)
-    {
-        if (landsController != null)
-        {
-            var lands = Utils.ParseJsonArray<LandData[]>(payload);
-            landsController.SetLands(lands);
-        }
-    }
-
-    void OnRequestUpdateSceneData(string id, SceneDataUpdatePayload dataUpdatePayload)
-    {
-        bridge?.SendSceneDataUpdate(id, dataUpdatePayload);
-    }
-
-    void OnRequestUpdateSceneContributors(string id, SceneContributorsUpdatePayload payload)
-    {
-        bridge?.SendSceneContributorsUpdate(id, payload);
-    }
-    
-    void OnRequestUpdateSceneAdmins(string id, SceneAdminsUpdatePayload payload)
-    {
-        bridge?.SendSceneAdminsUpdate(id, payload);
-    }
-    
-    void OnRequestUpdateSceneBannedUsers(string id, SceneBannedUsersUpdatePayload payload)
-    {
-        bridge?.SendSceneBannedUsersUpdate(id, payload);
     }
 }
