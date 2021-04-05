@@ -12,7 +12,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
 {
     public string entityUniqueId;
 
-    public event System.Action<DCLBuilderInWorldEntity> onStatusUpdate;
+    public event System.Action<DCLBuilderInWorldEntity> OnShapeFinishLoading;
+    public event System.Action<DCLBuilderInWorldEntity> OnStatusUpdate;
     public event System.Action<DCLBuilderInWorldEntity> OnDelete;
 
     private bool isLockedValue = false;
@@ -23,7 +24,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             SetIsLockedValue(value);
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -35,7 +36,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             isSelectedValue = value;
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -47,7 +48,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             isNewValue = value;
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -59,7 +60,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         set
         {
             isVisibleValue = value;
-            onStatusUpdate?.Invoke(this);
+            OnStatusUpdate?.Invoke(this);
         }
     }
 
@@ -73,6 +74,8 @@ public class DCLBuilderInWorldEntity : EditableEntity
     private bool isShapeComponentSet = false;
 
     private Animation[] meshAnimations;
+
+    private Vector3 currentRotation;
     Transform originalParent;
 
     Material[] originalMaterials;
@@ -81,7 +84,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     Dictionary<string, List<GameObject>> collidersGameObjectDictionary = new Dictionary<string, List<GameObject>>();
 
-    public void Init(DecentralandEntity entity, Material editMaterial)
+    public void Init(IDCLEntity entity, Material editMaterial)
     {
         rootEntity = entity;
         rootEntity.OnShapeUpdated += OnShapeUpdate;
@@ -95,6 +98,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
         IsVisible = rootEntity.gameObject.activeSelf;
 
         isShapeComponentSet = false;
+        InitRotation();
 
         if (rootEntity.meshRootGameObject && rootEntity.meshesInfo.renderers.Length > 0)
         {
@@ -147,10 +151,12 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         rootEntity.gameObject.SetActive(!gameObject.activeSelf);
         IsVisible = gameObject.activeSelf;
-        onStatusUpdate?.Invoke(this);
+        OnStatusUpdate?.Invoke(this);
     }
 
     public void ToggleLockStatus() { IsLocked = !IsLocked; }
+
+    public void ShapeLoadFinish(ISharedComponent component) { OnShapeFinishLoading?.Invoke(this); }
 
     public void Delete()
     {
@@ -162,7 +168,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (isNFT)
         {
-            foreach (KeyValuePair<Type, ISharedComponent> kvp in rootEntity.GetSharedComponents())
+            foreach (KeyValuePair<Type, ISharedComponent> kvp in rootEntity.sharedComponents)
             {
                 if (kvp.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
                 {
@@ -193,6 +199,22 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     #region Components
 
+    #region Transfrom
+
+    public void AddRotation(Vector3 newRotation) { currentRotation += newRotation; }
+
+    public void SetRotation(Vector3 newRotation) { currentRotation = newRotation; }
+
+    public Vector3 GetEulerRotation() { return currentRotation; }
+
+    public void InitRotation()
+    {
+        //TODO : We need to implement the initial rotation from the transform component instead of getting the current rotation
+        currentRotation = rootEntity.gameObject.transform.eulerAngles;
+    }
+
+    #endregion
+
     #region SmartItem
 
     public bool HasSmartItemComponent()
@@ -215,7 +237,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool GetIsLockedValue()
     {
-        foreach (KeyValuePair<Type, ISharedComponent> kvp in rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> kvp in rootEntity.sharedComponents)
         {
             if (kvp.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
@@ -230,7 +252,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
     {
         bool foundComponent = false;
 
-        foreach (KeyValuePair<Type, ISharedComponent> kvp in rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> kvp in rootEntity.sharedComponents)
         {
             if (kvp.Value.GetClassId() == (int) CLASS_ID.LOCKED_ON_EDIT)
             {
@@ -266,7 +288,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             scene.SharedComponentAttach(rootEntity.entityId, name.id);
         }
 
-        onStatusUpdate?.Invoke(this);
+        OnStatusUpdate?.Invoke(this);
     }
 
     public string GetDescriptiveName()
@@ -302,7 +324,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
         if (isNFT)
         {
-            foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+            foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in rootEntity.sharedComponents)
             {
                 if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
                 {
@@ -455,9 +477,9 @@ public class DCLBuilderInWorldEntity : EditableEntity
         }
     }
 
-    void OnNameUpdate(DCLName.Model model) { onStatusUpdate?.Invoke(this); }
+    void OnNameUpdate(DCLName.Model model) { OnStatusUpdate?.Invoke(this); }
 
-    void OnShapeUpdate(DecentralandEntity decentralandEntity)
+    void OnShapeUpdate(IDCLEntity entity)
     {
         ShapeInit();
 
@@ -465,7 +487,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
             SetEditMaterial();
     }
 
-    void CreateCollidersForEntity(DecentralandEntity entity)
+    void CreateCollidersForEntity(IDCLEntity entity)
     {
         MeshesInfo meshInfo = entity.meshesInfo;
         if (meshInfo == null ||
@@ -533,7 +555,7 @@ public class DCLBuilderInWorldEntity : EditableEntity
 
     public bool IsEntityNFT()
     {
-        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in rootEntity.GetSharedComponents())
+        foreach (KeyValuePair<Type, ISharedComponent> keyValuePairBaseDisposable in rootEntity.sharedComponents)
         {
             if (keyValuePairBaseDisposable.Value.GetClassId() == (int) CLASS_ID.NFT_SHAPE)
                 return true;
