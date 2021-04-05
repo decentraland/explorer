@@ -79,7 +79,6 @@ public class GifProcessor
     {
         webRequest = UnityWebRequest.Get(url);
         yield return webRequest.SendWebRequest();
-        ;
 
         bool success = webRequest != null && webRequest.WebRequestSucceded();
         if (success)
