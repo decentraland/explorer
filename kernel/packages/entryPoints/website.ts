@@ -35,8 +35,8 @@ import { userAuthentified } from 'shared/session'
 import { realmInitialized } from 'shared/dao'
 import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
-import { WorldConfig } from 'shared/meta/types'
-import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
+import { FeatureFlags, WorldConfig } from 'shared/meta/types'
+import { isFeatureEnabled, isVoiceChatEnabledFor } from 'shared/meta/selectors'
 import { UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
@@ -126,6 +126,7 @@ namespace webApp {
         const identity = getCurrentIdentity(globalThis.globalStore.getState())!
 
         const voiceChatEnabled = isVoiceChatEnabledFor(globalThis.globalStore.getState(), identity.address)
+        const builderInWorldEnabled = identity.hasConnectedWeb3 && isFeatureEnabled(globalThis.globalStore.getState(), FeatureFlags.BUILDER_IN_WORLD, false)
 
         const configForRenderer = kernelConfigForRenderer()
         configForRenderer.comms.voiceChatEnabled = voiceChatEnabled
@@ -136,6 +137,7 @@ namespace webApp {
         i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
         i.ConfigureHUDElement(HUDElementID.USERS_AROUND_LIST_HUD, { active: voiceChatEnabled, visible: false })
         i.ConfigureHUDElement(HUDElementID.FRIENDS, { active: identity.hasConnectedWeb3, visible: false })
+        i.ConfigureHUDElement(HUDElementID.BUILDER_PROJECTS_PANEL, { active: builderInWorldEnabled, visible: false })
 
         ensureRendererEnabled().then(() => {
           globalThis.globalStore.dispatch(setLoadingWaitTutorial(false))
