@@ -175,7 +175,8 @@ namespace DCL
             string url,
             Action<UnityWebRequest> OnSuccess,
             Action<string> OnFail,
-            int requestAttemps, int timeout) where T : IWebRequest
+            int requestAttemps,
+            int timeout) where T : IWebRequest
         {
             int remainingAttemps = Mathf.Clamp(requestAttemps, 1, requestAttemps);
 
@@ -190,6 +191,7 @@ namespace DCL
                 if (request.WebRequestSucceded())
                 {
                     OnSuccess?.Invoke(request);
+                    request.Dispose();
                 }
                 else if (!request.WebRequestAborted() && request.WebRequestServerError())
                 {
@@ -197,20 +199,21 @@ namespace DCL
                     if (remainingAttemps > 0)
                     {
                         Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
-                        SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                        requestOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
                     }
                     else
                     {
                         OnFail?.Invoke(request.error);
+                        request.Dispose();
                     }
                 }
                 else
                 {
                     OnFail?.Invoke(request.error);
+                    request.Dispose();
                 }
 
                 ongoingWebRequests.Remove(request);
-                request?.Dispose();
             };
 
             return requestOp;
