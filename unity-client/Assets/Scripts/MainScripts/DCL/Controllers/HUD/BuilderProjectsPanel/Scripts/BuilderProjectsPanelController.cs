@@ -4,7 +4,7 @@ using Object = UnityEngine.Object;
 
 public class BuilderProjectsPanelController : IHUD
 {
-    private readonly BuilderProjectsPanelView view;
+    private readonly IBuilderProjectsPanelView view;
 
     private SectionsController sectionsController;
     private ScenesViewController scenesViewController;
@@ -21,16 +21,15 @@ public class BuilderProjectsPanelController : IHUD
     public BuilderProjectsPanelController() : this(
         Object.Instantiate(Resources.Load<BuilderProjectsPanelView>("BuilderProjectsPanel"))) { }
 
-    internal BuilderProjectsPanelController(BuilderProjectsPanelView view)
+    internal BuilderProjectsPanelController(IBuilderProjectsPanelView view)
     {
         this.view = view;
-        view.name = "_BuilderProjectsPanel";
         view.OnClosePressed += OnClose;
     }
 
     public void Dispose()
     {
-        DataStore.i.HUDs.builderProjectsPanelVisible.OnChange -= SetVisible;
+        DataStore.i.HUDs.builderProjectsPanelVisible.OnChange -= OnVisibilityChanged;
         view.OnClosePressed -= OnClose;
         
         leftMenuSettingsViewHandler.Dispose();
@@ -42,8 +41,7 @@ public class BuilderProjectsPanelController : IHUD
         sectionsController.Dispose();
         scenesViewController.Dispose();
 
-        if (view != null)
-            Object.Destroy(view.gameObject);
+        view.Dispose();
     }
     
     public void Initialize()
@@ -58,14 +56,14 @@ public class BuilderProjectsPanelController : IHUD
         
         isInitialized = true;
         
-        sectionsController = new SectionsController(view.sectionsContainer);
-        scenesViewController = new ScenesViewController(view.sceneCardViewPrefab);
+        sectionsController = new SectionsController(view.GetSectionContainer());
+        scenesViewController = new ScenesViewController(view.GetCardViewPrefab());
         landsController = new LandController();
 
-        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, landsController, view.searchBarView);
+        sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, landsController, view.GetSearchBar());
         leftMenuHandler = new LeftMenuHandler(view, sectionsController);
-        leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(view.settingsViewReferences, scenesViewController);
-        sceneContextMenuHandler = new SceneContextMenuHandler(view.contextMenu, sectionsController, scenesViewController, bridge);
+        leftMenuSettingsViewHandler = new LeftMenuSettingsViewHandler(view.GetSettingsViewReferences(), scenesViewController);
+        sceneContextMenuHandler = new SceneContextMenuHandler(view.GetSceneCardViewContextMenu(), sectionsController, scenesViewController, bridge);
         bridgeHandler = new BridgeHandler(bridge, scenesViewController, landsController, sectionsController);
 
         SetView();
@@ -75,7 +73,7 @@ public class BuilderProjectsPanelController : IHUD
         bridge.SendFetchProjects();
         bridge.SendFetchLands();
 
-        DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += SetVisible;
+        DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += OnVisibilityChanged;
     }
     
     public void SetVisibility(bool visible)
@@ -83,12 +81,12 @@ public class BuilderProjectsPanelController : IHUD
         DataStore.i.HUDs.builderProjectsPanelVisible.Set(visible);
     }
 
-    private void SetVisible(bool current, bool prev)
+    private void OnVisibilityChanged(bool current, bool prev)
     {
-        if (current != prev)
-        {
-            view.SetVisible(current);
-        }
+        if (current == prev)
+            return;
+        
+        view.SetVisible(current);
     }
 
     private void OnClose()

@@ -2,23 +2,18 @@
 
 internal class LeftMenuHandler : IDisposable
 {
-    private readonly BuilderProjectsPanelView view;
+    private readonly IBuilderProjectsPanelView view;
     private readonly SectionsController sectionsController;
 
     private bool isMainPanel = false;
     private SectionsController.SectionId lastMainSectionId;
 
-    public LeftMenuHandler(BuilderProjectsPanelView view, SectionsController sectionsController)
+    public LeftMenuHandler(IBuilderProjectsPanelView view, SectionsController sectionsController)
     {
         this.view = view;
         this.sectionsController = sectionsController;
 
-        for (int i = 0; i < view.sectionToggles.Length; i++)
-        {
-            view.sectionToggles[i].Setup();
-        }
-
-        view.backToMainPanelButton.onClick.AddListener(OnSceneSettingsBackPressed);
+        view.OnBackToMainMenuPressed += OnSceneSettingsBackPressed;
 
         sectionsController.OnOpenSectionId += OnOpenSectionId;
         LeftMenuButtonToggleView.OnToggleOn += OnToggleOn;
@@ -26,7 +21,7 @@ internal class LeftMenuHandler : IDisposable
 
     public void Dispose()
     {
-        view.backToMainPanelButton.onClick.RemoveListener(OnSceneSettingsBackPressed);
+        view.OnBackToMainMenuPressed -= OnSceneSettingsBackPressed;
 
         sectionsController.OnOpenSectionId -= OnOpenSectionId;
         LeftMenuButtonToggleView.OnToggleOn -= OnToggleOn;
@@ -47,10 +42,7 @@ internal class LeftMenuHandler : IDisposable
 
     void OnOpenSectionId(SectionsController.SectionId sectionId)
     {
-        for (int i = 0; i < view.sectionToggles.Length; i++)
-        {
-            view.sectionToggles[i].SetIsOnWithoutNotify(sectionId == view.sectionToggles[i].openSection);
-        }
+        view.SetTogglOnWithoutNotify(sectionId);
 
         bool isMainPanelSection = sectionId == SectionsController.SectionId.SCENES_MAIN ||
                                   sectionId == SectionsController.SectionId.SCENES_DEPLOYED ||
@@ -79,8 +71,7 @@ internal class LeftMenuHandler : IDisposable
             return;
 
         isMainPanel = true;
-        view.leftPanelMain.SetActive(true);
-        view.leftPanelProjectSettings.SetActive(false);
+        view.SetMainLeftPanel();
     }
 
     void SetSettingsLeftPanel()
@@ -89,7 +80,6 @@ internal class LeftMenuHandler : IDisposable
             return;
 
         isMainPanel = false;
-        view.leftPanelMain.SetActive(false);
-        view.leftPanelProjectSettings.SetActive(true);
+        view.SetProjectSettingsLeftPanel();
     }
 }

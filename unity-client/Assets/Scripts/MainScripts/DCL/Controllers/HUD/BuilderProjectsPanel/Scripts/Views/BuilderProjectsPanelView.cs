@@ -3,7 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener, IProjectSceneListener
+internal interface IBuilderProjectsPanelView : IDisposable
+{
+    event Action OnBackToMainMenuPressed;
+    event Action OnClosePressed;
+    void SetVisible(bool visible);
+    void SetTogglOnWithoutNotify(SectionsController.SectionId sectionId);
+    void SetMainLeftPanel();
+    void SetProjectSettingsLeftPanel();
+    SceneCardView GetCardViewPrefab();
+    Transform GetSectionContainer();
+    SearchBarView GetSearchBar();
+    LeftMenuSettingsViewReferences GetSettingsViewReferences();
+    SceneCardViewContextMenu GetSceneCardViewContextMenu();
+}
+
+internal class BuilderProjectsPanelView : MonoBehaviour, IBuilderProjectsPanelView, IDeployedSceneListener, IProjectSceneListener
 {
     [Header("General")]
     [SerializeField] internal Button closeButton;
@@ -32,11 +47,13 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
     public event Action OnClosePressed;
     public event Action OnCreateScenePressed;
     public event Action OnImportScenePressed;
+    public event Action OnBackToMainMenuPressed;
 
     private int deployedScenesCount = 0;
     private int projectScenesCount = 0;
+    private bool isDestroyed = false;
 
-    public void SetVisible(bool visible)
+    void IBuilderProjectsPanelView.SetVisible(bool visible)
     {
         if (visible)
         {
@@ -52,15 +69,81 @@ internal class BuilderProjectsPanelView : MonoBehaviour, IDeployedSceneListener,
         }
     }
 
+    void IBuilderProjectsPanelView.SetTogglOnWithoutNotify(SectionsController.SectionId sectionId)
+    {
+        for (int i = 0; i < sectionToggles.Length; i++)
+        {
+            sectionToggles[i].SetIsOnWithoutNotify(sectionId == sectionToggles[i].openSection);
+        }
+    }
+
+    void IBuilderProjectsPanelView.SetMainLeftPanel()
+    {
+        leftPanelMain.SetActive(true);
+        leftPanelProjectSettings.SetActive(false);
+    }
+    
+    void IBuilderProjectsPanelView.SetProjectSettingsLeftPanel()
+    {
+        leftPanelMain.SetActive(false);
+        leftPanelProjectSettings.SetActive(true);
+    }
+
+    SceneCardView IBuilderProjectsPanelView.GetCardViewPrefab()
+    {
+        return sceneCardViewPrefab;
+    }
+    
+    Transform IBuilderProjectsPanelView.GetSectionContainer()
+    {
+        return sectionsContainer;
+    }
+
+    SearchBarView IBuilderProjectsPanelView.GetSearchBar()
+    {
+        return  searchBarView;
+    }
+
+    LeftMenuSettingsViewReferences IBuilderProjectsPanelView.GetSettingsViewReferences()
+    {
+        return settingsViewReferences;
+    }
+
+    SceneCardViewContextMenu IBuilderProjectsPanelView.GetSceneCardViewContextMenu()
+    {
+        return contextMenu;
+    }
+
+    public void Dispose()
+    {
+        if (!isDestroyed)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Awake()
     {
+        name = "_BuilderProjectsPanel";
+        
         closeButton.onClick.AddListener(() => OnClosePressed?.Invoke());
         createSceneButton.onClick.AddListener(() => OnCreateScenePressed?.Invoke());
         importSceneButton.onClick.AddListener(() => OnImportScenePressed?.Invoke());
+        backToMainPanelButton.onClick.AddListener(()=> OnBackToMainMenuPressed?.Invoke());
         closeTrigger.OnTriggered += CloseTriggerOnOnTriggered;
 
         contextMenu.Hide();
         gameObject.SetActive(false);
+        
+        for (int i = 0; i < sectionToggles.Length; i++)
+        {
+            sectionToggles[i].Setup();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        isDestroyed = true;
     }
 
     private void CloseTriggerOnOnTriggered(DCLAction_Trigger action)
