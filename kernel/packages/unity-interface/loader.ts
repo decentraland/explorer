@@ -8,6 +8,7 @@ export type UnityLoader = {}
 export type LoadRendererResult = {
   DclRenderer: DclRenderer
   UnityLoader: UnityLoader
+  baseUrl: string
 }
 
 /**
@@ -37,7 +38,8 @@ async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
 
   return {
     DclRenderer: globalThis.DclRenderer,
-    UnityLoader: globalThis.UnityLoader
+    UnityLoader: globalThis.UnityLoader,
+    baseUrl
   }
 }
 // TODO: return type DclRenderer
@@ -52,7 +54,8 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
     }
     return {
       DclRenderer: globalThis.DclRenderer,
-      UnityLoader: globalThis.UnityLoader
+      UnityLoader: globalThis.UnityLoader,
+      baseUrl: getRendererArtifactsRoot()
     }
   }
 

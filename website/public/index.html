@@ -216,7 +216,7 @@
       var script = document.getElementById("unityLoader");
       script.onload = () => {};
       var UnityLoader = UnityLoader || {
-        instantiate: function (dclCanvas) {
+        instantiate: function (dclCanvas, loaderConfig) {
           var canvas = document.createElement("canvas");
           canvas.addEventListener("contextmenu", function (e) {
             e.preventDefault();
@@ -225,19 +225,7 @@
           dclCanvas.appendChild(canvas);
 
           return new Promise((resolve) => {
-            var buildUrl = "%PUBLIC_URL%/unity/Build";
-            var loaderUrl = buildUrl + "/unity.loader.js";
-            var config = {
-              dataUrl: buildUrl + "/unity.data.unityweb",
-              frameworkUrl: buildUrl + "/unity.framework.js.unityweb",
-              codeUrl: buildUrl + "/unity.wasm.unityweb",
-              streamingAssetsUrl: "StreamingAssets",
-              companyName: "Decentraland",
-              productName: "Decentraland World Client",
-              productVersion: "0.1",
-            };
-
-            createUnityInstance(canvas, config, (progress) => {})
+            createUnityInstance(canvas, loaderConfig, (progress) => {})
               .then(resolve)
               .catch((message) => {
                 alert(message);

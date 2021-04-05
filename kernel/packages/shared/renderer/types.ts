@@ -12,7 +12,7 @@ export type RootRendererState = {
 
 export type UnityLoaderType = {
   // https://docs.unity3d.com/Manual/webgl-templates.html
-  instantiate(divId: any): UnityGame
+  instantiate(divId: any, loaderConfig: any): UnityGame
 }
 
 export type UnityGame = {

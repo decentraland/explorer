@@ -1,25 +1,22 @@
+import { DEBUG_MESSAGES, unityBuildConfigurations } from 'config'
 import { call, put, select, take, takeEvery } from 'redux-saga/effects'
-
-import { DEBUG_MESSAGES } from 'config'
-import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
-
-import { waitingForRenderer, UNEXPECTED_ERROR } from 'shared/loading/types'
-import { createLogger } from 'shared/logger'
 import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { UNEXPECTED_ERROR, waitingForRenderer } from 'shared/loading/types'
+import { createLogger } from 'shared/logger'
 import { StoreContainer } from 'shared/store/rootTypes'
-
-import { UnityLoaderType, UnityGame, RENDERER_INITIALIZED } from './types'
+import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
 import {
-  INITIALIZE_RENDERER,
-  InitializeRenderer,
   engineStarted,
+  ENGINE_STARTED,
+  InitializeRenderer,
+  INITIALIZE_RENDERER,
   messageFromEngine,
   MessageFromEngineAction,
   MESSAGE_FROM_ENGINE,
-  rendererEnabled,
-  ENGINE_STARTED
+  rendererEnabled
 } from './actions'
 import { isInitialized } from './selectors'
+import { RENDERER_INITIALIZED, UnityGame, UnityLoaderType } from './types'
 
 const queryString = require('query-string')
 
@@ -51,7 +48,7 @@ export function* ensureRenderer() {
 }
 
 function* initializeRenderer(action: InitializeRenderer) {
-  const { container } = action.payload
+  const { container, baseUrl } = action.payload
 
   const qs = queryString.parse(document.location.search)
 
@@ -67,10 +64,20 @@ function* initializeRenderer(action: InitializeRenderer) {
     return _gameInstance
   }
 
+  const config = {
+    dataUrl: baseUrl + unityBuildConfigurations.UNITY_DATA_PATH,
+    frameworkUrl: baseUrl + unityBuildConfigurations.UNITY_FRAMEWORK_PATH,
+    codeUrl: baseUrl + unityBuildConfigurations.UNITY_CODE_PATH,
+    streamingAssetsUrl: unityBuildConfigurations.UNITY_STREAMING_ASSETS_URL,
+    companyName: unityBuildConfigurations.UNITY_ORGANIZATION_NAME,
+    productName: unityBuildConfigurations.UNITY_PRODUCT_NAME,
+    productVersion: unityBuildConfigurations.UNITY_PRODUCT_VERSION
+  }
+
   // We have to wait ENGINE_STARTED at the same time we fire off the async instantiate
   // otherwise we get a race condition because ENGINE_STARTED gets fired off as soon
   // instantiate is resolved.
-  let unityWillBeReady = UnityLoader.instantiate(container)
+  let unityWillBeReady = UnityLoader.instantiate(container, config)
   yield take(ENGINE_STARTED)
   _gameInstance = yield unityWillBeReady
 
