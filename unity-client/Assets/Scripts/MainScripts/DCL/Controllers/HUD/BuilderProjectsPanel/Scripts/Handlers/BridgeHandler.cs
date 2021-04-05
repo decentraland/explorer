@@ -10,6 +10,9 @@ internal class BridgeHandler : IDisposable
 
     public BridgeHandler(IBuilderProjectsPanelBridge bridge, ScenesViewController scenesViewController, LandController landsController, SectionsController sectionsController)
     {
+        if (bridge == null)
+            return;
+        
         this.bridge = bridge;
         this.scenesViewController = scenesViewController;
         this.landsController = landsController;
@@ -22,11 +25,26 @@ internal class BridgeHandler : IDisposable
         sectionsController.OnRequestUpdateSceneContributors += OnRequestUpdateSceneContributors;
         sectionsController.OnRequestUpdateSceneAdmins += OnRequestUpdateSceneAdmins;
         sectionsController.OnRequestUpdateSceneBannedUsers += OnRequestUpdateSceneBannedUsers;
+        
+        bridge.SendFetchProjects();
+        bridge.SendFetchLands();
     }
 
     public void Dispose()
     {
+        if (bridge != null)
+        {
+            bridge.OnLandsSet -= OnLandsUpdated;
+            bridge.OnProjectsSet -= OnProjectsUpdated;
+        }
 
+        if (sectionsController != null)
+        {
+            sectionsController.OnRequestUpdateSceneData -= OnRequestUpdateSceneData;
+            sectionsController.OnRequestUpdateSceneContributors -= OnRequestUpdateSceneContributors;
+            sectionsController.OnRequestUpdateSceneAdmins -= OnRequestUpdateSceneAdmins;
+            sectionsController.OnRequestUpdateSceneBannedUsers -= OnRequestUpdateSceneBannedUsers;
+        }
     }
     
     private void OnProjectsUpdated(string payload)

@@ -32,14 +32,14 @@ public class BuilderProjectsPanelController : IHUD
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange -= OnVisibilityChanged;
         view.OnClosePressed -= OnClose;
         
-        leftMenuSettingsViewHandler.Dispose();
-        sectionsHandler.Dispose();
-        sceneContextMenuHandler.Dispose();
-        leftMenuHandler.Dispose();
-        bridgeHandler.Dispose();
+        leftMenuSettingsViewHandler?.Dispose();
+        sectionsHandler?.Dispose();
+        sceneContextMenuHandler?.Dispose();
+        leftMenuHandler?.Dispose();
+        bridgeHandler?.Dispose();
 
-        sectionsController.Dispose();
-        scenesViewController.Dispose();
+        sectionsController?.Dispose();
+        scenesViewController?.Dispose();
 
         view.Dispose();
     }
@@ -69,9 +69,6 @@ public class BuilderProjectsPanelController : IHUD
         SetView();
 
         sectionsController.OpenSection(SectionsController.SectionId.SCENES_MAIN);
-        
-        bridge.SendFetchProjects();
-        bridge.SendFetchLands();
 
         DataStore.i.HUDs.builderProjectsPanelVisible.OnChange += OnVisibilityChanged;
     }
