@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace DCL.Components
 {
@@ -20,10 +21,7 @@ namespace DCL.Components
             [Range(0f, 1f)]
             public double volume = 1f;
 
-            public override BaseModel GetDataFromJSON(string json)
-            {
-                return Utils.SafeFromJson<Model>(json);
-            }
+            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
         }
 
         public AudioClip audioClip;
@@ -53,10 +51,7 @@ namespace DCL.Components
 
         public bool shouldTryLoad => ((Model) model).shouldTryToLoad;
 
-        public override int GetClassId()
-        {
-            return (int) CLASS_ID.AUDIO_CLIP;
-        }
+        public override int GetClassId() { return (int) CLASS_ID.AUDIO_CLIP; }
 
         void OnComplete(AudioClip clip)
         {
@@ -95,8 +90,13 @@ namespace DCL.Components
                 Model model = (Model) this.model;
                 if (scene.contentProvider.HasContentsUrl(model.url))
                 {
-                    yield return Utils.FetchAudioClip(scene.contentProvider.GetContentsUrl(model.url),
-                        Utils.GetAudioTypeFromUrlName(model.url), OnComplete, OnFail);
+                    UnityWebRequestAsyncOperation fetchOp = Utils.FetchAudioClip(
+                        scene.contentProvider.GetContentsUrl(model.url),
+                        Utils.GetAudioTypeFromUrlName(model.url),
+                        OnComplete,
+                        OnFail);
+
+                    yield return new WaitUntil(() => fetchOp.isDone);
                 }
             }
         }

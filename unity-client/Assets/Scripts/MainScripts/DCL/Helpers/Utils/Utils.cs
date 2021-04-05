@@ -210,42 +210,7 @@ namespace DCL.Helpers
             return component;
         }
 
-        public static IEnumerator FetchAsset(string url, UnityWebRequest request,
-            System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                using (var webRequest = request)
-                {
-                    yield return webRequest.SendWebRequest();
-
-                    if (!request.WebRequestSucceded())
-                    {
-                        Debug.Log(
-                            string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
-
-                        if (OnFail != null)
-                        {
-                            OnFail.Invoke(webRequest.error);
-                        }
-                    }
-                    else
-                    {
-                        if (OnSuccess != null)
-                        {
-                            OnSuccess.Invoke(webRequest);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                Debug.Log(string.Format("Can't fetch asset as the url is empty!"));
-            }
-        }
-
-        public static IEnumerator FetchAudioClip(string url, AudioType audioType, Action<AudioClip> OnSuccess,
-            Action<string> OnFail)
+        public static UnityWebRequestAsyncOperation FetchAudioClip(string url, AudioType audioType, Action<AudioClip> OnSuccess, Action<string> OnFail)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             Action<UnityWebRequest> OnSuccessInternal =
@@ -275,10 +240,7 @@ namespace DCL.Helpers
                     }
                 };
 
-            var req = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
-
-            yield return FetchAsset(url, req, OnSuccessInternal,
-                OnFailInternal);
+            return WebRequestController.i.GetAudioClip(url, audioType, OnSuccessInternal, OnFailInternal);
         }
 
         public static UnityWebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
