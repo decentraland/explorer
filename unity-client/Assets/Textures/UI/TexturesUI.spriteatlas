@@ -113,6 +113,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 2f8b0284904be4060b916850abd6f9c8, type: 3}
   - {fileID: 21300000, guid: c983eea4ebd9d43579acbb2e5c500480, type: 3}
   - {fileID: 21300000, guid: a13564b4fa74e4061bafd65fb9bfdc46, type: 3}
+  - {fileID: 21300000, guid: a97a0ec41c10cdf4991c0112c64b2e84, type: 3}
   - {fileID: 21300000, guid: acc672d4bfa668c40b5d8b96e9b94a7a, type: 3}
   - {fileID: 21300000, guid: 3652c7d4f41204ccbacf529de58ec612, type: 3}
   - {fileID: 21300000, guid: b5c699d454d344addad40a2576c0349f, type: 3}
@@ -145,6 +146,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 243dd557f2b614bc5ba2599f40d20448, type: 3}
   - {fileID: 21300000, guid: 7b4468575e3ab49e1aec3edd88298137, type: 3}
   - {fileID: 21300000, guid: 058e0097872914023991446b014562ef, type: 3}
+  - {fileID: 21300000, guid: b2755fa77563aad42bfdaa03c0e54746, type: 3}
   - {fileID: 21300000, guid: 7404b1b7d6b0f40929ae536f5b39be50, type: 3}
   - {fileID: 21300000, guid: 9af081c7b27544b809eda744a31a2889, type: 3}
   - {fileID: 21300000, guid: 0f4ebac7e595c4582aa0491ec5e6466a, type: 3}
@@ -302,6 +304,7 @@ SpriteAtlas:
   - HeaderExternalLink
   - Camera
   - NFTEmpty
+  - CheckmarkGreen
   - Ellipse38x38
   - MessageReceived
   - ScenesContainer
@@ -334,6 +337,7 @@ SpriteAtlas:
   - EllipticalSwitchBackground
   - ContainerRadius11Shadow
   - VoiceChatDisable
+  - RoundedContainerRadius23
   - MouseLocked
   - FriendsListImage
   - MagicWand

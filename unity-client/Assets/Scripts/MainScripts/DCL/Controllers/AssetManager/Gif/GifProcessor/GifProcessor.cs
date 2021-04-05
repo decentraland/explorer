@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System;
 using DCL.Helpers;
 using UnityEngine.Networking;
+using DCL;
 
 /// <summary>
 /// GifProcessor: Is in charge of choosing which gif processor tu use (typescript's webworker through GIFProcessingBridge or Unity's plugin UniGif)
@@ -77,14 +78,15 @@ public class GifProcessor
     private IEnumerator UniGifProcessorLoad(string url, Action<GifFrameData[]> OnSuccess, Action OnFail)
     {
         webRequest = UnityWebRequest.Get(url);
-        yield return webRequest.SendWebRequest();;
+        yield return webRequest.SendWebRequest();
+        ;
 
         bool success = webRequest != null && webRequest.WebRequestSucceded();
         if (success)
         {
             var bytes = webRequest.downloadHandler.data;
             yield return UniGif.GetTextureListCoroutine(bytes,
-                (frames,loopCount, width, height) =>
+                (frames, loopCount, width, height) =>
                 {
                     if (frames != null)
                     {

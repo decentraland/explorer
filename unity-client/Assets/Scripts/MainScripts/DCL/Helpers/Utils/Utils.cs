@@ -210,29 +210,6 @@ namespace DCL.Helpers
             return component;
         }
 
-        public static bool WebRequestSucceded(this UnityWebRequest request)
-        {
-            return request != null &&
-                   !request.isNetworkError &&
-                   !request.isHttpError;
-        }
-
-        public static bool WebRequestServerError(this UnityWebRequest request)
-        {
-            return request != null &&
-                   request.responseCode >= 500 &&
-                   request.responseCode < 600;
-        }
-
-        public static bool WebRequestAborted(this UnityWebRequest request)
-        {
-            return request != null &&
-                   request.isNetworkError &&
-                   request.isHttpError &&
-                   !string.IsNullOrEmpty(request.error) &&
-                   request.error.ToLower().Contains("aborted");
-        }
-
         public static IEnumerator FetchAsset(string url, UnityWebRequest request,
             System.Action<UnityWebRequest> OnSuccess = null, System.Action<string> OnFail = null)
         {
@@ -242,7 +219,7 @@ namespace DCL.Helpers
                 {
                     yield return webRequest.SendWebRequest();
 
-                    if (!WebRequestSucceded(request))
+                    if (!request.WebRequestSucceded())
                     {
                         Debug.Log(
                             string.Format("Fetching asset failed ({0}): {1} ", request.url, webRequest.error));
@@ -304,7 +281,7 @@ namespace DCL.Helpers
                 OnFailInternal);
         }
 
-        public static IEnumerator FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
+        public static UnityWebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
         {
             //NOTE(Brian): This closure is called when the download is a success.
             void SuccessInternal(UnityWebRequest request)
@@ -313,7 +290,7 @@ namespace DCL.Helpers
                 OnSuccess?.Invoke(texture);
             }
 
-            yield return FetchAsset(textureURL, UnityWebRequestTexture.GetTexture(textureURL), SuccessInternal, OnFail);
+            return WebRequestController.i.GetTexture(textureURL, SuccessInternal, OnFail);
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)

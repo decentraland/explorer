@@ -1,7 +1,6 @@
-using System;
 using DCL.Helpers;
-using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace DCL
@@ -20,36 +19,31 @@ namespace DCL
         protected RectTransform rt;
         protected bool isLoadingOrLoaded = false;
 
-        private void Start()
-        {
-            targetImage.color = Color.clear;
-        }
+        private void Start() { targetImage.color = Color.clear; }
 
-        public virtual IEnumerator LoadChunkImage()
+        public virtual UnityWebRequestAsyncOperation LoadChunkImage()
         {
-            if (isLoadingOrLoaded)
-                yield break;
-
             isLoadingOrLoaded = true;
 
             string url = $"{MAP_API_BASE}?center={center.x},{center.y}&width={size.x}&height={size.y}&size={tileSize}";
 
             Texture result = null;
 
-            yield return Utils.FetchTexture(url, (x) => result = x);
-
-            if (result != null)
+            return Utils.FetchTexture(url, (x) =>
             {
-                result.filterMode = FilterMode.Trilinear;
-                result.wrapMode = TextureWrapMode.Clamp;
-                result.anisoLevel = 16;
+                result = x;
 
-                targetImage.texture = result;
-                targetImage.SetNativeSize();
-                targetImage.color = Color.white;
-            }
+                if (result != null)
+                {
+                    result.filterMode = FilterMode.Trilinear;
+                    result.wrapMode = TextureWrapMode.Clamp;
+                    result.anisoLevel = 16;
 
-            loadCoroutine = null;
+                    targetImage.texture = result;
+                    targetImage.SetNativeSize();
+                    targetImage.color = Color.white;
+                }
+            });
         }
 
         public void UpdateCulling()
@@ -92,18 +86,17 @@ namespace DCL
             targetImage.enabled = visible;
 
             if (!isLoadingOrLoaded)
-                loadCoroutine = CoroutineStarter.Start(LoadChunkImage());
+                loadOp = LoadChunkImage();
         }
 
-        private Coroutine loadCoroutine;
+        private UnityWebRequestAsyncOperation loadOp;
 
         private void OnDestroy()
         {
-            if (loadCoroutine != null)
-            {
-                CoroutineStarter.Stop(loadCoroutine);
-                loadCoroutine = null;
-            }
+            if (loadOp == null || loadOp.isDone)
+                return;
+
+            loadOp.webRequest.Abort();
         }
     }
 }

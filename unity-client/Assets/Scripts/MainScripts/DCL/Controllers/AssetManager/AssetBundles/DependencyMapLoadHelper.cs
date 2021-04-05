@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using WaitUntil = DCL.WaitUntil;
-
+using DCL;
 
 public static class DependencyMapLoadHelper
 {
@@ -100,7 +100,8 @@ public static class DependencyMapLoadHelper
 
     private static void LoadPersistentCache()
     {
-        if (persistentCacheLoaded) return;
+        if (persistentCacheLoaded)
+            return;
 
         persistentCacheLoaded = true;
         CommonScriptableObjects.rendererState.OnChange += RendererState_OnChange;
