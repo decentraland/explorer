@@ -47,6 +47,7 @@ namespace DCL.ABConverter
         internal readonly string finalDownloadedPath;
         internal readonly string finalDownloadedAssetDbPath;
         public Dictionary<string, string> hashLowercaseToHashProper = new Dictionary<string, string>();
+        internal bool generateAssetBundles = true;
 
         public Client.Settings settings;
 
@@ -97,7 +98,7 @@ namespace DCL.ABConverter
             PopulateLowercaseMappings(rawContents);
             
             float timer = Time.realtimeSinceStartup;
-            bool shouldGenerateAssetBundles = true;
+            bool shouldGenerateAssetBundles = generateAssetBundles;
             bool assetsAlreadyDumped = false;
 
             //TODO(Brian): Use async-await instead of Application.update
@@ -128,7 +129,7 @@ namespace DCL.ABConverter
 
                     EditorApplication.update -= UpdateLoop;
 
-                    if (shouldGenerateAssetBundles)
+                    if (shouldGenerateAssetBundles && generateAssetBundles)
                     {
                         AssetBundleManifest manifest;
 
@@ -161,20 +162,46 @@ namespace DCL.ABConverter
                     EditorApplication.update -= UpdateLoop;
                 }
 
-                EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(
-                    env: env,
-                    OnFinish: (skippedAssetsCount) =>
-                    {
-                        this.skippedAssets = skippedAssetsCount;
-
-                        if (this.skippedAssets > 0)
-                            state.lastErrorCode = ErrorCodes.SOME_ASSET_BUNDLES_SKIPPED;
-
-                        OnFinish?.Invoke(state.lastErrorCode);
-                    }));
+                if (generateAssetBundles)
+                {
+                    EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(
+                        env: env,
+                        OnFinish: (skippedAssetsCount) =>
+                        {
+                            this.skippedAssets = skippedAssetsCount;
+                    
+                            if (this.skippedAssets > 0)
+                                state.lastErrorCode = ErrorCodes.SOME_ASSET_BUNDLES_SKIPPED;
+                    
+                            OnFinish?.Invoke(state.lastErrorCode);
+                        }));
+                }
+                else
+                {
+                    OnFinish?.Invoke(state.lastErrorCode);
+                }
             }
 
             EditorApplication.update += UpdateLoop;
+        }
+
+        public void ConvertDumpedAssets(Action<ErrorCodes> OnFinish = null)
+        {
+            if (!BuildAssetBundles(out AssetBundleManifest manifest)) return;
+            
+            CleanAssetBundleFolder(manifest.GetAllAssetBundles());
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(VisualTests.TestConvertedAssets(
+                env: env,
+                OnFinish: (skippedAssetsCount) =>
+                {
+                    this.skippedAssets = skippedAssetsCount;
+                    
+                    if (this.skippedAssets > 0)
+                        state.lastErrorCode = ErrorCodes.SOME_ASSET_BUNDLES_SKIPPED;
+                    
+                    OnFinish?.Invoke(state.lastErrorCode);
+                }));
         }
 
         /// <summary>

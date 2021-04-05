@@ -364,6 +364,10 @@ namespace DCL.ABConverter
             
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
                                                 .Where(x => x.category != WearableLiterals.Categories.BODY_SHAPE)
+                                                // .Where(x => x.id == "dcl://halloween_2019/vampire_upper_body" 
+                                                            // || x.id == "dcl://base-avatars/bear_slippers"
+                                                            // || x.id == "dcl://exclusive_masks/killer_mask"
+                                                            // ) // For Debugging
                                                 .ToList();
             
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
@@ -384,14 +388,12 @@ namespace DCL.ABConverter
         /// <param name="OnWearableLoad">an action to be bind to the OnWearableLoad event on each wearable</param>
         private static void DumpWearableQueue(ABConverter.Core abConverterCoreController, Queue<WearableItem> items, System.Action<UnityGLTF.GLTFSceneImporter> OnWearableLoad)
         {
+            // We toggle the core's ABs generation off so that we execute that conversion here when there is no more items left.
+            abConverterCoreController.generateAssetBundles = false;
+            
             if (items.Count == 0)
             {
-                AssetBundleManifest manifest;
-
-                if (abConverterCoreController.BuildAssetBundles(out manifest))
-                {
-                    abConverterCoreController.CleanAssetBundleFolder(manifest.GetAllAssetBundles());
-                }
+                abConverterCoreController.ConvertDumpedAssets();
 
                 return;
             }
