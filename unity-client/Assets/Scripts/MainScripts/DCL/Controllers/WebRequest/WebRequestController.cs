@@ -99,7 +99,7 @@ namespace DCL
         private IWebRequestAssetBundle assetBundleWebRequest;
         private IWebRequest textureWebRequest;
         private IWebRequestAudio audioClipWebRequest;
-        private List<UnityWebRequest> ongoingWebRequests = new List<UnityWebRequest>();
+        private List<WebRequestAsyncOperation> ongoingWebRequests = new List<WebRequestAsyncOperation>();
 
         public static WebRequestController Create()
         {
@@ -196,19 +196,19 @@ namespace DCL
             request.timeout = timeout;
 
             WebRequestAsyncOperation resultOp = new WebRequestAsyncOperation(request);
-            ongoingWebRequests.Add(request);
+            ongoingWebRequests.Add(resultOp);
 
-            UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
+            UnityWebRequestAsyncOperation requestOp = resultOp.webRequest.SendWebRequest();
             requestOp.completed += (asyncOp) =>
             {
                 if (!resultOp.isDisposed)
                 {
-                    if (request.WebRequestSucceded())
+                    if (resultOp.webRequest.WebRequestSucceded())
                     {
-                        OnSuccess?.Invoke(request);
+                        OnSuccess?.Invoke(resultOp.webRequest);
                         resultOp.SetAsCompleted();
                     }
-                    else if (!request.WebRequestAborted() && request.WebRequestServerError())
+                    else if (!resultOp.webRequest.WebRequestAborted() && resultOp.webRequest.WebRequestServerError())
                     {
                         remainingAttemps--;
                         if (remainingAttemps > 0)
@@ -218,18 +218,18 @@ namespace DCL
                         }
                         else
                         {
-                            OnFail?.Invoke(request.error);
+                            OnFail?.Invoke(resultOp.webRequest.error);
                             resultOp.SetAsCompleted();
                         }
                     }
                     else
                     {
-                        OnFail?.Invoke(request.error);
+                        OnFail?.Invoke(resultOp.webRequest.error);
                         resultOp.SetAsCompleted();
                     }
                 }
 
-                ongoingWebRequests.Remove(request);
+                ongoingWebRequests.Remove(resultOp);
             };
 
             return resultOp;
