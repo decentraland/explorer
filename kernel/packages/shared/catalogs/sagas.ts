@@ -133,13 +133,7 @@ function* initialLoad() {
 }
 
 export function* handleWearablesRequest(action: WearablesRequest) {
-  const { filters: filter2, context } = action.payload
-  const filters = {
-    ...filter2,
-    collectionIds: filter2?.collectionIds?.map((collectionId) =>
-      collectionId === 'base-avatars' ? BASE_AVATARS_COLLECTION_ID : collectionId
-    )
-  }
+  const { filters, context } = action.payload
 
   const valid = areFiltersValid(filters)
   if (valid) {
