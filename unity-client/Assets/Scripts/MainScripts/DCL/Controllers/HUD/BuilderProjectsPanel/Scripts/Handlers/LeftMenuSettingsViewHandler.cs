@@ -23,8 +23,8 @@ internal class LeftMenuSettingsViewReferences
 
 internal class LeftMenuSettingsViewHandler : IDisposable
 {
-    private const string PROJECT_TITLE = "Project settings";
-    private const string SCENE_TITLE = "Scene settings";
+    internal const string PROJECT_TITLE = "Project settings";
+    internal const string SCENE_TITLE = "Scene settings";
 
     private readonly LeftMenuSettingsViewReferences viewReferences;
     private readonly IScenesViewController scenesViewController;

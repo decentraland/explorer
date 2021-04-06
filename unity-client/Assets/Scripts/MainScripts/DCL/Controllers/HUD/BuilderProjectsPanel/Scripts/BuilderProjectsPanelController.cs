@@ -4,7 +4,7 @@ using Object = UnityEngine.Object;
 
 public class BuilderProjectsPanelController : IHUD
 {
-    private readonly IBuilderProjectsPanelView view;
+    internal readonly IBuilderProjectsPanelView view;
 
     private ISectionsController sectionsController;
     private IScenesViewController scenesViewController;
