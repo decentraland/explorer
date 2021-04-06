@@ -11,7 +11,7 @@ using DCL;
 public class GifProcessor
 {
     private bool jsGIFProcessingEnabled = false;
-    private UnityWebRequest webRequest;
+    private WebRequestAsyncOperation webRequestOp;
     private string url;
 
     public GifProcessor(string url)
@@ -49,9 +49,9 @@ public class GifProcessor
         {
             DCL.GIFProcessingBridge.i.DeleteGIF(url);
         }
-        else if (!(webRequest is null))
+        else if (webRequestOp != null)
         {
-            webRequest.Abort();
+            webRequestOp.Dispose();
         }
     }
 
@@ -77,13 +77,14 @@ public class GifProcessor
 
     private IEnumerator UniGifProcessorLoad(string url, Action<GifFrameData[]> OnSuccess, Action OnFail)
     {
-        webRequest = UnityWebRequest.Get(url);
-        yield return webRequest.SendWebRequest();
+        webRequestOp = WebRequestController.i.Get(url);
 
-        bool success = webRequest != null && webRequest.WebRequestSucceded();
+        yield return webRequestOp;
+
+        bool success = webRequestOp.webRequest != null && webRequestOp.webRequest.WebRequestSucceded();
         if (success)
         {
-            var bytes = webRequest.downloadHandler.data;
+            var bytes = webRequestOp.webRequest.downloadHandler.data;
             yield return UniGif.GetTextureListCoroutine(bytes,
                 (frames, loopCount, width, height) =>
                 {
@@ -101,7 +102,6 @@ public class GifProcessor
         {
             OnFail?.Invoke();
         }
-        webRequest.Dispose();
-        webRequest = null;
+        webRequestOp.Dispose();
     }
 }
