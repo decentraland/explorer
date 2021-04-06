@@ -47,8 +47,8 @@ namespace DCL
         /// </summary>
         internal void SetAsCompleted()
         {
-            isDone = true;
             completed?.Invoke(this);
+            isDone = true;
 
             if (disposeOnCompleted)
                 Dispose();

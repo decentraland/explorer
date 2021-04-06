@@ -127,18 +127,19 @@ namespace DCL
         {
             List<MappingPair> mappingPairs = new List<MappingPair>();
 
-            UnityWebRequest w = UnityWebRequest.Get(url);
-            w.SendWebRequest();
+            WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(url);
 
-            while (!w.isDone) { }
+            while (!asyncOp.isDone) { }
 
-            if (!w.WebRequestSucceded())
+            if (!asyncOp.webRequest.WebRequestSucceded())
             {
-                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {asyncOp.webRequest.error}");
+                asyncOp.Dispose();
                 return null;
             }
 
-            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
+            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + asyncOp.webRequest.downloadHandler.text + "}");
+            asyncOp.Dispose();
 
             foreach (var avatar in avatarApiData.data)
             {
