@@ -133,7 +133,13 @@ function* initialLoad() {
 }
 
 export function* handleWearablesRequest(action: WearablesRequest) {
-  const { filters, context } = action.payload
+  const { filters: filter2, context } = action.payload
+  const filters = {
+    ...filter2,
+    collectionIds: filter2?.collectionIds?.map((collectionId) =>
+      collectionId === 'base-avatars' ? BASE_AVATARS_COLLECTION_ID : collectionId
+    )
+  }
 
   const valid = areFiltersValid(filters)
   if (valid) {
@@ -171,8 +177,10 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
         client
       )
       for (const { amount, definition } of ownedWearables) {
-        for (let i = 0; i < amount; i++) {
-          result.push(definition)
+        if (definition) {
+          for (let i = 0; i < amount; i++) {
+            result.push(definition)
+          }
         }
       }
     }
