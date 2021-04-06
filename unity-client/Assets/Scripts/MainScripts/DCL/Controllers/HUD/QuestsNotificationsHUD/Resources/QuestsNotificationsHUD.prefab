@@ -117,3 +117,5 @@ MonoBehaviour:
     type: 3}
   questCompletedPrefab: {fileID: 1056732120328084277, guid: da46082f0669a0948bbcb130baad9a7b,
     type: 3}
+  rewardObtainedPrefab: {fileID: 1658646231584508166, guid: 109a9d70273810847bd39c01b622854b,
+    type: 3}

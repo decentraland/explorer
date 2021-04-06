@@ -1236,8 +1236,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainScrollRect: {fileID: 46766232827834759}
-  viewport: {fileID: 3907676170047710732}
-  contentContainer: {fileID: 3268782322294405303}
   minSensitivity: 5
   maxSensitivity: 50
   sensitivityMultiplier: 0.5
@@ -1806,7 +1804,7 @@ PrefabInstance:
     - target: {fileID: 6007858166302443194, guid: 49eaaf30e8891e64492f14c5d00dd127,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000050410188
+      value: -0.000045776367
       objectReference: {fileID: 0}
     - target: {fileID: 6504313740685595220, guid: 49eaaf30e8891e64492f14c5d00dd127,
         type: 3}

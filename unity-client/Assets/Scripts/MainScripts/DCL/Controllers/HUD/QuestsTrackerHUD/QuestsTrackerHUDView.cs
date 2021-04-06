@@ -29,8 +29,6 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
 
         internal readonly Dictionary<string, QuestsTrackerEntry> currentEntries = new Dictionary<string, QuestsTrackerEntry>();
-        internal  readonly Dictionary<string, DateTime> lastUpdateTimestamp = new Dictionary<string, DateTime>();
-        internal  readonly List<string> questsToBeAdded = new List<string>();
         private bool layoutRebuildRequested;
         private bool isDestroyed = false;
 
@@ -44,26 +42,16 @@ namespace DCL.Huds.QuestsTracker
             return view;
         }
 
-        private void Awake()
-        {
-            StartCoroutine(AddEntriesRoutine());
-            StartCoroutine(RemoveEntriesRoutine());
-        }
+        private void Awake() { StartCoroutine(RemoveEntriesRoutine()); }
 
-        public void UpdateQuest(string questId)
-        {
-            if (questsToBeAdded.Contains(questId))
-                return;
-
-            questsToBeAdded.Add(questId);
-        }
+        public void UpdateQuest(string questId) { AddOrUpdateQuest(questId, pinnedQuests.Contains(questId)); }
 
         internal void AddOrUpdateQuest(string questId, bool isPinned)
         {
-            if (!quests.TryGetValue(questId, out QuestModel quest) )
+            if (!quests.TryGetValue(questId, out QuestModel quest))
                 return;
 
-            if (quest.isCompleted || !quest.hasAvailableTasks)
+            if (quest.isCompleted && !quest.justProgressed)
             {
                 RemoveEntry(questId);
                 return;
@@ -76,7 +64,6 @@ namespace DCL.Huds.QuestsTracker
                 currentEntries.Add(quest.id, questEntry);
             }
 
-            RefreshLastUpdateTime(quest.id, isPinned ? DateTime.MaxValue : DateTime.Now);
             questEntry.transform.SetSiblingIndex(0);
 
             questEntry.Populate(quest);
@@ -86,12 +73,10 @@ namespace DCL.Huds.QuestsTracker
 
         public void RemoveEntry(string questId)
         {
-            questsToBeAdded.Remove(questId);
             if (!currentEntries.TryGetValue(questId, out QuestsTrackerEntry entry))
                 return;
 
             currentEntries.Remove(questId);
-            lastUpdateTimestamp.Remove(questId);
             entry.StartDestroy();
         }
 
@@ -100,14 +85,10 @@ namespace DCL.Huds.QuestsTracker
             if (currentEntries.TryGetValue(questId, out QuestsTrackerEntry entry))
             {
                 entry.SetPinStatus(true);
-                RefreshLastUpdateTime(questId, DateTime.MaxValue);
             }
             else
             {
-                if (questsToBeAdded.Contains(questId))
-                    return;
-
-                questsToBeAdded.Add(questId);
+                AddOrUpdateQuest(questId, pinnedQuests.Contains(questId));
             }
         }
 
@@ -117,7 +98,6 @@ namespace DCL.Huds.QuestsTracker
                 return;
 
             entry.SetPinStatus(false);
-            RefreshLastUpdateTime(questId, DateTime.MinValue);
         }
 
         private void Update()
@@ -130,17 +110,8 @@ namespace DCL.Huds.QuestsTracker
             }
         }
 
-        internal void RefreshLastUpdateTime(string questId, DateTime dateToSet)
-        {
-            if (lastUpdateTimestamp.ContainsKey(questId))
-                lastUpdateTimestamp[questId] = dateToSet;
-            else
-                lastUpdateTimestamp.Add(questId, dateToSet);
-        }
-
         public void ClearEntries()
         {
-            lastUpdateTimestamp.Clear();
             foreach ((string key, QuestsTrackerEntry value) in currentEntries)
             {
                 Destroy(value.gameObject);
@@ -158,25 +129,11 @@ namespace DCL.Huds.QuestsTracker
 
         private void OnDestroy() { isDestroyed = true; }
 
-        private IEnumerator AddEntriesRoutine()
-        {
-            while (true)
-            {
-                for (int i = 0; i < ENTRIES_PER_FRAME && questsToBeAdded.Count > 0; i++)
-                {
-                    string questId = questsToBeAdded.First();
-                    questsToBeAdded.RemoveAt(0);
-                    AddOrUpdateQuest(questId, pinnedQuests.Contains(questId));
-                }
-                yield return null;
-            }
-        }
-
         private IEnumerator RemoveEntriesRoutine()
         {
             while (true)
             {
-                var entriesToRemove = lastUpdateTimestamp.Where(x => (DateTime.Now - x.Value) > TimeSpan.FromSeconds(3)).Select(x => x.Key).ToArray();
+                var entriesToRemove = currentEntries.Where(x => x.Value.isReadyForDisposal).Select(x => x.Key).ToArray();
                 foreach (string questId in entriesToRemove)
                 {
                     RemoveEntry(questId);

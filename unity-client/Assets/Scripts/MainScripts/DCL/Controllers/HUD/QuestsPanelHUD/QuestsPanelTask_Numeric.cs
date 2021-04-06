@@ -37,7 +37,7 @@ namespace DCL.Huds.QuestsPanel
             current.text = payload.current.ToString();
             end.text = payload.end.ToString();
 
-            ongoingProgress.transform.localScale = new Vector3(1, task.progress, 1);
+            ongoingProgress.transform.localScale = new Vector3(task.progress, 1, 1);
         }
     }
 }

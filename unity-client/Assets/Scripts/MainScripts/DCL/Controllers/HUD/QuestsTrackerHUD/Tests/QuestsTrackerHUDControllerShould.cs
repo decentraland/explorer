@@ -170,7 +170,8 @@ namespace Tests.QuestsTrackerHUD
         public void BeEmptyOnInitialize()
         {
             Assert.AreEqual(0, hudView.currentEntries.Count);
-            Assert.AreEqual(0, hudView.questsToBeAdded.Count);
+            //Assert.AreEqual(0, hudView.questsToBeAdded.Count);
+            Assert.IsTrue(false); //TODO fix test
         }
 
         [Test]
@@ -178,8 +179,9 @@ namespace Tests.QuestsTrackerHUD
         {
             hudView.UpdateQuest(MOCK_QUEST_ID);
 
-            Assert.AreEqual(1, hudView.questsToBeAdded.Count);
-            Assert.IsTrue(hudView.questsToBeAdded.Contains(MOCK_QUEST_ID));
+            //Assert.AreEqual(1, hudView.questsToBeAdded.Count);
+            //Assert.IsTrue(hudView.questsToBeAdded.Contains(MOCK_QUEST_ID));
+            Assert.IsTrue(false); //TODO fix test
             Assert.AreEqual(0, hudView.currentEntries.Count);
         }
 
@@ -190,7 +192,8 @@ namespace Tests.QuestsTrackerHUD
 
             Assert.AreEqual(1, hudView.questsContainer.childCount);
             Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
-            Assert.AreEqual(DateTime.MaxValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]);
+            //Assert.IsTrue(DateTime.MaxValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]);
+            Assert.IsTrue(false); //TODO fix test
         }
 
         [Test]
@@ -200,7 +203,8 @@ namespace Tests.QuestsTrackerHUD
 
             Assert.AreEqual(1, hudView.questsContainer.childCount);
             Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
-            Assert.Less((DateTime.Now - hudView.lastUpdateTimestamp[MOCK_QUEST_ID]), TimeSpan.FromSeconds(1)); //Approximately comparing timestamps
+            //Assert.Less((DateTime.Now - hudView.lastUpdateTimestamp[MOCK_QUEST_ID]), TimeSpan.FromSeconds(1)); //Approximately comparing timestamps
+            Assert.IsTrue(false); //TODO fix test
         }
 
         [Test]
@@ -208,8 +212,9 @@ namespace Tests.QuestsTrackerHUD
         {
             hudView.PinQuest(MOCK_QUEST_ID);
 
-            Assert.AreEqual(1, hudView.questsToBeAdded.Count);
-            Assert.IsTrue(hudView.questsToBeAdded.Contains(MOCK_QUEST_ID));
+            //Assert.AreEqual(1, hudView.questsToBeAdded.Count);
+            //Assert.IsTrue(hudView.questsToBeAdded.Contains(MOCK_QUEST_ID));
+            Assert.IsTrue(false); //TODO fix test
             Assert.AreEqual(0, hudView.currentEntries.Count);
         }
 
@@ -220,7 +225,8 @@ namespace Tests.QuestsTrackerHUD
 
             hudView.PinQuest(MOCK_QUEST_ID);
 
-            Assert.AreEqual(DateTime.MaxValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]);
+            //Assert.AreEqual(DateTime.MaxValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]);
+            Assert.IsTrue(false); //TODO fix test
         }
 
         [Test]
@@ -230,7 +236,8 @@ namespace Tests.QuestsTrackerHUD
 
             hudView.UnpinQuest(MOCK_QUEST_ID);
 
-            Assert.AreEqual(DateTime.MinValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]); //Approximately comparing timestamps
+            //Assert.AreEqual(DateTime.MinValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]); //Approximately comparing timestamps
+            Assert.IsTrue(false); //TODO fix test
         }
 
         [UnityTest]
@@ -242,9 +249,10 @@ namespace Tests.QuestsTrackerHUD
 
             yield return null; //Let Unity destroy the entry properly
 
-            Assert.AreEqual(0, hudView.currentEntries.Count);
-            Assert.AreEqual(0, hudView.questsToBeAdded.Count);
-            Assert.AreEqual(0, hudView.lastUpdateTimestamp.Count);
+            //Assert.AreEqual(0, hudView.currentEntries.Count);
+            //Assert.AreEqual(0, hudView.questsToBeAdded.Count);
+            //Assert.AreEqual(0, hudView.lastUpdateTimestamp.Count);
+            Assert.IsTrue(false); //TODO fix test
         }
 
         [UnityTest]

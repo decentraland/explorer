@@ -12,6 +12,7 @@ namespace DCL.QuestsController
     public delegate void SectionCompleted(string questId, string sectionId);
     public delegate void SectionUnlocked(string questId, string sectionId);
     public delegate void TaskProgressed(string questId, string sectionId, string taskId);
+    public delegate void RewardObtained(string questId, string rewardId);
 
     public interface IQuestsController : IDisposable
     {
@@ -19,7 +20,7 @@ namespace DCL.QuestsController
         event QuestCompleted OnQuestCompleted;
         event SectionCompleted OnSectionCompleted;
         event SectionUnlocked OnSectionUnlocked;
-        event TaskProgressed OnTaskProgressed;
+        event RewardObtained OnRewardObtained;
 
         void InitializeQuests(List<QuestModel> parsedQuests);
         void UpdateQuestProgress(QuestModel progressedQuest);
@@ -36,12 +37,10 @@ namespace DCL.QuestsController
         public event QuestCompleted OnQuestCompleted;
         public event SectionCompleted OnSectionCompleted;
         public event SectionUnlocked OnSectionUnlocked;
-        public event TaskProgressed OnTaskProgressed;
+        public event RewardObtained OnRewardObtained;
 
         private static BaseCollection<string> pinnedQuests => DataStore.i.Quests.pinnedQuests;
         private static BaseDictionary<string, QuestModel> quests => DataStore.i.Quests.quests;
-
-        private bool pinnedQuestsIsDirty = false;
 
         static QuestsController() { i = new QuestsController(); }
 
@@ -88,54 +87,86 @@ namespace DCL.QuestsController
                 return;
             }
 
-            //Alex: Edge case. Progressed quest was not included in the initialization.
-            // We invoke quests events but no sections or QuestCompleted one.
+            //Alex: Edge case. Progressed quest was not included in the initialization. We dont invoke quests events
             if (!quests.TryGetValue(progressedQuest.id, out QuestModel oldQuest))
             {
                 quests.Add(progressedQuest.id, progressedQuest);
-                OnQuestProgressed?.Invoke(progressedQuest.id);
-
                 return;
             }
 
+            List<Action> eventsQueue = new List<Action>();
             quests[progressedQuest.id] = progressedQuest;
-            OnQuestProgressed?.Invoke(progressedQuest.id);
 
-            for (int i = 0; i < progressedQuest.sections.Length; i++)
+            //Events are deferred until everything is processed and the "justProgressed" flags are set
+            eventsQueue.Add(() => OnQuestProgressed?.Invoke(progressedQuest.id));
+
+            for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
-                QuestSection newQuestSection = progressedQuest.sections[i];
-                QuestSection nextQuestSection = (i + 1) < progressedQuest.sections.Length ? (progressedQuest.sections[i + 1]) : null;
+                QuestSection newQuestSection = progressedQuest.sections[index];
+                QuestSection nextQuestSection = (index + 1) < progressedQuest.sections.Length ? (progressedQuest.sections[index + 1]) : null;
 
                 //Alex: Edge case. New quest reported contains a section that was previously not contained.
                 // if it's completed, we call the SectionCompleted event and unlock the next one
-                bool sectionCompleted = !oldQuest.TryGetSection(newQuestSection.id, out QuestSection oldQuestSection);
+                bool oldQuestSectionFound = oldQuest.TryGetSection(newQuestSection.id, out QuestSection oldQuestSection);
+                bool sectionCompleted = (!oldQuestSectionFound && newQuestSection.progress >= 1) || (Math.Abs(oldQuestSection.progress - newQuestSection.progress) > Mathf.Epsilon && newQuestSection.progress >= 1);
 
-                sectionCompleted = sectionCompleted || Math.Abs(oldQuestSection.progress - newQuestSection.progress) > Mathf.Epsilon && newQuestSection.progress >= 1;
+                for (int index2 = 0; index2 < newQuestSection.tasks.Length; index2++)
+                {
+                    QuestTask currentTask = newQuestSection.tasks[index2];
+                    if (oldQuestSectionFound)
+                    {
+                        currentTask.justProgressed = !oldQuestSection.TryGetTask(currentTask.id, out QuestTask oldTask) || currentTask.progress != oldTask.progress;
+                    }
+                    else
+                    {
+                        currentTask.justProgressed = false;
+                    }
+                }
 
                 if (sectionCompleted)
                 {
-                    OnSectionCompleted?.Invoke(progressedQuest.id, newQuestSection.id);
+                    eventsQueue.Add(() => OnSectionCompleted?.Invoke(progressedQuest.id, newQuestSection.id));
                     if (nextQuestSection != null)
-                        OnSectionUnlocked?.Invoke(progressedQuest.id, nextQuestSection.id);
+                        eventsQueue.Add(() => OnSectionUnlocked?.Invoke(progressedQuest.id, nextQuestSection.id));
                 }
             }
 
             if (!oldQuest.isCompleted && progressedQuest.isCompleted)
-                OnQuestCompleted?.Invoke(progressedQuest.id);
+                eventsQueue.Add(() => OnQuestCompleted?.Invoke(progressedQuest.id));
+
+            for (int index = 0; index < progressedQuest.rewards.Length; index++)
+            {
+                QuestReward newReward = progressedQuest.rewards[index];
+
+                //Alex: Edge case. New quest reported contains a reward that was previously not contained.
+                // If it's completed, we call the RewardObtained event
+                bool oldRewardFound = oldQuest.TryGetReward(newReward.id, out QuestReward oldReward);
+                bool rewardObtained = (!oldRewardFound && newReward.status == QuestsLiterals.RewardStatus.ALREADY_GIVEN) || ( newReward.status != oldReward.status && newReward.status == QuestsLiterals.RewardStatus.ALREADY_GIVEN);
+                if (rewardObtained)
+                {
+                    eventsQueue.Add(() => OnRewardObtained?.Invoke(progressedQuest.id, newReward.id));
+                }
+            }
+
+            for (int index = 0; index < eventsQueue.Count; index++)
+            {
+                eventsQueue[index].Invoke();
+            }
+
+            //Restore "justProgressed" flags
+            for (int index = 0; index < progressedQuest.sections.Length; index++)
+            {
+                QuestSection section = progressedQuest.sections[index];
+                for (var index2 = 0; index2 < section.tasks.Length; index2++)
+                {
+                    section.tasks[index2].justProgressed = false;
+                }
+            }
         }
 
         public void RemoveQuest(QuestModel quest) { quests.Remove(quest.id); }
 
-        private void OnPinnedQuestUpdated(string questId) { pinnedQuestsIsDirty = true; }
-
-        private void Update()
-        {
-            if (pinnedQuestsIsDirty)
-            {
-                pinnedQuestsIsDirty = false;
-                PlayerPrefs.SetString(PINNED_QUESTS_KEY, JsonConvert.SerializeObject(pinnedQuests.Get()));
-            }
-        }
+        private void OnPinnedQuestUpdated(string questId) { PlayerPrefs.SetString(PINNED_QUESTS_KEY, JsonConvert.SerializeObject(pinnedQuests.Get())); }
 
         public void Dispose()
         {

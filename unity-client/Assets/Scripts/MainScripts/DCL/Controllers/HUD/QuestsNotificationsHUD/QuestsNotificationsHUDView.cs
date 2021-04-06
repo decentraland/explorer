@@ -9,6 +9,7 @@ namespace DCL.Huds.QuestsNotifications
         void ShowSectionCompleted(QuestSection section);
         void ShowSectionUnlocked(QuestSection section);
         void ShowQuestCompleted(QuestModel quest);
+        void ShowRewardObtained(QuestReward reward);
         void SetVisibility(bool visible);
         void Dispose();
     }
@@ -16,13 +17,14 @@ namespace DCL.Huds.QuestsNotifications
     public class QuestsNotificationsHUDView : MonoBehaviour, IQuestsNotificationsHUDView
     {
         internal static float NOTIFICATIONS_SEPARATION { get; set; } = 0.5f;
-        internal static float SECTION_NOTIFICATION_DURATION { get; set; } = 1.5f;
+        public static float DEFAULT_NOTIFICATION_DURATION { get; set; } = 2.5f;
 
-        internal readonly Queue<GameObject> notificationsQueue = new Queue<GameObject>();
+        internal readonly Queue<IQuestNotification> notificationsQueue = new Queue<IQuestNotification>();
 
         [SerializeField] private GameObject sectionCompletedPrefab;
         [SerializeField] private GameObject sectionUnlockedPrefab;
         [SerializeField] private GameObject questCompletedPrefab;
+        [SerializeField] private GameObject rewardObtainedPrefab;
         private bool isDestroyed = false;
 
         internal static QuestsNotificationsHUDView Create()
@@ -41,7 +43,7 @@ namespace DCL.Huds.QuestsNotifications
             var questNotification = Instantiate(sectionCompletedPrefab, transform).GetComponent<QuestNotification_SectionCompleted>();
             questNotification.Populate(section);
             questNotification.gameObject.SetActive(false);
-            notificationsQueue.Enqueue(questNotification.gameObject);
+            notificationsQueue.Enqueue(questNotification);
         }
 
         public void ShowSectionUnlocked(QuestSection section)
@@ -49,7 +51,7 @@ namespace DCL.Huds.QuestsNotifications
             var questNotification = Instantiate(sectionUnlockedPrefab, transform).GetComponent<QuestNotification_SectionUnlocked>();
             questNotification.Populate(section);
             questNotification.gameObject.SetActive(false);
-            notificationsQueue.Enqueue(questNotification.gameObject);
+            notificationsQueue.Enqueue(questNotification);
         }
 
         public void ShowQuestCompleted(QuestModel quest)
@@ -57,8 +59,17 @@ namespace DCL.Huds.QuestsNotifications
             var questNotification = Instantiate(questCompletedPrefab, transform).GetComponent<QuestNotification_QuestCompleted>();
             questNotification.Populate(quest);
             questNotification.gameObject.SetActive(false);
-            notificationsQueue.Enqueue(questNotification.gameObject);
+            notificationsQueue.Enqueue(questNotification);
         }
+
+        public void ShowRewardObtained(QuestReward reward)
+        {
+            var questNotification = Instantiate(rewardObtainedPrefab, transform).GetComponent<QuestNotification_RewardObtained>();
+            questNotification.Populate(reward);
+            questNotification.gameObject.SetActive(false);
+            notificationsQueue.Enqueue(questNotification);
+        }
+
         public void SetVisibility(bool visible) { gameObject.SetActive(visible); }
         public void Dispose()
         {
@@ -74,10 +85,10 @@ namespace DCL.Huds.QuestsNotifications
             {
                 if (notificationsQueue.Count > 0)
                 {
-                    GameObject notificationGO = notificationsQueue.Dequeue();
-                    notificationGO.gameObject.SetActive(true);
-                    yield return WaitForSecondsCache.Get(SECTION_NOTIFICATION_DURATION);
-                    Destroy(notificationGO);
+                    IQuestNotification notification = notificationsQueue.Dequeue();
+                    notification.Show();
+                    yield return notification.Waiter();
+                    notification.Dispose();
                 }
 
                 yield return WaitForSecondsCache.Get(NOTIFICATIONS_SEPARATION);

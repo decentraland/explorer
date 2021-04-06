@@ -12,6 +12,9 @@ public class QuestTask
     public string coordinates;
     public float progress;
     public DateTime completionTime = DateTime.Now;
+
+    [NonSerialized]
+    public bool justProgressed = false;
 }
 
 [System.Serializable]

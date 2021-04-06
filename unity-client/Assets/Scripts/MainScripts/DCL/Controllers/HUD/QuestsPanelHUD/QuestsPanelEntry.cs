@@ -23,6 +23,8 @@ namespace DCL.Huds.QuestsPanel
         [SerializeField] internal RawImage thumbnailImage;
         [SerializeField] internal Button jumpInButton;
         [SerializeField] internal Animator animator;
+        [SerializeField] internal GameObject rewardsPanel;
+        [SerializeField] internal TextMeshProUGUI rewardsAmount;
 
         private AssetPromise_Texture thumbnailPromise;
 
@@ -68,6 +70,8 @@ namespace DCL.Huds.QuestsPanel
             progressInTitle.fillAmount = quest.progress;
             completedProgressInTitle.gameObject.SetActive(questCompleted);
             completedMarkInTitle.gameObject.SetActive(questCompleted);
+
+            SetRewards(quest.rewards?.Length ?? 0);
         }
 
         private void OnPinToggleValueChanged(bool isOn)
@@ -138,6 +142,12 @@ namespace DCL.Huds.QuestsPanel
         {
             thumbnailImage.texture = assetTexture.texture;
             animator.SetTrigger(LOADED_ANIM_TRIGGER);
+        }
+
+        private void SetRewards(int amount)
+        {
+            rewardsPanel.SetActive(amount > 0);
+            rewardsAmount.text = amount.ToString();
         }
 
         private void OnDestroy()

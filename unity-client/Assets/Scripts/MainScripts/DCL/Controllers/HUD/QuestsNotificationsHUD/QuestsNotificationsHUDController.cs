@@ -17,11 +17,12 @@ namespace DCL.Huds.QuestsNotifications
             questsController.OnSectionCompleted += OnSectionCompleted;
             questsController.OnSectionUnlocked += OnSectionUnlocked;
             questsController.OnQuestCompleted += OnQuestCompleted;
+            questsController.OnRewardObtained += OnRewardObtained;
         }
 
         private void OnQuestCompleted(string questId)
         {
-            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestLiterals.Status.BLOCKED)
+            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestsLiterals.Status.BLOCKED)
                 return;
 
             view?.ShowQuestCompleted(quest);
@@ -29,7 +30,7 @@ namespace DCL.Huds.QuestsNotifications
 
         private void OnSectionCompleted(string questId, string sectionId)
         {
-            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestLiterals.Status.BLOCKED)
+            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestsLiterals.Status.BLOCKED)
                 return;
 
             if (!quest.TryGetSection(sectionId, out QuestSection section))
@@ -40,7 +41,7 @@ namespace DCL.Huds.QuestsNotifications
 
         private void OnSectionUnlocked(string questId, string sectionId)
         {
-            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestLiterals.Status.BLOCKED)
+            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestsLiterals.Status.BLOCKED)
                 return;
 
             if (!quest.TryGetSection(sectionId, out QuestSection section))
@@ -49,10 +50,18 @@ namespace DCL.Huds.QuestsNotifications
             view?.ShowSectionUnlocked(section);
         }
 
-        public void SetVisibility(bool visible)
+        private void OnRewardObtained(string questId, string rewardId)
         {
-            view?.SetVisibility(visible);
+            if (!quests.TryGetValue(questId, out QuestModel quest) || quest.status == QuestsLiterals.Status.BLOCKED)
+                return;
+
+            if (!quest.TryGetReward(rewardId, out QuestReward reward))
+                return;
+
+            view?.ShowRewardObtained(reward);
         }
+
+        public void SetVisibility(bool visible) { view?.SetVisibility(visible); }
 
         public void Dispose()
         {
@@ -62,6 +71,7 @@ namespace DCL.Huds.QuestsNotifications
                 questsController.OnSectionCompleted -= OnSectionCompleted;
                 questsController.OnSectionUnlocked -= OnSectionUnlocked;
                 questsController.OnQuestCompleted -= OnQuestCompleted;
+                questsController.OnRewardObtained -= OnRewardObtained;
             }
         }
 

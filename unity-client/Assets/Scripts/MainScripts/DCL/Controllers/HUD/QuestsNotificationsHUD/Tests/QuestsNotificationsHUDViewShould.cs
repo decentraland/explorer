@@ -15,7 +15,7 @@ namespace Tests.QuestsNotificationsHUD
         public void SetUp()
         {
             // Even though we set duration to 0, we have to wait a frame anyway for the yields to be performed.
-            QuestsNotificationsHUDView.SECTION_NOTIFICATION_DURATION = 0f;
+            QuestsNotificationsHUDView.DEFAULT_NOTIFICATION_DURATION = 0f;
             QuestsNotificationsHUDView.NOTIFICATIONS_SEPARATION = 0f;
             hudView = Object.Instantiate(Resources.Load<GameObject>("QuestsNotificationsHUD")).GetComponent<QuestsNotificationsHUDView>();
         }
@@ -33,7 +33,7 @@ namespace Tests.QuestsNotificationsHUD
         [Test]
         public void ReactToSectionCompleted()
         {
-            hudView.ShowSectionCompleted(new QuestSection { name = "theName"});
+            hudView.ShowSectionCompleted(new QuestSection { name = "theName" });
             Assert.AreEqual(1, hudView.transform.childCount);
             var notificationComponent = hudView.transform.GetChild(0).GetComponent<QuestNotification_SectionCompleted>();
             Assert.NotNull(notificationComponent);
@@ -46,7 +46,7 @@ namespace Tests.QuestsNotificationsHUD
             hudView.ShowSectionUnlocked(new QuestSection
             {
                 name = "sectionName",
-                tasks = new []{new QuestTask { name = "taskName"}}
+                tasks = new [] { new QuestTask { name = "taskName" } }
             });
             Assert.AreEqual(1, hudView.transform.childCount);
             var notificationComponent = hudView.transform.GetChild(0).GetComponent<QuestNotification_SectionUnlocked>();
@@ -73,9 +73,6 @@ namespace Tests.QuestsNotificationsHUD
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            Object.Destroy(hudView.gameObject);
-        }
+        public void TearDown() { Object.Destroy(hudView.gameObject); }
     }
 }

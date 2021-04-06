@@ -19,14 +19,24 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal Animator animator;
 
         private float progressTarget = 0;
-        private bool targetReached => Math.Abs(progressTarget - progress.transform.localScale.x) < Mathf.Epsilon;
+        private bool isProgressAnimationDone => Math.Abs(progressTarget - progress.transform.localScale.x) < Mathf.Epsilon;
+
+        private QuestTask task = null;
 
         private Action jumpInDelegate;
+        public bool isIdle => isProgressAnimationDone && !isCompleting;
+        public bool isCompleting { get; private set; } = false;
+        public bool isReadyForCompletion { get; private set; } = false;
 
-        public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
-
-        public void Populate(QuestTask task)
+        public void Awake()
         {
+            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); });
+            StartCoroutine(DisposalRoutine());
+        }
+
+        public void Populate(QuestTask newTask)
+        {
+            task = newTask;
             taskTitle.text = task.name;
             jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage
             {
@@ -51,10 +61,10 @@ namespace DCL.Huds.QuestsTracker
 
         private void Update()
         {
-            if (!targetReached)
+            if (!isProgressAnimationDone)
             {
                 Vector3 scale = progress.transform.localScale;
-                scale.x = Mathf.MoveTowards(scale.x, progressTarget, 0.1f);
+                scale.x = Mathf.MoveTowards(scale.x, progressTarget, 2f * Time.deltaTime);
                 progress.transform.localScale = scale;
             }
         }
@@ -69,18 +79,37 @@ namespace DCL.Huds.QuestsTracker
                 animator.SetTrigger(COLLAPSE_ANIMATOR_TRIGGER);
         }
 
-        public void StartDestroy(Action onDone)
+        public void StartCompletion(Action onDone)
         {
+            isCompleting = true;
             StopAllCoroutines();
-            StartCoroutine(DestroyRoutine(onDone));
+            StartCoroutine(CompletionRoutine(onDone));
         }
 
-        private IEnumerator DestroyRoutine(Action onDone)
+        private IEnumerator CompletionRoutine(Action onDone)
         {
-            yield return new WaitUntil(() => targetReached);
-            yield return WaitForSecondsCache.Get(0.5f);
+            yield return WaitForSecondsCache.Get(0.2f);
+            animator.SetTrigger("Completed");
+            yield return WaitForSecondsCache.Get(2f);
             Destroy(gameObject);
             onDone?.Invoke();
+            isCompleting = false;
+        }
+
+        private IEnumerator DisposalRoutine()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(0.25f);
+                if (task == null)
+                    continue;
+                if (!isProgressAnimationDone)
+                    continue;
+                if (task.progress < 1)
+                    continue;
+
+                isReadyForCompletion = true;
+            }
         }
     }
 }
