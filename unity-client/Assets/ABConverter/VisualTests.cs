@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using DCL.Helpers;
@@ -185,24 +185,24 @@ namespace DCL.ABConverter
             foreach (var hash in dependencyAbs)
             {
                 string path = abPath + hash;
-                var req = UnityWebRequestAssetBundle.GetAssetBundle(path);
 
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
-                    req.url = req.url.Replace("http://localhost", "file:///");
+                    path = path.Replace("http://localhost", "file:///");
 
-                req.SendWebRequest();
+                var reqOp = WebRequestController.i.GetAssetBundle(path);
 
-                while (!req.isDone) { }
+                while (!reqOp.isDone) { }
 
-                if (req.isHttpError || req.isNetworkError)
+                if (reqOp.webRequest.isHttpError || reqOp.webRequest.isNetworkError)
                 {
                     Debug.Log("Visual Test Detection: Failed to download dependency asset: " + hash);
                     continue;
                 }
 
-                var assetBundle = DownloadHandlerAssetBundle.GetContent(req);
+                var assetBundle = DownloadHandlerAssetBundle.GetContent(reqOp.webRequest);
                 assetBundle.LoadAllAssets();
                 loadedAbs.Add(assetBundle);
+                reqOp.Dispose();
             }
 
             List<GameObject> results = new List<GameObject>();
@@ -210,24 +210,24 @@ namespace DCL.ABConverter
             foreach (var hash in mainAbs)
             {
                 string path = abPath + hash;
-                var req = UnityWebRequestAssetBundle.GetAssetBundle(path);
 
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
-                    req.url = req.url.Replace("http://localhost", "file:///");
+                    path = path.Replace("http://localhost", "file:///");
 
-                req.SendWebRequest();
+                var reqOp = WebRequestController.i.GetAssetBundle(path);
 
-                while (!req.isDone) { }
+                while (!reqOp.isDone) { }
 
-                if (req.isHttpError || req.isNetworkError)
+                if (reqOp.webRequest.isHttpError || reqOp.webRequest.isNetworkError)
                 {
                     Debug.Log("Visual Test Detection: Failed to instantiate AB, missing source file for : " + hash);
                     skippedAssets++;
                     continue;
                 }
 
-                var assetBundle = DownloadHandlerAssetBundle.GetContent(req);
+                var assetBundle = DownloadHandlerAssetBundle.GetContent(reqOp.webRequest);
                 Object[] assets = assetBundle.LoadAllAssets();
+                reqOp.Dispose();
 
                 foreach (Object asset in assets)
                 {
