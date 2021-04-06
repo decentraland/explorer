@@ -108,7 +108,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         content.SetActive(false);
 
         if (fetchParcelImageOp != null)
-            fetchParcelImageOp.Abort();
+            fetchParcelImageOp.Dispose();
 
         if (downloadedBanner != null)
         {

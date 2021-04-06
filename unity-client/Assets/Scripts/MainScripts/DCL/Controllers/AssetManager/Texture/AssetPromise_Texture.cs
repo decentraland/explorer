@@ -40,7 +40,7 @@ namespace DCL
         protected override void OnCancelLoading()
         {
             if (webRequestOp != null)
-                webRequestOp.Abort();
+                webRequestOp.Dispose();
         }
 
         protected override void OnLoad(Action OnSuccess, Action OnFail)

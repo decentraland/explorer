@@ -96,7 +96,7 @@ namespace DCL
         private void OnDestroy()
         {
             if (loadOp != null)
-                loadOp.Abort();
+                loadOp.Dispose();
         }
     }
 }
