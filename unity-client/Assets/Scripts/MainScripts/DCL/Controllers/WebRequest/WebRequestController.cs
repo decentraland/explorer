@@ -1,3 +1,4 @@
+using DCL.Helpers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace DCL
         /// <param name="audioWebRequest"></param>
         void Initialize(
             IWebRequest genericWebRequest,
-            IWebRequestAssetBundle assetBundleWebRequest,
+            IWebRequest assetBundleWebRequest,
             IWebRequest textureWebRequest,
             IWebRequestAudio audioWebRequest);
 
@@ -96,7 +97,7 @@ namespace DCL
         public static WebRequestController i { get; private set; }
 
         private IWebRequest genericWebRequest;
-        private IWebRequestAssetBundle assetBundleWebRequest;
+        private IWebRequest assetBundleWebRequest;
         private IWebRequest textureWebRequest;
         private IWebRequestAudio audioClipWebRequest;
         private List<UnityWebRequest> ongoingWebRequests = new List<UnityWebRequest>();
@@ -116,7 +117,7 @@ namespace DCL
 
         public void Initialize(
             IWebRequest genericWebRequest,
-            IWebRequestAssetBundle assetBundleWebRequest,
+            IWebRequest assetBundleWebRequest,
             IWebRequest textureWebRequest,
             IWebRequestAudio audioClipWebRequest)
         {
@@ -145,18 +146,6 @@ namespace DCL
             int requestAttemps = 3,
             int timeout = 0)
         {
-            return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
-        }
-
-        public WebRequestAsyncOperation GetAssetBundle(
-            string url,
-            Hash128 hash,
-            Action<UnityWebRequest> OnSuccess = null,
-            Action<string> OnFail = null,
-            int requestAttemps = 3,
-            int timeout = 0)
-        {
-            assetBundleWebRequest.SetHash(hash);
             return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
