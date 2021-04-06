@@ -1,4 +1,3 @@
-using DCL.Helpers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +19,7 @@ namespace DCL
         /// <param name="audioWebRequest"></param>
         void Initialize(
             IWebRequest genericWebRequest,
-            IWebRequest assetBundleWebRequest,
+            IWebRequestAssetBundle assetBundleWebRequest,
             IWebRequest textureWebRequest,
             IWebRequestAudio audioWebRequest);
 
@@ -97,7 +96,7 @@ namespace DCL
         public static WebRequestController i { get; private set; }
 
         private IWebRequest genericWebRequest;
-        private IWebRequest assetBundleWebRequest;
+        private IWebRequestAssetBundle assetBundleWebRequest;
         private IWebRequest textureWebRequest;
         private IWebRequestAudio audioClipWebRequest;
         private List<UnityWebRequest> ongoingWebRequests = new List<UnityWebRequest>();
@@ -117,7 +116,7 @@ namespace DCL
 
         public void Initialize(
             IWebRequest genericWebRequest,
-            IWebRequest assetBundleWebRequest,
+            IWebRequestAssetBundle assetBundleWebRequest,
             IWebRequest textureWebRequest,
             IWebRequestAudio audioClipWebRequest)
         {
@@ -146,6 +145,18 @@ namespace DCL
             int requestAttemps = 3,
             int timeout = 0)
         {
+            return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+        }
+
+        public WebRequestAsyncOperation GetAssetBundle(
+            string url,
+            Hash128 hash,
+            Action<UnityWebRequest> OnSuccess = null,
+            Action<string> OnFail = null,
+            int requestAttemps = 3,
+            int timeout = 0)
+        {
+            assetBundleWebRequest.SetHash(hash);
             return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
@@ -190,29 +201,32 @@ namespace DCL
             UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
             requestOp.completed += (asyncOp) =>
             {
-                if (request.WebRequestSucceded())
+                if (!resultOp.isDisposed)
                 {
-                    OnSuccess?.Invoke(request);
-                    resultOp.SetAsCompleted();
-                }
-                else if (!request.WebRequestAborted() && request.WebRequestServerError())
-                {
-                    remainingAttemps--;
-                    if (remainingAttemps > 0)
+                    if (request.WebRequestSucceded())
                     {
-                        Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
-                        resultOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                        OnSuccess?.Invoke(request);
+                        resultOp.SetAsCompleted();
+                    }
+                    else if (!request.WebRequestAborted() && request.WebRequestServerError())
+                    {
+                        remainingAttemps--;
+                        if (remainingAttemps > 0)
+                        {
+                            Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
+                            resultOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                        }
+                        else
+                        {
+                            OnFail?.Invoke(request.error);
+                            resultOp.SetAsCompleted();
+                        }
                     }
                     else
                     {
                         OnFail?.Invoke(request.error);
                         resultOp.SetAsCompleted();
                     }
-                }
-                else
-                {
-                    OnFail?.Invoke(request.error);
-                    resultOp.SetAsCompleted();
                 }
 
                 ongoingWebRequests.Remove(request);
@@ -225,7 +239,7 @@ namespace DCL
         {
             foreach (var webRequest in ongoingWebRequests)
             {
-                webRequest.Abort();
+                webRequest.Dispose();
             }
         }
     }
