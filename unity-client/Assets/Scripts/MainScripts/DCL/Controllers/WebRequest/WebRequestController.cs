@@ -201,29 +201,32 @@ namespace DCL
             UnityWebRequestAsyncOperation requestOp = request.SendWebRequest();
             requestOp.completed += (asyncOp) =>
             {
-                if (request.WebRequestSucceded())
+                if (!resultOp.isDisposed)
                 {
-                    OnSuccess?.Invoke(request);
-                    resultOp.SetAsCompleted();
-                }
-                else if (!request.WebRequestAborted() && request.WebRequestServerError())
-                {
-                    remainingAttemps--;
-                    if (remainingAttemps > 0)
+                    if (request.WebRequestSucceded())
                     {
-                        Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
-                        resultOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                        OnSuccess?.Invoke(request);
+                        resultOp.SetAsCompleted();
+                    }
+                    else if (!request.WebRequestAborted() && request.WebRequestServerError())
+                    {
+                        remainingAttemps--;
+                        if (remainingAttemps > 0)
+                        {
+                            Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
+                            resultOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                        }
+                        else
+                        {
+                            OnFail?.Invoke(request.error);
+                            resultOp.SetAsCompleted();
+                        }
                     }
                     else
                     {
                         OnFail?.Invoke(request.error);
                         resultOp.SetAsCompleted();
                     }
-                }
-                else
-                {
-                    OnFail?.Invoke(request.error);
-                    resultOp.SetAsCompleted();
                 }
 
                 ongoingWebRequests.Remove(request);
@@ -236,7 +239,7 @@ namespace DCL
         {
             foreach (var webRequest in ongoingWebRequests)
             {
-                webRequest.Abort();
+                webRequest.Dispose();
             }
         }
     }

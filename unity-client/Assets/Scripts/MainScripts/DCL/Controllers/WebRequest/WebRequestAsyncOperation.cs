@@ -17,12 +17,17 @@ namespace DCL
         /// <summary>
         /// WebRequest that is being managed.
         /// </summary>
-        public UnityWebRequest webRequest { get; }
+        public UnityWebRequest webRequest { get; private set; }
 
         /// <summary>
         /// Returns true after the request has finished communicating with the remote server.
         /// </summary>
         public bool isDone { get; private set; }
+
+        /// <summary>
+        /// Returns true if webRequest has been disposed (webRequest = null).
+        /// </summary>
+        public bool isDisposed { get { return webRequest == null; } }
 
         /// <summary>
         /// Set to true for disposing the request just after it has been completed.
@@ -71,6 +76,7 @@ namespace DCL
                 return;
 
             webRequest.Dispose();
+            webRequest = null;
         }
     }
 }
