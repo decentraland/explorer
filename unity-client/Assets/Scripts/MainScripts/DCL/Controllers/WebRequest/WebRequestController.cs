@@ -192,9 +192,8 @@ namespace DCL
             {
                 if (request.WebRequestSucceded())
                 {
-                    resultOp.SetAsCompleted();
                     OnSuccess?.Invoke(request);
-                    request.Dispose();
+                    resultOp.SetAsCompleted();
                 }
                 else if (!request.WebRequestAborted() && request.WebRequestServerError())
                 {
@@ -206,16 +205,14 @@ namespace DCL
                     }
                     else
                     {
-                        resultOp.SetAsCompleted();
                         OnFail?.Invoke(request.error);
-                        request.Dispose();
+                        resultOp.SetAsCompleted();
                     }
                 }
                 else
                 {
-                    resultOp.SetAsCompleted();
                     OnFail?.Invoke(request.error);
-                    request.Dispose();
+                    resultOp.SetAsCompleted();
                 }
 
                 ongoingWebRequests.Remove(request);
