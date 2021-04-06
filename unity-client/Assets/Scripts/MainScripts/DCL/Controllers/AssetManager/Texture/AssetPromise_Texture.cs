@@ -67,14 +67,13 @@ namespace DCL
                         {
                             OnFail?.Invoke();
                         }
-
-                        webRequestOp.Dispose();
                     },
                     (errorMsg) =>
                     {
                         OnFail?.Invoke();
-                        webRequestOp.Dispose();
                     });
+
+                webRequestOp.disposeOnCompleted = true;
             }
             else
             {

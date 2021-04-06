@@ -78,7 +78,7 @@ namespace DCL.Components
             }
         }
 
-        IEnumerator TryToLoad()
+        void TryToLoad()
         {
             if (loadingState != LoadState.LOADING_IN_PROGRESS
                 && loadingState != LoadState.LOADING_COMPLETED)
@@ -93,9 +93,7 @@ namespace DCL.Components
                         OnComplete,
                         OnFail);
 
-                    yield return new WaitUntil(() => fetchOp.isDone);
-
-                    fetchOp.Dispose();
+                    fetchOp.disposeOnCompleted = true;
                 }
             }
         }
@@ -125,7 +123,7 @@ namespace DCL.Components
             {
                 if (model.shouldTryToLoad && audioClip == null)
                 {
-                    yield return TryToLoad();
+                    TryToLoad();
                 }
                 else if (!model.shouldTryToLoad && audioClip != null)
                 {

@@ -87,7 +87,7 @@ namespace DCL
             if (!isLoadingOrLoaded)
             {
                 loadOp = LoadChunkImage();
-                loadOp.completed += (asyncOp) => { asyncOp.Dispose(); };
+                loadOp.disposeOnCompleted = true;
             }
         }
 
