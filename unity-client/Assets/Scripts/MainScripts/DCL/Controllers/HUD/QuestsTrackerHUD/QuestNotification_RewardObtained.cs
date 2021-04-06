@@ -1,10 +1,9 @@
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace DCL.Huds.QuestsNotifications
+namespace DCL.Huds.QuestsTracker
 {
     public class QuestNotification_RewardObtained : MonoBehaviour, IQuestNotification
     {

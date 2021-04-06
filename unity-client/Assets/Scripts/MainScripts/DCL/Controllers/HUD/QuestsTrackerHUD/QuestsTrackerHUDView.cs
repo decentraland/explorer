@@ -15,6 +15,7 @@ namespace DCL.Huds.QuestsTracker
         void UnpinQuest(string questId);
         void ClearEntries();
         void SetVisibility(bool visibility);
+        void AddReward(string questId, QuestReward reward);
         void Dispose();
     }
 
@@ -27,9 +28,11 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal RectTransform questsContainer;
         [SerializeField] internal GameObject questPrefab;
         [SerializeField] private DynamicScrollSensitivity dynamicScrollSensitivity;
+        [SerializeField] internal QuestsNotificationsController notificationsController;
 
         internal readonly Dictionary<string, QuestsTrackerEntry> currentEntries = new Dictionary<string, QuestsTrackerEntry>();
         private bool layoutRebuildRequested;
+
         private bool isDestroyed = false;
 
         public static QuestsTrackerHUDView Create()
@@ -61,6 +64,8 @@ namespace DCL.Huds.QuestsTracker
             {
                 questEntry = Instantiate(questPrefab, questsContainer).GetComponent<QuestsTrackerEntry>();
                 questEntry.OnLayoutRebuildRequested += () => layoutRebuildRequested = true;
+                questEntry.OnQuestCompleted += (x => notificationsController.ShowQuestCompleted(x));
+                questEntry.OnRewardObtained += (x => notificationsController.ShowRewardObtained(x));
                 currentEntries.Add(quest.id, questEntry);
             }
 
@@ -120,6 +125,12 @@ namespace DCL.Huds.QuestsTracker
         }
 
         public void SetVisibility(bool visibility) { gameObject.SetActive(visibility); }
+        public void AddReward(string questId, QuestReward reward)
+        {
+            if (!currentEntries.TryGetValue(questId, out QuestsTrackerEntry entry))
+                return;
+            entry.AddRewardToGive(reward);
+        }
 
         public void Dispose()
         {

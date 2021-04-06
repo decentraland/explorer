@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace DCL.Huds.QuestsNotifications
+namespace DCL.Huds.QuestsTracker
 {
     public interface IQuestNotification
     {

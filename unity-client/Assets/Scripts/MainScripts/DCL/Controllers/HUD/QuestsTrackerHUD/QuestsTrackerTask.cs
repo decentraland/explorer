@@ -12,6 +12,10 @@ namespace DCL.Huds.QuestsTracker
         private static readonly int EXPAND_ANIMATOR_TRIGGER = Animator.StringToHash("Expand");
         private static readonly int COLLAPSE_ANIMATOR_TRIGGER = Animator.StringToHash("Collapse");
 
+        public event Action<string> OnCompleted;
+        public event Action<string> OnDestroyed;
+        public event Action OnRequestLayoutRebuild;
+
         [SerializeField] internal TextMeshProUGUI taskTitle;
         [SerializeField] internal Image progress;
         [SerializeField] internal TextMeshProUGUI progressText;
@@ -26,16 +30,14 @@ namespace DCL.Huds.QuestsTracker
         private Action jumpInDelegate;
         public bool isIdle => isProgressAnimationDone && !isCompleting;
         public bool isCompleting { get; private set; } = false;
-        public bool isReadyForCompletion { get; private set; } = false;
+        public bool enableProgress = false;
 
-        public void Awake()
-        {
-            jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); });
-            StartCoroutine(DisposalRoutine());
-        }
+        public void Awake() { jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); }); }
 
         public void Populate(QuestTask newTask)
         {
+            StopAllCoroutines();
+            isCompleting = false;
             task = newTask;
             taskTitle.text = task.name;
             jumpInDelegate = () => WebInterface.SendChatMessage(new ChatMessage
@@ -61,11 +63,16 @@ namespace DCL.Huds.QuestsTracker
 
         private void Update()
         {
+            if (!enableProgress)
+                return;
+
             if (!isProgressAnimationDone)
             {
                 Vector3 scale = progress.transform.localScale;
                 scale.x = Mathf.MoveTowards(scale.x, progressTarget, 2f * Time.deltaTime);
                 progress.transform.localScale = scale;
+                if (progressTarget >= 1 && !isCompleting)
+                    StartCompletion();
             }
         }
 
@@ -79,37 +86,30 @@ namespace DCL.Huds.QuestsTracker
                 animator.SetTrigger(COLLAPSE_ANIMATOR_TRIGGER);
         }
 
-        public void StartCompletion(Action onDone)
+        private void StartCompletion()
         {
             isCompleting = true;
             StopAllCoroutines();
-            StartCoroutine(CompletionRoutine(onDone));
+            StartCoroutine(CompletionRoutine());
         }
 
-        private IEnumerator CompletionRoutine(Action onDone)
+        private IEnumerator CompletionRoutine()
         {
-            yield return WaitForSecondsCache.Get(0.2f);
+            yield return WaitForSecondsCache.Get(0.5f);
             animator.SetTrigger("Completed");
+
             yield return WaitForSecondsCache.Get(2f);
-            Destroy(gameObject);
-            onDone?.Invoke();
+
+            //Note Alex: We set the height to 0 to hide the entry. Disabling it would end up on the coroutine being stuck
+            RectTransform rectTransform = GetComponent<RectTransform>();
+            rectTransform.sizeDelta *= Vector2.right;
+            OnRequestLayoutRebuild?.Invoke();
+            OnCompleted?.Invoke(task.id);
+            yield return WaitForSecondsCache.Get(0.5f);
+
             isCompleting = false;
-        }
-
-        private IEnumerator DisposalRoutine()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(0.25f);
-                if (task == null)
-                    continue;
-                if (!isProgressAnimationDone)
-                    continue;
-                if (task.progress < 1)
-                    continue;
-
-                isReadyForCompletion = true;
-            }
+            OnDestroyed?.Invoke(task.id);
+            Destroy(gameObject);
         }
     }
 }

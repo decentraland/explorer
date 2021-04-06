@@ -8,5 +8,9 @@ public class TaskbarNewQuestTooltip : MonoBehaviour
 
     private void Awake() { DataStore.i.Quests.quests.OnAdded += OnQuestsAdded; }
 
-    private void OnQuestsAdded(string s, QuestModel model) { animator?.SetTrigger(ANIM_STATE_TRIGGER); }
+    private void OnQuestsAdded(string s, QuestModel model)
+    {
+        if (!model.isCompleted)
+            animator?.SetTrigger(ANIM_STATE_TRIGGER);
+    }
 }

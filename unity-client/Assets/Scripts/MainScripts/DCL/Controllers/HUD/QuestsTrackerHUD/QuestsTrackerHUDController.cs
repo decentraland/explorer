@@ -17,6 +17,7 @@ namespace DCL.Huds.QuestsTracker
             view = CreateView();
 
             questsController.OnQuestProgressed += OnQuestProgressed;
+            questsController.OnRewardObtained += AddReward;
             pinnedQuests.OnAdded += OnPinnedQuest;
             pinnedQuests.OnRemoved += OnUnpinnedQuest;
             pinnedQuests.OnSet += OnPinnedQuestsSet;
@@ -28,6 +29,16 @@ namespace DCL.Huds.QuestsTracker
             {
                 view?.PinQuest(questId);
             }
+        }
+
+        private void AddReward(string questId, string rewardId)
+        {
+            if (!quests.TryGetValue(questId, out QuestModel model) || model.status == QuestsLiterals.Status.BLOCKED)
+                return;
+
+            if (!model.TryGetReward(rewardId, out var reward))
+                return;
+            view?.AddReward(questId, reward);
         }
 
         private void OnQuestsAdded(string questId, QuestModel quest)
@@ -70,7 +81,10 @@ namespace DCL.Huds.QuestsTracker
         {
             view.Dispose();
             if (questsController != null)
+            {
                 questsController.OnQuestProgressed -= OnQuestProgressed;
+                questsController.OnRewardObtained -= AddReward;
+            }
             pinnedQuests.OnAdded -= OnPinnedQuest;
             pinnedQuests.OnRemoved -= OnUnpinnedQuest;
             pinnedQuests.OnSet -= OnPinnedQuestsSet;

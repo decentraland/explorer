@@ -11,9 +11,12 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerEntry : MonoBehaviour
     {
+        internal const float OUT_ANIM_DELAY = 1f;
         private const float DELAY_TO_DESTROY = 0.5f;
         private static readonly int OUT_ANIM_TRIGGER = Animator.StringToHash("Out");
         public event Action OnLayoutRebuildRequested;
+        public event Action<QuestModel> OnQuestCompleted;
+        public event Action<QuestReward> OnRewardObtained;
 
         [SerializeField] internal TextMeshProUGUI questTitle;
         [SerializeField] internal RawImage questIcon;
@@ -29,7 +32,6 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal Animator containerAnimator;
 
         public bool isReadyForDisposal { get; private set; } = false;
-
         private static BaseCollection<string> pinnedQuests => DataStore.i.Quests.pinnedQuests;
         private bool isProgressAnimationDone => Math.Abs(progress.fillAmount - progressTarget) < Mathf.Epsilon;
         private bool isLastUpdateDelayDone => (DateTime.Now - lastUpdateTime) > TimeSpan.FromSeconds(3);
@@ -41,8 +43,12 @@ namespace DCL.Huds.QuestsTracker
         private bool isExpanded;
         private bool isPinned;
         private DateTime lastUpdateTime = DateTime.MaxValue;
+        private bool outAnimDone = false;
 
         private readonly Dictionary<string, QuestsTrackerTask> taskEntries = new Dictionary<string, QuestsTrackerTask>();
+        private readonly HashSet<string> completedTasksInTracker = new HashSet<string>();
+
+        private readonly List<QuestReward> rewardsToNotify = new List<QuestReward>();
 
         public void Awake()
         {
@@ -52,19 +58,30 @@ namespace DCL.Huds.QuestsTracker
             SetExpandCollapseState(true);
             expandCollapseButton.onClick.AddListener(() => SetExpandCollapseState(!isExpanded));
             StartCoroutine(DisposalRoutine());
-            StartCoroutine(RemoveTasksRoutine());
+            StartCoroutine(OutDelayRoutine());
+        }
+
+        private IEnumerator OutDelayRoutine()
+        {
+            yield return new WaitForSeconds(OUT_ANIM_DELAY);
+            outAnimDone = true;
+            foreach (QuestsTrackerTask entry in taskEntries.Values)
+            {
+                entry.enableProgress = outAnimDone;
+            }
         }
 
         public void Populate(QuestModel newQuest)
         {
+            completedTasksInTracker.Clear();
             quest = newQuest;
             lastUpdateTime = DateTime.Now;
             questTitle.text = quest.name;
             SetIcon(quest.thumbnail_entry);
-            var availableTasks = quest.sections.SelectMany(x => x.tasks).Where(x => x.status != QuestsLiterals.Status.BLOCKED).ToArray();
+            var availableTasks = quest.sections.SelectMany(x => x.tasks).ToArray();
             int totalTasks = availableTasks.Count();
             int completedTasks = availableTasks.Count(x => x.progress >= 1);
-            QuestTask[] tasksToShow = availableTasks.Where(x => x.status != QuestsLiterals.Status.BLOCKED && (x.justProgressed || x.progress < 1))
+            QuestTask[] tasksToShow = availableTasks.Where(x => x.status != QuestsLiterals.Status.BLOCKED && (x.justProgressed || x.progress < 1 || taskEntries.ContainsKey(x.id)))
                                                     .ToArray();
             sectionTitle.text = $"{completedTasks}/{totalTasks}";
             progressTarget = (float)completedTasks / totalTasks;
@@ -89,6 +106,7 @@ namespace DCL.Huds.QuestsTracker
 
             expandCollapseButton.gameObject.SetActive(taskEntries.Count > 0);
             SetExpandCollapseState(true);
+            TryActivateSpawnedEntriesCompletedAreDone();
             OnLayoutRebuildRequested?.Invoke();
         }
 
@@ -97,8 +115,23 @@ namespace DCL.Huds.QuestsTracker
             if (!taskEntries.TryGetValue(task.id, out QuestsTrackerTask taskEntry))
             {
                 taskEntry = Instantiate(taskPrefab, tasksContainer).GetComponent<QuestsTrackerTask>();
+                taskEntry.gameObject.SetActive(task.progress >= 1);
                 taskEntries.Add(task.id, taskEntry);
+                taskEntry.enableProgress = outAnimDone;
+                taskEntry.OnRequestLayoutRebuild += () => OnLayoutRebuildRequested?.Invoke();
+                taskEntry.OnCompleted += (taskId) =>
+                {
+                    completedTasksInTracker.Remove(taskId);
+                    TryActivateSpawnedEntriesCompletedAreDone();
+                };
+                taskEntry.OnDestroyed += (taskId) =>
+                {
+                    taskEntries.Remove(taskId);
+                    OnLayoutRebuildRequested?.Invoke();
+                };
             }
+            if (task.progress >= 1)
+                completedTasksInTracker.Add(task.id);
             taskEntry.Populate(task);
             taskEntry.transform.SetSiblingIndex(siblingIndex);
         }
@@ -167,6 +200,8 @@ namespace DCL.Huds.QuestsTracker
             pinQuestToggle.SetIsOnWithoutNotify(newIsPinned);
         }
 
+        public void AddRewardToGive(QuestReward reward) { rewardsToNotify.Add(reward); }
+
         public void StartDestroy() { StartCoroutine(DestroyRoutine()); }
 
         private IEnumerator DestroyRoutine()
@@ -180,10 +215,11 @@ namespace DCL.Huds.QuestsTracker
 
         private void Update()
         {
+            if (!outAnimDone)
+                return;
+
             if (!isProgressAnimationDone)
-            {
                 progress.fillAmount = Mathf.MoveTowards(progress.fillAmount, progressTarget, 2f * Time.deltaTime);
-            }
         }
 
         private void OnDestroy()
@@ -193,6 +229,23 @@ namespace DCL.Huds.QuestsTracker
                 iconPromise.ClearEvents();
                 AssetPromiseKeeper_Texture.i.Forget(iconPromise);
             }
+        }
+
+        private void TryActivateSpawnedEntriesCompletedAreDone()
+        {
+            if (completedTasksInTracker.Count > 0)
+                return;
+
+            bool isDirty = false;
+            foreach (QuestsTrackerTask taskEntry in taskEntries.Values)
+            {
+                if (taskEntry.gameObject.activeSelf)
+                    continue;
+                isDirty = true;
+                taskEntry.gameObject.SetActive(true);
+            }
+            if (isDirty)
+                OnLayoutRebuildRequested?.Invoke();
         }
 
         private IEnumerator DisposalRoutine()
@@ -206,30 +259,26 @@ namespace DCL.Huds.QuestsTracker
                     continue;
                 if (isPinned)
                     continue;
-                if (!isLastUpdateDelayDone)
-                    continue;
                 if (taskEntries.Values.Any(x => !x.isIdle))
+                {
+                    lastUpdateTime = DateTime.Now;
+                    continue;
+                }
+
+                if (quest.isCompleted)
+                    OnQuestCompleted?.Invoke(quest);
+
+                for (var i = 0; i < rewardsToNotify.Count; i++)
+                {
+                    OnRewardObtained?.Invoke(rewardsToNotify[i]);
+                }
+                rewardsToNotify.Clear();
+
+                if (!isLastUpdateDelayDone && !quest.isCompleted)
                     continue;
 
                 isReadyForDisposal = true;
-            }
-        }
-
-        private IEnumerator RemoveTasksRoutine()
-        {
-            while (true)
-            {
-                string[] entriesToRemove = taskEntries.Where(x => x.Value.isReadyForCompletion && !x.Value.isCompleting).Select(x => x.Key).ToArray();
-                foreach (string taskId in entriesToRemove)
-                {
-                    taskEntries[taskId]
-                        .StartCompletion(() =>
-                        {
-                            taskEntries.Remove(taskId);
-                            OnLayoutRebuildRequested?.Invoke();
-                        });
-                }
-                yield return WaitForSecondsCache.Get(0.25f);
+                break;
             }
         }
     }
