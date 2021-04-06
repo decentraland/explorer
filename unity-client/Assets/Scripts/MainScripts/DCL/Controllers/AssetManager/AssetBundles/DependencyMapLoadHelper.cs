@@ -62,31 +62,30 @@ public static class DependencyMapLoadHelper
             yield break;
         }
 
-        using (UnityWebRequest depmapRequest = UnityWebRequest.Get(url))
-        {
-            downloadingDepmap.Add(hash);
+        downloadingDepmap.Add(hash);
+        WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(
+            url,
+            (depmapRequest) =>
+            {
+                AssetDependencyMap map = JsonUtility.FromJson<AssetDependencyMap>(depmapRequest.downloadHandler.text);
+                map.dependencies = map.dependencies.Where(x => !x.Contains("mainshader")).ToArray();
 
-            yield return depmapRequest.SendWebRequest();
+                dependenciesMap.Add(hash, new List<string>(map.dependencies));
 
-            if (!depmapRequest.WebRequestSucceded())
+                downloadingDepmap.Remove(hash);
+
+                if (DCLTime.realtimeSinceStartup - lastTimeSavedPersistentCache >= MIN_TIME_BETWEEN_SAVING_PERSISTENT_CACHE)
+                {
+                    SavePersistentCache();
+                }
+            },
+            (errorMsg) =>
             {
                 failedRequests.Add(hash);
                 downloadingDepmap.Remove(hash);
-                yield break;
-            }
+            });
 
-            AssetDependencyMap map = JsonUtility.FromJson<AssetDependencyMap>(depmapRequest.downloadHandler.text);
-            map.dependencies = map.dependencies.Where(x => !x.Contains("mainshader")).ToArray();
-
-            dependenciesMap.Add(hash, new List<string>(map.dependencies));
-
-            downloadingDepmap.Remove(hash);
-
-            if (DCLTime.realtimeSinceStartup - lastTimeSavedPersistentCache >= MIN_TIME_BETWEEN_SAVING_PERSISTENT_CACHE)
-            {
-                SavePersistentCache();
-            }
-        }
+        asyncOp.disposeOnCompleted = true;
     }
 
     private static void SavePersistentCache()
