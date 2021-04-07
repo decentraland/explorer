@@ -286,11 +286,10 @@ namespace Tests.QuestsTrackerHUD
             yield return null; //wait for all the instantiation/destruction of items to be done by unity
 
             Assert.AreEqual( "questName", hudView.currentEntries[MOCK_QUEST_ID].questTitle.text);
-            Assert.AreEqual( $"sectionName1 - {0:0.0}%", hudView.currentEntries[MOCK_QUEST_ID].sectionTitle.text);
             Assert.AreEqual( 0, hudView.currentEntries[MOCK_QUEST_ID].progress.fillAmount);
-            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].tasksContainer.childCount);
+            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.childCount);
 
-            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].tasksContainer.GetComponentInChildren<QuestsTrackerTask>();
+            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.GetComponentInChildren<QuestsTrackerTask>();
             Assert.NotNull(taskEntry);
             Assert.AreEqual("task1" , taskEntry.taskTitle.text);
             Assert.AreEqual("0/1" , taskEntry.progressText.text);
@@ -327,11 +326,10 @@ namespace Tests.QuestsTrackerHUD
             yield return null; //wait for all the instantiation/destruction of items to be done by unity
 
             Assert.AreEqual( "questName", hudView.currentEntries[MOCK_QUEST_ID].questTitle.text);
-            Assert.AreEqual( $"sectionName1 - {0:0.0}%", hudView.currentEntries[MOCK_QUEST_ID].sectionTitle.text);
             Assert.AreEqual( 0, hudView.currentEntries[MOCK_QUEST_ID].progress.fillAmount);
-            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].tasksContainer.childCount);
+            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.childCount);
 
-            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].tasksContainer.GetComponentInChildren<QuestsTrackerTask>();
+            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.GetComponentInChildren<QuestsTrackerTask>();
             Assert.NotNull(taskEntry);
             Assert.AreEqual("task1" , taskEntry.taskTitle.text);
             Assert.AreEqual("15/20" , taskEntry.progressText.text);
