@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 internal class SectionLandController : SectionBase, ILandsListener
 {
     public const string VIEW_PREFAB_PATH = "BuilderProjectsPanelMenuSections/SectionLandsView";
-    
+
     public override ISectionSearchHandler searchHandler => landSearchHandler;
 
     private readonly SectionLandView view;
@@ -17,10 +17,8 @@ internal class SectionLandController : SectionBase, ILandsListener
 
     public SectionLandController() : this(
         Object.Instantiate(Resources.Load<SectionLandView>(VIEW_PREFAB_PATH))
-        )
-    {
-    }
-    
+    ) { }
+
     public SectionLandController(SectionLandView view)
     {
         this.view = view;
@@ -53,15 +51,16 @@ internal class SectionLandController : SectionBase, ILandsListener
     {
         view.SetEmpty(lands.Length == 0);
 
-        List<LandElementView> toRemove = new List<LandElementView>(
-            landElementViews.Values.Where(landElementView => lands.All(land => land.id != landElementView.GetId())));
-        
-        for (int i=0; i<toRemove.Count; i++)
+        List<LandElementView> toRemove = landElementViews.Values
+                                                         .Where(landElementView => lands.All(land => land.id != landElementView.GetId()))
+                                                         .ToList();
+
+        for (int i = 0; i < toRemove.Count; i++)
         {
             landElementViews.Remove(toRemove[i].GetId());
             PoolView(toRemove[i]);
         }
-        
+
         for (int i = 0; i < lands.Length; i++)
         {
             if (!landElementViews.TryGetValue(lands[i].id, out LandElementView landElementView))
@@ -69,10 +68,10 @@ internal class SectionLandController : SectionBase, ILandsListener
                 landElementView = GetPooledView();
                 landElementViews.Add(lands[i].id, landElementView);
             }
-            
+
             landElementView.SetId(lands[i].id);
             landElementView.SetName(lands[i].name);
-            landElementView.SetCoords(lands[i].x,lands[i].y);
+            landElementView.SetCoords(lands[i].x, lands[i].y);
             landElementView.SetSize(lands[i].size);
             landElementView.SetRole(lands[i].isOwner);
             landElementView.SetThumbnail(lands[i].thumbnailURL);
@@ -99,7 +98,7 @@ internal class SectionLandController : SectionBase, ILandsListener
         {
             if (!landElementViews.TryGetValue(searchInfoLands[i].id, out LandElementView landView))
                 continue;
-            
+
             landView.gameObject.SetActive(true);
             landView.transform.SetSiblingIndex(i);
         }
