@@ -55,8 +55,8 @@ namespace DCL
             if (!url.StartsWith(PLAIN_BASE64_PROTOCOL))
             {
                 webRequestOp = WebRequestController.i.GetTexture(
-                    url,
-                    (webRequestResult) =>
+                    url: url,
+                    OnSuccess: (webRequestResult) =>
                     {
                         if (asset != null)
                         {
@@ -68,7 +68,7 @@ namespace DCL
                             OnFail?.Invoke();
                         }
                     },
-                    (errorMsg) =>
+                    OnFail: (errorMsg) =>
                     {
                         OnFail?.Invoke();
                     });

@@ -99,7 +99,7 @@ namespace DCL
 
             RegisterConcurrentRequest();
 #if UNITY_EDITOR
-            asyncOp = WebRequestController.i.GetAssetBundle(finalUrl, Hash128.Compute(hash));
+            asyncOp = WebRequestController.i.GetAssetBundle(url: finalUrl, hash: Hash128.Compute(hash));
 #else
             //NOTE(Brian): Disable in build because using the asset bundle caching uses IDB.
             asyncOp = WebRequestController.i.GetAssetBundle(finalUrl);

@@ -240,7 +240,11 @@ namespace DCL.Helpers
                     }
                 };
 
-            return WebRequestController.i.GetAudioClip(url, audioType, OnSuccessInternal, OnFailInternal);
+            return WebRequestController.i.GetAudioClip(
+                url: url,
+                audioType: audioType,
+                OnSuccess: OnSuccessInternal,
+                OnFail: OnFailInternal);
         }
 
         public static WebRequestAsyncOperation FetchTexture(string textureURL, Action<Texture2D> OnSuccess, Action<string> OnFail = null)
@@ -252,7 +256,10 @@ namespace DCL.Helpers
                 OnSuccess?.Invoke(texture);
             }
 
-            return WebRequestController.i.GetTexture(textureURL, SuccessInternal, OnFail);
+            return WebRequestController.i.GetTexture(
+                url: textureURL,
+                OnSuccess: SuccessInternal,
+                OnFail: OnFail);
         }
 
         public static AudioType GetAudioTypeFromUrlName(string url)
