@@ -34,8 +34,8 @@ MonoBehaviour:
     antiAliasing: 1
     renderScale: 0.8
     shadows: 1
-    softShadows: 1
-    shadowResolution: 512
+    softShadows: 0
+    shadowResolution: 256
     cameraDrawDistance: 80
     bloom: 1
     fpsCap: 1
