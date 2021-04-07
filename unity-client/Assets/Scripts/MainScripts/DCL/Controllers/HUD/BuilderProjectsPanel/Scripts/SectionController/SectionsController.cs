@@ -14,6 +14,8 @@ internal class SectionsController : IDisposable
     public event Action<SectionId> OnOpenSectionId;
     public event Action<string, SceneDataUpdatePayload> OnRequestUpdateSceneData;
     public event Action<string, SceneContributorsUpdatePayload> OnRequestUpdateSceneContributors;
+    public event Action<string, SceneAdminsUpdatePayload> OnRequestUpdateSceneAdmins;
+    public event Action<string, SceneBannedUsersUpdatePayload> OnRequestUpdateSceneBannedUsers;
 
     private Dictionary<SectionId, SectionBase> loadedSections = new Dictionary<SectionId, SectionBase>();
     private Transform sectionsParent;
@@ -27,7 +29,8 @@ internal class SectionsController : IDisposable
         SCENES_PROJECT,
         LAND,
         SETTINGS_PROJECT_GENERAL,
-        SETTINGS_PROJECT_CONTRIBUTORS
+        SETTINGS_PROJECT_CONTRIBUTORS,
+        SETTINGS_PROJECT_ADMIN
     }
 
     /// <summary>
@@ -138,6 +141,16 @@ internal class SectionsController : IDisposable
         OnRequestUpdateSceneContributors?.Invoke(id, payload);
     }
 
+    private void OnUpdateSceneAdminsRequested(string id, SceneAdminsUpdatePayload payload)
+    {
+        OnRequestUpdateSceneAdmins?.Invoke(id, payload);
+    }
+    
+    private void OnUpdateSceneBannedUsersRequested(string id, SceneBannedUsersUpdatePayload payload)
+    {
+        OnRequestUpdateSceneBannedUsers?.Invoke(id, payload);
+    }
+
     private void SubscribeEvents(SectionBase sectionBase)
     {
         if (sectionBase is ISectionOpenSectionRequester openSectionRequester)
@@ -155,6 +168,14 @@ internal class SectionsController : IDisposable
         if (sectionBase is ISectionUpdateSceneContributorsRequester updateSceneContributorsRequester)
         {
             updateSceneContributorsRequester.OnRequestUpdateSceneContributors += OnUpdateSceneContributorsRequested;
+        }
+        if (sectionBase is ISectionUpdateSceneAdminsRequester updateSceneAdminsRequester)
+        {
+            updateSceneAdminsRequester.OnRequestUpdateSceneAdmins += OnUpdateSceneAdminsRequested;
+        }
+        if (sectionBase is ISectionUpdateSceneBannedUsersRequester updateSceneBannedUsersRequester)
+        {
+            updateSceneBannedUsersRequester.OnRequestUpdateSceneBannedUsers += OnUpdateSceneBannedUsersRequested;
         }
     }
 }
