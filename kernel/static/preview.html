@@ -668,35 +668,6 @@
       })
       var RENDERER_ARTIFACTS_ROOT = '/@/artifacts/unity/Build/'
     </script>
-
-    <script
-      id="unityLoader"
-      src="%PUBLIC_URL%/unity/Build/DCLUnityLoader.js?%REACT_APP_LOADER_VERSION%"
-    ></script>
-    <script>
-      var script = document.getElementById("unityLoader");
-      script.onload = () => {};
-
-      var UnityLoader = UnityLoader || {
-        instantiate: function (dclCanvas, loaderConfig) {
-          var canvas = document.createElement("canvas");
-          canvas.addEventListener("contextmenu", function (e) {
-            e.preventDefault();
-          }),
-            (canvas.id = "#canvas");
-          dclCanvas.appendChild(canvas);
-
-          return new Promise((resolve) => {
-            createUnityInstance(canvas, loaderConfig, (progress) => {})
-              .then(resolve)
-              .catch((message) => {
-                alert(message);
-              });
-          });
-        },
-      };
-    </script>
-
   </body>
   <script defer async src="/@/artifacts/preview.js"></script>
 
