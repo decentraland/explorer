@@ -30,7 +30,7 @@ export type UnityGame = {
  * preview uses '/@/artifacts'
  */
 function getRendererArtifactsRoot() {
-  if (typeof globalThis.RENDERER_ARTIFACTS_ROOT == 'undefined') {
+  if (typeof globalThis.RENDERER_ARTIFACTS_ROOT === 'undefined') {
     throw new Error('RENDERER_ARTIFACTS_ROOT is undefined')
   } else {
     return new URL(globalThis.RENDERER_ARTIFACTS_ROOT, document.location.toString()).toString()
@@ -73,10 +73,10 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
     }
   }
 
-  // {
+  // 1 {
   //   // Load the renderer from the artifacts root folder
-  //   return await injectRenderer(getRendererArtifactsRoot())
-  // }
+  // 1  return await injectRenderer(getRendererArtifactsRoot())
+  // 1 }
 }
 
 async function loadRendererByBranch(branch: string): Promise<LoadRendererResult> {

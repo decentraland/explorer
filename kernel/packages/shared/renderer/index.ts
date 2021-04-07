@@ -4,6 +4,8 @@ import { RootState, StoreContainer } from 'shared/store/rootTypes'
 
 import { isInitialized } from './selectors'
 import { RendererInterfaces } from 'unity-interface/dcl'
+import { unityInterface } from 'unity-interface/UnityInterface'
+import { browserInterface } from 'unity-interface/BrowserInterface'
 
 declare const globalThis: StoreContainer
 
@@ -29,17 +31,23 @@ export function rendererInitialized() {
 export async function ensureUnityInterface(): Promise<RendererInterfaces> {
   const store: Store<RootState> = globalThis.globalStore
 
-  const instancedJS = store.getState().renderer.instancedJS
-  if (instancedJS) {
-    return instancedJS
+  const { initialized } = store.getState().renderer
+  if (initialized) {
+    return {
+      unityInterface: unityInterface,
+      browserInterface: browserInterface
+    }
   }
 
   return new Promise<RendererInterfaces>((resolve) => {
     const unsubscribe = store.subscribe(() => {
-      const instancedJS = store.getState().renderer.instancedJS
-      if (instancedJS) {
+      const { initialized } = store.getState().renderer
+      if (initialized) {
         unsubscribe()
-        return resolve(instancedJS)
+        return resolve({
+          unityInterface: unityInterface,
+          browserInterface: browserInterface
+        })
       }
     })
   })

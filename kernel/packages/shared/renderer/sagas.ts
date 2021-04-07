@@ -1,9 +1,10 @@
 import { call, put, select, take } from 'redux-saga/effects'
 import { waitingForRenderer } from 'shared/loading/types'
 import { createLogger } from 'shared/logger'
+import { browserInterface } from 'unity-interface/BrowserInterface'
 import { initializeEngine, RendererInterfaces, setLoadingScreenVisible } from 'unity-interface/dcl'
 import { UnityGame } from 'unity-interface/loader'
-import { engineStarted, InitializeRenderer, INITIALIZE_RENDERER, rendererEnabled } from './actions'
+import { engineStarted, InitializeRenderer, INITIALIZE_RENDERER } from './actions'
 import { isInitialized } from './selectors'
 import { RENDERER_INITIALIZED } from './types'
 
@@ -32,12 +33,7 @@ function* initializeRenderer(action: InitializeRenderer) {
   yield put(waitingForRenderer())
 
   // async start loading
-  let rendererFuture = delegate(container, function handleRendererMessage(
-    type: string,
-    jsonEncodedMessage: string
-  ): void {
-    handleMessageFromEngine(instancedJS, type, jsonEncodedMessage)
-  })
+  let rendererFuture = delegate(container, handleMessageFromEngine)
 
   // We have to wait ENGINE_STARTED at the same time we fire off the async instantiate
   // otherwise we get a race condition because ENGINE_STARTED gets fired off as soon
@@ -48,17 +44,15 @@ function* initializeRenderer(action: InitializeRenderer) {
 
   instancedJS = yield initializeEngine(renderer)
 
-  yield put(rendererEnabled(instancedJS!))
-
   // send an "engineStarted" notification
   yield put(engineStarted())
 
   return renderer
 }
 
-function handleMessageFromEngine(instancedJS: RendererInterfaces | null, type: string, jsonEncodedMessage: string) {
+function handleMessageFromEngine(type: string, jsonEncodedMessage: string) {
   DEBUG && logger.info(`handleMessageFromEngine`, type)
-  if (instancedJS) {
+  if (browserInterface) {
     let parsedJson = null
     try {
       parsedJson = JSON.parse(jsonEncodedMessage)
@@ -67,7 +61,9 @@ function handleMessageFromEngine(instancedJS: RendererInterfaces | null, type: s
       logger.error(e.message + ' messageFromEngine: ' + type + ' ' + jsonEncodedMessage)
       throw e
     }
-    instancedJS.browserInterface.handleUnityMessage(type, parsedJson)
+    // this is outside of the try-catch to enable V8 path optimizations
+    // keep the following line outside the `try`
+    browserInterface.handleUnityMessage(type, parsedJson)
   } else {
     logger.error('Message received without initializing engine', type, jsonEncodedMessage)
   }

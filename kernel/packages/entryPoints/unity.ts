@@ -29,7 +29,7 @@ import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { UnityInterface } from 'unity-interface/UnityInterface'
+import { unityInterface, UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from 'unity-interface/kernelConfigForRenderer'
 
 const container = document.getElementById('gameContainer')
@@ -57,8 +57,8 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
 }
 
 initializeUnity(container)
-  .then(async ({ instancedJS }) => {
-    const i = instancedJS.unityInterface
+  .then(async () => {
+    const i = unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
