@@ -4,11 +4,25 @@ import { parseUrn } from '@dcl/urn-resolver'
 declare const globalThis: any
 
 export type DclRenderer = {}
-export type UnityLoader = {}
+
 export type LoadRendererResult = {
   DclRenderer: DclRenderer
-  UnityLoader: UnityLoader
+  createUnityInstance: (
+    canvas: HTMLCanvasElement,
+    config: any,
+    onProgress?: (progress: number) => void
+  ) => Promise<UnityGame>
   baseUrl: string
+}
+
+export type UnityGame = {
+  Module: {
+    /** this handler can be overwritten, return true to stop error propagation */
+    errorHandler?: (message: string, filename: string, lineno: number) => boolean
+  }
+  SendMessage(object: string, method: string, args: number | string): void
+  SetFullscreen(): void
+  Quit(): Promise<void>
 }
 
 /**
@@ -28,17 +42,17 @@ async function injectRenderer(baseUrl: string): Promise<LoadRendererResult> {
   const scriptUrl = new URL('index.js', baseUrl).toString()
   await injectScript(scriptUrl)
 
-  if (typeof globalThis.UnityLoader == 'undefined') {
-    throw new Error('Error while loading UnityLoader from ' + scriptUrl)
+  if (typeof globalThis.createUnityInstance === 'undefined') {
+    throw new Error('Error while loading createUnityInstance from ' + scriptUrl)
   }
 
-  if (typeof globalThis.DclRenderer == 'undefined') {
+  if (typeof globalThis.DclRenderer === 'undefined') {
     throw new Error('Error while loading the renderer from ' + scriptUrl)
   }
 
   return {
     DclRenderer: globalThis.DclRenderer,
-    UnityLoader: globalThis.UnityLoader,
+    createUnityInstance: globalThis.createUnityInstance,
     baseUrl
   }
 }
@@ -49,12 +63,12 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
   {
     const scriptUrl = new URL('DCLUnityLoader.js', getRendererArtifactsRoot()).toString()
     await injectScript(scriptUrl)
-    if (typeof globalThis.UnityLoader == 'undefined') {
+    if (typeof globalThis.createUnityInstance === 'undefined') {
       throw new Error('Error while loading the renderer from ' + scriptUrl)
     }
     return {
       DclRenderer: globalThis.DclRenderer,
-      UnityLoader: globalThis.UnityLoader,
+      createUnityInstance: globalThis.createUnityInstance,
       baseUrl: getRendererArtifactsRoot()
     }
   }
@@ -67,7 +81,7 @@ async function loadDefaultRenderer(): Promise<LoadRendererResult> {
 
 async function loadRendererByBranch(branch: string): Promise<LoadRendererResult> {
   const baseUrl = `https://renderer-artifacts.decentraland.org/branch/${branch}/`
-  return await injectRenderer(baseUrl)
+  return injectRenderer(baseUrl)
 }
 
 // TODO: return type DclRenderer
@@ -82,7 +96,7 @@ export async function loadUnity(urn?: string): Promise<LoadRendererResult> {
     }
 
     // urn:decentraland:off-chain:renderer-artifacts:${branch}
-    if (parsedUrn.type == 'off-chain' && parsedUrn.registry == 'renderer-artifacts') {
+    if (parsedUrn.type === 'off-chain' && parsedUrn.registry === 'renderer-artifacts') {
       return loadRendererByBranch(parsedUrn.id)
     }
 

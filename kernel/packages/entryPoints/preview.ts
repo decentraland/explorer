@@ -85,7 +85,7 @@ function sceneRenderable() {
 
 initializeUnity(container)
   .then(async (ret) => {
-    const i = (await ret.instancedJS).unityInterface
+    const i = ret.instancedJS.unityInterface
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.NOTIFICATION, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.SETTINGS_PANEL, { active: true, visible: false })

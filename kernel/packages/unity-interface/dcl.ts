@@ -35,16 +35,11 @@ import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
 
-declare const globalThis: UnityInterfaceContainer &
-  BrowserInterfaceContainer &
-  StoreContainer & { analytics: any; delighted: any }
+declare const globalThis: RendererInterfaces & StoreContainer & { analytics: any; delighted: any }
 
-export type BrowserInterfaceContainer = {
-  browserInterface: BrowserInterface
-}
-
-export type UnityInterfaceContainer = {
+export type RendererInterfaces = {
   unityInterface: UnityInterface
+  browserInterface: BrowserInterface
 }
 
 globalThis.browserInterface = browserInterface
@@ -91,7 +86,7 @@ function debuggingDecorator(_gameInstance: GameInstance) {
  *
  * @param _gameInstance Unity game instance
  */
-export async function initializeEngine(_gameInstance: GameInstance) {
+export async function initializeEngine(_gameInstance: GameInstance): Promise<RendererInterfaces> {
   gameInstance = debuggingDecorator(_gameInstance)
 
   unityInterface.Init(_gameInstance)
@@ -126,14 +121,7 @@ export async function initializeEngine(_gameInstance: GameInstance) {
 
   return {
     unityInterface,
-    onMessage(type: string, message: any) {
-      if (type in browserInterface) {
-        // tslint:disable-next-line:semicolon
-        ;(browserInterface as any)[type](message)
-      } else {
-        defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
-      }
-    }
+    browserInterface
   }
 }
 

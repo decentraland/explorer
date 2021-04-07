@@ -1,4 +1,4 @@
-declare const globalThis: { UnityLoader: any } & StoreContainer
+declare const globalThis: StoreContainer
 declare const global: any
 ;(window as any).reactVersion = false
 
@@ -58,7 +58,7 @@ function configureTaskbarDependentHUD(i: UnityInterface, voiceChatEnabled: boole
 
 initializeUnity(container)
   .then(async ({ instancedJS }) => {
-    const i = (await instancedJS).unityInterface
+    const i = instancedJS.unityInterface
 
     i.ConfigureHUDElement(HUDElementID.MINIMAP, { active: true, visible: true })
     i.ConfigureHUDElement(HUDElementID.PROFILE_HUD, { active: true, visible: true })
@@ -80,9 +80,9 @@ initializeUnity(container)
     i.ConfigureHUDElement(HUDElementID.NFT_INFO_DIALOG, { active: true, visible: false })
     i.ConfigureHUDElement(HUDElementID.TELEPORT_DIALOG, { active: true, visible: false })
 
-    //NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
-    //             so ensuring meta configuration is initialized in this stage is a must
-    //NOTE(Pablo): We also need meta configuration to know if we need to enable voice chat
+    // NOTE(Brian): Scene download manager uses meta config to determine which empty parcels we want
+    //              so ensuring meta configuration is initialized in this stage is a must
+    // NOTE(Pablo): We also need meta configuration to know if we need to enable voice chat
     await ensureMetaConfigurationInitialized()
 
     try {
@@ -152,23 +152,12 @@ initializeUnity(container)
           { active: !!messageOfTheDay, visible: false },
           messageOfTheDay
         )
-      })
+      }).catch(logger.error)
     }
 
     teleportObservable.notifyObservers(worldToGrid(lastPlayerPosition))
 
     document.body.classList.remove('dcl-loading')
-
-    globalThis.UnityLoader.dclErrorHandler = (error: any) => {
-      if (error.isSceneError) {
-        // @see CustomWebWorkerTransport.ts
-        debugger
-        return
-      }
-
-      console['error'](error)
-      ReportFatalError(error.message)
-    }
   })
   .catch((err) => {
     document.body.classList.remove('dcl-loading')
