@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-internal class SectionSceneContributorsSettingsView : MonoBehaviour
+internal class SectionSceneContributorsSettingsView : MonoBehaviour, IDisposable
 {
     [SerializeField] internal UsersSearchPromptView usersSearchPromptView;
     [SerializeField] internal Button addUserButton;
@@ -20,6 +20,7 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
     private readonly Queue<UserElementView> userElementViewsPool = new Queue<UserElementView>();
 
     private string contributorLabelFormat;
+    private bool isDestroyed = false;
 
     private void Awake()
     {
@@ -27,7 +28,20 @@ internal class SectionSceneContributorsSettingsView : MonoBehaviour
         PoolView(userElementView);
         contributorLabelFormat = labelContributor.text;
     }
-    
+
+    private void OnDestroy()
+    {
+        isDestroyed  = true;
+    }
+
+    public void Dispose()
+    {
+        if (!isDestroyed)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     public void SetParent(Transform parent)
     {
         transform.SetParent(parent);

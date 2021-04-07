@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-internal class SectionSceneAdminsSettingsView : MonoBehaviour
+internal class SectionSceneAdminsSettingsView : MonoBehaviour, IDisposable
 {
     [SerializeField] internal UsersSearchPromptView adminsSearchPromptView;
     [SerializeField] internal UsersSearchPromptView blockedSearchPromptView;
@@ -29,6 +29,7 @@ internal class SectionSceneAdminsSettingsView : MonoBehaviour
 
     private string adminsLabelFormat;
     private string blockedLabelFormat;
+    private bool isDestroyed;
 
     private void Awake()
     {
@@ -39,7 +40,20 @@ internal class SectionSceneAdminsSettingsView : MonoBehaviour
         adminsLabelFormat = labelAdmins.text;
         blockedLabelFormat = labelBlocked.text;
     }
-    
+
+    private void OnDestroy()
+    {
+        isDestroyed = true;
+    }
+
+    public void Dispose()
+    {
+        if (!isDestroyed)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     public void SetParent(Transform parent)
     {
         transform.SetParent(parent);

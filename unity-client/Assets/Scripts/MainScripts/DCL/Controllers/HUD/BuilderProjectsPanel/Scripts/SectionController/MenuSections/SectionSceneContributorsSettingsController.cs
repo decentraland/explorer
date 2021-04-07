@@ -37,7 +37,7 @@ internal class SectionSceneContributorsSettingsController : SectionBase, ISelect
 
     public override void Dispose()
     {
-        Object.Destroy(view.gameObject);
+        view.Dispose();
         profileFetcher.Dispose();
         friendsSearchPromptController.Dispose();
     }

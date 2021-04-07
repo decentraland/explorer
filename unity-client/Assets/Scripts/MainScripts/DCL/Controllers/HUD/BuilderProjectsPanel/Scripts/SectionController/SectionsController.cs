@@ -46,7 +46,6 @@ internal class SectionsController : ISectionsController
     private Transform sectionsParent;
     private ISectionFactory sectionFactory;
     private SectionBase currentOpenSection;
-    
 
     /// <summary>
     /// Ctor
@@ -183,7 +182,7 @@ internal class SectionsController : ISectionsController
         if (sectionBase is ISectionUpdateSceneContributorsRequester updateSceneContributorsRequester)
         {
             updateSceneContributorsRequester.OnRequestUpdateSceneContributors += OnUpdateSceneContributorsRequested;
-        }   
+        }
         if (sectionBase is ISectionUpdateSceneAdminsRequester updateSceneAdminsRequester)
         {
             updateSceneAdminsRequester.OnRequestUpdateSceneAdmins += OnUpdateSceneAdminsRequested;
