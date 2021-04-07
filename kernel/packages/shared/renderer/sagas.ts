@@ -2,7 +2,7 @@ import { call, put, select, take } from 'redux-saga/effects'
 import { waitingForRenderer } from 'shared/loading/types'
 import { createLogger } from 'shared/logger'
 import { browserInterface } from 'unity-interface/BrowserInterface'
-import { initializeEngine, RendererInterfaces, setLoadingScreenVisible } from 'unity-interface/dcl'
+import { initializeEngine, setLoadingScreenVisible } from 'unity-interface/dcl'
 import { UnityGame } from 'unity-interface/loader'
 import { engineStarted, InitializeRenderer, INITIALIZE_RENDERER } from './actions'
 import { isInitialized } from './selectors'
@@ -27,22 +27,14 @@ function* initializeRenderer(action: InitializeRenderer) {
 
   setLoadingScreenVisible(true)
 
-  let instancedJS: RendererInterfaces | null = null
-
   // will start loading
   yield put(waitingForRenderer())
 
-  // async start loading
-  let rendererFuture = delegate(container, handleMessageFromEngine)
+  // start loading the renderer
+  const renderer: UnityGame = yield delegate(container, handleMessageFromEngine)
 
-  // We have to wait ENGINE_STARTED at the same time we fire off the async instantiate
-  // otherwise we get a race condition because ENGINE_STARTED gets fired off as soon
-  // instantiate is resolved.
-
-  // wait for the UnityGame instance, it means the renderer is connected and working
-  const renderer: UnityGame = yield rendererFuture
-
-  instancedJS = yield initializeEngine(renderer)
+  // wire the kernel to the renderer
+  yield initializeEngine(renderer)
 
   // send an "engineStarted" notification
   yield put(engineStarted())

@@ -2,7 +2,7 @@ import { action } from 'typesafe-actions'
 
 import { UnityGame } from 'unity-interface/loader'
 
-import { RENDERER_INITIALIZED, PARCEL_LOADING_STARTED } from './types'
+import { RENDERER_INITIALIZED, PARCEL_LOADING_STARTED, ENGINE_STARTED } from './types'
 
 export const INITIALIZE_RENDERER = '[Request] Initialize renderer'
 export const initializeRenderer = (
@@ -11,7 +11,6 @@ export const initializeRenderer = (
 ) => action(INITIALIZE_RENDERER, { delegate, container })
 export type InitializeRenderer = ReturnType<typeof initializeRenderer>
 
-export const ENGINE_STARTED = '[Success] Engine started'
 export const engineStarted = () => action(ENGINE_STARTED)
 export type EngineStarted = ReturnType<typeof engineStarted>
 

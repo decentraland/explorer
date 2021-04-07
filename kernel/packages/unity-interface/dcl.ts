@@ -1,4 +1,3 @@
-import { TeleportController } from 'shared/world/TeleportController'
 import {
   DEBUG,
   EDITOR,
@@ -34,6 +33,7 @@ import Html from '../shared/Html'
 import { WebSocketTransport } from 'decentraland-rpc'
 import { kernelConfigForRenderer } from './kernelConfigForRenderer'
 import type { ScriptingTransport } from 'decentraland-rpc/lib/common/json-rpc/types'
+import { TeleportController } from 'shared/world/TeleportController'
 
 declare const globalThis: RendererInterfaces & StoreContainer & { analytics: any; delighted: any }
 
@@ -86,7 +86,7 @@ function debuggingDecorator(_gameInstance: GameInstance) {
  *
  * @param _gameInstance Unity game instance
  */
-export async function initializeEngine(_gameInstance: GameInstance): Promise<RendererInterfaces> {
+export async function initializeEngine(_gameInstance: GameInstance): Promise<void> {
   gameInstance = debuggingDecorator(_gameInstance)
 
   unityInterface.Init(_gameInstance)
@@ -117,11 +117,6 @@ export async function initializeEngine(_gameInstance: GameInstance): Promise<Ren
 
   if (!EDITOR) {
     await startGlobalScene(unityInterface, 'dcl-gs-avatars', 'Avatars', hudWorkerUrl)
-  }
-
-  return {
-    unityInterface,
-    browserInterface
   }
 }
 

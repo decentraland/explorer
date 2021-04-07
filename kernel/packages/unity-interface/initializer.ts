@@ -7,7 +7,6 @@ import { StoreContainer } from 'shared/store/rootTypes'
 import { ensureUnityInterface } from 'shared/renderer'
 import { loadUnity, UnityGame } from './loader'
 
-import { RendererInterfaces } from './dcl'
 import { unityBuildConfigurations } from 'config'
 import { initializeUnityEditor } from './wsEditorAdapter'
 import future from 'fp-future'
@@ -19,7 +18,6 @@ globalThis.Hls = require('hls.js')
 
 export type InitializeUnityResult = {
   container: HTMLElement
-  instancedJS: RendererInterfaces
 }
 
 async function loadInjectedUnityDelegate(
@@ -61,9 +59,6 @@ async function loadInjectedUnityDelegate(
     productVersion: unityBuildConfigurations.UNITY_PRODUCT_VERSION
   }
 
-  // We have to wait ENGINE_STARTED at the same time we fire off the async instantiate
-  // otherwise we get a race condition because ENGINE_STARTED gets fired off as soon
-  // instantiate is resolved.
   const canvas = document.createElement('canvas')
   canvas.addEventListener('contextmenu', function (e) {
     e.preventDefault()
@@ -119,11 +114,10 @@ export async function initializeUnity(container: HTMLElement): Promise<Initializ
     globalThis.globalStore.dispatch(initializeRenderer(loadInjectedUnityDelegate, container))
   }
 
-  const instancedJS = await ensureUnityInterface()
+  await ensureUnityInterface()
 
   return {
-    container,
-    instancedJS
+    container
   }
 }
 

@@ -22,7 +22,7 @@ import { signalParcelLoadingStarted, signalRendererInitialized } from 'shared/re
 import { lastPlayerPosition, teleportObservable } from 'shared/world/positionThings'
 import { RootStore, StoreContainer } from 'shared/store/rootTypes'
 import { startUnitySceneWorkers } from '../unity-interface/dcl'
-import { initializeUnity, InitializeUnityResult } from '../unity-interface/initializer'
+import { initializeUnity } from '../unity-interface/initializer'
 import { HUDElementID, RenderProfile } from 'shared/types'
 import {
   ensureRendererEnabled,
@@ -37,7 +37,7 @@ import { EnsureProfile } from 'shared/profiles/ProfileAsPromise'
 import { ensureMetaConfigurationInitialized, waitForMessageOfTheDay } from 'shared/meta'
 import { WorldConfig } from 'shared/meta/types'
 import { isVoiceChatEnabledFor } from 'shared/meta/selectors'
-import { UnityInterface } from 'unity-interface/UnityInterface'
+import { unityInterface, UnityInterface } from 'unity-interface/UnityInterface'
 import { kernelConfigForRenderer } from '../unity-interface/kernelConfigForRenderer'
 import Html from 'shared/Html'
 import { filterInvalidNameCharacters, isBadWord } from 'shared/profiles/utils/names'
@@ -89,8 +89,8 @@ namespace webApp {
     })
   }
 
-  export async function loadUnity({ instancedJS }: InitializeUnityResult) {
-    const i = instancedJS.unityInterface
+  export async function loadUnity() {
+    const i = unityInterface
     const worldConfig: WorldConfig | undefined = globalThis.globalStore.getState().meta.config.world
     const renderProfile = worldConfig ? worldConfig.renderProfile ?? RenderProfile.DEFAULT : RenderProfile.DEFAULT
 
