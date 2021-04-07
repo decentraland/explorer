@@ -21,43 +21,43 @@ MonoBehaviour:
     shadows: 0
     softShadows: 0
     shadowResolution: 256
-    cameraDrawDistance: 50
+    cameraDrawDistance: 40
     bloom: 0
     fpsCap: 1
-    colorGrading: 0
-    shadowDistance: 30
+    colorGrading: 1
+    shadowDistance: 0
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 100
-    ssaoQuality: 0
+    detailObjectCullingThreshold: 0
+    ssaoQuality: 1
   - displayName: Medium
     baseResolution: 1
     antiAliasing: 1
     renderScale: 0.8
     shadows: 1
-    softShadows: 0
-    shadowResolution: 256
-    cameraDrawDistance: 80
+    softShadows: 1
+    shadowResolution: 512
+    cameraDrawDistance: 75
     bloom: 1
     fpsCap: 1
     colorGrading: 1
-    shadowDistance: 45
+    shadowDistance: 0
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 75
-    ssaoQuality: 1
+    detailObjectCullingThreshold: 0
+    ssaoQuality: 2
   - displayName: High
-    baseResolution: 2
-    antiAliasing: 2
+    baseResolution: 1
+    antiAliasing: 1
     renderScale: 1
     shadows: 1
     softShadows: 1
-    shadowResolution: 512
-    cameraDrawDistance: 100
+    shadowResolution: 1024
+    cameraDrawDistance: 85
     bloom: 1
     fpsCap: 1
     colorGrading: 1
-    shadowDistance: 60
+    shadowDistance: 0
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 50
+    detailObjectCullingThreshold: 0
     ssaoQuality: 2
   - displayName: Ultra
     baseResolution: 2
@@ -70,7 +70,7 @@ MonoBehaviour:
     bloom: 1
     fpsCap: 0
     colorGrading: 1
-    shadowDistance: 60
+    shadowDistance: 100
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 26.4
+    detailObjectCullingThreshold: 0
     ssaoQuality: 3

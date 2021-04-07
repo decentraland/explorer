@@ -106,11 +106,11 @@ namespace DCL.SettingsData
             if (shadows != otherSetting.shadows) return false;
             if (softShadows != otherSetting.softShadows) return false;
             if (shadowResolution != otherSetting.shadowResolution) return false;
-            if (Mathf.Abs(cameraDrawDistance - otherSetting.cameraDrawDistance) > 0.001f) return false;
+            if (cameraDrawDistance != otherSetting.cameraDrawDistance) return false;
             if (bloom != otherSetting.bloom) return false;
             if (fpsCap != otherSetting.fpsCap) return false;
             if (colorGrading != otherSetting.colorGrading) return false;
-            if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) > 0.001f) return false;
+            if (shadowDistance != otherSetting.shadowDistance) return false;
             if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
             if (detailObjectCullingThreshold != otherSetting.detailObjectCullingThreshold) return false;
             if (ssaoQuality != otherSetting.ssaoQuality) return false;
