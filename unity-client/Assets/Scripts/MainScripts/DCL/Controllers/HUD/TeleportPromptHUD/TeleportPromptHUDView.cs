@@ -161,5 +161,8 @@ public class TeleportPromptHUDView : MonoBehaviour
             UnityEngine.Object.Destroy(downloadedBanner);
             downloadedBanner = null;
         }
+
+        if (fetchParcelImageOp != null)
+            fetchParcelImageOp.Dispose();
     }
 }
