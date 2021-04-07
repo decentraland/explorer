@@ -27,12 +27,14 @@ namespace DCL
         /// Download data from a url.
         /// </summary>
         /// <param name="url">Url where to make the request.</param>
+        /// <param name="downloadHandler">Downloader handler to be used by the GET request.</param>
         /// <param name="OnSuccess">This action will be executed if the request successfully finishes and it includes the request with the data downloaded.</param>
         /// <param name="OnFail">This action will be executed if the request fails.</param>
         /// <param name="requestAttemps">Number of attemps for re-trying failed requests.</param>
         /// <param name="timeout">Sets the request to attempt to abort after the configured number of seconds have passed (0 = no timeout).</param>
         WebRequestAsyncOperation Get(
             string url,
+            DownloadHandler downloadHandler = null,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
             int requestAttemps = 3,
@@ -130,12 +132,13 @@ namespace DCL
 
         public WebRequestAsyncOperation Get(
             string url,
+            DownloadHandler downloadHandler = null,
             Action<UnityWebRequest> OnSuccess = null,
             Action<string> OnFail = null,
             int requestAttemps = 3,
             int timeout = 0)
         {
-            return SendWebRequest(genericWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+            return SendWebRequest(genericWebRequest, url, downloadHandler, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
         public WebRequestAsyncOperation GetAssetBundle(
@@ -145,7 +148,7 @@ namespace DCL
             int requestAttemps = 3,
             int timeout = 0)
         {
-            return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+            return SendWebRequest(assetBundleWebRequest, url, null, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
         public WebRequestAsyncOperation GetAssetBundle(
@@ -157,7 +160,7 @@ namespace DCL
             int timeout = 0)
         {
             assetBundleWebRequest.SetHash(hash);
-            return SendWebRequest(assetBundleWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+            return SendWebRequest(assetBundleWebRequest, url, null, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
         public WebRequestAsyncOperation GetTexture(
@@ -167,7 +170,7 @@ namespace DCL
             int requestAttemps = 3,
             int timeout = 0)
         {
-            return SendWebRequest(textureWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+            return SendWebRequest(textureWebRequest, url, null, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
         public WebRequestAsyncOperation GetAudioClip(
@@ -179,12 +182,13 @@ namespace DCL
             int timeout = 0)
         {
             audioClipWebRequest.SetAudioType(audioType);
-            return SendWebRequest(audioClipWebRequest, url, OnSuccess, OnFail, requestAttemps, timeout);
+            return SendWebRequest(audioClipWebRequest, url, null, OnSuccess, OnFail, requestAttemps, timeout);
         }
 
         private WebRequestAsyncOperation SendWebRequest<T>(
             T requestType,
             string url,
+            DownloadHandler downloadHandler,
             Action<UnityWebRequest> OnSuccess,
             Action<string> OnFail,
             int requestAttemps,
@@ -194,6 +198,9 @@ namespace DCL
 
             UnityWebRequest request = requestType.CreateWebRequest(url);
             request.timeout = timeout;
+
+            if (downloadHandler != null)
+                request.downloadHandler = downloadHandler;
 
             WebRequestAsyncOperation resultOp = new WebRequestAsyncOperation(request);
             ongoingWebRequests.Add(resultOp);
@@ -214,7 +221,7 @@ namespace DCL
                         if (remainingAttemps > 0)
                         {
                             Debug.LogWarning($"Retrying web request: {url} ({remainingAttemps} attemps remaining)");
-                            resultOp = SendWebRequest(requestType, url, OnSuccess, OnFail, remainingAttemps, timeout);
+                            resultOp = SendWebRequest(requestType, url, downloadHandler, OnSuccess, OnFail, remainingAttemps, timeout);
                         }
                         else
                         {

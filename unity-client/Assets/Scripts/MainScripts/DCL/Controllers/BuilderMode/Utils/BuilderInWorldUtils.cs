@@ -310,8 +310,8 @@ public static partial class BuilderInWorldUtils
     public static void MakeGetCall(string url, Action<string> functionToCall)
     {
         WebRequestAsyncOperation asyncOp = Environment.i.platform.webRequest.Get(
-            url,
-            (webRequestResult) =>
+            url: url,
+            OnSuccess: (webRequestResult) =>
             {
                 if (functionToCall != null)
                 {
@@ -320,7 +320,7 @@ public static partial class BuilderInWorldUtils
                     functionToCall?.Invoke(result);
                 }
             },
-            (errorMsg) =>
+            OnFail: (errorMsg) =>
             {
                 Debug.Log(errorMsg);
             });

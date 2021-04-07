@@ -64,8 +64,8 @@ public static class DependencyMapLoadHelper
 
         downloadingDepmap.Add(hash);
         WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(
-            url,
-            (depmapRequest) =>
+            url: url,
+            OnSuccess: (depmapRequest) =>
             {
                 AssetDependencyMap map = JsonUtility.FromJson<AssetDependencyMap>(depmapRequest.downloadHandler.text);
                 map.dependencies = map.dependencies.Where(x => !x.Contains("mainshader")).ToArray();
@@ -79,7 +79,7 @@ public static class DependencyMapLoadHelper
                     SavePersistentCache();
                 }
             },
-            (errorMsg) =>
+            OnFail: (errorMsg) =>
             {
                 failedRequests.Add(hash);
                 downloadingDepmap.Remove(hash);

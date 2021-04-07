@@ -47,8 +47,8 @@ public class DynamicOBJLoaderController : MonoBehaviour
             Destroy(loadedOBJGameObject);
 
             loadingOp = Environment.i.platform.webRequest.Get(
-                OBJUrl,
-                (webRequestResult) =>
+                url: OBJUrl,
+                OnSuccess: (webRequestResult) =>
                 {
                     loadedOBJGameObject = OBJLoader.LoadOBJFile(webRequestResult.downloadHandler.text, true);
                     loadedOBJGameObject.name = "LoadedOBJ";
@@ -58,7 +58,7 @@ public class DynamicOBJLoaderController : MonoBehaviour
                     OnFinishedLoadingAsset?.Invoke();
                     alreadyLoadedAsset = true;
                 },
-                (errorMsg) =>
+                OnFail: (errorMsg) =>
                 {
                     Debug.Log("Couldn't get OBJ, error: " + errorMsg + " ... " + OBJUrl);
                 });
