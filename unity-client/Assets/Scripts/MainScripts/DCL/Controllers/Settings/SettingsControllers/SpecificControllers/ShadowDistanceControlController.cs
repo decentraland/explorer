@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -23,7 +24,7 @@ namespace DCL.SettingsControls
 
         public override void UpdateSetting(object newValue)
         {
-            currentQualitySetting.shadowDistance = (float)newValue;
+            currentQualitySetting.shadowDistance = Convert.ToInt32( newValue );
 
             if (lightweightRenderPipelineAsset)
                 lightweightRenderPipelineAsset.shadowDistance = currentQualitySetting.shadowDistance;

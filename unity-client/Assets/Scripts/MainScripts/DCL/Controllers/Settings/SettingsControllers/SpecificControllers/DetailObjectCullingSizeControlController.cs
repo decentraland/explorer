@@ -1,3 +1,4 @@
+using System;
 using DCL.Rendering;
 using DCL.SettingsController;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace DCL.SettingsControls
 
         public override void UpdateSetting(object newValue)
         {
-            currentQualitySetting.detailObjectCullingThreshold = (float)newValue;
+            currentQualitySetting.detailObjectCullingThreshold = Convert.ToInt32(newValue);
 
             if (currentQualitySetting.enableDetailObjectCulling)
             {

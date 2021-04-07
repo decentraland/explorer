@@ -75,7 +75,7 @@ namespace DCL.SettingsData
         public UnityEngine.Rendering.Universal.ShadowResolution shadowResolution;
 
         [Tooltip("Camera Far")] [Range(40, 100)]
-        public float cameraDrawDistance;
+        public int cameraDrawDistance;
 
         [Tooltip("Enable bloom post process")]
         public bool bloom;
@@ -87,13 +87,13 @@ namespace DCL.SettingsData
         public bool colorGrading;
 
         [Tooltip("Shadow Distance")] [Range(30, 100)]
-        public float shadowDistance;
+        public int shadowDistance;
 
         [Tooltip("Enable culling for detail objects in the viewport.")]
         public bool enableDetailObjectCulling;
 
         [Tooltip("If detail object culling is ON, this slider determines the relative size of culled objects from tiny to big. Bigger values gives better performance, but more objects will be hidden.")] [Range(0, 100)]
-        public float detailObjectCullingThreshold;
+        public int detailObjectCullingThreshold;
 
         [Tooltip("SSAO quality level")]
         public SSAOQualityLevel ssaoQuality;
@@ -112,7 +112,7 @@ namespace DCL.SettingsData
             if (colorGrading != otherSetting.colorGrading) return false;
             if (Mathf.Abs(shadowDistance - otherSetting.shadowDistance) > 0.001f) return false;
             if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
-            if (Mathf.Abs(detailObjectCullingThreshold - otherSetting.detailObjectCullingThreshold) > 0.001f) return false;
+            if (detailObjectCullingThreshold != otherSetting.detailObjectCullingThreshold) return false;
             if (ssaoQuality != otherSetting.ssaoQuality) return false;
 
             return true;

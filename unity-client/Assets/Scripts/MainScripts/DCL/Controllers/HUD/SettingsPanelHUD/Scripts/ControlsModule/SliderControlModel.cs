@@ -15,9 +15,6 @@ namespace DCL.SettingsPanelHUD.Controls
         [Tooltip("Max allowed value for the slider.")]
         public float sliderMaxValue;
 
-        [Tooltip("True if the slider values will be integers.")]
-        public bool sliderWholeNumbers;
-
         [Tooltip("True if the slider value will be stored in a normalized way.")]
         public bool storeValueAsNormalized;
     }

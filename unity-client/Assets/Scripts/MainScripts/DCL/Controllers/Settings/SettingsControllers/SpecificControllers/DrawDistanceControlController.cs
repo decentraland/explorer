@@ -1,3 +1,4 @@
+using System;
 using DCL.SettingsController;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace DCL.SettingsControls
 
         public override void UpdateSetting(object newValue)
         {
-            currentQualitySetting.cameraDrawDistance = (float)newValue;
+            currentQualitySetting.cameraDrawDistance = Convert.ToInt32(newValue);
 
             if (QualitySettingsReferences.i.thirdPersonCamera)
                 QualitySettingsReferences.i.thirdPersonCamera.m_Lens.FarClipPlane = currentQualitySetting.cameraDrawDistance;

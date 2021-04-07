@@ -62,8 +62,6 @@ public class SpinBoxPresetted : MonoBehaviour
             return;
         }
 
-        Debug.Log("Setting value to " + value);
-
         textLabel.text = labels[value];
         currentValue = (int)value;
         startingValue = currentValue;
