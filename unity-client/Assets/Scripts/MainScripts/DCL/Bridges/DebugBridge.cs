@@ -40,6 +40,7 @@ namespace DCL
             Environment.i.platform.debugController.SetEngineDebugPanel();
         }
 
+        [ContextMenu("Dump Scenes Load Info")]
         public void DumpScenesLoadInfo()
         {
             bool prevLogValue = Debug.unityLogger.logEnabled;
@@ -72,6 +73,7 @@ namespace DCL
             ssaoFeature.SetActive(!ssaoFeature.isActive);
         }
 
+        [ContextMenu("Dump Renderers Lockers Info")]
         public void DumpRendererLockersInfo()
         {
             bool prevLogValue = Debug.unityLogger.logEnabled;
