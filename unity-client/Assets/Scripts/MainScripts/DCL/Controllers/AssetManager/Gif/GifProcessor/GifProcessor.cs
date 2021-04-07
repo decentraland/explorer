@@ -81,8 +81,7 @@ public class GifProcessor
 
         yield return webRequestOp;
 
-        bool success = webRequestOp.webRequest != null && webRequestOp.webRequest.WebRequestSucceded();
-        if (success)
+        if (webRequestOp.isSucceded)
         {
             var bytes = webRequestOp.webRequest.downloadHandler.data;
             yield return UniGif.GetTextureListCoroutine(bytes,
@@ -102,6 +101,7 @@ public class GifProcessor
         {
             OnFail?.Invoke();
         }
+
         webRequestOp.Dispose();
     }
 }

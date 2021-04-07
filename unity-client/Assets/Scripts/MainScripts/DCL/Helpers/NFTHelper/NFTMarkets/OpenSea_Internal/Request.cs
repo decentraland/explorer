@@ -144,17 +144,19 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                 if (OpenSeaRequestController.VERBOSE)
                     Debug.Log($"RequestGroup: Request to OpenSea {url}");
 
-                WebRequestAsyncOperation requestOp = WebRequestController.i.Get(url: url, requestAttemps: 1);
-                yield return requestOp;
+                // NOTE(Santi): In this case, as this code is implementing a very specific retries system (including delays), we use our
+                //              custom WebRequest system without retries (requestAttemps = 1) and let the current code to apply the retries.
+                WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(url: url, requestAttemps: 1);
+                yield return asyncOp;
 
                 AssetsResponse response = null;
-                if (requestOp.webRequest.WebRequestSucceded())
+                if (asyncOp.isSucceded)
                 {
-                    response = Utils.FromJsonWithNulls<AssetsResponse>(requestOp.webRequest.downloadHandler.text);
+                    response = Utils.FromJsonWithNulls<AssetsResponse>(asyncOp.webRequest.downloadHandler.text);
                 }
 
                 if (OpenSeaRequestController.VERBOSE)
-                    Debug.Log($"RequestGroup: Request resolving {response != null} {requestOp.webRequest.error} {url}");
+                    Debug.Log($"RequestGroup: Request resolving {response != null} {asyncOp.webRequest.error} {url}");
 
                 if (response != null)
                 {
@@ -176,7 +178,7 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                         SplitGroup();
                     }
 
-                    requestOp.Dispose();
+                    asyncOp.Dispose();
                 }
                 else
                 {
@@ -187,11 +189,11 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                         {
                             while (iterator.MoveNext())
                             {
-                                iterator.Current.Value.Resolve(requestOp.webRequest.error);
+                                iterator.Current.Value.Resolve(asyncOp.webRequest.error);
                             }
                         }
 
-                        requestOp.Dispose();
+                        asyncOp.Dispose();
                     }
                     else
                     {
@@ -200,8 +202,9 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                         if (OpenSeaRequestController.VERBOSE)
                             Debug.Log($"RequestGroup: Request retrying {url}");
 
+                        asyncOp.Dispose();
+
                         yield return new WaitForSeconds(GetRetryDelay());
-                        requestOp.Dispose();
                     }
                 }
             } while (shouldRetry);
@@ -278,11 +281,13 @@ namespace DCL.Helpers.NFT.Markets.OpenSea_Internal
                 if (OpenSeaRequestController.VERBOSE)
                     Debug.Log($"RequestGroup: Request to OpenSea {url}");
 
+                // NOTE(Santi): In this case, as this code is implementing a very specific retries system (including delays), we use our
+                //              custom WebRequest system without retries (requestAttemps = 1) and let the current code to apply the retries.
                 WebRequestAsyncOperation requestOp = WebRequestController.i.Get(url: url, requestAttemps: 1);
                 yield return requestOp;
 
                 AssetsResponse response = null;
-                if (requestOp.webRequest.WebRequestSucceded())
+                if (requestOp.isSucceded)
                 {
                     response = Utils.FromJsonWithNulls<AssetsResponse>(requestOp.webRequest.downloadHandler.text);
                 }

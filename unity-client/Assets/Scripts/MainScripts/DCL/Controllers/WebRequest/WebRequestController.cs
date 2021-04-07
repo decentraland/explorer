@@ -213,7 +213,7 @@ namespace DCL
                     if (resultOp.webRequest.WebRequestSucceded())
                     {
                         OnSuccess?.Invoke(resultOp.webRequest);
-                        resultOp.SetAsCompleted();
+                        resultOp.SetAsCompleted(true);
                     }
                     else if (!resultOp.webRequest.WebRequestAborted() && resultOp.webRequest.WebRequestServerError())
                     {
@@ -226,13 +226,13 @@ namespace DCL
                         else
                         {
                             OnFail?.Invoke(resultOp.webRequest.error);
-                            resultOp.SetAsCompleted();
+                            resultOp.SetAsCompleted(false);
                         }
                     }
                     else
                     {
                         OnFail?.Invoke(resultOp.webRequest.error);
-                        resultOp.SetAsCompleted();
+                        resultOp.SetAsCompleted(false);
                     }
                 }
 

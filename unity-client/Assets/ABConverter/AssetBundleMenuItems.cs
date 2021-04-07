@@ -131,7 +131,7 @@ namespace DCL
 
             while (!asyncOp.isDone) { }
 
-            if (!asyncOp.webRequest.WebRequestSucceded())
+            if (!asyncOp.isSucceded)
             {
                 Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {asyncOp.webRequest.error}");
                 asyncOp.Dispose();

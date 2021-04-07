@@ -123,21 +123,15 @@ namespace DCL
                 }
             }
 
-            while (!asyncOp.isDone)
-            {
-                yield return null;
-            }
+            yield return asyncOp;
 
-            //NOTE(Brian): For some reason, another coroutine iteration can be triggered after Cleanup().
-            //             So assetBundleRequest can be null here.
-            if (asyncOp.webRequest == null)
+            if (asyncOp.isDisposed)
             {
                 OnFail?.Invoke();
-                asyncOp.Dispose();
                 yield break;
             }
 
-            if (!asyncOp.webRequest.WebRequestSucceded())
+            if (!asyncOp.isSucceded)
             {
                 if (VERBOSE)
                     Debug.Log($"Request failed? {asyncOp.webRequest.error} ... {finalUrl}");
@@ -155,11 +149,11 @@ namespace DCL
             }
 
             AssetBundle assetBundle = DownloadHandlerAssetBundle.GetContent(asyncOp.webRequest);
+            asyncOp.Dispose();
 
             if (assetBundle == null || asset == null)
             {
                 OnFail?.Invoke();
-                asyncOp.Dispose();
 
                 failedRequestUrls.Add(finalUrl);
                 yield break;

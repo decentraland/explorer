@@ -12,7 +12,7 @@ public class DynamicOBJLoaderController : MonoBehaviour
     [HideInInspector] public bool alreadyLoadedAsset = false;
     [HideInInspector] public GameObject loadedOBJGameObject;
 
-    WebRequestAsyncOperation loadingOp = null;
+    WebRequestAsyncOperation asyncOp = null;
 
     void Awake()
     {
@@ -32,21 +32,21 @@ public class DynamicOBJLoaderController : MonoBehaviour
             OBJUrl = url;
         }
 
-        if (loadingOp != null)
+        if (asyncOp != null)
         {
-            loadingOp.Dispose();
+            asyncOp.Dispose();
         }
 
-        LoadAssetCoroutine();
+        LoadAsset();
     }
 
-    void LoadAssetCoroutine()
+    void LoadAsset()
     {
         if (!string.IsNullOrEmpty(OBJUrl))
         {
             Destroy(loadedOBJGameObject);
 
-            loadingOp = Environment.i.platform.webRequest.Get(
+            asyncOp = Environment.i.platform.webRequest.Get(
                 url: OBJUrl,
                 OnSuccess: (webRequestResult) =>
                 {
@@ -63,7 +63,7 @@ public class DynamicOBJLoaderController : MonoBehaviour
                     Debug.Log("Couldn't get OBJ, error: " + errorMsg + " ... " + OBJUrl);
                 });
 
-            loadingOp.disposeOnCompleted = true;
+            asyncOp.disposeOnCompleted = true;
         }
         else
         {
@@ -78,9 +78,9 @@ public class DynamicOBJLoaderController : MonoBehaviour
 
     void OnDestroy()
     {
-        if (loadingOp != null)
+        if (asyncOp != null)
         {
-            loadingOp.Dispose();
+            asyncOp.Dispose();
         }
 
         Destroy(loadingPlaceholder);
