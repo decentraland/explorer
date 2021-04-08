@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 785002488258546488b783004eed1484, type: 3}
   m_Name: SSAOControlConfiguration
   m_EditorClassIdentifier: 
-  title: Ambient Occlusion
+  title: AMBIENT OCCLUSION
   controlPrefab: {fileID: 3856968550380144319, guid: 12ace77c1b449714b89d5793ef36f983,
     type: 3}
   controlController: {fileID: 11400000, guid: 11a79c434dba49a468b8ce8c97eefc60, type: 2}
