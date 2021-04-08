@@ -228,12 +228,12 @@ async function mapV2RepresentationIntoV1(representation: any): Promise<BodyShape
 }
 
 /** We need to map the v2 wearable format into the v1 format, that is accepted by the renderer */
-function mapV2WearablesIntoV1(v2Wearables: any[]): Promise<Omit<Wearable, 'baseUrl' | 'baseUrlBundles'>[]> {
+function mapV2WearablesIntoV1(v2Wearables: any[]): Promise<Wearable[]> {
   return Promise.all(v2Wearables.map(mapV2WearableIntoV1))
 }
 
-async function mapV2WearableIntoV1(v2Wearable: any): Promise<Omit<Wearable, 'baseUrl' | 'baseUrlBundles'>> {
-  const { id, data, rarity, i18n, thumbnail } = v2Wearable
+async function mapV2WearableIntoV1(v2Wearable: any): Promise<Wearable> {
+  const { id, data, rarity, i18n, thumbnail, baseUrl, baseUrlBundles } = v2Wearable
   const { category, tags, hides, replaces, representations } = data
   const newId = await mapUrnToLegacyId(id)
   const newRepresentations: BodyShapeRepresentation[] = await Promise.all(
@@ -251,7 +251,9 @@ async function mapV2WearableIntoV1(v2Wearable: any): Promise<Omit<Wearable, 'bas
     rarity,
     representations: newRepresentations,
     i18n,
-    thumbnail: newThumbnail
+    thumbnail: newThumbnail,
+    baseUrl,
+    baseUrlBundles
   }
 }
 
