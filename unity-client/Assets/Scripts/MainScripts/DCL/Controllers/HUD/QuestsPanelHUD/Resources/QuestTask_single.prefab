@@ -419,6 +419,10 @@ MonoBehaviour:
   taskName: {fileID: 2160389509011029812}
   status: {fileID: 6552971525278984882}
   jumpInButton: {fileID: 5233531536427764897}
+  progressText: {fileID: 73464035909574632}
+  ongoingProgress: {fileID: 4733674078838224735}
+  ongoinColor: {r: 0.9960785, g: 0.8352942, b: 0, a: 1}
+  completedcolor: {r: 0.02745098, g: 0.9254902, b: 0.16862746, a: 1}
 --- !u!114 &4454304652239728267
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -122,10 +122,10 @@ namespace DCL.Huds.QuestsTracker
                 {
                     sectionEntry = CreateSection();
                     //New tasks are invisible
-                    sectionEntry.gameObject.SetActive(isVisible);
                     sectionEntries.Add(section.id, sectionEntry);
                 }
 
+                sectionEntry.gameObject.SetActive(isVisible);
                 sectionEntry.Populate(section);
                 sectionEntry.transform.SetAsLastSibling();
 
@@ -199,7 +199,7 @@ namespace DCL.Huds.QuestsTracker
             }
 
             //Wait until all the sections with completed tasks are done
-            yield return new WaitUntil(() => visibleSections.Any(x => x.sequenceState != QuestsTrackerSection.SequenceState.ProgressingOngoingTasks));
+            yield return new WaitUntil(() => visibleSections.All(x => x.sequenceState != QuestsTrackerSection.SequenceState.ProgressingOngoingTasks));
 
             //Show and progress of new tasks
             for (int i = 0; i < newSections.Count; i++)
