@@ -10,6 +10,15 @@ internal class LandSearchHandler : ISectionSearchHandler
 
     public event Action OnUpdated;
     public event Action<List<LandSearchInfo>> OnResult;
+    
+    string[] ISectionSearchHandler.sortTypes => landSortTypes;
+    string ISectionSearchHandler.searchString => landSearchHandler.currentSearchString;
+    bool ISectionSearchHandler.filterOwner => filterOwner;
+    bool ISectionSearchHandler.filterOperator => filterOperator;
+    bool ISectionSearchHandler.filterContributor => filterContributor;
+    bool ISectionSearchHandler.descendingSortOrder => landSearchHandler.isDescendingSortOrder;
+    string ISectionSearchHandler.sortType => landSearchHandler.currentSortingType;
+    int ISectionSearchHandler.resultCount => landSearchHandler.resultCount;
 
     private SearchHandler<LandSearchInfo> landSearchHandler;
 
@@ -43,15 +52,6 @@ internal class LandSearchHandler : ISectionSearchHandler
     public void AddItem(LandSearchInfo item) { landSearchHandler.AddItem(item); }
 
     public void RemoveItem(LandSearchInfo item) { landSearchHandler.RemoveItem(item); }
-
-    string[] ISectionSearchHandler.sortTypes => landSortTypes;
-    string ISectionSearchHandler.searchString => landSearchHandler.currentSearchString;
-    bool ISectionSearchHandler.filterOwner => filterOwner;
-    bool ISectionSearchHandler.filterOperator => filterOperator;
-    bool ISectionSearchHandler.filterContributor => filterContributor;
-    bool ISectionSearchHandler.descendingSortOrder => landSearchHandler.isDescendingSortOrder;
-    string ISectionSearchHandler.sortType => landSearchHandler.currentSortingType;
-    int ISectionSearchHandler.resultCount => landSearchHandler.resultCount;
 
     void ISectionSearchHandler.SetFilter(bool isOwner, bool isOperator, bool isContributor)
     {
