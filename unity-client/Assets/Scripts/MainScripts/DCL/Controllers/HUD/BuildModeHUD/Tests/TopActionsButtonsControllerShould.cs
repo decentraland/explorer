@@ -14,14 +14,12 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController = new TopActionsButtonsController();
             topActionsButtonsController.Initialize(
                 Substitute.For<ITopActionsButtonsView>(),
-                Substitute.For<ITooltipController>());
+                Substitute.For<ITooltipController>(),
+                Substitute.For<IExitFromBuildModeController>());
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            topActionsButtonsController.Dispose();
-        }
+        public void TearDown() { topActionsButtonsController.Dispose(); }
 
         [Test]
         public void ClickOnChangeModeCorrectly()
@@ -136,14 +134,34 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void ClickOnLogoutCorrectly()
+        public void HideLogoutConfirmationCorrectly()
+        {
+            // Act
+            topActionsButtonsController.HideLogoutConfirmation();
+
+            // Assert
+            topActionsButtonsController.exitFromBuildModeController.Received(1).SetActive(false);
+        }
+
+        [Test]
+        public void ShowLogoutConfirmationCorrectly()
+        {
+            // Act
+            topActionsButtonsController.ShowLogoutConfirmation();
+
+            // Assert
+            topActionsButtonsController.exitFromBuildModeController.Received(1).SetActive(true);
+        }
+
+        [Test]
+        public void ConfirmLogoutCorrectly()
         {
             // Arrange
             bool clicked = false;
             topActionsButtonsController.OnLogOutClick += () => { clicked = true; };
 
             // Act
-            topActionsButtonsController.LogOutClicked();
+            topActionsButtonsController.ConfirmLogout();
 
             // Assert
             Assert.IsTrue(clicked, "The clicked is false!");

@@ -85,6 +85,7 @@ public class BuildModeHUDController : IHUD
             inspectorBtnController = new InspectorBtnController(),
             catalogBtnController = new CatalogBtnController(),
             inspectorController = new InspectorController(),
+            exitFromBuildModeController = new ExitFromBuildModeController(),
             topActionsButtonsController = new TopActionsButtonsController()
         };
 

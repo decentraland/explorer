@@ -15,7 +15,7 @@ public interface ITopActionsButtonsController
 
     IExtraActionsController extraActionsController { get; }
 
-    void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController);
+    void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController, IExitFromBuildModeController exitFromBuildModeController);
     void Dispose();
     void ChangeModeClicked();
     void ExtraClicked();
@@ -25,7 +25,9 @@ public interface ITopActionsButtonsController
     void ResetClicked();
     void DuplicateClicked();
     void DeleteClicked();
-    void LogOutClicked();
+    void ShowLogoutConfirmation();
+    void HideLogoutConfirmation();
+    void ConfirmLogout();
     void TooltipPointerEntered(BaseEventData eventData, string tooltipText);
     void TooltipPointerExited();
     void SetExtraActionsActive(bool isActive);
@@ -47,11 +49,13 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     internal ITopActionsButtonsView topActionsButtonsView;
     internal ITooltipController tooltipController;
+    internal IExitFromBuildModeController exitFromBuildModeController;
 
-    public void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController)
+    public void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController, IExitFromBuildModeController exitFromBuildModeController)
     {
         this.topActionsButtonsView = topActionsButtonsView;
         this.tooltipController = tooltipController;
+        this.exitFromBuildModeController = exitFromBuildModeController;
 
         topActionsButtonsView.OnChangeModeClicked += ChangeModeClicked;
         topActionsButtonsView.OnExtraClicked += ExtraClicked;
@@ -61,7 +65,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnResetClicked += ResetClicked;
         topActionsButtonsView.OnDuplicateClicked += DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked += DeleteClicked;
-        topActionsButtonsView.OnLogOutClicked += LogOutClicked;
+        topActionsButtonsView.OnLogOutClicked += ShowLogoutConfirmation;
         topActionsButtonsView.OnPointerExit += TooltipPointerExited;
         topActionsButtonsView.OnChangeCameraModePointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnTranslatePointerEnter += TooltipPointerEntered;
@@ -72,6 +76,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDeletePointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnMoreActionsPointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter += TooltipPointerEntered;
+        exitFromBuildModeController.OnCancelExit += HideLogoutConfirmation;
+        exitFromBuildModeController.OnConfirmExit += ConfirmLogout;
 
         extraActionsController = new ExtraActionsController();
         topActionsButtonsView.ConfigureExtraActions(extraActionsController);
@@ -88,7 +94,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnResetClicked -= ResetClicked;
         topActionsButtonsView.OnDuplicateClicked -= DuplicateClicked;
         topActionsButtonsView.OnDeleteClicked -= DeleteClicked;
-        topActionsButtonsView.OnLogOutClicked -= LogOutClicked;
+        topActionsButtonsView.OnLogOutClicked -= ShowLogoutConfirmation;
         topActionsButtonsView.OnPointerExit -= TooltipPointerExited;
         topActionsButtonsView.OnChangeCameraModePointerEnter -= TooltipPointerEntered;
         topActionsButtonsView.OnTranslatePointerEnter -= TooltipPointerEntered;
@@ -99,52 +105,31 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDeletePointerEnter -= TooltipPointerEntered;
         topActionsButtonsView.OnMoreActionsPointerEnter -= TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter -= TooltipPointerEntered;
+        exitFromBuildModeController.OnCancelExit -= HideLogoutConfirmation;
+        exitFromBuildModeController.OnConfirmExit -= ConfirmLogout;
     }
 
-    public void ChangeModeClicked()
-    {
-        OnChangeModeClick?.Invoke();
-    }
+    public void ChangeModeClicked() { OnChangeModeClick?.Invoke(); }
 
-    public void ExtraClicked()
-    {
-        OnExtraClick?.Invoke();
-    }
+    public void ExtraClicked() { OnExtraClick?.Invoke(); }
 
-    public void TranslateClicked()
-    {
-        OnTranslateClick?.Invoke();
-    }
+    public void TranslateClicked() { OnTranslateClick?.Invoke(); }
 
-    public void RotateClicked()
-    {
-        OnRotateClick?.Invoke();
-    }
+    public void RotateClicked() { OnRotateClick?.Invoke(); }
 
-    public void ScaleClicked()
-    {
-        OnScaleClick?.Invoke();
-    }
+    public void ScaleClicked() { OnScaleClick?.Invoke(); }
 
-    public void ResetClicked()
-    {
-        OnResetClick?.Invoke();
-    }
+    public void ResetClicked() { OnResetClick?.Invoke(); }
 
-    public void DuplicateClicked()
-    {
-        OnDuplicateClick?.Invoke();
-    }
+    public void DuplicateClicked() { OnDuplicateClick?.Invoke(); }
 
-    public void DeleteClicked()
-    {
-        OnDeleteClick?.Invoke();
-    }
+    public void DeleteClicked() { OnDeleteClick?.Invoke(); }
 
-    public void LogOutClicked()
-    {
-        OnLogOutClick?.Invoke();
-    }
+    public void HideLogoutConfirmation() { exitFromBuildModeController.SetActive(false); }
+
+    public void ShowLogoutConfirmation() { exitFromBuildModeController.SetActive(true); }
+
+    public void ConfirmLogout() { OnLogOutClick?.Invoke(); }
 
     public void TooltipPointerEntered(BaseEventData eventData, string tooltipText)
     {
@@ -152,13 +137,7 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         tooltipController.SetTooltipText(tooltipText);
     }
 
-    public void TooltipPointerExited()
-    {
-        tooltipController.HideTooltip();
-    }
+    public void TooltipPointerExited() { tooltipController.HideTooltip(); }
 
-    public void SetExtraActionsActive(bool isActive)
-    {
-        extraActionsController.SetActive(isActive);
-    }
+    public void SetExtraActionsActive(bool isActive) { extraActionsController.SetActive(isActive); }
 }
