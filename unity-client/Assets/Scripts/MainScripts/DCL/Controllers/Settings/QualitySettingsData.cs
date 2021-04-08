@@ -93,7 +93,7 @@ namespace DCL.SettingsData
         public bool enableDetailObjectCulling;
 
         [Tooltip("If detail object culling is ON, this slider determines the relative size of culled objects from tiny to big. Bigger values gives better performance, but more objects will be hidden.")] [Range(0, 100)]
-        public int detailObjectCullingThreshold;
+        public int detailObjectCullingLimit;
 
         [Tooltip("SSAO quality level")]
         public SSAOQualityLevel ssaoQuality;
@@ -112,7 +112,7 @@ namespace DCL.SettingsData
             if (colorGrading != otherSetting.colorGrading) return false;
             if (shadowDistance != otherSetting.shadowDistance) return false;
             if (enableDetailObjectCulling != otherSetting.enableDetailObjectCulling) return false;
-            if (detailObjectCullingThreshold != otherSetting.detailObjectCullingThreshold) return false;
+            if (detailObjectCullingLimit != otherSetting.detailObjectCullingLimit) return false;
             if (ssaoQuality != otherSetting.ssaoQuality) return false;
 
             return true;

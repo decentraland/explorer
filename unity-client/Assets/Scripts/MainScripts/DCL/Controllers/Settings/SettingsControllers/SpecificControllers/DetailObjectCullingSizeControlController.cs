@@ -10,12 +10,12 @@ namespace DCL.SettingsControls
     {
         public override object GetStoredValue()
         {
-            return currentQualitySetting.detailObjectCullingThreshold;
+            return currentQualitySetting.detailObjectCullingLimit;
         }
 
         public override void UpdateSetting(object newValue)
         {
-            currentQualitySetting.detailObjectCullingThreshold = Convert.ToInt32(newValue);
+            currentQualitySetting.detailObjectCullingLimit = Convert.ToInt32(newValue);
 
             if (currentQualitySetting.enableDetailObjectCulling)
             {
@@ -24,12 +24,12 @@ namespace DCL.SettingsControls
                 settings.rendererProfile = CullingControllerProfile.Lerp(
                     QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMin,
                     QualitySettingsReferences.i.cullingControllerSettingsData.rendererProfileMax,
-                    currentQualitySetting.detailObjectCullingThreshold / 100.0f);
+                    currentQualitySetting.detailObjectCullingLimit / 100.0f);
 
                 settings.skinnedRendererProfile = CullingControllerProfile.Lerp(
                     QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMin,
                     QualitySettingsReferences.i.cullingControllerSettingsData.skinnedRendererProfileMax,
-                    currentQualitySetting.detailObjectCullingThreshold / 100.0f);
+                    currentQualitySetting.detailObjectCullingLimit / 100.0f);
 
                 Environment.i.platform.cullingController.SetSettings(settings);
             }
