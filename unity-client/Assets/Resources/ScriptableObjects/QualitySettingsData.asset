@@ -25,9 +25,9 @@ MonoBehaviour:
     bloom: 0
     fpsCap: 1
     colorGrading: 1
-    shadowDistance: 0
+    shadowDistance: 45
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 0
+    detailObjectCullingThreshold: 85
     ssaoQuality: 1
   - displayName: Medium
     baseResolution: 1
@@ -40,9 +40,9 @@ MonoBehaviour:
     bloom: 1
     fpsCap: 1
     colorGrading: 1
-    shadowDistance: 0
+    shadowDistance: 60
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 0
+    detailObjectCullingThreshold: 50
     ssaoQuality: 2
   - displayName: High
     baseResolution: 1
@@ -55,9 +55,9 @@ MonoBehaviour:
     bloom: 1
     fpsCap: 1
     colorGrading: 1
-    shadowDistance: 0
+    shadowDistance: 70
     enableDetailObjectCulling: 1
-    detailObjectCullingThreshold: 0
+    detailObjectCullingThreshold: 50
     ssaoQuality: 2
   - displayName: Ultra
     baseResolution: 2
