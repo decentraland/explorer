@@ -63,23 +63,23 @@ namespace DCL.Components
             if (currentMesh == null)
                 return true;
 
-            BoxShape.Model newPlaneModel = (BoxShape.Model) this.model;
-            BoxShape.Model oldPlaneModel = (BoxShape.Model) previousModel;
+            BoxShape.Model newBoxModel = (BoxShape.Model) this.model;
+            BoxShape.Model oldBoxModel = (BoxShape.Model) previousModel;
 
-            if (newPlaneModel.uvs != null && oldPlaneModel.uvs != null)
+            if (newBoxModel.uvs != null && oldBoxModel.uvs != null)
             {
-                if (newPlaneModel.uvs.Length != oldPlaneModel.uvs.Length)
+                if (newBoxModel.uvs.Length != oldBoxModel.uvs.Length)
                     return true;
 
-                for (int i = 0; i < newPlaneModel.uvs.Length; i++)
+                for (int i = 0; i < newBoxModel.uvs.Length; i++)
                 {
-                    if (newPlaneModel.uvs[i] != oldPlaneModel.uvs[i])
+                    if (newBoxModel.uvs[i] != oldBoxModel.uvs[i])
                         return true;
                 }
             }
             else
             {
-                if (newPlaneModel.uvs != oldPlaneModel.uvs)
+                if (newBoxModel.uvs != oldBoxModel.uvs)
                     return true;
             }
 
