@@ -19,10 +19,10 @@ namespace DCL.Huds.QuestsTracker
         public event Action<QuestReward> OnRewardObtained;
 
         [SerializeField] internal TextMeshProUGUI questTitle;
-        [SerializeField] internal RawImage questIcon;
+        [SerializeField] internal TextMeshProUGUI questProgressText;
         [SerializeField] internal Image progress;
         [SerializeField] internal RectTransform sectionContainer;
-        [SerializeField] internal GameObject taskPrefab;
+        [SerializeField] internal GameObject sectionPrefab;
         [SerializeField] internal Button expandCollapseButton;
         [SerializeField] internal GameObject expandIcon;
         [SerializeField] internal GameObject collapseIcon;
@@ -42,9 +42,9 @@ namespace DCL.Huds.QuestsTracker
         private bool isPinned;
         private bool outAnimDone = false;
 
-        private readonly Dictionary<string, QuestsTrackerTask> taskEntries = new Dictionary<string, QuestsTrackerTask>();
+        private readonly Dictionary<string, QuestsTrackerSection> sectionEntries = new Dictionary<string, QuestsTrackerSection>();
         private readonly List<QuestReward> rewardsToNotify = new List<QuestReward>();
-        private readonly List<Coroutine> tasksRoutines = new List<Coroutine>();
+        private readonly List<Coroutine> sectionRoutines = new List<Coroutine>();
         private Coroutine sequenceRoutine;
         private Coroutine progressRoutine;
 
@@ -66,76 +66,101 @@ namespace DCL.Huds.QuestsTracker
 
         public void Populate(QuestModel newQuest)
         {
-            ClearTaskRoutines();
+            StopSequence();
 
             quest = newQuest;
             SetIcon(quest.thumbnail_entry);
             QuestTask[] allTasks = quest.sections.SelectMany(x => x.tasks).ToArray();
 
             int completedTasksAmount = allTasks.Count(x => x.progress >= 1);
-            questTitle.text = $"{quest.name} - {completedTasksAmount}/{allTasks.Length}";
+            questTitle.text = $"{quest.name}";
+            questProgressText.text = $"{completedTasksAmount}/{allTasks.Length}";
             progressTarget = (float)completedTasksAmount / allTasks.Length;
 
             bool hasCompletedTasksToShow = false;
-            List<string> entriesToRemove = taskEntries.Keys.ToList();
-            List<QuestsTrackerTask> visibleTaskEntries = new List<QuestsTrackerTask>();
-            List<QuestsTrackerTask> newTaskEntries = new List<QuestsTrackerTask>();
-            for (int index = 0; index < allTasks.Length; index++)
+            List<string> entriesToRemove = sectionEntries.Keys.ToList();
+            List<QuestsTrackerSection> visibleSectionEntries = new List<QuestsTrackerSection>();
+            List<QuestsTrackerSection> newSectionEntries = new List<QuestsTrackerSection>();
+            for (var i = 0; i < quest.sections.Length; i++)
             {
-                QuestTask task = allTasks[index];
-                //We only show completed quests that has been just completed to show the progress
-                if (task.status == QuestsLiterals.Status.BLOCKED || (task.progress >= 1 && !task.justProgressed))
-                    continue;
+                QuestSection section = quest.sections[i];
 
-                entriesToRemove.Remove(task.id);
-                if (!taskEntries.TryGetValue(task.id, out QuestsTrackerTask taskEntry))
+                bool hasTasks = false;
+                bool isVisible = false;
+                for (int j = 0; j < section.tasks.Length; j++)
                 {
-                    taskEntry = CreateTask();
-                    //Only completed tasks are visible when created
-                    taskEntry.gameObject.SetActive(task.progress >= 1);
-                    taskEntries.Add(task.id, taskEntry);
+                    QuestTask task = section.tasks[j];
+                    if (task.status == QuestsLiterals.Status.BLOCKED)
+                        continue;
+
+                    if (task.progress >= 1 && task.justProgressed)
+                    {
+                        hasCompletedTasksToShow = true;
+                        isVisible = true;
+                        hasTasks = true;
+                    }
+
+                    if (task.progress < 1)
+                    {
+                        hasTasks = true;
+                        if (!task.justUnlocked)
+                        {
+                            isVisible = true;
+                        }
+                    }
+
+                    //Early return
+                    if (isVisible && hasCompletedTasksToShow)
+                        break;
                 }
 
-                taskEntry.Populate(task);
-                taskEntry.transform.SetSiblingIndex(index);
+                if (!hasTasks)
+                    continue;
 
-                if (taskEntry.gameObject.activeSelf)
-                    visibleTaskEntries.Add(taskEntry);
+                entriesToRemove.Remove(section.id);
+                if (!sectionEntries.TryGetValue(section.id, out QuestsTrackerSection sectionEntry))
+                {
+                    sectionEntry = CreateSection();
+                    //New tasks are invisible
+                    sectionEntry.gameObject.SetActive(isVisible);
+                    sectionEntries.Add(section.id, sectionEntry);
+                }
+
+                sectionEntry.Populate(section);
+                sectionEntry.transform.SetAsLastSibling();
+
+                if (sectionEntry.gameObject.activeSelf)
+                    visibleSectionEntries.Add(sectionEntry);
                 else
-                    newTaskEntries.Add(taskEntry);
-
-                if (task.progress >= 1)
-                    hasCompletedTasksToShow = true;
+                    newSectionEntries.Add(sectionEntry);
             }
 
             for (int index = 0; index < entriesToRemove.Count; index++)
             {
-                DestroyTaskEntry(entriesToRemove[index]);
+                DestroySectionEntry(entriesToRemove[index]);
             }
 
-            expandCollapseButton.gameObject.SetActive(taskEntries.Count > 0);
+            expandCollapseButton.gameObject.SetActive(sectionEntries.Count > 0);
             SetExpandCollapseState(true);
             OnLayoutRebuildRequested?.Invoke();
 
-            if (sequenceRoutine != null)
-                StopCoroutine(sequenceRoutine);
-            sequenceRoutine = StartCoroutine(Sequence(visibleTaskEntries, newTaskEntries, hasCompletedTasksToShow));
+            sequenceRoutine = StartCoroutine(Sequence(visibleSectionEntries, newSectionEntries, hasCompletedTasksToShow));
         }
 
-        internal QuestsTrackerTask CreateTask()
+        private QuestsTrackerSection CreateSection()
         {
-            var taskEntry = Instantiate(taskPrefab, sectionContainer).GetComponent<QuestsTrackerTask>();
-            taskEntry.OnRequestLayoutRebuild += () => OnLayoutRebuildRequested?.Invoke();
-            taskEntry.OnDestroyed += (taskId) => taskEntries.Remove(taskId);
-            return taskEntry;
+            var sectionEntry = Instantiate(sectionPrefab, sectionContainer).GetComponent<QuestsTrackerSection>();
+            sectionEntry.OnLayoutRebuildRequested += () => OnLayoutRebuildRequested?.Invoke();
+            sectionEntry.OnDestroyed += (sectionId) => sectionEntries.Remove(sectionId);
+            return sectionEntry;
         }
 
-        private void DestroyTaskEntry(string taskId)
+        private void DestroySectionEntry(string taskId)
         {
-            if (!taskEntries.TryGetValue(taskId, out QuestsTrackerTask taskEntry))
+            if (!sectionEntries.TryGetValue(taskId, out QuestsTrackerSection sectionEntry))
                 return;
-            Destroy(taskEntry.gameObject);
-            taskEntries.Remove(taskId);
+            Destroy(sectionEntry.gameObject);
+            sectionEntries.Remove(taskId);
         }
 
         internal void SetIcon(string iconURL)
@@ -156,37 +181,36 @@ namespace DCL.Huds.QuestsTracker
             AssetPromiseKeeper_Texture.i.Keep(iconPromise);
         }
 
-        private IEnumerator Sequence(List<QuestsTrackerTask> visibleTasks, List<QuestsTrackerTask> newTasks, bool hasCompletedTasks)
+        private IEnumerator Sequence(List<QuestsTrackerSection> visibleSections, List<QuestsTrackerSection> newSections, bool hasCompletedTasks)
         {
             if (hasCompletedTasks)
                 yield return new WaitUntil(() => outAnimDone);
 
-            ClearTaskRoutines();
+            ClearSectionRoutines();
 
             if (progressRoutine != null)
                 StopCoroutine(progressRoutine);
             progressRoutine = StartCoroutine(ProgressSequence());
 
-            //Progress of currently visible tasks
-            for (int i = 0; i < visibleTasks.Count; i++)
+            //Progress of currently visible sections
+            for (int i = 0; i < visibleSections.Count; i++)
             {
-                tasksRoutines.Add(StartCoroutine(visibleTasks[i].ProgressAndCompleteSequence()));
+                sectionRoutines.Add(StartCoroutine(visibleSections[i].Sequence()));
             }
-            yield return WaitForTaskRoutines();
-            OnLayoutRebuildRequested?.Invoke();
+
+            //Wait until all the sections with completed tasks are done
+            yield return new WaitUntil(() => visibleSections.Any(x => x.sequenceState != QuestsTrackerSection.SequenceState.ProgressingOngoingTasks));
 
             //Show and progress of new tasks
-            for (int i = 0; i < newTasks.Count; i++)
+            for (int i = 0; i < newSections.Count; i++)
             {
-                newTasks[i].gameObject.SetActive(true);
-                tasksRoutines.Add(StartCoroutine(newTasks[i].ProgressAndCompleteSequence()));
+                newSections[i].gameObject.SetActive(true);
+                sectionRoutines.Add(StartCoroutine(newSections[i].Sequence()));
             }
             OnLayoutRebuildRequested?.Invoke();
             yield return WaitForTaskRoutines();
 
-            if (progressRoutine != null)
-                yield return progressRoutine;
-
+            OnLayoutRebuildRequested?.Invoke();
             //The entry should exit automatically if questCompleted, therefore the use of MinValue
             DateTime tasksIdleTime = quest.isCompleted ? DateTime.MinValue : DateTime.Now;
             yield return new WaitUntil(() => isProgressAnimationDone && !isPinned && (DateTime.Now - tasksIdleTime) > TimeSpan.FromSeconds(3));
@@ -203,16 +227,27 @@ namespace DCL.Huds.QuestsTracker
             isReadyForDisposal = true;
         }
 
-        private void ClearTaskRoutines()
+        private void StopSequence()
         {
-            if (tasksRoutines.Count > 0)
+            if (sequenceRoutine != null)
+                StopCoroutine(sequenceRoutine);
+            ClearSectionRoutines();
+        }
+
+        private void ClearSectionRoutines()
+        {
+            if (sectionRoutines.Count > 0)
             {
-                for (int i = 0; i < tasksRoutines.Count; i++)
+                for (int i = 0; i < sectionRoutines.Count; i++)
                 {
-                    if (tasksRoutines[i] != null)
-                        StopCoroutine(tasksRoutines[i]);
+                    if (sectionRoutines[i] != null)
+                        StopCoroutine(sectionRoutines[i]);
                 }
-                tasksRoutines.Clear();
+                sectionRoutines.Clear();
+            }
+            foreach (var section in sectionEntries)
+            {
+                section.Value.ClearTaskRoutines();
             }
         }
 
@@ -223,9 +258,9 @@ namespace DCL.Huds.QuestsTracker
             collapseIcon.SetActive(isExpanded);
             sectionContainer.gameObject.SetActive(isExpanded);
 
-            foreach (QuestsTrackerTask taskEntry in taskEntries.Values)
+            foreach (QuestsTrackerSection section in sectionEntries.Values)
             {
-                taskEntry.SetExpandedStatus(newIsExpanded);
+                section.SetExpandCollapseState(newIsExpanded);
             }
 
             OnLayoutRebuildRequested?.Invoke();
@@ -285,10 +320,10 @@ namespace DCL.Huds.QuestsTracker
 
         private IEnumerator WaitForTaskRoutines()
         {
-            for (int i = 0; i < tasksRoutines.Count; i++)
+            for (int i = 0; i < sectionRoutines.Count; i++)
             {
                 //yielding Coroutines (not IEnumerators) allows us to wait for them in parallel
-                yield return tasksRoutines[i];
+                yield return sectionRoutines[i];
             }
         }
 
@@ -301,4 +336,5 @@ namespace DCL.Huds.QuestsTracker
             }
         }
     }
+
 }

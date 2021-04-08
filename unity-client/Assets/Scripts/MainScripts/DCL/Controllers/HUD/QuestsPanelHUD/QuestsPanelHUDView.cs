@@ -88,8 +88,6 @@ namespace DCL.Huds.QuestsPanel
             }
 
             questEntry.transform.localScale = Vector3.one;
-
-            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
             questEntry.Populate(quest);
             if (currentQuestInPopup == questId)
                 questPopup.Populate(quest);
@@ -188,6 +186,8 @@ namespace DCL.Huds.QuestsPanel
                 questEntries[completedQuestsSorted[i]].transform.localScale = Vector3.one;
                 questEntries[completedQuestsSorted[i]].transform.SetSiblingIndex(i);
             }
+
+            questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
         }
 
         public void SetVisibility(bool active) { gameObject.SetActive(active); }

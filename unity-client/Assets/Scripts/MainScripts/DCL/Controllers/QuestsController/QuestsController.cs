@@ -99,9 +99,16 @@ namespace DCL.QuestsController
                 {
                     QuestTask currentTask = newQuestSection.tasks[index2];
                     if (oldQuestSectionFound)
-                        currentTask.justProgressed = !oldQuestSection.TryGetTask(currentTask.id, out QuestTask oldTask) || currentTask.progress != oldTask.progress;
+                    {
+                        bool oldTaskFound = oldQuestSection.TryGetTask(currentTask.id, out QuestTask oldTask);
+                        currentTask.justProgressed = !oldTaskFound || currentTask.progress != oldTask.progress;
+                        currentTask.justUnlocked = !oldTaskFound || (currentTask.status != QuestsLiterals.Status.BLOCKED &&  oldTask.status == QuestsLiterals.Status.BLOCKED);
+                    }
                     else
+                    {
                         currentTask.justProgressed = false;
+                        currentTask.justUnlocked = false;
+                    }
                 }
             }
 

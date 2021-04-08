@@ -14,7 +14,6 @@ namespace DCL.Huds.QuestsTracker
         private static readonly int ANIMATION_TRIGGER_COMPLETED = Animator.StringToHash("Completed");
 
         public event Action<string> OnDestroyed;
-        public event Action OnRequestLayoutRebuild;
 
         [SerializeField] internal TextMeshProUGUI taskTitle;
         [SerializeField] internal Image progress;
