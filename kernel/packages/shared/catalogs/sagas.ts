@@ -7,7 +7,8 @@ import {
   WSS_ENABLED,
   TEST_WEARABLES_OVERRIDE,
   ALL_WEARABLES,
-  WITH_FIXED_COLLECTIONS
+  WITH_FIXED_COLLECTIONS,
+  getTLD
 } from 'config'
 
 import defaultLogger from 'shared/logger'
@@ -162,8 +163,17 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
   if (filters.ownedByUser) {
     if (WITH_FIXED_COLLECTIONS) {
       const collectionIds = WITH_FIXED_COLLECTIONS.split(',')
-      const wearables = yield call(fetchWearablesByFilters, { collectionIds }, client)
-      result.push(...wearables)
+      let zoneClient: CatalystClient, orgClient: CatalystClient
+      if (getTLD() === 'zone') {
+        zoneClient = client
+        orgClient = new CatalystClient('peer.decentraland.org', 'EXPLORER')
+      } else {
+        zoneClient = new CatalystClient('peer.decentraland.zone', 'EXPLORER')
+        orgClient = client
+      }
+      const zoneWearables = yield zoneClient.fetchWearables({ collectionIds })
+      const orgWearables = yield orgClient.fetchWearables({ collectionIds })
+      result.push(...zoneWearables, ...orgWearables)
     } else {
       const ownedWearables: OwnedWearablesWithDefinition[] = yield call(
         fetchOwnedWearables,
