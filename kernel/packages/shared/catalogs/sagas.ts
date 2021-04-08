@@ -38,6 +38,8 @@ import { FeatureFlags } from 'shared/meta/types'
 import { CatalystClient, OwnedWearablesWithDefinition } from 'dcl-catalyst-client'
 import { parseUrn } from '@dcl/urn-resolver'
 import { getCatalystServer, getFetchContentServer } from 'shared/dao/selectors'
+import { ReportFatalError } from 'shared/loading/ReportFatalError'
+import { CONTENT_SERVER_DOWN } from 'shared/loading/types'
 
 declare const globalThis: Window & RendererInterfaces & StoreContainer
 export const BASE_AVATARS_COLLECTION_ID = 'urn:decentraland:off-chain:base-avatars'
@@ -178,9 +180,19 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
         }
       }
     }
+
+    if (result.length === 0) {
+      ReportFatalError(CONTENT_SERVER_DOWN)
+      throw new Error(`[FATAL]: Can't fetch owned wearables!\nCatalyst:${catalystUrl}`)
+    }
+
   } else {
     const wearables = yield call(fetchWearablesByFilters, filters, client)
     result.push(...wearables)
+
+    if (result.length === 0) {
+      defaultLogger.error(`[Caution]: Couldn't resolve non-owned wearables\nCatalyst:${catalystUrl}`)
+    }
   }
 
   const v1Wearables = yield call(mapV2WearablesIntoV1, result)
@@ -316,12 +328,29 @@ function* fetchWearablesV1(filters: WearablesRequestFilters) {
       const inventoryItemIds: WearableId[] = yield call(fetchInventoryItemsByAddress, filters.ownedByUser)
       response = inventoryItemIds.map((id) => exclusiveCatalog[id]).filter((wearable) => !!wearable)
     }
+
+    if (response.length === 0) {
+      ReportFatalError(CONTENT_SERVER_DOWN)
+      throw new Error(
+        `[FATAL]: Can't fetch owned wearables!\nAPI: ${getServerConfigurations().wearablesApi}`
+      )
+    }
+
   } else if (filters.collectionIds) {
     // We assume that the only collection id used is base-avatars
     response = Object.values(platformCatalog)
   } else {
     throw new Error('Unknown filter')
   }
+
+  if (response.length === 0) {
+    defaultLogger.error(
+      `[Caution]: Couldn't resolve non-owned wearables\nAPI: ${
+        getServerConfigurations().wearablesApi
+      }`
+    )
+  }
+
   return response
 }
 
