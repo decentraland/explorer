@@ -7,8 +7,7 @@ import {
   WSS_ENABLED,
   TEST_WEARABLES_OVERRIDE,
   ALL_WEARABLES,
-  WITH_FIXED_COLLECTIONS,
-  getTLD
+  WITH_FIXED_COLLECTIONS
 } from 'config'
 
 import defaultLogger from 'shared/logger'
