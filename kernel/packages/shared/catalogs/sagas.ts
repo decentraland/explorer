@@ -162,10 +162,15 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
   if (filters.ownedByUser) {
     if (WITH_FIXED_COLLECTIONS) {
       const collectionIds = WITH_FIXED_COLLECTIONS.split(',')
-      const orgClient = new CatalystClient('peer.decentraland.org', 'EXPLORER')
+      const orgCatalyst = 'https://peer.decentraland.org'
+      const orgClient = new CatalystClient(orgCatalyst, 'EXPLORER')
       const zoneWearables = yield client.fetchWearables({ collectionIds })
       const orgWearables = yield orgClient.fetchWearables({ collectionIds })
-      result.push(...zoneWearables, ...orgWearables)
+      const orgWearablesWithBaseUrl = orgWearables.map((wearable: any) => ({
+        ...wearable,
+        baseUrl: `${orgCatalyst}/content/contents/`
+      }))
+      result.push(...zoneWearables, ...orgWearablesWithBaseUrl)
     } else {
       const ownedWearables: OwnedWearablesWithDefinition[] = yield call(
         fetchOwnedWearables,
@@ -186,9 +191,10 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
   }
 
   const v1Wearables = yield call(mapV2WearablesIntoV1, result)
-  return v1Wearables.map(overrideBaseUrl).map((wearable: Wearable) => ({
+  return v1Wearables.map((wearable: Wearable) => ({
     ...wearable,
-    baseUrl: downloadUrl + '/contents/'
+    baseUrl: wearable.baseUrl ?? downloadUrl + '/contents/',
+    baseUrlBundles: PIN_CATALYST ? '' : getServerConfigurations().contentAsBundle + '/'
   }))
 }
 
@@ -222,11 +228,11 @@ async function mapV2RepresentationIntoV1(representation: any): Promise<BodyShape
 }
 
 /** We need to map the v2 wearable format into the v1 format, that is accepted by the renderer */
-function mapV2WearablesIntoV1(v2Wearables: any[]): Promise<Wearable[]> {
+function mapV2WearablesIntoV1(v2Wearables: any[]): Promise<Omit<Wearable, 'baseUrl' | 'baseUrlBundles'>[]> {
   return Promise.all(v2Wearables.map(mapV2WearableIntoV1))
 }
 
-async function mapV2WearableIntoV1(v2Wearable: any): Promise<Wearable> {
+async function mapV2WearableIntoV1(v2Wearable: any): Promise<Omit<Wearable, 'baseUrl' | 'baseUrlBundles'>> {
   const { id, data, rarity, i18n, thumbnail } = v2Wearable
   const { category, tags, hides, replaces, representations } = data
   const newId = await mapUrnToLegacyId(id)
@@ -245,9 +251,7 @@ async function mapV2WearableIntoV1(v2Wearable: any): Promise<Wearable> {
     rarity,
     representations: newRepresentations,
     i18n,
-    thumbnail: newThumbnail,
-    baseUrl: '',
-    baseUrlBundles: ''
+    thumbnail: newThumbnail
   }
 }
 
