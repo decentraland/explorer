@@ -229,7 +229,6 @@ export class UnityInterface {
   }
 
   public AddWearablesToCatalog(wearables: Wearable[], context?: string) {
-    defaultLogger.log('wearables', JSON.stringify(wearables))
     this.SendMessageToUnity('Main', 'AddWearablesToCatalog', JSON.stringify({ wearables, context }))
   }
 
