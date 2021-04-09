@@ -26,6 +26,7 @@ namespace DCL
 
         public static AssetBundlesLoader assetBundlesLoader = new AssetBundlesLoader();
         private Transform containerTransform;
+        private WebRequestAsyncOperation asyncOp;
 
         public AssetPromise_AB(string contentUrl, string hash, Transform containerTransform = null) : base(contentUrl, hash)
         {
@@ -82,8 +83,6 @@ namespace DCL
         protected override void OnAfterLoadOrReuse() { }
 
         protected override void OnBeforeLoadOrReuse() { }
-
-        private WebRequestAsyncOperation asyncOp;
 
         protected IEnumerator LoadAssetBundleWithDeps(string baseUrl, string hash, Action OnSuccess, Action OnFail)
         {
