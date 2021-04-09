@@ -24,7 +24,7 @@ namespace DCL.SettingsControls
 
         public override void UpdateSetting(object newValue)
         {
-            currentQualitySetting.shadowDistance = Convert.ToInt32( newValue );
+            currentQualitySetting.shadowDistance = (float)newValue;
 
             if (lightweightRenderPipelineAsset)
                 lightweightRenderPipelineAsset.shadowDistance = currentQualitySetting.shadowDistance;
