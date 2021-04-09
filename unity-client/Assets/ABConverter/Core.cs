@@ -43,6 +43,7 @@ namespace DCL.ABConverter
         public readonly State state = new State();
 
         private const string MAIN_SHADER_AB_NAME = "MainShader_Delete_Me";
+        private const float MAX_TEXTURE_SIZE = 512f;
 
         internal readonly string finalDownloadedPath;
         internal readonly string finalDownloadedAssetDbPath;
@@ -85,7 +86,7 @@ namespace DCL.ABConverter
         /// </summary>
         /// <param name="rawContents">A list detailing assets to be dumped</param>
         /// <param name="OnFinish">End callback with the proper ErrorCode</param>
-        public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null, bool clearDirectoriesOnStart = true)
+        public void Convert(ContentServerUtils.MappingPair[] rawContents, Action<ErrorCodes> OnFinish = null)
         {
             OnFinish -= CleanAndExit;
             OnFinish += CleanAndExit;
@@ -94,7 +95,7 @@ namespace DCL.ABConverter
 
             log.Info($"Conversion start... free space in disk: {PathUtils.GetFreeSpace()}");
             
-            InitializeDirectoryPaths(clearDirectoriesOnStart);
+            InitializeDirectoryPaths(settings.clearDirectoriesOnStart);
             PopulateLowercaseMappings(rawContents);
             
             float timer = Time.realtimeSinceStartup;
@@ -481,7 +482,7 @@ namespace DCL.ABConverter
                     texImporter.crunchedCompression = true;
                     texImporter.textureCompression = TextureImporterCompression.CompressedHQ;
                     
-                    ReduceTextureSizeIfNeeded(assetPath.hash + "/" + assetPath.hash + Path.GetExtension(assetPath.file), 512);
+                    ReduceTextureSizeIfNeeded(assetPath.hash + "/" + assetPath.hash + Path.GetExtension(assetPath.file), MAX_TEXTURE_SIZE);
                 }
                 else
                 {

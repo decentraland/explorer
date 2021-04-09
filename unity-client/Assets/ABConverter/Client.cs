@@ -27,6 +27,11 @@ namespace DCL.ABConverter
             /// the conversion process.
             /// </summary>
             public bool skipAlreadyBuiltBundles = false;
+            
+            /// <summary>
+            /// If set to true, the GLTF _Downloads folder and the Asset Bundles folder will be deleted at the beginning of the conversion
+            /// </summary>
+            public bool clearDirectoriesOnStart = true;
 
             /// <summary>
             /// Log verbosity.
@@ -349,6 +354,7 @@ namespace DCL.ABConverter
             var settings = new Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
+            settings.clearDirectoriesOnStart = false;
             var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
             DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnBodyWearableLoad);
@@ -362,18 +368,16 @@ namespace DCL.ABConverter
         {
             EnsureEnvironment();
             
+            // For debugging purposes we can intercept this item list with LinQ for specific wearables
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
                                                 .Where(x => x.category != WearableLiterals.Categories.BODY_SHAPE)
-                                                // .Where(x => x.id == "dcl://halloween_2019/vampire_upper_body" 
-                                                            // || x.id == "dcl://base-avatars/bear_slippers"
-                                                            // || x.id == "dcl://exclusive_masks/killer_mask"
-                                                            // ) // For Debugging
                                                 .ToList();
             
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
             var settings = new Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
+            settings.clearDirectoriesOnStart = false;
             var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
             DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
@@ -410,7 +414,7 @@ namespace DCL.ABConverter
                     UnityGLTF.GLTFImporter.OnGLTFWillLoad -= OnWearableLoad;
                     abConverterCoreController.CleanupWorkingFolders();
                     DumpWearableQueue(abConverterCoreController, items, OnWearableLoad);
-                }, false);
+                });
         }
         
         /// <summary>
