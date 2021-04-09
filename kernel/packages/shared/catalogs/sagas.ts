@@ -162,7 +162,7 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
   if (filters.ownedByUser) {
     if (WITH_FIXED_COLLECTIONS) {
       // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
-      // That's why we are also querying a prod catalysts for the given collections
+      // That's why we are also querying a prod catalyst for the given collections
       const collectionIds = WITH_FIXED_COLLECTIONS.split(',')
       const orgClient: CatalystClient = yield CatalystClient.connectedToCatalystIn('mainnet', 'EXPLORER')
       const zoneWearables = yield client.fetchWearables({ collectionIds })
