@@ -29,7 +29,6 @@ namespace UnityGLTF
         [SerializeField] private GLTFImporterNormals _importNormals = GLTFImporterNormals.Import;
         [SerializeField] private bool _importMaterials = true;
         [SerializeField] private bool _useJpgTextures = false;
-        [SerializeField] private bool _importSkeleton = true;
 
         public bool _importTextures = true;
 
@@ -511,7 +510,6 @@ namespace UnityGLTF
                 loader.useMaterialTransition = false;
                 loader.maximumLod = _maximumLod;
                 loader.isMultithreaded = true;
-                loader.importSkeleton = !_importSkeleton;
 
                 OnGLTFWillLoad?.Invoke(loader);
 

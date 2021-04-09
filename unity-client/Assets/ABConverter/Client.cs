@@ -357,6 +357,7 @@ namespace DCL.ABConverter
             settings.clearDirectoriesOnStart = false;
             var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
+            abConverterCoreController.InitializeDirectoryPaths(true);
             DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnBodyWearableLoad);
         }
 
@@ -380,6 +381,7 @@ namespace DCL.ABConverter
             settings.clearDirectoriesOnStart = false;
             var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
             
+            abConverterCoreController.InitializeDirectoryPaths(true);
             DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
         }
         
