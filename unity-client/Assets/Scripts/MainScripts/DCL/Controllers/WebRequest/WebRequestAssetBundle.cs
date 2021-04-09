@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 namespace DCL
 {
     /// <summary>
-    /// Our custom implementation of the UnityWebRequestMultimedia (Audio Clip).
+    /// Our custom implementation of the UnityWebRequestAssetBundle.
     /// </summary>
     public interface IWebRequestAssetBundle : IWebRequest
     {
