@@ -46,7 +46,7 @@ half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
 #endif
 
 
-    color += surfaceData.emission;
+    color += surfaceData.emission * 5;
 
     return half4(color, surfaceData.alpha);
 }
