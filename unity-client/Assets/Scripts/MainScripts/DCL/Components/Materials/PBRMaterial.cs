@@ -35,7 +35,7 @@ namespace DCL.Components
             public string refractionTexture;
             public bool castShadows = true;
 
-            [Range(0, 4)] 
+            [Range(0, 4)]
             public int transparencyMode = 4; // 0: OPAQUE; 1: ALPHATEST; 2: ALPHBLEND; 3: ALPHATESTANDBLEND; 4: AUTO (Engine decide)
 
             public override BaseModel GetDataFromJSON(string json)
@@ -64,7 +64,7 @@ namespace DCL.Components
         DCLTexture emissiveDCLTexture = null;
         DCLTexture bumpDCLTexture = null;
 
-        public PBRMaterial(IParcelScene scene) : base(scene)
+        public PBRMaterial()
         {
             model = new Model();
 
@@ -76,7 +76,7 @@ namespace DCL.Components
 
         new public Model GetModel()
         {
-            return (Model)model;
+            return (Model) model;
         }
 
         public override int GetClassId()
@@ -84,7 +84,7 @@ namespace DCL.Components
             return (int) CLASS_ID.PBR_MATERIAL;
         }
 
-        public override void AttachTo(DecentralandEntity entity, System.Type overridenAttachedType = null)
+        public override void AttachTo(IDCLEntity entity, System.Type overridenAttachedType = null)
         {
             if (attachedEntities.Contains(entity))
             {
@@ -127,7 +127,7 @@ namespace DCL.Components
             SetMaterialTexture(ShaderUtils.AlphaTexture, model.alphaTexture, alphaDCLTexture);
             SetMaterialTexture(ShaderUtils.BumpMap, model.bumpTexture, bumpDCLTexture);
 
-            foreach (DecentralandEntity decentralandEntity in attachedEntities)
+            foreach (IDCLEntity decentralandEntity in attachedEntities)
             {
                 InitMaterial(decentralandEntity.meshRootGameObject);
             }
@@ -137,7 +137,7 @@ namespace DCL.Components
 
         private void SetupTransparencyMode()
         {
-            Model model = (Model)this.model;
+            Model model = (Model) this.model;
 
             // Reset shader keywords
             material.DisableKeyword("_ALPHATEST_ON"); // Cut Out Transparency
@@ -211,7 +211,7 @@ namespace DCL.Components
             }
         }
 
-        void OnMaterialAttached(DecentralandEntity entity)
+        void OnMaterialAttached(IDCLEntity entity)
         {
             entity.OnShapeUpdated -= OnShapeUpdated;
             entity.OnShapeUpdated += OnShapeUpdated;
@@ -237,7 +237,7 @@ namespace DCL.Components
             var meshRenderer = meshGameObject.GetComponent<MeshRenderer>();
             if (meshRenderer == null)
                 return;
-            Model model = (Model)this.model;
+            Model model = (Model) this.model;
 
             meshRenderer.shadowCastingMode = model.castShadows ? ShadowCastingMode.On : ShadowCastingMode.Off;
             if (meshRenderer.sharedMaterial != material)
@@ -257,7 +257,7 @@ namespace DCL.Components
         }
 
 
-        private void OnShapeUpdated(DecentralandEntity entity)
+        private void OnShapeUpdated(IDCLEntity entity)
         {
             if (entity != null)
             {
@@ -266,7 +266,7 @@ namespace DCL.Components
         }
 
 
-        void OnMaterialDetached(DecentralandEntity entity)
+        void OnMaterialDetached(IDCLEntity entity)
         {
             if (entity.meshRootGameObject == null)
             {

@@ -13,7 +13,7 @@ import { identifyEmail, queueTrackingEvent } from 'shared/analytics'
 import { aborted } from 'shared/loading/ReportFatalError'
 import { defaultLogger } from 'shared/logger'
 import { profileRequest, saveProfileRequest } from 'shared/profiles/actions'
-import { Avatar } from 'shared/profiles/types'
+import { Avatar, ProfileType } from 'shared/profiles/types'
 import {
   ChatMessage,
   FriendshipUpdateStatusMessage,
@@ -53,10 +53,10 @@ import { killPortableExperienceScene } from './portableExperiencesUtils'
 import { wearablesRequest } from 'shared/catalogs/actions'
 import { WearablesRequestFilters } from 'shared/catalogs/types'
 import { fetchENSOwnerProfile } from './fetchENSOwnerProfile'
+import { ProfileAsPromise } from 'shared/profiles/ProfileAsPromise'
+import { profileToRendererFormat } from 'shared/profiles/transformations/profileToRendererFormat'
 
-declare const DCL: any
-
-declare const globalThis: StoreContainer
+declare const globalThis: StoreContainer & { gifProcessor?: GIFProcessor }
 export let futures: Record<string, IFuture<any>> = {}
 
 // ** TODO - move to friends related file - moliva - 15/07/2020
@@ -76,6 +76,23 @@ const positionEvent = {
 
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
+
+  // visitor pattern? anyone?
+  /**
+   * This is the only method that should be called publically in this class.
+   * It dispatches "renderer messages" to the correct handlers.
+   *
+   * It has a fallback that doesn't fail to support future versions of renderers
+   * and independant workflows for both teams.
+   */
+  public handleUnityMessage(type: string, message: any) {
+    if (type in this) {
+      // tslint:disable-next-line:semicolon
+      ;(this as any)[type](message)
+    } else {
+      defaultLogger.info(`Unknown message (did you forget to add ${type} to unity-interface/dcl.ts?)`, message)
+    }
+  }
 
   /** Triggered when the camera moves */
   public ReportPosition(data: {
@@ -445,16 +462,16 @@ export class BrowserInterface {
   }
 
   async RequestGIFProcessor(data: { imageSource: string; id: string; isWebGL1: boolean }) {
-    if (!DCL.gifProcessor) {
-      DCL.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
+    if (!globalThis.gifProcessor) {
+      globalThis.gifProcessor = new GIFProcessor(unityInterface.gameInstance, unityInterface, data.isWebGL1)
     }
 
-    DCL.gifProcessor.ProcessGIF(data)
+    globalThis.gifProcessor.ProcessGIF(data)
   }
 
   public DeleteGIF(data: { value: string }) {
-    if (DCL.gifProcessor) {
-      DCL.gifProcessor.DeleteGIF(data.value)
+    if (globalThis.gifProcessor) {
+      globalThis.gifProcessor.DeleteGIF(data.value)
     }
   }
 
@@ -499,6 +516,12 @@ export class BrowserInterface {
       collectionIds: this.arrayCleanup(filters.collectionIds)
     }
     globalThis.globalStore.dispatch(wearablesRequest(newFilters, context))
+  }
+
+  public RequestUserProfile(userIdPayload: { value: string }) {
+    ProfileAsPromise(userIdPayload.value, undefined, ProfileType.DEPLOYED)
+      .then((profile) => unityInterface.AddUserProfileToCatalog(profileToRendererFormat(profile)))
+      .catch((error) => defaultLogger.error(`error fetching profile ${userIdPayload.value} ${error}`))
   }
 
   private arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {

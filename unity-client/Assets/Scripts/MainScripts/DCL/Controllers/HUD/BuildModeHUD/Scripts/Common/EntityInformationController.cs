@@ -31,8 +31,9 @@ public interface IEntityInformationController
 
 public class EntityInformationController : IEntityInformationController
 {
-    private const string LEFT_TEXT_FORMAT = "ENTITIES: {0}\nBODIES:{1}\nTIRS:{2}";
-    private const string RIGHT_TEXT_FORMAT = "TEXTURES: {0}\nMATERIALS:{1}\nGEOMETRIES:{2}";
+    private const string TRIS_TEXT_FORMAT  = "{0} TRIS";
+    private const string MATERIALS_TEXT_FORMAT  = "{0} MATERIALS";
+    private const string TEXTURES_TEXT_FORMAT = "{0} TEXTURES";
 
     public event Action<Vector3> OnPositionChange;
     public event Action<Vector3> OnRotationChange;
@@ -44,6 +45,7 @@ public class EntityInformationController : IEntityInformationController
     internal ParcelScene parcelScene;
     internal AssetPromise_Texture loadedThumbnailPromise;
     internal bool isChangingName = false;
+    internal DCLBuilderInWorldEntity currentEntity;
 
     public void Initialize(IEntityInformationView entityInformationView)
     {
@@ -83,64 +85,44 @@ public class EntityInformationController : IEntityInformationController
         entityInformationView.OnDisable -= Disable;
     }
 
-    public void PositionChanged(Vector3 pos)
-    {
-        OnPositionChange?.Invoke(pos);
-    }
+    public void PositionChanged(Vector3 pos) { OnPositionChange?.Invoke(pos); }
 
     public void RotationChanged(Vector3 rot)
     {
+        currentEntity?.SetRotation(rot);
         OnRotationChange?.Invoke(rot);
     }
 
-    public void ScaleChanged(Vector3 scale)
-    {
-        OnScaleChange?.Invoke(scale);
-    }
+    public void ScaleChanged(Vector3 scale) { OnScaleChange?.Invoke(scale); }
 
-    public void NameChanged(DCLBuilderInWorldEntity entity, string name)
-    {
-        OnNameChange?.Invoke(entity, name);
-    }
+    public void NameChanged(DCLBuilderInWorldEntity entity, string name) { OnNameChange?.Invoke(entity, name); }
 
-    public void ToggleDetailsInfo()
-    {
-        entityInformationView.ToggleDetailsInfo();
-    }
+    public void ToggleDetailsInfo() { entityInformationView.ToggleDetailsInfo(); }
 
-    public void ToggleBasicInfo()
-    {
-        entityInformationView.ToggleBasicInfo();
-    }
+    public void ToggleBasicInfo() { entityInformationView.ToggleBasicInfo(); }
 
-    public void StartChangingName()
-    {
-        isChangingName = true;
-    }
+    public void StartChangingName() { isChangingName = true; }
 
-    public void EndChangingName()
-    {
-        isChangingName = false;
-    }
+    public void EndChangingName() { isChangingName = false; }
 
     public void SetEntity(DCLBuilderInWorldEntity entity, ParcelScene currentScene)
     {
+        currentEntity = entity;
         EntityDeselected();
         entityInformationView.SetCurrentEntity(entity);
 
         if (entityInformationView.currentEntity != null)
         {
-            entity.onStatusUpdate -= UpdateEntityName;
-            entityInformationView.currentEntity.onStatusUpdate += UpdateEntityName;
+            entity.OnStatusUpdate -= UpdateEntityName;
+            entityInformationView.currentEntity.OnStatusUpdate += UpdateEntityName;
         }
-        
+
         parcelScene = currentScene;
 
         if (entity.HasSmartItemComponent())
         {
-            if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent baseComponent))
-                entityInformationView.smartItemList.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent)baseComponent).GetValues());
-
+            if (entity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent baseComponent))
+                entityInformationView.smartItemList.SetSmartItemParameters(entity.GetSmartItemParameters(), ((SmartItemComponent) baseComponent).GetValues());
         }
         else
         {
@@ -195,22 +177,18 @@ public class EntityInformationController : IEntityInformationController
     {
         if (catalogItem == null)
         {
-            entityInformationView.SeEntityLimitsLeftText("");
-            entityInformationView.SeEntityLimitsRightText("");
+            entityInformationView.SeEntityLimitsText("", "", "");
             return;
         }
 
-        string leftText = string.Format(LEFT_TEXT_FORMAT, catalogItem.metrics.entities, catalogItem.metrics.bodies, catalogItem.metrics.triangles);
-        string rightText = string.Format(RIGHT_TEXT_FORMAT, catalogItem.metrics.textures, catalogItem.metrics.materials, catalogItem.metrics.meshes);
+        string trisText = string.Format(TRIS_TEXT_FORMAT, catalogItem.metrics.triangles);
+        string materialText = string.Format(MATERIALS_TEXT_FORMAT, catalogItem.metrics.materials);
+        string textureText = string.Format(TEXTURES_TEXT_FORMAT, catalogItem.metrics.textures);
 
-        entityInformationView.SeEntityLimitsLeftText(leftText);
-        entityInformationView.SeEntityLimitsRightText(rightText);
+        entityInformationView.SeEntityLimitsText(trisText, materialText, textureText);
     }
 
-    public void Enable()
-    {
-        entityInformationView.SetActive(true);
-    }
+    public void Enable() { entityInformationView.SetActive(true); }
 
     public void Disable()
     {
@@ -224,9 +202,9 @@ public class EntityInformationController : IEntityInformationController
         if (entityInformationView.currentEntity == null)
             return;
 
-        if (entityInformationView.currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out BaseComponent component))
+        if (entityInformationView.currentEntity.rootEntity.TryGetBaseComponent(CLASS_ID_COMPONENT.SMART_ITEM, out IEntityComponent component))
         {
-            SmartItemComponent smartItemComponent = (SmartItemComponent)component;
+            SmartItemComponent smartItemComponent = (SmartItemComponent) component;
             OnSmartItemComponentUpdate?.Invoke(entityInformationView.currentEntity);
         }
     }
@@ -239,22 +217,11 @@ public class EntityInformationController : IEntityInformationController
             Vector3 currentRotation = entity.gameObject.transform.rotation.eulerAngles;
             Vector3 currentScale = entity.gameObject.transform.localScale;
 
-            var newEuler = currentRotation;
-
-            newEuler.x = RepeatWorking(newEuler.x - currentRotation.x + 180.0F, 360.0F) + currentRotation.x - 180.0F;
-            newEuler.y = RepeatWorking(newEuler.y - currentRotation.y + 180.0F, 360.0F) + currentRotation.y - 180.0F;
-            newEuler.z = RepeatWorking(newEuler.z - currentRotation.z + 180.0F, 360.0F) + currentRotation.z - 180.0F;
-
-            currentRotation = newEuler;
+            currentRotation = entity.GetEulerRotation();
 
             entityInformationView.SetPositionAttribute(positionConverted);
             entityInformationView.SetRotationAttribute(currentRotation);
             entityInformationView.SetScaleAttribute(currentScale);
         }
-    }
-
-    internal float RepeatWorking(float t, float length)
-    {
-        return (t - (Mathf.Floor(t / length) * length));
     }
 }
