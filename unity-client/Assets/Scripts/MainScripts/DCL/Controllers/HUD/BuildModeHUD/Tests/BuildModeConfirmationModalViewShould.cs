@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace Tests.BuildModeHUDViews
 {
-    public class ExitFromBuildModeViewShould
+    public class BuildModeConfirmationModalViewShould
     {
-        private ExitFromBuildModeView exitFromBiWModalView;
+        private BuildModeConfirmationModalView exitFromBiWModalView;
 
         [SetUp]
-        public void SetUp() { exitFromBiWModalView = ExitFromBuildModeView.Create(); }
+        public void SetUp() { exitFromBiWModalView = BuildModeConfirmationModalView.Create(); }
 
         [TearDown]
         public void TearDown() { Object.Destroy(exitFromBiWModalView.gameObject); }
@@ -26,6 +26,34 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             Assert.AreEqual(isActive, exitFromBiWModalView.gameObject.activeSelf, "Game object activate property does not match!");
+        }
+
+        [Test]
+        public void SetTitleCorrectly()
+        {
+            // Arrange
+            string testText = "Test text";
+            exitFromBiWModalView.title.text = "";
+
+            // Act
+            exitFromBiWModalView.SetTitle(testText);
+
+            // Assert
+            Assert.AreEqual(testText, exitFromBiWModalView.title.text, "Title text does not match!");
+        }
+
+        [Test]
+        public void SetSubTitleCorrectly()
+        {
+            // Arrange
+            string testText = "Test text";
+            exitFromBiWModalView.subTitle.text = "";
+
+            // Act
+            exitFromBiWModalView.SetSubTitle(testText);
+
+            // Assert
+            Assert.AreEqual(testText, exitFromBiWModalView.subTitle.text, "SubTitle text does not match!");
         }
 
         [Test]

@@ -15,7 +15,7 @@ public interface ITopActionsButtonsController
 
     IExtraActionsController extraActionsController { get; }
 
-    void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController, IExitFromBuildModeController exitFromBuildModeController);
+    void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController, IBuildModeConfirmationModalController buildModeConfirmationModalController);
     void Dispose();
     void ChangeModeClicked();
     void ExtraClicked();
@@ -47,15 +47,18 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     public IExtraActionsController extraActionsController { get; private set; }
 
+    private const string EXIT_CONFIRMATION_TITLE = "Exiting Builder mode";
+    private const string EXIT_CONFIRMATION_SUBTITLE = "Are you sure you want to exit Builder mode?";
+
     internal ITopActionsButtonsView topActionsButtonsView;
     internal ITooltipController tooltipController;
-    internal IExitFromBuildModeController exitFromBuildModeController;
+    internal IBuildModeConfirmationModalController buildModeConfirmationModalController;
 
-    public void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController, IExitFromBuildModeController exitFromBuildModeController)
+    public void Initialize(ITopActionsButtonsView topActionsButtonsView, ITooltipController tooltipController, IBuildModeConfirmationModalController buildModeConfirmationModalController)
     {
         this.topActionsButtonsView = topActionsButtonsView;
         this.tooltipController = tooltipController;
-        this.exitFromBuildModeController = exitFromBuildModeController;
+        this.buildModeConfirmationModalController = buildModeConfirmationModalController;
 
         topActionsButtonsView.OnChangeModeClicked += ChangeModeClicked;
         topActionsButtonsView.OnExtraClicked += ExtraClicked;
@@ -76,8 +79,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDeletePointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnMoreActionsPointerEnter += TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter += TooltipPointerEntered;
-        exitFromBuildModeController.OnCancelExit += HideLogoutConfirmation;
-        exitFromBuildModeController.OnConfirmExit += ConfirmLogout;
+        buildModeConfirmationModalController.OnCancelExit += HideLogoutConfirmation;
+        buildModeConfirmationModalController.OnConfirmExit += ConfirmLogout;
 
         extraActionsController = new ExtraActionsController();
         topActionsButtonsView.ConfigureExtraActions(extraActionsController);
@@ -105,8 +108,8 @@ public class TopActionsButtonsController : ITopActionsButtonsController
         topActionsButtonsView.OnDeletePointerEnter -= TooltipPointerEntered;
         topActionsButtonsView.OnMoreActionsPointerEnter -= TooltipPointerEntered;
         topActionsButtonsView.OnLogoutPointerEnter -= TooltipPointerEntered;
-        exitFromBuildModeController.OnCancelExit -= HideLogoutConfirmation;
-        exitFromBuildModeController.OnConfirmExit -= ConfirmLogout;
+        buildModeConfirmationModalController.OnCancelExit -= HideLogoutConfirmation;
+        buildModeConfirmationModalController.OnConfirmExit -= ConfirmLogout;
     }
 
     public void ChangeModeClicked() { OnChangeModeClick?.Invoke(); }
@@ -125,9 +128,14 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     public void DeleteClicked() { OnDeleteClick?.Invoke(); }
 
-    public void HideLogoutConfirmation() { exitFromBuildModeController.SetActive(false); }
+    public void HideLogoutConfirmation() { buildModeConfirmationModalController.SetActive(false); }
 
-    public void ShowLogoutConfirmation() { exitFromBuildModeController.SetActive(true); }
+    public void ShowLogoutConfirmation()
+    {
+        buildModeConfirmationModalController.SetActive(true);
+        buildModeConfirmationModalController.SetTitle(EXIT_CONFIRMATION_TITLE);
+        buildModeConfirmationModalController.SetSubTitle(EXIT_CONFIRMATION_SUBTITLE);
+    }
 
     public void ConfirmLogout() { OnLogOutClick?.Invoke(); }
 

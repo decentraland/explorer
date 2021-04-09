@@ -342,7 +342,7 @@ MonoBehaviour:
   catalogBtnView: {fileID: 7322161856441836932}
   inspectorView: {fileID: 851071765682423724}
   topActionsButtonsView: {fileID: 8782452489027953282}
-  exitFromBuildModeView: {fileID: 2597530036226113637}
+  buildModeConfirmationModalView: {fileID: 2597530036226113637}
 --- !u!223 &851071764747098676
 Canvas:
   m_ObjectHideFlags: 0
@@ -566,7 +566,7 @@ PrefabInstance:
     - target: {fileID: 5203811818029387293, guid: 92f068ec1838d554f9ac9501828a3154,
         type: 3}
       propertyPath: m_Name
-      value: ExitFromBuildModeView
+      value: BuildModeConfirmationModalView
       objectReference: {fileID: 0}
     - target: {fileID: 5203811818029387293, guid: 92f068ec1838d554f9ac9501828a3154,
         type: 3}

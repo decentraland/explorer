@@ -15,7 +15,7 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.Initialize(
                 Substitute.For<ITopActionsButtonsView>(),
                 Substitute.For<ITooltipController>(),
-                Substitute.For<IExitFromBuildModeController>());
+                Substitute.For<IBuildModeConfirmationModalController>());
         }
 
         [TearDown]
@@ -140,7 +140,7 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.HideLogoutConfirmation();
 
             // Assert
-            topActionsButtonsController.exitFromBuildModeController.Received(1).SetActive(false);
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(false);
         }
 
         [Test]
@@ -150,7 +150,9 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.ShowLogoutConfirmation();
 
             // Assert
-            topActionsButtonsController.exitFromBuildModeController.Received(1).SetActive(true);
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true);
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetTitle(Arg.Any<string>());
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetSubTitle(Arg.Any<string>());
         }
 
         [Test]

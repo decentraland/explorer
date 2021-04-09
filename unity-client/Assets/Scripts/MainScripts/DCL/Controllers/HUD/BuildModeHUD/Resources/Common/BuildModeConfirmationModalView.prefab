@@ -279,7 +279,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Exiting Builder mode
+  m_text: Title text...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
   m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,
@@ -537,6 +537,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c78275de26dad664581f7f9e027b7af7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  title: {fileID: 609534503993898499}
+  subTitle: {fileID: 8725489334196202994}
   closeButton: {fileID: 8020024164275962418}
   cancelButton: {fileID: 5666705888952991144}
   confirmButton: {fileID: 1797494477277664120}
@@ -893,7 +895,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Are you sure you want to exit Builder mode?
+  m_text: Subtitle text...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c0f2e4affe3f2438d9042ca1db45764f, type: 2}
   m_sharedMaterial: {fileID: 8921694724713903678, guid: c0f2e4affe3f2438d9042ca1db45764f,

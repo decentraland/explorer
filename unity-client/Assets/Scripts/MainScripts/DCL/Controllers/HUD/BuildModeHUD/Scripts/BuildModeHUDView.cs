@@ -52,7 +52,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
     [SerializeField] internal CatalogBtnView catalogBtnView;
     [SerializeField] internal InspectorView inspectorView;
     [SerializeField] internal TopActionsButtonsView topActionsButtonsView;
-    [SerializeField] internal ExitFromBuildModeView exitFromBuildModeView;
+    [SerializeField] internal BuildModeConfirmationModalView buildModeConfirmationModalView;
 
     private bool isDestroyed = false;
     internal BuildModeHUDInitializationModel controllers;
@@ -82,8 +82,8 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         this.controllers.inspectorBtnController.Initialize(inspectorBtnView, this.controllers.tooltipController);
         this.controllers.catalogBtnController.Initialize(catalogBtnView, this.controllers.tooltipController);
         this.controllers.inspectorController.Initialize(inspectorView);
-        this.controllers.exitFromBuildModeController.Initialize(exitFromBuildModeView);
-        this.controllers.topActionsButtonsController.Initialize(topActionsButtonsView, this.controllers.tooltipController, this.controllers.exitFromBuildModeController);
+        this.controllers.buildModeConfirmationModalController.Initialize(buildModeConfirmationModalView);
+        this.controllers.topActionsButtonsController.Initialize(topActionsButtonsView, this.controllers.tooltipController, this.controllers.buildModeConfirmationModalController);
     }
 
     private void OnDestroy()
@@ -101,7 +101,7 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         controllers.inspectorBtnController.Dispose();
         controllers.catalogBtnController.Dispose();
         controllers.inspectorController.Dispose();
-        controllers.exitFromBuildModeController.Dispose();
+        controllers.buildModeConfirmationModalController.Dispose();
         controllers.topActionsButtonsController.Dispose();
     }
 

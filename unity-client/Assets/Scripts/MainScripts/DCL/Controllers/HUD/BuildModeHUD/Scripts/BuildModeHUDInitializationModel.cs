@@ -13,5 +13,5 @@ public class BuildModeHUDInitializationModel
     public ICatalogBtnController catalogBtnController;
     public IInspectorController inspectorController;
     public ITopActionsButtonsController topActionsButtonsController;
-    public IExitFromBuildModeController exitFromBuildModeController;
+    public IBuildModeConfirmationModalController buildModeConfirmationModalController;
 }

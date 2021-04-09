@@ -3,15 +3,15 @@ using NUnit.Framework;
 
 namespace Tests.BuildModeHUDControllers
 {
-    public class ExitFromBuildModeControllerShould
+    public class BuildModeConfirmationModalControllerShould
     {
-        private ExitFromBuildModeController exitFromBiWModalController;
+        private BuildModeConfirmationModalController exitFromBiWModalController;
 
         [SetUp]
         public void SetUp()
         {
-            exitFromBiWModalController = new ExitFromBuildModeController();
-            exitFromBiWModalController.Initialize(Substitute.For<IExitFromBuildModeView>());
+            exitFromBiWModalController = new BuildModeConfirmationModalController();
+            exitFromBiWModalController.Initialize(Substitute.For<IBuildModeConfirmationModalView>());
         }
 
         [TearDown]
@@ -27,6 +27,32 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             exitFromBiWModalController.exitFromBiWModalView.Received(1).SetActive(isActive);
+        }
+
+        [Test]
+        public void SetTitleCorrectly()
+        {
+            // Arrange
+            string testText = "Test text";
+
+            // Act
+            exitFromBiWModalController.SetTitle(testText);
+
+            // Assert
+            exitFromBiWModalController.exitFromBiWModalView.Received(1).SetTitle(testText);
+        }
+
+        [Test]
+        public void SetSubTitleCorrectly()
+        {
+            // Arrange
+            string testText = "Test text";
+
+            // Act
+            exitFromBiWModalController.SetSubTitle(testText);
+
+            // Assert
+            exitFromBiWModalController.exitFromBiWModalView.Received(1).SetSubTitle(testText);
         }
 
         [Test]

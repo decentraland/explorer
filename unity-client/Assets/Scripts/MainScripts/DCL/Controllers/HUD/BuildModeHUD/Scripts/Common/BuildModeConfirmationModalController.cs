@@ -1,25 +1,27 @@
 using System;
 
-public interface IExitFromBuildModeController
+public interface IBuildModeConfirmationModalController
 {
     event Action OnCancelExit;
     event Action OnConfirmExit;
 
-    void Initialize(IExitFromBuildModeView exitFromBiWModalView);
+    void Initialize(IBuildModeConfirmationModalView exitFromBiWModalView);
     void Dispose();
     void SetActive(bool isActive);
+    void SetTitle(string text);
+    void SetSubTitle(string text);
     void CancelExit();
     void ConfirmExit();
 }
 
-public class ExitFromBuildModeController : IExitFromBuildModeController
+public class BuildModeConfirmationModalController : IBuildModeConfirmationModalController
 {
     public event Action OnCancelExit;
     public event Action OnConfirmExit;
 
-    internal IExitFromBuildModeView exitFromBiWModalView;
+    internal IBuildModeConfirmationModalView exitFromBiWModalView;
 
-    public void Initialize(IExitFromBuildModeView exitFromBiWModalView)
+    public void Initialize(IBuildModeConfirmationModalView exitFromBiWModalView)
     {
         this.exitFromBiWModalView = exitFromBiWModalView;
 
@@ -34,6 +36,10 @@ public class ExitFromBuildModeController : IExitFromBuildModeController
     }
 
     public void SetActive(bool isActive) { exitFromBiWModalView.SetActive(isActive); }
+
+    public void SetTitle(string text) { exitFromBiWModalView.SetTitle(text); }
+
+    public void SetSubTitle(string text) { exitFromBiWModalView.SetSubTitle(text); }
 
     public void CancelExit()
     {

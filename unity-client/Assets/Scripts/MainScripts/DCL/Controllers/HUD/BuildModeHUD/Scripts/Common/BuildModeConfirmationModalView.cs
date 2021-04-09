@@ -2,30 +2,34 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public interface IExitFromBuildModeView
+public interface IBuildModeConfirmationModalView
 {
     event Action OnCancelExit;
     event Action OnConfirmExit;
 
     void SetActive(bool isActive);
+    void SetTitle(string text);
+    void SetSubTitle(string text);
     void CancelExit();
     void ConfirmExit();
 }
 
-public class ExitFromBuildModeView : MonoBehaviour, IExitFromBuildModeView
+public class BuildModeConfirmationModalView : MonoBehaviour, IBuildModeConfirmationModalView
 {
     public event Action OnCancelExit;
     public event Action OnConfirmExit;
 
+    [SerializeField] internal TMPro.TMP_Text title;
+    [SerializeField] internal TMPro.TMP_Text subTitle;
     [SerializeField] internal Button closeButton;
     [SerializeField] internal Button cancelButton;
     [SerializeField] internal Button confirmButton;
 
-    private const string VIEW_PATH = "Common/ExitFromBuildModeView";
+    private const string VIEW_PATH = "Common/BuildModeConfirmationModalView";
 
-    internal static ExitFromBuildModeView Create()
+    internal static BuildModeConfirmationModalView Create()
     {
-        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<ExitFromBuildModeView>();
+        var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<BuildModeConfirmationModalView>();
         view.gameObject.name = "_ExitFromBiWModalView";
 
         return view;
@@ -46,6 +50,10 @@ public class ExitFromBuildModeView : MonoBehaviour, IExitFromBuildModeView
     }
 
     public void SetActive(bool isActive) { gameObject.SetActive(isActive); }
+
+    public void SetTitle(string text) { title.text = text; }
+
+    public void SetSubTitle(string text) { subTitle.text = text; }
 
     public void CancelExit() { OnCancelExit?.Invoke(); }
 
