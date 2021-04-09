@@ -177,8 +177,8 @@ public class BodyShapeController : WearableController, IBodyShapeController
             else if (parentName.Contains("mouth"))
                 mouthRenderer = r;
         }
-        
-        InitializeAvatarAudioHandlers(container, animation);
+
+        InitializeAvatarAudioHandlers(assetContainer, animation);
     }
 
     public SkinnedMeshRenderer headRenderer { get; private set; }
@@ -202,7 +202,7 @@ public class BodyShapeController : WearableController, IBodyShapeController
         upperBodyRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.UPPER_BODY);
         lowerBodyRenderer.enabled = !hiddenList.Contains(WearableLiterals.Categories.LOWER_BODY);
     }
-    
+
     private void InitializeAvatarAudioHandlers(GameObject container, Animation createdAnimation)
     {
         //NOTE(Mordi): Adds audio handler for animation events, and passes in the audioContainer for the avatar
