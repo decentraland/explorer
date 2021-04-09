@@ -161,14 +161,15 @@ function* fetchWearablesV2(filters: WearablesRequestFilters) {
   const result: any[] = []
   if (filters.ownedByUser) {
     if (WITH_FIXED_COLLECTIONS) {
+      // The WITH_FIXED_COLLECTIONS config can only be used in zone. However, we want to be able to use prod collections for testing.
+      // That's why we are also querying a prod catalysts for the given collections
       const collectionIds = WITH_FIXED_COLLECTIONS.split(',')
-      const orgCatalyst = 'https://peer.decentraland.org'
-      const orgClient = new CatalystClient(orgCatalyst, 'EXPLORER')
+      const orgClient: CatalystClient = yield CatalystClient.connectedToCatalystIn('mainnet', 'EXPLORER')
       const zoneWearables = yield client.fetchWearables({ collectionIds })
       const orgWearables = yield orgClient.fetchWearables({ collectionIds })
       const orgWearablesWithBaseUrl = orgWearables.map((wearable: any) => ({
         ...wearable,
-        baseUrl: `${orgCatalyst}/content/contents/`
+        baseUrl: `${orgClient.getContentUrl()}/contents/`
       }))
       result.push(...zoneWearables, ...orgWearablesWithBaseUrl)
     } else {
