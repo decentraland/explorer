@@ -126,6 +126,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: baeafb15684bb4604bd26954c2fc9240, type: 3}
   - {fileID: 21300000, guid: c6bfc325bda1f44ba9affb7ecdf26a11, type: 3}
   - {fileID: 21300000, guid: 6fbdd825c58334612a3d1645eba6da25, type: 3}
+  - {fileID: 21300000, guid: 4e9a4135cdf6d42afb73b12a76bf53f2, type: 3}
   - {fileID: 21300000, guid: 4bb84435c63fb4e1f9276314c9e47125, type: 3}
   - {fileID: 21300000, guid: 914d7e458aea54023ade17e08c509416, type: 3}
   - {fileID: 21300000, guid: 3e026055304a14525a6f24ebe12e875f, type: 3}
@@ -211,6 +212,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 0829529b4cd624727a16edcc165c4a97, type: 3}
   - {fileID: 21300000, guid: 01894c9b0e4cc4d15a7f0fe26505e2c9, type: 3}
   - {fileID: 21300000, guid: f3e766ab5571e436ebb74c06db87db7b, type: 3}
+  - {fileID: 21300000, guid: da7e5aab6c83c471e9951b0ff723a822, type: 3}
   - {fileID: 21300000, guid: 7bfca4cb270a343c682028817c0d5bf4, type: 3}
   - {fileID: 21300000, guid: fe4a00db663ed4d3abe06167ea5b3317, type: 3}
   - {fileID: 21300000, guid: 07a400eb205264a4f9e2aad5d599b4a3, type: 3}
@@ -321,6 +323,7 @@ SpriteAtlas:
   - DiscordIconHD
   - Button14
   - ContainerShadowRadiusSix
+  - JumpIconSquare
   - StokeRectRadius12
   - SettingsIconNew
   - MagicSpark
@@ -406,6 +409,7 @@ SpriteAtlas:
   - Button8
   - RectRadius12
   - ToggleCheckOff
+  - PoapIcon
   - SettingsIcon
   - Compass
   - BackpackIconNew

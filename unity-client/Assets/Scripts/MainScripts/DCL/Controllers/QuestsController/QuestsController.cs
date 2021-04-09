@@ -88,6 +88,7 @@ namespace DCL.QuestsController
             }
 
             quests[progressedQuest.id] = progressedQuest;
+            progressedQuest.oldProgress = oldQuest.progress;
 
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
@@ -103,11 +104,13 @@ namespace DCL.QuestsController
                         bool oldTaskFound = oldQuestSection.TryGetTask(currentTask.id, out QuestTask oldTask);
                         currentTask.justProgressed = !oldTaskFound || currentTask.progress != oldTask.progress;
                         currentTask.justUnlocked = !oldTaskFound || (currentTask.status != QuestsLiterals.Status.BLOCKED &&  oldTask.status == QuestsLiterals.Status.BLOCKED);
+                        currentTask.oldProgress = oldTaskFound ? oldTask.progress : 0;
                     }
                     else
                     {
                         currentTask.justProgressed = false;
                         currentTask.justUnlocked = false;
+                        currentTask.oldProgress = 0;
                     }
                 }
             }

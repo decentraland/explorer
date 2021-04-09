@@ -36,6 +36,9 @@ public class QuestModel : BaseModel
     public DateTime completionTime = DateTime.Now; //TODO remove this once kernel send the data properly
     public QuestReward[] rewards;
 
+    [NonSerialized]
+    public float oldProgress = 0;
+
     public bool TryGetSection(string sectionId, out QuestSection section)
     {
         section = sections.FirstOrDefault(x => x.id == sectionId);

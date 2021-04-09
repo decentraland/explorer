@@ -17,6 +17,8 @@ public class QuestTask
     public bool justProgressed = false;
     [NonSerialized]
     public bool justUnlocked = false;
+    [NonSerialized]
+    public float oldProgress = 0;
 }
 
 [System.Serializable]

@@ -38,7 +38,9 @@ namespace DCL.Huds.QuestsTracker
                 recipient = string.Empty,
                 body = $"/goto {task.coordinates}",
             });
-
+            Vector3 scale = progress.transform.localScale;
+            scale.x =  newTask.oldProgress;
+            progress.transform.localScale = scale;
             jumpInButton.gameObject.SetActive(task.progress < 1 && !string.IsNullOrEmpty(task.coordinates));
             progressTarget = task.progress;
             switch (task.type)
@@ -68,7 +70,7 @@ namespace DCL.Huds.QuestsTracker
             yield return WaitForSecondsCache.Get(0.5f);
             animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
 
-            yield return WaitForSecondsCache.Get(2f);
+            yield return WaitForSecondsCache.Get(3f);
 
             OnDestroyed?.Invoke(task.id);
             Destroy(gameObject);

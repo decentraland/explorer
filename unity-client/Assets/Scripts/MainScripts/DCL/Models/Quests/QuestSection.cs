@@ -8,8 +8,6 @@ public class QuestSection
     public float progress;
     public QuestTask[] tasks;
 
-    public bool anyTaskJustProgressed => tasks.Any(x => x.justProgressed);
-
     public bool TryGetTask(string taskId, out QuestTask task)
     {
         task = tasks.FirstOrDefault(x => x.id == taskId);

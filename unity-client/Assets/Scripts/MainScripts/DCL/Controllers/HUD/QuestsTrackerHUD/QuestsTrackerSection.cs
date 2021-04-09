@@ -48,7 +48,7 @@ namespace DCL.Huds.QuestsTracker
             {
                 QuestTask task = allTasks[index];
                 //We only show completed quests that has been just completed to show the progress
-                if (task.status == QuestsLiterals.Status.BLOCKED || (task.progress >= 1 && !task.justProgressed))
+                if (!taskEntries.ContainsKey(task.id) && (task.status == QuestsLiterals.Status.BLOCKED || (task.progress >= 1 && !task.justProgressed)))
                     continue;
 
                 entriesToRemove.Remove(task.id);
@@ -126,7 +126,6 @@ namespace DCL.Huds.QuestsTracker
 
             if (taskEntries.Count == 0)
             {
-                yield return WaitForSecondsCache.Get(2f); //Close section anim goes here
                 Destroy(gameObject);
                 OnDestroyed?.Invoke(section.id);
             }

@@ -75,9 +75,9 @@ namespace DCL.Huds.QuestsTracker
             int completedTasksAmount = allTasks.Count(x => x.progress >= 1);
             questTitle.text = $"{quest.name}";
             questProgressText.text = $"{completedTasksAmount}/{allTasks.Length}";
+            progress.fillAmount = quest.oldProgress;
             progressTarget = (float)completedTasksAmount / allTasks.Length;
 
-            bool hasCompletedTasksToShow = false;
             List<string> entriesToRemove = sectionEntries.Keys.ToList();
             List<QuestsTrackerSection> visibleSectionEntries = new List<QuestsTrackerSection>();
             List<QuestsTrackerSection> newSectionEntries = new List<QuestsTrackerSection>();
@@ -85,37 +85,11 @@ namespace DCL.Huds.QuestsTracker
             {
                 QuestSection section = quest.sections[i];
 
-                bool hasTasks = false;
-                bool isVisible = false;
-                for (int j = 0; j < section.tasks.Length; j++)
-                {
-                    QuestTask task = section.tasks[j];
-                    if (task.status == QuestsLiterals.Status.BLOCKED)
-                        continue;
-
-                    if (task.progress >= 1 && task.justProgressed)
-                    {
-                        hasCompletedTasksToShow = true;
-                        isVisible = true;
-                        hasTasks = true;
-                    }
-
-                    if (task.progress < 1)
-                    {
-                        hasTasks = true;
-                        if (!task.justUnlocked)
-                        {
-                            isVisible = true;
-                        }
-                    }
-
-                    //Early return
-                    if (isVisible && hasCompletedTasksToShow)
-                        break;
-                }
-
+                bool hasTasks = section.tasks.Any(x => x.status != QuestsLiterals.Status.BLOCKED && (x.progress < 1 || x.justProgressed));
                 if (!hasTasks)
                     continue;
+
+                bool isVisible = section.tasks.Any(x => (x.progress < 1 && !x.justUnlocked) || (x.progress >= 1 && x.justProgressed));
 
                 entriesToRemove.Remove(section.id);
                 if (!sectionEntries.TryGetValue(section.id, out QuestsTrackerSection sectionEntry))
@@ -144,7 +118,7 @@ namespace DCL.Huds.QuestsTracker
             SetExpandCollapseState(true);
             OnLayoutRebuildRequested?.Invoke();
 
-            sequenceRoutine = StartCoroutine(Sequence(visibleSectionEntries, newSectionEntries, hasCompletedTasksToShow));
+            sequenceRoutine = StartCoroutine(Sequence(visibleSectionEntries, newSectionEntries));
         }
 
         private QuestsTrackerSection CreateSection()
@@ -181,10 +155,9 @@ namespace DCL.Huds.QuestsTracker
             AssetPromiseKeeper_Texture.i.Keep(iconPromise);
         }
 
-        private IEnumerator Sequence(List<QuestsTrackerSection> visibleSections, List<QuestsTrackerSection> newSections, bool hasCompletedTasks)
+        private IEnumerator Sequence(List<QuestsTrackerSection> visibleSections, List<QuestsTrackerSection> newSections)
         {
-            if (hasCompletedTasks)
-                yield return new WaitUntil(() => outAnimDone);
+            yield return new WaitUntil(() => outAnimDone);
 
             ClearSectionRoutines();
 

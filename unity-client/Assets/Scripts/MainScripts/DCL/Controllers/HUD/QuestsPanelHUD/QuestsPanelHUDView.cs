@@ -257,7 +257,7 @@ namespace DCL.Huds.QuestsPanel
                             completionTime = DateTime.Now,
                             coordinates = "1,0",
                             progress = 0,
-                            status = QuestsLiterals.Status.BLOCKED,
+                            status = QuestsLiterals.Status.ON_GOING,
                             payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = false }),
                             type = "single",
                         }
@@ -283,6 +283,9 @@ namespace DCL.Huds.QuestsPanel
             }
         };
         private QuestModel currentFakeQuest;
+
+        [ContextMenu("Reset")]
+        public void ResetFakeFlow() { fakeFlowStep = 0; }
         [ContextMenu("Next Step")]
         public void FakeFlow()
         {
@@ -300,14 +303,23 @@ namespace DCL.Huds.QuestsPanel
                     currentFakeQuest.sections[0].tasks[1].status = QuestsLiterals.Status.ON_GOING;
                     currentFakeQuest.sections[0].progress = 0.5f;
                     break;
-                //section 0, task 1 halfway
+                //section 0, task 1 1/10
                 case 2:
-                    currentFakeQuest.sections[0].tasks[1].progress = 0.5f;
-                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 5, end = 10, start = 0 });
-                    currentFakeQuest.sections[0].progress = 0.75f;
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                    int progress = fakeFlowStep - 1;
+                    currentFakeQuest.sections[0].tasks[1].progress = progress / 10f;
+                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = progress, end = 10, start = 0 });
+                    currentFakeQuest.sections[0].progress = currentFakeQuest.sections[0].tasks.Average(y => y.progress);
                     break;
                 //section 0, task 1 completed
-                case 3:
+                case 11:
                     currentFakeQuest.sections[0].tasks[1].progress = 1f;
                     currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 10, end = 10, start = 0 });
                     currentFakeQuest.sections[0].progress = 1;
@@ -315,7 +327,7 @@ namespace DCL.Huds.QuestsPanel
 
                     break;
                 //section 1, task 0 completed and quest completed
-                case 4:
+                case 12:
                     currentFakeQuest.sections[1].tasks[0].progress = 1;
                     currentFakeQuest.sections[1].tasks[0].payload = JsonUtility.ToJson(new TaskPayload_Single { isDone = true });
                     currentFakeQuest.status = QuestsLiterals.Status.COMPLETED;
@@ -324,7 +336,7 @@ namespace DCL.Huds.QuestsPanel
                     currentFakeQuest.sections[1].progress = 1;
                     break;
             }
-            fakeFlowStep = (fakeFlowStep + 1) % 5;
+            fakeFlowStep = (fakeFlowStep + 1) % 13;
             QuestsController.QuestsController.i.UpdateQuestProgress(JsonUtility.FromJson<QuestModel>(JsonUtility.ToJson(currentFakeQuest)));
         }
     }
