@@ -62,8 +62,6 @@ public class DynamicOBJLoaderController : MonoBehaviour
                 {
                     Debug.Log("Couldn't get OBJ, error: " + errorMsg + " ... " + OBJUrl);
                 });
-
-            asyncOp.disposeOnCompleted = true;
         }
         else
         {

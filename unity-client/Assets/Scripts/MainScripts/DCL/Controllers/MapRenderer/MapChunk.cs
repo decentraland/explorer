@@ -17,6 +17,7 @@ namespace DCL
         [System.NonSerialized] public MapAtlas owner;
         protected RectTransform rt;
         protected bool isLoadingOrLoaded = false;
+        private WebRequestAsyncOperation loadOp;
 
         private void Start() { targetImage.color = Color.clear; }
 
@@ -87,11 +88,8 @@ namespace DCL
             if (!isLoadingOrLoaded)
             {
                 loadOp = LoadChunkImage();
-                loadOp.disposeOnCompleted = true;
             }
         }
-
-        private WebRequestAsyncOperation loadOp;
 
         private void OnDestroy()
         {

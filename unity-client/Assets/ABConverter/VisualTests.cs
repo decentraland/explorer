@@ -189,7 +189,7 @@ namespace DCL.ABConverter
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
                     path = path.Replace("http://localhost", "file:///");
 
-                var reqOp = WebRequestController.i.GetAssetBundle(path);
+                var reqOp = WebRequestController.i.GetAssetBundle(url: path, disposeOnCompleted: false);
 
                 while (!reqOp.isDone) { }
 
@@ -214,7 +214,7 @@ namespace DCL.ABConverter
                 if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
                     path = path.Replace("http://localhost", "file:///");
 
-                var reqOp = WebRequestController.i.GetAssetBundle(path);
+                var reqOp = WebRequestController.i.GetAssetBundle(url: path, disposeOnCompleted: false);
 
                 while (!reqOp.isDone) { }
 

@@ -127,7 +127,7 @@ namespace DCL
         {
             List<MappingPair> mappingPairs = new List<MappingPair>();
 
-            WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(url);
+            WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(url: url, disposeOnCompleted: false);
 
             while (!asyncOp.isDone) { }
 

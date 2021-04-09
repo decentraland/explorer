@@ -77,7 +77,7 @@ public class GifProcessor
 
     private IEnumerator UniGifProcessorLoad(string url, Action<GifFrameData[]> OnSuccess, Action OnFail)
     {
-        webRequestOp = WebRequestController.i.Get(url);
+        webRequestOp = WebRequestController.i.Get(url: url, disposeOnCompleted: false);
 
         yield return webRequestOp;
 

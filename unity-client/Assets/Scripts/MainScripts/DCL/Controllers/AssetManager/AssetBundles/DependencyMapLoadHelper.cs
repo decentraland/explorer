@@ -63,7 +63,7 @@ public static class DependencyMapLoadHelper
         }
 
         downloadingDepmap.Add(hash);
-        WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(
+        WebRequestController.i.Get(
             url: url,
             OnSuccess: (depmapRequest) =>
             {
@@ -84,8 +84,6 @@ public static class DependencyMapLoadHelper
                 failedRequests.Add(hash);
                 downloadingDepmap.Remove(hash);
             });
-
-        asyncOp.disposeOnCompleted = true;
     }
 
     private static void SavePersistentCache()

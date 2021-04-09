@@ -136,8 +136,6 @@ public class TeleportPromptHUDView : MonoBehaviour
             spinnerImage.SetActive(false);
             imageSceneThumbnail.gameObject.SetActive(true);
         });
-
-        fetchParcelImageOp.disposeOnCompleted = true;
     }
 
     private void OnClosePressed()

@@ -37,27 +37,16 @@ namespace DCL
         /// <summary>
         /// Set to true for disposing the request just after it has been completed.
         /// </summary>
-        public bool disposeOnCompleted
-        {
-            get { return disposeOnCompletedValue; }
-            set
-            {
-                disposeOnCompletedValue = value;
-
-                if (value && isDone)
-                    Dispose();
-            }
-        }
+        public bool disposeOnCompleted { get; set; }
 
         public override bool keepWaiting { get { return !isDone; } }
-
-        private bool disposeOnCompletedValue = false;
 
         public WebRequestAsyncOperation(UnityWebRequest webRequest)
         {
             this.webRequest = webRequest;
             isDone = false;
             isSucceded = false;
+            disposeOnCompleted = true;
         }
 
         /// <summary>

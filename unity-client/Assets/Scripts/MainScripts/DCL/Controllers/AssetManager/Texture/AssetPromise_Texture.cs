@@ -72,8 +72,6 @@ namespace DCL
                     {
                         OnFail?.Invoke();
                     });
-
-                webRequestOp.disposeOnCompleted = true;
             }
             else
             {

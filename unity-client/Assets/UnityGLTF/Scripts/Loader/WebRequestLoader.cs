@@ -59,7 +59,7 @@ namespace UnityGLTF.Loader
                 finalUrl = Path.Combine(rootUri, httpRequestPath);
             }
 
-            WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(
+            return WebRequestController.i.Get(
                 url: finalUrl,
                 downloadHandler: new DownloadHandlerBuffer(),
                 OnSuccess: (webRequestResult) =>
@@ -82,10 +82,6 @@ namespace UnityGLTF.Loader
                     Debug.LogError($"{errorMsg} - {finalUrl}");
                 },
                 timeout: 5000);
-
-            asyncOp.disposeOnCompleted = true;
-
-            return asyncOp;
         }
     }
 }

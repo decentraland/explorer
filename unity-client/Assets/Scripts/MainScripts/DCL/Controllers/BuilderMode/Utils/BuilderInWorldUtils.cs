@@ -309,7 +309,7 @@ public static partial class BuilderInWorldUtils
 
     public static void MakeGetCall(string url, Action<string> functionToCall)
     {
-        WebRequestAsyncOperation asyncOp = Environment.i.platform.webRequest.Get(
+        Environment.i.platform.webRequest.Get(
             url: url,
             OnSuccess: (webRequestResult) =>
             {
@@ -324,8 +324,6 @@ public static partial class BuilderInWorldUtils
             {
                 Debug.Log(errorMsg);
             });
-
-        asyncOp.disposeOnCompleted = true;
     }
 
     public static void ConfigureEventTrigger(EventTrigger eventTrigger, EventTriggerType eventType, UnityAction<BaseEventData> call)

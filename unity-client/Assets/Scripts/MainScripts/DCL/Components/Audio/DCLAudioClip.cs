@@ -87,13 +87,11 @@ namespace DCL.Components
                 Model model = (Model) this.model;
                 if (scene.contentProvider.HasContentsUrl(model.url))
                 {
-                    WebRequestAsyncOperation fetchOp = Utils.FetchAudioClip(
+                    Utils.FetchAudioClip(
                         scene.contentProvider.GetContentsUrl(model.url),
                         Utils.GetAudioTypeFromUrlName(model.url),
                         OnComplete,
                         OnFail);
-
-                    fetchOp.disposeOnCompleted = true;
                 }
             }
         }
