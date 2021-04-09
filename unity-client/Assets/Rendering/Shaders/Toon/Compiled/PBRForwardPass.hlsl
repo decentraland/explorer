@@ -80,7 +80,7 @@ half4 frag(PackedVaryings packedInput) : SV_TARGET
     surface.specular            = specular;
     surface.smoothness          = saturate(surfaceDescription.Smoothness),
     surface.occlusion           = surfaceDescription.Occlusion,
-    surface.emission            = surfaceDescription.Emission,
+    surface.emission            = surfaceDescription.Emission * 5,
     surface.alpha               = saturate(alpha);
     surface.clearCoatMask       = 0;
     surface.clearCoatSmoothness = 1;
