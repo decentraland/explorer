@@ -14,7 +14,15 @@ public static class NotificationScriptableObjects
 
 public static class AudioScriptableObjects
 {
-    // UI events
+    // Builder
+
+    private static AudioEvent builderEnterEvent;
+    public static AudioEvent builderEnter => CommonScriptableObjects.GetOrLoad(ref builderEnterEvent, "ScriptableObjects/AudioEvents/Builder/BuilderEnter");
+
+    private static AudioEvent builderReadyEvent;
+    public static AudioEvent builderReady => CommonScriptableObjects.GetOrLoad(ref builderReadyEvent, "ScriptableObjects/AudioEvents/Builder/BuilderReady");
+
+    // Common UI
 
     private static AudioEvent cameraFadeInEvent;
     public static AudioEvent cameraFadeIn => CommonScriptableObjects.GetOrLoad(ref cameraFadeInEvent, "ScriptableObjects/AudioEvents/HUDCommon/CameraFadeIn");

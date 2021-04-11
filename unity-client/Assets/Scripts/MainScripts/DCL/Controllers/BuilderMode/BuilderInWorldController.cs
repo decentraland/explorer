@@ -222,7 +222,10 @@ public class BuilderInWorldController : MonoBehaviour
         bIWInputHandler.Init();
     }
 
-    private void StartTutorial() { TutorialController.i.SetBuilderInWorldTutorialEnabled(); }
+    private void StartTutorial()
+    {
+        TutorialController.i.SetBuilderInWorldTutorialEnabled();
+    }
 
     public void CleanItems()
     {

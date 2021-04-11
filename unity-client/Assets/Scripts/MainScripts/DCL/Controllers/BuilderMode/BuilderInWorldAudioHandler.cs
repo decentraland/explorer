@@ -6,9 +6,6 @@ using UnityEngine.EventSystems;
 public class BuilderInWorldAudioHandler : MonoBehaviour
 {
     [SerializeField]
-    AudioContainer audioContainer;
-
-    [SerializeField]
     BIWCreatorController creatorController;
 
     [SerializeField]
@@ -31,9 +28,9 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     [SerializeField]
     AudioEvent eventAssetDelete;
     [SerializeField]
-    AudioEvent eventBuilderEnter;
-    [SerializeField]
     AudioEvent eventBuilderExit;
+    [SerializeField]
+    AudioEvent eventBuilderMusic;
 
     BuilderInWorldMode[] builderInWorldModes;
 
@@ -44,6 +41,9 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
         entityHandler.OnDeleteSelectedEntities += OnAssetDelete;
         modeController.OnChangedEditModeState += OnChangedEditModeState;
 
+        DCL.Tutorial.TutorialController.i.OnTutorialEnabled += OnTutorialEnabled;
+        DCL.Tutorial.TutorialController.i.OnTutorialDisabled += OnTutorialDisabled;
+
         builderInWorldModes = builderInWorldModesParent.GetComponentsInChildren<BuilderInWorldMode>(true);
         for (int i = 0; i < builderInWorldModes.Length; i++) {
             builderInWorldModes[i].OnEntityDeselected += OnAssetDeselect;
@@ -53,6 +53,13 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
 
     private void OnDestroy() {
         creatorController.OnSceneObjectPlaced -= OnAssetSpawn;
+        inWorldController.OnEnterEditMode -= OnEnterEditMode;
+        inWorldController.OnExitEditMode -= OnExitEditMode;
+        entityHandler.OnDeleteSelectedEntities -= OnAssetDelete;
+        modeController.OnChangedEditModeState -= OnChangedEditModeState;
+
+        DCL.Tutorial.TutorialController.i.OnTutorialEnabled -= OnTutorialEnabled;
+        DCL.Tutorial.TutorialController.i.OnTutorialDisabled -= OnTutorialDisabled;
 
         for (int i = 0; i < builderInWorldModes.Length; i++) {
             builderInWorldModes[i].OnEntityDeselected -= OnAssetDeselect;
@@ -78,11 +85,26 @@ public class BuilderInWorldAudioHandler : MonoBehaviour
     }
 
     void OnEnterEditMode() {
-        eventBuilderEnter.Play();
+        StartCoroutine(StartBuilderMusic());
     }
 
     void OnExitEditMode() {
         eventBuilderExit.Play();
+        StartCoroutine(eventBuilderMusic.FadeOut(5f));
+    }
+
+    IEnumerator StartBuilderMusic() {
+        yield return new WaitForSeconds(4f);
+
+        eventBuilderMusic.Play();
+    }
+
+    void OnTutorialEnabled() {
+        StartCoroutine(eventBuilderMusic.FadeOut(3f));
+    }
+
+    void OnTutorialDisabled() {
+        StartCoroutine(StartBuilderMusic());
     }
 
     void OnChangedEditModeState(BIWModeController.EditModeState previous, BIWModeController.EditModeState current) {

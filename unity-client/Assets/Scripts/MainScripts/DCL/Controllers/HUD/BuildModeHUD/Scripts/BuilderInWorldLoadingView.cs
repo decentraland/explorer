@@ -26,6 +26,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     [SerializeField] internal float minVisibilityTime = 1.5f;
 
     public event System.Action OnCancelLoading;
+    public event System.Action OnHide;
 
     internal Coroutine tipsCoroutine;
     internal Coroutine hideCoroutine;
@@ -86,6 +87,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 
         StopTipsCarousel();
         gameObject.SetActive(false);
+        OnHide?.Invoke();
     }
 
     internal IEnumerator ShowRandomTipsCoroutine()

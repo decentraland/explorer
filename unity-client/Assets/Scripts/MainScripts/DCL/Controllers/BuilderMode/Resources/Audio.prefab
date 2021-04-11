@@ -44,7 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99a326a5182e1ed4a91515ceb71d0f1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioContainer: {fileID: 4501830319568291384}
   creatorController: {fileID: 0}
   builderInWorldModesParent: {fileID: 0}
   inWorldController: {fileID: 0}
@@ -53,8 +52,8 @@ MonoBehaviour:
   eventAssetSpawn: {fileID: 11400000, guid: 50ff649965aff034aa8227fa845ff804, type: 2}
   eventAssetPlace: {fileID: 11400000, guid: 6be02392848c7b84e84edb760304a42a, type: 2}
   eventAssetDelete: {fileID: 11400000, guid: 0426caa2d686a4943baa16e374f9b6bd, type: 2}
-  eventBuilderEnter: {fileID: 11400000, guid: d85bc9f8739c09a41b7744ce4c154393, type: 2}
   eventBuilderExit: {fileID: 11400000, guid: 43c277932af173344857f28888a953d0, type: 2}
+  eventBuilderMusic: {fileID: 11400000, guid: ce6bf664fc1d9124bab9ccb368cdb5ea, type: 2}
 --- !u!114 &4501830319568291384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,5 +79,5 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 6be02392848c7b84e84edb760304a42a, type: 2}
     - {fileID: 11400000, guid: 50ff649965aff034aa8227fa845ff804, type: 2}
     - {fileID: 11400000, guid: 0426caa2d686a4943baa16e374f9b6bd, type: 2}
-    - {fileID: 11400000, guid: d85bc9f8739c09a41b7744ce4c154393, type: 2}
     - {fileID: 11400000, guid: 43c277932af173344857f28888a953d0, type: 2}
+    - {fileID: 11400000, guid: ce6bf664fc1d9124bab9ccb368cdb5ea, type: 2}
