@@ -94,7 +94,7 @@ public class TheGraph : ITheGraph
         Query(url, TheGraphQueries.getLandQuery, new AddressVariable() { address = lowerCaseAddress })
             .Then(resultJson =>
             {
-                ProcessReceivedLandsData(promise, resultJson, address, true);
+                ProcessReceivedLandsData(promise, resultJson, lowerCaseAddress, true);
             })
             .Catch(error => promise.Reject(error));
 
