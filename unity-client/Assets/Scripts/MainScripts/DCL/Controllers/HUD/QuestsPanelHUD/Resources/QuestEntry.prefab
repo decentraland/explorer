@@ -1424,6 +1424,7 @@ GameObject:
   - component: {fileID: 1195840645414075866}
   - component: {fileID: 1762257619492916684}
   - component: {fileID: 4608763362399702161}
+  - component: {fileID: 5938958579591883431}
   m_Layer: 5
   m_Name: RewardPanel
   m_TagString: Untagged
@@ -1510,6 +1511,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!225 &5938958579591883431
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3106154385572071907}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3241734735562090403
 GameObject:
   m_ObjectHideFlags: 0
@@ -1984,7 +1997,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
