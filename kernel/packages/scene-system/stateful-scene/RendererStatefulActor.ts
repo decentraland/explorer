@@ -1,5 +1,5 @@
 import { CLASS_ID } from 'decentraland-ecs/src'
-import { IEngineAPI } from 'shared/apis/EngineAPI'
+import type { IEngineAPI } from 'shared/apis/IEngineAPI'
 import {
   AttachEntityComponentPayload,
   ComponentCreatedPayload,
@@ -19,7 +19,7 @@ import {
   StateContainerListener,
   StatefulActor
 } from './types'
-import { generatePBObjectJSON } from 'scene-system/sdk/Utils'
+import { generatePBObjectJSON } from '../sdk/Utils'
 
 export class RendererStatefulActor extends StatefulActor implements StateContainerListener {
   private disposableComponents: number = 0

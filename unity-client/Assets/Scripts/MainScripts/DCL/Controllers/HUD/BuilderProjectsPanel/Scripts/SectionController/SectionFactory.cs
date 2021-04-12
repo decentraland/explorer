@@ -16,14 +16,22 @@ internal class SectionFactory : ISectionFactory
                 result = new SectionScenesController();
                 break;
             case SectionsController.SectionId.SCENES_DEPLOYED:
+                result = new SectionDeployedScenesController();
                 break;
             case SectionsController.SectionId.SCENES_PROJECT:
                 result = new SectionProjectScenesController();
                 break;
             case SectionsController.SectionId.LAND:
+                result = new SectionLandController();
                 break;
             case SectionsController.SectionId.SETTINGS_PROJECT_GENERAL:
                 result = new SectionSceneGeneralSettingsController();
+                break;
+            case SectionsController.SectionId.SETTINGS_PROJECT_CONTRIBUTORS:
+                result = new SectionSceneContributorsSettingsController();
+                break;
+            case SectionsController.SectionId.SETTINGS_PROJECT_ADMIN:
+                result = new SectionSceneAdminsSettingsController();
                 break;
         }
 

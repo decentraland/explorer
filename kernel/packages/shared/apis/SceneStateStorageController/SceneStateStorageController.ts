@@ -26,11 +26,12 @@ import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefi
 import { ILand } from 'shared/types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
+import { ISceneStateStorageController } from './ISceneStateStorageController'
 
-declare const window: any
+declare const globalThis: any
 
 @registerAPI('SceneStateStorageController')
-export class SceneStateStorageController extends ExposableAPI {
+export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
   private builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest
@@ -149,7 +150,12 @@ export class SceneStateStorageController extends ExposableAPI {
         )
 
         // Sign entity id
-        const authChain = Authenticator.signPayload(this.getIdentity(), entityId)
+        const store: Store<RootState> = globalThis['globalStore']
+        const identity = getCurrentIdentity(store.getState())
+        if (!identity) {
+          throw new Error('Identity not found when trying to deploy an entity')
+        }
+        const authChain = Authenticator.signPayload(identity, entityId)
 
         // Deploy
         const contentClient = this.getContentClient()
@@ -161,7 +167,7 @@ export class SceneStateStorageController extends ExposableAPI {
         result = { ok: false, error: `${error}` }
       }
     }
-    window.unityInterface.SendPublishSceneResult(result)
+    globalThis.unityInterface.SendPublishSceneResult(result)
     return result
   }
 
@@ -173,7 +179,8 @@ export class SceneStateStorageController extends ExposableAPI {
         return fromStorableFormatToSerializedState(sceneState)
       }
       defaultLogger.warn(`Couldn't find a local scene state for scene ${sceneId}`)
-      return
+      // NOTE: RPC controllers should NEVER return undefined. Use null instead
+      return undefined
     }
 
     const contentClient = this.getContentClient()
@@ -213,7 +220,7 @@ export class SceneStateStorageController extends ExposableAPI {
   }
 
   private getContentClient(): ContentClient {
-    const store: Store<RootState> = window['globalStore']
+    const store: Store<RootState> = globalThis['globalStore']
     const contentUrl = getUpdateProfileServer(store.getState())
     return new ContentClient(contentUrl, 'builder in-world')
   }

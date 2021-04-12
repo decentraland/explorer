@@ -3,6 +3,16 @@ const queryString = require('query-string')
 
 export const NETWORK_HZ = 10
 
+export namespace unityBuildConfigurations {
+  export const UNITY_DATA_PATH = 'unity.data.unityweb'
+  export const UNITY_FRAMEWORK_PATH = 'unity.framework.js.unityweb'
+  export const UNITY_CODE_PATH = 'unity.wasm.unityweb'
+  export const UNITY_STREAMING_ASSETS_URL = 'StreamingAssets'
+  export const UNITY_ORGANIZATION_NAME = 'Decentraland'
+  export const UNITY_PRODUCT_NAME = 'Decentraland World Client'
+  export const UNITY_PRODUCT_VERSION = '0.1'
+}
+
 export namespace interactionLimits {
   /**
    * click distance, this is the length of the ray/lens
@@ -65,9 +75,8 @@ export namespace parcelLimits {
   ]
 
   export const descriptiveValidWorldRanges = validWorldRanges
-    .map(range => `(X from ${range.x.from} to ${range.x.to}, and Y from ${range.y.from} to ${range.y.to})`)
+    .map((range) => `(X from ${range.x.from} to ${range.x.to}, and Y from ${range.y.from} to ${range.y.to})`)
     .join(' or ')
-
 }
 export namespace playerConfigurations {
   export const gravity = -0.2
@@ -266,6 +275,7 @@ export function getExclusiveServer() {
 }
 
 export const ALL_WEARABLES = location.search.includes('ALL_WEARABLES') && getDefaultTLD() !== 'org'
+export const WITH_FIXED_COLLECTIONS = qs.WITH_COLLECTIONS && getDefaultTLD() !== 'org' ? qs.WITH_COLLECTIONS : undefined
 export const WEARABLE_API_DOMAIN = qs.WEARABLE_API_DOMAIN || 'wearable-api.decentraland.org'
 export const WEARABLE_API_PATH_PREFIX = qs.WEARABLE_API_PATH_PREFIX || 'v2'
 export const ENABLE_EMPTY_SCENES = !DEBUG || knownTLDs.includes(getTLD())
