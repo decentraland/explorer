@@ -137,10 +137,10 @@ namespace Tests.BuildModeHUDControllers
         public void HideLogoutConfirmationCorrectly()
         {
             // Act
-            topActionsButtonsController.HideLogoutConfirmation();
+            topActionsButtonsController.HideLogoutConfirmation(BuildModeModalType.EXIT);
 
             // Assert
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(false);
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(false, BuildModeModalType.EXIT);
         }
 
         [Test]
@@ -150,7 +150,7 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.ShowLogoutConfirmation();
 
             // Assert
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true);
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.EXIT);
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetTitle(Arg.Any<string>());
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetSubTitle(Arg.Any<string>());
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetCancelButtonText(Arg.Any<string>());
@@ -165,7 +165,7 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.OnLogOutClick += () => { clicked = true; };
 
             // Act
-            topActionsButtonsController.ConfirmLogout();
+            topActionsButtonsController.ConfirmLogout(BuildModeModalType.EXIT);
 
             // Assert
             Assert.IsTrue(clicked, "The clicked is false!");

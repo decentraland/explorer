@@ -26,8 +26,8 @@ public interface ITopActionsButtonsController
     void DuplicateClicked();
     void DeleteClicked();
     void ShowLogoutConfirmation();
-    void HideLogoutConfirmation();
-    void ConfirmLogout();
+    void HideLogoutConfirmation(BuildModeModalType modalType);
+    void ConfirmLogout(BuildModeModalType modalType);
     void TooltipPointerEntered(BaseEventData eventData, string tooltipText);
     void TooltipPointerExited();
     void SetExtraActionsActive(bool isActive);
@@ -130,18 +130,30 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     public void DeleteClicked() { OnDeleteClick?.Invoke(); }
 
-    public void HideLogoutConfirmation() { buildModeConfirmationModalController.SetActive(false); }
+    public void HideLogoutConfirmation(BuildModeModalType modalType)
+    {
+        if (modalType != BuildModeModalType.EXIT)
+            return;
+
+        buildModeConfirmationModalController.SetActive(false, BuildModeModalType.EXIT);
+    }
 
     public void ShowLogoutConfirmation()
     {
-        buildModeConfirmationModalController.SetActive(true);
+        buildModeConfirmationModalController.SetActive(true, BuildModeModalType.EXIT);
         buildModeConfirmationModalController.SetTitle(EXIT_MODAL_TITLE);
         buildModeConfirmationModalController.SetSubTitle(EXIT_MODAL_SUBTITLE);
         buildModeConfirmationModalController.SetCancelButtonText(EXIT_MODAL_CANCEL_BUTTON);
         buildModeConfirmationModalController.SetConfirmButtonText(EXIT_MODAL_CONFIRM_BUTTON);
     }
 
-    public void ConfirmLogout() { OnLogOutClick?.Invoke(); }
+    public void ConfirmLogout(BuildModeModalType modalType)
+    {
+        if (modalType != BuildModeModalType.EXIT)
+            return;
+
+        OnLogOutClick?.Invoke();
+    }
 
     public void TooltipPointerEntered(BaseEventData eventData, string tooltipText)
     {

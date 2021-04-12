@@ -28,6 +28,7 @@ namespace Tests.BuildModeHUDControllers
                 inspectorBtnController = Substitute.For<IInspectorBtnController>(),
                 catalogBtnController = Substitute.For<ICatalogBtnController>(),
                 inspectorController = Substitute.For<IInspectorController>(),
+                buildModeConfirmationModalController = Substitute.For<IBuildModeConfirmationModalController>(),
                 topActionsButtonsController = Substitute.For<ITopActionsButtonsController>()
             };
 
@@ -37,9 +38,7 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [TearDown]
-        public void TearDown()
-        {
-        }
+        public void TearDown() { }
 
         [Test]
         public void CreateBuildModeControllersCorrectly()
@@ -99,7 +98,36 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.PublishStart();
 
             // Assert
-            buildModeHUDController.view.Received(1).PublishStart();
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.PUBLISH);
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetTitle(Arg.Any<string>());
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetSubTitle(Arg.Any<string>());
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetCancelButtonText(Arg.Any<string>());
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetConfirmButtonText(Arg.Any<string>());
+        }
+
+        [Test]
+        public void CancelPublishModalCorrectly()
+        {
+            // Act
+            buildModeHUDController.CancelPublishModal(BuildModeModalType.PUBLISH);
+
+            // Assert
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(false, BuildModeModalType.PUBLISH);
+        }
+
+        [Test]
+        public void ConfirmPublishModalCorrectly()
+        {
+            // Arrange
+            bool publishConfirmed = false;
+            buildModeHUDController.OnConfirmPublishAction += () => { publishConfirmed = true; };
+
+            // Act
+            buildModeHUDController.ConfirmPublishModal(BuildModeModalType.PUBLISH);
+
+            // Assert
+            buildModeHUDController.controllers.publishPopupController.Received(1).PublishStart();
+            Assert.IsTrue(publishConfirmed, "publishConfirmed is false!");
         }
 
         [Test]

@@ -15,7 +15,10 @@ public class BIWPublishController : BIWController
     public override void Init()
     {
         if (HUDController.i.builderInWorldMainHud != null)
+        {
             HUDController.i.builderInWorldMainHud.OnPublishAction += PublishScene;
+            HUDController.i.builderInWorldMainHud.OnConfirmPublishAction += ConfirmPublishScene;
+        }
     }
 
     protected override void FrameUpdate()
@@ -35,16 +38,19 @@ public class BIWPublishController : BIWController
     private void OnDestroy()
     {
         if (HUDController.i.builderInWorldMainHud != null)
+        {
             HUDController.i.builderInWorldMainHud.OnPublishAction -= PublishScene;
+            HUDController.i.builderInWorldMainHud.OnConfirmPublishAction -= ConfirmPublishScene;
+        }
     }
 
     public bool CanPublish()
     {
         if (!sceneToEdit.metricsController.IsInsideTheLimits())
-            return false;     
+            return false;
 
         if (!builderInWorldEntityHandler.AreAllEntitiesInsideBoundaries())
-            return false;        
+            return false;
         return true;
     }
 
@@ -60,7 +66,9 @@ public class BIWPublishController : BIWController
     {
         if (!CanPublish())
             return;
-        builderInWorldBridge.PublishScene(sceneToEdit);
+
         HUDController.i.builderInWorldMainHud.PublishStart();
     }
+
+    void ConfirmPublishScene() { builderInWorldBridge.PublishScene(sceneToEdit); }
 }

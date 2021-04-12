@@ -11,7 +11,6 @@ public interface IBuildModeHUDView
     void HideToolTip();
     void Initialize(BuildModeHUDInitializationModel controllers);
     void PublishEnd(string message);
-    void PublishStart();
     void RefreshCatalogAssetPack();
     void RefreshCatalogContent();
     void SetActive(bool isActive);
@@ -104,8 +103,6 @@ public class BuildModeHUDView : MonoBehaviour, IBuildModeHUDView
         controllers.buildModeConfirmationModalController.Dispose();
         controllers.topActionsButtonsController.Dispose();
     }
-
-    public void PublishStart() { controllers.publishPopupController.PublishStart(); }
 
     public void PublishEnd(string message) { controllers.publishPopupController.PublishEnd(message); }
 

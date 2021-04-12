@@ -6,6 +6,11 @@ using UnityEngine.EventSystems;
 
 public class BuildModeHUDController : IHUD
 {
+    private const string PUBLISH_MODAL_TITLE = "Publish Scene";
+    private const string PUBLISH_MODAL_SUBTITLE = "Are you sure you want to publish your scene to this Land?";
+    private const string PUBLISH_MODAL_CONFIRM_BUTTON = "PUBLISH";
+    private const string PUBLISH_MODAL_CANCEL_BUTTON = "CANCEL";
+
     public event Action OnChangeModeAction;
     public event Action OnTranslateSelectedAction;
     public event Action OnRotateSelectedAction;
@@ -18,6 +23,7 @@ public class BuildModeHUDController : IHUD
     public event Action OnResumeInput;
     public event Action OnTutorialAction;
     public event Action OnPublishAction;
+    public event Action OnConfirmPublishAction;
     public event Action OnLogoutAction;
     public event Action<CatalogItem> OnCatalogItemSelected;
     public event Action<DCLBuilderInWorldEntity> OnEntityClick;
@@ -59,6 +65,7 @@ public class BuildModeHUDController : IHUD
         ConfigureInspectorController();
         ConfigureTopActionsButtonsController();
         ConfigureCatalogItemDropController();
+        ConfigureBuildModeConfirmationModalController();
     }
 
     public void Initialize(BuildModeHUDInitializationModel controllers)
@@ -166,7 +173,37 @@ public class BuildModeHUDController : IHUD
         catalogItemDropController.OnCatalogItemDropped += CatalogItemSelected;
     }
 
-    public void PublishStart() { view.PublishStart(); }
+    private void ConfigureBuildModeConfirmationModalController()
+    {
+        controllers.buildModeConfirmationModalController.OnCancelExit += CancelPublishModal;
+        controllers.buildModeConfirmationModalController.OnConfirmExit += ConfirmPublishModal;
+    }
+
+    public void PublishStart()
+    {
+        controllers.buildModeConfirmationModalController.SetActive(true, BuildModeModalType.PUBLISH);
+        controllers.buildModeConfirmationModalController.SetTitle(PUBLISH_MODAL_TITLE);
+        controllers.buildModeConfirmationModalController.SetSubTitle(PUBLISH_MODAL_SUBTITLE);
+        controllers.buildModeConfirmationModalController.SetCancelButtonText(PUBLISH_MODAL_CANCEL_BUTTON);
+        controllers.buildModeConfirmationModalController.SetConfirmButtonText(PUBLISH_MODAL_CONFIRM_BUTTON);
+    }
+
+    internal void CancelPublishModal(BuildModeModalType modalType)
+    {
+        if (modalType != BuildModeModalType.PUBLISH)
+            return;
+
+        controllers.buildModeConfirmationModalController.SetActive(false, BuildModeModalType.PUBLISH);
+    }
+
+    internal void ConfirmPublishModal(BuildModeModalType modalType)
+    {
+        if (modalType != BuildModeModalType.PUBLISH)
+            return;
+
+        controllers.publishPopupController.PublishStart();
+        OnConfirmPublishAction?.Invoke();
+    }
 
     public void PublishEnd(string message) { view.PublishEnd(message); }
 

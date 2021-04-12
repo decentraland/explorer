@@ -23,7 +23,7 @@ namespace Tests.BuildModeHUDControllers
         public void SetActiveCorrectly(bool isActive)
         {
             // Act
-            exitFromBiWModalController.SetActive(isActive);
+            exitFromBiWModalController.SetActive(isActive, BuildModeModalType.EXIT);
 
             // Assert
             exitFromBiWModalController.exitFromBiWModalView.Received(1).SetActive(isActive);
@@ -86,7 +86,7 @@ namespace Tests.BuildModeHUDControllers
         {
             // Arrange
             bool canceled = false;
-            exitFromBiWModalController.OnCancelExit += () => { canceled = true; };
+            exitFromBiWModalController.OnCancelExit += (modalType) => { canceled = true; };
 
             // Act
             exitFromBiWModalController.CancelExit();
@@ -101,7 +101,7 @@ namespace Tests.BuildModeHUDControllers
         {
             // Arrange
             bool confirmed = false;
-            exitFromBiWModalController.OnConfirmExit += () => { confirmed = true; };
+            exitFromBiWModalController.OnConfirmExit += (modalType) => { confirmed = true; };
 
             // Act
             exitFromBiWModalController.ConfirmExit();

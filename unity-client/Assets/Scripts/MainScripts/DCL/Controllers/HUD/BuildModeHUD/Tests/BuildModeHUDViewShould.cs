@@ -72,16 +72,6 @@ namespace Tests.BuildModeHUDViews
         }
 
         [Test]
-        public void PublishStartCorrectly()
-        {
-            // Act
-            buildModeHUDView.PublishStart();
-
-            // Assert
-            testControllers.publishPopupController.Received(1).PublishStart();
-        }
-
-        [Test]
         public void PublishEndCorrectly()
         {
             // Arrange
