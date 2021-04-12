@@ -498,7 +498,7 @@ GameObject:
   - component: {fileID: 9185754462392474648}
   - component: {fileID: 2718762391877449105}
   m_Layer: 5
-  m_Name: ExitFromBuildModeView
+  m_Name: BuildModeConfirmationModalView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -539,6 +539,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: {fileID: 609534503993898499}
   subTitle: {fileID: 8725489334196202994}
+  cancelButtonText: {fileID: 6756098382439779319}
+  confirmButtonText: {fileID: 3114774194737841141}
   closeButton: {fileID: 8020024164275962418}
   cancelButton: {fileID: 5666705888952991144}
   confirmButton: {fileID: 1797494477277664120}
@@ -556,7 +558,7 @@ GameObject:
   - component: {fileID: 1797494477277664120}
   - component: {fileID: 3122533678122427788}
   m_Layer: 0
-  m_Name: ExitButton
+  m_Name: ConfirmButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

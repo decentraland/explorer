@@ -56,6 +56,32 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
+        public void SetCancelButtonTextCorrectly()
+        {
+            // Arrange
+            string testText = "Test text";
+
+            // Act
+            exitFromBiWModalController.SetCancelButtonText(testText);
+
+            // Assert
+            exitFromBiWModalController.exitFromBiWModalView.Received(1).SetCancelButtonText(testText);
+        }
+
+        [Test]
+        public void SetConfirmButtonTextCorrectly()
+        {
+            // Arrange
+            string testText = "Test text";
+
+            // Act
+            exitFromBiWModalController.SetConfirmButtonText(testText);
+
+            // Assert
+            exitFromBiWModalController.exitFromBiWModalView.Received(1).SetConfirmButtonText(testText);
+        }
+
+        [Test]
         public void CancelExitCorrectly()
         {
             // Arrange

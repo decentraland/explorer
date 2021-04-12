@@ -10,6 +10,8 @@ public interface IBuildModeConfirmationModalController
     void SetActive(bool isActive);
     void SetTitle(string text);
     void SetSubTitle(string text);
+    void SetCancelButtonText(string text);
+    void SetConfirmButtonText(string text);
     void CancelExit();
     void ConfirmExit();
 }
@@ -40,6 +42,10 @@ public class BuildModeConfirmationModalController : IBuildModeConfirmationModalC
     public void SetTitle(string text) { exitFromBiWModalView.SetTitle(text); }
 
     public void SetSubTitle(string text) { exitFromBiWModalView.SetSubTitle(text); }
+
+    public void SetCancelButtonText(string text) { exitFromBiWModalView.SetCancelButtonText(text); }
+
+    public void SetConfirmButtonText(string text) { exitFromBiWModalView.SetConfirmButtonText(text); }
 
     public void CancelExit()
     {

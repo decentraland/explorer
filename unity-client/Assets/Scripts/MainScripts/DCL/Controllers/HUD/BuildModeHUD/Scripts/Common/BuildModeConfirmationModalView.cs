@@ -10,6 +10,8 @@ public interface IBuildModeConfirmationModalView
     void SetActive(bool isActive);
     void SetTitle(string text);
     void SetSubTitle(string text);
+    void SetCancelButtonText(string text);
+    void SetConfirmButtonText(string text);
     void CancelExit();
     void ConfirmExit();
 }
@@ -21,6 +23,8 @@ public class BuildModeConfirmationModalView : MonoBehaviour, IBuildModeConfirmat
 
     [SerializeField] internal TMPro.TMP_Text title;
     [SerializeField] internal TMPro.TMP_Text subTitle;
+    [SerializeField] internal TMPro.TMP_Text cancelButtonText;
+    [SerializeField] internal TMPro.TMP_Text confirmButtonText;
     [SerializeField] internal Button closeButton;
     [SerializeField] internal Button cancelButton;
     [SerializeField] internal Button confirmButton;
@@ -54,6 +58,10 @@ public class BuildModeConfirmationModalView : MonoBehaviour, IBuildModeConfirmat
     public void SetTitle(string text) { title.text = text; }
 
     public void SetSubTitle(string text) { subTitle.text = text; }
+
+    public void SetCancelButtonText(string text) { cancelButtonText.text = text; }
+
+    public void SetConfirmButtonText(string text) { confirmButtonText.text = text; }
 
     public void CancelExit() { OnCancelExit?.Invoke(); }
 

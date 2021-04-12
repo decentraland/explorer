@@ -47,8 +47,10 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     public IExtraActionsController extraActionsController { get; private set; }
 
-    private const string EXIT_CONFIRMATION_TITLE = "Exiting Builder mode";
-    private const string EXIT_CONFIRMATION_SUBTITLE = "Are you sure you want to exit Builder mode?";
+    private const string EXIT_MODAL_TITLE = "Exiting Builder mode";
+    private const string EXIT_MODAL_SUBTITLE = "Are you sure you want to exit Builder mode?";
+    private const string EXIT_MODAL_CONFIRM_BUTTON = "EXIT";
+    private const string EXIT_MODAL_CANCEL_BUTTON = "CANCEL";
 
     internal ITopActionsButtonsView topActionsButtonsView;
     internal ITooltipController tooltipController;
@@ -133,8 +135,10 @@ public class TopActionsButtonsController : ITopActionsButtonsController
     public void ShowLogoutConfirmation()
     {
         buildModeConfirmationModalController.SetActive(true);
-        buildModeConfirmationModalController.SetTitle(EXIT_CONFIRMATION_TITLE);
-        buildModeConfirmationModalController.SetSubTitle(EXIT_CONFIRMATION_SUBTITLE);
+        buildModeConfirmationModalController.SetTitle(EXIT_MODAL_TITLE);
+        buildModeConfirmationModalController.SetSubTitle(EXIT_MODAL_SUBTITLE);
+        buildModeConfirmationModalController.SetCancelButtonText(EXIT_MODAL_CANCEL_BUTTON);
+        buildModeConfirmationModalController.SetConfirmButtonText(EXIT_MODAL_CONFIRM_BUTTON);
     }
 
     public void ConfirmLogout() { OnLogOutClick?.Invoke(); }

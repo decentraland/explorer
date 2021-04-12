@@ -153,6 +153,8 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true);
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetTitle(Arg.Any<string>());
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetSubTitle(Arg.Any<string>());
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetCancelButtonText(Arg.Any<string>());
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetConfirmButtonText(Arg.Any<string>());
         }
 
         [Test]
