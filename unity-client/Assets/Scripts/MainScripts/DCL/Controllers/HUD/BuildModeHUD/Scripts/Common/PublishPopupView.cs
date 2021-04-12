@@ -1,17 +1,18 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public interface IPublishPopupView
 {
-    void PublishEnd(string message);
     void PublishStart();
+    void PublishEnd(string message);
 }
 
 public class PublishPopupView : MonoBehaviour, IPublishPopupView
 {
-    [SerializeField] internal GameObject publishingGO;
-    [SerializeField] internal GameObject publishingFinishedGO;
-    [SerializeField] internal TextMeshProUGUI publishStatusTxt;
+    [SerializeField] internal TMP_Text resultText;
+    [SerializeField] internal GameObject loadingBar;
+    [SerializeField] internal Button closeButton;
 
     private const string VIEW_PATH = "Common/PublishPopupView";
 
@@ -23,17 +24,25 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
         return view;
     }
 
+    private void Awake() { closeButton.onClick.AddListener(CloseModal); }
+
+    private void OnDestroy() { closeButton.onClick.RemoveListener(CloseModal); }
+
     public void PublishStart()
     {
         gameObject.SetActive(true);
-        publishingGO.SetActive(true);
-        publishingFinishedGO.SetActive(false);
+        loadingBar.SetActive(true);
+        resultText.gameObject.SetActive(false);
+        closeButton.gameObject.SetActive(false);
     }
 
     public void PublishEnd(string message)
     {
-        publishingGO.SetActive(false);
-        publishingFinishedGO.SetActive(true);
-        publishStatusTxt.text = message;
+        loadingBar.SetActive(false);
+        resultText.text = message;
+        resultText.gameObject.SetActive(true);
+        closeButton.gameObject.SetActive(true);
     }
+
+    private void CloseModal() { gameObject.SetActive(false); }
 }

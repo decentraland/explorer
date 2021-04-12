@@ -205,7 +205,7 @@ public class BuildModeHUDController : IHUD
         OnConfirmPublishAction?.Invoke();
     }
 
-    public void PublishEnd(string message) { view.PublishEnd(message); }
+    public void PublishEnd(string message) { controllers.publishPopupController.PublishEnd(message); }
 
     public void SetParcelScene(ParcelScene parcelScene) { controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene); }
 

@@ -48,8 +48,7 @@ public class BuilderInWorldBridge : MonoBehaviour
         string message;
         if (publishSceneResultPayload.ok)
         {
-            //Note (Adrian): This is temporary until implement the UI
-            message = "Done!\nThe scene has been published";
+            message = "We successfully publish your scene.";
             OnPublishSuccess?.Invoke();
         }
         else

@@ -140,7 +140,7 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.PublishEnd(testText);
 
             // Assert
-            buildModeHUDController.view.Received(1).PublishEnd(testText);
+            buildModeHUDController.controllers.publishPopupController.Received(1).PublishEnd(testText);
         }
 
         [Test]
