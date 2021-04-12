@@ -431,6 +431,7 @@ public class BuilderInWorldController : MonoBehaviour
 
     public void ExitEditMode()
     {
+        builderInWorldBridge.SaveSceneState(sceneToEdit);
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.Set(true);
 
         inputController.isBuildModeActivate = false;

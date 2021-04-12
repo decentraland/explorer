@@ -7,8 +7,10 @@ import { SceneStateStorageController } from 'shared/apis/SceneStateStorageContro
 import { defaultLogger } from 'shared/logger'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
 import { RendererStatefulActor } from './stateful-scene/RendererStatefulActor'
-import { SceneStateDefinition } from './stateful-scene/SceneStateDefinition'
-import { deserializeSceneState, serializeSceneState } from './stateful-scene/SceneStateDefinitionSerializer'
+import { BuilderStatefulActor } from "./stateful-scene/BuilderStatefulActor"
+import { SceneStateActor as SceneStatefulActor } from './stateful-scene/SceneStateActor'
+import { serializeSceneState } from './stateful-scene/SceneStateDefinitionSerializer'
+import { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
 
 class StatefulWebWorkerScene extends Script {
   @inject('DevTools')
@@ -17,6 +19,9 @@ class StatefulWebWorkerScene extends Script {
   @inject('EngineAPI')
   engine!: IEngineAPI
 
+  @inject('EnvironmentAPI')
+  environmentAPI!: EnvironmentAPI
+
   @inject('ParcelIdentity')
   parcelIdentity!: ParcelIdentity
 
@@ -24,8 +29,9 @@ class StatefulWebWorkerScene extends Script {
   sceneStateStorage!: SceneStateStorageController
 
   private devToolsAdapter!: DevToolsAdapter
-  private renderer!: RendererStatefulActor
-  private sceneState!: SceneStateDefinition
+  private rendererActor!: RendererStatefulActor
+  private builderActor!: BuilderStatefulActor
+  private sceneActor!: SceneStatefulActor
   private eventSubscriber!: EventSubscriber
 
   constructor(transport: ScriptingTransport, opt?: ILogOpts) {
@@ -33,34 +39,54 @@ class StatefulWebWorkerScene extends Script {
   }
 
   async systemDidEnable(): Promise<void> {
+    const currentRealm = await this.environmentAPI.getCurrentRealm();
     this.devToolsAdapter = new DevToolsAdapter(this.devTools)
-    const { cid: sceneId } = await this.parcelIdentity.getParcel()
-    this.renderer = new RendererStatefulActor(this.engine, sceneId)
+    const { cid: sceneId, land: land } = await this.parcelIdentity.getParcel()
+    this.rendererActor = new RendererStatefulActor(this.engine, sceneId)
     this.eventSubscriber = new EventSubscriber(this.engine)
-
+    this.builderActor = new BuilderStatefulActor(land, currentRealm!.domain, this.sceneStateStorage)
+    
     // Fetch stored scene
-    const storedState = await this.sceneStateStorage.getStoredState(sceneId)
-    this.sceneState = storedState ? deserializeSceneState(storedState) : new SceneStateDefinition()
+    const initialState = await this.builderActor.getInititalSceneState()
 
-    // Listen to the renderer and update the local scene state
-    this.renderer.forwardChangesTo(this.sceneState)
-
+    this.sceneActor = new SceneStatefulActor(this.engine, initialState);
+ 
+    // Listen to the renderer and update the local scene state  
+    this.rendererActor.forwardChangesTo(this.sceneActor)
+    
     // Send the initial state ot the renderer
-    this.sceneState.sendStateTo(this.renderer)
-    this.renderer.sendInitFinished()
+    this.sceneActor.sendStateTo(this.rendererActor)
+
+    this.rendererActor.sendInitFinished()
     this.log('Sent initial load')
 
-    // Listen to storage requests
-    this.eventSubscriber.on('stateEvent', ({ data }) => {
+    // Listen to scene state events
+    this.ListenToEvents(sceneId)
+  }
+
+  private ListenToEvents(sceneId: string): void
+  {
+     // Listen to storage requests
+     this.eventSubscriber.on('stateEvent', ({ data }) => {
       if (data.type === 'StoreSceneState') {
         this.sceneStateStorage
-          .storeState(sceneId, serializeSceneState(this.sceneState))
+          .storeState(sceneId, serializeSceneState(this.sceneActor.getState()))
           .catch((error) => this.error(`Failed to store the scene's state`, error))
       }
     })
+
+      // Listen to save scene requests
+      this.eventSubscriber.on('stateEvent', ({ data }) => {
+        if (data.type === 'SaveSceneState') {
+          this.sceneStateStorage
+            .saveProjectManifest(serializeSceneState(this.sceneActor.getState()))
+            .catch((error) => this.error(`Failed to save the scene's manifest`, error))
+        }
+      })
   }
 
   private error(context: string, error: Error) {
+    
     if (this.devToolsAdapter) {
       this.devToolsAdapter.error(error)
     } else {

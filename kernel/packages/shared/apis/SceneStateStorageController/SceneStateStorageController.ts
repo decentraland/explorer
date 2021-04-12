@@ -6,13 +6,15 @@ import { Authenticator } from 'dcl-crypto'
 import { ExposableAPI } from '../ExposableAPI'
 import { defaultLogger } from '../../logger'
 import { DEBUG } from '../../../config'
-import { CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
+import { BuilderManifest, CONTENT_PATH, DeploymentResult, SerializedSceneState } from './types'
 import { getCurrentIdentity } from 'shared/session/selectors'
-import { Asset, AssetId, AssetManager } from './AssetManager'
+import { Asset, AssetId, BuilderServerAPIManager } from './BuilderServerAPIManager'
 import {
+  fromBuildertoStateDefinitionFormat,
   fromSerializedStateToStorableFormat,
   fromStorableFormatToSerializedState,
-  StorableSceneState
+  StorableSceneState,
+  toBuilderFromStateDefinitionFormat
 } from './StorableSceneStateTranslation'
 import { CLASS_ID } from 'decentraland-ecs/src'
 import { ParcelIdentity } from '../ParcelIdentity'
@@ -20,12 +22,91 @@ import { Store } from 'redux'
 import { RootState } from 'shared/store/rootTypes'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
+import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
+import { ILand } from 'shared/types'
+import { ExplorerIdentity } from 'shared/session/types'
+import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
 
 declare const window: any
 
 @registerAPI('SceneStateStorageController')
 export class SceneStateStorageController extends ExposableAPI {
+  private builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
+  private builderManifest !: BuilderManifest
+  
+
+  @exposeMethod
+  async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
+    const manifest = await this.builderApiManager.getBuilderManifestFromProjectId(projectId, this.getIdentity())
+
+    if(!manifest)
+      return undefined
+      
+    this.builderManifest = manifest;
+    const definition = fromBuildertoStateDefinitionFormat(manifest.scene)
+    console.log('Testing ' +  JSON.stringify(definition))   
+    return serializeSceneState(definition)
+  }
+
+  @exposeMethod
+  async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
+    const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land,this.getIdentity())
+    if(newProject)
+    {
+      this.builderManifest = newProject
+      const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
+      return serializeSceneState(translatedManifest)
+    }
+    return undefined
+  }
+
+  @exposeMethod
+  async createProjectWithCoords(land: ILand): Promise<SerializedSceneState | undefined> {
+
+    const newProject = await this.builderApiManager.createProjectWithCoords(land,this.getIdentity())
+    if(newProject)
+    {
+      this.builderManifest = newProject
+      return serializeSceneState(new SceneStateDefinition())
+    }
+    return  undefined
+  }
+
+  @exposeMethod
+  async saveProjectManifest(serializedSceneState: SerializedSceneState) {
+    const sceneState : SceneStateDefinition = deserializeSceneState(serializedSceneState)
+    let builderManifest = toBuilderFromStateDefinitionFormat(sceneState,this.builderManifest)
+
+    let idArray :string[]= []
+    Object.entries(builderManifest.scene.components).forEach(component => {
+      if(component[1].type === "GLTFShape"){
+        let found = false
+        Object.entries(builderManifest.scene.assets).forEach(assets => {
+            if(assets[0] === component[1].data.assetId){
+              found = true;
+            }
+        });
+        if(!found){
+          idArray.push(component[1].data.assetId)
+        }
+      }
+    });
+ 
+    builderManifest.scene.assets = await this.builderApiManager.getFullAssets(idArray)
+    Object.entries(builderManifest.scene.assets).forEach(asset => {
+      if(asset[1].category === "ground"){
+        builderManifest.scene.ground.assetId = asset[0]
+        Object.entries(builderManifest.scene.components).forEach(component => {
+          if(component[1].data.assetId === asset[0])
+          builderManifest.scene.ground.componentId = component[0]
+        });
+      }
+    });
+
+    
+    this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+  }
 
   @exposeMethod
   async storeState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
@@ -70,12 +151,7 @@ export class SceneStateStorageController extends ExposableAPI {
         )
 
         // Sign entity id
-        const store: Store<RootState> = window['globalStore']
-        const identity = getCurrentIdentity(store.getState())
-        if (!identity) {
-          throw new Error('Identity not found when trying to deploy an entity')
-        }
-        const authChain = Authenticator.signPayload(identity, entityId)
+        const authChain = Authenticator.signPayload(this.getIdentity(), entityId)
 
         // Deploy
         const contentClient = this.getContentClient()
@@ -87,7 +163,6 @@ export class SceneStateStorageController extends ExposableAPI {
         result = { ok: false, error: `${error}` }
       }
     }
-
     window.unityInterface.SendPublishSceneResult(result)
     return result
   }
@@ -126,6 +201,15 @@ export class SceneStateStorageController extends ExposableAPI {
     }
   }
 
+  private getIdentity(): ExplorerIdentity{
+    const store: Store<RootState> = window['globalStore']
+    const identity = getCurrentIdentity(store.getState())
+    if (!identity) {
+      throw new Error('Identity not found when trying to deploy an entity')
+    }
+    return identity
+  }
+
   private getParcels(): Pointer[] {
     return this.parcelIdentity.land.sceneJsonData.scene.parcels
   }
@@ -137,14 +221,13 @@ export class SceneStateStorageController extends ExposableAPI {
   }
 
   private getAllAssets(state: SerializedSceneState): Promise<Map<AssetId, Asset>> {
-    const assetManager = new AssetManager()
     const assetIds: Set<AssetId> = new Set()
     for (const entity of state.entities) {
       entity.components
         .filter(({ type, value }) => type === CLASS_ID.GLTF_SHAPE && value.assetId)
         .forEach(({ value }) => assetIds.add(value.assetId))
     }
-    return assetManager.getAssets([...assetIds])
+    return this.builderApiManager.getConvertedAssets([...assetIds])
   }
 
   private async downloadAssetFiles(assets: Map<AssetId, Asset>): Promise<Map<string, Buffer>> {
@@ -182,3 +265,4 @@ function blobToBuffer(blob: Blob): Promise<Buffer> {
     })
   })
 }
+

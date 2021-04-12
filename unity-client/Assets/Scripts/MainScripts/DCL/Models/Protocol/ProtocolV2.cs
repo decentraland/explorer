@@ -155,6 +155,13 @@ public class ProtocolV2
         public string type = "StoreSceneState";
         public string payload = "";
     }
+    
+    [System.Serializable]
+    public class SaveSceneStateEvent
+    {
+        public string type = "SaveSceneState";
+        public string payload = "";
+    }
 
     #endregion
 }

@@ -1,5 +1,8 @@
 import { CLASS_ID } from 'decentraland-ecs/src'
-import { SerializedSceneState } from './types'
+import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
+import { Component } from 'scene-system/stateful-scene/types'
+import { uuid } from 'decentraland-ecs/src/ecs/helpers'
+import { BuilderComponent, BuilderEntity, BuilderManifest, BuilderScene, SerializedSceneState } from './types'
 
 const CURRENT_SCHEMA_VERSION = 1
 
@@ -16,6 +19,79 @@ type StorableEntity = {
 type StorableComponent = {
   type: string
   value: any
+}
+
+export function toBuilderFromStateDefinitionFormat(scene: SceneStateDefinition, builderManifest: BuilderManifest): BuilderManifest {
+ 
+  let entities: Record<string,BuilderEntity> = {}
+  let builderComponents: Record<string,BuilderComponent> = {}
+
+  for (const [entityId, components] of scene.getState().entries()) {
+    let builderComponentsIds: string[] = [] 
+    const mappedComponents = Array.from(components.entries())
+      .map(([componentId, data]) => ({ componentId, data }))
+      for (let component of mappedComponents) {
+
+        //We generate a new uuid for the component
+        let newId = uuid()
+
+        let componentType = toHumanReadableType(component.componentId)
+        builderComponentsIds.push(newId)
+
+        let builderComponent: BuilderComponent = {
+          id: newId,
+          type: componentType,
+          data: component.data
+        }
+        builderComponents[builderComponent.id] = builderComponent
+      }
+
+    let builderEntity: BuilderEntity = {
+      id: entityId,
+      components: builderComponentsIds
+    }
+    entities[builderEntity.id] = builderEntity
+  }
+
+  var sceneState: BuilderScene = {
+    id: builderManifest.scene.id,
+    entities: entities,
+    components: builderComponents,
+    assets: builderManifest.scene.assets,
+    metrics: builderManifest.scene.metrics,
+    limits: builderManifest.scene.limits,
+    ground: builderManifest.scene.ground
+  }
+
+  builderManifest.scene = sceneState
+  return builderManifest
+}
+
+
+export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneStateDefinition {
+  var sceneState = new SceneStateDefinition()
+
+  const entitiesMap = new Map(Object.entries(scene.entities));
+  const componentMap = new Map(Object.entries(scene.components));
+
+  for (let entity of entitiesMap.values()) {
+    let components: Component[] = []
+    for (let componentId of entity.components.values()) {
+      for (let builderComponent of componentMap.values()) {
+        if (builderComponent.id === componentId) {
+          let component: Component = {
+            componentId: fromHumanReadableType(builderComponent.type),
+            data: builderComponent.data
+          }
+          components.push(component)
+        }
+      }
+    }
+
+   sceneState.addEntity(entity.id, components)
+  }
+  console.log("loco la escena es " + JSON.stringify(sceneState.getState()))
+  return sceneState
 }
 
 export function fromSerializedStateToStorableFormat(state: SerializedSceneState): StorableSceneState {
