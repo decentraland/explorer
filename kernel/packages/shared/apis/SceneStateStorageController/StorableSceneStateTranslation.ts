@@ -21,31 +21,37 @@ type StorableComponent = {
   value: any
 }
 
-export function toBuilderFromStateDefinitionFormat(scene: SceneStateDefinition, builderManifest: BuilderManifest): BuilderManifest {
- 
-  let entities: Record<string,BuilderEntity> = {}
-  let builderComponents: Record<string,BuilderComponent> = {}
+export function toBuilderFromStateDefinitionFormat(
+  scene: SceneStateDefinition,
+  builderManifest: BuilderManifest
+): BuilderManifest {
+  let entities: Record<string, BuilderEntity> = {}
+  let builderComponents: Record<string, BuilderComponent> = {}
 
+  // Iterate every entity to get the components for builder
   for (const [entityId, components] of scene.getState().entries()) {
-    let builderComponentsIds: string[] = [] 
-    const mappedComponents = Array.from(components.entries())
-      .map(([componentId, data]) => ({ componentId, data }))
-      for (let component of mappedComponents) {
 
-        //We generate a new uuid for the component
-        let newId = uuid()
+    let builderComponentsIds: string[] = []
 
-        let componentType = toHumanReadableType(component.componentId)
-        builderComponentsIds.push(newId)
+    //Iterate the entity components to transform them to the builder format
+    const mappedComponents = Array.from(components.entries()).map(([componentId, data]) => ({ componentId, data }))
+    for (let component of mappedComponents) {
+      //We generate a new uuid for the component since there is no uuid for components in the stateful scheme
+      let newId = uuid()
 
-        let builderComponent: BuilderComponent = {
-          id: newId,
-          type: componentType,
-          data: component.data
-        }
-        builderComponents[builderComponent.id] = builderComponent
+      let componentType = toHumanReadableType(component.componentId)
+      builderComponentsIds.push(newId)
+
+      //we add the component to the builder format
+      let builderComponent: BuilderComponent = {
+        id: newId,
+        type: componentType,
+        data: component.data
       }
+      builderComponents[builderComponent.id] = builderComponent
+    }
 
+    //we add the entity to builder format
     let builderEntity: BuilderEntity = {
       id: entityId,
       components: builderComponentsIds
@@ -53,6 +59,7 @@ export function toBuilderFromStateDefinitionFormat(scene: SceneStateDefinition, 
     entities[builderEntity.id] = builderEntity
   }
 
+  // We create the scene and add it to the manifest
   var sceneState: BuilderScene = {
     id: builderManifest.scene.id,
     entities: entities,
@@ -67,12 +74,11 @@ export function toBuilderFromStateDefinitionFormat(scene: SceneStateDefinition, 
   return builderManifest
 }
 
-
 export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneStateDefinition {
   var sceneState = new SceneStateDefinition()
 
-  const entitiesMap = new Map(Object.entries(scene.entities));
-  const componentMap = new Map(Object.entries(scene.components));
+  const entitiesMap = new Map(Object.entries(scene.entities))
+  const componentMap = new Map(Object.entries(scene.components))
 
   for (let entity of entitiesMap.values()) {
     let components: Component[] = []
@@ -88,9 +94,8 @@ export function fromBuildertoStateDefinitionFormat(scene: BuilderScene): SceneSt
       }
     }
 
-   sceneState.addEntity(entity.id, components)
+    sceneState.addEntity(entity.id, components)
   }
-  console.log("loco la escena es " + JSON.stringify(sceneState.getState()))
   return sceneState
 }
 

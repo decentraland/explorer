@@ -15,12 +15,13 @@ import {
   ComponentData,
   ComponentId,
   EntityId,
+  StateContainer,
+  StateContainerListener,
   StatefulActor
 } from './types'
 import { generatePBObjectJSON } from 'scene-system/sdk/Utils'
 
-export class RendererStatefulActor extends StatefulActor{
-
+export class RendererStatefulActor extends StatefulActor implements StateContainerListener {
   private disposableComponents: number = 0
 
   constructor(protected readonly engine: IEngineAPI, private readonly sceneId: string) {
@@ -78,6 +79,52 @@ export class RendererStatefulActor extends StatefulActor{
         payload: '{}'
       }
     ])
+  }
+
+  /**
+   * Take a @param container and update it when an change to the º occurs
+   */
+  forwardChangesTo(container: StateContainer) {
+    this.onAddEntity((entityId, components) => container.addEntity(entityId, components))
+    this.onRemoveEntity((entityId) => container.removeEntity(entityId))
+    this.onSetComponent((entityId, componentId, data) => container.setComponent(entityId, componentId, data))
+    this.onRemoveComponent((entityId, componentId) => container.removeComponent(entityId, componentId))
+  }
+
+  onAddEntity(listener: (entityId: EntityId, components?: Component[]) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
+      if (type === 'AddEntity') {
+        listener(payload.entityId, payload.components)
+      }
+    })
+  }
+
+  onRemoveEntity(listener: (entityId: EntityId) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
+      if (type === 'RemoveEntity') {
+        listener(payload.entityId)
+      }
+    })
+  }
+
+  onSetComponent(listener: (entityId: EntityId, componentId: ComponentId, data: ComponentData) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
+      if (type === 'SetComponent') {
+        listener(payload.entityId, payload.componentId, payload.data)
+      }
+    })
+  }
+
+  onRemoveComponent(listener: (entityId: EntityId, componentId: ComponentId) => void): void {
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      const { type, payload } = data
+      if (type === 'RemoveComponent') {
+        listener(payload.entityId, payload.componentId)
+      }
+    })
   }
 
   private mapComponentToActions(entityId: EntityId, componentId: ComponentId, data: ComponentData): EntityAction[] {

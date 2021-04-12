@@ -7,7 +7,7 @@ import { SceneStateStorageController } from 'shared/apis/SceneStateStorageContro
 import { defaultLogger } from 'shared/logger'
 import { DevToolsAdapter } from './sdk/DevToolsAdapter'
 import { RendererStatefulActor } from './stateful-scene/RendererStatefulActor'
-import { BuilderStatefulActor } from "./stateful-scene/BuilderStatefulActor"
+import { BuilderStatefulActor } from './stateful-scene/BuilderStatefulActor'
 import { SceneStateActor as SceneStatefulActor } from './stateful-scene/SceneStateActor'
 import { serializeSceneState } from './stateful-scene/SceneStateDefinitionSerializer'
 import { EnvironmentAPI } from 'shared/apis/EnvironmentAPI'
@@ -39,21 +39,21 @@ class StatefulWebWorkerScene extends Script {
   }
 
   async systemDidEnable(): Promise<void> {
-    const currentRealm = await this.environmentAPI.getCurrentRealm();
+    const currentRealm = await this.environmentAPI.getCurrentRealm()
     this.devToolsAdapter = new DevToolsAdapter(this.devTools)
     const { cid: sceneId, land: land } = await this.parcelIdentity.getParcel()
     this.rendererActor = new RendererStatefulActor(this.engine, sceneId)
     this.eventSubscriber = new EventSubscriber(this.engine)
     this.builderActor = new BuilderStatefulActor(land, currentRealm!.domain, this.sceneStateStorage)
-    
+
     // Fetch stored scene
     const initialState = await this.builderActor.getInititalSceneState()
 
-    this.sceneActor = new SceneStatefulActor(this.engine, initialState);
- 
-    // Listen to the renderer and update the local scene state  
+    this.sceneActor = new SceneStatefulActor(this.engine, initialState)
+
+    // Listen to the renderer and update the local scene state
     this.rendererActor.forwardChangesTo(this.sceneActor)
-    
+
     // Send the initial state ot the renderer
     this.sceneActor.sendStateTo(this.rendererActor)
 
@@ -64,10 +64,9 @@ class StatefulWebWorkerScene extends Script {
     this.ListenToEvents(sceneId)
   }
 
-  private ListenToEvents(sceneId: string): void
-  {
-     // Listen to storage requests
-     this.eventSubscriber.on('stateEvent', ({ data }) => {
+  private ListenToEvents(sceneId: string): void {
+    // Listen to storage requests
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
       if (data.type === 'StoreSceneState') {
         this.sceneStateStorage
           .storeState(sceneId, serializeSceneState(this.sceneActor.getState()))
@@ -75,18 +74,17 @@ class StatefulWebWorkerScene extends Script {
       }
     })
 
-      // Listen to save scene requests
-      this.eventSubscriber.on('stateEvent', ({ data }) => {
-        if (data.type === 'SaveSceneState') {
-          this.sceneStateStorage
-            .saveProjectManifest(serializeSceneState(this.sceneActor.getState()))
-            .catch((error) => this.error(`Failed to save the scene's manifest`, error))
-        }
-      })
+    // Listen to save scene requests
+    this.eventSubscriber.on('stateEvent', ({ data }) => {
+      if (data.type === 'SaveSceneState') {
+        this.sceneStateStorage
+          .saveProjectManifest(serializeSceneState(this.sceneActor.getState()))
+          .catch((error) => this.error(`Failed to save the scene's manifest`, error))
+      }
+    })
   }
 
   private error(context: string, error: Error) {
-    
     if (this.devToolsAdapter) {
       this.devToolsAdapter.error(error)
     } else {

@@ -33,27 +33,23 @@ declare const window: any
 export class SceneStateStorageController extends ExposableAPI {
   private builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
-  private builderManifest !: BuilderManifest
-  
+  private builderManifest!: BuilderManifest
 
   @exposeMethod
   async getProjectManifest(projectId: string): Promise<SerializedSceneState | undefined> {
     const manifest = await this.builderApiManager.getBuilderManifestFromProjectId(projectId, this.getIdentity())
 
-    if(!manifest)
-      return undefined
-      
-    this.builderManifest = manifest;
+    if (!manifest) return undefined
+
+    this.builderManifest = manifest
     const definition = fromBuildertoStateDefinitionFormat(manifest.scene)
-    console.log('Testing ' +  JSON.stringify(definition))   
     return serializeSceneState(definition)
   }
 
   @exposeMethod
   async getProjectManifestByCoordinates(land: string): Promise<SerializedSceneState | undefined> {
-    const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land,this.getIdentity())
-    if(newProject)
-    {
+    const newProject = await this.builderApiManager.getBuilderManifestFromLandCoordinates(land, this.getIdentity())
+    if (newProject) {
       this.builderManifest = newProject
       const translatedManifest = fromBuildertoStateDefinitionFormat(this.builderManifest.scene)
       return serializeSceneState(translatedManifest)
@@ -62,49 +58,51 @@ export class SceneStateStorageController extends ExposableAPI {
   }
 
   @exposeMethod
-  async createProjectWithCoords(land: ILand): Promise<SerializedSceneState | undefined> {
-
-    const newProject = await this.builderApiManager.createProjectWithCoords(land,this.getIdentity())
-    if(newProject)
-    {
-      this.builderManifest = newProject
-      return serializeSceneState(new SceneStateDefinition())
-    }
-    return  undefined
+  async createProjectWithCoords(land: ILand): Promise<SerializedSceneState> {
+    const newProject = await this.builderApiManager.createProjectWithCoords(land, this.getIdentity())
+    this.builderManifest = newProject   
+    return serializeSceneState(new SceneStateDefinition())
   }
 
   @exposeMethod
   async saveProjectManifest(serializedSceneState: SerializedSceneState) {
-    const sceneState : SceneStateDefinition = deserializeSceneState(serializedSceneState)
-    let builderManifest = toBuilderFromStateDefinitionFormat(sceneState,this.builderManifest)
+    //Deserialize the scene state
+    const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
 
-    let idArray :string[]= []
-    Object.entries(builderManifest.scene.components).forEach(component => {
-      if(component[1].type === "GLTFShape"){
+    //Convert the scene state to builder scheme format
+    let builderManifest = toBuilderFromStateDefinitionFormat(sceneState, this.builderManifest)
+
+    //We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
+    let idArray: string[] = []
+    Object.entries(builderManifest.scene.components).forEach((component) => {
+      if (component[1].type === 'GLTFShape') {
         let found = false
-        Object.entries(builderManifest.scene.assets).forEach(assets => {
-            if(assets[0] === component[1].data.assetId){
-              found = true;
-            }
-        });
-        if(!found){
+        Object.entries(builderManifest.scene.assets).forEach((assets) => {
+          if (assets[0] === component[1].data.assetId) {
+            found = true
+          }
+        })
+        if (!found) {
           idArray.push(component[1].data.assetId)
         }
       }
-    });
- 
-    builderManifest.scene.assets = await this.builderApiManager.getFullAssets(idArray)
-    Object.entries(builderManifest.scene.assets).forEach(asset => {
-      if(asset[1].category === "ground"){
-        builderManifest.scene.ground.assetId = asset[0]
-        Object.entries(builderManifest.scene.components).forEach(component => {
-          if(component[1].data.assetId === asset[0])
-          builderManifest.scene.ground.componentId = component[0]
-        });
-      }
-    });
+    })
 
-    
+    //We fetch all the assets that the scene contains since builder needs the assets
+    builderManifest.scene.assets = await this.builderApiManager.getAssets(idArray)
+
+    //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
+    //Unity handles this, so only 1 entitty will contain the "ground" category. We can safely assume that we can search it and assign
+    Object.entries(builderManifest.scene.assets).forEach((asset) => {
+      if (asset[1].category === 'ground') {
+        builderManifest.scene.ground.assetId = asset[0]
+        Object.entries(builderManifest.scene.components).forEach((component) => {
+          if (component[1].data.assetId === asset[0]) builderManifest.scene.ground.componentId = component[0]
+        })
+      }
+    })
+
+    //Update the manifest
     this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
   }
 
@@ -201,7 +199,7 @@ export class SceneStateStorageController extends ExposableAPI {
     }
   }
 
-  private getIdentity(): ExplorerIdentity{
+  private getIdentity(): ExplorerIdentity {
     const store: Store<RootState> = window['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
@@ -265,4 +263,3 @@ function blobToBuffer(blob: Blob): Promise<Buffer> {
     })
   })
 }
-

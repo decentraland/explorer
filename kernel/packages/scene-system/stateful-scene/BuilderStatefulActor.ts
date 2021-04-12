@@ -3,29 +3,16 @@ import { EntityType } from 'dcl-catalyst-commons'
 import { SceneStateDefinition } from './SceneStateDefinition'
 import { ILand } from 'shared/types'
 import { SceneStateStorageController } from 'shared/apis/SceneStateStorageController/SceneStateStorageController'
-import { deserializeSceneState, serializeSceneState } from './SceneStateDefinitionSerializer'
+import { deserializeSceneState } from './SceneStateDefinitionSerializer'
 
 declare var window: any
 
 export class BuilderStatefulActor {
-
-  private lastTimeUpdated =  0
-  private times = 0
-  constructor(protected readonly land: ILand, protected readonly realmDomain: string, private readonly sceneStorage : SceneStateStorageController) 
-  {
-  }
-
-  sceneStateChange(sceneState: SceneStateDefinition): void {
-    if(this.lastTimeUpdated < Date.now().valueOf())
-    {
-
-    this.lastTimeUpdated = Date.now().valueOf()+2000
-    this.times++
-    console.warn("time saved" + this.times)
-    this.sceneStorage.saveProjectManifest(serializeSceneState(sceneState))
-    }
-  }
-
+  constructor(
+    protected readonly land: ILand,
+    protected readonly realmDomain: string,
+    private readonly sceneStorage: SceneStateStorageController
+  ) {}
 
   async getInititalSceneState(): Promise<SceneStateDefinition> {
     const sceneState = await this.getContentLandDefinition()
@@ -33,49 +20,32 @@ export class BuilderStatefulActor {
   }
 
   async getContentLandDefinition(): Promise<SceneStateDefinition | undefined> {
-    const builderProjectByCoordinates = await this.sceneStorage.getProjectManifestByCoordinates(this.land.sceneJsonData.scene.base)
-    console.log("Projecto busdcado por coordinadas " + JSON.stringify(builderProjectByCoordinates))
-    if(builderProjectByCoordinates)
-    {
-      console.log("Projecto por coordenadas encontrado")
+
+    //First we search the definition in the builder server filtering by land coordinates
+    const builderProjectByCoordinates = await this.sceneStorage.getProjectManifestByCoordinates(
+      this.land.sceneJsonData.scene.base
+    )
+    if (builderProjectByCoordinates) {
       return deserializeSceneState(builderProjectByCoordinates)
     }
 
-    const catalyst = this.getContentClient();
+    //if there is no project associated to the land, we search the last builder project deployed in the land
+    const catalyst = this.getContentClient()
     const entity = await catalyst.fetchEntityById(EntityType.SCENE, this.land.sceneId)
 
     if (entity.metadata.source?.projectId) {
-      console.log('Scene del builder encontrada con id' + entity.metadata?.source?.projectId)
       const builderProject = await this.sceneStorage.getProjectManifest(entity.metadata.source.projectId)
-      console.log('Projecto del builder con id ' + entity.metadata?.source?.projectId + ' encontrado con los datos ' +  JSON.stringify(builderProject))
-      if(builderProject) {
+      if (builderProject) {
         return deserializeSceneState(builderProject)
       }
     }
 
-    console.log("No encontrado ningun projecto asociado al builder, o builder in world, creando uno nuevo")
+    //If there is no builder project deployed in the land, we just create a new one
     const newProject = await this.sceneStorage.createProjectWithCoords(this.land)
     return newProject ? deserializeSceneState(newProject) : new SceneStateDefinition()
   }
 
- 
-
-  saveToLocalStorage(key: string, data: any) {
-    if (!window.localStorage) {
-      throw new Error('Storage not supported')
-    }
-    window.localStorage.setItem(key, JSON.stringify(data))
-  }
-
-  getFromLocalStorage(key: string) {
-    if (!window.localStorage) {
-      throw new Error('Storage not supported')
-    }
-    const data = window.localStorage.getItem(key)
-    return (data && JSON.parse(data)) || null
-  }
-
   private getContentClient(): CatalystClient {
-    return new CatalystClient(this.realmDomain, 'builder in-world')
+    return new CatalystClient(this.realmDomain, 'builder-in-world')
   }
 }

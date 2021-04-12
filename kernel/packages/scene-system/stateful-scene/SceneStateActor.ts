@@ -1,13 +1,6 @@
 import { IEngineAPI } from 'shared/apis/EngineAPI'
 import { SceneStateDefinition } from './SceneStateDefinition'
-import {
-  Component,
-  ComponentData,
-  ComponentId,
-  EntityId,
-  StateContainer,
-  StatefulActor
-} from './types'
+import { Component, ComponentData, ComponentId, EntityId, StateContainer, StatefulActor } from './types'
 
 export class SceneStateActor extends StatefulActor {
   constructor(protected readonly engine: IEngineAPI, private sceneState: SceneStateDefinition) {
@@ -31,7 +24,7 @@ export class SceneStateActor extends StatefulActor {
   }
 
   sendStateTo(container: StateContainer) {
-      this.sceneState.sendStateTo(container)
+    this.sceneState.sendStateTo(container)
   }
 
   getState(): SceneStateDefinition {
