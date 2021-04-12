@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace DCL.ABConverter
             /// the conversion process.
             /// </summary>
             public bool skipAlreadyBuiltBundles = false;
-            
+
             /// <summary>
             /// If set to true, the GLTF _Downloads folder and the Asset Bundles folder will be deleted at the beginning of the conversion
             /// </summary>
@@ -61,7 +61,7 @@ namespace DCL.ABConverter
                 this.baseUrl = ContentServerUtils.GetContentAPIUrlBase(tld);
             }
         }
-        
+
         [System.Serializable]
         private class WearableItemArray
         {
@@ -338,14 +338,14 @@ namespace DCL.ABConverter
 
             return ConvertAssetToAssetBundle(assetHash, assetFilename, sceneCid, settings);
         }
-        
+
         /// <summary>
         /// Dump all bodyshape wearables normally, including their imported skeleton 
         /// </summary>
         public static void DumpAllBodiesWearables()
         {
             EnsureEnvironment();
-            
+
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
                                                 .Where(x => x.category == WearableLiterals.Categories.BODY_SHAPE)
                                                 .ToList();
@@ -356,7 +356,7 @@ namespace DCL.ABConverter
             settings.deleteDownloadPathAfterFinished = false;
             settings.clearDirectoriesOnStart = false;
             var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
-            
+
             abConverterCoreController.InitializeDirectoryPaths(true);
             DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnBodyWearableLoad);
         }
@@ -368,23 +368,23 @@ namespace DCL.ABConverter
         public static void DumpAllNonBodiesWearables()
         {
             EnsureEnvironment();
-            
+
             // For debugging purposes we can intercept this item list with LinQ for specific wearables
             List<WearableItem> avatarItemList = GetAvatarMappingList("https://wearable-api.decentraland.org/v2/collections")
                                                 .Where(x => x.category != WearableLiterals.Categories.BODY_SHAPE)
                                                 .ToList();
-            
+
             Queue<WearableItem> itemQueue = new Queue<WearableItem>(avatarItemList);
             var settings = new Settings();
             settings.skipAlreadyBuiltBundles = false;
             settings.deleteDownloadPathAfterFinished = false;
             settings.clearDirectoriesOnStart = false;
             var abConverterCoreController = new ABConverter.Core(ABConverter.Environment.CreateWithDefaultImplementations(), settings);
-            
+
             abConverterCoreController.InitializeDirectoryPaths(true);
             DumpWearableQueue(abConverterCoreController, itemQueue, GLTFImporter_OnNonBodyWearableLoad);
         }
-        
+
         /// <summary>
         /// Given a list of WearableItems, each one is downloaded along with its dependencies and converted to ABs recursively
         /// (to avoid mixing same-name dependencies between wearables)
@@ -396,7 +396,7 @@ namespace DCL.ABConverter
         {
             // We toggle the core's ABs generation off so that we execute that conversion here when there is no more items left.
             abConverterCoreController.generateAssetBundles = false;
-            
+
             if (items.Count == 0)
             {
                 abConverterCoreController.ConvertDumpedAssets();
@@ -407,7 +407,7 @@ namespace DCL.ABConverter
             Debug.Log("Building wearables... items left... " + items.Count);
 
             var pairs = ExtractMappingPairs(new List<WearableItem>() { items.Dequeue() });
-            
+
             UnityGLTF.GLTFImporter.OnGLTFWillLoad += OnWearableLoad;
 
             abConverterCoreController.Convert(pairs.ToArray(),
@@ -418,7 +418,7 @@ namespace DCL.ABConverter
                     DumpWearableQueue(abConverterCoreController, items, OnWearableLoad);
                 });
         }
-        
+
         /// <summary>
         /// Given a list of WearableItems, extracts and returns a list of MappingPairs
         /// </summary>
@@ -451,19 +451,19 @@ namespace DCL.ABConverter
         {
             List<WearableItem> result = new List<WearableItem>();
 
-            UnityWebRequest w = UnityWebRequest.Get(url);
-            w.SendWebRequest();
+            WebRequestAsyncOperation asyncOp = WebRequestController.i.Get(url: url, disposeOnCompleted: false);
 
-            while (!w.isDone) { }
+            while (!asyncOp.isDone) { }
 
-            if (!w.WebRequestSucceded())
+            if (!asyncOp.isSucceded)
             {
-                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {w.error}");
+                Debug.LogWarning($"Request error! Parcels couldn't be fetched! -- {asyncOp.webRequest.error}");
                 return null;
             }
 
-            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + w.downloadHandler.text + "}");
-            
+            var avatarApiData = JsonUtility.FromJson<WearableItemArray>("{\"data\":" + asyncOp.webRequest.downloadHandler.text + "}");
+            asyncOp.Dispose();
+
             foreach (var collection in avatarApiData.data)
             {
                 foreach (var wearable in collection.wearables)
@@ -474,7 +474,7 @@ namespace DCL.ABConverter
 
             return result;
         }
-        
+
         private static void GLTFImporter_OnNonBodyWearableLoad(UnityGLTF.GLTFSceneImporter obj)
         {
             obj.importSkeleton = false;
