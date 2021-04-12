@@ -15,7 +15,7 @@ namespace DCL.SettingsControls
 
         public override void UpdateSetting(object newValue)
         {
-            currentQualitySetting.detailObjectCullingLimit = Convert.ToInt32(newValue);
+            currentQualitySetting.detailObjectCullingLimit = (float)newValue;
 
             if (currentQualitySetting.enableDetailObjectCulling)
             {

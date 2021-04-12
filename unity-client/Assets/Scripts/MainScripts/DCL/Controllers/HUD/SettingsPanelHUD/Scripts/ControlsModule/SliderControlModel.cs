@@ -17,5 +17,8 @@ namespace DCL.SettingsPanelHUD.Controls
 
         [Tooltip("True if the slider value will be stored in a normalized way.")]
         public bool storeValueAsNormalized;
+
+        [Tooltip("True if the slider value will be shown as integers.")]
+        public bool wholeNumbers;
     }
 }

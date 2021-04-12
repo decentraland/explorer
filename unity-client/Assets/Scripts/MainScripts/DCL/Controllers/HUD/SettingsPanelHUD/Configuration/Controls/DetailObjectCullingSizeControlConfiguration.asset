@@ -23,5 +23,5 @@ MonoBehaviour:
   isBeta: 0
   sliderMinValue: 0
   sliderMaxValue: 100
-  sliderWholeNumbers: 0
   storeValueAsNormalized: 0
+  wholeNumbers: 1
