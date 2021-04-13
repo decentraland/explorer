@@ -13,19 +13,19 @@ public interface IPublishPopupView
 
 public class PublishPopupView : MonoBehaviour, IPublishPopupView
 {
-    public float currentProgress => loadingBar.currentPercentage;
-
-    [SerializeField] internal TMP_Text titleText;
-    [SerializeField] internal TMP_Text resultText;
-    [SerializeField] internal LoadingBar loadingBar;
-    [SerializeField] internal Button closeButton;
-
     internal const string VIEW_PATH = "Common/PublishPopupView";
     internal const string TITLE_INITIAL_MESSAGE = "Publishing Scene...";
     internal const string SUCCESS_TITLE_MESSAGE = "Scene Published!";
     internal const string FAIL_TITLE_MESSAGE = "Whoops!";
     internal const string SUCCESS_MESSAGE = "We successfully publish your scene.";
     internal const string FAIL_MESSAGE = "There has been an unexpected error. Please contact the support service on the Discord channel.";
+
+    public float currentProgress => loadingBar.currentPercentage;
+
+    [SerializeField] internal TMP_Text titleText;
+    [SerializeField] internal TMP_Text resultText;
+    [SerializeField] internal LoadingBar loadingBar;
+    [SerializeField] internal Button closeButton;
 
     internal static PublishPopupView Create()
     {
