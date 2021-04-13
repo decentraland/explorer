@@ -22,6 +22,8 @@ public interface ITheGraph
 public class TheGraph : ITheGraph
 {
     private const float CACHE_TIME = 5 * 60;
+    private const string LAND_SUBGRAPH_URL_ORG = "https://api.thegraph.com/subgraphs/name/decentraland/land-manager";
+    private const string LAND_SUBGRAPH_URL_ZONE = "https://api.thegraph.com/subgraphs/name/decentraland/land-manager-ropsten";
 
     private readonly Dictionary<string, QueryLandCache> landQueryCache = new Dictionary<string, QueryLandCache>();
 
@@ -85,11 +87,7 @@ public class TheGraph : ITheGraph
             }
         }
 
-        string url = "https://api.thegraph.com/subgraphs/name/decentraland/land-manager";
-        if (tld != "org")
-        {
-            url = "https://api.thegraph.com/subgraphs/name/decentraland/land-manager-ropsten";
-        }
+        string url = tld == "org" ? LAND_SUBGRAPH_URL_ORG : LAND_SUBGRAPH_URL_ZONE;
 
         Query(url, TheGraphQueries.getLandQuery, new AddressVariable() { address = lowerCaseAddress })
             .Then(resultJson =>

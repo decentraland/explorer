@@ -58,7 +58,6 @@ internal static class LandHelper
             }
         }
 
-        //return lands;
         return lands
                .Where(land => land.type == LandType.PARCEL || land.parcels.Count > 0)
                .ToList();
