@@ -26,7 +26,7 @@ namespace Tests.BuildModeHUDViews
 
             // Assert
             Assert.IsTrue(publishPopupView.gameObject.activeSelf, "game object activate property is false!");
-            Assert.IsTrue(publishPopupView.loadingBar.activeSelf, "loadingBar activate property is false!");
+            Assert.IsTrue(publishPopupView.loadingBar.gameObject.activeSelf, "loadingBar activate property is false!");
             Assert.IsFalse(publishPopupView.resultText.gameObject.activeInHierarchy, "resultText activate property is true!");
         }
 
@@ -44,7 +44,7 @@ namespace Tests.BuildModeHUDViews
             publishPopupView.PublishEnd(message);
 
             // Assert
-            Assert.IsFalse(publishPopupView.loadingBar.activeSelf, "loadingBar activate property is false!");
+            Assert.IsFalse(publishPopupView.loadingBar.gameObject.activeSelf, "loadingBar activate property is false!");
             Assert.IsTrue(publishPopupView.resultText.gameObject.activeInHierarchy, "resultText activate property is false!");
             Assert.AreEqual(message, publishPopupView.resultText.text, "Publish Status text does not match!");
             Assert.IsTrue(publishPopupView.closeButton.gameObject.activeInHierarchy, "closeButton activate property is false!");

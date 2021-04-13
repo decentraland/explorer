@@ -4,14 +4,19 @@ using UnityEngine.UI;
 
 public interface IPublishPopupView
 {
+    public float currentProgress { get; }
+
     void PublishStart();
     void PublishEnd(string message);
+    void SetPercentage(float newValue);
 }
 
 public class PublishPopupView : MonoBehaviour, IPublishPopupView
 {
+    public float currentProgress => loadingBar.currentPercentage;
+
     [SerializeField] internal TMP_Text resultText;
-    [SerializeField] internal GameObject loadingBar;
+    [SerializeField] internal LoadingBar loadingBar;
     [SerializeField] internal Button closeButton;
 
     private const string VIEW_PATH = "Common/PublishPopupView";
@@ -43,6 +48,8 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
         resultText.gameObject.SetActive(true);
         closeButton.gameObject.SetActive(true);
     }
+
+    public void SetPercentage(float newValue) { loadingBar.SetPercentage(newValue); }
 
     private void CloseModal() { gameObject.SetActive(false); }
 }

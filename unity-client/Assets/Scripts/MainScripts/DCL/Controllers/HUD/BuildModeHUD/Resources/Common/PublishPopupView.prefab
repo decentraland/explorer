@@ -96,7 +96,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3971535280644005037
 RectTransform:
   m_ObjectHideFlags: 0
@@ -249,7 +249,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 350, y: 0}
+  m_SizeDelta: {x: 337.5, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &5312955804429165697
 CanvasRenderer:
@@ -548,10 +548,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dd0ccc8d8f0eaf4ea72f294d0786f56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  title: {fileID: 299766830869166727}
   resultText: {fileID: 1446796507290642713}
-  loadingBar: {fileID: 7845107165576962979}
-  closeButtonText: {fileID: 9168020035606600584}
+  loadingBar: {fileID: 1968269793049070987}
   closeButton: {fileID: 1537436650855564777}
 --- !u!1 &5721040771259555972
 GameObject:
@@ -618,7 +616,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 60%
+  m_text: 75%
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 131598e906f4d4a048cfa339caa74472, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 7690d5dc153c64a7288ed2bb11a07d7f, type: 2}
@@ -698,13 +696,14 @@ GameObject:
   - component: {fileID: 8866793877076689496}
   - component: {fileID: 2040143953248857871}
   - component: {fileID: 6548248451684291907}
+  - component: {fileID: 1968269793049070987}
   m_Layer: 0
   m_Name: LoadingBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8866793877076689496
 RectTransform:
   m_ObjectHideFlags: 0
@@ -764,6 +763,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1968269793049070987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7845107165576962979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bff0e1e6d3f106d4499ed45e940e9e40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  percentageText: {fileID: 5075661244396997828}
+  loadingBar: {fileID: 4025717063231710085}
 --- !u!1 &8602134762568357921
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,7 +931,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6181121179289490168
 RectTransform:
   m_ObjectHideFlags: 0

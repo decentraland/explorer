@@ -1,5 +1,6 @@
 using DCL.Controllers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -49,6 +50,8 @@ public class BuildModeHUDController : IHUD
     internal CatalogItemDropController catalogItemDropController;
 
     internal static readonly Vector3 catalogItemTooltipOffset = new Vector3 (0, 25, 0);
+
+    private Coroutine publishProgressCoroutine = null;
 
     public void Initialize()
     {
@@ -204,9 +207,37 @@ public class BuildModeHUDController : IHUD
 
         controllers.publishPopupController.PublishStart();
         OnConfirmPublishAction?.Invoke();
+
+        // NOTE (Santi): This is temporal until we implement the way of return the publish progress from the kernel side.
+        //               Meanwhile we will display a fake progress.
+        publishProgressCoroutine = CoroutineStarter.Start(FakePublishProgress());
     }
 
-    public void PublishEnd(string message) { controllers.publishPopupController.PublishEnd(message); }
+    private IEnumerator FakePublishProgress()
+    {
+        while (true)
+        {
+            float newPercentage = Mathf.Clamp(
+                controllers.publishPopupController.currentProgress + UnityEngine.Random.Range(10f, 30f),
+                controllers.publishPopupController.currentProgress,
+                100f);
+
+            controllers.publishPopupController.SetPercentage(newPercentage);
+
+            yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.5f));
+        }
+    }
+
+    public void PublishEnd(string message)
+    {
+        if (publishProgressCoroutine != null)
+        {
+            CoroutineStarter.Stop(publishProgressCoroutine);
+            publishProgressCoroutine = null;
+        }
+
+        controllers.publishPopupController.PublishEnd(message);
+    }
 
     public void SetParcelScene(ParcelScene parcelScene) { controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene); }
 
