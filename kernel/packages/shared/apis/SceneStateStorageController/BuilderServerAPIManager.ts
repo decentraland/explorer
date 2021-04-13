@@ -126,7 +126,7 @@ export class BuilderServerAPIManager {
   }
 
   async createProjectWithCoords(coordinates: string, identity: ExplorerIdentity): Promise<BuilderManifest> {
-    var builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
+    const builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
     try {
       this.setManifestOnServer(builderManifest, identity)
     } catch (e) {
