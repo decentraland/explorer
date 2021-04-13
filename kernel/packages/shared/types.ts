@@ -564,6 +564,7 @@ export type KernelConfigForRenderer = {
     enableBuilderInWorld: boolean
   }
   gifSupported: boolean
+  tld: string
 }
 
 export type RealmsInfoForRenderer = {
