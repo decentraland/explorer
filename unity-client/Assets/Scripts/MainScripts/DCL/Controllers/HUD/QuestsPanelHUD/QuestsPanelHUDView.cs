@@ -238,7 +238,7 @@ namespace DCL.Huds.QuestsPanel
                             completionTime = DateTime.Now,
                             progress = 0,
                             status = QuestsLiterals.Status.BLOCKED,
-                            payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 0, end = 10, start = 0 }),
+                            payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 10, end = 0, start = 10 }),
                             type = "numeric",
                         }
                     }
@@ -315,13 +315,13 @@ namespace DCL.Huds.QuestsPanel
                 case 10:
                     int progress = fakeFlowStep - 1;
                     currentFakeQuest.sections[0].tasks[1].progress = progress / 10f;
-                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = progress, end = 10, start = 0 });
+                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 10 - progress, end = 0, start = 10 });
                     currentFakeQuest.sections[0].progress = currentFakeQuest.sections[0].tasks.Average(y => y.progress);
                     break;
                 //section 0, task 1 completed
                 case 11:
                     currentFakeQuest.sections[0].tasks[1].progress = 1f;
-                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 10, end = 10, start = 0 });
+                    currentFakeQuest.sections[0].tasks[1].payload = JsonUtility.ToJson(new TaskPayload_Numeric() { current = 0, end = 0, start = 10 });
                     currentFakeQuest.sections[0].progress = 1;
                     currentFakeQuest.sections[1].tasks[0].status = QuestsLiterals.Status.ON_GOING;
 
