@@ -228,7 +228,7 @@ public class BuildModeHUDController : IHUD
         }
     }
 
-    public void PublishEnd(string message)
+    public void PublishEnd(bool isOk)
     {
         if (publishProgressCoroutine != null)
         {
@@ -236,7 +236,7 @@ public class BuildModeHUDController : IHUD
             publishProgressCoroutine = null;
         }
 
-        controllers.publishPopupController.PublishEnd(message);
+        controllers.publishPopupController.PublishEnd(isOk);
     }
 
     public void SetParcelScene(ParcelScene parcelScene) { controllers.inspectorController.sceneLimitsController.SetParcelScene(parcelScene); }

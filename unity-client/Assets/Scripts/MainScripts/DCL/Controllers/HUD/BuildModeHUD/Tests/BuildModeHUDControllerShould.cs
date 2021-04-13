@@ -133,16 +133,15 @@ namespace Tests.BuildModeHUDControllers
         }
 
         [Test]
-        public void PublishEndCorrectly()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void PublishEndCorrectly(bool isOk)
         {
-            // Arrange
-            string testText = "Test text";
-
             // Act
-            buildModeHUDController.PublishEnd(testText);
+            buildModeHUDController.PublishEnd(isOk);
 
             // Assert
-            buildModeHUDController.controllers.publishPopupController.Received(1).PublishEnd(testText);
+            buildModeHUDController.controllers.publishPopupController.Received(1).PublishEnd(isOk);
         }
 
         [Test]

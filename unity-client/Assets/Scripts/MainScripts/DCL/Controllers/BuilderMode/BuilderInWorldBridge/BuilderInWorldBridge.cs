@@ -45,19 +45,12 @@ public class BuilderInWorldBridge : MonoBehaviour
     public void PublishSceneResult(string payload)
     {
         PublishSceneResultPayload publishSceneResultPayload = JsonUtility.FromJson<PublishSceneResultPayload>(payload);
-        string message;
         if (publishSceneResultPayload.ok)
-        {
-            message = "We successfully publish your scene.";
             OnPublishSuccess?.Invoke();
-        }
         else
-        {
-            message = publishSceneResultPayload.error;
             OnPublishError?.Invoke(publishSceneResultPayload.error);
-        }
 
-        HUDController.i.builderInWorldMainHud.PublishEnd(message);
+        HUDController.i.builderInWorldMainHud.PublishEnd(publishSceneResultPayload.ok);
     }
 
     public void ChangeEntityLockStatus(DCLBuilderInWorldEntity entity, ParcelScene scene)

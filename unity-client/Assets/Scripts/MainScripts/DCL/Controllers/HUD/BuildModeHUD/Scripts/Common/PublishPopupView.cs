@@ -7,7 +7,7 @@ public interface IPublishPopupView
     public float currentProgress { get; }
 
     void PublishStart();
-    void PublishEnd(string message);
+    void PublishEnd(bool isOk);
     void SetPercentage(float newValue);
 }
 
@@ -15,11 +15,17 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
 {
     public float currentProgress => loadingBar.currentPercentage;
 
+    [SerializeField] internal TMP_Text titleText;
     [SerializeField] internal TMP_Text resultText;
     [SerializeField] internal LoadingBar loadingBar;
     [SerializeField] internal Button closeButton;
 
-    private const string VIEW_PATH = "Common/PublishPopupView";
+    internal const string VIEW_PATH = "Common/PublishPopupView";
+    internal const string TITLE_INITIAL_MESSAGE = "Publishing Scene...";
+    internal const string SUCCESS_TITLE_MESSAGE = "Scene Published!";
+    internal const string FAIL_TITLE_MESSAGE = "Whoops!";
+    internal const string SUCCESS_MESSAGE = "We successfully publish your scene.";
+    internal const string FAIL_MESSAGE = "There has been an unexpected error. Please contact the support service on the Discord channel.";
 
     internal static PublishPopupView Create()
     {
@@ -39,12 +45,14 @@ public class PublishPopupView : MonoBehaviour, IPublishPopupView
         loadingBar.SetActive(true);
         resultText.gameObject.SetActive(false);
         closeButton.gameObject.SetActive(false);
+        titleText.text = TITLE_INITIAL_MESSAGE;
     }
 
-    public void PublishEnd(string message)
+    public void PublishEnd(bool isOk)
     {
         loadingBar.SetActive(false);
-        resultText.text = message;
+        titleText.text = isOk ? SUCCESS_TITLE_MESSAGE : FAIL_TITLE_MESSAGE;
+        resultText.text = isOk ? SUCCESS_MESSAGE : FAIL_MESSAGE;
         resultText.gameObject.SetActive(true);
         closeButton.gameObject.SetActive(true);
     }

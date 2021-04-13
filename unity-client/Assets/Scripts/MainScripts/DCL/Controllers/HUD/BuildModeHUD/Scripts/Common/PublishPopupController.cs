@@ -5,7 +5,7 @@ public interface IPublishPopupController
     void Initialize(IPublishPopupView publishPopupView);
     void Dispose();
     void PublishStart();
-    void PublishEnd(string message);
+    void PublishEnd(bool isOk);
     void SetPercentage(float newValue);
 }
 
@@ -25,7 +25,7 @@ public class PublishPopupController : IPublishPopupController
         SetPercentage(0f);
     }
 
-    public void PublishEnd(string message) { publishPopupView.PublishEnd(message); }
+    public void PublishEnd(bool isOk) { publishPopupView.PublishEnd(isOk); }
 
     public void SetPercentage(float newValue) { publishPopupView.SetPercentage(newValue); }
 }
