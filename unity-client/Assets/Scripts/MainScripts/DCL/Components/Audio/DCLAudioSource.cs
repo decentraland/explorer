@@ -165,7 +165,7 @@ namespace DCL.Components
 
             Model model = (Model) this.model;
             bool shouldPlay = playedAtTimestamp != model.playedAtTimestamp ||
-                              (model.playing == true && audioSource.isPlaying == false);
+                              (model.playing && !audioSource.isPlaying);
 
             if (audioSource.enabled && model.playing && shouldPlay)
             {
