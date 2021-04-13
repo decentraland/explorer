@@ -21,32 +21,31 @@ export enum CONTENT_PATH {
 
 export type DeploymentResult = { ok: true } | { ok: false; error: string }
 
-
 export type BuilderManifest = {
-  version: number,
-  project: BuilderProject,
+  version: number
+  project: BuilderProject
   scene: BuilderScene
 }
 
 export type BuilderProject = {
-   id: string,
-   title: string,
-   description: string,
-   is_public: boolean,
-   scene_id: string,
-   eth_address: string,
-   rows: number,
-   cols: number,
-   created_at: string,
-   updated_at: string,
-   created_location: string
+  id: string
+  title: string
+  description: string
+  is_public: boolean
+  scene_id: string
+  eth_address: string
+  rows: number
+  cols: number
+  created_at: string
+  updated_at: string
+  created_location: string
 }
 
 export type BuilderScene = {
   id: string
   entities: Record<string, BuilderEntity>
-  components: Record<string,BuilderComponent>
-  assets: Record<string,BuilderAsset>
+  components: Record<string, BuilderComponent>
+  assets: Record<string, BuilderAsset>
   metrics: BuilderMetric
   limits: BuilderMetric
   ground: BuilderGround
@@ -72,7 +71,7 @@ export type BuilderAsset = {
   thumbnail: string
   tags: string[]
   category: string
-  contents: Record<string,string>
+  contents: Record<string, string>
   metrics: BuilderMetric
   parameters: any
   actions: any
