@@ -18,7 +18,6 @@ internal class BridgeHandler : IDisposable
         this.landsController = landsController;
         this.sectionsController = sectionsController;
 
-        bridge.OnLandsSet += OnLandsUpdated;
         bridge.OnProjectsSet += OnProjectsUpdated;
         
         sectionsController.OnRequestUpdateSceneData += OnRequestUpdateSceneData;
@@ -27,14 +26,12 @@ internal class BridgeHandler : IDisposable
         sectionsController.OnRequestUpdateSceneBannedUsers += OnRequestUpdateSceneBannedUsers;
         
         bridge.SendFetchProjects();
-        bridge.SendFetchLands();
     }
 
     public void Dispose()
     {
         if (bridge != null)
         {
-            bridge.OnLandsSet -= OnLandsUpdated;
             bridge.OnProjectsSet -= OnProjectsUpdated;
         }
 
@@ -56,15 +53,6 @@ internal class BridgeHandler : IDisposable
         }
     }
 
-    private void OnLandsUpdated(string payload)
-    {
-        if (landsController != null)
-        {
-            var lands = Utils.ParseJsonArray<LandData[]>(payload);
-            landsController.SetLands(lands);
-        }
-    }
-    
     private void OnRequestUpdateSceneData(string id, SceneDataUpdatePayload dataUpdatePayload)
     {
         bridge?.SendSceneDataUpdate(id, dataUpdatePayload);

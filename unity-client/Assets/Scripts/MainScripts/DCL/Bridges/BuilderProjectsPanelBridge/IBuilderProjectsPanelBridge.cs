@@ -1,14 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 public interface IBuilderProjectsPanelBridge
 {
     event Action<string> OnProjectsSet;
-    event Action<string> OnLandsSet;
 
     void OnReceivedProjects(string payload);
-    void OnReceivedLands(string payload);
     void SendFetchProjects();
-    void SendFetchLands();
     void SendDuplicateProject(string id);
     void SendDownload(string id);
     void SendShare(string id);

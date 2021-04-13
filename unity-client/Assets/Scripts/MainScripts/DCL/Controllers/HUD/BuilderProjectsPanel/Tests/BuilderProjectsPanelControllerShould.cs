@@ -199,14 +199,8 @@ namespace Tests
         [Test]
         public void BridgeReceiveDataCorrectly()
         {
-            LandData land = new LandData() { name = "Temptation" };
-            string landPayload = $"[{JsonUtility.ToJson(land)}]";
-
             SceneData scene = new SceneData() { name = "Temptation" };
             string scenesPayload = $"[{JsonUtility.ToJson(scene)}]";
-
-            bridge.OnLandsSet += Raise.Event<Action<string>>(landPayload);
-            landsController.Received(1).SetLands(Arg.Is<LandData[]>(l => l.Length == 1 && l[0].name == land.name));
 
             bridge.OnProjectsSet += Raise.Event<Action<string>>(scenesPayload);
             scenesViewController.Received(1).SetScenes(Arg.Is<ISceneData[]>(s => s.Length == 1 && s[0].name == scene.name));

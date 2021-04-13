@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -64,15 +65,15 @@ namespace Tests
             SectionLandController controller = new SectionLandController(view);
             ILandsListener landsListener = controller;
             
-            landsListener.OnSetLands(new []{ new LandData(){id = "1"}, new LandData(){id = "2"}});
+            landsListener.OnSetLands(new List<Land>(){ new Land(){id = "1"}, new Land(){id = "2"}});
             Assert.AreEqual(2, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsTrue(view.contentContainer.activeSelf);
             
-            landsListener.OnSetLands(new []{ new LandData(){id = "1"}});
+            landsListener.OnSetLands(new List<Land>(){ new Land(){id = "1"}});
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsTrue(view.contentContainer.activeSelf);
             
-            landsListener.OnSetLands(new LandData[]{});
+            landsListener.OnSetLands(new List<Land>(){});
             Assert.AreEqual(0, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.IsFalse(view.contentContainer.activeSelf);
             Assert.IsTrue(view.emptyContainer.activeSelf);
@@ -90,7 +91,7 @@ namespace Tests
             ILandsListener landsListener = controller;
             LandElementView landElementView = view.GetLandElementeBaseView();
             
-            landsListener.OnSetLands(new []{ new LandData()
+            landsListener.OnSetLands(new List<Land>(){ new Land()
             {
                 id = "1",
                 name = startingName
@@ -98,7 +99,7 @@ namespace Tests
             Assert.AreEqual(1, GetVisibleChildrenAmount(view.GetLandElementsContainer()));
             Assert.AreEqual(startingName, landElementView.landName.text);
             
-            landsListener.OnSetLands(new []{ new LandData()
+            landsListener.OnSetLands(new List<Land>(){ new Land()
             {
                 id = "1",
                 name = updatedName

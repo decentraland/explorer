@@ -49,6 +49,12 @@ internal class LandElementView : MonoBehaviour, IDisposable
     private void OnDestroy()
     {
         isDestroyed = true;
+        
+        if (thumbnailPromise != null)
+        {
+            AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
+            thumbnailPromise = null;
+        }
     }
 
     public void SetActive(bool active)
@@ -93,7 +99,7 @@ internal class LandElementView : MonoBehaviour, IDisposable
         searchInfo.SetRole(isOwner);
     }
 
-    public void SetIsState(bool isEstate)
+    public void SetIsEstate(bool isEstate)
     {
         this.isEstate = isEstate;
     }
@@ -145,11 +151,6 @@ internal class LandElementView : MonoBehaviour, IDisposable
         if (!isDestroyed)
         {
             Destroy(gameObject);
-        }
-        if (thumbnailPromise != null)
-        {
-            AssetPromiseKeeper_Texture.i.Forget(thumbnailPromise);
-            thumbnailPromise = null;
         }
     }
 

@@ -40,6 +40,7 @@ public class BuilderProjectsPanelController : IHUD
 
         sectionsController?.Dispose();
         scenesViewController?.Dispose();
+        landsController?.Dispose();
 
         view.Dispose();
     }
@@ -49,11 +50,11 @@ public class BuilderProjectsPanelController : IHUD
         Initialize(BuilderProjectsPanelBridge.i,
             new SectionsController(view.GetSectionContainer()),
             new ScenesViewController(view.GetCardViewPrefab(), view.GetTransform()),
-            new LandController());
+            new LandController(Environment.i.platform.serviceProviders.theGraph));
     }
 
     internal void Initialize(IBuilderProjectsPanelBridge bridge, ISectionsController sectionsController, 
-        IScenesViewController scenesViewController, ILandController landsController)
+        IScenesViewController scenesViewController, ILandController landController)
     {
         if (isInitialized)
             return;
@@ -62,7 +63,7 @@ public class BuilderProjectsPanelController : IHUD
 
         this.sectionsController = sectionsController;
         this.scenesViewController = scenesViewController;
-        this.landsController = landsController;
+        this.landsController = landController;
 
         // set listeners for sections, setup searchbar for section, handle request for opening a new section
         sectionsHandler = new SectionsHandler(sectionsController, scenesViewController, landsController, view.GetSearchBar());
@@ -96,6 +97,7 @@ public class BuilderProjectsPanelController : IHUD
         
         if (isVisible)
         {
+            landsController.FetchLands();
             sectionsController.OpenSection(SectionId.SCENES_MAIN);
         }
     }

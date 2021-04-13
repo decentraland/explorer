@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using DCL.Helpers;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -47,9 +48,12 @@ internal class SectionLandController : SectionBase, ILandsListener
         view.SetActive(false);
     }
 
-    void ILandsListener.OnSetLands(LandData[] lands)
+    void ILandsListener.OnSetLands(List<Land> lands)
     {
-        view.SetEmpty(lands.Length == 0);
+        view.SetEmpty(lands == null || lands.Count == 0);
+        
+        if (lands == null)
+            return;
 
         List<LandElementView> toRemove = landElementViews.Values
                                                          .Where(landElementView => lands.All(land => land.id != landElementView.GetId()))
@@ -61,7 +65,7 @@ internal class SectionLandController : SectionBase, ILandsListener
             PoolView(toRemove[i]);
         }
         
-        for (int i = 0; i < lands.Length; i++)
+        for (int i = 0; i < lands.Count; i++)
         {
             if (!landElementViews.TryGetValue(lands[i].id, out LandElementView landElementView))
             {
@@ -69,13 +73,14 @@ internal class SectionLandController : SectionBase, ILandsListener
                 landElementViews.Add(lands[i].id, landElementView);
             }
 
+            bool isEstate = lands[i].type == LandType.ESTATE;
             landElementView.SetId(lands[i].id);
             landElementView.SetName(lands[i].name);
             landElementView.SetCoords(lands[i].x, lands[i].y);
             landElementView.SetSize(lands[i].size);
-            landElementView.SetRole(lands[i].isOwner);
-            landElementView.SetThumbnail(lands[i].thumbnailURL);
-            landElementView.SetIsState(lands[i].isEstate);
+            landElementView.SetRole(lands[i].role == LandRole.OWNER);
+            landElementView.SetThumbnail(GetLandThumbnailUrl(lands[i], isEstate));
+            landElementView.SetIsEstate(isEstate);
         }
         landSearchHandler.SetSearchableList(landElementViews.Values.Select(scene => scene.searchInfo).ToList());
     }
@@ -124,5 +129,20 @@ internal class SectionLandController : SectionBase, ILandsListener
             landView = Object.Instantiate(view.GetLandElementeBaseView(), view.GetLandElementsContainer());
         }
         return landView;
+    }
+
+    private string GetLandThumbnailUrl(Land land, bool isEstate)
+    {
+        const int width = 100;
+        const int height = 100;
+        const int sizeFactorParcel = 15;
+        const int sizeFactorEstate = 35;
+        
+        if (!isEstate)
+        {
+            return MapUtils.GetMarketPlaceThumbnailUrl(new[] { new Vector2Int(land.x, land.y) }, width, height, sizeFactorParcel);
+        }
+
+        return MapUtils.GetMarketPlaceThumbnailUrl(land.parcels.Select(p => new Vector2Int(p.x, p.y)).ToArray(), width, height, sizeFactorEstate);
     }
 }

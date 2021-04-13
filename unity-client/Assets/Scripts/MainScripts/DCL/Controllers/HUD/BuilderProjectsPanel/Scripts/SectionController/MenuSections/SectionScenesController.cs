@@ -60,8 +60,8 @@ internal class SectionScenesController : SectionBase, IDeployedSceneListener, IP
     {
         view.gameObject.SetActive(false);
         searchList.Clear();
-        deployedViews.Clear();
-        projectViews.Clear();
+        deployedViews?.Clear();
+        projectViews?.Clear();
     }
 
     private void ViewDirty()

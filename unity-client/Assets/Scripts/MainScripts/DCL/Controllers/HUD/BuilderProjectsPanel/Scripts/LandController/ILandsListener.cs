@@ -1,4 +1,6 @@
+using System.Collections.Generic;
+
 internal interface ILandsListener
 {
-    void OnSetLands(LandData[] lands);
+    void OnSetLands(List<Land> lands);
 }
