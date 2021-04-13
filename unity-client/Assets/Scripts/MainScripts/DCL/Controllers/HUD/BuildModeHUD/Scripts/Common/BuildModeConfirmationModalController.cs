@@ -13,11 +13,8 @@ public interface IBuildModeConfirmationModalController
 
     void Initialize(IBuildModeConfirmationModalView exitFromBiWModalView);
     void Dispose();
+    void Configure(string titleText, string subTitleText, string cancelBtnText, string confirmBtnText);
     void SetActive(bool isActive, BuildModeModalType modalType);
-    void SetTitle(string text);
-    void SetSubTitle(string text);
-    void SetCancelButtonText(string text);
-    void SetConfirmButtonText(string text);
     void CancelExit();
     void ConfirmExit();
 }
@@ -44,19 +41,19 @@ public class BuildModeConfirmationModalController : IBuildModeConfirmationModalC
         exitFromBiWModalView.OnConfirmExit -= ConfirmExit;
     }
 
+    public void Configure(string titleText, string subTitleText, string cancelBtnText, string confirmBtnText)
+    {
+        exitFromBiWModalView.SetTitle(titleText);
+        exitFromBiWModalView.SetSubTitle(subTitleText);
+        exitFromBiWModalView.SetCancelButtonText(cancelBtnText);
+        exitFromBiWModalView.SetConfirmButtonText(confirmBtnText);
+    }
+
     public void SetActive(bool isActive, BuildModeModalType modalType)
     {
         this.modalType = modalType;
         exitFromBiWModalView.SetActive(isActive);
     }
-
-    public void SetTitle(string text) { exitFromBiWModalView.SetTitle(text); }
-
-    public void SetSubTitle(string text) { exitFromBiWModalView.SetSubTitle(text); }
-
-    public void SetCancelButtonText(string text) { exitFromBiWModalView.SetCancelButtonText(text); }
-
-    public void SetConfirmButtonText(string text) { exitFromBiWModalView.SetConfirmButtonText(text); }
 
     public void CancelExit()
     {

@@ -98,11 +98,13 @@ namespace Tests.BuildModeHUDControllers
             buildModeHUDController.PublishStart();
 
             // Assert
+            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1)
+                                  .Configure(
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>(),
+                                      Arg.Any<string>());
             buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.PUBLISH);
-            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetTitle(Arg.Any<string>());
-            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetSubTitle(Arg.Any<string>());
-            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetCancelButtonText(Arg.Any<string>());
-            buildModeHUDController.controllers.buildModeConfirmationModalController.Received(1).SetConfirmButtonText(Arg.Any<string>());
         }
 
         [Test]

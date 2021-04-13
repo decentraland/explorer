@@ -181,11 +181,12 @@ public class BuildModeHUDController : IHUD
 
     public void PublishStart()
     {
+        controllers.buildModeConfirmationModalController.Configure(
+            PUBLISH_MODAL_TITLE,
+            PUBLISH_MODAL_SUBTITLE,
+            PUBLISH_MODAL_CANCEL_BUTTON,
+            PUBLISH_MODAL_CONFIRM_BUTTON);
         controllers.buildModeConfirmationModalController.SetActive(true, BuildModeModalType.PUBLISH);
-        controllers.buildModeConfirmationModalController.SetTitle(PUBLISH_MODAL_TITLE);
-        controllers.buildModeConfirmationModalController.SetSubTitle(PUBLISH_MODAL_SUBTITLE);
-        controllers.buildModeConfirmationModalController.SetCancelButtonText(PUBLISH_MODAL_CANCEL_BUTTON);
-        controllers.buildModeConfirmationModalController.SetConfirmButtonText(PUBLISH_MODAL_CONFIRM_BUTTON);
     }
 
     internal void CancelPublishModal(BuildModeModalType modalType)

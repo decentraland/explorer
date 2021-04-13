@@ -140,11 +140,12 @@ public class TopActionsButtonsController : ITopActionsButtonsController
 
     public void ShowLogoutConfirmation()
     {
+        buildModeConfirmationModalController.Configure(
+            EXIT_MODAL_TITLE,
+            EXIT_MODAL_SUBTITLE,
+            EXIT_MODAL_CANCEL_BUTTON,
+            EXIT_MODAL_CONFIRM_BUTTON);
         buildModeConfirmationModalController.SetActive(true, BuildModeModalType.EXIT);
-        buildModeConfirmationModalController.SetTitle(EXIT_MODAL_TITLE);
-        buildModeConfirmationModalController.SetSubTitle(EXIT_MODAL_SUBTITLE);
-        buildModeConfirmationModalController.SetCancelButtonText(EXIT_MODAL_CANCEL_BUTTON);
-        buildModeConfirmationModalController.SetConfirmButtonText(EXIT_MODAL_CONFIRM_BUTTON);
     }
 
     public void ConfirmLogout(BuildModeModalType modalType)

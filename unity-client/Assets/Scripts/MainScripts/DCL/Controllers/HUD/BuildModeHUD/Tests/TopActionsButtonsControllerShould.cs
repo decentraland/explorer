@@ -150,11 +150,13 @@ namespace Tests.BuildModeHUDControllers
             topActionsButtonsController.ShowLogoutConfirmation();
 
             // Assert
+            topActionsButtonsController.buildModeConfirmationModalController.Received(1)
+                                       .Configure(
+                                           Arg.Any<string>(),
+                                           Arg.Any<string>(),
+                                           Arg.Any<string>(),
+                                           Arg.Any<string>());
             topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetActive(true, BuildModeModalType.EXIT);
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetTitle(Arg.Any<string>());
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetSubTitle(Arg.Any<string>());
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetCancelButtonText(Arg.Any<string>());
-            topActionsButtonsController.buildModeConfirmationModalController.Received(1).SetConfirmButtonText(Arg.Any<string>());
         }
 
         [Test]
