@@ -285,7 +285,7 @@ namespace DCL.Huds.QuestsTracker
         {
             while (progress.fillAmount < progressTarget)
             {
-                progress.fillAmount = Mathf.MoveTowards(progress.fillAmount, progressTarget, 2f * Time.deltaTime);
+                progress.fillAmount = Mathf.MoveTowards(progress.fillAmount, progressTarget, Time.deltaTime);
                 yield return null;
             }
             progressRoutine = null;

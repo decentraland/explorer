@@ -60,7 +60,7 @@ namespace DCL.Huds.QuestsTracker
             Vector3 scale = progress.transform.localScale;
             while (scale.x < progressTarget)
             {
-                scale.x = Mathf.MoveTowards(scale.x, progressTarget, 2f * Time.deltaTime);
+                scale.x = Mathf.MoveTowards(scale.x, progressTarget, Time.deltaTime);
                 progress.transform.localScale = scale;
                 yield return null;
             }
