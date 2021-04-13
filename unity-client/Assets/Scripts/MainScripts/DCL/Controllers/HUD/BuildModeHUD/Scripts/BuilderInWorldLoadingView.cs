@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public interface IBuilderInWorldLoadingView
 {
@@ -12,7 +11,8 @@ public interface IBuilderInWorldLoadingView
     void Hide(bool forzeHidding = false);
     void StartTipsCarousel();
     void StopTipsCarousel();
-    void CancelLoading();
+    void CancelLoading(DCLAction_Trigger action);
+    void SetPercentage(float newValue);
 }
 
 public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingView
@@ -22,8 +22,9 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     [SerializeField] internal List<string> loadingTips;
     [SerializeField] internal float timeBetweenTips = 3f;
     [SerializeField] internal TMP_Text tipsText;
-    [SerializeField] internal Button cancelButton;
+    [SerializeField] internal InputAction_Trigger cancelLoadingInputAction;
     [SerializeField] internal float minVisibilityTime = 1.5f;
+    [SerializeField] internal LoadingBar loadingBar;
 
     public event System.Action OnCancelLoading;
 
@@ -39,9 +40,9 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         return view;
     }
 
-    private void Awake() { cancelButton.onClick.AddListener(CancelLoading); }
+    private void Awake() { cancelLoadingInputAction.OnTriggered += CancelLoading; }
 
-    private void OnDestroy() { cancelButton.onClick.RemoveListener(CancelLoading); }
+    private void OnDestroy() { cancelLoadingInputAction.OnTriggered -= CancelLoading; }
 
     public void Show(bool showTips = true)
     {
@@ -97,9 +98,11 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         }
     }
 
-    public void CancelLoading()
+    public void CancelLoading(DCLAction_Trigger action)
     {
         Hide();
         OnCancelLoading?.Invoke();
     }
+
+    public void SetPercentage(float newValue) { loadingBar.SetPercentage(newValue); }
 }

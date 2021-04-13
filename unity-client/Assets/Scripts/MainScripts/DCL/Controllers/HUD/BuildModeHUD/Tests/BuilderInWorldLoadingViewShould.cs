@@ -58,7 +58,7 @@ namespace Tests.BuildModeHUDViews
             builderInWorldLoadingView.OnCancelLoading += () => { loadingCanceled = true; };
 
             // Act
-            builderInWorldLoadingView.CancelLoading();
+            builderInWorldLoadingView.CancelLoading(new DCLAction_Trigger());
 
             // Assert
             Assert.IsFalse(builderInWorldLoadingView.gameObject.activeSelf, "The view activeSelf property is true!");

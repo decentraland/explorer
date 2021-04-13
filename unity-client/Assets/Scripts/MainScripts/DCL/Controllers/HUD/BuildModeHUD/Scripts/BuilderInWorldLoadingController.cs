@@ -7,6 +7,7 @@ public interface IBuilderInWorldLoadingController
     void Show(bool showTips = true);
     void Hide(bool forzeHidding = false);
     void CancelLoading();
+    void SetPercentage(float newValue);
 }
 
 public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
@@ -24,12 +25,18 @@ public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
     public void Dispose()
     {
         initialLoadingView.StopTipsCarousel();
-        this.initialLoadingView.OnCancelLoading -= CancelLoading;
+        initialLoadingView.OnCancelLoading -= CancelLoading;
     }
 
-    public void Show(bool showTips = true) { initialLoadingView.Show(showTips); }
+    public void Show(bool showTips = true)
+    {
+        initialLoadingView.Show(showTips);
+        SetPercentage(0f);
+    }
 
     public void Hide(bool forzeHidding = false) { initialLoadingView.Hide(forzeHidding); }
 
     public void CancelLoading() { OnCancelLoading?.Invoke(); }
+
+    public void SetPercentage(float newValue) { initialLoadingView.SetPercentage(newValue); }
 }

@@ -27,6 +27,7 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             builderInWorldLoadingController.initialLoadingView.Received(1).Show(showTips);
+            builderInWorldLoadingController.initialLoadingView.Received(1).SetPercentage(0f);
         }
 
         [Test]
@@ -51,6 +52,19 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             Assert.IsTrue(loadingCanceled, "loadingCanceled is false!");
+        }
+
+        [Test]
+        public void SetPercentageCorrectly()
+        {
+            // Arrange
+            float testPercentage = 15.3f;
+
+            // Act
+            builderInWorldLoadingController.SetPercentage(testPercentage);
+
+            // Assert
+            builderInWorldLoadingController.initialLoadingView.Received(1).SetPercentage(testPercentage);
         }
     }
 }
