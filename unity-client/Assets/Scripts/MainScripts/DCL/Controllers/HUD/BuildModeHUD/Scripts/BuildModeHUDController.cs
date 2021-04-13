@@ -220,7 +220,7 @@ public class BuildModeHUDController : IHUD
             float newPercentage = Mathf.Clamp(
                 controllers.publishPopupController.currentProgress + UnityEngine.Random.Range(10f, 30f),
                 controllers.publishPopupController.currentProgress,
-                100f);
+                99f);
 
             controllers.publishPopupController.SetPercentage(newPercentage);
 
