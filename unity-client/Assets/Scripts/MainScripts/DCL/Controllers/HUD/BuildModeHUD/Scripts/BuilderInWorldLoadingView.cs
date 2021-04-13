@@ -40,9 +40,9 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         return view;
     }
 
-    private void Awake() { cancelLoadingInputAction.OnTriggered += CancelLoading; }
+    private void OnEnable() { cancelLoadingInputAction.OnTriggered += CancelLoading; }
 
-    private void OnDestroy() { cancelLoadingInputAction.OnTriggered -= CancelLoading; }
+    private void OnDisable() { cancelLoadingInputAction.OnTriggered -= CancelLoading; }
 
     public void Show(bool showTips = true)
     {
