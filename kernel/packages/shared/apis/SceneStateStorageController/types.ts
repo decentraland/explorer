@@ -72,7 +72,7 @@ export type BuilderAsset = {
   thumbnail: string
   tags: string[]
   category: string
-  contents: Map<string,string>
+  contents: Record<string,string>
   metrics: BuilderMetric
   parameters: any
   actions: any

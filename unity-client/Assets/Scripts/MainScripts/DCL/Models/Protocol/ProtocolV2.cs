@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class ProtocolV2
 {
+
     #region Class Declarations
 
     [System.Serializable]
@@ -23,10 +24,7 @@ public class ProtocolV2
             a = color.a;
         }
 
-        public Color ToColor()
-        {
-            return new Color(r,g,b,a);
-        }
+        public Color ToColor() { return new Color(r, g, b, a); }
     }
 
     [System.Serializable]
@@ -58,7 +56,7 @@ public class ProtocolV2
     }
 
     [System.Serializable]
-    public class TransformComponent 
+    public class TransformComponent
     {
         public Vector3 position;
 
@@ -69,11 +67,11 @@ public class ProtocolV2
     }
 
     [System.Serializable]
-    public class NFTComponent 
+    public class NFTComponent
     {
         public string src;
         public string assetId;
-        public ColorRepresentation color; 
+        public ColorRepresentation color;
         public int style = 0;
     }
 
@@ -152,10 +150,10 @@ public class ProtocolV2
     [System.Serializable]
     public class StoreSceneStateEvent
     {
-        public string type = "StoreSceneState";
+        public string type = "PublishSceneState";
         public string payload = "";
     }
-    
+
     [System.Serializable]
     public class SaveSceneStateEvent
     {
@@ -164,4 +162,5 @@ public class ProtocolV2
     }
 
     #endregion
+
 }

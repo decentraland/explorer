@@ -23,7 +23,6 @@ import { RootState } from 'shared/store/rootTypes'
 import { getUpdateProfileServer } from 'shared/dao/selectors'
 import { createGameFile } from './SceneStateDefinitionCodeGenerator'
 import { SceneStateDefinition } from 'scene-system/stateful-scene/SceneStateDefinition'
-import { ILand } from 'shared/types'
 import { ExplorerIdentity } from 'shared/session/types'
 import { deserializeSceneState, serializeSceneState } from 'scene-system/stateful-scene/SceneStateDefinitionSerializer'
 import { ISceneStateStorageController } from './ISceneStateStorageController'
@@ -32,7 +31,7 @@ declare const globalThis: any
 
 @registerAPI('SceneStateStorageController')
 export class SceneStateStorageController extends ExposableAPI implements ISceneStateStorageController {
-  private builderApiManager = new BuilderServerAPIManager()
+  private readonly builderApiManager = new BuilderServerAPIManager()
   private parcelIdentity = this.options.getAPIInstance(ParcelIdentity)
   private builderManifest!: BuilderManifest
 
@@ -59,56 +58,65 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   @exposeMethod
-  async createProjectWithCoords(land: ILand): Promise<SerializedSceneState> {
-    const newProject = await this.builderApiManager.createProjectWithCoords(land, this.getIdentity())
-    this.builderManifest = newProject   
-    return serializeSceneState(new SceneStateDefinition())
+  async createProjectWithCoords(coordinates: string): Promise<boolean> {
+    const newProject = await this.builderApiManager.createProjectWithCoords(coordinates, this.getIdentity())
+    this.builderManifest = newProject
+    return newProject ? true : false
   }
 
   @exposeMethod
-  async saveProjectManifest(serializedSceneState: SerializedSceneState) {
-    //Deserialize the scene state
-    const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
+  async saveSceneState(serializedSceneState: SerializedSceneState): Promise<DeploymentResult> {
+    let result: DeploymentResult
 
-    //Convert the scene state to builder scheme format
-    let builderManifest = toBuilderFromStateDefinitionFormat(sceneState, this.builderManifest)
+    try {
+      //Deserialize the scene state
+      const sceneState: SceneStateDefinition = deserializeSceneState(serializedSceneState)
 
-    //We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
-    let idArray: string[] = []
-    Object.entries(builderManifest.scene.components).forEach((component) => {
-      if (component[1].type === 'GLTFShape') {
-        let found = false
-        Object.entries(builderManifest.scene.assets).forEach((assets) => {
-          if (assets[0] === component[1].data.assetId) {
-            found = true
+      //Convert the scene state to builder scheme format
+      let builderManifest = toBuilderFromStateDefinitionFormat(sceneState, this.builderManifest)
+
+      //We get all the assetIds from the gltfShapes so we can fetch the corresponded asset
+      let idArray: string[] = []
+      Object.values(builderManifest.scene.components).forEach((component) => {
+        if (component.type === 'GLTFShape') {
+          let found = false
+          Object.keys(builderManifest.scene.assets).forEach((assets) => {
+            if (assets === component.data.assetId) {
+              found = true
+            }
+          })
+          if (!found) {
+            idArray.push(component.data.assetId)
           }
-        })
-        if (!found) {
-          idArray.push(component[1].data.assetId)
         }
-      }
-    })
+      })
 
-    //We fetch all the assets that the scene contains since builder needs the assets
-    builderManifest.scene.assets = await this.builderApiManager.getAssets(idArray)
+      //We fetch all the assets that the scene contains since builder needs the assets
+      builderManifest.scene.assets = await this.builderApiManager.getAssets(idArray)
 
-    //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
-    //Unity handles this, so only 1 entitty will contain the "ground" category. We can safely assume that we can search it and assign
-    Object.entries(builderManifest.scene.assets).forEach((asset) => {
-      if (asset[1].category === 'ground') {
-        builderManifest.scene.ground.assetId = asset[0]
-        Object.entries(builderManifest.scene.components).forEach((component) => {
-          if (component[1].data.assetId === asset[0]) builderManifest.scene.ground.componentId = component[0]
-        })
-      }
-    })
+      //This is a special case. The builder needs the ground separated from the rest of the components so we search for it.
+      //Unity handles this, so only 1 entitty will contain the "ground" category. We can safely assume that we can search it and assign
+      Object.entries(builderManifest.scene.assets).forEach(([assetId, asset]) => {
+        if (asset.category === 'ground') {
+          builderManifest.scene.ground.assetId = assetId
+          Object.entries(builderManifest.scene.components).forEach(([componentId, component]) => {
+            if (component.data.assetId === assetId) builderManifest.scene.ground.componentId = componentId
+          })
+        }
+      })
 
-    //Update the manifest
-    this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+      //Update the manifest
+      this.builderApiManager.updateProjectManifest(builderManifest, this.getIdentity())
+      result = { ok: true }
+    } catch (error) {
+      defaultLogger.error('Saving manifest failed', error)
+      result = { ok: false, error: `${error}` }
+    }
+    return result
   }
 
   @exposeMethod
-  async storeState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
+  async publishSceneState(sceneId: string, sceneState: SerializedSceneState): Promise<DeploymentResult> {
     let result: DeploymentResult
 
     // Convert to storable format
@@ -207,7 +215,7 @@ export class SceneStateStorageController extends ExposableAPI implements ISceneS
   }
 
   private getIdentity(): ExplorerIdentity {
-    const store: Store<RootState> = window['globalStore']
+    const store: Store<RootState> = globalThis['globalStore']
     const identity = getCurrentIdentity(store.getState())
     if (!identity) {
       throw new Error('Identity not found when trying to deploy an entity')

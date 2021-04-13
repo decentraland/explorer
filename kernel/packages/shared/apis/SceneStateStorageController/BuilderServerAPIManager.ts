@@ -1,7 +1,7 @@
 import { Authenticator } from 'dcl-crypto'
 import { ExplorerIdentity } from 'shared/session/types'
 import { uuid } from 'decentraland-ecs/src/ecs/helpers'
-import { ContentMapping, ILand } from '../../types'
+import { ContentMapping } from '../../types'
 import { BuilderAsset, BuilderManifest, BuilderProject, BuilderScene } from './types'
 import { getDefaultTLD } from 'config'
 
@@ -36,12 +36,12 @@ export class BuilderServerAPIManager {
         console.trace(e)
       }
     }
-    const test: Record<string, BuilderAsset> = {}
+    const assets: Record<string, BuilderAsset> = {}
 
     assetIds.map((assetId) => {
-      test[assetId] = this.assets.get(assetId)!
+      assets[assetId] = this.assets.get(assetId)!
     })
-    return test
+    return assets
   }
 
   async getConvertedAssets(assetIds: AssetId[]): Promise<Map<AssetId, Asset>> {
@@ -74,8 +74,7 @@ export class BuilderServerAPIManager {
       const response = await fetch(urlToFecth, params)
       const data = await response.json()
 
-      var value = JSON.parse(JSON.stringify(data))
-      const manifest: BuilderManifest = value.data
+      const manifest: BuilderManifest = data.data
 
       //If this manifest contains assets, we add them so we don't need to fetch them
       this.addAssetsFromManifest(manifest)
@@ -102,11 +101,10 @@ export class BuilderServerAPIManager {
       const response = await fetch(urlToFecth, params)
       const data = await response.json()
 
-      var value = JSON.parse(JSON.stringify(data))
-      if (value['data'] === 'false') {
+      if (data.data === false) {
         return undefined
       }
-      const manifest: BuilderManifest = value.data
+      const manifest: BuilderManifest = data.data
 
       //If this manifest contains assets, we add them so we don't need to fetch them
       this.addAssetsFromManifest(manifest)
@@ -127,8 +125,8 @@ export class BuilderServerAPIManager {
     }
   }
 
-  async createProjectWithCoords(land: ILand, identity: ExplorerIdentity): Promise<BuilderManifest> {
-    var builderManifest = this.createEmptyDefaultBuilderScene(land.sceneJsonData.scene.base, identity.rawAddress)
+  async createProjectWithCoords(coordinates: string, identity: ExplorerIdentity): Promise<BuilderManifest> {
+    var builderManifest = this.createEmptyDefaultBuilderScene(coordinates, identity.rawAddress)
     try {
       this.setManifestOnServer(builderManifest, identity)
     } catch (e) {
@@ -137,7 +135,7 @@ export class BuilderServerAPIManager {
     return builderManifest
   }
 
-  async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
+  private async setManifestOnServer(builderManifest: BuilderManifest, identity: ExplorerIdentity) {
     const queryParams = builderManifest.project.id + '/manifest'
     const urlToFecth = `${this.getBaseUrl()}${queryParams}`
 
@@ -156,12 +154,12 @@ export class BuilderServerAPIManager {
     return data
   }
 
-  getBaseUrl(): string {
+  private getBaseUrl(): string {
     if (getDefaultTLD() === 'org') return BASE_PROJECT_URL
     else return BASE_PROJECT_URL_ROPSTEN
   }
 
-  addAssetsFromManifest(manifest: BuilderManifest) {
+  private addAssetsFromManifest(manifest: BuilderManifest) {
     Object.entries(manifest.scene.assets).forEach((asset) => {
       if (!this.assets.has(asset[0])) {
         this.assets.set(asset[0], asset[1])
@@ -169,7 +167,7 @@ export class BuilderServerAPIManager {
     })
   }
 
-  createEmptyDefaultBuilderScene(land: string, eth_address: string): BuilderManifest {
+  private createEmptyDefaultBuilderScene(land: string, eth_address: string): BuilderManifest {
     let today = new Date().toISOString().slice(0, 10)
     let projectId = uuid()
     let sceneId = uuid()
@@ -232,7 +230,7 @@ export class BuilderServerAPIManager {
     return headers
   }
 
-  authorize = (identity: ExplorerIdentity, method: string = 'get', path: string = '') => {
+  authorize (identity: ExplorerIdentity, method: string = 'get', path: string = '')  {
     const headers: Record<string, string> = {}
 
     if (identity) {

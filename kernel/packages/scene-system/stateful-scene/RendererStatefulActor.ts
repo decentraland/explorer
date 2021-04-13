@@ -20,12 +20,15 @@ import {
   StatefulActor
 } from './types'
 import { generatePBObjectJSON } from '../sdk/Utils'
+import { EventSubscriber } from 'decentraland-rpc'
 
 export class RendererStatefulActor extends StatefulActor implements StateContainerListener {
   private disposableComponents: number = 0
+  private readonly eventSubscriber: EventSubscriber
 
   constructor(protected readonly engine: IEngineAPI, private readonly sceneId: string) {
-    super(engine)
+    super()
+    this.eventSubscriber = new EventSubscriber(this.engine)
   }
 
   addEntity(entityId: EntityId, components?: Component[]): void {

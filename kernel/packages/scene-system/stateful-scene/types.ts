@@ -1,6 +1,3 @@
-import { EventSubscriber } from 'decentraland-rpc'
-import { IEngineAPI } from 'shared/apis/EngineAPI'
-
 export type EntityId = string
 export type ComponentId = number
 export type ComponentData = any
@@ -33,11 +30,6 @@ export interface StateContainerListener {
  * An actor that contains the state of the scene, but it can also generate updates to it
  */
 export abstract class StatefulActor implements StateContainer {
-  protected readonly eventSubscriber: EventSubscriber
-
-  constructor(protected readonly engine: IEngineAPI) {
-    this.eventSubscriber = new EventSubscriber(this.engine)
-  }
 
   abstract addEntity(entityId: string, components?: Component[]): void
   abstract removeEntity(entityId: string): void

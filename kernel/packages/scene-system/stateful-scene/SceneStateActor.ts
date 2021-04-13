@@ -1,10 +1,10 @@
-import { IEngineAPI } from 'shared/apis/EngineAPI'
+
 import { SceneStateDefinition } from './SceneStateDefinition'
 import { Component, ComponentData, ComponentId, EntityId, StateContainer, StatefulActor } from './types'
 
 export class SceneStateActor extends StatefulActor {
-  constructor(protected readonly engine: IEngineAPI, private sceneState: SceneStateDefinition) {
-    super(engine)
+  constructor(private sceneState: SceneStateDefinition) {
+    super()
   }
 
   addEntity(entityId: EntityId, components?: Component[]): void {

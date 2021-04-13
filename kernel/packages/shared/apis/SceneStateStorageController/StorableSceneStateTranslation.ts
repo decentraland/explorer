@@ -60,7 +60,7 @@ export function toBuilderFromStateDefinitionFormat(
   }
 
   // We create the scene and add it to the manifest
-  var sceneState: BuilderScene = {
+  const sceneState: BuilderScene = {
     id: builderManifest.scene.id,
     entities: entities,
     components: builderComponents,
