@@ -567,7 +567,11 @@ export type KernelConfigForRenderer = {
 }
 
 export type RealmsInfoForRenderer = {
-  current: Realm
+  current: {
+    layer: string
+    serverName: string
+    domain: string
+  }
   realms: {
     layer: string
     serverName: string
