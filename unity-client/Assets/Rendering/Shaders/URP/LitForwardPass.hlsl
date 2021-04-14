@@ -172,7 +172,10 @@ half4 LitPassFragment(Varyings input) : SV_Target
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
 
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
-    //color.a = OutputAlpha(color.a, _Surface);
+    
+    // We divide by 5 to correct the * 5 multiplication that takes place 
+    // in the emission calculation of LitInput.hlsl
+    color.a *= saturate( surfaceData.emission / 5 );
     
 	color = fadeDithering(color, input.positionWS, input.positionSS);
 
