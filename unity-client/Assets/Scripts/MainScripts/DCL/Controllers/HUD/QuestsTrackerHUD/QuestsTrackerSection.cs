@@ -9,6 +9,8 @@ namespace DCL.Huds.QuestsTracker
 {
     public class QuestsTrackerSection : MonoBehaviour
     {
+        private static readonly int ANIMATION_TRIGGER_OUT = Animator.StringToHash("Out");
+
         public enum SequenceState
         {
             NotStarted,
@@ -21,6 +23,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal TextMeshProUGUI sectionTitle;
         [SerializeField] internal RectTransform taskContainer;
         [SerializeField] internal GameObject taskPrefab;
+        [SerializeField] internal Animator animator;
 
         public event Action OnLayoutRebuildRequested;
         public event Action<string> OnDestroyed;
@@ -93,6 +96,8 @@ namespace DCL.Huds.QuestsTracker
 
         public IEnumerator Sequence()
         {
+            sequenceState = SequenceState.ProgressingOngoingTasks;
+
             ClearTaskRoutines();
 
             List<QuestsTrackerTask> visibleTasks = new List<QuestsTrackerTask>();
@@ -105,7 +110,6 @@ namespace DCL.Huds.QuestsTracker
                     newTasks.Add(task);
             }
 
-            sequenceState = SequenceState.ProgressingOngoingTasks;
             //Progress of currently visible tasks
             for (int i = 0; i < visibleTasks.Count; i++)
             {
@@ -126,6 +130,8 @@ namespace DCL.Huds.QuestsTracker
 
             if (taskEntries.Count == 0)
             {
+                animator.SetTrigger(ANIMATION_TRIGGER_OUT);
+                yield return WaitForSecondsCache.Get(0.5f);
                 Destroy(gameObject);
                 OnDestroyed?.Invoke(section.id);
             }

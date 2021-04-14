@@ -133,13 +133,16 @@ namespace DCL.QuestsController
                 }
             }
 
-            //Restore "justProgressed" flags
+            //Restore "progress" flags
+            progressedQuest.oldProgress = progressedQuest.progress;
             for (int index = 0; index < progressedQuest.sections.Length; index++)
             {
                 QuestSection section = progressedQuest.sections[index];
                 for (var index2 = 0; index2 < section.tasks.Length; index2++)
                 {
                     section.tasks[index2].justProgressed = false;
+                    section.tasks[index2].justUnlocked = false;
+                    section.tasks[index2].oldProgress = section.tasks[index2].progress;
                 }
             }
         }

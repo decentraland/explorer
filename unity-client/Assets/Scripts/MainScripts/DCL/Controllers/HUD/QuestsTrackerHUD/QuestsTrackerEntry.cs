@@ -76,7 +76,7 @@ namespace DCL.Huds.QuestsTracker
             questTitle.text = $"{quest.name}";
             questProgressText.text = $"{completedTasksAmount}/{allTasks.Length}";
             progress.fillAmount = quest.oldProgress;
-            progressTarget = (float)completedTasksAmount / allTasks.Length;
+            progressTarget = quest.progress;
 
             List<string> entriesToRemove = sectionEntries.Keys.ToList();
             List<QuestsTrackerSection> visibleSectionEntries = new List<QuestsTrackerSection>();
@@ -171,8 +171,7 @@ namespace DCL.Huds.QuestsTracker
                 sectionRoutines.Add(StartCoroutine(visibleSections[i].Sequence()));
             }
 
-            //Wait until all the sections with completed tasks are done
-            yield return new WaitUntil(() => visibleSections.All(x => x.sequenceState != QuestsTrackerSection.SequenceState.ProgressingOngoingTasks));
+            yield return WaitForTaskRoutines();
 
             //Show and progress of new tasks
             for (int i = 0; i < newSections.Count; i++)

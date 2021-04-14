@@ -70,7 +70,7 @@ namespace DCL.Huds.QuestsTracker
             yield return WaitForSecondsCache.Get(0.5f);
             animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
 
-            yield return WaitForSecondsCache.Get(3f);
+            yield return WaitForSecondsCache.Get(2.9f);
 
             OnDestroyed?.Invoke(task.id);
             Destroy(gameObject);
