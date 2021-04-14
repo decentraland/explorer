@@ -37,16 +37,15 @@ half4 DCL_SimpleFragmentPBR(InputData inputData, SurfaceData surfaceData)
         surfaceData.occlusion = min(surfaceData.occlusion, aoFactor.indirectAmbientOcclusion * DCL_CUSTOM_AO_TOON_FACTOR);
         surfaceData.occlusion = max(surfaceData.occlusion, aoFactor.directAmbientOcclusion);
     #endif
-    half3 color = GlobalIllumination(brdfData, brdfDataClearCoat, surfaceData.clearCoatMask,
-                                     inputData.bakedGI, surfaceData.occlusion,
-                                     inputData.normalWS, inputData.viewDirectionWS);
+    
+    half3 color = surfaceData.albedo * surfaceData.occlusion;
 
 #ifdef _ADDITIONAL_LIGHTS_VERTEX
     color += inputData.vertexLighting * brdfData.diffuse;
 #endif
-
-
-    color += surfaceData.emission * 5;
+    
+    const float DCL_EMISSION_MULTIPLIER = 4;
+    color += surfaceData.emission * DCL_EMISSION_MULTIPLIER;
 
     return half4(color, surfaceData.alpha);
 }
