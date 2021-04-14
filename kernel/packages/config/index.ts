@@ -55,27 +55,36 @@ export namespace parcelLimits {
   export const minParcelX = -150
   export const minParcelZ = -150
 
+  // TODO(Mateo): Move to decentraland/common-schemas
   export const validWorldRanges = [
     {
-      x: { from: -150, to: 150 },
-      y: { from: -150, to: 150 }
+      xMin: -150,
+      yMin: -150,
+      xMax: 150,
+      yMax: 150
     },
     {
-      x: { from: 62, to: 163 },
-      y: { from: 151, to: 158 }
+      xMin: 62,
+      yMin: 151,
+      xMax: 162,
+      yMax: 158
     },
     {
-      x: { from: 151, to: 162 },
-      y: { from: 144, to: 150 }
+      xMin: 151,
+      yMin: 144,
+      xMax: 162,
+      yMax: 150
     },
     {
-      x: { from: 151, to: 163 },
-      y: { from: 59, to: 143 }
+      xMin: 151,
+      yMin: 59,
+      xMax: 163,
+      yMax: 143
     }
   ]
 
   export const descriptiveValidWorldRanges = validWorldRanges
-    .map((range) => `(X from ${range.x.from} to ${range.x.to}, and Y from ${range.y.from} to ${range.y.to})`)
+    .map((range) => `(X from ${range.xMin} to ${range.xMax}, and Y from ${range.yMin} to ${range.yMax})`)
     .join(' or ')
 }
 export namespace playerConfigurations {
