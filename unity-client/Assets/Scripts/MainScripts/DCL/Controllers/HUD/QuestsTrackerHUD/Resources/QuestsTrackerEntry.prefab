@@ -472,6 +472,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3605852883595966644}
   - component: {fileID: 1981296600491382650}
+  - component: {fileID: 5608536538094982499}
   m_Layer: 5
   m_Name: PinnedToggle
   m_TagString: Untagged
@@ -547,6 +548,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!114 &5608536538094982499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017340730365494196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b102d1bc6e18474980da7b796ce9b08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3712377636045840568
 GameObject:
   m_ObjectHideFlags: 0
@@ -559,6 +572,7 @@ GameObject:
   - component: {fileID: 8100871245705856953}
   - component: {fileID: 8039251360556758058}
   - component: {fileID: 9138625984518409277}
+  - component: {fileID: 4286754687270340976}
   m_Layer: 5
   m_Name: CollapseExpandButton
   m_TagString: Untagged
@@ -667,6 +681,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3712377636045840568}
   m_CullTransparentMesh: 0
+--- !u!114 &4286754687270340976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3712377636045840568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playHover: 0
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &3977868677711378609
 GameObject:
   m_ObjectHideFlags: 0
