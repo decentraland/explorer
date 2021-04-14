@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using System.Linq;
 
 namespace Tests.BuildModeHUDViews
 {
@@ -20,7 +21,7 @@ namespace Tests.BuildModeHUDViews
         {
             // Arrange
             builderInWorldLoadingView.gameObject.SetActive(false);
-            builderInWorldLoadingView.tipsText.text = string.Empty;
+            builderInWorldLoadingView.loadingTipItem.tipText.text = string.Empty;
 
             // Act
             builderInWorldLoadingView.Show(showTips);
@@ -29,11 +30,11 @@ namespace Tests.BuildModeHUDViews
             Assert.IsTrue(builderInWorldLoadingView.gameObject.activeSelf, "The view activeSelf property is false!");
             if (showTips && builderInWorldLoadingView.loadingTips.Count > 0)
             {
-                Assert.IsNotEmpty(builderInWorldLoadingView.tipsText.text, "tipsText is empty!");
-                Assert.IsTrue(builderInWorldLoadingView.loadingTips.Contains(builderInWorldLoadingView.tipsText.text), "The set tipsText does not match!");
+                Assert.IsNotEmpty(builderInWorldLoadingView.loadingTipItem.tipText.text, "tipsText is empty!");
+                Assert.IsTrue(builderInWorldLoadingView.loadingTips.Any(x => x.tipMessage == builderInWorldLoadingView.loadingTipItem.tipText.text), "The set tipsText does not match!");
             }
             else
-                Assert.IsEmpty(builderInWorldLoadingView.tipsText.text, "tipsText is not empty!");
+                Assert.IsEmpty(builderInWorldLoadingView.loadingTipItem.tipText.text, "tipsText is not empty!");
         }
 
         [Test]
@@ -43,7 +44,7 @@ namespace Tests.BuildModeHUDViews
             builderInWorldLoadingView.gameObject.SetActive(true);
 
             // Act
-            builderInWorldLoadingView.Hide();
+            builderInWorldLoadingView.Hide(true);
 
             // Assert
             Assert.IsFalse(builderInWorldLoadingView.gameObject.activeSelf, "The view activeSelf property is true!");
@@ -53,7 +54,6 @@ namespace Tests.BuildModeHUDViews
         public void CancelLoadingCorrectly()
         {
             // Arrange
-            builderInWorldLoadingView.gameObject.SetActive(true);
             bool loadingCanceled = false;
             builderInWorldLoadingView.OnCancelLoading += () => { loadingCanceled = true; };
 
@@ -61,7 +61,6 @@ namespace Tests.BuildModeHUDViews
             builderInWorldLoadingView.CancelLoading(new DCLAction_Trigger());
 
             // Assert
-            Assert.IsFalse(builderInWorldLoadingView.gameObject.activeSelf, "The view activeSelf property is true!");
             Assert.IsTrue(loadingCanceled, "loadingCanceled is false!");
         }
     }

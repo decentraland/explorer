@@ -19,9 +19,9 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
 {
     private const string VIEW_PATH = "BuilderInWorldLoadingView";
 
-    [SerializeField] internal List<string> loadingTips;
+    [SerializeField] internal BuilderInWorldLoadingTip loadingTipItem;
+    [SerializeField] internal List<BuilderInWorldLoadingTipModel> loadingTips;
     [SerializeField] internal float timeBetweenTips = 3f;
-    [SerializeField] internal TMP_Text tipsText;
     [SerializeField] internal InputAction_Trigger cancelLoadingInputAction;
     [SerializeField] internal float minVisibilityTime = 1.5f;
     [SerializeField] internal LoadingBar loadingBar;
@@ -50,9 +50,17 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
         showTime = Time.realtimeSinceStartup;
 
         if (showTips && loadingTips.Count > 0)
+        {
             StartTipsCarousel();
+        }
         else
-            tipsText.text = string.Empty;
+        {
+            loadingTipItem.Configure(new BuilderInWorldLoadingTipModel
+            {
+                tipMessage = string.Empty,
+                tipImage = null
+            });
+        }
     }
 
     public void Hide(bool forzeHidding = false)
@@ -93,7 +101,7 @@ public class BuilderInWorldLoadingView : MonoBehaviour, IBuilderInWorldLoadingVi
     {
         while (true)
         {
-            tipsText.text = loadingTips[Random.Range(0, loadingTips.Count - 1)];
+            loadingTipItem.Configure(loadingTips[Random.Range(0, loadingTips.Count - 1)]);
             yield return new WaitForSeconds(timeBetweenTips);
         }
     }
