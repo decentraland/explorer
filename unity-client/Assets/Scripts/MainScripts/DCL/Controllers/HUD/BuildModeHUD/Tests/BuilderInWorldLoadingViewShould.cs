@@ -15,26 +15,23 @@ namespace Tests.BuildModeHUDViews
         public void TearDown() { Object.Destroy(builderInWorldLoadingView.gameObject); }
 
         [Test]
-        [TestCase(true)]
-        [TestCase(false)]
-        public void ShowCorrectly(bool showTips)
+        public void ShowCorrectly()
         {
             // Arrange
             builderInWorldLoadingView.gameObject.SetActive(false);
-            builderInWorldLoadingView.loadingTipItem.tipText.text = string.Empty;
+            builderInWorldLoadingView.currentTipIndex = -1;
+            builderInWorldLoadingView.tipsCoroutine = null;
 
             // Act
-            builderInWorldLoadingView.Show(showTips);
+            builderInWorldLoadingView.Show();
 
             // Assert
             Assert.IsTrue(builderInWorldLoadingView.gameObject.activeSelf, "The view activeSelf property is false!");
-            if (showTips && builderInWorldLoadingView.loadingTips.Count > 0)
+            if (builderInWorldLoadingView.loadingTips.Count > 0)
             {
-                Assert.IsNotEmpty(builderInWorldLoadingView.loadingTipItem.tipText.text, "tipsText is empty!");
-                Assert.IsTrue(builderInWorldLoadingView.loadingTips.Any(x => x.tipMessage == builderInWorldLoadingView.loadingTipItem.tipText.text), "The set tipsText does not match!");
+                Assert.IsTrue(builderInWorldLoadingView.currentTipIndex >= 0, "currentTipIndex is less than 0!");
+                Assert.NotNull(builderInWorldLoadingView.tipsCoroutine, "tipsCoroutine is null!");
             }
-            else
-                Assert.IsEmpty(builderInWorldLoadingView.loadingTipItem.tipText.text, "tipsText is not empty!");
         }
 
         [Test]

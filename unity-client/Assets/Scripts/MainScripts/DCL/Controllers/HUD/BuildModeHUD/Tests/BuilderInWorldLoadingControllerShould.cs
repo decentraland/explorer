@@ -18,15 +18,13 @@ namespace Tests.BuildModeHUDControllers
         public void TearDown() { builderInWorldLoadingController.Dispose(); }
 
         [Test]
-        [TestCase(true)]
-        [TestCase(false)]
-        public void ShowCorrectly(bool showTips)
+        public void ShowCorrectly()
         {
             // Act
-            builderInWorldLoadingController.Show(showTips);
+            builderInWorldLoadingController.Show();
 
             // Assert
-            builderInWorldLoadingController.initialLoadingView.Received(1).Show(showTips);
+            builderInWorldLoadingController.initialLoadingView.Received(1).Show();
             builderInWorldLoadingController.initialLoadingView.Received(1).SetPercentage(0f);
         }
 

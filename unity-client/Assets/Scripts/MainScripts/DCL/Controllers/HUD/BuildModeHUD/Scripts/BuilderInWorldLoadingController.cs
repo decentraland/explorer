@@ -4,7 +4,7 @@ public interface IBuilderInWorldLoadingController
 
     void Initialize(IBuilderInWorldLoadingView initialLoadingView);
     void Dispose();
-    void Show(bool showTips = true);
+    void Show();
     void Hide(bool forzeHidding = false);
     void CancelLoading();
     void SetPercentage(float newValue);
@@ -28,9 +28,9 @@ public class BuilderInWorldLoadingController : IBuilderInWorldLoadingController
         initialLoadingView.OnCancelLoading -= CancelLoading;
     }
 
-    public void Show(bool showTips = true)
+    public void Show()
     {
-        initialLoadingView.Show(showTips);
+        initialLoadingView.Show();
         SetPercentage(0f);
     }
 
