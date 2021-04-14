@@ -36,6 +36,7 @@ namespace Tests.BuildModeHUDControllers
 
             // Assert
             builderInWorldLoadingController.initialLoadingView.Received(1).Hide();
+            builderInWorldLoadingController.initialLoadingView.Received(1).SetPercentage(100f);
         }
 
         [Test]

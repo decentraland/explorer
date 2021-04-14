@@ -383,6 +383,8 @@ public class BuilderInWorldController : MonoBehaviour
         if (sceneToEdit == null)
             return;
 
+        initialLoadingController.SetPercentage(50f);
+
         sceneToEditId = sceneToEdit.sceneData.id;
         inputController.isInputActive = false;
 
