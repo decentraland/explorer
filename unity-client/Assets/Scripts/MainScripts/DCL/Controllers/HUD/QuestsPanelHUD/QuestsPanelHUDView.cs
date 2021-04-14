@@ -103,7 +103,7 @@ namespace DCL.Huds.QuestsPanel
             if (!questEntries.TryGetValue(questId, out QuestsPanelEntry questEntry))
                 return;
             questEntries.Remove(questId);
-            questEntry.transform.SetParent(null);
+            questEntry.Unparent();
             Destroy(questEntry.gameObject);
 
             if (currentQuestInPopup == questId)
