@@ -326,6 +326,8 @@ MonoBehaviour:
   rewardName: {fileID: 4918812999615045564}
   rewardImage: {fileID: 2856872264644878891}
   okButton: {fileID: 6840439127664954191}
+  rewardObtainedAudioEvent: {fileID: 11400000, guid: 96e59e41f230539488ccb8445f1c1631,
+    type: 2}
 --- !u!95 &417963785382909262
 Animator:
   serializedVersion: 3

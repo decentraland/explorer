@@ -1,4 +1,4 @@
-﻿using DCL;
+using DCL;
 using UnityEngine;
 
 public class TaskbarNewQuestTooltip : MonoBehaviour
@@ -10,7 +10,9 @@ public class TaskbarNewQuestTooltip : MonoBehaviour
 
     private void OnQuestsAdded(string s, QuestModel model)
     {
-        if (!model.isCompleted)
+        if (!model.isCompleted) {
             animator?.SetTrigger(ANIM_STATE_TRIGGER);
+            AudioScriptableObjects.tooltipPopup.Play();
+        }
     }
 }

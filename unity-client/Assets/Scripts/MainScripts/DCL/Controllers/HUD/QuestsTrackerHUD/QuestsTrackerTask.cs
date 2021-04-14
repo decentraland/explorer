@@ -20,6 +20,9 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal TextMeshProUGUI progressText;
         [SerializeField] internal Button jumpInButton;
         [SerializeField] internal Animator animator;
+
+        [Header("Audio Events")]
+        [SerializeField] internal AudioEvent progressBarIncrementAudioEvent;
         [SerializeField] internal AudioEvent taskCompleteAudioEvent;
 
         private QuestTask task = null;
@@ -58,6 +61,7 @@ namespace DCL.Huds.QuestsTracker
 
         public IEnumerator ProgressAndCompleteSequence()
         {
+            progressBarIncrementAudioEvent.Play();
             Vector3 scale = progress.transform.localScale;
             while (scale.x < progressTarget)
             {

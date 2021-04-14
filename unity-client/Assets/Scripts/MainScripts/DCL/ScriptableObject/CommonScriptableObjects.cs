@@ -70,6 +70,9 @@ public static class AudioScriptableObjects
 
     private static AudioEvent UIShowEvent;
     public static AudioEvent UIShow => CommonScriptableObjects.GetOrLoad(ref UIShowEvent, "ScriptableObjects/AudioEvents/HUDCommon/UIUnhide");
+
+    private static AudioEvent tooltipPopupEvent;
+    public static AudioEvent tooltipPopup => CommonScriptableObjects.GetOrLoad(ref tooltipPopupEvent, "ScriptableObjects/AudioEvents/HUDCommon/TooltipPopup");
 }
 
 public static class CommonScriptableObjects

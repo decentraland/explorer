@@ -132,6 +132,8 @@ MonoBehaviour:
   progressText: {fileID: 9056996428100650665}
   jumpInButton: {fileID: 2573009063786507353}
   animator: {fileID: 4549193508197797611}
+  progressBarIncrementAudioEvent: {fileID: 11400000, guid: 93e652556837dff4c823de2b001577dd,
+    type: 2}
   taskCompleteAudioEvent: {fileID: 11400000, guid: e985a6d6b4e6ae74b8cfb76996e22ab7,
     type: 2}
 --- !u!95 &4549193508197797611
@@ -495,6 +497,7 @@ GameObject:
   - component: {fileID: 5681339602998691023}
   - component: {fileID: 1975611323978914260}
   - component: {fileID: 2573009063786507353}
+  - component: {fileID: 256082583978649234}
   m_Layer: 5
   m_Name: JumpInButton
   m_TagString: Untagged
@@ -602,6 +605,22 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &256082583978649234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2547836435105905274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfd0d144b6d3dd438b84fa14a062c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playHover: 0
+  playClick: 1
+  playRelease: 1
+  extraClickEvent: {fileID: 0}
 --- !u!1 &2649595464422490040
 GameObject:
   m_ObjectHideFlags: 0
