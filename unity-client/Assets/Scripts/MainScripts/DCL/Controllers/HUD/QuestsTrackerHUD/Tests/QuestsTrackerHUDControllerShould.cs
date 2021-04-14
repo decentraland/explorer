@@ -167,22 +167,15 @@ namespace Tests.QuestsTrackerHUD
         }
 
         [Test]
-        public void BeEmptyOnInitialize()
-        {
-            Assert.AreEqual(0, hudView.currentEntries.Count);
-            //Assert.AreEqual(0, hudView.questsToBeAdded.Count);
-            Assert.IsTrue(false); //TODO fix test
-        }
+        public void BeEmptyOnInitialize() { Assert.AreEqual(0, hudView.currentEntries.Count); }
 
         [Test]
         public void TrackQuestProgress()
         {
             hudView.UpdateQuest(MOCK_QUEST_ID);
 
-            //Assert.AreEqual(1, hudView.questsToBeAdded.Count);
-            //Assert.IsTrue(hudView.questsToBeAdded.Contains(MOCK_QUEST_ID));
-            Assert.IsTrue(false); //TODO fix test
-            Assert.AreEqual(0, hudView.currentEntries.Count);
+            Assert.AreEqual(1, hudView.currentEntries.Count);
+            Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
         }
 
         [Test]
@@ -192,8 +185,7 @@ namespace Tests.QuestsTrackerHUD
 
             Assert.AreEqual(1, hudView.questsContainer.childCount);
             Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
-            //Assert.IsTrue(DateTime.MaxValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]);
-            Assert.IsTrue(false); //TODO fix test
+            Assert.IsTrue(hudView.currentEntries[MOCK_QUEST_ID].isPinned);
         }
 
         [Test]
@@ -203,19 +195,14 @@ namespace Tests.QuestsTrackerHUD
 
             Assert.AreEqual(1, hudView.questsContainer.childCount);
             Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
-            //Assert.Less((DateTime.Now - hudView.lastUpdateTimestamp[MOCK_QUEST_ID]), TimeSpan.FromSeconds(1)); //Approximately comparing timestamps
-            Assert.IsTrue(false); //TODO fix test
+            Assert.IsFalse(hudView.currentEntries[MOCK_QUEST_ID].isPinned);
         }
 
         [Test]
         public void PinUntrackedQuestProperly()
         {
             hudView.PinQuest(MOCK_QUEST_ID);
-
-            //Assert.AreEqual(1, hudView.questsToBeAdded.Count);
-            //Assert.IsTrue(hudView.questsToBeAdded.Contains(MOCK_QUEST_ID));
-            Assert.IsTrue(false); //TODO fix test
-            Assert.AreEqual(0, hudView.currentEntries.Count);
+            Assert.IsTrue(hudView.currentEntries.ContainsKey(MOCK_QUEST_ID));
         }
 
         [Test]
@@ -225,8 +212,7 @@ namespace Tests.QuestsTrackerHUD
 
             hudView.PinQuest(MOCK_QUEST_ID);
 
-            //Assert.AreEqual(DateTime.MaxValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]);
-            Assert.IsTrue(false); //TODO fix test
+            Assert.IsTrue(hudView.currentEntries[MOCK_QUEST_ID].isPinned);
         }
 
         [Test]
@@ -236,8 +222,7 @@ namespace Tests.QuestsTrackerHUD
 
             hudView.UnpinQuest(MOCK_QUEST_ID);
 
-            //Assert.AreEqual(DateTime.MinValue, hudView.lastUpdateTimestamp[MOCK_QUEST_ID]); //Approximately comparing timestamps
-            Assert.IsTrue(false); //TODO fix test
+            Assert.IsFalse(hudView.currentEntries[MOCK_QUEST_ID].isPinned);
         }
 
         [UnityTest]
@@ -249,10 +234,7 @@ namespace Tests.QuestsTrackerHUD
 
             yield return null; //Let Unity destroy the entry properly
 
-            //Assert.AreEqual(0, hudView.currentEntries.Count);
-            //Assert.AreEqual(0, hudView.questsToBeAdded.Count);
-            //Assert.AreEqual(0, hudView.lastUpdateTimestamp.Count);
-            Assert.IsTrue(false); //TODO fix test
+            Assert.AreEqual(0, hudView.currentEntries.Count);
         }
 
         [UnityTest]
@@ -287,12 +269,18 @@ namespace Tests.QuestsTrackerHUD
 
             Assert.AreEqual( "questName", hudView.currentEntries[MOCK_QUEST_ID].questTitle.text);
             Assert.AreEqual( 0, hudView.currentEntries[MOCK_QUEST_ID].progress.fillAmount);
-            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.childCount);
+            Assert.AreEqual( 2, hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.childCount);
+            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].sectionEntries["section0"].taskEntries.Count);
 
-            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.GetComponentInChildren<QuestsTrackerTask>();
+            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].sectionEntries["section0"].taskContainer.GetComponentInChildren<QuestsTrackerTask>();
             Assert.NotNull(taskEntry);
-            Assert.AreEqual("task1" , taskEntry.taskTitle.text);
+            Assert.AreEqual("task0" , taskEntry.taskTitle.text);
             Assert.AreEqual("0/1" , taskEntry.progressText.text);
+
+            var taskEntry1 = hudView.currentEntries[MOCK_QUEST_ID].sectionEntries["section1"].taskContainer.GetComponentInChildren<QuestsTrackerTask>();
+            Assert.NotNull(taskEntry1);
+            Assert.AreEqual("task1" , taskEntry1.taskTitle.text);
+            Assert.AreEqual("0/1" , taskEntry1.progressText.text);
         }
 
         [UnityTest]
@@ -327,12 +315,18 @@ namespace Tests.QuestsTrackerHUD
 
             Assert.AreEqual( "questName", hudView.currentEntries[MOCK_QUEST_ID].questTitle.text);
             Assert.AreEqual( 0, hudView.currentEntries[MOCK_QUEST_ID].progress.fillAmount);
-            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.childCount);
+            Assert.AreEqual( 2, hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.childCount);
+            Assert.AreEqual( 1, hudView.currentEntries[MOCK_QUEST_ID].sectionEntries["section0"].taskEntries.Count);
 
-            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].sectionContainer.GetComponentInChildren<QuestsTrackerTask>();
+            var taskEntry = hudView.currentEntries[MOCK_QUEST_ID].sectionEntries["section0"].taskContainer.GetComponentInChildren<QuestsTrackerTask>();
             Assert.NotNull(taskEntry);
-            Assert.AreEqual("task1" , taskEntry.taskTitle.text);
+            Assert.AreEqual("task0" , taskEntry.taskTitle.text);
             Assert.AreEqual("15/20" , taskEntry.progressText.text);
+
+            var taskEntry1 = hudView.currentEntries[MOCK_QUEST_ID].sectionEntries["section1"].taskContainer.GetComponentInChildren<QuestsTrackerTask>();
+            Assert.NotNull(taskEntry1);
+            Assert.AreEqual("task1" , taskEntry1.taskTitle.text);
+            Assert.AreEqual("15/20" , taskEntry1.progressText.text);
         }
 
         [TearDown]

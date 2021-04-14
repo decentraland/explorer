@@ -87,6 +87,8 @@ GameObject:
   - component: {fileID: 8214907723983321489}
   - component: {fileID: 7957550999004163702}
   - component: {fileID: 8822622157141627189}
+  - component: {fileID: 331270297320709848}
+  - component: {fileID: 7351090112296718893}
   m_Layer: 5
   m_Name: ConfettiPink
   m_TagString: Untagged
@@ -4835,6 +4837,41 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
+--- !u!222 &331270297320709848
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1365250340332656180}
+  m_CullTransparentMesh: 0
+--- !u!114 &7351090112296718893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1365250340332656180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f0b0b6d0b7542bfbd20a3e05b04ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_IsTrail: 0
+  m_IgnoreCanvasScaler: 0
+  m_Scale: 1.3
+  m_Scale3D: {x: 1.3, y: 1.3, z: 1.3}
+  m_AnimatableProperties: []
+  m_Particles:
+  - {fileID: 0}
+  m_ShrinkByMaterial: 0
 --- !u!1 &1417582125084394279
 GameObject:
   m_ObjectHideFlags: 0
@@ -5002,6 +5039,8 @@ GameObject:
   - component: {fileID: 8823562113215206396}
   - component: {fileID: 4618703449960976926}
   - component: {fileID: 9180926211076921821}
+  - component: {fileID: 2615054385075619540}
+  - component: {fileID: 7930375289748978137}
   m_Layer: 5
   m_Name: ConfettiBlue
   m_TagString: Untagged
@@ -9750,6 +9789,41 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
+--- !u!222 &2615054385075619540
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1634441210313276962}
+  m_CullTransparentMesh: 0
+--- !u!114 &7930375289748978137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1634441210313276962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f0b0b6d0b7542bfbd20a3e05b04ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_IsTrail: 0
+  m_IgnoreCanvasScaler: 0
+  m_Scale: 1.3
+  m_Scale3D: {x: 1.3, y: 1.3, z: 1.3}
+  m_AnimatableProperties: []
+  m_Particles:
+  - {fileID: 0}
+  m_ShrinkByMaterial: 0
 --- !u!1 &1674520888669842555
 GameObject:
   m_ObjectHideFlags: 0
@@ -9761,6 +9835,8 @@ GameObject:
   - component: {fileID: 7269119087575268091}
   - component: {fileID: 833994487173301356}
   - component: {fileID: 3233063869193238967}
+  - component: {fileID: 5904137405897997695}
+  - component: {fileID: 8351238206768835186}
   m_Layer: 5
   m_Name: ConfettiGreen
   m_TagString: Untagged
@@ -14509,6 +14585,41 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
+--- !u!222 &5904137405897997695
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674520888669842555}
+  m_CullTransparentMesh: 0
+--- !u!114 &8351238206768835186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674520888669842555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f0b0b6d0b7542bfbd20a3e05b04ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_IsTrail: 0
+  m_IgnoreCanvasScaler: 0
+  m_Scale: 1.3
+  m_Scale3D: {x: 1.3, y: 1.3, z: 1.3}
+  m_AnimatableProperties: []
+  m_Particles:
+  - {fileID: 0}
+  m_ShrinkByMaterial: 0
 --- !u!1 &2146640426754896331
 GameObject:
   m_ObjectHideFlags: 0
@@ -14584,7 +14695,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 16777215
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -14740,7 +14851,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 1375731711
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -14834,6 +14945,8 @@ GameObject:
   - component: {fileID: 4748362401556064375}
   - component: {fileID: 7264303598395167375}
   - component: {fileID: 8031315213861550443}
+  - component: {fileID: 1736188539039686153}
+  - component: {fileID: 836579177504939888}
   m_Layer: 5
   m_Name: ConfettiYellow
   m_TagString: Untagged
@@ -19582,3 +19695,38 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
+--- !u!222 &1736188539039686153
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8830413183386271105}
+  m_CullTransparentMesh: 0
+--- !u!114 &836579177504939888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8830413183386271105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16f0b0b6d0b7542bfbd20a3e05b04ff1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_IsTrail: 0
+  m_IgnoreCanvasScaler: 0
+  m_Scale: 1.3
+  m_Scale3D: {x: 1.3, y: 1.3, z: 1.3}
+  m_AnimatableProperties: []
+  m_Particles:
+  - {fileID: 0}
+  m_ShrinkByMaterial: 0

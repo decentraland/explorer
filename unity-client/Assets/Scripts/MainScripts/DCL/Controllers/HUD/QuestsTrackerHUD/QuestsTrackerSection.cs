@@ -31,7 +31,7 @@ namespace DCL.Huds.QuestsTracker
         public SequenceState sequenceState { get; private set; } = SequenceState.NotStarted;
 
         private QuestSection section;
-        private readonly Dictionary<string, QuestsTrackerTask> taskEntries = new Dictionary<string, QuestsTrackerTask>();
+        internal readonly Dictionary<string, QuestsTrackerTask> taskEntries = new Dictionary<string, QuestsTrackerTask>();
         private readonly List<Coroutine> tasksRoutines = new List<Coroutine>();
 
         public void Populate(QuestSection newSection)

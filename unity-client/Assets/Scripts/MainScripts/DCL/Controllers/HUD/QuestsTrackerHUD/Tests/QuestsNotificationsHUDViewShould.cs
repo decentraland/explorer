@@ -17,7 +17,7 @@ namespace Tests.QuestsNotificationsHUD
             // Even though we set duration to 0, we have to wait a frame anyway for the yields to be performed.
             QuestsNotificationsController.DEFAULT_NOTIFICATION_DURATION = 0f;
             QuestsNotificationsController.NOTIFICATIONS_SEPARATION = 0f;
-            controller = Object.Instantiate(Resources.Load<GameObject>("QuestsNotificationsHUD")).GetComponent<QuestsNotificationsController>();
+            controller = Object.Instantiate(Resources.Load<GameObject>("QuestsTrackerHUD")).GetComponentInChildren<QuestsNotificationsController>();
         }
 
         [Test]

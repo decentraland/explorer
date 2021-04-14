@@ -38,11 +38,11 @@ namespace DCL.Huds.QuestsTracker
         private AssetPromise_Texture iconPromise;
 
         internal QuestModel quest;
-        private bool isExpanded;
-        private bool isPinned;
-        private bool outAnimDone = false;
+        internal bool isExpanded;
+        internal bool isPinned;
+        internal bool outAnimDone = false;
 
-        private readonly Dictionary<string, QuestsTrackerSection> sectionEntries = new Dictionary<string, QuestsTrackerSection>();
+        internal readonly Dictionary<string, QuestsTrackerSection> sectionEntries = new Dictionary<string, QuestsTrackerSection>();
         private readonly List<QuestReward> rewardsToNotify = new List<QuestReward>();
         private readonly List<Coroutine> sectionRoutines = new List<Coroutine>();
         private Coroutine sequenceRoutine;
