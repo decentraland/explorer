@@ -18,5 +18,6 @@ MonoBehaviour:
   randomPitch: 0
   cooldownSeconds: 0
   clips:
-    array: []
+    array:
+    - {fileID: 8300000, guid: acc7eebb8ecc2d445b0e18300f3df6fb, type: 3}
   source: {fileID: 0}

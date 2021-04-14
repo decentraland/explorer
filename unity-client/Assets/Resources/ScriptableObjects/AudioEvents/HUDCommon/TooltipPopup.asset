@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9988baed5dc8ecd469322b1c7d95b381, type: 3}
-  m_Name: QuestTaskCompleted
+  m_Name: TooltipPopup
   m_EditorClassIdentifier: 
   loop: 0
   initialVolume: 1
   initialPitch: 1
   randomPitch: 0
-  cooldownSeconds: 0
+  cooldownSeconds: 0.1
   clips:
     array:
-    - {fileID: 8300000, guid: 85a400b3bd63eb04d93dbf3a6ca00596, type: 3}
+    - {fileID: 8300000, guid: e134d8c09228ed0448e0458ba8602c43, type: 3}
   source: {fileID: 0}

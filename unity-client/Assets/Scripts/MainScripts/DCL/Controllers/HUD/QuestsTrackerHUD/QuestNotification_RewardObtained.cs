@@ -10,6 +10,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal TextMeshProUGUI rewardName;
         [SerializeField] internal RawImage rewardImage;
         [SerializeField] internal Button okButton;
+        [SerializeField] internal AudioEvent rewardObtainedAudioEvent;
 
         private AssetPromise_Texture imagePromise;
         private bool okPressed = false;
@@ -42,7 +43,11 @@ namespace DCL.Huds.QuestsTracker
 
         private void OnImageReady(Asset_Texture assetTexture) { rewardImage.texture = assetTexture.texture; }
 
-        public void Show() { gameObject.SetActive(true); }
+        public void Show()
+        {
+            gameObject.SetActive(true);
+            rewardObtainedAudioEvent.Play();
+        }
         public void Dispose() { Destroy(gameObject); }
         public IEnumerator Waiter() { yield return new WaitUntil(() => okPressed); }
     }
