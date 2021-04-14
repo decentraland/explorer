@@ -126,7 +126,7 @@ namespace DCL.QuestsController
                 //Alex: Edge case. New quest reported contains a reward that was previously not contained.
                 // If it's completed, we call the RewardObtained event
                 bool oldRewardFound = oldQuest.TryGetReward(newReward.id, out QuestReward oldReward);
-                bool rewardObtained = (!oldRewardFound && newReward.status == QuestsLiterals.RewardStatus.ALREADY_GIVEN) || ( newReward.status != oldReward.status && newReward.status == QuestsLiterals.RewardStatus.ALREADY_GIVEN);
+                bool rewardObtained = (!oldRewardFound && newReward.status == QuestsLiterals.RewardStatus.OK) || ( newReward.status != oldReward.status && newReward.status == QuestsLiterals.RewardStatus.OK);
                 if (rewardObtained)
                 {
                     OnRewardObtained?.Invoke(progressedQuest.id, newReward.id);
