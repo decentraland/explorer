@@ -40,6 +40,8 @@ public class KernelConfigModel
         clone.comms = comms.Clone();
         clone.profiles = profiles.Clone();
         clone.features = features.Clone();
+        clone.gifSupported = gifSupported;
+        clone.tld = tld;
         clone.validWorldRanges = new List<WorldRange>(validWorldRanges);
         return clone;
     }
