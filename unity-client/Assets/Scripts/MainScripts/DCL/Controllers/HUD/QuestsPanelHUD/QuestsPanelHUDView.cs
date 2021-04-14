@@ -190,7 +190,15 @@ namespace DCL.Huds.QuestsPanel
             questsContainerSeparators.SetActive(completedQuestsContainer.childCount > 0);
         }
 
-        public void SetVisibility(bool active) { gameObject.SetActive(active); }
+        public void SetVisibility(bool active)
+        {
+            gameObject.SetActive(active);
+
+            if (active)
+                AudioScriptableObjects.dialogOpen.Play();
+            else
+                AudioScriptableObjects.dialogClose.Play();
+        }
 
         public bool isVisible => gameObject.activeSelf;
 

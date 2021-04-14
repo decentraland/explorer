@@ -1,4 +1,4 @@
-﻿using DCL.Helpers;
+using DCL.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -134,9 +134,17 @@ namespace DCL.Huds.QuestsPanel
             }
         }
 
-        public void Show() { gameObject.SetActive(true); }
+        public void Show()
+        {
+            gameObject.SetActive(true);
+            AudioScriptableObjects.dialogOpen.Play();
+        }
 
-        public void Close() { gameObject.SetActive(false); }
+        public void Close()
+        {
+            gameObject.SetActive(false);
+            AudioScriptableObjects.dialogClose.Play();
+        }
 
         private void Update()
         {
