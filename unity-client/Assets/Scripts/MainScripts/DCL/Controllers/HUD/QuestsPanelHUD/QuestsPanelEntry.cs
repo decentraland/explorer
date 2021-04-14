@@ -37,6 +37,8 @@ namespace DCL.Huds.QuestsPanel
         private Action jumpInDelegate;
         public Vector3 readMorePosition => readMoreButton.transform.position;
 
+        private bool isDestroyed = false;
+
         private void Awake()
         {
             jumpInButton.onClick.AddListener(() => { jumpInDelegate?.Invoke(); });
@@ -44,6 +46,12 @@ namespace DCL.Huds.QuestsPanel
             pinQuestToggle.onValueChanged.AddListener(OnPinToggleValueChanged);
             pinnedQuests.OnAdded += OnPinnedQuests;
             pinnedQuests.OnRemoved += OnUnpinnedQuest;
+        }
+
+        private void OnEnable()
+        {
+            if (string.IsNullOrEmpty(currentThumbnail) || (thumbnailPromise != null && thumbnailPromise.state == AssetPromiseState.FINISHED))
+                animator?.SetTrigger(LOADED_ANIM_TRIGGER);
         }
 
         public void Populate(QuestModel newQuest)
@@ -112,7 +120,10 @@ namespace DCL.Huds.QuestsPanel
         internal void SetThumbnail(string thumbnailURL)
         {
             if (thumbnailURL == currentThumbnail)
+            {
+                animator.SetTrigger(LOADED_ANIM_TRIGGER);
                 return;
+            }
 
             currentThumbnail = thumbnailURL;
             if (thumbnailPromise != null)
@@ -159,6 +170,14 @@ namespace DCL.Huds.QuestsPanel
             }
             pinnedQuests.OnAdded -= OnUnpinnedQuest;
             pinnedQuests.OnRemoved -= OnPinnedQuests;
+            isDestroyed = true;
+        }
+
+        public void Unparent()
+        {
+            if (isDestroyed)
+                return;
+            transform.parent = null;
         }
     }
 }
