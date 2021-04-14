@@ -20,6 +20,7 @@ namespace DCL.Huds.QuestsTracker
         [SerializeField] internal TextMeshProUGUI progressText;
         [SerializeField] internal Button jumpInButton;
         [SerializeField] internal Animator animator;
+        [SerializeField] internal AudioEvent taskCompleteAudioEvent;
 
         private QuestTask task = null;
         private float progressTarget = 0;
@@ -69,6 +70,7 @@ namespace DCL.Huds.QuestsTracker
 
             yield return WaitForSecondsCache.Get(0.5f);
             animator.SetTrigger(ANIMATION_TRIGGER_COMPLETED);
+            taskCompleteAudioEvent.Play();
 
             yield return WaitForSecondsCache.Get(2.9f);
 

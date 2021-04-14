@@ -132,6 +132,8 @@ MonoBehaviour:
   progressText: {fileID: 9056996428100650665}
   jumpInButton: {fileID: 2573009063786507353}
   animator: {fileID: 4549193508197797611}
+  taskCompleteAudioEvent: {fileID: 11400000, guid: e985a6d6b4e6ae74b8cfb76996e22ab7,
+    type: 2}
 --- !u!95 &4549193508197797611
 Animator:
   serializedVersion: 3
